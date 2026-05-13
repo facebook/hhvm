@@ -303,7 +303,7 @@ A Thrift **<KW>list of `V`</KW>** <KW>type</KW> is a finite, **ordered sequence 
 
 A Thrift **<KW>set of `V`</KW>** type is a finite, **unordered collection of unique <KW>values</KW>**, where:
 * The <KW>type</KW> of each <KW>value</KW> is `V`
-* No two <KW>values</KW> in the set [compare equal](#equality)
+* No two <KW>values</KW> in the set [compare equal](#operation-areequal)
 * The <KW>type</KW> `V` is [<KW>sealed</KW>](#sealed-types)
 
 ##### Map of K to V
@@ -312,7 +312,7 @@ A Thrift **<KW>map of `K` to `V`</KW>** <KW>type</KW> is defined as a finite, **
 * `k` and `v` are Thrift <KW>values</KW>.
 * The <KW>type</KW> of each key (`k`) is `K`
 * The <KW>type</KW> of each value (`v`) is `V`
-* No two keys in the set [compare equal](#equality)
+* No two keys in the set [compare equal](#operation-areequal)
 * The <KW>type</KW> `K` is [<KW>sealed</KW>](#sealed-types)
 * `V` can be any <KW>type</KW>
 
@@ -735,14 +735,6 @@ Examples:
    ) # invalid protocol: field "standard" is reserved but does not match schema
 ```
 
-#### Equality
-
-Two <KW>records</KW> are considered equal if they have the same <KW>record kind</KW> and represent the same <KW>datum</KW>.
-For *record kinds* that contain other <KW>records</KW> (`List`, `Set`, `Map` & `FieldSet`), the contained <KW>records</KW> must also be equal.
-
-Note that <KW>record</KW> equality is not the same as Thrift [<KW>value</KW> equality](#operation-areequal).
-Most notably, <KW>Thrift type</KW> information is not considered in <KW>record</KW> equality, so while two <KW>Thrift values</KW> of different <KW>types</KW> can never be equal, their corresponding <KW>datums</KW> (i.e., `FieldSet`-kind <KW>records</KW>) may be equal.
-
 #### Thrift type ↔ Record Kind
 
 The previous section showed how different <KW>record kinds</KW> capture the structure needed to represent every <KW>datum</KW> in Thrift.
@@ -1131,7 +1123,7 @@ export const CreateStandardDefaultFieldSetDescription = () => {
 
 > **<code>areEqual<sub>S, E</sub>(lhs, rhs) → Value(bool, ?)</code>**
 >
-> Checks whether two Thrift <KW>values</KW> are **<KW>equal</KW>**.
+> Checks whether two Thrift <KW>values</KW> are **semantically <KW>equal</KW>**.
 
 **Environment**:
 * `S` — a <KW>type system</KW>
@@ -1146,16 +1138,73 @@ export const CreateStandardDefaultFieldSetDescription = () => {
 
 **Outcome**:
 * If `L` is not the same as `R`, i.e. the input values do not have the same type, produces `False`.
-* if the <KW>type</KW> of `lhs` and `rhs` is not `any`...
-  * Produces `True` if `record-of(lhs)` [equals](#equality) `record-of(rhs)`, otherwise `False`.
-* if the <KW>type</KW> of `lhs` and `rhs` is `any`...
-  * Produces `True` if `lhs` and `rhs` are both empty.
-  * Produces `False` if only one of `lhs` or `rhs` is empty.
-  * Produces `False` if `lhs.typeid` and `rhs.typeid` are not equal.
-* Otherwise, given <code>v<sub>lhs</sub></code> = <code>anyUnpack<sub>S, E</sub>(lhs)</code>, <code>v<sub>rhs</sub></code> = <code>anyUnpack<sub>S, E</sub>(rhs)</code>...
-    * FAILS if the aforementioned [<code>anyUnpack<sub>S, E</sub></code>](#operation-anyunpack) fails.
-      * Otherwise, produces <code>areEqual<sub>S, E</sub>(v<sub>lhs</sub>, v<sub>rhs</sub>)</code>.
-    * Note how comparison of `any` values may succeed even if the unpacking of the underlying value would have failed: for example, if the `typeid`s are different, or only one of the values is not empty, `areEqual` can return `False` even if the current <KW>type system</KW> did not have the corresponding <KW>type</KW> (which would have caused `anyUnpack` to fail).
+* Otherwise, produces <code><a href="#operation-arerecordsequal">areRecordsEqual<sub>S, E</sub></a>(record-of(lhs), record-of(rhs))</code>.
+
+</Operation>
+
+#### Operation: `areRecordsEqual`
+
+<Operation>
+
+> **<code>areRecordsEqual<sub>S, E</sub>(lhs, rhs) → Bool(?)</code>**
+>
+> Checks for semantic equality between two <KW>records</KW> (instead of Thrift <KW>values</KW>).
+
+**Environment**:
+* `S` — a <KW>type system</KW>
+* `E` — a <KW>runtime environment</KW>
+
+**Inputs**:
+* `lhs`, `rhs` — <KW>records</KW>
+
+**Outputs**:
+* a `Bool`-kind <KW>record</KW>
+
+**Outcome**:
+* If the <KW>record kinds</KW> of `lhs` and `rhs` are not the same, FAILS.
+* Otherwise, if the <KW>record kind</KW> of `lhs` and `rhs` is...
+  * **`Bool`**: standard boolean equality
+    * Produces `lhs == rhs`.
+  * **`Int8`**, **`Int16`**, **`Int32`**, **`Int64`**: arithmetic equality
+    * Produces `lhs == rhs`.
+  * **`Float32`**, **`Float64`**: IEEE 754 equality **except for `+NaN` and `-NaN`**, which are considered semantically equal to themselves by this operation
+    * Reminder: `Float{N}`-kind records [merge NaN variants](#floatn) into just `+NaN` and `-NaN`
+    * Produces `True` if `lhs` and `rhs` are both `+NaN`
+    * Produces `True` if `lhs` and `rhs` are both `-NaN`
+    * Otherwise, produces `True` if and only if the `lhs`, `rhs` floating-point datums are considered equal according to the comparison predicates defined in [IEEE 754 2019, §5.11](https://en.wikipedia.org/wiki/IEEE_754#Comparison_predicates), i.e.:
+      * `+0.0` vs `-0.0` ⇒ `True` (numerically equal)
+      * `+Infinity` vs `+Infinity` ⇒ `True`
+      * `-Infinity` vs `-Infinity` ⇒ `True`
+      * `+Infinity` vs `-Infinity` ⇒ `False`
+      * Otherwise, standard numeric equality.
+  * **`Text`**: same sequence of Unicode code points
+    * Produces `True` if `lhs` and `rhs` contain the same sequence of Unicode code points, otherwise `False`.
+  * **`ByteArray`**: same sequence of bytes
+    * Produces `True` if `lhs` and `rhs` contain the same sequence of bytes, otherwise `False`.
+  * **`List`**: same length and pairwise equal elements
+    * Produces `True` if `len(lhs) == len(rhs)` and for all `i` in `0 ... len(lhs)`, `areRecordsEqual(lhs[i], rhs[i])` produces `True`.
+    * Otherwise, produces `False`.
+  * **`Set`**: equal as mathematical sets
+    * Produces `True` if every element in `lhs` has an `areRecordsEqual` counterpart in `rhs`, and vice versa, and `|lhs| == |rhs|`.
+    * Otherwise, produces `False`.
+  * **`Map`**: equal key sets and pairwise equal values
+    * Produces `True` if the key sets of `lhs` and `rhs` are equal (as defined for `Set` above), and for each key `k`, `areRecordsEqual(lhs[k], rhs[k])` produces `True`.
+    * Otherwise, produces `False`.
+  * **`FieldSet`**: same set of <KW>field identities</KW> and pairwise equal <KW>field values</KW>
+    * Produces `True` if `lhs` and `rhs` have the same set of <KW>field identities</KW>, and for each <KW>field identity</KW> `f`, `areRecordsEqual(lhs[f], rhs[f])` produces `True`.
+    * Otherwise, produces `False`.
+  * **`Any`**:
+    * Produces `True` if both `lhs` and `rhs` are empty
+    * Produces `False` if only one of `lhs` or `rhs` is empty
+    * Otherwise (neither `lhs` nor `rhs` are empty) ...
+      * Produces `False` if `areRecordsEqual(lhs.typeid, rhs.typeid)` is `False`
+      * Otherwise, produces `True` if the protocols used in `lhs` and `rhs` are identical, and the encoded <KW>ciphers</KW> are equal, i.e.:
+        * `(areRecordsEqual(lhs.protocol, rhs.protocol) OR resolveProtocol(lhs.protocol) == resolveProtocol(rhs.protocol))`, **and**
+        * `areRecordsEqual(lhs.cipher, rhs.cipher)`
+          * Note: this leverages the fact that, for any given <KW>serialization protocol</KW>, [equality of <KW>ciphers</KW> guarantees <KW>value</KW> equality](#cipher-and-value-equality).
+      * Otherwise, produces `areRecordsEqual(anyUnpack(lhs), anyUnpack(rhs))`
+        * FAILS if the aforementioned [`anyUnpack`](#operation-anyunpack) fails.
+        * Note: comparison of `Any` records may succeed (produce `False`) even when unpacking of the underlying value would have failed — for example, if the `typeid`s are different, or only one of the values is empty, `areRecordsEqual` can return `False` even if the current <KW>type system</KW> did not have the corresponding <KW>type</KW> (which would have caused `anyUnpack` to fail).
 
 </Operation>
 
@@ -1239,7 +1288,7 @@ export const CreateStandardDefaultFieldSetDescription = () => {
     * Produces `isRecordStableLessThan(List(Int8(lhs[0]), ...), List(Int8(rhs[0]), ...))`.
   * **`List`**: lexicographical order of the sequence of elements
     * For `i` in `0 ... min(len(lhs), len(rhs))`:
-      * If `lhs[i]` and `rhs[i]` are not [equal](#equality):
+      * If [`areRecordsEqual`](#operation-arerecordsequal)`(lhs[i], rhs[i])` produces `False`:
         * Produces `isRecordStableLessThan(lhs[i], rhs[i])`.
     * Produces `len(lhs) < len(rhs)`.
   * **`Set`**: lexicographical order of the sequence formed by sorting the elements of the set.
@@ -1256,14 +1305,14 @@ export const CreateStandardDefaultFieldSetDescription = () => {
     * If `f` is not in `lhs` ⇒ produces `False`.
     * If `f` is not in `rhs` ⇒ produces `True`.
     * Let `lf`, `rf` be the <KW>records</KW> corresponding to field `f` in `lhs`, `rhs` respectively.
-      * If `lf` and `rf` are not [equal](#equality):
+      * If [`areRecordsEqual`](#operation-arerecordsequal)`(lf, rf)` produces `False`:
         * Produces `isRecordStableLessThan(lf, rf)`.
     * Finally, produces `False` (`lhs` and `rhs` are equal).
   * **`Any`**:
     * If `lhs` is empty and `rhs` is empty ⇒ produces `False`.
     * If `lhs` is empty ⇒ produces `False`.
     * If `rhs` is empty ⇒ produces `True`.
-    * If `lhs.typeid` and `rhs.typeid` are not [equal](#equality):
+    * If [`areRecordsEqual`](#operation-arerecordsequal)`(lhs.typeid, rhs.typeid)` produces `False`:
       * Produces `isRecordStableLessThan(lhs.typeid, rhs.typeid)`.
     * Otherwise, produces <code>isRecordStableLessThan<sub>S, E</sub>(<a href="#operation-anyunpack">anyUnpack<sub>S, E</sub></a>(lhs), <a href="#operation-anyunpack">anyUnpack<sub>S, E</sub></a>(rhs))</code>.
       * FAILS if the aforementioned `anyUnpack` fails.
@@ -1273,6 +1322,20 @@ The default comparison for <KW>FieldSet</KW> in C++, Python, and likely other la
 :::
 
 </Operation>
+
+#### Note: Asymmetry in Floating-Point Comparisons
+
+There is a deliberate asymmetry between the *equality* ([`areRecordsEqual`](#operation-arerecordsequal)) and the *ordering* ([`isRecordStableLessThan`](#operation-isrecordstablelessthan)) of <KW>records</KW> (and, by extension, <KW>values</KW>). While this may initially seem counterintuitive, it is an intentional choice to balance intuitive data semantics with algorithmic stability.
+
+##### 1. Equality as Semantic Equivalence
+The equality predicate is designed to capture **semantic equivalence**. When two Thrift <KW>values</KW> are determined to be equal, they should be considered effectively (if not practically) substitutable for one another for any semantic purposes.
+
+The caveat, in practice, is that values that rely on specific encodings for type-erasure ([`any`](#any-type)) MAY NOT be fully substitutable for each other, as specific <KW>runtime environments</KW> may not be able to resolve their <KW>protocol descriptor</KW>.
+
+##### 2. Ordering as Mechanical Stability
+The ordering predicate is designed for the **stable, mechanical processing** of values. Unlike equality, which prioritizes "meaning," ordering prioritizes "determinism."
+
+This ensures that operations like sorting or range-queries remain consistent across different platforms and language implementations, providing a well defined order for values that would semantically be considered equivalent (like `-0.0` and `+0.0`).
 
 ### Runtime Resolution
 
@@ -1305,7 +1368,7 @@ In practice, this corresponds to the set of *runtime libraries* that are provide
 
 **Outcome**:
 * If the runtime environment `E` can resolve `descriptor` to a <KW>protocol</KW> `P`, produces `P`.
-  * Remember: for any two <KW>protocol descriptors</KW> `d1`, `d2`: if `d1` and `d2` are [<KW>record</KW>-equal](#equality), then `resolveProtocol`<sub>`E`</sub>`(d1)` and `resolveProtocol`<sub>`E`</sub>`(d2)` MUST produce the same <KW>protocol</KW>.
+  * Remember: for any two <KW>protocol descriptors</KW> `d1`, `d2`: if [`areRecordsEqual`](#operation-arerecordsequal)`(d1, d2)` produces `True`, then `resolveProtocol`<sub>`E`</sub>`(d1)` and `resolveProtocol`<sub>`E`</sub>`(d2)` must produce the same <KW>protocol</KW>.
 * FAILS otherwise.
 
 </Operation>
@@ -1313,6 +1376,8 @@ In practice, this corresponds to the set of *runtime libraries* that are provide
 ### Type Erasure
 
 #### Operation: `anyUnpack`
+
+**TODO(aristidis): Need to change this to act on records.**
 
 <Operation>
 
@@ -2022,6 +2087,7 @@ Equivalent to **<code><a href="#operation-materialize">materialize<sub>S,P</sub>
 | February 24, 2026 | 1.2.0   | [`MINOR`](#versioning-minor):<ol><li>Added [Thrift identifier](#thrift-identifier) definition, applied to enum names and field names.</li><li>Allow `NaN` and signed zero <KW>datums</KW> for [`Float{N}`-kind records](#floatn).</li></ol>[`PATCH`](#versioning-patch): <ol><li>[Sealed types](#sealed-types): added formal definition.</li><li>Minor header changes.</li></ol>
 | April 21, 2026    | 1.3.0   | [`MINOR`](#versioning-minor):<ol><li>Added [`isStableLessThan`](#operation-isstablelessthan) and [`isRecordStableLessThan`](#operation-isrecordstablelessthan) operations.</li><li>`Any`-kind records: defined <KW>protocol descriptor</KW> invariants and operations.</li><li>Defined <KW>Thrift Runtime Environment</KW> and added [`resolveProtocol`](#operation-resolveprotocol) for resolving protocol descriptors to concrete protocols.</li></ol>[`PATCH`](#versioning-patch): <ol><li>Clarified `string` and `Text`-kind records as sequences of Unicode scalar values (excluding surrogates).</li></ol>
 | April 21, 2026    | 1.3.1   | [`PATCH`](#versioning-patch): <ol><li>Threaded <KW>runtime environment</KW> `E` through [`areEqual`](#operation-areequal), [`isStableLessThan`](#operation-isstablelessthan), and [`isRecordStableLessThan`](#operation-isrecordstablelessthan) operations, and their [`anyUnpack`](#operation-anyunpack) calls.</li></ol>
+| May 12, 2026      | 1.3.2   | [`PATCH`](#versioning-patch): <ol><li>Added [`areRecordsEqual`](#operation-arerecordsequal) operation formalizing record equality.</li></ol>
 
 ### Versioning
 

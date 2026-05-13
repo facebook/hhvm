@@ -122,6 +122,6 @@ final class ResourceConfiguration {
       System.getProperty("thrift.separate-offloop-scheduler", "false").equalsIgnoreCase("true");
 
   static ClientRuntimeMode getClientRuntimeMode() {
-    return ClientRuntimeMode.fromString(System.getProperty("thrift.client.runtime", "legacy"));
+    return ClientRuntimeMode.fromString(System.getProperty("thrift.client.runtime", "v2"));
   }
 }

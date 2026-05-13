@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c9e86226488a28d795b3da7aa862e2e4>>
+// @generated SignedSource<<d8920eb2b335bd9fb1260db9c735fb08>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -737,6 +737,116 @@ impl<P: Params> NodeMut<P> for DefaultCase<P::Ex, P::En> {
         self.1.accept(c, v)
     }
 }
+impl<P: Params> NodeMut<P> for DestructureShape<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_destructure_shape(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.pos.accept(c, v)?;
+        self.fields.accept(c, v)?;
+        self.ellipsis.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for DestructureShapeField<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_destructure_shape_field(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.optional.accept(c, v)?;
+        self.name.accept(c, v)?;
+        self.target.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for DestructureTarget<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_destructure_target(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_ex(c, &mut self.0)?;
+        v.visit_en(c, &mut self.1)?;
+        self.2.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for DestructureTarget_<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_destructure_target_(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            DestructureTarget_::DtLvar(a0) => a0.accept(c, v),
+            DestructureTarget_::DtWildcard(a0) => a0.accept(c, v),
+            DestructureTarget_::DtShape(a0) => a0.accept(c, v),
+            DestructureTarget_::DtTuple(a0) => a0.accept(c, v),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for DestructureTuple<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_destructure_tuple(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.pos.accept(c, v)?;
+        self.entries.accept(c, v)?;
+        self.ellipsis.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for DestructureTupleEntry<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_destructure_tuple_entry(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.optional.accept(c, v)?;
+        self.target.accept(c, v)
+    }
+}
 impl<P: Params> NodeMut<P> for Efun<P::Ex, P::En> {
     fn accept<'node>(
         &'node mut self,
@@ -1119,6 +1229,8 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             Expr_::ReadonlyExpr(a0) => a0.accept(c, v),
             Expr_::Tuple(a0) => a0.accept(c, v),
             Expr_::List(a0) => a0.accept(c, v),
+            Expr_::DestructureShape(a0) => a0.accept(c, v),
+            Expr_::DestructureTuple(a0) => a0.accept(c, v),
             Expr_::Cast(a) => helper8(a, c, v),
             Expr_::Unop(a) => helper9(a, c, v),
             Expr_::Binop(a0) => a0.accept(c, v),

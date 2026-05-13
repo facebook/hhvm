@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures('shape_destructure')>>
+<<file:__EnableUnstableFeatures('shape_and_tuple_destructuring')>>
 
 function f(shape('a' => int) $x): void {
   shape('a' => $i) = $x;

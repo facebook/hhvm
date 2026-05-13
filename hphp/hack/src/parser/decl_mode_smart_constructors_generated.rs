@@ -711,12 +711,12 @@ where
         <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_shape_type_specifier(self, arg0, arg1, arg2, arg3, arg4)
     }
 
-    fn make_shape_expression(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output) -> Self::Output {
-        <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_shape_expression(self, arg0, arg1, arg2, arg3)
+    fn make_shape_expression(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output) -> Self::Output {
+        <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_shape_expression(self, arg0, arg1, arg2, arg3, arg4)
     }
 
-    fn make_tuple_expression(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output) -> Self::Output {
-        <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_tuple_expression(self, arg0, arg1, arg2, arg3)
+    fn make_tuple_expression(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output) -> Self::Output {
+        <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_tuple_expression(self, arg0, arg1, arg2, arg3, arg4)
     }
 
     fn make_generic_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {

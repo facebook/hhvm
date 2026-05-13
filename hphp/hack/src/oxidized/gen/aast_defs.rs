@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<37551fc166c0400a63bae094a6bc5a25>>
+// @generated SignedSource<<9bdae32f9e9bbd5c114cd87168e94319>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -515,6 +515,162 @@ pub struct PatRefinement {
     pub hint: Hint,
 }
 
+/// Shape destructuring pattern, used only in lvalue positions.
+///
+///     shape('x' => $x, ?'y' => $y, ...) = $point;
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "ds_")]
+#[repr(C)]
+pub struct DestructureShape<Ex, En> {
+    #[rust_to_ocaml(attr = "transform.opaque")]
+    pub pos: Pos,
+    pub fields: Vec<DestructureShapeField<Ex, En>>,
+    pub ellipsis: bool,
+}
+
+/// A field entry in a shape destructuring pattern.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "dsf_")]
+#[repr(C)]
+pub struct DestructureShapeField<Ex, En> {
+    pub optional: bool,
+    pub name: ast_defs::ShapeFieldName,
+    pub target: DestructureTarget<Ex, En>,
+}
+
+/// Tuple destructuring pattern, used only in lvalue positions.
+///
+///     tuple($a, optional $b, ...) = $pair;
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "dt_")]
+#[repr(C)]
+pub struct DestructureTuple<Ex, En> {
+    #[rust_to_ocaml(attr = "transform.opaque")]
+    pub pos: Pos,
+    pub entries: Vec<DestructureTupleEntry<Ex, En>>,
+    pub ellipsis: bool,
+}
+
+/// An entry in a tuple destructuring pattern.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "dte_")]
+#[repr(C)]
+pub struct DestructureTupleEntry<Ex, En> {
+    pub optional: bool,
+    pub target: DestructureTarget<Ex, En>,
+}
+
+/// Recursive target for shape/tuple destructuring patterns.
+/// The 'ex annotation mirrors how expr carries an annotation.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct DestructureTarget<Ex, En>(pub Ex, pub En, pub DestructureTarget_<Ex, En>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C, u8)]
+pub enum DestructureTarget_<Ex, En> {
+    /// A local variable target.
+    ///
+    ///     $x
+    DtLvar(Lid),
+    /// Wildcard _ target. Accesses the field at runtime but does not bind.
+    ///
+    ///     _
+    DtWildcard(Pos),
+    /// Nested shape destructuring.
+    ///
+    ///     shape('inner' => $x)
+    DtShape(DestructureShape<Ex, En>),
+    /// Nested tuple destructuring.
+    ///
+    ///     tuple($a, $b)
+    DtTuple(DestructureTuple<Ex, En>),
+}
+
 #[derive(
     Clone,
     Debug,
@@ -990,6 +1146,16 @@ pub enum Expr_<Ex, En> {
     ///     list(list($x)) = vec[vec[1]]; // nesting
     ///     list($v[0], $x[], $y->foo) = $blah;
     List(Vec<Expr<Ex, En>>),
+    /// Shape destructuring pattern, only used in lvalue positions.
+    /// Distinct from Shape (which is for construction on RHS).
+    ///
+    ///     shape('x' => $x, ?'y' => $y, ...) = $point;
+    DestructureShape(Box<DestructureShape<Ex, En>>),
+    /// Tuple destructuring pattern, only used in lvalue positions.
+    /// Distinct from Tuple (which is for construction on RHS).
+    ///
+    ///     tuple($a, optional $b, ...) = $pair;
+    DestructureTuple(Box<DestructureTuple<Ex, En>>),
     /// Cast expression, converting a value to a different type. Only
     /// primitive types are supported in the hint position.
     ///

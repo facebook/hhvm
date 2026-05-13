@@ -1,6 +1,6 @@
 ERROR: File "foreach.php", line 6, characters 12-16:
 This variable cannot be reassigned because it is used for a dependent context (Typing[4404])
-ERROR: File "foreach.php", line 10, characters 22-23:
+ERROR: File "foreach.php", line 10, characters 12-17:
 This variable cannot be reassigned because it is used for a dependent context (Typing[4404])
-ERROR: File "foreach.php", line 14, characters 22-23:
+ERROR: File "foreach.php", line 14, characters 12-17:
 This variable cannot be reassigned because it is used for a dependent context (Typing[4404])

@@ -12,6 +12,9 @@ type destructure_kind =
   | SplatUnpack
 [@@deriving eq, ord, show]
 
+(** Constraint type for [list()] destructuring and splat unpacking.
+    Shape and tuple destructuring (e.g., [shape('x' => $x) = $s]) uses
+    Can_index under the hood, see {!Typing_destructure}. *)
 type destructure = {
   d_required: locl_ty list;
       (** This represents the standard parameters of a function or the fields in a list
@@ -61,11 +64,19 @@ type has_member = {
  * We should have t <: { ci_key; ci_val; _ } when t is a type that supports
  * being index with a value of type ci_key, and will return a value of ci_val.
  *)
+type ci_access_kind =
+  | Ci_normal  (** Standard array/shape/tuple index access. *)
+  | Ci_lhs_of_null_coalesce
+      (** Access on the left side of [??], e.g. [$x['k'] ?? $default]. Suppresses errors for missing/optional fields and nullable containers. *)
+  | Ci_destructure_optional
+      (** Access of an [optional] tuple entry in a destructuring pattern. Suppresses OOB errors for optional entries but does NOT suppress nullable-container errors. *)
+[@@deriving show, ord]
+
 type can_index = {
   ci_key: locl_ty;
   ci_val: locl_ty;
   ci_index_expr: Nast.expr;
-  ci_lhs_of_null_coalesce: bool;
+  ci_access_kind: ci_access_kind;
   ci_expr_pos: Pos.t;
   ci_array_pos: Pos.t;
   ci_index_pos: Pos.t;

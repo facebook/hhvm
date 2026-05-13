@@ -2015,7 +2015,8 @@ impl RewriteState {
                 unchanged_result
             }
             Omitted | Invalid(_) | ClassGet(_) | PrefixedString(_) | Upcast(_)
-            | Lplaceholder(_) | MethodCaller(_) | Import(_) | Hole(_) | Package(_) => {
+            | Lplaceholder(_) | MethodCaller(_) | Import(_) | Hole(_) | Package(_)
+            | DestructureShape(_) | DestructureTuple(_) => {
                 self.errors
                     .push((pos, "Unsupported expression tree syntax.".into()));
                 unchanged_result

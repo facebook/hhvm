@@ -16,7 +16,11 @@ let elab_value = function
   | expr -> (expr, None)
 
 let elab_key = function
-  | (_, _, Aast.(Lvar _ | Lplaceholder _)) as expr -> (expr, None)
+  | ( _,
+      _,
+      Aast.(Lvar _ | Lplaceholder _ | DestructureShape _ | DestructureTuple _)
+    ) as expr ->
+    (expr, None)
   | (annot, pos, _) ->
     let err = Err.naming @@ Naming_error.Expected_variable pos in
     let ident = Local_id.make_unscoped "__internal_placeholder" in

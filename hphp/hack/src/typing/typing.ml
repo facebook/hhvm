@@ -3939,7 +3939,11 @@ end = struct
                       ci_key = key_ty;
                       ci_val = val_ty;
                       ci_index_expr = e2;
-                      ci_lhs_of_null_coalesce = lhs_of_null_coalesce;
+                      ci_access_kind =
+                        (if lhs_of_null_coalesce then
+                          Ci_lhs_of_null_coalesce
+                        else
+                          Ci_normal);
                       ci_expr_pos = p;
                       ci_array_pos = p1;
                       ci_index_pos = p2;
@@ -5007,6 +5011,16 @@ end = struct
         p
         (Aast.Nameof ce)
         (MakeType.classname (Reason.witness p) [cty])
+    | DestructureShape _
+    | DestructureTuple _ ->
+      (* Unreachable: the lowerer only produces DestructureShape/DestructureTuple
+         in LvaluePosition (LHS of assignment, foreach value). See ExprLocation
+         in lowerer.rs. *)
+      HackEventLogger.invariant_violation_bug
+        ~pos:(Pos.show_absolute (Pos.to_absolute p))
+        "DestructureShape/DestructureTuple reached rvalue typing";
+      let (env, ty) = Env.fresh_type_error env p in
+      make_result env p Aast.Omitted ty
 
   and class_const
       ~under_type_structure
@@ -12506,39 +12520,26 @@ and As_expr : sig
     (unit, unit) as_expr ->
     env * (locl_ty, saved_env) as_expr
 end = struct
+  let bind_foreach_target env p ty expr =
+    let (env, te, _, _) = Assign.assign p env expr p ty in
+    (env, te)
+
   let bind_as_expr env p ty1 ty2 aexpr =
     match aexpr with
     | As_v ev ->
-      let (env, te, _, _) = Assign.assign p env ev p ty2 in
+      let (env, te) = bind_foreach_target env p ty2 ev in
       (env, Aast.As_v te)
     | Await_as_v (p, ev) ->
-      let (env, te, _, _) = Assign.assign p env ev p ty2 in
+      let (env, te) = bind_foreach_target env p ty2 ev in
       (env, Aast.Await_as_v (p, te))
-    | As_kv ((_, p, Lvar ((_, k) as id)), ev) ->
-      let env = set_valid_rvalue p env k None ty1 in
-      let (env, te, _, _) = Assign.assign p env ev p ty2 in
-      let (env, tk) =
-        Typing_helpers.make_simplify_typed_expr env p ty1 (Aast.Lvar id)
-      in
+    | As_kv (ek, ev) ->
+      let (env, tk) = bind_foreach_target env p ty1 ek in
+      let (env, te) = bind_foreach_target env p ty2 ev in
       (env, Aast.As_kv (tk, te))
-    | As_kv ((_, p, (Lplaceholder _ as k)), ev) ->
-      let (env, te, _, _) = Assign.assign p env ev p ty2 in
-      let (env, tk) = Typing_helpers.make_simplify_typed_expr env p ty1 k in
-      (env, Aast.As_kv (tk, te))
-    | Await_as_kv (p, (_, p1, Lvar ((_, k) as id)), ev) ->
-      let env = set_valid_rvalue p env k None ty1 in
-      let (env, te, _, _) = Assign.assign p env ev p ty2 in
-      let (env, tk) =
-        Typing_helpers.make_simplify_typed_expr env p1 ty1 (Aast.Lvar id)
-      in
-      (env, Aast.Await_as_kv (p, tk, te))
-    | Await_as_kv (p, (_, p1, (Lplaceholder _ as k)), ev) ->
-      let (env, te, _, _) = Assign.assign p env ev p ty2 in
-      let (env, tk) = Typing_helpers.make_simplify_typed_expr env p1 ty1 k in
-      (env, Aast.Await_as_kv (p, tk, te))
-    | _ ->
-      (* TODO Probably impossible, should check that *)
-      assert false
+    | Await_as_kv (await_pos, ek, ev) ->
+      let (env, tk) = bind_foreach_target env p ty1 ek in
+      let (env, te) = bind_foreach_target env p ty2 ev in
+      (env, Aast.Await_as_kv (await_pos, tk, te))
 end
 
 and Using_stmt : sig
@@ -13080,91 +13081,15 @@ end = struct
           assign_with_subtype_err_ pos ur env e pos2 ty2
         in
         (env, (ty, pos, Aast.ReadonlyExpr te1), ty, err)
-      | (_, _pos, (Shape _ | Tuple _)) ->
-        let is_error_type = TUtils.is_tyvar_error env ty2 in
-        let env = Env.open_tyvars env p in
-        let (env, (te, ty)) =
-          assign_shape_tuple
-            ?expr_for_string_check
-            ~rhs:(get_reason ty2)
-            ~is_error_type
-            p
-            ur
-            pos2
-            env
-            e1
-        in
-        let (env, ty_err1) =
-          Type.sub_type p ur env ty2 ty Typing_error.Callback.unify_error
-        in
-        let (env, ty_err2) = Typing_solver.close_tyvars_and_solve env in
-        let ty_err_opt = Option.merge ty_err1 ty_err2 ~f:Typing_error.both in
-        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-        (env, te, ty, None)
+      | (_, pos1, DestructureShape _ds) ->
+        (* TODO(T266467978): replace stub with Typing_destructure.shape *)
+        let (env, ty) = Env.fresh_type_error env pos1 in
+        (env, Tast.make_typed_expr pos1 ty Aast.Omitted, ty, None)
+      | (_, pos1, DestructureTuple _dt) ->
+        (* TODO(T266467978): replace stub with Typing_destructure.tuple *)
+        let (env, ty) = Env.fresh_type_error env pos1 in
+        (env, Tast.make_typed_expr pos1 ty Aast.Omitted, ty, None)
       | _ -> assign_simple p ur env e1 ty2)
-
-  (* Traverse the shape/tuple skeleton and build a shape/tuple with type variables
-     in the leaves *)
-  and assign_shape_tuple
-      ?expr_for_string_check ~rhs ~is_error_type p ur pos2 env e1 =
-    match e1 with
-    | (_, pos, Tuple es) ->
-      let (env, te_tys) =
-        List.map_env
-          ~f:
-            (assign_shape_tuple
-               ?expr_for_string_check
-               ~rhs
-               ~is_error_type
-               p
-               ur
-               pos2)
-          env
-          es
-      in
-      let (tes, tys) = List.unzip te_tys in
-      let ty = MakeType.tuple (Reason.destructure pos) tys in
-      let (env, te, ty) = make_result env p (Aast.Tuple tes) ty in
-      (env, (te, ty))
-    | (_, pos, Shape fields) ->
-      let (env, te_tys) =
-        List.map_env
-          ~f:(fun env (field, e) ->
-            let (env, (te, ty)) =
-              assign_shape_tuple
-                ?expr_for_string_check
-                ~rhs
-                ~is_error_type
-                p
-                ur
-                pos2
-                env
-                e
-            in
-            ( env,
-              ( (field, te),
-                ( TShapeField.of_ast Pos_or_decl.of_raw_pos field,
-                  { sft_optional = false; sft_ty = ty } ) ) ))
-          env
-          fields
-      in
-      let (tes, tys) = List.unzip te_tys in
-      let ty =
-        MakeType.closed_shape (Reason.destructure pos) (TShapeMap.of_list tys)
-      in
-      let (env, te, ty) = make_result env p (Aast.Shape tes) ty in
-      (env, (te, ty))
-    | (_, p, _) ->
-      let (env, tvar) =
-        if is_error_type then
-          Env.fresh_type_error env p
-        else
-          Env.fresh_type env p
-      in
-      let (env, te1, ty, _) =
-        assign_with_subtype_err_ ?expr_for_string_check p ur env e1 pos2 tvar
-      in
-      (env, (te1, ty))
 
   (* Deal with assignment of a value of type ty2 to lvalue e1 *)
   and assign ?expr_for_string_check p env e1 pos2 ty2 =

@@ -244,17 +244,9 @@ fn make_env(
 
 /// Run the passes which are common to codegen and typechecking.
 /// For now, these passes may not emit errors.
-fn elaborate_common<T: Transform>(env: &Env, node: &mut T) {
-    #[derive(Copy, Clone)]
-    struct NoopPass;
-    impl Pass for NoopPass {}
-    #[rustfmt::skip]
-    let mut passes = pass::Passes { passes:vec![
-        Box::new(NoopPass)
-    ]};
-
-    node.transform(env, &mut passes);
-    env.assert_no_errors();
+fn elaborate_common<T: Transform>(_env: &Env, _node: &mut T) {
+    // Shape/tuple destructure disambiguation is now handled in the lowerer
+    // (ExprLocation::LvaluePosition), so no common passes remain.
 }
 
 fn elaborate_package_expr<T: Transform>(env: &Env, node: &mut T) {

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ac494b234cb6aedd5b594f8ec04eb838>>
+// @generated SignedSource<<c209a9ff020087e00402fa7e8b64c834>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -495,6 +495,153 @@ impl Transform for PatRefinement {
         }
     }
 }
+impl Transform for DestructureShape {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_destructure_shape_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        let _ = in_pass.on_ty_destructure_shape_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            DestructureShape {
+                fields: ref mut __binding_1,
+                ellipsis: ref mut __binding_2,
+                ..
+            } => {
+                {
+                    __binding_1.transform(env, &mut pass.clone())
+                }
+                { __binding_2.transform(env, &mut pass.clone()) }
+            }
+        }
+    }
+}
+impl Transform for DestructureShapeField {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_destructure_shape_field_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        let _ = in_pass.on_ty_destructure_shape_field_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            DestructureShapeField {
+                optional: ref mut __binding_0,
+                name: ref mut __binding_1,
+                target: ref mut __binding_2,
+            } => {
+                {
+                    __binding_0.transform(env, &mut pass.clone())
+                }
+                {
+                    __binding_1.transform(env, &mut pass.clone())
+                }
+                { __binding_2.transform(env, &mut pass.clone()) }
+            }
+        }
+    }
+}
+impl Transform for DestructureTuple {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_destructure_tuple_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        let _ = in_pass.on_ty_destructure_tuple_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            DestructureTuple {
+                entries: ref mut __binding_1,
+                ellipsis: ref mut __binding_2,
+                ..
+            } => {
+                {
+                    __binding_1.transform(env, &mut pass.clone())
+                }
+                { __binding_2.transform(env, &mut pass.clone()) }
+            }
+        }
+    }
+}
+impl Transform for DestructureTupleEntry {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_destructure_tuple_entry_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        let _ = in_pass.on_ty_destructure_tuple_entry_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            DestructureTupleEntry {
+                optional: ref mut __binding_0,
+                target: ref mut __binding_1,
+            } => {
+                {
+                    __binding_0.transform(env, &mut pass.clone())
+                }
+                { __binding_1.transform(env, &mut pass.clone()) }
+            }
+        }
+    }
+}
+impl Transform for DestructureTarget {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_destructure_target_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        let _ = in_pass.on_ty_destructure_target_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            DestructureTarget(ref mut __binding_0, ref mut __binding_1, ref mut __binding_2) => {
+                {
+                    __binding_0.transform(env, &mut pass.clone())
+                }
+                {
+                    __binding_1.transform(env, &mut pass.clone())
+                }
+                { __binding_2.transform(env, &mut pass.clone()) }
+            }
+        }
+    }
+}
+impl Transform for DestructureTarget_ {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_destructure_target__top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        let _ = in_pass.on_ty_destructure_target__bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            DestructureTarget_::DtLvar(ref mut __binding_0) => {
+                __binding_0.transform(env, &mut pass.clone())
+            }
+            DestructureTarget_::DtWildcard(ref mut __binding_0) => {
+                __binding_0.transform(env, &mut pass.clone())
+            }
+            DestructureTarget_::DtShape(ref mut __binding_0) => {
+                __binding_0.transform(env, &mut pass.clone())
+            }
+            DestructureTarget_::DtTuple(ref mut __binding_0) => {
+                __binding_0.transform(env, &mut pass.clone())
+            }
+        }
+    }
+}
 impl Transform for ClassId {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
@@ -754,6 +901,12 @@ impl Transform for Expr_ {
             }
             Expr_::Tuple(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Expr_::List(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
+            Expr_::DestructureShape(ref mut __binding_0) => {
+                __binding_0.transform(env, &mut pass.clone())
+            }
+            Expr_::DestructureTuple(ref mut __binding_0) => {
+                __binding_0.transform(env, &mut pass.clone())
+            }
             Expr_::Cast(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Expr_::Unop(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Expr_::Binop(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),

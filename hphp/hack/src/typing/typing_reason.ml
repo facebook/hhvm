@@ -339,6 +339,7 @@ type witness_locl =
   | Shape of Pos.t * string
   | Shape_literal of Pos.t
   | Destructure of Pos.t
+  | Shape_or_tuple_destructure of Pos.t
   | Key_value_collection_key of Pos.t
   | Splice of Pos.t
   | Et_boolean of Pos.t
@@ -404,6 +405,7 @@ let witness_locl_to_raw_pos = function
   | Shape (pos, _)
   | Shape_literal pos
   | Destructure pos
+  | Shape_or_tuple_destructure pos
   | Key_value_collection_key pos
   | Splice pos
   | Et_boolean pos
@@ -476,6 +478,7 @@ let map_pos_witness_locl pos pos_or_decl w =
   | Shape (p, fun_name) -> Shape (pos p, fun_name)
   | Shape_literal p -> Shape_literal (pos p)
   | Destructure p -> Destructure (pos p)
+  | Shape_or_tuple_destructure p -> Shape_or_tuple_destructure (pos p)
   | Key_value_collection_key p -> Key_value_collection_key (pos p)
   | Splice p -> Splice (pos p)
   | Et_boolean p -> Et_boolean (pos p)
@@ -540,6 +543,7 @@ let constructor_string_of_witness_locl = function
   | Shape _ -> "Rshape"
   | Shape_literal _ -> "Rshape_literal"
   | Destructure _ -> "Rdestructure"
+  | Shape_or_tuple_destructure _ -> "Rshape_or_tuple_destructure"
   | Key_value_collection_key _ -> "Rkey_value_collection_key"
   | Splice _ -> "Rsplice"
   | Et_boolean _ -> "Ret_boolean"
@@ -615,6 +619,7 @@ let pp_witness_locl fmt witness =
     | Type_variable_error (p, _)
     | Shape_literal p
     | Destructure p
+    | Shape_or_tuple_destructure p
     | Key_value_collection_key p
     | Splice p
     | Et_boolean p
@@ -731,6 +736,8 @@ let witness_locl_to_json witness =
   | Shape (pos, str) -> `Assoc [("Shape", `List [pos_to_json pos; `String str])]
   | Shape_literal pos -> `Assoc [("Shape_literal", `List [pos_to_json pos])]
   | Destructure pos -> `Assoc [("Destructure", `List [pos_to_json pos])]
+  | Shape_or_tuple_destructure pos ->
+    `Assoc [("Shape_or_tuple_destructure", `List [pos_to_json pos])]
   | Key_value_collection_key pos ->
     `Assoc [("Key_value_collection_key", `List [pos_to_json pos])]
   | Splice pos -> `Assoc [("Splice", `List [pos_to_json pos])]
@@ -917,6 +924,9 @@ let witness_locl_to_string prefix witness =
   | Destructure pos ->
     ( Pos_or_decl.of_raw_pos pos,
       prefix ^ " resulting from a list destructuring assignment or a splat" )
+  | Shape_or_tuple_destructure pos ->
+    ( Pos_or_decl.of_raw_pos pos,
+      prefix ^ " resulting from a shape or tuple destructuring pattern" )
   | Key_value_collection_key pos ->
     ( Pos_or_decl.of_raw_pos pos,
       "This is a key-value collection, which requires `arraykey`-typed keys" )
@@ -2610,6 +2620,9 @@ module Constructors = struct
 
   let destructure p = from_witness_locl @@ Destructure p
 
+  let shape_or_tuple_destructure p =
+    from_witness_locl @@ Shape_or_tuple_destructure p
+
   let key_value_collection_key p =
     from_witness_locl @@ Key_value_collection_key p
 
@@ -4257,6 +4270,9 @@ module Derivation = struct
       | Destructure pos ->
         Explanation.Witness
           (Pos_or_decl.of_raw_pos pos, "destructure expression")
+      | Shape_or_tuple_destructure pos ->
+        Explanation.Witness
+          (Pos_or_decl.of_raw_pos pos, "shape or tuple destructuring pattern")
       | Join_point pos ->
         Explanation.Witness (Pos_or_decl.of_raw_pos pos, "join point")
       | Static_property_access pos ->

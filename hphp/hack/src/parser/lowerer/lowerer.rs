@@ -96,6 +96,30 @@ pub enum ExprLocation {
     RightOfReturn,
     UsingStatement,
     CallReceiver,
+    /// Lvalue context: LHS of `=`, foreach value/key.
+    ///
+    /// We initially parse shape and tuple destructuring as if they were
+    /// expressions, then disambiguate here in the lowerer. This avoids
+    /// arbitrary lookahead in the parser. For example, consider:
+    ///
+    ///     shape('x' => $x, 'y' => $y)  .... remainder of statement
+    ///
+    /// We can't distinguish between an expression statement and a
+    /// destructuring assignment. Two possible completions:
+    ///
+    ///     shape('x' => $x, 'y' => $y);           // expression statement
+    ///     shape('x' => $x, 'y' => $y) = $point;  // destructuring assignment
+    ///
+    /// We always parse as an expression, then in the lowerer produce distinct
+    /// AAST nodes: `Expr_::Shape`/`Expr_::Tuple` for expressions vs
+    /// `Expr_::DestructureShape`/`Expr_::DestructureTuple` for destructuring
+    /// patterns.
+    ///
+    /// This two-pass technique is similar to legacy `list()` destructuring,
+    /// except `list()` reuses a single `Expr_::List` node for both contexts
+    /// and relies on the type checker and emitter to track where it appears.
+    /// The dedicated AAST nodes are more explicit and less error-prone.
+    LvaluePosition,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -788,7 +812,18 @@ fn map_shape_expression_field<'a, F, R>(
 where
     F: Fn(S<'a>, &mut Env<'a>) -> Result<R>,
 {
-    match &node.children {
+    let inner = match &node.children {
+        PrefixUnaryExpression(c) if token_kind(&c.operator) == Some(TK::Question) => {
+            raise_parsing_error(
+                node,
+                env,
+                "Optional field syntax `?` is only valid in shape destructuring patterns",
+            );
+            &c.operand
+        }
+        _ => node,
+    };
+    match &inner.children {
         FieldInitializer(c) => {
             let name = p_shape_field_name(&c.name, env)?;
             let value = f(&c.value, env)?;
@@ -796,16 +831,16 @@ where
         }
         VariableExpression(c) => {
             // Shape field punning: $foo becomes 'foo' => $foo
-            let pos = p_pos(node, env);
+            let pos = p_pos(inner, env);
             let var_name = text_str(&c.expression, env);
             // Strip the '$' prefix to get the field name
             let field_name = var_name.strip_prefix('$').unwrap_or(var_name);
             let shape_field_name =
                 ast::ShapeFieldName::SFlitStr((pos, field_name.to_string().into()));
-            let value = f(node, env)?;
+            let value = f(inner, env)?;
             Ok((shape_field_name, value))
         }
-        _ => missing_syntax("shape field", node, env),
+        _ => missing_syntax("shape field", inner, env),
     }
 }
 
@@ -1869,7 +1904,7 @@ fn p_expr_impl<'a>(
         ListExpression(c) => p_list_expr(c, env),
         EvalExpression(c) => p_special_call(&c.keyword, &c.argument, env),
         IssetExpression(c) => p_special_call(&c.keyword, &c.argument_list, env),
-        TupleExpression(c) => p_tuple_expr(c, env),
+        TupleExpression(c) => p_tuple_expr(c, env, location),
         FunctionCallExpression(c) => p_function_call_expr(c, env),
         FunctionPointerExpression(c) => p_function_pointer_expr(node, c, env),
         QualifiedName(_) => p_qualified_name(node, env, location),
@@ -1896,7 +1931,7 @@ fn p_expr_impl<'a>(
         ConditionalExpression(c) => p_conditional_expr(c, env),
         SubscriptExpression(c) => p_subscript_expr(c, env),
         EmbeddedSubscriptExpression(c) => p_embedded_subscript_expr(c, env, location),
-        ShapeExpression(c) => p_shape_expr(c, env),
+        ShapeExpression(c) => p_shape_expr(c, env, location),
         ObjectCreationExpression(c) => p_expr_recurse(location, &c.object, env, Some(pos)),
         ConstructorCall(c) => p_constructor_call(node, c, env, pos),
         GenericTypeSpecifier(c) => p_generic_type_specifier(c, env),
@@ -2071,8 +2106,46 @@ fn p_list_expr<'a>(
 fn p_tuple_expr<'a>(
     c: &'a TupleExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
+    location: ExprLocation,
 ) -> Result<Expr_> {
-    Ok(Expr_::mk_tuple(could_map(&c.items, env, p_expr)?))
+    let has_ellipsis = !c.ellipsis.is_missing();
+    if location == ExprLocation::LvaluePosition {
+        // Lvalue context: produce DestructureTuple
+        let pos = p_pos(&c.keyword, env);
+        let mut seen_optional = false;
+        let mut dt_entries = Vec::new();
+        for node in c.items.syntax_node_to_list_skip_separator() {
+            let mut entry = p_destructure_tuple_entry(node, env)?;
+            if seen_optional && !entry.optional {
+                raise_parsing_error(
+                    node,
+                    env,
+                    "There must be no required elements following an optional element",
+                );
+                // Mark as optional to maintain the invariant that all entries
+                // after the first optional are also optional. The type
+                // checker and emitter iterate entries positionally.
+                entry.optional = true;
+            }
+            seen_optional |= entry.optional;
+            dt_entries.push(entry);
+        }
+        Ok(Expr_::DestructureTuple(Box::new(aast::DestructureTuple {
+            pos,
+            entries: dt_entries,
+            ellipsis: has_ellipsis,
+        })))
+    } else {
+        // Expression context: produce Tuple
+        if has_ellipsis {
+            raise_parsing_error(
+                &c.ellipsis,
+                env,
+                "Ellipsis `...` is only valid in tuple destructuring patterns",
+            );
+        }
+        Ok(Expr_::mk_tuple(could_map(&c.items, env, p_expr)?))
+    }
 }
 
 fn p_function_call_expr<'a>(
@@ -2249,7 +2322,12 @@ fn p_binary_expr<'a>(
     location: ExprLocation,
 ) -> Result<Expr_> {
     use ExprLocation::*;
-    let left = p_expr_with_loc(ExprLocation::TopLevel, &c.left_operand, env, None)?;
+    let lhs_location = if token_kind(&c.operator) == Some(TK::Equal) {
+        LvaluePosition
+    } else {
+        TopLevel
+    };
+    let left = p_expr_with_loc(lhs_location, &c.left_operand, env, None)?;
     let rlocation = match (token_kind(&c.operator), location) {
         (Some(TK::Equal), AsStatement) => RightOfAssignment,
         (Some(TK::Equal), UsingStatement) => RightOfAssignmentInUsingStatement,
@@ -2285,7 +2363,8 @@ fn p_token<'a>(
         | (RightOfAssignment, _)
         | (RightOfAssignmentInUsingStatement, _)
         | (RightOfReturn, _)
-        | (CallReceiver, _) => Ok(Expr_::mk_id(pos_name(node, env)?)),
+        | (CallReceiver, _)
+        | (LvaluePosition, _) => Ok(Expr_::mk_id(pos_name(node, env)?)),
     }
 }
 
@@ -2618,13 +2697,139 @@ fn p_generic_type_specifier<'a>(
     Ok(Expr_::mk_id(pos_name(&c.class_type, env)?))
 }
 
+/// Lower a shape field for destructuring patterns. Handles:
+/// - FieldInitializer: 'key' => $var
+/// - VariableExpression: $var (punning)
+/// - PrefixUnaryExpression(?, inner): ?'key' => $var or ?$var (optional)
+fn p_destructure_shape_field<'a>(
+    node: S<'a>,
+    env: &mut Env<'a>,
+) -> Result<aast::DestructureShapeField<(), ()>> {
+    match &node.children {
+        PrefixUnaryExpression(c) if token_kind(&c.operator) == Some(TK::Question) => {
+            // ?'key' => $var or ?$var (optional field)
+            let inner = &c.operand;
+            let mut field = p_destructure_shape_field(inner, env)?;
+            field.optional = true;
+            Ok(field)
+        }
+        FieldInitializer(c) => {
+            let name = p_shape_field_name(&c.name, env)?;
+            let value = p_expr_with_loc(ExprLocation::LvaluePosition, &c.value, env, None)?;
+            let target = expr_to_destructure_target(value, env);
+            Ok(aast::DestructureShapeField {
+                optional: false,
+                name,
+                target,
+            })
+        }
+        VariableExpression(c) => {
+            // Punning in destructuring patterns: shape($foo) = $s is sugar for shape('foo' => $foo) = $s
+            let pos = p_pos(node, env);
+            let var_name = text_str(&c.expression, env);
+            let field_name = var_name.strip_prefix('$').unwrap_or(var_name);
+            let name = ast::ShapeFieldName::SFlitStr((pos.clone(), field_name.to_string().into()));
+            let value = p_expr_with_loc(ExprLocation::LvaluePosition, node, env, None)?;
+            let target = expr_to_destructure_target(value, env);
+            Ok(aast::DestructureShapeField {
+                optional: false,
+                name,
+                target,
+            })
+        }
+        _ => missing_syntax("shape destructure field", node, env),
+    }
+}
+
+/// Lower a tuple entry for destructuring patterns. Handles:
+/// - PrefixUnaryExpression(optional, inner): optional $var (optional entry)
+/// - Any other expression: plain entry
+fn p_destructure_tuple_entry<'a>(
+    node: S<'a>,
+    env: &mut Env<'a>,
+) -> Result<aast::DestructureTupleEntry<(), ()>> {
+    match &node.children {
+        PrefixUnaryExpression(c) if token_kind(&c.operator) == Some(TK::Optional) => {
+            let value = p_expr_with_loc(ExprLocation::LvaluePosition, &c.operand, env, None)?;
+            let target = expr_to_destructure_target(value, env);
+            Ok(aast::DestructureTupleEntry {
+                optional: true,
+                target,
+            })
+        }
+        _ => {
+            let value = p_expr_with_loc(ExprLocation::LvaluePosition, node, env, None)?;
+            let target = expr_to_destructure_target(value, env);
+            Ok(aast::DestructureTupleEntry {
+                optional: false,
+                target,
+            })
+        }
+    }
+}
+
+/// Convert an Expr to a DestructureTarget for destructuring patterns.
+/// The only valid targets per the spec are: lvar, wildcard (_),
+/// destructure_shape, and destructure_tuple.
+fn expr_to_destructure_target<'a>(
+    value: ast::Expr,
+    env: &mut Env<'a>,
+) -> aast::DestructureTarget<(), ()> {
+    match value.2 {
+        Expr_::Lvar(lid) => aast::DestructureTarget((), (), aast::DestructureTarget_::DtLvar(*lid)),
+        Expr_::Lplaceholder(pos) => {
+            aast::DestructureTarget((), (), aast::DestructureTarget_::DtWildcard(*pos))
+        }
+        Expr_::DestructureShape(ds) => {
+            aast::DestructureTarget((), (), aast::DestructureTarget_::DtShape(*ds))
+        }
+        Expr_::DestructureTuple(dt) => {
+            aast::DestructureTarget((), (), aast::DestructureTarget_::DtTuple(*dt))
+        }
+        Expr_::Id(sid) if sid.1 == "_" => {
+            aast::DestructureTarget((), (), aast::DestructureTarget_::DtWildcard(value.1))
+        }
+        _ => {
+            // Invalid target in destructuring pattern (e.g., $obj->prop, f(), etc.).
+            let pos = value.1;
+            raise_parsing_error_pos(
+                &pos,
+                env,
+                "Only variables, wildcards, and nested shape/tuple patterns are allowed in destructuring patterns",
+            );
+            aast::DestructureTarget((), (), aast::DestructureTarget_::DtWildcard(pos))
+        }
+    }
+}
+
 fn p_shape_expr<'a>(
     c: &'a ShapeExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
+    location: ExprLocation,
 ) -> Result<Expr_> {
-    Ok(Expr_::Shape(could_map(&c.fields, env, |n, e| {
-        map_shape_expression_field(n, e, p_expr)
-    })?))
+    let has_ellipsis = !c.ellipsis.is_missing();
+    if location == ExprLocation::LvaluePosition {
+        // Lvalue context: produce DestructureShape
+        let pos = p_pos(&c.keyword, env);
+        let ds_fields = could_map(&c.fields, env, |n, e| p_destructure_shape_field(n, e))?;
+        Ok(Expr_::DestructureShape(Box::new(aast::DestructureShape {
+            pos,
+            fields: ds_fields,
+            ellipsis: has_ellipsis,
+        })))
+    } else {
+        // Expression context: produce Shape
+        if has_ellipsis {
+            raise_parsing_error(
+                &c.ellipsis,
+                env,
+                "Ellipsis `...` is only valid in shape destructuring patterns",
+            );
+        }
+        Ok(Expr_::Shape(could_map(&c.fields, env, |n, e| {
+            map_shape_expression_field(n, e, p_expr)
+        })?))
+    }
 }
 
 fn p_prefixed_string_expr<'a>(
@@ -3416,12 +3621,21 @@ fn p_foreach_stmt<'a>(
         }
         _ => None,
     };
-    let value = p_expr(&c.value, env)?;
+    let value = p_expr_with_loc(ExprLocation::LvaluePosition, &c.value, env, None)?;
+    // The key position also uses LvaluePosition so destructuring works on both
+    // sides of `foreach ($xs as key => value)`.
     let akv = match (akw, &c.key.children) {
         (Some(p), Missing) => ast::AsExpr::AwaitAsV(p, value),
         (None, Missing) => ast::AsExpr::AsV(value),
-        (Some(p), _) => ast::AsExpr::AwaitAsKv(p, p_expr(&c.key, env)?, value),
-        (None, _) => ast::AsExpr::AsKv(p_expr(&c.key, env)?, value),
+        (Some(p), _) => ast::AsExpr::AwaitAsKv(
+            p,
+            p_expr_with_loc(ExprLocation::LvaluePosition, &c.key, env, None)?,
+            value,
+        ),
+        (None, _) => ast::AsExpr::AsKv(
+            p_expr_with_loc(ExprLocation::LvaluePosition, &c.key, env, None)?,
+            value,
+        ),
     };
     let blk = p_block(true, &c.body, env)?;
     Ok(new(pos, S_::mk_foreach(col, akv, blk)))

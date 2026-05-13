@@ -396,6 +396,9 @@ let rec assign (env : Tast_env.env) lval rval =
   match lval with
   (* List assignment *)
   | (_, _, List exprs) -> List.iter exprs ~f:(fun lval -> assign env lval rval)
+  (* TODO(T266467978): real shape/tuple destructure readonly checking in next commit *)
+  | (_, _, DestructureShape _) -> ()
+  | (_, _, DestructureTuple _) -> ()
   | (_, _, Array_get (array, _)) -> begin
     match (ty_expr env array, ty_expr env rval) with
     | (Readonly, _) when is_value_collection_ty env (Tast.get_type array) ->
@@ -715,7 +718,9 @@ let check =
       | (_, _, PrefixedString _)
       | (_, _, Hole _)
       | (_, _, Nameof _)
-      | (_, _, Package _) ->
+      | (_, _, Package _)
+      | (_, _, DestructureShape _)
+      | (_, _, DestructureTuple _) ->
         super#on_expr env e
       (* Stop at invalid marker *)
       | (_, _, Invalid _) -> ()

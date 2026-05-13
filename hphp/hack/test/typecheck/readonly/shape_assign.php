@@ -26,3 +26,5 @@ function test(readonly shape('a' => Foo, 'b' => Foo) $x, readonly (Foo, Foo) $y)
   tuple($c, $d) = $y;
   $c->prop = 4; // error $c is readonly
 }
+
+//

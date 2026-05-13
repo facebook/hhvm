@@ -54,7 +54,7 @@ type feature_name =
   | TypeSplat
   | ExpressionTreeNestedBindings
   | LikeTypeHints
-  | ShapeDestructure
+  | ShapeAndTupleDestructuring
   | ExpressionTreeShapeCreation
   | NoDisjointUnion
   | SimpliHack

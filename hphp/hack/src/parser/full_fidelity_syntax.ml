@@ -2518,11 +2518,13 @@ module WithToken (Token : TokenType) = struct
             shape_expression_keyword;
             shape_expression_left_paren;
             shape_expression_fields;
+            shape_expression_ellipsis;
             shape_expression_right_paren;
           } ->
         let acc = f acc shape_expression_keyword in
         let acc = f acc shape_expression_left_paren in
         let acc = f acc shape_expression_fields in
+        let acc = f acc shape_expression_ellipsis in
         let acc = f acc shape_expression_right_paren in
         acc
       | TupleExpression
@@ -2530,11 +2532,13 @@ module WithToken (Token : TokenType) = struct
             tuple_expression_keyword;
             tuple_expression_left_paren;
             tuple_expression_items;
+            tuple_expression_ellipsis;
             tuple_expression_right_paren;
           } ->
         let acc = f acc tuple_expression_keyword in
         let acc = f acc tuple_expression_left_paren in
         let acc = f acc tuple_expression_items in
+        let acc = f acc tuple_expression_ellipsis in
         let acc = f acc tuple_expression_right_paren in
         acc
       | GenericTypeSpecifier { generic_class_type; generic_argument_list } ->
@@ -4335,12 +4339,14 @@ module WithToken (Token : TokenType) = struct
             shape_expression_keyword;
             shape_expression_left_paren;
             shape_expression_fields;
+            shape_expression_ellipsis;
             shape_expression_right_paren;
           } ->
         [
           shape_expression_keyword;
           shape_expression_left_paren;
           shape_expression_fields;
+          shape_expression_ellipsis;
           shape_expression_right_paren;
         ]
       | TupleExpression
@@ -4348,12 +4354,14 @@ module WithToken (Token : TokenType) = struct
             tuple_expression_keyword;
             tuple_expression_left_paren;
             tuple_expression_items;
+            tuple_expression_ellipsis;
             tuple_expression_right_paren;
           } ->
         [
           tuple_expression_keyword;
           tuple_expression_left_paren;
           tuple_expression_items;
+          tuple_expression_ellipsis;
           tuple_expression_right_paren;
         ]
       | GenericTypeSpecifier { generic_class_type; generic_argument_list } ->
@@ -6162,12 +6170,14 @@ module WithToken (Token : TokenType) = struct
             shape_expression_keyword;
             shape_expression_left_paren;
             shape_expression_fields;
+            shape_expression_ellipsis;
             shape_expression_right_paren;
           } ->
         [
           "shape_expression_keyword";
           "shape_expression_left_paren";
           "shape_expression_fields";
+          "shape_expression_ellipsis";
           "shape_expression_right_paren";
         ]
       | TupleExpression
@@ -6175,12 +6185,14 @@ module WithToken (Token : TokenType) = struct
             tuple_expression_keyword;
             tuple_expression_left_paren;
             tuple_expression_items;
+            tuple_expression_ellipsis;
             tuple_expression_right_paren;
           } ->
         [
           "tuple_expression_keyword";
           "tuple_expression_left_paren";
           "tuple_expression_items";
+          "tuple_expression_ellipsis";
           "tuple_expression_right_paren";
         ]
       | GenericTypeSpecifier { generic_class_type; generic_argument_list } ->
@@ -8207,6 +8219,7 @@ module WithToken (Token : TokenType) = struct
             shape_expression_keyword;
             shape_expression_left_paren;
             shape_expression_fields;
+            shape_expression_ellipsis;
             shape_expression_right_paren;
           ] ) ->
         ShapeExpression
@@ -8214,6 +8227,7 @@ module WithToken (Token : TokenType) = struct
             shape_expression_keyword;
             shape_expression_left_paren;
             shape_expression_fields;
+            shape_expression_ellipsis;
             shape_expression_right_paren;
           }
       | ( SyntaxKind.TupleExpression,
@@ -8221,6 +8235,7 @@ module WithToken (Token : TokenType) = struct
             tuple_expression_keyword;
             tuple_expression_left_paren;
             tuple_expression_items;
+            tuple_expression_ellipsis;
             tuple_expression_right_paren;
           ] ) ->
         TupleExpression
@@ -8228,6 +8243,7 @@ module WithToken (Token : TokenType) = struct
             tuple_expression_keyword;
             tuple_expression_left_paren;
             tuple_expression_items;
+            tuple_expression_ellipsis;
             tuple_expression_right_paren;
           }
       | ( SyntaxKind.GenericTypeSpecifier,
@@ -10778,6 +10794,7 @@ module WithToken (Token : TokenType) = struct
           shape_expression_keyword
           shape_expression_left_paren
           shape_expression_fields
+          shape_expression_ellipsis
           shape_expression_right_paren =
         let syntax =
           ShapeExpression
@@ -10785,6 +10802,7 @@ module WithToken (Token : TokenType) = struct
               shape_expression_keyword;
               shape_expression_left_paren;
               shape_expression_fields;
+              shape_expression_ellipsis;
               shape_expression_right_paren;
             }
         in
@@ -10795,6 +10813,7 @@ module WithToken (Token : TokenType) = struct
           tuple_expression_keyword
           tuple_expression_left_paren
           tuple_expression_items
+          tuple_expression_ellipsis
           tuple_expression_right_paren =
         let syntax =
           TupleExpression
@@ -10802,6 +10821,7 @@ module WithToken (Token : TokenType) = struct
               tuple_expression_keyword;
               tuple_expression_left_paren;
               tuple_expression_items;
+              tuple_expression_ellipsis;
               tuple_expression_right_paren;
             }
         in

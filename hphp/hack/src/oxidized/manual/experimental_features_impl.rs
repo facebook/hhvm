@@ -45,7 +45,7 @@ impl FeatureName {
             TypeSplat => OngoingRelease,
             ExpressionTreeNestedBindings => OngoingRelease,
             LikeTypeHints => Unstable,
-            ShapeDestructure => Unstable,
+            ShapeAndTupleDestructuring => Unstable,
             ExpressionTreeShapeCreation => OngoingRelease,
             NoDisjointUnion => OngoingRelease,
             SimpliHack => Preview,

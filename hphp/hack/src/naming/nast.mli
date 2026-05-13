@@ -87,6 +87,18 @@ type stmt_match = (unit, unit) Aast.stmt_match
 
 type stmt_match_arm = (unit, unit) Aast.stmt_match_arm
 
+type destructure_shape = (unit, unit) Aast.destructure_shape
+
+type destructure_shape_field = (unit, unit) Aast.destructure_shape_field
+
+type destructure_tuple = (unit, unit) Aast.destructure_tuple
+
+type destructure_tuple_entry = (unit, unit) Aast.destructure_tuple_entry
+
+type destructure_target = (unit, unit) Aast.destructure_target
+
+type destructure_target_ = (unit, unit) Aast.destructure_target_
+
 type default_case = (unit, unit) Aast.default_case
 
 type gen_case = (unit, unit) Aast.gen_case

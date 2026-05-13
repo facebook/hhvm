@@ -2690,13 +2690,18 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn invalid_shape_field_check(&mut self, node: S<'a>) {
+    fn invalid_shape_field_check(&mut self, node: S<'a>, allow_optional: bool) {
         match &node.children {
             FieldInitializer(x) => self.invalid_shape_initializer_name(&x.name),
             VariableExpression(_) => {
                 // Shape field punning: $foo becomes 'foo' => $foo
                 // Check if the feature is enabled
                 self.check_can_use_feature(node, &FeatureName::ShapeFieldPunning);
+            }
+            PrefixUnaryExpression(c)
+                if allow_optional && token_kind(&c.operator) == Some(TokenKind::Question) =>
+            {
+                self.invalid_shape_field_check(&c.operand, allow_optional)
             }
             _ => self
                 .errors
@@ -3351,8 +3356,36 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 if self.context.active_expression_tree {
                     self.check_can_use_feature(node, &FeatureName::ExpressionTreeShapeCreation)
                 }
+                let is_destructure_lhs = {
+                    let mut found = false;
+                    let mut child: S<'a> = node;
+                    for &parent in self.parents.iter().rev() {
+                        match &parent.children {
+                            FieldInitializer(_)
+                            | ShapeExpression(_)
+                            | TupleExpression(_)
+                            | ListItem(_)
+                            | SyntaxList(_)
+                            | PrefixUnaryExpression(_) => {
+                                child = parent;
+                                continue;
+                            }
+                            BinaryExpression(bx) => {
+                                found = token_kind(&bx.operator) == Some(TokenKind::Equal)
+                                    && std::ptr::eq(child, &bx.left_operand);
+                                break;
+                            }
+                            ForeachStatement(fx) => {
+                                found = std::ptr::eq(child, &fx.value);
+                                break;
+                            }
+                            _ => break,
+                        }
+                    }
+                    found
+                };
                 for f in syntax_to_list_no_separators(&x.fields).rev() {
-                    self.invalid_shape_field_check(f)
+                    self.invalid_shape_field_check(f, is_destructure_lhs)
                 }
             }
             VectorIntrinsicExpression(_)
@@ -5238,16 +5271,49 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             ListExpression(x) => syntax_to_list_no_separators(&x.members)
                 .for_each(|n| self.check_lvalue_and_inout(n, lval_root, NestingContext::List)),
             TupleExpression(x) => {
-                self.check_can_use_feature(loperand, &FeatureName::ShapeDestructure);
-                syntax_to_list_no_separators(&x.items).for_each(|n| {
-                    self.check_lvalue_and_inout(n, lval_root, NestingContext::ShapeTuple)
-                })
+                self.check_can_use_feature(loperand, &FeatureName::ShapeAndTupleDestructuring);
+                for item in syntax_to_list_no_separators(&x.items) {
+                    match &item.children {
+                        PrefixUnaryExpression(c)
+                            if token_kind(&c.operator) == Some(TokenKind::Optional) =>
+                        {
+                            self.check_lvalue_and_inout(
+                                &c.operand,
+                                lval_root,
+                                NestingContext::ShapeTuple,
+                            )
+                        }
+                        _ => {
+                            self.check_lvalue_and_inout(item, lval_root, NestingContext::ShapeTuple)
+                        }
+                    }
+                }
             }
             ShapeExpression(x) => {
-                self.check_can_use_feature(loperand, &FeatureName::ShapeDestructure);
+                self.check_can_use_feature(loperand, &FeatureName::ShapeAndTupleDestructuring);
                 for field in syntax_to_list_no_separators(&x.fields) {
-                    if let FieldInitializer(x) = field.children {
-                        self.check_lvalue_and_inout(&x.value, lval_root, NestingContext::ShapeTuple)
+                    match &field.children {
+                        FieldInitializer(x) => self.check_lvalue_and_inout(
+                            &x.value,
+                            lval_root,
+                            NestingContext::ShapeTuple,
+                        ),
+                        // ?'key' => $var or ?$var (optional field in destructuring)
+                        PrefixUnaryExpression(x)
+                            if token_kind(&x.operator) == Some(TokenKind::Question) =>
+                        {
+                            match &x.operand.children {
+                                FieldInitializer(fi) => self.check_lvalue_and_inout(
+                                    &fi.value,
+                                    lval_root,
+                                    NestingContext::ShapeTuple,
+                                ),
+                                VariableExpression(_) => {} // ?$var punning, valid
+                                _ => err(self, errors::not_allowed_in_write("Expression")),
+                            }
+                        }
+                        VariableExpression(_) => {} // $var punning, valid
+                        _ => {}
                     }
                 }
             }
@@ -5316,6 +5382,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 // Foo::BAR = ...;  // Not OK, this is an assignment to a constant
                 err(self, errors::invalid_lval(lval_root))
             }
+            // Bare `_` is a valid wildcard in shape/tuple destructuring patterns
+            Token(t)
+                if matches!(c, NestingContext::ShapeTuple)
+                    && t.kind() == TokenKind::Name
+                    && self.text(loperand) == "_" => {}
             _ => err(self, errors::invalid_lval(lval_root)),
         }
     }

@@ -346,7 +346,12 @@ val shape_literal : Pos.t -> t
 
 val enforceable : Pos_or_decl.t -> 'phase t_
 
+(** Reason for types arising from [list()] destructuring or splat unpacking. *)
 val destructure : Pos.t -> t
+
+(** Reason for types arising from shape or tuple destructuring patterns.
+    Used for fresh tyvars and nullable wrapping in {!Typing_destructure}. *)
+val shape_or_tuple_destructure : Pos.t -> t
 
 val tuple_from_splat : Pos_or_decl.t -> 'phase t_
 

@@ -1848,22 +1848,24 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_shape_expression(_: &C, shape_expression_keyword: Self, shape_expression_left_paren: Self, shape_expression_fields: Self, shape_expression_right_paren: Self) -> Self {
+    fn make_shape_expression(_: &C, shape_expression_keyword: Self, shape_expression_left_paren: Self, shape_expression_fields: Self, shape_expression_ellipsis: Self, shape_expression_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ShapeExpression(Box::new(ShapeExpressionChildren {
             shape_expression_keyword,
             shape_expression_left_paren,
             shape_expression_fields,
+            shape_expression_ellipsis,
             shape_expression_right_paren,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
-    fn make_tuple_expression(_: &C, tuple_expression_keyword: Self, tuple_expression_left_paren: Self, tuple_expression_items: Self, tuple_expression_right_paren: Self) -> Self {
+    fn make_tuple_expression(_: &C, tuple_expression_keyword: Self, tuple_expression_left_paren: Self, tuple_expression_items: Self, tuple_expression_ellipsis: Self, tuple_expression_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::TupleExpression(Box::new(TupleExpressionChildren {
             tuple_expression_keyword,
             tuple_expression_left_paren,
             tuple_expression_items,
+            tuple_expression_ellipsis,
             tuple_expression_right_paren,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
@@ -3380,18 +3382,20 @@ where
                 acc
             },
             SyntaxVariant::ShapeExpression(x) => {
-                let ShapeExpressionChildren { shape_expression_keyword, shape_expression_left_paren, shape_expression_fields, shape_expression_right_paren } = *x;
+                let ShapeExpressionChildren { shape_expression_keyword, shape_expression_left_paren, shape_expression_fields, shape_expression_ellipsis, shape_expression_right_paren } = *x;
                 let acc = f(shape_expression_keyword, acc);
                 let acc = f(shape_expression_left_paren, acc);
                 let acc = f(shape_expression_fields, acc);
+                let acc = f(shape_expression_ellipsis, acc);
                 let acc = f(shape_expression_right_paren, acc);
                 acc
             },
             SyntaxVariant::TupleExpression(x) => {
-                let TupleExpressionChildren { tuple_expression_keyword, tuple_expression_left_paren, tuple_expression_items, tuple_expression_right_paren } = *x;
+                let TupleExpressionChildren { tuple_expression_keyword, tuple_expression_left_paren, tuple_expression_items, tuple_expression_ellipsis, tuple_expression_right_paren } = *x;
                 let acc = f(tuple_expression_keyword, acc);
                 let acc = f(tuple_expression_left_paren, acc);
                 let acc = f(tuple_expression_items, acc);
+                let acc = f(tuple_expression_ellipsis, acc);
                 let acc = f(tuple_expression_right_paren, acc);
                 acc
             },
@@ -4867,15 +4871,17 @@ where
                  shape_type_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ShapeExpression, 4) => SyntaxVariant::ShapeExpression(Box::new(ShapeExpressionChildren {
+             (SyntaxKind::ShapeExpression, 5) => SyntaxVariant::ShapeExpression(Box::new(ShapeExpressionChildren {
                  shape_expression_right_paren: ts.pop().unwrap(),
+                 shape_expression_ellipsis: ts.pop().unwrap(),
                  shape_expression_fields: ts.pop().unwrap(),
                  shape_expression_left_paren: ts.pop().unwrap(),
                  shape_expression_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::TupleExpression, 4) => SyntaxVariant::TupleExpression(Box::new(TupleExpressionChildren {
+             (SyntaxKind::TupleExpression, 5) => SyntaxVariant::TupleExpression(Box::new(TupleExpressionChildren {
                  tuple_expression_right_paren: ts.pop().unwrap(),
+                 tuple_expression_ellipsis: ts.pop().unwrap(),
                  tuple_expression_items: ts.pop().unwrap(),
                  tuple_expression_left_paren: ts.pop().unwrap(),
                  tuple_expression_keyword: ts.pop().unwrap(),
@@ -5143,8 +5149,8 @@ where
             SyntaxVariant::FieldSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.field_question, 4) },
             SyntaxVariant::FieldInitializer(x) => unsafe { std::slice::from_raw_parts(&x.field_initializer_name, 3) },
             SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.shape_type_keyword, 5) },
-            SyntaxVariant::ShapeExpression(x) => unsafe { std::slice::from_raw_parts(&x.shape_expression_keyword, 4) },
-            SyntaxVariant::TupleExpression(x) => unsafe { std::slice::from_raw_parts(&x.tuple_expression_keyword, 4) },
+            SyntaxVariant::ShapeExpression(x) => unsafe { std::slice::from_raw_parts(&x.shape_expression_keyword, 5) },
+            SyntaxVariant::TupleExpression(x) => unsafe { std::slice::from_raw_parts(&x.tuple_expression_keyword, 5) },
             SyntaxVariant::GenericTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.generic_class_type, 2) },
             SyntaxVariant::NullableTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.nullable_question, 2) },
             SyntaxVariant::LikeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.like_tilde, 2) },
@@ -5332,8 +5338,8 @@ where
             SyntaxVariant::FieldSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.field_question, 4) },
             SyntaxVariant::FieldInitializer(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.field_initializer_name, 3) },
             SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_type_keyword, 5) },
-            SyntaxVariant::ShapeExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_expression_keyword, 4) },
-            SyntaxVariant::TupleExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.tuple_expression_keyword, 4) },
+            SyntaxVariant::ShapeExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_expression_keyword, 5) },
+            SyntaxVariant::TupleExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.tuple_expression_keyword, 5) },
             SyntaxVariant::GenericTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.generic_class_type, 2) },
             SyntaxVariant::NullableTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.nullable_question, 2) },
             SyntaxVariant::LikeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.like_tilde, 2) },
@@ -6855,6 +6861,7 @@ pub struct ShapeExpressionChildren<T, V> {
     pub shape_expression_keyword: Syntax<T, V>,
     pub shape_expression_left_paren: Syntax<T, V>,
     pub shape_expression_fields: Syntax<T, V>,
+    pub shape_expression_ellipsis: Syntax<T, V>,
     pub shape_expression_right_paren: Syntax<T, V>,
 }
 
@@ -6864,6 +6871,7 @@ pub struct TupleExpressionChildren<T, V> {
     pub tuple_expression_keyword: Syntax<T, V>,
     pub tuple_expression_left_paren: Syntax<T, V>,
     pub tuple_expression_items: Syntax<T, V>,
+    pub tuple_expression_ellipsis: Syntax<T, V>,
     pub tuple_expression_right_paren: Syntax<T, V>,
 }
 
@@ -8859,21 +8867,23 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ShapeExpression(x) => {
-                get_index(4).and_then(|index| { match index {
+                get_index(5).and_then(|index| { match index {
                         0 => Some(&x.shape_expression_keyword),
                     1 => Some(&x.shape_expression_left_paren),
                     2 => Some(&x.shape_expression_fields),
-                    3 => Some(&x.shape_expression_right_paren),
+                    3 => Some(&x.shape_expression_ellipsis),
+                    4 => Some(&x.shape_expression_right_paren),
                         _ => None,
                     }
                 })
             },
             TupleExpression(x) => {
-                get_index(4).and_then(|index| { match index {
+                get_index(5).and_then(|index| { match index {
                         0 => Some(&x.tuple_expression_keyword),
                     1 => Some(&x.tuple_expression_left_paren),
                     2 => Some(&x.tuple_expression_items),
-                    3 => Some(&x.tuple_expression_right_paren),
+                    3 => Some(&x.tuple_expression_ellipsis),
+                    4 => Some(&x.tuple_expression_right_paren),
                         _ => None,
                     }
                 })

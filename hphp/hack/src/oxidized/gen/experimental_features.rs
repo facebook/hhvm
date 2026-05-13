@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c649f83e5e895fa0ef3bb6be6f3ae815>>
+// @generated SignedSource<<ce584ce730ffa5f5f2df06e4ed7922bb>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -115,7 +115,7 @@ pub enum FeatureName {
     TypeSplat,
     ExpressionTreeNestedBindings,
     LikeTypeHints,
-    ShapeDestructure,
+    ShapeAndTupleDestructuring,
     ExpressionTreeShapeCreation,
     NoDisjointUnion,
     SimpliHack,

@@ -318,6 +318,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         // More function values which are always mutable
         MethodCaller(_) => Rty::Mutable,
         Package(_) => Rty::Mutable,
+        DestructureShape(_) | DestructureTuple(_) => Rty::Mutable,
     }
 }
 
@@ -460,6 +461,36 @@ fn merge_lenvs(lenv1: &Lenv, lenv2: &Lenv) -> Lenv {
     new_lenv
 }
 
+// Check readonly validity for a destructure target (DtLvar, DtWildcard, DtShape, DtTuple)
+fn check_destructure_target_assignment(
+    context: &mut Context,
+    checker: &mut Checker,
+    target: &aast::DestructureTarget<(), ()>,
+    rhs: &mut Expr,
+) {
+    match &target.2 {
+        aast::DestructureTarget_::DtLvar(id_orig) => {
+            let var_name = local_id::get_name(&id_orig.1).to_string();
+            let rhs_rty = rty_expr(context, rhs);
+            if context.inout_params.contains(&var_name) && rhs_rty == Rty::Readonly {
+                checker.add_error(&id_orig.0, syntax_error::inout_readonly_assignment);
+            }
+            context.add_local(&var_name, rhs_rty);
+        }
+        aast::DestructureTarget_::DtWildcard(_) => {}
+        aast::DestructureTarget_::DtShape(ds) => {
+            for dsf in ds.fields.iter() {
+                check_destructure_target_assignment(context, checker, &dsf.target, rhs);
+            }
+        }
+        aast::DestructureTarget_::DtTuple(dt) => {
+            for dte in dt.entries.iter() {
+                check_destructure_target_assignment(context, checker, &dte.target, rhs);
+            }
+        }
+    }
+}
+
 // Toplevel assignment check
 fn check_assignment_validity(
     context: &mut Context,
@@ -489,6 +520,18 @@ fn check_assignment_validity(
             let exprs = &mut **l;
             for (_field_name, e) in exprs.iter_mut() {
                 check_assignment_validity(context, checker, &e.1.clone(), e, rhs);
+            }
+        }
+        // shape destructuring pattern
+        aast::Expr_::DestructureShape(ds) => {
+            for dsf in ds.fields.iter_mut() {
+                check_destructure_target_assignment(context, checker, &dsf.target, rhs);
+            }
+        }
+        // tuple destructuring pattern
+        aast::Expr_::DestructureTuple(dt) => {
+            for dte in dt.entries.iter_mut() {
+                check_destructure_target_assignment(context, checker, &dte.target, rhs);
             }
         }
         // directly assigning to a class static is always valid (locally) as long as

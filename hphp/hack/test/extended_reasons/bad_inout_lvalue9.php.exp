@@ -5,6 +5,8 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
  7 | }
+ 8 | 
+ 9 | //
 
 error: Typing[4110] Invalid argument
 
@@ -17,6 +19,8 @@ File bad_inout_lvalue9.php, line 6, character 5 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(»inout tuple($x, $y)«);
  7 | }
+ 8 | 
+ 9 | //
 
 Expected vec<int>
 
@@ -29,6 +33,8 @@ File bad_inout_lvalue9.php, line 3, character 18 - line 3, character 28:
  5 | function test(int $x, int $y): void {
  6 |   f(inout tuple($x, $y));
  7 | }
+ 8 | 
+ 9 | //
 
 But got (int, int)
 
@@ -41,6 +47,8 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
  7 | }
+ 8 | 
+ 9 | //
 
 Here's why:
 
@@ -60,6 +68,8 @@ File bad_inout_lvalue9.php, line 3, character 10 - line 3, character 10:
  5 | function test(int $x, int $y): void {
  6 |   f(inout tuple($x, $y));
  7 | }
+ 8 | 
+ 9 | //
 
 The supertype comes from this expression
 
@@ -72,6 +82,8 @@ File bad_inout_lvalue9.php, line 6, character 3 - line 6, character 24:
  5 | function test(int $x, int $y): void {
  6 |   »f(inout tuple($x, $y))«;
  7 | }
+ 8 | 
+ 9 | //
 
 
   Step 2 of 2                                 (here is where the error occurred) 
@@ -90,6 +102,8 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
  7 | }
+ 8 | 
+ 9 | //
 
 The supertype comes from this hint
 
@@ -102,6 +116,8 @@ File bad_inout_lvalue9.php, line 3, character 18 - line 3, character 28:
  5 | function test(int $x, int $y): void {
  6 |   f(inout tuple($x, $y));
  7 | }
+ 8 | 
+ 9 | //
 
 which is defined here
 
@@ -124,8 +140,10 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
  7 | }
+ 8 | 
+ 9 | //
 
-Expected (nothing, nothing) resulting from a list destructuring assignment or a splat
+Expected (int, int)
 
 File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
 
@@ -136,6 +154,8 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
  7 | }
+ 8 | 
+ 9 | //
 
 But got vec<int>
 
@@ -148,6 +168,8 @@ File bad_inout_lvalue9.php, line 3, character 18 - line 3, character 28:
  5 | function test(int $x, int $y): void {
  6 |   f(inout tuple($x, $y));
  7 | }
+ 8 | 
+ 9 | //
 
 Here's why:
 
@@ -167,8 +189,10 @@ File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
  5 | function test(int $x, int $y): void {
  6 |   f(inout tuple($x, $y));
  7 | }
+ 8 | 
+ 9 | //
 
-The supertype comes from this destructure expression
+The supertype comes from this expression
 
 File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
 
@@ -179,6 +203,24 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
  7 | }
+ 8 | 
+ 9 | //
+
+and flows into this inout parameter
+
+File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(inout varray<int> »$a«): void {}
+ 4 | 
+ 5 | function test(int $x, int $y): void {
+ 6 |   f(inout tuple($x, $y));
+ 7 | }
+ 8 | 
+ 9 | //
+
+via an assignment
 
 
   Step 2 of 2                                 (here is where the error occurred) 
@@ -196,6 +238,8 @@ File bad_inout_lvalue9.php, line 3, character 18 - line 3, character 28:
  5 | function test(int $x, int $y): void {
  6 |   f(inout tuple($x, $y));
  7 | }
+ 8 | 
+ 9 | //
 
 which is defined here
 
@@ -218,6 +262,8 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
  7 | }
+ 8 | 
+ 9 | //
 
 error: Typing[4110] Invalid argument to an inout parameter
 
@@ -230,8 +276,10 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
  7 | }
+ 8 | 
+ 9 | //
 
-Expected (nothing, nothing) resulting from a list destructuring assignment or a splat
+Expected (int, int)
 
 File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
 
@@ -242,6 +290,8 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
  7 | }
+ 8 | 
+ 9 | //
 
 But got dynamic because the type of this inout parameter is implicitly a like-type
 
@@ -254,6 +304,8 @@ File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
  5 | function test(int $x, int $y): void {
  6 |   f(inout tuple($x, $y));
  7 | }
+ 8 | 
+ 9 | //
 
 Here's why:
 
@@ -273,8 +325,10 @@ File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
  5 | function test(int $x, int $y): void {
  6 |   f(inout tuple($x, $y));
  7 | }
+ 8 | 
+ 9 | //
 
-The supertype comes from this destructure expression
+The supertype comes from this expression
 
 File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
 
@@ -285,6 +339,24 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
  7 | }
+ 8 | 
+ 9 | //
+
+and flows into this inout parameter
+
+File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(inout varray<int> »$a«): void {}
+ 4 | 
+ 5 | function test(int $x, int $y): void {
+ 6 |   f(inout tuple($x, $y));
+ 7 | }
+ 8 | 
+ 9 | //
+
+via an assignment
 
 
   Step 2 of 2                                 (here is where the error occurred) 
@@ -302,6 +374,8 @@ File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
  5 | function test(int $x, int $y): void {
  6 |   f(inout tuple($x, $y));
  7 | }
+ 8 | 
+ 9 | //
 
 The supertype is the same as before.
 
@@ -314,4 +388,6 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
  7 | }
+ 8 | 
+ 9 | //
 

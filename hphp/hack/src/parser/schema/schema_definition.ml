@@ -2383,6 +2383,7 @@ let schema : schema_node list =
           ("keyword", Token);
           ("left_paren", Token);
           ("fields", ZeroOrMore (Just "FieldInitializer"));
+          ("ellipsis", ZeroOrOne Token);
           ("right_paren", Token);
         ];
     };
@@ -2398,6 +2399,7 @@ let schema : schema_node list =
           ("keyword", Token);
           ("left_paren", Token);
           ("items", ZeroOrMore (Aggregate Expression));
+          ("ellipsis", ZeroOrOne Token);
           ("right_paren", Token);
         ];
     }

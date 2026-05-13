@@ -41,6 +41,8 @@ let rec can_be_captured = function
   | Lplaceholder _
   | Method_caller _
   | EnumClassLabel _
+  | DestructureShape _
+  | DestructureTuple _
   | Invalid None ->
     false
   | Yield _
@@ -206,6 +208,9 @@ let rec is_const_expr (_, _, expr_) =
     && Option.fold ~none:true ~some:is_const_expr e2
     && is_const_expr e3
   | Collection (_, _, afields) -> List.for_all afields ~f:is_const_afield
+  | DestructureShape _
+  | DestructureTuple _ ->
+    false
 
 and is_const_afield afield =
   match afield with

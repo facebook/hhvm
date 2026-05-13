@@ -785,7 +785,9 @@ fn print_expr(
         | Expr_::Pair(_)
         | Expr_::This
         | Expr_::Upcast(_)
-        | Expr_::ValCollection(_) => {
+        | Expr_::ValCollection(_)
+        | Expr_::DestructureShape(_)
+        | Expr_::DestructureTuple(_) => {
             todo!("T117477443: Unimplemented: Cannot print: {:?}", expr)
         }
     }

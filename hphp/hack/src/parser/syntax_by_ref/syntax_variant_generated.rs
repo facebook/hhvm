@@ -1546,6 +1546,7 @@ pub struct ShapeExpressionChildren<'a, T, V> {
     pub keyword: Syntax<'a, T, V>,
     pub left_paren: Syntax<'a, T, V>,
     pub fields: Syntax<'a, T, V>,
+    pub ellipsis: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
 }
 
@@ -1554,6 +1555,7 @@ pub struct TupleExpressionChildren<'a, T, V> {
     pub keyword: Syntax<'a, T, V>,
     pub left_paren: Syntax<'a, T, V>,
     pub items: Syntax<'a, T, V>,
+    pub ellipsis: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
 }
 

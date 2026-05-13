@@ -1,5 +1,5 @@
 <?hh
-<<file: __EnableUnstableFeatures('shape_destructure')>>
+<<file: __EnableUnstableFeatures('shape_and_tuple_destructuring')>>
 
 class C {
   const string s1 = 'a';
@@ -38,31 +38,27 @@ function main(): void {
 
   $s13 = mk($s4, $s8, $s12);
 
-  $v = vec[];
-  for ($i = 0; $i < 27; $i++) {
-    $v[] = 0;
-  }
-
   foreach (
     dict[10000 => $s13] as $k => shape(
       C::s1 => shape(
-        C::s1 => shape(C::s1 => $v[0], C::s2 => $v[1], C::s3 => $v[2]),
-        C::s2 => shape(C::s1 => $v[3], C::s2 => $v[4], C::s3 => $v[5]),
-        C::s3 => shape(C::s1 => $v[6], C::s2 => $v[7], C::s3 => $v[8]),
+        C::s1 => shape(C::s1 => $v0, C::s2 => $v1, C::s3 => $v2),
+        C::s2 => shape(C::s1 => $v3, C::s2 => $v4, C::s3 => $v5),
+        C::s3 => shape(C::s1 => $v6, C::s2 => $v7, C::s3 => $v8),
       ),
       C::s2 => shape(
-        C::s1 => shape(C::s1 => $v[9], C::s2 => $v[10], C::s3 => $v[11]),
-        C::s2 => shape(C::s1 => $v[12], C::s2 => $v[13], C::s3 => $v[14]),
-        C::s3 => shape(C::s1 => $v[15], C::s2 => $v[16], C::s3 => $v[17]),
+        C::s1 => shape(C::s1 => $v9, C::s2 => $v10, C::s3 => $v11),
+        C::s2 => shape(C::s1 => $v12, C::s2 => $v13, C::s3 => $v14),
+        C::s3 => shape(C::s1 => $v15, C::s2 => $v16, C::s3 => $v17),
       ),
       C::s3 => shape(
-        C::s1 => shape(C::s1 => $v[18], C::s2 => $v[19], C::s3 => $v[20]),
-        C::s2 => shape(C::s1 => $v[21], C::s2 => $v[22], C::s3 => $v[23]),
-        C::s3 => shape(C::s1 => $v[24], C::s2 => $v[25], C::s3 => $v[26]),
+        C::s1 => shape(C::s1 => $v18, C::s2 => $v19, C::s3 => $v20),
+        C::s2 => shape(C::s1 => $v21, C::s2 => $v22, C::s3 => $v23),
+        C::s3 => shape(C::s1 => $v24, C::s2 => $v25, C::s3 => $v26),
       ),
     )
   ) {
     var_dump($k);
+    $v = vec[$v0, $v1, $v2, $v3, $v4, $v5, $v6, $v7, $v8, $v9, $v10, $v11, $v12, $v13, $v14, $v15, $v16, $v17, $v18, $v19, $v20, $v21, $v22, $v23, $v24, $v25, $v26];
     var_dump($v);
   }
 
@@ -83,31 +79,27 @@ function main(): void {
 
   $s13 = mk2($s4, $s8, $s12);
 
-  $v = vec[];
-  for ($i = 0; $i < 27; $i++) {
-    $v[] = 0;
-  }
-
   foreach (
     dict[2000 => $s13] as $k => shape(
       C::s1 => shape(
-        C::s1 => shape(C::s1 => $v[0], C::s2 => $v[1], C::s3 => $v[2]),
-        C::s2 => shape(C::s1 => $v[3], C::s2 => $v[4], C::s3 => $v[5]),
-        C::s3 => shape(C::s1 => $v[6], C::s2 => $v[7], C::s3 => $v[8]),
+        C::s1 => shape(C::s1 => $v0, C::s2 => $v1, C::s3 => $v2),
+        C::s2 => shape(C::s1 => $v3, C::s2 => $v4, C::s3 => $v5),
+        C::s3 => shape(C::s1 => $v6, C::s2 => $v7, C::s3 => $v8),
       ),
       C::s2 => shape(
-        C::s1 => shape(C::s1 => $v[9], C::s2 => $v[10], C::s3 => $v[11]),
-        C::s2 => shape(C::s1 => $v[12], C::s2 => $v[13], C::s3 => $v[14]),
-        C::s3 => shape(C::s1 => $v[15], C::s2 => $v[16], C::s3 => $v[17]),
+        C::s1 => shape(C::s1 => $v9, C::s2 => $v10, C::s3 => $v11),
+        C::s2 => shape(C::s1 => $v12, C::s2 => $v13, C::s3 => $v14),
+        C::s3 => shape(C::s1 => $v15, C::s2 => $v16, C::s3 => $v17),
       ),
       C::s3 => shape(
-        C::s1 => shape(C::s1 => $v[18], C::s2 => $v[19], C::s3 => $v[20]),
-        C::s2 => shape(C::s1 => $v[21], C::s2 => $v[22], C::s3 => $v[23]),
-        C::s3 => shape(C::s1 => $v[24], C::s2 => $v[25], C::s3 => $v[26]),
+        C::s1 => shape(C::s1 => $v18, C::s2 => $v19, C::s3 => $v20),
+        C::s2 => shape(C::s1 => $v21, C::s2 => $v22, C::s3 => $v23),
+        C::s3 => shape(C::s1 => $v24, C::s2 => $v25, C::s3 => $v26),
       ),
     )
   ) {
     var_dump($k);
+    $v = vec[$v0, $v1, $v2, $v3, $v4, $v5, $v6, $v7, $v8, $v9, $v10, $v11, $v12, $v13, $v14, $v15, $v16, $v17, $v18, $v19, $v20, $v21, $v22, $v23, $v24, $v25, $v26];
     var_dump($v);
   }
 }

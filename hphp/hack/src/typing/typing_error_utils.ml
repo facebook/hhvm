@@ -526,6 +526,85 @@ end = struct
         shapes_access_with_non_existent_field pos field_name decl_pos reason
   end
 
+  module Eval_destructure = struct
+    let missing_ellipsis pos =
+      let claim =
+        lazy
+          ( pos,
+            "Missing `...`: the shape type has unknown fields, so the destructuring pattern must end with `...`"
+          )
+      in
+      create ~code:Error_code.DestructureMissingEllipsis ~claim ()
+
+    let missing_required_fields pos field_names =
+      let claim =
+        lazy
+          ( pos,
+            "Missing required fields in destructuring pattern: " ^ field_names
+          )
+      in
+      create ~code:Error_code.DestructureMissingRequiredField ~claim ()
+
+    let unknown_field pos field_name =
+      let claim =
+        lazy
+          ( pos,
+            "Field "
+            ^ Markdown_lite.md_codify field_name
+            ^ " does not exist in the shape type" )
+      in
+      create ~code:Error_code.DestructureUnknownField ~claim ()
+
+    let plural_s n =
+      if n = 1 then
+        ""
+      else
+        "s"
+
+    let tuple_arity_mismatch pos ~pat_arity ~tuple_arity =
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Tuple arity mismatch: expected %d element%s in destructuring pattern but the tuple type has %d"
+              pat_arity
+              (plural_s pat_arity)
+              tuple_arity )
+      in
+      create ~code:Error_code.DestructureTupleArityMismatch ~claim ()
+
+    let tuple_arity_exceeds pos ~pat_arity ~tuple_arity =
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Too many entries in tuple destructuring pattern: pattern has %d but the tuple type only has %d element%s"
+              pat_arity
+              tuple_arity
+              (plural_s tuple_arity) )
+      in
+      create ~code:Error_code.DestructureTupleArityMismatch ~claim ()
+
+    let tuple_arity_union_conflict pos =
+      let claim =
+        lazy (pos, "Tuple arity mismatch: union members have different arities")
+      in
+      create ~code:Error_code.DestructureTupleArityMismatch ~claim ()
+
+    let to_error t ~env:_ =
+      let open Typing_error.Primary.Shape_and_tuple_destructure in
+      match t with
+      | Missing_ellipsis pos -> missing_ellipsis pos
+      | Missing_required_fields { pos; field_names } ->
+        missing_required_fields pos field_names
+      | Unknown_field { pos; field_name } -> unknown_field pos field_name
+      | Tuple_arity_mismatch { pos; pat_arity; tuple_arity } ->
+        tuple_arity_mismatch pos ~pat_arity ~tuple_arity
+      | Tuple_arity_exceeds { pos; pat_arity; tuple_arity } ->
+        tuple_arity_exceeds pos ~pat_arity ~tuple_arity
+      | Tuple_arity_union_conflict pos -> tuple_arity_union_conflict pos
+  end
+
   module Eval_switch = struct
     let switch_nonexhaustive ~switch_pos ~scrutinee_pos scrutinee_type missing =
       let claim =
@@ -4769,6 +4848,7 @@ end = struct
     | Package err -> Eval_package.to_error err ~env
     | Readonly err -> Eval_readonly.to_error err ~env
     | Shape err -> Eval_shape.to_error err ~env
+    | Shape_and_tuple_destructure err -> Eval_destructure.to_error err ~env
     | Switch err -> Eval_switch.to_error err ~env
     | Wellformedness err -> Eval_wellformedness.to_error err ~env
     | Xhp err -> Eval_xhp.to_error err ~env

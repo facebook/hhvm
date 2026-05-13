@@ -35,11 +35,17 @@ type has_member = {
 }
 [@@deriving show]
 
+type ci_access_kind =
+  | Ci_normal
+  | Ci_lhs_of_null_coalesce
+  | Ci_destructure_optional
+[@@deriving show, ord]
+
 type can_index = {
   ci_key: locl_ty;
   ci_val: locl_ty;
   ci_index_expr: Nast.expr;
-  ci_lhs_of_null_coalesce: bool;
+  ci_access_kind: ci_access_kind;
   ci_expr_pos: Pos.t;
   ci_array_pos: Pos.t;
   ci_index_pos: Pos.t;
@@ -145,9 +151,7 @@ let can_index_compare ~normalize_lists ci1 ci2 =
         (ty_compare ~normalize_lists ci1.ci_val ci2.ci_val)
         (fun _ ->
           chain_compare
-            (Bool.compare
-               ci1.ci_lhs_of_null_coalesce
-               ci2.ci_lhs_of_null_coalesce)
+            (compare_ci_access_kind ci1.ci_access_kind ci2.ci_access_kind)
             (fun _ ->
               Aast.compare_expr
                 (fun _ _ -> 0)

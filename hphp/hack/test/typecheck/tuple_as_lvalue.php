@@ -14,3 +14,5 @@ function foo((int, string) $x): void {
   $b = null;
   tuple($a, $b) = $x;
 }
+
+//

@@ -189,7 +189,10 @@ and check_await_usage expr =
         { et_class = _; et_runtime_expr = runtime_expr; et_free_vars = _ } ->
       check_await_usage runtime_expr
     (* lvalues: shouldn't contain await or $$ *)
-    | List _ -> NoAwait
+    | List _
+    | DestructureShape _
+    | DestructureTuple _ ->
+      NoAwait
   in
   match await_usage with
   | Error None -> Error (Some pos)

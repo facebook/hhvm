@@ -1,0 +1,351 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes =
+      [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring"))] }];
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+           ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+           ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+         }
+        ];
+      fd_mode = Mstrict; fd_name = ([4:10-39], "\\test_shape_assignment_capture");
+      fd_fun =
+      { f_span = [4:1-9:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([6:4-8], (Hprim Tvoid))));
+        f_params =
+        [{ param_annotation = ();
+           param_type_hint =
+           ((),
+            (Some ([5:3-40],
+                   (Hshape
+                      { nsi_allows_unknown_fields = false;
+                        nsi_field_map =
+                        [{ sfi_optional = false; sfi_hint = ([5:17-20], (Hprim Tint)); sfi_name = (SFlit_str ([5:9-13], "id")) };
+                          { sfi_optional = false; sfi_hint = ([5:33-39], (Happly (([5:33-39], "\\HH\\string"), []))); sfi_name = (SFlit_str ([5:22-29], "label")) }]
+                        }))));
+           param_pos = [5:41-46]; param_name = "$item"; param_info = Param_required; 
+           param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+           param_named = None; param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([7:3-49],
+            (Expr
+               ((), [7:3-48],
+                (Assign (
+                   ((), [7:3-40],
+                    (DestructureShape
+                       { ds_pos = [7:3-8];
+                         ds_fields =
+                         [{ dsf_optional = false; dsf_name = (SFlit_str ([7:9-13], "id")); dsf_target = ((), (), (DtLvar ([7:17-20], $id))) };
+                           { dsf_optional = false; dsf_name = (SFlit_str ([7:22-29], "label")); dsf_target = ((), (), (DtLvar ([7:33-39], $label))) }];
+                         ds_ellipsis = false })),
+                   None, ((), [7:43-48], (Lvar ([7:43-48], $item))))))));
+            ([8:3-55],
+             (Expr
+                ((), [8:3-54],
+                 (Assign (((), [8:3-11], (Lvar ([8:3-11], $capture))), None,
+                    ((), [8:14-54],
+                     (Lfun (
+                        { f_span = [8:14-54]; f_readonly_this = None; 
+                          f_annotation = (); f_readonly_ret = None; f_tparams = [];
+                          f_ret =
+                          ((),
+                           (Some ([8:18-31],
+                                  (Htuple
+                                     { tup_required = [([8:19-22], (Hprim Tint)); ([8:24-30], (Happly (([8:24-30], "\\HH\\string"), [])))];
+                                       tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
+                          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+                          f_body = { fb_ast = [([8:36-54], (Return (Some ((), [8:36-54], (Tuple [((), [8:42-45], (Lvar ([8:42-45], $id))); ((), [8:47-53], (Lvar ([8:47-53], $label)))])))))] };
+                          f_fun_kind = FSync; f_user_attributes = []; 
+                          f_external = false; f_hidden = false; f_doc_comment = None },
+                        [((), ([8:47-53], $label)); ((), ([8:42-45], $id))])))
+                    )))))
+            ]
+          };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-39], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([11:10-39], "\\test_tuple_assignment_capture");
+       fd_fun =
+       { f_span = [11:1-14:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([11:62-66], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ();
+            param_type_hint =
+            ((),
+             (Some ([11:40-53],
+                    (Htuple { tup_required = [([11:41-44], (Hprim Tint)); ([11:46-52], (Happly (([11:46-52], "\\HH\\string"), [])))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
+            param_pos = [11:54-59]; param_name = "$item"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([12:3-30],
+             (Expr
+                ((), [12:3-29],
+                 (Assign (
+                    ((), [12:3-21],
+                     (DestructureTuple
+                        { dt_pos = [12:3-8];
+                          dt_entries = [{ dte_optional = false; dte_target = ((), (), (DtLvar ([12:9-12], $id))) }; { dte_optional = false; dte_target = ((), (), (DtLvar ([12:14-20], $label))) }];
+                          dt_ellipsis = false })),
+                    None, ((), [12:24-29], (Lvar ([12:24-29], $item))))))));
+             ([13:3-55],
+              (Expr
+                 ((), [13:3-54],
+                  (Assign (((), [13:3-11], (Lvar ([13:3-11], $capture))), None,
+                     ((), [13:14-54],
+                      (Lfun (
+                         { f_span = [13:14-54]; f_readonly_this = None; 
+                           f_annotation = (); f_readonly_ret = None; 
+                           f_tparams = [];
+                           f_ret =
+                           ((),
+                            (Some ([13:18-31],
+                                   (Htuple
+                                      { tup_required = [([13:19-22], (Hprim Tint)); ([13:24-30], (Happly (([13:24-30], "\\HH\\string"), [])))];
+                                        tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
+                           f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+                           f_body = { fb_ast = [([13:36-54], (Return (Some ((), [13:36-54], (Tuple [((), [13:42-45], (Lvar ([13:42-45], $id))); ((), [13:47-53], (Lvar ([13:47-53], $label)))])))))] };
+                           f_fun_kind = FSync; f_user_attributes = []; 
+                           f_external = false; f_hidden = false; f_doc_comment = None },
+                         [((), ([13:47-53], $label)); ((), ([13:42-45], $id))])))
+                     )))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([11:10-39], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([17:10-40], "\\test_foreach_shape_key_capture");
+       fd_fun =
+       { f_span = [16:1-24:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([19:4-8], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ();
+            param_type_hint =
+            ((),
+             (Some ([18:3-70],
+                    (Happly (([18:3-16], "\\HH\\KeyedIterator"),
+                       [([18:17-54],
+                         (Hshape
+                            { nsi_allows_unknown_fields = false;
+                              nsi_field_map =
+                              [{ sfi_optional = false; sfi_hint = ([18:31-34], (Hprim Tint)); sfi_name = (SFlit_str ([18:23-27], "id")) };
+                                { sfi_optional = false; sfi_hint = ([18:47-53], (Happly (([18:47-53], "\\HH\\string"), []))); sfi_name = (SFlit_str ([18:36-43], "label")) }]
+                              }));
+                         ([18:56-69],
+                          (Htuple
+                             { tup_required = [([18:57-60], (Hprim Tint)); ([18:62-68], (Happly (([18:62-68], "\\HH\\string"), [])))]; 
+                               tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))
+                         ]
+                       )))));
+            param_pos = [18:71-77]; param_name = "$items"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([20:3-23:4],
+             (Foreach (((), [20:12-18], (Lvar ([20:12-18], $items))),
+                (As_kv (
+                   ((), [20:22-59],
+                    (DestructureShape
+                       { ds_pos = [20:22-27];
+                         ds_fields =
+                         [{ dsf_optional = false; dsf_name = (SFlit_str ([20:28-32], "id")); dsf_target = ((), (), (DtLvar ([20:36-39], $id))) };
+                           { dsf_optional = false; dsf_name = (SFlit_str ([20:41-48], "label")); dsf_target = ((), (), (DtLvar ([20:52-58], $label))) }];
+                         ds_ellipsis = false })),
+                   ((), [20:63-81],
+                    (DestructureTuple
+                       { dt_pos = [20:63-68];
+                         dt_entries = [{ dte_optional = false; dte_target = ((), (), (DtLvar ([20:69-73], $num))) }; { dte_optional = false; dte_target = ((), (), (DtLvar ([20:75-80], $name))) }];
+                         dt_ellipsis = false }))
+                   )),
+                [([21:5-61],
+                  (Expr
+                     ((), [21:5-60],
+                      (Assign (((), [21:5-17], (Lvar ([21:5-17], $capture_key))), None,
+                         ((), [21:20-60],
+                          (Lfun (
+                             { f_span = [21:20-60]; f_readonly_this = None; 
+                               f_annotation = (); f_readonly_ret = None; 
+                               f_tparams = [];
+                               f_ret =
+                               ((),
+                                (Some ([21:24-37],
+                                       (Htuple
+                                          { tup_required = [([21:25-28], (Hprim Tint)); ([21:30-36], (Happly (([21:30-36], "\\HH\\string"), [])))];
+                                            tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
+                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+                               f_body =
+                               { fb_ast = [([21:42-60], (Return (Some ((), [21:42-60], (Tuple [((), [21:48-51], (Lvar ([21:48-51], $id))); ((), [21:53-59], (Lvar ([21:53-59], $label)))])))))] };
+                               f_fun_kind = FSync; f_user_attributes = []; 
+                               f_external = false; f_hidden = false; 
+                               f_doc_comment = None },
+                             [((), ([21:53-59], $label)); ((), ([21:48-51], $id))])))
+                         )))));
+                  ([22:5-63],
+                   (Expr
+                      ((), [22:5-62],
+                       (Assign (((), [22:5-19], (Lvar ([22:5-19], $capture_value))), None,
+                          ((), [22:22-62],
+                           (Lfun (
+                              { f_span = [22:22-62]; f_readonly_this = None; 
+                                f_annotation = (); f_readonly_ret = None; 
+                                f_tparams = [];
+                                f_ret =
+                                ((),
+                                 (Some ([22:26-39],
+                                        (Htuple
+                                           { tup_required = [([22:27-30], (Hprim Tint)); ([22:32-38], (Happly (([22:32-38], "\\HH\\string"), [])))];
+                                             tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
+                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+                                f_body =
+                                { fb_ast = [([22:44-62], (Return (Some ((), [22:44-62], (Tuple [((), [22:50-54], (Lvar ([22:50-54], $num))); ((), [22:56-61], (Lvar ([22:56-61], $name)))])))))] };
+                                f_fun_kind = FSync; f_user_attributes = []; 
+                                f_external = false; f_hidden = false; 
+                                f_doc_comment = None },
+                              [((), ([22:50-54], $num)); ((), ([22:56-61], $name))])))
+                          )))))
+                  ]
+                )))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([16:3-18], "__NoAutoDynamic"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([27:10-40], "\\test_foreach_tuple_key_capture");
+       fd_fun =
+       { f_span = [26:1-34:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([29:4-8], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ();
+            param_type_hint =
+            ((),
+             (Some ([28:3-52],
+                    (Happly (([28:3-16], "\\HH\\KeyedIterator"),
+                       [([28:17-30],
+                         (Htuple
+                            { tup_required = [([28:18-21], (Hprim Tint)); ([28:23-29], (Happly (([28:23-29], "\\HH\\string"), [])))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                         ([28:32-51],
+                          (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([28:46-50], (Hprim Tbool)); sfi_name = (SFlit_str ([28:38-42], "ok")) }] }))
+                         ]
+                       )))));
+            param_pos = [28:53-59]; param_name = "$items"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([30:3-33:4],
+             (Foreach (((), [30:12-18], (Lvar ([30:12-18], $items))),
+                (As_kv (
+                   ((), [30:22-40],
+                    (DestructureTuple
+                       { dt_pos = [30:22-27];
+                         dt_entries = [{ dte_optional = false; dte_target = ((), (), (DtLvar ([30:28-31], $id))) }; { dte_optional = false; dte_target = ((), (), (DtLvar ([30:33-39], $label))) }];
+                         dt_ellipsis = false })),
+                   ((), [30:44-62],
+                    (DestructureShape
+                       { ds_pos = [30:44-49]; ds_fields = [{ dsf_optional = false; dsf_name = (SFlit_str ([30:50-54], "ok")); dsf_target = ((), (), (DtLvar ([30:58-61], $ok))) }]; 
+                         ds_ellipsis = false }))
+                   )),
+                [([31:5-61],
+                  (Expr
+                     ((), [31:5-60],
+                      (Assign (((), [31:5-17], (Lvar ([31:5-17], $capture_key))), None,
+                         ((), [31:20-60],
+                          (Lfun (
+                             { f_span = [31:20-60]; f_readonly_this = None; 
+                               f_annotation = (); f_readonly_ret = None; 
+                               f_tparams = [];
+                               f_ret =
+                               ((),
+                                (Some ([31:24-37],
+                                       (Htuple
+                                          { tup_required = [([31:25-28], (Hprim Tint)); ([31:30-36], (Happly (([31:30-36], "\\HH\\string"), [])))];
+                                            tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
+                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+                               f_body =
+                               { fb_ast = [([31:42-60], (Return (Some ((), [31:42-60], (Tuple [((), [31:48-51], (Lvar ([31:48-51], $id))); ((), [31:53-59], (Lvar ([31:53-59], $label)))])))))] };
+                               f_fun_kind = FSync; f_user_attributes = []; 
+                               f_external = false; f_hidden = false; 
+                               f_doc_comment = None },
+                             [((), ([31:53-59], $label)); ((), ([31:48-51], $id))])))
+                         )))));
+                  ([32:5-39],
+                   (Expr
+                      ((), [32:5-38],
+                       (Assign (((), [32:5-19], (Lvar ([32:5-19], $capture_value))), None,
+                          ((), [32:22-38],
+                           (Lfun (
+                              { f_span = [32:22-38]; f_readonly_this = None; 
+                                f_annotation = (); f_readonly_ret = None; 
+                                f_tparams = []; f_ret = ((), (Some ([32:26-30], (Hprim Tbool)))); 
+                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
+                                f_body = { fb_ast = [([32:35-38], (Return (Some ((), [32:35-38], (Lvar ([32:35-38], $ok))))))] }; 
+                                f_fun_kind = FSync; f_user_attributes = []; 
+                                f_external = false; f_hidden = false; 
+                                f_doc_comment = None },
+                              [((), ([32:35-38], $ok))])))
+                          )))))
+                  ]
+                )))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([26:3-18], "__NoAutoDynamic"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None })
+  ]

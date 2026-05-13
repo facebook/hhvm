@@ -133,7 +133,9 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
         | Expr_::Nameof(_)
         | Expr_::FunctionPointer(_)
         | Expr_::ClassGet(_)
-        | Expr_::Package(_) => NoAwait,
+        | Expr_::Package(_)
+        | Expr_::DestructureShape(_)
+        | Expr_::DestructureTuple(_) => NoAwait,
 
         // Expressions with exactly one sub-expression that we can lift an await out of
         Expr_::Invalid(box Some(expr))
@@ -391,7 +393,9 @@ fn extract_subexprs(expr: &mut nast::Expr) -> Vec<&mut nast::Expr> {
         | Expr_::EnumClassLabel(_)
         | Expr_::Nameof(_)
         | Expr_::FunctionPointer(_)
-        | Expr_::Package(_) => {
+        | Expr_::Package(_)
+        | Expr_::DestructureShape(_)
+        | Expr_::DestructureTuple(_) => {
             return vec![];
         }
 
@@ -893,7 +897,9 @@ impl LiftAwait {
             | Expr_::EnumClassLabel(_)
             | Expr_::Nameof(_)
             | Expr_::FunctionPointer(_)
-            | Expr_::Package(_) => {}
+            | Expr_::Package(_)
+            | Expr_::DestructureShape(_)
+            | Expr_::DestructureTuple(_) => {}
 
             // Expressions that can't contain an await, but might contain a $$ to replace
             Expr_::ClassGet(box (nast::ClassId(_, _, nast::ClassId_::CIexpr(expr)), _, _))

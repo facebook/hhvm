@@ -675,6 +675,8 @@ and expr_ env acc p e =
   (* Don't analyze invalid expressions *)
   | Invalid _ -> acc
   | Package _ -> acc
+  | DestructureShape _ -> acc
+  | DestructureTuple _ -> acc
 
 and case env acc ((_, b) : (_, _) Aast.case) = block env acc b
 

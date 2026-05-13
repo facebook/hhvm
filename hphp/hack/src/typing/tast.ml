@@ -115,6 +115,16 @@ type module_def = (ty, saved_env) Aast.module_def
 
 type call_expr = (ty, saved_env) Aast.call_expr
 
+type destructure_shape = (ty, saved_env) Aast.destructure_shape
+
+type destructure_shape_field = (ty, saved_env) Aast.destructure_shape_field
+
+type destructure_tuple = (ty, saved_env) Aast.destructure_tuple
+
+type destructure_tuple_entry = (ty, saved_env) Aast.destructure_tuple_entry
+
+type destructure_target = (ty, saved_env) Aast.destructure_target
+
 type by_names = {
   fun_tasts: def Tast_with_dynamic.t SMap.t;
   class_tasts: def Tast_with_dynamic.t SMap.t;

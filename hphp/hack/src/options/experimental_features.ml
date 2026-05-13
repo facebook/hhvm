@@ -60,7 +60,7 @@ type feature_name =
   | TypeSplat
   | ExpressionTreeNestedBindings
   | LikeTypeHints
-  | ShapeDestructure
+  | ShapeAndTupleDestructuring
   | ExpressionTreeShapeCreation
   | NoDisjointUnion
   | SimpliHack
@@ -115,7 +115,7 @@ let feature_name_map =
       ("type_splat", TypeSplat);
       ("expression_tree_nested_bindings", ExpressionTreeNestedBindings);
       ("like_type_hints", LikeTypeHints);
-      ("shape_destructure", ShapeDestructure);
+      ("shape_and_tuple_destructuring", ShapeAndTupleDestructuring);
       ("expression_tree_shape_creation", ExpressionTreeShapeCreation);
       ("no_disjoint_union", NoDisjointUnion);
       ("simpli_hack", SimpliHack);

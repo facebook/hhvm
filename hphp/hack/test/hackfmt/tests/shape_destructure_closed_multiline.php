@@ -1,0 +1,5 @@
+<?hh
+
+function f(shape('long_field_name_one' => int, 'long_field_name_two' => int, 'long_field_name_three' => int) $s): void {
+  shape('long_field_name_one' => $long_field_name_one, 'long_field_name_two' => $long_field_name_two, 'long_field_name_three' => $long_field_name_three) = $s;
+}

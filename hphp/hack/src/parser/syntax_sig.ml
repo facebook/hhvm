@@ -1026,12 +1026,14 @@ module type Syntax_S = sig
         shape_expression_keyword: t;
         shape_expression_left_paren: t;
         shape_expression_fields: t;
+        shape_expression_ellipsis: t;
         shape_expression_right_paren: t;
       }
     | TupleExpression of {
         tuple_expression_keyword: t;
         tuple_expression_left_paren: t;
         tuple_expression_items: t;
+        tuple_expression_ellipsis: t;
         tuple_expression_right_paren: t;
       }
     | GenericTypeSpecifier of {
@@ -1503,9 +1505,9 @@ module type Syntax_S = sig
 
   val make_shape_type_specifier : t -> t -> t -> t -> t -> t
 
-  val make_shape_expression : t -> t -> t -> t -> t
+  val make_shape_expression : t -> t -> t -> t -> t -> t
 
-  val make_tuple_expression : t -> t -> t -> t -> t
+  val make_tuple_expression : t -> t -> t -> t -> t -> t
 
   val make_generic_type_specifier : t -> t -> t
 

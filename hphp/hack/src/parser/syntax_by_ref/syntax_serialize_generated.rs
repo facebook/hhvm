@@ -1538,21 +1538,23 @@ ss.serialize_field("shape_type_ellipsis", &self.with(ellipsis))?;
 ss.serialize_field("shape_type_right_paren", &self.with(right_paren))?;
       ss.end()
 } 
-SyntaxVariant::ShapeExpression (ShapeExpressionChildren{keyword,left_paren,fields,right_paren} ) => {
-      let mut ss = s.serialize_struct("", 5)?;
+SyntaxVariant::ShapeExpression (ShapeExpressionChildren{keyword,left_paren,fields,ellipsis,right_paren} ) => {
+      let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "shape_expression")?;
       ss.serialize_field("shape_expression_keyword", &self.with(keyword))?;
 ss.serialize_field("shape_expression_left_paren", &self.with(left_paren))?;
 ss.serialize_field("shape_expression_fields", &self.with(fields))?;
+ss.serialize_field("shape_expression_ellipsis", &self.with(ellipsis))?;
 ss.serialize_field("shape_expression_right_paren", &self.with(right_paren))?;
       ss.end()
 } 
-SyntaxVariant::TupleExpression (TupleExpressionChildren{keyword,left_paren,items,right_paren} ) => {
-      let mut ss = s.serialize_struct("", 5)?;
+SyntaxVariant::TupleExpression (TupleExpressionChildren{keyword,left_paren,items,ellipsis,right_paren} ) => {
+      let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "tuple_expression")?;
       ss.serialize_field("tuple_expression_keyword", &self.with(keyword))?;
 ss.serialize_field("tuple_expression_left_paren", &self.with(left_paren))?;
 ss.serialize_field("tuple_expression_items", &self.with(items))?;
+ss.serialize_field("tuple_expression_ellipsis", &self.with(ellipsis))?;
 ss.serialize_field("tuple_expression_right_paren", &self.with(right_paren))?;
       ss.end()
 } 

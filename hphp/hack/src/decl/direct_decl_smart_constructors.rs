@@ -1480,7 +1480,8 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                         | Lfun(_) | List(_) | Lplaceholder(_) | Lvar(_) | MethodCaller(_)
                         | New(_) | ObjGet(_) | Omitted | Pair(_) | Pipe(_) | ReadonlyExpr(_)
                         | Shape(_) | Tuple(_) | Upcast(_) | ValCollection(_) | Xml(_)
-                        | Yield(_) | Invalid(_) | Package(_) | Nameof(_) => None,
+                        | Yield(_) | Invalid(_) | Package(_) | Nameof(_) | DestructureShape(_)
+                        | DestructureTuple(_) => None,
                     }
                 }
                 Some(Ty(

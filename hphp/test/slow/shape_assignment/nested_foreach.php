@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('shape_destructure')>>
+<<file: __EnableUnstableFeatures('shape_and_tuple_destructuring')>>
 
 class C {
   const string d = 'a';
@@ -22,13 +22,12 @@ function main(): void {
       's' => shape('nest' => 13, C::d => 14),
     )),
   ];
-  $v = vec[0];
   foreach (
     $s as tuple(
       $a,
       shape(
         'b' => $b,
-        'v0' => $v[0],
+        'v0' => $v0,
         'l' => tuple($c, $d),
         's' => shape('nest' => $nest, C::d => $e),
       ),
@@ -36,7 +35,7 @@ function main(): void {
   ) {
     var_dump($a);
     var_dump($b);
-    var_dump($v[0]);
+    var_dump($v0);
     var_dump($c);
     var_dump($d);
     var_dump($nest);

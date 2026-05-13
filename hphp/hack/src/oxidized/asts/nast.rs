@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7ea6560e665f55a3461e9e64717bb96c>>
+// @generated SignedSource<<45fe3096570df9c415e06d1827542ec3>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -28,6 +28,12 @@ pub type Block = aast_defs::Block<Ex, En>;
 pub type FinallyBlock = aast_defs::FinallyBlock<Ex, En>;
 pub type StmtMatch = aast_defs::StmtMatch<Ex, En>;
 pub type StmtMatchArm = aast_defs::StmtMatchArm<Ex, En>;
+pub type DestructureShape = aast_defs::DestructureShape<Ex, En>;
+pub type DestructureShapeField = aast_defs::DestructureShapeField<Ex, En>;
+pub type DestructureTuple = aast_defs::DestructureTuple<Ex, En>;
+pub type DestructureTupleEntry = aast_defs::DestructureTupleEntry<Ex, En>;
+pub type DestructureTarget = aast_defs::DestructureTarget<Ex, En>;
+pub type DestructureTarget_ = aast_defs::DestructureTarget_<Ex, En>;
 pub type ClassId = aast_defs::ClassId<Ex, En>;
 pub type ClassId_ = aast_defs::ClassId_<Ex, En>;
 pub type Expr = aast_defs::Expr<Ex, En>;

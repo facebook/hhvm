@@ -1854,22 +1854,24 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_shape_expression(ctx: &C, keyword: Self, left_paren: Self, fields: Self, right_paren: Self) -> Self {
+    fn make_shape_expression(ctx: &C, keyword: Self, left_paren: Self, fields: Self, ellipsis: Self, right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ShapeExpression(ctx.get_arena().alloc(ShapeExpressionChildren {
             keyword,
             left_paren,
             fields,
+            ellipsis,
             right_paren,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
-    fn make_tuple_expression(ctx: &C, keyword: Self, left_paren: Self, items: Self, right_paren: Self) -> Self {
+    fn make_tuple_expression(ctx: &C, keyword: Self, left_paren: Self, items: Self, ellipsis: Self, right_paren: Self) -> Self {
         let syntax = SyntaxVariant::TupleExpression(ctx.get_arena().alloc(TupleExpressionChildren {
             keyword,
             left_paren,
             items,
+            ellipsis,
             right_paren,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));

@@ -4,3 +4,15 @@ ERROR: File "shape_assign.php", line 25, characters 3-14:
 This expression is readonly, its members cannot be modified (Parsing[1002])
 ERROR: File "shape_assign.php", line 27, characters 3-14:
 This expression is readonly, its members cannot be modified (Parsing[1002])
+ERROR: File "shape_assign.php", line 24, characters 3-4:
+Variable `$a` is undefined, or not always defined. (Naming[2050])
+  File "shape_assign.php", line 22, characters 78-79:
+  Did you mean `$y` instead?
+ERROR: File "shape_assign.php", line 25, characters 3-4:
+Variable `$b` is undefined, or not always defined. (Naming[2050])
+  File "shape_assign.php", line 22, characters 78-79:
+  Did you mean `$y` instead?
+ERROR: File "shape_assign.php", line 27, characters 3-4:
+Variable `$c` is undefined, or not always defined. (Naming[2050])
+  File "shape_assign.php", line 22, characters 78-79:
+  Did you mean `$y` instead?

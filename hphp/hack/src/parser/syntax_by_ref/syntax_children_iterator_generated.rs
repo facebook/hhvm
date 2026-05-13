@@ -1703,21 +1703,23 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ShapeExpression(x) => {
-                get_index(4).and_then(|index| { match index {
+                get_index(5).and_then(|index| { match index {
                         0 => Some(&x.keyword),
                     1 => Some(&x.left_paren),
                     2 => Some(&x.fields),
-                    3 => Some(&x.right_paren),
+                    3 => Some(&x.ellipsis),
+                    4 => Some(&x.right_paren),
                         _ => None,
                     }
                 })
             },
             TupleExpression(x) => {
-                get_index(4).and_then(|index| { match index {
+                get_index(5).and_then(|index| { match index {
                         0 => Some(&x.keyword),
                     1 => Some(&x.left_paren),
                     2 => Some(&x.items),
-                    3 => Some(&x.right_paren),
+                    3 => Some(&x.ellipsis),
+                    4 => Some(&x.right_paren),
                         _ => None,
                     }
                 })

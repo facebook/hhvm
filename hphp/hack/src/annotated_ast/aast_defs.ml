@@ -286,6 +286,59 @@ and pat_refinement = {
   pr_hint: hint;
 }
 
+(** Shape destructuring pattern, used only in lvalue positions.
+ *
+ *     shape('x' => $x, ?'y' => $y, ...) = $point; *)
+and ('ex, 'en) destructure_shape = {
+  ds_pos: pos; [@transform.opaque]
+  ds_fields: ('ex, 'en) destructure_shape_field list;
+  ds_ellipsis: bool;
+}
+
+(** A field entry in a shape destructuring pattern. *)
+and ('ex, 'en) destructure_shape_field = {
+  dsf_optional: bool;
+  dsf_name: (Ast_defs.shape_field_name[@transform.opaque]);
+  dsf_target: ('ex, 'en) destructure_target;
+}
+
+(** Tuple destructuring pattern, used only in lvalue positions.
+ *
+ *     tuple($a, optional $b, ...) = $pair; *)
+and ('ex, 'en) destructure_tuple = {
+  dt_pos: pos; [@transform.opaque]
+  dt_entries: ('ex, 'en) destructure_tuple_entry list;
+  dt_ellipsis: bool;
+}
+
+(** An entry in a tuple destructuring pattern. *)
+and ('ex, 'en) destructure_tuple_entry = {
+  dte_optional: bool;
+  dte_target: ('ex, 'en) destructure_target;
+}
+
+(** Recursive target for shape/tuple destructuring patterns.
+ * The 'ex annotation mirrors how expr carries an annotation. *)
+and ('ex, 'en) destructure_target = 'ex * 'en * ('ex, 'en) destructure_target_
+
+and ('ex, 'en) destructure_target_ =
+  | DtLvar of lid
+      (** A local variable target.
+       *
+       *     $x *)
+  | DtWildcard of (pos[@transform.opaque])
+      (** Wildcard _ target. Accesses the field at runtime but does not bind.
+       *
+       *     _ *)
+  | DtShape of ('ex, 'en) destructure_shape
+      (** Nested shape destructuring.
+       *
+       *     shape('inner' => $x) *)
+  | DtTuple of ('ex, 'en) destructure_tuple
+      (** Nested tuple destructuring.
+       *
+       *     tuple($a, $b) *)
+
 and ('ex, 'en) class_id = 'ex * (pos[@transform.opaque]) * ('ex, 'en) class_id_
 
 (** Class ID, used in things like instantiation and static property access. *)
@@ -613,6 +666,16 @@ and ('ex, 'en) expr_ =
        *     list(, $y) = vec[1, 2]; // skipping items
        *     list(list($x)) = vec[vec[1]]; // nesting
        *     list($v[0], $x[], $y->foo) = $blah; *)
+  | DestructureShape of ('ex, 'en) destructure_shape
+      (** Shape destructuring pattern, only used in lvalue positions.
+       * Distinct from Shape (which is for construction on RHS).
+       *
+       *     shape('x' => $x, ?'y' => $y, ...) = $point; *)
+  | DestructureTuple of ('ex, 'en) destructure_tuple
+      (** Tuple destructuring pattern, only used in lvalue positions.
+       * Distinct from Tuple (which is for construction on RHS).
+       *
+       *     tuple($a, optional $b, ...) = $pair; *)
   | Cast of hint * ('ex, 'en) expr
       (** Cast expression, converting a value to a different type. Only
        * primitive types are supported in the hint position.

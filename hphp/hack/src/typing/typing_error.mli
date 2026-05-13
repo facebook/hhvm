@@ -72,6 +72,31 @@ module Primary : sig
     [@@deriving show]
   end
 
+  module Shape_and_tuple_destructure : sig
+    type t =
+      | Missing_ellipsis of Pos.t
+      | Missing_required_fields of {
+          pos: Pos.t;
+          field_names: string;
+        }
+      | Unknown_field of {
+          pos: Pos.t;
+          field_name: string;
+        }
+      | Tuple_arity_mismatch of {
+          pos: Pos.t;
+          pat_arity: int;
+          tuple_arity: int;
+        }
+      | Tuple_arity_exceeds of {
+          pos: Pos.t;
+          pat_arity: int;
+          tuple_arity: int;
+        }
+      | Tuple_arity_union_conflict of Pos.t
+    [@@deriving show]
+  end
+
   module Switch : sig
     type t =
       | Switch_nonexhaustive of {
@@ -443,6 +468,7 @@ module Primary : sig
     | Package of Package.t
     | Readonly of Readonly.t
     | Shape of Shape.t
+    | Shape_and_tuple_destructure of Shape_and_tuple_destructure.t
     | Switch of Switch.t
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t

@@ -2585,17 +2585,37 @@ where
     }
 
     fn parse_shape_field(&mut self) -> S::Output {
-        // SPEC extension for shape field punning:
+        // SPEC extension for shape field punning and destructuring:
         // shape-field:
-        //   field-initializer
-        //   variable  (shorthand for 'var_name' => $var_name)
+        //   field-initializer                    ('key' => expr)
+        //   variable                             ($var, shorthand for 'var_name' => $var_name)
+        //   ? field-initializer                  (?'key' => lvalue, optional destructure field)
+        //   ? variable                           (?$var, optional punned destructure field)
         //
-        // If we see a variable followed by , or ) we treat it as shorthand syntax.
-        // Otherwise, we fall back to the regular field initializer syntax.
+        // If we see a variable followed by , or ) or ... we treat it as shorthand syntax.
+        // ? prefix is for optional fields in destructuring patterns (validated later).
 
+        let is_field_end = |k: TokenKind| {
+            k == TokenKind::Comma || k == TokenKind::RightParen || k == TokenKind::DotDotDot
+        };
+
+        // Handle ? prefix for optional fields in destructuring
+        if self.peek_token_kind() == TokenKind::Question {
+            let question = self.next_token();
+            let question_token = self.sc_mut().make_token(question);
+            let inner = self.parse_shape_field_inner(is_field_end);
+            return self
+                .sc_mut()
+                .make_prefix_unary_expression(question_token, inner);
+        }
+
+        self.parse_shape_field_inner(is_field_end)
+    }
+
+    fn parse_shape_field_inner<F: Fn(TokenKind) -> bool>(&mut self, is_field_end: F) -> S::Output {
         if self.peek_token_kind() == TokenKind::Variable {
             let next_kind = self.peek_token_kind_with_lookahead(1);
-            if next_kind == TokenKind::Comma || next_kind == TokenKind::RightParen {
+            if is_field_end(next_kind) {
                 // Shorthand syntax: $foo becomes 'foo' => $foo
                 let token = self.next_token();
                 let variable = self.sc_mut().make_token(token);
@@ -2622,11 +2642,30 @@ where
         //   shape-field:
         //     field-initializer
         //     variable  (shorthand for 'var_name' => $var_name)
+        //
+        // Extended for shape destructuring (LHS):
+        //   shape-field:
+        //     ?field-initializer       (optional field)
+        //     ?variable                (optional punned field)
+        //   field-initializer-list may end with ...
         let shape = self.assert_token(TokenKind::Shape);
-        let (left_paren, fields, right_paren) =
-            self.parse_parenthesized_comma_list_opt_allow_trailing(|p| p.parse_shape_field());
+        let left_paren = self.require_left_paren();
+        let is_closing_token =
+            |x: TokenKind| x == TokenKind::RightParen || x == TokenKind::DotDotDot;
+        let fields = self.parse_comma_list_opt_allow_trailing_predicate(
+            is_closing_token,
+            Errors::error1025,
+            |x: &mut Self| x.parse_shape_field(),
+        );
+        let ellipsis = if self.peek_token_kind() == TokenKind::DotDotDot {
+            self.assert_token(TokenKind::DotDotDot)
+        } else {
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
+        };
+        let right_paren = self.require_right_paren();
         self.sc_mut()
-            .make_shape_expression(shape, left_paren, fields, right_paren)
+            .make_shape_expression(shape, left_paren, fields, ellipsis, right_paren)
     }
 
     fn parse_tuple_expression(&mut self) -> S::Output {
@@ -2638,15 +2677,41 @@ where
         //   expression
         //   expression-list-one-or-more  ,  expression
         //
-        // TODO: Can the list be comma-terminated? If so, update the spec.
-        // TODO: We need to produce an error in a later pass if the list is empty.
+        // Extended for tuple destructuring (LHS):
+        //   entry may be prefixed with 'optional'
+        //   entry-list may end with ...
         let keyword = self.assert_token(TokenKind::Tuple);
-        let (left_paren, items, right_paren) = self
-            .parse_parenthesized_comma_list_opt_allow_trailing(|p| {
-                p.parse_expression_with_reset_precedence()
-            });
+        let left_paren = self.require_left_paren();
+        let is_closing_token =
+            |x: TokenKind| x == TokenKind::RightParen || x == TokenKind::DotDotDot;
+        let items = self.parse_comma_list_opt_allow_trailing_predicate(
+            is_closing_token,
+            Errors::error1025,
+            |x: &mut Self| x.parse_tuple_entry(),
+        );
+        let ellipsis = if self.peek_token_kind() == TokenKind::DotDotDot {
+            self.assert_token(TokenKind::DotDotDot)
+        } else {
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
+        };
+        let right_paren = self.require_right_paren();
         self.sc_mut()
-            .make_tuple_expression(keyword, left_paren, items, right_paren)
+            .make_tuple_expression(keyword, left_paren, items, ellipsis, right_paren)
+    }
+
+    fn parse_tuple_entry(&mut self) -> S::Output {
+        // Handle 'optional' prefix for tuple destructuring entries.
+        // Validated later: only valid on the LHS of assignment.
+        if self.peek_token_kind() == TokenKind::Optional {
+            let optional = self.next_token();
+            let optional_token = self.sc_mut().make_token(optional);
+            let inner = self.parse_expression_with_reset_precedence();
+            return self
+                .sc_mut()
+                .make_prefix_unary_expression(optional_token, inner);
+        }
+        self.parse_expression_with_reset_precedence()
     }
 
     fn parse_use_variable(&mut self) -> S::Output {

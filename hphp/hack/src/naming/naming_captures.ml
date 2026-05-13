@@ -28,10 +28,27 @@ let add_param vars param : vars =
 let add_params vars f : vars = List.fold f.Aast.f_params ~init:vars ~f:add_param
 
 let lvalues (e : Nast.expr) : Nast.capture_lid list =
+  let rec aux_target acc (_, _, target) =
+    match target with
+    | Aast.DtLvar (pos, lid) -> ((), (pos, lid)) :: acc
+    | Aast.DtWildcard _ -> acc
+    | Aast.DtShape ds ->
+      List.fold_left ds.Aast.ds_fields ~init:acc ~f:(fun acc field ->
+          aux_target acc field.Aast.dsf_target)
+    | Aast.DtTuple dt ->
+      List.fold_left dt.Aast.dt_entries ~init:acc ~f:(fun acc entry ->
+          aux_target acc entry.Aast.dte_target)
+  in
   let rec aux acc (_, _, e) =
     match e with
     | Aast.List lv -> List.fold_left ~init:acc ~f:aux lv
     | Aast.Lvar (pos, lid) -> ((), (pos, lid)) :: acc
+    | Aast.DestructureShape ds ->
+      List.fold_left ds.Aast.ds_fields ~init:acc ~f:(fun acc field ->
+          aux_target acc field.Aast.dsf_target)
+    | Aast.DestructureTuple dt ->
+      List.fold_left dt.Aast.dt_entries ~init:acc ~f:(fun acc entry ->
+          aux_target acc entry.Aast.dte_target)
     | _ -> acc
   in
   aux [] e

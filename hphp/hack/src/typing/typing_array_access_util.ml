@@ -19,14 +19,16 @@ open String.Replace_polymorphic_compare
 
 (* Like widen_for_array_get, but for when constraint_can_index is on. *)
 let widen_for_array_get_ci
-    {
-      ci_lhs_of_null_coalesce = lhs_of_null_coalesce;
-      ci_index_expr = index_expr;
-      ci_expr_pos = expr_pos;
-      _;
-    }
+    { ci_access_kind; ci_index_expr = index_expr; ci_expr_pos = expr_pos; _ }
     env
     ty =
+  let lhs_of_null_coalesce =
+    match ci_access_kind with
+    | Ci_normal -> false
+    | Ci_lhs_of_null_coalesce
+    | Ci_destructure_optional ->
+      true
+  in
   Typing_log.(
     log_with_level env "typing" ~level:1 (fun () ->
         log_types

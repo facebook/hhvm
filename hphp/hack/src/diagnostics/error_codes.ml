@@ -799,6 +799,10 @@ module Typing = struct
     | NeedsConcreteOnConstructor [@value 4507]
     | ConsistentConstructAbstractExtendsNonAbstract [@value 4508]
     | GatedByFeatureFlag [@value 4509]
+    | DestructureMissingEllipsis [@value 4510]
+    | DestructureMissingRequiredField [@value 4511]
+    | DestructureUnknownField [@value 4512]
+    | DestructureTupleArityMismatch [@value 4513]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

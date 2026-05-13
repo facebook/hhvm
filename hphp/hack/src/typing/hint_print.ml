@@ -477,6 +477,8 @@ and pp_expr_ ppf = function
   | Aast.ExpressionTree _
   | Aast.Method_caller _
   | Aast.ET_Splice _
+  | Aast.DestructureShape _
+  | Aast.DestructureTuple _
   | Aast.Omitted ->
     ()
 

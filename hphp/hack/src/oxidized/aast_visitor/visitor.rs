@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<08282b126cc6ec58b8c62b37f6d2d75e>>
+// @generated SignedSource<<01608159620074903878c860709af306>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -270,6 +270,48 @@ pub trait Visitor<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node DefaultCase<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_destructure_shape(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node DestructureShape<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_destructure_shape_field(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node DestructureShapeField<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_destructure_target(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node DestructureTarget<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_destructure_target_(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node DestructureTarget_<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_destructure_tuple(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node DestructureTuple<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_destructure_tuple_entry(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node DestructureTupleEntry<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }

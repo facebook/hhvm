@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures('shape_destructure')>>
+<<file:__EnableUnstableFeatures('shape_and_tuple_destructuring')>>
 
 function f(): void {
   tuple($a, $b) = tuple(1, 2, 3);

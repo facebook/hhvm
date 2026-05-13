@@ -13,3 +13,5 @@ function foreach_kv_l(V $v)[$v::C]: void {
 function foreach_kv_r(V $v)[$v::C]: void {
   foreach (dict[] as $_ => $v) {} // TODO(coeffects) buggy position
 }
+
+//

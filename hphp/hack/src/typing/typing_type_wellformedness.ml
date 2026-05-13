@@ -863,7 +863,9 @@ let expr tenv ((), _p, e) =
   | ET_Splice _
   | Hole _
   | Package _
-  | Nameof _ ->
+  | Nameof _
+  | DestructureShape _
+  | DestructureTuple _ ->
     []
 
 (** Check well-formedness of type hints. See .mli file for more. *)

@@ -2503,18 +2503,55 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         {
           shape_expression_keyword = shape_kw;
           shape_expression_left_paren = left_p;
-          shape_expression_fields = fields;
+          shape_expression_fields = shape_expr_fields;
+          shape_expression_ellipsis = ellipsis;
           shape_expression_right_paren = right_p;
         } ->
-      transform_container_literal env shape_kw left_p fields right_p
+      let fields =
+        if Syntax.is_missing ellipsis then
+          shape_expr_fields
+        else
+          let missing_separator = make_missing () in
+          let ellipsis_list =
+            [Syntax.make_list_item ellipsis missing_separator]
+          in
+          make_list (Syntax.children shape_expr_fields @ ellipsis_list)
+      in
+      transform_container_literal
+        env
+        shape_kw
+        left_p
+        fields
+        right_p
+        ~allow_trailing:(Syntax.is_missing ellipsis)
     | Syntax.TupleExpression
         {
           tuple_expression_keyword = kw;
           tuple_expression_left_paren = left_p;
-          tuple_expression_items = items;
+          tuple_expression_items = tuple_items;
+          tuple_expression_ellipsis = ellipsis;
           tuple_expression_right_paren = right_p;
         } ->
-      Concat [t env kw; transform_argish env left_p items right_p]
+      let items =
+        if Syntax.is_missing ellipsis then
+          tuple_items
+        else
+          let missing_separator = make_missing () in
+          let ellipsis_list =
+            [Syntax.make_list_item ellipsis missing_separator]
+          in
+          make_list (Syntax.children tuple_items @ ellipsis_list)
+      in
+      Concat
+        [
+          t env kw;
+          transform_argish
+            env
+            ~allow_trailing:(Syntax.is_missing ellipsis)
+            left_p
+            items
+            right_p;
+        ]
     | Syntax.TypeArguments
         {
           type_arguments_left_angle = left_a;

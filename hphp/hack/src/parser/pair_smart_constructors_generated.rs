@@ -732,12 +732,12 @@ where
         Node(self.0.make_shape_type_specifier(keyword.0, left_paren.0, fields.0, ellipsis.0, right_paren.0), self.1.make_shape_type_specifier(keyword.1, left_paren.1, fields.1, ellipsis.1, right_paren.1))
     }
 
-    fn make_shape_expression(&mut self, keyword: Self::Output, left_paren: Self::Output, fields: Self::Output, right_paren: Self::Output) -> Self::Output {
-        Node(self.0.make_shape_expression(keyword.0, left_paren.0, fields.0, right_paren.0), self.1.make_shape_expression(keyword.1, left_paren.1, fields.1, right_paren.1))
+    fn make_shape_expression(&mut self, keyword: Self::Output, left_paren: Self::Output, fields: Self::Output, ellipsis: Self::Output, right_paren: Self::Output) -> Self::Output {
+        Node(self.0.make_shape_expression(keyword.0, left_paren.0, fields.0, ellipsis.0, right_paren.0), self.1.make_shape_expression(keyword.1, left_paren.1, fields.1, ellipsis.1, right_paren.1))
     }
 
-    fn make_tuple_expression(&mut self, keyword: Self::Output, left_paren: Self::Output, items: Self::Output, right_paren: Self::Output) -> Self::Output {
-        Node(self.0.make_tuple_expression(keyword.0, left_paren.0, items.0, right_paren.0), self.1.make_tuple_expression(keyword.1, left_paren.1, items.1, right_paren.1))
+    fn make_tuple_expression(&mut self, keyword: Self::Output, left_paren: Self::Output, items: Self::Output, ellipsis: Self::Output, right_paren: Self::Output) -> Self::Output {
+        Node(self.0.make_tuple_expression(keyword.0, left_paren.0, items.0, ellipsis.0, right_paren.0), self.1.make_tuple_expression(keyword.1, left_paren.1, items.1, ellipsis.1, right_paren.1))
     }
 
     fn make_generic_type_specifier(&mut self, class_type: Self::Output, argument_list: Self::Output) -> Self::Output {

@@ -1,0 +1,543 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes =
+      [{ fa_user_attributes =
+         [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring")); ((), [2:66-87], (String "shape_field_punning"))] }];
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+           ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+           ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+         }
+        ];
+      fd_mode = Mstrict; fd_name = ([4:10-26], "\\test_shape_basic");
+      fd_fun =
+      { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([4:62-66], (Hprim Tvoid))));
+        f_params =
+        [{ param_annotation = ();
+           param_type_hint =
+           ((),
+            (Some ([4:27-56],
+                   (Hshape
+                      { nsi_allows_unknown_fields = false;
+                        nsi_field_map =
+                        [{ sfi_optional = false; sfi_hint = ([4:40-43], (Hprim Tint)); sfi_name = (SFlit_str ([4:33-36], "x")) };
+                          { sfi_optional = false; sfi_hint = ([4:52-55], (Hprim Tint)); sfi_name = (SFlit_str ([4:45-48], "y")) }]
+                        }))));
+           param_pos = [4:57-59]; param_name = "$s"; param_info = Param_required; 
+           param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+           param_named = None; param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-36],
+            (Expr
+               ((), [5:3-35],
+                (Assign (
+                   ((), [5:3-30],
+                    (DestructureShape
+                       { ds_pos = [5:3-8];
+                         ds_fields =
+                         [{ dsf_optional = false; dsf_name = (SFlit_str ([5:9-12], "x")); dsf_target = ((), (), (DtLvar ([5:16-18], $x))) };
+                           { dsf_optional = false; dsf_name = (SFlit_str ([5:20-23], "y")); dsf_target = ((), (), (DtLvar ([5:27-29], $y))) }];
+                         ds_ellipsis = false })),
+                   None, ((), [5:33-35], (Lvar ([5:33-35], $s))))))))
+            ]
+          };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-26], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring")); ((), [2:66-87], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([8:10-29], "\\test_shape_ellipsis");
+       fd_fun =
+       { f_span = [8:1-10:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([8:65-69], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ();
+            param_type_hint =
+            ((),
+             (Some ([8:30-59],
+                    (Hshape
+                       { nsi_allows_unknown_fields = false;
+                         nsi_field_map =
+                         [{ sfi_optional = false; sfi_hint = ([8:43-46], (Hprim Tint)); sfi_name = (SFlit_str ([8:36-39], "x")) };
+                           { sfi_optional = false; sfi_hint = ([8:55-58], (Hprim Tint)); sfi_name = (SFlit_str ([8:48-51], "y")) }]
+                         }))));
+            param_pos = [8:60-62]; param_name = "$s"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([9:3-30],
+             (Expr
+                ((), [9:3-29],
+                 (Assign (
+                    ((), [9:3-24],
+                     (DestructureShape
+                        { ds_pos = [9:3-8]; ds_fields = [{ dsf_optional = false; dsf_name = (SFlit_str ([9:9-12], "x")); dsf_target = ((), (), (DtLvar ([9:16-18], $x))) }]; ds_ellipsis = true })),
+                    None, ((), [9:27-29], (Lvar ([9:27-29], $s))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-29], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring")); ((), [2:66-87], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([12:10-29], "\\test_shape_optional");
+       fd_fun =
+       { f_span = [12:1-14:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([12:66-70], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ();
+            param_type_hint =
+            ((),
+             (Some ([12:30-60],
+                    (Hshape
+                       { nsi_allows_unknown_fields = false;
+                         nsi_field_map =
+                         [{ sfi_optional = false; sfi_hint = ([12:43-46], (Hprim Tint)); sfi_name = (SFlit_str ([12:36-39], "x")) };
+                           { sfi_optional = true; sfi_hint = ([12:56-59], (Hprim Tint)); sfi_name = (SFlit_str ([12:49-52], "y")) }]
+                         }))));
+            param_pos = [12:61-63]; param_name = "$s"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([13:3-37],
+             (Expr
+                ((), [13:3-36],
+                 (Assign (
+                    ((), [13:3-31],
+                     (DestructureShape
+                        { ds_pos = [13:3-8];
+                          ds_fields =
+                          [{ dsf_optional = false; dsf_name = (SFlit_str ([13:9-12], "x")); dsf_target = ((), (), (DtLvar ([13:16-18], $x))) };
+                            { dsf_optional = true; dsf_name = (SFlit_str ([13:21-24], "y")); dsf_target = ((), (), (DtLvar ([13:28-30], $y))) }];
+                          ds_ellipsis = false })),
+                    None, ((), [13:34-36], (Lvar ([13:34-36], $s))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([12:10-29], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring")); ((), [2:66-87], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([16:10-29], "\\test_shape_wildcard");
+       fd_fun =
+       { f_span = [16:1-18:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([16:65-69], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ();
+            param_type_hint =
+            ((),
+             (Some ([16:30-59],
+                    (Hshape
+                       { nsi_allows_unknown_fields = false;
+                         nsi_field_map =
+                         [{ sfi_optional = false; sfi_hint = ([16:43-46], (Hprim Tint)); sfi_name = (SFlit_str ([16:36-39], "x")) };
+                           { sfi_optional = false; sfi_hint = ([16:55-58], (Hprim Tint)); sfi_name = (SFlit_str ([16:48-51], "y")) }]
+                         }))));
+            param_pos = [16:60-62]; param_name = "$s"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([17:3-35],
+             (Expr
+                ((), [17:3-34],
+                 (Assign (
+                    ((), [17:3-29],
+                     (DestructureShape
+                        { ds_pos = [17:3-8];
+                          ds_fields =
+                          [{ dsf_optional = false; dsf_name = (SFlit_str ([17:9-12], "x")); dsf_target = ((), (), (DtLvar ([17:16-18], $x))) };
+                            { dsf_optional = false; dsf_name = (SFlit_str ([17:20-23], "y")); dsf_target = ((), (), (DtWildcard [17:27-28])) }];
+                          ds_ellipsis = false })),
+                    None, ((), [17:32-34], (Lvar ([17:32-34], $s))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([16:10-29], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring")); ((), [2:66-87], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([20:10-28], "\\test_shape_punning");
+       fd_fun =
+       { f_span = [20:1-22:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([20:64-68], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ();
+            param_type_hint =
+            ((),
+             (Some ([20:29-58],
+                    (Hshape
+                       { nsi_allows_unknown_fields = false;
+                         nsi_field_map =
+                         [{ sfi_optional = false; sfi_hint = ([20:42-45], (Hprim Tint)); sfi_name = (SFlit_str ([20:35-38], "x")) };
+                           { sfi_optional = false; sfi_hint = ([20:54-57], (Hprim Tint)); sfi_name = (SFlit_str ([20:47-50], "y")) }]
+                         }))));
+            param_pos = [20:59-61]; param_name = "$s"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([21:3-22],
+             (Expr
+                ((), [21:3-21],
+                 (Assign (
+                    ((), [21:3-16],
+                     (DestructureShape
+                        { ds_pos = [21:3-8];
+                          ds_fields =
+                          [{ dsf_optional = false; dsf_name = (SFlit_str ([21:9-11], "x")); dsf_target = ((), (), (DtLvar ([21:9-11], $x))) };
+                            { dsf_optional = false; dsf_name = (SFlit_str ([21:13-15], "y")); dsf_target = ((), (), (DtLvar ([21:13-15], $y))) }];
+                          ds_ellipsis = false })),
+                    None, ((), [21:19-21], (Lvar ([21:19-21], $s))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([20:10-28], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring")); ((), [2:66-87], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([24:10-26], "\\test_tuple_basic");
+       fd_fun =
+       { f_span = [24:1-26:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([24:46-50], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ();
+            param_type_hint =
+            ((),
+             (Some ([24:27-40],
+                    (Htuple { tup_required = [([24:28-31], (Hprim Tint)); ([24:33-39], (Happly (([24:33-39], "\\HH\\string"), [])))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
+            param_pos = [24:41-43]; param_name = "$t"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([25:3-22],
+             (Expr
+                ((), [25:3-21],
+                 (Assign (
+                    ((), [25:3-16],
+                     (DestructureTuple
+                        { dt_pos = [25:3-8];
+                          dt_entries = [{ dte_optional = false; dte_target = ((), (), (DtLvar ([25:9-11], $a))) }; { dte_optional = false; dte_target = ((), (), (DtLvar ([25:13-15], $b))) }];
+                          dt_ellipsis = false })),
+                    None, ((), [25:19-21], (Lvar ([25:19-21], $t))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([24:10-26], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring")); ((), [2:66-87], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([28:10-29], "\\test_tuple_ellipsis");
+       fd_fun =
+       { f_span = [28:1-30:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([28:55-59], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ();
+            param_type_hint =
+            ((),
+             (Some ([28:30-49],
+                    (Htuple
+                       { tup_required = [([28:31-34], (Hprim Tint)); ([28:36-42], (Happly (([28:36-42], "\\HH\\string"), []))); ([28:44-48], (Hprim Tbool))];
+                         tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
+            param_pos = [28:50-52]; param_name = "$t"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([29:3-23],
+             (Expr
+                ((), [29:3-22],
+                 (Assign (((), [29:3-17], (DestructureTuple { dt_pos = [29:3-8]; dt_entries = [{ dte_optional = false; dte_target = ((), (), (DtLvar ([29:9-11], $a))) }]; dt_ellipsis = true })),
+                    None, ((), [29:20-22], (Lvar ([29:20-22], $t))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([28:10-29], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring")); ((), [2:66-87], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([32:10-21], "\\test_nested");
+       fd_fun =
+       { f_span = [32:1-36:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([34:4-8], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ();
+            param_type_hint =
+            ((),
+             (Some ([33:3-34],
+                    (Hshape
+                       { nsi_allows_unknown_fields = false;
+                         nsi_field_map =
+                         [{ sfi_optional = false;
+                            sfi_hint =
+                            ([33:20-33],
+                             (Htuple
+                                { tup_required = [([33:21-24], (Hprim Tint)); ([33:26-32], (Happly (([33:26-32], "\\HH\\string"), [])))];
+                                  tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                            sfi_name = (SFlit_str ([33:9-16], "inner")) }
+                           ]
+                         }))));
+            param_pos = [33:35-37]; param_name = "$s"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([35:3-40],
+             (Expr
+                ((), [35:3-39],
+                 (Assign (
+                    ((), [35:3-34],
+                     (DestructureShape
+                        { ds_pos = [35:3-8];
+                          ds_fields =
+                          [{ dsf_optional = false; dsf_name = (SFlit_str ([35:9-16], "inner"));
+                             dsf_target =
+                             ((), (),
+                              (DtTuple
+                                 { dt_pos = [35:20-25];
+                                   dt_entries =
+                                   [{ dte_optional = false; dte_target = ((), (), (DtLvar ([35:26-28], $a))) }; { dte_optional = false; dte_target = ((), (), (DtLvar ([35:30-32], $b))) }];
+                                   dt_ellipsis = false }))
+                             }
+                            ];
+                          ds_ellipsis = false })),
+                    None, ((), [35:37-39], (Lvar ([35:37-39], $s))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([32:10-21], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring")); ((), [2:66-87], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([39:10-32], "\\test_foreach_shape_key");
+       fd_fun =
+       { f_span = [38:1-43:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([41:4-8], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ();
+            param_type_hint =
+            ((),
+             (Some ([40:3-51],
+                    (Happly (([40:3-16], "\\HH\\KeyedIterator"),
+                       [([40:17-35],
+                         (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([40:31-34], (Hprim Tint)); sfi_name = (SFlit_str ([40:23-27], "id")) }] }));
+                         ([40:37-50],
+                          (Htuple
+                             { tup_required = [([40:38-41], (Hprim Tint)); ([40:43-49], (Happly (([40:43-49], "\\HH\\string"), [])))]; 
+                               tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))
+                         ]
+                       )))));
+            param_pos = [40:52-58]; param_name = "$items"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([42:3-61],
+             (Foreach (((), [42:12-18], (Lvar ([42:12-18], $items))),
+                (As_kv (
+                   ((), [42:22-40],
+                    (DestructureShape
+                       { ds_pos = [42:22-27]; ds_fields = [{ dsf_optional = false; dsf_name = (SFlit_str ([42:28-32], "id")); dsf_target = ((), (), (DtLvar ([42:36-39], $id))) }]; 
+                         ds_ellipsis = false })),
+                   ((), [42:44-57],
+                    (DestructureTuple
+                       { dt_pos = [42:44-49];
+                         dt_entries = [{ dte_optional = false; dte_target = ((), (), (DtLvar ([42:50-52], $a))) }; { dte_optional = false; dte_target = ((), (), (DtLvar ([42:54-56], $b))) }];
+                         dt_ellipsis = false }))
+                   )),
+                [])))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([38:3-18], "__NoAutoDynamic"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-64], (String "shape_and_tuple_destructuring")); ((), [2:66-87], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([46:10-32], "\\test_foreach_tuple_key");
+       fd_fun =
+       { f_span = [45:1-50:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([48:4-8], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ();
+            param_type_hint =
+            ((),
+             (Some ([47:3-52],
+                    (Happly (([47:3-16], "\\HH\\KeyedIterator"),
+                       [([47:17-30],
+                         (Htuple
+                            { tup_required = [([47:18-21], (Hprim Tint)); ([47:23-29], (Happly (([47:23-29], "\\HH\\string"), [])))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                         ([47:32-51],
+                          (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([47:46-50], (Hprim Tbool)); sfi_name = (SFlit_str ([47:38-42], "ok")) }] }))
+                         ]
+                       )))));
+            param_pos = [47:53-59]; param_name = "$items"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([49:3-66],
+             (Foreach (((), [49:12-18], (Lvar ([49:12-18], $items))),
+                (As_kv (
+                   ((), [49:22-40],
+                    (DestructureTuple
+                       { dt_pos = [49:22-27];
+                         dt_entries = [{ dte_optional = false; dte_target = ((), (), (DtLvar ([49:28-31], $id))) }; { dte_optional = false; dte_target = ((), (), (DtLvar ([49:33-39], $label))) }];
+                         dt_ellipsis = false })),
+                   ((), [49:44-62],
+                    (DestructureShape
+                       { ds_pos = [49:44-49]; ds_fields = [{ dsf_optional = false; dsf_name = (SFlit_str ([49:50-54], "ok")); dsf_target = ((), (), (DtLvar ([49:58-61], $ok))) }]; 
+                         ds_ellipsis = false }))
+                   )),
+                [])))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([45:3-18], "__NoAutoDynamic"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None })
+  ]

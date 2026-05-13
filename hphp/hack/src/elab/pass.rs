@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<da8e8b4660b3909a8e98480a70028872>>
+// @generated SignedSource<<1989fa00aab5349f71f296855ed2a1a9>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -188,6 +188,102 @@ pub trait Pass: PassClone {
         &mut self,
         env: &Env,
         elem: &mut PatRefinement,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_shape_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureShape<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_shape_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureShape<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_shape_field_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureShapeField<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_shape_field_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureShapeField<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_tuple_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTuple<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_tuple_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTuple<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_tuple_entry_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTupleEntry<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_tuple_entry_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTupleEntry<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_target_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTarget<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_target_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTarget<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_target__top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTarget_<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_target__bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTarget_<Ex, En>,
     ) -> ControlFlow<()> {
         Continue(())
     }
@@ -1680,6 +1776,138 @@ impl Pass for Passes {
     ) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_ty_pat_refinement_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_shape_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureShape<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_destructure_shape_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_shape_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureShape<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_destructure_shape_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_shape_field_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureShapeField<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_destructure_shape_field_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_shape_field_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureShapeField<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_destructure_shape_field_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_tuple_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTuple<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_destructure_tuple_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_tuple_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTuple<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_destructure_tuple_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_tuple_entry_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTupleEntry<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_destructure_tuple_entry_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_tuple_entry_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTupleEntry<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_destructure_tuple_entry_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_target_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTarget<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_destructure_target_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_target_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTarget<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_destructure_target_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_target__top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTarget_<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_destructure_target__top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_destructure_target__bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut DestructureTarget_<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_destructure_target__bottom_up(env, elem)?;
         }
         Continue(())
     }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<67b823353cde3535e514f0eba714e87b>>
+// @generated SignedSource<<fc728531e7e108ac61d09f90cf8982e6>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -714,6 +714,116 @@ impl Pattern {
         }
     }
 }
+impl<Ex, En> DestructureTarget_<Ex, En> {
+    pub fn mk_dt_lvar(p0: Lid) -> Self {
+        DestructureTarget_::DtLvar(p0)
+    }
+    pub fn mk_dt_wildcard(p0: Pos) -> Self {
+        DestructureTarget_::DtWildcard(p0)
+    }
+    pub fn mk_dt_shape(p0: DestructureShape<Ex, En>) -> Self {
+        DestructureTarget_::DtShape(p0)
+    }
+    pub fn mk_dt_tuple(p0: DestructureTuple<Ex, En>) -> Self {
+        DestructureTarget_::DtTuple(p0)
+    }
+    pub fn is_dt_lvar(&self) -> bool {
+        match self {
+            DestructureTarget_::DtLvar(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_dt_wildcard(&self) -> bool {
+        match self {
+            DestructureTarget_::DtWildcard(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_dt_shape(&self) -> bool {
+        match self {
+            DestructureTarget_::DtShape(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_dt_tuple(&self) -> bool {
+        match self {
+            DestructureTarget_::DtTuple(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_dt_lvar(&self) -> Option<&Lid> {
+        match self {
+            DestructureTarget_::DtLvar(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_dt_wildcard(&self) -> Option<&Pos> {
+        match self {
+            DestructureTarget_::DtWildcard(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_dt_shape(&self) -> Option<&DestructureShape<Ex, En>> {
+        match self {
+            DestructureTarget_::DtShape(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_dt_tuple(&self) -> Option<&DestructureTuple<Ex, En>> {
+        match self {
+            DestructureTarget_::DtTuple(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_dt_lvar_mut(&mut self) -> Option<&mut Lid> {
+        match self {
+            DestructureTarget_::DtLvar(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_dt_wildcard_mut(&mut self) -> Option<&mut Pos> {
+        match self {
+            DestructureTarget_::DtWildcard(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_dt_shape_mut(&mut self) -> Option<&mut DestructureShape<Ex, En>> {
+        match self {
+            DestructureTarget_::DtShape(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_dt_tuple_mut(&mut self) -> Option<&mut DestructureTuple<Ex, En>> {
+        match self {
+            DestructureTarget_::DtTuple(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_dt_lvar_into(self) -> Option<Lid> {
+        match self {
+            DestructureTarget_::DtLvar(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_dt_wildcard_into(self) -> Option<Pos> {
+        match self {
+            DestructureTarget_::DtWildcard(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_dt_shape_into(self) -> Option<DestructureShape<Ex, En>> {
+        match self {
+            DestructureTarget_::DtShape(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_dt_tuple_into(self) -> Option<DestructureTuple<Ex, En>> {
+        match self {
+            DestructureTarget_::DtTuple(p0) => Some(p0),
+            _ => None,
+        }
+    }
+}
 impl<Ex, En> ClassId_<Ex, En> {
     pub fn mk_ciparent() -> Self {
         ClassId_::CIparent
@@ -1044,6 +1154,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_list(p0: Vec<Expr<Ex, En>>) -> Self {
         Expr_::List(p0)
     }
+    pub fn mk_destructure_shape(p0: DestructureShape<Ex, En>) -> Self {
+        Expr_::DestructureShape(Box::new(p0))
+    }
+    pub fn mk_destructure_tuple(p0: DestructureTuple<Ex, En>) -> Self {
+        Expr_::DestructureTuple(Box::new(p0))
+    }
     pub fn mk_cast(p0: Hint, p1: Expr<Ex, En>) -> Self {
         Expr_::Cast(Box::new((p0, p1)))
     }
@@ -1303,6 +1419,18 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn is_list(&self) -> bool {
         match self {
             Expr_::List(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_destructure_shape(&self) -> bool {
+        match self {
+            Expr_::DestructureShape(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_destructure_tuple(&self) -> bool {
+        match self {
+            Expr_::DestructureTuple(..) => true,
             _ => false,
         }
     }
@@ -1618,6 +1746,18 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_list(&self) -> Option<&Vec<Expr<Ex, En>>> {
         match self {
             Expr_::List(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_destructure_shape(&self) -> Option<&DestructureShape<Ex, En>> {
+        match self {
+            Expr_::DestructureShape(p0) => Some(&p0),
+            _ => None,
+        }
+    }
+    pub fn as_destructure_tuple(&self) -> Option<&DestructureTuple<Ex, En>> {
+        match self {
+            Expr_::DestructureTuple(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -1953,6 +2093,18 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_list_mut(&mut self) -> Option<&mut Vec<Expr<Ex, En>>> {
         match self {
             Expr_::List(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_destructure_shape_mut(&mut self) -> Option<&mut DestructureShape<Ex, En>> {
+        match self {
+            Expr_::DestructureShape(p0) => Some(p0.as_mut()),
+            _ => None,
+        }
+    }
+    pub fn as_destructure_tuple_mut(&mut self) -> Option<&mut DestructureTuple<Ex, En>> {
+        match self {
+            Expr_::DestructureTuple(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
@@ -2306,6 +2458,18 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_list_into(self) -> Option<Vec<Expr<Ex, En>>> {
         match self {
             Expr_::List(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_destructure_shape_into(self) -> Option<DestructureShape<Ex, En>> {
+        match self {
+            Expr_::DestructureShape(p0) => Some(*p0),
+            _ => None,
+        }
+    }
+    pub fn as_destructure_tuple_into(self) -> Option<DestructureTuple<Ex, En>> {
+        match self {
+            Expr_::DestructureTuple(p0) => Some(*p0),
             _ => None,
         }
     }

@@ -92,6 +92,20 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
         }
     }
 
+    fn visit_destructure_target_(
+        &mut self,
+        env: &mut (),
+        t: &DestructureTarget_,
+    ) -> Result<(), String> {
+        match t {
+            DestructureTarget_::DtLvar(lid) => {
+                self.add_local(lid.name());
+                Ok(())
+            }
+            _ => t.recurse(env, self.object()),
+        }
+    }
+
     fn visit_expr_(&mut self, env: &mut (), e: &Expr_) -> Result<(), String> {
         use aast::Expr_;
         match e {

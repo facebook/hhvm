@@ -86,3 +86,5 @@ let expr_name = function
   | A.Invalid _ -> "Invalid"
   | A.Package _ -> "Package"
   | A.Nameof _ -> "Nameof"
+  | A.DestructureShape _ -> "DestructureShape"
+  | A.DestructureTuple _ -> "DestructureTuple"

@@ -6666,7 +6666,13 @@ end = struct
       do_tuple required (fun i ie_ctx ->
           match List.nth optional i with
           | Some ty ->
-            if can_index.ci_lhs_of_null_coalesce then
+            if
+              match can_index.ci_access_kind with
+              | Ci_lhs_of_null_coalesce
+              | Ci_destructure_optional ->
+                true
+              | Ci_normal -> false
+            then
               return_val ty env
             else
               tuple_oob env
@@ -6677,7 +6683,12 @@ end = struct
               if
                 i >= 0
                 && (not (Typing_utils.is_nothing env ty))
-                && can_index.ci_lhs_of_null_coalesce
+                &&
+                match can_index.ci_access_kind with
+                | Ci_lhs_of_null_coalesce
+                | Ci_destructure_optional ->
+                  true
+                | Ci_normal -> false
               then
                 return_val ty env
               else
@@ -6708,7 +6719,13 @@ end = struct
       with
       | Error ty_err -> invalid ~fail:(Some ty_err) env
       | Ok field ->
-        if can_index.ci_lhs_of_null_coalesce then
+        if
+          match can_index.ci_access_kind with
+          | Ci_lhs_of_null_coalesce -> true
+          | Ci_normal
+          | Ci_destructure_optional ->
+            false
+        then
           (* The expression $s['x'] ?? $y is semantically equivalent to
              Shapes::idx ($s, 'x') ?? $y.  I.e., if $s['x'] occurs on
              the left of a coalesce operator, then for type checking it
@@ -6750,7 +6767,15 @@ end = struct
                             }))
                 env
           | Some { sft_optional; sft_ty } ->
-            if sft_optional && not can_index.ci_lhs_of_null_coalesce then
+            if
+              sft_optional
+              &&
+              match can_index.ci_access_kind with
+              | Ci_normal -> true
+              | Ci_lhs_of_null_coalesce
+              | Ci_destructure_optional ->
+                false
+            then
               let declared_field =
                 List.find_exn
                   ~f:(fun x -> TShapeField.equal field x)
@@ -6788,7 +6813,11 @@ end = struct
       |> likely_solvable
     in
     let is_nullable =
-      can_index.ci_lhs_of_null_coalesce
+      (match can_index.ci_access_kind with
+      | Ci_lhs_of_null_coalesce -> true
+      | Ci_normal
+      | Ci_destructure_optional ->
+        false)
       || Tast.is_under_dynamic_assumptions env.Typing_env_types.checked
     in
     match deref ty_sub with

@@ -734,8 +734,12 @@ TEST_F(AcceptorTest, AcceptorUsesFizzCertManagerIfFizzFallbackStateEnabled) {
         fizz::test::createCert(std::move(cn), false, nullptr, keyType);
     std::vector<folly::ssl::X509UniquePtr> certChain;
     certChain.push_back(std::move(certData.cert));
-    auto fizzCert = fizz::openssl::CertUtils::makeSelfCert(
-        std::move(certChain), std::move(certData.key));
+    std::unique_ptr<fizz::SelfCert> fizzCert;
+    fizz::Error err;
+    EXPECT_EQ(
+        fizz::openssl::CertUtils::makeSelfCert(
+            fizzCert, err, std::move(certChain), std::move(certData.key)),
+        fizz::Status::Success);
     return fizzCert;
   };
   auto fuzzCert = makeCert("Bar", fizz::KeyType::RSA);

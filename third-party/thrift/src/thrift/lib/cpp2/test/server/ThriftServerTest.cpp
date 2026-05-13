@@ -3514,8 +3514,11 @@ static std::shared_ptr<quic::QuicClientTransport> makeQuicClient(
     folly::readFile(find_resource(folly::test::kTestKey).c_str(), keyData);
     auto certMgr = std::make_shared<CertManager>();
     if (!certData.empty() && !keyData.empty()) {
-      auto cert = fizz::openssl::CertUtils::makeSelfCert(
-          std::move(certData), std::move(keyData));
+      std::unique_ptr<fizz::SelfCert> cert;
+      FIZZ_THROW_ON_ERROR(
+          fizz::openssl::CertUtils::makeSelfCert(
+              cert, err, std::move(certData), std::move(keyData)),
+          err);
       certMgr->addCert(std::move(cert));
     }
     ctx->setClientCertManager(std::move(certMgr));

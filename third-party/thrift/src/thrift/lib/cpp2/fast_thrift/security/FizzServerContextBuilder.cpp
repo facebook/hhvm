@@ -65,21 +65,23 @@ BuiltFizzServerContext buildFizzServerContext(
   std::string keyData =
       hasPaths ? readFile(certConfig.keyPath) : certConfig.keyPem;
 
-  std::unique_ptr<fizz::SelfCert> selfCertOwned;
+  std::unique_ptr<fizz::SelfCert> selfCert;
   fizz::Error err;
-  fizz::Status status = certConfig.keyPassword.empty()
-      ? fizz::openssl::CertUtils::makeSelfCert(
-            selfCertOwned, err, std::move(certData), std::move(keyData))
-      : fizz::openssl::CertUtils::makeSelfCert(
-            selfCertOwned,
+  if (certConfig.keyPassword.empty()) {
+    FIZZ_THROW_ON_ERROR(
+        fizz::openssl::CertUtils::makeSelfCert(
+            selfCert, err, std::move(certData), std::move(keyData)),
+        err);
+  } else {
+    FIZZ_THROW_ON_ERROR(
+        fizz::openssl::CertUtils::makeSelfCert(
+            selfCert,
             err,
             std::move(certData),
             std::move(keyData),
-            certConfig.keyPassword);
-  if (status == fizz::Status::Fail) {
-    err.throwException();
+            certConfig.keyPassword),
+        err);
   }
-  std::shared_ptr<fizz::SelfCert> selfCert = std::move(selfCertOwned);
 
   auto certManager = std::make_shared<fizz::server::DefaultCertManager>();
   certManager->addCertAndSetDefault(std::move(selfCert));

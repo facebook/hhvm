@@ -664,6 +664,16 @@ final class AsyncMysqlConnection {
    */
   <<__Native>>
   public function isSslCertValidationEnforced(): bool;
+
+  /**
+   * Retrieve the SSL/TLS version for a connection
+   *
+   * This information can be logged to have visibility on what was resolved during the TLS handshake.
+   *
+   * @return - The TLS version or an empty string
+   */
+  <<__Native>>
+  public function getSslVersion(): string;
 }
 
 /**

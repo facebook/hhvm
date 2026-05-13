@@ -1324,6 +1324,14 @@ static bool HHVM_METHOD(AsyncMysqlConnection, isSslCertValidationEnforced) {
   return context && context->isServerCertValidated;
 }
 
+static String HHVM_METHOD(AsyncMysqlConnection, getSslVersion) {
+  auto* data = Native::data<AsyncMysqlConnection>(this_);
+  if (data->m_conn) {
+    return data->m_conn->getTlsVersion();
+  }
+  return String();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlResult
 
@@ -2182,7 +2190,7 @@ static struct AsyncMysqlExtension final : Extension {
   // bump the version number and use a version guard in www:
   //   $ext = new ReflectionExtension("async_mysql");
   //   $version = (float) $ext->getVersion();
-  AsyncMysqlExtension() : Extension("async_mysql", "8.1", "mysql_gateway") {}
+  AsyncMysqlExtension() : Extension("async_mysql", "8.2", "mysql_gateway") {}
   void moduleRegisterNative() override {
     // expose the mysql flags
     HHVM_RC_INT_SAME(NOT_NULL_FLAG);
@@ -2270,6 +2278,7 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlConnection, getSslCertSan);
     HHVM_ME(AsyncMysqlConnection, getSslCertExtensions);
     HHVM_ME(AsyncMysqlConnection, isSslCertValidationEnforced);
+    HHVM_ME(AsyncMysqlConnection, getSslVersion);
 
     Native::registerNativeDataInfo<AsyncMysqlConnection>(
       Native::NDIFlags::NO_COPY);

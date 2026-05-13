@@ -43,11 +43,36 @@ ThriftClientChannel::ThriftClientChannel(
     folly::EventBase* evb, uint16_t protocolId)
     : evb_(evb), protocolId_(protocolId) {}
 
-ThriftClientChannel::~ThriftClientChannel() {}
+ThriftClientChannel::~ThriftClientChannel() {
+  resetPipeline();
+}
 
 void ThriftClientChannel::setPipeline(
     apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline) {
-  pipeline_ = std::move(pipeline);
+  DCHECK(pipeline);
+  if (pipeline_) {
+    XLOG(FATAL) << "must reset pipeline before setting a new one";
+  }
+  pipeline_ = pipeline;
+  pipelineGuard_ =
+      std::make_unique<folly::DelayedDestruction::DestructorGuard>(pipeline);
+}
+
+void ThriftClientChannel::resetPipeline() noexcept {
+  pipeline_ = nullptr;
+  pipelineGuard_.reset();
+}
+
+void ThriftClientChannel::onPipelineActive() noexcept {
+  state_ = State::Open;
+  lastError_ = {};
+}
+
+void ThriftClientChannel::onPipelineInactive() noexcept {
+  // Pipeline disconnect is the canonical "no longer accepting writes"
+  // edge. Whether we got here via a graceful close or a hard error, the
+  // state machine ends up Closed.
+  state_ = State::Closed;
 }
 
 void ThriftClientChannel::sendRequestInternal(
@@ -277,11 +302,6 @@ void ThriftClientChannel::onException(folly::exception_wrapper&& e) noexcept {
   }
 
   state_ = State::Closed;
-
-  // Close the pipeline. Pending streams will be failed.
-  if (pipeline_) {
-    pipeline_->close();
-  }
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

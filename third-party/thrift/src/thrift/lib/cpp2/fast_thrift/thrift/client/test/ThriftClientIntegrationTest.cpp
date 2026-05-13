@@ -158,6 +158,16 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
   void SetUp() override { allocator_.reset(); }
 
   void TearDown() override {
+    if (pipeline_) {
+      pipeline_->deactivate();
+      pipeline_->close();
+    }
+    if (transportAdapter_) {
+      transportAdapter_->resetPipeline();
+    }
+    if (channel_) {
+      channel_->resetPipeline();
+    }
     channel_.reset();
     pipeline_.reset();
     transportAdapter_.reset();
@@ -1223,6 +1233,19 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
   void SetUp() override { allocator_.reset(); }
 
   void TearDown() override {
+    // Fire handlerRemoved on every handler while everything is still alive
+    // (close() walks the chain in reverse and marks the pipeline closed so
+    // the eventual destroy() skips the implicit handlerRemoved fan-out).
+    // Then release every guard the bridge / appAdapter holds so the
+    // pipeline storage can actually be freed when pipeline_.reset() runs.
+    if (pipeline_) {
+      pipeline_->deactivate();
+      pipeline_->close();
+    }
+    if (transportAdapter_) {
+      transportAdapter_->resetPipeline();
+    }
+    client_.adapter().resetPipeline();
     pipeline_.reset();
     transportAdapter_.reset();
     testTransport_ = nullptr;

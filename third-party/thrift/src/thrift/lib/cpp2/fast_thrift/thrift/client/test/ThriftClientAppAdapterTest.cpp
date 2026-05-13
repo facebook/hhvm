@@ -113,11 +113,19 @@ class ThriftClientAppAdapterTest : public ::testing::Test {
         transportHandler;
     PipelineImpl::Ptr pipeline;
     MockHandler* handler{nullptr};
+    ThriftClientAppAdapter* adapter{nullptr};
 
     ~BuiltPipeline() {
       if (transportHandler) {
         transportHandler->close(folly::exception_wrapper{});
         transportHandler->resetPipeline();
+      }
+      if (pipeline) {
+        pipeline->deactivate();
+        pipeline->close();
+      }
+      if (adapter) {
+        adapter->resetPipeline();
       }
     }
   };
@@ -152,7 +160,8 @@ class ThriftClientAppAdapterTest : public ::testing::Test {
 
     adapter->setPipeline(pipeline.get());
 
-    return {std::move(transportHandler), std::move(pipeline), rawHandler};
+    return {
+        std::move(transportHandler), std::move(pipeline), rawHandler, adapter};
   }
 
   std::unique_ptr<folly::ScopedEventBaseThread> evbThread_;

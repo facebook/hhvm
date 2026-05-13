@@ -440,8 +440,16 @@ class FastThriftE2ETest : public ::testing::Test {
 
   void destroyClientOnEvb(
       std::unique_ptr<apache::thrift::Client<TestService>>& client) {
-    clientThread_->getEventBase()->runInEventBaseThreadAndWait(
-        [&] { client.reset(); });
+    clientThread_->getEventBase()->runInEventBaseThreadAndWait([&] {
+      if (clientPipeline_) {
+        clientPipeline_->deactivate();
+        clientPipeline_->close();
+      }
+      if (clientTransportAdapter_) {
+        clientTransportAdapter_->resetPipeline();
+      }
+      client.reset();
+    });
   }
 
   std::shared_ptr<TestHandler> handler_;
@@ -801,6 +809,19 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
     return std::make_unique<FastClientType>(std::move(appAdapter));
   }
 
+  void destroyFastClientOnEvb(std::unique_ptr<FastClientType>& client) {
+    clientThread_->getEventBase()->runInEventBaseThreadAndWait([&] {
+      if (clientPipeline_) {
+        clientPipeline_->deactivate();
+        clientPipeline_->close();
+      }
+      if (clientTransportAdapter_) {
+        clientTransportAdapter_->resetPipeline();
+      }
+      client.reset();
+    });
+  }
+
   std::shared_ptr<TestHandler> handler_;
   std::shared_ptr<folly::IOThreadPoolExecutor> executor_;
   rocket::server::connection::ConnectionManager::Ptr connectionManager_;
@@ -839,6 +860,8 @@ TEST_F(FastThriftFastClientE2ETest, Ping) {
             }
           }));
   std::move(cbFuture).get();
+
+  destroyFastClientOnEvb(client);
 }
 
 TEST_F(FastThriftFastClientE2ETest, Echo) {
@@ -872,6 +895,8 @@ TEST_F(FastThriftFastClientE2ETest, Echo) {
           }),
       "hello callback");
   EXPECT_EQ(std::move(cbFuture).get(), "hello callback");
+
+  destroyFastClientOnEvb(client);
 }
 
 TEST_F(FastThriftFastClientE2ETest, Add) {
@@ -902,6 +927,8 @@ TEST_F(FastThriftFastClientE2ETest, Add) {
       3,
       7);
   EXPECT_EQ(std::move(cbFuture).get(), 10);
+
+  destroyFastClientOnEvb(client);
 }
 
 TEST_F(FastThriftFastClientE2ETest, SendResponse) {
@@ -941,6 +968,8 @@ TEST_F(FastThriftFastClientE2ETest, SendResponse) {
   auto cbResult = std::move(cbFuture).get();
   EXPECT_EQ(cbResult.size(), kResponseSize);
   EXPECT_EQ(cbResult, std::string(kResponseSize, 'x'));
+
+  destroyFastClientOnEvb(client);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift::test

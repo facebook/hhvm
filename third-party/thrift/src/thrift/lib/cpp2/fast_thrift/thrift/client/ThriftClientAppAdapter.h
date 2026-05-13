@@ -22,6 +22,7 @@
 #include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/DelayedDestruction.h>
+#include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
@@ -66,7 +67,22 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
 
   void setPipeline(
       apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline) {
+    DCHECK(pipeline);
+    if (pipeline_) {
+      XLOG(FATAL) << "must reset pipeline before setting a new one";
+    }
     pipeline_ = pipeline;
+    pipelineGuard_ =
+        std::make_unique<folly::DelayedDestruction::DestructorGuard>(pipeline);
+  }
+
+  /**
+   * Release this adapter's hold on the pipeline. Owner must ensure no
+   * cross-thread submitWrite callbacks are pending before calling.
+   */
+  void resetPipeline() noexcept {
+    pipeline_ = nullptr;
+    pipelineGuard_.reset();
   }
 
   uint16_t getProtocolId() const noexcept { return protocolId_; }
@@ -90,9 +106,12 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
 
   // === TailEndpointHandler lifecycle ===
   void handlerAdded() noexcept {}
-  void handlerRemoved() noexcept {}
-  void onPipelineActive() noexcept {}
-  void onPipelineInactive() noexcept {}
+  void handlerRemoved() noexcept {
+    DCHECK(state_ == State::Closed);
+    state_ = State::Closed;
+  }
+  void onPipelineActive() noexcept;
+  void onPipelineInactive() noexcept;
   void onWriteReady() noexcept {}
 
   // === TailEndpointHandler interface ===
@@ -104,7 +123,7 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
   void onException(folly::exception_wrapper&& e) noexcept;
 
  protected:
-  ~ThriftClientAppAdapter() override = default;
+  ~ThriftClientAppAdapter() override { resetPipeline(); }
 
  private:
   enum class State { Open, Closing, Closed };
@@ -114,6 +133,7 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
 
   apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline_{
       nullptr};
+  std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
   uint16_t protocolId_{0};
   State state_{State::Open};
   folly::exception_wrapper lastError_;

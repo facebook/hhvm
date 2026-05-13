@@ -18,6 +18,7 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/io/async/AsyncTransport.h>
+#include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
@@ -60,9 +61,18 @@ class ThriftClientChannel : public apache::thrift::RequestChannel {
       folly::EventBase* evb,
       uint16_t protocolId = apache::thrift::protocol::T_COMPACT_PROTOCOL);
 
-  // Set the pipeline - must be called before sending requests
+  // Set the pipeline - must be called before sending requests. The
+  // channel installs a DestructorGuard on the pipeline so the pipeline
+  // cannot be destroyed while it is attached. Caller releases this hold
+  // via resetPipeline() (or destroys the channel, which calls
+  // resetPipeline implicitly).
   void setPipeline(
       apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline);
+
+  // Release the channel's hold on the pipeline. After this returns the
+  // pipeline may be destroyed (modulo other guards) and sendRequest must
+  // not be called.
+  void resetPipeline() noexcept;
 
   using RequestChannel::sendRequestNoResponse;
   using RequestChannel::sendRequestResponse;
@@ -126,9 +136,12 @@ class ThriftClientChannel : public apache::thrift::RequestChannel {
 
   // === TailEndpointHandler lifecycle ===
   void handlerAdded() noexcept {}
-  void handlerRemoved() noexcept {}
-  void onPipelineActive() noexcept {}
-  void onPipelineInactive() noexcept {}
+  void handlerRemoved() noexcept {
+    DCHECK(state_ == State::Closed);
+    state_ = State::Closed;
+  }
+  void onPipelineActive() noexcept;
+  void onPipelineInactive() noexcept;
   void onWriteReady() noexcept {}
 
   // === TailEndpointHandler interface ===
@@ -177,6 +190,7 @@ class ThriftClientChannel : public apache::thrift::RequestChannel {
   folly::EventBase* evb_;
   apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline_{
       nullptr};
+  std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
   uint16_t protocolId_;
   State state_{State::Open};
   folly::exception_wrapper lastError_;

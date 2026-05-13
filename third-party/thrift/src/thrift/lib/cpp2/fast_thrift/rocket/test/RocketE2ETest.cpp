@@ -100,6 +100,14 @@ class RocketE2ETest : public ::testing::Test {
         serverTransport_->close(folly::exception_wrapper{});
         serverTransport_->resetPipeline();
       }
+      if (clientPipeline_) {
+        clientPipeline_->deactivate();
+        clientPipeline_->close();
+      }
+      if (serverPipeline_) {
+        serverPipeline_->deactivate();
+        serverPipeline_->close();
+      }
       if (clientAppAdapter_) {
         clientAppAdapter_->resetPipeline();
       }

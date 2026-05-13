@@ -100,6 +100,18 @@ ThriftClientAppAdapter::onRead(
   return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
 }
 
+void ThriftClientAppAdapter::onPipelineActive() noexcept {
+  state_ = State::Open;
+  lastError_ = {};
+}
+
+void ThriftClientAppAdapter::onPipelineInactive() noexcept {
+  // Pipeline disconnect is the canonical "no longer accepting writes"
+  // edge. Whether we got here via a graceful close or a hard error, the
+  // state machine ends up Closed.
+  state_ = State::Closed;
+}
+
 void ThriftClientAppAdapter::onException(
     folly::exception_wrapper&& e) noexcept {
   XLOG(ERR) << "Pipeline exception: " << e.what();
@@ -115,15 +127,15 @@ void ThriftClientAppAdapter::onException(
       tex->getType() ==
           apache::thrift::transport::TTransportException::NOT_OPEN) {
     // CONNECTION_CLOSE: graceful drain — reject new writes, let inflight
-    // responses complete
+    // responses complete. The eventual onPipelineInactive from the
+    // transport side will drive us to Closed.
     state_ = State::Closing;
     return;
   }
 
+  // Hard error: stop accepting new writes immediately. Transport will
+  // drive the structural teardown via onPipelineInactive.
   state_ = State::Closed;
-  if (pipeline_) {
-    pipeline_->close();
-  }
 }
 
 void ThriftClientAppAdapter::submitWrite(ThriftRequestMessage msg) noexcept {

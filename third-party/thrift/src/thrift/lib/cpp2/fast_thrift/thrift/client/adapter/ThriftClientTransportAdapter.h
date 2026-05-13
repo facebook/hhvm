@@ -19,6 +19,8 @@
 #include <memory>
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/io/async/DelayedDestruction.h>
+#include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
@@ -75,11 +77,21 @@ class ThriftClientTransportAdapter {
         [this](folly::exception_wrapper&& e) noexcept {
           onTransportError(std::move(e));
         });
+    // Subscribe to the connection's domain lifecycle. The bridge mirrors
+    // those events into the thrift pipeline's lifecycle.
+    connection_->setLifecycleHandlers(
+        [this]() noexcept { onConnect(); },
+        [this]() noexcept { onDisconnect(); });
   }
 
   ~ThriftClientTransportAdapter() {
+    // Defensive: if the bridge is destroyed without going through the
+    // thrift pipeline's handlerRemoved (which would have called destroy
+    // already), tear the rocket connection down explicitly. destroy() is
+    // idempotent so the normal path stays a no-op.
+    resetPipeline();
     if (connection_) {
-      connection_->close(folly::exception_wrapper{});
+      connection_->destroy();
     }
   }
 
@@ -91,19 +103,36 @@ class ThriftClientTransportAdapter {
       delete;
 
   void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept {
+    DCHECK(pipeline);
+    if (pipeline_) {
+      XLOG(FATAL) << "must reset pipeline before setting a new one";
+    }
     pipeline_ = pipeline;
+    pipelineGuard_ =
+        std::make_unique<folly::DelayedDestruction::DestructorGuard>(pipeline);
   }
 
-  // === Transport-facing interface (inbound from rocket pipeline) ===
+  /**
+   * Release this bridge's hold on the thrift pipeline. Called from
+   * handlerRemoved on the normal teardown path; also from the dtor as a
+   * defensive fallback.
+   */
+  void resetPipeline() noexcept {
+    pipeline_ = nullptr;
+    pipelineGuard_.reset();
+  }
+
+  // === Transport-facing interface (inbound from the connection) ===
 
   /**
-   * Called when the rocket pipeline delivers a response.
+   * Called when the connection delivers a response.
    *
-   * Converts RocketResponseMessage to ThriftResponseMessage and pushes it
-   * into the thrift pipeline via fireRead. Per-request rocket errors are
-   * translated into a `ThriftClientResponseError` payload alternative — they
-   * travel inbound through the same fireRead path, so the tail can fail
-   * just the affected pending callback without tearing down the channel.
+   * Converts the rocket response message to a thrift response message and
+   * pushes it into the thrift pipeline via fireRead. Per-request errors
+   * are translated into a `ThriftClientResponseError` payload alternative —
+   * they travel inbound through the same fireRead path, so the tail can
+   * fail just the affected pending callback without tearing down the
+   * channel.
    */
   channel_pipeline::Result onTransportResponse(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
@@ -146,10 +175,9 @@ class ThriftClientTransportAdapter {
   }
 
   /**
-   * Called when the rocket pipeline delivers an error. Propagates the
-   * error up the thrift pipeline. The connection is torn down later via
-   * the bridge dtor (or explicit caller close); doing it synchronously
-   * here would re-enter the pipeline mid-fireRead.
+   * Called when the connection delivers an error. Propagates the error
+   * up the thrift pipeline. The disconnect happens via the lifecycle
+   * path (onDisconnect callback / onPipelineInactive), not from here.
    */
   void onTransportError(folly::exception_wrapper&& ew) noexcept {
     if (FOLLY_UNLIKELY(!pipeline_)) {
@@ -161,17 +189,15 @@ class ThriftClientTransportAdapter {
   // === HeadEndpointHandler interface ===
 
   /**
-   * Called when an outbound write reaches the tail of the thrift pipeline.
-   *
-   * Converts ThriftRequestMessage to RocketRequestMessage and writes it
-   * into the rocket pipeline.
+   * Called when an outbound write reaches the head of the thrift
+   * pipeline. Converts the thrift request message to a rocket request
+   * message and submits it to the connection.
    *
    * Today only the request-response RPC pattern is wired through the
    * client; `ThriftRequestMessage::payload` is a single-alternative
    * variant of `ThriftRequestResponsePayload`. As other RpcKinds are
    * added to the variant, this method gains dispatch over the held
-   * alternative — by then the rocket layer's variant is also expected to
-   * widen so that `payload.toRocketFrame()` can plug in directly.
+   * alternative.
    */
   channel_pipeline::Result onWrite(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
@@ -206,13 +232,64 @@ class ThriftClientTransportAdapter {
   void onReadReady() noexcept {}
 
   void handlerAdded() noexcept {}
-  void handlerRemoved() noexcept {}
-  void onPipelineActive() noexcept {}
-  void onPipelineInactive() noexcept {}
+
+  // Thrift pipeline destroyed → tear down the rocket connection.
+  void handlerRemoved() noexcept {
+    DCHECK(!connected_);
+    // Defensive: removed without prior deactivate. destroy() runs
+    // disconnect first, so the rocket side still tears down cleanly.
+    connected_ = false;
+    if (connection_) {
+      connection_->destroy();
+    }
+  }
+
+  // Thrift pipeline went active. Just stamp our local view; the
+  // connection drives activation via its onConnect callback.
+  void onPipelineActive() noexcept { connected_ = true; }
+
+  // Thrift pipeline went inactive — disconnect the connection. The
+  // connection's onDisconnect callback re-enters us; the connected_
+  // flag absorbs the loop.
+  void onPipelineInactive() noexcept {
+    if (!connected_) {
+      return;
+    }
+    connected_ = false;
+    if (connection_) {
+      connection_->disconnect();
+    }
+  }
 
  private:
+  // Connection came up — activate the thrift pipeline so handlers can
+  // react. Idempotent in connected_; reactivate after disconnect works.
+  void onConnect() noexcept {
+    if (connected_) {
+      return;
+    }
+    connected_ = true;
+    if (pipeline_) {
+      pipeline_->activate();
+    }
+  }
+
+  // Connection went down — deactivate the thrift pipeline so handlers
+  // drain in-flight state. Idempotent in connected_.
+  void onDisconnect() noexcept {
+    if (!connected_) {
+      return;
+    }
+    connected_ = false;
+    if (pipeline_) {
+      pipeline_->deactivate();
+    }
+  }
+
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
+  std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
   std::unique_ptr<rocket::client::RocketClientConnection> connection_;
+  bool connected_{false};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift::client

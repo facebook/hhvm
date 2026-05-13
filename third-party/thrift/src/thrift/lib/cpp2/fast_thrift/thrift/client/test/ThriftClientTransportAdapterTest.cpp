@@ -191,6 +191,11 @@ TEST(ThriftClientTransportAdapterTest, InboundResponseConvertedToThrift) {
       [](channel_pipeline::TypeErasedBox&&) { return Result::Success; });
   TestAllocator rocketAllocator;
 
+  // Declared before `adapter` so they outlive the bridge's deferred thrift
+  // pipeline destruction (the bridge holds a guard on the thrift pipeline).
+  MockTailHandler thriftTail;
+  TestAllocator thriftAllocator;
+
   auto rocketPipeline = PipelineBuilder<
                             MockHeadHandler,
                             rocket::client::RocketClientAppAdapter,
@@ -205,9 +210,6 @@ TEST(ThriftClientTransportAdapterTest, InboundResponseConvertedToThrift) {
   connection->pipeline = std::move(rocketPipeline);
 
   ThriftClientTransportAdapter adapter(std::move(connection));
-
-  MockTailHandler thriftTail;
-  TestAllocator thriftAllocator;
 
   auto thriftPipeline = PipelineBuilder<
                             ThriftClientTransportAdapter,
@@ -241,6 +243,11 @@ TEST(
       [](channel_pipeline::TypeErasedBox&&) { return Result::Success; });
   TestAllocator rocketAllocator;
 
+  // Declared before `adapter` so they outlive the bridge's deferred thrift
+  // pipeline destruction (the bridge holds a guard on the thrift pipeline).
+  MockTailHandler thriftTail;
+  TestAllocator thriftAllocator;
+
   auto rocketPipeline = PipelineBuilder<
                             MockHeadHandler,
                             rocket::client::RocketClientAppAdapter,
@@ -255,9 +262,6 @@ TEST(
   connection->pipeline = std::move(rocketPipeline);
 
   ThriftClientTransportAdapter adapter(std::move(connection));
-
-  MockTailHandler thriftTail;
-  TestAllocator thriftAllocator;
 
   auto thriftPipeline = PipelineBuilder<
                             ThriftClientTransportAdapter,
@@ -295,6 +299,11 @@ TEST(ThriftClientTransportAdapterTest, OnTransportErrorPropagatesException) {
       [](channel_pipeline::TypeErasedBox&&) { return Result::Success; });
   TestAllocator rocketAllocator;
 
+  // Declared before `adapter` so they outlive the bridge's deferred thrift
+  // pipeline destruction (the bridge holds a guard on the thrift pipeline).
+  MockTailHandler thriftTail;
+  TestAllocator thriftAllocator;
+
   auto rocketPipeline = PipelineBuilder<
                             MockHeadHandler,
                             rocket::client::RocketClientAppAdapter,
@@ -309,9 +318,6 @@ TEST(ThriftClientTransportAdapterTest, OnTransportErrorPropagatesException) {
   connection->pipeline = std::move(rocketPipeline);
 
   ThriftClientTransportAdapter adapter(std::move(connection));
-
-  MockTailHandler thriftTail;
-  TestAllocator thriftAllocator;
 
   auto thriftPipeline = PipelineBuilder<
                             ThriftClientTransportAdapter,
@@ -329,6 +335,139 @@ TEST(ThriftClientTransportAdapterTest, OnTransportErrorPropagatesException) {
       folly::make_exception_wrapper<std::runtime_error>("connection lost"));
 
   EXPECT_EQ(thriftTail.exceptionCount(), 1);
+}
+
+// =============================================================================
+// Cross-pipeline lifecycle wiring
+// =============================================================================
+
+namespace {
+
+// Counts lifecycle callbacks fired on the rocket pipeline so we can
+// observe how the bridge propagates between the two pipelines.
+struct RocketLifecycleCounter {
+  int active{0};
+  int inactive{0};
+};
+
+struct AdapterWithBothPipelines {
+  folly::EventBase evb;
+  MockHeadHandler rocketHead;
+  TestAllocator rocketAllocator;
+  TestAllocator thriftAllocator;
+  // thriftTail must be declared BEFORE bridge: the bridge holds a guard
+  // on the thrift pipeline, so pipeline destruction is deferred to bridge
+  // destruction. The tail handler must outlive that deferred destruction.
+  MockTailHandler thriftTail;
+  // Non-owning pointers retained for test-side reach-through into the
+  // rocket pipeline (otherwise hidden inside the bridge's connection_).
+  rocket::client::RocketClientAppAdapter* rocketAppAdapter{nullptr};
+  PipelineImpl* rocketPipelineRaw{nullptr};
+  std::unique_ptr<ThriftClientTransportAdapter> bridge;
+  PipelineImpl::Ptr thriftPipeline;
+
+  AdapterWithBothPipelines() {
+    auto connection =
+        std::make_unique<rocket::client::RocketClientConnection>();
+    rocketAppAdapter = connection->appAdapter.get();
+
+    rocketHead.setOnWriteCallback(
+        [](channel_pipeline::TypeErasedBox&&) { return Result::Success; });
+
+    auto rocketPipeline = PipelineBuilder<
+                              MockHeadHandler,
+                              rocket::client::RocketClientAppAdapter,
+                              TestAllocator>()
+                              .setEventBase(&evb)
+                              .setHead(&rocketHead)
+                              .setTail(rocketAppAdapter)
+                              .setAllocator(&rocketAllocator)
+                              .build();
+
+    rocketAppAdapter->setPipeline(rocketPipeline.get());
+    rocketPipelineRaw = rocketPipeline.get();
+    connection->pipeline = std::move(rocketPipeline);
+
+    bridge =
+        std::make_unique<ThriftClientTransportAdapter>(std::move(connection));
+
+    thriftPipeline = PipelineBuilder<
+                         ThriftClientTransportAdapter,
+                         MockTailHandler,
+                         TestAllocator>()
+                         .setEventBase(&evb)
+                         .setHead(bridge.get())
+                         .setTail(&thriftTail)
+                         .setAllocator(&thriftAllocator)
+                         .build();
+
+    bridge->setPipeline(thriftPipeline.get());
+  }
+
+  ~AdapterWithBothPipelines() {
+    // If the test already reset thriftPipeline, the bridge's handlerRemoved
+    // will have run connection->destroy(), which already destroyed the
+    // rocket pipeline. Touching rocketPipelineRaw would be a UAF.
+    if (!thriftPipeline) {
+      return;
+    }
+    rocketPipelineRaw->deactivate();
+    thriftPipeline->deactivate();
+  }
+};
+
+} // namespace
+
+TEST(
+    ThriftClientTransportAdapterTest,
+    ThriftPipelineDeactivateDisconnectsRocketConnection) {
+  AdapterWithBothPipelines fixture;
+
+  // Thrift side initiates: deactivate the thrift pipeline. Bridge head's
+  // onPipelineInactive must call connection_->disconnect(), which in turn
+  // deactivates the rocket pipeline.
+  EXPECT_EQ(fixture.thriftTail.pipelineInactiveCount(), 0);
+
+  fixture.thriftPipeline->deactivate();
+
+  // Tail handler of thrift pipeline saw inactive exactly once (proves the
+  // deactivate fan-out ran). The rocket-side tail's onPipelineInactive
+  // would have tried to re-deactivate the thrift pipeline, but the
+  // bridge's inactivated_ flag absorbs the loop.
+  EXPECT_EQ(fixture.thriftTail.pipelineInactiveCount(), 1);
+}
+
+TEST(ThriftClientTransportAdapterTest, HandlerRemovedDestroysRocketConnection) {
+  AdapterWithBothPipelines fixture;
+
+  // Closing the thrift pipeline runs handlerRemoved on every handler.
+  // The bridge's handlerRemoved must destroy the rocket connection
+  // (which closes the rocket pipeline + drops the transport handler).
+  // Validate that close completes without crashing.
+  fixture.thriftPipeline->close();
+  fixture.thriftPipeline.reset();
+  // Reaching here without crash is the test — the bridge tore the rocket
+  // side down cleanly.
+}
+
+TEST(ThriftClientTransportAdapterTest, RocketActivePropagatesToThriftPipeline) {
+  AdapterWithBothPipelines fixture;
+
+  EXPECT_EQ(fixture.thriftTail.pipelineActiveCount(), 0);
+
+  // Activate the rocket pipeline (TransportHandler::onConnect normally
+  // does this when the socket connects). The bridge's onActive_ lambda
+  // must propagate the activation to the thrift pipeline.
+  fixture.rocketPipelineRaw->activate();
+
+  // Thrift tail saw onPipelineActive exactly once (proves bridge's
+  // propagateActive ran and called thrift pipeline activate).
+  EXPECT_EQ(fixture.thriftTail.pipelineActiveCount(), 1);
+
+  // Re-activating rocket should NOT re-fire the thrift active path
+  // because of the bridge's activated_ guard.
+  fixture.rocketPipelineRaw->activate();
+  EXPECT_EQ(fixture.thriftTail.pipelineActiveCount(), 1);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift::client::test

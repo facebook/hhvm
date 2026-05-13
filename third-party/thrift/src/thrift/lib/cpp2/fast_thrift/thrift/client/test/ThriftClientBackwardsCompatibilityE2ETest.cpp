@@ -226,6 +226,20 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
     clientThread_.reset();
   }
 
+  template <typename ClientT>
+  void destroyClientOnEvb(std::unique_ptr<ClientT>& client) {
+    clientThread_->getEventBase()->runInEventBaseThreadAndWait([&] {
+      if (clientPipeline_) {
+        clientPipeline_->deactivate();
+        clientPipeline_->close();
+      }
+      if (clientTransportAdapter_) {
+        clientTransportAdapter_->resetPipeline();
+      }
+      client.reset();
+    });
+  }
+
   /**
    * Create a fast_thrift client channel connected to the test server.
    *
@@ -384,8 +398,7 @@ TEST_F(ThriftClientBackwardsCompatibilityE2ETest, Ping) {
           clientThread_->getEventBase(), client->co_ping()));
 
   // Destroy the client in the EventBase thread
-  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
-      [&] { client.reset(); });
+  destroyClientOnEvb(client);
 }
 
 TEST_F(ThriftClientBackwardsCompatibilityE2ETest, EchoRequestResponse) {
@@ -401,8 +414,7 @@ TEST_F(ThriftClientBackwardsCompatibilityE2ETest, EchoRequestResponse) {
   EXPECT_EQ(result, "hello world");
 
   // Destroy the client in the EventBase thread
-  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
-      [&] { client.reset(); });
+  destroyClientOnEvb(client);
 }
 
 // =============================================================================
@@ -428,8 +440,7 @@ TEST_F(ThriftClientBackwardsCompatibilityE2ETest, EchoWithXXH3_64Checksum) {
           client->co_echo(options, "xxh3 payload")));
   EXPECT_EQ(result, "xxh3 payload");
 
-  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
-      [&] { client.reset(); });
+  destroyClientOnEvb(client);
 }
 
 TEST_F(ThriftClientBackwardsCompatibilityE2ETest, AddNumbers) {
@@ -445,8 +456,7 @@ TEST_F(ThriftClientBackwardsCompatibilityE2ETest, AddNumbers) {
   EXPECT_EQ(result, 42);
 
   // Destroy the client in the EventBase thread
-  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
-      [&] { client.reset(); });
+  destroyClientOnEvb(client);
 }
 
 TEST_F(ThriftClientBackwardsCompatibilityE2ETest, MultipleRequests) {
@@ -468,8 +478,7 @@ TEST_F(ThriftClientBackwardsCompatibilityE2ETest, MultipleRequests) {
   EXPECT_EQ(r3, "third");
 
   // Destroy the client in the EventBase thread
-  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
-      [&] { client.reset(); });
+  destroyClientOnEvb(client);
 }
 
 TEST_F(ThriftClientBackwardsCompatibilityE2ETest, LargeResponse) {
@@ -489,8 +498,7 @@ TEST_F(ThriftClientBackwardsCompatibilityE2ETest, LargeResponse) {
   EXPECT_EQ(result, std::string(kResponseSize, 'x'));
 
   // Destroy the client in the EventBase thread
-  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
-      [&] { client.reset(); });
+  destroyClientOnEvb(client);
 }
 
 // =============================================================================
@@ -518,8 +526,7 @@ TEST_F(
   }
 
   // Destroy the client in the EventBase thread
-  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
-      [&] { client.reset(); });
+  destroyClientOnEvb(client);
 }
 
 TEST_F(
@@ -548,8 +555,7 @@ TEST_F(
       std::exception);
 
   // Destroy the client in the EventBase thread
-  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
-      [&] { client.reset(); });
+  destroyClientOnEvb(client);
 }
 
 TEST_F(ThriftClientBackwardsCompatibilityE2ETest, RequestAfterThrowStillWorks) {
@@ -574,8 +580,7 @@ TEST_F(ThriftClientBackwardsCompatibilityE2ETest, RequestAfterThrowStillWorks) {
   EXPECT_EQ(result, "still alive");
 
   // Destroy the client in the EventBase thread
-  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
-      [&] { client.reset(); });
+  destroyClientOnEvb(client);
 }
 
 TEST_F(
@@ -617,8 +622,7 @@ TEST_F(
   }
 
   // Destroy the client in the EventBase thread
-  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
-      [&] { client.reset(); });
+  destroyClientOnEvb(client);
 }
 
 TEST_F(
@@ -660,8 +664,7 @@ TEST_F(
   EXPECT_EQ(result, "recovered");
 
   // Destroy the client in the EventBase thread
-  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
-      [&] { client.reset(); });
+  destroyClientOnEvb(client);
 }
 
 // =============================================================================
@@ -684,6 +687,20 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
     });
     server_.reset();
     clientThread_.reset();
+  }
+
+  template <typename ClientT>
+  void destroyClientOnEvb(std::unique_ptr<ClientT>& client) {
+    clientThread_->getEventBase()->runInEventBaseThreadAndWait([&] {
+      if (thriftPipeline_) {
+        thriftPipeline_->deactivate();
+        thriftPipeline_->close();
+      }
+      if (transportAdapter_) {
+        transportAdapter_->resetPipeline();
+      }
+      client.reset();
+    });
   }
 
   template <typename Service = BackwardsCompatibilityTestFastService>
@@ -824,6 +841,8 @@ TEST_F(BackwardsCompatibilityFastClientE2ETest, Ping) {
   folly::coro::blockingWait(
       folly::coro::co_withExecutor(
           clientThread_->getEventBase(), client->co_ping()));
+
+  destroyClientOnEvb(client);
 }
 
 TEST_F(BackwardsCompatibilityFastClientE2ETest, EchoRequestResponse) {
@@ -833,6 +852,8 @@ TEST_F(BackwardsCompatibilityFastClientE2ETest, EchoRequestResponse) {
       folly::coro::co_withExecutor(
           clientThread_->getEventBase(), client->co_echo("hello world")));
   EXPECT_EQ(result, "hello world");
+
+  destroyClientOnEvb(client);
 }
 
 TEST_F(BackwardsCompatibilityFastClientE2ETest, AddNumbers) {
@@ -842,6 +863,8 @@ TEST_F(BackwardsCompatibilityFastClientE2ETest, AddNumbers) {
       folly::coro::co_withExecutor(
           clientThread_->getEventBase(), client->co_add(17, 25)));
   EXPECT_EQ(result, 42);
+
+  destroyClientOnEvb(client);
 }
 
 TEST_F(BackwardsCompatibilityFastClientE2ETest, MultipleRequests) {
@@ -857,6 +880,8 @@ TEST_F(BackwardsCompatibilityFastClientE2ETest, MultipleRequests) {
   EXPECT_EQ(r1, "first");
   EXPECT_EQ(r2, "second");
   EXPECT_EQ(r3, "third");
+
+  destroyClientOnEvb(client);
 }
 
 TEST_F(BackwardsCompatibilityFastClientE2ETest, LargeResponse) {
@@ -870,6 +895,8 @@ TEST_F(BackwardsCompatibilityFastClientE2ETest, LargeResponse) {
           client->co_sendResponse(kResponseSize)));
   EXPECT_EQ(result.size(), kResponseSize);
   EXPECT_EQ(result, std::string(kResponseSize, 'x'));
+
+  destroyClientOnEvb(client);
 }
 
 // =============================================================================
@@ -891,6 +918,8 @@ TEST_F(
     EXPECT_NE(
         std::string(ex.what()).find("fast client error"), std::string::npos);
   }
+
+  destroyClientOnEvb(client);
 }
 
 TEST_F(BackwardsCompatibilityFastClientE2ETest, RequestAfterThrowStillWorks) {
@@ -908,6 +937,8 @@ TEST_F(BackwardsCompatibilityFastClientE2ETest, RequestAfterThrowStillWorks) {
       folly::coro::co_withExecutor(
           clientThread_->getEventBase(), client->co_echo("still alive")));
   EXPECT_EQ(result, "still alive");
+
+  destroyClientOnEvb(client);
 }
 
 TEST_F(
@@ -940,6 +971,8 @@ TEST_F(
         << "Overload rejection should map to LOADSHEDDING, got: "
         << ex.getType();
   }
+
+  destroyClientOnEvb(client);
 }
 
 TEST_F(
@@ -974,6 +1007,8 @@ TEST_F(
       folly::coro::co_withExecutor(
           clientThread_->getEventBase(), client->co_echo("recovered")));
   EXPECT_EQ(result, "recovered");
+
+  destroyClientOnEvb(client);
 }
 
 // =============================================================================
@@ -1003,6 +1038,8 @@ TEST_F(
       folly::coro::blockingWait(
           folly::coro::co_withExecutor(
               clientThread_->getEventBase(), client->co_ping())));
+
+  destroyClientOnEvb(client);
 }
 
 TEST_F(
@@ -1013,6 +1050,8 @@ TEST_F(
       folly::coro::co_withExecutor(
           clientThread_->getEventBase(), client->co_echo("inherited")));
   EXPECT_EQ(result, "inherited");
+
+  destroyClientOnEvb(client);
 }
 
 TEST_F(BackwardsCompatibilityFastChildClientE2ETest, ChildOwnMethod) {
@@ -1022,6 +1061,8 @@ TEST_F(BackwardsCompatibilityFastChildClientE2ETest, ChildOwnMethod) {
       folly::coro::co_withExecutor(
           clientThread_->getEventBase(), client->co_childEcho("hi")));
   EXPECT_EQ(result, "child:hi");
+
+  destroyClientOnEvb(client);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift::client::test

@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 
+#include <folly/ScopeGuard.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBase.h>
@@ -185,6 +186,17 @@ class ThriftClientChannelTest : public ::testing::Test {
     return response;
   }
 
+  void teardownChannelPipeline(
+      ThriftClientChannel::UniquePtr& channel, PipelineImpl::Ptr& pipeline) {
+    if (pipeline) {
+      pipeline->deactivate();
+      pipeline->close();
+    }
+    if (channel) {
+      channel->resetPipeline();
+    }
+  }
+
   folly::EventBase evb_;
   MockTransportHandler mockTransport_;
   TestAllocator allocator_;
@@ -256,6 +268,9 @@ TEST_F(ThriftClientChannelTest, OnMessageInvokesCallbackWithCorrectState) {
         return Result::Success;
       });
   channel->setPipeline(pipeline.get());
+  SCOPE_EXIT {
+    teardownChannelPipeline(channel, pipeline);
+  };
 
   auto [cb, state] = makeCallback();
 
@@ -295,6 +310,9 @@ TEST_F(ThriftClientChannelTest, OnMessageWithErrorInvokesErrorCallback) {
         return Result::Success;
       });
   channel->setPipeline(pipeline.get());
+  SCOPE_EXIT {
+    teardownChannelPipeline(channel, pipeline);
+  };
 
   auto [cb, state] = makeCallback();
 
@@ -341,6 +359,9 @@ TEST_F(ThriftClientChannelTest, MultiplePendingCallbacksRoutedCorrectly) {
         return Result::Success;
       });
   channel->setPipeline(pipeline.get());
+  SCOPE_EXIT {
+    teardownChannelPipeline(channel, pipeline);
+  };
 
   auto [cb1, state1] = makeCallback();
   auto [cb2, state2] = makeCallback();
@@ -429,6 +450,9 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineCallsHandler) {
         return Result::Success;
       });
   channel->setPipeline(pipeline.get());
+  SCOPE_EXIT {
+    teardownChannelPipeline(channel, pipeline);
+  };
 
   auto [cb, state] = makeCallback();
 
@@ -463,6 +487,9 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineErrorClosesChannel) {
       [](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
          TypeErasedBox&&) { return Result::Error; });
   channel->setPipeline(pipeline.get());
+  SCOPE_EXIT {
+    teardownChannelPipeline(channel, pipeline);
+  };
 
   auto [cb, state] = makeCallback();
 
@@ -511,6 +538,9 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineBackpressureProceeds) {
         return Result::Backpressure;
       });
   channel->setPipeline(pipeline.get());
+  SCOPE_EXIT {
+    teardownChannelPipeline(channel, pipeline);
+  };
 
   auto [cb, state] = makeCallback();
 
@@ -560,6 +590,9 @@ TEST_F(ThriftClientChannelTest, SendRequestPassesCorrectMessageContent) {
         return Result::Success;
       });
   channel->setPipeline(pipeline.get());
+  SCOPE_EXIT {
+    teardownChannelPipeline(channel, pipeline);
+  };
 
   auto [cb, state] = makeCallback();
 
@@ -599,6 +632,9 @@ TEST_F(ThriftClientChannelTest, OnExceptionWithNoPendingCallbacksIsNoop) {
       [](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
          TypeErasedBox&&) { return Result::Success; });
   channel->setPipeline(pipeline.get());
+  SCOPE_EXIT {
+    teardownChannelPipeline(channel, pipeline);
+  };
 
   // No pending requests - onException should not crash
   auto error =

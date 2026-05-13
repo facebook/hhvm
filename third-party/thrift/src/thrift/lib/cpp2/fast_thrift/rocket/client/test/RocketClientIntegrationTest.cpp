@@ -157,6 +157,10 @@ class RocketClientIntegrationTest : public ::testing::Test {
       transportHandler_->close(folly::exception_wrapper{});
       transportHandler_->resetPipeline();
     }
+    if (pipeline_) {
+      pipeline_->deactivate();
+      pipeline_->close();
+    }
     if (appAdapter_) {
       appAdapter_->resetPipeline();
     }

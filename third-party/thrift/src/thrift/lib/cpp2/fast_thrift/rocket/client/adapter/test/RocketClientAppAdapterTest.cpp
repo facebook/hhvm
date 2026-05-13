@@ -208,6 +208,8 @@ TEST(RocketClientAppAdapterTest, WriteWithPipelineCallsFireWrite) {
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(head.writeCount(), 1);
 
+  pipeline->deactivate();
+  pipeline->close();
   adapter->resetPipeline();
 }
 

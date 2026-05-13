@@ -21,7 +21,7 @@
 #endif
 #include "hphp/util/logger.h"
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/ScopeGuard.h>
 
 #include "hphp/tools/hfsort/hfutil.h"
@@ -211,19 +211,19 @@ int jitsort(int pid, int time, FILE* perfSymFile, FILE* relocResultsFile) {
     }
 #ifndef _MSC_VER
   } else {
-    auto perfData = folly::sformat("/tmp/perf-{}.data", pid);
-    auto perfHitsFileName = folly::sformat("/tmp/perf-{}.out", pid);
+    auto perfData = fmt::format("/tmp/perf-{}.data", pid);
+    auto perfHitsFileName = fmt::format("/tmp/perf-{}.out", pid);
 
     auto perfCmd =
         "perf record -BN --no-buffering -g -p {0} -e instructions -o {1} -- sleep {2} && "
         "perf script -i {1} --fields comm,ip > {3}";
 
     auto cmds = std::string("sh -c '(") + perfCmd + ") 2>&1'";
-    cmds = folly::sformat(cmds, pid, perfData, time, perfHitsFileName);
+    cmds = fmt::format(fmt::runtime(cmds), pid, perfData, time, perfHitsFileName);
 
     std::string err;
     if (!skipPerf && !light_exec(cmds, err)) {
-      error(folly::sformat("Failed to run `{}': {}\n", cmds, err).c_str());
+      error(fmt::format("Failed to run `{}': {}\n", cmds, err).c_str());
     }
     if (FILE* perfHitsFile = fopen(perfHitsFileName.c_str(), "r")) {
       SCOPE_EXIT { fclose(perfHitsFile); };

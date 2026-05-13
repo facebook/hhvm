@@ -24,7 +24,7 @@
 #include <fstream>
 #include <unordered_map>
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/String.h>
 
 #include "hphp/util/text-util.h"
@@ -183,7 +183,7 @@ void print(CallGraph& cg, const char* filename,
            const std::vector<Cluster>& clusters, bool useWildcards) {
   FILE* outfile = fopen(filename, "wt");
   if (!outfile) {
-    error(folly::sformat("opening output file {}", filename).c_str());
+    error(fmt::format("opening output file {}", filename).c_str());
   }
   uint32_t totalSize   = 0;
   uint32_t curPage     = 0;

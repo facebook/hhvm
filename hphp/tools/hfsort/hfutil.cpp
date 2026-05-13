@@ -16,7 +16,7 @@
 
 #include "hphp/tools/hfsort/hfutil.h"
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 
 namespace HPHP::hfsort {
 
@@ -69,7 +69,7 @@ TargetId CallGraph::funcToTargetId(const std::string &func) const {
 }
 
 std::string CallGraph::toString(TargetId id) const {
-  return folly::sformat("func = {:5} : samples = {:6} : size = {:6} : {}\n",
+  return fmt::format("func = {:5} : samples = {:6} : size = {:6} : {}\n",
                         id, targets[id].samples, targets[id].size,
                         funcs[id].mangledNames[0]);
 }

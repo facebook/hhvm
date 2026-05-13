@@ -22,7 +22,7 @@
 #include <memory>
 
 #include <folly/Demangle.h>
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/Hash.h>
 #include <folly/Memory.h>
 #include <folly/Singleton.h>
@@ -1014,7 +1014,7 @@ T Generator::extractFromMarkers(const C& types, F&& f) const {
       try {
         ins = f(*o);
       } catch (Exception& e) {
-        folly::format(&msg, " => {}\n", e.what());
+        msg += fmt::format(" => {}\n", e.what());
       }
     }
   );
@@ -1099,7 +1099,7 @@ void Generator::sanityCheckTemplateParams(const Object& object) {
   if (index == std::string::npos ||
       index != object.name.name.size()-2) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Object type '{}' at ({},{}) is reported as having "
         "no template parameters, but its name indicates "
         "otherwise. This usually indicates the compiler "
@@ -1118,7 +1118,7 @@ void Generator::sanityCheckTemplateParams(const Object& object) {
 const Object& Generator::getMarkedCollectable(const Object& mark) const {
   if (mark.incomplete) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Collectable marker '{}' at ({},{}) is an incomplete type",
         mark.name.name,
         mark.key.object_id,
@@ -1129,7 +1129,7 @@ const Object& Generator::getMarkedCollectable(const Object& mark) const {
 
   if (mark.kind != Object::Kind::k_class) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Collectable marker '{}' at ({},{}) isn't a class type",
         mark.name.name,
         mark.key.object_id,
@@ -1140,7 +1140,7 @@ const Object& Generator::getMarkedCollectable(const Object& mark) const {
 
   if (!mark.bases.empty()) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Collectable marker '{}' at ({},{}) has base classes",
         mark.name.name,
         mark.key.object_id,
@@ -1151,7 +1151,7 @@ const Object& Generator::getMarkedCollectable(const Object& mark) const {
 
   if (!mark.members.empty()) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Collectable marker '{}' at ({},{}) has members",
         mark.name.name,
         mark.key.object_id,
@@ -1162,7 +1162,7 @@ const Object& Generator::getMarkedCollectable(const Object& mark) const {
 
   if (mark.name.linkage != ObjectTypeName::Linkage::external) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Collectable marker '{}' at ({},{}) does not have external linkage",
         mark.name.name,
         mark.key.object_id,
@@ -1173,7 +1173,7 @@ const Object& Generator::getMarkedCollectable(const Object& mark) const {
 
   if (mark.template_params.size() != 1) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Collectable marker '{}' at ({},{}) does not have exactly "
         "one template parameter",
         mark.name.name,
@@ -1188,7 +1188,7 @@ const Object& Generator::getMarkedCollectable(const Object& mark) const {
   const auto* obj_type = stripModifiers(type).asObject();
   if (!obj_type) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Collectable marker '{}' at ({},{}) is instantiated on type '{}', "
         "which is not an object",
         mark.name.name,
@@ -1201,7 +1201,7 @@ const Object& Generator::getMarkedCollectable(const Object& mark) const {
 
   if (obj_type->name.linkage != ObjectTypeName::Linkage::external) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Collectable marker '{}' at ({},{}) is instantiated on object type '{}'"
         " at ({}, {}), which does not have external linkage",
         mark.name.name,
@@ -1217,7 +1217,7 @@ const Object& Generator::getMarkedCollectable(const Object& mark) const {
   const auto& obj = getObject(*obj_type);
   if (obj.incomplete) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Collectable marker '{}' at ({},{}) is instantiated on object type '{}'"
         " at ({}, {}), which is an incomplete type",
         mark.name.name,
@@ -1231,7 +1231,7 @@ const Object& Generator::getMarkedCollectable(const Object& mark) const {
   }
   if (obj.kind != Object::Kind::k_class) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Collectable marker '{}' at ({},{}) is instantiated on object type '{}'"
         " at ({}, {}), which is not a class type",
         mark.name.name,
@@ -1253,7 +1253,7 @@ const Object& Generator::getMarkedCollectable(const Object& mark) const {
 Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
   if (indexer.incomplete) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Indexer '{}' at ({},{}) is an incomplete type",
         indexer.name.name,
         indexer.key.object_id,
@@ -1264,7 +1264,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
 
   if (indexer.kind != Object::Kind::k_class) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Indexer '{}' at ({},{}) is not a class type",
         indexer.name.name,
         indexer.key.object_id,
@@ -1275,7 +1275,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
 
   if (!indexer.bases.empty()) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Indexer '{}' at ({},{}) has base classes",
         indexer.name.name,
         indexer.key.object_id,
@@ -1286,7 +1286,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
 
   if (indexer.members.size() != 2) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Indexer '{}' at ({},{}) does not have exactly two members ({})",
         indexer.name.name,
         indexer.key.object_id,
@@ -1298,7 +1298,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
 
   if (indexer.template_params.size() != 2) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Indexer '{}' at ({},{}) does not have exactly two "
         "template parameters ({})",
         indexer.name.name,
@@ -1316,7 +1316,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
   );
   if (index_iter == indexer.members.end()) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Indexer '{}' at ({},{}) does not a s_index member",
         indexer.name.name,
         indexer.key.object_id,
@@ -1328,7 +1328,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
 
   if (index_member.offset) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Indexer '{}' at ({},{}) has a non-static s_index member",
         indexer.name.name,
         indexer.key.object_id,
@@ -1341,7 +1341,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
   // had better either have a symbol (preferred), or an absolute address.
   if (!index_member.address && index_member.linkage_name.empty()) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Indexer '{}' at ({},{}) has a s_index member which "
         "has neither a linkage name, nor an address",
         indexer.name.name,
@@ -1370,7 +1370,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
         [&](const ObjectType* t) -> const Type* {
           if (t->name.linkage == ObjectTypeName::Linkage::pseudo) {
             throw Exception{
-              folly::sformat(
+              fmt::format(
                 "Indexer '{}' at ({},{}) is instantiated on "
                 "object type '{}' which is the pseudo-type",
                 indexer.name.name,
@@ -1384,7 +1384,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
           const auto& obj = getObject(*t);
           if (obj.incomplete) {
             throw Exception{
-              folly::sformat(
+              fmt::format(
                 "Indexer '{}' at ({},{}) is instantiated on "
                 "object type '{}' which is an incomplete type",
                 indexer.name.name,
@@ -1397,7 +1397,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
 
           if (obj.kind == Object::Kind::k_other) {
             throw Exception{
-              folly::sformat(
+              fmt::format(
                 "Indexer '{}' at ({},{}) is instantiated on "
                 "object type '{}' which has an 'other' kind",
                 indexer.name.name,
@@ -1416,7 +1416,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
         [&](const ArrType* t) {
           if (!t->count) {
             throw Exception{
-              folly::sformat(
+              fmt::format(
                 "Indexer '{}' at ({},{}) is instantiated on "
                 "unbounded array type '{}'",
                 indexer.name.name,
@@ -1433,7 +1433,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
         [&](const RestrictType* t) { return &t->modified; },
         [&](const FuncType*) -> const Type* {
           throw Exception{
-            folly::sformat(
+            fmt::format(
               "Indexer '{}' at ({},{}) is instantiated on function type '{}'",
               indexer.name.name,
               indexer.key.object_id,
@@ -1445,7 +1445,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
         },
         [&](const MemberType*) -> const Type* {
           throw Exception{
-            folly::sformat(
+            fmt::format(
               "Indexer '{}' at ({},{}) is instantiated on member type '{}'",
               indexer.name.name,
               indexer.key.object_id,
@@ -1457,7 +1457,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
         },
         [&](const VoidType*) -> const Type* {
           throw Exception{
-            folly::sformat(
+            fmt::format(
               "Indexer '{}' at ({},{}) is instantiated on void type",
               indexer.name.name,
               indexer.key.object_id,
@@ -1486,7 +1486,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
     stripModifiers(indexer.template_params[1].type).asObject();
   if (!action_type) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Indexer '{}' at ({},{}) action type '{}' isn't an object type",
         indexer.name.name,
         indexer.key.object_id,
@@ -1499,7 +1499,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
 
   if (action.incomplete) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Indexer '{}' at ({},{}) action type '{}' at ({},{}) is incomplete",
         indexer.name.name,
         indexer.key.object_id,
@@ -1540,7 +1540,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
   } else if (isWithSuffixActionName(action.name.name)) {
     if (action.template_params.size() != 1) {
       throw Exception{
-        folly::sformat(
+        fmt::format(
           "Indexer '{}' at ({},{}) action type '{}' at ({},{}) does not "
           "have exactly one template parameter",
           indexer.name.name,
@@ -1555,7 +1555,7 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
     indexed_type.suffix_type = &stripModifiers(action.template_params[0].type);
   } else {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Indexer '{}' at ({},{}) action type '{}' at ({},{}) is unknown",
         indexer.name.name,
         indexer.key.object_id,
@@ -1606,7 +1606,7 @@ Generator::Action Generator::inferAction(const Object& object,
                                          bool conservative_everything) const {
   if (object.incomplete) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Trying to infer actions on object type '{}' at ({},{}) "
         "which is incomplete",
         object.name.name,
@@ -1664,7 +1664,7 @@ Generator::Action Generator::inferAction(const Object& object,
     auto verify_func = [&](const Object::Function& func) {
       if (func.kind != Object::Function::Kind::k_member) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains scanner func '{}' "
             "which is not a non-static, non-virtual member",
             object.name.name,
@@ -1677,7 +1677,7 @@ Generator::Action Generator::inferAction(const Object& object,
 
       if (!func.ret_type.isVoid()) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains scanner func '{}' "
             "which does not have a void return type",
             object.name.name,
@@ -1690,7 +1690,7 @@ Generator::Action Generator::inferAction(const Object& object,
 
       if (func.arg_types.size() != 2) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains scanner func '{}' "
             "which does not take exactly two parameter ({})",
             object.name.name,
@@ -1706,7 +1706,7 @@ Generator::Action Generator::inferAction(const Object& object,
       const auto* this_ptr_arg = this_arg.asPtr();
       if (!this_ptr_arg) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains scanner func '{}' "
             "whose first parameter isn't a pointer type '{}'",
             object.name.name,
@@ -1721,7 +1721,7 @@ Generator::Action Generator::inferAction(const Object& object,
       const auto* this_const_arg = this_ptr_arg->pointee.asConst();
       if (!this_const_arg) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains scanner func '{}' "
             "whose first parameter isn't a const pointer type '{}'",
             object.name.name,
@@ -1736,7 +1736,7 @@ Generator::Action Generator::inferAction(const Object& object,
       const auto* this_obj_arg = this_const_arg->modified.asObject();
       if (!this_obj_arg) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains scanner func '{}' "
             "whose first parameter isn't a pointer type to object type '{}'",
             object.name.name,
@@ -1750,7 +1750,7 @@ Generator::Action Generator::inferAction(const Object& object,
 
       if (&getObject(*this_obj_arg) != &object) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains scanner func '{}' "
             "whose first parameter isn't a valid this pointer '{}'",
             object.name.name,
@@ -1766,7 +1766,7 @@ Generator::Action Generator::inferAction(const Object& object,
       const auto* scanner_ref_arg = scanner_arg.asRef();
       if (!scanner_ref_arg) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains scanner func '{}' "
             "whose second parameter isn't a reference '{}'",
             object.name.name,
@@ -1781,7 +1781,7 @@ Generator::Action Generator::inferAction(const Object& object,
       const auto* scanner_obj_arg = scanner_ref_arg->referenced.asObject();
       if (!scanner_obj_arg) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains scanner func '{}' "
             "whose second parameter isn't a reference to object-type '{}'",
             object.name.name,
@@ -1796,7 +1796,7 @@ Generator::Action Generator::inferAction(const Object& object,
       const auto& scanner_obj = getObject(*scanner_obj_arg);
       if (scanner_obj.name.name != s_scanner_name) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains scanner func '{}' "
             "whose second parameter isn't a reference to "
             "{} '{}'",
@@ -1821,7 +1821,7 @@ Generator::Action Generator::inferAction(const Object& object,
 
       if (!find_member(custom_field)) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains custom field marker "
             "referring to unknown non-static field '{}'",
             object.name.name,
@@ -1866,7 +1866,7 @@ Generator::Action Generator::inferAction(const Object& object,
     if (!ignore_field.empty()) {
       if (!find_member(ignore_field)) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains ignore field marker "
             "referring to unknown non-static field '{}'",
             object.name.name,
@@ -1889,7 +1889,7 @@ Generator::Action Generator::inferAction(const Object& object,
     if (!conservative_field.empty()) {
       if (!find_member(conservative_field)) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains conservative field marker "
             "referring to unknown non-static field '{}'",
             object.name.name,
@@ -1913,7 +1913,7 @@ Generator::Action Generator::inferAction(const Object& object,
     if (!flexible_array_field.empty()) {
       if (!action.flexible_array_field.empty()) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains more than one flexible "
             "array field marker",
             object.name.name,
@@ -1925,7 +1925,7 @@ Generator::Action Generator::inferAction(const Object& object,
 
       if (!find_member(flexible_array_field)) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains flexible array field marker "
             "referring to unknown non-static field '{}'",
             object.name.name,
@@ -1956,7 +1956,7 @@ Generator::Action Generator::inferAction(const Object& object,
       const auto* ignore_type = stripModifiers(member.type).asObject();
       if (!ignore_type) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains an ignore base marker "
             "for a non-object type '{}'",
             object.name.name,
@@ -1974,7 +1974,7 @@ Generator::Action Generator::inferAction(const Object& object,
         const auto* ignored_type = stripModifiers(param.type).asObject();
         if (!ignored_type) {
           throw Exception{
-            folly::sformat(
+            fmt::format(
               "Object type '{}' at ({},{}) contains an ignore base marker "
               "instantiated on non-object type '{}'",
               object.name.name,
@@ -1988,7 +1988,7 @@ Generator::Action Generator::inferAction(const Object& object,
         const auto& ignored = getObject(*ignored_type);
         if (!find_base(ignored)) {
           throw Exception{
-            folly::sformat(
+            fmt::format(
               "Object type '{}' at ({},{}) contains an ignore base marker "
               "instantiated on object-type '{}' which isn't a base class",
               object.name.name,
@@ -2009,7 +2009,7 @@ Generator::Action Generator::inferAction(const Object& object,
       const auto* silence_type = stripModifiers(member.type).asObject();
       if (!silence_type) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains a silence base marker "
             "for a non-object type '{}'",
             object.name.name,
@@ -2027,7 +2027,7 @@ Generator::Action Generator::inferAction(const Object& object,
         const auto* silenced_type = stripModifiers(param.type).asObject();
         if (!silenced_type) {
           throw Exception{
-            folly::sformat(
+            fmt::format(
               "Object type '{}' at ({},{}) contains a silence base marker "
               "instantiated on non-object type '{}'",
               object.name.name,
@@ -2041,7 +2041,7 @@ Generator::Action Generator::inferAction(const Object& object,
         const auto& silenced = getObject(*silenced_type);
         if (!find_base(silenced)) {
           throw Exception{
-            folly::sformat(
+            fmt::format(
               "Object type '{}' at ({},{}) contains a silence base marker "
               "instantiated on object-type '{}' which isn't a base class",
               object.name.name,
@@ -2062,7 +2062,7 @@ Generator::Action Generator::inferAction(const Object& object,
       const auto* custom_list_type = stripModifiers(member.type).asObject();
       if (!custom_list_type) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Object type '{}' at ({},{}) contains a custom base marker "
             "for a non-object type '{}'",
             object.name.name,
@@ -2080,7 +2080,7 @@ Generator::Action Generator::inferAction(const Object& object,
         const auto* custom_type = stripModifiers(param.type).asObject();
         if (!custom_type) {
           throw Exception{
-            folly::sformat(
+            fmt::format(
               "Object type '{}' at ({},{}) contains a custom base marker "
               "instantiated on non-object type '{}'",
               object.name.name,
@@ -2094,7 +2094,7 @@ Generator::Action Generator::inferAction(const Object& object,
         const auto& custom = getObject(*custom_type);
         if (!find_base(custom)) {
           throw Exception{
-            folly::sformat(
+            fmt::format(
               "Object type '{}' at ({},{}) contains a custom base marker "
               "instantiated on object-type '{}' which isn't a base class",
               object.name.name,
@@ -2116,7 +2116,7 @@ Generator::Action Generator::inferAction(const Object& object,
       const auto* guard_type = stripModifiers(member.type).asObject();
       if (!guard_type) {
         throw Exception{
-            folly::sformat(
+            fmt::format(
               "Object type '{}' at ({},{}) contains a custom guard marker "
               "instantiated on non-object type '{}'",
               object.name.name,
@@ -2391,7 +2391,7 @@ bool Generator::checkMemberSpecialAction(const Object& base_object,
   if (custom_iter != action.custom_fields.end()) {
     if (custom_iter->second.empty()) {
       throw LayoutError{
-        folly::sformat(
+        fmt::format(
           "'{}' needs to have external linkage (not in unnamed namespace)"
           " to use custom field scanner. If a template, template parameters"
           " must have external linkage as well.",
@@ -2423,7 +2423,7 @@ void Generator::genLayout(const Object& object,
 
   if (!m_layout_being_generated.emplace(&object).second) {
     throw LayoutError{
-      folly::sformat(
+      fmt::format(
         "'{}' is contained within a recursive definition. "
         "This can only happen with invalid debug information "
         "or a type-scanner generator bug.",
@@ -2446,7 +2446,7 @@ void Generator::genLayout(const Object& object,
       action.forbidden_template &&
       forbiddenTemplateCheck(object)) {
     throw LayoutError{
-      folly::sformat(
+      fmt::format(
         "'{}' shouldn't be used with potentially req-heap "
         "allocated objects. Use req:: equivalents instead or add "
         "annotations.",
@@ -2488,7 +2488,7 @@ void Generator::genLayout(const Object& object,
       );
     } catch (LayoutError& exn) {
       exn.addContext(
-        folly::sformat(
+        fmt::format(
           "from base class '{}'",
           base.type.name.name
         )
@@ -2501,7 +2501,7 @@ void Generator::genLayout(const Object& object,
   if (action.custom_bases_scanner && !action.custom_bases.empty()) {
     if (action.custom_bases_scanner->empty()) {
       throw LayoutError{
-        folly::sformat(
+        fmt::format(
           "'{}' needs to have external linkage (not in unnamed namespace)"
           " to use custom base scanner. If a template, template parameters"
           " must have external linkage as well.",
@@ -2530,7 +2530,7 @@ void Generator::genLayout(const Object& object,
       // such things, so error out.
       if (action.custom_all->empty()) {
         throw LayoutError{
-          folly::sformat(
+          fmt::format(
             "'{}' needs to have external linkage (not in unnamed namespace)"
             " to use custom scanner. If a template, template parameters must"
             " have external linkage as well.",
@@ -2578,7 +2578,7 @@ void Generator::genLayout(const Object& object,
         genLayout(member.type, other_layout, 0, conservative_everything);
         if (first_layout != other_layout) {
           throw LayoutError{
-            folly::sformat(
+            fmt::format(
               "'{}' is a union containing potentially req-heap allocated "
               "objects with different layouts. Add annotation to disambiguate "
               "contents. (Conflicting members: '{}' and '{}')",
@@ -2617,7 +2617,7 @@ void Generator::genLayout(const Object& object,
       );
     } catch (LayoutError& exn) {
       exn.addContext(
-        folly::sformat(
+        fmt::format(
           "from member '{}' of type '{}'",
           member.name,
           member.type.toString()
@@ -3019,7 +3019,7 @@ void Generator::genDataTable(std::ostream& os) const {
     const auto get_scanner_name = [&]() -> std::string {
       if (indexed.ignore) return "scanner_noptrs";
       if (indexed.conservative) return "scanner_conservative";
-      return folly::sformat("scanner_{}", indexed.layout_index);
+      return fmt::format("scanner_{}", indexed.layout_index);
     };
     os << "  {\"" << *indexed.type << "\", "
        << get_scanner_name() << "},\n";
@@ -3429,7 +3429,7 @@ int main(int argc, char** argv) {
 
     const auto output_filename =
       vm.contains("install_dir") ?
-      folly::sformat(
+      fmt::format(
         "{}{}{}",
         vm["install_dir"].as<std::string>(),
         HPHP::FileUtil::getDirSeparator(),

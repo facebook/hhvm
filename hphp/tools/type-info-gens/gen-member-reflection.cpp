@@ -23,7 +23,7 @@
 
 #include <boost/program_options.hpp>
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/Singleton.h>
 
 #include <algorithm>
@@ -76,7 +76,7 @@ std::size_t size_of(const Type& type,
 
 void generate_entry(const Object& object, std::ostream& o,
                     const std::unique_ptr<TypeParser>& parser) {
-  o << folly::format(
+  o << fmt::format(
     "  {{\n"
     "    \"{}\",\n"
     "    [](const void* base, const void* internal) -> const char* {{\n"
@@ -95,14 +95,14 @@ void generate_entry(const Object& object, std::ostream& o,
     auto const size = size_of(member.type, parser);
 
     auto const name = member.name.empty()
-      ? folly::format("union@{}", off).str()
+      ? fmt::format("union@{}", off)
       : member.name;
 
     if (last_end < off) {
-      o << folly::format("      // hole ({})\n", off - last_end);
+      o << fmt::format("      // hole ({})\n", off - last_end);
     }
 
-    o << "      " << folly::format(
+    o << "      " << fmt::format(
       "if ({} <= diff && diff < {}) return \"{}\"; // size {}\n",
       off, off + size, name, size
     );
@@ -229,7 +229,7 @@ int main(int argc, char** argv) {
 
     auto const source_executable = vm["source_file"].as<std::string>();
     auto const output_filename = vm.contains("install_dir")
-      ? folly::sformat(
+      ? fmt::format(
           "{}{}{}",
           vm["install_dir"].as<std::string>(),
           HPHP::FileUtil::getDirSeparator(),

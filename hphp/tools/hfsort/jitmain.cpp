@@ -19,7 +19,7 @@
 #include "hphp/tools/hfsort/jitsort.h"
 #include "hphp/util/logger.h"
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/ScopeGuard.h>
 
 #include <stdio.h>
@@ -38,21 +38,21 @@ int main(int argc, char* argv[]) {
     if (argc < 2 || argc > 3 ||
         sscanf(argv[1], "%d %c", &pid, &tmp) != 1 ||
         (argc == 3 && sscanf(argv[2], "%d %c", &time, &tmp) != 1)) {
-      error(folly::sformat("Usage: {} <process-id> [<time>]\n",
+      error(fmt::format("Usage: {} <process-id> [<time>]\n",
                            argc > 0 ? argv[0] : "jitsort").c_str());
     }
 
     bool skipPerf = pid < 0;
     if (skipPerf) pid = -pid;
 
-    auto perfSymFileName = folly::sformat("/tmp/hhvm-reloc-{}.map", pid);
+    auto perfSymFileName = fmt::format("/tmp/hhvm-reloc-{}.map", pid);
     FILE* perfSymFile;
     if (!(perfSymFile = fopen(perfSymFileName.c_str(), "r"))) {
       error("Error opening perf data file\n");
     }
     SCOPE_EXIT { fclose(perfSymFile); };
 
-    auto relocResultsName = folly::sformat("/tmp/hhvm-reloc-{}.results", pid);
+    auto relocResultsName = fmt::format("/tmp/hhvm-reloc-{}.results", pid);
     FILE* relocResultsFile;
     if (!(relocResultsFile = fopen(relocResultsName.c_str(), "w"))) {
       error("Error creating perf results file\n");

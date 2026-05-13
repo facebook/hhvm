@@ -57,9 +57,9 @@ proxygen_add_library(proxygen_utils_logging
     Logging.cpp
   DEPS
     Folly::folly_debugging_symbolizer_symbolizer
-    Folly::folly_format
     Folly::folly_singleton
     Folly::folly_string
+    fmt::fmt
   EXPORTED_DEPS
     Folly::folly_io_iobuf
     Folly::folly_optional

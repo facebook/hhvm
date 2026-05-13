@@ -8,7 +8,7 @@
 
 #include <proxygen/lib/utils/Logging.h>
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/Singleton.h>
 #include <folly/String.h>
 #include <folly/debugging/symbolizer/Symbolizer.h>
@@ -41,7 +41,7 @@ namespace proxygen {
 string hexStr(StringPiece sp) {
   string out;
   for (auto ch : sp) {
-    out.append(folly::sformat("{:02x}", (uint8_t)ch));
+    out.append(fmt::format("{:02x}", (uint8_t)ch));
   }
   return out;
 }

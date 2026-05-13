@@ -2544,8 +2544,23 @@ namespace {
 std::atomic_flag s_sbDeserDone = ATOMIC_FLAG_INIT;
 }
 
+// Read and discard extension registry data from the stream without applying
+// any warmup side effects. Mirrors the read pattern of
+// ExtensionRegistry::deserialize() so the stream position advances correctly.
+void skipExtensionRegistryData(ProfDataDeserializer& des) {
+  auto const nExts = read_raw<uint32_t>(des);
+  for (uint32_t i = 0; i < nExts; ++i) {
+    read_cpp_string(des);
+    auto const size = read_raw<uint32_t>(des);
+    std::string buf;
+    buf.resize(size);
+    read_raw(des, buf.data(), size);
+  }
+}
+
 std::string deserializeSBProfData(const std::string& root,
-                                  const std::string& filename) {
+                                  const std::string& filename,
+                                  SBWarmupFlags flags) {
   if (!Cfg::Eval::EnableSBProfDeserialize ||
       !Cfg::Eval::EnableAsyncJIT) {
     return "Deser failed: options not enabled\n";
@@ -2585,11 +2600,27 @@ std::string deserializeSBProfData(const std::string& root,
       // Read the SB version. For now, it's not checked.
       read_raw<uint32_t>(des);
 
+      // Phase 1: Unit preloading. Always read paths from the stream; only
+      // start the background preload dispatcher when the Preload flag is set.
       // TODO: repo-schema
-      read_units_preload(des, root);
+      if (!!(flags & SBWarmupFlags::Preload)) {
+        read_units_preload(des, root);
+      } else {
+        // Consume the relPaths container without preloading.
+        read_container(des, [&] { read_cpp_string(des); });
+      }
 
-      ExtensionRegistry::deserialize(des);
+      // Phase 2: Extension data (e.g. APC keys). Always consume the bytes;
+      // only apply the warmup effect when the Apc flag is set.
+      if (!!(flags & SBWarmupFlags::Apc)) {
+        ExtensionRegistry::deserialize(des);
+      } else {
+        skipExtensionRegistryData(des);
+      }
 
+      // Phase 3: Read JIT prof data entries. Always consume from the stream
+      // (required for des.done() assertion). The data is stored in memory but
+      // only acted on in Phase 5 if the Jit flag is set.
       auto& sbProfData = getSBDeserProfData();
       {
         BootStats::Block timer("DES_read_sb_prof_data",
@@ -2600,6 +2631,7 @@ std::string deserializeSBProfData(const std::string& root,
 
       always_assert(des.done());
 
+      // Phase 4: Wait for unit preloading to complete.
       if (s_preload_dispatcher) {
         BootStats::Block timer("DES_wait_for_units_preload",
                                Cfg::Server::Mode);
@@ -2608,9 +2640,17 @@ std::string deserializeSBProfData(const std::string& root,
         s_preload_dispatcher = nullptr;
       }
 
-      merge_and_enqueue_for_jit(root, numWorkers);
+      // Phase 5: Enqueue JIT translation requests.
+      if (!!(flags & SBWarmupFlags::Jit)) {
+        merge_and_enqueue_for_jit(root, numWorkers);
+      }
 
-      errMsg = "Deserialization of profile data successful\n";
+      auto const preload = !!(flags & SBWarmupFlags::Preload);
+      auto const jit = !!(flags & SBWarmupFlags::Jit);
+      auto const apc = !!(flags & SBWarmupFlags::Apc);
+      errMsg = folly::sformat(
+        "Deserialization of profile data successful "
+        "(preload={}, jit={}, apc={})\n", preload, jit, apc);
     } catch (Exception& ex) {
       errMsg = folly::sformat("Deser failed {}: {}\n", profFileName,
                               ex.what());

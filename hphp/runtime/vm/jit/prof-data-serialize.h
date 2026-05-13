@@ -40,6 +40,30 @@ struct TypeAlias;
 namespace jit {
 //////////////////////////////////////////////////////////////////////
 
+// Flags controlling which warmup phases are enabled during sandbox jumpstart
+// deserialization. Each flag gates a specific side effect; the profile data
+// is always fully read from the stream regardless of these flags (required
+// by the always_assert(des.done()) invariant).
+enum class SBWarmupFlags : uint32_t {
+  None    = 0,
+  Preload = 1 << 0,  // Parallel unit preloading
+  Jit     = 1 << 1,  // Enqueue translations for async JIT compilation
+  Apc     = 1 << 2,  // Reserved for future APC warmup data in SB profiles
+  All     = Preload | Jit | Apc,
+};
+
+inline SBWarmupFlags operator|(SBWarmupFlags a, SBWarmupFlags b) {
+  return static_cast<SBWarmupFlags>(
+    static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+}
+inline SBWarmupFlags operator&(SBWarmupFlags a, SBWarmupFlags b) {
+  return static_cast<SBWarmupFlags>(
+    static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
+}
+inline bool operator!(SBWarmupFlags f) {
+  return static_cast<uint32_t>(f) == 0;
+}
+
 struct ProfDataSerializer {
   enum class FileMode {
     Create,
@@ -281,7 +305,8 @@ bool tryDeserializePartialProfData(const std::string& filename,
                                    bool loadRDS);
 
 std::string deserializeSBProfData(const std::string& root,
-                                  const std::string& filename);
+                                  const std::string& filename,
+                                  SBWarmupFlags flags = SBWarmupFlags::All);
 
 // Return whether or not serialization of profile data for optimized code is
 // enabled.

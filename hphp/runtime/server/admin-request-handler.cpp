@@ -411,6 +411,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/sb-prof-deser:   deserialize sandbox profiles\n"
         "    root          path of sandbox root\n"
         "    path          absolute path of profile data\n"
+        "    warmup        optional, comma-separated warmup phases to enable\n"
+        "                  (preload,apc,jit). Default: all phases\n"
         "/sb-prof-ser:     serialize sandbox profiles\n"
         "    root          path of sandbox root\n"
         "    path          absolute path of profile data\n"
@@ -694,7 +696,22 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     if (cmd == "sb-prof-deser") {
       auto const sbRoot = transport->getParam("root");
       auto const profPath = transport->getParam("path");
-      auto const status = jit::deserializeSBProfData(sbRoot, profPath);
+      auto const warmupParam = transport->getParam("warmup");
+      auto flags = jit::SBWarmupFlags::All;
+      if (!warmupParam.empty()) {
+        flags = jit::SBWarmupFlags::None;
+        if (warmupParam.find("preload") != std::string::npos) {
+          flags = flags | jit::SBWarmupFlags::Preload;
+        }
+        if (warmupParam.find("apc") != std::string::npos) {
+          flags = flags | jit::SBWarmupFlags::Apc;
+        }
+        if (warmupParam.find("jit") != std::string::npos) {
+          flags = flags | jit::SBWarmupFlags::Jit;
+        }
+      }
+      auto const status =
+        jit::deserializeSBProfData(sbRoot, profPath, flags);
       transport->sendString(status);
       break;
     }

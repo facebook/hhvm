@@ -12,8 +12,11 @@ String HHVM_FUNCTION(sb_profile_ser,
 
 String HHVM_FUNCTION(sb_profile_deser,
                      const String& sb_root,
-                     const String& prof_path) {
-  auto const status = jit::deserializeSBProfData(sb_root.data(), prof_path.data());
+                     const String& prof_path,
+                     int64_t warmup) {
+  auto const flags = static_cast<jit::SBWarmupFlags>(warmup);
+  auto const status =
+    jit::deserializeSBProfData(sb_root.data(), prof_path.data(), flags);
   return String{status.c_str()};
 }
 

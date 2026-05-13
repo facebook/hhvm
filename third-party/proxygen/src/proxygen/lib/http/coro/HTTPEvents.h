@@ -177,7 +177,8 @@ struct HTTPBodyEvent {
 
     eventType = goner.eventType;
     eom = goner.eom;
-    byteEventRegistrations = std::move(goner.byteEventRegistrations);
+    new (&byteEventRegistrations) std::vector<HTTPByteEventRegistration>(
+        std::move(goner.byteEventRegistrations));
     switch (eventType) {
       case BODY:
         new (&event.body) BufQueue(std::move(goner.event.body));

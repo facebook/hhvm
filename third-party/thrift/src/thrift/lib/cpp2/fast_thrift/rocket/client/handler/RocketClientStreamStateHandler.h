@@ -84,13 +84,20 @@ class RocketClientStreamStateHandler {
         << "handlerRemoved called with " << activeStreams_.size()
         << " in-flight streams; per-stream fan-out missed";
     activeStreams_.clear();
-    nextStreamId_ = 1;
   }
 
   // === InboundHandler ===
 
   template <typename Context>
-  void onPipelineActive(Context& /*ctx*/) noexcept {}
+  void onPipelineActive(Context& /*ctx*/) noexcept {
+    // RSocket clients start every connection at streamId 1. On a
+    // reactivate (disconnect → reconnect) the slot map should already be
+    // empty thanks to onPipelineInactive's drain.
+    DCHECK(activeStreams_.empty())
+        << "onPipelineActive called with " << activeStreams_.size()
+        << " leftover streams; previous disconnect did not drain";
+    nextStreamId_ = 1;
+  }
 
   template <typename Context>
   void onReadReady(Context& /*ctx*/) noexcept {}

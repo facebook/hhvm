@@ -16,10 +16,13 @@
 
 #pragma once
 
+#include <memory>
+
 #include <folly/ExceptionWrapper.h>
 #include <folly/Function.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/lang/Assume.h>
+#include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
@@ -70,6 +73,15 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
       channel_pipeline::TypeErasedBox&&) noexcept>;
   using OnErrorFn = folly::Function<void(folly::exception_wrapper&&) noexcept>;
 
+  // Lifecycle callbacks — relay channel_pipeline lifecycle transitions to
+  // the owner using rocket-domain terminology (connect/disconnect map to
+  // the underlying onPipelineActive/onPipelineInactive). Distinct from
+  // OnError: lifecycle events carry no exception, they just signal "the
+  // connection became connected / disconnected / was closed".
+  using OnConnectFn = folly::Function<void() noexcept>;
+  using OnDisconnectFn = folly::Function<void() noexcept>;
+  using OnCloseFn = folly::Function<void() noexcept>;
+
   RocketClientAppAdapter() = default;
 
   RocketClientAppAdapter(const RocketClientAppAdapter&) = delete;
@@ -78,7 +90,23 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
   RocketClientAppAdapter& operator=(RocketClientAppAdapter&&) = delete;
 
   void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept {
+    DCHECK(pipeline);
+    if (pipeline_) {
+      XLOG(FATAL) << "must reset pipeline before setting a new one";
+    }
     pipeline_ = pipeline;
+    pipelineGuard_ =
+        std::make_unique<folly::DelayedDestruction::DestructorGuard>(pipeline);
+  }
+
+  /**
+   * Release this adapter's hold on the pipeline. After this returns,
+   * the pipeline may be destroyed (modulo other guards) and write() must
+   * not be called.
+   */
+  void resetPipeline() noexcept {
+    pipeline_ = nullptr;
+    pipelineGuard_.reset();
   }
 
   void setResponseHandlers(
@@ -87,15 +115,22 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
     onError_ = std::move(errHandler);
   }
 
+  void setLifecycleHandlers(
+      OnConnectFn connectHandler,
+      OnDisconnectFn disconnectHandler,
+      OnCloseFn closeHandler) noexcept {
+    onConnect_ = std::move(connectHandler);
+    onDisconnect_ = std::move(disconnectHandler);
+    onClose_ = std::move(closeHandler);
+  }
+
   // === RocketClientAppOutboundHandler interface ===
 
   /**
    * Write a rocket request message into the pipeline (outbound path).
    */
   channel_pipeline::Result write(RocketRequestMessage&& msg) noexcept {
-    if (FOLLY_UNLIKELY(!pipeline_)) {
-      return channel_pipeline::Result::Error;
-    }
+    DCHECK(pipeline_);
     return pipeline_->fireWrite(
         channel_pipeline::erase_and_box(std::move(msg)));
   }
@@ -126,18 +161,61 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
   }
 
   void handlerAdded() noexcept {}
-  void handlerRemoved() noexcept {}
-  void onPipelineActive() noexcept {}
-  void onPipelineInactive() noexcept {}
+
+  void handlerRemoved() noexcept {
+    DCHECK(disconnected_);
+    // Defensive: pipeline removed us without a prior deactivate. Fan out
+    // onDisconnect_ so the owner observes the disconnect before the close.
+    if (!disconnected_) {
+      disconnected_ = true;
+      if (onDisconnect_) {
+        onDisconnect_();
+      }
+    }
+    if (onClose_) {
+      onClose_();
+    }
+    // Drop callbacks so any post-destroy use-after-detach (e.g. a queued
+    // EventBase callback that still holds a stale captured `this`) sees
+    // empty Functions and no-ops rather than firing into stale state.
+    onResponse_ = {};
+    onError_ = {};
+    onConnect_ = {};
+    onDisconnect_ = {};
+    onClose_ = {};
+  }
+
+  void onPipelineActive() noexcept {
+    disconnected_ = false;
+    if (onConnect_) {
+      onConnect_();
+    }
+  }
+
+  void onPipelineInactive() noexcept {
+    disconnected_ = true;
+    if (onDisconnect_) {
+      onDisconnect_();
+    }
+  }
+
   void onWriteReady() noexcept {}
 
  protected:
-  ~RocketClientAppAdapter() override = default;
+  ~RocketClientAppAdapter() override {
+    DCHECK(!pipeline_);
+    resetPipeline();
+  }
 
  private:
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
+  std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
   OnResponseFn onResponse_;
   OnErrorFn onError_;
+  OnConnectFn onConnect_;
+  OnDisconnectFn onDisconnect_;
+  OnCloseFn onClose_;
+  bool disconnected_{true};
 };
 
 } // namespace apache::thrift::fast_thrift::rocket::client

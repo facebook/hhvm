@@ -64,21 +64,6 @@ static_assert(
 // Unit tests
 // =============================================================================
 
-TEST(RocketClientAppAdapterTest, WriteWithoutPipelineReturnsError) {
-  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
-
-  RocketRequestMessage msg{
-      .frame =
-          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
-              .data = folly::IOBuf::copyBuffer("test"),
-          },
-      .requestContext = {},
-      .streamType = frame::FrameType::REQUEST_RESPONSE,
-  };
-
-  EXPECT_EQ(adapter->write(std::move(msg)), Result::Error);
-}
-
 TEST(RocketClientAppAdapterTest, OnReadDelegatesToCallback) {
   RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
   int responseCount = 0;
@@ -125,6 +110,71 @@ TEST(RocketClientAppAdapterTest, OnReadWithoutCallbackReturnsError) {
   EXPECT_EQ(result, Result::Error);
 }
 
+TEST(RocketClientAppAdapterTest, OnPipelineActiveFiresOnActiveCallback) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  int activeCount = 0;
+
+  adapter->setLifecycleHandlers(
+      [&]() noexcept { activeCount++; }, []() noexcept {}, []() noexcept {});
+
+  adapter->onPipelineActive();
+  EXPECT_EQ(activeCount, 1);
+}
+
+TEST(RocketClientAppAdapterTest, OnPipelineInactiveFiresOnInactiveCallback) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  int inactiveCount = 0;
+
+  adapter->setLifecycleHandlers(
+      []() noexcept {}, [&]() noexcept { inactiveCount++; }, []() noexcept {});
+
+  adapter->onPipelineInactive();
+  EXPECT_EQ(inactiveCount, 1);
+}
+
+TEST(RocketClientAppAdapterTest, HandlerRemovedFiresOnCloseCallback) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  int closeCount = 0;
+
+  adapter->setLifecycleHandlers(
+      []() noexcept {}, []() noexcept {}, [&]() noexcept { closeCount++; });
+
+  adapter->handlerRemoved();
+  EXPECT_EQ(closeCount, 1);
+}
+
+TEST(RocketClientAppAdapterTest, LifecycleCallbacksNoOpWhenUnset) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  // No setLifecycleHandlers call.
+  adapter->onPipelineActive();
+  adapter->onPipelineInactive();
+  adapter->handlerRemoved();
+  // Reaching here without crash is the test.
+}
+
+TEST(RocketClientAppAdapterTest, LifecycleAndErrorChannelsAreIndependent) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  int errorCount = 0;
+  int inactiveCount = 0;
+
+  adapter->setResponseHandlers(
+      [](TypeErasedBox&&) noexcept -> Result { return Result::Success; },
+      [&](folly::exception_wrapper&&) noexcept { errorCount++; });
+  adapter->setLifecycleHandlers(
+      []() noexcept {}, [&]() noexcept { inactiveCount++; }, []() noexcept {});
+
+  // Lifecycle event must NOT route through the error callback.
+  adapter->onPipelineInactive();
+  EXPECT_EQ(inactiveCount, 1);
+  EXPECT_EQ(errorCount, 0);
+
+  // Error event must NOT route through the lifecycle callback.
+  adapter->onException(
+      folly::make_exception_wrapper<std::runtime_error>("boom"));
+  EXPECT_EQ(errorCount, 1);
+  EXPECT_EQ(inactiveCount, 1);
+}
+
 HANDLER_TAG(mock_head_tag);
 
 TEST(RocketClientAppAdapterTest, WriteWithPipelineCallsFireWrite) {
@@ -157,6 +207,8 @@ TEST(RocketClientAppAdapterTest, WriteWithPipelineCallsFireWrite) {
   auto result = adapter->write(std::move(msg));
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(head.writeCount(), 1);
+
+  adapter->resetPipeline();
 }
 
 } // namespace apache::thrift::fast_thrift::rocket::client::test

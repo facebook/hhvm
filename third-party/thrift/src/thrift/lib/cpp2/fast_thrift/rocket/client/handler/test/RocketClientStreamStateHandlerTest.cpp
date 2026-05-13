@@ -529,11 +529,10 @@ TEST_F(ClientStreamStateHandlerTest, ConnectionFramesPassThrough) {
 // Handler Lifecycle
 // =============================================================================
 
-TEST_F(ClientStreamStateHandlerTest, HandlerRemovedAfterFanOutResetsStreamId) {
+TEST_F(ClientStreamStateHandlerTest, HandlerRemovedRequiresDrainedSlotMap) {
   // Contract: by the time handlerRemoved runs, the slot map must be
   // empty — onException or onPipelineInactive should have already done
-  // the fan-out. handlerRemoved DCHECKs that and resets the stream-id
-  // counter for the next pipeline.
+  // the fan-out. handlerRemoved DCHECKs that.
   auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"));
@@ -548,7 +547,38 @@ TEST_F(ClientStreamStateHandlerTest, HandlerRemovedAfterFanOutResetsStreamId) {
   EXPECT_EQ(handler_.activeStreamCount(), 0);
 
   handler_.handlerRemoved(ctx_);
+}
+
+TEST_F(ClientStreamStateHandlerTest, OnPipelineActiveResetsStreamId) {
+  // Stream-id reset belongs on the activate edge: a fresh connection
+  // (first activate or post-disconnect reactivate) must start at 1
+  // per RSocket spec.
+  for (int i = 0; i < 3; ++i) {
+    auto request = makeClientRequest(
+        folly::IOBuf::copyBuffer("request"),
+        folly::IOBuf::copyBuffer("metadata"));
+    EXPECT_EQ(
+        handler_.onWrite(ctx_, erase_and_box(std::move(request))),
+        Result::Success);
+  }
+  EXPECT_EQ(handler_.nextStreamId(), 7);
+
+  // Disconnect (drains in-flight) → reactivate (resets counter).
+  handler_.onPipelineInactive(ctx_);
+  EXPECT_EQ(handler_.activeStreamCount(), 0);
+  handler_.onPipelineActive(ctx_);
   EXPECT_EQ(handler_.nextStreamId(), 1);
+
+  // Next request on the reactivated connection starts at streamId 1.
+  ctx_.writeMessages().clear();
+  auto next = makeClientRequest(
+      folly::IOBuf::copyBuffer("request"),
+      folly::IOBuf::copyBuffer("metadata"));
+  EXPECT_EQ(
+      handler_.onWrite(ctx_, erase_and_box(std::move(next))), Result::Success);
+  ASSERT_EQ(ctx_.writeMessages().size(), 1);
+  EXPECT_EQ(
+      getStreamId(ctx_.writeMessages()[0].get<RocketRequestMessage>()), 1);
 }
 
 TEST_F(

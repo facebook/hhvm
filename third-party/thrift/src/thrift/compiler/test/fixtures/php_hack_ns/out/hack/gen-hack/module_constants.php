@@ -6,6 +6,8 @@
  *  @generated
  */
 
+namespace test\foo\php\ns;
+
 class AnnotatedPhpConstants implements \IThriftConstants {
   /**
    * Original thrift constant:-

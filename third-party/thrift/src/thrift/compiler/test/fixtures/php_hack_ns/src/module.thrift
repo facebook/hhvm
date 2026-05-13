@@ -15,47 +15,32 @@
  */
 
 include "thrift/annotation/hack.thrift"
-include "thrift/annotation/thrift.thrift"
 
 @hack.ConstantsClass{name = "AnnotatedPhpConstants"}
 @hack.NamePrefix{prefix = "ProgramPrefixed"}
 package "test.dev/foo/php/ns"
-
-namespace php foo.php.ns
 
 const i32 ANSWER = 42;
 
 @hack.NamePrefix{prefix = "Prefixed"}
 typedef string TestTypedef
 
-@thrift.Uri{
-  value = "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/Status",
-}
 enum Status {
   Unknown = 0,
 }
 
 @hack.NamePrefix{prefix = "Prefixed"}
-@thrift.Uri{
-  value = "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestUnion",
-}
 union TestUnion {
   1: string string_value;
 }
 
 @hack.NamePrefix{prefix = "Prefixed", apply_on_getName = false}
-@thrift.Uri{
-  value = "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestException",
-}
 exception TestException {
   1: string message;
 }
 
 @hack.NamePrefix{prefix = "Double_", apply_on_getName = false}
 @hack.Name{name = "Prefixed_"}
-@thrift.Uri{
-  value = "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestStruct",
-}
 struct TestStruct {
   1: string str_value;
   2: TestTypedef typedef_value;
@@ -63,9 +48,6 @@ struct TestStruct {
 }
 
 @hack.NamePrefix{prefix = "Deprecated_"}
-@thrift.Uri{
-  value = "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/FooHackService",
-}
 service FooHackService {
   Status fetchStatus(1: TestStruct request);
   TestStruct ping(1: string str_arg) throws (1: TestException ex);

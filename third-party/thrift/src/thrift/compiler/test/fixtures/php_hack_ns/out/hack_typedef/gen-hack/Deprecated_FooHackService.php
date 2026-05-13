@@ -6,18 +6,20 @@
  *  @generated
  */
 
+namespace test\foo\php\ns;
+
 /**
  * Original thrift service:-
  * FooHackService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/FooHackService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/foo/php/ns/FooHackService'))>>
 interface Deprecated_FooHackServiceAsyncIf extends \IThriftAsyncIf {
   /**
    * Original thrift definition:-
    * Status
    *   fetchStatus(1: TestStruct request);
    */
-  public function fetchStatus(?foo_php_ns_Double_Prefixed_ $request): Awaitable<foo_php_ns_ProgramPrefixedStatus>;
+  public function fetchStatus(?\test\foo\php\ns\Double_Prefixed_ $request): Awaitable<\test\foo\php\ns\ProgramPrefixedStatus>;
 
   /**
    * Original thrift definition:-
@@ -25,14 +27,14 @@ interface Deprecated_FooHackServiceAsyncIf extends \IThriftAsyncIf {
    *   ping(1: string str_arg)
    *   throws (1: TestException ex);
    */
-  public function ping(string $str_arg): Awaitable<foo_php_ns_Double_Prefixed_>;
+  public function ping(string $str_arg): Awaitable<\test\foo\php\ns\Double_Prefixed_>;
 }
 
 /**
  * Original thrift service:-
  * FooHackService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/FooHackService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/foo/php/ns/FooHackService'))>>
 interface Deprecated_FooHackServiceAsyncClientIf extends Deprecated_FooHackServiceAsyncIf {
 }
 
@@ -40,14 +42,14 @@ interface Deprecated_FooHackServiceAsyncClientIf extends Deprecated_FooHackServi
  * Original thrift service:-
  * FooHackService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/FooHackService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/foo/php/ns/FooHackService'))>>
 interface Deprecated_FooHackServiceClientIf extends \IThriftSyncIf {
   /**
    * Original thrift definition:-
    * Status
    *   fetchStatus(1: TestStruct request);
    */
-  public function fetchStatus(?foo_php_ns_Double_Prefixed_ $request): Awaitable<foo_php_ns_ProgramPrefixedStatus>;
+  public function fetchStatus(?\test\foo\php\ns\Double_Prefixed_ $request): Awaitable<\test\foo\php\ns\ProgramPrefixedStatus>;
 
   /**
    * Original thrift definition:-
@@ -55,7 +57,7 @@ interface Deprecated_FooHackServiceClientIf extends \IThriftSyncIf {
    *   ping(1: string str_arg)
    *   throws (1: TestException ex);
    */
-  public function ping(string $str_arg): Awaitable<foo_php_ns_Double_Prefixed_>;
+  public function ping(string $str_arg): Awaitable<\test\foo\php\ns\Double_Prefixed_>;
 }
 
 /**
@@ -70,7 +72,7 @@ trait Deprecated_FooHackServiceClientBase {
    * Status
    *   fetchStatus(1: TestStruct request);
    */
-  public async function fetchStatus(?foo_php_ns_Double_Prefixed_ $request): Awaitable<foo_php_ns_ProgramPrefixedStatus> {
+  public async function fetchStatus(?\test\foo\php\ns\Double_Prefixed_ $request): Awaitable<\test\foo\php\ns\ProgramPrefixedStatus> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Deprecated_FooHackService_fetchStatus_args::fromShape(shape(
       'request' => $request,
@@ -86,7 +88,7 @@ trait Deprecated_FooHackServiceClientBase {
    *   ping(1: string str_arg)
    *   throws (1: TestException ex);
    */
-  public async function ping(string $str_arg): Awaitable<foo_php_ns_Double_Prefixed_> {
+  public async function ping(string $str_arg): Awaitable<\test\foo\php\ns\Double_Prefixed_> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Deprecated_FooHackService_ping_args::fromShape(shape(
       'str_arg' => $str_arg,
@@ -124,7 +126,7 @@ abstract class Deprecated_FooHackServiceAsyncProcessorBase extends \ThriftAsyncP
     $result = Deprecated_FooHackService_fetchStatus_result::withDefaultValues();
     try {
       $args = $this->readHelper(Deprecated_FooHackService_fetchStatus_args::class, $input, 'fetchStatus', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'foo_php_ns_Deprecated_FooHackService', 'fetchStatus', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\foo\php\ns\Deprecated_FooHackService', 'fetchStatus', $args);
       $result->success = await $this->handler->fetchStatus($args->request);
       $this->eventHandler_->postExec($handler_ctx, 'fetchStatus', $result);
     } catch (\Exception $ex) {
@@ -140,7 +142,7 @@ abstract class Deprecated_FooHackServiceAsyncProcessorBase extends \ThriftAsyncP
     $result = Deprecated_FooHackService_ping_result::withDefaultValues();
     try {
       $args = $this->readHelper(Deprecated_FooHackService_ping_args::class, $input, 'ping', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'foo_php_ns_Deprecated_FooHackService', 'ping', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\foo\php\ns\Deprecated_FooHackService', 'ping', $args);
       $result->success = await $this->handler->ping($args->str_arg);
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
     } catch (\Exception $ex) {
@@ -202,7 +204,7 @@ class Deprecated_FooHackService_fetchStatus_args implements \IThriftSyncStruct, 
     1 => shape(
       'var' => 'request',
       'type' => \TType::STRUCT,
-      'class' => foo_php_ns_Double_Prefixed_::class,
+      'class' => \test\foo\php\ns\Double_Prefixed_::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -210,13 +212,13 @@ class Deprecated_FooHackService_fetchStatus_args implements \IThriftSyncStruct, 
   ];
 
   const type TConstructorShape = shape(
-    ?'request' => ?foo_php_ns_Double_Prefixed_,
+    ?'request' => ?\test\foo\php\ns\Double_Prefixed_,
   );
 
   const int STRUCTURAL_ID = 8833886197915097673;
-  public ?foo_php_ns_Double_Prefixed_ $request;
+  public ?\test\foo\php\ns\Double_Prefixed_ $request;
 
-  public function __construct(?foo_php_ns_Double_Prefixed_ $request = null)[] {
+  public function __construct(?\test\foo\php\ns\Double_Prefixed_ $request = null)[] {
     $this->request = $request;
   }
 
@@ -235,16 +237,16 @@ class Deprecated_FooHackService_fetchStatus_args implements \IThriftSyncStruct, 
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.fetchStatus_args",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.TestStruct",
                     )
@@ -278,11 +280,6 @@ class Deprecated_FooHackService_fetchStatus_args implements \IThriftSyncStruct, 
                 "name" => "Prefixed_",
               )
             ),
-            '\facebook\thrift\annotation\Uri' => \facebook\thrift\annotation\Uri::fromShape(
-              shape(
-                "value" => "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestStruct",
-              )
-            ),
           ],
         ),
       ],
@@ -298,13 +295,13 @@ class Deprecated_FooHackService_fetchStatus_args implements \IThriftSyncStruct, 
 class Deprecated_FooHackService_fetchStatus_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const type TResult = foo_php_ns_ProgramPrefixedStatus;
+  const type TResult = \test\foo\php\ns\ProgramPrefixedStatus;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
-      'enum' => foo_php_ns_ProgramPrefixedStatus::class,
+      'enum' => \test\foo\php\ns\ProgramPrefixedStatus::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -337,16 +334,16 @@ class Deprecated_FooHackService_fetchStatus_result extends \ThriftSyncStructWith
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.Deprecated_FooHackService_fetchStatus_result",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 0,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_enum" => tmeta_ThriftEnumType::fromShape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
                     shape(
                       "name" => "module.Status",
                     )
@@ -366,16 +363,6 @@ class Deprecated_FooHackService_fetchStatus_result extends \ThriftSyncStructWith
     return shape(
       'struct' => dict[],
       'fields' => dict[
-        'success' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\facebook\thrift\annotation\Uri' => \facebook\thrift\annotation\Uri::fromShape(
-              shape(
-                "value" => "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/Status",
-              )
-            ),
-          ],
-        ),
       ],
     );
   }
@@ -425,16 +412,16 @@ class Deprecated_FooHackService_ping_args implements \IThriftSyncStruct, \IThrif
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.ping_args",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                 )
               ),
               "name" => "str_arg",
@@ -463,18 +450,18 @@ class Deprecated_FooHackService_ping_args implements \IThriftSyncStruct, \IThrif
 class Deprecated_FooHackService_ping_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const type TResult = foo_php_ns_Double_Prefixed_;
+  const type TResult = \test\foo\php\ns\Double_Prefixed_;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
-      'class' => foo_php_ns_Double_Prefixed_::class,
+      'class' => \test\foo\php\ns\Double_Prefixed_::class,
     ),
     1 => shape(
       'var' => 'ex',
       'type' => \TType::STRUCT,
-      'class' => foo_php_ns_PrefixedTestException::class,
+      'class' => \test\foo\php\ns\PrefixedTestException::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -484,14 +471,14 @@ class Deprecated_FooHackService_ping_result extends \ThriftSyncStructWithResult 
 
   const type TConstructorShape = shape(
     ?'success' => ?this::TResult,
-    ?'ex' => ?foo_php_ns_PrefixedTestException,
+    ?'ex' => ?\test\foo\php\ns\PrefixedTestException,
   );
 
   const int STRUCTURAL_ID = 8181663870339538726;
   public ?this::TResult $success;
-  public ?foo_php_ns_PrefixedTestException $ex;
+  public ?\test\foo\php\ns\PrefixedTestException $ex;
 
-  public function __construct(?this::TResult $success = null, ?foo_php_ns_PrefixedTestException $ex = null)[] {
+  public function __construct(?this::TResult $success = null, ?\test\foo\php\ns\PrefixedTestException $ex = null)[] {
     $this->success = $success;
     $this->ex = $ex;
   }
@@ -512,16 +499,16 @@ class Deprecated_FooHackService_ping_result extends \ThriftSyncStructWithResult 
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.Deprecated_FooHackService_ping_result",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 0,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.TestStruct",
                     )
@@ -531,12 +518,12 @@ class Deprecated_FooHackService_ping_result extends \ThriftSyncStructWithResult 
               "name" => "success",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.TestException",
                     )
@@ -570,11 +557,6 @@ class Deprecated_FooHackService_ping_result extends \ThriftSyncStructWithResult 
                 "name" => "Prefixed_",
               )
             ),
-            '\facebook\thrift\annotation\Uri' => \facebook\thrift\annotation\Uri::fromShape(
-              shape(
-                "value" => "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestStruct",
-              )
-            ),
           ],
         ),
         'ex' => shape(
@@ -584,11 +566,6 @@ class Deprecated_FooHackService_ping_result extends \ThriftSyncStructWithResult 
               shape(
                 "prefix" => "Prefixed",
                 "apply_on_getName" => false,
-              )
-            ),
-            '\facebook\thrift\annotation\Uri' => \facebook\thrift\annotation\Uri::fromShape(
-              shape(
-                "value" => "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestException",
               )
             ),
           ],
@@ -609,7 +586,7 @@ class Deprecated_FooHackService_ping_result extends \ThriftSyncStructWithResult 
   }
   
   public function setException(\Exception $e): bool {
-    if ($e is foo_php_ns_PrefixedTestException) {
+    if ($e is \test\foo\php\ns\PrefixedTestException) {
       $this->ex = $e;
       return true;
     }
@@ -621,16 +598,16 @@ class Deprecated_FooHackServiceStaticMetadata implements \IThriftServiceStaticMe
   const string THRIFT_SVC_NAME = 'FooHackService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
-    return tmeta_ThriftService::fromShape(
+    return \tmeta_ThriftService::fromShape(
       shape(
         "name" => "module.FooHackService",
         "functions" => vec[
-          tmeta_ThriftFunction::fromShape(
+          \tmeta_ThriftFunction::fromShape(
             shape(
               "name" => "fetchStatus",
-              "return_type" => tmeta_ThriftType::fromShape(
+              "return_type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_enum" => tmeta_ThriftEnumType::fromShape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
                     shape(
                       "name" => "module.Status",
                     )
@@ -638,12 +615,12 @@ class Deprecated_FooHackServiceStaticMetadata implements \IThriftServiceStaticMe
                 )
               ),
               "arguments" => vec[
-                tmeta_ThriftField::fromShape(
+                \tmeta_ThriftField::fromShape(
                   shape(
                     "id" => 1,
-                    "type" => tmeta_ThriftType::fromShape(
+                    "type" => \tmeta_ThriftType::fromShape(
                       shape(
-                        "t_struct" => tmeta_ThriftStructType::fromShape(
+                        "t_struct" => \tmeta_ThriftStructType::fromShape(
                           shape(
                             "name" => "module.TestStruct",
                           )
@@ -656,12 +633,12 @@ class Deprecated_FooHackServiceStaticMetadata implements \IThriftServiceStaticMe
               ],
             )
           ),
-          tmeta_ThriftFunction::fromShape(
+          \tmeta_ThriftFunction::fromShape(
             shape(
               "name" => "ping",
-              "return_type" => tmeta_ThriftType::fromShape(
+              "return_type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.TestStruct",
                     )
@@ -669,12 +646,12 @@ class Deprecated_FooHackServiceStaticMetadata implements \IThriftServiceStaticMe
                 )
               ),
               "arguments" => vec[
-                tmeta_ThriftField::fromShape(
+                \tmeta_ThriftField::fromShape(
                   shape(
                     "id" => 1,
-                    "type" => tmeta_ThriftType::fromShape(
+                    "type" => \tmeta_ThriftType::fromShape(
                       shape(
-                        "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                        "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                       )
                     ),
                     "name" => "str_arg",
@@ -682,12 +659,12 @@ class Deprecated_FooHackServiceStaticMetadata implements \IThriftServiceStaticMe
                 ),
               ],
               "exceptions" => vec[
-                tmeta_ThriftField::fromShape(
+                \tmeta_ThriftField::fromShape(
                   shape(
                     "id" => 1,
-                    "type" => tmeta_ThriftType::fromShape(
+                    "type" => \tmeta_ThriftType::fromShape(
                       shape(
-                        "t_struct" => tmeta_ThriftStructType::fromShape(
+                        "t_struct" => \tmeta_ThriftStructType::fromShape(
                           shape(
                             "name" => "module.TestException",
                           )
@@ -721,14 +698,14 @@ class Deprecated_FooHackServiceStaticMetadata implements \IThriftServiceStaticMe
         'metadata' => \tmeta_ThriftMetadata::fromShape(
           shape(
             'enums' => dict[
-              'module.Status' => foo_php_ns_ProgramPrefixedStatus_TEnumStaticMetadata::getEnumMetadata(),
+              'module.Status' => \test\foo\php\ns\ProgramPrefixedStatus_TEnumStaticMetadata::getEnumMetadata(),
             ],
             'structs' => dict[
-              'module.TestStruct' => foo_php_ns_Double_Prefixed_::getStructMetadata(),
-              'module.TestUnion' => foo_php_ns_PrefixedTestUnion::getStructMetadata(),
+              'module.TestStruct' => \test\foo\php\ns\Double_Prefixed_::getStructMetadata(),
+              'module.TestUnion' => \test\foo\php\ns\PrefixedTestUnion::getStructMetadata(),
             ],
             'exceptions' => dict[
-              'module.TestException' => foo_php_ns_PrefixedTestException::getExceptionMetadata(),
+              'module.TestException' => \test\foo\php\ns\PrefixedTestException::getExceptionMetadata(),
             ],
             'services' => dict[
             ],
@@ -744,11 +721,6 @@ class Deprecated_FooHackServiceStaticMetadata implements \IThriftServiceStaticMe
         '\facebook\thrift\annotation\hack\NamePrefix' => \facebook\thrift\annotation\hack\NamePrefix::fromShape(
           shape(
             "prefix" => "Deprecated_",
-          )
-        ),
-        '\facebook\thrift\annotation\Uri' => \facebook\thrift\annotation\Uri::fromShape(
-          shape(
-            "value" => "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/FooHackService",
           )
         ),
       ],

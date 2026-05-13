@@ -13,7 +13,7 @@ namespace hack_ns2;
  * TestService
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/php_hack_ns/TestService'))>>
-interface GlobalTestServiceAsyncIf extends \Deprecated_FooHackServiceAsyncIf {
+interface GlobalTestServiceAsyncIf extends \test\foo\php\ns\Deprecated_FooHackServiceAsyncIf {
   /**
    * Original thrift definition:-
    * FBStruct
@@ -27,7 +27,7 @@ interface GlobalTestServiceAsyncIf extends \Deprecated_FooHackServiceAsyncIf {
  * TestService
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/php_hack_ns/TestService'))>>
-interface GlobalTestServiceAsyncClientIf extends GlobalTestServiceAsyncIf, \Deprecated_FooHackServiceAsyncClientIf {
+interface GlobalTestServiceAsyncClientIf extends GlobalTestServiceAsyncIf, \test\foo\php\ns\Deprecated_FooHackServiceAsyncClientIf {
 }
 
 /**
@@ -35,7 +35,7 @@ interface GlobalTestServiceAsyncClientIf extends GlobalTestServiceAsyncIf, \Depr
  * TestService
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/php_hack_ns/TestService'))>>
-interface GlobalTestServiceClientIf extends \Deprecated_FooHackServiceClientIf {
+interface GlobalTestServiceClientIf extends \test\foo\php\ns\Deprecated_FooHackServiceClientIf {
   /**
    * Original thrift definition:-
    * FBStruct
@@ -68,14 +68,14 @@ trait GlobalTestServiceClientBase {
 
 }
 
-class GlobalTestServiceAsyncClient extends \Deprecated_FooHackServiceAsyncClient implements GlobalTestServiceAsyncClientIf {
+class GlobalTestServiceAsyncClient extends \test\foo\php\ns\Deprecated_FooHackServiceAsyncClient implements GlobalTestServiceAsyncClientIf {
   use GlobalTestServiceClientBase;
 
   const string THRIFT_SVC_NAME = GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
-class GlobalTestServiceClient extends \Deprecated_FooHackServiceClient implements GlobalTestServiceClientIf {
+class GlobalTestServiceClient extends \test\foo\php\ns\Deprecated_FooHackServiceClient implements GlobalTestServiceClientIf {
   use GlobalTestServiceClientBase;
 
   const string THRIFT_SVC_NAME = GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME;
@@ -296,18 +296,18 @@ class GlobalTestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
         'metadata' => \tmeta_ThriftMetadata::fromShape(
           shape(
             'enums' => dict[
-              'module.Status' => \foo_php_ns_ProgramPrefixedStatus_TEnumStaticMetadata::getEnumMetadata(),
+              'module.Status' => \test\foo\php\ns\ProgramPrefixedStatus_TEnumStaticMetadata::getEnumMetadata(),
             ],
             'structs' => dict[
               'module2.FBStruct' => \hack_ns2\GlobalFBStruct::getStructMetadata(),
-              'module.TestStruct' => \foo_php_ns_Double_Prefixed_::getStructMetadata(),
-              'module.TestUnion' => \foo_php_ns_PrefixedTestUnion::getStructMetadata(),
+              'module.TestStruct' => \test\foo\php\ns\Double_Prefixed_::getStructMetadata(),
+              'module.TestUnion' => \test\foo\php\ns\PrefixedTestUnion::getStructMetadata(),
             ],
             'exceptions' => dict[
-              'module.TestException' => \foo_php_ns_PrefixedTestException::getExceptionMetadata(),
+              'module.TestException' => \test\foo\php\ns\PrefixedTestException::getExceptionMetadata(),
             ],
             'services' => dict[
-              'module.FooHackService' => \Deprecated_FooHackServiceStaticMetadata::getServiceMetadata(),
+              'module.FooHackService' => \test\foo\php\ns\Deprecated_FooHackServiceStaticMetadata::getServiceMetadata(),
             ],
           )
         ),

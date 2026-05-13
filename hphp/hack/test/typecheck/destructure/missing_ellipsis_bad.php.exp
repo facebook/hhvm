@@ -1,0 +1,4 @@
+ERROR: File "missing_ellipsis_bad.php", line 5, characters 3-7:
+Tuple arity mismatch: expected 1 element in destructuring pattern but the tuple type has 2 (Typing[4513])
+ERROR: File "missing_ellipsis_bad.php", line 10, characters 3-7:
+Missing `...`: the shape type has unknown fields, so the destructuring pattern must end with `...` (Typing[4510])

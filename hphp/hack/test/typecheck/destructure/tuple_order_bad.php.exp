@@ -1,0 +1,2 @@
+ERROR: File "tuple_order_bad.php", line 9, characters 22-23:
+There must be no required elements following an optional element (Parsing[1002])

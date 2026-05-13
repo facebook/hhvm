@@ -13081,14 +13081,16 @@ end = struct
           assign_with_subtype_err_ pos ur env e pos2 ty2
         in
         (env, (ty, pos, Aast.ReadonlyExpr te1), ty, err)
-      | (_, pos1, DestructureShape _ds) ->
-        (* TODO(T266467978): replace stub with Typing_destructure.shape *)
-        let (env, ty) = Env.fresh_type_error env pos1 in
-        (env, Tast.make_typed_expr pos1 ty Aast.Omitted, ty, None)
-      | (_, pos1, DestructureTuple _dt) ->
-        (* TODO(T266467978): replace stub with Typing_destructure.tuple *)
-        let (env, ty) = Env.fresh_type_error env pos1 in
-        (env, Tast.make_typed_expr pos1 ty Aast.Omitted, ty, None)
+      | (_, pos1, DestructureShape ds) ->
+        let (env, te, ty) =
+          Typing_destructure.shape ~assign_pos:p ~pat_pos:pos1 env ds ty2
+        in
+        (env, te, ty, None)
+      | (_, pos1, DestructureTuple dt) ->
+        let (env, te, ty) =
+          Typing_destructure.tuple ~assign_pos:p ~pat_pos:pos1 env dt ty2
+        in
+        (env, te, ty, None)
       | _ -> assign_simple p ur env e1 ty2)
 
   (* Deal with assignment of a value of type ty2 to lvalue e1 *)

@@ -1,0 +1,58 @@
+WARN: File "wrong_type_bad.php", line 15, characters 8-33:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `null` which is a subtype of `?shape('x' => int)`. (Warn[12011])
+WARN: File "wrong_type_bad.php", line 20, characters 8-29:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `null` which is a subtype of `?(int, string)`. (Warn[12011])
+ERROR: File "wrong_type_bad.php", line 7, characters 3-23:
+Typing error (Typing[4110])
+  File "wrong_type_bad.php", line 7, characters 3-23:
+  Expected `shape('x' => _, ...)` resulting from a shape or tuple destructuring pattern
+  File "wrong_type_bad.php", line 6, characters 27-31:
+  But got `mixed`
+ERROR: File "wrong_type_bad.php", line 11, characters 3-15:
+Typing error (Typing[4110])
+  File "wrong_type_bad.php", line 11, characters 3-15:
+  Expected `(_, _, mixed...)` resulting from a shape or tuple destructuring pattern
+  File "wrong_type_bad.php", line 10, characters 27-31:
+  But got `mixed`
+ERROR: File "wrong_type_bad.php", line 16, characters 3-18:
+Typing error (Typing[4110])
+  File "wrong_type_bad.php", line 16, characters 3-18:
+  Expected `shape('x' => _, ...)` resulting from a shape or tuple destructuring pattern
+  File "wrong_type_bad.php", line 15, characters 8-11:
+  But got `null`
+ERROR: File "wrong_type_bad.php", line 21, characters 3-15:
+Typing error (Typing[4110])
+  File "wrong_type_bad.php", line 21, characters 3-15:
+  Expected `(_, _, mixed...)` resulting from a shape or tuple destructuring pattern
+  File "wrong_type_bad.php", line 20, characters 8-11:
+  But got `null`
+ERROR: File "wrong_type_bad.php", line 25, characters 3-23:
+Typing error (Typing[4110])
+  File "wrong_type_bad.php", line 25, characters 3-23:
+  Expected `shape('a' => _, ...)` resulting from a shape or tuple destructuring pattern
+  File "wrong_type_bad.php", line 24, characters 29-35:
+  But got `nonnull`
+ERROR: File "wrong_type_bad.php", line 29, characters 3-15:
+Typing error (Typing[4110])
+  File "wrong_type_bad.php", line 29, characters 3-15:
+  Expected `(_, _, mixed...)` resulting from a shape or tuple destructuring pattern
+  File "wrong_type_bad.php", line 28, characters 29-35:
+  But got `nonnull`
+ERROR: File "wrong_type_bad.php", line 33, characters 3-23:
+Typing error (Typing[4110])
+  File "wrong_type_bad.php", line 33, characters 3-23:
+  Expected `shape('x' => _, ...)` resulting from a shape or tuple destructuring pattern
+  File "wrong_type_bad.php", line 32, characters 25-27:
+  But got `int`
+ERROR: File "wrong_type_bad.php", line 37, characters 3-11:
+Typing error (Typing[4110])
+  File "wrong_type_bad.php", line 37, characters 3-11:
+  Expected `(_, mixed...)` resulting from a shape or tuple destructuring pattern
+  File "wrong_type_bad.php", line 36, characters 28-33:
+  But got `string`
+ERROR: File "wrong_type_bad.php", line 50, characters 3-16:
+Typing error (Typing[4110])
+  File "wrong_type_bad.php", line 50, characters 3-16:
+  Expected `(_, _, mixed...)` resulting from a shape or tuple destructuring pattern
+  File "wrong_type_bad.php", line 47, characters 14-16:
+  But got `Foo`

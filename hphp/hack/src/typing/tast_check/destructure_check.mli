@@ -1,6 +1,6 @@
 (** Structural validation for shape and tuple destructuring patterns.
 
-    Catches errors we do not catch in subtyping, such as:
+    This check catches errors we do not catch in subtyping, such as:
     {[
       $s : shape('a' => int, 'b' => string);
       shape('a' => $a) = $s;            // error: missing required field 'b'

@@ -1,0 +1,18 @@
+ERROR: File "inout_readonly_bad.php", line 15, characters 16-17:
+Cannot write a readonly value to an inout parameter (Parsing[1002])
+ERROR: File "inout_readonly_bad.php", line 22, characters 9-10:
+Cannot write a readonly value to an inout parameter (Parsing[1002])
+ERROR: File "inout_readonly_bad.php", line 29, characters 35-36:
+Cannot write a readonly value to an inout parameter (Parsing[1002])
+ERROR: File "inout_readonly_bad.php", line 15, characters 3-24:
+Invalid assignment to an `inout` parameter (Typing[4337])
+  File "inout_readonly_bad.php", line 12, characters 9-37:
+  Expected `shape('x' => Foo, 'y' => Foo)` (`inout` parameter)
+  File "inout_readonly_bad.php", line 13, characters 25-27:
+  But got `Foo`
+ERROR: File "inout_readonly_bad.php", line 22, characters 3-17:
+Invalid assignment to an `inout` parameter (Typing[4337])
+  File "inout_readonly_bad.php", line 19, characters 9-18:
+  Expected `(Foo, Foo)` (`inout` parameter)
+  File "inout_readonly_bad.php", line 20, characters 13-15:
+  But got `Foo`

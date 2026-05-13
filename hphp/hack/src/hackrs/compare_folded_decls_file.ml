@@ -239,6 +239,7 @@ let () =
       ignored_arg "--require-types-class-consts";
       ignored_flag "--skip-tast-checks";
       ignored_flag "--expression-tree-virtualize-functions";
+      ignored_flag "--enable-supportdyn-hint";
       ignored_arg "--config";
     ]
     set_file

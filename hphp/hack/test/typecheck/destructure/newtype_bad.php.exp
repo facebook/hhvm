@@ -1,0 +1,10 @@
+ERROR: File "newtype_bad.php--use.php", line 6, characters 3-34:
+Typing error (Typing[4163])
+  File "newtype_bad.php--def.php", line 4, characters 23-44:
+  The field `y` is **optional**
+  File "newtype_bad.php--use.php", line 6, characters 3-34:
+  The field `y` is defined as **required**
+  File "newtype_bad.php--use.php", line 6, characters 20-22:
+  `y` is defined here
+ERROR: File "newtype_bad.php--use.php", line 6, characters 20-22:
+Field `'y'` does not exist in the shape type (Typing[4512])

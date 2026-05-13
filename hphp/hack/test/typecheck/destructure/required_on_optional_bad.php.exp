@@ -1,0 +1,16 @@
+ERROR: File "required_on_optional_bad.php", line 11, characters 3-34:
+Typing error (Typing[4163])
+  File "required_on_optional_bad.php", line 8, characters 3-32:
+  The field `y` is **optional**
+  File "required_on_optional_bad.php", line 11, characters 3-34:
+  The field `y` is defined as **required**
+  File "required_on_optional_bad.php", line 11, characters 20-22:
+  `y` is defined here
+ERROR: File "required_on_optional_bad.php", line 18, characters 3-37:
+Typing error (Typing[4163])
+  File "required_on_optional_bad.php", line 15, characters 16-36:
+  The field `b` is **optional**
+  File "required_on_optional_bad.php", line 18, characters 16-20:
+  The field `b` is defined as **required**
+  File "required_on_optional_bad.php", line 18, characters 22-24:
+  `b` is defined here

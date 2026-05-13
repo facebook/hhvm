@@ -1,0 +1,20 @@
+ERROR: File "simple_bad.php", line 8, characters 9-13:
+Only variables, wildcards, and nested shape/tuple patterns are allowed in destructuring patterns (Parsing[1002])
+ERROR: File "simple_bad.php", line 5, characters 3-7:
+Tuple arity mismatch: expected 2 elements in destructuring pattern but the tuple type has 3 (Typing[4513])
+ERROR: File "simple_bad.php", line 6, characters 3-15:
+Typing error (Typing[4110])
+  File "simple_bad.php", line 6, characters 3-15:
+  Expected `(_, _, mixed...)` resulting from a shape or tuple destructuring pattern
+  File "simple_bad.php", line 6, characters 19-28:
+  But got `vec<int>`
+ERROR: File "simple_bad.php", line 10, characters 3-29:
+Typing error (Typing[4057])
+  File "simple_bad.php", line 10, characters 33-47:
+  The field `a` is missing
+  File "simple_bad.php", line 10, characters 9-11:
+  The field `a` is required here
+ERROR: File "simple_bad.php", line 10, characters 9-11:
+Field `'a'` does not exist in the shape type (Typing[4512])
+ERROR: File "simple_bad.php", line 11, characters 3-7:
+Missing required fields in destructuring pattern: 'a' (Typing[4511])

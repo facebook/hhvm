@@ -1,0 +1,2 @@
+ERROR: File "union_good.php", line 111, characters 21-23:
+Field `'b'` does not exist in the shape type (Typing[4512])

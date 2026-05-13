@@ -1,0 +1,12 @@
+ERROR: File "position_bad.php", line 5, characters 40-41:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "position_bad.php", line 5, characters 40-41:
+Encountered unexpected text `$x`, was expecting a type hint. (Parsing[1002])
+ERROR: File "position_bad.php", line 16, characters 1-33:
+Declarations are not supported outside global scope (Parsing[1002])
+ERROR: File "position_bad.php", line 13, characters 35-36:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+ERROR: File "position_bad.php", line 13, characters 38-38:
+Unbound name: `)` (a global constant) (Naming[2049])
+ERROR: File "position_bad.php", line 13, characters 38-38:
+Unbound global constant (Typing) (Typing[4106])

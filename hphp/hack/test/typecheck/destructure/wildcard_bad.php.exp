@@ -1,0 +1,22 @@
+ERROR: File "wildcard_bad.php", line 8, characters 9-9:
+Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
+ERROR: File "wildcard_bad.php", line 8, characters 10-10:
+An arrow `=>` is expected here. (Parsing[1002])
+ERROR: File "wildcard_bad.php", line 8, characters 10-10:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+ERROR: File "wildcard_bad.php", line 8, characters 10-10:
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
+ERROR: File "wildcard_bad.php", line 5, characters 57-57:
+Wildcard typehints are not allowed in this position (Naming[2084])
+ERROR: File "wildcard_bad.php", line 8, characters 10-10:
+Unbound name: `)` (a global constant) (Naming[2049])
+ERROR: File "wildcard_bad.php", line 12, characters 21-21:
+Unbound name: `_` (a global constant) (Naming[2049])
+ERROR: File "wildcard_bad.php", line 16, characters 8-8:
+Unbound name: `_` (a global constant) (Naming[2049])
+ERROR: File "wildcard_bad.php", line 8, characters 10-10:
+Unbound global constant (Typing) (Typing[4106])
+ERROR: File "wildcard_bad.php", line 12, characters 21-21:
+Unbound global constant (Typing) (Typing[4106])
+ERROR: File "wildcard_bad.php", line 16, characters 8-8:
+Unbound global constant (Typing) (Typing[4106])

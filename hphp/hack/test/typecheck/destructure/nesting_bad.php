@@ -6,7 +6,6 @@ function f(): void {
   list(tuple($a), $b) = tuple(tuple(1), 2);
   tuple(list($a, $b)) = tuple(tuple(1, 2));
 
-
 }
 
 //

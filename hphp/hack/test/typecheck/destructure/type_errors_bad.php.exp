@@ -1,0 +1,14 @@
+ERROR: File "type_errors_bad.php", line 6, characters 3-7:
+Missing required fields in destructuring pattern: 'y' (Typing[4511])
+ERROR: File "type_errors_bad.php", line 11, characters 3-29:
+Typing error (Typing[4057])
+  File "type_errors_bad.php", line 10, characters 29-45:
+  The field `z` is missing
+  File "type_errors_bad.php", line 11, characters 20-22:
+  The field `z` is required here
+ERROR: File "type_errors_bad.php", line 11, characters 20-22:
+Field `'z'` does not exist in the shape type (Typing[4512])
+ERROR: File "type_errors_bad.php", line 16, characters 3-7:
+Missing required fields in destructuring pattern: 'c', 'b' (Typing[4511])
+ERROR: File "type_errors_bad.php", line 21, characters 3-7:
+Tuple arity mismatch: expected 1 element in destructuring pattern but the tuple type has 2 (Typing[4513])

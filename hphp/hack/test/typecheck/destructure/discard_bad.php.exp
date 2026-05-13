@@ -1,0 +1,20 @@
+ERROR: File "discard_bad.php", line 7, characters 3-4:
+Typing error (Typing[4429])
+  File "discard_bad.php", line 7, characters 3-8:
+  Expected `num` because this is used in an arithmetic operation
+  File "discard_bad.php", line 7, characters 3-4:
+  But got `void` (`$_` is a placeholder variable not meant to be used)
+ERROR: File "discard_bad.php", line 7, characters 3-4:
+You are using the return value of a `void` function (Typing[4119])
+  File "discard_bad.php", line 7, characters 3-4:
+  A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
+ERROR: File "discard_bad.php", line 12, characters 3-4:
+Typing error (Typing[4429])
+  File "discard_bad.php", line 12, characters 3-8:
+  Expected `num` because this is used in an arithmetic operation
+  File "discard_bad.php", line 12, characters 3-4:
+  But got `void` (`$_` is a placeholder variable not meant to be used)
+ERROR: File "discard_bad.php", line 12, characters 3-4:
+You are using the return value of a `void` function (Typing[4119])
+  File "discard_bad.php", line 12, characters 3-4:
+  A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)

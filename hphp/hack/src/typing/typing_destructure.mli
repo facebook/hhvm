@@ -1,4 +1,4 @@
-(** Typing of shape and tuple destructuring patterns. *)
+(** Typing of shape and tuple destructuring patterns *)
 
 (** [shape ~assign_pos ~pat_pos env ds rhs_ty] types shape
     destructuring pattern [ds] against [rhs_ty]. [assign_pos]

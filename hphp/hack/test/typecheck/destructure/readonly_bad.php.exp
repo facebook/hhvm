@@ -1,0 +1,4 @@
+ERROR: File "readonly_bad.php", line 8, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+ERROR: File "readonly_bad.php", line 13, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])

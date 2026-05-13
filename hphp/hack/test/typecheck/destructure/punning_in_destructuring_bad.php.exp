@@ -1,0 +1,8 @@
+ERROR: File "punning_in_destructuring_bad.php", line 6, characters 3-15:
+Typing error (Typing[4057])
+  File "punning_in_destructuring_bad.php", line 5, characters 29-45:
+  The field `y` is missing
+  File "punning_in_destructuring_bad.php", line 6, characters 13-14:
+  The field `y` is required here
+ERROR: File "punning_in_destructuring_bad.php", line 6, characters 13-14:
+Field `'y'` does not exist in the shape type (Typing[4512])

@@ -1,0 +1,16 @@
+ERROR: File "invalid_syntax_bad.php", line 5, characters 24-26:
+Ellipsis `...` is only valid in shape destructuring patterns (Parsing[1002])
+ERROR: File "invalid_syntax_bad.php", line 6, characters 20-22:
+Ellipsis `...` is only valid in tuple destructuring patterns (Parsing[1002])
+ERROR: File "invalid_syntax_bad.php", line 10, characters 14-22:
+Optional field syntax `?` is only valid in shape destructuring patterns (Parsing[1002])
+ERROR: File "invalid_syntax_bad.php", line 10, characters 14-22:
+Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
+ERROR: File "invalid_syntax_bad.php", line 11, characters 14-16:
+Optional field syntax `?` is only valid in shape destructuring patterns (Parsing[1002])
+ERROR: File "invalid_syntax_bad.php", line 11, characters 14-16:
+Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
+ERROR: File "invalid_syntax_bad.php", line 11, characters 15-16:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+  File "invalid_syntax_bad.php", line 10, characters 3-23:
+  Did you mean `$s` instead?

@@ -396,9 +396,13 @@ let rec assign (env : Tast_env.env) lval rval =
   match lval with
   (* List assignment *)
   | (_, _, List exprs) -> List.iter exprs ~f:(fun lval -> assign env lval rval)
-  (* TODO(T266467978): real shape/tuple destructure readonly checking in next commit *)
-  | (_, _, DestructureShape _) -> ()
-  | (_, _, DestructureTuple _) -> ()
+  (* Shape/tuple destructuring: propagate readonly from RHS to each target *)
+  | (_, _, DestructureShape { ds_fields; _ }) ->
+    List.iter ds_fields ~f:(fun dsf ->
+        assign_destructure_target env dsf.dsf_target rval)
+  | (_, _, DestructureTuple { dt_entries; _ }) ->
+    List.iter dt_entries ~f:(fun dte ->
+        assign_destructure_target env dte.dte_target rval)
   | (_, _, Array_get (array, _)) -> begin
     match (ty_expr env array, ty_expr env rval) with
     | (Readonly, _) when is_value_collection_ty env (Tast.get_type array) ->
@@ -457,6 +461,19 @@ let rec assign (env : Tast_env.env) lval rval =
     | _ -> ())
   (* TODO: make this exhaustive *)
   | _ -> ()
+
+and assign_destructure_target env target rval =
+  let (_, _, target_) = target in
+  match target_ with
+  | Aast.DtLvar _
+  | Aast.DtWildcard _ ->
+    ()
+  | Aast.DtShape ds ->
+    List.iter ds.ds_fields ~f:(fun dsf ->
+        assign_destructure_target env dsf.dsf_target rval)
+  | Aast.DtTuple dt ->
+    List.iter dt.dt_entries ~f:(fun dte ->
+        assign_destructure_target env dte.dte_target rval)
 
 (* Method call invocation *)
 let method_call env caller =

@@ -24,7 +24,6 @@ from contextvars import ContextVar
 import ipaddress
 import os
 from pathlib import Path
-
 from thrift.python.common import Priority
 
 SocketAddress = collections.namedtuple('SocketAddress', 'ip port path')
@@ -34,13 +33,33 @@ THRIFT_REQUEST_CONTEXT = ContextVar('ThriftRequestContext')
 get_context = THRIFT_REQUEST_CONTEXT.get
 
 cdef class RequestContext:
+    def __cinit__(self):
+        self._ctx_holder = make_shared[Cpp2RequestContextHolder](<Cpp2RequestContext*>NULL)
+
     @staticmethod
     cdef RequestContext _fbthrift_create(Cpp2RequestContext* ctx):
         inst = <RequestContext>RequestContext.__new__(RequestContext)
-        inst._ctx = ctx
+        inst._ctx_holder = make_shared[Cpp2RequestContextHolder](ctx)
         inst._c_ctx = ConnectionContext._fbthrift_create(ctx.getConnectionContext())
         inst._requestId = getRequestId()
         return inst
+
+    def is_valid(self):
+        return self._ctx_holder.get().is_valid()
+
+    def _enable_validity_enforcement(self):
+        cdef Cpp2RequestContext* ctx = self._ctx_holder.get().get_ctx()
+        if ctx != NULL:
+            installInvalidator(ctx, self._ctx_holder)
+
+    cdef Cpp2RequestContext* _get_ctx(self) except NULL:
+        cdef Cpp2RequestContext* ctx = self._ctx_holder.get().get_ctx()
+        if ctx == NULL:
+            raise RuntimeError(
+                "Request context is no longer valid. "
+                "The Thrift request has already completed."
+            )
+        return ctx
 
     @property
     def connection_context(self):
@@ -48,27 +67,26 @@ cdef class RequestContext:
 
     @property
     def read_headers(self):
-        if not self._readheaders:
+        if self._readheaders is None:
             self._readheaders = ReadHeaders._fbthrift_create(self)
         return self._readheaders
 
     @property
     def write_headers(self):
-        # So we don't create a cycle
-        if not self._writeheaders:
+        if self._writeheaders is None:
             self._writeheaders = WriteHeaders._fbthrift_create(self)
         return self._writeheaders
 
     @property
     def priority(self):
-        return Priority(<int>self._ctx.getCallPriority())
+        return Priority(<int>self._get_ctx().getCallPriority())
 
     def set_header(self, str key not None, str value not None):
-        self._ctx.getHeader().setHeader(key.encode('utf-8'), value.encode('utf-8'))
+        self._get_ctx().getHeader().setHeader(key.encode('utf-8'), value.encode('utf-8'))
 
     @property
-    def method_name(ConnectionContext self):
-        return self._ctx.getMethodName().decode('utf-8')
+    def method_name(self):
+        return self._ctx_holder.get().methodName.decode('utf-8')
 
     @property
     def request_id(self):
@@ -76,7 +94,7 @@ cdef class RequestContext:
 
     @property
     def request_timeout(self):
-        return float(self._ctx.getRequestTimeout().count() / 1000)
+        return float(self._get_ctx().getRequestTimeout().count() / 1000)
 
 
 cdef class ClientMetadata:
@@ -184,8 +202,8 @@ cdef class ReadHeaders(Headers):
         inst._parent = ctx
         return inst
 
-    cdef const F14NodeMap[string, string]* _getMap(self):
-        return &self._parent._ctx.getHeader().getHeaders()
+    cdef const F14NodeMap[string, string]* _getMap(self) except NULL:
+        return &self._parent._get_ctx().getHeader().getHeaders()
 
 
 cdef class WriteHeaders(Headers):
@@ -195,8 +213,8 @@ cdef class WriteHeaders(Headers):
         inst._parent = ctx
         return inst
 
-    cdef const F14NodeMap[string, string]* _getMap(self):
-        return &self._parent._ctx.getHeader().getWriteHeaders()
+    cdef const F14NodeMap[string, string]* _getMap(self) except NULL:
+        return &self._parent._get_ctx().getHeader().getWriteHeaders()
 
 
 cdef void handleAddressCallback(PyObject* future, cfollySocketAddress address) noexcept:
@@ -236,7 +254,7 @@ cdef inline _get_SocketAddress(const cfollySocketAddress* sadr):
     )
 
 cdef api Cpp2RequestContext* extract_cpp_request_context(object ctx) except NULL:
-    return (<RequestContext?>ctx)._ctx
+    return (<RequestContext?>ctx)._get_ctx()
 
 cdef api Cpp2ConnContext* extract_cpp_connection_context(object ctx) except NULL:
     return (<ConnectionContext?>ctx)._ctx

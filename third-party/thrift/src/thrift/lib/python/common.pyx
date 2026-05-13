@@ -37,7 +37,7 @@ cdef class Headers:
     def __init__(self):
         raise TypeError('This class is for wrapping maps originating in C++')
 
-    cdef const F14NodeMap[string, string]* _getMap(self):
+    cdef const F14NodeMap[string, string]* _getMap(self) except NULL:
         """ This method should be overloaded """
         pass
 
@@ -142,7 +142,7 @@ cdef class ReadHeaders(Headers):
         inst._parent = rpc_options
         return inst
 
-    cdef const F14NodeMap[string, string]* _getMap(self):
+    cdef const F14NodeMap[string, string]* _getMap(self) except NULL:
         return &self._parent._cpp_obj.getReadHeaders()
 
 
@@ -153,7 +153,7 @@ cdef class WriteHeaders(Headers):
         inst._parent = rpc_options
         return inst
 
-    cdef const F14NodeMap[string, string]* _getMap(self):
+    cdef const F14NodeMap[string, string]* _getMap(self) except NULL:
         return &self._parent._cpp_obj.getWriteHeaders()
 
 

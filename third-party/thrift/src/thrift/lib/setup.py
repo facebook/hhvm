@@ -374,7 +374,10 @@ else:
         ),
         Extension(
             "thrift.python.server_impl.request_context",
-            sources=["thrift/python/server_impl/request_context.pyx"],
+            sources=[
+                "thrift/python/server_impl/request_context.pyx",
+                "thrift/python/server/request_context_holder.cpp",
+            ],
             **common_options,
         ),
         Extension(

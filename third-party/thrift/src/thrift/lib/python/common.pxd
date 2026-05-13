@@ -57,7 +57,7 @@ cdef extern from "folly/container/F14Map.h" namespace "folly":
 
 cdef class Headers:
     cdef object __weakref__
-    cdef const F14NodeMap[string, string]* _getMap(self)
+    cdef const F14NodeMap[string, string]* _getMap(self) except NULL
 
 
 cdef extern from "thrift/lib/cpp2/async/RpcOptions.h" namespace "apache::thrift":

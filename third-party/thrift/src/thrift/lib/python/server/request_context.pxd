@@ -15,7 +15,7 @@
 from cpython.ref cimport PyObject
 from libc.stdint cimport uint64_t
 from libcpp cimport bool as cbool
-from libcpp.memory cimport unique_ptr
+from libcpp.memory cimport make_shared, shared_ptr, unique_ptr
 from libcpp.string cimport string
 from libcpp.utility cimport pair
 
@@ -99,6 +99,18 @@ cdef extern from "folly/io/async/ssl/OpenSSLTransportCertificate.h" \
         namespace "folly::OpenSSLTransportCertificate":
     X509UniquePtr tryExtractX509(const AsyncTransportCertificate* cert)
 
+cdef extern from "thrift/lib/python/server/request_context_holder.h" \
+        namespace "apache::thrift::python":
+    cdef cppclass Cpp2RequestContextHolder:
+        string methodName
+        Cpp2RequestContext* get_ctx()
+        cbool is_valid()
+        void invalidate()
+
+    void installInvalidator(
+        Cpp2RequestContext* ctx,
+        shared_ptr[Cpp2RequestContextHolder] holder,
+    )
 
 cdef void handleAddressCallback(PyObject* future, cfollySocketAddress address) noexcept
 
@@ -123,13 +135,14 @@ cdef class ConnectionContext:
 
 cdef class RequestContext:
     cdef ConnectionContext _c_ctx
-    cdef Cpp2RequestContext* _ctx
+    cdef shared_ptr[Cpp2RequestContextHolder] _ctx_holder
     cdef object _readheaders
     cdef object _writeheaders
     cdef string _requestId
 
     @staticmethod
     cdef RequestContext _fbthrift_create(Cpp2RequestContext* ctx)
+    cdef Cpp2RequestContext* _get_ctx(self) except NULL
 
 cdef class ReadHeaders(Headers):
     cdef RequestContext _parent

@@ -33,7 +33,7 @@ from test_thrift.thrift_services import TestingServiceInterface
 from test_thrift.thrift_types import Color, easy, SimpleError
 from thrift.lib.python.test.event_handlers.helper import ThrowHelper, ThrowHelperHandler
 from thrift.lib.python.test.test_server import TestServer
-from thrift.py3.server import get_context
+from thrift.py3.server import get_context, ReadHeaders, RequestContext, WriteHeaders
 from thrift.python.client import get_client
 from thrift.python.common import Priority, RpcOptions
 from thrift.python.exceptions import ApplicationError
@@ -309,6 +309,120 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                     with ThrowHelper(handler):
                         with self.assertRaisesRegex(ApplicationError, handler.value):
                             await client.complex_action("1", "2", 3, "4")
+
+    async def test_request_context_invalidated_after_rpc(self) -> None:
+        captured_ctx: RequestContext | None = None
+        captured_headers: ReadHeaders | None = None
+
+        class CapturingHandler(Handler):
+            async def getName(self) -> str:
+                nonlocal captured_ctx, captured_headers
+                captured_ctx = get_context()
+                captured_ctx._enable_validity_enforcement()  # pyre-ignore[16]
+                captured_headers = captured_ctx.read_headers
+                return "Testing"
+
+        async with local_server(handler=CapturingHandler()) as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(TestingService, host=ip, port=port) as client:
+                self.assertEqual("Testing", await client.getName())
+
+        assert captured_ctx is not None
+        assert captured_headers is not None
+
+        with self.assertRaises(RuntimeError):
+            dict(captured_ctx.read_headers)
+        with self.assertRaises(RuntimeError):
+            _ = captured_ctx.priority
+        with self.assertRaises(RuntimeError):
+            _ = captured_ctx.request_timeout
+        with self.assertRaises(RuntimeError):
+            captured_ctx.set_header("key", "value")
+
+        with self.assertRaises(RuntimeError):
+            _ = captured_headers["any_key"]
+
+        self.assertIsNotNone(captured_ctx.connection_context)
+        self.assertIsInstance(captured_ctx.request_id, str)
+        self.assertIsInstance(captured_ctx.method_name, str)
+
+    async def test_request_context_no_error_without_enforcement(self) -> None:
+        captured_ctx: RequestContext | None = None
+
+        class CapturingHandler(Handler):
+            async def getName(self) -> str:
+                nonlocal captured_ctx
+                captured_ctx = get_context()
+                return "Testing"
+
+        async with local_server(handler=CapturingHandler()) as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(TestingService, host=ip, port=port) as client:
+                self.assertEqual("Testing", await client.getName())
+
+        assert captured_ctx is not None
+        # Without _enable_validity_enforcement(), the invalidator is never
+        # installed, so the holder's pointer is not nulled on request
+        # completion. The pointer still appears valid.
+        _ = captured_ctx.read_headers
+
+    async def test_request_context_invalidated_in_background_task(self) -> None:
+        captured_ctx: RequestContext | None = None
+        background_error: Exception | None = None
+        background_done: asyncio.Event = asyncio.Event()
+        eviction_done: asyncio.Event = asyncio.Event()
+
+        class CapturingHandler(Handler):
+            async def getName(self) -> str:
+                nonlocal captured_ctx
+                if captured_ctx is None:
+                    captured_ctx = get_context()
+                    captured_ctx._enable_validity_enforcement()  # pyre-ignore[16]
+                    asyncio.get_running_loop().create_task(background_access())
+                return "Testing"
+
+        async def background_access() -> None:
+            nonlocal background_error
+            try:
+                await eviction_done.wait()
+                assert captured_ctx is not None
+                _ = captured_ctx.priority
+            except Exception as e:
+                background_error = e
+            finally:
+                background_done.set()
+
+        test_server = TestServer(handler=CapturingHandler(), ip="::1")
+        test_server.server.set_io_worker_threads(1)
+        async with test_server as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(TestingService, host=ip, port=port) as client:
+                self.assertEqual("Testing", await client.getName())
+                # Send 11 more requests to evict the first request's DebugStub
+                # from RequestsRegistry's finished list (default limit: 10),
+                # freeing the underlying Cpp2RequestContext memory.
+                for _ in range(11):
+                    await client.getName()
+
+            eviction_done.set()
+            await asyncio.wait_for(background_done.wait(), timeout=5.0)
+
+        self.assertIsInstance(background_error, RuntimeError)
+
+    def test_request_context_direct_construction(self) -> None:
+        ctx = RequestContext()
+        self.assertFalse(ctx.is_valid())
+        self.assertIsNone(ctx.connection_context)
+        self.assertEqual(ctx.method_name, "")
+        self.assertEqual(ctx.request_id, "")
+        # actually accessing them can cause problems because cpp pointer
+        # invalid, but tests that construct RequestContext directly
+        # just rely on these for mocking
+        self.assertIsInstance(ctx.read_headers, ReadHeaders)
+        self.assertIsInstance(ctx.write_headers, WriteHeaders)
 
 
 class StackHandler(StackServiceInterface):

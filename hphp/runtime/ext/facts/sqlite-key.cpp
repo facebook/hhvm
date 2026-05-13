@@ -23,7 +23,6 @@
 #include <sys/stat.h>
 
 #include <fmt/core.h>
-#include <folly/Format.h>
 #include <folly/hash/Hash.h>
 #include <folly/logging/xlog.h>
 #include <folly/portability/Fcntl.h>
@@ -78,7 +77,7 @@ std::string formatGidForDebug(gid_t gid) {
   auto member = [&]() {
     const auto* username = user.pw->pw_name;
     if (user.pw->pw_gid == gid) {
-      return folly::sformat("{} is a member", username);
+      return fmt::format("{} is a member", username);
     }
 
     int ngroups = 4096;
@@ -86,17 +85,17 @@ std::string formatGidForDebug(gid_t gid) {
     if (getgrouplist(username, gid, groups, &ngroups) != -1) {
       for (int i = 0; i < ngroups; ++i) {
         if (gid == groups[i]) {
-          return folly::sformat("{} is a member", username);
+          return fmt::format("{} is a member", username);
         }
       }
     } else {
       XLOGF(ERR, "Unabled to get group list for {}", username);
     }
 
-    return folly::sformat("{} is not a member", username);
+    return fmt::format("{} is not a member", username);
   }();
 
-  return folly::sformat("{} (gid={}, {})", group.gr->gr_name, gid, member);
+  return fmt::format("{} (gid={}, {})", group.gr->gr_name, gid, member);
 }
 
 std::string getPermissionsForPath(const fs::path& path) {
@@ -106,7 +105,7 @@ std::string getPermissionsForPath(const fs::path& path) {
     if (perms == 0xffff) {
       return "unknown/may not exist";
     } else {
-      return folly::sformat("{:04o}", perms);
+      return fmt::format("{:04o}", perms);
     }
   } catch (...) {
   }
@@ -161,7 +160,7 @@ std::string getDirectoryTreeInformation(const fs::path& base_path) {
           groupname,
           path.native());
 
-      ss << folly::sformat(
+      ss << fmt::format(
           "({} -> {} {}/{})\n",
           path.native(),
           permissions,
@@ -172,7 +171,7 @@ std::string getDirectoryTreeInformation(const fs::path& base_path) {
           ERR,
           "Exception thrown while getting directory permissions: {}",
           e.what());
-      return folly::sformat("<error: {}>", e.what());
+      return fmt::format("<error: {}>", e.what());
     }
     tree.pop();
   }
@@ -183,12 +182,11 @@ std::string getDirectoryTreeInformation(const fs::path& base_path) {
 } // namespace
 
 std::string SQLiteKey::toString() const {
-  return folly::sformat(
-      "SQLiteKey({}, {}, {})", m_path.native(), m_gid, m_perms);
+  return fmt::format("SQLiteKey({}, {}, {})", m_path.native(), m_gid, m_perms);
 }
 
 std::string SQLiteKey::toDebugString() const {
-  return folly::sformat(
+  return fmt::format(
       "SQLiteKey(Path: {}, Group: {}, Create Permissions: {:04o}, Mode: {}, "
       "Path Permissions: {}",
       m_path.native(),

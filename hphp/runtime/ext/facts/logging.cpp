@@ -22,6 +22,7 @@
 
 #include <unistd.h>
 
+#include <fmt/core.h>
 #include <folly/Conv.h>
 #include <folly/SynchronizedPtr.h>
 #include <folly/futures/FutureSplitter.h>
@@ -69,7 +70,7 @@ folly::SynchronizedPtr<std::unique_ptr<Cronolog>> make_synchronized_crono(
   // which won't be able to write to a file owned by apache.
   if (crono->getOutputFile() == nullptr) {
     crono->m_template =
-        folly::sformat("/tmp/facts.%Y-%m-%d.log_{}.log", ::getpid());
+        fmt::format("/tmp/facts.%Y-%m-%d.log_{}.log", ::getpid());
     crono->m_linkName.clear();
   }
 
@@ -297,7 +298,7 @@ struct HhvmLogFormatter final : public folly::LogFormatter {
       level_string = "<level:none>";
     }
 
-    return folly::sformat(
+    return fmt::format(
         "{} {} {}:{} {}",
         level_string,
         message.getThreadID(),

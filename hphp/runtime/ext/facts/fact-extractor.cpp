@@ -19,6 +19,7 @@
 #include <string>
 #include <utility>
 
+#include <fmt/core.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
 #include <folly/json/dynamic.h>
@@ -54,7 +55,7 @@ std::string summarized_string(std::string_view blob, int excerpt_len) {
   if (s.size() < 2 * excerpt_len + 20) {
     to_encode = s;
   } else {
-    to_encode = folly::sformat(
+    to_encode = fmt::format(
         "{} [...{} bytes omitted...] {}",
         s.substr(0, excerpt_len),
         s.size() - 2 * excerpt_len,
@@ -67,7 +68,7 @@ hackc::FileFacts decode_facts(const std::string& blob) {
   try {
     return hackc::binary_to_facts(blob);
   } catch (const std::exception& e) {
-    throw FactsExtractionExc{folly::sformat(
+    throw FactsExtractionExc{fmt::format(
         "{} - blob is \"{}\"", e.what(), summarized_string(blob, 80))};
   }
 }
@@ -165,7 +166,7 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
                     // The hash we got out of memcache doesn't match the hash
                     // we expected. We'll try to extract facts from disk
                     // instead.
-                    throw FactsExtractionExc{folly::sformat(
+                    throw FactsExtractionExc{fmt::format(
                         "Error extracting {} from memcache: hash '{}' != '{}'",
                         absPathAndHash.m_path.native(),
                         std::string{facts.sha1sum},

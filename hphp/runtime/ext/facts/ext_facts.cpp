@@ -23,6 +23,7 @@
 #include <string>
 #include <string_view>
 
+#include <fmt/core.h>
 #include <folly/Conv.h>
 #include <folly/Hash.h>
 #include <folly/concurrency/ConcurrentHashMap.h>
@@ -97,7 +98,7 @@ SQLiteKey getDBKey(const fs::path& root, const RepoOptions& repoOptions) {
     try {
       return fs::canonical(trusted);
     } catch (const fs::filesystem_error& e) {
-      throw RepoOptionsParseExc{folly::sformat(
+      throw RepoOptionsParseExc{fmt::format(
           "Error resolving Autoload.TrustedDBPath = {}: {}",
           trusted.native().c_str(),
           e.what())};
@@ -192,7 +193,7 @@ struct SqliteAutoloadMapKey {
       try {
         return folly::parseJson(queryStr);
       } catch (const folly::json::parse_error& e) {
-        throw RepoOptionsParseExc{folly::sformat(
+        throw RepoOptionsParseExc{fmt::format(
             "Error JSON-parsing Autoload.Query = \"{}\": {}",
             queryStr,
             e.what())};
@@ -224,7 +225,7 @@ struct SqliteAutoloadMapKey {
     }
     indexedMethodAttrString += '}';
 
-    return folly::sformat(
+    return fmt::format(
         "SqliteAutoloadMapKey({}, {}, {}, {})",
         m_root.native(),
         folly::toJson(m_queryExpr),

@@ -22,6 +22,7 @@
 #include <string_view>
 #include <thread>
 
+#include <fmt/core.h>
 #include <folly/Likely.h>
 #include <folly/Synchronized.h>
 #include <folly/Unit.h>
@@ -1168,7 +1169,7 @@ struct FactsStoreImpl final
                   })
               .thenTry([this](folly::Try<Watcher::Delta>&& delta) {
                 if (delta.hasException()) {
-                  auto msg = folly::sformat(
+                  auto msg = fmt::format(
                       "Exception while querying watcher: {}",
                       delta.exception().what());
                   XLOG(ERR) << msg;
@@ -1187,7 +1188,7 @@ struct FactsStoreImpl final
           auto lastWatchmanQueryStart = m_lastWatchmanQueryStart.load();
           if (UNLIKELY(lastWatchmanQueryStart < updateStart)) {
             auto currentTime = std::chrono::steady_clock::now();
-            auto msg = folly::sformat(
+            auto msg = fmt::format(
                 "Stale update. Last Watchman query was {}ms ago, but update was only {}ms ago.",
                 std::chrono::duration_cast<
                     std::chrono::duration<double, std::milli>>(
@@ -1318,7 +1319,7 @@ struct FactsStoreImpl final
       // will be fileFacts.m_sha1hex.
       if (as_slice(fileFacts.sha1sum) == kEmptyFileSha1Hash &&
           !isEmpty(fileFacts)) {
-        throw FactsExtractionExc{folly::sformat(
+        throw FactsExtractionExc{fmt::format(
             "{} has a SHA1 hash corresponding to an empty file ('{}'), "
             "but we are attempting to assign it non-empty facts: `{}`",
             alteredPathsAndHashes[i].m_path.native(),

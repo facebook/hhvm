@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <fmt/core.h>
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 #include <folly/json/dynamic.h>
@@ -775,7 +776,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
             ? "open or create"
             : "open";
 
-        auto exception_str = folly::sformat(
+        auto exception_str = fmt::format(
             "Couldn't {} native Facts DB.\n"
 #ifdef HHVM_FACEBOOK
             "You may be able to fix this by running 'arc fix facts'\n"

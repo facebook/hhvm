@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/core.h>
 #include <folly/ScopeGuard.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/hash/Hash.h>
@@ -1300,7 +1301,7 @@ void SymbolMap::update(
   }
 
   if (since != wlock->m_clock) {
-    throw UpdateExc{folly::sformat(
+    throw UpdateExc{fmt::format(
         "Cannot use information since {} to update a map currently at {}.",
         since,
         wlock->m_clock)};
@@ -1473,7 +1474,7 @@ void SymbolMap::updateDB(
   // and proceeding might overwrite newer data.
   auto const dbClock = db->getClock();
   if (dbClock != since) {
-    throw UpdateExc{folly::sformat(
+    throw UpdateExc{fmt::format(
         "Told to update the DB with information from {}, but DB is currently "
         "at {}",
         since,

@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 
+#include <fmt/core.h>
 #include <folly/Try.h>
 #include <folly/json/dynamic.h>
 #include <folly/json/json.h>
@@ -79,7 +80,7 @@ Watcher::Delta parseWatchmanResults(
     folly::dynamic&& result) {
   if (result.count("error")) {
     throw UpdateExc{
-        folly::sformat("Got a watchman error: {}\n", folly::toJson(result))};
+        fmt::format("Got a watchman error: {}\n", folly::toJson(result))};
   }
 
   std::vector<Watcher::FileDelta> alteredPaths;
@@ -119,7 +120,7 @@ Watcher::Delta parseWatchmanResults(
   std::string clock = [&] {
     auto* clockPtr = result.get_ptr("clock");
     if (!clockPtr) {
-      throw UpdateExc{folly::sformat(
+      throw UpdateExc{fmt::format(
           R"-(Malformed watchman output: no "clock" field in "{}")-",
           folly::toJson(result))};
     }
@@ -130,7 +131,7 @@ Watcher::Delta parseWatchmanResults(
 
     auto* nestedClockPtr = clockPtr->get_ptr("clock");
     if (!nestedClockPtr || !nestedClockPtr->isString()) {
-      throw UpdateExc{folly::sformat(
+      throw UpdateExc{fmt::format(
           R"-(Malformed watchman output: malformed "clock" field in "{}")-",
           folly::toJson(result))};
     }

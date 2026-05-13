@@ -94,6 +94,9 @@ StaticString s_invoke("__invoke");
 
 constexpr uint32_t kMagic = 0x4d564848;
 
+// SB profile format version.
+constexpr uint32_t kSBVersion = 2;
+
 // The extra data field, which contains the offset where the extra data starts
 // in the file (or zero if not present), is placed right after the kMagic value.
 constexpr uint32_t kExtraDataFieldOffset = sizeof(decltype(kMagic));
@@ -2307,6 +2310,10 @@ std::string serializeSBProfData(const std::string& root,
     // don't, but still need to write a placeholder offset to avoid being overwritten.
     write_raw(ser, off_t(0));
 
+    // SB profile format version, placed in the header right after kMagic and
+    // off_t.
+    write_raw(ser, kSBVersion);
+
     // TODO: repo-schema
     auto const sbProfData = getSBSerProfDataCopy();
     // TODO: do not serialize unit paths for preloading here --
@@ -2329,6 +2336,10 @@ std::string serializeSBProfData(const std::string& root,
                     [&](const std::string& path) {
                       write_string(ser, path);
                     });
+
+    // Write extension data (e.g. APC keys via Server.APC.SerializePrefix).
+    ExtensionRegistry::serialize(ser);
+
     write_container(ser, filteredProfData,
                     [&](const ProfDataSBSer* pd) {
                       write_sb_prof_data(ser, pd, root);
@@ -2571,13 +2582,20 @@ std::string deserializeSBProfData(const std::string& root,
       auto const extraDataOffset = read_raw<off_t>(des);
       des.setExtraDataOffset(extraDataOffset);
 
+      // Read the SB version. For now, it's not checked.
+      read_raw<uint32_t>(des);
+
       // TODO: repo-schema
       read_units_preload(des, root);
+
+      ExtensionRegistry::deserialize(des);
+
       auto& sbProfData = getSBDeserProfData();
       {
         BootStats::Block timer("DES_read_sb_prof_data",
                                Cfg::Server::Mode);
-        read_container(des, [&] {read_sb_prof_data(des, sbProfData, root);});
+        read_container(des,
+                       [&] { read_sb_prof_data(des, sbProfData, root); });
       }
 
       always_assert(des.done());

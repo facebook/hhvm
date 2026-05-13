@@ -145,7 +145,10 @@ void codegen_data::register_visitors(
         }
       });
 
-  // Populate disambiguated field setter names
+  // Populate disambiguated field setter names for all programs (including
+  // included programs). This is needed because templates may access
+  // go_setter_name on fields from included structs (e.g. when generating
+  // default values that reference fields from included programs).
   visitor.add_structured_definition_visitor(
       [this](const const_visitor_context&, const t_structured& node) {
         add_struct_go_field_setter_names(node);

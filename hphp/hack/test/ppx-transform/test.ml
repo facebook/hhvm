@@ -449,9 +449,9 @@ module SMap = Map.Make (String)
 module TShapeMap = Map.Make (String)
 
 module Hack_builtins : sig
-  type t = { map: t SMap.t } [@@deriving transform]
+  type t = { map: t SMap.t } [@@deriving transform ~maps:["SMap.t"]]
 end = struct
-  type t = { map: t SMap.t } [@@deriving transform]
+  type t = { map: t SMap.t } [@@deriving transform ~maps:["SMap.t"]]
 
   let depth_limit t ~n =
     let on_ty_t t ~ctx =
@@ -646,5 +646,5 @@ module Typing_defs_core = struct
         t_variadic: 'phase ty;
       }
     | Tsplat of 'phase ty
-  [@@deriving transform]
+  [@@deriving transform ~maps:["SMap.t"; "TShapeMap.t"; "fun_type"]]
 end

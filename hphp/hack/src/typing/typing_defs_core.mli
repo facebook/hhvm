@@ -459,7 +459,7 @@ and 'phase tuple_type = {
 and 'phase tuple_extra =
   | Tvariadic of 'phase ty
   | Tsplat of 'phase ty
-[@@deriving hash, transform]
+[@@deriving hash, transform ~maps:["SMap.t"; "TShapeMap.t"; "fun_type"]]
 
 type decl_ty = decl_phase ty [@@deriving hash]
 

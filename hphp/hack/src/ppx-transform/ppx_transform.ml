@@ -5,12 +5,6 @@ module SMap = Map.Make (String)
 module SSet = Set.Make (String)
 
 module Help = struct
-  let unzip xys =
-    List.fold_right (fun (x, y) (xs, ys) -> (x :: xs, y :: ys)) xys ([], [])
-
-  let smap_of_list xs =
-    List.fold_left (fun acc (k, v) -> SMap.add k v acc) SMap.empty xs
-
   (** Generate nice type variable names: `'a,'b,...,'z,'a1,...` *)
   let tyvar_name i =
     let (c, n) = (i mod 26, i / 26) in
@@ -104,6 +98,28 @@ module Restart = struct
     | Disallow encoding -> encoding
 end
 
+module Maps = struct
+  (** Configuration for custom map functions for type constructors.
+      Maps type names (e.g., "SMap.t") to the expression for their map function
+      (e.g., "SMap.map").
+  *)
+  type t = string SMap.t
+
+  let empty = SMap.empty
+
+  let of_list lst =
+    List.fold_left (fun acc (k, v) -> SMap.add k v acc) SMap.empty lst
+
+  let infer_map_fn type_name =
+    match String.rindex_opt type_name '.' with
+    | Some i -> String.sub type_name 0 (i + 1) ^ "map"
+    | None -> "map_" ^ type_name
+
+  let find_opt = SMap.find_opt
+
+  let add = SMap.add
+end
+
 module Annot = struct
   (** Interpreted annotations for the ppx:
       - [Opaque] means we will not transform a type;
@@ -146,16 +162,19 @@ end
 module Core_ty = struct
   (** Get the name of a type variable failing when the [core_type] is not a
       type variable  *)
-  let tyvar_exn { ptyp_desc; _ } =
+  let tyvar_exn { ptyp_desc; ptyp_loc; _ } =
     match ptyp_desc with
     | Ptyp_var nm -> nm
     | Ptyp_any -> gen_symbol ()
-    | _ -> failwith "Expected a type variable"
+    | _ ->
+      Location.raise_errorf
+        ~loc:ptyp_loc
+        "Expected a type variable in type parameter"
 
-  let ctor_longident_exn { ptyp_desc; _ } =
+  let ctor_longident_exn { ptyp_desc; ptyp_loc; _ } =
     match ptyp_desc with
     | Ptyp_constr (ident, _) -> ident
-    | _ -> failwith "Expected a type constructor"
+    | _ -> Location.raise_errorf ~loc:ptyp_loc "Expected a type constructor"
 
   (** Replace each named type variable in a [core_type] using the provided
       substitution. This will fail if the substitution does not contain the
@@ -271,14 +290,15 @@ module Core_ty = struct
             acc
           else
             match core_type.ptyp_desc with
-            | Ptyp_constr ({ txt; _ }, _) ->
+            | Ptyp_constr ({ txt; loc; _ }, _) ->
               let (tyname, key, path) =
                 match List.rev @@ Longident.flatten_exn txt with
                 | ty :: path ->
                   ( String.concat "." @@ List.rev (ty :: path),
                     String.concat "" path,
                     path )
-                | _ -> failwith "Bad `Longident`"
+                | _ ->
+                  Location.raise_errorf ~loc "Invalid type constructor name"
               in
               let is_excluded = SSet.mem tyname excluded
               and is_builtin = SSet.mem tyname builtin in
@@ -471,7 +491,7 @@ module Decl = struct
     let opaque = Annot.has_opaque_attr ptype_attributes
     and (subst, tyvars) =
       let (subst, tyvars) =
-        Help.unzip
+        List.split
         @@ List.mapi
              (fun i (ty, _) ->
                let new_nm = Help.tyvar_name i in
@@ -575,7 +595,9 @@ module Decl = struct
         (match ptyp_desc with
         | Ptyp_var nm when not @@ String.equal nm tv -> true
         | _ -> auxs tys tyvars)
-      | _ -> failwith "Type constructors have different arities"
+      | _ ->
+        (* This should not happen with valid OCaml types *)
+        false
     in
     aux ty
 
@@ -759,9 +781,10 @@ module Analyse = struct
     decls: Decl.t list;
     opaque_map: bool SMap.t;
     decl_names: SSet.t;
+    maps: Maps.t;
   }
 
-  let analyse tds =
+  let analyse tds ~maps =
     let decls = List.map Decl.of_ty_decl tds in
     let (opaque_map, decl_names) =
       List.fold_left
@@ -771,7 +794,7 @@ module Analyse = struct
         (SMap.empty, SSet.empty)
         decls
     in
-    { decls; opaque_map; decl_names }
+    { decls; opaque_map; decl_names; maps }
 end
 
 module Transform_field : sig
@@ -1572,7 +1595,7 @@ module Gen_transform = struct
 end
 
 module Gen_traverse = struct
-  let gen_core_ty ty ~binding ~opaque_map =
+  let gen_core_ty ty ~binding ~opaque_map ~maps =
     let rec aux ty binding =
       let loc = ty.ptyp_loc in
       let dflt_pat = ppat_var ~loc { loc; txt = binding } in
@@ -1587,7 +1610,7 @@ module Gen_traverse = struct
         | Ptyp_alias (ty, _) -> aux ty binding
         | Ptyp_arrow (arg_lbl, ty_dom, ty_codom) ->
           aux_arrow arg_lbl ty_dom ty_codom binding loc
-        | Ptyp_constr ({ loc; txt }, tys) -> aux_constr txt tys binding loc
+        | Ptyp_constr ({ loc; txt }, tys) -> aux_constr txt tys binding loc maps
         | Ptyp_poly (_, ty) -> aux ty binding
         | Ptyp_tuple tys -> aux_tuple tys binding loc
         | Ptyp_variant (row_flds, closedflag, lbl_opts) ->
@@ -1675,7 +1698,7 @@ module Gen_traverse = struct
           let coerce_expr = pexp_coerce ~loc expr None ty in
           (pat, Some coerce_expr)
         | _ -> default)
-    and aux_constr lident tys binding loc =
+    and aux_constr lident tys binding loc maps =
       let flat_lident = Longident.flatten_exn lident in
       match (flat_lident, tys) with
       (* -- Common type constructors ---------------------------------------- *)
@@ -1687,12 +1710,6 @@ module Gen_traverse = struct
       | ((["lazy_t"] | ["Lazy"; "t"]), [ty]) -> aux_lazy ty binding loc
       | ((["result"] | ["Result"; ("result" | "t")]), [ty_ok; ty_err]) ->
         aux_result ty_ok ty_err binding loc
-      | (["Either"; "t"], [ty_left; ty_right]) ->
-        aux_either ty_left ty_right binding loc
-      | (["SMap"; "t"], [ty]) -> aux_functor [%expr SMap.map] ty binding loc
-      | (["TShapeMap"; "t"], [ty]) ->
-        aux_functor [%expr TShapeMap.map] ty binding loc
-      | (["fun_type"], [ty]) -> aux_functor [%expr map_fun_type] ty binding loc
       | (["ref"], [ty]) -> aux_ref ty binding loc
       (* -- Commom primitives ----------------------------------------------- *)
       | ([ty], []) when SSet.mem ty Core_ty.builtin_prims ->
@@ -1714,64 +1731,81 @@ module Gen_traverse = struct
         in
         (pat, expr_opt)
       | (ids, _) ->
-        let pat = ppat_var ~loc { loc; txt = binding } in
-        let binding_expr = pexp_ident ~loc { loc; txt = Lident binding } in
-        let (ty, path) =
-          match List.rev ids with
-          | ty :: path -> (ty, path)
-          | _ -> failwith "Bad `Longident`"
-        in
-        let identity_lident =
-          Longident.parse
-          @@ String.concat "."
-          @@ List.rev (Names.identity_name :: Names.pass_module_name :: path)
-        in
-        let identity_expr = pexp_ident ~loc { loc; txt = identity_lident } in
-        let pass_fld_nm = String.concat "_" (Names.pass_field_pfx :: path) in
-        let pass_fld =
-          {
-            loc;
-            txt =
-              Longident.parse
-              @@ String.concat "." [Names.pass_module_name; pass_fld_nm];
-          }
-        in
-        let fn_name =
-          let transform_fn = Ident.(transform_fn_name @@ Type ty) in
-          Longident.parse @@ String.concat "." @@ List.rev (transform_fn :: path)
-        in
-        let fn_expr = pexp_ident ~loc { loc; txt = fn_name }
-        and top_down_expr =
-          pexp_field
-            ~loc
-            (pexp_ident ~loc { loc; txt = Lident Names.top_down_arg })
-            pass_fld
-        and bottom_up_expr =
-          pexp_field
-            ~loc
-            (pexp_ident ~loc { loc; txt = Lident Names.bottom_up_arg })
-            pass_fld
-        in
-        let expr =
-          [%expr
-            match ([%e top_down_expr], [%e bottom_up_expr]) with
-            | (Some top_down, Some bottom_up) ->
-              [%e fn_expr] [%e binding_expr] ~ctx ~top_down ~bottom_up
-            | (Some top_down, _) ->
-              [%e fn_expr]
-                [%e binding_expr]
-                ~ctx
-                ~top_down
-                ~bottom_up:([%e identity_expr] ())
-            | (_, Some bottom_up) ->
-              [%e fn_expr]
-                [%e binding_expr]
-                ~ctx
-                ~top_down:([%e identity_expr] ())
-                ~bottom_up
-            | _ -> [%e binding_expr]]
-        in
-        (pat, Some expr)
+        (* Check if this is a configured map type *)
+        let type_name = String.concat "." ids in
+        (match (tys, Maps.find_opt type_name maps) with
+        | ([ty], Some map_expr_str) ->
+          (* Use configured map function *)
+          let map_expr =
+            pexp_ident ~loc { loc; txt = Longident.parse map_expr_str }
+          in
+          aux_functor map_expr ty binding loc
+        | _ ->
+          (* Default handling for external types *)
+          let pat = ppat_var ~loc { loc; txt = binding } in
+          let binding_expr = pexp_ident ~loc { loc; txt = Lident binding } in
+          let (ty, path) =
+            match List.rev ids with
+            | ty :: path -> (ty, path)
+            | _ ->
+              Location.raise_errorf
+                ~loc
+                "Invalid type path: %s"
+                (String.concat "." ids)
+          in
+          let identity_lident =
+            Longident.parse
+            @@ String.concat "."
+            @@ List.rev (Names.identity_name :: Names.pass_module_name :: path)
+          in
+          let identity_expr = pexp_ident ~loc { loc; txt = identity_lident } in
+          let pass_fld_nm = String.concat "_" (Names.pass_field_pfx :: path) in
+          let pass_fld =
+            {
+              loc;
+              txt =
+                Longident.parse
+                @@ String.concat "." [Names.pass_module_name; pass_fld_nm];
+            }
+          in
+          let fn_name =
+            let transform_fn = Ident.(transform_fn_name @@ Type ty) in
+            Longident.parse
+            @@ String.concat "."
+            @@ List.rev (transform_fn :: path)
+          in
+          let fn_expr = pexp_ident ~loc { loc; txt = fn_name }
+          and top_down_expr =
+            pexp_field
+              ~loc
+              (pexp_ident ~loc { loc; txt = Lident Names.top_down_arg })
+              pass_fld
+          and bottom_up_expr =
+            pexp_field
+              ~loc
+              (pexp_ident ~loc { loc; txt = Lident Names.bottom_up_arg })
+              pass_fld
+          in
+          let expr =
+            [%expr
+              match ([%e top_down_expr], [%e bottom_up_expr]) with
+              | (Some top_down, Some bottom_up) ->
+                [%e fn_expr] [%e binding_expr] ~ctx ~top_down ~bottom_up
+              | (Some top_down, _) ->
+                [%e fn_expr]
+                  [%e binding_expr]
+                  ~ctx
+                  ~top_down
+                  ~bottom_up:([%e identity_expr] ())
+              | (_, Some bottom_up) ->
+                [%e fn_expr]
+                  [%e binding_expr]
+                  ~ctx
+                  ~top_down:([%e identity_expr] ())
+                  ~bottom_up
+              | _ -> [%e binding_expr]]
+          in
+          (pat, Some expr))
     and aux_ref ty binding loc =
       let pat = ppat_var ~loc { loc; txt = binding } in
       let binding_deref = binding ^ "_deref" in
@@ -1846,36 +1880,6 @@ module Gen_traverse = struct
         | _ -> None
       in
       (pat, expr_opt)
-    and aux_either ty_left ty_right binding loc =
-      let pat = ppat_var ~loc { loc; txt = binding } in
-      let scrut_expr = pexp_ident ~loc { loc; txt = lident binding } in
-      let expr_opt =
-        match
-          ( aux ty_left (String.concat "_" [binding; "left"]),
-            aux ty_right (String.concat "_" [binding; "right"]) )
-        with
-        | ((pat_left, Some expr_left), (pat_right, Some expr_right)) ->
-          Some
-            [%expr
-              Either.map
-                ~left:(fun [%p pat_left] -> [%e expr_left])
-                ~right:(fun [%p pat_right] -> [%e expr_right])
-                [%e scrut_expr]]
-        | ((pat_left, Some expr_left), _) ->
-          Some
-            [%expr
-              Either.map_left
-                (fun [%p pat_left] -> [%e expr_left])
-                [%e scrut_expr]]
-        | (_, (pat_right, Some expr_right)) ->
-          Some
-            [%expr
-              Either.map_right
-                (fun [%p pat_right] -> [%e expr_right])
-                [%e scrut_expr]]
-        | _ -> None
-      in
-      (pat, expr_opt)
     and aux_functor map_expr ty binding loc =
       let (inner_pat, inner_expr_opt) = aux ty binding in
       let pat = ppat_var ~loc { loc; txt = binding } in
@@ -1896,7 +1900,7 @@ module Gen_traverse = struct
       (ppat_var ~loc { loc; txt = binding }, None)
     and aux_tuple tys binding loc =
       let (pats, expr_res) =
-        Help.unzip
+        List.split
         @@ List.mapi
              (fun i ty ->
                let binding = String.concat "_" [binding; string_of_int i] in
@@ -1923,10 +1927,10 @@ module Gen_traverse = struct
     in
     aux ty binding
 
-  let gen_record_field Record_field.{ label; ty; _ } ~opaque_map =
-    gen_core_ty ~binding:label ty ~opaque_map
+  let gen_record_field Record_field.{ label; ty; _ } ~opaque_map ~maps =
+    gen_core_ty ~binding:label ty ~opaque_map ~maps
 
-  let gen_record_fields record_name record_fields ~loc ~opaque_map =
+  let gen_record_fields record_name record_fields ~loc ~opaque_map ~maps =
     let fld_opts =
       List.map
         (fun ((Record_field.{ label; loc; _ } as fld), annot_opt) ->
@@ -1945,7 +1949,7 @@ module Gen_traverse = struct
             in
 
             ((label, loc), (pat, Some expr))
-          | _ -> ((label, loc), gen_record_field fld ~opaque_map))
+          | _ -> ((label, loc), gen_record_field fld ~opaque_map ~maps))
         record_fields
     in
     let (pats, exprs, partial, empty) =
@@ -1970,7 +1974,7 @@ module Gen_traverse = struct
     else
       (ppat_record ~loc pats Closed, Some (pexp_record ~loc exprs None))
 
-  let gen_variant_ctor variant_name variant_ctor ~opaque_map ~explicit =
+  let gen_variant_ctor variant_name variant_ctor ~opaque_map ~maps ~explicit =
     let open Variant_ctor in
     match variant_ctor with
     | Constant_ctor (lbl, loc) ->
@@ -1996,7 +2000,7 @@ module Gen_traverse = struct
       (pat, Some expr)
     | Single_ctor (lbl, loc, ty) ->
       let binding = String.(concat "_" [lowercase_ascii lbl; "elem"]) in
-      let (ty_pat, ty_expr_opt) = gen_core_ty ~binding ty ~opaque_map in
+      let (ty_pat, ty_expr_opt) = gen_core_ty ~binding ty ~opaque_map ~maps in
       let pat = ppat_construct ~loc { loc; txt = lident lbl } @@ Some ty_pat in
       let expr_opt =
         Option.map
@@ -2040,7 +2044,7 @@ module Gen_traverse = struct
     | Tuple_ctor (lbl, loc, tys) ->
       let ty = ptyp_tuple ~loc tys in
       let binding = String.(concat "_" [lowercase_ascii lbl; "elem"]) in
-      let (ty_pat, ty_expr_opt) = gen_core_ty ~binding ty ~opaque_map in
+      let (ty_pat, ty_expr_opt) = gen_core_ty ~binding ty ~opaque_map ~maps in
       let pat = ppat_construct ~loc { loc; txt = lident lbl } @@ Some ty_pat in
       let expr_opt =
         Option.map
@@ -2052,7 +2056,7 @@ module Gen_traverse = struct
     | Record_ctor (lbl, loc, flds) ->
       let binding = String.lowercase_ascii lbl in
       let (ty_pat, ty_expr_opt) =
-        gen_record_fields binding flds ~loc ~opaque_map
+        gen_record_fields binding flds ~loc ~opaque_map ~maps
       in
       let pat = ppat_construct ~loc { loc; txt = lident lbl } @@ Some ty_pat in
       if explicit then
@@ -2066,7 +2070,7 @@ module Gen_traverse = struct
         in
         (pat, expr_opt)
 
-  let gen_variant_ctors variant_name variant_ctors ~loc ~opaque_map =
+  let gen_variant_ctors variant_name variant_ctors ~loc ~opaque_map ~maps =
     let elem lbl = String.(concat "_" [lowercase_ascii lbl; "elem"]) in
     let ctor_opts =
       List.map
@@ -2083,10 +2087,20 @@ module Gen_traverse = struct
           | Some Annot.Opaque -> ((txt, loc), (ppat_var ~loc { loc; txt }, None))
           | Some Annot.Explicit ->
             ( (txt, loc),
-              gen_variant_ctor variant_name ctor ~opaque_map ~explicit:true )
+              gen_variant_ctor
+                variant_name
+                ctor
+                ~opaque_map
+                ~maps
+                ~explicit:true )
           | _ ->
             ( (txt, loc),
-              gen_variant_ctor variant_name ctor ~opaque_map ~explicit:false ))
+              gen_variant_ctor
+                variant_name
+                ctor
+                ~opaque_map
+                ~maps
+                ~explicit:false ))
         variant_ctors
     in
     let (pats, exprs, partial, empty) =
@@ -2117,15 +2131,16 @@ module Gen_traverse = struct
 
   let gen_def
       Transform_field.{ ident; ty; loc; definition; tyvars; type_info; _ }
-      ~opaque_map =
+      ~opaque_map
+      ~maps =
     let (pat, expr_opt) =
       match definition with
       | Transform_field.Core_ty def_ty ->
-        gen_core_ty def_ty ~opaque_map ~binding:(Ident.to_string ident)
+        gen_core_ty def_ty ~opaque_map ~maps ~binding:(Ident.to_string ident)
       | Transform_field.Variant_ctors (name, ctors) ->
-        gen_variant_ctors name ctors ~loc ~opaque_map
+        gen_variant_ctors name ctors ~loc ~opaque_map ~maps
       | Transform_field.Record_fields (name, flds) ->
-        gen_record_fields name flds ~loc ~opaque_map
+        gen_record_fields name flds ~loc ~opaque_map ~maps
     in
     let fn_name = Ident.traverse_fn_name ident in
     Option.map
@@ -2133,9 +2148,9 @@ module Gen_traverse = struct
         Gen_fn.gen_str fn_name ty tyvars type_info pat body_expr loc)
       expr_opt
 
-  let gen_str fld ~opaque_map =
+  let gen_str fld ~opaque_map ~maps =
     match fld with
-    | Transform_field.Field def -> gen_def def ~opaque_map
+    | Transform_field.Field def -> gen_def def ~opaque_map ~maps
     | Transform_field.Unsupported Unsupported.{ loc; kind; _ } ->
       let err =
         match kind with
@@ -2149,9 +2164,10 @@ module Gen_traverse = struct
            ~expr:(pexp_extension ~loc @@ err))
 end
 
-let gen_str ~loc ~path:_ (_rec_flag, tds) restart =
+let gen_str ~loc ~path:_ (_rec_flag, tds) restart maps =
   let allow_restart = Option.value ~default:Restart.Allow restart in
-  let analysis = Analyse.analyse tds in
+  let maps = Option.value ~default:Maps.empty maps in
+  let analysis = Analyse.analyse tds ~maps in
   let strat_transform_fields = Transform_field.fields analysis in
   let pass_fields = Pass_field.fields analysis in
   let transform_fields = List.concat strat_transform_fields in
@@ -2172,6 +2188,7 @@ let gen_str ~loc ~path:_ (_rec_flag, tds) restart =
                 Gen_traverse.gen_str
                   tfld
                   ~opaque_map:analysis.Analyse.opaque_map
+                  ~maps:analysis.Analyse.maps
               with
               | Some vb ->
                 [
@@ -2208,9 +2225,10 @@ let gen_str ~loc ~path:_ (_rec_flag, tds) restart =
   in
   pass_module :: fns
 
-let gen_sig ~loc ~path:_ (_rec_flag, tds) restart =
+let gen_sig ~loc ~path:_ (_rec_flag, tds) restart maps =
   let allow_restart = Option.value ~default:Restart.Allow restart in
-  let analysis = Analyse.analyse tds in
+  let maps = Option.value ~default:Maps.empty maps in
+  let analysis = Analyse.analyse tds ~maps in
   let transform_fields = List.concat @@ Transform_field.fields analysis in
   let pass_fields = Pass_field.fields analysis in
   let pass_ty =
@@ -2232,6 +2250,35 @@ let gen_sig ~loc ~path:_ (_rec_flag, tds) restart =
   in
   pass_module :: fns
 
+let parse_maps_expr expr =
+  let extract_string e =
+    match e.pexp_desc with
+    | Pexp_constant (Pconst_string (s, _, _)) -> s
+    | _ ->
+      Location.raise_errorf ~loc:e.pexp_loc "~maps: expected a string literal"
+  in
+  let extract_entry e =
+    match e.pexp_desc with
+    | Pexp_constant (Pconst_string (s, _, _)) -> (s, Maps.infer_map_fn s)
+    | Pexp_tuple [k; v] -> (extract_string k, extract_string v)
+    | _ ->
+      Location.raise_errorf
+        ~loc:e.pexp_loc
+        "~maps: expected a string or pair (\"Type.t\", \"Module.map\")"
+  in
+  let rec extract_list e =
+    match e.pexp_desc with
+    | Pexp_construct ({ txt = Lident "[]"; _ }, None) -> []
+    | Pexp_construct ({ txt = Lident "::"; _ }, Some cons) ->
+      (match cons.pexp_desc with
+      | Pexp_tuple [hd; tl] -> extract_entry hd :: extract_list tl
+      | _ ->
+        Location.raise_errorf ~loc:e.pexp_loc "~maps: expected a list of pairs")
+    | _ ->
+      Location.raise_errorf ~loc:e.pexp_loc "~maps: expected a list literal"
+  in
+  Maps.of_list (extract_list expr)
+
 let args () =
   let inner =
     Ast_pattern.(
@@ -2241,14 +2288,15 @@ let args () =
         (as__ @@ pexp_variant (string "Encode_as_result") none
         |> map1 ~f:(fun _ -> Restart.(Disallow Encode_as_result))))
   in
-  let pat =
+  let restart_pat =
     Ast_pattern.(
       alt
         (as__ @@ pexp_variant (string "Allow") none
         |> map1 ~f:(fun _ -> Restart.Allow))
         (pexp_variant (string "Disallow") (some inner)))
   in
-  Deriving.Args.(empty +> arg "restart" pat)
+  let maps_pat = Ast_pattern.(__ |> map1 ~f:parse_maps_expr) in
+  Deriving.Args.(empty +> arg "restart" restart_pat +> arg "maps" maps_pat)
 
 let transform =
   Deriving.add

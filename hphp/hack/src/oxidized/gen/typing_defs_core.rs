@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<72dc0940c966632fc78dd5990cdb1147>>
+// @generated SignedSource<<4f66a39fc73459ae62e772e9baf1e67f>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -824,7 +824,9 @@ pub struct TupleType {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving (hash, transform)")]
+#[rust_to_ocaml(
+    attr = r#"deriving (hash, (transform ~maps:["SMap.t"; "TShapeMap.t"; "fun_type"]))"#
+)]
 #[repr(C, u8)]
 pub enum TupleExtra {
     Tvariadic(Ty),

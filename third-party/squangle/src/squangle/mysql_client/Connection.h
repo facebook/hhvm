@@ -279,6 +279,11 @@ class Connection {
     return mysql_connection_->sslSessionReused();
   }
 
+  [[nodiscard]] std::string getTlsVersion() const {
+    CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
+    return mysql_connection_->getTlsVersion();
+  }
+
   // Checks if `client_flag` is set for SSL.
   [[nodiscard]] bool isSSL() const;
 

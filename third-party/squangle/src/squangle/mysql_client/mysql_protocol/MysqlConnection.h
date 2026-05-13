@@ -83,7 +83,7 @@ class MysqlConnection : public InternalConnection {
 
   [[nodiscard]] bool sslSessionReused() const override;
 
-  [[nodiscard]] std::string getTlsVersion() const;
+  [[nodiscard]] std::string getTlsVersion() const override;
 
   // Returns the raw SSL* handle (as void*), or nullptr if not an SSL
   // connection. Useful for testing TLS-level operations like KeyUpdate.

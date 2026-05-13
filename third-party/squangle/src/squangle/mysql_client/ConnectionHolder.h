@@ -178,6 +178,10 @@ class ConnectionHolder : public InternalConnection {
     return internalConn_->sslSessionReused();
   }
 
+  [[nodiscard]] std::string getTlsVersion() const override {
+    return internalConn_->getTlsVersion();
+  }
+
   [[nodiscard]] unsigned int warningCount() const override {
     return internalConn_->warningCount();
   }

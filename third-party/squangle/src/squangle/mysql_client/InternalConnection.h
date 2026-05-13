@@ -127,6 +127,10 @@ class InternalConnection {
     return false;
   }
 
+  [[nodiscard]] virtual std::string getTlsVersion() const {
+    return "";
+  }
+
   virtual unsigned int warningCount() const = 0;
 
   std::string escapeString(std::string_view unescaped) const;

@@ -118,7 +118,9 @@ class PeekingAcceptorHandshakeHelper : public AcceptorHandshakeHelper,
     auto callback = callback_;
     callback_ = nullptr;
     callback->connectionError(
-        socket_.get(), folly::exception_wrapper(ex), folly::none);
+        socket_.get(),
+        folly::make_exception_wrapper<folly::AsyncSocketException>(ex),
+        folly::none);
   }
 
  private:

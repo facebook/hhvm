@@ -410,7 +410,8 @@ void AsyncFizzClientT<SM>::deliverAllErrors(
     const folly::AsyncSocketException& ex,
     bool closeTransport) {
   DelayedDestruction::DestructorGuard dg(this);
-  deliverHandshakeError(ex);
+  deliverHandshakeError(
+      folly::make_exception_wrapper<folly::AsyncSocketException>(ex));
 
   if (replaySafetyCallback_) {
     replaySafetyCallback_ = nullptr;

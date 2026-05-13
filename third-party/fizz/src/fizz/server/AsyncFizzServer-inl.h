@@ -262,7 +262,8 @@ template <typename SM>
 void AsyncFizzServerT<SM>::deliverAllErrors(
     const folly::AsyncSocketException& ex,
     bool closeTransport) {
-  deliverHandshakeError(ex);
+  deliverHandshakeError(
+      folly::make_exception_wrapper<folly::AsyncSocketException>(ex));
 
   fizzServer_.moveToErrorState([&](void* callback) {
     static_cast<folly::AsyncTransportWrapper::WriteCallback*>(callback)

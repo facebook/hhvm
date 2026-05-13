@@ -80,7 +80,7 @@ class ConnectionManagerTest : public ::testing::Test {
                               .setAllocator(&allocator_)
                               .build();
 
-          transportHandler->setPipeline(*pipeline);
+          transportHandler->setPipeline(pipeline.get());
 
           if (auto hook = onConnectionCreatedHook_.rlock(); *hook) {
             (*hook)();

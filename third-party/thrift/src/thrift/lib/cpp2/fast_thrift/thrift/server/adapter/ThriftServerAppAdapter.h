@@ -107,9 +107,7 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   // buffer (success / declared exception / app error metadata) — the adapter
   // only frames them onto the pipeline.
   //
-  // Returns the pipeline write Result. On Error, the pipeline is closed
-  // before returning. Synchronous callers should propagate; async callers
-  // (callbacks) may discard the result since the close has already happened.
+  // Returns the pipeline write Result. Callers should propagate the Result.
   [[nodiscard]] channel_pipeline::Result writeResponse(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
@@ -122,7 +120,6 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   // the frame itself. Caller pre-serializes the error body via
   // serializeResponseRpcError (which also returns the matching ErrorCode).
   //
-  // Same Error-handling contract as writeResponse: pipeline closes on Error.
   [[nodiscard]] channel_pipeline::Result writeError(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> errorData,

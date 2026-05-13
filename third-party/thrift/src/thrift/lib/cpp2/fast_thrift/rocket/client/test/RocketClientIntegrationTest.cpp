@@ -153,10 +153,11 @@ class RocketClientIntegrationTest : public ::testing::Test {
   void SetUp() override { allocator_.reset(); }
 
   void TearDown() override {
-    pipeline_.reset();
     if (transportHandler_) {
-      transportHandler_->onClose(folly::exception_wrapper{});
+      transportHandler_->close(folly::exception_wrapper{});
+      transportHandler_->resetPipeline();
     }
+    pipeline_.reset();
     testTransport_ = nullptr;
   }
 
@@ -218,7 +219,7 @@ class RocketClientIntegrationTest : public ::testing::Test {
                     .build();
 
     appAdapter_->setPipeline(pipeline_.get());
-    transportHandler_->setPipeline(*pipeline_);
+    transportHandler_->setPipeline(pipeline_.get());
     transportHandler_->onConnect();
 
     evb_.loopOnce();
@@ -291,7 +292,7 @@ class RocketClientIntegrationTest : public ::testing::Test {
                     .build();
 
     appAdapter_->setPipeline(pipeline_.get());
-    transportHandler_->setPipeline(*pipeline_);
+    transportHandler_->setPipeline(pipeline_.get());
     transportHandler_->onConnect();
 
     evb_.loopOnce();
@@ -359,7 +360,7 @@ class RocketClientIntegrationTest : public ::testing::Test {
                     .build();
 
     appAdapter_->setPipeline(pipeline_.get());
-    transportHandler_->setPipeline(*pipeline_);
+    transportHandler_->setPipeline(pipeline_.get());
     transportHandler_->onConnect();
 
     evb_.loopOnce();
@@ -722,7 +723,7 @@ TEST_F(
       apache::thrift::transport::TTransportException>(
       apache::thrift::transport::TTransportException::END_OF_FILE,
       "Transport closed unexpectedly");
-  transportHandler_->onException(folly::exception_wrapper(ew));
+  transportHandler_->close(folly::exception_wrapper(ew));
   evb_.loopOnce();
 
   ASSERT_EQ(responseCount_, 2);
@@ -768,7 +769,7 @@ TEST_F(
   ASSERT_NE(getWrittenFrame(), nullptr);
 
   // No exception — graceful close path.
-  transportHandler_->onClose(folly::exception_wrapper{});
+  transportHandler_->close(folly::exception_wrapper{});
   evb_.loopOnce();
 
   ASSERT_EQ(responseCount_, 2);

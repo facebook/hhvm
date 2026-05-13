@@ -26,7 +26,7 @@
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/test/MockAsyncTransport.h>
 #include <folly/portability/GMock.h>
-#include <folly/synchronization/Baton.h>
+
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
@@ -80,7 +80,7 @@ class TransportHandlerTest : public ::testing::Test {
                         .setAllocator(&allocator_)
                         .build();
 
-    handler->setPipeline(*pipeline);
+    handler->setPipeline(pipeline.get());
 
     return {std::move(handler), std::move(pipeline)};
   }
@@ -112,7 +112,7 @@ class TransportHandlerTest : public ::testing::Test {
                             exception_handler_tag, std::move(mockHandler))
                         .build();
 
-    handler->setPipeline(*pipeline);
+    handler->setPipeline(pipeline.get());
 
     return {std::move(handler), std::move(pipeline), mockHandlerPtr};
   }
@@ -145,6 +145,10 @@ TEST_F(TransportHandlerTest, WritePath) {
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(handler->writePending_, 0);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: Pause and Resume Read
@@ -168,6 +172,10 @@ TEST_F(TransportHandlerTest, PauseAndResumeRead) {
   // Destructor closeInternal uses pauseRead() which is idempotent - no extra
   // setReadCB(nullptr) call since already paused
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: Pause Read is idempotent
@@ -195,6 +203,10 @@ TEST_F(TransportHandlerTest, PauseReadIdempotent) {
 
   // Destructor closeInternal uses pauseRead() which is idempotent
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: Resume Read is idempotent
@@ -216,6 +228,10 @@ TEST_F(TransportHandlerTest, ResumeReadIdempotent) {
   // Second resume should not call setReadCB again (already resumed)
   handler->resumeRead();
   EXPECT_FALSE(handler->readPaused_);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 TEST_F(TransportHandlerTest, OnReadReadyResumesRead) {
@@ -230,6 +246,10 @@ TEST_F(TransportHandlerTest, OnReadReadyResumesRead) {
 
   EXPECT_CALL(*mockSocket_, setReadCB(nullptr)).Times(1);
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 TEST_F(
@@ -259,6 +279,10 @@ TEST_F(
 
   EXPECT_CALL(*mockSocket_, setReadCB(nullptr)).Times(1);
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: onConnect resumes reading and fires connect event to pipeline
@@ -280,6 +304,10 @@ TEST_F(TransportHandlerTest, OnConnectResumesReadAndFiresConnect) {
 
   EXPECT_FALSE(handler->readPaused_);
   EXPECT_EQ(mockHandler->pipelineActivatedCount(), 1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: Write Backpressure When Write Pending
@@ -310,6 +338,10 @@ TEST_F(TransportHandlerTest, WriteBackpressureWhenWritePending) {
   // Second write also goes through and returns Backpressure
   EXPECT_EQ(result2, Result::Backpressure);
   EXPECT_EQ(handler->writePending_, 2);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: Write Success Clears Pending State
@@ -340,6 +372,10 @@ TEST_F(TransportHandlerTest, WriteSuccessClearsPendingState) {
           std::move(bytes2)));
 
   EXPECT_EQ(result2, Result::Backpressure);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: Write Error Clears Pending State
@@ -365,6 +401,10 @@ TEST_F(TransportHandlerTest, WriteErrorClearsPendingState) {
   capturedCallback->writeErr(0, ex);
 
   EXPECT_EQ(handler->writePending_, 0);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: Multiple Writes After Completion
@@ -386,6 +426,10 @@ TEST_F(TransportHandlerTest, MultipleWritesAfterCompletion) {
     capturedCallback->writeSuccess();
     EXPECT_EQ(handler->writePending_, 0);
   }
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // --- Read Tests ---
@@ -401,6 +445,10 @@ TEST_F(TransportHandlerTest, ReadBufferAvailableForwardsToPipeline) {
   handler->readBufferAvailable(std::move(data));
 
   EXPECT_EQ(appHandler_.readCount(), 1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: Multiple readBufferAvailable calls
@@ -413,74 +461,13 @@ TEST_F(TransportHandlerTest, MultipleReadBufferAvailableCalls) {
   }
 
   EXPECT_EQ(appHandler_.readCount(), 5);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // --- Lifecycle Tests ---
-
-// Test: Pipeline reset during pending write completes safely
-TEST_F(TransportHandlerTest, PipelineResetDuringPendingWriteCompletesSafely) {
-  auto [handler, pipeline] = createHandlerAndPipeline();
-
-  folly::AsyncTransport::WriteCallback* capturedCallback = nullptr;
-
-  EXPECT_CALL(*mockSocket_, writeChain(_, _, _))
-      .WillOnce(SaveArg<0>(&capturedCallback));
-
-  // Start a write operation
-  auto bytes = folly::IOBuf::copyBuffer("test data");
-  Result result = handler->onWrite(TypeErasedBox(std::move(bytes)));
-  EXPECT_EQ(result, Result::Backpressure);
-  EXPECT_GT(handler->writePending_, 0);
-
-  // Reset the pipeline while write is pending
-  // The DestructorGuard in handler should keep pipeline alive
-  pipeline.reset();
-
-  // Complete the write via callback - should not crash
-  // because pipeline is kept alive by pipelineGuard_
-  capturedCallback->writeSuccess();
-  EXPECT_EQ(handler->writePending_, 0);
-}
-
-// Test: Pipeline reset during read operation completes safely
-TEST_F(TransportHandlerTest, PipelineResetDuringReadCompletesSafely) {
-  auto [handler, pipeline] = createHandlerAndPipeline();
-
-  folly::Baton<> baton;
-  bool readCompleted = false;
-
-  // Set up app handler to wait on a baton during onMessage
-  appHandler_.setOnReadCallback([&](TypeErasedBox&&) {
-    baton.wait();
-    readCompleted = true;
-    return Result::Success;
-  });
-
-  // Schedule onRead to run through the eventBase
-  evb_.runInEventBaseThread([&handler]() {
-    auto bytes = folly::IOBuf::copyBuffer("test data");
-    handler->readBufferAvailable(std::move(bytes));
-  });
-
-  // Drive the event base to start the read (but it will block on baton)
-  std::thread t1([evb = &evb_]() { evb->loopOnce(); });
-
-  // Reset the pipeline while read is in progress (blocked on baton)
-  pipeline.reset();
-
-  // Post to baton to let the read complete
-  baton.post();
-
-  // Wait for the read to complete
-  t1.join();
-
-  // Drive event loop to completion
-  evb_.loopOnce();
-
-  // Verify the read completed successfully
-  EXPECT_TRUE(readCompleted);
-  EXPECT_EQ(appHandler_.readCount(), 1);
-}
 
 // --- Close Behavior Tests ---
 
@@ -492,7 +479,6 @@ TEST_F(TransportHandlerTest, ReadEOFCloseBehavior) {
   handler->setCloseCallback([&callbackInvoked]() { callbackInvoked = true; });
 
   EXPECT_NE(handler->pipeline_, nullptr);
-  EXPECT_NE(handler->pipelineGuard_, nullptr);
 
   // closeInternal uses pauseRead() which is idempotent - no setReadCB call
   // since already paused
@@ -501,9 +487,11 @@ TEST_F(TransportHandlerTest, ReadEOFCloseBehavior) {
   handler->readEOF();
 
   EXPECT_TRUE(handler->closed_);
-  EXPECT_EQ(handler->pipeline_, nullptr);
-  EXPECT_EQ(handler->pipelineGuard_, nullptr);
   EXPECT_TRUE(callbackInvoked);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: readErr closes socket, resets pipeline, and invokes close callback
@@ -514,7 +502,6 @@ TEST_F(TransportHandlerTest, ReadErrCloseBehavior) {
   handler->setCloseCallback([&callbackInvoked]() { callbackInvoked = true; });
 
   EXPECT_NE(handler->pipeline_, nullptr);
-  EXPECT_NE(handler->pipelineGuard_, nullptr);
 
   // closeInternal uses pauseRead() which is idempotent - no setReadCB call
   // since already paused
@@ -525,9 +512,11 @@ TEST_F(TransportHandlerTest, ReadErrCloseBehavior) {
   handler->readErr(ex);
 
   EXPECT_TRUE(handler->closed_);
-  EXPECT_EQ(handler->pipeline_, nullptr);
-  EXPECT_EQ(handler->pipelineGuard_, nullptr);
   EXPECT_TRUE(callbackInvoked);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: writeErr closes socket, resets pipeline, and invokes close callback
@@ -550,16 +539,17 @@ TEST_F(TransportHandlerTest, WriteErrCloseBehavior) {
   EXPECT_EQ(result, Result::Backpressure);
 
   EXPECT_NE(handler->pipeline_, nullptr);
-  EXPECT_NE(handler->pipelineGuard_, nullptr);
 
   folly::AsyncSocketException ex(
       folly::AsyncSocketException::NETWORK_ERROR, "write failed");
   capturedCallback->writeErr(0, ex);
 
   EXPECT_TRUE(handler->closed_);
-  EXPECT_EQ(handler->pipeline_, nullptr);
-  EXPECT_EQ(handler->pipelineGuard_, nullptr);
   EXPECT_TRUE(callbackInvoked);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: onClose closes socket, resets pipeline, and invokes close callback
@@ -570,18 +560,19 @@ TEST_F(TransportHandlerTest, OnCloseCloseBehavior) {
   handler->setCloseCallback([&callbackInvoked]() { callbackInvoked = true; });
 
   EXPECT_NE(handler->pipeline_, nullptr);
-  EXPECT_NE(handler->pipelineGuard_, nullptr);
 
   // closeInternal uses pauseRead() which is idempotent - no setReadCB call
   // since already paused
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
 
-  handler->onClose(folly::exception_wrapper{});
+  handler->close(folly::exception_wrapper{});
 
   EXPECT_TRUE(handler->closed_);
-  EXPECT_EQ(handler->pipeline_, nullptr);
-  EXPECT_EQ(handler->pipelineGuard_, nullptr);
   EXPECT_TRUE(callbackInvoked);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: Close is idempotent - callback only invoked once
@@ -596,8 +587,8 @@ TEST_F(TransportHandlerTest, CloseCallbackInvokedOnlyOnce) {
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
 
   // Close multiple times via different paths
-  handler->onClose(folly::exception_wrapper{});
-  handler->onClose(
+  handler->close(folly::exception_wrapper{});
+  handler->close(
       folly::exception_wrapper{}); // Second call should be idempotent
   folly::AsyncSocketException ex(
       folly::AsyncSocketException::NETWORK_ERROR, "error");
@@ -605,6 +596,10 @@ TEST_F(TransportHandlerTest, CloseCallbackInvokedOnlyOnce) {
 
   // Callback should only be invoked once
   EXPECT_EQ(callbackCount, 1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: Close callback can be set to nullptr (no-op)
@@ -616,9 +611,13 @@ TEST_F(TransportHandlerTest, CloseWithNoCallback) {
   // since already paused
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
 
-  handler->onClose(folly::exception_wrapper{});
+  handler->close(folly::exception_wrapper{});
 
   EXPECT_TRUE(handler->closed_);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // --- setPipeline Death Tests ---
@@ -638,7 +637,11 @@ TEST_F(TransportHandlerTest, SetPipelineWithoutResetDeath) {
           .build();
 
   // Attempting to set a second pipeline without resetting should trigger FATAL
-  EXPECT_DEATH(handler->setPipeline(*pipeline2), "must reset pipeline");
+  EXPECT_DEATH(handler->setPipeline(pipeline2.get()), "must reset pipeline");
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: write with null bytes triggers DCHECK
@@ -647,6 +650,10 @@ TEST_F(TransportHandlerTest, WriteWithNullBytesDeath) {
 
   EXPECT_DEBUG_DEATH(
       (void)handler->onWrite(TypeErasedBox(BytesPtr{})), "bytes");
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: isBufferMovable returns true
@@ -654,6 +661,10 @@ TEST_F(TransportHandlerTest, IsBufferMovableReturnsTrue) {
   auto [handler, pipeline] = createHandlerAndPipeline();
 
   EXPECT_TRUE(handler->isBufferMovable());
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: setPipeline fires onConnect when socket is already connected
@@ -689,9 +700,13 @@ TEST_F(TransportHandlerTest, SetPipelineFiresConnectWhenSocketGood) {
   EXPECT_EQ(mockHandlerPtr->pipelineActivatedCount(), 0);
 
   // setPipeline should fire onConnect since socket is good
-  handler->setPipeline(*pipeline);
+  handler->setPipeline(pipeline.get());
 
   EXPECT_EQ(mockHandlerPtr->pipelineActivatedCount(), 1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: setPipeline does not fire onConnect when socket is not connected
@@ -720,9 +735,13 @@ TEST_F(TransportHandlerTest, SetPipelineDoesNotFireConnectWhenSocketNotGood) {
           .build();
 
   // setPipeline should NOT fire onConnect since socket is not good
-  handler->setPipeline(*pipeline);
+  handler->setPipeline(pipeline.get());
 
   EXPECT_EQ(mockHandlerPtr->pipelineActivatedCount(), 0);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // --- Exception Firing Tests ---
@@ -749,6 +768,10 @@ TEST_F(TransportHandlerTest, ReadEOFFiresExceptionToPipeline) {
 
   EXPECT_TRUE(exceptionReceived);
   EXPECT_EQ(mockHandler->exceptionCount(), 1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: readErr fires exception to pipeline
@@ -775,6 +798,10 @@ TEST_F(TransportHandlerTest, ReadErrFiresExceptionToPipeline) {
 
   EXPECT_TRUE(exceptionReceived);
   EXPECT_EQ(mockHandler->exceptionCount(), 1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: writeErr fires exception to pipeline
@@ -808,6 +835,10 @@ TEST_F(TransportHandlerTest, WriteErrFiresExceptionToPipeline) {
 
   EXPECT_TRUE(exceptionReceived);
   EXPECT_EQ(mockHandler->exceptionCount(), 1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: onClose with exception fires exception to pipeline
@@ -827,11 +858,15 @@ TEST_F(TransportHandlerTest, OnCloseWithExceptionFiresExceptionToPipeline) {
   // closeInternal uses pauseRead() which is idempotent
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
 
-  handler->onClose(
+  handler->close(
       folly::make_exception_wrapper<std::runtime_error>("connection closed"));
 
   EXPECT_TRUE(exceptionReceived);
   EXPECT_EQ(mockHandler->exceptionCount(), 1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: onClose without exception does not fire exception to pipeline
@@ -842,9 +877,13 @@ TEST_F(TransportHandlerTest, OnCloseWithoutExceptionDoesNotFireException) {
   // closeInternal uses pauseRead() which is idempotent
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
 
-  handler->onClose(folly::exception_wrapper{});
+  handler->close(folly::exception_wrapper{});
 
   EXPECT_EQ(mockHandler->exceptionCount(), 0);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // --- Disconnect Event Tests ---
@@ -859,9 +898,13 @@ TEST_F(TransportHandlerTest, CloseFiresDisconnectToPipeline) {
 
   EXPECT_EQ(mockHandler->pipelineDeactivatedCount(), 0);
 
-  handler->onClose(folly::exception_wrapper{});
+  handler->close(folly::exception_wrapper{});
 
   EXPECT_EQ(mockHandler->pipelineDeactivatedCount(), 1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: readEOF fires disconnect to pipeline
@@ -875,6 +918,10 @@ TEST_F(TransportHandlerTest, ReadEOFFiresDisconnectToPipeline) {
   handler->readEOF();
 
   EXPECT_EQ(mockHandler->pipelineDeactivatedCount(), 1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: readErr fires disconnect to pipeline
@@ -890,6 +937,10 @@ TEST_F(TransportHandlerTest, ReadErrFiresDisconnectToPipeline) {
   handler->readErr(ex);
 
   EXPECT_EQ(mockHandler->pipelineDeactivatedCount(), 1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: writeErr fires disconnect to pipeline
@@ -913,6 +964,10 @@ TEST_F(TransportHandlerTest, WriteErrFiresDisconnectToPipeline) {
   capturedCallback->writeErr(0, ex);
 
   EXPECT_EQ(mockHandler->pipelineDeactivatedCount(), 1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // Test: disconnect is only fired once even with multiple close calls
@@ -924,71 +979,35 @@ TEST_F(TransportHandlerTest, DisconnectFiredOnlyOnceOnMultipleClose) {
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
 
   // Close multiple times
-  handler->onClose(folly::exception_wrapper{});
-  handler->onClose(folly::exception_wrapper{});
-  handler->onClose(folly::exception_wrapper{});
+  handler->close(folly::exception_wrapper{});
+  handler->close(folly::exception_wrapper{});
+  handler->close(folly::exception_wrapper{});
 
   // Disconnect should only be called once (close is idempotent)
   EXPECT_EQ(mockHandler->pipelineDeactivatedCount(), 1);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
 }
 
 // --- Destructor Tests ---
 
-// Test: Destructor closes transport and fires disconnect when not already
-// closed
-TEST_F(TransportHandlerTest, DestructorClosesTransportWhenNotAlreadyClosed) {
-  auto [handler, pipeline, mockHandler] =
-      createHandlerAndPipelineWithExceptionHandler();
-
-  EXPECT_FALSE(handler->closed_);
-  EXPECT_EQ(mockHandler->pipelineDeactivatedCount(), 0);
-
-  // closeInternal uses pauseRead() which is idempotent - no setReadCB call
-  // since already paused
-  EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
-
-  // Destroy the handler - destructor should call closeInternal
-  handler.reset();
-
-  // Verify disconnect was fired
-  EXPECT_EQ(mockHandler->pipelineDeactivatedCount(), 1);
-}
-
-// Test: Destructor is idempotent - no double close if already closed
+// Test: Destructor is idempotent when caller already called close() — no
+// second deactivate, no second closeNow.
 TEST_F(TransportHandlerTest, DestructorNoOpWhenAlreadyClosed) {
   auto [handler, pipeline, mockHandler] =
       createHandlerAndPipelineWithExceptionHandler();
 
-  // closeInternal uses pauseRead() which is idempotent
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
 
-  // Explicitly close
-  handler->onClose(folly::exception_wrapper{});
+  handler->close(folly::exception_wrapper{});
   EXPECT_TRUE(handler->closed_);
   EXPECT_EQ(mockHandler->pipelineDeactivatedCount(), 1);
 
-  // Destroy the handler - destructor should not close again
+  handler->resetPipeline();
+  pipeline.reset();
   handler.reset();
-
-  // Verify disconnect was only fired once (from explicit close, not destructor)
-  EXPECT_EQ(mockHandler->pipelineDeactivatedCount(), 1);
-}
-
-// Test: Destructor invokes close callback when not already closed
-TEST_F(TransportHandlerTest, DestructorInvokesCloseCallback) {
-  auto [handler, pipeline] = createHandlerAndPipeline();
-
-  bool callbackInvoked = false;
-  handler->setCloseCallback([&callbackInvoked]() { callbackInvoked = true; });
-
-  // closeInternal uses pauseRead() which is idempotent - no setReadCB call
-  // since already paused
-  EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
-
-  // Destroy the handler - destructor should invoke close callback
-  handler.reset();
-
-  EXPECT_TRUE(callbackInvoked);
 }
 
 } // namespace apache::thrift::fast_thrift::transport

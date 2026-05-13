@@ -133,10 +133,11 @@ std::unique_ptr<folly::IOBuf> prependLengthPrefix(
 struct BenchmarkFixture {
   BenchmarkFixture() = default;
   ~BenchmarkFixture() {
-    pipeline.reset();
     if (transportHandler) {
-      transportHandler->onClose(folly::exception_wrapper{});
+      transportHandler->close(folly::exception_wrapper{});
+      transportHandler->resetPipeline();
     }
+    pipeline.reset();
   }
   BenchmarkFixture(const BenchmarkFixture&) = delete;
   BenchmarkFixture& operator=(const BenchmarkFixture&) = delete;
@@ -189,7 +190,7 @@ struct BenchmarkFixture {
                    .build();
 
     appAdapter->setPipeline(pipeline.get());
-    transportHandler->setPipeline(*pipeline);
+    transportHandler->setPipeline(pipeline.get());
     transportHandler->onConnect();
 
     // Inject SETUP frame to bring pipeline into ready state
@@ -360,7 +361,7 @@ BENCHMARK(Rocket_Server_SetupFrame, iters) {
             .build();
 
     fixture.appAdapter->setPipeline(fixture.pipeline.get());
-    fixture.transportHandler->setPipeline(*fixture.pipeline);
+    fixture.transportHandler->setPipeline(fixture.pipeline.get());
     fixture.transportHandler->onConnect();
 
     auto setupFrame = createSetupFrame();

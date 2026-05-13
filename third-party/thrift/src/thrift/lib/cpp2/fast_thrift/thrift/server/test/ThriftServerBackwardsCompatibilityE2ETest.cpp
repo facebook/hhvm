@@ -190,7 +190,7 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
                       .build();
 
               conn.appAdapter->setPipeline(rocketPipeline.get());
-              transportHandler->setPipeline(*rocketPipeline);
+              transportHandler->setPipeline(rocketPipeline.get());
 
               conn.transportHandler = std::move(transportHandler);
               conn.pipeline = std::move(rocketPipeline);

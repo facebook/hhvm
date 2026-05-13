@@ -80,19 +80,21 @@ class TransportHandler : public folly::DelayedDestruction,
   /**
    * Phase 2: Set the pipeline reference.
    * Must be called before any read/write operations.
-   * Stores a DestructorGuard to ensure the pipeline outlives the transport.
+   * The handler holds a DestructorGuard on the pipeline, so the pipeline
+   * cannot be destroyed while it is attached. Caller releases this hold
+   * via resetPipeline() (or destroys the handler, which calls
+   * resetPipeline implicitly).
    */
   void setPipeline(
-      apache::thrift::fast_thrift::channel_pipeline::PipelineImpl&
+      apache::thrift::fast_thrift::channel_pipeline::PipelineImpl*
           pipeline) noexcept {
+    DCHECK(pipeline);
     if (pipeline_) {
       XLOG(FATAL) << "must reset pipeline before setting a new one";
     }
-
+    pipeline_ = pipeline;
     pipelineGuard_ =
-        std::make_unique<folly::DelayedDestruction::DestructorGuard>(&pipeline);
-    pipeline_ = &pipeline;
-
+        std::make_unique<folly::DelayedDestruction::DestructorGuard>(pipeline_);
     // If the socket is already connected, fire the connect event.
     if (socket_->good()) {
       onConnect();
@@ -124,6 +126,7 @@ class TransportHandler : public folly::DelayedDestruction,
   }
 
   void onConnect() noexcept {
+    DCHECK(pipeline_);
     resumeRead();
     pipeline_->activate();
   }
@@ -145,50 +148,50 @@ class TransportHandler : public folly::DelayedDestruction,
 
   void readDataAvailable(size_t len) noexcept override {
     folly::DelayedDestruction::DestructorGuard dg(this);
-
     readBufQueue_.postallocate(len);
     auto buf = readBufQueue_.move();
     auto msg = TypeErasedBox(std::move(buf));
+
+    DCHECK(pipeline_);
     Result result = pipeline_->fireRead(std::move(msg));
 
-    switch (result) {
-      case Result::Success:
-        break;
-      case Result::Backpressure:
-        pauseRead();
-        break;
-      case Result::Error:
-        closeInternal(
-            folly::AsyncSocketException(
-                folly::AsyncSocketException::UNKNOWN, "Pipeline read error"));
-        break;
+    if (FOLLY_LIKELY(result == Result::Success)) {
+      return;
+    }
+
+    if (result == Result::Backpressure) {
+      pauseRead();
+    } else {
+      DCHECK(result == Result::Error);
+      closeInternal(
+          folly::AsyncSocketException(
+              folly::AsyncSocketException::UNKNOWN, "Pipeline read error"));
     }
   }
 
   void readBufferAvailable(
       std::unique_ptr<folly::IOBuf> buf) noexcept override {
     folly::DelayedDestruction::DestructorGuard dg(this);
-
     auto msg = TypeErasedBox(std::move(buf));
-    Result result = pipeline_->fireRead(std::move(msg));
 
-    switch (result) {
-      case Result::Success:
-        break;
-      case Result::Backpressure:
-        pauseRead();
-        break;
-      case Result::Error:
-        closeInternal(
-            folly::AsyncSocketException(
-                folly::AsyncSocketException::UNKNOWN, "Pipeline read error"));
-        break;
+    DCHECK(pipeline_);
+    Result result = pipeline_->fireRead(std::move(msg));
+    if (FOLLY_LIKELY(result == Result::Success)) {
+      return;
+    }
+
+    if (result == Result::Backpressure) {
+      pauseRead();
+    } else {
+      DCHECK(result == Result::Error);
+      closeInternal(
+          folly::AsyncSocketException(
+              folly::AsyncSocketException::UNKNOWN, "Pipeline read error"));
     }
   }
 
   void readEOF() noexcept override {
     folly::DelayedDestruction::DestructorGuard dg(this);
-
     closeInternal(
         apache::thrift::transport::TTransportException(
             apache::thrift::transport::TTransportException::
@@ -208,7 +211,10 @@ class TransportHandler : public folly::DelayedDestruction,
   // --- TailEndpointHandler lifecycle ---
 
   void handlerAdded() noexcept {}
-  void handlerRemoved() noexcept {}
+  void handlerRemoved() noexcept {
+    DCHECK(closed_);
+    closeInternal(folly::exception_wrapper());
+  }
   void onPipelineActive() noexcept {}
   void onPipelineInactive() noexcept {}
 
@@ -232,10 +238,10 @@ class TransportHandler : public folly::DelayedDestruction,
    * write completes (signaled via writeSuccess()).
    */
   Result onWrite(TypeErasedBox&& msg) noexcept {
+    folly::DelayedDestruction::DestructorGuard dg(this);
     auto bytes = std::move(msg.get<BytesPtr>());
     DCHECK(bytes);
-    folly::DelayedDestruction::DestructorGuard dg(this);
-    if (closed_) {
+    if (FOLLY_UNLIKELY(closed_)) {
       return Result::Error;
     }
 
@@ -256,7 +262,7 @@ class TransportHandler : public folly::DelayedDestruction,
    */
   void pauseRead() noexcept {
     folly::DelayedDestruction::DestructorGuard dg(this);
-    if (readPaused_) {
+    if (FOLLY_UNLIKELY(readPaused_)) {
       return;
     }
     readPaused_ = true;
@@ -268,7 +274,7 @@ class TransportHandler : public folly::DelayedDestruction,
    */
   void resumeRead() noexcept {
     folly::DelayedDestruction::DestructorGuard dg(this);
-    if (!readPaused_) {
+    if (FOLLY_UNLIKELY(!readPaused_)) {
       return;
     }
     readPaused_ = false;
@@ -276,17 +282,30 @@ class TransportHandler : public folly::DelayedDestruction,
   }
 
   /**
-   * Called when the transport is closed externally.
-   * Triggers internal close logic and notifies the close callback.
+   * Close the transport: pause reads, close the socket, fire any
+   * exception up the pipeline, deactivate the pipeline, invoke the close
+   * callback. Idempotent.
+   *
+   * Pipeline reference is NOT cleared here — close is for disconnect,
+   * not pointer cleanup. Call resetPipeline() externally during teardown
+   * after the pipeline is gone if you want defensive null-out.
    */
-  void onClose(folly::exception_wrapper&& ex) noexcept {
+  void close(folly::exception_wrapper&& ex) noexcept {
     folly::DelayedDestruction::DestructorGuard dg(this);
     closeInternal(std::move(ex));
   }
 
-  void onException(folly::exception_wrapper&& ex) noexcept {
+  /**
+   * Detach from the pipeline. Closes the transport first (idempotent) so
+   * the socket stops firing callbacks at the pipeline, then releases the
+   * DestructorGuard that's keeping the pipeline alive. After this returns
+   * the caller may safely destroy the pipeline.
+   */
+  void resetPipeline() noexcept {
     folly::DelayedDestruction::DestructorGuard dg(this);
-    closeInternal(std::move(ex));
+    closeInternal(folly::exception_wrapper());
+    pipeline_ = nullptr;
+    pipelineGuard_.reset();
   }
 
   // --- AsyncTransport::WriteCallback interface ---
@@ -294,6 +313,7 @@ class TransportHandler : public folly::DelayedDestruction,
   void writeSuccess() noexcept override {
     folly::DelayedDestruction::DestructorGuard dg(this);
     --writePending_;
+    DCHECK(pipeline_);
     pipeline_->onWriteReady();
   }
 
@@ -310,7 +330,10 @@ class TransportHandler : public folly::DelayedDestruction,
     closeInternal(newEx);
   }
 
-  ~TransportHandler() override { closeInternal(folly::exception_wrapper()); }
+  ~TransportHandler() override {
+    DCHECK(!pipeline_);
+    resetPipeline();
+  }
 
  protected:
   TransportHandler(
@@ -322,13 +345,8 @@ class TransportHandler : public folly::DelayedDestruction,
         maxBufferSize_(maxBufferSize) {}
 
  private:
-  void resetPipeline() noexcept {
-    pipeline_ = nullptr;
-    pipelineGuard_.reset();
-  }
-
   void closeInternal(folly::exception_wrapper ex) noexcept {
-    if (closed_) {
+    if (FOLLY_UNLIKELY(closed_)) {
       return;
     }
 
@@ -337,14 +355,12 @@ class TransportHandler : public folly::DelayedDestruction,
     pauseRead();
     socket_->closeNow();
 
-    if (pipeline_) {
+    if (FOLLY_LIKELY(pipeline_)) {
       if (ex) {
         pipeline_->fireException(std::move(ex));
       }
       pipeline_->deactivate();
     }
-
-    resetPipeline();
 
     if (auto closeCallback = std::move(closeCallback_)) {
       closeCallback();
@@ -355,8 +371,7 @@ class TransportHandler : public folly::DelayedDestruction,
   folly::IOBufQueue readBufQueue_{folly::IOBufQueue::cacheChainLength()};
   size_t minBufferSize_;
   size_t maxBufferSize_;
-  apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline_{
-      nullptr};
+  channel_pipeline::PipelineImpl* pipeline_{nullptr};
   std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
   bool readPaused_{true};
   uint32_t writePending_{0};

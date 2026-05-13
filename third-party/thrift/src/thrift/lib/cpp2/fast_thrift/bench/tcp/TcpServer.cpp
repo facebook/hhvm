@@ -111,7 +111,7 @@ TcpServer::TcpServer(
             adapter->setPipeline(pipeline.get());
             adapters_.insert(std::move(adapter));
 
-            transportHandler->setPipeline(*pipeline);
+            transportHandler->setPipeline(pipeline.get());
 
             // Configure MSG_ZEROCOPY for large payloads
             if (zeroCopyThreshold_ > 0) {

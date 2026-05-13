@@ -249,11 +249,15 @@ class ThriftServerIntegrationTest : public ::testing::Test {
     // Drain pending write callbacks before destroying
     evb_.loopOnce();
 
-    serverChannel_.reset();
+    if (transportHandler_) {
+      transportHandler_->close(folly::exception_wrapper{});
+      transportHandler_->resetPipeline();
+    }
     thriftPipeline_.reset();
-    transportAdapter_.reset();
-    appAdapter_.reset();
     rocketPipeline_.reset();
+    transportAdapter_.reset();
+    serverChannel_.reset();
+    appAdapter_.reset();
     transportHandler_.reset();
     testTransport_ = nullptr;
   }
@@ -325,7 +329,7 @@ class ThriftServerIntegrationTest : public ::testing::Test {
     serverChannel_->setPipelineRef(*thriftPipeline_);
     serverChannel_->setWorker(apache::thrift::Cpp2Worker::createDummy(&evb_));
 
-    transportHandler_->setPipeline(*rocketPipeline_);
+    transportHandler_->setPipeline(rocketPipeline_.get());
     transportHandler_->onConnect();
   }
 
@@ -795,6 +799,10 @@ class ThriftServerAppAdapterIntegrationTest : public ::testing::Test {
   void TearDown() override {
     evb_.loopOnce();
 
+    if (transportHandler_) {
+      transportHandler_->close(folly::exception_wrapper{});
+      transportHandler_->resetPipeline();
+    }
     pipeline_.reset();
     transportHandler_.reset();
     testTransport_ = nullptr;
@@ -841,7 +849,7 @@ class ThriftServerAppAdapterIntegrationTest : public ::testing::Test {
             .build();
 
     adapter_->setPipeline(pipeline_.get());
-    transportHandler_->setPipeline(*pipeline_);
+    transportHandler_->setPipeline(pipeline_.get());
     transportHandler_->onConnect();
   }
 

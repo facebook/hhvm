@@ -69,7 +69,7 @@ class ConnectionHandlerTest : public ::testing::Test {
                               .setAllocator(&allocator_)
                               .build();
 
-          transportHandler->setPipeline(*pipeline);
+          transportHandler->setPipeline(pipeline.get());
 
           if (auto hook = onConnectionCreatedHook_.rlock(); *hook) {
             (*hook)();
@@ -245,7 +245,7 @@ TEST_F(ConnectionHandlerTest, CloseCallback) {
 
   evb_->runInEventBaseThreadAndWait([&] {
     auto* transportHandler = handler->connections_[1].transportHandler.get();
-    transportHandler->onClose(folly::exception_wrapper{});
+    transportHandler->close(folly::exception_wrapper{});
 
     EXPECT_EQ(handler->connectionCount(), 2);
     for (auto& connection : handler->connections_) {

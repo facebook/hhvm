@@ -77,7 +77,11 @@ class ThriftClientTransportAdapter {
         });
   }
 
-  ~ThriftClientTransportAdapter() = default;
+  ~ThriftClientTransportAdapter() {
+    if (connection_) {
+      connection_->close(folly::exception_wrapper{});
+    }
+  }
 
   ThriftClientTransportAdapter(const ThriftClientTransportAdapter&) = delete;
   ThriftClientTransportAdapter& operator=(const ThriftClientTransportAdapter&) =
@@ -142,18 +146,16 @@ class ThriftClientTransportAdapter {
   }
 
   /**
-   * Called when the rocket pipeline delivers an error response.
-   * Propagates the error up the thrift pipeline and then closes the transport
-   * connection.
+   * Called when the rocket pipeline delivers an error. Propagates the
+   * error up the thrift pipeline. The connection is torn down later via
+   * the bridge dtor (or explicit caller close); doing it synchronously
+   * here would re-enter the pipeline mid-fireRead.
    */
   void onTransportError(folly::exception_wrapper&& ew) noexcept {
     if (FOLLY_UNLIKELY(!pipeline_)) {
       return;
     }
-
     pipeline_->fireException(std::move(ew));
-    connection_->close(
-        folly::make_exception_wrapper<std::runtime_error>("Transport error"));
   }
 
   // === HeadEndpointHandler interface ===

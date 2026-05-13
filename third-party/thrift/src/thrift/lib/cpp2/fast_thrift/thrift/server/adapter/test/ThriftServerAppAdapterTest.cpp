@@ -238,6 +238,13 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
         transportHandler;
     PipelineImpl::Ptr pipeline;
     MockHandler* handler{nullptr};
+
+    ~BuiltPipeline() {
+      if (transportHandler) {
+        transportHandler->close(folly::exception_wrapper{});
+        transportHandler->resetPipeline();
+      }
+    }
   };
 
   BuiltPipeline buildPipeline(
@@ -728,7 +735,7 @@ TEST_F(
 // writeResponse Result Check Tests
 // =============================================================================
 
-TEST_F(ThriftServerAppAdapterTest, WriteResponseClosesPipelineOnWriteFailure) {
+TEST_F(ThriftServerAppAdapterTest, WriteResponseSurfacesPipelineWriteError) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
 
   auto built = buildPipeline(
@@ -738,19 +745,14 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseClosesPipelineOnWriteFailure) {
         return Result::Error; // Simulate pipeline write failure
       });
 
-  EXPECT_EQ(built.handler->handlerRemovedCount(), 0);
-
   auto result = adapter->writeResponse(
       /*streamId=*/42,
       folly::IOBuf::copyBuffer("response"),
       /*metadata=*/nullptr,
       /*complete=*/true);
 
-  // Adapter must surface the Error to its caller and close the pipeline so
-  // subsequent writes on the dead connection short-circuit. Pipeline close
-  // calls handlerRemoved on every handler — we use that as the witness.
   EXPECT_EQ(result, Result::Error);
-  EXPECT_EQ(built.handler->handlerRemovedCount(), 1);
+  EXPECT_EQ(built.handler->handlerRemovedCount(), 0);
 }
 
 // =============================================================================

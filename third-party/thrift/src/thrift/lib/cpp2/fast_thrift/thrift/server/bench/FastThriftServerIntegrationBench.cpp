@@ -294,7 +294,7 @@ struct RocketPipelineResources {
             .build();
 
     appAdapter->setPipeline(pipeline.get());
-    transportHandler->setPipeline(*pipeline);
+    transportHandler->setPipeline(pipeline.get());
     transportHandler->onConnect();
 
     return testTransport;

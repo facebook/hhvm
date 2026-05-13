@@ -50,7 +50,8 @@ class TcpClient::AppAdapter {
 
   ~AppAdapter() {
     if (transportHandler_) {
-      transportHandler_->onClose(folly::exception_wrapper{});
+      transportHandler_->close(folly::exception_wrapper{});
+      transportHandler_->resetPipeline();
     }
   }
 
@@ -63,7 +64,7 @@ class TcpClient::AppAdapter {
       apache::thrift::fast_thrift::channel_pipeline::PipelineImpl::Ptr
           pipeline) {
     pipeline_ = std::move(pipeline);
-    transportHandler_->setPipeline(*pipeline_);
+    transportHandler_->setPipeline(pipeline_.get());
     transportHandler_->resumeRead();
   }
 

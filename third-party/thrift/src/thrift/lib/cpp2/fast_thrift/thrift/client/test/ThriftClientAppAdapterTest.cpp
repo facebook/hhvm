@@ -113,6 +113,13 @@ class ThriftClientAppAdapterTest : public ::testing::Test {
         transportHandler;
     PipelineImpl::Ptr pipeline;
     MockHandler* handler{nullptr};
+
+    ~BuiltPipeline() {
+      if (transportHandler) {
+        transportHandler->close(folly::exception_wrapper{});
+        transportHandler->resetPipeline();
+      }
+    }
   };
 
   BuiltPipeline buildPipeline(

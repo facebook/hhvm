@@ -32,7 +32,7 @@ class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
   void connectSuccess() noexcept override { handler_->onConnect(); }
 
   void connectErr(const folly::AsyncSocketException& ex) noexcept override {
-    handler_->onClose(ex);
+    handler_->close(ex);
   }
 
  private:
@@ -64,7 +64,7 @@ void IntegrationTestFixture::SetUp() {
                     .setAllocator(&serverAllocator_)
                     .build();
             serverAppAdapter_.setPipeline(pipeline.get());
-            transportHandler->setPipeline(*pipeline);
+            transportHandler->setPipeline(pipeline.get());
 
             return apache::thrift::fast_thrift::rocket::server::connection::
                 RocketServerConnection{
@@ -117,7 +117,7 @@ ClientConnection& IntegrationTestFixture::connectClient() {
             .setAllocator(&clientAllocator_)
             .build();
 
-    transportHandler->setPipeline(*pipeline);
+    transportHandler->setPipeline(pipeline.get());
     clientConnection_.appAdapter.setPipeline(pipeline.get());
     clientConnection_.appAdapter.setEventBase(evb);
 
@@ -137,8 +137,12 @@ void IntegrationTestFixture::disconnectClient() {
     auto* evb = clientThread_->getEventBase();
     evb->runInEventBaseThreadAndWait([this]() {
       clientConnection_.connectCallback.reset();
-      clientConnection_.transportHandler.reset();
+      if (clientConnection_.transportHandler) {
+        clientConnection_.transportHandler->close(folly::exception_wrapper{});
+        clientConnection_.transportHandler->resetPipeline();
+      }
       clientConnection_.pipeline.reset();
+      clientConnection_.transportHandler.reset();
     });
     clientThread_.reset();
   }

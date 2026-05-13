@@ -92,16 +92,18 @@ class RocketE2ETest : public ::testing::Test {
 
   void TearDown() override {
     evbThread_.getEventBase()->runInEventBaseThreadAndWait([this]() {
-      clientPipeline_.reset();
-      serverPipeline_.reset();
       if (clientTransport_) {
-        clientTransport_->onClose(folly::exception_wrapper{});
-        clientTransport_.reset();
+        clientTransport_->close(folly::exception_wrapper{});
+        clientTransport_->resetPipeline();
       }
       if (serverTransport_) {
-        serverTransport_->onClose(folly::exception_wrapper{});
-        serverTransport_.reset();
+        serverTransport_->close(folly::exception_wrapper{});
+        serverTransport_->resetPipeline();
       }
+      clientPipeline_.reset();
+      serverPipeline_.reset();
+      clientTransport_.reset();
+      serverTransport_.reset();
     });
   }
 
@@ -209,7 +211,7 @@ class RocketE2ETest : public ::testing::Test {
               .build();
 
       clientAppAdapter_->setPipeline(clientPipeline_.get());
-      clientTransport_->setPipeline(*clientPipeline_);
+      clientTransport_->setPipeline(clientPipeline_.get());
 
       // Build server pipeline
       serverPipeline_ =
@@ -240,7 +242,7 @@ class RocketE2ETest : public ::testing::Test {
               .build();
 
       serverAppAdapter_->setPipeline(serverPipeline_.get());
-      serverTransport_->setPipeline(*serverPipeline_);
+      serverTransport_->setPipeline(serverPipeline_.get());
 
       // Activate both sides — server first so it's ready for the SETUP frame
       serverTransport_->onConnect();

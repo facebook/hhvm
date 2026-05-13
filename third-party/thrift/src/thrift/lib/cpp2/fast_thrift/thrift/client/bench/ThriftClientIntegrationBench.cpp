@@ -320,7 +320,7 @@ std::unique_ptr<rocket::client::RocketClientConnection> createRocketConnection(
           .build();
 
   connection->appAdapter->setPipeline(connection->pipeline.get());
-  connection->transportHandler->setPipeline(*connection->pipeline);
+  connection->transportHandler->setPipeline(connection->pipeline.get());
 
   return connection;
 }

@@ -162,7 +162,7 @@ class FastThriftBenchmarkServer {
       serverChannel->setPipelineRef(*pipeline);
       serverChannel->setWorker(apache::thrift::Cpp2Worker::createDummy(evb));
 
-      transportHandler->setPipeline(*pipeline);
+      transportHandler->setPipeline(pipeline.get());
 
       serverChannels_.withWLock([&](auto& channels) {
         channels.push_back(std::move(serverChannel));

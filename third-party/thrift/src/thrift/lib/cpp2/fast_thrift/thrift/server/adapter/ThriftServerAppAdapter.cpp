@@ -179,13 +179,8 @@ channel_pipeline::Result ThriftServerAppAdapter::fireResponse(
     XLOG(ERR) << "Pipeline not set, cannot send response";
     return channel_pipeline::Result::Error;
   }
-  auto result = pipeline_->fireWrite(
+  return pipeline_->fireWrite(
       channel_pipeline::erase_and_box(std::move(response)));
-  if (FOLLY_UNLIKELY(result == channel_pipeline::Result::Error)) {
-    XLOG(ERR) << "Pipeline write failed; closing pipeline";
-    pipeline_->close();
-  }
-  return result;
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

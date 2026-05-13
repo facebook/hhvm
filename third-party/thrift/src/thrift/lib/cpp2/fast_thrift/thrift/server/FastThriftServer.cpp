@@ -104,7 +104,7 @@ FastThriftServer::createConnectionFactory() {
           adapter->setMetadataProtocol(p.metadataProtocol);
         });
     conn.appAdapter->setPipeline(rocketPipeline.get());
-    transportHandler->setPipeline(*rocketPipeline);
+    transportHandler->setPipeline(rocketPipeline.get());
 
     if (config_.zeroCopyThreshold > 0) {
       if (!transportHandler->setZeroCopy(true)) {

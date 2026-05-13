@@ -227,7 +227,7 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
             .build();
 
     connection->appAdapter->setPipeline(connection->pipeline.get());
-    connection->transportHandler->setPipeline(*connection->pipeline);
+    connection->transportHandler->setPipeline(connection->pipeline.get());
 
     // 2. Build thrift pipeline: ThriftClientChannel → TransportAdapter
     channel_ = ThriftClientChannel::newChannel(&evb_);
@@ -1283,7 +1283,7 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
             .build();
 
     connection->appAdapter->setPipeline(connection->pipeline.get());
-    connection->transportHandler->setPipeline(*connection->pipeline);
+    connection->transportHandler->setPipeline(connection->pipeline.get());
 
     // Create transport adapter (takes ownership of connection)
     transportAdapter_ = std::make_unique<client::ThriftClientTransportAdapter>(

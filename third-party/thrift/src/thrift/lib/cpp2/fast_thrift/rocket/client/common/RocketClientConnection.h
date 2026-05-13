@@ -43,17 +43,22 @@ struct RocketClientConnection {
   channel_pipeline::SimpleBufferAllocator allocator;
 
   /**
-   * Close the connection and tear down the rocket pipeline.
+   * Close the connection and tear down the rocket pipeline. Order
+   * matters: transport stays alive while the pipeline runs
+   * handlerRemoved, then transport and appAdapter are destroyed last.
+   * Idempotent.
    */
   void close(folly::exception_wrapper&& e) noexcept {
     if (transportHandler) {
-      transportHandler->onClose(std::move(e));
-      transportHandler.reset();
+      transportHandler->close(std::move(e));
+      transportHandler->resetPipeline();
     }
     if (pipeline) {
       pipeline->close();
       pipeline.reset();
     }
+    transportHandler.reset();
+    appAdapter.reset();
   }
 };
 

@@ -258,10 +258,24 @@ class FastThriftServerIntegrationTest : public ::testing::Test {
     rebuildPipelineWith(std::make_shared<TestHandler>());
   }
 
+  void TearDown() override {
+    if (transportHandler_) {
+      transportHandler_->close(folly::exception_wrapper{});
+      transportHandler_->resetPipeline();
+    }
+    pipeline_.reset();
+  }
+
   // Tear down + rebuild pipeline with a different handler. Used by the
   // unimplemented-method test that needs a different handler instance.
   template <typename Handler>
   void rebuildPipelineWith(std::shared_ptr<Handler> h) {
+    if (transportHandler_) {
+      transportHandler_->close(folly::exception_wrapper{});
+      transportHandler_->resetPipeline();
+    }
+    pipeline_.reset();
+
     handler_ = h;
     adapter_.reset(new FastThriftServerAppAdapter(h));
 

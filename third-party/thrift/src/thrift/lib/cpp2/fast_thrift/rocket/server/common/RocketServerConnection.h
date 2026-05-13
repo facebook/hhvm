@@ -43,22 +43,27 @@ struct RocketServerConnection {
   channel_pipeline::SimpleBufferAllocator allocator;
 
   /**
-   * Close the connection and tear down the rocket pipeline.
+   * Close the connection and tear down the rocket pipeline. Order
+   * matters: transport stays alive while the pipeline runs
+   * handlerRemoved, then transport and appAdapter are destroyed last.
+   * Idempotent.
    */
   void close(folly::exception_wrapper&& e) noexcept {
     if (transportHandler) {
-      // Clear the close callback before calling onClose to prevent re-entry:
-      // onClose() triggers the callback, which would call removeConnection(),
+      // Clear the close callback before calling close to prevent re-entry:
+      // close() triggers the callback, which would call removeConnection(),
       // which calls close() again — causing double-close and iterator
       // invalidation in closeAllConnections().
       transportHandler->setCloseCallback(nullptr);
-      transportHandler->onClose(std::move(e));
-      transportHandler.reset();
+      transportHandler->close(std::move(e));
+      transportHandler->resetPipeline();
     }
     if (pipeline) {
       pipeline->close();
       pipeline.reset();
     }
+    transportHandler.reset();
+    appAdapter.reset();
   }
 };
 

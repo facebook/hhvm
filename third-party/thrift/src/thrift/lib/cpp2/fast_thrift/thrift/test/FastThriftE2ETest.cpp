@@ -227,7 +227,7 @@ class FastThriftE2ETest : public ::testing::Test {
                       .build();
 
               conn.appAdapter->setPipeline(rocketPipeline.get());
-              transportHandler->setPipeline(*rocketPipeline);
+              transportHandler->setPipeline(rocketPipeline.get());
 
               conn.transportHandler = std::move(transportHandler);
               conn.pipeline = std::move(rocketPipeline);
@@ -393,7 +393,7 @@ class FastThriftE2ETest : public ::testing::Test {
               .build();
 
       connection->appAdapter->setPipeline(connection->pipeline.get());
-      connection->transportHandler->setPipeline(*connection->pipeline);
+      connection->transportHandler->setPipeline(connection->pipeline.get());
 
       // 2. Build thrift pipeline: ThriftClientChannel → TransportAdapter
       channel = thrift::ThriftClientChannel::newChannel(evb);
@@ -603,7 +603,7 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
               .build();
 
       conn.appAdapter->setPipeline(rocketPipeline.get());
-      transportHandler->setPipeline(*rocketPipeline);
+      transportHandler->setPipeline(rocketPipeline.get());
 
       conn.transportHandler = std::move(transportHandler);
       conn.pipeline = std::move(rocketPipeline);
@@ -765,7 +765,7 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
               .build();
 
       connection->appAdapter->setPipeline(connection->pipeline.get());
-      connection->transportHandler->setPipeline(*connection->pipeline);
+      connection->transportHandler->setPipeline(connection->pipeline.get());
 
       // 2. Build thrift pipeline: AppAdapter → TransportAdapter
       clientTransportAdapter_ =

@@ -317,7 +317,7 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
               .build();
 
       connection->appAdapter->setPipeline(connection->pipeline.get());
-      connection->transportHandler->setPipeline(*connection->pipeline);
+      connection->transportHandler->setPipeline(connection->pipeline.get());
 
       // 2. Build thrift pipeline: ThriftClientChannel → TransportAdapter
       channel = thrift::ThriftClientChannel::newChannel(evb);
@@ -770,7 +770,7 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
               .build();
 
       connection->appAdapter->setPipeline(connection->pipeline.get());
-      connection->transportHandler->setPipeline(*connection->pipeline);
+      connection->transportHandler->setPipeline(connection->pipeline.get());
 
       // 2. Build thrift pipeline: AppAdapter → TransportAdapter
       transportAdapter_ =

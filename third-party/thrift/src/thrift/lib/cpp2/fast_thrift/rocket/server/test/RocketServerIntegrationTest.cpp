@@ -160,10 +160,11 @@ class RocketServerIntegrationTest : public ::testing::Test {
     // must process those callbacks while the pipeline is still alive.
     evb_.loopOnce();
 
-    pipeline_.reset();
     if (transportHandler_) {
-      transportHandler_->onClose(folly::exception_wrapper{});
+      transportHandler_->close(folly::exception_wrapper{});
+      transportHandler_->resetPipeline();
     }
+    pipeline_.reset();
     testTransport_ = nullptr;
   }
 
@@ -212,7 +213,7 @@ class RocketServerIntegrationTest : public ::testing::Test {
                     .build();
 
     appAdapter_->setPipeline(pipeline_.get());
-    transportHandler_->setPipeline(*pipeline_);
+    transportHandler_->setPipeline(pipeline_.get());
     transportHandler_->onConnect();
   }
 
@@ -292,7 +293,7 @@ class RocketServerIntegrationTest : public ::testing::Test {
                     .build();
 
     appAdapter_->setPipeline(pipeline_.get());
-    transportHandler_->setPipeline(*pipeline_);
+    transportHandler_->setPipeline(pipeline_.get());
     transportHandler_->onConnect();
     injectSetupFrame();
   }

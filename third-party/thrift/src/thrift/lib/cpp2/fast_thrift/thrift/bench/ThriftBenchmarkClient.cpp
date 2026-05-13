@@ -282,7 +282,7 @@ FastThriftClientState createFastThriftClient(const folly::SocketAddress& addr) {
             .build();
 
     connection->appAdapter->setPipeline(connection->pipeline.get());
-    connection->transportHandler->setPipeline(*connection->pipeline);
+    connection->transportHandler->setPipeline(connection->pipeline.get());
 
     // Create transport adapter (takes ownership of connection)
     state.transportAdapter =

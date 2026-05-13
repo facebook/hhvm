@@ -159,7 +159,7 @@ auto createHandlerAndPipeline(
                       .setAllocator(&allocator)
                       .build();
 
-  handler->setPipeline(*pipeline);
+  handler->setPipeline(pipeline.get());
 
   return std::make_pair(std::move(handler), std::move(pipeline));
 }

@@ -148,10 +148,11 @@ RocketRequestMessage createRocketRequest(size_t payloadSize) {
 struct BenchmarkFixture {
   BenchmarkFixture() = default;
   ~BenchmarkFixture() {
-    pipeline.reset();
     if (transportHandler) {
-      transportHandler->onClose(folly::exception_wrapper{});
+      transportHandler->close(folly::exception_wrapper{});
+      transportHandler->resetPipeline();
     }
+    pipeline.reset();
   }
   BenchmarkFixture(const BenchmarkFixture&) = delete;
   BenchmarkFixture& operator=(const BenchmarkFixture&) = delete;
@@ -211,7 +212,7 @@ struct BenchmarkFixture {
                    .build();
 
     appAdapter->setPipeline(pipeline.get());
-    transportHandler->setPipeline(*pipeline);
+    transportHandler->setPipeline(pipeline.get());
     transportHandler->onConnect();
 
     // Drive event loop and discard SETUP frame
@@ -379,7 +380,7 @@ BENCHMARK(Rocket_SetupFrame, iters) {
             .build();
 
     fixture.appAdapter->setPipeline(fixture.pipeline.get());
-    fixture.transportHandler->setPipeline(*fixture.pipeline);
+    fixture.transportHandler->setPipeline(fixture.pipeline.get());
 
     innerSuspender.dismiss();
 

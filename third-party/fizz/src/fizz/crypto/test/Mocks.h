@@ -75,13 +75,12 @@ class MockKeyDerivation : public KeyDerivation {
        uint16_t length));
   Status deriveSecret(
       std::vector<uint8_t>& ret,
-      Error& /*err*/,
+      Error& err,
       folly::ByteRange secret,
       folly::StringPiece label,
       folly::ByteRange messageHash,
       uint16_t length) override {
-    ret = _deriveSecret(secret, label, messageHash, length);
-    return Status::Success;
+    FIZZ_THROW_TO_ERROR(ret, _deriveSecret(secret, label, messageHash, length));
   }
   MOCK_METHOD(
       std::vector<uint8_t>,

@@ -27,7 +27,6 @@ class MockKeyExchange : public KeyExchange {
   Status getKeyShare(std::unique_ptr<folly::IOBuf>& ret, Error& err)
       const override {
     FIZZ_THROW_TO_ERROR(ret, _getKeyShare());
-    return Status::Success;
   }
   MOCK_METHOD(
       std::unique_ptr<folly::IOBuf>,
@@ -43,7 +42,6 @@ class MockKeyExchange : public KeyExchange {
   MOCK_METHOD(std::unique_ptr<KeyExchange>, _clone, (), (const));
   Status clone(std::unique_ptr<KeyExchange>& ret, Error& err) const override {
     FIZZ_THROW_TO_ERROR(ret, _clone());
-    return Status::Success;
   }
   MOCK_METHOD(std::size_t, getExpectedKeyShareSize, (), (const));
   int keyGenerated = 0;
@@ -99,10 +97,9 @@ class MockAsyncKeyExchange : public AsyncKeyExchange {
     FIZZ_THROW_TO_ERROR(_generateKeyPair());
   }
   MOCK_METHOD(std::unique_ptr<folly::IOBuf>, _getKeyShare, (), (const));
-  Status getKeyShare(std::unique_ptr<folly::IOBuf>& ret, Error& /*err*/)
+  Status getKeyShare(std::unique_ptr<folly::IOBuf>& ret, Error& err)
       const override {
-    ret = _getKeyShare();
-    return Status::Success;
+    FIZZ_THROW_TO_ERROR(ret, _getKeyShare());
   }
   MOCK_METHOD(
       std::unique_ptr<folly::IOBuf>,
@@ -116,10 +113,8 @@ class MockAsyncKeyExchange : public AsyncKeyExchange {
     FIZZ_THROW_TO_ERROR(ret, _generateSharedSecret(keyShare));
   }
   MOCK_METHOD(std::unique_ptr<KeyExchange>, _clone, (), (const));
-  Status clone(std::unique_ptr<KeyExchange>& ret, Error& /*err*/)
-      const override {
-    ret = _clone();
-    return Status::Success;
+  Status clone(std::unique_ptr<KeyExchange>& ret, Error& err) const override {
+    FIZZ_THROW_TO_ERROR(ret, _clone());
   }
   MOCK_METHOD(std::size_t, getExpectedKeyShareSize, (), (const));
   MOCK_METHOD(

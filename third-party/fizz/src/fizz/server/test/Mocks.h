@@ -299,12 +299,11 @@ class MockAsyncSelfCert : public AsyncSelfCert {
       (const));
   Status sign(
       Buf& ret,
-      Error& /* err */,
+      Error& err,
       SignatureScheme scheme,
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned) const override {
-    ret = _sign(scheme, context, toBeSigned);
-    return Status::Success;
+    FIZZ_THROW_TO_ERROR(ret, _sign(scheme, context, toBeSigned));
   }
   MOCK_METHOD(folly::ssl::X509UniquePtr, getX509, (), (const));
   MOCK_METHOD(

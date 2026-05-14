@@ -294,7 +294,6 @@ class ListTests(unittest.TestCase):
         y = list(x)
         self.assertEqual(x.count(2), y.count(2))
         self.assertEqual(x.count(5), y.count(5))
-        # pyre-ignore[6]: deliberate type mismatch
         self.assertEqual(x.count("str"), 0)
 
     def test_contains_enum(self) -> None:

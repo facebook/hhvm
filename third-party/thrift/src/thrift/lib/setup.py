@@ -535,6 +535,7 @@ else:
         "thrift",
         "thrift.python",
         "thrift.python.any",
+        "thrift.python.reflection",
         "thrift.python.client",
         "thrift.python.conformance",
         "thrift.python.schema",

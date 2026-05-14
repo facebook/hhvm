@@ -19,14 +19,27 @@
 #include <fmt/core.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
+THRIFT_FLAG_DEFINE_bool(bidi_error_on_server_close_killswitch, false);
+
 namespace apache::thrift::rocket {
 
 namespace {
+StreamRpcError getStreamConnectionClosingError() {
+  StreamRpcError streamRpcError;
+  streamRpcError.code() = StreamRpcErrorCode::SERVER_CLOSING_CONNECTION;
+  streamRpcError.name_utf8() =
+      apache::thrift::TEnumTraits<StreamRpcErrorCode>::findName(
+          StreamRpcErrorCode::SERVER_CLOSING_CONNECTION);
+  streamRpcError.what_utf8() = "Server closing connection, cancelling stream";
+  return streamRpcError;
+}
+
 class BiDiTimeoutCallback : public folly::HHWheelTimer::Callback {
  public:
   explicit BiDiTimeoutCallback(RocketBiDiClientCallback& parent)
@@ -472,6 +485,14 @@ void RocketBiDiClientCallback::handleConnectionClose() {
             TApplicationException::TApplicationExceptionType::INTERRUPTION));
   }
   if (isStreamOpen()) {
+    if (!THRIFT_FLAG(bidi_error_on_server_close_killswitch)) {
+      connection_.sendErrorAfterDrain(
+          streamId_,
+          RocketException(
+              ErrorCode::CANCELED,
+              connection_.getPayloadSerializer()->packCompact(
+                  getStreamConnectionClosingError())));
+    }
     std::ignore = cb->onStreamCancel();
   }
 }

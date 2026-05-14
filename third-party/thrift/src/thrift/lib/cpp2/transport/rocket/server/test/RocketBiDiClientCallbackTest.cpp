@@ -16,10 +16,14 @@
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <thrift/lib/cpp2/Flags.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketBiDiClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/test/MockIRocketServerConnection.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
+
+THRIFT_FLAG_DECLARE_bool(bidi_error_on_server_close_killswitch);
 
 using namespace ::testing;
 using namespace apache::thrift;
@@ -206,6 +210,16 @@ TEST_F(RocketBiDiClientCallbackTest, HandleConnectionClose) {
   makeReady();
 
   EXPECT_CALL(serverCallback_, onSinkError(_)).Times(1);
+  EXPECT_CALL(connection_, sendErrorAfterDrain(kStreamId, _))
+      .WillOnce([](StreamId, RocketException&& rex) {
+        EXPECT_EQ(rex.getErrorCode(), ErrorCode::CANCELED);
+        StreamRpcError streamRpcError;
+        CompactSerializer::deserialize(
+            rex.moveErrorData().get(), streamRpcError);
+        EXPECT_EQ(
+            *streamRpcError.code(),
+            StreamRpcErrorCode::SERVER_CLOSING_CONNECTION);
+      });
   EXPECT_CALL(serverCallback_, onStreamCancel()).Times(1);
 
   callback_->handleConnectionClose();
@@ -682,7 +696,9 @@ TEST_F(RocketBiDiClientCallbackTest, HandleConnectionCloseWithOnlySinkOpen) {
   callback_->onStreamComplete();
 
   // Only onSinkError should be called (stream is already closed).
+  // No error frame should be sent since the stream is not open.
   EXPECT_CALL(serverCallback_, onSinkError(_)).Times(1);
+  EXPECT_CALL(connection_, sendErrorAfterDrain(_, _)).Times(0);
   EXPECT_CALL(serverCallback_, onStreamCancel()).Times(0);
 
   callback_->handleConnectionClose();
@@ -696,7 +712,23 @@ TEST_F(RocketBiDiClientCallbackTest, HandleConnectionCloseWithOnlyStreamOpen) {
   callback_->onSinkCancel();
 
   // Only onStreamCancel should be called (sink is already closed).
+  // Error frame should still be sent for the open stream.
   EXPECT_CALL(serverCallback_, onSinkError(_)).Times(0);
+  EXPECT_CALL(connection_, sendErrorAfterDrain(kStreamId, _)).Times(1);
+  EXPECT_CALL(serverCallback_, onStreamCancel()).Times(1);
+
+  callback_->handleConnectionClose();
+  EXPECT_FALSE(callback_->serverCallbackReady());
+}
+
+TEST_F(
+    RocketBiDiClientCallbackTest,
+    HandleConnectionCloseNoErrorFrameWhenKillswitchDisabled) {
+  THRIFT_FLAG_SET_MOCK(bidi_error_on_server_close_killswitch, true);
+  makeReady();
+
+  EXPECT_CALL(serverCallback_, onSinkError(_)).Times(1);
+  EXPECT_CALL(connection_, sendErrorAfterDrain(_, _)).Times(0);
   EXPECT_CALL(serverCallback_, onStreamCancel()).Times(1);
 
   callback_->handleConnectionClose();

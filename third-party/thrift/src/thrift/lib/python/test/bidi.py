@@ -670,15 +670,14 @@ class BidiTests(IsolatedAsyncioTestCase):
                 server.server.stop()
                 assert server.serve_task is not None
                 await server.serve_task
-                # TODO(T123456789): RocketBiDiClientCallback::handleConnectionClose
-                # calls onStreamCancel() which sends a clean COMPLETE frame,
-                # so the client sees StopAsyncIteration instead of
-                # ApplicationError(INTERRUPTION). Regular streams correctly
-                # send StreamRpcError(SERVER_CLOSING_CONNECTION).
-                remaining = []
-                async for item in bidi.stream:
-                    remaining.append(item)
-                self.assertEqual(remaining, [])
+                read_task = asyncio.ensure_future(bidi.stream.__anext__())
+                try:
+                    await asyncio.wait_for(read_task, timeout=5.0)
+                    self.fail("Expected an error after server disconnect")
+                except asyncio.TimeoutError:
+                    self.fail("Client hung after server disconnect")
+                except ApplicationError as ex:
+                    self.assertEqual(ex.type, ApplicationErrorType.INTERRUPTION)
                 sink_task.cancel()
                 try:
                     await sink_task

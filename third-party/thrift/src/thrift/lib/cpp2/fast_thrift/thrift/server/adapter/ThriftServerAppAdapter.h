@@ -22,6 +22,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Synchronized.h>
@@ -41,6 +42,8 @@
 
 namespace apache::thrift::fast_thrift::thrift {
 
+class ThriftServerCompositeAppAdapter;
+
 /**
  * ThriftServerAppAdapter — base class for generated fast server handlers.
  *
@@ -50,7 +53,20 @@ namespace apache::thrift::fast_thrift::thrift {
  * Satisfies TailEndpointHandler concept (onRead / onException).
  */
 class ThriftServerAppAdapter : public folly::DelayedDestruction {
+  // ThriftServerCompositeAppAdapter reads each child's method names at ctor
+  // (methodNames) to build a merged name -> owner map, then on each request
+  // forwards the inbound message into the chosen child's onRead. Friend-only
+  // — not part of the public adapter API.
+  friend class ThriftServerCompositeAppAdapter;
+
  public:
+  // Canonical owning-pointer alias. Adapters are folly::DelayedDestruction
+  // objects, so they can't be deleted with plain delete. Every site that
+  // owns an adapter (FastThriftServer's per-connection state, factory
+  // returns, composite children) should use this alias.
+  using Ptr = std::
+      unique_ptr<ThriftServerAppAdapter, folly::DelayedDestruction::Destructor>;
+
   // Per-method handler signature for SINGLE_REQUEST_SINGLE_RESPONSE RPCs.
   // The dispatcher pre-extracts the components codegen actually needs from
   // the inbound frame so the handler doesn't have to reach back into
@@ -190,9 +206,6 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   void addMethodHandler(
       std::string_view name, RequestResponseProcessFn handler);
 
-  channel_pipeline::Result handleRequestResponse(
-      ThriftServerRequestMessage&& request) noexcept;
-
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
 
   ~ThriftServerAppAdapter() override;
@@ -200,6 +213,12 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   folly::EventBase* getEventBase() const { return evb_; }
 
  private:
+  // Routing surface for the composite (befriended above). Composite calls
+  // methodNames() at ctor to discover what each child owns.
+  std::vector<std::string_view> methodNames() const noexcept;
+  channel_pipeline::Result handleRequestResponse(
+      ThriftServerRequestMessage&& request) noexcept;
+
   folly::EventBase* evb_{nullptr};
   folly::F14FastMap<std::string, RequestResponseProcessFn> dispatch_;
   folly::Synchronized<std::function<void()>> closeCallback_;

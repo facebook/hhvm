@@ -43,9 +43,8 @@ class ThriftServerAppAdapterFactory {
   // Construct a per-connection adapter. The override receives `self` (the
   // server's shared handler ptr) so it can hand a typed shared_ptr to the
   // generated <Service>AppAdapter ctor without enable_shared_from_this.
-  virtual std::
-      unique_ptr<ThriftServerAppAdapter, folly::DelayedDestruction::Destructor>
-      getAppAdapter(std::shared_ptr<ThriftServerAppAdapterFactory> self) = 0;
+  virtual ThriftServerAppAdapter::Ptr getAppAdapter(
+      std::shared_ptr<ThriftServerAppAdapterFactory> self) = 0;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

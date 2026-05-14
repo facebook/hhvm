@@ -90,10 +90,21 @@ void ThriftServerAppAdapter::addMethodHandler(
   dispatch_[std::string(name)] = handler;
 }
 
+std::vector<std::string_view> ThriftServerAppAdapter::methodNames()
+    const noexcept {
+  std::vector<std::string_view> names;
+  names.reserve(dispatch_.size());
+  for (const auto& [name, _] : dispatch_) {
+    names.push_back(name);
+  }
+  return names;
+}
+
 channel_pipeline::Result ThriftServerAppAdapter::handleRequestResponse(
     ThriftServerRequestMessage&& request) noexcept {
-  DCHECK(request.payload.is<ThriftRequestResponsePayload>());
-  auto& rr = request.payload.get<ThriftRequestResponsePayload>();
+  auto& inbound = request.payload;
+  DCHECK(inbound.is<ThriftRequestResponsePayload>());
+  auto& rr = inbound.get<ThriftRequestResponsePayload>();
   DCHECK(rr.metadata != nullptr);
   auto& metadata = *rr.metadata;
 
@@ -102,26 +113,22 @@ channel_pipeline::Result ThriftServerAppAdapter::handleRequestResponse(
     methodName = metadata.name()->view();
   }
 
-  auto kindRef = metadata.kind();
+  auto kind =
+      metadata.kind().value_or(static_cast<apache::thrift::RpcKind>(-1));
   if (FOLLY_UNLIKELY(
-          !kindRef.has_value() ||
-          *kindRef !=
-              apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    XLOG(ERR) << "Unsupported RPC kind: "
-              << (kindRef.has_value() ? static_cast<int>(*kindRef) : -1);
+          kind != apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
+    XLOG(ERR) << "Unsupported RPC kind: " << static_cast<int>(kind);
     return writeFrameworkError(
         request.streamId,
         apache::thrift::ResponseRpcErrorCode::WRONG_RPC_KIND,
         std::string("Unsupported RPC kind: ") +
-            std::to_string(
-                kindRef.has_value() ? static_cast<int>(*kindRef) : -1));
+            std::to_string(static_cast<int>(kind)));
   }
 
   auto it = dispatch_.find(methodName);
   if (FOLLY_LIKELY(it != dispatch_.end())) {
-    auto streamId = request.streamId;
     apache::thrift::ProtocolId protocol = metadata.protocol().value_or(0);
-    return it->second(this, streamId, std::move(rr.data), protocol);
+    return it->second(this, request.streamId, std::move(rr.data), protocol);
   }
 
   return writeFrameworkError(

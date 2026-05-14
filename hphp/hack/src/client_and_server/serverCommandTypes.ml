@@ -170,10 +170,19 @@ module Find_my_tests = struct
 
   type provenance = { root_indices: int list } [@@deriving yojson]
 
+  type selected_test_method = { method_name: string } [@@deriving yojson]
+
+  type selected_test_class = {
+    class_name: string;
+    methods: selected_test_method list;
+  }
+  [@@deriving yojson]
+
   type selected_test_file = {
     file_path: string;
     distance: int;
     provenance: provenance option;
+    test_classes: selected_test_class list option;
   }
   [@@deriving yojson]
 

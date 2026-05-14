@@ -203,8 +203,6 @@ module Hhconfig = struct
   let package_allow_classconst_violations =
     key "package_allow_classconst_violations"
 
-  let package_allow_typedef_violations = key "package_allow_typedef_violations"
-
   let package_exclude_patterns = key "package_exclude_patterns"
 
   let pessimise_builtins = key "pessimise_builtins"

@@ -555,10 +555,6 @@ impl HhConfig {
             warnings_generated_files: hhconfig
                 .get_str("warnings_generated_files")
                 .map_or(default.warnings_generated_files, parse_svec),
-            tco_package_allow_typedef_violations: hhconfig.get_bool_or(
-                "package_allow_typedef_violations",
-                default.tco_package_allow_typedef_violations,
-            )?,
             tco_package_allow_classconst_violations: hhconfig.get_bool_or(
                 "package_allow_classconst_violations",
                 default.tco_package_allow_classconst_violations,

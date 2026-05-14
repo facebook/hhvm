@@ -571,8 +571,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (string_list_opt
          Config_keys.Hhconfig.allowed_files_for_ignore_readonly
          config)
-    ?tco_package_allow_typedef_violations:
-      (bool_opt Config_keys.Hhconfig.package_allow_typedef_violations config)
     ?tco_package_allow_classconst_violations:
       (bool_opt Config_keys.Hhconfig.package_allow_classconst_violations config)
     ?tco_package_allow_all_tconst_violations:

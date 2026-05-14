@@ -1,5 +1,5 @@
 name: \Foo, kind: class, span: line 5, characters 10-12, is_declaration: false
-affects_prod_build: false
+affects_prod_build: true
 definition:
  Foo
    kind: class

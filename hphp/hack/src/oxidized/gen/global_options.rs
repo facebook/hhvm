@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2305266cff5b2c2a403a7b595950540c>>
+// @generated SignedSource<<f5af8f21d4b3affe2ae12d9f78936c91>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -348,9 +348,6 @@ pub struct GlobalOptions {
     pub tco_allowed_files_for_ignore_readonly: Vec<String>,
     /// Patterns for files excluded from the package boundary check.
     pub tco_package_exclude_patterns: Vec<String>,
-    /// Option for package support to bypass package boundary violation errors on typedefs to unblock V1 of
-    /// intern-prod separation
-    pub tco_package_allow_typedef_violations: bool,
     /// Option for package support to bypass package boundary violation errors on ::class during
     /// the ::class to nameof migration to unblock V1 of intern-prod separation
     pub tco_package_allow_classconst_violations: bool,

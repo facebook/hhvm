@@ -184,8 +184,6 @@ module Hhconfig : sig
 
   val package_allow_classconst_violations : string
 
-  val package_allow_typedef_violations : string
-
   val package_exclude_patterns : string
 
   val pessimise_builtins : string

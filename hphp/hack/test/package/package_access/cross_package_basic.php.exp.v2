@@ -6,7 +6,7 @@ error: Typing[4472] Cannot access transparent type alias TFoo defined in package
 cross_package_basic.php--bar.php:5:13
     3 | module bar;
     4 | 
-[1] 5 | type TBar = TFoo; // error when `package_allow_typedef_violations` is turned off
+[1] 5 | type TBar = TFoo; // error: transparent type alias cross-package violation
     6 | newtype NBar1 = TFoo; // ok
     7 | newtype NBar2 as TFoo = int; // ok
 

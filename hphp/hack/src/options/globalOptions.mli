@@ -243,9 +243,6 @@ type t = {
   tco_allowed_files_for_ignore_readonly: string list;
   tco_package_exclude_patterns: string list;
       (** Patterns for files excluded from the package boundary check. *)
-  tco_package_allow_typedef_violations: bool;
-      (** Option for package support to bypass package boundary violation errors on typedefs to unblock V1 of
-          intern-prod separation *)
   tco_package_allow_classconst_violations: bool;
       (** Option for package support to bypass package boundary violation errors on ::class during
           the ::class to nameof migration to unblock V1 of intern-prod separation *)
@@ -388,7 +385,6 @@ val set :
   ?warnings_generated_files:string list ->
   ?tco_allowed_files_for_ignore_readonly:string list ->
   ?tco_package_exclude_patterns:string list ->
-  ?tco_package_allow_typedef_violations:bool ->
   ?tco_package_allow_classconst_violations:bool ->
   ?tco_package_allow_all_tconst_violations:bool ->
   ?tco_package_allow_as_expression_violations:bool ->

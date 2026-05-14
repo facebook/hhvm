@@ -127,7 +127,6 @@ impl Default for GlobalOptions {
                 String::from(".*/__tests__/.*"),
                 String::from(".*/flib/intern/makehaste/.*"),
             ],
-            tco_package_allow_typedef_violations: true,
             tco_package_allow_classconst_violations: true,
             tco_package_allow_all_tconst_violations: true,
             tco_package_allow_as_expression_violations: true,

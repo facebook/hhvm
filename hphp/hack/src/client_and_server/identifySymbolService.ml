@@ -545,8 +545,7 @@ let visitor =
           else if !in_newtype || !in_is_expression then
             false
           else if !in_typedef then
-            let tcopt = Tast_env.get_tcopt env in
-            not (TypecheckerOptions.package_allow_typedef_violations tcopt)
+            true
           else if !in_as_expression then
             let tcopt = Tast_env.get_tcopt env in
             not
@@ -758,8 +757,7 @@ let visitor =
           else if !in_newtype || !in_is_expression then
             false
           else if !in_typedef then
-            let tcopt = Tast_env.get_tcopt env in
-            not (TypecheckerOptions.package_allow_typedef_violations tcopt)
+            true
           else if !in_as_expression then
             let tcopt = Tast_env.get_tcopt env in
             not

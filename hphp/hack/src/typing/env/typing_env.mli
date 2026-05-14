@@ -632,8 +632,6 @@ val get_loaded_packages_list : env -> Package.pos_id list
     the current package and any loaded packages. *)
 val get_included_packages : env -> (string * string * Pos.t) list
 
-val package_allow_typedef_violations : env -> bool
-
 val package_allow_classconst_violations : env -> bool
 
 val package_allow_all_tconst_violations : env -> bool

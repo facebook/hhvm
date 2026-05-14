@@ -694,14 +694,8 @@ let typedef tenv (t : (_, _) typedef) =
        if its type params satisfy the constraints of any tapply it
        references. *)
     | SimpleTypeDef { tvh_vis = Transparent; tvh_hint } ->
-      let should_check_package_boundary =
-        let open Typing_error.Primary.Package in
-        if Env.package_allow_typedef_violations tenv then
-          `No
-        else
-          `Yes Transparent_type_alias
-      in
-      (true, should_check_package_boundary, t_tparams, [(tvh_hint, [])])
+      let open Typing_error.Primary.Package in
+      (true, `Yes Transparent_type_alias, t_tparams, [(tvh_hint, [])])
     | SimpleTypeDef { tvh_vis = _; tvh_hint } ->
       (false, `No, [], [(tvh_hint, [])])
     | CaseType (variant, variants) ->

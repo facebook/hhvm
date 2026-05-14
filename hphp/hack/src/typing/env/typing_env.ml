@@ -728,9 +728,6 @@ module M = struct
     in
     current_pkg_includes @ loaded_pkg_includes
 
-  let package_allow_typedef_violations env =
-    TypecheckerOptions.package_allow_typedef_violations @@ get_tcopt env
-
   let package_allow_classconst_violations env =
     TypecheckerOptions.package_allow_classconst_violations @@ get_tcopt env
 

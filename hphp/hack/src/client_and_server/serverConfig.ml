@@ -575,16 +575,8 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt Config_keys.Hhconfig.package_allow_typedef_violations config)
     ?tco_package_allow_classconst_violations:
       (bool_opt Config_keys.Hhconfig.package_allow_classconst_violations config)
-    ?tco_package_allow_reifiable_tconst_violations:
-      (bool_opt
-         Config_keys.Hhconfig.package_allow_reifiable_tconst_violations
-         config)
     ?tco_package_allow_all_tconst_violations:
       (bool_opt Config_keys.Hhconfig.package_allow_all_tconst_violations config)
-    ?tco_package_allow_all_generics_violations:
-      (bool_opt
-         Config_keys.Hhconfig.package_allow_all_generics_violations
-         config)
     ?tco_package_allow_as_expression_violations:
       (bool_opt
          Config_keys.Hhconfig.package_allow_as_expression_violations

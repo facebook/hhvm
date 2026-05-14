@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<71665718798359adf906f30b1a27547a>>
+// @generated SignedSource<<2305266cff5b2c2a403a7b595950540c>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -355,16 +355,8 @@ pub struct GlobalOptions {
     /// the ::class to nameof migration to unblock V1 of intern-prod separation
     pub tco_package_allow_classconst_violations: bool,
     /// Option for package support to bypass package boundary violation errors on definitions of
-    /// reifiable abstract type constants to unblock V1 of intern-prod separation
-    pub tco_package_allow_reifiable_tconst_violations: bool,
-    /// Option for package support to bypass package boundary violation errors on definitions of
-    /// all type constants to unblock V1 of intern-prod separation. This flag controls the
-    /// superset of violations controlled by `tco_package_allow_reifiable_tconst_violations`
-    /// and will be switched off as a step further in tightening the packgage boundary endforcement.
+    /// all type constants to unblock V1 of intern-prod separation.
     pub tco_package_allow_all_tconst_violations: bool,
-    /// Option for package support to bypass package boundary violation errors on all generics
-    /// to unblock V1 of intern-prod separation.
-    pub tco_package_allow_all_generics_violations: bool,
     /// Option for package support to bypass package boundary violation errors on types used
     /// in as/?as expressions
     pub tco_package_allow_as_expression_violations: bool,

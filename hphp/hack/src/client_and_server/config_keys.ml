@@ -188,9 +188,6 @@ module Hhconfig = struct
 
   let needs_concrete_override_check = key "needs_concrete_override_check"
 
-  let package_allow_all_generics_violations =
-    key "package_allow_all_generics_violations"
-
   let package_allow_as_expression_violations =
     key "package_allow_as_expression_violations"
 
@@ -205,9 +202,6 @@ module Hhconfig = struct
 
   let package_allow_classconst_violations =
     key "package_allow_classconst_violations"
-
-  let package_allow_reifiable_tconst_violations =
-    key "package_allow_reifiable_tconst_violations"
 
   let package_allow_typedef_violations = key "package_allow_typedef_violations"
 

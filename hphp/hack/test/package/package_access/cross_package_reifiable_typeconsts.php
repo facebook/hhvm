@@ -15,7 +15,7 @@ abstract class MyProdBase {
 
 class MyProd extends MyProdBase {
   const type T1 = MyInternClass; // error when package_allow_all_tconst_violations is turned off
-  const type T2 = MyInternClass; // error when package_allow_reifiable_tconst_violations is off
+  const type T2 = MyInternClass; // error: reifiable type constant cross-package violation
 }
 
 class MyProdDirect {

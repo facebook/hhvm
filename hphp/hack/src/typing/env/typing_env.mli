@@ -636,11 +636,7 @@ val package_allow_typedef_violations : env -> bool
 
 val package_allow_classconst_violations : env -> bool
 
-val package_allow_reifiable_tconst_violations : env -> bool
-
 val package_allow_all_tconst_violations : env -> bool
-
-val package_allow_all_generics_violations : env -> bool
 
 val package_allow_as_expression_violations : env -> bool
 

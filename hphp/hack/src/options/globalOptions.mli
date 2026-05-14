@@ -249,17 +249,9 @@ type t = {
   tco_package_allow_classconst_violations: bool;
       (** Option for package support to bypass package boundary violation errors on ::class during
           the ::class to nameof migration to unblock V1 of intern-prod separation *)
-  tco_package_allow_reifiable_tconst_violations: bool;
-      (** Option for package support to bypass package boundary violation errors on definitions of
-          reifiable abstract type constants to unblock V1 of intern-prod separation *)
   tco_package_allow_all_tconst_violations: bool;
       (** Option for package support to bypass package boundary violation errors on definitions of
-          all type constants to unblock V1 of intern-prod separation. This flag controls the
-          superset of violations controlled by `tco_package_allow_reifiable_tconst_violations`
-          and will be switched off as a step further in tightening the packgage boundary endforcement. *)
-  tco_package_allow_all_generics_violations: bool;
-      (** Option for package support to bypass package boundary violation errors on all generics
-          to unblock V1 of intern-prod separation.  *)
+          all type constants to unblock V1 of intern-prod separation. *)
   tco_package_allow_as_expression_violations: bool;
       (** Option for package support to bypass package boundary violation errors on types used
           in as/?as expressions *)
@@ -398,9 +390,7 @@ val set :
   ?tco_package_exclude_patterns:string list ->
   ?tco_package_allow_typedef_violations:bool ->
   ?tco_package_allow_classconst_violations:bool ->
-  ?tco_package_allow_reifiable_tconst_violations:bool ->
   ?tco_package_allow_all_tconst_violations:bool ->
-  ?tco_package_allow_all_generics_violations:bool ->
   ?tco_package_allow_as_expression_violations:bool ->
   ?tco_package_allow_enforceable_type_alias_violations:bool ->
   ?tco_package_allow_enforceable_type_alias_class_like_violations:bool ->

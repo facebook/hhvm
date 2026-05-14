@@ -253,14 +253,8 @@ let package_allow_typedef_violations t =
 let package_allow_classconst_violations t =
   t.GlobalOptions.tco_package_allow_classconst_violations
 
-let package_allow_reifiable_tconst_violations t =
-  t.GlobalOptions.tco_package_allow_reifiable_tconst_violations
-
 let package_allow_all_tconst_violations t =
   t.GlobalOptions.tco_package_allow_all_tconst_violations
-
-let package_allow_all_generics_violations t =
-  t.GlobalOptions.tco_package_allow_all_generics_violations
 
 let package_allow_as_expression_violations t =
   t.GlobalOptions.tco_package_allow_as_expression_violations

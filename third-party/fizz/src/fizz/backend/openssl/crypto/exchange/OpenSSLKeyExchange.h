@@ -54,7 +54,9 @@ class OpenSSLECKeyExchange : public KeyExchange {
 
   Status clone(std::unique_ptr<KeyExchange>& ret, Error& err) const override;
 
-  std::unique_ptr<folly::IOBuf> generateSharedSecret(
+  Status generateSharedSecret(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       const folly::ssl::EvpPkeyUniquePtr& peerKey) const;
 
   void setPrivateKey(folly::ssl::EvpPkeyUniquePtr privateKey);

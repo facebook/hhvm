@@ -56,28 +56,31 @@ Status validateEdKey(
   return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> generateEvpSharedSecret(
+Status generateEvpSharedSecret(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     const folly::ssl::EvpPkeyUniquePtr& key,
     const folly::ssl::EvpPkeyUniquePtr& peerKey) {
   folly::ssl::EvpPkeyCtxUniquePtr ctx(EVP_PKEY_CTX_new(key.get(), nullptr));
   if (EVP_PKEY_derive_init(ctx.get()) != 1) {
-    throw std::runtime_error("Initializing derive context failed");
+    return err.error("Initializing derive context failed");
   }
   // Start deriving the key.
   if (EVP_PKEY_derive_set_peer(ctx.get(), peerKey.get()) != 1) {
-    throw std::runtime_error("Error setting peer key");
+    return err.error("Error setting peer key");
   }
   size_t secretLen = 0;
   if (EVP_PKEY_derive(ctx.get(), nullptr, &secretLen) != 1) {
-    throw std::runtime_error("Error deriving key");
+    return err.error("Error deriving key");
   }
   // secretLen is now the maximum secret length.
   auto buf = folly::IOBuf::create(secretLen);
   if (EVP_PKEY_derive(ctx.get(), buf->writableData(), &secretLen) != 1) {
-    throw std::runtime_error("Error deriving key");
+    return err.error("Error deriving key");
   }
   buf->append(secretLen);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 folly::ssl::EvpPkeyUniquePtr generateECKeyPair(int curveNid) {

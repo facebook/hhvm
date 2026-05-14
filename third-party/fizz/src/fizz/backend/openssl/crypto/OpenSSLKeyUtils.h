@@ -77,7 +77,9 @@ std::unique_ptr<folly::IOBuf> encodeECPublicKey(
  * Generates a shared secred from a private key, key and the
  * peerKey public key.
  */
-std::unique_ptr<folly::IOBuf> generateEvpSharedSecret(
+Status generateEvpSharedSecret(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     const folly::ssl::EvpPkeyUniquePtr& key,
     const folly::ssl::EvpPkeyUniquePtr& peerKey);
 

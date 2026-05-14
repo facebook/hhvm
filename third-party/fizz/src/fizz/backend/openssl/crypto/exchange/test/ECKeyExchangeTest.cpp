@@ -47,7 +47,10 @@ TYPED_TEST(Key, SharedSecret) {
   auto kex = TestFixture::makeKex();
   Error err;
   EXPECT_EQ(kex->generateKeyPair(err), Status::Success);
-  auto shared = kex->generateSharedSecret(kex->getPrivateKey());
+  std::unique_ptr<folly::IOBuf> shared;
+  EXPECT_EQ(
+      kex->generateSharedSecret(shared, err, kex->getPrivateKey()),
+      Status::Success);
   EXPECT_TRUE(shared);
 }
 
@@ -59,7 +62,11 @@ TYPED_TEST(Key, ReadFromKey) {
   auto pkey2 = getPrivateKey(this->getKeyParams().privateKey);
   auto kex2 = TestFixture::makeKex();
   kex2->setPrivateKey(std::move(pkey2));
-  auto shared = kex->generateSharedSecret(kex2->getPrivateKey());
+  std::unique_ptr<folly::IOBuf> shared;
+  Error err;
+  EXPECT_EQ(
+      kex->generateSharedSecret(shared, err, kex2->getPrivateKey()),
+      Status::Success);
   EXPECT_TRUE(shared);
 }
 
@@ -168,23 +175,27 @@ TEST_P(ECDHTest, TestKeyAgreement) {
     auto pkeyPeerKey = createPublicKey(GetParam());
 
     std::unique_ptr<folly::IOBuf> shared;
+    Error err;
     switch (GetParam().key) {
       case fizz::KeyType::P256: {
         auto kex = makeOpenSSLECKeyExchange<fizz::P256>();
         kex->setPrivateKey(std::move(privateKey));
-        shared = kex->generateSharedSecret(pkeyPeerKey);
+        FIZZ_THROW_ON_ERROR(
+            kex->generateSharedSecret(shared, err, pkeyPeerKey), err);
         break;
       }
       case fizz::KeyType::P384: {
         auto kex = makeOpenSSLECKeyExchange<fizz::P384>();
         kex->setPrivateKey(std::move(privateKey));
-        shared = kex->generateSharedSecret(pkeyPeerKey);
+        FIZZ_THROW_ON_ERROR(
+            kex->generateSharedSecret(shared, err, pkeyPeerKey), err);
         break;
       }
       case fizz::KeyType::P521: {
         auto kex = makeOpenSSLECKeyExchange<fizz::P521>();
         kex->setPrivateKey(std::move(privateKey));
-        shared = kex->generateSharedSecret(pkeyPeerKey);
+        FIZZ_THROW_ON_ERROR(
+            kex->generateSharedSecret(shared, err, pkeyPeerKey), err);
         break;
       }
       default:

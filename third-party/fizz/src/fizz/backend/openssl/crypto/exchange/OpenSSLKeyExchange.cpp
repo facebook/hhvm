@@ -42,19 +42,23 @@ Status OpenSSLECKeyExchange::getKeyShare(
 
 Status OpenSSLECKeyExchange::generateSharedSecret(
     std::unique_ptr<folly::IOBuf>& ret,
-    Error& /*err*/,
+    Error& err,
     folly::ByteRange keyShare) const {
   auto peerKey = detail::OpenSSLECKeyDecoder::decode(keyShare, nid_);
-  ret = generateSharedSecret(peerKey);
+  FIZZ_RETURN_ON_ERROR(generateSharedSecret(ret, err, peerKey));
   return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> OpenSSLECKeyExchange::generateSharedSecret(
+Status OpenSSLECKeyExchange::generateSharedSecret(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     const folly::ssl::EvpPkeyUniquePtr& peerKey) const {
   if (!key_) {
-    throw std::runtime_error("Key not generated");
+    return err.error("Key not generated");
   }
-  return detail::generateEvpSharedSecret(key_, peerKey);
+  FIZZ_RETURN_ON_ERROR(
+      detail::generateEvpSharedSecret(ret, err, key_, peerKey));
+  return Status::Success;
 }
 
 void OpenSSLECKeyExchange::setPrivateKey(

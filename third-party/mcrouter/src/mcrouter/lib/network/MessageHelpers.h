@@ -121,6 +121,27 @@ uint64_t getFlagsIfExist(Message& message) {
   return detail::getFlagsImpl(HasFlagsTrait<Message>{}, message);
 }
 
+// LeaseToken helpers
+template <typename Message, typename = std::enable_if_t<true>>
+class HasLeaseTokenTrait : public std::false_type {};
+template <typename Message>
+class HasLeaseTokenTrait<
+    Message,
+    std::enable_if_t<std::is_same<
+        decltype(std::declval<std::remove_const_t<Message>&>()
+                     .leaseToken_ref()),
+        apache::thrift::field_ref<std::int64_t&>>{}>> : public std::true_type {
+};
+// Return leaseToken if it exists in Message and std::nullopt otherwise.
+// Carried by McLeaseGetReply and McLeaseSetRequest only.
+template <class Message>
+std::optional<int64_t> getLeaseTokenIfExist(Message& message) {
+  if constexpr (HasLeaseTokenTrait<Message>::value) {
+    return *message.leaseToken_ref();
+  }
+  return std::nullopt;
+}
+
 // Exptime helpers
 template <typename Message, typename = std::enable_if_t<true>>
 class HasExptimeTrait : public std::false_type {};

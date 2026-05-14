@@ -549,6 +549,17 @@ proxygen::HTTPMessage HTTPClientChannel::buildHTTPMessage(THeader* header) {
   return msg;
 }
 
+void HTTPClientChannel::enablePingProbes(
+    std::chrono::seconds interval,
+    std::chrono::seconds timeout,
+    bool extendIntervalOnIngress,
+    bool immediate) {
+  if (httpSession_) {
+    httpSession_->enablePingProbes(
+        interval, timeout, extendIntervalOnIngress, immediate);
+  }
+}
+
 void HTTPClientChannel::setFlowControl(
     size_t initialReceiveWindow,
     size_t receiveStreamWindowSize,

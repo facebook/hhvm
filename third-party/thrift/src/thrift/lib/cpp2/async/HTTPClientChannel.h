@@ -177,6 +177,22 @@ class HTTPClientChannel : public ClientChannel,
 
   void setSessionWriteBufferLimit(uint32_t limit);
 
+  // Enable periodic HTTP/2 PING probes on the underlying session. Delegates
+  // to `proxygen::HTTPSession::enablePingProbes`, which sends a PING frame
+  // every `interval`, drops the connection if a reply is not received within
+  // `timeout`, and (when `extendIntervalOnIngress` is true) resets the timer
+  // on any ingress data so PINGs only fire during true wire idle.
+  //
+  // No-op for HTTP/1.1 codec sessions and when the session is closed.
+  //
+  // Use to keep the connection alive across layer-7 reverse proxies (e.g.
+  // HTTP CONNECT through fwdproxy, AWS ALB) that close idle connections.
+  void enablePingProbes(
+      std::chrono::seconds interval,
+      std::chrono::seconds timeout,
+      bool extendIntervalOnIngress = true,
+      bool immediate = false);
+
  protected:
   void sendRequest_(
       const RpcOptions&,

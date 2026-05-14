@@ -88,29 +88,44 @@ TEST_P(ECDSA256Test, TestSignature) {
   EXPECT_EQ(ecdsa.setKey(err, std::move(key)), Status::Success);
   {
     std::string msg = GetParam().msg;
-    auto sig = ecdsa.sign<SignatureScheme::ecdsa_secp256r1_sha256>(
-        IOBuf::copyBuffer(msg)->coalesce());
-    ecdsa.verify<SignatureScheme::ecdsa_secp256r1_sha256>(
-        IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce());
+    std::unique_ptr<folly::IOBuf> sig;
+    EXPECT_EQ(
+        ecdsa.sign<SignatureScheme::ecdsa_secp256r1_sha256>(
+            sig, err, IOBuf::copyBuffer(msg)->coalesce()),
+        Status::Success);
+    EXPECT_EQ(
+        ecdsa.verify<SignatureScheme::ecdsa_secp256r1_sha256>(
+            err, IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+        Status::Success);
   }
   {
     std::string msg = GetParam().msg;
-    auto sig = ecdsa.sign<SignatureScheme::ecdsa_secp256r1_sha256>(
-        IOBuf::copyBuffer(msg)->coalesce());
+    std::unique_ptr<folly::IOBuf> sig;
+    EXPECT_EQ(
+        ecdsa.sign<SignatureScheme::ecdsa_secp256r1_sha256>(
+            sig, err, IOBuf::copyBuffer(msg)->coalesce()),
+        Status::Success);
     modifySig(sig.get());
     EXPECT_THROW(
-        ecdsa.verify<SignatureScheme::ecdsa_secp256r1_sha256>(
-            IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+        FIZZ_THROW_ON_ERROR(
+            ecdsa.verify<SignatureScheme::ecdsa_secp256r1_sha256>(
+                err, IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+            err),
         std::runtime_error);
   }
   {
     std::string msg = GetParam().msg;
-    auto sig = ecdsa.sign<SignatureScheme::ecdsa_secp256r1_sha256>(
-        IOBuf::copyBuffer(msg)->coalesce());
+    std::unique_ptr<folly::IOBuf> sig;
+    EXPECT_EQ(
+        ecdsa.sign<SignatureScheme::ecdsa_secp256r1_sha256>(
+            sig, err, IOBuf::copyBuffer(msg)->coalesce()),
+        Status::Success);
     modifyData(sig.get(), msg);
     EXPECT_THROW(
-        ecdsa.verify<SignatureScheme::ecdsa_secp256r1_sha256>(
-            IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+        FIZZ_THROW_ON_ERROR(
+            ecdsa.verify<SignatureScheme::ecdsa_secp256r1_sha256>(
+                err, IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+            err),
         std::runtime_error);
   }
 }
@@ -122,29 +137,44 @@ TEST_P(ECDSA384Test, TestSignature) {
   EXPECT_EQ(ecdsa.setKey(err, std::move(key)), Status::Success);
   {
     std::string msg = GetParam().msg;
-    auto sig = ecdsa.sign<SignatureScheme::ecdsa_secp384r1_sha384>(
-        IOBuf::copyBuffer(msg)->coalesce());
-    ecdsa.verify<SignatureScheme::ecdsa_secp384r1_sha384>(
-        IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce());
+    std::unique_ptr<folly::IOBuf> sig;
+    EXPECT_EQ(
+        ecdsa.sign<SignatureScheme::ecdsa_secp384r1_sha384>(
+            sig, err, IOBuf::copyBuffer(msg)->coalesce()),
+        Status::Success);
+    EXPECT_EQ(
+        ecdsa.verify<SignatureScheme::ecdsa_secp384r1_sha384>(
+            err, IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+        Status::Success);
   }
   {
     std::string msg = GetParam().msg;
-    auto sig = ecdsa.sign<SignatureScheme::ecdsa_secp384r1_sha384>(
-        IOBuf::copyBuffer(msg)->coalesce());
+    std::unique_ptr<folly::IOBuf> sig;
+    EXPECT_EQ(
+        ecdsa.sign<SignatureScheme::ecdsa_secp384r1_sha384>(
+            sig, err, IOBuf::copyBuffer(msg)->coalesce()),
+        Status::Success);
     modifySig(sig.get());
     EXPECT_THROW(
-        ecdsa.verify<SignatureScheme::ecdsa_secp384r1_sha384>(
-            IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+        FIZZ_THROW_ON_ERROR(
+            ecdsa.verify<SignatureScheme::ecdsa_secp384r1_sha384>(
+                err, IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+            err),
         std::runtime_error);
   }
   {
     std::string msg = GetParam().msg;
-    auto sig = ecdsa.sign<SignatureScheme::ecdsa_secp384r1_sha384>(
-        IOBuf::copyBuffer(msg)->coalesce());
+    std::unique_ptr<folly::IOBuf> sig;
+    EXPECT_EQ(
+        ecdsa.sign<SignatureScheme::ecdsa_secp384r1_sha384>(
+            sig, err, IOBuf::copyBuffer(msg)->coalesce()),
+        Status::Success);
     modifyData(sig.get(), msg);
     EXPECT_THROW(
-        ecdsa.verify<SignatureScheme::ecdsa_secp384r1_sha384>(
-            IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+        FIZZ_THROW_ON_ERROR(
+            ecdsa.verify<SignatureScheme::ecdsa_secp384r1_sha384>(
+                err, IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+            err),
         std::runtime_error);
   }
 }
@@ -156,29 +186,44 @@ TEST_P(ECDSA521Test, TestSignature) {
   EXPECT_EQ(ecdsa.setKey(err, std::move(key)), Status::Success);
   {
     std::string msg = GetParam().msg;
-    auto sig = ecdsa.sign<SignatureScheme::ecdsa_secp521r1_sha512>(
-        IOBuf::copyBuffer(msg)->coalesce());
-    ecdsa.verify<SignatureScheme::ecdsa_secp521r1_sha512>(
-        IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce());
+    std::unique_ptr<folly::IOBuf> sig;
+    EXPECT_EQ(
+        ecdsa.sign<SignatureScheme::ecdsa_secp521r1_sha512>(
+            sig, err, IOBuf::copyBuffer(msg)->coalesce()),
+        Status::Success);
+    EXPECT_EQ(
+        ecdsa.verify<SignatureScheme::ecdsa_secp521r1_sha512>(
+            err, IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+        Status::Success);
   }
   {
     std::string msg = GetParam().msg;
-    auto sig = ecdsa.sign<SignatureScheme::ecdsa_secp521r1_sha512>(
-        IOBuf::copyBuffer(msg)->coalesce());
+    std::unique_ptr<folly::IOBuf> sig;
+    EXPECT_EQ(
+        ecdsa.sign<SignatureScheme::ecdsa_secp521r1_sha512>(
+            sig, err, IOBuf::copyBuffer(msg)->coalesce()),
+        Status::Success);
     modifySig(sig.get());
     EXPECT_THROW(
-        ecdsa.verify<SignatureScheme::ecdsa_secp521r1_sha512>(
-            IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+        FIZZ_THROW_ON_ERROR(
+            ecdsa.verify<SignatureScheme::ecdsa_secp521r1_sha512>(
+                err, IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+            err),
         std::runtime_error);
   }
   {
     std::string msg = GetParam().msg;
-    auto sig = ecdsa.sign<SignatureScheme::ecdsa_secp521r1_sha512>(
-        IOBuf::copyBuffer(msg)->coalesce());
+    std::unique_ptr<folly::IOBuf> sig;
+    EXPECT_EQ(
+        ecdsa.sign<SignatureScheme::ecdsa_secp521r1_sha512>(
+            sig, err, IOBuf::copyBuffer(msg)->coalesce()),
+        Status::Success);
     modifyData(sig.get(), msg);
     EXPECT_THROW(
-        ecdsa.verify<SignatureScheme::ecdsa_secp521r1_sha512>(
-            IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+        FIZZ_THROW_ON_ERROR(
+            ecdsa.verify<SignatureScheme::ecdsa_secp521r1_sha512>(
+                err, IOBuf::copyBuffer(msg)->coalesce(), sig->coalesce()),
+            err),
         std::runtime_error);
   }
 }

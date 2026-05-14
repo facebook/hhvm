@@ -38,17 +38,22 @@ class OpenSSLSignature {
    * setKey() must be called before with a private key.
    */
   template <SignatureScheme Scheme>
-  std::unique_ptr<folly::IOBuf> sign(folly::ByteRange data) const;
+  Status sign(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
+      folly::ByteRange data) const;
 
   /**
-   * Verifies that signature is a valid signature over data. Throws if it's not.
+   * Verifies that signature is a valid signature over data. return Status::Fail
+   * if it's not.
    *
    * Only valid for SignatureSchemes that are compatible with KeyType.
    *
    * setKey() must be called before.
    */
   template <SignatureScheme Scheme>
-  void verify(folly::ByteRange data, folly::ByteRange signature) const;
+  Status verify(Error& err, folly::ByteRange data, folly::ByteRange signature)
+      const;
 
  private:
   folly::ssl::EvpPkeyUniquePtr pkey_;

@@ -49,8 +49,9 @@ inline Status CertUtils::verify<KeyType::P256>(
     folly::ByteRange signature) {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ecdsa_secp256r1_sha256) {
-    certSignature.verify<SignatureScheme::ecdsa_secp256r1_sha256>(
-        signData->coalesce(), signature);
+    FIZZ_RETURN_ON_ERROR(
+        certSignature.verify<SignatureScheme::ecdsa_secp256r1_sha256>(
+            err, signData->coalesce(), signature));
     return Status::Success;
   }
 
@@ -67,8 +68,9 @@ inline Status CertUtils::verify<KeyType::P384>(
     folly::ByteRange signature) {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ecdsa_secp384r1_sha384) {
-    certSignature.verify<SignatureScheme::ecdsa_secp384r1_sha384>(
-        signData->coalesce(), signature);
+    FIZZ_RETURN_ON_ERROR(
+        certSignature.verify<SignatureScheme::ecdsa_secp384r1_sha384>(
+            err, signData->coalesce(), signature));
     return Status::Success;
   }
 
@@ -85,8 +87,9 @@ inline Status CertUtils::verify<KeyType::P521>(
     folly::ByteRange signature) {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ecdsa_secp521r1_sha512) {
-    certSignature.verify<SignatureScheme::ecdsa_secp521r1_sha512>(
-        signData->coalesce(), signature);
+    FIZZ_RETURN_ON_ERROR(
+        certSignature.verify<SignatureScheme::ecdsa_secp521r1_sha512>(
+            err, signData->coalesce(), signature));
     return Status::Success;
   }
   return err.error("Unsupported signature scheme");
@@ -102,8 +105,8 @@ inline Status CertUtils::verify<KeyType::ED25519>(
     folly::ByteRange signature) {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ed25519) {
-    certSignature.verify<SignatureScheme::ed25519>(
-        signData->coalesce(), signature);
+    FIZZ_RETURN_ON_ERROR(certSignature.verify<SignatureScheme::ed25519>(
+        err, signData->coalesce(), signature));
     return Status::Success;
   }
 
@@ -120,8 +123,8 @@ inline Status CertUtils::verify<KeyType::RSA>(
     folly::ByteRange signature) {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::rsa_pss_sha256) {
-    certSignature.verify<SignatureScheme::rsa_pss_sha256>(
-        signData->coalesce(), signature);
+    FIZZ_RETURN_ON_ERROR(certSignature.verify<SignatureScheme::rsa_pss_sha256>(
+        err, signData->coalesce(), signature));
     return Status::Success;
   }
 

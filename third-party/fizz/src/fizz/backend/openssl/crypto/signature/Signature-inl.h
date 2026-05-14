@@ -85,24 +85,23 @@ struct SigAlg<SignatureScheme::ecdsa_secp521r1_sha512> {
 
 template <KeyType Type>
 template <SignatureScheme Scheme>
-inline std::unique_ptr<folly::IOBuf> OpenSSLSignature<Type>::sign(
+inline Status OpenSSLSignature<Type>::sign(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     folly::ByteRange data) const {
   static_assert(
       SigAlg<Scheme>::type == Type, "Called with mismatched type and scheme");
-  std::unique_ptr<folly::IOBuf> ret;
-  Error err;
   switch (Type) {
     case KeyType::P256:
     case KeyType::P384:
     case KeyType::P521:
-      FIZZ_THROW_ON_ERROR(
-          detail::ecSign(ret, err, data, pkey_, SigAlg<Scheme>::HashNid), err);
-      return ret;
+      FIZZ_RETURN_ON_ERROR(
+          detail::ecSign(ret, err, data, pkey_, SigAlg<Scheme>::HashNid));
+      return Status::Success;
     case KeyType::RSA:
-      FIZZ_THROW_ON_ERROR(
-          detail::rsaPssSign(ret, err, data, pkey_, SigAlg<Scheme>::HashNid),
-          err);
-      return ret;
+      FIZZ_RETURN_ON_ERROR(
+          detail::rsaPssSign(ret, err, data, pkey_, SigAlg<Scheme>::HashNid));
+      return Status::Success;
     default:
       folly::assume_unreachable();
   }
@@ -113,36 +112,34 @@ inline std::unique_ptr<folly::IOBuf> OpenSSLSignature<Type>::sign(
 // used in the generic template
 template <>
 template <>
-inline std::unique_ptr<folly::IOBuf>
+inline Status
 OpenSSLSignature<KeyType::ED25519>::sign<SignatureScheme::ed25519>(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     folly::ByteRange data) const {
-  std::unique_ptr<folly::IOBuf> ret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(detail::edSign(ret, err, data, pkey_), err);
-  return ret;
+  FIZZ_RETURN_ON_ERROR(detail::edSign(ret, err, data, pkey_));
+  return Status::Success;
 }
 
 template <KeyType Type>
 template <SignatureScheme Scheme>
-inline void OpenSSLSignature<Type>::verify(
+inline Status OpenSSLSignature<Type>::verify(
+    Error& err,
     folly::ByteRange data,
     folly::ByteRange signature) const {
-  Error err;
   switch (Type) {
     case KeyType::P256:
     case KeyType::P384:
     case KeyType::P521:
-      FIZZ_THROW_ON_ERROR(
+      FIZZ_RETURN_ON_ERROR(
           detail::ecVerify(
-              err, data, signature, pkey_, SigAlg<Scheme>::HashNid),
-          err);
-      return;
+              err, data, signature, pkey_, SigAlg<Scheme>::HashNid));
+      return Status::Success;
     case KeyType::RSA:
-      FIZZ_THROW_ON_ERROR(
+      FIZZ_RETURN_ON_ERROR(
           detail::rsaPssVerify(
-              err, data, signature, pkey_, SigAlg<Scheme>::HashNid),
-          err);
-      return;
+              err, data, signature, pkey_, SigAlg<Scheme>::HashNid));
+      return Status::Success;
     case KeyType::ED25519:
     default:
       folly::assume_unreachable();
@@ -154,12 +151,13 @@ inline void OpenSSLSignature<Type>::verify(
 // used in the generic template
 template <>
 template <>
-inline void
+inline Status
 OpenSSLSignature<KeyType::ED25519>::verify<SignatureScheme::ed25519>(
+    Error& err,
     folly::ByteRange data,
     folly::ByteRange signature) const {
-  Error err;
-  FIZZ_THROW_ON_ERROR(detail::edVerify(err, data, signature, pkey_), err);
+  FIZZ_RETURN_ON_ERROR(detail::edVerify(err, data, signature, pkey_));
+  return Status::Success;
 }
 
 template <>

@@ -94,29 +94,41 @@ TEST_P(Ed25519Test, TestOpenSSLSignature) {
   EXPECT_EQ(eddsa.setKey(err, std::move(privateKey)), Status::Success);
 
   // 3. Test sign method
-  auto generatedSignature = eddsa.sign<SignatureScheme::ed25519>(
-      IOBuf::copyBuffer(message)->coalesce());
+  std::unique_ptr<folly::IOBuf> generatedSignature;
+  EXPECT_EQ(
+      eddsa.sign<SignatureScheme::ed25519>(
+          generatedSignature, err, IOBuf::copyBuffer(message)->coalesce()),
+      Status::Success);
   EXPECT_EQ(hexlify(generatedSignature->coalesce()), GetParam().hexSignature);
 
   // 4. Test verify method succeeds when it should
-  eddsa.verify<SignatureScheme::ed25519>(
-      IOBuf::copyBuffer(message)->coalesce(),
-      folly::ByteRange(folly::StringPiece(signature)));
+  EXPECT_EQ(
+      eddsa.verify<SignatureScheme::ed25519>(
+          err,
+          IOBuf::copyBuffer(message)->coalesce(),
+          folly::ByteRange(folly::StringPiece(signature))),
+      Status::Success);
 
   // 5. Test verify method fails if the message is modified
   auto modifiedMessage = modifyMessage(message);
   EXPECT_THROW(
-      eddsa.verify<SignatureScheme::ed25519>(
-          IOBuf::copyBuffer(modifiedMessage)->coalesce(),
-          folly::ByteRange(folly::StringPiece(signature))),
+      FIZZ_THROW_ON_ERROR(
+          eddsa.verify<SignatureScheme::ed25519>(
+              err,
+              IOBuf::copyBuffer(modifiedMessage)->coalesce(),
+              folly::ByteRange(folly::StringPiece(signature))),
+          err),
       std::runtime_error);
 
   // 6. Test verify method fails if the signature is modified
   auto modifiedSignature = modifySignature(signature);
   EXPECT_THROW(
-      eddsa.verify<SignatureScheme::ed25519>(
-          IOBuf::copyBuffer(message)->coalesce(),
-          folly::ByteRange(folly::StringPiece(modifiedSignature))),
+      FIZZ_THROW_ON_ERROR(
+          eddsa.verify<SignatureScheme::ed25519>(
+              err,
+              IOBuf::copyBuffer(message)->coalesce(),
+              folly::ByteRange(folly::StringPiece(modifiedSignature))),
+          err),
       std::runtime_error);
 }
 

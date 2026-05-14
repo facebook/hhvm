@@ -41,8 +41,13 @@ TEST_F(RSAPSSTest, TestSignVerify) {
   Error err;
   EXPECT_EQ(rsa.setKey(err, generateKey()), Status::Success);
   static constexpr StringPiece msg{"message"};
-  auto sig = rsa.sign<SignatureScheme::rsa_pss_sha256>(msg);
-  rsa.verify<SignatureScheme::rsa_pss_sha256>(msg, sig->coalesce());
+  std::unique_ptr<folly::IOBuf> sig;
+  EXPECT_EQ(
+      rsa.sign<SignatureScheme::rsa_pss_sha256>(sig, err, msg),
+      Status::Success);
+  EXPECT_EQ(
+      rsa.verify<SignatureScheme::rsa_pss_sha256>(err, msg, sig->coalesce()),
+      Status::Success);
 }
 
 TEST_F(RSAPSSTest, TestVerifyDifferent) {
@@ -51,9 +56,15 @@ TEST_F(RSAPSSTest, TestVerifyDifferent) {
   EXPECT_EQ(rsa.setKey(err, generateKey()), Status::Success);
   static constexpr StringPiece msg1{"message"};
   static constexpr StringPiece msg2{"somethingelse"};
-  auto sig = rsa.sign<SignatureScheme::rsa_pss_sha256>(msg1);
+  std::unique_ptr<folly::IOBuf> sig;
+  EXPECT_EQ(
+      rsa.sign<SignatureScheme::rsa_pss_sha256>(sig, err, msg1),
+      Status::Success);
   EXPECT_THROW(
-      rsa.verify<SignatureScheme::rsa_pss_sha256>(msg2, sig->coalesce()),
+      FIZZ_THROW_ON_ERROR(
+          rsa.verify<SignatureScheme::rsa_pss_sha256>(
+              err, msg2, sig->coalesce()),
+          err),
       std::runtime_error);
 }
 
@@ -62,10 +73,16 @@ TEST_F(RSAPSSTest, TestVerifyFailure) {
   Error err;
   EXPECT_EQ(rsa.setKey(err, generateKey()), Status::Success);
   static constexpr StringPiece msg{"message"};
-  auto sig = rsa.sign<SignatureScheme::rsa_pss_sha256>(msg);
+  std::unique_ptr<folly::IOBuf> sig;
+  EXPECT_EQ(
+      rsa.sign<SignatureScheme::rsa_pss_sha256>(sig, err, msg),
+      Status::Success);
   sig->writableData()[1] ^= 0x2;
   EXPECT_THROW(
-      rsa.verify<SignatureScheme::rsa_pss_sha256>(msg, sig->coalesce()),
+      FIZZ_THROW_ON_ERROR(
+          rsa.verify<SignatureScheme::rsa_pss_sha256>(
+              err, msg, sig->coalesce()),
+          err),
       std::runtime_error);
 }
 

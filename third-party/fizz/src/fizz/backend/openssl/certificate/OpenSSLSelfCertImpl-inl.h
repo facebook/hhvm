@@ -99,8 +99,9 @@ inline Status OpenSSLSelfCertImpl<KeyType::P256>::sign(
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ecdsa_secp256r1_sha256) {
-    ret = signature_.sign<SignatureScheme::ecdsa_secp256r1_sha256>(
-        signData->coalesce());
+    FIZZ_RETURN_ON_ERROR(
+        signature_.sign<SignatureScheme::ecdsa_secp256r1_sha256>(
+            ret, err, signData->coalesce()));
     return Status::Success;
   }
 
@@ -116,8 +117,9 @@ inline Status OpenSSLSelfCertImpl<KeyType::P384>::sign(
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ecdsa_secp384r1_sha384) {
-    ret = signature_.sign<SignatureScheme::ecdsa_secp384r1_sha384>(
-        signData->coalesce());
+    FIZZ_RETURN_ON_ERROR(
+        signature_.sign<SignatureScheme::ecdsa_secp384r1_sha384>(
+            ret, err, signData->coalesce()));
     return Status::Success;
   }
 
@@ -133,8 +135,9 @@ inline Status OpenSSLSelfCertImpl<KeyType::P521>::sign(
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ecdsa_secp521r1_sha512) {
-    ret = signature_.sign<SignatureScheme::ecdsa_secp521r1_sha512>(
-        signData->coalesce());
+    FIZZ_RETURN_ON_ERROR(
+        signature_.sign<SignatureScheme::ecdsa_secp521r1_sha512>(
+            ret, err, signData->coalesce()));
     return Status::Success;
   }
 
@@ -150,7 +153,8 @@ inline Status OpenSSLSelfCertImpl<KeyType::ED25519>::sign(
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ed25519) {
-    ret = signature_.sign<SignatureScheme::ed25519>(signData->coalesce());
+    FIZZ_RETURN_ON_ERROR(signature_.sign<SignatureScheme::ed25519>(
+        ret, err, signData->coalesce()));
     return Status::Success;
   }
 
@@ -166,8 +170,8 @@ inline Status OpenSSLSelfCertImpl<KeyType::RSA>::sign(
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::rsa_pss_sha256) {
-    ret =
-        signature_.sign<SignatureScheme::rsa_pss_sha256>(signData->coalesce());
+    FIZZ_RETURN_ON_ERROR(signature_.sign<SignatureScheme::rsa_pss_sha256>(
+        ret, err, signData->coalesce()));
     return Status::Success;
   }
 

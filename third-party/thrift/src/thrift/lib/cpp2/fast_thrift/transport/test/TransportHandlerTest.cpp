@@ -67,6 +67,9 @@ class TransportHandlerTest : public ::testing::Test {
     auto socket = folly::AsyncTransport::UniquePtr(
         new NiceMock<folly::test::MockAsyncTransport>());
     mockSocket_ = static_cast<folly::test::MockAsyncTransport*>(socket.get());
+    // onConnect() DCHECKs the socket is good. Tests that want to drive
+    // not-good behavior override this in-line.
+    ON_CALL(*mockSocket_, good()).WillByDefault(Return(true));
 
     auto handler = TransportHandler::create(std::move(socket), 256, 4096);
 
@@ -94,6 +97,9 @@ class TransportHandlerTest : public ::testing::Test {
     auto socket = folly::AsyncTransport::UniquePtr(
         new NiceMock<folly::test::MockAsyncTransport>());
     mockSocket_ = static_cast<folly::test::MockAsyncTransport*>(socket.get());
+    // onConnect() DCHECKs the socket is good. Tests that want to drive
+    // not-good behavior override this in-line.
+    ON_CALL(*mockSocket_, good()).WillByDefault(Return(true));
 
     auto handler = TransportHandler::create(std::move(socket), 256, 4096);
 
@@ -667,17 +673,54 @@ TEST_F(TransportHandlerTest, IsBufferMovableReturnsTrue) {
   pipeline.reset();
 }
 
-// Test: setPipeline fires onConnect when socket is already connected
-TEST_F(TransportHandlerTest, SetPipelineFiresConnectWhenSocketGood) {
+// Test: setPipeline is a pure setter and does not fire onConnect, even when
+// the socket is already good. Activation is the caller's responsibility:
+// they call onConnect() once the socket is connected (server: right after
+// accept; client: from their AsyncSocket connect callback).
+TEST_F(TransportHandlerTest, SetPipelineIsInert) {
   auto socket = folly::AsyncTransport::UniquePtr(
       new NiceMock<folly::test::MockAsyncTransport>());
   auto* mockSocket =
       static_cast<folly::test::MockAsyncTransport*>(socket.get());
 
-  // Mock socket->good() returning true (already connected)
+  // Even with a good socket, setPipeline must not touch readCB.
   ON_CALL(*mockSocket, good()).WillByDefault(Return(true));
-  // Expect setReadCB called twice: once from onConnect (resumeRead), once from
-  // destructor (closeInternal -> pauseRead since not paused)
+  EXPECT_CALL(*mockSocket, setReadCB(_)).Times(0);
+
+  auto handler = TransportHandler::create(std::move(socket), 256, 4096);
+
+  auto mockHandler = std::make_unique<MockHandler>();
+  auto* mockHandlerPtr = mockHandler.get();
+
+  auto pipeline =
+      PipelineBuilder<TransportHandler, MockAppHandler, SimpleBufferAllocator>()
+          .setEventBase(&evb_)
+          .setHead(handler.get())
+          .setTail(&appHandler_)
+          .setAllocator(&allocator_)
+          .addNextDuplex<MockHandler>(
+              exception_handler_tag, std::move(mockHandler))
+          .build();
+
+  handler->setPipeline(pipeline.get());
+
+  EXPECT_EQ(mockHandlerPtr->pipelineActivatedCount(), 0);
+  if (handler) {
+    handler->resetPipeline();
+  }
+  pipeline.reset();
+}
+
+// Test: onConnect() fires activation when the socket is already connected.
+TEST_F(TransportHandlerTest, OnConnectActivatesPipelineWhenSocketGood) {
+  auto socket = folly::AsyncTransport::UniquePtr(
+      new NiceMock<folly::test::MockAsyncTransport>());
+  auto* mockSocket =
+      static_cast<folly::test::MockAsyncTransport*>(socket.get());
+
+  ON_CALL(*mockSocket, good()).WillByDefault(Return(true));
+  // Expect setReadCB called twice: once from start->onConnect (resumeRead),
+  // once from destructor (closeInternal -> pauseRead since not paused).
   EXPECT_CALL(*mockSocket, setReadCB(_)).Times(2);
   EXPECT_CALL(*mockSocket, closeNow()).Times(1);
 
@@ -696,48 +739,11 @@ TEST_F(TransportHandlerTest, SetPipelineFiresConnectWhenSocketGood) {
               exception_handler_tag, std::move(mockHandler))
           .build();
 
-  // Initially no connect received
+  handler->setPipeline(pipeline.get());
   EXPECT_EQ(mockHandlerPtr->pipelineActivatedCount(), 0);
 
-  // setPipeline should fire onConnect since socket is good
-  handler->setPipeline(pipeline.get());
-
+  handler->onConnect();
   EXPECT_EQ(mockHandlerPtr->pipelineActivatedCount(), 1);
-  if (handler) {
-    handler->resetPipeline();
-  }
-  pipeline.reset();
-}
-
-// Test: setPipeline does not fire onConnect when socket is not connected
-TEST_F(TransportHandlerTest, SetPipelineDoesNotFireConnectWhenSocketNotGood) {
-  auto socket = folly::AsyncTransport::UniquePtr(
-      new NiceMock<folly::test::MockAsyncTransport>());
-  auto* mockSocket =
-      static_cast<folly::test::MockAsyncTransport*>(socket.get());
-
-  // Mock socket->good() returning false (not connected)
-  ON_CALL(*mockSocket, good()).WillByDefault(Return(false));
-
-  auto handler = TransportHandler::create(std::move(socket), 256, 4096);
-
-  auto mockHandler = std::make_unique<MockHandler>();
-  auto* mockHandlerPtr = mockHandler.get();
-
-  auto pipeline =
-      PipelineBuilder<TransportHandler, MockAppHandler, SimpleBufferAllocator>()
-          .setEventBase(&evb_)
-          .setHead(handler.get())
-          .setTail(&appHandler_)
-          .setAllocator(&allocator_)
-          .addNextDuplex<MockHandler>(
-              exception_handler_tag, std::move(mockHandler))
-          .build();
-
-  // setPipeline should NOT fire onConnect since socket is not good
-  handler->setPipeline(pipeline.get());
-
-  EXPECT_EQ(mockHandlerPtr->pipelineActivatedCount(), 0);
   if (handler) {
     handler->resetPipeline();
   }

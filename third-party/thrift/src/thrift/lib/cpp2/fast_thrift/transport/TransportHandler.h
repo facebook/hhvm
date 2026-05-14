@@ -78,8 +78,8 @@ class TransportHandler : public folly::DelayedDestruction,
   }
 
   /**
-   * Phase 2: Set the pipeline reference.
-   * Must be called before any read/write operations.
+   * Phase 2: Set the pipeline reference. Must be called before onConnect()
+   * and before any read/write operations.
    * The handler holds a DestructorGuard on the pipeline, so the pipeline
    * cannot be destroyed while it is attached. Caller releases this hold
    * via resetPipeline() (or destroys the handler, which calls
@@ -95,10 +95,6 @@ class TransportHandler : public folly::DelayedDestruction,
     pipeline_ = pipeline;
     pipelineGuard_ =
         std::make_unique<folly::DelayedDestruction::DestructorGuard>(pipeline_);
-    // If the socket is already connected, fire the connect event.
-    if (socket_->good()) {
-      onConnect();
-    }
   }
 
   /**
@@ -125,8 +121,24 @@ class TransportHandler : public folly::DelayedDestruction,
     socket_->setZeroCopyEnableThreshold(threshold);
   }
 
+  /**
+   * Notify the transport that the underlying socket is connected and the
+   * pipeline is fully built — go ahead and activate.
+   *
+   * Contract: caller MUST ensure the socket is connected before calling.
+   * For server-side flows this is trivial (the socket was just accepted).
+   * For client-side flows, call this from the AsyncSocket::ConnectCallback's
+   * connectSuccess() handler.
+   *
+   * Idempotent: subsequent calls are no-ops.
+   */
   void onConnect() noexcept {
-    DCHECK(pipeline_);
+    DCHECK(pipeline_) << "setPipeline must be called before onConnect";
+    DCHECK(socket_->good()) << "onConnect requires a connected socket";
+    if (started_) {
+      return;
+    }
+    started_ = true;
     resumeRead();
     pipeline_->activate();
   }
@@ -376,6 +388,7 @@ class TransportHandler : public folly::DelayedDestruction,
   bool readPaused_{true};
   uint32_t writePending_{0};
   bool closed_{false};
+  bool started_{false};
   folly::Function<void()> closeCallback_;
 };
 

@@ -384,7 +384,7 @@ BENCHMARK(Rocket_SetupFrame, iters) {
 
     innerSuspender.dismiss();
 
-    // This triggers onConnect which sends SETUP frame
+    // This triggers start which sends SETUP frame
     fixture.transportHandler->onConnect();
     fixture.evb.loopOnce();
 

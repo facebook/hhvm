@@ -17,6 +17,7 @@
 #pragma once
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
@@ -104,24 +105,10 @@ class ThriftServerTransportAdapter {
   channel_pipeline::Result onTransportRequest(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto request = msg.take<rocket::server::RocketRequestMessage>();
-
-    // TODO: Fire request based errors via fireRead. onException is only for
-    // connection level errors.
-    if (FOLLY_UNLIKELY(
-            request.payload.is<rocket::server::RocketRequestError>())) {
-      pipeline_->fireException(
-          std::move(
-              request.payload.get<rocket::server::RocketRequestError>().ew));
-      return channel_pipeline::Result::Success;
-    }
-
     ThriftServerRequestMessage thriftMsg{
-        .frame = std::move(
-            request.payload
-                .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>()),
+        .frame = std::move(request.frame),
         .streamId = request.streamId,
     };
-
     return pipeline_->fireRead(
         channel_pipeline::erase_and_box(std::move(thriftMsg)));
   }
@@ -163,13 +150,6 @@ class ThriftServerTransportAdapter {
     };
     return appAdapter_.write(std::move(rocketMsg));
   }
-
-  /**
-   * Called when an exception propagates through the thrift pipeline.
-   *
-   * Per-request thrift errors do NOT close the transport connection.
-   */
-  void onException(folly::exception_wrapper&& /*e*/) noexcept {}
 
   void handlerAdded() noexcept {}
   void handlerRemoved() noexcept {}

@@ -74,17 +74,11 @@ class RocketServerStreamStateHandler {
   /**
    * Handle inbound frames from FrameHandler.
    *
-   * Hot path: parsed wire frame.
    * - Connection-level frames (streamId == 0): pass through
    * - Request-initiating frames: register new stream, fire to app
    * - CANCEL/ERROR: remove active stream (terminal), fire to app
    * - Non-terminal frames (e.g., REQUEST_N): pass through
    * - Unknown streamId: log warning and drop
-   *
-   * Cold path: RocketRequestMessage carrying RocketRequestError. This is
-   * an in-process per-request failure routed back inbound by the codec
-   * (e.g., outbound serialize threw). Always terminal; clean up the
-   * stream and stamp identity, then forward to App.
    */
   template <typename Context>
   apache::thrift::fast_thrift::channel_pipeline::Result onRead(
@@ -92,50 +86,29 @@ class RocketServerStreamStateHandler {
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
     auto& request = msg.get<RocketRequestMessage>();
+    auto& frame = request.frame;
+    uint32_t streamId = frame.streamId();
 
-    // Hot path: parsed wire frame from the codec.
-    if (FOLLY_LIKELY(
-            request.payload
-                .is<apache::thrift::fast_thrift::frame::read::ParsedFrame>())) {
-      auto& frame =
-          request.payload
-              .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
-      uint32_t streamId = frame.streamId();
-
-      if (frame.isConnectionFrame()) {
-        // Connection-level frames (streamId == 0) like KEEPALIVE are
-        // protocol-level frames handled below this layer. Do not forward
-        // to the application layer.
-        return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
-      }
-
-      auto frameType = frame.type();
-      const auto& desc =
-          apache::thrift::fast_thrift::frame::getDescriptor(frameType);
-
-      if (frame.isTerminalFrame()) {
-        return onTerminalEvent(ctx, streamId, desc, std::move(msg));
-      }
-
-      if (desc.isRequestFrame) {
-        return onNewStream(ctx, streamId, frameType, std::move(msg));
-      }
-
-      return onStreamFrame(ctx, streamId, desc, std::move(msg));
+    if (frame.isConnectionFrame()) {
+      // Connection-level frames (streamId == 0) like KEEPALIVE are
+      // protocol-level frames handled below this layer. Do not forward
+      // to the application layer.
+      return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
     }
 
-    // Cold path: in-process per-request error (e.g. from codec serialize
-    // failure). Always terminal — App must be notified so it can clean up
-    // its per-stream state. The codec has already stamped streamId and
-    // streamType on the message, so no lookup is required to forward.
-    // If the stream is still tracked here (e.g. non-terminal response
-    // failed), erase it; for terminal responses the outbound onWrite path
-    // has already erased.
-    if (auto it = activeStreams_.find(request.streamId);
-        it != activeStreams_.end()) {
-      activeStreams_.erase(it);
+    auto frameType = frame.type();
+    const auto& desc =
+        apache::thrift::fast_thrift::frame::getDescriptor(frameType);
+
+    if (frame.isTerminalFrame()) {
+      return onTerminalEvent(ctx, streamId, desc, std::move(msg));
     }
-    return ctx.fireRead(std::move(msg));
+
+    if (desc.isRequestFrame) {
+      return onNewStream(ctx, streamId, frameType, std::move(msg));
+    }
+
+    return onStreamFrame(ctx, streamId, desc, std::move(msg));
   }
 
   template <typename Context>

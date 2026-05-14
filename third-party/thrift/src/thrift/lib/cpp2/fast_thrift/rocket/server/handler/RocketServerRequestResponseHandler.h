@@ -31,8 +31,6 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 
-#include <variant>
-
 namespace apache::thrift::fast_thrift::rocket::server::handler {
 
 /**
@@ -112,18 +110,7 @@ class RocketServerRequestResponseHandler {
       return ctx.fireRead(std::move(msg));
     }
 
-    // In-process per-request errors are already terminal failures; no
-    // pattern validation applies. Pass through to the App callback.
-    if (FOLLY_UNLIKELY(
-            !request.payload.is<
-                apache::thrift::fast_thrift::frame::read::ParsedFrame>())) {
-      return ctx.fireRead(std::move(msg));
-    }
-    auto& parsed =
-        request.payload
-            .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
-
-    auto frameType = parsed.type();
+    auto frameType = request.frame.type();
 
     // Hot path: the initial REQUEST_RESPONSE frame from the client.
     if (FOLLY_LIKELY(
@@ -142,7 +129,7 @@ class RocketServerRequestResponseHandler {
     // EXT MUST be dropped silently when ignore=true and rejected with
     // ERROR(INVALID) otherwise.
     if (frameType == apache::thrift::fast_thrift::frame::FrameType::EXT &&
-        parsed.metadata.shouldIgnore()) {
+        request.frame.metadata.shouldIgnore()) {
       return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
     }
 
@@ -150,12 +137,12 @@ class RocketServerRequestResponseHandler {
     // streamId, non-ignorable EXT, etc.) is a peer protocol violation per
     // RSocket spec, which warrants closing the stream.
     XLOG(ERR) << "Unexpected frame type for REQUEST_RESPONSE stream: streamId="
-              << request.streamId << ", frameType=" << parsed.typeName()
+              << request.streamId << ", frameType=" << request.frame.typeName()
               << "; sending ERROR(INVALID)";
 
     auto description = fmt::format(
         "unexpected frame type {} on REQUEST_RESPONSE stream",
-        parsed.typeName());
+        request.frame.typeName());
     RocketResponseMessage errorResponse{
         .frame =
             apache::thrift::fast_thrift::frame::ComposedErrorFrame{

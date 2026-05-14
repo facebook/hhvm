@@ -90,7 +90,7 @@ TEST(RocketServerAppAdapterTest, OnReadDelegatesToCallback) {
       [](folly::exception_wrapper&&) noexcept {});
 
   auto box = channel_pipeline::erase_and_box(
-      rocket::server::RocketRequestMessage{.payload = {}, .streamId = 1});
+      rocket::server::RocketRequestMessage{.frame = {}, .streamId = 1});
 
   auto result = adapter->onRead(std::move(box));
   EXPECT_EQ(result, Result::Success);

@@ -54,7 +54,7 @@ RocketRequestMessage makeRequestResponseRequest(
       nullptr,
       std::move(data));
   return RocketRequestMessage{
-      .payload = makeParsedFrame(std::move(buf)),
+      .frame = makeParsedFrame(std::move(buf)),
       .streamId = streamId,
       .streamType = streamType,
   };
@@ -66,7 +66,7 @@ RocketRequestMessage makeCancelRequest(
       apache::thrift::fast_thrift::frame::write::CancelHeader{
           .streamId = streamId});
   return RocketRequestMessage{
-      .payload = makeParsedFrame(std::move(buf)),
+      .frame = makeParsedFrame(std::move(buf)),
       .streamId = streamId,
       .streamType = streamType,
   };
@@ -85,7 +85,7 @@ RocketRequestMessage makeExtRequest(
       nullptr,
       nullptr);
   return RocketRequestMessage{
-      .payload = makeParsedFrame(std::move(buf)),
+      .frame = makeParsedFrame(std::move(buf)),
       .streamId = streamId,
       .streamType = streamType,
   };
@@ -99,7 +99,7 @@ RocketRequestMessage makeRequestNRequest(
       apache::thrift::fast_thrift::frame::write::RequestNHeader{
           .streamId = streamId, .requestN = requestN});
   return RocketRequestMessage{
-      .payload = makeParsedFrame(std::move(buf)),
+      .frame = makeParsedFrame(std::move(buf)),
       .streamId = streamId,
       .streamType = streamType,
   };
@@ -211,11 +211,7 @@ TEST_F(ServerRequestResponseHandlerTest, Read_RequestResponse_Forwarded) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
   EXPECT_TRUE(ctx_.writeMessages().empty());
   auto& forwarded = ctx_.readMessages()[0].get<RocketRequestMessage>();
-  EXPECT_EQ(
-      forwarded.payload
-          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>()
-          .type(),
-      FrameType::REQUEST_RESPONSE);
+  EXPECT_EQ(forwarded.frame.type(), FrameType::REQUEST_RESPONSE);
   EXPECT_EQ(forwarded.streamId, 1u);
 }
 
@@ -232,11 +228,7 @@ TEST_F(ServerRequestResponseHandlerTest, Read_Cancel_Forwarded) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
   EXPECT_TRUE(ctx_.writeMessages().empty());
   auto& forwarded = ctx_.readMessages()[0].get<RocketRequestMessage>();
-  EXPECT_EQ(
-      forwarded.payload
-          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>()
-          .type(),
-      FrameType::CANCEL);
+  EXPECT_EQ(forwarded.frame.type(), FrameType::CANCEL);
 }
 
 // =============================================================================

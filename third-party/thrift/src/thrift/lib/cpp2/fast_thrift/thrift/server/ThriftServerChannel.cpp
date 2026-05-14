@@ -297,6 +297,8 @@ ThriftServerChannel::onRead(
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
 
+  auto& frame = request.frame;
+
   // Deserialize request metadata from frame (on the stack, no heap alloc)
   apache::thrift::RequestRpcMetadata metadata;
   auto deserError =
@@ -340,7 +342,7 @@ ThriftServerChannel::onRead(
   }
 
   // Extract data payload from frame (zero-copy)
-  auto dataBuf = std::move(request.frame).extractData();
+  auto dataBuf = std::move(frame).extractData();
   if (!dataBuf) {
     dataBuf = pipeline_->allocate(0);
   }
@@ -373,14 +375,24 @@ ThriftServerChannel::onRead(
   apache::thrift::AsyncProcessorFactory::WildcardMethodMetadata
       wildcardMetadata;
 
-  processor_->processSerializedCompressedRequestWithMetadata(
-      std::move(reqPtr),
-      std::move(serializedRequest),
-      wildcardMetadata,
-      protocolId,
-      reqCtxPtr,
-      pipeline_->eventBase(),
-      nullptr /* tm */);
+  // Defensive try/catch around AsyncProcessor dispatch — synchronous throws
+  // would otherwise propagate through this noexcept onRead() and abort the
+  // process. Mirrors legacy Cpp2Worker.cpp:765-785: log DFATAL and swallow,
+  // do NOT call sendErrorWrapped on a request whose internal state may be
+  // partially constructed. Connection stays alive; the client will time out.
+  try {
+    processor_->processSerializedCompressedRequestWithMetadata(
+        std::move(reqPtr),
+        std::move(serializedRequest),
+        wildcardMetadata,
+        protocolId,
+        reqCtxPtr,
+        pipeline_->eventBase(),
+        nullptr /* tm */);
+  } catch (...) {
+    XLOG(DFATAL) << "AsyncProcessor::process exception: "
+                 << folly::exceptionStr(std::current_exception());
+  }
 
   return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
 }

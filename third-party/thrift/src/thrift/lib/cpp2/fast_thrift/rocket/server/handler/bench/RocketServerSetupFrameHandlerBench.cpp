@@ -109,7 +109,7 @@ ParsedFrame makePayloadFrame(uint32_t streamId) {
 // RocketServerFrameCodecHandler delivers inbound frames to SetupHandler).
 RocketRequestMessage wrapRequest(ParsedFrame frame) {
   RocketRequestMessage msg;
-  msg.payload = std::move(frame);
+  msg.frame = std::move(frame);
   return msg;
 }
 

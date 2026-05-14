@@ -34,8 +34,8 @@ namespace apache::thrift::fast_thrift::thrift {
 /**
  * ThriftServerRequestMessage - Inbound request from pipeline to handler.
  *
- * Carries the parsed wire frame as-is; the channel decodes RpcKind,
- * method name, and metadata from it.
+ * Carries the parsed wire frame; the channel decodes RpcKind, method
+ * name, and metadata from it.
  */
 #pragma pack(push, 1)
 struct ThriftServerRequestMessage {

@@ -247,7 +247,7 @@ class ServerSetupFrameHandlerTest : public ::testing::Test {
   Result callOnRead(
       apache::thrift::fast_thrift::frame::read::ParsedFrame frame) {
     rocket::server::RocketRequestMessage msg;
-    msg.payload = std::move(frame);
+    msg.frame = std::move(frame);
     return handler_.onRead(ctx_, erase_and_box(std::move(msg)));
   }
 
@@ -351,7 +351,7 @@ TEST_F(
       ctx_,
       erase_and_box(
           rocket::server::RocketRequestMessage{
-              .payload = makeSetupFrameWithMetadataMimeType(
+              .frame = makeSetupFrameWithMetadataMimeType(
                   apache::thrift::fast_thrift::rocket::server::
                       kMetadataCompactMimeType),
           }));
@@ -371,7 +371,7 @@ TEST_F(ServerSetupFrameHandlerTest, EmptyCallbackIsSafe) {
       ctx_,
       erase_and_box(
           rocket::server::RocketRequestMessage{
-              .payload = makeSetupFrameWithMetadataMimeType(
+              .frame = makeSetupFrameWithMetadataMimeType(
                   apache::thrift::fast_thrift::rocket::server::
                       kMetadataCompactMimeType),
           }));
@@ -544,11 +544,8 @@ TEST_F(ServerSetupFrameHandlerTest, PostSetupRequestFramePassesThrough) {
 
   auto& request =
       ctx_.readMessages()[0].get<rocket::server::RocketRequestMessage>();
-  auto& frame =
-      request.payload
-          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
   EXPECT_EQ(
-      frame.type(),
+      request.frame.type(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
 }
 

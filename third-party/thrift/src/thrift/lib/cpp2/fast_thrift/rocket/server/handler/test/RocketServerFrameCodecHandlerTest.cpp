@@ -149,9 +149,7 @@ TEST_F(RocketServerFrameCodecHandlerTest, DecodesPayloadFrame) {
 
   auto& request =
       ctx_.readMessages()[0].get<rocket::server::RocketRequestMessage>();
-  auto& frame =
-      request.payload
-          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+  auto& frame = request.frame;
   EXPECT_EQ(
       frame.type(), apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
   EXPECT_EQ(frame.streamId(), 1);
@@ -172,9 +170,7 @@ TEST_F(RocketServerFrameCodecHandlerTest, DecodesRequestResponseFrame) {
 
   auto& request =
       ctx_.readMessages()[0].get<rocket::server::RocketRequestMessage>();
-  auto& frame =
-      request.payload
-          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+  auto& frame = request.frame;
   EXPECT_EQ(
       frame.type(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
@@ -192,9 +188,7 @@ TEST_F(RocketServerFrameCodecHandlerTest, DecodesKeepAliveFrame) {
 
   auto& request =
       ctx_.readMessages()[0].get<rocket::server::RocketRequestMessage>();
-  auto& frame =
-      request.payload
-          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+  auto& frame = request.frame;
   EXPECT_EQ(
       frame.type(), apache::thrift::fast_thrift::frame::FrameType::KEEPALIVE);
   EXPECT_EQ(frame.streamId(), 0);
@@ -211,9 +205,7 @@ TEST_F(RocketServerFrameCodecHandlerTest, DecodesErrorFrame) {
 
   auto& request =
       ctx_.readMessages()[0].get<rocket::server::RocketRequestMessage>();
-  auto& frame =
-      request.payload
-          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+  auto& frame = request.frame;
   EXPECT_EQ(frame.type(), apache::thrift::fast_thrift::frame::FrameType::ERROR);
   EXPECT_EQ(frame.streamId(), 5);
 }

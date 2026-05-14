@@ -721,9 +721,7 @@ class RocketThriftServerInterfaceHandler {
         apache::thrift::fast_thrift::rocket::server::RocketRequestMessage>();
 
     ThriftServerRequestMessage thriftMsg{
-        .frame = std::move(
-            rocketMsg.payload
-                .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>()),
+        .frame = std::move(rocketMsg.frame),
         .streamId = rocketMsg.streamId,
     };
 

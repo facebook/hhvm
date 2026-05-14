@@ -70,7 +70,7 @@ RocketRequestMessage makeRequestResponseRequest(
       nullptr,
       copyBuffer("payload"));
   return RocketRequestMessage{
-      .payload = parseFrame(std::move(buf)),
+      .frame = parseFrame(std::move(buf)),
       .streamId = streamId,
       .streamType = streamType,
   };
@@ -80,7 +80,7 @@ RocketRequestMessage makeRequestNRequest(
     uint32_t streamId, FrameType streamType = FrameType::REQUEST_RESPONSE) {
   auto buf = serialize(RequestNHeader{.streamId = streamId, .requestN = 1});
   return RocketRequestMessage{
-      .payload = parseFrame(std::move(buf)),
+      .frame = parseFrame(std::move(buf)),
       .streamId = streamId,
       .streamType = streamType,
   };

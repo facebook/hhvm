@@ -65,7 +65,7 @@ using cp::TypeErasedBox;
 using cp::test::MockHandler;
 using cp::test::TestAllocator;
 using ft::ThriftErrorPayload;
-using ft::ThriftFirstResponsePayload;
+using ft::ThriftInitialResponsePayload;
 using ft::ThriftServerAppAdapter;
 using ft::ThriftServerRequestMessage;
 using ft::ThriftServerResponseMessage;
@@ -74,17 +74,17 @@ using ft::ThriftServerResponseMessage;
 // regardless of which alternative is held.
 const std::unique_ptr<folly::IOBuf>& payloadData(
     const ThriftServerResponseMessage& msg) {
-  if (msg.payload.is<ThriftFirstResponsePayload>()) {
-    return msg.payload.get<ThriftFirstResponsePayload>().data;
+  if (msg.payload.is<ThriftInitialResponsePayload>()) {
+    return msg.payload.get<ThriftInitialResponsePayload>().data;
   }
   return msg.payload.get<ThriftErrorPayload>().data;
 }
-// Returns the typed ResponseRpcMetadata held by a ThriftFirstResponsePayload,
+// Returns the typed ResponseRpcMetadata held by a ThriftInitialResponsePayload,
 // or nullptr if the message carries an error payload instead.
 const apache::thrift::ResponseRpcMetadata* payloadMetadata(
     const ThriftServerResponseMessage& msg) {
-  if (msg.payload.is<ThriftFirstResponsePayload>()) {
-    return msg.payload.get<ThriftFirstResponsePayload>().metadata.get();
+  if (msg.payload.is<ThriftInitialResponsePayload>()) {
+    return msg.payload.get<ThriftInitialResponsePayload>().metadata.get();
   }
   return nullptr;
 }

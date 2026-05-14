@@ -23,7 +23,6 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Handler.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/transport/rocket/ChecksumGenerator.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -49,7 +48,7 @@ namespace apache::thrift::fast_thrift::thrift::client::handler {
  *   - Otherwise → pass through (the common case when checksumming is
  *     not requested).
  *
- * Inbound (response): validates the checksum on `ThriftFirstResponsePayload`
+ * Inbound (response): validates the checksum on `ThriftInitialResponsePayload`
  * against the data IOBuf. Mirrors legacy
  * `ChecksumPayloadSerializerStrategy`:
  *
@@ -129,13 +128,13 @@ class ThriftClientChecksumHandler {
     }
 
     auto& inbound = response.payload.get<ThriftClientInboundPayloadVariant>();
-    if (!inbound.is<ThriftFirstResponsePayload>()) {
+    if (!inbound.is<ThriftInitialResponsePayload>()) {
       // Subsequent stream chunks, errors, cancels, etc. — no checksum
       // contract on those payload alternatives today.
       return ctx.fireRead(std::move(msg));
     }
 
-    auto& payload = inbound.get<ThriftFirstResponsePayload>();
+    auto& payload = inbound.get<ThriftInitialResponsePayload>();
     if (auto error = validateChecksum(*payload.metadata, payload.data.get())) {
       // Mismatch: convert to per-request transport error so the channel
       // fails just this callback. Connection stays Open.

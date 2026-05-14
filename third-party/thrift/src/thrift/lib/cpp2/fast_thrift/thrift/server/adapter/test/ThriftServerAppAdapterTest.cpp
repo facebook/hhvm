@@ -53,23 +53,23 @@ namespace {
 // ThriftServerResponseMessage's variant payload regardless of held alternative.
 inline const std::unique_ptr<folly::IOBuf>& payloadData(
     const ThriftServerResponseMessage& msg) {
-  if (msg.payload.is<ThriftFirstResponsePayload>()) {
-    return msg.payload.get<ThriftFirstResponsePayload>().data;
+  if (msg.payload.is<ThriftInitialResponsePayload>()) {
+    return msg.payload.get<ThriftInitialResponsePayload>().data;
   }
   return msg.payload.get<ThriftErrorPayload>().data;
 }
-// Returns the typed ResponseRpcMetadata held by a ThriftFirstResponsePayload,
+// Returns the typed ResponseRpcMetadata held by a ThriftInitialResponsePayload,
 // or nullptr if the message carries an error payload instead.
 inline const apache::thrift::ResponseRpcMetadata* payloadMetadata(
     const ThriftServerResponseMessage& msg) {
-  if (msg.payload.is<ThriftFirstResponsePayload>()) {
-    return msg.payload.get<ThriftFirstResponsePayload>().metadata.get();
+  if (msg.payload.is<ThriftInitialResponsePayload>()) {
+    return msg.payload.get<ThriftInitialResponsePayload>().metadata.get();
   }
   return nullptr;
 }
 inline uint32_t payloadStreamId(const ThriftServerResponseMessage& msg) {
-  if (msg.payload.is<ThriftFirstResponsePayload>()) {
-    return msg.payload.get<ThriftFirstResponsePayload>().streamId;
+  if (msg.payload.is<ThriftInitialResponsePayload>()) {
+    return msg.payload.get<ThriftInitialResponsePayload>().streamId;
   }
   return msg.payload.get<ThriftErrorPayload>().streamId;
 }
@@ -413,8 +413,7 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseFiresWrite) {
   auto result = adapter->writeResponse(
       /*streamId=*/42,
       folly::IOBuf::copyBuffer("response"),
-      /*metadata=*/nullptr,
-      /*complete=*/true);
+      /*metadata=*/nullptr);
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled);
@@ -428,8 +427,7 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseWithNoPipelineReturnsError) {
   auto result = adapter->writeResponse(
       /*streamId=*/1,
       folly::IOBuf::copyBuffer("response"),
-      /*metadata=*/nullptr,
-      /*complete=*/true);
+      /*metadata=*/nullptr);
 
   // Without a pipeline there's nothing to write to — surface that as Error.
   EXPECT_EQ(result, Result::Error);
@@ -569,8 +567,7 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithClientBlame) {
       adapter->writeResponse(
           /*streamId=*/7,
           /*data=*/nullptr,
-          std::move(md),
-          /*complete=*/true),
+          std::move(md)),
       Result::Success);
 
   EXPECT_TRUE(captured.writeCalled);
@@ -630,8 +627,7 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithServerBlame) {
       adapter->writeResponse(
           /*streamId=*/7,
           /*data=*/nullptr,
-          std::move(md),
-          /*complete=*/true),
+          std::move(md)),
       Result::Success);
 
   EXPECT_TRUE(captured.writeCalled);
@@ -659,8 +655,7 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseSurfacesPipelineWriteError) {
   auto result = adapter->writeResponse(
       /*streamId=*/42,
       folly::IOBuf::copyBuffer("response"),
-      /*metadata=*/nullptr,
-      /*complete=*/true);
+      /*metadata=*/nullptr);
 
   EXPECT_EQ(result, Result::Error);
   EXPECT_EQ(built.handler->handlerRemovedCount(), 0);
@@ -768,8 +763,7 @@ TEST_F(
       adapter->writeResponse(
           /*streamId=*/7,
           folly::IOBuf::copyBuffer("serialized exception struct"),
-          std::move(md),
-          /*complete=*/true),
+          std::move(md)),
       Result::Success);
 
   EXPECT_TRUE(writeCalled);
@@ -814,7 +808,8 @@ TEST_F(
   EXPECT_EQ(payloadStreamId(captured), 7u);
   EXPECT_EQ(payloadErrorCode(captured), 0u) << "PAYLOAD frame, not ERROR";
   EXPECT_EQ(payloadData(captured), nullptr);
-  EXPECT_TRUE(captured.payload.get<ThriftFirstResponsePayload>().complete);
+  // Terminal-and-data invariant is enforced in toRocketFrame and verified
+  // by ThriftPayloadTest.
 
   const auto* md = payloadMetadata(captured);
   ASSERT_NE(md, nullptr);

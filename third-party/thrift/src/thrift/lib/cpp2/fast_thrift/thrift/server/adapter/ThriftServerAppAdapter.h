@@ -96,15 +96,14 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   // ResponseRpcMetadata struct (populated via fillSuccessResponseMetadata /
   // fillAppErrorResponseMetadata / fillDeclaredExceptionMetadata, or by
   // hand). Metadata serialization is deferred into the pipeline
-  // (ThriftFirstResponsePayload::toRocketFrame) so the adapter never has to
+  // (ThriftInitialResponsePayload::toRocketFrame) so the adapter never has to
   // pre-serialize.
   //
   // Returns the pipeline write Result. Callers should propagate the Result.
   [[nodiscard]] channel_pipeline::Result writeResponse(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
-      std::unique_ptr<apache::thrift::ResponseRpcMetadata> metadata,
-      bool complete) noexcept;
+      std::unique_ptr<apache::thrift::ResponseRpcMetadata> metadata) noexcept;
 
   // Sends an ERROR frame (framework-level error: bad metadata, unknown
   // method, parse failure, etc.). Distinct from writeResponse because the
@@ -137,8 +136,7 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
         [&](Writer& w) { return presult.serializedSizeZC(&w); });
     auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
     fillSuccessResponseMetadata(*md);
-    return writeResponse(
-        streamId, std::move(data), std::move(md), /*complete=*/true);
+    return writeResponse(streamId, std::move(data), std::move(md));
   }
 
   // Declared exception: caller has already populated the matching presult
@@ -164,8 +162,7 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
         ew.class_name().toStdString(),
         ew.what().toStdString(),
         classification);
-    return writeResponse(
-        streamId, std::move(data), std::move(md), /*complete=*/true);
+    return writeResponse(streamId, std::move(data), std::move(md));
   }
 
   // Undeclared exception (cascade fall-through): null data +

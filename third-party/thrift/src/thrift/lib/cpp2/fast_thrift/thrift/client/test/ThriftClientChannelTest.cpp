@@ -172,12 +172,11 @@ class ThriftClientChannelTest : public ::testing::Test {
 
     ThriftResponseMessage response;
     response.payload = ThriftClientInboundPayloadVariant{
-        ThriftFirstResponsePayload{
+        ThriftInitialResponsePayload{
             .data = folly::IOBuf::copyBuffer(data),
             .metadata = std::move(metadata),
             .streamId = 1,
-            .complete = true,
-            .next = true},
+        },
         apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
     response.requestContext =
         apache::thrift::fast_thrift::rocket::borrow(requestContext);
@@ -466,7 +465,8 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineCallsHandler) {
 
   EXPECT_TRUE(handlerCalled);
 
-  // Deliver synthetic response to clean up the heap-allocated callback context.
+  // Deliver synthetic response to clean up the heap-allocated callback
+  // context.
   auto response = createSuccessResponse(
       capturedHandle,
       apache::thrift::protocol::T_COMPACT_PROTOCOL,
@@ -556,7 +556,8 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineBackpressureProceeds) {
   EXPECT_FALSE(state->errorReceived);
   EXPECT_FALSE(state->responseReceived);
 
-  // Deliver synthetic response to clean up the heap-allocated callback context.
+  // Deliver synthetic response to clean up the heap-allocated callback
+  // context.
   auto response = createSuccessResponse(
       capturedHandle,
       apache::thrift::protocol::T_COMPACT_PROTOCOL,
@@ -609,9 +610,9 @@ TEST_F(ThriftClientChannelTest, SendRequestPassesCorrectMessageContent) {
   EXPECT_EQ(capturedMethodName, "myTestMethod");
   EXPECT_NE(capturedHandle, nullptr);
 
-  // Deliver synthetic response to clean up the heap-allocated callback context
-  // that the channel allocated during sendRequestResponse. Without this, LSAN
-  // would flag the leak under //thrift/lib/cpp2/fast_thrift/...
+  // Deliver synthetic response to clean up the heap-allocated callback
+  // context that the channel allocated during sendRequestResponse. Without
+  // this, LSAN would flag the leak under //thrift/lib/cpp2/fast_thrift/...
   auto response = createSuccessResponse(
       capturedHandle,
       apache::thrift::protocol::T_COMPACT_PROTOCOL,

@@ -18,6 +18,10 @@
 
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrameVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftControlPayloads.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadConcept.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftRequestPayloads.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftResponsePayloads.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 #include <algorithm>
@@ -43,36 +47,6 @@ template <typename... Ts>
 inline constexpr size_t maxAlignof = std::max({alignof(Ts)...});
 
 } // namespace thrift_payload_variant_detail
-
-/**
- * Concept for Thrift payload types that can be held in
- * `ThriftPayloadVariant`. Each payload provides:
- *
- *   - `T::RocketFrame` typedef naming the matching `frame::Composed*Frame`.
- *   - `std::move(t).toRocketFrame()` produces the rocket frame.
- *
- * `toRocketFrame()` may be either noexcept or throwing — the
- * request-response client payload performs metadata serialization
- * inside `toRocketFrame()` and can throw on serializer/allocator
- * failure. The transport adapter catches and surfaces such failures
- * inbound as per-request errors.
- *
- * The rocket frame returned by `toRocketFrame()` must satisfy the
- * `frame::ComposedFrameConcept` (i.e., it can be held in a
- * `ComposedFrameVariant`). Together this lets the variant expose a single
- * `toRocketFrame()` accessor that returns a `ComposedFrameVariant<...>` of
- * all the alternatives' rocket frames — eliminating the runtime switch in
- * the transport adapter.
- */
-template <typename T>
-concept ThriftPayloadConcept =
-    requires(T&& t, rocket::server::MetadataProtocol p) {
-      {
-        std::move(t).toRocketFrame(p)
-      } -> std::same_as<typename T::RocketFrame>;
-    } &&
-    apache::thrift::fast_thrift::frame::ComposedFrameConcept<
-        typename T::RocketFrame>;
 
 /**
  * ThriftPayloadVariant - A discriminated union of `ThriftPayloadConcept`
@@ -146,6 +120,30 @@ class ThriftPayloadVariant {
             (result = std::move(
                           *std::launder(reinterpret_cast<AltAt<Is>*>(storage_)))
                           .toRocketFrame(metadataProtocol),
+             true)) ||
+           ...);
+    return result;
+  }
+
+  template <size_t... Is>
+  const apache::thrift::RequestRpcMetadata* getRequestRpcMetadataImpl(
+      std::index_sequence<Is...>) const noexcept {
+    const apache::thrift::RequestRpcMetadata* result = nullptr;
+    (void)((index_ == Is &&
+            (result = std::launder(reinterpret_cast<const AltAt<Is>*>(storage_))
+                          ->getRequestRpcMetadata(),
+             true)) ||
+           ...);
+    return result;
+  }
+
+  template <size_t... Is>
+  const apache::thrift::ResponseRpcMetadata* getResponseRpcMetadataImpl(
+      std::index_sequence<Is...>) const noexcept {
+    const apache::thrift::ResponseRpcMetadata* result = nullptr;
+    (void)((index_ == Is &&
+            (result = std::launder(reinterpret_cast<const AltAt<Is>*>(storage_))
+                          ->getResponseRpcMetadata(),
              true)) ||
            ...);
     return result;
@@ -292,6 +290,36 @@ class ThriftPayloadVariant {
       rocket::server::MetadataProtocol metadataProtocol) && {
     return std::move(*this).toRocketFrameImpl(
         metadataProtocol, std::index_sequence_for<Ts...>{});
+  }
+
+  // === Metadata accessors ===
+  //
+  // Constrained on the refined concepts: only well-formed when every
+  // alternative satisfies the corresponding role-payload concept. This
+  // turns "is this a role-X variant?" into a compile-time question — the
+  // method exists iff the variant's alternatives form a role.
+  //
+  // Returns nullptr if the variant is valueless or the held alternative
+  // hasn't yet been reshaped to expose typed metadata.
+
+  const apache::thrift::RequestRpcMetadata* getRequestRpcMetadata()
+      const noexcept
+    requires(ThriftRequestPayloadConcept<Ts> && ...)
+  {
+    if (valueless_) {
+      return nullptr;
+    }
+    return getRequestRpcMetadataImpl(std::index_sequence_for<Ts...>{});
+  }
+
+  const apache::thrift::ResponseRpcMetadata* getResponseRpcMetadata()
+      const noexcept
+    requires(ThriftInitialResponsePayloadConcept<Ts> && ...)
+  {
+    if (valueless_) {
+      return nullptr;
+    }
+    return getResponseRpcMetadataImpl(std::index_sequence_for<Ts...>{});
   }
 };
 #pragma pack(pop)

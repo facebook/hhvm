@@ -35,8 +35,8 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/common/PayloadVariants.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientChecksumHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 using namespace apache::thrift::fast_thrift;

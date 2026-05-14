@@ -18,8 +18,8 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <thrift/lib/cpp2/fast_thrift/common/CompactVariant.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadVariant.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/PayloadVariants.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RocketFrameDecoder.h>
 
 #include <cstdint>
@@ -45,22 +45,13 @@ struct ThriftServerRequestMessage {
 /**
  * ThriftServerResponseMessage - Outbound message from handler to pipeline.
  *
- * `payload` is a typed variant of per-stream payload structs from
- * `thrift/common/ThriftPayload.h`. Today the variant carries
- * `ThriftFirstResponsePayload` (initial reply, carrying the typed
- * `ResponseRpcMetadata` which the payload's `toRocketFrame()` serializes)
- * and `ThriftErrorPayload` (failure) — the only response operations wired
- * end-to-end through the server. As stream/sink/bidi handlers come online,
- * a separate payload for subsequent stream chunks plus `ThriftCancelPayload`
- * and `ThriftRequestNPayload` will join the variant.
- *
- * The variant carries `rpcKind` internally; the transport adapter uses
- * it to set the rocket message's `streamType` for the matching pattern
- * handler. Each per-stream payload also carries its `streamId`.
+ * `payload` carries the typed response payload; only alternatives wired
+ * end-to-end today are listed in `ThriftServerOutboundPayloadVariant`,
+ * new alternatives join as their handlers come online.
  */
 #pragma pack(push, 1)
 struct ThriftServerResponseMessage {
-  ThriftPayloadVariant<ThriftFirstResponsePayload, ThriftErrorPayload> payload;
+  ThriftServerOutboundPayloadVariant payload;
 };
 #pragma pack(pop)
 

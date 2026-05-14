@@ -1047,10 +1047,7 @@ TEST_F(
         auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
         fillSuccessResponseMetadata(*md);
         auto writeResult = self->writeResponse(
-            streamId,
-            folly::IOBuf::copyBuffer("echo response"),
-            std::move(md),
-            /*complete=*/true);
+            streamId, folly::IOBuf::copyBuffer("echo response"), std::move(md));
         return writeResult == Result::Error ? Result::Error : Result::Success;
       });
 
@@ -1083,10 +1080,7 @@ TEST_F(
         auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
         fillSuccessResponseMetadata(*md);
         auto writeResult = self->writeResponse(
-            streamId,
-            folly::IOBuf::copyBuffer("reply"),
-            std::move(md),
-            /*complete=*/true);
+            streamId, folly::IOBuf::copyBuffer("reply"), std::move(md));
         return writeResult == Result::Error ? Result::Error : Result::Success;
       });
 

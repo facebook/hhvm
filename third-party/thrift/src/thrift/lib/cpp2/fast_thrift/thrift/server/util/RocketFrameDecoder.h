@@ -20,18 +20,9 @@
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadVariant.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/PayloadVariants.h>
 
 namespace apache::thrift::fast_thrift::thrift {
-
-// Server-inbound first-frame payloads. Today only RR is wired end-to-end;
-// FNF / Stream / Sink / Bidi join as their handlers come online (Sink vs
-// Bidi disambiguation will live inside the REQUEST_CHANNEL arm of
-// fromRocketFrame, since both share that wire frame and only metadata.kind
-// distinguishes them).
-using ThriftServerInboundPayloadVariant =
-    ThriftPayloadVariant<ThriftRequestResponsePayload>;
 
 // Convert a parsed inbound rocket request frame into the typed thrift
 // inbound payload variant. Single decode point for the server bridge —

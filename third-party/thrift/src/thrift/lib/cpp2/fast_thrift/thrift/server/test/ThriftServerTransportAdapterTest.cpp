@@ -85,12 +85,10 @@ TypeErasedBox makeThriftResponseBox(uint32_t streamId = 1) {
   auto metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>();
   fillSuccessResponseMetadata(*metadata);
   ThriftServerResponseMessage msg{
-      .payload = ThriftFirstResponsePayload{
+      .payload = ThriftInitialResponsePayload{
           .data = folly::IOBuf::copyBuffer("response-data"),
           .metadata = std::move(metadata),
           .streamId = streamId,
-          .complete = true,
-          .next = true,
       }};
   return erase_and_box(std::move(msg));
 }

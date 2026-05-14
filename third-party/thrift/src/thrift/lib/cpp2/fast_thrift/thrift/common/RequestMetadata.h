@@ -35,12 +35,8 @@ inline constexpr size_t kMetadataHeadroomBytes = 16;
  * Serialize a populated RequestRpcMetadata into an IOBuf.
  *
  * Pre-calculates serialized size to allocate an exactly-sized buffer.
- * Reserves headroom so the downstream frame writer can prepend headers
+ * Reserves headroom so a downstream frame writer can prepend headers
  * without a separate allocation.
- *
- * Called from `ThriftRequestResponsePayload::toRocketFrame()` on the
- * client outbound path, and from the client-side metadata builders in
- * `thrift/client/RequestMetadata.h`.
  */
 inline std::unique_ptr<folly::IOBuf> serializeRequestMetadata(
     apache::thrift::RequestRpcMetadata& metadata) {

@@ -24,9 +24,8 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/common/PayloadVariants.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/client/util/RocketFrameDecoder.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -143,12 +142,11 @@ class ThriftClientMetadataPushHandlerTest : public ::testing::Test {
       void* requestContext = nullptr) {
     ThriftResponseMessage response;
     response.payload = ThriftClientInboundPayloadVariant{
-        ThriftFirstResponsePayload{
+        ThriftInitialResponsePayload{
             .data = folly::IOBuf::copyBuffer("test payload"),
             .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
             .streamId = 1,
-            .complete = true,
-            .next = true},
+        },
         apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
     response.requestContext =
         apache::thrift::fast_thrift::rocket::borrow(requestContext);

@@ -47,8 +47,10 @@ fromRocketFrame(
                 static_cast<int>(kind))));
       }
 
-      const auto complete = frame.isComplete();
-      const auto next = frame.hasNext();
+      // RR / Sink invariants enforced upstream (kind check above): the wire
+      // frame must be terminal + carry data. Drop the wire flag reads;
+      // ThriftInitialResponsePayload bakes complete=next=true into
+      // toRocketFrame.
       auto metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>();
       if (auto ew = deserializeResponseMetadata(frame, *metadata)) {
         return folly::makeUnexpected(std::move(ew));
@@ -56,12 +58,10 @@ fromRocketFrame(
       auto data = std::move(frame).extractData();
 
       return ThriftClientInboundPayloadVariant{
-          ThriftFirstResponsePayload{
+          ThriftInitialResponsePayload{
               .data = std::move(data),
               .metadata = std::move(metadata),
-              .streamId = streamId,
-              .complete = complete,
-              .next = next},
+              .streamId = streamId},
           kind};
     }
 

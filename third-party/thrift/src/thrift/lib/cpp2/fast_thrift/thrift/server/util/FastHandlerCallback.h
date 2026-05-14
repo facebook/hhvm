@@ -77,8 +77,7 @@ inline void writeExceptionCascade(
         ew.class_name().toStdString(),
         ew.what().toStdString(),
         classification);
-    (void)a->writeResponse(
-        sid, std::move(buf), std::move(md), /*complete=*/true);
+    (void)a->writeResponse(sid, std::move(buf), std::move(md));
   } else {
     auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
     fillAppErrorResponseMetadata(
@@ -86,8 +85,7 @@ inline void writeExceptionCascade(
         ew.class_name().toStdString(),
         ew.what().toStdString(),
         apache::thrift::ErrorBlame::SERVER);
-    (void)a->writeResponse(
-        sid, /*data=*/nullptr, std::move(md), /*complete=*/true);
+    (void)a->writeResponse(sid, /*data=*/nullptr, std::move(md));
   }
 }
 
@@ -158,8 +156,7 @@ class FastHandlerCallback : public folly::DelayedDestruction {
         });
     auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
     fillSuccessResponseMetadata(*md);
-    (void)a->writeResponse(
-        sid, std::move(buf), std::move(md), /*complete=*/true);
+    (void)a->writeResponse(sid, std::move(buf), std::move(md));
   }
 
   template <typename Presult, typename ProtocolWriter>
@@ -246,8 +243,7 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
         });
     auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
     fillSuccessResponseMetadata(*md);
-    (void)a->writeResponse(
-        sid, std::move(buf), std::move(md), /*complete=*/true);
+    (void)a->writeResponse(sid, std::move(buf), std::move(md));
   }
 
   template <typename Presult, typename ProtocolWriter>
@@ -324,8 +320,7 @@ parseArgsOrSendError(
         "TApplicationException",
         ex.what(),
         apache::thrift::ErrorBlame::SERVER);
-    return adapter->writeResponse(
-        streamId, /*data=*/nullptr, std::move(md), /*complete=*/true);
+    return adapter->writeResponse(streamId, /*data=*/nullptr, std::move(md));
   } catch (...) {
     auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
     fillAppErrorResponseMetadata(
@@ -333,8 +328,7 @@ parseArgsOrSendError(
         "TApplicationException",
         "Unknown exception during args deserialization",
         apache::thrift::ErrorBlame::SERVER);
-    return adapter->writeResponse(
-        streamId, /*data=*/nullptr, std::move(md), /*complete=*/true);
+    return adapter->writeResponse(streamId, /*data=*/nullptr, std::move(md));
   }
 }
 

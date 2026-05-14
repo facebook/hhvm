@@ -24,7 +24,6 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Handler.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 
 namespace apache::thrift::fast_thrift::thrift::client::handler {

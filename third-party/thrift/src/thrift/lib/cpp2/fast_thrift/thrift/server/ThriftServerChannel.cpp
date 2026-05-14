@@ -122,12 +122,10 @@ class PipelineResponseChannelRequest
 
     apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage msg{
         .payload =
-            apache::thrift::fast_thrift::thrift::ThriftFirstResponsePayload{
+            apache::thrift::fast_thrift::thrift::ThriftInitialResponsePayload{
                 .data = std::move(response).buffer(),
                 .metadata = std::move(responseMetadata),
                 .streamId = streamId_,
-                .complete = true,
-                .next = true,
             }};
 
     if (!pipelineAlive_->load()) {
@@ -213,12 +211,11 @@ class PipelineResponseChannelRequest
         *responseMetadata, std::move(exName), ex.what().toStdString(), blame);
 
     ThriftServerResponseMessage msg{
-        .payload = ThriftFirstResponsePayload{
+        .payload = ThriftInitialResponsePayload{
             .data = nullptr,
             .metadata = std::move(responseMetadata),
             .streamId = streamId_,
-            .complete = true,
-            .next = true}};
+        }};
 
     auto result = pipeline_->fireWrite(
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(

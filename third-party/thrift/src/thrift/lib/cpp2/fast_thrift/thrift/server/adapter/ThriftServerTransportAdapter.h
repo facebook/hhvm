@@ -23,8 +23,8 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/PayloadVariants.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RocketFrameDecoder.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -99,10 +99,8 @@ class ThriftServerTransportAdapter {
     pipeline_ = pipeline;
   }
 
-  // Set the SETUP-negotiated metadata protocol used to deserialize inbound
-  // request metadata. Called by the SETUP-completion callback in
-  // FastThriftServer once the rocket setup handler has parsed the SETUP
-  // frame's metadata MIME.
+  // Set the metadata protocol (Binary or Compact) used to deserialize
+  // inbound request metadata.
   void setMetadataProtocol(rocket::server::MetadataProtocol p) noexcept {
     metadataProtocol_ = p;
   }

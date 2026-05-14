@@ -19,8 +19,7 @@
 #include <folly/Expected.h>
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadVariant.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/common/PayloadVariants.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -35,12 +34,8 @@ namespace apache::thrift::fast_thrift::thrift {
  * transport means writing a different `from*Frame` returning the same
  * variant; the thrift pipeline above is unchanged.
  */
-using ThriftClientInboundPayloadVariant = ThriftPayloadVariant<
-    ThriftFirstResponsePayload,
-    ThriftErrorPayload,
-    ThriftCancelPayload,
-    ThriftRequestNPayload,
-    ThriftMetadataPushPayload>;
+// ThriftClientInboundPayloadVariant is defined canonically in
+// thrift/client/common/PayloadVariants.h.
 
 /**
  * Convert a parsed rocket frame into the typed thrift inbound payload
@@ -49,7 +44,7 @@ using ThriftClientInboundPayloadVariant = ThriftPayloadVariant<
  *
  * Dispatch is by frame type; per-pattern semantics (RR vs Stream first
  * vs subsequent) come from `kind`:
- *   - PAYLOAD on REQUEST_RESPONSE → `ThriftFirstResponsePayload`
+ *   - PAYLOAD on REQUEST_RESPONSE → `ThriftInitialResponsePayload`
  *     (deserializes `ResponseRpcMetadata` from the metadata IOBuf).
  *   - ERROR  → `ThriftErrorPayload` (errorCode + remaining payload).
  *   - CANCEL → `ThriftCancelPayload` (header-only).

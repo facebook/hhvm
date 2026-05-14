@@ -26,8 +26,8 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/RequestMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ResponseMetadata.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/common/PayloadVariants.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/util/ErrorDecoding.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -180,8 +180,8 @@ void ThriftClientChannel::handleRequestResponse(
     apache::thrift::RequestClientCallback::Ptr callback) {
   auto& inbound = response.payload.get<ThriftClientInboundPayloadVariant>();
 
-  if (FOLLY_LIKELY(inbound.is<ThriftFirstResponsePayload>())) {
-    auto& payload = inbound.get<ThriftFirstResponsePayload>();
+  if (FOLLY_LIKELY(inbound.is<ThriftInitialResponsePayload>())) {
+    auto& payload = inbound.get<ThriftInitialResponsePayload>();
     DCHECK(payload.metadata != nullptr);
     auto& metadata = *payload.metadata;
 

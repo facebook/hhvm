@@ -54,23 +54,23 @@ namespace {
 // ThriftServerResponseMessage's variant payload regardless of held alternative.
 const std::unique_ptr<folly::IOBuf>& payloadData(
     const ThriftServerResponseMessage& msg) {
-  if (msg.payload.is<ThriftFirstResponsePayload>()) {
-    return msg.payload.get<ThriftFirstResponsePayload>().data;
+  if (msg.payload.is<ThriftInitialResponsePayload>()) {
+    return msg.payload.get<ThriftInitialResponsePayload>().data;
   }
   return msg.payload.get<ThriftErrorPayload>().data;
 }
-// Returns the typed ResponseRpcMetadata held by a ThriftFirstResponsePayload,
+// Returns the typed ResponseRpcMetadata held by a ThriftInitialResponsePayload,
 // or nullptr if the message carries an error payload instead.
 const apache::thrift::ResponseRpcMetadata* payloadMetadata(
     const ThriftServerResponseMessage& msg) {
-  if (msg.payload.is<ThriftFirstResponsePayload>()) {
-    return msg.payload.get<ThriftFirstResponsePayload>().metadata.get();
+  if (msg.payload.is<ThriftInitialResponsePayload>()) {
+    return msg.payload.get<ThriftInitialResponsePayload>().metadata.get();
   }
   return nullptr;
 }
 uint32_t payloadStreamId(const ThriftServerResponseMessage& msg) {
-  if (msg.payload.is<ThriftFirstResponsePayload>()) {
-    return msg.payload.get<ThriftFirstResponsePayload>().streamId;
+  if (msg.payload.is<ThriftInitialResponsePayload>()) {
+    return msg.payload.get<ThriftInitialResponsePayload>().streamId;
   }
   return msg.payload.get<ThriftErrorPayload>().streamId;
 }

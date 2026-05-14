@@ -73,15 +73,11 @@ inline folly::exception_wrapper deserializeResponseMetadata(
 
 /**
  * Serialize a populated ResponseRpcMetadata into an IOBuf using the
- * SETUP-negotiated metadata protocol (Binary or Compact).
+ * given metadata protocol (Binary or Compact).
  *
- * Mirror of `serializeRequestMetadata`: pre-calculates serialized size,
- * allocates exactly the needed buffer, and reserves headroom so the
- * downstream frame writer can prepend headers without a separate
- * allocation.
- *
- * Called from `ThriftFirstResponsePayload::toRocketFrame()` on the server
- * outbound path.
+ * Pre-calculates serialized size to allocate an exactly-sized buffer.
+ * Reserves headroom so a downstream frame writer can prepend headers
+ * without a separate allocation.
  */
 inline std::unique_ptr<folly::IOBuf> serializeResponseMetadata(
     const apache::thrift::ResponseRpcMetadata& metadata,

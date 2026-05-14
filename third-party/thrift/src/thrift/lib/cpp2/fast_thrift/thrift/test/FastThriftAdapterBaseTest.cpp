@@ -19,8 +19,7 @@
 #include <gtest/gtest.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/client/util/RocketFrameDecoder.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/common/PayloadVariants.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/type/Protocol.h>
@@ -52,13 +51,12 @@ ThriftResponseMessage makePayloadResponse(
     std::unique_ptr<folly::IOBuf> data) {
   ThriftResponseMessage response;
   response.payload = ThriftClientInboundPayloadVariant{
-      ThriftFirstResponsePayload{
+      ThriftInitialResponsePayload{
           .data = std::move(data),
           .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(
               std::move(metadata)),
           .streamId = 1,
-          .complete = true,
-          .next = true},
+      },
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
   return response;
 }

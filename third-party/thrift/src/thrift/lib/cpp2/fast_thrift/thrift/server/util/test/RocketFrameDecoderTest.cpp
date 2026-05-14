@@ -20,7 +20,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/RequestMetadata.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/PayloadVariants.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RocketFrameDecoder.h>
 
 namespace apache::thrift::fast_thrift::thrift {

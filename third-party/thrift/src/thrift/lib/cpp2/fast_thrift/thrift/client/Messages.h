@@ -20,8 +20,8 @@
 #include <thrift/lib/cpp2/fast_thrift/common/CompactVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/common/PayloadVariants.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/util/RocketFrameDecoder.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadVariant.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -43,15 +43,13 @@ namespace apache::thrift::fast_thrift::thrift {
 /**
  * ThriftRequestMessage - Outbound request from channel to pipeline.
  *
- * `payload` is a typed variant of per-RPC-kind payload structs from
- * `thrift/common/ThriftPayload.h`. Today only `ThriftRequestResponsePayload`
- * is in the variant — the only RpcKind wired end-to-end through the
- * client pipeline. As FNF / Stream / Sink / Bidi handlers come online,
- * their payload alternatives join the variant.
+ * `payload` carries the typed request payload; only alternatives wired
+ * end-to-end today are listed in `ThriftClientOutboundPayloadVariant`,
+ * new alternatives join as their handlers come online.
  */
 #pragma pack(push, 1)
 struct ThriftRequestMessage {
-  ThriftPayloadVariant<ThriftRequestResponsePayload> payload;
+  ThriftClientOutboundPayloadVariant payload;
   apache::thrift::fast_thrift::rocket::TypeErasedPtr requestContext;
 };
 #pragma pack(pop)

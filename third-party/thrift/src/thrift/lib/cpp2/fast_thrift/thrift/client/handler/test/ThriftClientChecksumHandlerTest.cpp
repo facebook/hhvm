@@ -22,8 +22,8 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/common/PayloadVariants.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientChecksumHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/transport/rocket/ChecksumGenerator.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -120,12 +120,11 @@ ThriftResponseMessage makeFirstResponse(
 
   ThriftResponseMessage response;
   response.payload = ThriftClientInboundPayloadVariant{
-      ThriftFirstResponsePayload{
+      ThriftInitialResponsePayload{
           .data = std::move(data),
           .metadata = std::move(metadata),
           .streamId = 1,
-          .complete = true,
-          .next = true},
+      },
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
   return response;
 }
@@ -134,12 +133,11 @@ ThriftResponseMessage makeFirstResponseNoChecksum(
     std::unique_ptr<folly::IOBuf> data) {
   ThriftResponseMessage response;
   response.payload = ThriftClientInboundPayloadVariant{
-      ThriftFirstResponsePayload{
+      ThriftInitialResponsePayload{
           .data = std::move(data),
           .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
           .streamId = 1,
-          .complete = true,
-          .next = true},
+      },
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
   return response;
 }
@@ -367,8 +365,8 @@ TEST_F(
 
   EXPECT_EQ(result, Result::Success);
   ASSERT_EQ(ctx_.readMessages().size(), 1);
-  // Mismatch → payload swapped to ThriftClientResponseError; channel will fail
-  // just this callback.
+  // Mismatch → payload swapped to ThriftClientResponseError; channel will
+  // fail just this callback.
   auto& fwd = ctx_.readMessages()[0].get<ThriftResponseMessage>();
   ASSERT_TRUE(fwd.payload.is<ThriftClientResponseError>());
   auto* tae = fwd.payload.get<ThriftClientResponseError>()
@@ -392,7 +390,7 @@ TEST_F(
   auto& fwd = ctx_.readMessages()[0].get<ThriftResponseMessage>();
   ASSERT_TRUE(fwd.payload.is<ThriftClientInboundPayloadVariant>());
   EXPECT_TRUE(fwd.payload.get<ThriftClientInboundPayloadVariant>()
-                  .is<ThriftFirstResponsePayload>());
+                  .is<ThriftInitialResponsePayload>());
 }
 
 TEST_F(ThriftClientChecksumHandlerTest, InboundAlgorithmNoneIsPassThrough) {

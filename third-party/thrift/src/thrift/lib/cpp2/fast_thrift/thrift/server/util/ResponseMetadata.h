@@ -60,7 +60,7 @@ inline apache::thrift::PayloadMetadata buildDeclaredExceptionPayloadMetadata(
 }
 
 // fill-in-place API: caller hands a ResponseRpcMetadata, we populate it.
-// Pipeline serializes downstream (ThriftFirstResponsePayload::toRocketFrame)
+// Pipeline serializes downstream (ThriftInitialResponsePayload::toRocketFrame)
 // so the adapter is free of wire-format choice.
 
 inline void fillSuccessResponseMetadata(

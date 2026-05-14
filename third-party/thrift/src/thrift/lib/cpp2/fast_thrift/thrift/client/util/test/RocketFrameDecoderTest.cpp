@@ -19,9 +19,8 @@
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/common/PayloadVariants.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/util/RocketFrameDecoder.h>
-
-#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -36,13 +35,16 @@ apache::thrift::ResponseRpcMetadata makePopulatedResponseMetadata() {
 
 apache::thrift::fast_thrift::frame::read::ParsedFrame makePayloadFrame(
     uint32_t streamId, bool complete, bool next) {
-  ThriftFirstResponsePayload payload{
+  // ThriftInitialResponsePayload bakes in complete=next=true. The function
+  // params are left for caller convenience but no longer affect the frame
+  // produced by this builder.
+  (void)complete;
+  (void)next;
+  ThriftInitialResponsePayload payload{
       .data = folly::IOBuf::copyBuffer("hello"),
       .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(
           makePopulatedResponseMetadata()),
-      .streamId = streamId,
-      .complete = complete,
-      .next = next};
+      .streamId = streamId};
   auto wire = std::move(payload)
                   .toRocketFrame(
                       ::apache::thrift::fast_thrift::rocket::server::
@@ -95,12 +97,10 @@ TEST(FromRocketFrameTest, RRPayloadDeserializesAsFirstResponse) {
       std::move(frame),
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
   ASSERT_TRUE(result.hasValue());
-  ASSERT_TRUE(result->is<ThriftFirstResponsePayload>());
+  ASSERT_TRUE(result->is<ThriftInitialResponsePayload>());
 
-  auto& first = result->get<ThriftFirstResponsePayload>();
+  auto& first = result->get<ThriftInitialResponsePayload>();
   EXPECT_EQ(first.streamId, 7u);
-  EXPECT_TRUE(first.complete);
-  EXPECT_TRUE(first.next);
   ASSERT_NE(first.metadata, nullptr);
   ASSERT_TRUE(first.metadata->otherMetadata().has_value());
   EXPECT_EQ((*first.metadata->otherMetadata())["x-trace-id"], "abc123");

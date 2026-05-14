@@ -417,8 +417,7 @@ struct AppAdapterBenchFixture {
             auto writeResult = self->writeResponse(
                 streamId,
                 folly::IOBuf::copyBuffer("echo response"),
-                std::move(md),
-                /*complete=*/true);
+                std::move(md));
             return writeResult == Result::Error ? Result::Error
                                                 : Result::Success;
           });

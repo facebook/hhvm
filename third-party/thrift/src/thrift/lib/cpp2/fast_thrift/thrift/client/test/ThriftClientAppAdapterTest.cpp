@@ -64,12 +64,11 @@ ThriftResponseMessage makeResponse(
         apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE) {
   ThriftResponseMessage response;
   response.payload = ThriftClientInboundPayloadVariant{
-      ThriftFirstResponsePayload{
+      ThriftInitialResponsePayload{
           .data = folly::IOBuf::copyBuffer("response"),
           .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
           .streamId = 1,
-          .complete = true,
-          .next = true},
+      },
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
   response.requestContext =
       apache::thrift::fast_thrift::rocket::borrow(requestContext);

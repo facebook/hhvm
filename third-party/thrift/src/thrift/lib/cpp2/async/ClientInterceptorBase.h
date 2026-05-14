@@ -16,10 +16,12 @@
 
 #pragma once
 
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/coro/Task.h>
 
 #include <thrift/lib/cpp/StreamEventHandler.h>
 #include <thrift/lib/cpp2/async/ClientInterceptorStorage.h>
@@ -83,7 +85,8 @@ class ClientInterceptorBase {
 
     ClientInterceptorOnResponseResult result;
   };
-  virtual void internal_onResponse(ResponseInfo) = 0;
+  virtual std::optional<folly::coro::Task<void>> internal_onResponse(
+      ResponseInfo) = 0;
 
   // Information provided for each decoded stream payload
   struct StreamPayloadInfo {

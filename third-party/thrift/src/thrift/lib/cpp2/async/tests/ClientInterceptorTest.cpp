@@ -603,8 +603,10 @@ class ClientInterceptorCountWithRequestState
     return 1;
   }
 
-  void onResponse(RequestState* requestState, ResponseInfo) override {
+  std::optional<folly::coro::Task<void>> onResponse(
+      RequestState* requestState, ResponseInfo) override {
     onResponseCount += *requestState;
+    return std::nullopt;
   }
 
   int onRequestCount = 0;
@@ -629,11 +631,55 @@ class ClientInterceptorThatThrowsOnResponse
   using ClientInterceptorCountWithRequestState::
       ClientInterceptorCountWithRequestState;
 
-  void onResponse(
+  std::optional<folly::coro::Task<void>> onResponse(
       RequestState* requestState, ResponseInfo responseInfo) override {
     ClientInterceptorCountWithRequestState::onResponse(
         requestState, std::move(responseInfo));
     throw std::runtime_error("Oh no!");
+  }
+};
+
+class ClientInterceptorAsyncOnResponse
+    : public NamedClientInterceptor<folly::Unit> {
+ public:
+  using RequestState = folly::Unit;
+  using NamedClientInterceptor::NamedClientInterceptor;
+
+  std::optional<RequestState> onRequest(RequestInfo) override {
+    onRequestCount++;
+    return folly::unit;
+  }
+
+  std::optional<folly::coro::Task<void>> onResponse(
+      RequestState*, ResponseInfo) override {
+    return folly::coro::co_invoke(
+        // NOLINTNEXTLINE(facebook-folly-coro-return-captures-local-var)
+        [this]() -> folly::coro::Task<void> {
+          onResponseCount++;
+          co_return;
+        });
+  }
+
+  int onRequestCount = 0;
+  int onResponseCount = 0;
+};
+
+class ClientInterceptorAsyncOnResponseThatThrows
+    : public NamedClientInterceptor<folly::Unit> {
+ public:
+  using RequestState = folly::Unit;
+  using NamedClientInterceptor::NamedClientInterceptor;
+
+  std::optional<RequestState> onRequest(RequestInfo) override {
+    return folly::unit;
+  }
+
+  std::optional<folly::coro::Task<void>> onResponse(
+      RequestState*, ResponseInfo) override {
+    return folly::coro::co_invoke([]() -> folly::coro::Task<void> {
+      throw std::runtime_error("Async interceptor error");
+      co_return;
+    });
   }
 };
 
@@ -652,10 +698,12 @@ class TracingClientInterceptor : public NamedClientInterceptor<folly::Unit> {
     return folly::unit;
   }
 
-  void onResponse(folly::Unit*, ResponseInfo responseInfo) override {
+  std::optional<folly::coro::Task<void>> onResponse(
+      folly::Unit*, ResponseInfo responseInfo) override {
     responses_.emplace_back(
         std::string(responseInfo.serviceName),
         std::string(responseInfo.methodName));
+    return std::nullopt;
   }
 
  private:
@@ -685,7 +733,8 @@ class ClientInterceptorWithResponseValue
     return folly::unit;
   }
 
-  void onResponse(RequestState*, ResponseInfo responseInfo) override {
+  std::optional<folly::coro::Task<void>> onResponse(
+      RequestState*, ResponseInfo responseInfo) override {
     // Store the method name
     methodName = responseInfo.methodName;
 
@@ -731,6 +780,7 @@ class ClientInterceptorWithResponseValue
       resultType = "none";
       hadResult = false;
     }
+    return std::nullopt;
   }
 
   // Stored information about the response
@@ -768,11 +818,13 @@ class ClientInterceptorOnResponse : public NamedClientInterceptor<folly::Unit> {
     return folly::unit;
   }
 
-  void onResponse(RequestState*, ResponseInfo responseInfo) override {
+  std::optional<folly::coro::Task<void>> onResponse(
+      RequestState*, ResponseInfo responseInfo) override {
     // Call the provided callback with the response info
     if (callback_) {
       callback_(std::move(responseInfo));
     }
+    return std::nullopt;
   }
 
  private:
@@ -969,8 +1021,10 @@ CO_TEST_P(ClientInterceptorTestP, IterationOrder) {
       return std::nullopt;
     }
 
-    void onResponse(RequestState*, ResponseInfo) override {
+    std::optional<folly::coro::Task<void>> onResponse(
+        RequestState*, ResponseInfo) override {
       onResponseSeq = seq_++;
+      return std::nullopt;
     }
 
     int onRequestSeq = 0;
@@ -1042,6 +1096,71 @@ CO_TEST_P(
   EXPECT_EQ(interceptor->onResponseCount, 1);
 }
 
+CO_TEST_P(ClientInterceptorTestP, AsyncOnResponse) {
+  auto interceptor =
+      std::make_shared<ClientInterceptorAsyncOnResponse>("AsyncInterceptor");
+  auto client = makeClient(makeInterceptorsList(interceptor));
+
+  auto result = co_await client->echo("hello");
+  EXPECT_EQ(result, "hello");
+  EXPECT_EQ(interceptor->onRequestCount, 1);
+  EXPECT_EQ(interceptor->onResponseCount, 1);
+}
+
+CO_TEST_P(ClientInterceptorTestP, AsyncOnResponseMixedWithSync) {
+  auto sync1 =
+      std::make_shared<ClientInterceptorCountWithRequestState>("Sync1");
+  auto async1 = std::make_shared<ClientInterceptorAsyncOnResponse>("Async1");
+  auto sync2 =
+      std::make_shared<ClientInterceptorCountWithRequestState>("Sync2");
+  auto client = makeClient(makeInterceptorsList(sync1, async1, sync2));
+
+  co_await client->noop();
+
+  EXPECT_EQ(sync1->onRequestCount, 1);
+  EXPECT_EQ(sync1->onResponseCount, 1);
+  EXPECT_EQ(async1->onRequestCount, 1);
+  EXPECT_EQ(async1->onResponseCount, 1);
+  EXPECT_EQ(sync2->onRequestCount, 1);
+  EXPECT_EQ(sync2->onResponseCount, 1);
+}
+
+CO_TEST_P(ClientInterceptorTestP, AsyncOnResponseException) {
+  auto sync1 =
+      std::make_shared<ClientInterceptorCountWithRequestState>("Sync1");
+  auto asyncThrows =
+      std::make_shared<ClientInterceptorAsyncOnResponseThatThrows>(
+          "AsyncThrows");
+  auto sync2 =
+      std::make_shared<ClientInterceptorCountWithRequestState>("Sync2");
+  auto client = makeClient(makeInterceptorsList(sync1, asyncThrows, sync2));
+
+  EXPECT_THROW(
+      {
+        try {
+          co_await client->noop();
+        } catch (const ClientInterceptorException& ex) {
+          EXPECT_EQ(ex.causes().size(), 1);
+          EXPECT_EQ(ex.causes()[0].sourceInterceptorName, "AsyncThrows");
+          throw;
+        }
+      },
+      ClientInterceptorException);
+  EXPECT_EQ(sync1->onResponseCount, 1);
+  EXPECT_EQ(sync2->onResponseCount, 1);
+}
+
+CO_TEST_P(ClientInterceptorTestP, MultipleAsyncOnResponse) {
+  auto async1 = std::make_shared<ClientInterceptorAsyncOnResponse>("Async1");
+  auto async2 = std::make_shared<ClientInterceptorAsyncOnResponse>("Async2");
+  auto client = makeClient(makeInterceptorsList(async1, async2));
+
+  co_await client->noop();
+
+  EXPECT_EQ(async1->onResponseCount, 1);
+  EXPECT_EQ(async2->onResponseCount, 1);
+}
+
 // Test that the result field in responseInfo contains the correct type for
 // successful calls
 CO_TEST_P(ClientInterceptorTestP, ResponseInfoResultTypeWithSuccess) {
@@ -1091,7 +1210,10 @@ CO_TEST_P(ClientInterceptorTestP, NonTrivialRequestState) {
     std::optional<RequestState> onRequest(RequestInfo) override {
       return RequestState(counts_);
     }
-    void onResponse(RequestState*, ResponseInfo) override {}
+    std::optional<folly::coro::Task<void>> onResponse(
+        RequestState*, ResponseInfo) override {
+      return std::nullopt;
+    }
 
    private:
     Counts& counts_;
@@ -1263,8 +1385,10 @@ CO_TEST_P(ClientInterceptorTestP, Headers) {
       onRequestHeader = requestInfo.headers->getWriteHeaders().at(kDummyHeader);
       return std::nullopt;
     }
-    void onResponse(RequestState*, ResponseInfo responseInfo) override {
+    std::optional<folly::coro::Task<void>> onResponse(
+        RequestState*, ResponseInfo responseInfo) override {
       onResponseHeader = responseInfo.headers->getHeaders().at(kDummyHeader);
+      return std::nullopt;
     }
 
     std::string onRequestHeader;
@@ -1840,7 +1964,10 @@ CO_TEST_P(ClientInterceptorTestP, StreamInterceptorLifecycle) {
     std::optional<RequestState> onRequest(RequestInfo) override {
       return folly::unit;
     }
-    void onResponse(RequestState*, ResponseInfo) override {}
+    std::optional<folly::coro::Task<void>> onResponse(
+        RequestState*, ResponseInfo) override {
+      return std::nullopt;
+    }
 
     void onStreamBegin(RequestState*) override { streamBeginCount++; }
 

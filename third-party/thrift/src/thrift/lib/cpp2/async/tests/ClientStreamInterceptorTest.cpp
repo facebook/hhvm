@@ -43,7 +43,10 @@ class RecordingInterceptor : public ClientInterceptor<TestRequestState> {
     return TestRequestState{std::string(info.methodName), 0};
   }
 
-  void onResponse(TestRequestState*, ResponseInfo) override {}
+  std::optional<folly::coro::Task<void>> onResponse(
+      TestRequestState*, ResponseInfo) override {
+    return std::nullopt;
+  }
 
   void onStreamBegin(TestRequestState* reqState) override {
     streamBeginCalls++;

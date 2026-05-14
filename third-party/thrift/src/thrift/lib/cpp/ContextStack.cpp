@@ -821,7 +821,17 @@ ContextStack::processClientInterceptorsOnResponse(
         result,
     };
     try {
-      clientInterceptor->internal_onResponse(std::move(responseInfo));
+      auto maybeTask =
+          clientInterceptor->internal_onResponse(std::move(responseInfo));
+      if (maybeTask) {
+        return processRemainingInterceptorsAsync(
+            std::move(*maybeTask),
+            i - 1,
+            this,
+            headers,
+            result,
+            std::move(exceptions));
+      }
     } catch (...) {
       exceptions.emplace_back(
           ClientInterceptorException::SingleExceptionInfo{
@@ -837,6 +847,77 @@ ContextStack::processClientInterceptorsOnResponse(
             std::move(exceptions)));
   }
   return folly::Try<void>();
+}
+
+folly::coro::Task<folly::Try<void>>
+ContextStack::processRemainingInterceptorsAsync(
+    folly::coro::Task<void> currentTask,
+    std::ptrdiff_t index,
+    ContextStack* self,
+    const apache::thrift::transport::THeader* headers,
+    ClientInterceptorOnResponseResult result,
+    std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions) {
+  // Snapshot ContextStack data into owned locals before any co_await.
+  // ContextStack may be destroyed after this coroutine is returned to
+  // the caller — only locals are safe across suspension points.
+  // The headers pointer is safe: on the co_ path it lives in the caller's
+  // coroutine frame; on other paths blockingWaitInterceptorResult completes
+  // before the caller's stack is destroyed.
+  auto interceptors = self->clientInterceptors_;
+  auto triggeringInterceptorName = (*interceptors)[index + 1]->getName();
+  struct RemainingInterceptor {
+    std::shared_ptr<ClientInterceptorBase> interceptor;
+    detail::ClientInterceptorOnRequestStorage* storage;
+  };
+  std::vector<RemainingInterceptor> remaining;
+  remaining.reserve(index + 1);
+  for (auto i = index; i >= 0; --i) {
+    remaining.push_back(
+        {(*interceptors)[i],
+         self->getStorageForClientInterceptorOnRequestByIndex(i)});
+  }
+  std::string serviceName(self->serviceName_);
+  std::string methodName(self->methodNameUnprefixed_);
+
+  // Now safe to co_await — no more ContextStack access.
+  try {
+    co_await std::move(currentTask);
+  } catch (...) {
+    exceptions.emplace_back(
+        ClientInterceptorException::SingleExceptionInfo{
+            std::move(triggeringInterceptorName),
+            folly::exception_wrapper(folly::current_exception())});
+  }
+
+  for (auto& [interceptor, storage] : remaining) {
+    ClientInterceptorBase::ResponseInfo responseInfo{
+        storage,
+        headers,
+        serviceName,
+        methodName,
+        result,
+    };
+    try {
+      auto maybeTask =
+          interceptor->internal_onResponse(std::move(responseInfo));
+      if (maybeTask) {
+        co_await std::move(*maybeTask);
+      }
+    } catch (...) {
+      exceptions.emplace_back(
+          ClientInterceptorException::SingleExceptionInfo{
+              interceptor->getName(),
+              folly::exception_wrapper(folly::current_exception())});
+    }
+  }
+
+  if (!exceptions.empty()) {
+    co_return folly::Try<void>(
+        folly::make_exception_wrapper<ClientInterceptorException>(
+            ClientInterceptorException::CallbackKind::ON_RESPONSE,
+            std::move(exceptions)));
+  }
+  co_return folly::Try<void>();
 }
 
 void*& ContextStack::contextAt(size_t i) {

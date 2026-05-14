@@ -139,7 +139,13 @@ class I final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_interact(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      folly::Try<void> tryObj;
+      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
+        tryObj = co_await std::move(*task);
+      } else {
+        tryObj = std::get<folly::Try<void>>(std::move(interceptorResult));
+      }
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -252,7 +258,12 @@ class I final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_foo(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
+      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
+        (co_await std::move(*task)).throwUnlessValue();
+      } else {
+        std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
+      }
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -405,7 +416,13 @@ class Client<::cpp2::B> : public ::cpp2::AAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_bar(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      folly::Try<void> tryObj;
+      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
+        tryObj = co_await std::move(*task);
+      } else {
+        tryObj = std::get<folly::Try<void>>(std::move(interceptorResult));
+      }
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -520,7 +537,12 @@ class Client<::cpp2::B> : public ::cpp2::AAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_stream_stuff(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
+      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
+        (co_await std::move(*task)).throwUnlessValue();
+      } else {
+        std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
+      }
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {
@@ -700,7 +722,13 @@ class I final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_interact(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      folly::Try<void> tryObj;
+      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
+        tryObj = co_await std::move(*task);
+      } else {
+        tryObj = std::get<folly::Try<void>>(std::move(interceptorResult));
+      }
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }

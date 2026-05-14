@@ -17,6 +17,7 @@
 #pragma once
 
 #include <iostream>
+#include <fmt/core.h>
 #include <folly/String.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
@@ -135,6 +136,7 @@ class AlignedParserStrategy {
   void submitFrame();
   void submitIOBufQueueFrame();
   void resetToInitialState();
+  void resetToInitialStateOnFailure();
 };
 
 template <typename T>
@@ -258,6 +260,16 @@ void AlignedParserStrategy<T>::handleAwaitingHeader(size_t len) {
 template <typename T>
 void AlignedParserStrategy<T>::configureAligned() {
   if (flags_.metadata()) { // has metadata, need to get the length
+    if (frameLength_ <
+        kHeaderLength + Serializer::kBytesForFrameOrMetadataLength) {
+      resetToInitialStateOnFailure();
+      throw std::runtime_error(
+          fmt::format(
+              "Frame too small for metadata length field: "
+              "expected at least {} bytes, got {}",
+              kHeaderLength + Serializer::kBytesForFrameOrMetadataLength,
+              frameLength_));
+    }
     remainingHeader_ += Serializer::kBytesForFrameOrMetadataLength;
     state_ = State::AwaitingMetadataLength;
   } else { // no metadata, so we can get the data
@@ -288,11 +300,18 @@ void AlignedParserStrategy<T>::handleAwaitingMetadataLength(size_t len) {
     remainingMetadata_ =
         readFrameOrMetadataSize(header_->data() + kFrameSizeAndHeaderLength);
 
-    remainingData_ = frameLength_ // Overall Frame Length
-        - kHeaderLength // Minus the header length
-        - Serializer::kBytesForFrameOrMetadataLength // Minus the metadata
-                                                     // length field size
-        - remainingMetadata_; // Minus the metadata length
+    auto budget = frameLength_ - kHeaderLength -
+        Serializer::kBytesForFrameOrMetadataLength;
+    if (remainingMetadata_ > budget) {
+      resetToInitialStateOnFailure();
+      throw std::runtime_error(
+          fmt::format(
+              "Metadata length {} exceeds available frame budget {}",
+              remainingMetadata_,
+              budget));
+    }
+
+    remainingData_ = budget - remainingMetadata_;
     metadata_ = folly::IOBuf::createCombined(remainingMetadata_);
   }
 }
@@ -341,6 +360,14 @@ template <typename T>
 void AlignedParserStrategy<T>::parseHeader() {
   folly::io::Cursor cursor{header_.get()};
   frameLength_ = readFrameOrMetadataSize(cursor);
+  if (frameLength_ < kHeaderLength) {
+    resetToInitialStateOnFailure();
+    throw std::runtime_error(
+        fmt::format(
+            "Frame length too small: expected at least {} bytes, got {}",
+            kHeaderLength,
+            frameLength_));
+  }
   cursor.skip(sizeof(StreamId));
   auto [frameType, flags] = readFrameTypeAndFlagsUnsafe(cursor);
   frameType_ = static_cast<FrameType>(frameType);
@@ -403,6 +430,12 @@ void AlignedParserStrategy<T>::resetToInitialState() {
   remainingData_ = 0;
   frameLength_ = 0;
   remainingUnaligned_ = 0;
+}
+
+template <typename T>
+void AlignedParserStrategy<T>::resetToInitialStateOnFailure() {
+  resetToInitialState();
+  header_ = createHeaderBuffer();
 }
 
 } // namespace apache::thrift::rocket

@@ -29,8 +29,15 @@ namespace testing {
 TEST_P(EdDSATest, TestSignature) {
   auto privateKey = fizz::test::getPrivateKey(GetParam().privateKey);
   auto message = unhexlify(GetParam().hexMessage);
-  auto generatedSignature =
-      detail::edSign(IOBuf::copyBuffer(message)->coalesce(), privateKey);
+  std::unique_ptr<folly::IOBuf> generatedSignature;
+  Error err;
+  EXPECT_EQ(
+      detail::edSign(
+          generatedSignature,
+          err,
+          IOBuf::copyBuffer(message)->coalesce(),
+          privateKey),
+      Status::Success);
   EXPECT_EQ(hexlify(generatedSignature->coalesce()), GetParam().hexSignature);
 }
 
@@ -38,29 +45,39 @@ TEST_P(EdDSATest, TestVerify) {
   auto publicKey = fizz::test::getPublicKey(GetParam().publicKey);
   auto message = unhexlify(GetParam().hexMessage);
   auto signature = unhexlify(GetParam().hexSignature);
+  Error err;
 
   // 1. Verification should pass for the message-signature pair in our fixtures
-  detail::edVerify(
-      IOBuf::copyBuffer(message)->coalesce(),
-      folly::ByteRange(folly::StringPiece(signature)),
-      publicKey);
+  EXPECT_EQ(
+      detail::edVerify(
+          err,
+          IOBuf::copyBuffer(message)->coalesce(),
+          folly::ByteRange(folly::StringPiece(signature)),
+          publicKey),
+      Status::Success);
 
   // 2. Verification should fail if the message is modified
   auto modifiedMessage = modifyMessage(message);
   EXPECT_THROW(
-      detail::edVerify(
-          IOBuf::copyBuffer(modifiedMessage)->coalesce(),
-          folly::ByteRange(folly::StringPiece(signature)),
-          publicKey),
+      FIZZ_THROW_ON_ERROR(
+          detail::edVerify(
+              err,
+              IOBuf::copyBuffer(modifiedMessage)->coalesce(),
+              folly::ByteRange(folly::StringPiece(signature)),
+              publicKey),
+          err),
       std::runtime_error);
 
   // 3. Verification should fail if the signature is modified
   auto modifiedSignature = modifySignature(signature);
   EXPECT_THROW(
-      detail::edVerify(
-          IOBuf::copyBuffer(message)->coalesce(),
-          folly::ByteRange(folly::StringPiece(modifiedSignature)),
-          publicKey),
+      FIZZ_THROW_ON_ERROR(
+          detail::edVerify(
+              err,
+              IOBuf::copyBuffer(message)->coalesce(),
+              folly::ByteRange(folly::StringPiece(modifiedSignature)),
+              publicKey),
+          err),
       std::runtime_error);
 }
 

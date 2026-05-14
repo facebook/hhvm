@@ -15,32 +15,41 @@ namespace openssl {
 
 namespace detail {
 
-std::unique_ptr<folly::IOBuf> ecSign(
+Status ecSign(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     folly::ByteRange data,
     const folly::ssl::EvpPkeyUniquePtr& pkey,
     int hashNid);
 
-void ecVerify(
+Status ecVerify(
+    Error& err,
     folly::ByteRange data,
     folly::ByteRange signature,
     const folly::ssl::EvpPkeyUniquePtr& pkey,
     int hashNid);
 
-std::unique_ptr<folly::IOBuf> edSign(
+Status edSign(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     folly::ByteRange data,
     const folly::ssl::EvpPkeyUniquePtr& pkey);
 
-void edVerify(
+Status edVerify(
+    Error& err,
     folly::ByteRange data,
     folly::ByteRange signature,
     const folly::ssl::EvpPkeyUniquePtr& pkey);
 
-std::unique_ptr<folly::IOBuf> rsaPssSign(
+Status rsaPssSign(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     folly::ByteRange data,
     const folly::ssl::EvpPkeyUniquePtr& pkey,
     int hashNid);
 
-void rsaPssVerify(
+Status rsaPssVerify(
+    Error& err,
     folly::ByteRange data,
     folly::ByteRange signature,
     const folly::ssl::EvpPkeyUniquePtr& pkey,
@@ -80,13 +89,20 @@ inline std::unique_ptr<folly::IOBuf> OpenSSLSignature<Type>::sign(
     folly::ByteRange data) const {
   static_assert(
       SigAlg<Scheme>::type == Type, "Called with mismatched type and scheme");
+  std::unique_ptr<folly::IOBuf> ret;
+  Error err;
   switch (Type) {
     case KeyType::P256:
     case KeyType::P384:
     case KeyType::P521:
-      return detail::ecSign(data, pkey_, SigAlg<Scheme>::HashNid);
+      FIZZ_THROW_ON_ERROR(
+          detail::ecSign(ret, err, data, pkey_, SigAlg<Scheme>::HashNid), err);
+      return ret;
     case KeyType::RSA:
-      return detail::rsaPssSign(data, pkey_, SigAlg<Scheme>::HashNid);
+      FIZZ_THROW_ON_ERROR(
+          detail::rsaPssSign(ret, err, data, pkey_, SigAlg<Scheme>::HashNid),
+          err);
+      return ret;
     default:
       folly::assume_unreachable();
   }
@@ -100,7 +116,10 @@ template <>
 inline std::unique_ptr<folly::IOBuf>
 OpenSSLSignature<KeyType::ED25519>::sign<SignatureScheme::ed25519>(
     folly::ByteRange data) const {
-  return detail::edSign(data, pkey_);
+  std::unique_ptr<folly::IOBuf> ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(detail::edSign(ret, err, data, pkey_), err);
+  return ret;
 }
 
 template <KeyType Type>
@@ -108,14 +127,22 @@ template <SignatureScheme Scheme>
 inline void OpenSSLSignature<Type>::verify(
     folly::ByteRange data,
     folly::ByteRange signature) const {
+  Error err;
   switch (Type) {
     case KeyType::P256:
     case KeyType::P384:
     case KeyType::P521:
-      return detail::ecVerify(data, signature, pkey_, SigAlg<Scheme>::HashNid);
+      FIZZ_THROW_ON_ERROR(
+          detail::ecVerify(
+              err, data, signature, pkey_, SigAlg<Scheme>::HashNid),
+          err);
+      return;
     case KeyType::RSA:
-      return detail::rsaPssVerify(
-          data, signature, pkey_, SigAlg<Scheme>::HashNid);
+      FIZZ_THROW_ON_ERROR(
+          detail::rsaPssVerify(
+              err, data, signature, pkey_, SigAlg<Scheme>::HashNid),
+          err);
+      return;
     case KeyType::ED25519:
     default:
       folly::assume_unreachable();
@@ -131,7 +158,8 @@ inline void
 OpenSSLSignature<KeyType::ED25519>::verify<SignatureScheme::ed25519>(
     folly::ByteRange data,
     folly::ByteRange signature) const {
-  return detail::edVerify(data, signature, pkey_);
+  Error err;
+  FIZZ_THROW_ON_ERROR(detail::edVerify(err, data, signature, pkey_), err);
 }
 
 template <>

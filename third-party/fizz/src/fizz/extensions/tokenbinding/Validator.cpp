@@ -134,8 +134,13 @@ Status Validator::verify(
 
     // Verify the signature
     try {
-      fizz::openssl::detail::edVerify(
-          message->coalesce(), signature->coalesce(), pkey);
+      if (fizz::openssl::detail::edVerify(
+              err, message->coalesce(), signature->coalesce(), pkey) ==
+          Status::Fail) {
+        return err.error(
+            folly::to<std::string>(
+                "Verification failed: ", openssl::detail::getOpenSSLError()));
+      }
     } catch (const std::exception&) {
       return err.error(
           folly::to<std::string>(

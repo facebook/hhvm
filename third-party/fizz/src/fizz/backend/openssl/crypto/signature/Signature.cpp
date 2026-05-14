@@ -18,80 +18,90 @@ namespace fizz {
 namespace openssl {
 namespace detail {
 
-static const EVP_MD* getHash(int hashNid) {
+static Status getHash(const EVP_MD*& ret, Error& err, int hashNid) {
   const auto hash = EVP_get_digestbynid(hashNid);
   if (!hash) {
-    throw std::runtime_error("Invalid hash. Have you initialized openssl?");
+    return err.error("Invalid hash. Have you initialized openssl?");
   }
-  return hash;
+  ret = hash;
+  return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> ecSign(
+Status ecSign(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     folly::ByteRange data,
     const folly::ssl::EvpPkeyUniquePtr& pkey,
     int hashNid) {
   folly::ssl::EvpMdCtxUniquePtr mdCtx(EVP_MD_CTX_new());
   if (!mdCtx) {
-    throw std::runtime_error(
+    return err.error(
         to<std::string>("Could not allocate EVP_MD_CTX", getOpenSSLError()));
   }
 
-  auto hash = getHash(hashNid);
+  const EVP_MD* hash;
+  FIZZ_RETURN_ON_ERROR(getHash(hash, err, hashNid));
 
   if (EVP_SignInit(mdCtx.get(), hash) != 1) {
-    throw std::runtime_error("Could not initialize signature");
+    return err.error("Could not initialize signature");
   }
   if (EVP_SignUpdate(mdCtx.get(), data.data(), data.size()) != 1) {
-    throw std::runtime_error(
+    return err.error(
         to<std::string>("Could not sign data ", getOpenSSLError()));
   }
   auto out = folly::IOBuf::create(EVP_PKEY_size(pkey.get()));
   unsigned int bytesWritten = 0;
   if (EVP_SignFinal(
           mdCtx.get(), out->writableData(), &bytesWritten, pkey.get()) != 1) {
-    throw std::runtime_error("Failed to sign");
+    return err.error("Failed to sign");
   }
   out->append(bytesWritten);
-  return out;
+  ret = std::move(out);
+  return Status::Success;
 }
 
-void ecVerify(
+Status ecVerify(
+    Error& err,
     folly::ByteRange data,
     folly::ByteRange signature,
     const folly::ssl::EvpPkeyUniquePtr& pkey,
     int hashNid) {
-  auto hash = getHash(hashNid);
+  const EVP_MD* hash;
+  FIZZ_RETURN_ON_ERROR(getHash(hash, err, hashNid));
   folly::ssl::EvpMdCtxUniquePtr mdCtx(EVP_MD_CTX_new());
   if (!mdCtx) {
-    throw std::runtime_error(
+    return err.error(
         to<std::string>("Could not allocate EVP_MD_CTX", getOpenSSLError()));
   }
 
   if (EVP_VerifyInit(mdCtx.get(), hash) != 1) {
-    throw std::runtime_error("Could not initialize verification");
+    return err.error("Could not initialize verification");
   }
 
   if (EVP_VerifyUpdate(mdCtx.get(), data.data(), data.size()) != 1) {
-    throw std::runtime_error("Could not update verification");
+    return err.error("Could not update verification");
   }
 
   if (EVP_VerifyFinal(
           mdCtx.get(), signature.data(), signature.size(), pkey.get()) != 1) {
-    throw std::runtime_error("Signature verification failed");
+    return err.error("Signature verification failed");
   }
+  return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> edSign(
+Status edSign(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     folly::ByteRange data,
     const folly::ssl::EvpPkeyUniquePtr& pkey) {
   folly::ssl::EvpMdCtxUniquePtr mdCtx(EVP_MD_CTX_new());
   if (!mdCtx) {
-    throw std::runtime_error(
+    return err.error(
         to<std::string>("Could not allocate EVP_MD_CTX", getOpenSSLError()));
   }
   if (EVP_DigestSignInit(mdCtx.get(), nullptr, nullptr, nullptr, pkey.get()) !=
       1) {
-    throw std::runtime_error("Could not initialize digest signature");
+    return err.error("Could not initialize digest signature");
   }
   auto out = folly::IOBuf::create(EVP_PKEY_size(pkey.get()));
   size_t bytesWritten = out->capacity();
@@ -106,24 +116,26 @@ std::unique_ptr<folly::IOBuf> edSign(
           &bytesWritten,
           data.data(),
           data.size()) != 1) {
-    throw std::runtime_error("Failed to sign");
+    return err.error("Failed to sign");
   }
   out->append(bytesWritten);
-  return out;
+  ret = std::move(out);
+  return Status::Success;
 }
 
-void edVerify(
+Status edVerify(
+    Error& err,
     folly::ByteRange data,
     folly::ByteRange signature,
     const folly::ssl::EvpPkeyUniquePtr& pkey) {
   folly::ssl::EvpMdCtxUniquePtr mdCtx(EVP_MD_CTX_new());
   if (!mdCtx) {
-    throw std::runtime_error(
+    return err.error(
         to<std::string>("Could not allocate EVP_MD_CTX", getOpenSSLError()));
   }
   if (EVP_DigestVerifyInit(
           mdCtx.get(), nullptr, nullptr, nullptr, pkey.get()) != 1) {
-    throw std::runtime_error("Could not initialize digest signature");
+    return err.error("Could not initialize digest signature");
   }
 
   // Sign & verify APIs for EdDSA exist in OpenSSL only as one-shot digest APIs
@@ -136,75 +148,82 @@ void edVerify(
           signature.size(),
           data.data(),
           data.size()) != 1) {
-    throw std::runtime_error("Signature verification failed");
+    return err.error("Signature verification failed");
   }
+  return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> rsaPssSign(
+Status rsaPssSign(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     folly::ByteRange data,
     const folly::ssl::EvpPkeyUniquePtr& pkey,
     int hashNid) {
-  auto hash = getHash(hashNid);
+  const EVP_MD* hash;
+  FIZZ_RETURN_ON_ERROR(getHash(hash, err, hashNid));
   folly::ssl::EvpMdCtxUniquePtr mdCtx(EVP_MD_CTX_new());
   if (!mdCtx) {
-    throw std::runtime_error(
+    return err.error(
         to<std::string>("Could not allocate EVP_MD_CTX", getOpenSSLError()));
   }
 
   EVP_PKEY_CTX* ctx;
   if (EVP_DigestSignInit(mdCtx.get(), &ctx, hash, nullptr, pkey.get()) != 1) {
-    throw std::runtime_error("Could not initialize signature");
+    return err.error("Could not initialize signature");
   }
 
   if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_PSS_PADDING) <= 0) {
-    throw std::runtime_error("Could not set pss padding");
+    return err.error("Could not set pss padding");
   }
 
   if (EVP_PKEY_CTX_set_rsa_pss_saltlen(ctx, -1) <= 0) {
-    throw std::runtime_error("Could not set pss salt length");
+    return err.error("Could not set pss salt length");
   }
 
   if (EVP_DigestSignUpdate(mdCtx.get(), data.data(), data.size()) != 1) {
-    throw std::runtime_error("Could not update signature");
+    return err.error("Could not update signature");
   }
 
   size_t bytesWritten = EVP_PKEY_size(pkey.get());
   auto out = folly::IOBuf::create(bytesWritten);
   if (EVP_DigestSignFinal(mdCtx.get(), out->writableData(), &bytesWritten) !=
       1) {
-    throw std::runtime_error("Failed to sign");
+    return err.error("Failed to sign");
   }
   out->append(bytesWritten);
-  return out;
+  ret = std::move(out);
+  return Status::Success;
 }
 
-void rsaPssVerify(
+Status rsaPssVerify(
+    Error& err,
     folly::ByteRange data,
     folly::ByteRange signature,
     const folly::ssl::EvpPkeyUniquePtr& pkey,
     int hashNid) {
-  auto hash = getHash(hashNid);
+  const EVP_MD* hash;
+  FIZZ_RETURN_ON_ERROR(getHash(hash, err, hashNid));
   folly::ssl::EvpMdCtxUniquePtr mdCtx(EVP_MD_CTX_new());
   if (!mdCtx) {
-    throw std::runtime_error(
+    return err.error(
         to<std::string>("Could not allocate EVP_MD_CTX", getOpenSSLError()));
   }
 
   EVP_PKEY_CTX* ctx;
   if (EVP_DigestVerifyInit(mdCtx.get(), &ctx, hash, nullptr, pkey.get()) != 1) {
-    throw std::runtime_error("Could not initialize verification");
+    return err.error("Could not initialize verification");
   }
 
   if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_PSS_PADDING) <= 0) {
-    throw std::runtime_error("Could not set pss padding");
+    return err.error("Could not set pss padding");
   }
 
   if (EVP_PKEY_CTX_set_rsa_pss_saltlen(ctx, -1) <= 0) {
-    throw std::runtime_error("Could not set pss salt length");
+    return err.error("Could not set pss salt length");
   }
 
   if (EVP_DigestVerifyUpdate(mdCtx.get(), data.data(), data.size()) != 1) {
-    throw std::runtime_error("Could not update verification");
+    return err.error("Could not update verification");
   }
 
   if (EVP_DigestVerifyFinal(
@@ -213,8 +232,9 @@ void rsaPssVerify(
           // which HHVM currently expects to support until 2020/6/30
           const_cast<unsigned char*>(signature.data()),
           signature.size()) != 1) {
-    throw std::runtime_error("Signature verification failed");
+    return err.error("Signature verification failed");
   }
+  return Status::Success;
 }
 } // namespace detail
 } // namespace openssl

@@ -259,9 +259,15 @@ class MockCertificateSerialization : public CertificateSerialization {
       (const));
   MOCK_METHOD(
       std::shared_ptr<const fizz::Cert>,
-      deserialize,
+      _deserialize,
       (folly::ByteRange),
       (const));
+  Status deserialize(
+      std::shared_ptr<const fizz::Cert>& ret,
+      Error& err,
+      folly::ByteRange range) const override {
+    FIZZ_THROW_TO_ERROR(ret, _deserialize(range));
+  }
 };
 
 class MockFactory : public ::fizz::DefaultFactory {

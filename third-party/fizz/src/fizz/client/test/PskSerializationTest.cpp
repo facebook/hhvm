@@ -93,7 +93,7 @@ TEST_F(PskSerializationTest, TestSerializationWithMock) {
         std::string repr = fmt::format("serialized: {}", cert.getIdentity());
         return folly::IOBuf::copyBuffer(repr);
       }));
-  EXPECT_CALL(mockSerializer, deserialize(_))
+  EXPECT_CALL(mockSerializer, _deserialize(_))
       .Times(2)
       .WillRepeatedly(Invoke([](folly::ByteRange range) {
         folly::StringPiece sp(
@@ -137,7 +137,7 @@ TEST_F(PskSerializationTest, TestSerializationThatFails) {
       .WillOnce(Throw(std::runtime_error("failed serialization")));
 
   // When serialization fails, then we expect that deserialize is not called
-  EXPECT_CALL(mockSerializer, deserialize(_)).Times(0);
+  EXPECT_CALL(mockSerializer, _deserialize(_)).Times(0);
   std::string serializedPsk;
   Error err;
   EXPECT_EQ(
@@ -164,10 +164,10 @@ TEST_F(PskSerializationTest, TestDeserializationThatFails) {
           Invoke([](auto&&) { return folly::IOBuf::copyBuffer("hello"); }));
 
   Sequence s;
-  EXPECT_CALL(mockSerializer, deserialize(_))
+  EXPECT_CALL(mockSerializer, _deserialize(_))
       .InSequence(s)
       .WillOnce(Return(nullptr));
-  EXPECT_CALL(mockSerializer, deserialize(_))
+  EXPECT_CALL(mockSerializer, _deserialize(_))
       .InSequence(s)
       .WillOnce(Throw(std::runtime_error("failed deserialization")));
   Error err;

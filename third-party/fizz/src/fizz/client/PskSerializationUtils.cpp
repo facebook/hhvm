@@ -43,7 +43,13 @@ std::shared_ptr<const fizz::Cert> tryReadCert(
     return nullptr;
   }
   try {
-    return serializer.deserialize(serializedCert->coalesce());
+    std::shared_ptr<const fizz::Cert> ret;
+    Error err;
+    if (serializer.deserialize(ret, err, serializedCert->coalesce()) ==
+        Status::Fail) {
+      return nullptr;
+    }
+    return ret;
   } catch (...) {
     return nullptr;
   }

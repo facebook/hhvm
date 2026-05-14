@@ -363,12 +363,14 @@ class Serializer : public CertificateSerialization {
     return nullptr;
   }
 
-  std::shared_ptr<const fizz::Cert> deserialize(
+  Status deserialize(
+      std::shared_ptr<const fizz::Cert>& ret,
+      Error& err,
       folly::ByteRange range) const override {
-    std::unique_ptr<PeerCert> ret;
-    Error err;
-    FIZZ_THROW_ON_ERROR(CertUtils::makePeerCert(ret, err, range), err);
-    return ret;
+    std::unique_ptr<PeerCert> peerCert;
+    FIZZ_RETURN_ON_ERROR(CertUtils::makePeerCert(peerCert, err, range));
+    ret = std::move(peerCert);
+    return Status::Success;
   }
 };
 } // namespace

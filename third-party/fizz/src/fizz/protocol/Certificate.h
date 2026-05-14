@@ -130,9 +130,12 @@ class CertificateSerialization {
    * the in-memory `fizz::Cert`.
    *
    * If the `CertificateSerialization` does not recognize the serialized
-   * representation, then `deserialize` should return `nullptr`.
+   * representation, then `deserialize` should write `nullptr` to the
+   * out-parameter.
    */
-  virtual std::shared_ptr<const fizz::Cert> deserialize(
+  virtual Status deserialize(
+      std::shared_ptr<const fizz::Cert>& ret,
+      Error& err,
       folly::ByteRange range) const = 0;
 
   virtual ~CertificateSerialization() = default;

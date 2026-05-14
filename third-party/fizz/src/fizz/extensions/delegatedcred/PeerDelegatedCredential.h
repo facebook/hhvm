@@ -29,7 +29,7 @@ template <openssl::KeyType T>
 class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
  private:
   PeerDelegatedCredentialImpl(
-      folly::ssl::X509UniquePtr cert,
+      std::unique_ptr<openssl::OpenSSLPeerCertImpl<T>> peerCert,
       folly::ssl::EvpPkeyUniquePtr pubKey,
       DelegatedCredential credential);
 
@@ -51,11 +51,11 @@ class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
       folly::ByteRange signature) const override;
 
   folly::ssl::X509UniquePtr getX509() const override {
-    return peerCert_.getX509();
+    return peerCert_->getX509();
   }
 
   std::string getIdentity() const override {
-    return peerCert_.getIdentity();
+    return peerCert_->getIdentity();
   }
 
   const DelegatedCredential& getDelegatedCredential() const override {
@@ -70,7 +70,7 @@ class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
   }
 
  private:
-  openssl::OpenSSLPeerCertImpl<T> peerCert_;
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<T>> peerCert_;
   DelegatedCredential credential_;
   openssl::OpenSSLSignature<T> credentialSignature_;
   std::shared_ptr<Clock> clock_ = std::make_shared<SystemClock>();

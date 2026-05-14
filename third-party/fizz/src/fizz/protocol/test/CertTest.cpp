@@ -155,9 +155,14 @@ TEST(CertTest, MakePeerCertJunk) {
 }
 
 TEST(CertTest, PeerCertGetX509) {
-  openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256> peerCert(
-      getCert(kP256Certificate));
-  auto x509 = peerCert.getX509();
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>
+      peerCert;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>::create(
+          peerCert, err, getCert(kP256Certificate)),
+      Status::Success);
+  auto x509 = peerCert->getX509();
   EXPECT_NE(x509.get(), nullptr);
 }
 

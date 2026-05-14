@@ -391,11 +391,16 @@ TEST_F(HandshakeTest, TestExtensions) {
 }
 
 TEST_F(HandshakeTest, BasicCertRequest) {
+  Error err;
   expectSuccess();
   serverContext_->setClientAuthMode(ClientAuthMode::Required);
-  expected_.clientCert =
-      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>(
-          getCert(kClientAuthClientCert));
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>
+      peerCertUniq;
+  EXPECT_EQ(
+      openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>::create(
+          peerCertUniq, err, getCert(kClientAuthClientCert)),
+      Status::Success);
+  expected_.clientCert = std::move(peerCertUniq);
   doHandshake();
   verifyParameters();
   sendAppData();
@@ -414,10 +419,15 @@ TEST_P(SigSchemeTest, Schemes) {
 }
 
 TEST_F(HandshakeTest, CertRequestPskPreservesIdentity) {
+  Error err;
   serverContext_->setClientAuthMode(ClientAuthMode::Required);
-  expected_.clientCert =
-      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>(
-          getCert(kClientAuthClientCert));
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>
+      peerCertUniq;
+  EXPECT_EQ(
+      openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>::create(
+          peerCertUniq, err, getCert(kClientAuthClientCert)),
+      Status::Success);
+  expected_.clientCert = std::move(peerCertUniq);
   setupResume();
 
   expectSuccess();
@@ -622,6 +632,7 @@ TEST_F(HandshakeTest, EarlyDataTrickleSendAccepted) {
 }
 
 TEST_F(HandshakeTest, EarlyDataTrickleSendRejected) {
+  Error err;
   clientContext_->setSendEarlyData(true);
   setupResume();
 
@@ -637,9 +648,13 @@ TEST_F(HandshakeTest, EarlyDataTrickleSendRejected) {
   expected_.pskMode = none;
   expected_.earlyDataType = EarlyDataType::Rejected;
   expected_.scheme = SignatureScheme::ecdsa_secp256r1_sha256;
-  expected_.clientCert =
-      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>(
-          getCert(kClientAuthClientCert));
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>
+      peerCertUniq;
+  EXPECT_EQ(
+      openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>::create(
+          peerCertUniq, err, getCert(kClientAuthClientCert)),
+      Status::Success);
+  expected_.clientCert = std::move(peerCertUniq);
 
   expectEarlyDataRejectError();
   expectServerSuccess();

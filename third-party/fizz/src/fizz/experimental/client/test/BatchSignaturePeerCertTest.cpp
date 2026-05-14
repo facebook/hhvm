@@ -83,9 +83,15 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyP256) {
   executor.drain();
 
   // verify
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>
+      peerCertUniq;
+  EXPECT_EQ(
+      openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>::create(
+          peerCertUniq, err, getCert(kP256Certificate)),
+      Status::Success);
   auto peerCert =
-      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
-          getCert(kP256Certificate));
+      std::shared_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
+          std::move(peerCertUniq));
   BatchSignaturePeerCert batchPeerCert(peerCert);
   EXPECT_EQ(
       batchPeerCert.verify(
@@ -133,9 +139,15 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyRSA) {
   executor.drain();
 
   // verify
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>
+      peerCertUniq;
+  EXPECT_EQ(
+      openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>::create(
+          peerCertUniq, err, getCert(kRSACertificate)),
+      Status::Success);
   auto peerCert =
-      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>(
-          getCert(kRSACertificate));
+      std::shared_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>(
+          std::move(peerCertUniq));
   BatchSignaturePeerCert batchPeerCert(peerCert);
   EXPECT_EQ(
       batchPeerCert.verify(
@@ -184,9 +196,15 @@ TEST(BatchSignaturePeerCertTest, TestWrongBatchSignature) {
   executor.drain();
   auto signatureBuf = *std::move(signature).get();
 
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>
+      peerCertUniq;
+  EXPECT_EQ(
+      openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>::create(
+          peerCertUniq, err, getCert(kP256Certificate)),
+      Status::Success);
   auto peerCert =
-      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
-          getCert(kP256Certificate));
+      std::shared_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
+          std::move(peerCertUniq));
   BatchSignaturePeerCert batchPeerCert(peerCert);
   // normal verify
   EXPECT_NO_THROW(FIZZ_THROW_ON_ERROR(

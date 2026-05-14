@@ -248,8 +248,14 @@ inline CertAndKey createCert(
 }
 
 inline std::shared_ptr<PeerCert> getPeerCert(const CertAndKey& cert) {
-  return std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
-      folly::ssl::X509UniquePtr(X509_dup(cert.cert.get())));
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>
+      peerCert;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>::create(
+          peerCert, err, folly::ssl::X509UniquePtr(X509_dup(cert.cert.get()))),
+      err);
+  return std::move(peerCert);
 }
 
 } // namespace test

@@ -157,10 +157,14 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyP256) {
       SignatureScheme::ecdsa_secp256r1_sha256,
       CertificateVerifyContext::Server,
       folly::IOBuf::copyBuffer(folly::StringPiece("Message1")));
-  openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256> peerCert(
-      getCert(kP256Certificate));
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>
+      peerCert;
   EXPECT_EQ(
-      peerCert.verify(
+      openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>::create(
+          peerCert, err, getCert(kP256Certificate)),
+      Status::Success);
+  EXPECT_EQ(
+      peerCert->verify(
           err,
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Server,
@@ -203,10 +207,13 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyRSA) {
       SignatureScheme::rsa_pss_sha256,
       CertificateVerifyContext::Server,
       folly::IOBuf::copyBuffer(folly::StringPiece("Message1")));
-  openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA> peerCert(
-      getCert(kRSACertificate));
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>> peerCert;
   EXPECT_EQ(
-      peerCert.verify(
+      openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>::create(
+          peerCert, err, getCert(kRSACertificate)),
+      Status::Success);
+  EXPECT_EQ(
+      peerCert->verify(
           err,
           SignatureScheme::rsa_pss_sha256,
           CertificateVerifyContext::Server,

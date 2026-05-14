@@ -14,10 +14,10 @@ namespace extensions {
 
 template <openssl::KeyType T>
 PeerDelegatedCredentialImpl<T>::PeerDelegatedCredentialImpl(
-    folly::ssl::X509UniquePtr cert,
+    std::unique_ptr<openssl::OpenSSLPeerCertImpl<T>> peerCert,
     folly::ssl::EvpPkeyUniquePtr pubKey,
     DelegatedCredential credential)
-    : peerCert_(std::move(cert)), credential_(std::move(credential)) {
+    : peerCert_(std::move(peerCert)), credential_(std::move(credential)) {
   credentialSignature_.setKey(std::move(pubKey));
 }
 
@@ -28,6 +28,9 @@ template <openssl::KeyType T>
     folly::ssl::X509UniquePtr cert,
     folly::ssl::EvpPkeyUniquePtr pubKey,
     DelegatedCredential credential) {
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<T>> peerCert;
+  FIZZ_RETURN_ON_ERROR(
+      openssl::OpenSSLPeerCertImpl<T>::create(peerCert, err, std::move(cert)));
   openssl::KeyType keyType;
   FIZZ_RETURN_ON_ERROR(openssl::CertUtils::getKeyType(keyType, err, pubKey));
   if (keyType != T) {
@@ -35,7 +38,7 @@ template <openssl::KeyType T>
   }
   ret = std::unique_ptr<PeerDelegatedCredentialImpl<T>>(
       new PeerDelegatedCredentialImpl<T>(
-          std::move(cert), std::move(pubKey), std::move(credential)));
+          std::move(peerCert), std::move(pubKey), std::move(credential)));
   return Status::Success;
 }
 
@@ -52,7 +55,7 @@ Status PeerDelegatedCredentialImpl<T>::verify(
         "certificate verify didn't use credential's algorithm",
         AlertDescription::illegal_parameter);
   }
-  auto x509 = peerCert_.getX509();
+  auto x509 = peerCert_->getX509();
   // Check extensions on cert
   FIZZ_RETURN_ON_ERROR(DelegatedCredentialUtils::checkExtensions(err, x509));
   FIZZ_RETURN_ON_ERROR(
@@ -69,7 +72,7 @@ Status PeerDelegatedCredentialImpl<T>::verify(
           folly::ssl::OpenSSLCertUtils::derEncode(*x509)));
 
   try {
-    if (peerCert_.verify(
+    if (peerCert_->verify(
             err,
             credential_.credential_scheme,
             context == CertificateVerifyContext::Server

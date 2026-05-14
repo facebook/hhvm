@@ -21,7 +21,10 @@ namespace openssl {
 template <KeyType T>
 class OpenSSLPeerCertImpl : public fizz::PeerCert {
  public:
-  explicit OpenSSLPeerCertImpl(folly::ssl::X509UniquePtr cert);
+  static Status create(
+      std::unique_ptr<OpenSSLPeerCertImpl>& ret,
+      Error& err,
+      folly::ssl::X509UniquePtr cert);
 
   ~OpenSSLPeerCertImpl() override = default;
 
@@ -37,6 +40,9 @@ class OpenSSLPeerCertImpl : public fizz::PeerCert {
   [[nodiscard]] folly::ssl::X509UniquePtr getX509() const override;
 
  protected:
+  OpenSSLPeerCertImpl(
+      folly::ssl::EvpPkeyUniquePtr pkey,
+      folly::ssl::X509UniquePtr cert);
   OpenSSLSignature<T> signature_;
   folly::ssl::X509UniquePtr cert_;
 };

@@ -104,28 +104,47 @@ Status CertUtils::makePeerCert(
   }
   const auto pkeyID = EVP_PKEY_id(pubKey.get());
   if (pkeyID == EVP_PKEY_RSA) {
-    ret = std::make_unique<OpenSSLPeerCertImpl<KeyType::RSA>>(std::move(cert));
+    std::unique_ptr<OpenSSLPeerCertImpl<KeyType::RSA>> peerCert;
+    FIZZ_RETURN_ON_ERROR(
+        OpenSSLPeerCertImpl<KeyType::RSA>::create(
+            peerCert, err, std::move(cert)));
+    ret = std::move(peerCert);
     return Status::Success;
   } else if (pkeyID == EVP_PKEY_EC) {
     switch (getCurveName(pubKey.get())) {
-      case NID_X9_62_prime256v1:
-        ret = std::make_unique<OpenSSLPeerCertImpl<KeyType::P256>>(
-            std::move(cert));
+      case NID_X9_62_prime256v1: {
+        std::unique_ptr<OpenSSLPeerCertImpl<KeyType::P256>> peerCert;
+        FIZZ_RETURN_ON_ERROR(
+            OpenSSLPeerCertImpl<KeyType::P256>::create(
+                peerCert, err, std::move(cert)));
+        ret = std::move(peerCert);
         return Status::Success;
-      case NID_secp384r1:
-        ret = std::make_unique<OpenSSLPeerCertImpl<KeyType::P384>>(
-            std::move(cert));
+      }
+      case NID_secp384r1: {
+        std::unique_ptr<OpenSSLPeerCertImpl<KeyType::P384>> peerCert;
+        FIZZ_RETURN_ON_ERROR(
+            OpenSSLPeerCertImpl<KeyType::P384>::create(
+                peerCert, err, std::move(cert)));
+        ret = std::move(peerCert);
         return Status::Success;
-      case NID_secp521r1:
-        ret = std::make_unique<OpenSSLPeerCertImpl<KeyType::P521>>(
-            std::move(cert));
+      }
+      case NID_secp521r1: {
+        std::unique_ptr<OpenSSLPeerCertImpl<KeyType::P521>> peerCert;
+        FIZZ_RETURN_ON_ERROR(
+            OpenSSLPeerCertImpl<KeyType::P521>::create(
+                peerCert, err, std::move(cert)));
+        ret = std::move(peerCert);
         return Status::Success;
+      }
       default:
         break;
     }
   } else if (pkeyID == EVP_PKEY_ED25519) {
-    ret = std::make_unique<OpenSSLPeerCertImpl<KeyType::ED25519>>(
-        std::move(cert));
+    std::unique_ptr<OpenSSLPeerCertImpl<KeyType::ED25519>> peerCert;
+    FIZZ_RETURN_ON_ERROR(
+        OpenSSLPeerCertImpl<KeyType::ED25519>::create(
+            peerCert, err, std::move(cert)));
+    ret = std::move(peerCert);
     return Status::Success;
   }
   return err.error("unknown peer cert type");

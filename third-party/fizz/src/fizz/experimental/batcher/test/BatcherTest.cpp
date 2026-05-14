@@ -170,9 +170,15 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherWithSelfCertP256) {
   }
 
   // verify
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>
+      peerCertUniq;
+  EXPECT_EQ(
+      openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>::create(
+          peerCertUniq, err, getCert(kP256Certificate)),
+      Status::Success);
   auto peerCert =
-      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
-          getCert(kP256Certificate));
+      std::shared_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
+          std::move(peerCertUniq));
   BatchSignaturePeerCert batchPeerCert(peerCert);
   for (size_t i = 0; i < results.size(); i++) {
     EXPECT_EQ(
@@ -292,9 +298,15 @@ TEST(BatchSignatureTest, TestThreadLocalBatcherWithSelfCertP256) {
     t.join();
   }
   // verify
+  std::unique_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>
+      peerCertUniq2;
+  EXPECT_EQ(
+      openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>::create(
+          peerCertUniq2, err, getCert(kP256Certificate)),
+      Status::Success);
   auto peerCert =
-      std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
-          getCert(kP256Certificate));
+      std::shared_ptr<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
+          std::move(peerCertUniq2));
   BatchSignaturePeerCert batchPeerCert(peerCert);
   for (size_t i = 0; i < results.size(); i++) {
     EXPECT_EQ(

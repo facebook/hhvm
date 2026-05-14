@@ -835,7 +835,15 @@ void setImpl(MemoCacheBase*& base,
   assertx(val.m_type != KindOfUninit);
   if (!base) base = req::make_raw<MemoCache<K>>();
   auto& cache = getCache<MemoCache<K>>(base);
-  cache.insert_or_assign(K{header, keys}, TVWrapper{val});
+  auto [it, inserted] = cache.emplace(
+    std::piecewise_construct,
+    std::forward_as_tuple(header, keys),
+    std::forward_as_tuple(val)
+  );
+  // www relies on the behavior of last set winning
+  if (!inserted) {
+    it->second = TVWrapper{val};
+  }
 }
 
 }

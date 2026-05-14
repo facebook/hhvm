@@ -38,7 +38,8 @@ static EvpPkeyUniquePtr generateKey() {
 
 TEST_F(RSAPSSTest, TestSignVerify) {
   OpenSSLSignature<KeyType::RSA> rsa;
-  rsa.setKey(generateKey());
+  Error err;
+  EXPECT_EQ(rsa.setKey(err, generateKey()), Status::Success);
   static constexpr StringPiece msg{"message"};
   auto sig = rsa.sign<SignatureScheme::rsa_pss_sha256>(msg);
   rsa.verify<SignatureScheme::rsa_pss_sha256>(msg, sig->coalesce());
@@ -46,7 +47,8 @@ TEST_F(RSAPSSTest, TestSignVerify) {
 
 TEST_F(RSAPSSTest, TestVerifyDifferent) {
   OpenSSLSignature<KeyType::RSA> rsa;
-  rsa.setKey(generateKey());
+  Error err;
+  EXPECT_EQ(rsa.setKey(err, generateKey()), Status::Success);
   static constexpr StringPiece msg1{"message"};
   static constexpr StringPiece msg2{"somethingelse"};
   auto sig = rsa.sign<SignatureScheme::rsa_pss_sha256>(msg1);
@@ -57,7 +59,8 @@ TEST_F(RSAPSSTest, TestVerifyDifferent) {
 
 TEST_F(RSAPSSTest, TestVerifyFailure) {
   OpenSSLSignature<KeyType::RSA> rsa;
-  rsa.setKey(generateKey());
+  Error err;
+  EXPECT_EQ(rsa.setKey(err, generateKey()), Status::Success);
   static constexpr StringPiece msg{"message"};
   auto sig = rsa.sign<SignatureScheme::rsa_pss_sha256>(msg);
   sig->writableData()[1] ^= 0x2;
@@ -68,7 +71,8 @@ TEST_F(RSAPSSTest, TestVerifyFailure) {
 
 TEST_F(RSAPSSTest, TestGetKey) {
   OpenSSLSignature<KeyType::RSA> rsa;
-  rsa.setKey(generateKey());
+  Error err;
+  EXPECT_EQ(rsa.setKey(err, generateKey()), Status::Success);
   auto key = rsa.getKey();
   EXPECT_EQ(EVP_PKEY_id(key.get()), EVP_PKEY_RSA);
 }

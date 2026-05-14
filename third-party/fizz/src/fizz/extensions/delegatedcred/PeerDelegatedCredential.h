@@ -30,7 +30,7 @@ class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
  private:
   PeerDelegatedCredentialImpl(
       std::unique_ptr<openssl::OpenSSLPeerCertImpl<T>> peerCert,
-      folly::ssl::EvpPkeyUniquePtr pubKey,
+      openssl::OpenSSLSignature<T> credentialSignature,
       DelegatedCredential credential);
 
  public:

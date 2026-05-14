@@ -15,11 +15,11 @@ namespace extensions {
 template <openssl::KeyType T>
 PeerDelegatedCredentialImpl<T>::PeerDelegatedCredentialImpl(
     std::unique_ptr<openssl::OpenSSLPeerCertImpl<T>> peerCert,
-    folly::ssl::EvpPkeyUniquePtr pubKey,
+    openssl::OpenSSLSignature<T> credentialSignature,
     DelegatedCredential credential)
-    : peerCert_(std::move(peerCert)), credential_(std::move(credential)) {
-  credentialSignature_.setKey(std::move(pubKey));
-}
+    : peerCert_(std::move(peerCert)),
+      credential_(std::move(credential)),
+      credentialSignature_(std::move(credentialSignature)) {}
 
 template <openssl::KeyType T>
 /* static */ Status PeerDelegatedCredentialImpl<T>::create(
@@ -36,9 +36,13 @@ template <openssl::KeyType T>
   if (keyType != T) {
     return err.error("Key and credential type don't match");
   }
+  openssl::OpenSSLSignature<T> credentialSignature;
+  FIZZ_RETURN_ON_ERROR(credentialSignature.setKey(err, std::move(pubKey)));
   ret = std::unique_ptr<PeerDelegatedCredentialImpl<T>>(
       new PeerDelegatedCredentialImpl<T>(
-          std::move(peerCert), std::move(pubKey), std::move(credential)));
+          std::move(peerCert),
+          std::move(credentialSignature),
+          std::move(credential)));
   return Status::Success;
 }
 

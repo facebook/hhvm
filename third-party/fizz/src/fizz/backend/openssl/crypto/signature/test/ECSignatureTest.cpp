@@ -84,7 +84,8 @@ void modifyData(folly::IOBuf* sig, std::string& msg) {
 TEST_P(ECDSA256Test, TestSignature) {
   auto key = getKey(openssl::Properties<P256>::curveNid, GetParam());
   OpenSSLSignature<KeyType::P256> ecdsa;
-  ecdsa.setKey(std::move(key));
+  Error err;
+  EXPECT_EQ(ecdsa.setKey(err, std::move(key)), Status::Success);
   {
     std::string msg = GetParam().msg;
     auto sig = ecdsa.sign<SignatureScheme::ecdsa_secp256r1_sha256>(
@@ -117,7 +118,8 @@ TEST_P(ECDSA256Test, TestSignature) {
 TEST_P(ECDSA384Test, TestSignature) {
   auto key = getKey(openssl::Properties<P384>::curveNid, GetParam());
   OpenSSLSignature<KeyType::P384> ecdsa;
-  ecdsa.setKey(std::move(key));
+  Error err;
+  EXPECT_EQ(ecdsa.setKey(err, std::move(key)), Status::Success);
   {
     std::string msg = GetParam().msg;
     auto sig = ecdsa.sign<SignatureScheme::ecdsa_secp384r1_sha384>(
@@ -150,7 +152,8 @@ TEST_P(ECDSA384Test, TestSignature) {
 TEST_P(ECDSA521Test, TestSignature) {
   auto key = getKey(openssl::Properties<P521>::curveNid, GetParam());
   OpenSSLSignature<KeyType::P521> ecdsa;
-  ecdsa.setKey(std::move(key));
+  Error err;
+  EXPECT_EQ(ecdsa.setKey(err, std::move(key)), Status::Success);
   {
     std::string msg = GetParam().msg;
     auto sig = ecdsa.sign<SignatureScheme::ecdsa_secp521r1_sha512>(

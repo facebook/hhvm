@@ -9,6 +9,7 @@
 #pragma once
 
 #include <fizz/backend/openssl/crypto/OpenSSL.h>
+#include <fizz/util/Status.h>
 #include <folly/Range.h>
 #include <folly/io/IOBuf.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
@@ -31,16 +32,22 @@ namespace detail {
 
 /**
  * Validates whether or not the EVP_PKEY belongs to the
- * curve. If not, this throws an exception.
+ * curve. Returns Status::Fail on error.
  */
-void validateECKey(const folly::ssl::EvpPkeyUniquePtr& key, int curveNid);
+Status validateECKey(
+    Error& err,
+    const folly::ssl::EvpPkeyUniquePtr& key,
+    int curveNid);
 
 /**
  * Validates whether or not the EVP_PKEY belongs to the
  * Edwards curve (currently supports only Ed25519 & Ed448).
- * If not, this throws an exception.
+ * Returns Status::Fail on error.
  */
-void validateEdKey(const folly::ssl::EvpPkeyUniquePtr& key, int curveNid);
+Status validateEdKey(
+    Error& err,
+    const folly::ssl::EvpPkeyUniquePtr& key,
+    int curveNid);
 
 /**
  * Generates an new EVP_PKEY on the curve.

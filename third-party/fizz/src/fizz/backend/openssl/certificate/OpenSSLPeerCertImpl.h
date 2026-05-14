@@ -41,7 +41,7 @@ class OpenSSLPeerCertImpl : public fizz::PeerCert {
 
  protected:
   OpenSSLPeerCertImpl(
-      folly::ssl::EvpPkeyUniquePtr pkey,
+      OpenSSLSignature<T> signature,
       folly::ssl::X509UniquePtr cert);
   OpenSSLSignature<T> signature_;
   folly::ssl::X509UniquePtr cert_;

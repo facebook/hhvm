@@ -73,7 +73,8 @@ TEST_P(Ed25519Test, TestOpenSSLSignature) {
   OpenSSLSignature<KeyType::ED25519> eddsa;
 
   // 2. Test setting key
-  eddsa.setKey(std::move(privateKey));
+  Error err;
+  EXPECT_EQ(eddsa.setKey(err, std::move(privateKey)), Status::Success);
 
   // 3. Test sign method
   auto generatedSignature = eddsa.sign<SignatureScheme::ed25519>(

@@ -59,7 +59,8 @@ std::unique_ptr<folly::IOBuf> OpenSSLECKeyExchange::generateSharedSecret(
 
 void OpenSSLECKeyExchange::setPrivateKey(
     folly::ssl::EvpPkeyUniquePtr privateKey) {
-  detail::validateECKey(privateKey, nid_);
+  Error err;
+  FIZZ_THROW_ON_ERROR(detail::validateECKey(err, privateKey, nid_), err);
   key_ = std::move(privateKey);
 }
 

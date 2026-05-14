@@ -19,44 +19,62 @@ namespace test {
 
 TEST(ValidateECKey, GoodPrivateKey) {
   auto key = getPrivateKey(kP256Key);
-  detail::validateECKey(key, NID_X9_62_prime256v1);
+  Error err;
+  EXPECT_EQ(
+      detail::validateECKey(err, key, NID_X9_62_prime256v1), Status::Success);
 }
 
 TEST(ValidateECKey, GoodPublicKey) {
   auto key = getPublicKey(kP256PublicKey);
-  detail::validateECKey(key, NID_X9_62_prime256v1);
+  Error err;
+  EXPECT_EQ(
+      detail::validateECKey(err, key, NID_X9_62_prime256v1), Status::Success);
 }
 
 TEST(ValidateECKey, WrongKeyType) {
   auto key = getPrivateKey(kRSAKey);
+  Error err;
   EXPECT_THROW(
-      detail::validateECKey(key, NID_X9_62_prime256v1), std::runtime_error);
+      FIZZ_THROW_ON_ERROR(
+          detail::validateECKey(err, key, NID_X9_62_prime256v1), err),
+      std::runtime_error);
 }
 
 TEST(ValidateECKey, WrongCurve) {
   auto key = getPrivateKey(kP256Key);
+  Error err;
   EXPECT_THROW(
-      detail::validateECKey(key, NID_X9_62_prime239v3), std::runtime_error);
+      FIZZ_THROW_ON_ERROR(
+          detail::validateECKey(err, key, NID_X9_62_prime239v3), err),
+      std::runtime_error);
 }
 
 TEST(ValidateEdKey, GoodPrivateKey) {
   auto key = getPrivateKey(kEd25519Key);
-  detail::validateEdKey(key, NID_ED25519);
+  Error err;
+  EXPECT_EQ(detail::validateEdKey(err, key, NID_ED25519), Status::Success);
 }
 
 TEST(ValidateEdKey, GoodPublicKey) {
   auto key = getPublicKey(kEd25519PublicKey);
-  detail::validateEdKey(key, NID_ED25519);
+  Error err;
+  EXPECT_EQ(detail::validateEdKey(err, key, NID_ED25519), Status::Success);
 }
 
 TEST(ValidateEdKey, WrongKeyType) {
   auto key = getPrivateKey(kP256Key);
-  EXPECT_THROW(detail::validateEdKey(key, NID_ED25519), std::runtime_error);
+  Error err;
+  EXPECT_THROW(
+      FIZZ_THROW_ON_ERROR(detail::validateEdKey(err, key, NID_ED25519), err),
+      std::runtime_error);
 }
 
 TEST(ValidateEdKey, WrongCurve) {
   auto key = getPrivateKey(kEd448Key);
-  EXPECT_THROW(detail::validateEdKey(key, NID_ED25519), std::runtime_error);
+  Error err;
+  EXPECT_THROW(
+      FIZZ_THROW_ON_ERROR(detail::validateEdKey(err, key, NID_ED25519), err),
+      std::runtime_error);
 }
 
 } // namespace test

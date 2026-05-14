@@ -21,11 +21,9 @@ extern folly::Optional<std::string> getIdentityFromX509(X509* x);
 
 template <KeyType T>
 OpenSSLPeerCertImpl<T>::OpenSSLPeerCertImpl(
-    folly::ssl::EvpPkeyUniquePtr pkey,
+    OpenSSLSignature<T> signature,
     folly::ssl::X509UniquePtr cert)
-    : cert_(std::move(cert)) {
-  signature_.setKey(std::move(pkey));
-}
+    : signature_(std::move(signature)), cert_(std::move(cert)) {}
 
 template <KeyType T>
 /* static */ Status OpenSSLPeerCertImpl<T>::create(
@@ -36,8 +34,10 @@ template <KeyType T>
   if (!pkey) {
     return err.error("could not get key from cert");
   }
+  OpenSSLSignature<T> signature;
+  FIZZ_RETURN_ON_ERROR(signature.setKey(err, std::move(pkey)));
   ret = std::unique_ptr<OpenSSLPeerCertImpl>(
-      new OpenSSLPeerCertImpl(std::move(pkey), std::move(cert)));
+      new OpenSSLPeerCertImpl(std::move(signature), std::move(cert)));
   return Status::Success;
 }
 

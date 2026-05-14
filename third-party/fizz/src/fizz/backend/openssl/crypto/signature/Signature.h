@@ -24,7 +24,7 @@ enum class KeyType { RSA, P256, P384, P521, ED25519 };
 template <KeyType T>
 class OpenSSLSignature {
  public:
-  void setKey(folly::ssl::EvpPkeyUniquePtr pkey);
+  Status setKey(Error& err, folly::ssl::EvpPkeyUniquePtr pkey);
   /**
    * Returns the EVP_PKEY private key as a unique pointer.
    */

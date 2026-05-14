@@ -30,8 +30,10 @@ template <openssl::KeyType T>
   FIZZ_RETURN_ON_ERROR(
       DelegatedCredentialUtils::checkExtensions(err, certs.front()));
 
+  openssl::OpenSSLSignature<T> signature;
+  FIZZ_RETURN_ON_ERROR(signature.setKey(err, std::move(privateKey)));
   ret = std::unique_ptr<InternalSelfCert>(
-      new InternalSelfCert(std::move(certs), std::move(privateKey)));
+      new InternalSelfCert(std::move(certs), std::move(signature)));
   return Status::Success;
 }
 

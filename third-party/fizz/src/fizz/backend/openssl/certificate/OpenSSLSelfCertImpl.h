@@ -70,7 +70,7 @@ class OpenSSLSelfCertImpl : public SelfCert,
  protected:
   OpenSSLSelfCertImpl(
       std::vector<folly::ssl::X509UniquePtr> certs,
-      folly::ssl::EvpPkeyUniquePtr pkey,
+      OpenSSLSignature<T> signature,
       std::map<CertificateCompressionAlgorithm, CompressedCertificate>
           compressedCerts = {});
   OpenSSLSignature<T> signature_;

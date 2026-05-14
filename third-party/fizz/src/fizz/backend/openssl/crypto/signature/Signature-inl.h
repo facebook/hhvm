@@ -135,40 +135,50 @@ OpenSSLSignature<KeyType::ED25519>::verify<SignatureScheme::ed25519>(
 }
 
 template <>
-inline void OpenSSLSignature<KeyType::P256>::setKey(
+inline Status OpenSSLSignature<KeyType::P256>::setKey(
+    Error& err,
     folly::ssl::EvpPkeyUniquePtr pkey) {
-  detail::validateECKey(pkey, NID_X9_62_prime256v1);
+  FIZZ_RETURN_ON_ERROR(detail::validateECKey(err, pkey, NID_X9_62_prime256v1));
   pkey_ = std::move(pkey);
+  return Status::Success;
 }
 
 template <>
-inline void OpenSSLSignature<KeyType::P384>::setKey(
+inline Status OpenSSLSignature<KeyType::P384>::setKey(
+    Error& err,
     folly::ssl::EvpPkeyUniquePtr pkey) {
-  detail::validateECKey(pkey, NID_secp384r1);
+  FIZZ_RETURN_ON_ERROR(detail::validateECKey(err, pkey, NID_secp384r1));
   pkey_ = std::move(pkey);
+  return Status::Success;
 }
 
 template <>
-inline void OpenSSLSignature<KeyType::P521>::setKey(
+inline Status OpenSSLSignature<KeyType::P521>::setKey(
+    Error& err,
     folly::ssl::EvpPkeyUniquePtr pkey) {
-  detail::validateECKey(pkey, NID_secp521r1);
+  FIZZ_RETURN_ON_ERROR(detail::validateECKey(err, pkey, NID_secp521r1));
   pkey_ = std::move(pkey);
+  return Status::Success;
 }
 
 template <>
-inline void OpenSSLSignature<KeyType::ED25519>::setKey(
+inline Status OpenSSLSignature<KeyType::ED25519>::setKey(
+    Error& err,
     folly::ssl::EvpPkeyUniquePtr pkey) {
-  detail::validateEdKey(pkey, NID_ED25519);
+  FIZZ_RETURN_ON_ERROR(detail::validateEdKey(err, pkey, NID_ED25519));
   pkey_ = std::move(pkey);
+  return Status::Success;
 }
 
 template <>
-inline void OpenSSLSignature<KeyType::RSA>::setKey(
+inline Status OpenSSLSignature<KeyType::RSA>::setKey(
+    Error& err,
     folly::ssl::EvpPkeyUniquePtr pkey) {
   if (EVP_PKEY_id(pkey.get()) != EVP_PKEY_RSA) {
-    throw std::runtime_error("key not rsa");
+    return err.error("key not rsa");
   }
   pkey_ = std::move(pkey);
+  return Status::Success;
 }
 
 template <KeyType T>

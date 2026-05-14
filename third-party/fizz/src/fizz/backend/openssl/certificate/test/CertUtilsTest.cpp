@@ -38,10 +38,11 @@ TYPED_TEST(CertUtilsTestTyped, TestSignVerify) {
   certs.push_back(getCert<TypeParam>());
   folly::ssl::EvpPkeyUniquePtr pubKey(X509_get_pubkey(certs.back().get()));
   openssl::OpenSSLSignature<TypeParam::Type> verificationSignature;
-  verificationSignature.setKey(std::move(pubKey));
+  Error err;
+  EXPECT_EQ(
+      verificationSignature.setKey(err, std::move(pubKey)), Status::Success);
 
   std::unique_ptr<openssl::OpenSSLSelfCertImpl<TypeParam::Type>> selfCert;
-  Error err;
   EXPECT_EQ(
       openssl::OpenSSLSelfCertImpl<TypeParam::Type>::create(
           selfCert, err, getKey<TypeParam>(), std::move(certs)),
@@ -73,10 +74,11 @@ TYPED_TEST(CertUtilsTestTyped, TestSignVerifyBitFlip) {
   certs.push_back(getCert<TypeParam>());
   folly::ssl::EvpPkeyUniquePtr pubKey(X509_get_pubkey(certs.back().get()));
   openssl::OpenSSLSignature<TypeParam::Type> verificationSignature;
-  verificationSignature.setKey(std::move(pubKey));
+  Error err;
+  EXPECT_EQ(
+      verificationSignature.setKey(err, std::move(pubKey)), Status::Success);
 
   std::unique_ptr<openssl::OpenSSLSelfCertImpl<TypeParam::Type>> selfCert;
-  Error err;
   EXPECT_EQ(
       openssl::OpenSSLSelfCertImpl<TypeParam::Type>::create(
           selfCert, err, getKey<TypeParam>(), std::move(certs)),
@@ -111,10 +113,11 @@ TYPED_TEST(CertUtilsTestTyped, TestSignVerifyWrongSize) {
   certs.push_back(getCert<TypeParam>());
   folly::ssl::EvpPkeyUniquePtr pubKey(X509_get_pubkey(certs.back().get()));
   openssl::OpenSSLSignature<TypeParam::Type> verificationSignature;
-  verificationSignature.setKey(std::move(pubKey));
+  Error err;
+  EXPECT_EQ(
+      verificationSignature.setKey(err, std::move(pubKey)), Status::Success);
 
   std::unique_ptr<openssl::OpenSSLSelfCertImpl<TypeParam::Type>> selfCert;
-  Error err;
   EXPECT_EQ(
       openssl::OpenSSLSelfCertImpl<TypeParam::Type>::create(
           selfCert, err, getKey<TypeParam>(), std::move(certs)),
@@ -149,10 +152,11 @@ TYPED_TEST(CertUtilsTestTyped, TestSignVerifyWrongScheme) {
   certs.push_back(getCert<TypeParam>());
   folly::ssl::EvpPkeyUniquePtr pubKey(X509_get_pubkey(certs.back().get()));
   openssl::OpenSSLSignature<TypeParam::Type> verificationSignature;
-  verificationSignature.setKey(std::move(pubKey));
+  Error err;
+  EXPECT_EQ(
+      verificationSignature.setKey(err, std::move(pubKey)), Status::Success);
 
   std::unique_ptr<openssl::OpenSSLSelfCertImpl<TypeParam::Type>> selfCert;
-  Error err;
   EXPECT_EQ(
       openssl::OpenSSLSelfCertImpl<TypeParam::Type>::create(
           selfCert, err, getKey<TypeParam>(), std::move(certs)),

@@ -23,12 +23,12 @@ extern folly::Optional<std::string> getIdentityFromX509(X509* x);
 template <KeyType T>
 OpenSSLSelfCertImpl<T>::OpenSSLSelfCertImpl(
     std::vector<folly::ssl::X509UniquePtr> certs,
-    folly::ssl::EvpPkeyUniquePtr pkey,
+    OpenSSLSignature<T> signature,
     std::map<CertificateCompressionAlgorithm, CompressedCertificate>
         compressedCerts)
-    : certs_(std::move(certs)), compressedCerts_(std::move(compressedCerts)) {
-  signature_.setKey(std::move(pkey));
-}
+    : signature_(std::move(signature)),
+      certs_(std::move(certs)),
+      compressedCerts_(std::move(compressedCerts)) {}
 
 template <KeyType T>
 /* static */ Status OpenSSLSelfCertImpl<T>::create(
@@ -53,8 +53,10 @@ template <KeyType T>
         CertUtils::getCertMessage(certMsg, err, certs, nullptr));
     compressedCerts[compressor->getAlgorithm()] = compressor->compress(certMsg);
   }
+  OpenSSLSignature<T> signature;
+  FIZZ_RETURN_ON_ERROR(signature.setKey(err, std::move(pkey)));
   ret = std::unique_ptr<OpenSSLSelfCertImpl>(new OpenSSLSelfCertImpl(
-      std::move(certs), std::move(pkey), std::move(compressedCerts)));
+      std::move(certs), std::move(signature), std::move(compressedCerts)));
   return Status::Success;
 }
 

@@ -37,10 +37,10 @@ class SelfDelegatedCredentialImpl : public SelfDelegatedCredential {
    private:
     InternalSelfCert(
         std::vector<folly::ssl::X509UniquePtr> certs,
-        folly::ssl::EvpPkeyUniquePtr privateKey)
+        openssl::OpenSSLSignature<T> signature)
         : openssl::OpenSSLSelfCertImpl<T>(
               std::move(certs),
-              std::move(privateKey)) {}
+              std::move(signature)) {}
 
    public:
     ~InternalSelfCert() override = default;

@@ -267,8 +267,10 @@ class TestRsaCert : public openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA> {
     if (X509_check_private_key(certs[0].get(), pkey.get()) != 1) {
       return err.error("Cert does not match private key");
     }
+    openssl::OpenSSLSignature<openssl::KeyType::RSA> signature;
+    FIZZ_RETURN_ON_ERROR(signature.setKey(err, std::move(pkey)));
     ret = std::unique_ptr<TestRsaCert>(
-        new TestRsaCert(std::move(certs), std::move(pkey)));
+        new TestRsaCert(std::move(certs), std::move(signature)));
     return Status::Success;
   }
   std::string getIdentity() const override {
@@ -278,10 +280,10 @@ class TestRsaCert : public openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA> {
  private:
   TestRsaCert(
       std::vector<folly::ssl::X509UniquePtr> certs,
-      folly::ssl::EvpPkeyUniquePtr pkey)
+      openssl::OpenSSLSignature<openssl::KeyType::RSA> signature)
       : openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>(
             std::move(certs),
-            std::move(pkey)) {}
+            std::move(signature)) {}
 };
 
 class TestP256Cert
@@ -298,8 +300,10 @@ class TestP256Cert
     if (X509_check_private_key(certs[0].get(), pkey.get()) != 1) {
       return err.error("Cert does not match private key");
     }
+    openssl::OpenSSLSignature<openssl::KeyType::P256> signature;
+    FIZZ_RETURN_ON_ERROR(signature.setKey(err, std::move(pkey)));
     ret = std::unique_ptr<TestP256Cert>(
-        new TestP256Cert(std::move(certs), std::move(pkey)));
+        new TestP256Cert(std::move(certs), std::move(signature)));
     return Status::Success;
   }
   std::string getIdentity() const override {
@@ -309,10 +313,10 @@ class TestP256Cert
  private:
   TestP256Cert(
       std::vector<folly::ssl::X509UniquePtr> certs,
-      folly::ssl::EvpPkeyUniquePtr pkey)
+      openssl::OpenSSLSignature<openssl::KeyType::P256> signature)
       : openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>(
             std::move(certs),
-            std::move(pkey)) {}
+            std::move(signature)) {}
 };
 
 std::unique_ptr<SelfCert> readSelfCert() {

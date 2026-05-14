@@ -20,32 +20,40 @@ namespace openssl {
 
 namespace detail {
 
-void validateECKey(const folly::ssl::EvpPkeyUniquePtr& key, int curveNid) {
+Status validateECKey(
+    Error& err,
+    const folly::ssl::EvpPkeyUniquePtr& key,
+    int curveNid) {
   folly::ssl::EcKeyUniquePtr ecKey(EVP_PKEY_get1_EC_KEY(key.get()));
   if (!ecKey) {
-    throw std::runtime_error("Wrong key type");
+    return err.error("Wrong key type");
   }
   if (EC_KEY_check_key(ecKey.get()) != 1) {
-    throw std::runtime_error("Private key not valid");
+    return err.error("Private key not valid");
   }
   folly::ssl::EcGroupUniquePtr curve(EC_GROUP_new_by_curve_name(curveNid));
   if (!curve) {
-    throw std::runtime_error("Failed to create curve");
+    return err.error("Failed to create curve");
   }
   auto keyGroup = EC_KEY_get0_group(ecKey.get());
   if (EC_GROUP_cmp(keyGroup, curve.get(), nullptr) != 0) {
-    throw std::runtime_error("Invalid group");
+    return err.error("Invalid group");
   }
+  return Status::Success;
 }
 
-void validateEdKey(const folly::ssl::EvpPkeyUniquePtr& key, int curveNid) {
+Status validateEdKey(
+    Error& err,
+    const folly::ssl::EvpPkeyUniquePtr& key,
+    int curveNid) {
   int pkeyNid = EVP_PKEY_base_id(key.get());
   if (pkeyNid != NID_ED25519 && pkeyNid != NID_ED448) {
-    throw std::runtime_error("Wrong key type");
+    return err.error("Wrong key type");
   }
   if (pkeyNid != curveNid) {
-    throw std::runtime_error("Invalid group");
+    return err.error("Invalid group");
   }
+  return Status::Success;
 }
 
 std::unique_ptr<folly::IOBuf> generateEvpSharedSecret(
@@ -94,7 +102,8 @@ folly::ssl::EvpPkeyUniquePtr generateECKeyPair(int curveNid) {
   }
   folly::ssl::EvpPkeyUniquePtr evpKey(pkey);
   folly::ssl::EcKeyUniquePtr ecKey(EVP_PKEY_get1_EC_KEY(evpKey.get()));
-  validateECKey(evpKey, curveNid);
+  Error err;
+  FIZZ_THROW_ON_ERROR(validateECKey(err, evpKey, curveNid), err);
   return evpKey;
 }
 

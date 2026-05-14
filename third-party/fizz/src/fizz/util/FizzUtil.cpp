@@ -9,8 +9,8 @@
 #include <fizz/util/FizzUtil.h>
 
 #include <fizz/backend/libsodium/crypto/exchange/X25519.h>
+#include <fmt/core.h>
 #include <folly/FileUtil.h>
-#include <folly/Format.h>
 #include <folly/io/async/SSLContext.h>
 #include <folly/portability/OpenSSL.h>
 #include <sodium.h>
@@ -65,7 +65,7 @@ folly::ssl::EvpPkeyUniquePtr FizzUtil::readPrivateKeyFromBuf(
   } catch (std::runtime_error&) {
     std::string pwFile = pf ? pf->describe().c_str() : "(none)";
     throw std::runtime_error(
-        folly::sformat("failed to decrypt private key; pwFile: {}", pwFile));
+        fmt::format("failed to decrypt private key; pwFile: {}", pwFile));
   }
 }
 
@@ -78,7 +78,7 @@ folly::ssl::EvpPkeyUniquePtr FizzUtil::readPrivateKey(
     return FizzUtil::decryptPrivateKey(data, pf.get());
   } catch (std::runtime_error&) {
     std::string pwFile = pf ? pf->describe().c_str() : "(none)";
-    auto ex = folly::sformat(
+    auto ex = fmt::format(
         "Failed to read private key from file: {}, password file: {}",
         filename,
         pwFile);

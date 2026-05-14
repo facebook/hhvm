@@ -142,6 +142,15 @@ CarbonRouterInstance<RouterInfo>* CarbonRouterInstance<RouterInfo>::createRaw(
           deleter);
 
   folly::Expected<folly::Unit, std::string> result;
+  auto formatError = [](const auto& router, auto&& msg) {
+    return fmt::format(
+        "mcrouter error (router name '{}', flavor '{}',"
+        " service '{}'): {}",
+        router->opts().router_name,
+        router->opts().flavor_name,
+        router->opts().service_name,
+        std::forward<decltype(msg)>(msg));
+  };
   try {
     folly::json::serialization_opts jsonOpts;
     jsonOpts.sort_keys = true;
@@ -155,18 +164,11 @@ CarbonRouterInstance<RouterInfo>* CarbonRouterInstance<RouterInfo>::createRaw(
     if (result.hasValue()) {
       return router.release();
     }
+    result.error() = formatError(router, result.error());
   } catch (...) {
     result = folly::makeUnexpected(
-        folly::exceptionStr(std::current_exception()).toStdString());
+        formatError(router, folly::exceptionStr(std::current_exception())));
   }
-
-  result.error() = fmt::format(
-      "mcrouter error (router name '{}', flavor '{}',"
-      " service '{}'): {}",
-      router->opts().router_name,
-      router->opts().flavor_name,
-      router->opts().service_name,
-      result.error());
 
   // If router cannot be spun up, reset the references to
   // the SR client factories so that SR-related singletons

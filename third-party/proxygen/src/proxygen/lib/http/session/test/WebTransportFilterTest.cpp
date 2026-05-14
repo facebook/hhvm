@@ -201,8 +201,8 @@ TEST_F(WebTransportFilterTest, MultipleCapsulesInOneBody) {
             filter_->WebTransportFilter::onCloseSession(capsule);
           }));
 
+  // handler only receives the first close session capsule
   EXPECT_CALL(*handler_, onSessionEnd(Optional<uint32_t>(WT_ERROR_CODE)));
-  EXPECT_CALL(*handler_, onSessionEnd(Optional<uint32_t>(WT_ERROR_CODE + 1)));
 
   filter_->onBody(queue.move());
 }

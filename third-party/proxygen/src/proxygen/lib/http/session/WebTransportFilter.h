@@ -421,8 +421,8 @@ class WebTransportFilter
       closeErrorMessage_ = capsule.applicationErrorMessage;
     }
 
-    if (handler_) {
-      handler_->onSessionEnd(capsule.applicationErrorCode);
+    if (auto* handler = std::exchange(handler_, nullptr)) {
+      handler->onSessionEnd(capsule.applicationErrorCode);
     }
 
     if (txn_ && !txn_->isEgressComplete()) {

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <fizz/crypto/Crypto.h>
+#include <fizz/util/Status.h>
 #include <folly/portability/OpenSSL.h>
 #include <openssl/evp.h>
 
@@ -17,8 +18,9 @@ struct Properties;
 
 template <>
 struct Properties<fizz::AESGCM128> {
-  static const EVP_CIPHER* Cipher() {
-    return EVP_aes_128_gcm();
+  static Status Cipher(const EVP_CIPHER*& ret, Error& /*err*/) {
+    ret = EVP_aes_128_gcm();
+    return Status::Success;
   }
 
   static const bool kOperatesInBlocks{false};
@@ -27,8 +29,9 @@ struct Properties<fizz::AESGCM128> {
 
 template <>
 struct Properties<fizz::AESGCM256> {
-  static const EVP_CIPHER* Cipher() {
-    return EVP_aes_256_gcm();
+  static Status Cipher(const EVP_CIPHER*& ret, Error& /*err*/) {
+    ret = EVP_aes_256_gcm();
+    return Status::Success;
   }
   static const bool kOperatesInBlocks{false};
   static const bool kRequiresPresetTagLen{false};
@@ -36,12 +39,14 @@ struct Properties<fizz::AESGCM256> {
 
 template <>
 struct Properties<fizz::AESOCB128> {
-  static const EVP_CIPHER* Cipher() {
+  static Status Cipher(
+      [[maybe_unused]] const EVP_CIPHER*& ret,
+      [[maybe_unused]] Error& err) {
 #if !defined(OPENSSL_NO_OCB)
-    return EVP_aes_128_ocb();
+    ret = EVP_aes_128_ocb();
+    return Status::Success;
 #else
-    throw std::runtime_error(
-        "aes-ocb support requires OpenSSL 1.1.0 with ocb enabled");
+    return err.error("aes-ocb support requires OpenSSL 1.1.0 with ocb enabled");
 #endif
   }
 
@@ -51,12 +56,14 @@ struct Properties<fizz::AESOCB128> {
 
 template <>
 struct Properties<fizz::ChaCha20Poly1305> {
-  static const EVP_CIPHER* Cipher() {
+  static Status Cipher(
+      [[maybe_unused]] const EVP_CIPHER*& ret,
+      [[maybe_unused]] Error& err) {
 #if FOLLY_OPENSSL_HAS_CHACHA
-    return EVP_chacha20_poly1305();
+    ret = EVP_chacha20_poly1305();
+    return Status::Success;
 #else
-    throw std::runtime_error(
-        "chacha20-poly1305 support requires OpenSSL 1.1.0");
+    return err.error("chacha20-poly1305 support requires OpenSSL 1.1.0");
 #endif // FOLLY_OPENSSL_HAS_CHACHA
   }
 

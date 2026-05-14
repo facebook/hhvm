@@ -14,8 +14,10 @@ std::unique_ptr<Aead> OpenSSLEVPCipher::makeCipher() {
   static_assert(AeadCipher::kIVLength >= sizeof(uint64_t), "iv too small");
   static_assert(AeadCipher::kIVLength < kMaxIVLength, "iv too large");
   static_assert(AeadCipher::kTagLength < kMaxTagLength, "tag too large");
-  std::unique_ptr<OpenSSLEVPCipher> cipher;
+  const EVP_CIPHER* cipherType;
   Error err;
+  FIZZ_THROW_ON_ERROR(Properties<AeadCipher>::Cipher(cipherType, err), err);
+  std::unique_ptr<OpenSSLEVPCipher> cipher;
   FIZZ_THROW_ON_ERROR(
       OpenSSLEVPCipher::create(
           cipher,
@@ -23,7 +25,7 @@ std::unique_ptr<Aead> OpenSSLEVPCipher::makeCipher() {
           AeadCipher::kKeyLength,
           AeadCipher::kIVLength,
           AeadCipher::kTagLength,
-          Properties<AeadCipher>::Cipher(),
+          cipherType,
           Properties<AeadCipher>::kOperatesInBlocks,
           Properties<AeadCipher>::kRequiresPresetTagLen),
       err);

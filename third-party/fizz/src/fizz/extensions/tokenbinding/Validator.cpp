@@ -209,8 +209,10 @@ Status Validator::constructEcKeyFromBuf(
   keyAppender.push(keyReader, keyLen);
   auto combinedRange = combinedKey->coalesce();
 
-  auto evpKey = fizz::openssl::detail::decodeECPublicKey(
-      combinedRange, NID_X9_62_prime256v1);
+  folly::ssl::EvpPkeyUniquePtr evpKey;
+  FIZZ_RETURN_ON_ERROR(
+      fizz::openssl::detail::decodeECPublicKey(
+          evpKey, err, combinedRange, NID_X9_62_prime256v1));
   EcKeyUniquePtr publicKey(EVP_PKEY_get1_EC_KEY(evpKey.get()));
   if (!publicKey) {
     return err.error("Error getting EC_key");

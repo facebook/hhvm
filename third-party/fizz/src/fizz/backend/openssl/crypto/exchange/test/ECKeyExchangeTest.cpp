@@ -78,17 +78,27 @@ TYPED_TEST(Key, ReadWrongGroup) {
 
 TYPED_TEST(Key, Decode) {
   std::string out = unhexlify(this->getKeyParams().encodedShare);
-  auto pub = detail::OpenSSLECKeyDecoder::decode(
-      range(out), openssl::Properties<TypeParam>::curveNid);
+  folly::ssl::EvpPkeyUniquePtr pub;
+  Error err;
+  EXPECT_EQ(
+      detail::OpenSSLECKeyDecoder::decode(
+          pub, err, range(out), openssl::Properties<TypeParam>::curveNid),
+      Status::Success);
   EXPECT_TRUE(pub);
 }
 
 TYPED_TEST(Key, Encode) {
   std::string out = unhexlify(this->getKeyParams().encodedShare);
-  auto pub = detail::OpenSSLECKeyDecoder::decode(
-      range(out), openssl::Properties<TypeParam>::curveNid);
+  folly::ssl::EvpPkeyUniquePtr pub;
+  Error err;
+  EXPECT_EQ(
+      detail::OpenSSLECKeyDecoder::decode(
+          pub, err, range(out), openssl::Properties<TypeParam>::curveNid),
+      Status::Success);
   EXPECT_TRUE(pub);
-  auto encoded = detail::OpenSSLECKeyEncoder::encode(pub);
+  std::unique_ptr<folly::IOBuf> encoded;
+  EXPECT_EQ(
+      detail::OpenSSLECKeyEncoder::encode(encoded, err, pub), Status::Success);
 
   auto encodedStr = encoded->moveToFbString();
   EXPECT_EQ(encodedStr, out);
@@ -96,17 +106,29 @@ TYPED_TEST(Key, Encode) {
 
 TYPED_TEST(Key, DecodeInvalid) {
   std::string out = unhexlify(this->getKeyParams().invalidEncodedShare);
+  Error err;
   EXPECT_THROW(
-      detail::OpenSSLECKeyDecoder::decode(
-          range(out), openssl::Properties<TypeParam>::curveNid),
+      {
+        folly::ssl::EvpPkeyUniquePtr pub;
+        FIZZ_THROW_ON_ERROR(
+            detail::OpenSSLECKeyDecoder::decode(
+                pub, err, range(out), openssl::Properties<TypeParam>::curveNid),
+            err);
+      },
       std::runtime_error);
 }
 
 TYPED_TEST(Key, DecodeInvalidSmallLength) {
   std::string out = unhexlify(this->getKeyParams().tooSmallEncodedShare);
+  Error err;
   EXPECT_THROW(
-      detail::OpenSSLECKeyDecoder::decode(
-          range(out), openssl::Properties<TypeParam>::curveNid),
+      {
+        folly::ssl::EvpPkeyUniquePtr pub;
+        FIZZ_THROW_ON_ERROR(
+            detail::OpenSSLECKeyDecoder::decode(
+                pub, err, range(out), openssl::Properties<TypeParam>::curveNid),
+            err);
+      },
       std::runtime_error);
 }
 
@@ -249,7 +271,9 @@ TEST_P(ECDHTest, TestKexClone) {
       throw std::runtime_error("public key invalid");
     }
 
-    auto encodedPubKey = detail::encodeECPublicKey(pkeyPeerKey);
+    auto encodedPubKey = std::unique_ptr<folly::IOBuf>{};
+    FIZZ_THROW_ON_ERROR(
+        detail::encodeECPublicKey(encodedPubKey, err, pkeyPeerKey), err);
     std::unique_ptr<folly::IOBuf> shared;
 
     EXPECT_EQ(

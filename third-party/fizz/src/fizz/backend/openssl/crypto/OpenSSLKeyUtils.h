@@ -21,11 +21,14 @@ class OpenSSLKeyUtils {
  public:
   /**
    * Generates an new EVP_PKEY on the curve.
-   * Throws an exception on error.
+   * Returns Status::Fail on error.
    *
    * This is a public interface to the namespaced private method below.
    */
-  static folly::ssl::EvpPkeyUniquePtr generateECKeyPair(int curveNid);
+  static Status generateECKeyPair(
+      folly::ssl::EvpPkeyUniquePtr& ret,
+      Error& err,
+      int curveNid);
 };
 
 namespace detail {
@@ -51,15 +54,18 @@ Status validateEdKey(
 
 /**
  * Generates an new EVP_PKEY on the curve.
- * Throws an exception on error.
+ * Returns Status::Fail on error.
  */
-folly::ssl::EvpPkeyUniquePtr generateECKeyPair(int curveNid);
+Status
+generateECKeyPair(folly::ssl::EvpPkeyUniquePtr& ret, Error& err, int curveNid);
 
 /**
  * Decodes a EC public key specified as a member of the curve
  * curveNid.
  */
-folly::ssl::EvpPkeyUniquePtr decodeECPublicKey(
+Status decodeECPublicKey(
+    folly::ssl::EvpPkeyUniquePtr& ret,
+    Error& err,
     folly::ByteRange range,
     int curveNid);
 
@@ -67,10 +73,14 @@ folly::ssl::EvpPkeyUniquePtr decodeECPublicKey(
  * Encodes the public key and returns a buffer.
  */
 
-std::unique_ptr<folly::IOBuf> encodeECPublicKey(
+Status encodeECPublicKey(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     const folly::ssl::EvpPkeyUniquePtr& key);
 
-std::unique_ptr<folly::IOBuf> encodeECPublicKey(
+Status encodeECPublicKey(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     const folly::ssl::EcKeyUniquePtr& ecKey);
 
 /**

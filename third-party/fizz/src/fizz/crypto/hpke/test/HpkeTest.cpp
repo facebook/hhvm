@@ -1921,8 +1921,12 @@ void setOpenSSLPrivKey(
     std::string& pubKey) {
   auto pubKeyBuf = toIOBuf(pubKey);
   std::string privKeyBin = folly::unhexlify(privKey);
-  auto key = fizz::openssl::detail::decodeECPublicKey(
-      pubKeyBuf->coalesce(), openssl::Properties<T>::curveNid);
+  folly::ssl::EvpPkeyUniquePtr key;
+  fizz::Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizz::openssl::detail::decodeECPublicKey(
+          key, err, pubKeyBuf->coalesce(), openssl::Properties<T>::curveNid),
+      err);
   folly::ssl::EcKeyUniquePtr ecKey(EVP_PKEY_get1_EC_KEY(key.get()));
   folly::ssl::BIGNUMUniquePtr privateBn(
       BN_bin2bn((uint8_t*)privKeyBin.c_str(), privKeyBin.size(), nullptr));

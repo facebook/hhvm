@@ -119,7 +119,9 @@ Status TokenBindingConstructor::encodeEcKey(
     Buf& ret,
     Error& err,
     const EcKeyUniquePtr& ecKey) {
-  auto ecKeyBuf = openssl::detail::encodeECPublicKey(ecKey);
+  std::unique_ptr<folly::IOBuf> ecKeyBuf;
+  FIZZ_RETURN_ON_ERROR(
+      openssl::detail::encodeECPublicKey(ecKeyBuf, err, ecKey));
   if (ecKeyBuf->isChained() ||
       ecKeyBuf->length() != TokenBindingUtils::kP256EcKeySize + 1) {
     return err.error("Incorrect encoded EC Key Length");

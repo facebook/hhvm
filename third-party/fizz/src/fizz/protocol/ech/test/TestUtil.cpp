@@ -34,8 +34,15 @@ ParsedECHConfig getParsedECHConfig(ECHConfigParam param) {
   ParsedECHConfig parsedECHConfig;
   parsedECHConfig.key_config.config_id = param.configId;
   parsedECHConfig.key_config.kem_id = hpke::KEMId::secp256r1;
-  parsedECHConfig.key_config.public_key = openssl::detail::encodeECPublicKey(
-      ::fizz::test::getPublicKey(::fizz::test::kP256PublicKey));
+  std::unique_ptr<folly::IOBuf> publicKeyBuf;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      openssl::detail::encodeECPublicKey(
+          publicKeyBuf,
+          err,
+          ::fizz::test::getPublicKey(::fizz::test::kP256PublicKey)),
+      err);
+  parsedECHConfig.key_config.public_key = std::move(publicKeyBuf);
   parsedECHConfig.key_config.cipher_suites.push_back(
       HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256});

@@ -89,8 +89,12 @@ TEST(DHKEMTest, TestP256EncapDecapEqual) {
   actualKex->setPrivateKey(std::move(privateKey));
   auto dhkem = getDHKEM(std::move(actualKex), NamedGroup::secp256r1);
 
-  auto publicKey =
-      openssl::detail::encodeECPublicKey(getPublicKey(kP256PublicKey));
+  std::unique_ptr<folly::IOBuf> publicKey;
+  Error err;
+  EXPECT_EQ(
+      openssl::detail::encodeECPublicKey(
+          publicKey, err, getPublicKey(kP256PublicKey)),
+      Status::Success);
   std::unique_ptr<folly::IOBuf> sharedKey;
   std::unique_ptr<folly::IOBuf> gotSharedKey;
   std::tie(sharedKey, gotSharedKey) =
@@ -130,8 +134,12 @@ TEST(DHKEMTest, TestP384EncapDecapEqual) {
   actualKex->setPrivateKey(std::move(privateKey));
   auto dhkem = getDHKEM(std::move(actualKex), NamedGroup::secp384r1);
 
-  auto publicKey =
-      openssl::detail::encodeECPublicKey(getPublicKey(kP384PublicKey));
+  std::unique_ptr<folly::IOBuf> publicKey;
+  Error err;
+  EXPECT_EQ(
+      openssl::detail::encodeECPublicKey(
+          publicKey, err, getPublicKey(kP384PublicKey)),
+      Status::Success);
   std::unique_ptr<folly::IOBuf> sharedKey;
   std::unique_ptr<folly::IOBuf> gotSharedKey;
   std::tie(sharedKey, gotSharedKey) =

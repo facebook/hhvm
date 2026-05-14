@@ -17,14 +17,18 @@ namespace openssl {
 namespace detail {
 class OpenSSLECKeyDecoder {
  public:
-  static folly::ssl::EvpPkeyUniquePtr decode(
+  static Status decode(
+      folly::ssl::EvpPkeyUniquePtr& ret,
+      Error& err,
       folly::ByteRange range,
       const int curveNid);
 };
 
 class OpenSSLECKeyEncoder {
  public:
-  static std::unique_ptr<folly::IOBuf> encode(
+  static Status encode(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       const folly::ssl::EvpPkeyUniquePtr& key);
 };
 } // namespace detail

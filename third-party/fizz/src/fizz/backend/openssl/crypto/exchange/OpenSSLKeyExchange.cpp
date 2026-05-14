@@ -13,20 +13,26 @@ namespace fizz {
 namespace openssl {
 
 namespace detail {
-folly::ssl::EvpPkeyUniquePtr OpenSSLECKeyDecoder::decode(
+Status OpenSSLECKeyDecoder::decode(
+    folly::ssl::EvpPkeyUniquePtr& ret,
+    Error& err,
     folly::ByteRange range,
     const int curveNid) {
-  return decodeECPublicKey(range, curveNid);
+  FIZZ_RETURN_ON_ERROR(decodeECPublicKey(ret, err, range, curveNid));
+  return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> OpenSSLECKeyEncoder::encode(
+Status OpenSSLECKeyEncoder::encode(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     const folly::ssl::EvpPkeyUniquePtr& key) {
-  return encodeECPublicKey(key);
+  FIZZ_RETURN_ON_ERROR(encodeECPublicKey(ret, err, key));
+  return Status::Success;
 }
 } // namespace detail
 
-Status OpenSSLECKeyExchange::generateKeyPair(Error& /*err*/) {
-  key_ = detail::generateECKeyPair(nid_);
+Status OpenSSLECKeyExchange::generateKeyPair(Error& err) {
+  FIZZ_RETURN_ON_ERROR(detail::generateECKeyPair(key_, err, nid_));
   return Status::Success;
 }
 
@@ -36,7 +42,7 @@ Status OpenSSLECKeyExchange::getKeyShare(
   if (!key_) {
     return err.error("Key not initialized");
   }
-  ret = detail::OpenSSLECKeyEncoder::encode(key_);
+  FIZZ_RETURN_ON_ERROR(detail::OpenSSLECKeyEncoder::encode(ret, err, key_));
   return Status::Success;
 }
 
@@ -44,7 +50,9 @@ Status OpenSSLECKeyExchange::generateSharedSecret(
     std::unique_ptr<folly::IOBuf>& ret,
     Error& err,
     folly::ByteRange keyShare) const {
-  auto peerKey = detail::OpenSSLECKeyDecoder::decode(keyShare, nid_);
+  folly::ssl::EvpPkeyUniquePtr peerKey;
+  FIZZ_RETURN_ON_ERROR(
+      detail::OpenSSLECKeyDecoder::decode(peerKey, err, keyShare, nid_));
   FIZZ_RETURN_ON_ERROR(generateSharedSecret(ret, err, peerKey));
   return Status::Success;
 }

@@ -139,7 +139,7 @@ impl<'mock> ::::BiDiService for BiDiService<'mock> {
     }
     fn response(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::string::String, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
         let mut closure = self.response.closure.lock().unwrap();
         let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure()))
@@ -168,7 +168,7 @@ where
     fn response_with_rpc_opts(
         &self,
         _rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::string::String, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
         <Self as ::::BiDiService>::response(
             self,
         )
@@ -247,7 +247,7 @@ pub mod r#impl {
         pub struct response<'mock> {
             pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
                 dyn ::std::ops::FnMut() -> ::std::result::Result<
-                    (::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>),
+                    (::std::string::String, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>),
                     ::::errors::bi_di_service::ResponseError,
                 > + ::std::marker::Send + ::std::marker::Sync + 'mock,
             >>,
@@ -265,16 +265,16 @@ pub mod r#impl {
                 }
             }
 
-            pub fn ret(&self, __value: (::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>)) {
+            pub fn ret(&self, __value: (::std::string::String, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>)) {
                 unimplemented!("Mocking bidirectional streams is not yet implemented, as value isn't cloneable");
             }
 
-            pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> (::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>) + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+            pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> (::std::string::String, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>) + ::std::marker::Send + ::std::marker::Sync + 'mock) {
                 let mut closure = self.closure.lock().unwrap();
                 *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
             }
 
-            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), ::::errors::bi_di_service::ResponseError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<(::std::string::String, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), ::::errors::bi_di_service::ResponseError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
                 let mut closure = self.closure.lock().unwrap();
                 *closure = ::std::boxed::Box::new(move || mock());
             }

@@ -184,9 +184,10 @@ where
                 sink_processor,
             } = call_bidirectional.await?;
 
-            // Deserialize the initial response (should be empty for bidirectional)
+            // Deserialize the initial response. For bidi without initial response this is `()`;
+            // for bidi with initial response this is the typed first response value.
             let de = P::deserializer(_initial_response);
-            let _initial_result = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}Reader, S>(de).await??;
+            let {{#if function.sink_has_first_response?}}initial_response{{#else}}_initial_result{{/if}} = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}Reader, S>(de).await???;
 
             // Process the server-to-client stream
             let server_stream = stream.then(|item_res| {
@@ -253,7 +254,7 @@ where
                 }.boxed()
             };
 
-            let res = ::std::result::Result::Ok((server_stream, Box::new(sink_helper_fn) as Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<{{#partial types.type_name type=function.sink.elem_type}}, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>> + ::std::marker::Send>));
+            let res = ::std::result::Result::Ok(({{#if function.sink_has_first_response?}}initial_response, {{/if}}server_stream, Box::new(sink_helper_fn) as Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<{{#partial types.type_name type=function.sink.elem_type}}, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>> + ::std::marker::Send>));
         {{#else if function.stream?}}{{!
 
             ******************************

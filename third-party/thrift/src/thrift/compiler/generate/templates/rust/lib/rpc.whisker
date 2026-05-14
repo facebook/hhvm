@@ -69,7 +69,7 @@
 }}{{/let partial}}
 
   {{#if function.bidirectional_stream?}}
-(::futures::stream::BoxStream<'static, ::std::result::Result<
+({{#if function.sink_has_first_response?}}{{#partial types.type_name type=function.return_type}}, {{/if}}::futures::stream::BoxStream<'static, ::std::result::Result<
 {{#partial types.type_name type=function.stream.elem_type}}, {{!}}
 {{root_program.crate}}::errors::{{service.snake}}::{{function.upcamel}}StreamError
 >>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<{{#partial types.type_name type=function.sink.elem_type}}, {{!}}

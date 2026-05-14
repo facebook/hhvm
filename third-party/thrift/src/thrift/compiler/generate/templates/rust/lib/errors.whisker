@@ -35,14 +35,11 @@
 {{#pragma ignore-newlines}}
 {{#if (not function.void_or_void_stream?)}}::std::option::Option::Some({{/if}}
 ::std::result::Result::Ok(
-  {{#if function.bidirectional_stream?}}
-    {{! Bidirectional methods deserialize nothing for initial response !}}
-()
-  {{#else if function.sink_or_stream?}}
+  {{#if function.sink_or_stream?}}
 ::fbthrift::Deserialize::rs_thrift_read(p)?
   {{#else}}
 {{#partial type_adapter_read type=function.return_type}}
-  {{/if function.bidirectional_stream?}}
+  {{/if function.sink_or_stream?}}
 )
 {{#if (not function.void_or_void_stream?)}}){{/if}}
 {{/let partial}}{{!
@@ -225,8 +222,9 @@ pub mod {{interface.snake}} {
     pub(crate) enum {{function.upcamel}}Reader {}
 
     impl ::fbthrift::help::DeserializeExn for {{function.upcamel}}Reader {
-        {{! Bidirectional methods deserialize nothing for initial response }}
-        {{#let void_initial_response=(or function.bidirectional_stream? function.void_or_void_stream?)}}
+        {{! When the function has no initial response (void or void stream/bidi),
+            Success is `()`. Otherwise Success is the initial response type. }}
+        {{#let void_initial_response=function.void_or_void_stream?}}
         type Success = {{#if void_initial_response}}(){{!
         }}{{#else if function.sink_or_stream?}}{{#partial types.type_name type=function.return_type}}{{!
         }}{{#else}}{{#partial rpc.server_ok_type function=function service=interface}}{{/if void_initial_response}};

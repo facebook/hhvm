@@ -23,7 +23,7 @@ pub trait BiDiService: ::std::marker::Send {
 
     fn response(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::string::String, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>>;
 
     fn canThrow(
         &self,
@@ -41,7 +41,7 @@ where
     fn response_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::string::String, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>>;
     fn canThrow_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
@@ -64,7 +64,7 @@ where
     }
     fn response(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::string::String, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
         self.as_ref().response(
         )
     }
@@ -94,7 +94,7 @@ where
     fn response_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::string::String, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
         <Self as ::std::convert::AsRef<dyn BiDiServiceExt<T>>>::as_ref(self).response_with_rpc_opts(
             rpc_options,
         )
@@ -179,9 +179,10 @@ where
                 sink_processor,
             } = call_bidirectional.await?;
 
-            // Deserialize the initial response (should be empty for bidirectional)
+            // Deserialize the initial response. For bidi without initial response this is `()`;
+            // for bidi with initial response this is the typed first response value.
             let de = P::deserializer(_initial_response);
-            let _initial_result = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::bi_di_service::SimpleReader, S>(de).await??;
+            let _initial_result = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::bi_di_service::SimpleReader, S>(de).await???;
 
             // Process the server-to-client stream
             let server_stream = stream.then(|item_res| {
@@ -252,7 +253,7 @@ where
     fn _response_impl(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::string::String, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
         use ::futures::StreamExt as _;
@@ -285,9 +286,10 @@ where
                 sink_processor,
             } = call_bidirectional.await?;
 
-            // Deserialize the initial response (should be empty for bidirectional)
+            // Deserialize the initial response. For bidi without initial response this is `()`;
+            // for bidi with initial response this is the typed first response value.
             let de = P::deserializer(_initial_response);
-            let _initial_result = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::bi_di_service::ResponseReader, S>(de).await??;
+            let initial_response = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::bi_di_service::ResponseReader, S>(de).await???;
 
             // Process the server-to-client stream
             let server_stream = stream.then(|item_res| {
@@ -348,7 +350,7 @@ where
                 }.boxed()
             };
 
-            let res = ::std::result::Result::Ok((server_stream, Box::new(sink_helper_fn) as Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>));
+            let res = ::std::result::Result::Ok((initial_response, server_stream, Box::new(sink_helper_fn) as Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>));
             res
         }
         .instrument(::tracing::info_span!("stream", method = "BiDiService.response"))
@@ -391,9 +393,10 @@ where
                 sink_processor,
             } = call_bidirectional.await?;
 
-            // Deserialize the initial response (should be empty for bidirectional)
+            // Deserialize the initial response. For bidi without initial response this is `()`;
+            // for bidi with initial response this is the typed first response value.
             let de = P::deserializer(_initial_response);
-            let _initial_result = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::bi_di_service::CanThrowReader, S>(de).await??;
+            let _initial_result = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::bi_di_service::CanThrowReader, S>(de).await???;
 
             // Process the server-to-client stream
             let server_stream = stream.then(|item_res| {
@@ -538,7 +541,7 @@ where
     }
     fn response(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::string::String, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
         let rpc_options = T::RpcOptions::default();
         self._response_impl(
             rpc_options,
@@ -574,7 +577,7 @@ where
     fn response_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::string::String, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i16, crate::errors::bi_di_service::ResponseStreamError>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bi_di_service::ResponseSinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bi_di_service::ResponseSinkError>> + ::std::marker::Send>), crate::errors::bi_di_service::ResponseError>> {
         self._response_impl(
             rpc_options,
         )

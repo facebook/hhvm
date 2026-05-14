@@ -57,8 +57,8 @@ fromRocketFrame(
 
       return ThriftClientInboundPayloadVariant{
           ThriftFirstResponsePayload{
-              .metadata = std::move(metadata),
               .data = std::move(data),
+              .metadata = std::move(metadata),
               .streamId = streamId,
               .complete = complete,
               .next = next},

@@ -49,10 +49,12 @@ struct ThriftServerRequestMessage {
  *
  * `payload` is a typed variant of per-stream payload structs from
  * `thrift/common/ThriftPayload.h`. Today the variant carries
- * `ThriftResponsePayload` (success / chunk) and `ThriftErrorPayload`
- * (failure) — the only response operations wired end-to-end through the
- * server. As stream/sink/bidi handlers come online, `ThriftCancelPayload`
- * and `ThriftRequestNPayload` join the variant.
+ * `ThriftFirstResponsePayload` (initial reply, carrying the typed
+ * `ResponseRpcMetadata` which the payload's `toRocketFrame()` serializes)
+ * and `ThriftErrorPayload` (failure) — the only response operations wired
+ * end-to-end through the server. As stream/sink/bidi handlers come online,
+ * a separate payload for subsequent stream chunks plus `ThriftCancelPayload`
+ * and `ThriftRequestNPayload` will join the variant.
  *
  * The variant carries `rpcKind` internally; the transport adapter uses
  * it to set the rocket message's `streamType` for the matching pattern
@@ -60,7 +62,7 @@ struct ThriftServerRequestMessage {
  */
 #pragma pack(push, 1)
 struct ThriftServerResponseMessage {
-  ThriftPayloadVariant<ThriftResponsePayload, ThriftErrorPayload> payload;
+  ThriftPayloadVariant<ThriftFirstResponsePayload, ThriftErrorPayload> payload;
 };
 #pragma pack(pop)
 

@@ -16,110 +16,20 @@
 
 #pragma once
 
+#include <memory>
 #include <optional>
+#include <string>
+#include <utility>
 
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ResponseMetadata.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-#include <memory>
-
 namespace apache::thrift::fast_thrift::thrift {
-
-inline constexpr size_t kResponseMetadataHeadroomBytes = 16;
-
-namespace detail {
-
-/**
- * Serialize ResponseRpcMetadata into IOBuf using the ProtocolWriter selected
- * at instantiation (BinaryProtocolWriter or CompactProtocolWriter).
- * Pre-computes serialized size for right-sized buffer allocation and reserves
- * headroom for downstream frame header serialization.
- */
-template <typename ProtocolWriter>
-inline std::unique_ptr<folly::IOBuf> serializeResponseMetadata(
-    const apache::thrift::ResponseRpcMetadata& metadata) {
-  ProtocolWriter writer;
-  auto serializedSize = metadata.serializedSizeZC(&writer);
-  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
-  auto buf =
-      folly::IOBuf::create(kResponseMetadataHeadroomBytes + serializedSize);
-  buf->advance(kResponseMetadataHeadroomBytes);
-  queue.append(std::move(buf));
-  writer.setOutput(&queue);
-  metadata.write(&writer);
-  return queue.move();
-}
-
-} // namespace detail
-
-/**
- * Build a serialized default success metadata IOBuf — an empty
- * PayloadResponseMetadata wrapped in a ResponseRpcMetadata. Mirrors the
- * legacy per-response build (no cache).
- */
-template <typename ProtocolWriter>
-inline std::unique_ptr<folly::IOBuf> getDefaultSuccessMetadata() {
-  apache::thrift::ResponseRpcMetadata metadata;
-  apache::thrift::PayloadMetadata payloadMetadata;
-  payloadMetadata.responseMetadata() =
-      apache::thrift::PayloadResponseMetadata();
-  metadata.payloadMetadata() = std::move(payloadMetadata);
-  return detail::serializeResponseMetadata<ProtocolWriter>(metadata);
-}
-
-/**
- * Build serialized error metadata for an exception response.
- * Legacy version without ErrorBlame — prefer makeAppErrorResponseMetadata().
- */
-template <typename ProtocolWriter>
-inline std::unique_ptr<folly::IOBuf> makeErrorResponseMetadata(
-    std::string errorMessage) {
-  apache::thrift::ResponseRpcMetadata responseMetadata;
-  apache::thrift::PayloadMetadata payloadMetadata;
-  apache::thrift::PayloadExceptionMetadataBase exBase;
-  apache::thrift::PayloadExceptionMetadata exMeta;
-  exMeta.appUnknownException() =
-      apache::thrift::PayloadAppUnknownExceptionMetdata();
-  exBase.metadata() = std::move(exMeta);
-  exBase.what_utf8() = std::move(errorMessage);
-  payloadMetadata.exceptionMetadata() = std::move(exBase);
-  responseMetadata.payloadMetadata() = std::move(payloadMetadata);
-  return detail::serializeResponseMetadata<ProtocolWriter>(responseMetadata);
-}
-
-/**
- * Build serialized app error metadata with ErrorBlame.
- * Used by sendErrorWrapped for app-level errors (PAYLOAD frame).
- */
-template <typename ProtocolWriter>
-inline std::unique_ptr<folly::IOBuf> makeAppErrorResponseMetadata(
-    std::string exName,
-    std::string errorMessage,
-    apache::thrift::ErrorBlame blame = apache::thrift::ErrorBlame::SERVER) {
-  apache::thrift::ResponseRpcMetadata responseMetadata;
-  apache::thrift::PayloadMetadata payloadMetadata;
-  apache::thrift::PayloadExceptionMetadataBase exBase;
-  apache::thrift::PayloadExceptionMetadata exMeta;
-
-  apache::thrift::PayloadAppUnknownExceptionMetdata appUnknown;
-  apache::thrift::ErrorClassification errorClassification;
-  errorClassification.blame() = blame;
-  appUnknown.errorClassification() = errorClassification;
-  exMeta.appUnknownException() = appUnknown;
-
-  if (!exName.empty()) {
-    exBase.name_utf8() = std::move(exName);
-  }
-  exBase.what_utf8() = std::move(errorMessage);
-  exBase.metadata() = std::move(exMeta);
-  payloadMetadata.exceptionMetadata() = std::move(exBase);
-  responseMetadata.payloadMetadata() = std::move(payloadMetadata);
-  return detail::serializeResponseMetadata<ProtocolWriter>(responseMetadata);
-}
 
 /**
  * Build the inner PayloadMetadata for a declared exception (IDL `throws`).
@@ -149,20 +59,88 @@ inline apache::thrift::PayloadMetadata buildDeclaredExceptionPayloadMetadata(
   return payloadMetadata;
 }
 
-/**
- * Build serialized declared exception metadata with optional
- * ErrorClassification. Used by sendReply when isException is set.
- */
+// fill-in-place API: caller hands a ResponseRpcMetadata, we populate it.
+// Pipeline serializes downstream (ThriftFirstResponsePayload::toRocketFrame)
+// so the adapter is free of wire-format choice.
+
+inline void fillSuccessResponseMetadata(
+    apache::thrift::ResponseRpcMetadata& md) {
+  apache::thrift::PayloadMetadata payloadMetadata;
+  payloadMetadata.responseMetadata() =
+      apache::thrift::PayloadResponseMetadata();
+  md.payloadMetadata() = std::move(payloadMetadata);
+}
+
+inline void fillAppErrorResponseMetadata(
+    apache::thrift::ResponseRpcMetadata& md,
+    std::string exName,
+    std::string errorMessage,
+    apache::thrift::ErrorBlame blame = apache::thrift::ErrorBlame::SERVER) {
+  apache::thrift::PayloadMetadata payloadMetadata;
+  apache::thrift::PayloadExceptionMetadataBase exBase;
+  apache::thrift::PayloadExceptionMetadata exMeta;
+
+  apache::thrift::PayloadAppUnknownExceptionMetdata appUnknown;
+  apache::thrift::ErrorClassification errorClassification;
+  errorClassification.blame() = blame;
+  appUnknown.errorClassification() = errorClassification;
+  exMeta.appUnknownException() = appUnknown;
+
+  if (!exName.empty()) {
+    exBase.name_utf8() = std::move(exName);
+  }
+  exBase.what_utf8() = std::move(errorMessage);
+  exBase.metadata() = std::move(exMeta);
+  payloadMetadata.exceptionMetadata() = std::move(exBase);
+  md.payloadMetadata() = std::move(payloadMetadata);
+}
+
+inline void fillDeclaredExceptionMetadata(
+    apache::thrift::ResponseRpcMetadata& md,
+    std::string exName,
+    std::string exWhat,
+    std::optional<apache::thrift::ErrorClassification> classification =
+        std::nullopt) {
+  md.payloadMetadata() = buildDeclaredExceptionPayloadMetadata(
+      std::move(exName), std::move(exWhat), classification);
+}
+
+// pre-serialized API: each helper allocates a fresh IOBuf using the
+// caller-selected ProtocolWriter. Used by callsites that need a serialized
+// metadata buffer up front (e.g., the channel-based path's request-side
+// dispatch).
+
+template <typename ProtocolWriter>
+inline std::unique_ptr<folly::IOBuf> getDefaultSuccessMetadata() {
+  apache::thrift::ResponseRpcMetadata metadata;
+  fillSuccessResponseMetadata(metadata);
+  return detail::serializeResponseMetadata<ProtocolWriter>(metadata);
+}
+
+template <typename ProtocolWriter>
+inline std::unique_ptr<folly::IOBuf> makeAppErrorResponseMetadata(
+    std::string exName,
+    std::string errorMessage,
+    apache::thrift::ErrorBlame blame = apache::thrift::ErrorBlame::SERVER) {
+  apache::thrift::ResponseRpcMetadata metadata;
+  fillAppErrorResponseMetadata(
+      metadata, std::move(exName), std::move(errorMessage), blame);
+  return detail::serializeResponseMetadata<ProtocolWriter>(metadata);
+}
+
 template <typename ProtocolWriter>
 inline std::unique_ptr<folly::IOBuf> makeDeclaredExceptionMetadata(
     std::string exName,
     std::string exWhat,
     std::optional<apache::thrift::ErrorClassification> classification =
         std::nullopt) {
-  apache::thrift::ResponseRpcMetadata responseMetadata;
-  responseMetadata.payloadMetadata() = buildDeclaredExceptionPayloadMetadata(
-      std::move(exName), std::move(exWhat), classification);
-  return detail::serializeResponseMetadata<ProtocolWriter>(responseMetadata);
+  apache::thrift::ResponseRpcMetadata metadata;
+  fillDeclaredExceptionMetadata(
+      metadata,
+      std::move(exName),
+      std::move(exWhat),
+      std::move(classification));
+  return detail::serializeResponseMetadata<ProtocolWriter>(metadata);
 }
 
 // =============================================================================

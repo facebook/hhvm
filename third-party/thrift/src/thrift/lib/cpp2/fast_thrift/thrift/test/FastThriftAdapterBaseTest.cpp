@@ -53,9 +53,9 @@ ThriftResponseMessage makePayloadResponse(
   ThriftResponseMessage response;
   response.payload = ThriftClientInboundPayloadVariant{
       ThriftFirstResponsePayload{
+          .data = std::move(data),
           .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(
               std::move(metadata)),
-          .data = std::move(data),
           .streamId = 1,
           .complete = true,
           .next = true},

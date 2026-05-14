@@ -37,7 +37,6 @@ namespace apache::thrift::fast_thrift::thrift {
  */
 using ThriftClientInboundPayloadVariant = ThriftPayloadVariant<
     ThriftFirstResponsePayload,
-    ThriftResponsePayload,
     ThriftErrorPayload,
     ThriftCancelPayload,
     ThriftRequestNPayload,

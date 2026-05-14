@@ -18,6 +18,7 @@
 
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/RequestMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ResponseMetadata.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -175,7 +176,10 @@ struct ThriftRequestBidiPayload {
 // ============================================================================
 
 /**
- * ThriftResponsePayload — App's "respond / send chunk" operation.
+ * ThriftFirstResponsePayload — App's "first response" operation: the initial
+ * (and, for RR / Sink, only) PAYLOAD frame on a server-initiated reply.
+ * Carries the typed `ResponseRpcMetadata` struct; the metadata is serialized
+ * inline by `toRocketFrame()` so the channel never has to pre-serialize.
  *
  * `complete` and `next` correspond to the RSocket PAYLOAD flags:
  *   - complete = stream is done after this frame
@@ -184,56 +188,32 @@ struct ThriftRequestBidiPayload {
  * Semantics by RpcKind (per-message rpcKind tag controls dispatch):
  *   - RR / Sink: rocket / Thrift adapter enforces complete=next=true.
  *     App-set values are DCHECKed; the wire frame is always terminal+data.
- *   - Stream / Bidi: caller controls per chunk.
- */
-struct ThriftResponsePayload {
-  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedPayloadFrame;
-
-  std::unique_ptr<folly::IOBuf> data{nullptr};
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
-  uint32_t streamId{apache::thrift::fast_thrift::rocket::kInvalidStreamId};
-  bool complete{true};
-  bool next{true};
-
-  RocketFrame toRocketFrame() && noexcept {
-    return {
-        .data = std::move(data),
-        .metadata = std::move(metadata),
-        .header = {.streamId = streamId, .complete = complete, .next = next},
-    };
-  }
-};
-
-/**
- * ThriftFirstResponsePayload — first response on a stream.
+ *   - Stream / Bidi: caller controls per chunk for the initial frame; later
+ *     stream chunks (without metadata) will use a separate payload type.
  *
- * Models the RR response and the first PAYLOAD on a Stream/Sink/Bidi
- * exchange — the cases where the wire metadata buffer carries a typed
- * `ResponseRpcMetadata`. Subsequent stream chunks carry the leaner
- * `StreamPayloadMetadata` and use `ThriftResponsePayload` (raw IOBuf)
- * with use-time deserialization.
- *
- * Bidirectional:
- *   - Client inbound: `fromRocketFrame` produces this struct with metadata
- *     already deserialized so handlers above operate on a typed view
- *     without re-parsing.
- *   - Server outbound: `toRocketFrame()` serializes metadata back into the
- *     PAYLOAD frame. Throws on serializer/allocator failure.
+ * `toRocketFrame()` may throw on serializer/allocator failure; the transport
+ * adapter catches and surfaces such failures.
  */
 struct ThriftFirstResponsePayload {
   using RocketFrame = apache::thrift::fast_thrift::frame::ComposedPayloadFrame;
 
-  std::unique_ptr<apache::thrift::ResponseRpcMetadata> metadata{nullptr};
   std::unique_ptr<folly::IOBuf> data{nullptr};
+  std::unique_ptr<apache::thrift::ResponseRpcMetadata> metadata{nullptr};
   uint32_t streamId{apache::thrift::fast_thrift::rocket::kInvalidStreamId};
+  // SETUP-negotiated metadata protocol used to serialize `metadata` in
+  // `toRocketFrame()`. The channel sets this from its connection-level
+  // protocol field; defaults to BINARY for tests/constructors that don't
+  // set it explicitly.
+  rocket::server::MetadataProtocol metadataProtocol{
+      rocket::server::MetadataProtocol::BINARY};
   bool complete{true};
   bool next{true};
 
   RocketFrame toRocketFrame() && {
-    DCHECK(metadata);
+    DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
         .data = std::move(data),
-        .metadata = serializeResponseMetadata(*metadata),
+        .metadata = serializeResponseMetadata(*metadata, metadataProtocol),
         .header = {.streamId = streamId, .complete = complete, .next = next},
     };
   }

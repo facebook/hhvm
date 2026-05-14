@@ -37,8 +37,6 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseSerializer.h>
-#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
-#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -67,23 +65,24 @@ inline void writeExceptionCascade(
       presult, ew, [&]<typename Ex>(Ex&) {
         classification = getDeclaredExceptionClassification<Ex>(ew);
       });
-  auto p = a->metadataProtocol();
   if (handled) {
     auto buf = serializeResponse<ProtocolWriter>(
         [&](ProtocolWriter& w) { presult.write(&w); },
         [&](ProtocolWriter& w) -> uint32_t {
           return presult.serializedSizeZC(&w);
         });
-    auto md = declaredExceptionMetadata(
-        p,
+    auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+    fillDeclaredExceptionMetadata(
+        *md,
         ew.class_name().toStdString(),
         ew.what().toStdString(),
         classification);
     (void)a->writeResponse(
         sid, std::move(buf), std::move(md), /*complete=*/true);
   } else {
-    auto md = appErrorMetadata(
-        p,
+    auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+    fillAppErrorResponseMetadata(
+        *md,
         ew.class_name().toStdString(),
         ew.what().toStdString(),
         apache::thrift::ErrorBlame::SERVER);
@@ -157,11 +156,10 @@ class FastHandlerCallback : public folly::DelayedDestruction {
         [&](ProtocolWriter& w) -> uint32_t {
           return presult.serializedSizeZC(&w);
         });
+    auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+    fillSuccessResponseMetadata(*md);
     (void)a->writeResponse(
-        sid,
-        std::move(buf),
-        defaultSuccessMetadata(a->metadataProtocol()),
-        /*complete=*/true);
+        sid, std::move(buf), std::move(md), /*complete=*/true);
   }
 
   template <typename Presult, typename ProtocolWriter>
@@ -246,11 +244,10 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
         [&](ProtocolWriter& w) -> uint32_t {
           return presult.serializedSizeZC(&w);
         });
+    auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+    fillSuccessResponseMetadata(*md);
     (void)a->writeResponse(
-        sid,
-        std::move(buf),
-        defaultSuccessMetadata(a->metadataProtocol()),
-        /*complete=*/true);
+        sid, std::move(buf), std::move(md), /*complete=*/true);
   }
 
   template <typename Presult, typename ProtocolWriter>
@@ -321,16 +318,18 @@ parseArgsOrSendError(
         ex.what());
     return adapter->writeError(streamId, std::move(err.data), err.errorCode);
   } catch (const std::exception& ex) {
-    auto md = appErrorMetadata(
-        adapter->metadataProtocol(),
+    auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+    fillAppErrorResponseMetadata(
+        *md,
         "TApplicationException",
         ex.what(),
         apache::thrift::ErrorBlame::SERVER);
     return adapter->writeResponse(
         streamId, /*data=*/nullptr, std::move(md), /*complete=*/true);
   } catch (...) {
-    auto md = appErrorMetadata(
-        adapter->metadataProtocol(),
+    auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+    fillAppErrorResponseMetadata(
+        *md,
         "TApplicationException",
         "Unknown exception during args deserialization",
         apache::thrift::ErrorBlame::SERVER);

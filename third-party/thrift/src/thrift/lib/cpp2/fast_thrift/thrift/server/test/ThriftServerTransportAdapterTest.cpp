@@ -38,6 +38,8 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift::server::test {
 
@@ -80,10 +82,12 @@ TypeErasedBox makeRocketRequestBox(uint32_t streamId = 1) {
 }
 
 TypeErasedBox makeThriftResponseBox(uint32_t streamId = 1) {
+  auto metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+  fillSuccessResponseMetadata(*metadata);
   ThriftServerResponseMessage msg{
-      .payload = ThriftResponsePayload{
+      .payload = ThriftFirstResponsePayload{
           .data = folly::IOBuf::copyBuffer("response-data"),
-          .metadata = folly::IOBuf::copyBuffer("response-meta"),
+          .metadata = std::move(metadata),
           .streamId = streamId,
           .complete = true,
           .next = true,

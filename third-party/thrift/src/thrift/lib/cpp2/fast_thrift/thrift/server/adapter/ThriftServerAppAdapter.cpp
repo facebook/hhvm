@@ -73,11 +73,11 @@ void ThriftServerAppAdapter::onException(
 channel_pipeline::Result ThriftServerAppAdapter::writeResponse(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
-    std::unique_ptr<folly::IOBuf> metadata,
+    std::unique_ptr<apache::thrift::ResponseRpcMetadata> metadata,
     bool complete) noexcept {
   return fireResponse(
       ThriftServerResponseMessage{
-          .payload = ThriftResponsePayload{
+          .payload = ThriftFirstResponsePayload{
               .data = std::move(data),
               .metadata = std::move(metadata),
               .streamId = streamId,
@@ -156,11 +156,9 @@ channel_pipeline::Result ThriftServerAppAdapter::writeUnknownException(
     uint32_t streamId,
     const folly::exception_wrapper& ew,
     apache::thrift::ErrorBlame blame) noexcept {
-  auto md = appErrorMetadata(
-      metadataProtocol_,
-      ew.class_name().toStdString(),
-      ew.what().toStdString(),
-      blame);
+  auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+  fillAppErrorResponseMetadata(
+      *md, ew.class_name().toStdString(), ew.what().toStdString(), blame);
   return writeResponse(
       streamId, /*data=*/nullptr, std::move(md), /*complete=*/true);
 }

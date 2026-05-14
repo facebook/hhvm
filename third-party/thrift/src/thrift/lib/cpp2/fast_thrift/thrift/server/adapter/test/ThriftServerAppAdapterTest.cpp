@@ -56,21 +56,23 @@ namespace {
 // ThriftServerResponseMessage's variant payload regardless of held alternative.
 inline const std::unique_ptr<folly::IOBuf>& payloadData(
     const ThriftServerResponseMessage& msg) {
-  if (msg.payload.is<ThriftResponsePayload>()) {
-    return msg.payload.get<ThriftResponsePayload>().data;
+  if (msg.payload.is<ThriftFirstResponsePayload>()) {
+    return msg.payload.get<ThriftFirstResponsePayload>().data;
   }
   return msg.payload.get<ThriftErrorPayload>().data;
 }
-inline const std::unique_ptr<folly::IOBuf>& payloadMetadata(
+// Returns the typed ResponseRpcMetadata held by a ThriftFirstResponsePayload,
+// or nullptr if the message carries an error payload instead.
+inline const apache::thrift::ResponseRpcMetadata* payloadMetadata(
     const ThriftServerResponseMessage& msg) {
-  if (msg.payload.is<ThriftResponsePayload>()) {
-    return msg.payload.get<ThriftResponsePayload>().metadata;
+  if (msg.payload.is<ThriftFirstResponsePayload>()) {
+    return msg.payload.get<ThriftFirstResponsePayload>().metadata.get();
   }
-  return msg.payload.get<ThriftErrorPayload>().metadata;
+  return nullptr;
 }
 inline uint32_t payloadStreamId(const ThriftServerResponseMessage& msg) {
-  if (msg.payload.is<ThriftResponsePayload>()) {
-    return msg.payload.get<ThriftResponsePayload>().streamId;
+  if (msg.payload.is<ThriftFirstResponsePayload>()) {
+    return msg.payload.get<ThriftFirstResponsePayload>().streamId;
   }
   return msg.payload.get<ThriftErrorPayload>().streamId;
 }
@@ -113,15 +115,6 @@ apache::thrift::ResponseRpcError deserializeResponseRpcError(
   reader.setInput(&buf);
   error.read(&reader);
   return error;
-}
-
-apache::thrift::ResponseRpcMetadata deserializeResponseMetadata(
-    const folly::IOBuf& buf) {
-  apache::thrift::ResponseRpcMetadata metadata;
-  apache::thrift::BinaryProtocolReader reader;
-  reader.setInput(&buf);
-  metadata.read(&reader);
-  return metadata;
 }
 
 ThriftServerRequestMessage makeRequestMessage(
@@ -585,9 +578,8 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithClientBlame) {
         captured.writeCalled = true;
         auto& resp = box.get<ThriftServerResponseMessage>();
         captured.errorCode = payloadErrorCode(resp);
-        if (auto& m = payloadMetadata(resp); m) {
-          auto meta = deserializeResponseMetadata(*m);
-          if (auto pmRef = meta.payloadMetadata(); pmRef &&
+        if (auto* m = payloadMetadata(resp); m) {
+          if (auto pmRef = m->payloadMetadata(); pmRef &&
               pmRef->getType() ==
                   apache::thrift::PayloadMetadata::Type::exceptionMetadata) {
             auto& exBase = pmRef->get_exceptionMetadata();
@@ -614,14 +606,17 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithClientBlame) {
         return Result::Success;
       });
 
+  auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+  fillAppErrorResponseMetadata(
+      *md,
+      "my.thrift.MyAppError",
+      "client did bad",
+      apache::thrift::ErrorBlame::CLIENT);
   EXPECT_EQ(
       adapter->writeResponse(
           /*streamId=*/7,
           /*data=*/nullptr,
-          makeAppErrorResponseMetadata<apache::thrift::BinaryProtocolWriter>(
-              "my.thrift.MyAppError",
-              "client did bad",
-              apache::thrift::ErrorBlame::CLIENT),
+          std::move(md),
           /*complete=*/true),
       Result::Success);
 
@@ -644,9 +639,8 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithServerBlame) {
         captured.writeCalled = true;
         auto& resp = box.get<ThriftServerResponseMessage>();
         captured.errorCode = payloadErrorCode(resp);
-        if (auto& m = payloadMetadata(resp); m) {
-          auto meta = deserializeResponseMetadata(*m);
-          if (auto pmRef = meta.payloadMetadata(); pmRef &&
+        if (auto* m = payloadMetadata(resp); m) {
+          if (auto pmRef = m->payloadMetadata(); pmRef &&
               pmRef->getType() ==
                   apache::thrift::PayloadMetadata::Type::exceptionMetadata) {
             auto& exBase = pmRef->get_exceptionMetadata();
@@ -673,14 +667,17 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithServerBlame) {
         return Result::Success;
       });
 
+  auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+  fillAppErrorResponseMetadata(
+      *md,
+      "my.thrift.MyAppError",
+      "server bug",
+      apache::thrift::ErrorBlame::SERVER);
   EXPECT_EQ(
       adapter->writeResponse(
           /*streamId=*/7,
           /*data=*/nullptr,
-          makeAppErrorResponseMetadata<apache::thrift::BinaryProtocolWriter>(
-              "my.thrift.MyAppError",
-              "server bug",
-              apache::thrift::ErrorBlame::SERVER),
+          std::move(md),
           /*complete=*/true),
       Result::Success);
 
@@ -818,9 +815,8 @@ TEST_F(
         if (auto& d = payloadData(resp); d) {
           capturedData = d->moveToFbString().toStdString();
         }
-        if (auto& m = payloadMetadata(resp); m) {
-          auto meta = deserializeResponseMetadata(*m);
-          if (auto pmRef = meta.payloadMetadata(); pmRef &&
+        if (auto* m = payloadMetadata(resp); m) {
+          if (auto pmRef = m->payloadMetadata(); pmRef &&
               pmRef->getType() ==
                   apache::thrift::PayloadMetadata::Type::exceptionMetadata) {
             auto& exBase = pmRef->get_exceptionMetadata();
@@ -851,14 +847,14 @@ TEST_F(
   apache::thrift::ErrorClassification classification;
   classification.blame() = apache::thrift::ErrorBlame::CLIENT;
 
+  auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+  fillDeclaredExceptionMetadata(
+      *md, "my.thrift.MyDeclaredException", "expected failure", classification);
   EXPECT_EQ(
       adapter->writeResponse(
           /*streamId=*/7,
           folly::IOBuf::copyBuffer("serialized exception struct"),
-          makeDeclaredExceptionMetadata<apache::thrift::BinaryProtocolWriter>(
-              "my.thrift.MyDeclaredException",
-              "expected failure",
-              classification),
+          std::move(md),
           /*complete=*/true),
       Result::Success);
 
@@ -904,13 +900,12 @@ TEST_F(
   EXPECT_EQ(payloadStreamId(captured), 7u);
   EXPECT_EQ(payloadErrorCode(captured), 0u) << "PAYLOAD frame, not ERROR";
   EXPECT_EQ(payloadData(captured), nullptr);
-  EXPECT_TRUE(captured.payload.get<ThriftResponsePayload>().complete);
+  EXPECT_TRUE(captured.payload.get<ThriftFirstResponsePayload>().complete);
 
-  auto& md_buf = payloadMetadata(captured);
-  ASSERT_NE(md_buf, nullptr);
-  auto md = deserializeResponseMetadata(*md_buf);
-  ASSERT_TRUE(md.payloadMetadata().has_value());
-  auto& base = md.payloadMetadata()->get_exceptionMetadata();
+  const auto* md = payloadMetadata(captured);
+  ASSERT_NE(md, nullptr);
+  ASSERT_TRUE(md->payloadMetadata().has_value());
+  auto& base = md->payloadMetadata()->get_exceptionMetadata();
   ASSERT_TRUE(base.metadata().has_value());
   EXPECT_EQ(
       base.metadata()->getType(),

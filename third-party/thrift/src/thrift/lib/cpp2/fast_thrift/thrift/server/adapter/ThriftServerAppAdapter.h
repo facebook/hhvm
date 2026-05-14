@@ -80,7 +80,8 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
 
   // Set the per-connection metadata protocol. Pushed once by the SETUP
   // handler's onSetupComplete callback; embedders that don't wire SETUP
-  // through leave the default (Binary).
+  // through leave the default (Binary). Used on the inbound path to pick
+  // the matching reader for RequestRpcMetadata.
   void setMetadataProtocol(rocket::server::MetadataProtocol p) noexcept {
     metadataProtocol_ = p;
   }
@@ -103,15 +104,18 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   void onWriteReady() noexcept {}
 
   // Sends a PAYLOAD frame. Caller (codegen / framework) is responsible for
-  // building the data buffer (serialized presult, or nullptr) and metadata
-  // buffer (success / declared exception / app error metadata) — the adapter
-  // only frames them onto the pipeline.
+  // building the data buffer (serialized presult, or nullptr) and the typed
+  // ResponseRpcMetadata struct (populated via fillSuccessResponseMetadata /
+  // fillAppErrorResponseMetadata / fillDeclaredExceptionMetadata, or by
+  // hand). Metadata serialization is deferred into the pipeline
+  // (ThriftFirstResponsePayload::toRocketFrame) so the adapter never has to
+  // pre-serialize.
   //
   // Returns the pipeline write Result. Callers should propagate the Result.
   [[nodiscard]] channel_pipeline::Result writeResponse(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
-      std::unique_ptr<folly::IOBuf> metadata,
+      std::unique_ptr<apache::thrift::ResponseRpcMetadata> metadata,
       bool complete) noexcept;
 
   // Sends an ERROR frame (framework-level error: bad metadata, unknown
@@ -135,19 +139,18 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   //   undeclared exception     → writeUnknownException  (PAYLOAD)
   //   framework dispatch error → writeFrameworkError    (ERROR)
 
-  // Success: serialize presult into a payload buffer, attach the cached
-  // default success metadata, fire as PAYLOAD (errorCode=0, complete=true).
+  // Success: serialize presult into a payload buffer, build success
+  // metadata, fire as PAYLOAD (errorCode=0, complete=true).
   template <typename Writer, typename Presult>
   [[nodiscard]] channel_pipeline::Result writeSuccessResponse(
       uint32_t streamId, const Presult& presult) noexcept {
     auto data = serializeResponse<Writer>(
         [&](Writer& w) { presult.write(&w); },
         [&](Writer& w) { return presult.serializedSizeZC(&w); });
+    auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+    fillSuccessResponseMetadata(*md);
     return writeResponse(
-        streamId,
-        std::move(data),
-        defaultSuccessMetadata(metadataProtocol_),
-        /*complete=*/true);
+        streamId, std::move(data), std::move(md), /*complete=*/true);
   }
 
   // Declared exception: caller has already populated the matching presult
@@ -167,8 +170,9 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
     auto data = serializeResponse<Writer>(
         [&](Writer& w) { presult.write(&w); },
         [&](Writer& w) { return presult.serializedSizeZC(&w); });
-    auto md = declaredExceptionMetadata(
-        metadataProtocol_,
+    auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+    fillDeclaredExceptionMetadata(
+        *md,
         ew.class_name().toStdString(),
         ew.what().toStdString(),
         classification);

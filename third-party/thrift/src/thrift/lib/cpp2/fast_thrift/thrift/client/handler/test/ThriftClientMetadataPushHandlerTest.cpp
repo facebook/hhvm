@@ -144,8 +144,8 @@ class ThriftClientMetadataPushHandlerTest : public ::testing::Test {
     ThriftResponseMessage response;
     response.payload = ThriftClientInboundPayloadVariant{
         ThriftFirstResponsePayload{
-            .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
             .data = folly::IOBuf::copyBuffer("test payload"),
+            .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
             .streamId = 1,
             .complete = true,
             .next = true},

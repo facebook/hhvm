@@ -25,26 +25,20 @@
 #include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/RequestMetadata.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
-/**
- * Serialize a populated ResponseRpcMetadata into an IOBuf.
- *
- * Mirror of `serializeRequestMetadata`: pre-calculates serialized size,
- * allocates exactly the needed buffer, and reserves headroom so the
- * downstream frame writer can prepend headers without a separate
- * allocation.
- *
- * Called from `ThriftFirstResponsePayload::toRocketFrame()` on the server
- * outbound path.
- */
+namespace detail {
+
+template <typename ProtocolWriter>
 inline std::unique_ptr<folly::IOBuf> serializeResponseMetadata(
-    apache::thrift::ResponseRpcMetadata& metadata) {
-  apache::thrift::BinaryProtocolWriter writer;
+    const apache::thrift::ResponseRpcMetadata& metadata) {
+  ProtocolWriter writer;
   size_t serSize = metadata.serializedSizeZC(&writer);
 
   constexpr size_t kMinAllocBytes = 1024;
@@ -58,19 +52,13 @@ inline std::unique_ptr<folly::IOBuf> serializeResponseMetadata(
   return queue.move();
 }
 
-/**
- * Deserialize ResponseRpcMetadata from a ParsedFrame's metadata section
- * using Binary protocol. Returns an error on deserialization failure.
- *
- * Inverse of `serializeResponseMetadata`. Used by `fromRocketFrame` on the
- * client inbound path (and any future symmetric server inbound path).
- */
+template <typename ProtocolReader>
 inline folly::exception_wrapper deserializeResponseMetadata(
     const apache::thrift::fast_thrift::frame::read::ParsedFrame& frame,
     apache::thrift::ResponseRpcMetadata& metadata) noexcept {
   try {
     if (frame.hasMetadata() && frame.metadataSize() > 0) {
-      apache::thrift::BinaryProtocolReader reader;
+      ProtocolReader reader;
       reader.setInput(frame.metadataCursor());
       metadata.read(&reader);
     }
@@ -79,6 +67,50 @@ inline folly::exception_wrapper deserializeResponseMetadata(
         "Failed to deserialize response metadata");
   }
   return folly::exception_wrapper{};
+}
+
+} // namespace detail
+
+/**
+ * Serialize a populated ResponseRpcMetadata into an IOBuf using the
+ * SETUP-negotiated metadata protocol (Binary or Compact).
+ *
+ * Mirror of `serializeRequestMetadata`: pre-calculates serialized size,
+ * allocates exactly the needed buffer, and reserves headroom so the
+ * downstream frame writer can prepend headers without a separate
+ * allocation.
+ *
+ * Called from `ThriftFirstResponsePayload::toRocketFrame()` on the server
+ * outbound path.
+ */
+inline std::unique_ptr<folly::IOBuf> serializeResponseMetadata(
+    const apache::thrift::ResponseRpcMetadata& metadata,
+    rocket::server::MetadataProtocol metadataProtocol) {
+  if (metadataProtocol == rocket::server::MetadataProtocol::COMPACT) {
+    return detail::serializeResponseMetadata<
+        apache::thrift::CompactProtocolWriter>(metadata);
+  }
+  return detail::serializeResponseMetadata<
+      apache::thrift::BinaryProtocolWriter>(metadata);
+}
+
+/**
+ * Deserialize ResponseRpcMetadata from a ParsedFrame's metadata section
+ * using Binary protocol. Returns an error on deserialization failure.
+ *
+ * Inverse of `serializeResponseMetadata`. Used by `fromRocketFrame` on the
+ * client inbound path.
+ *
+ * TODO: thread MetadataProtocol through this call once the client wires
+ * the SETUP-negotiated protocol into the transport adapter (matching the
+ * server outbound path). The templated detail::deserializeResponseMetadata
+ * above is ready for that switch.
+ */
+inline folly::exception_wrapper deserializeResponseMetadata(
+    const apache::thrift::fast_thrift::frame::read::ParsedFrame& frame,
+    apache::thrift::ResponseRpcMetadata& metadata) noexcept {
+  return detail::deserializeResponseMetadata<
+      apache::thrift::BinaryProtocolReader>(frame, metadata);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

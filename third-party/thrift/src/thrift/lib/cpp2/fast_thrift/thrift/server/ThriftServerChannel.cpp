@@ -28,6 +28,8 @@
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
+#include <memory>
+
 namespace apache::thrift::fast_thrift::thrift {
 
 namespace {
@@ -92,10 +94,10 @@ class PipelineResponseChannelRequest
       apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline,
       std::shared_ptr<std::atomic<bool>> pipelineAlive,
       bool isOneway,
-      apache::thrift::fast_thrift::rocket::server::MetadataProtocol
-          metadataProtocol,
       apache::thrift::Cpp2ConnContext* connContext,
-      std::string methodName)
+      std::string methodName,
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol
+          metadataProtocol)
       : streamId_(streamId),
         pipeline_(pipeline),
         pipelineAlive_(std::move(pipelineAlive)),
@@ -117,20 +119,21 @@ class PipelineResponseChannelRequest
       return;
     }
 
-    apache::thrift::ResponseRpcMetadata responseMetadata;
-    responseMetadata.payloadMetadata() =
+    auto responseMetadata =
+        std::make_unique<apache::thrift::ResponseRpcMetadata>();
+    responseMetadata->payloadMetadata() =
         buildPayloadMetadataFromContext(reqCtx_);
 
-    auto serializedMetadata =
-        serializeResponseMetadata(metadataProtocol_, responseMetadata);
     apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage msg{
-        .payload = apache::thrift::fast_thrift::thrift::ThriftResponsePayload{
-            .data = std::move(response).buffer(),
-            .metadata = std::move(serializedMetadata),
-            .streamId = streamId_,
-            .complete = true,
-            .next = true,
-        }};
+        .payload =
+            apache::thrift::fast_thrift::thrift::ThriftFirstResponsePayload{
+                .data = std::move(response).buffer(),
+                .metadata = std::move(responseMetadata),
+                .streamId = streamId_,
+                .metadataProtocol = metadataProtocol_,
+                .complete = true,
+                .next = true,
+            }};
 
     if (!pipelineAlive_->load()) {
       XLOG(WARN) << "Pipeline destroyed, cannot send reply for stream "
@@ -209,14 +212,19 @@ class PipelineResponseChannelRequest
     static const auto exHeader = std::string(apache::thrift::detail::kHeaderEx);
     writeHeaders->erase(exHeader);
 
-    auto md = appErrorMetadata(
-        metadataProtocol_, std::move(exName), ex.what().toStdString(), blame);
+    auto responseMetadata =
+        std::make_unique<apache::thrift::ResponseRpcMetadata>();
+    fillAppErrorResponseMetadata(
+        *responseMetadata, std::move(exName), ex.what().toStdString(), blame);
+
     ThriftServerResponseMessage msg{
-        .payload = ThriftResponsePayload{
+        .payload = ThriftFirstResponsePayload{
             .data = nullptr,
-            .metadata = std::move(md),
+            .metadata = std::move(responseMetadata),
             .streamId = streamId_,
-            .complete = true}};
+            .metadataProtocol = metadataProtocol_,
+            .complete = true,
+            .next = true}};
 
     auto result = pipeline_->fireWrite(
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
@@ -362,9 +370,9 @@ ThriftServerChannel::onRead(
           pipeline_,
           pipelineAlive_,
           isOneway,
-          metadataProtocol_,
           &connContext_,
-          std::move(methodName)));
+          std::move(methodName),
+          metadataProtocol_));
 
   auto* reqCtxPtr = channelRequest->requestContext();
 

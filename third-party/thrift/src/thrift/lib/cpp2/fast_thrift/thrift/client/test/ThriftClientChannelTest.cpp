@@ -173,8 +173,8 @@ class ThriftClientChannelTest : public ::testing::Test {
     ThriftResponseMessage response;
     response.payload = ThriftClientInboundPayloadVariant{
         ThriftFirstResponsePayload{
-            .metadata = std::move(metadata),
             .data = folly::IOBuf::copyBuffer(data),
+            .metadata = std::move(metadata),
             .streamId = 1,
             .complete = true,
             .next = true},

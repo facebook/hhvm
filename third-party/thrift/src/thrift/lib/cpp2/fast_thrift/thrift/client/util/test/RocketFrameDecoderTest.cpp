@@ -37,9 +37,9 @@ apache::thrift::ResponseRpcMetadata makePopulatedResponseMetadata() {
 apache::thrift::fast_thrift::frame::read::ParsedFrame makePayloadFrame(
     uint32_t streamId, bool complete, bool next) {
   ThriftFirstResponsePayload payload{
+      .data = folly::IOBuf::copyBuffer("hello"),
       .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(
           makePopulatedResponseMetadata()),
-      .data = folly::IOBuf::copyBuffer("hello"),
       .streamId = streamId,
       .complete = complete,
       .next = next};

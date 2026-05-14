@@ -121,8 +121,8 @@ ThriftResponseMessage makeFirstResponse(
   ThriftResponseMessage response;
   response.payload = ThriftClientInboundPayloadVariant{
       ThriftFirstResponsePayload{
-          .metadata = std::move(metadata),
           .data = std::move(data),
+          .metadata = std::move(metadata),
           .streamId = 1,
           .complete = true,
           .next = true},
@@ -135,8 +135,8 @@ ThriftResponseMessage makeFirstResponseNoChecksum(
   ThriftResponseMessage response;
   response.payload = ThriftClientInboundPayloadVariant{
       ThriftFirstResponsePayload{
-          .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
           .data = std::move(data),
+          .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
           .streamId = 1,
           .complete = true,
           .next = true},

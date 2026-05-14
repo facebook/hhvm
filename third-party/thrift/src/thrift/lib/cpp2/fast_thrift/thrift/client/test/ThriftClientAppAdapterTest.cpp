@@ -65,8 +65,8 @@ ThriftResponseMessage makeResponse(
   ThriftResponseMessage response;
   response.payload = ThriftClientInboundPayloadVariant{
       ThriftFirstResponsePayload{
-          .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
           .data = folly::IOBuf::copyBuffer("response"),
+          .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
           .streamId = 1,
           .complete = true,
           .next = true},

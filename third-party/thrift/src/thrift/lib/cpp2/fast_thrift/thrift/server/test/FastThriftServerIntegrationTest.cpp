@@ -68,7 +68,7 @@ using cp::TypeErasedBox;
 using cp::test::MockHandler;
 using cp::test::TestAllocator;
 using ft::ThriftErrorPayload;
-using ft::ThriftResponsePayload;
+using ft::ThriftFirstResponsePayload;
 using ft::ThriftServerAppAdapter;
 using ft::ThriftServerRequestMessage;
 using ft::ThriftServerResponseMessage;
@@ -77,17 +77,19 @@ using ft::ThriftServerResponseMessage;
 // regardless of which alternative is held.
 const std::unique_ptr<folly::IOBuf>& payloadData(
     const ThriftServerResponseMessage& msg) {
-  if (msg.payload.is<ThriftResponsePayload>()) {
-    return msg.payload.get<ThriftResponsePayload>().data;
+  if (msg.payload.is<ThriftFirstResponsePayload>()) {
+    return msg.payload.get<ThriftFirstResponsePayload>().data;
   }
   return msg.payload.get<ThriftErrorPayload>().data;
 }
-const std::unique_ptr<folly::IOBuf>& payloadMetadata(
+// Returns the typed ResponseRpcMetadata held by a ThriftFirstResponsePayload,
+// or nullptr if the message carries an error payload instead.
+const apache::thrift::ResponseRpcMetadata* payloadMetadata(
     const ThriftServerResponseMessage& msg) {
-  if (msg.payload.is<ThriftResponsePayload>()) {
-    return msg.payload.get<ThriftResponsePayload>().metadata;
+  if (msg.payload.is<ThriftFirstResponsePayload>()) {
+    return msg.payload.get<ThriftFirstResponsePayload>().metadata.get();
   }
-  return msg.payload.get<ThriftErrorPayload>().metadata;
+  return nullptr;
 }
 uint32_t payloadErrorCode(const ThriftServerResponseMessage& msg) {
   if (msg.payload.is<ThriftErrorPayload>()) {
@@ -141,15 +143,6 @@ ThriftServerRequestMessage makeRequest(
       ::apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
   msg.streamId = streamId;
   return msg;
-}
-
-apache::thrift::ResponseRpcMetadata deserializeResponseMetadata(
-    const folly::IOBuf& buf) {
-  apache::thrift::ResponseRpcMetadata metadata;
-  apache::thrift::BinaryProtocolReader reader;
-  reader.setInput(&buf);
-  metadata.read(&reader);
-  return metadata;
 }
 
 apache::thrift::ResponseRpcError deserializeResponseRpcError(
@@ -347,11 +340,11 @@ TEST_F(FastThriftServerIntegrationTest, PingSucceeds) {
 
   EXPECT_TRUE(testHandler()->pingCalled);
   EXPECT_EQ(payloadErrorCode(response), 0u);
-  ASSERT_NE(payloadMetadata(response), nullptr);
-  auto meta = deserializeResponseMetadata(*payloadMetadata(response));
-  ASSERT_TRUE(meta.payloadMetadata().has_value());
+  const auto* meta = payloadMetadata(response);
+  ASSERT_NE(meta, nullptr);
+  ASSERT_TRUE(meta->payloadMetadata().has_value());
   EXPECT_EQ(
-      meta.payloadMetadata()->getType(),
+      meta->payloadMetadata()->getType(),
       apache::thrift::PayloadMetadata::Type::responseMetadata);
 }
 
@@ -403,13 +396,13 @@ TEST_F(FastThriftServerIntegrationTest, LookupDeclaredExceptionMetadata) {
   auto response = drive(makeRequest(
       4, "lookup", apache::thrift::ProtocolId::BINARY, std::move(data)));
 
-  ASSERT_NE(payloadMetadata(response), nullptr);
-  auto meta = deserializeResponseMetadata(*payloadMetadata(response));
-  ASSERT_TRUE(meta.payloadMetadata().has_value());
+  const auto* meta = payloadMetadata(response);
+  ASSERT_NE(meta, nullptr);
+  ASSERT_TRUE(meta->payloadMetadata().has_value());
   ASSERT_EQ(
-      meta.payloadMetadata()->getType(),
+      meta->payloadMetadata()->getType(),
       apache::thrift::PayloadMetadata::Type::exceptionMetadata);
-  auto& exBase = meta.payloadMetadata()->get_exceptionMetadata();
+  auto& exBase = meta->payloadMetadata()->get_exceptionMetadata();
   ASSERT_TRUE(exBase.metadata().has_value());
   EXPECT_EQ(
       exBase.metadata()->getType(),
@@ -433,13 +426,13 @@ TEST_F(FastThriftServerIntegrationTest, SecureLookupSecondExceptionInCascade) {
   auto response = drive(makeRequest(
       5, "secureLookup", apache::thrift::ProtocolId::BINARY, std::move(data)));
 
-  ASSERT_NE(payloadMetadata(response), nullptr);
-  auto meta = deserializeResponseMetadata(*payloadMetadata(response));
-  ASSERT_TRUE(meta.payloadMetadata().has_value());
+  const auto* meta = payloadMetadata(response);
+  ASSERT_NE(meta, nullptr);
+  ASSERT_TRUE(meta->payloadMetadata().has_value());
   ASSERT_EQ(
-      meta.payloadMetadata()->getType(),
+      meta->payloadMetadata()->getType(),
       apache::thrift::PayloadMetadata::Type::exceptionMetadata);
-  auto& exBase = meta.payloadMetadata()->get_exceptionMetadata();
+  auto& exBase = meta->payloadMetadata()->get_exceptionMetadata();
   ASSERT_TRUE(exBase.metadata().has_value());
   EXPECT_EQ(
       exBase.metadata()->getType(),
@@ -470,13 +463,13 @@ TEST_F(
   // null data.
   EXPECT_EQ(payloadErrorCode(response), 0u);
   EXPECT_EQ(payloadData(response), nullptr);
-  ASSERT_NE(payloadMetadata(response), nullptr);
-  auto meta = deserializeResponseMetadata(*payloadMetadata(response));
-  ASSERT_TRUE(meta.payloadMetadata().has_value());
+  const auto* meta = payloadMetadata(response);
+  ASSERT_NE(meta, nullptr);
+  ASSERT_TRUE(meta->payloadMetadata().has_value());
   ASSERT_EQ(
-      meta.payloadMetadata()->getType(),
+      meta->payloadMetadata()->getType(),
       apache::thrift::PayloadMetadata::Type::exceptionMetadata);
-  auto& exBase = meta.payloadMetadata()->get_exceptionMetadata();
+  auto& exBase = meta->payloadMetadata()->get_exceptionMetadata();
   ASSERT_TRUE(exBase.metadata().has_value());
   EXPECT_EQ(
       exBase.metadata()->getType(),
@@ -527,13 +520,13 @@ TEST_F(
   // Unimplemented path: cb->exception(UNKNOWN_METHOD) → undeclared cascade →
   // PAYLOAD frame with appUnknownException metadata.
   EXPECT_EQ(payloadErrorCode(response), 0u);
-  ASSERT_NE(payloadMetadata(response), nullptr);
-  auto meta = deserializeResponseMetadata(*payloadMetadata(response));
-  ASSERT_TRUE(meta.payloadMetadata().has_value());
+  const auto* meta = payloadMetadata(response);
+  ASSERT_NE(meta, nullptr);
+  ASSERT_TRUE(meta->payloadMetadata().has_value());
   ASSERT_EQ(
-      meta.payloadMetadata()->getType(),
+      meta->payloadMetadata()->getType(),
       apache::thrift::PayloadMetadata::Type::exceptionMetadata);
-  auto& exBase = meta.payloadMetadata()->get_exceptionMetadata();
+  auto& exBase = meta->payloadMetadata()->get_exceptionMetadata();
   ASSERT_TRUE(exBase.metadata().has_value());
   EXPECT_EQ(
       exBase.metadata()->getType(),

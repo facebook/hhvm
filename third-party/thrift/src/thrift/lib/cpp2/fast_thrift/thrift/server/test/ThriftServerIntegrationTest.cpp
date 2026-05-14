@@ -1034,10 +1034,12 @@ TEST_F(
         // writeResponse returning Backpressure is a write-side flow-control
         // signal; the request was handled successfully so we report Success
         // back into the read chain. Only Error (connection dead) propagates.
+        auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+        fillSuccessResponseMetadata(*md);
         auto writeResult = self->writeResponse(
             streamId,
             folly::IOBuf::copyBuffer("echo response"),
-            /*metadata=*/nullptr,
+            std::move(md),
             /*complete=*/true);
         return writeResult == Result::Error ? Result::Error : Result::Success;
       });
@@ -1068,10 +1070,12 @@ TEST_F(
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId) noexcept -> Result {
+        auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+        fillSuccessResponseMetadata(*md);
         auto writeResult = self->writeResponse(
             streamId,
             folly::IOBuf::copyBuffer("reply"),
-            /*metadata=*/nullptr,
+            std::move(md),
             /*complete=*/true);
         return writeResult == Result::Error ? Result::Error : Result::Success;
       });

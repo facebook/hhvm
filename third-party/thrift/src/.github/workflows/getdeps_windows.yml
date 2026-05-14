@@ -19,26 +19,32 @@ jobs:
     runs-on: windows-2022
     timeout-minutes: 60
     steps:
+
     - name: Show runner info
       run: |
         echo "CPU cores: $env:NUMBER_OF_PROCESSORS"
         (Get-CimInstance Win32_Processor).Name
         [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 1).ToString() + " GB RAM"
       shell: pwsh
+
     - name: Export boost environment
       run: "echo BOOST_ROOT=%BOOST_ROOT_1_83_0% >> %GITHUB_ENV%"
       shell: cmd
+
     - name: Fix Git config
       run: >
         git config --system core.longpaths true &&
         git config --system core.autocrlf false &&
         git config --system core.symlinks true
       shell: cmd
+
     - uses: actions/checkout@v6
+
     - id: paths
       name: Query paths
       run: python build/fbcode_builder/getdeps.py query-paths --recursive --src-dir=. fbthrift  >> $env:GITHUB_OUTPUT
       shell: pwsh
+
     - name: Fetch libsodium
       if: ${{ steps.paths.outputs.libsodium_SOURCE }}
       run: python build/fbcode_builder/getdeps.py fetch --no-tests libsodium
@@ -117,6 +123,7 @@ jobs:
     - name: Fetch wangle
       if: ${{ steps.paths.outputs.wangle_SOURCE }}
       run: python build/fbcode_builder/getdeps.py fetch --no-tests wangle
+
     - name: Restore libsodium from cache
       id: restore_libsodium
       if: ${{ steps.paths.outputs.libsodium_SOURCE }}
@@ -133,6 +140,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.libsodium_INSTALL }}
        key: ${{ steps.paths.outputs.libsodium_CACHE_KEY }}-install
+
     - name: Restore ninja from cache
       id: restore_ninja
       if: ${{ steps.paths.outputs.ninja_SOURCE }}
@@ -149,6 +157,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.ninja_INSTALL }}
        key: ${{ steps.paths.outputs.ninja_CACHE_KEY }}-install
+
     - name: Restore cmake from cache
       id: restore_cmake
       if: ${{ steps.paths.outputs.cmake_SOURCE }}
@@ -165,6 +174,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.cmake_INSTALL }}
        key: ${{ steps.paths.outputs.cmake_CACHE_KEY }}-install
+
     - name: Restore benchmark from cache
       id: restore_benchmark
       if: ${{ steps.paths.outputs.benchmark_SOURCE }}
@@ -181,6 +191,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.benchmark_INSTALL }}
        key: ${{ steps.paths.outputs.benchmark_CACHE_KEY }}-install
+
     - name: Restore zlib from cache
       id: restore_zlib
       if: ${{ steps.paths.outputs.zlib_SOURCE }}
@@ -197,6 +208,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.zlib_INSTALL }}
        key: ${{ steps.paths.outputs.zlib_CACHE_KEY }}-install
+
     - name: Restore zstd from cache
       id: restore_zstd
       if: ${{ steps.paths.outputs.zstd_SOURCE }}
@@ -213,6 +225,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.zstd_INSTALL }}
        key: ${{ steps.paths.outputs.zstd_CACHE_KEY }}-install
+
     - name: Restore fmt from cache
       id: restore_fmt
       if: ${{ steps.paths.outputs.fmt_SOURCE }}
@@ -229,6 +242,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.fmt_INSTALL }}
        key: ${{ steps.paths.outputs.fmt_CACHE_KEY }}-install
+
     - name: Restore boost from cache
       id: restore_boost
       if: ${{ steps.paths.outputs.boost_SOURCE }}
@@ -245,6 +259,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.boost_INSTALL }}
        key: ${{ steps.paths.outputs.boost_CACHE_KEY }}-install
+
     - name: Restore double-conversion from cache
       id: restore_double-conversion
       if: ${{ steps.paths.outputs.double-conversion_SOURCE }}
@@ -261,6 +276,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.double-conversion_INSTALL }}
        key: ${{ steps.paths.outputs.double-conversion_CACHE_KEY }}-install
+
     - name: Restore fast_float from cache
       id: restore_fast_float
       if: ${{ steps.paths.outputs.fast_float_SOURCE }}
@@ -277,6 +293,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.fast_float_INSTALL }}
        key: ${{ steps.paths.outputs.fast_float_CACHE_KEY }}-install
+
     - name: Restore gflags from cache
       id: restore_gflags
       if: ${{ steps.paths.outputs.gflags_SOURCE }}
@@ -293,6 +310,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.gflags_INSTALL }}
        key: ${{ steps.paths.outputs.gflags_CACHE_KEY }}-install
+
     - name: Restore glog from cache
       id: restore_glog
       if: ${{ steps.paths.outputs.glog_SOURCE }}
@@ -309,6 +327,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.glog_INSTALL }}
        key: ${{ steps.paths.outputs.glog_CACHE_KEY }}-install
+
     - name: Restore googletest from cache
       id: restore_googletest
       if: ${{ steps.paths.outputs.googletest_SOURCE }}
@@ -325,6 +344,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.googletest_INSTALL }}
        key: ${{ steps.paths.outputs.googletest_CACHE_KEY }}-install
+
     - name: Restore libdwarf from cache
       id: restore_libdwarf
       if: ${{ steps.paths.outputs.libdwarf_SOURCE }}
@@ -341,6 +361,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.libdwarf_INSTALL }}
        key: ${{ steps.paths.outputs.libdwarf_CACHE_KEY }}-install
+
     - name: Restore lz4 from cache
       id: restore_lz4
       if: ${{ steps.paths.outputs.lz4_SOURCE }}
@@ -357,6 +378,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.lz4_INSTALL }}
        key: ${{ steps.paths.outputs.lz4_CACHE_KEY }}-install
+
     - name: Restore snappy from cache
       id: restore_snappy
       if: ${{ steps.paths.outputs.snappy_SOURCE }}
@@ -373,6 +395,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.snappy_INSTALL }}
        key: ${{ steps.paths.outputs.snappy_CACHE_KEY }}-install
+
     - name: Restore xxhash from cache
       id: restore_xxhash
       if: ${{ steps.paths.outputs.xxhash_SOURCE }}
@@ -389,6 +412,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.xxhash_INSTALL }}
        key: ${{ steps.paths.outputs.xxhash_CACHE_KEY }}-install
+
     - name: Restore jom from cache
       id: restore_jom
       if: ${{ steps.paths.outputs.jom_SOURCE }}
@@ -405,6 +429,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.jom_INSTALL }}
        key: ${{ steps.paths.outputs.jom_CACHE_KEY }}-install
+
     - name: Restore perl from cache
       id: restore_perl
       if: ${{ steps.paths.outputs.perl_SOURCE }}
@@ -421,6 +446,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.perl_INSTALL }}
        key: ${{ steps.paths.outputs.perl_CACHE_KEY }}-install
+
     - name: Restore openssl from cache
       id: restore_openssl
       if: ${{ steps.paths.outputs.openssl_SOURCE }}
@@ -437,6 +463,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.openssl_INSTALL }}
        key: ${{ steps.paths.outputs.openssl_CACHE_KEY }}-install
+
     - name: Restore libevent from cache
       id: restore_libevent
       if: ${{ steps.paths.outputs.libevent_SOURCE }}
@@ -453,6 +480,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.libevent_INSTALL }}
        key: ${{ steps.paths.outputs.libevent_CACHE_KEY }}-install
+
     - name: Restore folly from cache
       id: restore_folly
       if: ${{ steps.paths.outputs.folly_SOURCE }}
@@ -469,6 +497,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.folly_INSTALL }}
        key: ${{ steps.paths.outputs.folly_CACHE_KEY }}-install
+
     - name: Restore liboqs from cache
       id: restore_liboqs
       if: ${{ steps.paths.outputs.liboqs_SOURCE }}
@@ -485,6 +514,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.liboqs_INSTALL }}
        key: ${{ steps.paths.outputs.liboqs_CACHE_KEY }}-install
+
     - name: Restore fizz from cache
       id: restore_fizz
       if: ${{ steps.paths.outputs.fizz_SOURCE }}
@@ -501,6 +531,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.fizz_INSTALL }}
        key: ${{ steps.paths.outputs.fizz_CACHE_KEY }}-install
+
     - name: Restore mvfst from cache
       id: restore_mvfst
       if: ${{ steps.paths.outputs.mvfst_SOURCE }}
@@ -517,6 +548,7 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.mvfst_INSTALL }}
        key: ${{ steps.paths.outputs.mvfst_CACHE_KEY }}-install
+
     - name: Restore wangle from cache
       id: restore_wangle
       if: ${{ steps.paths.outputs.wangle_SOURCE }}
@@ -533,16 +565,20 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.wangle_INSTALL }}
        key: ${{ steps.paths.outputs.wangle_CACHE_KEY }}-install
+
     - name: Build fbthrift
       run: python build/fbcode_builder/getdeps.py build --build-type RelWithDebInfo --src-dir=. fbthrift
+
     - name: Copy artifacts
       run: python build/fbcode_builder/getdeps.py fixup-dyn-deps --src-dir=. fbthrift _artifacts/windows --final-install-prefix /usr/local
     - uses: actions/upload-artifact@v6
       with:
         name: fbthrift
         path: _artifacts
+
     - name: Test fbthrift
       run: python build/fbcode_builder/getdeps.py test --build-type RelWithDebInfo --src-dir=. fbthrift
+
     - name: Show GitHub Actions cache usage
       if: always()
       env:

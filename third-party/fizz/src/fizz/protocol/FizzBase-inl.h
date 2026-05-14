@@ -163,16 +163,12 @@ void FizzBase<Derived, ActionMoveVisitor, StateMachine>::
   };
 
   while (!actionGuard_ && !inTerminalState() && !paused_) {
-    if (waitForData_ && pendingEvents_.empty()) {
-      return;
-    }
-
     folly::Optional<typename StateMachine::ProcessingActions> actions;
     actionGuard_ = folly::DelayedDestruction::DestructorGuard(owner_);
     if (!waitForData_) {
       actions.emplace(machine_.processSocketData(
           state_, transportReadBuf_, readAeadOptions_));
-    } else {
+    } else if (!pendingEvents_.empty()) {
       auto event = std::move(pendingEvents_.front());
       pendingEvents_.pop_front();
       switch (event.type()) {
@@ -202,6 +198,9 @@ void FizzBase<Derived, ActionMoveVisitor, StateMachine>::
         default:
           break;
       }
+    } else {
+      actionGuard_.reset();
+      return;
     }
 
     static_cast<Derived*>(this)->startActions(std::move(*actions));

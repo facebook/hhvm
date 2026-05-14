@@ -393,7 +393,7 @@ int main(int argc, char* argv[]) {
 
   std::vector<Cluster> clusters;
 
-  const char* filename;
+  const char* filename = nullptr;
   if (algorithm == Algorithm::Hfsort) {
     HFTRACE(1, "=== algorithm : hfsort\n\n");
     clusters = clusterize(cg);

@@ -18,7 +18,9 @@
 
 #include <type_traits>
 
+#include <iterator>
 #include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <folly/String.h>
 #include <folly/json.h>
@@ -27,6 +29,10 @@ namespace {
 
 class WrappedIOBufQueueAppender {
  public:
+  // Required by std::back_insert_iterator so that fmt::format_to can treat
+  // this as an output iterator over chars.
+  using value_type = char;
+
   explicit WrappedIOBufQueueAppender(folly::io::QueueAppender& out)
       : out_(out) {}
 
@@ -102,11 +108,7 @@ uint32_t JSONProtocolWriterCommon::writeJSONDoubleInternal(float flt) {
   if (isMapKey()) {
     folly::toAppend('"', &appender);
   }
-  folly::toAppend(
-      flt,
-      &appender,
-      folly::DtoaMode::SHORTEST_SINGLE,
-      0 /* numDigits is unused in shortest */);
+  fmt::format_to(std::back_inserter(appender), "{}", flt);
   if (isMapKey()) {
     folly::toAppend('"', &appender);
   }

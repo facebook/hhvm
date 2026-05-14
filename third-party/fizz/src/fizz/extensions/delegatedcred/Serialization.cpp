@@ -7,7 +7,7 @@
  */
 #include <fizz/extensions/delegatedcred/DelegatedCredentialUtils.h>
 #include <fizz/extensions/delegatedcred/Serialization.h>
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/Range.h>
 #include <folly/base64.h>
 
@@ -94,7 +94,7 @@ Status loadDCFromPEM(
   if (!(keyHeaderPtr != std::string::npos &&
         keyFooderPtr != std::string::npos)) {
     return err.error(
-        folly::sformat(
+        fmt::format(
             "Failed to load delegated credential key from pem, expected label {} which was not found",
             dcKeyHeader));
   }
@@ -124,7 +124,7 @@ Status loadDCFromPEM(
   if (!(credDataPtr != std::string::npos &&
         credDataEndPtr != std::string::npos)) {
     return err.error(
-        folly::sformat(
+        fmt::format(
             "Failed to load delegated credential from pem, expected label {} which was not found",
             dcHeader));
   }
@@ -143,7 +143,7 @@ Status loadDCFromPEM(
     FIZZ_RETURN_ON_ERROR(getExtension<DelegatedCredential>(cred, err, credVec));
   } catch (const std::exception& e) {
     return err.error(
-        folly::sformat(
+        fmt::format(
             "Failed to decode delegated credential with exception {}",
             e.what()));
   }

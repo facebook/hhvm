@@ -71,14 +71,14 @@ Named parameters are part of a function's API and therefore are part of the type
 - Default values for optional parameters should be free of side effects
   in order to avoid interactions between different call sites.
 
-## Prefer Named Parameters Over Shapes
+## Prefer Named Parameters Over the "Shape-Passing Pattern"
 
 Older code sometimes simulates named arguments by passing a shape. It is
 recommended to use named parameters when you are designing or updating an API –
 they make call sites clearer, avoid unpacking boilerplate inside the callee, and
 are more efficient than the shape-based pattern.
 
-**GOOD**:
+**GOOD** (named parameters):
 
 ```hack
 <<file: __EnableUnstableFeatures('named_parameters')>>
@@ -92,7 +92,7 @@ function schedule_retry(
 }
 ```
 
-**BAD** (inefficient, high-boilerplate):
+**BAD** (inefficient, high-boilerplate shape-passing pattern):
 
 ```hack
 function schedule_retry(string $job, shape(?"delay_ms" => int, ?"max_attempts" => int) $options): void {
@@ -106,4 +106,4 @@ function schedule_retry(string $job, shape(?"delay_ms" => int, ?"max_attempts" =
 }
 ```
 
-Shapes can still be convenient when the same or similar options must be passed to multiple functions, but generally named parameters are preferred.
+Shape-passing can still be convenient when the same or similar options must be passed to multiple functions, but generally named parameters are preferred. Please reach out to Hack team ([internal link](https://fburl.com/workplace/i1f5coqc)) and share examples if you find yourself reaching for the shape-passing pattern frequently, as it could help evolve the language+codebase.

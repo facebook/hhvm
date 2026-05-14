@@ -72,17 +72,17 @@ inline void emitLdPackedPtr(Vout& v, Vptr src, Vreg dst) {
 }
 
 template <size_t BITS>
-void emitLdPtr(Vout& v, Vreg src, Vreg dst);
+void emitDecodePtr(Vout& v, Vreg src, Vreg dst);
 
 template <>
-void emitLdPtr<32>(Vout& v, Vreg src, Vreg dst);
+void emitDecodePtr<32>(Vout& v, Vreg src, Vreg dst);
 template <>
-void emitLdPtr<35>(Vout& v, Vreg src, Vreg dst);
+void emitDecodePtr<35>(Vout& v, Vreg src, Vreg dst);
 template <>
-void emitLdPtr<64>(Vout& v, Vreg src, Vreg dst);
+void emitDecodePtr<64>(Vout& v, Vreg src, Vreg dst);
 
-inline void emitLdPackedPtr(Vout& v, Vreg src, Vreg dst) {
-  emitLdPtr<PackedPtr<int>::bits>(v, src, dst);
+inline void emitDecodePackedPtr(Vout& v, Vreg src, Vreg dst) {
+  emitDecodePtr<PackedPtr<int>::bits>(v, src, dst);
 }
 
 template <size_t BITS>
@@ -100,17 +100,17 @@ inline void emitStPackedPtr(Vout& v, Vreg src, Vptr dst) {
 }
 
 template <size_t BITS>
-void emitStPtr(Vout& v, Vreg src, Vreg dst);
+void emitEncodePtr(Vout& v, Vreg src, Vreg dst);
 
 template <>
-void emitStPtr<32>(Vout& v, Vreg src, Vreg dst);
+void emitEncodePtr<32>(Vout& v, Vreg src, Vreg dst);
 template <>
-void emitStPtr<35>(Vout& v, Vreg src, Vreg dst);
+void emitEncodePtr<35>(Vout& v, Vreg src, Vreg dst);
 template <>
-void emitStPtr<64>(Vout& v, Vreg src, Vreg dst);
+void emitEncodePtr<64>(Vout& v, Vreg src, Vreg dst);
 
-inline void emitStPackedPtr(Vout& v, Vreg src, Vreg dst) {
-  emitStPtr<PackedPtr<int>::bits>(v, src, dst);
+inline void emitEncodePackedPtr(Vout& v, Vreg src, Vreg dst) {
+  emitEncodePtr<PackedPtr<int>::bits>(v, src, dst);
 }
 
 /*
@@ -275,7 +275,9 @@ Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad = false);
 Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d);
 
 /*
- * Internal helpers for LowPtr comparisons.
+ * Internal helpers for PackedPtr comparisons.
+ * The number of bits is only used for the Vptr. All Vregs are assumed to be a
+ * 64 bit pointer stored in a 64 bit register.
  */
 template <size_t BITS>
 void emitCmpPtr(Vout& v, Vreg sf, const void* ptr, Vptr mem);

@@ -280,7 +280,7 @@ void cgLdClsFromClsMeth(IRLS& env, const IRInstruction* inst) {
   v << movtql{clsMethDataRef, truncated};
   auto const packed = v.makeReg();
   v << movzlq{truncated, packed};
-  emitLdPackedPtr(v, packed, dst);
+  emitDecodePackedPtr(v, packed, dst);
 #else
   v << load{clsMethDataRef[ClsMethData::clsOffset()], dst};
 #endif
@@ -294,7 +294,7 @@ void cgLdFuncFromClsMeth(IRLS& env, const IRInstruction* inst) {
   static_assert(ClsMethData::funcOffset() == 4, "Func offset must be 4");
   auto packed = v.makeReg();
   v << shrqi{32, clsMethDataRef, packed, v.makeReg()};
-  emitLdPackedPtr(v, packed, dst);
+  emitDecodePackedPtr(v, packed, dst);
 #else
   v << load{clsMethDataRef[ClsMethData::funcOffset()], dst};
 #endif

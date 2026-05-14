@@ -88,12 +88,12 @@ void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
 }
 
 template <>
-void emitLdPtr<32>(Vout& v, Vreg src, Vreg dst) {
+void emitDecodePtr<32>(Vout& v, Vreg src, Vreg dst) {
   v << copy{src, dst};
 }
 
 template <>
-void emitLdPtr<35>(Vout& v, Vreg src, Vreg dst) {
+void emitDecodePtr<35>(Vout& v, Vreg src, Vreg dst) {
 #ifndef LOW_BUMP_ALLOCATOR
   v << shlqi{3, src, dst, v.makeReg()};
 #else
@@ -107,7 +107,7 @@ void emitLdPtr<35>(Vout& v, Vreg src, Vreg dst) {
 }
 
 template <>
-void emitLdPtr<64>(Vout& v, Vreg src, Vreg dst) {
+void emitDecodePtr<64>(Vout& v, Vreg src, Vreg dst) {
   v << copy{src, dst};
 }
 
@@ -120,7 +120,7 @@ template <>
 void emitLdPtr<35>(Vout& v, Vptr src, Vreg dst) {
   auto const packed = v.makeReg();
   v << loadzlq{src, packed};
-  emitLdPtr<35>(v, packed, dst);
+  emitDecodePtr<35>(v, packed, dst);
 }
 
 template <>
@@ -129,12 +129,12 @@ void emitLdPtr<64>(Vout& v, Vptr src, Vreg dst) {
 }
 
 template <>
-void emitStPtr<32>(Vout& v, Vreg src, Vreg dst) {
+void emitEncodePtr<32>(Vout& v, Vreg src, Vreg dst) {
   v << copy{src, dst};
 }
 
 template <>
-void emitStPtr<35>(Vout& v, Vreg src, Vreg dst) {
+void emitEncodePtr<35>(Vout& v, Vreg src, Vreg dst) {
 #ifndef LOW_BUMP_ALLOCATOR
   v << shrqi{3, src, dst, v.makeReg()};
 #else
@@ -148,7 +148,7 @@ void emitStPtr<35>(Vout& v, Vreg src, Vreg dst) {
 }
 
 template <>
-void emitStPtr<64>(Vout& v, Vreg src, Vreg dst) {
+void emitEncodePtr<64>(Vout& v, Vreg src, Vreg dst) {
   v << copy{src, dst};
 }
 
@@ -161,7 +161,7 @@ void emitStPtr<32>(Vout& v, Vreg src, Vptr dst) {
 template <>
 void emitStPtr<35>(Vout& v, Vreg src, Vptr dst) {
   auto const packed = v.makeReg();
-  emitStPtr<35>(v, src, packed);
+  emitEncodePtr<35>(v, src, packed);
   auto const temp = emitMovtql(v, packed);
   v << storel{temp, dst};
 }
@@ -578,7 +578,7 @@ void emitCmpPtr<35>(Vout& v, Vreg sf, const void* ptr, Vreg reg) {
 template <>
 void emitCmpPtr<35>(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
   auto shifted = v.makeReg();
-  emitStPtr<35>(v, reg, shifted);
+  emitEncodePtr<35>(v, reg, shifted);
   auto low = emitMovtql(v, shifted);
   v << cmplm{low, mem, sf};
 }

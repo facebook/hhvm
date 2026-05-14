@@ -255,7 +255,7 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
     // funcIdOffset only being defined in non-packedptr mode.
 #ifdef USE_PACKEDPTR
     // Funcs are identified with their PackedPtr representation in packedptr mode.
-    emitStPackedPtr(v, callee, r_func_entry_callee_id());
+    emitEncodePackedPtr(v, callee, r_func_entry_callee_id());
 #else
     v << load{callee[Func::funcIdOffset()], r_func_entry_callee_id()};
 #endif

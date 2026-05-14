@@ -12520,8 +12520,9 @@ and As_expr : sig
     (unit, unit) as_expr ->
     env * (locl_ty, saved_env) as_expr
 end = struct
-  let bind_foreach_target env p ty expr =
-    let (env, te, _, _) = Assign.assign p env expr p ty in
+  let bind_foreach_target env _p ty expr =
+    let (_, ep, _) = expr in
+    let (env, te, _, _) = Assign.assign ep env expr ep ty in
     (env, te)
 
   let bind_as_expr env p ty1 ty2 aexpr =

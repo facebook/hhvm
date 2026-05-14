@@ -121,7 +121,6 @@ struct TypeConstraint {
 
     size_t stableHash() const;
     bool operator==(const ClassConstraint& o) const;
-    bool operator<(const ClassConstraint& o) const;
 
     template <typename SerDe>
     void serdeHelper(SerDe& sd, bool isSubObject);
@@ -223,7 +222,6 @@ struct TypeConstraint {
   TypeConstraint& operator=(const TypeConstraint&) = default;
 
   bool operator==(const TypeConstraint& o) const;
-  bool operator<(const TypeConstraint& o) const;
 
   size_t stableHash() const;
 
@@ -804,38 +802,6 @@ struct TypeIntersectionConstraint {
       m_u.m_typeConstraint.~TypeConstraint();
     }
   }
-
-  bool operator==(const TypeIntersectionConstraint& o) const {
-    auto const lhs = range();
-    auto const rhs = o.range();
-    if (lhs.size() != rhs.size()) return false;
-    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
-  }
-
-  bool isAnyUnresolved() const {
-    return std::any_of(
-      range().begin(), range().end(),
-      [] (const TypeConstraint& c) { return c.isUnresolved(); }
-    );
-  }
-
-  bool operator<(const TypeIntersectionConstraint& o) const {
-    auto const lhs = range();
-    auto const rhs = o.range();
-    return std::lexicographical_compare(
-      lhs.begin(), lhs.end(), rhs.begin(), rhs.end()
-    );
-  }
-
-  struct Hasher {
-    size_t operator()(const TypeIntersectionConstraint& tc) const {
-      size_t h = 0;
-      for (auto const& c : tc.range()) {
-        h = folly::hash::hash_combine(h, c.stableHash());
-      }
-      return h;
-    }
-  };
 
   template<class SerDe>
   void serde(SerDe& sd) {

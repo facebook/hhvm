@@ -6485,9 +6485,6 @@ struct TypeCOWer : public COWer {
 void unserialize_classes_impl(const IIndex& index,
                               const Type& t,
                               COWer& parent) {
-  auto const resolve = [&] (const res::Class& cls) {
-    return cls.unserialize(index);
-  };
   SCOPE_EXIT { parent.noCOW().checkInvariants(); };
 
   auto const onDCls = [&] (const DCls& dcls, bool isObj) {
@@ -6496,7 +6493,7 @@ void unserialize_classes_impl(const IIndex& index,
         auto const nonReg = dcls.containsNonRegular();
         auto out = TInitCell;
         for (auto const i : dcls.isect()) {
-          auto const u = resolve(i);
+          auto const u = i.unserialize(index);
           if (!u) return TBottom;
           out &= isObj ? subObj(*u) : subCls(*u, nonReg);
         }
@@ -6504,17 +6501,17 @@ void unserialize_classes_impl(const IIndex& index,
       } else if (dcls.isIsectAndExact()) {
         auto const [e, isect] = dcls.isectAndExact();
         auto const nonReg = dcls.containsNonRegular();
-        auto const eu = resolve(e);
+        auto const eu = e.unserialize(index);
         if (!eu) return TBottom;
         auto out = isObj ? objExact(*eu) : clsExact(*eu, nonReg);
         for (auto const i : *isect) {
-          auto const u = resolve(i);
+          auto const u = i.unserialize(index);
           if (!u) return TBottom;
           out &= isObj ? subObj(*u) : subCls(*u, nonReg);
         }
         return out;
       } else {
-        auto const u = resolve(dcls.cls());
+        auto const u = dcls.cls().unserialize(index);
         if (!u) return TBottom;
         if (dcls.isExact()) {
           return isObj
@@ -6556,7 +6553,7 @@ void unserialize_classes_impl(const IIndex& index,
       unserialize_classes_impl(index, next.get().inner, next);
       auto const& dcls = next.get().cls;
       if (dcls.cls().isSerialized()) {
-        auto const u = resolve(dcls.cls());
+        auto const u = dcls.cls().unserialize(index);
         assertx(u.has_value());
         next.getAndCOW().cls.setCls(*u);
       }
@@ -6631,7 +6628,6 @@ Type unserialize_classes(const IIndex& index, Type t) {
   unserialize_classes_impl(index, t, cower);
   return t;
 }
-
 
 //////////////////////////////////////////////////////////////////////
 

@@ -628,36 +628,15 @@ UnionConstraint::allocObjects(UnionClassList objects) {
 }
 
 bool ClassConstraint::operator==(const ClassConstraint& o) const {
-  auto const eqType = [] (const StringData* a, const StringData* b) {
-    if (a == b) return true;
-    if (!a || !b) return false;
-    return a->tsame(b);
-  };
-  return eqType(m_clsName, o.m_clsName) && eqType(m_typeName, o.m_typeName);
-}
-
-bool ClassConstraint::operator<(const ClassConstraint& o) const {
-  if (m_clsName != o.m_clsName) {
-    if (!m_clsName || !o.m_clsName) return !m_clsName;
-    if (string_data_lt_type{}(m_clsName, o.m_clsName)) return true;
-    if (string_data_lt_type{}(o.m_clsName, m_clsName)) return false;
-  }
-  if (m_typeName != o.m_typeName) {
-    if (!m_typeName || !o.m_typeName) return !m_typeName;
-    return string_data_lt_type{}(m_typeName, o.m_typeName);
-  }
-  return false;
+  // The named entity is defined based on the typeName() and is redundant to
+  // include in the equality operation.
+  return m_clsName == o.m_clsName && m_typeName == o.m_typeName;
 }
 
 bool UnionConstraint::operator==(const UnionConstraint& o) const {
-  auto const eqType = [] (const StringData* a, const StringData* b) {
-    if (a == b) return true;
-    if (!a || !b) return false;
-    return a->tsame(b);
-  };
   return
     m_mask == o.m_mask &&
-    eqType(m_typeName, o.m_typeName) &&
+    m_typeName == o.m_typeName &&
     (m_classes != nullptr) == (o.m_classes != nullptr) &&
     (m_classes == nullptr || *m_classes == *o.m_classes);
 }
@@ -670,37 +649,6 @@ bool TypeConstraint::operator==(const TypeConstraint& o) const {
   auto& a = m_u.single;
   auto& b = o.m_u.single;
   return a.type == b.type && a.class_ == b.class_;
-}
-
-bool TypeConstraint::operator<(const TypeConstraint& o) const {
-  if (m_flags != o.m_flags) return m_flags < o.m_flags;
-  if (isUnion() != o.isUnion()) return isUnion() < o.isUnion();
-  if (isUnion()) {
-    auto& a = m_u.union_;
-    auto& b = o.m_u.union_;
-    if (a.m_mask != b.m_mask) return a.m_mask < b.m_mask;
-    if (a.m_typeName != b.m_typeName) {
-      if (!a.m_typeName || !b.m_typeName) return !a.m_typeName;
-      if (string_data_lt_type{}(a.m_typeName, b.m_typeName)) return true;
-      if (string_data_lt_type{}(b.m_typeName, a.m_typeName)) return false;
-    }
-    auto const aHas = (a.m_classes != nullptr);
-    auto const bHas = (b.m_classes != nullptr);
-    if (aHas != bHas) return !aHas;
-    if (aHas) {
-      auto& al = a.m_classes->m_list;
-      auto& bl = b.m_classes->m_list;
-      if (al.size() != bl.size()) return al.size() < bl.size();
-      for (size_t i = 0; i < al.size(); ++i) {
-        if (!(al[i] == bl[i])) return al[i] < bl[i];
-      }
-    }
-    return false;
-  }
-  auto& a = m_u.single;
-  auto& b = o.m_u.single;
-  if (a.type != b.type) return a.type < b.type;
-  return a.class_ < b.class_;
 }
 
 size_t ClassConstraint::stableHash() const {

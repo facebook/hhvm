@@ -138,7 +138,7 @@ class Client<::facebook::thrift::test::fixtures::service_schema::ExtendedService
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_init(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

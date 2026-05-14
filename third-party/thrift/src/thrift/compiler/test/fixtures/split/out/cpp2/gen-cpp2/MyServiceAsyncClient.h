@@ -131,7 +131,7 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_ping(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -248,7 +248,7 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getRandomData(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -362,7 +362,7 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_sink(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -478,7 +478,7 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_putDataById(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -595,7 +595,7 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_hasDataById(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -710,7 +710,7 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getDataById(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -824,7 +824,7 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_deleteDataById(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }

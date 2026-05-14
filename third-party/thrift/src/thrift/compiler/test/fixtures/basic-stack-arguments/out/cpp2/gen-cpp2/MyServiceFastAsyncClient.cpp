@@ -169,7 +169,7 @@ bool apache::thrift::Client<::cpp2::MyServiceFast>::sync_hasDataById(apache::thr
     bool _return;
     folly::exception_wrapper ew = recv_wrapped_hasDataById(_return, returnState);
     if (contextStack != nullptr) {
-      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -411,7 +411,7 @@ void apache::thrift::Client<::cpp2::MyServiceFast>::sync_getDataById(apache::thr
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getDataById(_return, returnState);
     if (contextStack != nullptr) {
-      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -651,7 +651,7 @@ void apache::thrift::Client<::cpp2::MyServiceFast>::sync_putDataById(apache::thr
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_putDataById(returnState);
     if (contextStack != nullptr) {
-      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

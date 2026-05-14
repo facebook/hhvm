@@ -137,7 +137,7 @@ class Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesServi
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_init(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -252,7 +252,7 @@ class Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesServi
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_method_that_throws(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -366,7 +366,7 @@ class Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesServi
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_return_void_method(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }

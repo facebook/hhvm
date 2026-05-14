@@ -161,7 +161,7 @@
       {{#if (or function.stream? (not function.return_type.void?))}}
     auto ew = recv_wrapped_{{function.cpp_name}}(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
         {{#if function.stream?}}
     // Attach interceptor context to stream for automatic interception
@@ -174,7 +174,7 @@
       {{#else}}
     auto ew = recv_wrapped_{{function.cpp_name}}(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }

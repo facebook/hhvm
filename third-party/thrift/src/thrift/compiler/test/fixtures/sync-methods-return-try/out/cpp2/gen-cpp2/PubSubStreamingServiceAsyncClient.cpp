@@ -251,7 +251,7 @@ auto tryObj = folly::makeTryWith([&]() {
       return recv_returnstream(returnState);
     });
     if (contextStack != nullptr) {
-      tryObj = contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj));
+      tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj)));
     }
     tryObj.throwUnlessValue();
     return std::move(tryObj.value());
@@ -485,7 +485,7 @@ auto tryObj = folly::makeTryWith([&]() {
       return recv_streamthrows(returnState);
     });
     if (contextStack != nullptr) {
-      tryObj = contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj));
+      tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj)));
     }
     tryObj.throwUnlessValue();
     return std::move(tryObj.value());
@@ -719,7 +719,7 @@ auto tryObj = folly::makeTryWith([&]() {
       return recv_servicethrows(returnState);
     });
     if (contextStack != nullptr) {
-      tryObj = contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj));
+      tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj)));
     }
     tryObj.throwUnlessValue();
     return std::move(tryObj.value());
@@ -953,7 +953,7 @@ auto tryObj = folly::makeTryWith([&]() {
       return recv_servicethrows2(returnState);
     });
     if (contextStack != nullptr) {
-      tryObj = contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj));
+      tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj)));
     }
     tryObj.throwUnlessValue();
     return std::move(tryObj.value());
@@ -1187,7 +1187,7 @@ auto tryObj = folly::makeTryWith([&]() {
       return recv_boththrows(returnState);
     });
     if (contextStack != nullptr) {
-      tryObj = contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj));
+      tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj)));
     }
     tryObj.throwUnlessValue();
     return std::move(tryObj.value());
@@ -1421,7 +1421,7 @@ auto tryObj = folly::makeTryWith([&]() {
       return recv_responseandstreamstreamthrows(returnState);
     });
     if (contextStack != nullptr) {
-      tryObj = contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj));
+      tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj)));
     }
     tryObj.throwUnlessValue();
     return std::move(tryObj.value());
@@ -1655,7 +1655,7 @@ auto tryObj = folly::makeTryWith([&]() {
       return recv_responseandstreamservicethrows(returnState);
     });
     if (contextStack != nullptr) {
-      tryObj = contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj));
+      tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj)));
     }
     tryObj.throwUnlessValue();
     return std::move(tryObj.value());
@@ -1889,7 +1889,7 @@ auto tryObj = folly::makeTryWith([&]() {
       return recv_responseandstreamboththrows(returnState);
     });
     if (contextStack != nullptr) {
-      tryObj = contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj));
+      tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj)));
     }
     tryObj.throwUnlessValue();
     return std::move(tryObj.value());

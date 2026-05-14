@@ -132,7 +132,7 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_query(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -248,7 +248,7 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_has_arg_docs(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }

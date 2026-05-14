@@ -130,7 +130,7 @@ class Client<::test::fixtures::basic::FooService> : public apache::thrift::Gener
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_simple_rpc(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }

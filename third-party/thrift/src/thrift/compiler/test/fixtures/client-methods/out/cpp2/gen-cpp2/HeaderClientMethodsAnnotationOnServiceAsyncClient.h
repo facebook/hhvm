@@ -134,7 +134,7 @@ class Client<::cpp2::HeaderClientMethodsAnnotationOnService> : public apache::th
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_echo(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -253,7 +253,7 @@ class Client<::cpp2::HeaderClientMethodsAnnotationOnService> : public apache::th
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_echo_2(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

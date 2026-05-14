@@ -132,7 +132,7 @@ class Client<::facebook::thrift::test::fixtures::adapter::AdapterService> : publ
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_count(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -247,7 +247,7 @@ class Client<::facebook::thrift::test::fixtures::adapter::AdapterService> : publ
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_adaptedTypes(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

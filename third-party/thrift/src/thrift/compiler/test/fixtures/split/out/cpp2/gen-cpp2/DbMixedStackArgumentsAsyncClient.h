@@ -130,7 +130,7 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getDataByKey0(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -245,7 +245,7 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getDataByKey1(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

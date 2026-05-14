@@ -145,7 +145,7 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_simple_function(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -259,7 +259,7 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_throws_function(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -376,7 +376,7 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_throws_function2(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -491,7 +491,7 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_throws_function3(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

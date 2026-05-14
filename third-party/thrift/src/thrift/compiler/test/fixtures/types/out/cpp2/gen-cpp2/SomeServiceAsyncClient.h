@@ -134,7 +134,7 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_bounce_map(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -249,7 +249,7 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_binary_keyed_map(_return, returnState);
     if (returnState.ctx()) {
-      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

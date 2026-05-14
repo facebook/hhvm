@@ -133,7 +133,7 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_mapList(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -249,7 +249,7 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_mapSet(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -365,7 +365,7 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_listMap(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -481,7 +481,7 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_listSet(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -597,7 +597,7 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_turtles(returnState);
     if (returnState.ctx()) {
-      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }

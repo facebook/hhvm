@@ -80,7 +80,7 @@ auto tryObj = folly::makeTryWith([&]() {
       return recv_{{function.cpp_name}}(returnState);
     });
     if (contextStack != nullptr) {
-      tryObj = contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj));
+      tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj)));
     }
     tryObj.throwUnlessValue();
         {{#if function.creates_interaction?}}
@@ -92,7 +92,7 @@ auto tryObj = folly::makeTryWith([&]() {
       {{#else if function.return_type.void?}}
     folly::exception_wrapper ew = recv_wrapped_{{function.cpp_name}}(returnState);
     if (contextStack != nullptr) {
-      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -105,7 +105,7 @@ auto tryObj = folly::makeTryWith([&]() {
     {{function.cpp_return_type}} _return;
     folly::exception_wrapper ew = recv_wrapped_{{function.cpp_name}}(_return, returnState);
     if (contextStack != nullptr) {
-      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -119,7 +119,7 @@ auto tryObj = folly::makeTryWith([&]() {
     {{#else}}
     auto ew = recv_wrapped_{{function.cpp_name}}(_return, returnState);
     if (contextStack != nullptr) {
-      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

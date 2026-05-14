@@ -132,7 +132,7 @@ std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::
     ::cpp2::ShouldBeBoxed _return;
     folly::exception_wrapper ew = recv_wrapped_getABoxSession(_return, returnState);
     if (contextStack != nullptr) {
-      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -341,7 +341,7 @@ void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::sync_getABox(
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getABox(_return, returnState);
     if (contextStack != nullptr) {
-      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

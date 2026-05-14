@@ -140,14 +140,20 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
               apache::thrift::fast_thrift::rocket::server::connection::
                   RocketServerConnection conn;
 
-              // 1. Build the server channel first so the rocket pipeline's
-              //    SETUP handler can capture a callback into it.
+              // 1. Build the server channel and transport adapter first so the
+              //    rocket pipeline's SETUP handler can capture callbacks into
+              //    both — channel for response serialization, transport
+              //    adapter for inbound request deserialization.
               auto serverChannel =
                   std::make_shared<thrift::ThriftServerChannel>(handler_);
               auto* channel = serverChannel.get();
+              auto transportAdapter = std::make_unique<
+                  thrift::server::ThriftServerTransportAdapter>(
+                  *conn.appAdapter);
+              auto* transportAdapterPtr = transportAdapter.get();
 
               // 2. Build rocket pipeline. The SETUP handler publishes the
-              //    negotiated metadata protocol into the server channel.
+              //    negotiated metadata protocol into both adapters.
               auto rocketPipeline =
                   PipelineBuilder<
                       apache::thrift::fast_thrift::transport::TransportHandler,
@@ -173,11 +179,13 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
                           apache::thrift::fast_thrift::rocket::server::handler::
                               RocketServerSetupFrameHandler>(
                           server_setup_frame_handler_tag,
-                          [channel](
+                          [channel, transportAdapterPtr](
                               const apache::thrift::fast_thrift::rocket::
                                   server::handler::SetupParameters&
                                       p) noexcept {
                             channel->setMetadataProtocol(p.metadataProtocol);
+                            transportAdapterPtr->setMetadataProtocol(
+                                p.metadataProtocol);
                           })
                       .addNextDuplex<
                           apache::thrift::fast_thrift::rocket::server::handler::
@@ -196,9 +204,6 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
               conn.pipeline = std::move(rocketPipeline);
 
               // 3. Build thrift pipeline
-              auto transportAdapter = std::make_unique<
-                  thrift::server::ThriftServerTransportAdapter>(
-                  *conn.appAdapter);
 
               ThriftConnectionContext ctx;
               auto thriftPipeline =

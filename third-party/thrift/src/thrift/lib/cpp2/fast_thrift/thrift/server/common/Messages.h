@@ -16,9 +16,11 @@
 
 #pragma once
 
-#include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
+#include <folly/ExceptionWrapper.h>
+#include <thrift/lib/cpp2/fast_thrift/common/CompactVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadVariant.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RocketFrameDecoder.h>
 
 #include <cstdint>
 
@@ -31,15 +33,11 @@ namespace apache::thrift::fast_thrift::thrift {
 //   Pipeline  ─────ThriftServerRequestMessage─────>  Handler
 //   Pipeline  <────ThriftServerResponseMessage─────  Handler
 
-/**
- * ThriftServerRequestMessage - Inbound request from pipeline to handler.
- *
- * Carries the parsed wire frame; the channel decodes RpcKind, method
- * name, and metadata from it.
- */
+// `payload` is the typed wire-derived inbound payload produced by
+// `fromRocketFrame` at the transport bridge.
 #pragma pack(push, 1)
 struct ThriftServerRequestMessage {
-  frame::read::ParsedFrame frame;
+  ThriftServerInboundPayloadVariant payload;
   uint32_t streamId{0};
 };
 #pragma pack(pop)

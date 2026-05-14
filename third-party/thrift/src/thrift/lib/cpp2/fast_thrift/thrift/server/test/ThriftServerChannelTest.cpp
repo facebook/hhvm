@@ -27,8 +27,6 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
@@ -244,8 +242,6 @@ class ThriftServerChannelTest : public ::testing::Test {
         .build();
   }
 
-  // Helper to create a ThriftServerRequestMessage with metadata baked into the
-  // frame
   apache::thrift::fast_thrift::thrift::ThriftServerRequestMessage
   createRequestMessage(
       uint32_t streamId,
@@ -253,36 +249,24 @@ class ThriftServerChannelTest : public ::testing::Test {
       const std::string& data = "",
       apache::thrift::RpcKind kind =
           apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE) {
-    apache::thrift::RequestRpcMetadata metadata;
-    metadata.name() = methodName;
-    metadata.protocol() = apache::thrift::ProtocolId::COMPACT;
-    metadata.kind() = kind;
-
-    // Serialize metadata into the frame
-    apache::thrift::BinaryProtocolWriter writer;
-    folly::IOBufQueue metadataQueue(folly::IOBufQueue::cacheChainLength());
-    writer.setOutput(&metadataQueue);
-    metadata.write(&writer);
-    auto serializedMetadata = metadataQueue.move();
+    auto metadata = std::make_unique<apache::thrift::RequestRpcMetadata>();
+    metadata->name() = methodName;
+    metadata->protocol() = apache::thrift::ProtocolId::COMPACT;
+    metadata->kind() = kind;
 
     std::unique_ptr<folly::IOBuf> dataBuffer;
     if (!data.empty()) {
       dataBuffer = copyBuffer(data);
     }
 
-    auto frame = apache::thrift::fast_thrift::frame::write::serialize(
-        apache::thrift::fast_thrift::frame::write::RequestResponseHeader{
-            .streamId = streamId,
-            .follows = false,
-        },
-        std::move(serializedMetadata),
-        std::move(dataBuffer));
-
-    auto parsedFrame =
-        apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
-
-    return apache::thrift::fast_thrift::thrift::ThriftServerRequestMessage{
-        .frame = std::move(parsedFrame), .streamId = streamId};
+    apache::thrift::fast_thrift::thrift::ThriftServerRequestMessage msg;
+    msg.streamId = streamId;
+    msg.payload =
+        apache::thrift::fast_thrift::thrift::ThriftServerInboundPayloadVariant{
+            apache::thrift::fast_thrift::thrift::ThriftRequestResponsePayload{
+                .data = std::move(dataBuffer),
+                .metadata = std::move(metadata)}};
+    return msg;
   }
 
   std::unique_ptr<folly::EventBase> evb_;

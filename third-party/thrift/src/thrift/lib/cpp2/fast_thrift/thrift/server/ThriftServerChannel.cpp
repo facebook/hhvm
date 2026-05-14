@@ -22,7 +22,6 @@
 #include <thrift/lib/cpp2/async/RpcTypes.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RequestMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
@@ -95,14 +94,11 @@ class PipelineResponseChannelRequest
       std::shared_ptr<std::atomic<bool>> pipelineAlive,
       bool isOneway,
       apache::thrift::Cpp2ConnContext* connContext,
-      std::string methodName,
-      apache::thrift::fast_thrift::rocket::server::MetadataProtocol
-          metadataProtocol)
+      std::string methodName)
       : streamId_(streamId),
         pipeline_(pipeline),
         pipelineAlive_(std::move(pipelineAlive)),
         isOneway_(isOneway),
-        metadataProtocol_(metadataProtocol),
         reqCtx_(connContext, &header_, std::move(methodName)) {}
 
   bool isActive() const override { return active_.load(); }
@@ -130,7 +126,6 @@ class PipelineResponseChannelRequest
                 .data = std::move(response).buffer(),
                 .metadata = std::move(responseMetadata),
                 .streamId = streamId_,
-                .metadataProtocol = metadataProtocol_,
                 .complete = true,
                 .next = true,
             }};
@@ -222,7 +217,6 @@ class PipelineResponseChannelRequest
             .data = nullptr,
             .metadata = std::move(responseMetadata),
             .streamId = streamId_,
-            .metadataProtocol = metadataProtocol_,
             .complete = true,
             .next = true}};
 
@@ -245,8 +239,6 @@ class PipelineResponseChannelRequest
   apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline_;
   std::shared_ptr<std::atomic<bool>> pipelineAlive_;
   bool isOneway_;
-  apache::thrift::fast_thrift::rocket::server::MetadataProtocol
-      metadataProtocol_;
   std::atomic<bool> active_{true};
   apache::thrift::transport::THeader header_;
   apache::thrift::Cpp2RequestContext reqCtx_;
@@ -305,23 +297,14 @@ ThriftServerChannel::onRead(
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
 
-  auto& frame = request.frame;
+  auto& payload = request.payload;
 
-  // Deserialize request metadata from frame (on the stack, no heap alloc)
-  apache::thrift::RequestRpcMetadata metadata;
-  auto deserError =
-      deserializeRequestMetadata(metadataProtocol_, request.frame, metadata);
-  if (FOLLY_UNLIKELY(!!deserError)) {
-    XLOG(ERR) << "Failed to deserialize request metadata: "
-              << deserError.what();
-    sendThriftError(
-        request.streamId,
-        apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-        "Failed to deserialize request metadata");
-    return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
-  }
+  // Today only RR is wired; FNF / Stream / Sink / Bidi will add arms here.
+  DCHECK(payload.is<ThriftRequestResponsePayload>());
+  auto& rr = payload.get<ThriftRequestResponsePayload>();
+  DCHECK(rr.metadata != nullptr);
+  auto& metadata = *rr.metadata;
 
-  // Reject unsupported RPC kinds (streaming, sink, etc.)
   auto kindRef = metadata.kind();
   if (kindRef &&
       *kindRef != apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE &&
@@ -336,30 +319,25 @@ ThriftServerChannel::onRead(
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
 
-  // Extract method name from metadata
   std::string methodName;
   if (metadata.name().has_value()) {
     methodName = std::move(*metadata.name()).str();
   }
 
-  // Extract protocol from metadata
   auto protocolId = apache::thrift::protocol::T_COMPACT_PROTOCOL;
   if (metadata.protocol().has_value()) {
     protocolId = static_cast<apache::thrift::protocol::PROTOCOL_TYPES>(
         *metadata.protocol());
   }
 
-  // Extract data payload from frame (zero-copy)
-  auto dataBuf = std::move(frame).extractData();
+  auto dataBuf = std::move(rr.data);
   if (!dataBuf) {
     dataBuf = pipeline_->allocate(0);
   }
 
-  // Create SerializedCompressedRequest from data
   apache::thrift::SerializedCompressedRequest serializedRequest(
       apache::thrift::SerializedRequest(std::move(dataBuf)));
 
-  // Detect oneway requests
   bool isOneway = kindRef &&
       *kindRef == apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE;
 
@@ -371,8 +349,7 @@ ThriftServerChannel::onRead(
           pipelineAlive_,
           isOneway,
           &connContext_,
-          std::move(methodName),
-          metadataProtocol_));
+          std::move(methodName)));
 
   auto* reqCtxPtr = channelRequest->requestContext();
 

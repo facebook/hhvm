@@ -43,7 +43,11 @@ apache::thrift::fast_thrift::frame::read::ParsedFrame makePayloadFrame(
       .streamId = streamId,
       .complete = complete,
       .next = next};
-  auto wire = std::move(payload).toRocketFrame().serialize();
+  auto wire = std::move(payload)
+                  .toRocketFrame(
+                      ::apache::thrift::fast_thrift::rocket::server::
+                          MetadataProtocol::BINARY)
+                  .serialize();
   return apache::thrift::fast_thrift::frame::read::parseFrame(std::move(wire));
 }
 

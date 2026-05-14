@@ -43,9 +43,6 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/FastThriftServer.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/FastThriftServer.tcc>
@@ -104,15 +101,6 @@ using AdapterPtr = std::unique_ptr<
     FastThriftServerAppAdapter,
     folly::DelayedDestruction::Destructor>;
 
-std::unique_ptr<folly::IOBuf> serializeRequestMetadata(
-    const apache::thrift::RequestRpcMetadata& metadata) {
-  apache::thrift::BinaryProtocolWriter writer;
-  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
-  writer.setOutput(&queue);
-  metadata.write(&writer);
-  return queue.move();
-}
-
 template <typename ProtocolWriter, typename Pargs>
 std::unique_ptr<folly::IOBuf> serializePargs(const Pargs& pargs) {
   ProtocolWriter writer;
@@ -127,21 +115,16 @@ ThriftServerRequestMessage makeRequest(
     const std::string& methodName,
     apache::thrift::ProtocolId protocolId,
     std::unique_ptr<folly::IOBuf> data) {
-  apache::thrift::RequestRpcMetadata metadata;
-  metadata.name() = methodName;
-  metadata.kind() = apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
-  metadata.protocol() = protocolId;
-
-  auto frame = ::apache::thrift::fast_thrift::frame::write::serialize(
-      ::apache::thrift::fast_thrift::frame::write::RequestResponseHeader{
-          .streamId = streamId},
-      serializeRequestMetadata(metadata),
-      std::move(data));
+  auto metadata = std::make_unique<apache::thrift::RequestRpcMetadata>();
+  metadata->name() = methodName;
+  metadata->kind() = apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
+  metadata->protocol() = protocolId;
 
   ThriftServerRequestMessage msg;
-  msg.frame =
-      ::apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
   msg.streamId = streamId;
+  msg.payload =
+      ft::ThriftServerInboundPayloadVariant{ft::ThriftRequestResponsePayload{
+          .data = std::move(data), .metadata = std::move(metadata)}};
   return msg;
 }
 

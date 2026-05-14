@@ -78,18 +78,6 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
     return pipeline_;
   }
 
-  // Set the per-connection metadata protocol. Pushed once by the SETUP
-  // handler's onSetupComplete callback; embedders that don't wire SETUP
-  // through leave the default (Binary). Used on the inbound path to pick
-  // the matching reader for RequestRpcMetadata.
-  void setMetadataProtocol(rocket::server::MetadataProtocol p) noexcept {
-    metadataProtocol_ = p;
-  }
-
-  rocket::server::MetadataProtocol metadataProtocol() const noexcept {
-    return metadataProtocol_;
-  }
-
   // === TailEndpointHandler interface ===
 
   channel_pipeline::Result onRead(
@@ -218,8 +206,6 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   folly::EventBase* evb_{nullptr};
   folly::F14FastMap<std::string, RequestResponseProcessFn> dispatch_;
   folly::Synchronized<std::function<void()>> closeCallback_;
-  rocket::server::MetadataProtocol metadataProtocol_{
-      rocket::server::MetadataProtocol::BINARY};
 
   [[nodiscard]] channel_pipeline::Result fireResponse(
       ThriftServerResponseMessage&& response) noexcept;

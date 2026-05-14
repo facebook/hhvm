@@ -208,8 +208,12 @@ class ThriftClientTransportAdapter {
     // request without tearing the channel down.
     frame::ComposedRequestResponseFrame frame;
     try {
+      // Client outbound: request metadata is currently always Binary on the
+      // wire — SETUP-time negotiation is not yet plumbed through the client
+      // transport adapter. The arg is uniform with the server-side variant
+      // dispatch but unused for request metadata today.
       frame = std::move(request.payload.get<ThriftRequestResponsePayload>())
-                  .toRocketFrame();
+                  .toRocketFrame(rocket::server::MetadataProtocol::BINARY);
     } catch (...) {
       ThriftResponseMessage errMsg{
           .payload =

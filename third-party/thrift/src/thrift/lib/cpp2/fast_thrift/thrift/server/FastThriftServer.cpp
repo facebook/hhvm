@@ -92,16 +92,19 @@ FastThriftServer::createConnectionFactory() {
             *conn.appAdapter);
 
     // 2. Build rocket pipeline. The SETUP handler publishes the negotiated
-    //    metadata protocol into the thrift adapter via this callback. Capture
-    //    by raw pointer is safe — adapter and pipeline share connection-level
-    //    lifetime via FastConnection.
-    auto* adapter = ctx.adapter.get();
+    //    metadata protocol into the transport adapter, which uses it for
+    //    both inbound request-metadata deserialization and outbound
+    //    response-metadata serialization. Capture by raw pointer is safe —
+    //    the transport adapter and pipeline share connection-level lifetime
+    //    via FastConnection.
+    auto* transportAdapter = ctx.transportAdapter.get();
     auto rocketPipeline = buildRocketPipeline(
         evb,
         transportHandler.get(),
         conn.appAdapter.get(),
-        [adapter](const rocket::server::handler::SetupParameters& p) noexcept {
-          adapter->setMetadataProtocol(p.metadataProtocol);
+        [transportAdapter](
+            const rocket::server::handler::SetupParameters& p) noexcept {
+          transportAdapter->setMetadataProtocol(p.metadataProtocol);
         });
     conn.appAdapter->setPipeline(rocketPipeline.get());
     transportHandler->setPipeline(rocketPipeline.get());

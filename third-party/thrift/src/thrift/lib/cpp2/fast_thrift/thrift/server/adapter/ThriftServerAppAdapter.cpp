@@ -21,7 +21,6 @@
 
 #include <folly/logging/xlog.h>
 
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RequestMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 
@@ -48,16 +47,6 @@ channel_pipeline::Result ThriftServerAppAdapter::onRead(
     channel_pipeline::TypeErasedBox&& msg) noexcept {
   auto request = msg.take<ThriftServerRequestMessage>();
   DCHECK(request.streamId != 0) << "Invalid stream ID";
-
-  if (FOLLY_UNLIKELY(
-          request.frame.type() != frame::FrameType::REQUEST_RESPONSE)) {
-    XLOG(ERR) << "Unsupported frame type: " << request.frame.typeName();
-    return writeFrameworkError(
-        request.streamId,
-        apache::thrift::ResponseRpcErrorCode::WRONG_RPC_KIND,
-        std::string("Unsupported frame type: ") + request.frame.typeName());
-  }
-
   return handleRequestResponse(std::move(request));
 }
 
@@ -105,24 +94,16 @@ void ThriftServerAppAdapter::addMethodHandler(
 
 channel_pipeline::Result ThriftServerAppAdapter::handleRequestResponse(
     ThriftServerRequestMessage&& request) noexcept {
-  apache::thrift::RequestRpcMetadata metadata;
-  auto error =
-      deserializeRequestMetadata(metadataProtocol_, request.frame, metadata);
-  if (FOLLY_UNLIKELY(!!error)) {
-    XLOG(ERR) << "Request metadata deserialization failed: " << error.what();
-    return writeFrameworkError(
-        request.streamId,
-        apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-        std::string("Request metadata deserialization failed: ") +
-            folly::exceptionStr(error).toStdString());
-  }
+  DCHECK(request.payload.is<ThriftRequestResponsePayload>());
+  auto& rr = request.payload.get<ThriftRequestResponsePayload>();
+  DCHECK(rr.metadata != nullptr);
+  auto& metadata = *rr.metadata;
 
   std::string_view methodName;
   if (FOLLY_LIKELY(metadata.name().has_value())) {
     methodName = metadata.name()->view();
   }
 
-  // Reject unsupported RPC kinds (streaming, sink, etc.)
   auto kindRef = metadata.kind();
   if (FOLLY_UNLIKELY(
           !kindRef.has_value() ||
@@ -142,8 +123,7 @@ channel_pipeline::Result ThriftServerAppAdapter::handleRequestResponse(
   if (FOLLY_LIKELY(it != dispatch_.end())) {
     auto streamId = request.streamId;
     apache::thrift::ProtocolId protocol = metadata.protocol().value_or(0);
-    auto data = std::move(request.frame).extractData();
-    return it->second(this, streamId, std::move(data), protocol);
+    return it->second(this, streamId, std::move(rr.data), protocol);
   }
 
   return writeFrameworkError(

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrameVariant.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 #include <algorithm>
@@ -65,8 +66,10 @@ inline constexpr size_t maxAlignof = std::max({alignof(Ts)...});
  */
 template <typename T>
 concept ThriftPayloadConcept =
-    requires(T&& t) {
-      { std::move(t).toRocketFrame() } -> std::same_as<typename T::RocketFrame>;
+    requires(T&& t, rocket::server::MetadataProtocol p) {
+      {
+        std::move(t).toRocketFrame(p)
+      } -> std::same_as<typename T::RocketFrame>;
     } &&
     apache::thrift::fast_thrift::frame::ComposedFrameConcept<
         typename T::RocketFrame>;
@@ -135,12 +138,14 @@ class ThriftPayloadVariant {
           typename Ts::RocketFrame...>;
 
   template <size_t... Is>
-  RocketFrameVariant toRocketFrameImpl(std::index_sequence<Is...>) && {
+  RocketFrameVariant toRocketFrameImpl(
+      rocket::server::MetadataProtocol metadataProtocol,
+      std::index_sequence<Is...>) && {
     RocketFrameVariant result;
     (void)((index_ == Is &&
             (result = std::move(
                           *std::launder(reinterpret_cast<AltAt<Is>*>(storage_)))
-                          .toRocketFrame(),
+                          .toRocketFrame(metadataProtocol),
              true)) ||
            ...);
     return result;
@@ -283,8 +288,10 @@ class ThriftPayloadVariant {
   // assigned into the uniform `ComposedFrameVariant` return type.
   // Eliminates the runtime switch in the transport adapter.
 
-  RocketFrameVariant toRocketFrame() && {
-    return std::move(*this).toRocketFrameImpl(std::index_sequence_for<Ts...>{});
+  RocketFrameVariant toRocketFrame(
+      rocket::server::MetadataProtocol metadataProtocol) && {
+    return std::move(*this).toRocketFrameImpl(
+        metadataProtocol, std::index_sequence_for<Ts...>{});
   }
 };
 #pragma pack(pop)

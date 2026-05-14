@@ -21,8 +21,13 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RocketFrameDecoder.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift::server {
 
@@ -94,6 +99,14 @@ class ThriftServerTransportAdapter {
     pipeline_ = pipeline;
   }
 
+  // Set the SETUP-negotiated metadata protocol used to deserialize inbound
+  // request metadata. Called by the SETUP-completion callback in
+  // FastThriftServer once the rocket setup handler has parsed the SETUP
+  // frame's metadata MIME.
+  void setMetadataProtocol(rocket::server::MetadataProtocol p) noexcept {
+    metadataProtocol_ = p;
+  }
+
   // === Transport-facing interface (inbound from rocket pipeline) ===
 
   /**
@@ -105,10 +118,36 @@ class ThriftServerTransportAdapter {
   channel_pipeline::Result onTransportRequest(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto request = msg.take<rocket::server::RocketRequestMessage>();
-    ThriftServerRequestMessage thriftMsg{
-        .frame = std::move(request.frame),
-        .streamId = request.streamId,
-    };
+
+    auto decoded = fromRocketFrame(std::move(request.frame), metadataProtocol_);
+
+    if (FOLLY_UNLIKELY(!decoded.hasValue())) {
+      // Per-request decode failure: synthesize a REQUEST_PARSING_FAILURE
+      // ERROR frame and write it outbound through the rocket pipeline.
+      // Don't propagate as a connection-level exception or push a valueless
+      // payload downstream — the connection itself is healthy. The error
+      // body is Compact-serialized regardless of negotiated metadata
+      // protocol (matches legacy: ResponseRpcError is a control-frame body
+      // with its own wire contract, not application metadata).
+      auto serialized = serializeResponseRpcError(
+          apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
+          decoded.error().what().toStdString());
+      ThriftErrorPayload errorPayload{
+          .data = std::move(serialized.data),
+          .metadata = nullptr,
+          .streamId = request.streamId,
+          .errorCode = static_cast<uint32_t>(serialized.errorCode),
+      };
+      return appAdapter_.write(
+          rocket::server::RocketResponseMessage{
+              .frame = std::move(errorPayload).toRocketFrame(metadataProtocol_),
+              .streamType = request.streamType,
+          });
+    }
+
+    ThriftServerRequestMessage thriftMsg;
+    thriftMsg.streamId = request.streamId;
+    thriftMsg.payload = std::move(decoded.value());
     return pipeline_->fireRead(
         channel_pipeline::erase_and_box(std::move(thriftMsg)));
   }
@@ -121,7 +160,7 @@ class ThriftServerTransportAdapter {
    * (e.g., by ConnectionHandler or the test fixture).
    */
   void onTransportError(folly::exception_wrapper&& e) noexcept {
-    if (pipeline_) {
+    if (FOLLY_LIKELY(pipeline_)) {
       pipeline_->fireException(std::move(e));
     }
   }
@@ -144,7 +183,7 @@ class ThriftServerTransportAdapter {
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto response = msg.take<ThriftServerResponseMessage>();
     rocket::server::RocketResponseMessage rocketMsg{
-        .frame = std::move(response.payload).toRocketFrame(),
+        .frame = std::move(response.payload).toRocketFrame(metadataProtocol_),
         .streamType =
             apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
     };
@@ -160,6 +199,8 @@ class ThriftServerTransportAdapter {
  private:
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
   rocket::server::RocketServerAppAdapter& appAdapter_;
+  rocket::server::MetadataProtocol metadataProtocol_{
+      rocket::server::MetadataProtocol::BINARY};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift::server

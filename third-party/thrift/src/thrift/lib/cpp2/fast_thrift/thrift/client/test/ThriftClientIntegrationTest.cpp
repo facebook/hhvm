@@ -409,7 +409,7 @@ TEST_F(
       parsed.streamId(),
       serializeResponseMetadata(
           createBasicResponseMetadata(),
-          ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
+          apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
               BINARY),
       folly::IOBuf::copyBuffer("cleanup")));
   evb_.loopOnce();
@@ -461,7 +461,7 @@ TEST_F(
         streamId,
         serializeResponseMetadata(
             createBasicResponseMetadata(),
-            ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
+            apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
                 BINARY),
         folly::IOBuf::copyBuffer("cleanup")));
     evb_.loopOnce();
@@ -503,7 +503,7 @@ TEST_F(
   auto responseMetadata = createBasicResponseMetadata();
   auto serializedMetadata = serializeResponseMetadata(
       responseMetadata,
-      ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
   auto responseData = folly::IOBuf::copyBuffer("response payload");
 
   auto responseFrame = createPayloadResponse(
@@ -563,7 +563,7 @@ TEST_F(
       streamId2,
       serializeResponseMetadata(
           metadata2,
-          ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
+          apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
               BINARY),
       folly::IOBuf::copyBuffer("response2"));
   injectFrame(std::move(response2));
@@ -579,7 +579,7 @@ TEST_F(
       streamId1,
       serializeResponseMetadata(
           metadata1,
-          ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
+          apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
               BINARY),
       folly::IOBuf::copyBuffer("response1"));
   injectFrame(std::move(response1));
@@ -941,7 +941,7 @@ TEST_F(
       pendingParsed.streamId(),
       serializeResponseMetadata(
           createBasicResponseMetadata(),
-          ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
+          apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
               BINARY),
       folly::IOBuf::copyBuffer("cleanup")));
   evb_.loopOnce();
@@ -984,7 +984,7 @@ TEST_F(ThriftClientChannelIntegrationTest, DeclaredExceptionInPayloadMetadata) {
 
   auto serializedMetadata = serializeResponseMetadata(
       metadata,
-      ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
   auto responseData = folly::IOBuf::copyBuffer("exception payload");
 
   auto responseFrame = createPayloadResponse(
@@ -1034,7 +1034,7 @@ TEST_F(
 
   auto serializedMetadata = serializeResponseMetadata(
       metadata,
-      ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
   auto responseData = folly::IOBuf::copyBuffer("exception payload");
 
   auto responseFrame = createPayloadResponse(
@@ -1078,7 +1078,7 @@ TEST_F(ThriftClientChannelIntegrationTest, ResponseWithEmptyPayload) {
   auto responseMetadata = createBasicResponseMetadata();
   auto serializedMetadata = serializeResponseMetadata(
       responseMetadata,
-      ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
 
   auto responseFrame = createPayloadResponse(
       streamId,
@@ -1116,7 +1116,7 @@ TEST_F(ThriftClientChannelIntegrationTest, ResponseForUnknownStreamId) {
   auto responseMetadata = createBasicResponseMetadata();
   auto serializedMetadata = serializeResponseMetadata(
       responseMetadata,
-      ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
   auto responseData = folly::IOBuf::copyBuffer("orphan response");
 
   auto responseFrame = createPayloadResponse(
@@ -1137,7 +1137,7 @@ TEST_F(ThriftClientChannelIntegrationTest, ResponseForUnknownStreamId) {
       parsedRequest.streamId(),
       serializeResponseMetadata(
           createBasicResponseMetadata(),
-          ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
+          apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
               BINARY),
       folly::IOBuf::copyBuffer("cleanup")));
   evb_.loopOnce();
@@ -1172,7 +1172,7 @@ TEST_F(
 
   auto serializedMetadata = serializeResponseMetadata(
       metadata,
-      ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
   auto responseData = folly::IOBuf::copyBuffer("response");
 
   auto responseFrame = createPayloadResponse(
@@ -1423,7 +1423,7 @@ TEST_F(
   auto metadata = createBasicResponseMetadata();
   auto serializedMetadata = serializeResponseMetadata(
       metadata,
-      ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
 
   auto future =
       client_.sendBenchRequest(folly::IOBuf::copyBuffer("test payload"));
@@ -1469,7 +1469,7 @@ TEST_F(
       streamId,
       serializeResponseMetadata(
           metadata,
-          ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
+          apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
               BINARY),
       folly::IOBuf::copyBuffer("response payload"));
 
@@ -1580,7 +1580,7 @@ TEST_F(
       pendingParsed.streamId(),
       serializeResponseMetadata(
           createBasicResponseMetadata(),
-          ::apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
+          apache::thrift::fast_thrift::rocket::server::MetadataProtocol::
               BINARY),
       folly::IOBuf::copyBuffer("cleanup")));
   evb_.loopOnce();

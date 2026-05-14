@@ -36,8 +36,9 @@ namespace apache::thrift::fast_thrift::thrift {
  *
  *   1. **Per-RpcKind initial-request payloads** — one per Thrift RpcKind.
  *      These model the *first frame* a client sends to open an exchange:
- *      RequestResponse, Fnf, Stream, Sink, Bidi. Each carries the pre-
- *      serialized RequestRpcMetadata IOBuf (universal across all RPC kinds)
+ *      RequestResponse, Fnf, Stream, Sink, Bidi. Each carries the typed
+ *      `RequestRpcMetadata` struct (universal across all RPC kinds — the
+ *      `kind` field disambiguates Sink vs Bidi, which share the wire frame)
  *      plus the request data, plus any per-pattern flow-control fields.
  *
  *   2. **Per-stream payloads** — emitted by either side on an established
@@ -49,9 +50,10 @@ namespace apache::thrift::fast_thrift::thrift {
  * `frame::Composed*Frame`. The `RocketFrame` typedef on each struct names
  * the return type for variant-level dispatch (see ThriftPayloadVariant).
  *
- * All overloads are `noexcept` except `ThriftRequestResponsePayload`, which
- * serializes its metadata struct inline and may throw on serializer/allocator
- * failure; the transport adapter catches and delivers the error inbound.
+ * Initial-request payloads serialize their metadata struct inline in
+ * `toRocketFrame()` and may throw on serializer/allocator failure; the
+ * transport adapter catches and delivers the error inbound. Per-stream
+ * payloads' `toRocketFrame()` is `noexcept`.
  *
  * Construction sites pick the alternative; the variant + `toRocketFrame()`
  * makes the Thrift→Rocket translation a single fold-expression dispatch
@@ -74,7 +76,11 @@ struct ThriftRequestResponsePayload {
   // Serializes metadata as part of frame composition. Throws on
   // serializer/allocator failure; the transport adapter catches and
   // delivers the error inbound as a per-request `ThriftClientResponseError`.
-  RocketFrame toRocketFrame() && {
+  // The metadata protocol param is unused today (request metadata is always
+  // Binary on the client outbound path until SETUP-time negotiation lands
+  // on the client transport adapter). Kept for variant-uniform dispatch.
+  RocketFrame toRocketFrame(
+      rocket::server::MetadataProtocol /*metadataProtocol*/) && {
     DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
         .data = std::move(data),
@@ -92,12 +98,14 @@ struct ThriftRequestFnfPayload {
       apache::thrift::fast_thrift::frame::ComposedRequestFnfFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
+  std::unique_ptr<apache::thrift::RequestRpcMetadata> metadata{nullptr};
 
-  RocketFrame toRocketFrame() && noexcept {
+  RocketFrame toRocketFrame(
+      rocket::server::MetadataProtocol /*metadataProtocol*/) && {
+    DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
         .data = std::move(data),
-        .metadata = std::move(metadata),
+        .metadata = serializeRequestMetadata(*metadata),
         .header =
             {.streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId},
     };
@@ -111,13 +119,15 @@ struct ThriftRequestStreamPayload {
       apache::thrift::fast_thrift::frame::ComposedRequestStreamFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
+  std::unique_ptr<apache::thrift::RequestRpcMetadata> metadata{nullptr};
   uint32_t initialRequestN{0};
 
-  RocketFrame toRocketFrame() && noexcept {
+  RocketFrame toRocketFrame(
+      rocket::server::MetadataProtocol /*metadataProtocol*/) && {
+    DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
         .data = std::move(data),
-        .metadata = std::move(metadata),
+        .metadata = serializeRequestMetadata(*metadata),
         .header =
             {.streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId,
              .initialRequestN = initialRequestN},
@@ -135,13 +145,15 @@ struct ThriftRequestSinkPayload {
       apache::thrift::fast_thrift::frame::ComposedRequestChannelFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
+  std::unique_ptr<apache::thrift::RequestRpcMetadata> metadata{nullptr};
   uint32_t initialRequestN{0};
 
-  RocketFrame toRocketFrame() && noexcept {
+  RocketFrame toRocketFrame(
+      rocket::server::MetadataProtocol /*metadataProtocol*/) && {
+    DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
         .data = std::move(data),
-        .metadata = std::move(metadata),
+        .metadata = serializeRequestMetadata(*metadata),
         .header =
             {.streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId,
              .initialRequestN = initialRequestN},
@@ -157,13 +169,15 @@ struct ThriftRequestBidiPayload {
       apache::thrift::fast_thrift::frame::ComposedRequestChannelFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
+  std::unique_ptr<apache::thrift::RequestRpcMetadata> metadata{nullptr};
   uint32_t initialRequestN{0};
 
-  RocketFrame toRocketFrame() && noexcept {
+  RocketFrame toRocketFrame(
+      rocket::server::MetadataProtocol /*metadataProtocol*/) && {
+    DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
         .data = std::move(data),
-        .metadata = std::move(metadata),
+        .metadata = serializeRequestMetadata(*metadata),
         .header =
             {.streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId,
              .initialRequestN = initialRequestN},
@@ -200,16 +214,11 @@ struct ThriftFirstResponsePayload {
   std::unique_ptr<folly::IOBuf> data{nullptr};
   std::unique_ptr<apache::thrift::ResponseRpcMetadata> metadata{nullptr};
   uint32_t streamId{apache::thrift::fast_thrift::rocket::kInvalidStreamId};
-  // SETUP-negotiated metadata protocol used to serialize `metadata` in
-  // `toRocketFrame()`. The channel sets this from its connection-level
-  // protocol field; defaults to BINARY for tests/constructors that don't
-  // set it explicitly.
-  rocket::server::MetadataProtocol metadataProtocol{
-      rocket::server::MetadataProtocol::BINARY};
   bool complete{true};
   bool next{true};
 
-  RocketFrame toRocketFrame() && {
+  RocketFrame toRocketFrame(
+      rocket::server::MetadataProtocol metadataProtocol) && {
     DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
         .data = std::move(data),
@@ -233,7 +242,8 @@ struct ThriftErrorPayload {
   uint32_t streamId{apache::thrift::fast_thrift::rocket::kInvalidStreamId};
   uint32_t errorCode{0};
 
-  RocketFrame toRocketFrame() && noexcept {
+  RocketFrame toRocketFrame(
+      rocket::server::MetadataProtocol /*metadataProtocol*/) && noexcept {
     return {
         .data = std::move(data),
         .metadata = std::move(metadata),
@@ -253,7 +263,8 @@ struct ThriftCancelPayload {
 
   uint32_t streamId{apache::thrift::fast_thrift::rocket::kInvalidStreamId};
 
-  RocketFrame toRocketFrame() && noexcept {
+  RocketFrame toRocketFrame(
+      rocket::server::MetadataProtocol /*metadataProtocol*/) && noexcept {
     return {.header = {.streamId = streamId}};
   }
 };
@@ -269,7 +280,8 @@ struct ThriftRequestNPayload {
   uint32_t streamId{apache::thrift::fast_thrift::rocket::kInvalidStreamId};
   uint32_t requestN{0};
 
-  RocketFrame toRocketFrame() && noexcept {
+  RocketFrame toRocketFrame(
+      rocket::server::MetadataProtocol /*metadataProtocol*/) && noexcept {
     return {.header = {.streamId = streamId, .requestN = requestN}};
   }
 };
@@ -291,7 +303,8 @@ struct ThriftMetadataPushPayload {
 
   std::unique_ptr<folly::IOBuf> metadata{nullptr};
 
-  RocketFrame toRocketFrame() && noexcept {
+  RocketFrame toRocketFrame(
+      rocket::server::MetadataProtocol /*metadataProtocol*/) && noexcept {
     return {.metadata = std::move(metadata), .header = {}};
   }
 };

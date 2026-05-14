@@ -27,14 +27,11 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockHandler.h>
 
-#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
+#include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
-#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -99,15 +96,6 @@ class TestServerAppAdapter : public ThriftServerAppAdapter {
   int method2Count{0};
 };
 
-std::unique_ptr<folly::IOBuf> serializeRequestMetadata(
-    const apache::thrift::RequestRpcMetadata& metadata) {
-  apache::thrift::BinaryProtocolWriter writer;
-  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
-  writer.setOutput(&queue);
-  metadata.write(&writer);
-  return queue.move();
-}
-
 apache::thrift::ResponseRpcError deserializeResponseRpcError(
     const folly::IOBuf& buf) {
   apache::thrift::ResponseRpcError error;
@@ -117,94 +105,59 @@ apache::thrift::ResponseRpcError deserializeResponseRpcError(
   return error;
 }
 
+ThriftServerRequestMessage makeTypedRequestMessage(
+    uint32_t streamId,
+    const std::string& methodName,
+    apache::thrift::RpcKind kind,
+    const std::string& data) {
+  auto metadata = std::make_unique<apache::thrift::RequestRpcMetadata>();
+  metadata->name() = methodName;
+  metadata->kind() = kind;
+  metadata->protocol() = apache::thrift::ProtocolId::BINARY;
+
+  std::unique_ptr<folly::IOBuf> payloadData;
+  if (!data.empty()) {
+    payloadData = folly::IOBuf::copyBuffer(data);
+  }
+
+  ThriftServerRequestMessage msg;
+  msg.streamId = streamId;
+  msg.payload = ThriftServerInboundPayloadVariant{ThriftRequestResponsePayload{
+      .data = std::move(payloadData), .metadata = std::move(metadata)}};
+  return msg;
+}
+
 ThriftServerRequestMessage makeRequestMessage(
     uint32_t streamId,
     const std::string& methodName,
     const std::string& data = "payload") {
-  apache::thrift::RequestRpcMetadata metadata;
-  metadata.name() = methodName;
-  metadata.kind() = apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
-  metadata.protocol() = apache::thrift::ProtocolId::BINARY;
-
-  auto serializedMetadata = serializeRequestMetadata(metadata);
-  auto payloadData = folly::IOBuf::copyBuffer(data);
-
-  auto frame = apache::thrift::fast_thrift::frame::write::serialize(
-      apache::thrift::fast_thrift::frame::write::RequestResponseHeader{
-          .streamId = streamId},
-      std::move(serializedMetadata),
-      std::move(payloadData));
-
-  ThriftServerRequestMessage msg;
-  msg.frame =
-      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
-  msg.streamId = streamId;
-  return msg;
+  return makeTypedRequestMessage(
+      streamId,
+      methodName,
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      data);
 }
 
+// Mirrors the old "FNF wire frame" test fixture in the new typed-payload
+// world: AppAdapter rejection now triggers off metadata.kind, not the
+// originating wire frame type (transport adapter would have already
+// rejected non-RR wire frames at fromRocketFrame).
 ThriftServerRequestMessage makeFnfRequestMessage(
     uint32_t streamId, const std::string& methodName) {
-  apache::thrift::RequestRpcMetadata metadata;
-  metadata.name() = methodName;
-  metadata.kind() = apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE;
-  metadata.protocol() = apache::thrift::ProtocolId::BINARY;
-
-  auto serializedMetadata = serializeRequestMetadata(metadata);
-  auto payloadData = folly::IOBuf::copyBuffer("fnf");
-
-  auto frame = apache::thrift::fast_thrift::frame::write::serialize(
-      apache::thrift::fast_thrift::frame::write::RequestFnfHeader{
-          .streamId = streamId},
-      std::move(serializedMetadata),
-      std::move(payloadData));
-
-  ThriftServerRequestMessage msg;
-  msg.frame =
-      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
-  msg.streamId = streamId;
-  return msg;
-}
-
-ThriftServerRequestMessage makeInvalidMetadataMessage(uint32_t streamId) {
-  auto garbageMetadata = folly::IOBuf::copyBuffer("not-valid-thrift");
-  auto payloadData = folly::IOBuf::copyBuffer("payload");
-
-  auto frame = apache::thrift::fast_thrift::frame::write::serialize(
-      apache::thrift::fast_thrift::frame::write::RequestResponseHeader{
-          .streamId = streamId},
-      std::move(garbageMetadata),
-      std::move(payloadData));
-
-  ThriftServerRequestMessage msg;
-  msg.frame =
-      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
-  msg.streamId = streamId;
-  return msg;
+  return makeTypedRequestMessage(
+      streamId,
+      methodName,
+      apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+      "fnf");
 }
 
 ThriftServerRequestMessage makeStreamingRequestMessage(
     uint32_t streamId, const std::string& methodName) {
-  apache::thrift::RequestRpcMetadata metadata;
-  metadata.name() = methodName;
-  metadata.kind() = apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE;
-  metadata.protocol() = apache::thrift::ProtocolId::BINARY;
-
-  auto serializedMetadata = serializeRequestMetadata(metadata);
-  auto payloadData = folly::IOBuf::copyBuffer("payload");
-
-  // Use REQUEST_RESPONSE frame (the only type onRead accepts),
-  // but with streaming RPC kind in metadata
-  auto frame = apache::thrift::fast_thrift::frame::write::serialize(
-      apache::thrift::fast_thrift::frame::write::RequestResponseHeader{
-          .streamId = streamId},
-      std::move(serializedMetadata),
-      std::move(payloadData));
-
-  ThriftServerRequestMessage msg;
-  msg.frame =
-      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
-  msg.streamId = streamId;
-  return msg;
+  return makeTypedRequestMessage(
+      streamId,
+      methodName,
+      apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+      "payload");
 }
 
 } // namespace
@@ -687,45 +640,6 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithServerBlame) {
   EXPECT_EQ(captured.what, "server bug");
   EXPECT_TRUE(captured.hasBlame);
   EXPECT_EQ(captured.blame, apache::thrift::ErrorBlame::SERVER);
-}
-
-// =============================================================================
-// handleRequestResponse Metadata Deserialization Failure Tests
-// =============================================================================
-
-TEST_F(
-    ThriftServerAppAdapterTest,
-    HandleRequestResponseBadMetadataSendsErrorResponse) {
-  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
-
-  bool writeCalled = false;
-  uint32_t capturedErrorCode = 0;
-  apache::thrift::ResponseRpcErrorCode capturedRpcErrorCode{};
-
-  auto built = buildPipeline(
-      adapter.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&& box) {
-        writeCalled = true;
-        auto& resp = box.get<ThriftServerResponseMessage>();
-        capturedErrorCode = payloadErrorCode(resp);
-        if (auto& d = payloadData(resp); d) {
-          auto rpcError = deserializeResponseRpcError(*d);
-          capturedRpcErrorCode = *rpcError.code();
-        }
-        return Result::Success;
-      });
-
-  auto msg = makeInvalidMetadataMessage(1);
-  auto result = adapter->onRead(erase_and_box(std::move(msg)));
-
-  EXPECT_EQ(result, Result::Success);
-  EXPECT_TRUE(writeCalled) << "Should send error response when metadata "
-                              "deserialization fails (not silently drop)";
-  EXPECT_NE(capturedErrorCode, 0u) << "Should be ERROR frame (errorCode != 0)";
-  EXPECT_EQ(
-      capturedRpcErrorCode,
-      apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE);
 }
 
 // =============================================================================

@@ -64,6 +64,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RocketFrameDecoder.h>
 
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/test/TestAsyncTransport.h>
@@ -720,11 +721,17 @@ class RocketThriftServerInterfaceHandler {
     auto rocketMsg = msg.take<
         apache::thrift::fast_thrift::rocket::server::RocketRequestMessage>();
 
-    ThriftServerRequestMessage thriftMsg{
-        .frame = std::move(rocketMsg.frame),
-        .streamId = rocketMsg.streamId,
-    };
+    auto decoded = apache::thrift::fast_thrift::thrift::fromRocketFrame(
+        std::move(rocketMsg.frame),
+        apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
 
+    ThriftServerRequestMessage thriftMsg;
+    thriftMsg.streamId = rocketMsg.streamId;
+    if (FOLLY_UNLIKELY(!decoded.hasValue())) {
+      // TODO send an error back (mirrors production transport adapter)
+    } else {
+      thriftMsg.payload = std::move(decoded.value());
+    }
     return ctx.fireRead(erase_and_box(std::move(thriftMsg)));
   }
 
@@ -736,7 +743,10 @@ class RocketThriftServerInterfaceHandler {
     auto thriftMsg = msg.take<ThriftServerResponseMessage>();
     apache::thrift::fast_thrift::rocket::server::RocketResponseMessage
         rocketMsg{
-            .frame = std::move(thriftMsg.payload).toRocketFrame(),
+            .frame = std::move(thriftMsg.payload)
+                         .toRocketFrame(
+                             ::apache::thrift::fast_thrift::rocket::server::
+                                 MetadataProtocol::BINARY),
             .streamType =
                 apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
         };

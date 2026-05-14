@@ -32,3 +32,17 @@ proxygen_add_library(proxygen_transport_qmux_qmux_codec
     proxygen_transport_qmux_qmux_framer
     Folly::folly_io_iobuf
 )
+
+proxygen_add_library(proxygen_transport_qmux_qmux_session
+  SRCS
+    QmuxSession.cpp
+  DEPS
+    proxygen_transport_qmux_qmux_codec
+    Folly::folly_io_coro_socket
+    Folly::folly_logging_logging
+  EXPORTED_DEPS
+    proxygen_http_coro_util_CoroWtSession
+    proxygen_http_webtransport_wt_stream_manager
+    proxygen_http_webtransport_wt_util
+    proxygen_transport_qmux_qmux_framer
+)

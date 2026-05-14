@@ -97,15 +97,6 @@ void QmuxCodec::onIngress(std::unique_ptr<folly::IOBuf> data) {
       size_t typeSize = typeOpt->second;
       recordRemaining -= typeSize;
 
-      if ((!receivedTransportParams_ &&
-           frameType != qval(QmuxFrameType::QX_TRANSPORT_PARAMS)) ||
-          (receivedTransportParams_ &&
-           frameType == qval(QmuxFrameType::QX_TRANSPORT_PARAMS))) {
-        connError_ = QmuxErrorCode::TRANSPORT_PARAMETER_ERROR;
-        callback_->onConnectionError(QmuxErrorCode::TRANSPORT_PARAMETER_ERROR);
-        return;
-      }
-
       if (!isAllowedFrameType(frameType)) {
         QMUX_REPORT_AND_RETURN(QmuxErrorCode::FRAME_ENCODING_ERROR);
       }
@@ -153,7 +144,6 @@ void QmuxCodec::onIngress(std::unique_ptr<folly::IOBuf> data) {
             return;
           }
           recordRemaining -= payloadLen;
-          receivedTransportParams_ = true;
           callback_->onTransportParameters(std::move(*result));
         } else if (frameType == qval(QmuxFrameType::DATAGRAM)) {
           auto result = proxygen::parseDatagram(cursor, payloadLen);

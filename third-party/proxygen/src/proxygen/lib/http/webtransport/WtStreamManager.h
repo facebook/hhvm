@@ -304,6 +304,7 @@ struct WtStreamManager {
     return !streams_.empty();
   }
 
+  // True iff shutdown() has been called and every stream has been torn down.
   [[nodiscard]] bool isClosed() const noexcept {
     return shutdown_ && !hasStreams();
   }

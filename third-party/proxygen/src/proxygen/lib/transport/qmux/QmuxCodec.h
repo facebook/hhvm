@@ -36,7 +36,6 @@ class QmuxCodec {
  private:
   Callback* callback_;
   uint64_t maxRecordSize_{kDefaultMaxRecordSize};
-  bool receivedTransportParams_{false};
   folly::IOBufQueue ingress_{folly::IOBufQueue::cacheChainLength()};
   folly::Optional<QmuxErrorCode> connError_;
   OffsetValidator offsetValidator_;

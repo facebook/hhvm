@@ -51,7 +51,16 @@ struct TestSmInfra {
   StubSession sess{nullptr, sm};
 };
 
-class TestCallback : public QmuxCodec::Callback {
+// Holder so infra_ is constructed before QmuxCodec::Callback (base classes
+// initialize in declaration order), enabling us to pass &infra_.sm to the
+// Callback's constructor without referencing an as-yet-uninitialized member.
+struct TestSmInfraHolder {
+  TestSmInfra infra_;
+};
+
+class TestCallback
+    : public TestSmInfraHolder
+    , public QmuxCodec::Callback {
  public:
   TestCallback() : QmuxCodec::Callback(infra_.sm, infra_.sess) {
   }
@@ -128,9 +137,6 @@ class TestCallback : public QmuxCodec::Callback {
   std::vector<QxPing> pings;
   std::vector<QxPing> pongs;
   std::vector<QmuxErrorCode> connectionErrors;
-
- private:
-  TestSmInfra infra_;
 };
 
 // Wrap serialized frame bytes into a QMUX record (Size varint + frames)
@@ -163,26 +169,6 @@ class CodecTestHelper {
 
 } // namespace
 
-//////// First frame must be QX_TRANSPORT_PARAMETERS ////////
-
-TEST(QmuxCodecTest, FirstFrameMustBeTransportParams) {
-  CodecTestHelper h;
-
-  folly::IOBufQueue frameQueue{folly::IOBufQueue::cacheChainLength()};
-  proxygen::WTStreamCapsule frame;
-  frame.streamId = 4;
-  frame.streamData = folly::IOBuf::copyBuffer("hi");
-  frame.fin = false;
-  writeWTStream(frameQueue, frame, FrameProtocol::QMUX);
-
-  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
-  appendRecord(queue, frameQueue);
-
-  h.codec.onIngress(queue.move());
-  ASSERT_EQ(h.cb.connectionErrors.size(), 1);
-  EXPECT_EQ(h.cb.connectionErrors[0], QmuxErrorCode::TRANSPORT_PARAMETER_ERROR);
-}
-
 TEST(QmuxCodecTest, TransportParamsAccepted) {
   CodecTestHelper h;
   QxTransportParams params;
@@ -194,18 +180,6 @@ TEST(QmuxCodecTest, TransportParamsAccepted) {
   EXPECT_EQ(h.cb.transportParams[0].initialMaxData, 65536);
   EXPECT_EQ(h.cb.transportParams[0].initialMaxStreamsBidi, 10);
   EXPECT_TRUE(h.cb.connectionErrors.empty());
-}
-
-TEST(QmuxCodecTest, DuplicateTransportParamsRejected) {
-  CodecTestHelper h;
-  h.feedTransportParams();
-  ASSERT_EQ(h.cb.transportParams.size(), 1);
-  EXPECT_TRUE(h.cb.connectionErrors.empty());
-
-  // Sending a second QX_TRANSPORT_PARAMETERS frame must fail
-  h.feedTransportParams();
-  ASSERT_EQ(h.cb.connectionErrors.size(), 1);
-  EXPECT_EQ(h.cb.connectionErrors[0], QmuxErrorCode::TRANSPORT_PARAMETER_ERROR);
 }
 
 //////// Stream frame dispatch ////////
@@ -504,23 +478,6 @@ TEST(QmuxCodecTest, UnknownFrameTypeRejected) {
   EXPECT_EQ(h.cb.connectionErrors[0], QmuxErrorCode::FRAME_ENCODING_ERROR);
 }
 
-//////// PADDING before transport params is rejected ////////
-
-TEST(QmuxCodecTest, PaddingBeforeTransportParamsError) {
-  CodecTestHelper h;
-
-  // Wrap a PADDING byte (0x00) in a record
-  folly::IOBufQueue frameQueue{folly::IOBufQueue::cacheChainLength()};
-  frameQueue.append(folly::IOBuf::copyBuffer("\x00", 1));
-
-  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
-  appendRecord(queue, frameQueue);
-
-  h.codec.onIngress(queue.move());
-  ASSERT_EQ(h.cb.connectionErrors.size(), 1);
-  EXPECT_EQ(h.cb.connectionErrors[0], QmuxErrorCode::TRANSPORT_PARAMETER_ERROR);
-}
-
 //////// Incremental feeding ////////
 
 TEST(QmuxCodecTest, IncrementalFeeding) {
@@ -658,11 +615,11 @@ TEST(QmuxCodecTest, UnknownFrameType) {
 TEST(QmuxCodecTest, AfterErrorIngressIgnored) {
   CodecTestHelper h;
 
-  // Trigger error by sending non-TP first (inside a record)
+  // Trigger error by sending an unknown frame type
   folly::IOBufQueue frameQueue{folly::IOBufQueue::cacheChainLength()};
-  proxygen::WTMaxDataCapsule frame;
-  frame.maximumData = 100;
-  writeWTMaxData(frameQueue, frame, FrameProtocol::QMUX);
+  folly::io::QueueAppender appender(&frameQueue, 32);
+  auto op = [&](auto v) { appender.writeBE(folly::tag<decltype(v)>, v); };
+  (void)quic::encodeQuicInteger(0xff, op);
 
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   appendRecord(queue, frameQueue);

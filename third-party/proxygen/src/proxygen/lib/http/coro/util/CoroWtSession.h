@@ -82,6 +82,12 @@ struct WtExpected {
 
 // WtStreamManager must be constructed prior to WtSessionBase; shim class
 struct CoroWtSessionBase {
+  struct Config {
+    using milliseconds = std::chrono::milliseconds;
+    static constexpr auto kDefaultTimeout = milliseconds(5'000);
+    milliseconds readTimeout{kDefaultTimeout};
+    milliseconds writeTimeout{kDefaultTimeout};
+  };
   CoroWtSessionBase(WtDir dir, WtStreamManager::WtConfig wtConfig) noexcept
       : sm(dir, wtConfig, wtSmEgressCb, wtSmIngressCb, pq) {
   }
@@ -97,12 +103,6 @@ class CoroWtSession
     , public proxygen::detail::WtSessionBase {
  public:
   using Ptr = std::shared_ptr<CoroWtSession>;
-  struct Config {
-    using milliseconds = std::chrono::milliseconds;
-    static constexpr auto kDefaultTimeout = milliseconds(5'000);
-    milliseconds readTimeout{kDefaultTimeout};
-    milliseconds writeTimeout{kDefaultTimeout};
-  };
   CoroWtSession(folly::EventBase* evb,
                 WtDir dir,
                 WtStreamManager::WtConfig wtConfig,

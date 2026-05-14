@@ -63,7 +63,7 @@ class OpenSSLECKeyExchange : public KeyExchange {
       Error& err,
       const folly::ssl::EvpPkeyUniquePtr& peerKey) const;
 
-  void setPrivateKey(folly::ssl::EvpPkeyUniquePtr privateKey);
+  Status setPrivateKey(Error& err, folly::ssl::EvpPkeyUniquePtr privateKey);
 
   const folly::ssl::EvpPkeyUniquePtr& getPrivateKey() const;
 

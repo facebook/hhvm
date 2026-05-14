@@ -10,15 +10,14 @@ namespace fizz {
 namespace openssl {
 
 template <typename AeadCipher>
-std::unique_ptr<Aead> OpenSSLEVPCipher::makeCipher() {
+Status OpenSSLEVPCipher::makeCipher(std::unique_ptr<Aead>& ret, Error& err) {
   static_assert(AeadCipher::kIVLength >= sizeof(uint64_t), "iv too small");
   static_assert(AeadCipher::kIVLength < kMaxIVLength, "iv too large");
   static_assert(AeadCipher::kTagLength < kMaxTagLength, "tag too large");
   const EVP_CIPHER* cipherType;
-  Error err;
-  FIZZ_THROW_ON_ERROR(Properties<AeadCipher>::Cipher(cipherType, err), err);
+  FIZZ_RETURN_ON_ERROR(Properties<AeadCipher>::Cipher(cipherType, err));
   std::unique_ptr<OpenSSLEVPCipher> cipher;
-  FIZZ_THROW_ON_ERROR(
+  FIZZ_RETURN_ON_ERROR(
       OpenSSLEVPCipher::create(
           cipher,
           err,
@@ -27,9 +26,9 @@ std::unique_ptr<Aead> OpenSSLEVPCipher::makeCipher() {
           AeadCipher::kTagLength,
           cipherType,
           Properties<AeadCipher>::kOperatesInBlocks,
-          Properties<AeadCipher>::kRequiresPresetTagLen),
-      err);
-  return std::unique_ptr<Aead>(std::move(cipher));
+          Properties<AeadCipher>::kRequiresPresetTagLen));
+  ret = std::unique_ptr<Aead>(std::move(cipher));
+  return Status::Success;
 }
 
 } // namespace openssl

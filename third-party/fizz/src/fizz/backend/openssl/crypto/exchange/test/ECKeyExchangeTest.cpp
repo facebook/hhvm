@@ -57,13 +57,13 @@ TYPED_TEST(Key, SharedSecret) {
 TYPED_TEST(Key, ReadFromKey) {
   auto kex = TestFixture::makeKex();
   auto pkey = getPrivateKey(this->getKeyParams().privateKey);
-  kex->setPrivateKey(std::move(pkey));
+  Error err;
+  EXPECT_EQ(kex->setPrivateKey(err, std::move(pkey)), Status::Success);
 
   auto pkey2 = getPrivateKey(this->getKeyParams().privateKey);
   auto kex2 = TestFixture::makeKex();
-  kex2->setPrivateKey(std::move(pkey2));
+  EXPECT_EQ(kex2->setPrivateKey(err, std::move(pkey2)), Status::Success);
   std::unique_ptr<folly::IOBuf> shared;
-  Error err;
   EXPECT_EQ(
       kex->generateSharedSecret(shared, err, kex2->getPrivateKey()),
       Status::Success);
@@ -73,7 +73,10 @@ TYPED_TEST(Key, ReadFromKey) {
 TYPED_TEST(Key, ReadWrongGroup) {
   auto pkey = getPrivateKey(this->getKeyParams().invalidPrivateKey);
   auto kex = TestFixture::makeKex();
-  EXPECT_THROW(kex->setPrivateKey(std::move(pkey)), std::runtime_error);
+  Error err;
+  EXPECT_THROW(
+      FIZZ_THROW_ON_ERROR(kex->setPrivateKey(err, std::move(pkey)), err),
+      std::runtime_error);
 }
 
 TYPED_TEST(Key, Decode) {
@@ -201,21 +204,24 @@ TEST_P(ECDHTest, TestKeyAgreement) {
     switch (GetParam().key) {
       case fizz::KeyType::P256: {
         auto kex = makeOpenSSLECKeyExchange<fizz::P256>();
-        kex->setPrivateKey(std::move(privateKey));
+        FIZZ_THROW_ON_ERROR(
+            kex->setPrivateKey(err, std::move(privateKey)), err);
         FIZZ_THROW_ON_ERROR(
             kex->generateSharedSecret(shared, err, pkeyPeerKey), err);
         break;
       }
       case fizz::KeyType::P384: {
         auto kex = makeOpenSSLECKeyExchange<fizz::P384>();
-        kex->setPrivateKey(std::move(privateKey));
+        FIZZ_THROW_ON_ERROR(
+            kex->setPrivateKey(err, std::move(privateKey)), err);
         FIZZ_THROW_ON_ERROR(
             kex->generateSharedSecret(shared, err, pkeyPeerKey), err);
         break;
       }
       case fizz::KeyType::P521: {
         auto kex = makeOpenSSLECKeyExchange<fizz::P521>();
-        kex->setPrivateKey(std::move(privateKey));
+        FIZZ_THROW_ON_ERROR(
+            kex->setPrivateKey(err, std::move(privateKey)), err);
         FIZZ_THROW_ON_ERROR(
             kex->generateSharedSecret(shared, err, pkeyPeerKey), err);
         break;
@@ -242,21 +248,24 @@ TEST_P(ECDHTest, TestKexClone) {
     switch (GetParam().key) {
       case fizz::KeyType::P256: {
         auto kex = makeOpenSSLECKeyExchange<fizz::P256>();
-        kex->setPrivateKey(std::move(privateKey));
+        FIZZ_THROW_ON_ERROR(
+            kex->setPrivateKey(err, std::move(privateKey)), err);
 
         FIZZ_THROW_ON_ERROR(kex->clone(chosenKex, err), err);
         break;
       }
       case fizz::KeyType::P384: {
         auto kex = makeOpenSSLECKeyExchange<fizz::P384>();
-        kex->setPrivateKey(std::move(privateKey));
+        FIZZ_THROW_ON_ERROR(
+            kex->setPrivateKey(err, std::move(privateKey)), err);
 
         FIZZ_THROW_ON_ERROR(kex->clone(chosenKex, err), err);
         break;
       }
       case fizz::KeyType::P521: {
         auto kex = makeOpenSSLECKeyExchange<fizz::P521>();
-        kex->setPrivateKey(std::move(privateKey));
+        FIZZ_THROW_ON_ERROR(
+            kex->setPrivateKey(err, std::move(privateKey)), err);
 
         FIZZ_THROW_ON_ERROR(kex->clone(chosenKex, err), err);
         break;

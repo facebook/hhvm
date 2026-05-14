@@ -58,7 +58,7 @@ template <>
 struct Properties<fizz::ChaCha20Poly1305> {
   static Status Cipher(
       [[maybe_unused]] const EVP_CIPHER*& ret,
-      [[maybe_unused]] Error& err) {
+      [[maybe_unused]] [[maybe_unused]] Error& err) {
 #if FOLLY_OPENSSL_HAS_CHACHA
     ret = EVP_chacha20_poly1305();
     return Status::Success;

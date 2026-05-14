@@ -76,32 +76,34 @@ void useMockRandom() {
 
 std::unique_ptr<Aead> getCipher(CipherSuite suite) {
   std::unique_ptr<Aead> cipher;
+  Error err;
   switch (suite) {
     case CipherSuite::TLS_AES_128_GCM_SHA256:
-      cipher = openssl::OpenSSLEVPCipher::makeCipher<AESGCM128>();
+      FIZZ_THROW_ON_ERROR(
+          openssl::OpenSSLEVPCipher::makeCipher<AESGCM128>(cipher, err), err);
       break;
     case CipherSuite::TLS_AES_256_GCM_SHA384:
-      cipher = openssl::OpenSSLEVPCipher::makeCipher<AESGCM256>();
+      FIZZ_THROW_ON_ERROR(
+          openssl::OpenSSLEVPCipher::makeCipher<AESGCM256>(cipher, err), err);
       break;
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
-      cipher = openssl::OpenSSLEVPCipher::makeCipher<ChaCha20Poly1305>();
+      FIZZ_THROW_ON_ERROR(
+          openssl::OpenSSLEVPCipher::makeCipher<ChaCha20Poly1305>(cipher, err),
+          err);
       break;
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
-      cipher = openssl::OpenSSLEVPCipher::makeCipher<AESOCB128>();
+      FIZZ_THROW_ON_ERROR(
+          openssl::OpenSSLEVPCipher::makeCipher<AESOCB128>(cipher, err), err);
       break;
 #if FIZZ_HAVE_LIBAEGIS
-    case CipherSuite::TLS_AEGIS_128L_SHA256: {
-      Error err;
+    case CipherSuite::TLS_AEGIS_128L_SHA256:
       FIZZ_THROW_ON_ERROR(
           libaegis::makeCipher<fizz::AEGIS128L>(cipher, err), err);
       break;
-    }
-    case CipherSuite::TLS_AEGIS_256_SHA512: {
-      Error err;
+    case CipherSuite::TLS_AEGIS_256_SHA512:
       FIZZ_THROW_ON_ERROR(
           libaegis::makeCipher<fizz::AEGIS256>(cipher, err), err);
       break;
-    }
 #endif
     default:
       throw std::runtime_error("Invalid cipher");

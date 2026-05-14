@@ -90,11 +90,11 @@ hpke::SetupResult constructSetupResult(
     const NegotiatedECHConfig& supportedConfig) {
   auto kex = std::make_unique<MockOpenSSLECKeyExchange256>();
   auto privateKey = getPrivateKey(kP256Key);
-  kex->setPrivateKey(std::move(privateKey));
+  Error err;
+  EXPECT_EQ(kex->setPrivateKey(err, std::move(privateKey)), Status::Success);
   EXPECT_CALL(*kex, _generateKeyPair()).Times(1);
 
   hpke::SetupResult ret;
-  Error err;
   FIZZ_THROW_ON_ERROR(
       constructHpkeSetupResult(
           ret, err, fizz::DefaultFactory(), std::move(kex), supportedConfig),
@@ -158,7 +158,7 @@ auto hpkeContext(OuterECHClientHello& clientECH) {
   hpkePrefix->prependChain(std::move(encoded));
 
   auto kex = std::make_unique<MockOpenSSLECKeyExchange256>();
-  kex->setPrivateKey(getPrivateKey(kP256Key));
+  EXPECT_EQ(kex->setPrivateKey(err, getPrivateKey(kP256Key)), Status::Success);
 
   hpke::HpkeSuiteId suiteId;
   EXPECT_EQ(
@@ -402,7 +402,7 @@ TEST(EncryptionTest, TestTryToDecryptECH) {
 
   auto kex = std::make_unique<MockOpenSSLECKeyExchange256>();
   auto privateKey = getPrivateKey(kP256Key);
-  kex->setPrivateKey(std::move(privateKey));
+  EXPECT_EQ(kex->setPrivateKey(err, std::move(privateKey)), Status::Success);
 
   std::unique_ptr<hpke::HpkeContext> context;
   EXPECT_EQ(

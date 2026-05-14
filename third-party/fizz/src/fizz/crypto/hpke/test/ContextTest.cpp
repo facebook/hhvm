@@ -240,15 +240,19 @@ TEST_P(HpkeContextTest, TestExportSecretThrow) {
             HashFunction::Sha256,
             CipherSuite::TLS_AES_128_GCM_SHA256),
         Status::Success);
+    std::unique_ptr<Aead> aead;
+    Error err;
+    EXPECT_EQ(
+        openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>(aead, err),
+        Status::Success);
     HpkeContextImpl context(
-        openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>(),
+        std::move(aead),
         toIOBuf(testParam.exporterSecret),
         std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::withPrefix(
             prefix07, openssl::hasherFactory<Sha256>())),
         std::move(suiteId),
         role);
 
-    Error err;
     EXPECT_THROW(
         {
           std::unique_ptr<folly::IOBuf> secret;

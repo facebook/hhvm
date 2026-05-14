@@ -86,11 +86,12 @@ DHKEM getDHKEM(std::unique_ptr<KeyExchange> actualKex, NamedGroup group) {
 TEST(DHKEMTest, TestP256EncapDecapEqual) {
   auto actualKex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   auto privateKey = getPrivateKey(kP256Key);
-  actualKex->setPrivateKey(std::move(privateKey));
+  Error err;
+  EXPECT_EQ(
+      actualKex->setPrivateKey(err, std::move(privateKey)), Status::Success);
   auto dhkem = getDHKEM(std::move(actualKex), NamedGroup::secp256r1);
 
   std::unique_ptr<folly::IOBuf> publicKey;
-  Error err;
   EXPECT_EQ(
       openssl::detail::encodeECPublicKey(
           publicKey, err, getPublicKey(kP256PublicKey)),
@@ -106,7 +107,9 @@ TEST(DHKEMTest, TestP256EncapDecapEqual) {
 TEST(DHKEMTest, TestP256EncapDecapNotEqual) {
   auto actualKex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
   auto privateKey = getPrivateKey(kP256Key);
-  actualKex->setPrivateKey(std::move(privateKey));
+  Error err;
+  EXPECT_EQ(
+      actualKex->setPrivateKey(err, std::move(privateKey)), Status::Success);
   auto dhkem = getDHKEM(std::move(actualKex), NamedGroup::secp256r1);
 
   // Set incorrect public key
@@ -131,11 +134,12 @@ TEST(DHKEMTest, TestP256EncapDecapNotEqual) {
 TEST(DHKEMTest, TestP384EncapDecapEqual) {
   auto actualKex = openssl::makeOpenSSLECKeyExchange<fizz::P384>();
   auto privateKey = getPrivateKey(kP384Key);
-  actualKex->setPrivateKey(std::move(privateKey));
+  Error err;
+  EXPECT_EQ(
+      actualKex->setPrivateKey(err, std::move(privateKey)), Status::Success);
   auto dhkem = getDHKEM(std::move(actualKex), NamedGroup::secp384r1);
 
   std::unique_ptr<folly::IOBuf> publicKey;
-  Error err;
   EXPECT_EQ(
       openssl::detail::encodeECPublicKey(
           publicKey, err, getPublicKey(kP384PublicKey)),

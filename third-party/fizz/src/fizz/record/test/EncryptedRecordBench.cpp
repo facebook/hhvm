@@ -80,8 +80,9 @@ void encryptGCM(
   std::vector<std::unique_ptr<folly::IOBuf>> msg_clones;
   EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
-    aead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
     Error err;
+    FIZZ_THROW_ON_ERROR(
+        openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>(aead, err), err);
     FIZZ_THROW_ON_ERROR(aead->setKey(err, getKey()), err);
     FIZZ_THROW_ON_ERROR(
         write.setAead(err, folly::ByteRange(), std::move(aead)), err);
@@ -112,9 +113,15 @@ void decryptGCM(uint32_t n, size_t size, IOBufAllocation iobufAllocation) {
   EncryptedReadRecordLayer read{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
     EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
-    auto writeAead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
-    auto readAead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
+    std::unique_ptr<Aead> writeAead;
+    std::unique_ptr<Aead> readAead;
     Error err;
+    FIZZ_THROW_ON_ERROR(
+        openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>(writeAead, err),
+        err);
+    FIZZ_THROW_ON_ERROR(
+        openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>(readAead, err),
+        err);
     FIZZ_THROW_ON_ERROR(writeAead->setKey(err, getKey()), err);
     FIZZ_THROW_ON_ERROR(readAead->setKey(err, getKey()), err);
     FIZZ_THROW_ON_ERROR(
@@ -152,21 +159,20 @@ void decryptGCMNoRecord(uint32_t n, size_t size) {
   std::vector<std::unique_ptr<folly::IOBuf>> contents;
   auto aad = folly::IOBuf::copyBuffer("aad");
   BENCHMARK_SUSPEND {
-    std::unique_ptr<Aead> writeAead =
-        openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
-    readAead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
-    {
-      Error err;
-      FIZZ_THROW_ON_ERROR(writeAead->setKey(err, getKey()), err);
-      FIZZ_THROW_ON_ERROR(readAead->setKey(err, getKey()), err);
-    }
+    std::unique_ptr<Aead> writeAead;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>(writeAead, err),
+        err);
+    FIZZ_THROW_ON_ERROR(
+        openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>(readAead, err),
+        err);
+    FIZZ_THROW_ON_ERROR(writeAead->setKey(err, getKey()), err);
+    FIZZ_THROW_ON_ERROR(readAead->setKey(err, getKey()), err);
     for (size_t i = 0; i < n; ++i) {
       std::unique_ptr<folly::IOBuf> out;
-      {
-        Error err;
-        FIZZ_THROW_ON_ERROR(
-            writeAead->encrypt(out, err, makeRandom(size), aad.get(), 0), err);
-      }
+      FIZZ_THROW_ON_ERROR(
+          writeAead->encrypt(out, err, makeRandom(size), aad.get(), 0), err);
       contents.push_back(std::move(out));
     }
   }
@@ -236,8 +242,9 @@ void encryptOCB(uint32_t n, size_t size) {
   std::vector<fizz::TLSMessage> msgs;
   EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
-    aead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESOCB128>();
     Error err;
+    FIZZ_THROW_ON_ERROR(
+        openssl::OpenSSLEVPCipher::makeCipher<fizz::AESOCB128>(aead, err), err);
     FIZZ_THROW_ON_ERROR(aead->setKey(err, getKey()), err);
     FIZZ_THROW_ON_ERROR(
         write.setAead(err, folly::ByteRange(), std::move(aead)), err);

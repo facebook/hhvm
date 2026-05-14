@@ -137,19 +137,25 @@ std::unique_ptr<KeyExchange> FizzUtil::createKeyExchangeFromBuf(
     case hpke::KEMId::secp256r1: {
       std::unique_ptr<openssl::OpenSSLECKeyExchange> kex =
           openssl::makeOpenSSLECKeyExchange<fizz::P256>();
-      kex->setPrivateKey(readPrivateKeyFromBuf(privKey, ""));
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          kex->setPrivateKey(err, readPrivateKeyFromBuf(privKey, "")), err);
       return kex;
     }
     case hpke::KEMId::secp384r1: {
       std::unique_ptr<openssl::OpenSSLECKeyExchange> kex =
           openssl::makeOpenSSLECKeyExchange<fizz::P384>();
-      kex->setPrivateKey(readPrivateKeyFromBuf(privKey, ""));
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          kex->setPrivateKey(err, readPrivateKeyFromBuf(privKey, "")), err);
       return kex;
     }
     case hpke::KEMId::secp521r1: {
       std::unique_ptr<openssl::OpenSSLECKeyExchange> kex =
           openssl::makeOpenSSLECKeyExchange<fizz::P521>();
-      kex->setPrivateKey(readPrivateKeyFromBuf(privKey, ""));
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          kex->setPrivateKey(err, readPrivateKeyFromBuf(privKey, "")), err);
       return kex;
     }
     case hpke::KEMId::x25519: {

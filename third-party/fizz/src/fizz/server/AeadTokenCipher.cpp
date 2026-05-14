@@ -121,10 +121,11 @@ folly::Optional<Buf> Aead128GCMTokenCipher::decrypt(
 std::unique_ptr<Aead> Aead128GCMTokenCipher::createAead(
     folly::ByteRange secret,
     folly::ByteRange salt) const {
-  auto aead = AeadType::makeCipher<CipherType>();
+  std::unique_ptr<Aead> aead;
+  Error err;
+  FIZZ_THROW_ON_ERROR(AeadType::makeCipher<CipherType>(aead, err), err);
   std::unique_ptr<folly::IOBuf> info = folly::IOBuf::wrapBuffer(salt);
   std::unique_ptr<folly::IOBuf> keys;
-  Error err;
   FIZZ_THROW_ON_ERROR(
       Hkdf(openssl::hasherFactory<HashType>())
           .expand(

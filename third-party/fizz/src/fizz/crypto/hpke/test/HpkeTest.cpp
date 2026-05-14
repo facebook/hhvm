@@ -1936,7 +1936,7 @@ void setOpenSSLPrivKey(
   if (EC_KEY_check_key(ecKey.get()) != 1) {
     throw std::runtime_error("Private key not valid");
   }
-  kex->setPrivateKey(std::move(key));
+  FIZZ_THROW_ON_ERROR(kex->setPrivateKey(err, std::move(key)), err);
 }
 
 std::unique_ptr<KeyExchange> generateAuthKex(

@@ -79,16 +79,21 @@ Status MultiBackendFactory::makeAead(
     CipherSuite cipher) const {
   switch (cipher) {
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
-      ret = openssl::OpenSSLEVPCipher::makeCipher<fizz::ChaCha20Poly1305>();
+      FIZZ_RETURN_ON_ERROR(
+          openssl::OpenSSLEVPCipher::makeCipher<fizz::ChaCha20Poly1305>(
+              ret, err));
       return Status::Success;
     case CipherSuite::TLS_AES_128_GCM_SHA256:
-      ret = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
+      FIZZ_RETURN_ON_ERROR(
+          openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>(ret, err));
       return Status::Success;
     case CipherSuite::TLS_AES_256_GCM_SHA384:
-      ret = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM256>();
+      FIZZ_RETURN_ON_ERROR(
+          openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM256>(ret, err));
       return Status::Success;
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
-      ret = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESOCB128>();
+      FIZZ_RETURN_ON_ERROR(
+          openssl::OpenSSLEVPCipher::makeCipher<fizz::AESOCB128>(ret, err));
       return Status::Success;
 #if FIZZ_HAVE_LIBAEGIS
     case CipherSuite::TLS_AEGIS_256_SHA512:

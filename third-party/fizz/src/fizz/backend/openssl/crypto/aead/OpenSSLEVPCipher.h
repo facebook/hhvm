@@ -44,7 +44,7 @@ class OpenSSLEVPCipher : public Aead {
   static constexpr size_t kMaxTagLength = 20;
 
   template <class AeadCipher>
-  static std::unique_ptr<Aead> makeCipher();
+  static Status makeCipher(std::unique_ptr<Aead>& ret, Error& err);
 
   static Status create(
       std::unique_ptr<OpenSSLEVPCipher>& ret,

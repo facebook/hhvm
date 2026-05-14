@@ -45,8 +45,11 @@ static std::unique_ptr<T> makeEncryptedRecordLayer(
   // parameter
   static unsigned char dummy;
 
-  auto aead = fizz::openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
+  std::unique_ptr<fizz::Aead> aead;
   fizz::Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizz::openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>(aead, err),
+      err);
   FIZZ_THROW_ON_ERROR(aead->setKey(err, std::move(key)), err);
   auto rl = std::make_unique<T>(fizz::EncryptionLevel::AppTraffic);
   FIZZ_THROW_ON_ERROR(

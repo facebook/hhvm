@@ -69,11 +69,12 @@ Status OpenSSLECKeyExchange::generateSharedSecret(
   return Status::Success;
 }
 
-void OpenSSLECKeyExchange::setPrivateKey(
+Status OpenSSLECKeyExchange::setPrivateKey(
+    Error& err,
     folly::ssl::EvpPkeyUniquePtr privateKey) {
-  Error err;
-  FIZZ_THROW_ON_ERROR(detail::validateECKey(err, privateKey, nid_), err);
+  FIZZ_RETURN_ON_ERROR(detail::validateECKey(err, privateKey, nid_));
   key_ = std::move(privateKey);
+  return Status::Success;
 }
 
 const folly::ssl::EvpPkeyUniquePtr& OpenSSLECKeyExchange::getPrivateKey()
@@ -95,7 +96,7 @@ Status OpenSSLECKeyExchange::clone(
 
   // Construct a new copy key exchange to return
   auto copyKex = std::make_unique<OpenSSLECKeyExchange>(nid_, keyShareLength_);
-  copyKex->setPrivateKey(std::move(keyCopy));
+  FIZZ_RETURN_ON_ERROR(copyKex->setPrivateKey(err, std::move(keyCopy)));
 
   ret = std::move(copyKex);
   return Status::Success;

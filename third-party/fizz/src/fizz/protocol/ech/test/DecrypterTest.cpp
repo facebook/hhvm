@@ -192,10 +192,10 @@ void checkRetryConfigExpectation(
 
 TEST(DecrypterTest, TestDecodeSuccess) {
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
-  kex->setPrivateKey(getPrivateKey(kP256Key));
+  Error err;
+  EXPECT_EQ(kex->setPrivateKey(err, getPrivateKey(kP256Key)), Status::Success);
 
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
-  Error err;
   std::unique_ptr<KeyExchange> kexClone;
   EXPECT_EQ(kex->clone(kexClone, err), Status::Success);
   decrypter.addDecryptionConfig(
@@ -237,10 +237,10 @@ TEST(DecrypterTest, TestDecodeSuccess) {
 
 TEST(DecrypterTest, TestDecodeHRRSuccess) {
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
-  kex->setPrivateKey(getPrivateKey(kP256Key));
+  Error err;
+  EXPECT_EQ(kex->setPrivateKey(err, getPrivateKey(kP256Key)), Status::Success);
 
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
-  Error err;
   std::unique_ptr<KeyExchange> kexClone;
   EXPECT_EQ(kex->clone(kexClone, err), Status::Success);
   decrypter.addDecryptionConfig(
@@ -285,10 +285,10 @@ TEST(DecrypterTest, TestDecodeHRRSuccess) {
 
 TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
-  kex->setPrivateKey(getPrivateKey(kP256Key));
+  Error err;
+  EXPECT_EQ(kex->setPrivateKey(err, getPrivateKey(kP256Key)), Status::Success);
 
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
-  Error err;
   std::unique_ptr<KeyExchange> kexClone;
   EXPECT_EQ(kex->clone(kexClone, err), Status::Success);
   decrypter.addDecryptionConfig(
@@ -342,10 +342,10 @@ TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
 
 TEST(DecrypterTest, TestDecodeFailure) {
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
-  kex->setPrivateKey(getPrivateKey(kP256Key));
+  Error err;
+  EXPECT_EQ(kex->setPrivateKey(err, getPrivateKey(kP256Key)), Status::Success);
 
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
-  Error err;
   std::unique_ptr<KeyExchange> kexClone;
   EXPECT_EQ(kex->clone(kexClone, err), Status::Success);
   decrypter.addDecryptionConfig(
@@ -360,10 +360,10 @@ TEST(DecrypterTest, TestDecodeFailure) {
 
 TEST(DecrypterTest, TestDecodeHRRFailure) {
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
-  kex->setPrivateKey(getPrivateKey(kP256Key));
+  Error err;
+  EXPECT_EQ(kex->setPrivateKey(err, getPrivateKey(kP256Key)), Status::Success);
 
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
-  Error err;
   std::unique_ptr<KeyExchange> kexClone;
   EXPECT_EQ(kex->clone(kexClone, err), Status::Success);
   decrypter.addDecryptionConfig(
@@ -383,10 +383,10 @@ TEST(DecrypterTest, TestDecodeHRRFailure) {
 
 TEST(DecrypterTest, TestDecodeHRRWithContextFailure) {
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
-  kex->setPrivateKey(getPrivateKey(kP256Key));
+  Error err;
+  EXPECT_EQ(kex->setPrivateKey(err, getPrivateKey(kP256Key)), Status::Success);
 
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
-  Error err;
   std::unique_ptr<KeyExchange> kexClone;
   EXPECT_EQ(kex->clone(kexClone, err), Status::Success);
   decrypter.addDecryptionConfig(
@@ -410,9 +410,9 @@ TEST(DecrypterTest, TestDecodeMultipleDecrypterParam) {
   targetECHConfigContent.key_config.config_id = 2;
 
   auto kex = openssl::makeOpenSSLECKeyExchange<fizz::P256>();
-  kex->setPrivateKey(getPrivateKey(kP256Key));
-  ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
   Error err;
+  EXPECT_EQ(kex->setPrivateKey(err, getPrivateKey(kP256Key)), Status::Success);
+  ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
   std::unique_ptr<KeyExchange> kexClone;
   // Load multiple decrypter params
   EXPECT_EQ(kex->clone(kexClone, err), Status::Success);

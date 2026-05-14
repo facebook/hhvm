@@ -518,7 +518,9 @@ add_library(
     client/ssl.cpp
     Serializer.cpp
     server/event_handler.cpp
+    server/flagged/PromptRequestContextInvalidation.cpp
     server/flagged/RcAwareTaskPatch.cpp
+    server/request_context_holder.cpp
     server/interceptor/PythonServiceInterceptor.cpp
     server/PythonAsyncProcessor.cpp
     server/PythonAsyncProcessorFactory.cpp

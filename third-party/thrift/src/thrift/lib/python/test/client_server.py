@@ -38,6 +38,7 @@ from thrift.python.client import get_client
 from thrift.python.common import Priority, RpcOptions
 from thrift.python.exceptions import ApplicationError
 from thrift.python.server import ServiceInterface
+from thrift.python.test.flag_helpers import mock_prompt_request_context_invalidation
 
 
 class Handler(TestingServiceInterface):
@@ -318,7 +319,6 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
             async def getName(self) -> str:
                 nonlocal captured_ctx, captured_headers
                 captured_ctx = get_context()
-                captured_ctx._enable_validity_enforcement()  # pyre-ignore[16]
                 captured_headers = captured_ctx.read_headers
                 return "Testing"
 
@@ -347,13 +347,37 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(captured_ctx.request_id, str)
         self.assertIsInstance(captured_ctx.method_name, str)
 
-    async def test_request_context_no_error_without_enforcement(self) -> None:
+    async def test_request_context_killswitch_disables_invalidation(self) -> None:
         captured_ctx: RequestContext | None = None
 
         class CapturingHandler(Handler):
             async def getName(self) -> str:
                 nonlocal captured_ctx
                 captured_ctx = get_context()
+                return "Testing"
+
+        with mock_prompt_request_context_invalidation(False):
+            async with local_server(handler=CapturingHandler()) as sa:
+                ip, port = sa.ip, sa.port
+                assert ip and port
+                async with get_client(TestingService, host=ip, port=port) as client:
+                    self.assertEqual("Testing", await client.getName())
+
+        assert captured_ctx is not None
+        # With the flag disabled, the invalidator is not installed, so the
+        # holder's pointer is not nulled on request completion. The pointer
+        # still appears valid.
+        _ = captured_ctx.read_headers
+
+    async def test_request_context_invalidated_by_default(self) -> None:
+        captured_ctx: RequestContext | None = None
+        captured_headers: ReadHeaders | None = None
+
+        class CapturingHandler(Handler):
+            async def getName(self) -> str:
+                nonlocal captured_ctx, captured_headers
+                captured_ctx = get_context()
+                captured_headers = captured_ctx.read_headers
                 return "Testing"
 
         async with local_server(handler=CapturingHandler()) as sa:
@@ -363,10 +387,16 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual("Testing", await client.getName())
 
         assert captured_ctx is not None
-        # Without _enable_validity_enforcement(), the invalidator is never
-        # installed, so the holder's pointer is not nulled on request
-        # completion. The pointer still appears valid.
-        _ = captured_ctx.read_headers
+        assert captured_headers is not None
+
+        self.assertFalse(captured_ctx.is_valid())
+
+        with self.assertRaises(RuntimeError):
+            dict(captured_ctx.read_headers)
+
+        self.assertIsNotNone(captured_ctx.connection_context)
+        self.assertIsInstance(captured_ctx.request_id, str)
+        self.assertIsInstance(captured_ctx.method_name, str)
 
     async def test_request_context_invalidated_in_background_task(self) -> None:
         captured_ctx: RequestContext | None = None
@@ -379,7 +409,6 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 nonlocal captured_ctx
                 if captured_ctx is None:
                     captured_ctx = get_context()
-                    captured_ctx._enable_validity_enforcement()  # pyre-ignore[16]
                     asyncio.get_running_loop().create_task(background_access())
                 return "Testing"
 
@@ -411,6 +440,10 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
             await asyncio.wait_for(background_done.wait(), timeout=5.0)
 
         self.assertIsInstance(background_error, RuntimeError)
+        self.assertIn(
+            "Request context is no longer valid. The Thrift request has already completed",
+            str(background_error),
+        )
 
     def test_request_context_direct_construction(self) -> None:
         ctx = RequestContext()

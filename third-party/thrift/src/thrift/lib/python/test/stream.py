@@ -20,7 +20,7 @@ import unittest
 from typing import AsyncIterator, Tuple
 
 from thrift.lib.python.test.test_server import TestServer
-from thrift.py3.server import get_context
+from thrift.py3.server import get_context, RequestContext
 from thrift.py3.test.included.included.thrift_types import Included
 from thrift.py3.test.stream.thrift_clients import StreamTestService
 from thrift.py3.test.stream.thrift_services import StreamTestServiceInterface
@@ -381,3 +381,56 @@ class StreamClientTest(unittest.IsolatedAsyncioTestCase):
                     async for _ in stream:
                         pass
                 self.assertEqual(ctx.exception.type, ApplicationErrorType.TIMEOUT)
+
+    async def test_stream_request_context_invalid_after_request(self) -> None:
+        """Accessing Cpp2RequestContext properties inside a stream generator
+        after the initial request's context has been deallocated must raise
+        RuntimeError, not dereference freed memory."""
+        captured_ctx: RequestContext | None = None
+        priority_error: BaseException | None = None
+        generator_started: asyncio.Event = asyncio.Event()
+        eviction_done: asyncio.Event = asyncio.Event()
+
+        class ContextCheckHandler(Handler):
+            async def returnstream(
+                self, i32_from: int, i32_to: int
+            ) -> AsyncIterator[int]:
+                nonlocal captured_ctx
+                captured_ctx = get_context()
+
+                async def gen() -> AsyncIterator[int]:
+                    nonlocal priority_error
+                    generator_started.set()
+                    await eviction_done.wait()
+                    try:
+                        _ = captured_ctx.priority
+                    except RuntimeError as e:
+                        priority_error = e
+                    yield i32_from
+
+                return gen()
+
+        test_server = TestServer(handler=ContextCheckHandler(), ip="::1")
+        test_server.server.set_io_worker_threads(1)
+        async with test_server as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                StreamTestService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                stream = await client.returnstream(42, 100)
+                await asyncio.wait_for(generator_started.wait(), timeout=5.0)
+                for _ in range(11):
+                    dummy = await client.stringstream()
+                    async for _ in dummy:
+                        pass
+                eviction_done.set()
+                results = [n async for n in stream]
+                self.assertEqual(results, [42])
+
+        assert captured_ctx is not None
+        self.assertFalse(captured_ctx.is_valid())
+        self.assertIsInstance(priority_error, RuntimeError)

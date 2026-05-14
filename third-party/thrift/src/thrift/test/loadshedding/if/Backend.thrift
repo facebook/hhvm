@@ -15,10 +15,8 @@
  */
 
 include "common/fb303/if/fb303.thrift"
-include "thrift/annotation/thrift.thrift"
 
-@thrift.AllowLegacyMissingUris
-package;
+package "facebook.com/thrift/test/loadshedding"
 
 namespace cpp2 facebook.thrift.test
 

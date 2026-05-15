@@ -46,3 +46,21 @@ proxygen_add_library(proxygen_transport_qmux_qmux_session
     proxygen_http_webtransport_wt_util
     proxygen_transport_qmux_qmux_framer
 )
+
+proxygen_add_library(proxygen_transport_qmux_qmux_connector
+  SRCS
+    QmuxConnector.cpp
+  DEPS
+    mvfst::mvfst_folly_utils
+    Folly::folly_coro_timeout
+    Folly::folly_futures_core
+    Folly::folly_io_coro_socket
+    Folly::folly_io_iobuf
+    Folly::folly_logging_logging
+    fmt::fmt
+  EXPORTED_DEPS
+    proxygen_http_webtransport_wt_stream_manager
+    proxygen_transport_qmux_qmux_framer
+    proxygen_transport_qmux_qmux_session
+    Folly::folly_coro_task
+)

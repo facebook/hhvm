@@ -6,8 +6,6 @@
 #
 
 from __future__ import annotations
-
-import __static__
 import builtins
 
 

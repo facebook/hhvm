@@ -7,8 +7,6 @@
 
 from __future__ import annotations
 
-import __static__
-
 import folly.iobuf as _fbthrift_iobuf
 
 from abc import ABCMeta as _fbthrift_ABCMeta

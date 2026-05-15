@@ -26,10 +26,6 @@
 #
 
 from __future__ import annotations
-{{#if (has_compiler_option? "import_static")}}
-
-import __static__
-{{/if (has_compiler_option? "import_static")}}
 {{/let partial}}
 
 {{!

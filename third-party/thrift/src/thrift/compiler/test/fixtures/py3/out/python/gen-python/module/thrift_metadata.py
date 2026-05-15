@@ -7,8 +7,6 @@
 
 from __future__ import annotations
 
-import __static__
-
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
 import module.thrift_enums as _fbthrift_current_module_enums

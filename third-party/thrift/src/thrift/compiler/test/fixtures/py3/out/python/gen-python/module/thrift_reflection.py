@@ -10,8 +10,6 @@
 
 from __future__ import annotations
 
-import __static__
-
 
 try:
     from thrift.python.reflection.types_reflection import (

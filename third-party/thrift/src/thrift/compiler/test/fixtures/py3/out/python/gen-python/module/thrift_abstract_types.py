@@ -9,8 +9,6 @@
 
 from __future__ import annotations
 
-import __static__
-
 import abc as _abc
 import typing as _typing
 import builtins as _fbthrift_builtins

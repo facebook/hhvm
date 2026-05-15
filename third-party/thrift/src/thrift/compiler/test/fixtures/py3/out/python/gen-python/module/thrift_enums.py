@@ -6,8 +6,6 @@
 #
 
 from __future__ import annotations
-
-import __static__
 import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata

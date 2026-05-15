@@ -313,6 +313,51 @@ final class TestStreamChunkTrackingHandler extends TClientAsyncHandler {
   }
 }
 
+/**
+ * Handler that provides bidi stream payloads and captures sink payloads.
+ * Used to test TClientMultiAsyncHandler.genWaitBiDi fan-out.
+ */
+<<Oncalls('thrift_hack')>>
+final class TestBiDiAsyncHandler extends TClientAsyncHandler {
+
+  private vec<string> $sinkReceived = vec[];
+
+  public function __construct(private vec<string> $streamPayloads) {}
+
+  <<__Override>>
+  public async function genWaitBiDi(int $_sequence_id)[zoned_local]: Awaitable<
+    (
+      HH\AsyncGenerator<null, string, void>,
+      (function(
+        HH\AsyncGenerator<null, string, void>,
+      )[zoned_local]: Awaitable<void>),
+    ),
+  > {
+    $payloads = $this->streamPayloads;
+    $stream = (
+      async function()[zoned_local] use ($payloads) {
+        foreach ($payloads as $p) {
+          yield $p;
+        }
+      }
+    )();
+
+    $sink_func = async (
+      HH\AsyncGenerator<null, string, void> $gen,
+    )[zoned_local] ==> {
+      foreach ($gen await as $item) {
+        $this->sinkReceived[] = $item;
+      }
+    };
+
+    return tuple($stream, $sink_func);
+  }
+
+  public function getSinkReceived()[]: vec<string> {
+    return $this->sinkReceived;
+  }
+}
+
 <<Oncalls('thrift_hack')>>
 final class TClientAsyncHandlerIntegrationTest extends WWWTest {
 
@@ -592,5 +637,79 @@ final class TClientAsyncHandlerIntegrationTest extends WWWTest {
       $received[] = $chunk;
     }
     expect($received)->toEqual(vec['a', 'b', 'c', 'd']);
+  }
+
+  // Multi-handler: genWaitBiDi stream payloads from multiple handlers are
+  // concatenated
+  public async function testMultiHandlerBiDiConcatenatesStreams(
+  ): Awaitable<void> {
+    $handler1 = new TestBiDiAsyncHandler(vec['a', 'b']);
+    $handler2 = new TestBiDiAsyncHandler(vec['c', 'd']);
+
+    $multi_handler = new TClientMultiAsyncHandler();
+    $multi_handler->addHandler('h1', $handler1);
+    $multi_handler->addHandler('h2', $handler2);
+
+    list($stream, $_sink_func) = await $multi_handler->genWaitBiDi(0);
+
+    $received = vec[];
+    foreach ($stream await as $payload) {
+      $received[] = $payload;
+    }
+    expect($received)->toEqual(vec['a', 'b', 'c', 'd']);
+  }
+
+  // Multi-handler: genWaitBiDi sink function is delegated to handlers
+  public async function testMultiHandlerBiDiDelegatesSink(): Awaitable<void> {
+    $handler1 = new TestBiDiAsyncHandler(vec[]);
+    $handler2 = new TestBiDiAsyncHandler(vec[]);
+
+    $multi_handler = new TClientMultiAsyncHandler();
+    $multi_handler->addHandler('h1', $handler1);
+    $multi_handler->addHandler('h2', $handler2);
+
+    list($_stream, $sink_func) = await $multi_handler->genWaitBiDi(0);
+
+    $gen = (
+      async function()[]: HH\AsyncGenerator<null, string, void> {
+        yield 'x';
+        yield 'y';
+      }
+    )();
+    await $sink_func($gen);
+
+    // Only the first handler receives the generator (generators are
+    // single-consume); the second handler gets an exhausted generator.
+    expect($handler1->getSinkReceived())->toEqual(vec['x', 'y']);
+    expect($handler2->getSinkReceived())->toEqual(vec[]);
+  }
+
+  // Multi-handler: genWaitBiDi with a single handler round-trips both
+  // stream and sink
+  public async function testMultiHandlerBiDiSingleHandlerRoundTrip(
+  ): Awaitable<void> {
+    $handler = new TestBiDiAsyncHandler(vec['s1', 's2']);
+
+    $multi_handler = new TClientMultiAsyncHandler();
+    $multi_handler->addHandler('h1', $handler);
+
+    list($stream, $sink_func) = await $multi_handler->genWaitBiDi(0);
+
+    $stream_received = vec[];
+    foreach ($stream await as $payload) {
+      $stream_received[] = $payload;
+    }
+    expect($stream_received)->toEqual(vec['s1', 's2']);
+
+    $sink_gen = (
+      async function()[]: HH\AsyncGenerator<null, string, void> {
+        yield 'k1';
+        yield 'k2';
+        yield 'k3';
+      }
+    )();
+    await $sink_func($sink_gen);
+
+    expect($handler->getSinkReceived())->toEqual(vec['k1', 'k2', 'k3']);
   }
 }

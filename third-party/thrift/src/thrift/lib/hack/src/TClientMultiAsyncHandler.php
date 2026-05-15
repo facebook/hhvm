@@ -1,4 +1,5 @@
 <?hh
+// (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 /*
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -159,5 +160,59 @@ final class TClientMultiAsyncHandler extends TClientAsyncHandler {
       }
       return '';
     };
+  }
+
+  // Note: Same constraint as genWaitSink — at most one handler should
+  // provide a real stream and consume the sink generator.
+  <<__Override>>
+  public async function genWaitBiDi(int $sequence_id)[zoned_local]: Awaitable<
+    (
+      HH\AsyncGenerator<null, string, void>,
+      (function(
+        HH\AsyncGenerator<null, string, void>,
+      )[zoned_local]: Awaitable<void>),
+    ),
+  > {
+    $results = await Vec\map_async(
+      $this->handlers,
+      async ($handler)[zoned_local] ==>
+        await $handler->genWaitBiDi($sequence_id),
+    );
+
+    $stream = (
+      async function()[zoned_local] use ($results) {
+        foreach ($results as list($result_gen, $_)) {
+          foreach ($result_gen await as $payload) {
+            yield $payload;
+          }
+        }
+      }
+    )();
+
+    $sink_funcs = Vec\map($results, ($r)[zoned_local] ==> $r[1]);
+    $first_sink = C\first($sink_funcs);
+    $rest_sinks = Vec\drop($sink_funcs, 1);
+
+    $sink_func = async (
+      HH\AsyncGenerator<null, string, void> $gen,
+    )[zoned_local] ==> {
+      if ($first_sink is nonnull) {
+        await $first_sink($gen);
+      }
+      await Vec\map_async(
+        $rest_sinks,
+        async ($f)[zoned_local] ==> {
+          try {
+            await $f($gen);
+          } catch (Exception $e) {
+            if ($e->getMessage() !== 'Generator is already finished') {
+              throw $e;
+            }
+          }
+        },
+      );
+    };
+
+    return tuple($stream, $sink_func);
   }
 }

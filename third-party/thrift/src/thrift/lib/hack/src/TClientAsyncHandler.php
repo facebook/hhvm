@@ -87,6 +87,27 @@ class TClientAsyncHandler {
     };
   }
 
+  // Called between the send and recv for bidi gen_methodName() calls.
+  // Returns a tuple of (stream, sink_func) where:
+  //   - stream yields raw serialized payload bytes (server→client direction)
+  //   - sink_func accepts a generator of raw serialized payload bytes
+  //     (client→server direction) and runs until the generator is exhausted
+  // The handler is responsible for making the first response available
+  // on the input transport before this method returns.
+  public async function genWaitBiDi(int $sequence_id)[zoned_local]: Awaitable<
+    (
+      HH\AsyncGenerator<null, string, void>,
+      (function(
+        HH\AsyncGenerator<null, string, void>,
+      )[zoned_local]: Awaitable<void>),
+    ),
+  > {
+    return tuple(
+      self::genEmptyStream(),
+      async (HH\AsyncGenerator<null, string, void> $_gen)[zoned_local] ==> {},
+    );
+  }
+
   // Called before stream consumption begins in streaming gen_methodName() calls
   public async function genBeforeStream(string $func_name): Awaitable<void> {
     // Do nothing

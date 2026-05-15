@@ -574,33 +574,58 @@ abstract class ThriftClientBase implements IThriftClient {
         $this->output_,
       );
 
-    invariant($channel !== null, "BiDi stream requires an async channel");
+    if ($channel !== null) {
+      $msg = $out_transport->getBuffer();
+      $out_transport->resetBuffer();
+      list($result_msg, $_read_headers, $sink, $stream) =
+        await $channel->genSendRequestBiDiStream($rpc_options, $msg);
 
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $sink, $stream) =
-      await $channel->genSendRequestBiDiStream($rpc_options, $msg);
+      $disable16kblimit = $this->config_?->getStreamDisable16KBLimit() ?? false;
+      if ($disable16kblimit) {
+        $stream->disable16KBBufferingPolicy();
+      }
 
-    $disable16kblimit = $this->config_?->getStreamDisable16KBLimit() ?? false;
-    if ($disable16kblimit) {
-      $stream->disable16KBBufferingPolicy();
+      $stream_gen = $stream->gen<TBiDiStreamType>($stream_decoder);
+
+      $client_sink_func = async function(
+        AsyncGenerator<null, TBiDiSinkType, void> $pld_generator,
+      ) use ($sink, $payload_serializer) {
+        await $this->genSinkFunc<TBiDiSinkType>(
+          $sink,
+          $pld_generator,
+          $payload_serializer,
+          true,
+        );
+      };
+
+      $in_transport->resetBuffer();
+      $in_transport->write($result_msg);
+    } else {
+      list($raw_stream, $raw_sink_func) = await $this->asyncHandler_
+        ->genWaitBiDi($expectedsequenceid);
+
+      $stream_gen = (
+        async function() use ($raw_stream, $stream_decoder) {
+          foreach ($raw_stream await as $raw_payload) {
+            yield $stream_decoder($raw_payload, null);
+          }
+        }
+      )();
+
+      $client_sink_func = async function(
+        AsyncGenerator<null, TBiDiSinkType, void> $pld_generator,
+      ) use ($raw_sink_func, $payload_serializer) {
+        $raw_gen = (
+          async function() use ($pld_generator, $payload_serializer) {
+            foreach ($pld_generator await as $item) {
+              list($serialized, $_) = $payload_serializer($item, null);
+              yield $serialized;
+            }
+          }
+        )();
+        await $raw_sink_func($raw_gen);
+      };
     }
-
-    $stream_gen = $stream->gen<TBiDiStreamType>($stream_decoder);
-
-    $client_sink_func = async function(
-      AsyncGenerator<null, TBiDiSinkType, void> $pld_generator,
-    ) use ($sink, $payload_serializer) {
-      await $this->genSinkFunc<TBiDiSinkType>(
-        $sink,
-        $pld_generator,
-        $payload_serializer,
-        true, // Bidi: return after sink-complete, don't wait for final response
-      );
-    };
-
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
 
     $first_response = await $this->genRecvImplHelper(
       $first_response_type,

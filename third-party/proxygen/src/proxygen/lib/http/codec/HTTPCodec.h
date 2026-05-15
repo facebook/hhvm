@@ -433,14 +433,6 @@ class HTTPCodec {
   virtual void onIngressEOF() = 0;
 
   /**
-   * Invoked on a codec that has been upgraded to via an HTTPMessage on
-   * a different codec.  The codec may return false to halt the upgrade.
-   */
-  virtual bool onIngressUpgradeMessage(const HTTPMessage& /* msg */) {
-    return true;
-  }
-
-  /**
    * Check whether the codec can process new streams. Typically,
    * an implementing subclass will return true when a new codec is
    * created and false once it encounters a situation that would

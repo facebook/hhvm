@@ -97,11 +97,6 @@ class HQFramedCodec : public HTTPCodec {
     return false;
   }
 
-  // No h2c upgrade in HQ
-  bool onIngressUpgradeMessage(const HTTPMessage& /*msg*/) override {
-    return false;
-  }
-
   // no connection preface for HQ
   size_t generateConnectionPreface(folly::IOBufQueue& /*writeBuf*/) override {
     LOG(FATAL) << __func__ << " not supported on this codec";

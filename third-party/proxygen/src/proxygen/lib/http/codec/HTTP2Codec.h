@@ -44,7 +44,6 @@ class HTTP2Codec
   }
 
   size_t onIngress(const folly::IOBuf& buf) noexcept override;
-  bool onIngressUpgradeMessage(const HTTPMessage& msg) override;
   size_t generateConnectionPreface(folly::IOBufQueue& writeBuf) override;
   void generateHeader(
       folly::IOBufQueue& writeBuf,

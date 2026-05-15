@@ -64,11 +64,4 @@ void HTTPParallelCodec::disableDoubleGoawayDrain() {
   }
 }
 
-bool HTTPParallelCodec::onIngressUpgradeMessage(const HTTPMessage& /*msg*/) {
-  if (transportDirection_ == TransportDirection::DOWNSTREAM) {
-    lastStreamID_ = 1;
-  }
-  return true;
-}
-
 } // namespace proxygen

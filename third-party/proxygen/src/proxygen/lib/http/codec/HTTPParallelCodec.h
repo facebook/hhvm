@@ -68,8 +68,6 @@ class HTTPParallelCodec : public HTTPCodec {
   void enableDoubleGoawayDrain() override;
   void disableDoubleGoawayDrain() override;
 
-  bool onIngressUpgradeMessage(const HTTPMessage& msg) override;
-
   void setNextEgressStreamId(StreamID nextEgressStreamID) {
     if (nextEgressStreamID > nextEgressStreamID_ &&
         (nextEgressStreamID & 0x1) == (nextEgressStreamID_ & 0x1) &&

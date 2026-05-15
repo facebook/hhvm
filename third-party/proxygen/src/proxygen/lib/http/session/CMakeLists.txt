@@ -33,7 +33,6 @@ proxygen_add_library(proxygen_http_session_session
     proxygen_http_session_http_event
     proxygen_http_session_http_session_activity_tracker
     proxygen_http_session_http_transaction
-    proxygen_http_session_secondary_auth_mgr_base
     proxygen_http_session_transaction_byte_events
     proxygen_utils_shared_wheel_timer
     proxygen_utils_time_util
@@ -204,23 +203,6 @@ proxygen_add_library(proxygen_http_session_http_session_codec_factory
   EXPORTED_DEPS
     proxygen_http_codec_codec_factory
     proxygen_services_acceptor_configuration
-)
-
-proxygen_add_library(proxygen_http_session_secondary_auth_mgr_base
-  EXPORTED_DEPS
-    proxygen_http_codec_direction
-    fizz::fizz
-)
-
-proxygen_add_library(proxygen_http_session_secondary_auth_mgr
-  SRCS
-    SecondaryAuthManager.cpp
-  DEPS
-    fizz::fizz
-    Folly::folly_io_iobuf
-  EXPORTED_DEPS
-    proxygen_http_session_secondary_auth_mgr_base
-    fizz::fizz
 )
 
 proxygen_add_library(proxygen_http_session_stream_dispatcher

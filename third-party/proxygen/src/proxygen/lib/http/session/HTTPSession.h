@@ -28,7 +28,6 @@
 #include <proxygen/lib/http/session/HTTPSessionActivityTracker.h>
 #include <proxygen/lib/http/session/HTTPSessionBase.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
-#include <proxygen/lib/http/session/SecondaryAuthManagerBase.h>
 #include <proxygen/lib/http/session/SessionLoopCallback.h>
 #include <proxygen/lib/utils/WheelTimerInstance.h>
 #include <vector>
@@ -250,18 +249,6 @@ class HTTPSession
     }
     return false;
   }
-
-  /**
-   * Attach a SecondaryAuthManager to this session to control secondary
-   * certificate authentication in HTTP/2.
-   */
-  void setSecondAuthManager(
-      std::unique_ptr<SecondaryAuthManagerBase> secondAuthManager);
-
-  /**
-   * Get the SecondaryAuthManager attached to this session.
-   */
-  SecondaryAuthManagerBase* getSecondAuthManager() const;
 
   bool isDetachable(bool checkSocket = true) const override;
 
@@ -770,8 +757,6 @@ class HTTPSession
   void onSetSendWindow(uint32_t windowSize);
   void onSetMaxInitiatedStreams(uint32_t maxTxns);
 
-  uint32_t getCertAuthSettingVal();
-
   bool verifyCertAuthSetting(uint32_t value);
 
   void addLastByteEvent(HTTPTransaction* txn, uint64_t byteNo) noexcept;
@@ -1042,9 +1027,6 @@ class HTTPSession
     bool extendIntervalOnIngress_{true};
   };
   std::unique_ptr<PingProber> pingProber_;
-
-  // secondary authentication manager
-  std::unique_ptr<SecondaryAuthManagerBase> secondAuthManager_;
 
   enum class SocketState : uint8_t {
     UNPAUSED = 0,

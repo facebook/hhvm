@@ -138,32 +138,6 @@ HTTPSession::HTTPSession(const WheelTimerInstance& wheelTimer,
   initCodecHeaderIndexingStrategy();
 }
 
-uint32_t HTTPSession::getCertAuthSettingVal() {
-  uint32_t certAuthSettingVal = 0;
-  constexpr uint16_t settingLen = 4;
-  std::unique_ptr<folly::IOBuf> ekm;
-  folly::StringPiece label;
-  if (isUpstream()) {
-    label = kClientLabel;
-  } else {
-    label = kServerLabel;
-  }
-  auto fizzBase = getTransport()->getUnderlyingTransport<AsyncFizzBase>();
-  if (fizzBase) {
-    ekm = fizzBase->getExportedKeyingMaterial(label, nullptr, settingLen);
-  } else {
-    VLOG(4) << "Underlying transport does not support secondary "
-               "authentication.";
-    return certAuthSettingVal;
-  }
-  if (ekm && ekm->computeChainDataLength() == settingLen) {
-    folly::io::Cursor cursor(ekm.get());
-    auto ekmVal = cursor.readBE<uint32_t>();
-    certAuthSettingVal = (ekmVal & 0x3fffffff) | 0x80000000;
-  }
-  return certAuthSettingVal;
-}
-
 bool HTTPSession::verifyCertAuthSetting(uint32_t value) {
   uint32_t certAuthSettingVal = 0;
   constexpr uint16_t settingLen = 4;
@@ -203,21 +177,10 @@ void HTTPSession::setupCodec() {
     maxConcurrentOutgoingStreamsRemote_ = isDownstream() ? 0 : 1;
   }
 
-  // If a secondary authentication manager is configured for this session, set
-  // the SETTINGS_HTTP_CERT_AUTH to indicate support for HTTP-layer certificate
-  // authentication.
-  uint32_t certAuthSettingVal = 0;
-  if (secondAuthManager_) {
-    certAuthSettingVal = getCertAuthSettingVal();
-  }
   HTTPSettings* settings = codec_->getEgressSettings();
   if (settings) {
     settings->setSetting(SettingsId::MAX_CONCURRENT_STREAMS,
                          maxConcurrentIncomingStreams_);
-    if (certAuthSettingVal != 0) {
-      settings->setSetting(SettingsId::SETTINGS_HTTP_CERT_AUTH,
-                           certAuthSettingVal);
-    }
   }
   codec_->generateConnectionPreface(writeBuf_);
 
@@ -1214,77 +1177,15 @@ void HTTPSession::onPriority(HTTPCodec::StreamID streamID,
 }
 
 void HTTPSession::onCertificateRequest(uint16_t requestId,
-                                       std::unique_ptr<IOBuf> authRequest) {
+                                       std::unique_ptr<IOBuf> /*authRequest*/) {
   DestructorGuard dg(this);
   VLOG(4) << "CERTIFICATE_REQUEST on" << *this << ", requestId=" << requestId;
-
-  if (!secondAuthManager_) {
-    return;
-  }
-
-  std::pair<uint16_t, std::unique_ptr<folly::IOBuf>> authenticator;
-  auto fizzBase = getTransport()->getUnderlyingTransport<AsyncFizzBase>();
-  if (fizzBase) {
-    if (isUpstream()) {
-      authenticator =
-          secondAuthManager_->getAuthenticator(*fizzBase,
-                                               TransportDirection::UPSTREAM,
-                                               requestId,
-                                               std::move(authRequest));
-    } else {
-      authenticator =
-          secondAuthManager_->getAuthenticator(*fizzBase,
-                                               TransportDirection::DOWNSTREAM,
-                                               requestId,
-                                               std::move(authRequest));
-    }
-  } else {
-    VLOG(4) << "Underlying transport does not support secondary "
-               "authentication.";
-    return;
-  }
-  if (codec_->generateCertificate(writeBuf_,
-                                  authenticator.first,
-                                  std::move(authenticator.second)) > 0) {
-    scheduleWrite();
-  }
 }
 
 void HTTPSession::onCertificate(uint16_t certId,
-                                std::unique_ptr<IOBuf> authenticator) {
+                                std::unique_ptr<IOBuf> /*authenticator*/) {
   DestructorGuard dg(this);
   VLOG(4) << "CERTIFICATE on" << *this << ", certId=" << certId;
-
-  if (!secondAuthManager_) {
-    return;
-  }
-
-  bool isValid = false;
-  auto fizzBase = getTransport()->getUnderlyingTransport<AsyncFizzBase>();
-  if (fizzBase) {
-    if (isUpstream()) {
-      isValid = secondAuthManager_->validateAuthenticator(
-          *fizzBase,
-          TransportDirection::UPSTREAM,
-          certId,
-          std::move(authenticator));
-    } else {
-      isValid = secondAuthManager_->validateAuthenticator(
-          *fizzBase,
-          TransportDirection::DOWNSTREAM,
-          certId,
-          std::move(authenticator));
-    }
-  } else {
-    VLOG(4) << "Underlying transport does not support secondary "
-               "authentication.";
-    return;
-  }
-  if (isValid) {
-    VLOG(4) << "Successfully validated the authenticator provided by the peer.";
-  } else {
-    VLOG(4) << "Failed to validate the authenticator provided by the peer";
-  }
 }
 
 void HTTPSession::onSetSendWindow(uint32_t windowSize) {
@@ -1654,49 +1555,10 @@ size_t HTTPSession::changePriority(HTTPTransaction* /*txn*/,
   return 0;
 }
 
-void HTTPSession::setSecondAuthManager(
-    std::unique_ptr<SecondaryAuthManagerBase> secondAuthManager) {
-  secondAuthManager_ = std::move(secondAuthManager);
-}
-
-SecondaryAuthManagerBase* HTTPSession::getSecondAuthManager() const {
-  return secondAuthManager_.get();
-}
-
-/**
- * Send a CERTIFICATE_REQUEST frame. If the underlying protocol doesn't
- * support secondary authentication, this is a no-op and 0 is returned.
- */
 size_t HTTPSession::sendCertificateRequest(
-    std::unique_ptr<folly::IOBuf> certificateRequestContext,
-    std::vector<fizz::Extension> extensions) {
-  // Check if both sending and receiving peer have advertised valid
-  // SETTINGS_HTTP_CERT_AUTH setting. Otherwise, the frames for secondary
-  // authentication should not be sent.
-  auto ingressSettings = codec_->getIngressSettings();
-  auto egressSettings = codec_->getEgressSettings();
-  if (ingressSettings && egressSettings) {
-    if (ingressSettings->getSetting(SettingsId::SETTINGS_HTTP_CERT_AUTH, 0) ==
-            0 ||
-        egressSettings->getSetting(SettingsId::SETTINGS_HTTP_CERT_AUTH, 0) ==
-            0) {
-      VLOG(4) << "Secondary certificate authentication is not supported.";
-      return 0;
-    }
-  }
-  if (!secondAuthManager_) {
-    return 0;
-  }
-  auto authRequest = secondAuthManager_->createAuthRequest(
-      std::move(certificateRequestContext), std::move(extensions));
-  auto encodedSize = codec_->generateCertificateRequest(
-      writeBuf_, authRequest.first, std::move(authRequest.second));
-  if (encodedSize > 0) {
-    scheduleWrite();
-  } else {
-    VLOG(4) << "Failed to generate CERTIFICATE_REQUEST frame.";
-  }
-  return encodedSize;
+    std::unique_ptr<folly::IOBuf> /*certificateRequestContext*/,
+    std::vector<fizz::Extension> /*extensions*/) {
+  return 0;
 }
 
 void HTTPSession::decrementTransactionCount(HTTPTransaction* txn,

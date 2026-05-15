@@ -158,9 +158,9 @@ AsyncMysqlClient::~AsyncMysqlClient() {
 
 db::SquangleLoggingData AsyncMysqlClient::makeSquangleLoggingData(
     std::shared_ptr<const ConnectionKey> connKey,
-    const db::ConnectionContextBase* connContext) {
+    std::shared_ptr<const db::ConnectionContextBase> connContext) {
   return db::SquangleLoggingData(
-      std::move(connKey), connContext, collectPerfStats());
+      std::move(connKey), std::move(connContext), collectPerfStats());
 }
 
 std::unique_ptr<ConnectOperationImpl>

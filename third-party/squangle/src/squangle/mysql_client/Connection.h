@@ -490,8 +490,14 @@ class Connection {
       std::unique_ptr<Connection> conn,
       std::shared_ptr<const ConnectionKey> key);
 
+  // The returned pointer is only valid for the lifetime of this Connection.
   const db::ConnectionContextBase* getConnectionContext() const {
     return connection_context_.get();
+  }
+
+  std::shared_ptr<const db::ConnectionContextBase> getConnectionContextShared()
+      const {
+    return connection_context_;
   }
 
   void setPersistentQueryAttributes(QueryAttributes attrs) {

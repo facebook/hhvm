@@ -72,7 +72,7 @@ class MysqlClientBase {
   void logConnectionSuccess(
       const db::CommonLoggingData& logging_data,
       std::shared_ptr<const ConnectionKey> conn_key,
-      const db::ConnectionContextBase* extra_logging_data);
+      std::shared_ptr<const db::ConnectionContextBase> extra_logging_data);
 
   void logConnectionFailure(
       const db::CommonLoggingData& logging_data,
@@ -80,7 +80,7 @@ class MysqlClientBase {
       std::shared_ptr<const ConnectionKey> conn_key,
       unsigned int mysqlErrno,
       const std::string& error,
-      const db::ConnectionContextBase* extra_logging_data);
+      std::shared_ptr<const db::ConnectionContextBase> extra_logging_data);
 
   db::DBCounterBase* stats() {
     return client_stats_.get();
@@ -225,8 +225,8 @@ class MysqlClientBase {
 
   virtual db::SquangleLoggingData makeSquangleLoggingData(
       std::shared_ptr<const ConnectionKey> connKey,
-      const db::ConnectionContextBase* connContext) {
-    return db::SquangleLoggingData(std::move(connKey), connContext);
+      std::shared_ptr<const db::ConnectionContextBase> connContext) {
+    return db::SquangleLoggingData(std::move(connKey), std::move(connContext));
   }
 
   virtual void addOperation(std::shared_ptr<Operation> /*op*/) {}

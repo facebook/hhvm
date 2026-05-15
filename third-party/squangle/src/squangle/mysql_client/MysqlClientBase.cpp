@@ -57,12 +57,13 @@ MysqlClientBase::MysqlClientBase(
 void MysqlClientBase::logQuerySuccess(
     const db::QueryLoggingData& logging_data,
     const Connection& conn) {
-  auto conn_context = conn.getConnectionContext();
-  stats()->incrSucceededQueries(conn_context);
+  auto conn_context = conn.getConnectionContextShared();
+  stats()->incrSucceededQueries(conn_context.get());
 
   if (db_logger_) {
     db_logger_->logQuerySuccess(
-        logging_data, makeSquangleLoggingData(conn.getKey(), conn_context));
+        logging_data,
+        makeSquangleLoggingData(conn.getKey(), std::move(conn_context)));
   }
 }
 
@@ -72,8 +73,8 @@ void MysqlClientBase::logQueryFailure(
     unsigned int mysqlErrno,
     const std::string& error,
     const Connection& conn) {
-  auto conn_context = conn.getConnectionContext();
-  stats()->incrFailedQueries(conn_context, mysqlErrno, error);
+  auto conn_context = conn.getConnectionContextShared();
+  stats()->incrFailedQueries(conn_context.get(), mysqlErrno, error);
 
   if (db_logger_) {
     db_logger_->logQueryFailure(
@@ -81,18 +82,19 @@ void MysqlClientBase::logQueryFailure(
         reason,
         mysqlErrno,
         error,
-        makeSquangleLoggingData(conn.getKey(), conn_context));
+        makeSquangleLoggingData(conn.getKey(), std::move(conn_context)));
   }
 }
 
 void MysqlClientBase::logConnectionSuccess(
     const db::CommonLoggingData& logging_data,
     std::shared_ptr<const ConnectionKey> conn_key,
-    const db::ConnectionContextBase* connection_context) {
+    std::shared_ptr<const db::ConnectionContextBase> connection_context) {
   if (db_logger_) {
     db_logger_->logConnectionSuccess(
         logging_data,
-        makeSquangleLoggingData(std::move(conn_key), connection_context));
+        makeSquangleLoggingData(
+            std::move(conn_key), std::move(connection_context)));
   }
 }
 
@@ -102,8 +104,8 @@ void MysqlClientBase::logConnectionFailure(
     std::shared_ptr<const ConnectionKey> conn_key,
     unsigned int mysqlErrno,
     const std::string& error,
-    const db::ConnectionContextBase* connection_context) {
-  stats()->incrFailedConnections(connection_context, mysqlErrno, error);
+    std::shared_ptr<const db::ConnectionContextBase> connection_context) {
+  stats()->incrFailedConnections(connection_context.get(), mysqlErrno, error);
 
   if (db_logger_) {
     db_logger_->logConnectionFailure(
@@ -111,7 +113,8 @@ void MysqlClientBase::logConnectionFailure(
         reason,
         mysqlErrno,
         error,
-        makeSquangleLoggingData(std::move(conn_key), connection_context));
+        makeSquangleLoggingData(
+            std::move(conn_key), std::move(connection_context)));
   }
 }
 

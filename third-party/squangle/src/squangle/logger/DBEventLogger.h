@@ -94,10 +94,10 @@ class SquangleLoggingData {
  public:
   SquangleLoggingData(
       std::shared_ptr<const common::mysql_client::ConnectionKey> conn_key,
-      const ConnectionContextBase* conn_context,
+      std::shared_ptr<const ConnectionContextBase> conn_context,
       db::ClientPerfStats clientPerfStats = db::ClientPerfStats())
       : connKey_(std::move(conn_key)),
-        connContext_(conn_context),
+        connContext_(std::move(conn_context)),
         clientPerfStats_(clientPerfStats) {
     if (!connKey_) {
       connKey_ = std::make_shared<common::mysql_client::MysqlConnectionKey>();
@@ -115,7 +115,7 @@ class SquangleLoggingData {
   }
 
   [[nodiscard]] const ConnectionContextBase* getConnContext() const {
-    return connContext_;
+    return connContext_.get();
   }
 
   [[nodiscard]] const db::ClientPerfStats& getClientPerfStats() const {
@@ -124,7 +124,7 @@ class SquangleLoggingData {
 
  private:
   std::shared_ptr<const common::mysql_client::ConnectionKey> connKey_;
-  const ConnectionContextBase* connContext_;
+  std::shared_ptr<const ConnectionContextBase> connContext_;
   db::ClientPerfStats clientPerfStats_;
 };
 

@@ -203,7 +203,7 @@ class AsyncMysqlClient : public MysqlClientBase {
 
   db::SquangleLoggingData makeSquangleLoggingData(
       std::shared_ptr<const ConnectionKey> connKey,
-      const db::ConnectionContextBase* connContext) override;
+      std::shared_ptr<const db::ConnectionContextBase> connContext) override;
 
   void activeConnectionAdded(
       std::shared_ptr<const ConnectionKey> key) override {

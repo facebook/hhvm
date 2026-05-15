@@ -243,7 +243,6 @@ void MysqlConnectOperationImpl::logConnectCompleted(OperationResult result) {
   if (!conn().hasInitialized()) {
     return;
   }
-  auto* context = connection_context_.get();
   if (result == OperationResult::Succeeded) {
     withOptionalConnectionContext([&](auto& context) {
       context.sslVersion = getMysqlConnection()->getTlsVersion();
@@ -257,7 +256,7 @@ void MysqlConnectOperationImpl::logConnectCompleted(OperationResult result) {
             getMaxThreadBlockTime(),
             getTotalThreadBlockTime()),
         conn().getKey(),
-        context);
+        connection_context_);
   } else {
     db::FailureReason reason = db::FailureReason::DATABASE_ERROR;
     if (result == OperationResult::TimedOut) {
@@ -277,7 +276,7 @@ void MysqlConnectOperationImpl::logConnectCompleted(OperationResult result) {
         conn().getKey(),
         mysql_errno(),
         mysql_error(),
-        context);
+        connection_context_);
   }
 }
 

@@ -730,6 +730,12 @@ class Connection {
       QueryOptions&& options);
 
  private:
+  template <typename Op, typename Cb>
+  void applyQueryOptions(Op& op, Cb&& cb, QueryOptions& options);
+
+  template <typename Op>
+  void runOperation(Op& op);
+
   template <typename QueryOperationType>
   static void checkForQueryTimeoutOverride(
       QueryOperationType& op,

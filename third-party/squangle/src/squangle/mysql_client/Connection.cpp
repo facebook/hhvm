@@ -303,52 +303,58 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
 
 // Query
 
+template <typename Op, typename Cb>
+void Connection::applyQueryOptions(Op& op, Cb&& cb, QueryOptions& options) {
+  Duration timeout = conn_options_.getQueryTimeout();
+  if (timeout.count() > 0) {
+    op.setTimeout(timeout);
+  }
+  mergePersistentQueryAttributes(options.getAttributes());
+  op.setAttributes(std::move(options.getAttributes()));
+  checkForQueryTimeoutOverride(op, options.getQueryTimeout());
+  if (cb) {
+    op.setCallback(std::forward<Cb>(cb));
+  }
+  setupOperationCallbacks(op, *this);
+}
+
+template <typename Op>
+void Connection::runOperation(Op& op) {
+  if (auto optFut = op.callPreQueryCallback(op)) {
+    optFut->wait();
+  }
+  op.run().wait();
+
+  if (!op.ok()) {
+    client()
+        .exceptionBuilder()
+        .buildQueryException(
+            op.numQueriesExecuted(),
+            op.result(),
+            op.mysql_errno(),
+            op.mysql_error(),
+            getKey(),
+            op.opElapsed())
+        .throw_exception();
+  }
+}
+
 DbQueryResult Connection::internalQuery(
     Query&& query,
     QueryCallback&& cb,
     QueryOptions&& options) {
-  // Use the new unified factory method with ConnectionProxy
   auto op = mysql_client_.createQueryOperation(
       std::make_unique<OperationBase::ReferencedConnection>(*this),
       std::move(query),
       options.stealLoggingFuncs());
 
-  // Apply connection-level query timeout
-  Duration timeout = conn_options_.getQueryTimeout();
-  if (timeout.count() > 0) {
-    op->setTimeout(timeout);
-  }
-
-  mergePersistentQueryAttributes(options.getAttributes());
-  op->setAttributes(std::move(options.getAttributes()));
-  checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
-  if (cb) {
-    op->setCallback(std::move(cb));
-  }
-
-  // Set up callbacks from the connection
-  setupOperationCallbacks(*op, *this);
+  applyQueryOptions(*op, std::move(cb), options);
 
   auto guard = folly::makeGuard([&] { operation_in_progress_ = false; });
   operation_in_progress_ = true;
 
-  if (auto optFut = op->callPreQueryCallback(*op)) {
-    optFut->wait();
-  }
-  op->run().wait();
+  runOperation(*op);
 
-  if (!op->ok()) {
-    client()
-        .exceptionBuilder()
-        .buildQueryException(
-            op->numQueriesExecuted(),
-            op->result(),
-            op->mysql_errno(),
-            op->mysql_error(),
-            getKey(),
-            op->opElapsed())
-        .throw_exception();
-  }
   DbQueryResult result(
       std::move(op->stealQueryResult()),
       op->numQueriesExecuted(),
@@ -468,48 +474,17 @@ DbMultiQueryResult Connection::internalMultiQuery(
     std::vector<Query>&& queries,
     MultiQueryCallback&& cb,
     QueryOptions&& options) {
-  // Use the new unified factory method with ConnectionProxy
   auto op = mysql_client_.createMultiQueryOperation(
       std::make_unique<OperationBase::ReferencedConnection>(*this),
       std::move(queries),
       options.stealLoggingFuncs());
 
-  // Apply connection-level query timeout
-  Duration timeout = conn_options_.getQueryTimeout();
-  if (timeout.count() > 0) {
-    op->setTimeout(timeout);
-  }
-
-  mergePersistentQueryAttributes(options.getAttributes());
-  op->setAttributes(std::move(options.getAttributes()));
-  checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
-  if (cb) {
-    op->setCallback(std::move(cb));
-  }
-
-  // Set up callbacks from the connection
-  setupOperationCallbacks(*op, *this);
+  applyQueryOptions(*op, std::move(cb), options);
 
   auto guard = folly::makeGuard([&] { operation_in_progress_ = false; });
   operation_in_progress_ = true;
 
-  if (auto optFut = op->callPreQueryCallback(*op)) {
-    optFut->wait();
-  }
-  op->run().wait();
-
-  if (!op->ok()) {
-    client()
-        .exceptionBuilder()
-        .buildQueryException(
-            op->numQueriesExecuted(),
-            op->result(),
-            op->mysql_errno(),
-            op->mysql_error(),
-            getKey(),
-            op->opElapsed())
-        .throw_exception();
-  }
+  runOperation(*op);
 
   DbMultiQueryResult result(
       std::move(op->stealQueryResults()),

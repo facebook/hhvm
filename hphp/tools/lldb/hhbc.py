@@ -285,9 +285,11 @@ class HHBC:
                 # pyre-fixme[6]: LLDB auto-converts int expression to str
                 ((large.unsigned & 0xFFFFFF00) >> 1) | (large.unsigned & 0x7F),
             )
+            # pyrefly: ignore [unsupported-operation]
             info["size"] = 4
         else:
             info["value"] = small
+            # pyrefly: ignore [unsupported-operation]
             info["size"] = 1
 
         utils.debug_print(f"decode_iva(pc=0x{pc.unsigned:x}): info={info}")

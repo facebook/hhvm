@@ -196,7 +196,7 @@ class LspTestBase(TestCase[LspTestDriver]):
         # pyrefly: ignore [bad-argument-type]
         expected_items = self.prepare_responses(expected)
         observed_items = self.prepare_responses(
-            # pyrefly: ignore [no-matching-overload]
+            # pyrefly: ignore [bad-argument-type, no-matching-overload]
             list(self.get_important_received_items(observed_transcript))
         )
 

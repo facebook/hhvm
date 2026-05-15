@@ -86,6 +86,7 @@ class ExtractCommand(utils.Command):
 
         if options.outfile:
             with open(options.outfile, "wb") as f:
+                # pyrefly: ignore [bad-argument-type]
                 f.write(memory)
                 result.write(f"Wrote to {options.outfile}\n")
         else:

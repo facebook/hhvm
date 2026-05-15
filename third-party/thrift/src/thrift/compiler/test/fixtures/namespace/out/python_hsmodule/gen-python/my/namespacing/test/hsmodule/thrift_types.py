@@ -39,6 +39,10 @@ class HsFoo(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xd9\x8a\x31\x48\xe5\x89\x8b\x4f\xf5\xbd\x1c\xd4\x24\xbe\xfb\xb1"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False

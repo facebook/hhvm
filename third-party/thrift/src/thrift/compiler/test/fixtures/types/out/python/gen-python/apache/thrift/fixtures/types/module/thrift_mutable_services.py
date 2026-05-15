@@ -45,6 +45,10 @@ class SomeServiceInterface(
         return "module.SomeService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xe6\x32\xc4\xb8\x1b\xf3\x9a\x28\x7e\x62\xd0\xfc\x09\x99\xd8\xa5"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__apache__thrift__fixtures__types__module__thrift_metadata.gen_metadata_service_SomeService()
 

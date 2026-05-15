@@ -135,6 +135,10 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/MyStruct"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xc6\xf5\xc0\x38\x42\x1a\x5e\x7d\x81\x08\xb7\xa0\x43\x39\x93\x25"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -199,6 +203,10 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/MyDataItem"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x7f\x84\xab\x78\xd0\x92\x23\x48\x99\xaf\x42\x5b\x5e\x95\x0f\x3a"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -251,6 +259,10 @@ class TransitiveDoubler(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/TransitiveDoubler"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xd6\xf3\xc3\xc1\x5a\xe2\x5b\xda\xc9\x8d\x0e\xdd\xf3\xb1\x01\xa8"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -327,6 +339,10 @@ class DoubledPair(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/DoubledPair"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x77\x55\xec\x5d\x00\xe5\x34\xa1\xd5\x11\xa6\xd3\xfa\x4d\x46\x53"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -402,6 +418,10 @@ class StringPair(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/StringPair"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x80\xbf\xbf\xb9\x29\xef\x58\xf0\xb1\x1c\x48\x4c\x2a\xdf\x64\xa1"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -454,6 +474,10 @@ class EmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/EmptyStruct"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x80\xdd\x29\x36\xe4\xa6\x9d\x65\xc3\xa7\x3b\xba\x04\x54\x16\xe8"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -684,6 +708,10 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/PrimitiveStruct"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x96\x6b\x3e\x6a\x9c\x71\xa4\x18\xd5\xb8\x53\x1c\x41\xe7\xd4\x2b"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -780,6 +808,10 @@ class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/AdaptedFields"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x05\x3d\xb1\x75\xbb\xd0\x32\xfd\x49\xdc\xa8\x41\x19\xcb\x01\xe0"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -933,6 +965,10 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/ListStruct"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x48\x37\x77\x71\x40\x26\xd8\xdb\xf7\xf9\x84\x0a\x8d\x09\x81\x16"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -1062,6 +1098,10 @@ class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/SetStruct"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x93\xb5\xfa\x8a\x3d\x43\x3e\xb1\x3b\x4a\x01\xc3\xc4\xe5\xaa\xb5"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -1226,6 +1266,10 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/MapStruct"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x6d\x10\xe1\xf8\xe8\x24\x36\x40\x2c\x40\xe2\x8f\x77\xfd\x44\x8c"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -1389,6 +1433,10 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/ComposeStruct"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xee\xbb\xdf\x5a\x36\x91\xbb\x81\x57\xb9\x35\x43\xd6\xe1\x40\xc4"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -1522,6 +1570,10 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/Onion"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xdf\x38\xfe\x2e\x42\x05\xb4\xe6\x87\x53\x93\x73\xd7\xcb\x75\x92"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -1610,6 +1662,10 @@ class SomeBinary(metaclass=_fbthrift_python_types.UnionMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/SomeBinary"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x39\x2e\x10\x83\x6d\x53\x95\xa2\x59\x81\xe0\xe1\xd9\x4a\x9e\x5f"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

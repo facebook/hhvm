@@ -35,6 +35,10 @@ def __get_thrift_uri__() -> _typing.Optional[str]:
     return {{#if (string.empty? service.uri)}}None{{#else}}"{{service.uri}}"{{/if}}
 
 @staticmethod
+def __get_thrift_definition_key__() -> bytes:
+    return b"{{service.definition_key.buffer}}"
+
+@staticmethod
 def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
     return {
         {{#each service.unstructured_annotations as |annot|}}
@@ -63,6 +67,10 @@ class Async({{#if extends_service?}}{{#service.extends}}{{!
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return {{#if (string.empty? service.uri)}}None{{#else}}"{{service.uri}}"{{/if}}
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"{{service.definition_key.buffer}}"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -192,6 +200,10 @@ class Sync({{#if extends_service?}}{{#service.extends}}{{!
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return {{#if (string.empty? service.uri)}}None{{#else}}"{{service.uri}}"{{/if}}
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"{{service.definition_key.buffer}}"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

@@ -63,6 +63,10 @@ class {{enum.py_name}}({{#if enum.format_as_int?}}_fbthrift_python_types.EnumFor
     def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return {{#if (string.empty? enum.uri)}}None{{#else}}"{{enum.uri}}"{{/if}}
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"{{enum.definition_key.buffer}}"
+
 {{#if (not (has_compiler_option? "no_metadata"))}}
     @staticmethod
     def __get_metadata__() -> {{> metadata/metadata_return_type}}

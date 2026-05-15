@@ -32,6 +32,10 @@ class FooStreamEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xe6\x01\xcc\x7e\xb9\x52\x92\x6d\x55\x0e\x82\x5e\x4f\x9c\xd5\xb0"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -86,6 +90,10 @@ class FooEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xa1\x22\x99\x43\x2d\x55\xec\x71\xb0\x55\x6c\x0e\x7a\xa9\x2f\x73"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -139,6 +147,10 @@ class FooEx2(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x02\x3e\x82\x40\xf2\xbc\x62\x76\xf4\x4c\xb7\x6e\x5c\xd5\x2f\x9a"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

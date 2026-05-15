@@ -43,6 +43,10 @@ class HsTestServiceInterface(
         return "hsmodule.HsTestService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x1a\x80\x5c\x9f\x4b\x25\x35\x57\x90\xb0\xc0\x94\x6b\xc3\xd5\x3d"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return python_module_root__my__namespacing__test__hsmodule__thrift_metadata.gen_metadata_service_HsTestService()
 

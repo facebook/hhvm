@@ -89,6 +89,10 @@ class {{service.name}}Interface(
         return "{{program.name}}.{{service.name}}"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"{{service.definition_key.buffer}}"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return {{program.module_mangle}}__thrift_metadata.gen_metadata_service_{{service.name}}()
 

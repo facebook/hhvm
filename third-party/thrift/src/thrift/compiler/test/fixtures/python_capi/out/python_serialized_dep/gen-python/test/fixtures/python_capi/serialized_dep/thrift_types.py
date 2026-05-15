@@ -72,6 +72,10 @@ class SerializedStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/SerializedStruct"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x85\xac\x86\x8c\xf2\xbc\xe4\xb3\x77\x0a\x30\xd0\xa0\xad\x77\x55"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -149,6 +153,10 @@ class SerializedUnion(metaclass=_fbthrift_python_types.UnionMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/SerializedUnion"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x3b\x7a\xcf\xbf\xed\xc6\x2c\x8d\xc6\x48\x82\x22\xdf\x17\xb2\x9a"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -238,6 +246,10 @@ class SerializedError(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/SerializedError"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xfd\x0d\x44\x65\x9d\x41\x84\xb4\xd0\x41\x07\x7e\x62\xe8\xea\xb3"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -334,6 +346,10 @@ class MarshalStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/MarshalStruct"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x7c\x06\x4c\x44\xae\x99\x13\x86\xfe\xce\x76\xe7\x2e\x29\xda\x08"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -411,6 +427,10 @@ class MarshalUnion(metaclass=_fbthrift_python_types.UnionMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/MarshalUnion"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x10\x8f\x9e\x71\xd9\x61\xdf\xa7\xba\x61\x6d\xc4\xef\x5a\xb3\x32"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -500,6 +520,10 @@ class MarshalError(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/MarshalError"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xa0\xbe\x1d\xd1\x20\xa6\xfe\xab\x61\xab\xd4\xe2\x1e\x26\x85\x38"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

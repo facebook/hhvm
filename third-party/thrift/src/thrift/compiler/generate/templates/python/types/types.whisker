@@ -122,6 +122,10 @@ class {{#partial m_types.unadapted_name type=struct}}{{!
     def __get_thrift_uri__():
         return {{#if (string.empty? struct.uri)}}None{{#else}}"{{struct.uri}}"{{/if}}
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"{{struct.definition_key.buffer}}"
+
 {{#if python.generate_immutable_types?}}
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

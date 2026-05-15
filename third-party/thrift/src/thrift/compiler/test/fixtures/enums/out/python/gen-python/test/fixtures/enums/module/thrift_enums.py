@@ -29,6 +29,10 @@ class Metasyntactic(_fbthrift_python_types.Enum, int):
         return "test.dev/fixtures/enums/Metasyntactic"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\xf6\xf4\xf1\xaf\xfe\xb7\x3c\x23\x92\x77\xc9\x8c\xe4\x4f\x5b\x1c"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_Metasyntactic()
 
@@ -61,6 +65,10 @@ class MyEnum1(_fbthrift_python_types.Enum, int):
         return "test.dev/fixtures/enums/MyEnum1"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\x33\x77\x32\x5d\x24\x97\xdf\x00\x52\x7c\xa2\x07\x7d\x57\x22\xd0"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum1()
 
@@ -88,6 +96,10 @@ class MyEnum2(_fbthrift_python_types.Enum, int):
     @staticmethod
     def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/enums/MyEnum2"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\x37\x0f\xf2\xef\xc1\x84\xc9\x78\x4b\x1c\x9d\xfb\x19\xee\x6e\x7c"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -122,6 +134,10 @@ class MyEnum3(_fbthrift_python_types.Enum, int):
         return "test.dev/fixtures/enums/MyEnum3"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\xcc\x85\x0f\xf7\x18\xa0\xbe\x45\x31\x85\x6c\x4e\xeb\x89\xca\x62"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum3()
 
@@ -150,6 +166,10 @@ class MyEnum4(_fbthrift_python_types.Enum, int):
     @staticmethod
     def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/enums/MyEnum4"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\x1a\x57\xf0\x48\xb9\x0b\xe4\x8b\xcf\x01\x0f\x69\x93\xcf\x19\xe0"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -181,6 +201,10 @@ class MyBitmaskEnum1(_fbthrift_python_types.Enum, int):
         return "test.dev/fixtures/enums/MyBitmaskEnum1"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\x3b\x51\x24\x77\x66\x53\x66\x67\x17\x5a\x0a\x98\x8c\x07\x97\x30"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyBitmaskEnum1()
 
@@ -208,6 +232,10 @@ class MyBitmaskEnum2(_fbthrift_python_types.Enum, int):
     @staticmethod
     def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/enums/MyBitmaskEnum2"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\x9f\x14\x16\xc1\xd9\xa5\x4c\x44\x7e\xf8\xde\x47\xc1\xd7\xe0\x4f"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

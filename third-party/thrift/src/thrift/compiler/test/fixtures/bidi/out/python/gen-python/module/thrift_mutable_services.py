@@ -45,6 +45,10 @@ class BiDiServiceInterface(
         return "module.BiDiService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xec\xc2\xd7\xab\xf5\xc7\xc5\x44\x3b\x30\x6f\xa5\x78\x7f\x04\x18"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__module__thrift_metadata.gen_metadata_service_BiDiService()
 

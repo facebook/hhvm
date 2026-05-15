@@ -116,6 +116,10 @@ class Limits(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x66\xbd\x47\x55\xb9\x34\x3d\x93\x3b\x92\x5e\xc8\x71\xf0\x57\x68"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False

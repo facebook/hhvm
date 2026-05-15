@@ -120,6 +120,10 @@ class Limits(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x66\xbd\x47\x55\xb9\x34\x3d\x93\x3b\x92\x5e\xc8\x71\xf0\x57\x68"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 

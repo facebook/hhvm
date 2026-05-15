@@ -89,6 +89,10 @@ class User(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "facebook.com/thrift/test/User"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x8f\xe0\x5d\xb9\x85\x9e\xae\xfb\xa5\xcf\xd8\xe7\x5b\xb0\x26\x31"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -166,6 +170,10 @@ class ExampleUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "facebook.com/thrift/test/ExampleUnion"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xc1\xc2\xde\xcf\x11\x76\xfb\xef\xde\x4e\x7c\x4b\x09\x17\x76\x30"
 
     @staticmethod
     def __get_metadata__():

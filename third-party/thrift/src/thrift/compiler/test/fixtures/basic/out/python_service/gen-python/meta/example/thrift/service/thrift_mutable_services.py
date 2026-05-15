@@ -45,6 +45,10 @@ class EchoServiceInterface(
         return "service.EchoService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x8a\x15\xc3\xc3\x86\x32\x64\x03\x44\xc7\x1a\xa5\x00\x68\xc5\xdf"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_EchoService()
 
@@ -92,6 +96,10 @@ EchoServiceInterface,
         return "service.ExtendedEchoService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xaa\x4c\xe9\xd0\x8d\x5e\xe5\x2f\xce\xd6\x69\xb3\x40\x41\x19\xdd"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_ExtendedEchoService()
 
@@ -137,6 +145,10 @@ class ExtendedMyServiceInterface(
     @staticmethod
     def __get_thrift_name__() -> str:
         return "service.ExtendedMyService"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x2c\x30\xb9\x15\xd0\xc8\x69\x09\x32\xda\xf3\x1e\xa5\x7c\x6c\x5a"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

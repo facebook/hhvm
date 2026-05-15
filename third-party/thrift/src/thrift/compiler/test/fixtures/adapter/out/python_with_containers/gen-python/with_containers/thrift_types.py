@@ -51,6 +51,10 @@ class _fbthrift_unadapted_AnnotationWithContainers(metaclass=_fbthrift_python_ty
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xcb\x6a\x08\x65\x13\xa0\xca\xfa\x6d\xb3\x9c\x68\x00\x97\x7e\x83"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -117,6 +121,10 @@ class _fbthrift_unadapted_MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xba\x70\x1f\x23\xc8\x53\xee\xcc\xff\xa5\xb4\x9b\x6b\xd6\x75\x6c"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

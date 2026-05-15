@@ -46,6 +46,10 @@ class EchoRequest(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "test.dev/fixtures/basic/EchoRequest"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xe7\x40\x60\x85\x8a\xf4\xd1\x17\x00\xb9\xd0\xcd\x2c\x1f\xfc\xc2"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -97,6 +101,10 @@ class EchoResponse(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/EchoResponse"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x82\xc0\xb6\xef\x13\xf7\x82\xa2\xd6\xea\x7f\x54\xe1\x28\xe0\x42"
 
     @staticmethod
     def __get_metadata__():
@@ -153,6 +161,10 @@ class WhisperException(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/WhisperException"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x35\xd6\x56\xcf\x27\x1a\xe0\x0c\x70\x51\xee\x89\x6d\xda\xd3\xaa"
 
     @staticmethod
     def __get_metadata__():

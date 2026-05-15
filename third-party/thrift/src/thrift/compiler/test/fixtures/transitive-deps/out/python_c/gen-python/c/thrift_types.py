@@ -39,6 +39,10 @@ class C(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x8a\x14\xd6\x81\x21\x0c\x1f\xfa\x34\x38\x56\x02\xbc\xab\xd1\x96"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -94,6 +98,10 @@ class E(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x23\x67\x71\xd6\xf4\xd2\x9e\x36\xa6\xcf\xaf\xea\x49\x56\xb9\xa0"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

@@ -47,6 +47,10 @@ class MyServiceInterface(
         return "module.MyService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x76\xb4\x43\x71\x74\x4c\xcf\x17\x4a\x1e\xac\xce\x43\xe0\xad\x38"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService()
 
@@ -139,6 +143,10 @@ class FactoriesInterface(
         return "module.Factories"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x4e\xac\x2e\x48\x8e\x4a\x06\x25\x0d\x9c\x20\x8c\x3d\x6e\x63\x21"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories()
 
@@ -228,6 +236,10 @@ class PerformInterface(
         return "module.Perform"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xd4\x56\x2f\xc1\x15\x85\x3e\x25\x6b\x9a\xa1\x73\x3b\x01\xcd\xbf"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform()
 
@@ -268,6 +280,10 @@ class InteractWithSharedInterface(
         return "module.InteractWithShared"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xee\x1e\x31\x94\xc7\x92\x5e\xbb\x4c\x6a\xdd\x02\x01\xd3\x32\x4d"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared()
 
@@ -306,6 +322,10 @@ class BoxServiceInterface(
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.BoxService"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x6c\x05\x03\x8b\xc9\x43\xfa\x33\xe4\x42\x2f\x59\x5a\xae\x0f\x5b"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

@@ -55,6 +55,10 @@ class CustomException(metaclass=_fbthrift_python_mutable_exceptions.MutableGener
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x6d\xf7\xf7\x52\xf1\x0e\xc6\x2d\x16\x2a\x96\xfd\x3a\x52\xfd\xc8"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -104,6 +108,10 @@ class ShouldBeBoxed(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x5f\xd2\x52\xff\x8c\x5f\x08\x5c\xce\x10\xe8\x7b\x23\xbf\x3d\xbf"
 
     @staticmethod
     def __get_metadata__():

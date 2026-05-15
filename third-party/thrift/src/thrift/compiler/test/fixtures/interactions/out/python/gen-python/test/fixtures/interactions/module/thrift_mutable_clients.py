@@ -44,6 +44,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x76\xb4\x43\x71\x74\x4c\xcf\x17\x4a\x1e\xac\xce\x43\xe0\xad\x38"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -60,6 +64,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x76\xb4\x43\x71\x74\x4c\xcf\x17\x4a\x1e\xac\xce\x43\xe0\xad\x38"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -215,6 +223,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x76\xb4\x43\x71\x74\x4c\xcf\x17\x4a\x1e\xac\xce\x43\xe0\xad\x38"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService()
 
@@ -243,6 +255,10 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x93\x55\xa7\x0c\x11\xcf\x34\x81\xb3\x02\xa3\xce\xe7\x27\x86\xaf"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -259,6 +275,10 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x93\x55\xa7\x0c\x11\xcf\x34\x81\xb3\x02\xa3\xce\xe7\x27\x86\xaf"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -377,6 +397,10 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x93\x55\xa7\x0c\x11\xcf\x34\x81\xb3\x02\xa3\xce\xe7\x27\x86\xaf"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_MyInteraction()
 
@@ -388,6 +412,10 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x49\x2a\x7a\x45\xf9\xed\x9e\xc6\x77\x07\xf1\x87\x65\xe2\x33\x35"
 
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -406,6 +434,10 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x49\x2a\x7a\x45\xf9\xed\x9e\xc6\x77\x07\xf1\x87\x65\xe2\x33\x35"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -521,6 +553,10 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x49\x2a\x7a\x45\xf9\xed\x9e\xc6\x77\x07\xf1\x87\x65\xe2\x33\x35"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_MyInteractionFast()
 
@@ -532,6 +568,10 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xa0\x4e\x45\x73\x44\xe5\xfc\x9d\x26\x10\xdf\xfa\xf4\x4a\x51\x40"
 
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -550,6 +590,10 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xa0\x4e\x45\x73\x44\xe5\xfc\x9d\x26\x10\xdf\xfa\xf4\x4a\x51\x40"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -587,6 +631,10 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xa0\x4e\x45\x73\x44\xe5\xfc\x9d\x26\x10\xdf\xfa\xf4\x4a\x51\x40"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_SerialInteraction()
 
@@ -601,6 +649,10 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x4e\xac\x2e\x48\x8e\x4a\x06\x25\x0d\x9c\x20\x8c\x3d\x6e\x63\x21"
 
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -619,6 +671,10 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x4e\xac\x2e\x48\x8e\x4a\x06\x25\x0d\x9c\x20\x8c\x3d\x6e\x63\x21"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -774,6 +830,10 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x4e\xac\x2e\x48\x8e\x4a\x06\x25\x0d\x9c\x20\x8c\x3d\x6e\x63\x21"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories()
 
@@ -802,6 +862,10 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x93\x55\xa7\x0c\x11\xcf\x34\x81\xb3\x02\xa3\xce\xe7\x27\x86\xaf"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -818,6 +882,10 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x93\x55\xa7\x0c\x11\xcf\x34\x81\xb3\x02\xa3\xce\xe7\x27\x86\xaf"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -936,6 +1004,10 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x93\x55\xa7\x0c\x11\xcf\x34\x81\xb3\x02\xa3\xce\xe7\x27\x86\xaf"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_MyInteraction()
 
@@ -947,6 +1019,10 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x49\x2a\x7a\x45\xf9\xed\x9e\xc6\x77\x07\xf1\x87\x65\xe2\x33\x35"
 
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -965,6 +1041,10 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x49\x2a\x7a\x45\xf9\xed\x9e\xc6\x77\x07\xf1\x87\x65\xe2\x33\x35"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1080,6 +1160,10 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x49\x2a\x7a\x45\xf9\xed\x9e\xc6\x77\x07\xf1\x87\x65\xe2\x33\x35"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_MyInteractionFast()
 
@@ -1091,6 +1175,10 @@ class Factories_SerialInteraction(_fbthrift_python_Client["Factories_SerialInter
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xa0\x4e\x45\x73\x44\xe5\xfc\x9d\x26\x10\xdf\xfa\xf4\x4a\x51\x40"
 
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -1109,6 +1197,10 @@ class Factories_SerialInteraction(_fbthrift_python_Client["Factories_SerialInter
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xa0\x4e\x45\x73\x44\xe5\xfc\x9d\x26\x10\xdf\xfa\xf4\x4a\x51\x40"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1146,6 +1238,10 @@ class Factories_SerialInteraction(_fbthrift_python_Client["Factories_SerialInter
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xa0\x4e\x45\x73\x44\xe5\xfc\x9d\x26\x10\xdf\xfa\xf4\x4a\x51\x40"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_SerialInteraction()
 
@@ -1160,6 +1256,10 @@ class Perform(_fbthrift_python_Client["Perform.Async", "Perform.Sync"]):
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xd4\x56\x2f\xc1\x15\x85\x3e\x25\x6b\x9a\xa1\x73\x3b\x01\xcd\xbf"
 
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -1178,6 +1278,10 @@ class Perform(_fbthrift_python_Client["Perform.Async", "Perform.Sync"]):
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xd4\x56\x2f\xc1\x15\x85\x3e\x25\x6b\x9a\xa1\x73\x3b\x01\xcd\xbf"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1249,6 +1353,10 @@ class Perform(_fbthrift_python_Client["Perform.Async", "Perform.Sync"]):
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xd4\x56\x2f\xc1\x15\x85\x3e\x25\x6b\x9a\xa1\x73\x3b\x01\xcd\xbf"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform()
 
@@ -1277,6 +1385,10 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x93\x55\xa7\x0c\x11\xcf\x34\x81\xb3\x02\xa3\xce\xe7\x27\x86\xaf"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -1293,6 +1405,10 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x93\x55\xa7\x0c\x11\xcf\x34\x81\xb3\x02\xa3\xce\xe7\x27\x86\xaf"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1411,6 +1527,10 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x93\x55\xa7\x0c\x11\xcf\x34\x81\xb3\x02\xa3\xce\xe7\x27\x86\xaf"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_MyInteraction()
 
@@ -1422,6 +1542,10 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x49\x2a\x7a\x45\xf9\xed\x9e\xc6\x77\x07\xf1\x87\x65\xe2\x33\x35"
 
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -1440,6 +1564,10 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x49\x2a\x7a\x45\xf9\xed\x9e\xc6\x77\x07\xf1\x87\x65\xe2\x33\x35"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1555,6 +1683,10 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x49\x2a\x7a\x45\xf9\xed\x9e\xc6\x77\x07\xf1\x87\x65\xe2\x33\x35"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_MyInteractionFast()
 
@@ -1566,6 +1698,10 @@ class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteracti
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xa0\x4e\x45\x73\x44\xe5\xfc\x9d\x26\x10\xdf\xfa\xf4\x4a\x51\x40"
 
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -1584,6 +1720,10 @@ class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteracti
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xa0\x4e\x45\x73\x44\xe5\xfc\x9d\x26\x10\xdf\xfa\xf4\x4a\x51\x40"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1621,6 +1761,10 @@ class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteracti
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xa0\x4e\x45\x73\x44\xe5\xfc\x9d\x26\x10\xdf\xfa\xf4\x4a\x51\x40"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_SerialInteraction()
 
@@ -1635,6 +1779,10 @@ class InteractWithShared(_fbthrift_python_Client["InteractWithShared.Async", "In
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xee\x1e\x31\x94\xc7\x92\x5e\xbb\x4c\x6a\xdd\x02\x01\xd3\x32\x4d"
 
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -1653,6 +1801,10 @@ class InteractWithShared(_fbthrift_python_Client["InteractWithShared.Async", "In
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xee\x1e\x31\x94\xc7\x92\x5e\xbb\x4c\x6a\xdd\x02\x01\xd3\x32\x4d"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1719,6 +1871,10 @@ class InteractWithShared(_fbthrift_python_Client["InteractWithShared.Async", "In
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xee\x1e\x31\x94\xc7\x92\x5e\xbb\x4c\x6a\xdd\x02\x01\xd3\x32\x4d"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared()
 
@@ -1754,6 +1910,10 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x93\x55\xa7\x0c\x11\xcf\x34\x81\xb3\x02\xa3\xce\xe7\x27\x86\xaf"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -1770,6 +1930,10 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x93\x55\xa7\x0c\x11\xcf\x34\x81\xb3\x02\xa3\xce\xe7\x27\x86\xaf"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1888,6 +2052,10 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x93\x55\xa7\x0c\x11\xcf\x34\x81\xb3\x02\xa3\xce\xe7\x27\x86\xaf"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared_MyInteraction()
 
@@ -1899,6 +2067,10 @@ class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWith
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x9a\x81\xa6\xc2\xdd\xd4\xf4\x46\x29\x95\x71\xe3\x20\xd4\xa6\xcf"
 
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -1917,6 +2089,10 @@ class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWith
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x9a\x81\xa6\xc2\xdd\xd4\xf4\x46\x29\x95\x71\xe3\x20\xd4\xa6\xcf"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -2008,6 +2184,10 @@ class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWith
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x9a\x81\xa6\xc2\xdd\xd4\xf4\x46\x29\x95\x71\xe3\x20\xd4\xa6\xcf"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared_SharedInteraction()
 
@@ -2022,6 +2202,10 @@ class BoxService(_fbthrift_python_Client["BoxService.Async", "BoxService.Sync"])
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x6c\x05\x03\x8b\xc9\x43\xfa\x33\xe4\x42\x2f\x59\x5a\xae\x0f\x5b"
 
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -2040,6 +2224,10 @@ class BoxService(_fbthrift_python_Client["BoxService.Async", "BoxService.Sync"])
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x6c\x05\x03\x8b\xc9\x43\xfa\x33\xe4\x42\x2f\x59\x5a\xae\x0f\x5b"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -2100,6 +2288,10 @@ class BoxService(_fbthrift_python_Client["BoxService.Async", "BoxService.Sync"])
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x6c\x05\x03\x8b\xc9\x43\xfa\x33\xe4\x42\x2f\x59\x5a\xae\x0f\x5b"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_BoxService()
 
@@ -2111,6 +2303,10 @@ class BoxService_BoxedInteraction(_fbthrift_python_Client["BoxService_BoxedInter
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xb6\xc9\xdb\x9e\x05\x5e\x64\x07\xac\x16\x56\x01\xcb\x2f\xaa\x90"
 
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -2129,6 +2325,10 @@ class BoxService_BoxedInteraction(_fbthrift_python_Client["BoxService_BoxedInter
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xb6\xc9\xdb\x9e\x05\x5e\x64\x07\xac\x16\x56\x01\xcb\x2f\xaa\x90"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -2171,6 +2371,10 @@ class BoxService_BoxedInteraction(_fbthrift_python_Client["BoxService_BoxedInter
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xb6\xc9\xdb\x9e\x05\x5e\x64\x07\xac\x16\x56\x01\xcb\x2f\xaa\x90"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

@@ -38,6 +38,10 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xab\x3e\x36\x4b\x2e\x35\xdf\x6b\x01\xa6\x9d\xdc\x03\x1b\x54\x13"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -54,6 +58,10 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xab\x3e\x36\x4b\x2e\x35\xdf\x6b\x01\xa6\x9d\xdc\x03\x1b\x54\x13"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -298,6 +306,10 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xab\x3e\x36\x4b\x2e\x35\xdf\x6b\x01\xa6\x9d\xdc\x03\x1b\x54\x13"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

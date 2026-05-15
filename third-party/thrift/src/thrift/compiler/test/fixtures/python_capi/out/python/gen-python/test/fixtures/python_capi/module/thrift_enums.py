@@ -30,6 +30,10 @@ class MyEnum(_fbthrift_python_types.Enum, int):
         return "test.dev/fixtures/python_capi/MyEnum"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\x91\x58\x3d\xc9\x13\xfe\xd0\xeb\x89\x02\xb9\x9b\x57\x95\x83\xa6"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum()
 
@@ -56,6 +60,10 @@ class AnnoyingEnum(_fbthrift_python_types.Enum, int):
     @staticmethod
     def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/python_capi/AnnoyingEnum"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\x65\x72\xef\x40\xea\xbb\x62\x6e\xdf\x6c\x92\x54\xc3\x31\x49\x78"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

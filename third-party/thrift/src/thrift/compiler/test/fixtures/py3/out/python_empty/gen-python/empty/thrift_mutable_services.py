@@ -42,6 +42,10 @@ class NullServiceInterface(
         return "empty.NullService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x8c\xed\x4e\x40\x8d\x25\xb0\xaf\x62\xfc\xe5\x34\x19\x22\x66\x6c"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__empty__thrift_metadata.gen_metadata_service_NullService()
 

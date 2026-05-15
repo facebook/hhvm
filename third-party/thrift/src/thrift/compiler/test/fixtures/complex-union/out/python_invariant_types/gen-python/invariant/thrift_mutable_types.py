@@ -43,6 +43,10 @@ class StructForInvariantTypes(metaclass=_fbthrift_python_mutable_types.MutableSt
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xfa\x6c\xfc\x1a\x37\xe4\xe1\xd2\x1c\xf6\x1e\xf2\x7a\xe7\xcd\xe1"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -105,6 +109,10 @@ class UnionForInvariantTypes(metaclass=_fbthrift_python_mutable_types.MutableStr
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x1d\xcb\xc3\x99\x32\xe4\xa2\xa1\x63\xfb\x12\x14\xc1\xdb\x4c\x9d"
 
     @staticmethod
     def __get_metadata__():
@@ -172,6 +180,10 @@ class InvariantTypes(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xad\x5a\x07\x0f\x96\x74\xe6\x2b\xe1\x2d\x90\x29\x80\x6c\x22\xd8"
 
     @staticmethod
     def __get_metadata__():

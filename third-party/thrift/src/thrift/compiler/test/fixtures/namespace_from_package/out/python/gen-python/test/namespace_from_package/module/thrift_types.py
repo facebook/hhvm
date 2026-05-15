@@ -39,6 +39,10 @@ class Foo(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/namespace_from_package/module/Foo"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x2b\x9e\x89\xe3\xff\xdf\x9d\x1a\x84\xe6\xd4\xcd\x8d\x46\x54\x4d"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False

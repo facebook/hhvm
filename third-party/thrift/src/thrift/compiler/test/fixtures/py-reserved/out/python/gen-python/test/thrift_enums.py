@@ -25,6 +25,10 @@ class from_(_fbthrift_python_types.Enum, int):
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\x65\x18\x72\x47\xff\x66\x91\x21\x08\xa0\xaf\x41\x2f\xb6\x10\x28"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_from_()
 

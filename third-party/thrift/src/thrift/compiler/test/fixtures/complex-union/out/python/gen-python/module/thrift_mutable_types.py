@@ -101,6 +101,10 @@ class ComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xa8\x6d\x70\x5c\x63\x71\xe5\x88\x1c\x6c\x4b\xd6\xa8\x72\xfb\xca"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -168,6 +172,10 @@ class ListUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xb0\x51\x7a\xff\x32\xdb\x9f\xd1\x69\xad\xa0\xb3\xba\xb9\xed\x9e"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -233,6 +241,10 @@ class DataUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x34\x84\x11\xee\x54\xe2\x22\x1d\x90\x2a\xd3\x63\xe2\xa2\x2f\x60"
 
     @staticmethod
     def __get_metadata__():
@@ -310,6 +322,10 @@ class Val(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x74\x36\x4b\x4d\x75\xd1\xad\x23\x4e\xd5\x49\x23\x16\x45\x54\x7d"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -375,6 +391,10 @@ class ValUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xb4\x55\x92\x7e\xe4\x78\x5d\xfc\xce\xc8\x6a\x68\x09\xa0\x5c\xe4"
 
     @staticmethod
     def __get_metadata__():
@@ -444,6 +464,10 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionM
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xc9\xb8\xd3\x44\x1b\xc5\xff\xb8\xe0\xb0\x02\x0e\x0d\x3f\xb7\x9c"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -495,6 +519,10 @@ class NonCopyableStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMe
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xe0\x8f\xe0\xfd\xcd\x21\x50\x54\x7c\x1e\xbc\x98\xcd\xe1\xdb\x65"
 
     @staticmethod
     def __get_metadata__():
@@ -551,6 +579,10 @@ class NonCopyableUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xd3\x34\x36\x2a\x51\xad\x05\xbf\x3c\xec\x85\x22\x4c\x8a\x58\x0c"
 
     @staticmethod
     def __get_metadata__():

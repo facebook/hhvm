@@ -39,6 +39,10 @@ class Mixin1(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xde\x15\x66\x90\xe8\xf0\x41\x9a\x9b\xbc\xe8\x95\xc0\x5a\x8d\x00"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -114,6 +118,10 @@ class Mixin2(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x2e\x85\x75\x29\x0f\x6d\x30\x04\xb1\xc7\x20\x67\xdd\x15\x49\x6a"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -177,6 +185,10 @@ class Mixin3Base(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x3c\x3a\xba\x14\xa2\x55\x01\x6a\xe2\xdf\x8d\x18\x29\x87\xc5\x13"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -263,6 +275,10 @@ class Foo(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x17\x9f\x85\x03\x41\x4d\x5a\x69\x57\xb1\x20\x3d\x1f\x9a\xbb\x48"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

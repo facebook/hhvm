@@ -44,6 +44,10 @@ class empty_struct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "apache.org/thrift/fixtures/types/empty_struct"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xdf\x4a\xc6\xa0\x9f\x3d\xa7\x40\xeb\x9c\x9e\xf2\x07\x92\x73\x9e"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -95,6 +99,10 @@ class decorated_struct(metaclass=_fbthrift_python_mutable_types.MutableStructMet
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/decorated_struct"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x36\xd4\x7f\x40\xfe\xd8\x0f\xc2\xf9\xdc\x1f\x6c\x49\x98\x5b\x02"
 
     @staticmethod
     def __get_metadata__():
@@ -227,6 +235,10 @@ class ContainerStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
         return "apache.org/thrift/fixtures/types/ContainerStruct"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x68\x84\x65\x2a\x5a\xd2\x47\xbc\x51\xc3\x03\xde\xef\xce\x74\x88"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -280,6 +292,10 @@ class CppTypeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "apache.org/thrift/fixtures/types/CppTypeStruct"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xad\x54\x09\xa0\x75\x84\x56\x01\xcd\x1d\x0b\x95\xfb\x5b\x7c\x65"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -331,6 +347,10 @@ class VirtualStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/VirtualStruct"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x09\xc9\x2d\x8e\xbd\xfc\x63\xe0\xb2\x2d\xbe\x4d\xc5\x93\x37\x2a"
 
     @staticmethod
     def __get_metadata__():
@@ -397,6 +417,10 @@ class MyStructWithForwardRefEnum(metaclass=_fbthrift_python_mutable_types.Mutabl
         return "apache.org/thrift/fixtures/types/MyStructWithForwardRefEnum"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xb4\x51\xb6\x0b\x0c\x32\x8a\x4d\xd1\x24\x29\x0e\x2d\x29\xa2\xca"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -459,6 +483,10 @@ class TrivialNumeric(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/TrivialNumeric"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x85\xcc\xeb\x8c\x04\xe2\x0a\x9f\x5d\xf2\xe7\xfc\x30\xac\x54\xf3"
 
     @staticmethod
     def __get_metadata__():
@@ -525,6 +553,10 @@ class TrivialNestedWithDefault(metaclass=_fbthrift_python_mutable_types.MutableS
         return "apache.org/thrift/fixtures/types/TrivialNestedWithDefault"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x81\x81\xb2\x95\x99\xc6\xc4\x70\xe0\x9f\x96\x9d\xcd\x78\xff\x2e"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -589,6 +621,10 @@ class ComplexString(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "apache.org/thrift/fixtures/types/ComplexString"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x6e\x2d\x9d\xb8\x90\x6c\x18\x2a\xee\xa8\x37\xcb\x7c\xc6\x18\x23"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -651,6 +687,10 @@ class ComplexNestedWithDefault(metaclass=_fbthrift_python_mutable_types.MutableS
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/ComplexNestedWithDefault"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x38\x9b\x00\x86\xc0\x80\x5f\x79\x64\x21\x02\x7b\x11\x36\xc5\xd7"
 
     @staticmethod
     def __get_metadata__():
@@ -750,6 +790,10 @@ class MinPadding(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "apache.org/thrift/fixtures/types/MinPadding"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x50\xf1\x0a\xd4\x65\x26\xed\x00\x6b\xd9\x74\x47\x93\x0c\x6a\xed"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -847,6 +891,10 @@ class MinPaddingWithCustomType(metaclass=_fbthrift_python_mutable_types.MutableS
         return "apache.org/thrift/fixtures/types/MinPaddingWithCustomType"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xc4\xf4\x4c\x5f\xb7\x6f\x99\x3c\xe3\x1a\xd9\x12\x10\xd9\x9d\xe6"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -933,6 +981,10 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "apache.org/thrift/fixtures/types/MyStruct"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x6c\xd6\xe3\x51\xa9\xe3\x1c\xfd\x10\x50\xc6\xbe\x2d\xa8\x5b\x28"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -973,6 +1025,10 @@ class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/MyDataItem"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xbb\xb0\x2c\xca\x9b\x28\x4a\x63\x3f\x4f\x39\x61\x85\x6c\xb0\xe5"
 
     @staticmethod
     def __get_metadata__():
@@ -1026,6 +1082,10 @@ class Renaming(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/Renaming"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xe5\x34\xa0\xc9\xc5\x8c\x16\xa4\x41\x97\xa0\x7f\x89\xe9\xfa\x09"
 
     @staticmethod
     def __get_metadata__():
@@ -1092,6 +1152,10 @@ class AnnotatedTypes(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
         return "apache.org/thrift/fixtures/types/AnnotatedTypes"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xb6\x37\xfe\x12\x11\x76\x0e\x1b\xef\xb3\xd3\x45\x8d\xa4\x44\xaf"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -1156,6 +1220,10 @@ class ForwardUsageRoot(metaclass=_fbthrift_python_mutable_types.MutableStructMet
         return "apache.org/thrift/fixtures/types/ForwardUsageRoot"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x4b\x87\xeb\xce\xe6\x17\x4c\xe9\xc9\x8b\x78\xef\xce\x8f\x15\x9f"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -1207,6 +1275,10 @@ class ForwardUsageStruct(metaclass=_fbthrift_python_mutable_types.MutableStructM
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/ForwardUsageStruct"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x8a\xcc\xfa\x34\x3e\xcb\xf3\xcc\x04\x96\x1d\xed\xe4\x48\x18\xc0"
 
     @staticmethod
     def __get_metadata__():
@@ -1262,6 +1334,10 @@ class ForwardUsageByRef(metaclass=_fbthrift_python_mutable_types.MutableStructMe
         return "apache.org/thrift/fixtures/types/ForwardUsageByRef"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x82\x6e\xc9\x26\x88\xf3\x15\xf9\x51\x25\x1c\x62\xa2\xbf\xd9\x46"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -1315,6 +1391,10 @@ class IncompleteMap(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "apache.org/thrift/fixtures/types/IncompleteMap"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x0e\xc5\xa2\x9d\xa7\x2c\x7a\xba\x8b\x56\x74\x07\x36\x57\xc6\x0f"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -1355,6 +1435,10 @@ class IncompleteMapDep(metaclass=_fbthrift_python_mutable_types.MutableStructMet
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/IncompleteMapDep"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x29\x62\x2f\xb3\xe7\xc4\x95\xa1\xc0\xe2\xce\x3f\xf3\xf7\x41\x5e"
 
     @staticmethod
     def __get_metadata__():
@@ -1410,6 +1494,10 @@ class CompleteMap(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "apache.org/thrift/fixtures/types/CompleteMap"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x73\xf7\x2b\x85\x51\xdb\x5a\x1c\x11\x93\xb6\x96\x28\x3c\x80\x7f"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -1450,6 +1538,10 @@ class CompleteMapDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/CompleteMapDep"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x95\xe2\x2f\x59\x3f\x70\x5c\x90\xa5\xae\xda\xd2\xaf\x3f\x61\xad"
 
     @staticmethod
     def __get_metadata__():
@@ -1505,6 +1597,10 @@ class IncompleteList(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
         return "apache.org/thrift/fixtures/types/IncompleteList"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xe8\x5d\x06\xce\xc1\x57\x18\xff\xb4\x92\x88\xba\x63\x1d\x41\x9e"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -1545,6 +1641,10 @@ class IncompleteListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMe
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/IncompleteListDep"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x89\xd0\x7e\x4b\x5d\xcc\x65\xf6\x7e\x81\x8f\xc6\xa5\x7f\xce\xc1"
 
     @staticmethod
     def __get_metadata__():
@@ -1600,6 +1700,10 @@ class CompleteList(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "apache.org/thrift/fixtures/types/CompleteList"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x5f\x32\x74\xd3\x75\x33\x74\x27\xe5\xbd\x71\xe2\xf7\x4c\xe5\x44"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -1640,6 +1744,10 @@ class CompleteListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/CompleteListDep"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xed\xfb\x3d\x86\x8c\x08\x90\x6f\xe8\x4c\xc7\x32\x52\x3b\x62\x79"
 
     @staticmethod
     def __get_metadata__():
@@ -1695,6 +1803,10 @@ class AdaptedList(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "apache.org/thrift/fixtures/types/AdaptedList"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xfb\x96\x68\x30\xa7\xf8\x71\x76\x55\x98\x97\xfa\xf7\xab\x48\x25"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -1746,6 +1858,10 @@ class AdaptedListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/AdaptedListDep"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x32\x3f\xf1\x74\x53\x8f\x29\x3e\x0d\x7f\xf8\xa5\xcf\x99\xe0\x01"
 
     @staticmethod
     def __get_metadata__():
@@ -1801,6 +1917,10 @@ class DependentAdaptedList(metaclass=_fbthrift_python_mutable_types.MutableStruc
         return "apache.org/thrift/fixtures/types/DependentAdaptedList"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x64\x4f\x5e\xa7\x7f\x1b\x4e\x38\x66\x83\xd8\xa7\xa3\x5b\x17\x0c"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -1852,6 +1972,10 @@ class DependentAdaptedListDep(metaclass=_fbthrift_python_mutable_types.MutableSt
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/DependentAdaptedListDep"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xc7\x3b\x37\x45\x0f\xd0\x78\xc7\x8b\x11\xa9\x0d\x75\x71\xc5\xa2"
 
     @staticmethod
     def __get_metadata__():
@@ -1973,6 +2097,10 @@ class AllocatorAware(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
         return "apache.org/thrift/fixtures/types/AllocatorAware"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x91\x16\xcd\xc8\xc3\x6b\x4f\x7f\x8c\x50\xcc\x99\xa5\x14\xf3\x2e"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -2035,6 +2163,10 @@ class AllocatorAware2(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/AllocatorAware2"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x5a\x0b\xd2\xd5\x3a\x31\x6f\x4c\xf1\x34\x83\xed\x5a\xd4\x72\x12"
 
     @staticmethod
     def __get_metadata__():
@@ -2112,6 +2244,10 @@ class TypedefStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "apache.org/thrift/fixtures/types/TypedefStruct"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x66\x3e\x0a\xaf\x89\x16\x1f\xa8\x0b\x3c\xf1\xb3\x05\xd3\x90\xb0"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -2163,6 +2299,10 @@ class StructWithDoubleUnderscores(metaclass=_fbthrift_python_mutable_types.Mutab
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/StructWithDoubleUnderscores"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x4a\x01\xc2\x9e\xd6\x80\x37\x78\x20\x4b\xdd\x35\xf2\xf6\x36\x58"
 
     @staticmethod
     def __get_metadata__():

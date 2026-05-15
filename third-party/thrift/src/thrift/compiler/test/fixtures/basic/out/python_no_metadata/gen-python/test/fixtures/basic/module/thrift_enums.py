@@ -23,6 +23,10 @@ class MyEnum(_fbthrift_python_types.Enum, int):
     def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/basic/MyEnum"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\x40\x18\x51\x9c\x54\xc1\xa2\x7b\x6d\x90\xf7\xe5\x36\xda\x96\xb4"
+
     def _to_python(self) -> _std_python_typing.Self:
         return self
 
@@ -46,6 +50,10 @@ class HackEnum(_fbthrift_python_types.Enum, int):
     @staticmethod
     def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
         return "test.dev/fixtures/basic/HackEnum"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\x6f\xb7\xd5\xeb\x69\xc5\xbb\xba\x3f\x40\x8a\x47\xc8\x51\xc2\x7f"
 
     def _to_python(self) -> _std_python_typing.Self:
         return self

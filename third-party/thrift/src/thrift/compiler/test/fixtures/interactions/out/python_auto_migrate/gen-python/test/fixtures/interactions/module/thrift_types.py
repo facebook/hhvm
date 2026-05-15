@@ -51,6 +51,10 @@ class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x6d\xf7\xf7\x52\xf1\x0e\xc6\x2d\x16\x2a\x96\xfd\x3a\x52\xfd\xc8"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return True
@@ -110,6 +114,10 @@ class ShouldBeBoxed(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x5f\xd2\x52\xff\x8c\x5f\x08\x5c\xce\x10\xe8\x7b\x23\xbf\x3d\xbf"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

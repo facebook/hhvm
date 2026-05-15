@@ -43,6 +43,10 @@ class Foo(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x0b\x17\xd1\xad\xdc\x1a\x95\xcd\x54\xf6\x12\xc3\x71\x96\x9c\x30"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 

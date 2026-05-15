@@ -94,6 +94,10 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/enums/SomeStruct"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x4c\x5e\xed\xd1\x6f\xa5\xf9\xfa\x98\x95\xa6\x1a\xd7\x86\xc0\x27"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -190,6 +194,10 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/enums/MyStruct"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xbf\x94\x21\x5c\x52\x96\xb7\x95\xff\x29\xc8\x97\xc1\x00\xec\x41"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

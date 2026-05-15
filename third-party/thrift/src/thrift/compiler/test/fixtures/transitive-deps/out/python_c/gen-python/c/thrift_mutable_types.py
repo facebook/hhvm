@@ -43,6 +43,10 @@ class C(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x8a\x14\xd6\x81\x21\x0c\x1f\xfa\x34\x38\x56\x02\xbc\xab\xd1\x96"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -86,6 +90,10 @@ class E(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta)
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x23\x67\x71\xd6\xf4\xd2\x9e\x36\xa6\xcf\xaf\xea\x49\x56\xb9\xa0"
 
     @staticmethod
     def __get_metadata__():

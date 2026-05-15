@@ -45,6 +45,10 @@ class InitialResponse(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x67\x4c\x21\x12\x5a\xaa\x7b\x5b\x97\x28\x43\x16\x70\xbe\xcc\xf7"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -108,6 +112,10 @@ class FinalResponse(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x97\x65\x33\x61\x49\x2c\xcb\xef\xf5\x12\xdd\x8e\xb5\xa8\xae\xe5"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -173,6 +181,10 @@ class SinkPayload(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x5f\xbd\x5a\x57\x7b\x20\x0a\x29\xc4\xfb\xf7\x18\xc7\x19\xc1\xb0"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -236,6 +248,10 @@ class CompatibleWithKeywordSink(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x16\x0d\x00\xa6\xa3\xa8\xa5\xe5\xd1\xcb\x4c\x84\xf6\x95\x3a\xaf"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -304,6 +320,10 @@ class InitialException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x1b\x4b\x08\x41\xad\x48\x77\x15\xf7\xf2\xff\x15\x2e\xd1\xdd\xdc"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -369,6 +389,10 @@ class SinkException1(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xbf\x2e\x9a\xbc\xa6\xda\x0d\x65\x64\x1b\xdd\x58\x9c\xf9\x3e\x64"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -433,6 +457,10 @@ class SinkException2(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x08\x6b\xf8\x51\xe0\x44\x72\xef\x52\xf5\x33\x5c\x8a\x52\x22\x17"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

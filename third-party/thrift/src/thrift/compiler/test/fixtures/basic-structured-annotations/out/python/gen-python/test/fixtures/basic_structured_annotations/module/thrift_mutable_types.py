@@ -43,6 +43,10 @@ class runtime_annotation(metaclass=_fbthrift_python_mutable_types.MutableStructM
         return "test.dev/fixtures/basic_structured_annotations/runtime_annotation"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x80\xab\x88\x82\x9d\x87\xf2\x40\xa3\x2b\x52\x9a\xff\xdb\xf0\x0e"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -107,6 +111,10 @@ class structured_annotation_inline(metaclass=_fbthrift_python_mutable_types.Muta
         return "test.dev/fixtures/basic_structured_annotations/structured_annotation_inline"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x82\x6a\x3f\xc6\xe1\xcb\x16\xa9\xa8\x9a\x3c\xee\x46\x20\x99\x6e"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -158,6 +166,10 @@ class structured_annotation_with_default(metaclass=_fbthrift_python_mutable_type
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic_structured_annotations/structured_annotation_with_default"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x00\x98\xf3\xcd\x98\x0d\x2f\x9a\x3a\xf9\xc5\x94\x09\x48\x31\x93"
 
     @staticmethod
     def __get_metadata__():
@@ -235,6 +247,10 @@ class structured_annotation_recursive(metaclass=_fbthrift_python_mutable_types.M
         return "test.dev/fixtures/basic_structured_annotations/structured_annotation_recursive"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xbb\x08\xf6\xfd\x9a\x1f\xff\xcb\xe2\x79\x80\x45\xe9\xc2\x82\x5a"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -286,6 +302,10 @@ class structured_annotation_forward(metaclass=_fbthrift_python_mutable_types.Mut
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic_structured_annotations/structured_annotation_forward"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xa3\x33\x70\xce\x1c\x10\x6f\xfb\x9b\xab\xbd\xcc\xaa\x7a\xe6\x04"
 
     @staticmethod
     def __get_metadata__():
@@ -350,6 +370,10 @@ class structured_annotation_nested(metaclass=_fbthrift_python_mutable_types.Muta
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic_structured_annotations/structured_annotation_nested"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x79\x8d\xeb\x79\x05\xde\x02\x6e\xb2\xd0\x2c\x0e\x74\x9c\x70\x53"
 
     @staticmethod
     def __get_metadata__():
@@ -438,6 +462,10 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "test.dev/fixtures/basic_structured_annotations/MyStruct"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xe2\xf8\x27\xa0\x91\x73\x03\xb5\x9a\xe9\x41\x39\xea\x24\x73\x3a"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -492,6 +520,10 @@ class MyException(metaclass=_fbthrift_python_mutable_exceptions.MutableGenerated
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic_structured_annotations/MyException"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xba\x1d\x7b\xf4\xf8\x39\xd5\xfe\x63\x4a\x8e\x3d\x56\x8d\x19\x56"
 
     @staticmethod
     def __get_metadata__():
@@ -557,6 +589,10 @@ class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic_structured_annotations/MyUnion"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xe5\xd8\x24\xa7\xe0\xf0\x13\x59\x31\xa6\x58\xa1\x15\xec\xf5\xf3"
 
     @staticmethod
     def __get_metadata__():

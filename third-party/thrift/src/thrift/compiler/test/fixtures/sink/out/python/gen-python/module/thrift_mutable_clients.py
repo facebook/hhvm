@@ -42,6 +42,10 @@ class SinkService(_fbthrift_python_Client["SinkService.Async", "SinkService.Sync
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x4e\x11\x60\x93\x6d\xd5\xe2\xbe\xbb\x66\xfc\xcc\x03\xe2\xdd\xca"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -58,6 +62,10 @@ class SinkService(_fbthrift_python_Client["SinkService.Async", "SinkService.Sync
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x4e\x11\x60\x93\x6d\xd5\xe2\xbe\xbb\x66\xfc\xcc\x03\xe2\xdd\xca"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -229,6 +237,10 @@ class SinkService(_fbthrift_python_Client["SinkService.Async", "SinkService.Sync
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x4e\x11\x60\x93\x6d\xd5\xe2\xbe\xbb\x66\xfc\xcc\x03\xe2\xdd\xca"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

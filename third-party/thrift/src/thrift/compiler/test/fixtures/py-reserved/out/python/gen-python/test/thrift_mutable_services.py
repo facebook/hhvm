@@ -44,6 +44,10 @@ class lambdaInterface(
         return "test.lambda"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x2e\x8a\xe6\xee\x65\x93\xcc\xe8\xe0\x10\x41\xe4\x1e\xae\xfc\xde"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__thrift_metadata.gen_metadata_service_lambda()
 

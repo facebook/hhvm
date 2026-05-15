@@ -51,6 +51,10 @@ class PubSubStreamingServiceInterface(
         return "module.PubSubStreamingService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xab\x3e\x36\x4b\x2e\x35\xdf\x6b\x01\xa6\x9d\xdc\x03\x1b\x54\x13"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__module__thrift_metadata.gen_metadata_service_PubSubStreamingService()
 

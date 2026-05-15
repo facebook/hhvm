@@ -42,6 +42,10 @@ class TestServiceInterface(
         return "module.TestService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xf0\xe3\x68\x4d\x9b\xeb\x52\x71\x51\x4a\x8e\x32\xbb\x98\x9d\xf7"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__namespace_from_package_without_module_name__module__thrift_metadata.gen_metadata_service_TestService()
 

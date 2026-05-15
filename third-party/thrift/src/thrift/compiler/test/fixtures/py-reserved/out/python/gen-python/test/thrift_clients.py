@@ -38,6 +38,10 @@ class lambda(_fbthrift_python_Client["lambda.Async", "lambda.Sync"]):
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x2e\x8a\xe6\xee\x65\x93\xcc\xe8\xe0\x10\x41\xe4\x1e\xae\xfc\xde"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -54,6 +58,10 @@ class lambda(_fbthrift_python_Client["lambda.Async", "lambda.Sync"]):
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x2e\x8a\xe6\xee\x65\x93\xcc\xe8\xe0\x10\x41\xe4\x1e\xae\xfc\xde"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -119,6 +127,10 @@ class lambda(_fbthrift_python_Client["lambda.Async", "lambda.Sync"]):
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x2e\x8a\xe6\xee\x65\x93\xcc\xe8\xe0\x10\x41\xe4\x1e\xae\xfc\xde"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

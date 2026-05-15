@@ -70,6 +70,10 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xa8\xdc\xf6\x84\x91\xf0\xb8\x8e\x11\xd3\x37\x20\xc4\x5c\x26\xbe"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False

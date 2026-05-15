@@ -87,6 +87,10 @@ class TemplateLists(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "test.dev/fixtures/python_capi/TemplateLists"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xce\xe8\x1d\xae\x46\xf3\x70\x43\x4b\x80\xc8\x6e\xbd\x30\x3b\xf7"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -204,6 +208,10 @@ class TemplateSets(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/TemplateSets"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x03\xc4\x2a\x40\x9d\x13\x9f\x80\xd3\xca\x77\x76\x7a\x56\xf1\x25"
 
     @staticmethod
     def __get_metadata__():
@@ -325,6 +333,10 @@ class TemplateMaps(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "test.dev/fixtures/python_capi/TemplateMaps"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xc1\x19\xbb\xa5\x03\x93\x7c\x11\xaa\x14\x2b\x87\x6a\xc3\x12\x54"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -389,6 +401,10 @@ class TWrapped(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "test.dev/fixtures/python_capi/TWrapped"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x2d\xa9\x9f\x83\xc7\xe0\x6b\xc0\xa5\x26\x36\xef\xba\x99\xb6\x75"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -440,6 +456,10 @@ class IndirectionA(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/IndirectionA"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xc6\xfc\x55\xdb\x8f\xad\xa1\x91\x4b\x34\x73\x33\x4c\xf4\xa3\xd9"
 
     @staticmethod
     def __get_metadata__():
@@ -495,6 +515,10 @@ class IndirectionB(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "test.dev/fixtures/python_capi/IndirectionB"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x22\xe5\xfe\x29\x82\x58\x52\x1e\x2f\x42\xc9\x87\xe7\x4a\x37\x1d"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -546,6 +570,10 @@ class IndirectionC(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/python_capi/IndirectionC"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x5b\xc1\x55\x39\x7f\x63\x8b\x52\x0e\x52\x0e\xe8\x85\x69\xbe\xb0"
 
     @staticmethod
     def __get_metadata__():

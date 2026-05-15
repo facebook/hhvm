@@ -38,6 +38,10 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xe1\xd0\xf0\xdd\xe7\x35\xea\x3e\xcb\xa1\x4a\x15\x84\x68\x61\x49"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -54,6 +58,10 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xe1\xd0\xf0\xdd\xe7\x35\xea\x3e\xcb\xa1\x4a\x15\x84\x68\x61\x49"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -169,6 +177,10 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xe1\xd0\xf0\xdd\xe7\x35\xea\x3e\xcb\xa1\x4a\x15\x84\x68\x61\x49"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

@@ -42,6 +42,10 @@ class Fiery(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x4f\xa1\x63\x99\x9a\xfa\x24\x96\x4f\x3d\x1f\x1c\x96\x80\xf8\xd6"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -113,6 +117,10 @@ class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x07\x6e\x29\x63\x3b\xa1\x10\x8d\x38\x40\x78\xcb\xa5\xd9\xeb\x01"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -197,6 +205,10 @@ class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x59\x37\xce\x26\x63\xab\x3f\x51\xba\x74\x42\x28\x72\x27\xad\xc6"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -279,6 +291,10 @@ class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xf5\x57\x91\x9a\xca\x67\xaf\x7c\x08\xb1\xd5\x1a\xbb\xef\x2c\xa9"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -363,6 +379,10 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.Generate
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xdc\xf4\x20\x91\x44\xca\x16\x22\x8a\x09\x58\x26\x67\xf2\x3c\x8a"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -446,6 +466,10 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.Ge
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x08\x4e\xb8\x22\x18\xc1\x48\xfb\x7d\x39\x30\x83\x3c\x88\x54\x1e"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -506,6 +530,10 @@ class Banal(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x9c\x5b\xd3\xf8\x90\x05\xcf\x00\x93\xd7\x1c\x3a\xf0\x75\x23\x6f"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

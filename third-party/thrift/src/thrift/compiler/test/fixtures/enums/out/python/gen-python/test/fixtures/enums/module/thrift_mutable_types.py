@@ -98,6 +98,10 @@ class SomeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return "test.dev/fixtures/enums/SomeStruct"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x4c\x5e\xed\xd1\x6f\xa5\xf9\xfa\x98\x95\xa6\x1a\xd7\x86\xc0\x27"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -182,6 +186,10 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/enums/MyStruct"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xbf\x94\x21\x5c\x52\x96\xb7\x95\xff\x29\xc8\x97\xc1\x00\xec\x41"
 
     @staticmethod
     def __get_metadata__():

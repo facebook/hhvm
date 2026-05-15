@@ -43,6 +43,10 @@ class TestServiceInterface(
         return "emptyns.TestService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xae\x33\x60\xa9\x8b\x8f\x50\x72\xdb\x4e\x5b\x35\xe3\x6f\xbe\x54"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__emptyns__thrift_metadata.gen_metadata_service_TestService()
 

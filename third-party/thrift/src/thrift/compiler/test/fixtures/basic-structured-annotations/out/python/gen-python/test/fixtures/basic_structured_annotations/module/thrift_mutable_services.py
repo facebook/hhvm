@@ -46,6 +46,10 @@ class MyServiceInterface(
         return "module.MyService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x87\x8c\x8c\x9a\x19\x91\x49\xc7\x08\x6c\x49\x48\xc6\x80\xa8\x94"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_metadata.gen_metadata_service_MyService()
 

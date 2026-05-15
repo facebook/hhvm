@@ -53,6 +53,10 @@ class Included(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x1b\x94\x37\xf6\x1c\x5b\xb9\xd0\x0d\xba\x61\xce\xd2\x88\xb3\xe5"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False

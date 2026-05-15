@@ -42,6 +42,10 @@ class EchoRequest(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/EchoRequest"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xe7\x40\x60\x85\x8a\xf4\xd1\x17\x00\xb9\xd0\xcd\x2c\x1f\xfc\xc2"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -105,6 +109,10 @@ class EchoResponse(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/EchoResponse"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x82\xc0\xb6\xef\x13\xf7\x82\xa2\xd6\xea\x7f\x54\xe1\x28\xe0\x42"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -172,6 +180,10 @@ class WhisperException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/WhisperException"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x35\xd6\x56\xcf\x27\x1a\xe0\x0c\x70\x51\xee\x89\x6d\xda\xd3\xaa"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

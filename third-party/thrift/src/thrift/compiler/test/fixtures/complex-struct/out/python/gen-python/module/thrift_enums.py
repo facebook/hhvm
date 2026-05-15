@@ -29,6 +29,10 @@ class MyEnum(_fbthrift_python_types.Enum, int):
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\x3d\x02\x98\xe7\x4d\x07\x84\x76\x8d\x93\xcd\x01\x08\xc7\x88\xd8"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum()
 

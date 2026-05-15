@@ -48,6 +48,10 @@ class BiDiSinkException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x69\xb5\x05\xc1\x17\x01\xd7\xa0\xd1\xc6\xcd\x5f\xe0\x98\xf8\x52"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -113,6 +117,10 @@ class BiDiStreamException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMe
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xb8\xab\xeb\xba\xd7\xc6\x33\xf6\x30\xce\xd8\x18\x24\xe4\x45\x97"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -177,6 +185,10 @@ class BiDiMethodException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMe
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xe8\xe9\x46\xee\x82\x8b\x7e\x38\x08\xd8\x2c\x7d\x0d\x8b\x23\x31"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

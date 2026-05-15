@@ -43,6 +43,10 @@ class BiDiService(_fbthrift_python_Client["BiDiService.Async", "BiDiService.Sync
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xec\xc2\xd7\xab\xf5\xc7\xc5\x44\x3b\x30\x6f\xa5\x78\x7f\x04\x18"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -59,6 +63,10 @@ class BiDiService(_fbthrift_python_Client["BiDiService.Async", "BiDiService.Sync
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xec\xc2\xd7\xab\xf5\xc7\xc5\x44\x3b\x30\x6f\xa5\x78\x7f\x04\x18"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -146,6 +154,10 @@ class BiDiService(_fbthrift_python_Client["BiDiService.Async", "BiDiService.Sync
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xec\xc2\xd7\xab\xf5\xc7\xc5\x44\x3b\x30\x6f\xa5\x78\x7f\x04\x18"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

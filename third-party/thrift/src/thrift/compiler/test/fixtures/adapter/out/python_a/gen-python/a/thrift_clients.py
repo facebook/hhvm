@@ -46,6 +46,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xca\xe8\x7b\xe3\xd5\xc7\xd2\x26\xf0\x05\x01\x63\xc0\x9e\xe5\x35"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -62,6 +66,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xca\xe8\x7b\xe3\xd5\xc7\xd2\x26\xf0\x05\x01\x63\xc0\x9e\xe5\x35"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -120,6 +128,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xca\xe8\x7b\xe3\xd5\xc7\xd2\x26\xf0\x05\x01\x63\xc0\x9e\xe5\x35"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

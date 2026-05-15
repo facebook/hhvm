@@ -49,6 +49,10 @@ class Fields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x2e\xfe\x5b\x09\x50\x28\xc8\xdd\x94\x5b\x54\xb6\x4f\xe9\x83\x63"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -100,6 +104,10 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_mutable_types.Mutab
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x64\x6f\x64\x11\x96\xfe\x85\x93\xcb\x03\xbf\x57\x96\x5a\x11\x9d"
 
     @staticmethod
     def __get_metadata__():
@@ -164,6 +172,10 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_mutable_types.MutableStr
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xc7\x5f\x27\x27\x49\xdb\x30\x08\x7d\xd6\x54\x1d\xd2\x36\xae\xa1"
 
     @staticmethod
     def __get_metadata__():
@@ -252,6 +264,10 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_mutable_types.
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x25\x05\xbd\x11\xc7\xa5\x12\xdc\x46\x7d\x03\xb3\xd8\xff\x6d\x8e"
+
+    @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
@@ -314,6 +330,10 @@ class FieldsInjectedWithFieldsWithIncludedStruct(metaclass=_fbthrift_python_muta
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x93\x13\x56\xec\xcb\xae\x9b\x8d\x2f\xdd\x86\xd9\x64\x83\xcc\x8f"
 
     @staticmethod
     def __get_metadata__():

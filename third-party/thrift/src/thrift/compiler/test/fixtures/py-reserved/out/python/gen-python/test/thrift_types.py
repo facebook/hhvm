@@ -154,6 +154,10 @@ class def_(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x37\xab\x8b\x79\x09\xab\x1f\xfd\x54\x95\x6b\x69\x52\x66\x46\x94"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False

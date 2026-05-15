@@ -136,6 +136,10 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/MyStruct"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xf4\x5e\x0d\xfd\x3b\x96\x8a\xb8\xe2\xc1\x01\x6a\xf9\xa6\xc2\xd7"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -222,6 +226,10 @@ class Containers(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/Containers"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xb9\xcf\xb3\xb2\xaa\x03\x68\x56\xff\x83\x12\x78\x13\x35\xf6\x15"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -274,6 +282,10 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/MyDataItem"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x2a\x82\xa4\xc6\x36\xa0\xac\xa9\x36\x60\x5f\x10\x60\xb1\x73\xd2"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -375,6 +387,10 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/MyUnion"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x2f\x7e\x4b\xfb\xb9\x54\xb2\x3e\xfa\x4c\x45\x04\x4a\x9b\xb8\xc4"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -475,6 +491,10 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/MyException"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x6f\x1e\x78\xde\x5b\x20\xfb\xe4\x3a\x4d\x3f\x06\x9d\xe9\x38\x10"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -573,6 +593,10 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErro
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/MyExceptionWithMessage"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x73\x86\x8e\x6c\xb6\x40\x2d\x5a\x08\x62\x51\x40\x0f\xf7\x4c\x12"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -642,6 +666,10 @@ class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/ReservedKeyword"
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x6b\x59\xb2\xe6\xec\x2a\x59\xb7\x9d\x20\xb3\xbc\xec\x60\x5c\x2c"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -708,6 +736,10 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "test.dev/fixtures/basic/UnionToBeRenamed"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xc7\x9a\xad\x62\xb6\xbf\x4a\xee\xbd\x83\x96\xe9\xfa\x19\x7c\xfe"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

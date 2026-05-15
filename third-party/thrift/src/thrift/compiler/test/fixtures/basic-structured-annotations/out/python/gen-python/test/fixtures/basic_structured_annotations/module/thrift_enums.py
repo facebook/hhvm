@@ -28,6 +28,10 @@ class MyEnum(_fbthrift_python_types.Enum, int):
         return "test.dev/fixtures/basic_structured_annotations/MyEnum"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> builtins.bytes:
+        return b"\xd2\xce\x51\x73\x76\xc2\x92\xfd\xd7\x3c\x39\x24\xd6\xdf\x7f\x20"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum()
 

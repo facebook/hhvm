@@ -43,6 +43,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         return "test.dev/fixtures/basic_structured_annotations/MyService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x87\x8c\x8c\x9a\x19\x91\x49\xc7\x08\x6c\x49\x48\xc6\x80\xa8\x94"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -59,6 +63,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return "test.dev/fixtures/basic_structured_annotations/MyService"
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x87\x8c\x8c\x9a\x19\x91\x49\xc7\x08\x6c\x49\x48\xc6\x80\xa8\x94"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -126,6 +134,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return "test.dev/fixtures/basic_structured_annotations/MyService"
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x87\x8c\x8c\x9a\x19\x91\x49\xc7\x08\x6c\x49\x48\xc6\x80\xa8\x94"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

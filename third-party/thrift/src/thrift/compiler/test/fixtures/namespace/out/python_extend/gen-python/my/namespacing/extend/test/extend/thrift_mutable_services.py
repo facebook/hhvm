@@ -45,6 +45,10 @@ class ExtendTestServiceInterface(
         return "extend.ExtendTestService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xf9\xec\x05\x1c\x0e\xfa\x74\x74\x4d\x2a\x15\x1f\xb5\xd0\xc8\x65"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return python_module_root__my__namespacing__extend__test__extend__thrift_metadata.gen_metadata_service_ExtendTestService()
 

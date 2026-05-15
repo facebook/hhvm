@@ -64,6 +64,10 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x6a\xd0\x6f\x9c\x59\x67\xfc\xe1\x82\x8f\xee\xd2\xdf\xd2\x5e\x99"
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False
@@ -127,6 +131,10 @@ class FieldsWithIncludedStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xf9\x99\x01\xb4\xe7\xf7\x9d\x64\x91\x51\xad\x11\x52\xaf\x8d\xe2"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

@@ -49,6 +49,10 @@ class SinkServiceInterface(
         return "module.SinkService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x4e\x11\x60\x93\x6d\xd5\xe2\xbe\xbb\x66\xfc\xcc\x03\xe2\xdd\xca"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__module__thrift_metadata.gen_metadata_service_SinkService()
 

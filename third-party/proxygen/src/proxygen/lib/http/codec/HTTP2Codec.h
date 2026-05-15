@@ -123,9 +123,6 @@ class HTTP2Codec
            (transportDirection_ == TransportDirection::UPSTREAM &&
             egressSettings_.getSetting(SettingsId::ENABLE_PUSH, 1));
   }
-  bool supportsExTransactions() const override {
-    return false;
-  }
   void setHeaderCodecStats(HeaderCodec::Stats* hcStats) override {
     headerCodec_.setStats(hcStats);
   }

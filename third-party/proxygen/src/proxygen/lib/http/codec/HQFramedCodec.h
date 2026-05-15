@@ -251,10 +251,6 @@ class HQFramedCodec : public HTTPCodec {
     return true;
   }
 
-  bool supportsExTransactions() const override {
-    return false;
-  }
-
   void setHeaderCodecStats(HeaderCodec::Stats* /*hcStats*/) override {
     LOG(FATAL) << __func__ << " not supported on this codec";
   }

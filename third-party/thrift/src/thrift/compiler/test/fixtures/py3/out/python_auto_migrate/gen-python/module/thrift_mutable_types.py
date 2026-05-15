@@ -12,11 +12,10 @@ import folly.iobuf as _fbthrift_iobuf
 from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import fbcode.thrift.python.types as _fbthrift_python_types
-try:
-    import fbcode.thrift.python.container_typedefs as _fbthrift_python_container_typedefs
-except ImportError:
-    _fbthrift_python_container_typedefs = None  # type: ignore
-import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
+import fbcode.thrift.python.mutable_types as _fbthrift_python_mutable_types
+import fbcode.thrift.python.mutable_containers as _fbthrift_python_mutable_containers
+import fbcode.thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
+import fbcode.thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 from module.thrift_enums import (
@@ -29,7 +28,7 @@ from module.thrift_enums import (
 )
 
 
-class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+class SimpleException(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -56,36 +55,21 @@ class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\x97\x15\x4a\x60\x92\x73\x4c\xd1\x21\xa8\xa2\x17\x30\x87\x1f\xb3"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
-
-    @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__exception_SimpleException()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    @staticmethod
-    def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__SimpleException() if _mod is not None else None
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.SimpleException, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.SimpleException, self)
+        return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.SimpleException, self)
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -98,7 +82,7 @@ class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             return converter.to_py_struct(py_asyncio_types.SimpleException, self)
 _fbthrift_SimpleException = SimpleException
 
-class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
+class OptionalRefStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -122,36 +106,21 @@ class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xba\xe1\x90\xb2\xe4\x06\xc3\x97\x98\xf3\xa0\x9e\x1c\x91\x4e\x9e"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
-
-    @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_OptionalRefStruct()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    @staticmethod
-    def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__OptionalRefStruct() if _mod is not None else None
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.OptionalRefStruct, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.OptionalRefStruct, self)
+        return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.OptionalRefStruct, self)
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -166,7 +135,7 @@ class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.OptionalRefStruct, OptionalRefStruct)
 _fbthrift_OptionalRefStruct = OptionalRefStruct
 
-class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
+class SimpleStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -261,7 +230,7 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "something",  # name
             "something",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -311,36 +280,21 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xfa\x91\xc1\x59\xd6\xaa\xcc\x88\xc5\x4b\xf0\xda\x0f\x15\x8d\xfe"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
-
-    @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_SimpleStruct()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    @staticmethod
-    def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__SimpleStruct() if _mod is not None else None
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.SimpleStruct, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.SimpleStruct, self)
+        return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.SimpleStruct, self)
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -355,7 +309,7 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.SimpleStruct, SimpleStruct)
 _fbthrift_SimpleStruct = SimpleStruct
 
-class Float32Struct(metaclass=_fbthrift_python_types.StructMeta):
+class Float32Struct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -384,7 +338,7 @@ class Float32Struct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "float_list",  # name
             "float_list",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_float_legacy),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_float_legacy),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -395,7 +349,7 @@ class Float32Struct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "float_map",  # name
             "float_map",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_float_legacy)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_float_legacy)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -412,36 +366,21 @@ class Float32Struct(metaclass=_fbthrift_python_types.StructMeta):
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xf5\xbf\xea\x9c\xd4\x74\xd5\x46\x00\x3a\xf1\xda\xbe\x2c\x48\x07"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
-
-    @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_Float32Struct()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    @staticmethod
-    def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__Float32Struct() if _mod is not None else None
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.Float32Struct, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.Float32Struct, self)
+        return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.Float32Struct, self)
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -456,14 +395,14 @@ class Float32Struct(metaclass=_fbthrift_python_types.StructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Float32Struct, Float32Struct)
 _fbthrift_Float32Struct = Float32Struct
 
-class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
+class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "field1",  # name
             "field1",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -474,7 +413,7 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "field2",  # name
             "field2",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(SimpleStruct)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -485,7 +424,7 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "field3",  # name
             "field3",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.StructTypeInfo(SimpleStruct)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -502,36 +441,21 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xd5\xa3\xd3\x5c\x3c\xe0\xd4\xbf\x9f\x00\x0a\x54\x95\x39\xb3\x06"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
-
-    @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_HiddenTypeFieldsStruct()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    @staticmethod
-    def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__HiddenTypeFieldsStruct() if _mod is not None else None
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.HiddenTypeFieldsStruct, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.HiddenTypeFieldsStruct, self)
+        return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.HiddenTypeFieldsStruct, self)
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -546,7 +470,7 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.HiddenTypeFieldsStruct, HiddenTypeFieldsStruct)
 _fbthrift_HiddenTypeFieldsStruct = HiddenTypeFieldsStruct
 
-class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
+class AdaptedUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -573,36 +497,21 @@ class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xef\x71\xb8\xf3\x12\xf0\x7d\x75\xdc\xd4\xe7\x20\x5d\xbc\x34\x58"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
-
-    @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_AdaptedUnion()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    @staticmethod
-    def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__AdaptedUnion() if _mod is not None else None
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.AdaptedUnion, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.AdaptedUnion, self)
+        return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.AdaptedUnion, self)
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -617,7 +526,7 @@ class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.AdaptedUnion, AdaptedUnion)
 _fbthrift_AdaptedUnion = AdaptedUnion
 
-class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+class HiddenException(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -644,36 +553,21 @@ class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xfd\xd9\x57\x91\x2c\x45\xf5\x08\x28\x5a\x92\x3b\xec\x3f\x5a\x91"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
-
-    @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__exception_HiddenException()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    @staticmethod
-    def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__HiddenException() if _mod is not None else None
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.HiddenException, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.HiddenException, self)
+        return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.HiddenException, self)
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -686,14 +580,14 @@ class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             return converter.to_py_struct(py_asyncio_types.HiddenException, self)
 _fbthrift_HiddenException = HiddenException
 
-class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
+class ComplexStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "structOne",  # name
             "structOne",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -704,7 +598,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "structTwo",  # name
             "structTwo",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -798,36 +692,21 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\x4c\x42\x6c\x79\x57\x87\x49\x52\xff\x31\x47\x46\x2b\x3a\xdf\xff"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
-
-    @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_ComplexStruct()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    @staticmethod
-    def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__ComplexStruct() if _mod is not None else None
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.ComplexStruct, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.ComplexStruct, self)
+        return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.ComplexStruct, self)
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -842,7 +721,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.ComplexStruct, ComplexStruct)
 _fbthrift_ComplexStruct = ComplexStruct
 
-class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
+class BinaryUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -869,36 +748,21 @@ class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xe3\x7f\x0e\x0e\xbb\x87\x55\x0a\x80\x67\xec\x27\x28\xa7\x74\x06"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
-
-    @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_BinaryUnion()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    @staticmethod
-    def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__BinaryUnion() if _mod is not None else None
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.BinaryUnion, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.BinaryUnion, self)
+        return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.BinaryUnion, self)
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -913,14 +777,14 @@ class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.BinaryUnion, BinaryUnion)
 _fbthrift_BinaryUnion = BinaryUnion
 
-class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
+class BinaryUnionStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "u",  # name
             "u",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(BinaryUnion),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(BinaryUnion),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -937,36 +801,21 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\x43\xf0\xc2\x26\x1c\xf8\xdf\x7b\xd4\x33\x60\xd1\xd6\xd8\xd4\xe6"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
-
-    @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_BinaryUnionStruct()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    @staticmethod
-    def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__BinaryUnionStruct() if _mod is not None else None
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.BinaryUnionStruct, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.BinaryUnionStruct, self)
+        return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.BinaryUnionStruct, self)
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -981,7 +830,7 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.BinaryUnionStruct, BinaryUnionStruct)
 _fbthrift_BinaryUnionStruct = BinaryUnionStruct
 
-class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
+class CustomFields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1043,7 +892,7 @@ class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "list_field",  # name
             "list_field",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1054,7 +903,7 @@ class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "set_field",  # name
             "set_field",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1065,7 +914,7 @@ class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "map_field",  # name
             "map_field",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1076,7 +925,7 @@ class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "struct_field",  # name
             "struct_field",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1093,36 +942,21 @@ class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xf5\xeb\xc0\xe7\x00\x68\x73\xfb\x81\x02\xc3\x6d\x57\x30\x1c\x60"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
-
-    @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_CustomFields()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    @staticmethod
-    def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__CustomFields() if _mod is not None else None
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.CustomFields, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.CustomFields, self)
+        return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.CustomFields, self)
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -1137,7 +971,7 @@ class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.CustomFields, CustomFields)
 _fbthrift_CustomFields = CustomFields
 
-class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
+class CustomTypedefFields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1199,7 +1033,7 @@ class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "list_field",  # name
             "list_field",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1210,7 +1044,7 @@ class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "set_field",  # name
             "set_field",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1221,7 +1055,7 @@ class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "map_field",  # name
             "map_field",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1232,7 +1066,7 @@ class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "struct_field",  # name
             "struct_field",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1249,36 +1083,21 @@ class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\x41\x9a\xb0\x02\x47\xa8\x02\xe9\xf3\x40\xa0\x48\xa9\xfa\x7b\xf2"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
-
-    @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_CustomTypedefFields()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    @staticmethod
-    def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__CustomTypedefFields() if _mod is not None else None
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.CustomTypedefFields, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.CustomTypedefFields, self)
+        return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.CustomTypedefFields, self)
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -1293,7 +1112,7 @@ class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.CustomTypedefFields, CustomTypedefFields)
 _fbthrift_CustomTypedefFields = CustomTypedefFields
 
-class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
+class AdaptedTypedefFields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1355,7 +1174,7 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "list_field",  # name
             "list_field",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1366,7 +1185,7 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "set_field",  # name
             "set_field",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1377,7 +1196,7 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "map_field",  # name
             "map_field",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1388,7 +1207,7 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "struct_field",  # name
             "struct_field",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1405,36 +1224,21 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\x3d\x90\x71\x04\x92\x58\x1b\x87\x06\x89\x04\x4e\x26\xce\x05\x19"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
-
-    @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_AdaptedTypedefFields()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 
-    @staticmethod
-    def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__AdaptedTypedefFields() if _mod is not None else None
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.AdaptedTypedefFields, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.AdaptedTypedefFields, self)
+        return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.AdaptedTypedefFields, self)
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -1449,73 +1253,12 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.AdaptedTypedefFields, AdaptedTypedefFields)
 _fbthrift_AdaptedTypedefFields = AdaptedTypedefFields
 
-# This unfortunately has to be down here to prevent circular imports
-import module.thrift_metadata as _fbthrift__module__thrift_metadata
 
 _fbthrift_all_enums = [
     AnEnum,
     AnEnumRenamed,
     Flags,
 ]
-
-
-def _fbthrift_metadata__exception_SimpleException():
-    return _fbthrift__module__thrift_metadata.gen_metadata_exception_SimpleException()
-
-
-def _fbthrift_metadata__struct_OptionalRefStruct():
-    return _fbthrift__module__thrift_metadata.gen_metadata_struct_OptionalRefStruct()
-
-
-def _fbthrift_metadata__struct_SimpleStruct():
-    return _fbthrift__module__thrift_metadata.gen_metadata_struct_SimpleStruct()
-
-
-def _fbthrift_metadata__struct_Float32Struct():
-    return _fbthrift__module__thrift_metadata.gen_metadata_struct_Float32Struct()
-
-
-def _fbthrift_metadata__struct_HiddenTypeFieldsStruct():
-    return _fbthrift__module__thrift_metadata.gen_metadata_struct_HiddenTypeFieldsStruct()
-
-
-def _fbthrift_metadata__struct_AdaptedUnion():
-    return _fbthrift__module__thrift_metadata.gen_metadata_struct_AdaptedUnion()
-
-
-def _fbthrift_metadata__exception_HiddenException():
-    return _fbthrift__module__thrift_metadata.gen_metadata_exception_HiddenException()
-
-
-def _fbthrift_metadata__struct_ComplexStruct():
-    return _fbthrift__module__thrift_metadata.gen_metadata_struct_ComplexStruct()
-
-
-def _fbthrift_metadata__struct_BinaryUnion():
-    return _fbthrift__module__thrift_metadata.gen_metadata_struct_BinaryUnion()
-
-
-def _fbthrift_metadata__struct_BinaryUnionStruct():
-    return _fbthrift__module__thrift_metadata.gen_metadata_struct_BinaryUnionStruct()
-
-
-def _fbthrift_metadata__struct_CustomFields():
-    return _fbthrift__module__thrift_metadata.gen_metadata_struct_CustomFields()
-
-
-def _fbthrift_metadata__struct_CustomTypedefFields():
-    return _fbthrift__module__thrift_metadata.gen_metadata_struct_CustomTypedefFields()
-
-
-def _fbthrift_metadata__struct_AdaptedTypedefFields():
-    return _fbthrift__module__thrift_metadata.gen_metadata_struct_AdaptedTypedefFields()
-
-def _fbthrift_get_reflection_module():
-    try:
-        import importlib
-        return importlib.import_module("module.thrift_reflection")
-    except ImportError:
-        return None
 
 
 _fbthrift_all_structs = [
@@ -1533,40 +1276,7 @@ _fbthrift_all_structs = [
     CustomTypedefFields,
     AdaptedTypedefFields,
 ]
-_fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
-
-
-A_BOOL = True
-
-A_BYTE = 8
-
-THE_ANSWER = 42
-
-A_NUMBER = 84
-
-A_BIG_NUMBER = 102
-
-A_REAL_NUMBER = float(3.14)
-
-A_FAKE_NUMBER = 3.0
-
-A_WORD = "Good word"
-
-SOME_BYTES = b"bytes"
-
-A_STRUCT = SimpleStruct(is_on=True, tiny_int=5, small_int=6, nice_sized_int=7, big_int=8, real=float(9.9))
-
-EMPTY = SimpleStruct()
-
-WORD_LIST = _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_string, ("the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog", ))
-
-SOME_MAP = _fbthrift_python_types.List(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_double), (_fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_double, { 1: float(1.1), 2: float(2.2)}), _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_double, { 3: float(3.3)}), ))
-
-DIGITS = _fbthrift_python_types.Set(_fbthrift_python_types.typeinfo_i32, (1, 2, 3, 4, 5, ))
-
-A_CONST_MAP = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(SimpleStruct), { "simple": SimpleStruct(is_on=False, tiny_int=50, small_int=61, nice_sized_int=72, big_int=83, real=float(99.9))})
-
-ANOTHER_CONST_MAP = _fbthrift_python_types.Map(_fbthrift_python_types.EnumTypeInfo(AnEnumRenamed), _fbthrift_python_types.typeinfo_i32, { AnEnumRenamed.name_: 0, AnEnumRenamed.value_: 1, AnEnumRenamed.renamed_: 2})
+_fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
 
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
@@ -1580,61 +1290,43 @@ CustomInteger = int
 CustomDouble = float
 CustomString = str
 CustomBinary = bytes
-if _fbthrift_python_container_typedefs is not None:
-    class CustomList(_fbthrift_python_container_typedefs._ListTypedefBase):
-        __slots__ = ()
-        _fbthrift_list_type_info = _fbthrift_python_types.typeinfo_i32
-else:
-    CustomList = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
-if _fbthrift_python_container_typedefs is not None:
-    class CustomSet(_fbthrift_python_container_typedefs._SetTypedefBase):
-        __slots__ = ()
-        _fbthrift_set_type_info = _fbthrift_python_types.typeinfo_i32
-else:
-    CustomSet = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
-if _fbthrift_python_container_typedefs is not None:
-    class CustomMap(_fbthrift_python_container_typedefs._MapTypedefBase):
-        __slots__ = ()
-        _fbthrift_map_key_type_info = _fbthrift_python_types.typeinfo_i32
-        _fbthrift_map_val_type_info = _fbthrift_python_types.typeinfo_i32
-else:
-    CustomMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
+class CustomList(_fbthrift_python_mutable_containers._MutableListTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_list_type_info = _fbthrift_python_types.typeinfo_i32
+class CustomSet(_fbthrift_python_mutable_containers._MutableSetTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_set_type_info = _fbthrift_python_types.typeinfo_i32
+class CustomMap(_fbthrift_python_mutable_containers._MutableMapTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_map_key_type_info = _fbthrift_python_types.typeinfo_i32
+    _fbthrift_mutable_map_val_type_info = _fbthrift_python_types.typeinfo_i32
 CustomStruct = _fbthrift_SimpleStruct
 AdaptedBool = bool
 AdaptedInteger = int
 AdaptedDouble = float
 AdaptedString = str
 AdaptedBinary = bytes
-if _fbthrift_python_container_typedefs is not None:
-    class AdaptedList(_fbthrift_python_container_typedefs._ListTypedefBase):
-        __slots__ = ()
-        _fbthrift_list_type_info = _fbthrift_python_types.typeinfo_i32
-else:
-    AdaptedList = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
-if _fbthrift_python_container_typedefs is not None:
-    class AdaptedSet(_fbthrift_python_container_typedefs._SetTypedefBase):
-        __slots__ = ()
-        _fbthrift_set_type_info = _fbthrift_python_types.typeinfo_i32
-else:
-    AdaptedSet = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
-if _fbthrift_python_container_typedefs is not None:
-    class AdaptedMap(_fbthrift_python_container_typedefs._MapTypedefBase):
-        __slots__ = ()
-        _fbthrift_map_key_type_info = _fbthrift_python_types.typeinfo_i32
-        _fbthrift_map_val_type_info = _fbthrift_python_types.typeinfo_i32
-else:
-    AdaptedMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
+class AdaptedList(_fbthrift_python_mutable_containers._MutableListTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_list_type_info = _fbthrift_python_types.typeinfo_i32
+class AdaptedSet(_fbthrift_python_mutable_containers._MutableSetTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_set_type_info = _fbthrift_python_types.typeinfo_i32
+class AdaptedMap(_fbthrift_python_mutable_containers._MutableMapTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_map_key_type_info = _fbthrift_python_types.typeinfo_i32
+    _fbthrift_mutable_map_val_type_info = _fbthrift_python_types.typeinfo_i32
 AdaptedStruct = _fbthrift_SimpleStruct
 
 
 
-class _fbthrift_SimpleService_get_five_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_five_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
-class _fbthrift_SimpleService_get_five_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_five_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1650,7 +1342,7 @@ class _fbthrift_SimpleService_get_five_result(metaclass=_fbthrift_python_types.S
     )
 
 
-class _fbthrift_SimpleService_add_five_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_add_five_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1667,7 +1359,7 @@ class _fbthrift_SimpleService_add_five_args(metaclass=_fbthrift_python_types.Str
     )
 
 
-class _fbthrift_SimpleService_add_five_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_add_five_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1683,19 +1375,19 @@ class _fbthrift_SimpleService_add_five_result(metaclass=_fbthrift_python_types.S
     )
 
 
-class _fbthrift_SimpleService_do_nothing_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_do_nothing_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
-class _fbthrift_SimpleService_do_nothing_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_do_nothing_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
-class _fbthrift_SimpleService_concat_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_concat_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1723,7 +1415,7 @@ class _fbthrift_SimpleService_concat_args(metaclass=_fbthrift_python_types.Struc
     )
 
 
-class _fbthrift_SimpleService_concat_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_concat_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1739,7 +1431,7 @@ class _fbthrift_SimpleService_concat_result(metaclass=_fbthrift_python_types.Str
     )
 
 
-class _fbthrift_SimpleService_get_value_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_value_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1747,7 +1439,7 @@ class _fbthrift_SimpleService_get_value_args(metaclass=_fbthrift_python_types.St
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "simple_struct",  # name
             "simple_struct",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1756,7 +1448,7 @@ class _fbthrift_SimpleService_get_value_args(metaclass=_fbthrift_python_types.St
     )
 
 
-class _fbthrift_SimpleService_get_value_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_value_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1772,7 +1464,7 @@ class _fbthrift_SimpleService_get_value_result(metaclass=_fbthrift_python_types.
     )
 
 
-class _fbthrift_SimpleService_negate_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_negate_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1789,7 +1481,7 @@ class _fbthrift_SimpleService_negate_args(metaclass=_fbthrift_python_types.Struc
     )
 
 
-class _fbthrift_SimpleService_negate_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_negate_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1805,7 +1497,7 @@ class _fbthrift_SimpleService_negate_result(metaclass=_fbthrift_python_types.Str
     )
 
 
-class _fbthrift_SimpleService_tiny_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_tiny_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1822,7 +1514,7 @@ class _fbthrift_SimpleService_tiny_args(metaclass=_fbthrift_python_types.StructM
     )
 
 
-class _fbthrift_SimpleService_tiny_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_tiny_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1838,7 +1530,7 @@ class _fbthrift_SimpleService_tiny_result(metaclass=_fbthrift_python_types.Struc
     )
 
 
-class _fbthrift_SimpleService_small_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_small_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1855,7 +1547,7 @@ class _fbthrift_SimpleService_small_args(metaclass=_fbthrift_python_types.Struct
     )
 
 
-class _fbthrift_SimpleService_small_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_small_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1871,7 +1563,7 @@ class _fbthrift_SimpleService_small_result(metaclass=_fbthrift_python_types.Stru
     )
 
 
-class _fbthrift_SimpleService_big_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_big_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1888,7 +1580,7 @@ class _fbthrift_SimpleService_big_args(metaclass=_fbthrift_python_types.StructMe
     )
 
 
-class _fbthrift_SimpleService_big_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_big_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1904,7 +1596,7 @@ class _fbthrift_SimpleService_big_result(metaclass=_fbthrift_python_types.Struct
     )
 
 
-class _fbthrift_SimpleService_two_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_two_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1921,7 +1613,7 @@ class _fbthrift_SimpleService_two_args(metaclass=_fbthrift_python_types.StructMe
     )
 
 
-class _fbthrift_SimpleService_two_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_two_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1937,13 +1629,13 @@ class _fbthrift_SimpleService_two_result(metaclass=_fbthrift_python_types.Struct
     )
 
 
-class _fbthrift_SimpleService_expected_exception_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_expected_exception_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
-class _fbthrift_SimpleService_expected_exception_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_expected_exception_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1951,7 +1643,7 @@ class _fbthrift_SimpleService_expected_exception_result(metaclass=_fbthrift_pyth
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "_ex0__se",  # name
             "_ex0__se",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(SimpleException),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleException),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1960,13 +1652,13 @@ class _fbthrift_SimpleService_expected_exception_result(metaclass=_fbthrift_pyth
     )
 
 
-class _fbthrift_SimpleService_unexpected_exception_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_unexpected_exception_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
-class _fbthrift_SimpleService_unexpected_exception_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_unexpected_exception_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1982,7 +1674,7 @@ class _fbthrift_SimpleService_unexpected_exception_result(metaclass=_fbthrift_py
     )
 
 
-class _fbthrift_SimpleService_sum_i16_list_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_sum_i16_list_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1990,7 +1682,7 @@ class _fbthrift_SimpleService_sum_i16_list_args(metaclass=_fbthrift_python_types
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "numbers",  # name
             "numbers",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1999,7 +1691,7 @@ class _fbthrift_SimpleService_sum_i16_list_args(metaclass=_fbthrift_python_types
     )
 
 
-class _fbthrift_SimpleService_sum_i16_list_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_sum_i16_list_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2015,7 +1707,7 @@ class _fbthrift_SimpleService_sum_i16_list_result(metaclass=_fbthrift_python_typ
     )
 
 
-class _fbthrift_SimpleService_sum_i32_list_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_sum_i32_list_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2023,7 +1715,7 @@ class _fbthrift_SimpleService_sum_i32_list_args(metaclass=_fbthrift_python_types
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "numbers",  # name
             "numbers",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2032,7 +1724,7 @@ class _fbthrift_SimpleService_sum_i32_list_args(metaclass=_fbthrift_python_types
     )
 
 
-class _fbthrift_SimpleService_sum_i32_list_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_sum_i32_list_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2048,7 +1740,7 @@ class _fbthrift_SimpleService_sum_i32_list_result(metaclass=_fbthrift_python_typ
     )
 
 
-class _fbthrift_SimpleService_sum_i64_list_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_sum_i64_list_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2056,7 +1748,7 @@ class _fbthrift_SimpleService_sum_i64_list_args(metaclass=_fbthrift_python_types
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "numbers",  # name
             "numbers",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2065,7 +1757,7 @@ class _fbthrift_SimpleService_sum_i64_list_args(metaclass=_fbthrift_python_types
     )
 
 
-class _fbthrift_SimpleService_sum_i64_list_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_sum_i64_list_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2081,7 +1773,7 @@ class _fbthrift_SimpleService_sum_i64_list_result(metaclass=_fbthrift_python_typ
     )
 
 
-class _fbthrift_SimpleService_concat_many_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_concat_many_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2089,7 +1781,7 @@ class _fbthrift_SimpleService_concat_many_args(metaclass=_fbthrift_python_types.
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "words",  # name
             "words",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2098,7 +1790,7 @@ class _fbthrift_SimpleService_concat_many_args(metaclass=_fbthrift_python_types.
     )
 
 
-class _fbthrift_SimpleService_concat_many_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_concat_many_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2114,7 +1806,7 @@ class _fbthrift_SimpleService_concat_many_result(metaclass=_fbthrift_python_type
     )
 
 
-class _fbthrift_SimpleService_count_structs_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_count_structs_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2122,7 +1814,7 @@ class _fbthrift_SimpleService_count_structs_args(metaclass=_fbthrift_python_type
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "items",  # name
             "items",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(SimpleStruct)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2131,7 +1823,7 @@ class _fbthrift_SimpleService_count_structs_args(metaclass=_fbthrift_python_type
     )
 
 
-class _fbthrift_SimpleService_count_structs_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_count_structs_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2147,7 +1839,7 @@ class _fbthrift_SimpleService_count_structs_result(metaclass=_fbthrift_python_ty
     )
 
 
-class _fbthrift_SimpleService_sum_set_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_sum_set_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2155,7 +1847,7 @@ class _fbthrift_SimpleService_sum_set_args(metaclass=_fbthrift_python_types.Stru
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "numbers",  # name
             "numbers",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2164,7 +1856,7 @@ class _fbthrift_SimpleService_sum_set_args(metaclass=_fbthrift_python_types.Stru
     )
 
 
-class _fbthrift_SimpleService_sum_set_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_sum_set_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2180,7 +1872,7 @@ class _fbthrift_SimpleService_sum_set_result(metaclass=_fbthrift_python_types.St
     )
 
 
-class _fbthrift_SimpleService_contains_word_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_contains_word_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2188,7 +1880,7 @@ class _fbthrift_SimpleService_contains_word_args(metaclass=_fbthrift_python_type
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "words",  # name
             "words",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2208,7 +1900,7 @@ class _fbthrift_SimpleService_contains_word_args(metaclass=_fbthrift_python_type
     )
 
 
-class _fbthrift_SimpleService_contains_word_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_contains_word_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2224,7 +1916,7 @@ class _fbthrift_SimpleService_contains_word_result(metaclass=_fbthrift_python_ty
     )
 
 
-class _fbthrift_SimpleService_get_map_value_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_map_value_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2232,7 +1924,7 @@ class _fbthrift_SimpleService_get_map_value_args(metaclass=_fbthrift_python_type
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "words",  # name
             "words",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2252,7 +1944,7 @@ class _fbthrift_SimpleService_get_map_value_args(metaclass=_fbthrift_python_type
     )
 
 
-class _fbthrift_SimpleService_get_map_value_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_map_value_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2268,7 +1960,7 @@ class _fbthrift_SimpleService_get_map_value_result(metaclass=_fbthrift_python_ty
     )
 
 
-class _fbthrift_SimpleService_map_length_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_map_length_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2276,7 +1968,7 @@ class _fbthrift_SimpleService_map_length_args(metaclass=_fbthrift_python_types.S
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "items",  # name
             "items",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(SimpleStruct)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2285,7 +1977,7 @@ class _fbthrift_SimpleService_map_length_args(metaclass=_fbthrift_python_types.S
     )
 
 
-class _fbthrift_SimpleService_map_length_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_map_length_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2301,7 +1993,7 @@ class _fbthrift_SimpleService_map_length_result(metaclass=_fbthrift_python_types
     )
 
 
-class _fbthrift_SimpleService_sum_map_values_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_sum_map_values_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2309,7 +2001,7 @@ class _fbthrift_SimpleService_sum_map_values_args(metaclass=_fbthrift_python_typ
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "items",  # name
             "items",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i16),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2318,7 +2010,7 @@ class _fbthrift_SimpleService_sum_map_values_args(metaclass=_fbthrift_python_typ
     )
 
 
-class _fbthrift_SimpleService_sum_map_values_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_sum_map_values_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2334,7 +2026,7 @@ class _fbthrift_SimpleService_sum_map_values_result(metaclass=_fbthrift_python_t
     )
 
 
-class _fbthrift_SimpleService_complex_sum_i32_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_complex_sum_i32_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2342,7 +2034,7 @@ class _fbthrift_SimpleService_complex_sum_i32_args(metaclass=_fbthrift_python_ty
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "counter",  # name
             "counter",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(ComplexStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(ComplexStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2351,7 +2043,7 @@ class _fbthrift_SimpleService_complex_sum_i32_args(metaclass=_fbthrift_python_ty
     )
 
 
-class _fbthrift_SimpleService_complex_sum_i32_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_complex_sum_i32_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2367,7 +2059,7 @@ class _fbthrift_SimpleService_complex_sum_i32_result(metaclass=_fbthrift_python_
     )
 
 
-class _fbthrift_SimpleService_repeat_name_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_repeat_name_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2375,7 +2067,7 @@ class _fbthrift_SimpleService_repeat_name_args(metaclass=_fbthrift_python_types.
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "counter",  # name
             "counter",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(ComplexStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(ComplexStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2384,7 +2076,7 @@ class _fbthrift_SimpleService_repeat_name_args(metaclass=_fbthrift_python_types.
     )
 
 
-class _fbthrift_SimpleService_repeat_name_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_repeat_name_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2400,13 +2092,13 @@ class _fbthrift_SimpleService_repeat_name_result(metaclass=_fbthrift_python_type
     )
 
 
-class _fbthrift_SimpleService_get_struct_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_struct_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
-class _fbthrift_SimpleService_get_struct_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_struct_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2414,7 +2106,7 @@ class _fbthrift_SimpleService_get_struct_result(metaclass=_fbthrift_python_types
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2422,7 +2114,7 @@ class _fbthrift_SimpleService_get_struct_result(metaclass=_fbthrift_python_types
     )
 
 
-class _fbthrift_SimpleService_fib_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_fib_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2439,7 +2131,7 @@ class _fbthrift_SimpleService_fib_args(metaclass=_fbthrift_python_types.StructMe
     )
 
 
-class _fbthrift_SimpleService_fib_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_fib_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2447,7 +2139,7 @@ class _fbthrift_SimpleService_fib_result(metaclass=_fbthrift_python_types.Struct
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2455,7 +2147,7 @@ class _fbthrift_SimpleService_fib_result(metaclass=_fbthrift_python_types.Struct
     )
 
 
-class _fbthrift_SimpleService_unique_words_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_unique_words_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2463,7 +2155,7 @@ class _fbthrift_SimpleService_unique_words_args(metaclass=_fbthrift_python_types
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "words",  # name
             "words",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2472,7 +2164,7 @@ class _fbthrift_SimpleService_unique_words_args(metaclass=_fbthrift_python_types
     )
 
 
-class _fbthrift_SimpleService_unique_words_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_unique_words_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2480,7 +2172,7 @@ class _fbthrift_SimpleService_unique_words_result(metaclass=_fbthrift_python_typ
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2488,7 +2180,7 @@ class _fbthrift_SimpleService_unique_words_result(metaclass=_fbthrift_python_typ
     )
 
 
-class _fbthrift_SimpleService_words_count_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_words_count_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2496,7 +2188,7 @@ class _fbthrift_SimpleService_words_count_args(metaclass=_fbthrift_python_types.
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "words",  # name
             "words",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2505,7 +2197,7 @@ class _fbthrift_SimpleService_words_count_args(metaclass=_fbthrift_python_types.
     )
 
 
-class _fbthrift_SimpleService_words_count_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_words_count_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2513,7 +2205,7 @@ class _fbthrift_SimpleService_words_count_result(metaclass=_fbthrift_python_type
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i16),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2521,7 +2213,7 @@ class _fbthrift_SimpleService_words_count_result(metaclass=_fbthrift_python_type
     )
 
 
-class _fbthrift_SimpleService_set_enum_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_set_enum_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2538,7 +2230,7 @@ class _fbthrift_SimpleService_set_enum_args(metaclass=_fbthrift_python_types.Str
     )
 
 
-class _fbthrift_SimpleService_set_enum_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_set_enum_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2554,7 +2246,7 @@ class _fbthrift_SimpleService_set_enum_result(metaclass=_fbthrift_python_types.S
     )
 
 
-class _fbthrift_SimpleService_list_of_lists_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_list_of_lists_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2582,7 +2274,7 @@ class _fbthrift_SimpleService_list_of_lists_args(metaclass=_fbthrift_python_type
     )
 
 
-class _fbthrift_SimpleService_list_of_lists_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_list_of_lists_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2590,7 +2282,7 @@ class _fbthrift_SimpleService_list_of_lists_result(metaclass=_fbthrift_python_ty
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2598,7 +2290,7 @@ class _fbthrift_SimpleService_list_of_lists_result(metaclass=_fbthrift_python_ty
     )
 
 
-class _fbthrift_SimpleService_word_character_frequency_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_word_character_frequency_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2615,7 +2307,7 @@ class _fbthrift_SimpleService_word_character_frequency_args(metaclass=_fbthrift_
     )
 
 
-class _fbthrift_SimpleService_word_character_frequency_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_word_character_frequency_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2623,7 +2315,7 @@ class _fbthrift_SimpleService_word_character_frequency_result(metaclass=_fbthrif
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2631,7 +2323,7 @@ class _fbthrift_SimpleService_word_character_frequency_result(metaclass=_fbthrif
     )
 
 
-class _fbthrift_SimpleService_list_of_sets_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_list_of_sets_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2648,7 +2340,7 @@ class _fbthrift_SimpleService_list_of_sets_args(metaclass=_fbthrift_python_types
     )
 
 
-class _fbthrift_SimpleService_list_of_sets_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_list_of_sets_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2656,7 +2348,7 @@ class _fbthrift_SimpleService_list_of_sets_result(metaclass=_fbthrift_python_typ
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_string)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2664,7 +2356,7 @@ class _fbthrift_SimpleService_list_of_sets_result(metaclass=_fbthrift_python_typ
     )
 
 
-class _fbthrift_SimpleService_nested_map_argument_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_nested_map_argument_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2672,7 +2364,7 @@ class _fbthrift_SimpleService_nested_map_argument_args(metaclass=_fbthrift_pytho
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "struct_map",  # name
             "struct_map",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(SimpleStruct))),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct))),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2681,7 +2373,7 @@ class _fbthrift_SimpleService_nested_map_argument_args(metaclass=_fbthrift_pytho
     )
 
 
-class _fbthrift_SimpleService_nested_map_argument_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_nested_map_argument_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2697,7 +2389,7 @@ class _fbthrift_SimpleService_nested_map_argument_result(metaclass=_fbthrift_pyt
     )
 
 
-class _fbthrift_SimpleService_make_sentence_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_make_sentence_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2705,7 +2397,7 @@ class _fbthrift_SimpleService_make_sentence_args(metaclass=_fbthrift_python_type
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "word_chars",  # name
             "word_chars",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_string)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2714,7 +2406,7 @@ class _fbthrift_SimpleService_make_sentence_args(metaclass=_fbthrift_python_type
     )
 
 
-class _fbthrift_SimpleService_make_sentence_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_make_sentence_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2730,7 +2422,7 @@ class _fbthrift_SimpleService_make_sentence_result(metaclass=_fbthrift_python_ty
     )
 
 
-class _fbthrift_SimpleService_get_union_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_union_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2738,7 +2430,7 @@ class _fbthrift_SimpleService_get_union_args(metaclass=_fbthrift_python_types.St
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "sets",  # name
             "sets",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2747,7 +2439,7 @@ class _fbthrift_SimpleService_get_union_args(metaclass=_fbthrift_python_types.St
     )
 
 
-class _fbthrift_SimpleService_get_union_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_union_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2755,7 +2447,7 @@ class _fbthrift_SimpleService_get_union_result(metaclass=_fbthrift_python_types.
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2763,7 +2455,7 @@ class _fbthrift_SimpleService_get_union_result(metaclass=_fbthrift_python_types.
     )
 
 
-class _fbthrift_SimpleService_get_keys_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_keys_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2771,7 +2463,7 @@ class _fbthrift_SimpleService_get_keys_args(metaclass=_fbthrift_python_types.Str
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "string_map",  # name
             "string_map",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2780,7 +2472,7 @@ class _fbthrift_SimpleService_get_keys_args(metaclass=_fbthrift_python_types.Str
     )
 
 
-class _fbthrift_SimpleService_get_keys_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_keys_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2788,7 +2480,7 @@ class _fbthrift_SimpleService_get_keys_result(metaclass=_fbthrift_python_types.S
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2796,7 +2488,7 @@ class _fbthrift_SimpleService_get_keys_result(metaclass=_fbthrift_python_types.S
     )
 
 
-class _fbthrift_SimpleService_lookup_double_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_lookup_double_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2813,7 +2505,7 @@ class _fbthrift_SimpleService_lookup_double_args(metaclass=_fbthrift_python_type
     )
 
 
-class _fbthrift_SimpleService_lookup_double_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_lookup_double_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2829,7 +2521,7 @@ class _fbthrift_SimpleService_lookup_double_result(metaclass=_fbthrift_python_ty
     )
 
 
-class _fbthrift_SimpleService_retrieve_binary_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_retrieve_binary_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2846,7 +2538,7 @@ class _fbthrift_SimpleService_retrieve_binary_args(metaclass=_fbthrift_python_ty
     )
 
 
-class _fbthrift_SimpleService_retrieve_binary_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_retrieve_binary_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2862,7 +2554,7 @@ class _fbthrift_SimpleService_retrieve_binary_result(metaclass=_fbthrift_python_
     )
 
 
-class _fbthrift_SimpleService_contain_binary_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_contain_binary_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2870,7 +2562,7 @@ class _fbthrift_SimpleService_contain_binary_args(metaclass=_fbthrift_python_typ
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "binaries",  # name
             "binaries",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_binary),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_binary),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2879,7 +2571,7 @@ class _fbthrift_SimpleService_contain_binary_args(metaclass=_fbthrift_python_typ
     )
 
 
-class _fbthrift_SimpleService_contain_binary_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_contain_binary_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2887,7 +2579,7 @@ class _fbthrift_SimpleService_contain_binary_result(metaclass=_fbthrift_python_t
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_binary),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_binary),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2895,7 +2587,7 @@ class _fbthrift_SimpleService_contain_binary_result(metaclass=_fbthrift_python_t
     )
 
 
-class _fbthrift_SimpleService_contain_enum_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_contain_enum_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2903,7 +2595,7 @@ class _fbthrift_SimpleService_contain_enum_args(metaclass=_fbthrift_python_types
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "the_enum",  # name
             "the_enum",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.EnumTypeInfo(AnEnum)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.EnumTypeInfo(AnEnum)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2912,7 +2604,7 @@ class _fbthrift_SimpleService_contain_enum_args(metaclass=_fbthrift_python_types
     )
 
 
-class _fbthrift_SimpleService_contain_enum_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_contain_enum_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2920,7 +2612,7 @@ class _fbthrift_SimpleService_contain_enum_result(metaclass=_fbthrift_python_typ
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.EnumTypeInfo(AnEnum)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.EnumTypeInfo(AnEnum)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2928,7 +2620,7 @@ class _fbthrift_SimpleService_contain_enum_result(metaclass=_fbthrift_python_typ
     )
 
 
-class _fbthrift_SimpleService_get_binary_union_struct_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_binary_union_struct_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2936,7 +2628,7 @@ class _fbthrift_SimpleService_get_binary_union_struct_args(metaclass=_fbthrift_p
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "u",  # name
             "u",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(BinaryUnion),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(BinaryUnion),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2945,7 +2637,7 @@ class _fbthrift_SimpleService_get_binary_union_struct_args(metaclass=_fbthrift_p
     )
 
 
-class _fbthrift_SimpleService_get_binary_union_struct_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_binary_union_struct_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2953,7 +2645,7 @@ class _fbthrift_SimpleService_get_binary_union_struct_result(metaclass=_fbthrift
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_types.StructTypeInfo(BinaryUnionStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(BinaryUnionStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2961,13 +2653,13 @@ class _fbthrift_SimpleService_get_binary_union_struct_result(metaclass=_fbthrift
     )
 
 
-class _fbthrift_SimpleService_get_struct_hidden_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_struct_hidden_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
-class _fbthrift_SimpleService_get_struct_hidden_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_SimpleService_get_struct_hidden_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -2975,7 +2667,7 @@ class _fbthrift_SimpleService_get_struct_hidden_result(metaclass=_fbthrift_pytho
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -2985,13 +2677,13 @@ class _fbthrift_SimpleService_get_struct_hidden_result(metaclass=_fbthrift_pytho
 
 
 
-class _fbthrift_DerivedService_get_six_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_DerivedService_get_six_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
-class _fbthrift_DerivedService_get_six_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_DerivedService_get_six_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -3009,13 +2701,13 @@ class _fbthrift_DerivedService_get_six_result(metaclass=_fbthrift_python_types.S
 
 
 
-class _fbthrift_RederivedService_get_seven_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_RederivedService_get_seven_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
-class _fbthrift_RederivedService_get_seven_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_RederivedService_get_seven_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -3032,7 +2724,7 @@ class _fbthrift_RederivedService_get_seven_result(metaclass=_fbthrift_python_typ
 
 
 
-_fbthrift_python_types.fill_specs(
+_fbthrift_python_mutable_types.fill_specs(
     _fbthrift_SimpleService_get_five_args,
     _fbthrift_SimpleService_get_five_result,
     _fbthrift_SimpleService_add_five_args,

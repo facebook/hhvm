@@ -73,7 +73,7 @@ class SimpleException(metaclass=_fbthrift_python_mutable_exceptions.MutableGener
         return self
 
     def _to_py3(self):
-        return self._to_python()
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -128,7 +128,7 @@ class OptionalRefStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMe
         return self
 
     def _to_py3(self):
-        return self._to_python()
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -306,7 +306,7 @@ class SimpleStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        return self._to_python()
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -396,7 +396,7 @@ class Float32Struct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        return self._to_python()
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -475,7 +475,7 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_mutable_types.MutableStr
         return self
 
     def _to_py3(self):
-        return self._to_python()
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -535,7 +535,7 @@ class AdaptedUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         return self
 
     def _to_py3(self):
-        return self._to_python()
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -595,7 +595,7 @@ class HiddenException(metaclass=_fbthrift_python_mutable_exceptions.MutableGener
         return self
 
     def _to_py3(self):
-        return self._to_python()
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -738,7 +738,7 @@ class ComplexStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        return self._to_python()
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -798,7 +798,7 @@ class BinaryUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         return self
 
     def _to_py3(self):
-        return self._to_python()
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -855,7 +855,7 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMe
         return self
 
     def _to_py3(self):
-        return self._to_python()
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -1000,7 +1000,7 @@ class CustomFields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        return self._to_python()
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -1145,7 +1145,7 @@ class CustomTypedefFields(metaclass=_fbthrift_python_mutable_types.MutableStruct
         return self
 
     def _to_py3(self):
-        return self._to_python()
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -1290,7 +1290,7 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_mutable_types.MutableStruc
         return self
 
     def _to_py3(self):
-        return self._to_python()
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

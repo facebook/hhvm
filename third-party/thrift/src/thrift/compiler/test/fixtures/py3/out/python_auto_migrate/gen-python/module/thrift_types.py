@@ -55,13 +55,9 @@ class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_thrift_uri__():
         return None
 
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\x97\x15\x4a\x60\x92\x73\x4c\xd1\x21\xa8\xa2\x17\x30\x87\x1f\xb3"
-
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -69,8 +65,9 @@ class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     @staticmethod
     def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__SimpleException() if _mod is not None else None
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__SimpleException()
 
     def _to_python(self):
         return self
@@ -82,10 +79,7 @@ class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.SimpleException, self)
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.SimpleException, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -121,13 +115,9 @@ class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xba\xe1\x90\xb2\xe4\x06\xc3\x97\x98\xf3\xa0\x9e\x1c\x91\x4e\x9e"
-
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -135,8 +125,9 @@ class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__OptionalRefStruct() if _mod is not None else None
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__OptionalRefStruct()
 
     def _to_python(self):
         return self
@@ -148,10 +139,7 @@ class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.OptionalRefStruct, self)
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.OptionalRefStruct, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -310,13 +298,9 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xfa\x91\xc1\x59\xd6\xaa\xcc\x88\xc5\x4b\xf0\xda\x0f\x15\x8d\xfe"
-
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -324,8 +308,9 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__SimpleStruct() if _mod is not None else None
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__SimpleStruct()
 
     def _to_python(self):
         return self
@@ -337,10 +322,7 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.SimpleStruct, self)
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.SimpleStruct, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -411,13 +393,9 @@ class Float32Struct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xf5\xbf\xea\x9c\xd4\x74\xd5\x46\x00\x3a\xf1\xda\xbe\x2c\x48\x07"
-
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -425,8 +403,9 @@ class Float32Struct(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__Float32Struct() if _mod is not None else None
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__Float32Struct()
 
     def _to_python(self):
         return self
@@ -438,10 +417,7 @@ class Float32Struct(metaclass=_fbthrift_python_types.StructMeta):
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.Float32Struct, self)
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.Float32Struct, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -501,13 +477,9 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xd5\xa3\xd3\x5c\x3c\xe0\xd4\xbf\x9f\x00\x0a\x54\x95\x39\xb3\x06"
-
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -515,8 +487,9 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__HiddenTypeFieldsStruct() if _mod is not None else None
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__HiddenTypeFieldsStruct()
 
     def _to_python(self):
         return self
@@ -528,10 +501,7 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.HiddenTypeFieldsStruct, self)
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.HiddenTypeFieldsStruct, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -572,13 +542,9 @@ class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_thrift_uri__():
         return None
 
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xef\x71\xb8\xf3\x12\xf0\x7d\x75\xdc\xd4\xe7\x20\x5d\xbc\x34\x58"
-
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -586,8 +552,9 @@ class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
     @staticmethod
     def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__AdaptedUnion() if _mod is not None else None
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__AdaptedUnion()
 
     def _to_python(self):
         return self
@@ -599,10 +566,7 @@ class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.AdaptedUnion, self)
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.AdaptedUnion, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -643,13 +607,9 @@ class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_thrift_uri__():
         return None
 
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xfd\xd9\x57\x91\x2c\x45\xf5\x08\x28\x5a\x92\x3b\xec\x3f\x5a\x91"
-
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -657,8 +617,9 @@ class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     @staticmethod
     def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__HiddenException() if _mod is not None else None
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__HiddenException()
 
     def _to_python(self):
         return self
@@ -670,10 +631,7 @@ class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.HiddenException, self)
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.HiddenException, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -797,13 +755,9 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\x4c\x42\x6c\x79\x57\x87\x49\x52\xff\x31\x47\x46\x2b\x3a\xdf\xff"
-
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -811,8 +765,9 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__ComplexStruct() if _mod is not None else None
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__ComplexStruct()
 
     def _to_python(self):
         return self
@@ -824,10 +779,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.ComplexStruct, self)
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.ComplexStruct, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -868,13 +820,9 @@ class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_thrift_uri__():
         return None
 
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xe3\x7f\x0e\x0e\xbb\x87\x55\x0a\x80\x67\xec\x27\x28\xa7\x74\x06"
-
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -882,8 +830,9 @@ class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
     @staticmethod
     def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__BinaryUnion() if _mod is not None else None
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__BinaryUnion()
 
     def _to_python(self):
         return self
@@ -895,10 +844,7 @@ class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.BinaryUnion, self)
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.BinaryUnion, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -936,13 +882,9 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\x43\xf0\xc2\x26\x1c\xf8\xdf\x7b\xd4\x33\x60\xd1\xd6\xd8\xd4\xe6"
-
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -950,8 +892,9 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__BinaryUnionStruct() if _mod is not None else None
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__BinaryUnionStruct()
 
     def _to_python(self):
         return self
@@ -963,10 +906,7 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.BinaryUnionStruct, self)
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.BinaryUnionStruct, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -1092,13 +1032,9 @@ class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xf5\xeb\xc0\xe7\x00\x68\x73\xfb\x81\x02\xc3\x6d\x57\x30\x1c\x60"
-
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -1106,8 +1042,9 @@ class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__CustomFields() if _mod is not None else None
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__CustomFields()
 
     def _to_python(self):
         return self
@@ -1119,10 +1056,7 @@ class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.CustomFields, self)
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.CustomFields, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -1248,13 +1182,9 @@ class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\x41\x9a\xb0\x02\x47\xa8\x02\xe9\xf3\x40\xa0\x48\xa9\xfa\x7b\xf2"
-
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -1262,8 +1192,9 @@ class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__CustomTypedefFields() if _mod is not None else None
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__CustomTypedefFields()
 
     def _to_python(self):
         return self
@@ -1275,10 +1206,7 @@ class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.CustomTypedefFields, self)
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.CustomTypedefFields, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -1404,13 +1332,9 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\x3d\x90\x71\x04\x92\x58\x1b\x87\x06\x89\x04\x4e\x26\xce\x05\x19"
-
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -1418,8 +1342,9 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_reflection__():
-        _mod = _fbthrift_get_reflection_module()
-        return _mod.get_reflection__AdaptedTypedefFields() if _mod is not None else None
+        import importlib
+        types_reflection = importlib.import_module("module.types_reflection")
+        return types_reflection.get_reflection__AdaptedTypedefFields()
 
     def _to_python(self):
         return self
@@ -1431,10 +1356,7 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.AdaptedTypedefFields, self)
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.AdaptedTypedefFields, self)
+        return self
 
     def _to_py_deprecated(self):
         import importlib
@@ -1510,12 +1432,6 @@ def _fbthrift_metadata__struct_CustomTypedefFields():
 def _fbthrift_metadata__struct_AdaptedTypedefFields():
     return _fbthrift__module__thrift_metadata.gen_metadata_struct_AdaptedTypedefFields()
 
-def _fbthrift_get_reflection_module():
-    try:
-        import importlib
-        return importlib.import_module("module.thrift_reflection")
-    except ImportError:
-        return None
 
 
 _fbthrift_all_structs = [

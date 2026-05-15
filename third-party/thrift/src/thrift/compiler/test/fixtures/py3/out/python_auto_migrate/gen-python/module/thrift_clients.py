@@ -21,12 +21,9 @@ from fbcode.thrift.python.client import (
 )
 from fbcode.thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
 from fbcode.thrift.python.common import RpcOptions
-import fbcode.thrift.python.mutable_containers as _fbthrift_python_mutable_containers
-import fbcode.thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
-import fbcode.thrift.python.mutable_types as _fbthrift_python_mutable_types
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 import fbcode.thrift.python.types as _fbthrift_python_types
-import module.thrift_mutable_types as _fbthrift__module__thrift_mutable_types
+import module.thrift_types as _fbthrift__module__thrift_types
 import module.thrift_metadata as _fbthrift__module__thrift_metadata
 
 class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleService.Sync"]):
@@ -39,10 +36,6 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
         return None
-
-    @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\x34\x9d\x3a\x35\x8a\x49\x1f\xd2\xe4\xfd\x03\x8c\x2a\x57\xa0\x57"
 
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -63,10 +56,6 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             return None
 
         @staticmethod
-        def __get_thrift_definition_key__() -> bytes:
-            return b"\x34\x9d\x3a\x35\x8a\x49\x1f\xd2\xe4\xfd\x03\x8c\x2a\x57\xa0\x57"
-
-        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__module__thrift_metadata.gen_metadata_service_SimpleService()
 
@@ -78,12 +67,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_five",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_five_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_five_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_five_args(),
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_five_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -102,13 +90,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "add_five",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_add_five_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_add_five_args(
                     num=num,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_add_five_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_add_five_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -126,12 +113,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "do_nothing",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_do_nothing_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_do_nothing_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_do_nothing_args(),
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_do_nothing_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
 
         async def concat(
@@ -144,14 +130,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "concat",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_concat_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_concat_args(
                     first=first,
                     second=second,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_concat_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_concat_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -163,20 +148,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def get_value(
             self,
-            simple_struct: _fbthrift__module__thrift_mutable_types.SimpleStruct,
+            simple_struct: _fbthrift__module__thrift_types.SimpleStruct,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_value",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_value_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_value_args(
                     simple_struct=simple_struct,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_value_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_value_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -195,13 +179,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "negate",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_negate_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_negate_args(
                     input=input,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_negate_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_negate_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -220,13 +203,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "tiny",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_tiny_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_tiny_args(
                     input=input,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_tiny_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_tiny_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -245,13 +227,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "small",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_small_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_small_args(
                     input=input,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_small_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_small_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -270,13 +251,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "big",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_big_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_big_args(
                     input=input,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_big_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_big_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -295,13 +275,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "two",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_two_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_two_args(
                     input=input,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_two_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_two_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -319,12 +298,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "expected_exception",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_expected_exception_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_expected_exception_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_expected_exception_args(),
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_expected_exception_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__se`
             if (_fbthrift_ex := _fbthrift_resp._ex0__se) is not None:
@@ -338,12 +316,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "unexpected_exception",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_unexpected_exception_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_unexpected_exception_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_unexpected_exception_args(),
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_unexpected_exception_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -355,20 +332,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def sum_i16_list(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableList[builtins.int] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            numbers: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_i16_list",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_i16_list_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i16_list_args(
                     numbers=numbers,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_i16_list_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i16_list_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -380,20 +356,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def sum_i32_list(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableList[builtins.int] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            numbers: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_i32_list",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_i32_list_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i32_list_args(
                     numbers=numbers,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_i32_list_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i32_list_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -405,20 +380,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def sum_i64_list(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableList[builtins.int] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            numbers: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_i64_list",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_i64_list_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i64_list_args(
                     numbers=numbers,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_i64_list_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i64_list_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -430,20 +404,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def concat_many(
             self,
-            words: _fbthrift_python_mutable_containers.MutableList[builtins.str] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            words: _typing.Sequence[builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.str:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "concat_many",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_concat_many_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_concat_many_args(
                     words=words,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_concat_many_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_concat_many_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -455,20 +428,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def count_structs(
             self,
-            items: _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.SimpleStruct] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            items: _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "count_structs",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_count_structs_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_count_structs_args(
                     items=items,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_count_structs_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_count_structs_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -480,20 +452,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def sum_set(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableSet[builtins.int] | _fbthrift_python_mutable_types._ThriftSetWrapper,
+            numbers: _typing.AbstractSet[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_set",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_set_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_set_args(
                     numbers=numbers,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_set_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_set_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -505,7 +476,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def contains_word(
             self,
-            words: _fbthrift_python_mutable_containers.MutableSet[builtins.str] | _fbthrift_python_mutable_types._ThriftSetWrapper,
+            words: _typing.AbstractSet[builtins.str],
             word: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
@@ -513,14 +484,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "contains_word",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_contains_word_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_contains_word_args(
                     words=words,
                     word=word,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_contains_word_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_contains_word_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -532,7 +502,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def get_map_value(
             self,
-            words: _fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.str] | _fbthrift_python_mutable_types._ThriftMapWrapper,
+            words: _typing.Mapping[builtins.str, builtins.str],
             key: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
@@ -540,14 +510,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_map_value",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_map_value_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_map_value_args(
                     words=words,
                     key=key,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_map_value_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_map_value_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -559,20 +528,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def map_length(
             self,
-            items: _fbthrift_python_mutable_containers.MutableMap[builtins.str, _fbthrift__module__thrift_mutable_types.SimpleStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper,
+            items: _typing.Mapping[builtins.str, _fbthrift__module__thrift_types.SimpleStruct],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "map_length",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_map_length_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_map_length_args(
                     items=items,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_map_length_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_map_length_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -584,20 +552,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def sum_map_values(
             self,
-            items: _fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.int] | _fbthrift_python_mutable_types._ThriftMapWrapper,
+            items: _typing.Mapping[builtins.str, builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_map_values",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_map_values_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_map_values_args(
                     items=items,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_map_values_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_map_values_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -609,20 +576,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def complex_sum_i32(
             self,
-            counter: _fbthrift__module__thrift_mutable_types.ComplexStruct,
+            counter: _fbthrift__module__thrift_types.ComplexStruct,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "complex_sum_i32",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_complex_sum_i32_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_complex_sum_i32_args(
                     counter=counter,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_complex_sum_i32_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_complex_sum_i32_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -634,20 +600,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def repeat_name(
             self,
-            counter: _fbthrift__module__thrift_mutable_types.ComplexStruct,
+            counter: _fbthrift__module__thrift_types.ComplexStruct,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.str:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "repeat_name",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_repeat_name_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_repeat_name_args(
                     counter=counter,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_repeat_name_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_repeat_name_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -661,16 +626,15 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift__module__thrift_mutable_types.SimpleStruct:
+        ) -> _fbthrift__module__thrift_types.SimpleStruct:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_struct",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_struct_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_struct_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_struct_args(),
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_struct_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -685,17 +649,16 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             n: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableList[builtins.int]:
+        ) -> _fbthrift_python_types.ImmutableList[builtins.int]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "fib",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_fib_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_fib_args(
                     n=n,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_fib_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_fib_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -707,20 +670,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def unique_words(
             self,
-            words: _fbthrift_python_mutable_containers.MutableList[builtins.str] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            words: _typing.Sequence[builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableSet[builtins.str]:
+        ) -> _fbthrift_python_types.ImmutableSet[builtins.str]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "unique_words",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_unique_words_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_unique_words_args(
                     words=words,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_unique_words_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_unique_words_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -732,20 +694,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def words_count(
             self,
-            words: _fbthrift_python_mutable_containers.MutableList[builtins.str] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            words: _typing.Sequence[builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.int]:
+        ) -> _fbthrift_python_types.ImmutableMap[builtins.str, builtins.int]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "words_count",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_words_count_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_words_count_args(
                     words=words,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_words_count_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_words_count_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -757,20 +718,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def set_enum(
             self,
-            in_enum: _fbthrift__module__thrift_mutable_types.AnEnum,
+            in_enum: _fbthrift__module__thrift_types.AnEnum,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift__module__thrift_mutable_types.AnEnum:
+        ) -> _fbthrift__module__thrift_types.AnEnum:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "set_enum",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_set_enum_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_set_enum_args(
                     in_enum=in_enum,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_set_enum_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_set_enum_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -786,18 +746,17 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             num_items: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableList[builtins.int]]:
+        ) -> _fbthrift_python_types.ImmutableList[_fbthrift_python_types.ImmutableList[builtins.int]]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "list_of_lists",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_list_of_lists_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_list_of_lists_args(
                     num_lists=num_lists,
                     num_items=num_items,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_list_of_lists_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_list_of_lists_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -812,17 +771,16 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             sentence: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableMap[builtins.str, _fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.int]]:
+        ) -> _fbthrift_python_types.ImmutableMap[builtins.str, _fbthrift_python_types.ImmutableMap[builtins.str, builtins.int]]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "word_character_frequency",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_word_character_frequency_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_word_character_frequency_args(
                     sentence=sentence,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_word_character_frequency_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_word_character_frequency_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -837,17 +795,16 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             some_words: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableSet[builtins.str]]:
+        ) -> _fbthrift_python_types.ImmutableList[_fbthrift_python_types.ImmutableSet[builtins.str]]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "list_of_sets",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_list_of_sets_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_list_of_sets_args(
                     some_words=some_words,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_list_of_sets_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_list_of_sets_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -859,20 +816,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def nested_map_argument(
             self,
-            struct_map: _fbthrift_python_mutable_containers.MutableMap[builtins.str, _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.SimpleStruct]] | _fbthrift_python_mutable_types._ThriftMapWrapper,
+            struct_map: _typing.Mapping[builtins.str, _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "nested_map_argument",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_nested_map_argument_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_nested_map_argument_args(
                     struct_map=struct_map,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_nested_map_argument_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_nested_map_argument_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -884,20 +840,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def make_sentence(
             self,
-            word_chars: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableList[builtins.str]] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            word_chars: _typing.Sequence[_typing.Sequence[builtins.str]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.str:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "make_sentence",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_make_sentence_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_make_sentence_args(
                     word_chars=word_chars,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_make_sentence_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_make_sentence_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -909,20 +864,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def get_union(
             self,
-            sets: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableSet[builtins.int]] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            sets: _typing.Sequence[_typing.AbstractSet[builtins.int]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableSet[builtins.int]:
+        ) -> _fbthrift_python_types.ImmutableSet[builtins.int]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_union",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_union_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_union_args(
                     sets=sets,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_union_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_union_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -934,20 +888,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def get_keys(
             self,
-            string_map: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.str]] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            string_map: _typing.Sequence[_typing.Mapping[builtins.str, builtins.str]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableSet[builtins.str]:
+        ) -> _fbthrift_python_types.ImmutableSet[builtins.str]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_keys",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_keys_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_keys_args(
                     string_map=string_map,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_keys_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_keys_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -966,13 +919,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "lookup_double",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_lookup_double_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_lookup_double_args(
                     key=key,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_lookup_double_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_lookup_double_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -991,13 +943,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "retrieve_binary",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_retrieve_binary_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_retrieve_binary_args(
                     something=something,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_retrieve_binary_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_retrieve_binary_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1009,20 +960,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def contain_binary(
             self,
-            binaries: _fbthrift_python_mutable_containers.MutableList[builtins.bytes] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            binaries: _typing.Sequence[builtins.bytes],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableSet[builtins.bytes]:
+        ) -> _fbthrift_python_types.ImmutableSet[builtins.bytes]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "contain_binary",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_contain_binary_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_contain_binary_args(
                     binaries=binaries,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_contain_binary_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_contain_binary_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1034,20 +984,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def contain_enum(
             self,
-            the_enum: _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.AnEnum] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            the_enum: _typing.Sequence[_fbthrift__module__thrift_types.AnEnum],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.AnEnum]:
+        ) -> _fbthrift_python_types.ImmutableList[_fbthrift__module__thrift_types.AnEnum]:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "contain_enum",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_contain_enum_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_contain_enum_args(
                     the_enum=the_enum,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_contain_enum_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_contain_enum_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1059,20 +1008,19 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         async def get_binary_union_struct(
             self,
-            u: _fbthrift__module__thrift_mutable_types.BinaryUnion,
+            u: _fbthrift__module__thrift_types.BinaryUnion,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift__module__thrift_mutable_types.BinaryUnionStruct:
+        ) -> _fbthrift__module__thrift_types.BinaryUnionStruct:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_binary_union_struct",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_binary_union_struct_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_binary_union_struct_args(
                     u=u,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_binary_union_struct_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_binary_union_struct_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1086,16 +1034,15 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift__module__thrift_mutable_types.SimpleStruct:
+        ) -> _fbthrift__module__thrift_types.SimpleStruct:
             _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_struct_hidden",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_struct_hidden_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_struct_hidden_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_struct_hidden_args(),
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_struct_hidden_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1190,6 +1137,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     get_binary_union_struct = Async.get_binary_union_struct
     # pyre-ignore[4]: Missing annotation.
     get_struct_hidden = Async.get_struct_hidden
+    async def __aenter__(self) -> "SimpleService.Async":
+        raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
+    async def __aexit__(self) -> None:
+        raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
 
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -1199,10 +1150,6 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
-
-        @staticmethod
-        def __get_thrift_definition_key__() -> bytes:
-            return b"\x34\x9d\x3a\x35\x8a\x49\x1f\xd2\xe4\xfd\x03\x8c\x2a\x57\xa0\x57"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1216,11 +1163,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "get_five",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_five_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_five_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_five_args(),
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_five_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1239,12 +1185,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "add_five",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_add_five_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_add_five_args(
                     num=num,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_add_five_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_add_five_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1262,11 +1207,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "do_nothing",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_do_nothing_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_do_nothing_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_do_nothing_args(),
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_do_nothing_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
 
         def concat(
@@ -1279,13 +1223,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "concat",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_concat_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_concat_args(
                     first=first,
                     second=second,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_concat_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_concat_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1297,19 +1240,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def get_value(
             self,
-            simple_struct: _fbthrift__module__thrift_mutable_types.SimpleStruct,
+            simple_struct: _fbthrift__module__thrift_types.SimpleStruct,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "get_value",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_value_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_value_args(
                     simple_struct=simple_struct,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_value_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_value_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1328,12 +1270,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "negate",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_negate_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_negate_args(
                     input=input,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_negate_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_negate_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1352,12 +1293,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "tiny",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_tiny_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_tiny_args(
                     input=input,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_tiny_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_tiny_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1376,12 +1316,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "small",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_small_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_small_args(
                     input=input,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_small_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_small_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1400,12 +1339,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "big",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_big_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_big_args(
                     input=input,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_big_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_big_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1424,12 +1362,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "two",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_two_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_two_args(
                     input=input,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_two_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_two_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1447,11 +1384,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "expected_exception",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_expected_exception_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_expected_exception_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_expected_exception_args(),
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_expected_exception_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__se`
             if (_fbthrift_ex := _fbthrift_resp._ex0__se) is not None:
@@ -1465,11 +1401,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "unexpected_exception",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_unexpected_exception_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_unexpected_exception_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_unexpected_exception_args(),
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_unexpected_exception_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1481,19 +1416,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def sum_i16_list(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableList[builtins.int] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            numbers: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "sum_i16_list",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_i16_list_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i16_list_args(
                     numbers=numbers,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_i16_list_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i16_list_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1505,19 +1439,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def sum_i32_list(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableList[builtins.int] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            numbers: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "sum_i32_list",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_i32_list_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i32_list_args(
                     numbers=numbers,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_i32_list_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i32_list_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1529,19 +1462,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def sum_i64_list(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableList[builtins.int] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            numbers: _typing.Sequence[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "sum_i64_list",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_i64_list_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i64_list_args(
                     numbers=numbers,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_i64_list_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i64_list_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1553,19 +1485,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def concat_many(
             self,
-            words: _fbthrift_python_mutable_containers.MutableList[builtins.str] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            words: _typing.Sequence[builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.str:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "concat_many",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_concat_many_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_concat_many_args(
                     words=words,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_concat_many_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_concat_many_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1577,19 +1508,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def count_structs(
             self,
-            items: _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.SimpleStruct] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            items: _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "count_structs",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_count_structs_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_count_structs_args(
                     items=items,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_count_structs_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_count_structs_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1601,19 +1531,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def sum_set(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableSet[builtins.int] | _fbthrift_python_mutable_types._ThriftSetWrapper,
+            numbers: _typing.AbstractSet[builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "sum_set",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_set_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_set_args(
                     numbers=numbers,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_set_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_set_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1625,7 +1554,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def contains_word(
             self,
-            words: _fbthrift_python_mutable_containers.MutableSet[builtins.str] | _fbthrift_python_mutable_types._ThriftSetWrapper,
+            words: _typing.AbstractSet[builtins.str],
             word: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
@@ -1633,13 +1562,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "contains_word",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_contains_word_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_contains_word_args(
                     words=words,
                     word=word,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_contains_word_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_contains_word_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1651,7 +1579,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def get_map_value(
             self,
-            words: _fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.str] | _fbthrift_python_mutable_types._ThriftMapWrapper,
+            words: _typing.Mapping[builtins.str, builtins.str],
             key: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
@@ -1659,13 +1587,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "get_map_value",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_map_value_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_map_value_args(
                     words=words,
                     key=key,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_map_value_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_map_value_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1677,19 +1604,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def map_length(
             self,
-            items: _fbthrift_python_mutable_containers.MutableMap[builtins.str, _fbthrift__module__thrift_mutable_types.SimpleStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper,
+            items: _typing.Mapping[builtins.str, _fbthrift__module__thrift_types.SimpleStruct],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "map_length",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_map_length_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_map_length_args(
                     items=items,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_map_length_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_map_length_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1701,19 +1627,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def sum_map_values(
             self,
-            items: _fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.int] | _fbthrift_python_mutable_types._ThriftMapWrapper,
+            items: _typing.Mapping[builtins.str, builtins.int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "sum_map_values",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_map_values_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_map_values_args(
                     items=items,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_sum_map_values_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_map_values_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1725,19 +1650,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def complex_sum_i32(
             self,
-            counter: _fbthrift__module__thrift_mutable_types.ComplexStruct,
+            counter: _fbthrift__module__thrift_types.ComplexStruct,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "complex_sum_i32",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_complex_sum_i32_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_complex_sum_i32_args(
                     counter=counter,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_complex_sum_i32_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_complex_sum_i32_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1749,19 +1673,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def repeat_name(
             self,
-            counter: _fbthrift__module__thrift_mutable_types.ComplexStruct,
+            counter: _fbthrift__module__thrift_types.ComplexStruct,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.str:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "repeat_name",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_repeat_name_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_repeat_name_args(
                     counter=counter,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_repeat_name_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_repeat_name_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1775,15 +1698,14 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift__module__thrift_mutable_types.SimpleStruct:
+        ) -> _fbthrift__module__thrift_types.SimpleStruct:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "get_struct",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_struct_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_struct_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_struct_args(),
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_struct_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1798,16 +1720,15 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             n: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableList[builtins.int]:
+        ) -> _fbthrift_python_types.ImmutableList[builtins.int]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "fib",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_fib_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_fib_args(
                     n=n,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_fib_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_fib_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1819,19 +1740,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def unique_words(
             self,
-            words: _fbthrift_python_mutable_containers.MutableList[builtins.str] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            words: _typing.Sequence[builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableSet[builtins.str]:
+        ) -> _fbthrift_python_types.ImmutableSet[builtins.str]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "unique_words",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_unique_words_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_unique_words_args(
                     words=words,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_unique_words_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_unique_words_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1843,19 +1763,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def words_count(
             self,
-            words: _fbthrift_python_mutable_containers.MutableList[builtins.str] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            words: _typing.Sequence[builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.int]:
+        ) -> _fbthrift_python_types.ImmutableMap[builtins.str, builtins.int]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "words_count",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_words_count_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_words_count_args(
                     words=words,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_words_count_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_words_count_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1867,19 +1786,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def set_enum(
             self,
-            in_enum: _fbthrift__module__thrift_mutable_types.AnEnum,
+            in_enum: _fbthrift__module__thrift_types.AnEnum,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift__module__thrift_mutable_types.AnEnum:
+        ) -> _fbthrift__module__thrift_types.AnEnum:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "set_enum",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_set_enum_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_set_enum_args(
                     in_enum=in_enum,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_set_enum_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_set_enum_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1895,17 +1813,16 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             num_items: builtins.int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableList[builtins.int]]:
+        ) -> _fbthrift_python_types.ImmutableList[_fbthrift_python_types.ImmutableList[builtins.int]]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "list_of_lists",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_list_of_lists_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_list_of_lists_args(
                     num_lists=num_lists,
                     num_items=num_items,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_list_of_lists_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_list_of_lists_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1920,16 +1837,15 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             sentence: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableMap[builtins.str, _fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.int]]:
+        ) -> _fbthrift_python_types.ImmutableMap[builtins.str, _fbthrift_python_types.ImmutableMap[builtins.str, builtins.int]]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "word_character_frequency",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_word_character_frequency_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_word_character_frequency_args(
                     sentence=sentence,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_word_character_frequency_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_word_character_frequency_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1944,16 +1860,15 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             some_words: builtins.str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableSet[builtins.str]]:
+        ) -> _fbthrift_python_types.ImmutableList[_fbthrift_python_types.ImmutableSet[builtins.str]]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "list_of_sets",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_list_of_sets_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_list_of_sets_args(
                     some_words=some_words,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_list_of_sets_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_list_of_sets_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1965,19 +1880,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def nested_map_argument(
             self,
-            struct_map: _fbthrift_python_mutable_containers.MutableMap[builtins.str, _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.SimpleStruct]] | _fbthrift_python_mutable_types._ThriftMapWrapper,
+            struct_map: _typing.Mapping[builtins.str, _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.int:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "nested_map_argument",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_nested_map_argument_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_nested_map_argument_args(
                     struct_map=struct_map,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_nested_map_argument_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_nested_map_argument_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1989,19 +1903,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def make_sentence(
             self,
-            word_chars: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableList[builtins.str]] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            word_chars: _typing.Sequence[_typing.Sequence[builtins.str]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> builtins.str:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "make_sentence",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_make_sentence_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_make_sentence_args(
                     word_chars=word_chars,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_make_sentence_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_make_sentence_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -2013,19 +1926,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def get_union(
             self,
-            sets: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableSet[builtins.int]] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            sets: _typing.Sequence[_typing.AbstractSet[builtins.int]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableSet[builtins.int]:
+        ) -> _fbthrift_python_types.ImmutableSet[builtins.int]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "get_union",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_union_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_union_args(
                     sets=sets,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_union_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_union_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -2037,19 +1949,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def get_keys(
             self,
-            string_map: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.str]] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            string_map: _typing.Sequence[_typing.Mapping[builtins.str, builtins.str]],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableSet[builtins.str]:
+        ) -> _fbthrift_python_types.ImmutableSet[builtins.str]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "get_keys",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_keys_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_keys_args(
                     string_map=string_map,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_keys_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_keys_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -2068,12 +1979,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "lookup_double",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_lookup_double_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_lookup_double_args(
                     key=key,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_lookup_double_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_lookup_double_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -2092,12 +2002,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "retrieve_binary",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_retrieve_binary_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_retrieve_binary_args(
                     something=something,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_retrieve_binary_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_retrieve_binary_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -2109,19 +2018,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def contain_binary(
             self,
-            binaries: _fbthrift_python_mutable_containers.MutableList[builtins.bytes] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            binaries: _typing.Sequence[builtins.bytes],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableSet[builtins.bytes]:
+        ) -> _fbthrift_python_types.ImmutableSet[builtins.bytes]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "contain_binary",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_contain_binary_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_contain_binary_args(
                     binaries=binaries,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_contain_binary_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_contain_binary_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -2133,19 +2041,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def contain_enum(
             self,
-            the_enum: _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.AnEnum] | _fbthrift_python_mutable_types._ThriftListWrapper,
+            the_enum: _typing.Sequence[_fbthrift__module__thrift_types.AnEnum],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.AnEnum]:
+        ) -> _fbthrift_python_types.ImmutableList[_fbthrift__module__thrift_types.AnEnum]:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "contain_enum",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_contain_enum_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_contain_enum_args(
                     the_enum=the_enum,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_contain_enum_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_contain_enum_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -2157,19 +2064,18 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
         def get_binary_union_struct(
             self,
-            u: _fbthrift__module__thrift_mutable_types.BinaryUnion,
+            u: _fbthrift__module__thrift_types.BinaryUnion,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift__module__thrift_mutable_types.BinaryUnionStruct:
+        ) -> _fbthrift__module__thrift_types.BinaryUnionStruct:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "get_binary_union_struct",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_binary_union_struct_args(
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_binary_union_struct_args(
                     u=u,),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_binary_union_struct_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_binary_union_struct_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -2183,15 +2089,14 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift__module__thrift_mutable_types.SimpleStruct:
+        ) -> _fbthrift__module__thrift_types.SimpleStruct:
             _fbthrift_resp = self._send_request(
                 "SimpleService",
                 "get_struct_hidden",
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_struct_hidden_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SimpleService_get_struct_hidden_result,
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_struct_hidden_args(),
+                _fbthrift__module__thrift_types._fbthrift_SimpleService_get_struct_hidden_result,
                 uri_or_name="SimpleService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -2216,10 +2121,6 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\xf9\xe3\xb4\x9c\x85\xde\xf0\x61\x9b\xf3\x0f\x7b\x27\x8d\x62\xb2"
-
-    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
             """bar""": """1""",
@@ -2240,10 +2141,6 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
             return None
 
         @staticmethod
-        def __get_thrift_definition_key__() -> bytes:
-            return b"\xf9\xe3\xb4\x9c\x85\xde\xf0\x61\x9b\xf3\x0f\x7b\x27\x8d\x62\xb2"
-
-        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__module__thrift_metadata.gen_metadata_service_DerivedService()
 
@@ -2255,12 +2152,11 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
             _fbthrift_resp = await self._send_request(
                 "DerivedService",
                 "get_six",
-                _fbthrift__module__thrift_mutable_types._fbthrift_DerivedService_get_six_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_DerivedService_get_six_result,
+                _fbthrift__module__thrift_types._fbthrift_DerivedService_get_six_args(),
+                _fbthrift__module__thrift_types._fbthrift_DerivedService_get_six_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="DerivedService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -2273,6 +2169,10 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
 
     # pyre-ignore[4]: Missing annotation.
     get_six = Async.get_six
+    async def __aenter__(self) -> "DerivedService.Async":
+        raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
+    async def __aexit__(self) -> None:
+        raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
 
     class Sync(SimpleService.Sync):
         @staticmethod
@@ -2282,10 +2182,6 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
-
-        @staticmethod
-        def __get_thrift_definition_key__() -> bytes:
-            return b"\xf9\xe3\xb4\x9c\x85\xde\xf0\x61\x9b\xf3\x0f\x7b\x27\x8d\x62\xb2"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -2299,11 +2195,10 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
             _fbthrift_resp = self._send_request(
                 "DerivedService",
                 "get_six",
-                _fbthrift__module__thrift_mutable_types._fbthrift_DerivedService_get_six_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_DerivedService_get_six_result,
+                _fbthrift__module__thrift_types._fbthrift_DerivedService_get_six_args(),
+                _fbthrift__module__thrift_types._fbthrift_DerivedService_get_six_result,
                 uri_or_name="DerivedService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -2326,10 +2221,6 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
         return None
 
     @staticmethod
-    def __get_thrift_definition_key__() -> bytes:
-        return b"\x07\x40\xfb\x24\x78\x1b\x64\xe4\x82\x89\x2c\xe9\xa1\x74\x01\x87"
-
-    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -2348,10 +2239,6 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
             return None
 
         @staticmethod
-        def __get_thrift_definition_key__() -> bytes:
-            return b"\x07\x40\xfb\x24\x78\x1b\x64\xe4\x82\x89\x2c\xe9\xa1\x74\x01\x87"
-
-        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__module__thrift_metadata.gen_metadata_service_RederivedService()
 
@@ -2363,12 +2250,11 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
             _fbthrift_resp = await self._send_request(
                 "RederivedService",
                 "get_seven",
-                _fbthrift__module__thrift_mutable_types._fbthrift_RederivedService_get_seven_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_RederivedService_get_seven_result,
+                _fbthrift__module__thrift_types._fbthrift_RederivedService_get_seven_args(),
+                _fbthrift__module__thrift_types._fbthrift_RederivedService_get_seven_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="RederivedService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -2381,6 +2267,10 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
 
     # pyre-ignore[4]: Missing annotation.
     get_seven = Async.get_seven
+    async def __aenter__(self) -> "RederivedService.Async":
+        raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
+    async def __aexit__(self) -> None:
+        raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
 
     class Sync(DerivedService.Sync):
         @staticmethod
@@ -2390,10 +2280,6 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
-
-        @staticmethod
-        def __get_thrift_definition_key__() -> bytes:
-            return b"\x07\x40\xfb\x24\x78\x1b\x64\xe4\x82\x89\x2c\xe9\xa1\x74\x01\x87"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -2407,11 +2293,10 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
             _fbthrift_resp = self._send_request(
                 "RederivedService",
                 "get_seven",
-                _fbthrift__module__thrift_mutable_types._fbthrift_RederivedService_get_seven_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_RederivedService_get_seven_result,
+                _fbthrift__module__thrift_types._fbthrift_RederivedService_get_seven_args(),
+                _fbthrift__module__thrift_types._fbthrift_RederivedService_get_seven_result,
                 uri_or_name="RederivedService",
                 rpc_options=rpc_options,
-                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:

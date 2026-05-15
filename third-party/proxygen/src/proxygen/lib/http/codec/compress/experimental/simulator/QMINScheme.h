@@ -439,18 +439,18 @@ class QMINScheme : public CompressionScheme {
     qms->write_ctl_msg(buf, sz, 1);
   }
 
-  char *qms_idstr;
+  char *qms_idstr = nullptr;
 
-  struct qmin_enc *qms_enc;
-  struct qmin_dec *qms_dec;
+  struct qmin_enc *qms_enc = nullptr;
+  struct qmin_dec *qms_dec = nullptr;
 
   /* Each call to `encode' is interpreted as a header block for a new
    * stream.
    */
-  unsigned qms_next_stream_id_to_encode;
+  unsigned qms_next_stream_id_to_encode = 0;
 
   /* 0: decoder-to-encoder; 1: encoder-to-decoder */
-  struct stream *qms_streams;
+  struct stream *qms_streams = nullptr;
 
   struct {
     struct qmin_ctl_out out;

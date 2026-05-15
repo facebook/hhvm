@@ -72,6 +72,8 @@
 
 #pragma once
 
+#include <fmt/core.h>
+#include <folly/Format.h>
 #include <folly/Memory.h>
 #include <folly/Optional.h>
 #include <folly/Range.h>

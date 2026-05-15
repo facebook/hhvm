@@ -236,8 +236,6 @@ class PassThroughHTTPCodecFilter : public HTTPCodecFilter {
   [[nodiscard]] HTTPCodec::StreamID getLastIncomingStreamID() const override;
 
   [[nodiscard]] uint32_t getDefaultWindowSize() const override;
-
-  [[nodiscard]] int8_t mapDependencyToPriority(StreamID parent) const override;
 };
 
 using HTTPCodecFilterChain = FilterChain<HTTPCodec,

@@ -366,9 +366,4 @@ uint32_t PassThroughHTTPCodecFilter::getDefaultWindowSize() const {
   return call_->getDefaultWindowSize();
 }
 
-int8_t PassThroughHTTPCodecFilter::mapDependencyToPriority(
-    StreamID parent) const {
-  return call_->mapDependencyToPriority(parent);
-}
-
 } // namespace proxygen

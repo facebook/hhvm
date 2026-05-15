@@ -746,14 +746,6 @@ class HTTPCodec {
   [[nodiscard]] virtual uint32_t getDefaultWindowSize() const {
     return 0;
   }
-
-  /**
-   * Map the parent back to the priority, -1 if this doesn't make sense.
-   */
-  [[nodiscard]] virtual int8_t mapDependencyToPriority(
-      StreamID /* parent */) const {
-    return -1;
-  }
 };
 
 } // namespace proxygen

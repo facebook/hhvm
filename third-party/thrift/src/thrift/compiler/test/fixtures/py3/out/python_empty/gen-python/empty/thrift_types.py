@@ -22,6 +22,13 @@ import empty.thrift_metadata as _fbthrift__empty__thrift_metadata
 _fbthrift_all_enums = [
 ]
 
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("empty.thrift_reflection")
+    except ImportError:
+        return None
+
 
 _fbthrift_all_structs = [
 ]

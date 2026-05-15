@@ -47,6 +47,11 @@ class C(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_C()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__C() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -98,6 +103,11 @@ class E(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_metadata__():
         return _fbthrift_metadata__exception_E()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__E() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -137,6 +147,13 @@ def _fbthrift_metadata__struct_C():
 
 def _fbthrift_metadata__exception_E():
     return _fbthrift__c__thrift_metadata.gen_metadata_exception_E()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("c.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

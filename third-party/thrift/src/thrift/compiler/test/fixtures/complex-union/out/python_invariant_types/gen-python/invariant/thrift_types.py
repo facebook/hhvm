@@ -47,6 +47,11 @@ class StructForInvariantTypes(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_StructForInvariantTypes()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__StructForInvariantTypes() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -116,6 +121,11 @@ class UnionForInvariantTypes(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_UnionForInvariantTypes()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__UnionForInvariantTypes() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -190,6 +200,11 @@ class InvariantTypes(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_InvariantTypes()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__InvariantTypes() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -235,6 +250,13 @@ def _fbthrift_metadata__struct_UnionForInvariantTypes():
 
 def _fbthrift_metadata__struct_InvariantTypes():
     return _fbthrift__invariant__thrift_metadata.gen_metadata_struct_InvariantTypes()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("invariant.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

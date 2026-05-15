@@ -50,6 +50,11 @@ class EchoRequest(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_EchoRequest()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__EchoRequest() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -108,6 +113,11 @@ class EchoResponse(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_EchoResponse()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__EchoResponse() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -171,6 +181,11 @@ class WhisperException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
     def __get_metadata__():
         return _fbthrift_metadata__exception_WhisperException()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__WhisperException() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -214,6 +229,13 @@ def _fbthrift_metadata__struct_EchoResponse():
 
 def _fbthrift_metadata__exception_WhisperException():
     return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_exception_WhisperException()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("meta.example.thrift.service.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

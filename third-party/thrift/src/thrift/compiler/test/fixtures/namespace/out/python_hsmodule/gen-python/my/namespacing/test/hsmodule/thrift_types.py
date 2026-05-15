@@ -47,6 +47,11 @@ class HsFoo(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_HsFoo()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__HsFoo() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -84,6 +89,13 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__struct_HsFoo():
     return python_module_root__my__namespacing__test__hsmodule__thrift_metadata.gen_metadata_struct_HsFoo()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("python_module_root.my.namespacing.test.hsmodule.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

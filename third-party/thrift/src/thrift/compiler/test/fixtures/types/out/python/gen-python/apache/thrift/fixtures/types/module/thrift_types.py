@@ -52,6 +52,11 @@ class empty_struct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_empty_struct()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__empty_struct() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -110,6 +115,11 @@ class decorated_struct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_decorated_struct()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__decorated_struct() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -247,6 +257,11 @@ class ContainerStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_ContainerStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ContainerStruct() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -306,6 +321,11 @@ class CppTypeStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_CppTypeStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__CppTypeStruct() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -364,6 +384,11 @@ class VirtualStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_VirtualStruct()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__VirtualStruct() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -435,6 +460,11 @@ class MyStructWithForwardRefEnum(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_MyStructWithForwardRefEnum()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MyStructWithForwardRefEnum() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -504,6 +534,11 @@ class TrivialNumeric(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_TrivialNumeric()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__TrivialNumeric() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -575,6 +610,11 @@ class TrivialNestedWithDefault(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_TrivialNestedWithDefault()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__TrivialNestedWithDefault() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -645,6 +685,11 @@ class ComplexString(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_ComplexString()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ComplexString() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -714,6 +759,11 @@ class ComplexNestedWithDefault(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_ComplexNestedWithDefault()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ComplexNestedWithDefault() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -818,6 +868,11 @@ class MinPadding(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_MinPadding()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MinPadding() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -921,6 +976,11 @@ class MinPaddingWithCustomType(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_MinPaddingWithCustomType()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MinPaddingWithCustomType() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -1013,6 +1073,11 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_MyStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MyStruct() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -1060,6 +1125,11 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_MyDataItem()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MyDataItem() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -1119,6 +1189,11 @@ class Renaming(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_Renaming()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Renaming() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -1190,6 +1265,11 @@ class AnnotatedTypes(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_AnnotatedTypes()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__AnnotatedTypes() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -1260,6 +1340,11 @@ class ForwardUsageRoot(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_ForwardUsageRoot()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ForwardUsageRoot() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -1318,6 +1403,11 @@ class ForwardUsageStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_ForwardUsageStruct()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ForwardUsageStruct() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -1378,6 +1468,11 @@ class ForwardUsageByRef(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_ForwardUsageByRef()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ForwardUsageByRef() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -1437,6 +1532,11 @@ class IncompleteMap(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_IncompleteMap()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__IncompleteMap() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -1484,6 +1584,11 @@ class IncompleteMapDep(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_IncompleteMapDep()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__IncompleteMapDep() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -1544,6 +1649,11 @@ class CompleteMap(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_CompleteMap()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__CompleteMap() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -1591,6 +1701,11 @@ class CompleteMapDep(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_CompleteMapDep()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__CompleteMapDep() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -1651,6 +1766,11 @@ class IncompleteList(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_IncompleteList()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__IncompleteList() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -1698,6 +1818,11 @@ class IncompleteListDep(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_IncompleteListDep()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__IncompleteListDep() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -1758,6 +1883,11 @@ class CompleteList(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_CompleteList()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__CompleteList() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -1805,6 +1935,11 @@ class CompleteListDep(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_CompleteListDep()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__CompleteListDep() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -1865,6 +2000,11 @@ class AdaptedList(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_AdaptedList()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__AdaptedList() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -1923,6 +2063,11 @@ class AdaptedListDep(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_AdaptedListDep()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__AdaptedListDep() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -1983,6 +2128,11 @@ class DependentAdaptedList(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_DependentAdaptedList()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__DependentAdaptedList() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -2041,6 +2191,11 @@ class DependentAdaptedListDep(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_DependentAdaptedListDep()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__DependentAdaptedListDep() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -2167,6 +2322,11 @@ class AllocatorAware(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_AllocatorAware()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__AllocatorAware() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -2236,6 +2396,11 @@ class AllocatorAware2(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_AllocatorAware2()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__AllocatorAware2() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -2318,6 +2483,11 @@ class TypedefStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_TypedefStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__TypedefStruct() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -2376,6 +2546,11 @@ class StructWithDoubleUnderscores(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_StructWithDoubleUnderscores()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__StructWithDoubleUnderscores() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -2553,6 +2728,13 @@ def _fbthrift_metadata__struct_TypedefStruct():
 
 def _fbthrift_metadata__struct_StructWithDoubleUnderscores():
     return _fbthrift__apache__thrift__fixtures__types__module__thrift_metadata.gen_metadata_struct_StructWithDoubleUnderscores()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("apache.thrift.fixtures.types.module.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

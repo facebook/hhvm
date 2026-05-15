@@ -72,6 +72,11 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_Fields()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Fields() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -131,6 +136,11 @@ class FieldsWithIncludedStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_FieldsWithIncludedStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__FieldsWithIncludedStruct() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -172,6 +182,13 @@ def _fbthrift_metadata__struct_Fields():
 
 def _fbthrift_metadata__struct_FieldsWithIncludedStruct():
     return _fbthrift__foo__thrift_metadata.gen_metadata_struct_FieldsWithIncludedStruct()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("foo.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

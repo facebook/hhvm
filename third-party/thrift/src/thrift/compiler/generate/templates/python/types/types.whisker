@@ -132,14 +132,20 @@ class {{#partial m_types.unadapted_name type=struct}}{{!
     def __get_metadata__():
         return _fbthrift_metadata__{{#if struct.exception?}}exception{{#else}}struct{{/if}}_{{#partial m_types.unadapted_name type=struct}}()
 {{/if (not (has_compiler_option? "no_metadata"))}}
-    {{! makes reflection work in auto-migrated thrift-py3 }}
     {{#if (has_compiler_option? "auto_migrate")}}
+    {{! makes reflection work in auto-migrated thrift-py3 }}
 
     @staticmethod
     def __get_reflection__():
         import importlib
         types_reflection = importlib.import_module("{{program.module_path}}.types_reflection")
         return types_reflection.get_reflection__{{struct.py_name}}()
+    {{#else}}
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__{{struct.py_name}}() if _mod is not None else None
     {{/if (has_compiler_option? "auto_migrate")}}
 {{/if python.generate_immutable_types?}}
 {{#if python.generate_mutable_types?}}
@@ -281,6 +287,15 @@ def _fbthrift_metadata__{{structured_kind}}_{{#partial m_types.unadapted_name ty
     return {{program.module_mangle}}__thrift_metadata.gen_metadata_{{structured_kind}}_{{#partial m_types.unadapted_name type=struct}}()
   {{/each}}
 {{/if (not (has_compiler_option? "no_metadata"))}}
+
+{{#if (not (has_compiler_option? "auto_migrate"))}}
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("{{program.module_path}}.thrift_reflection")
+    except ImportError:
+        return None
+{{/if (not (has_compiler_option? "auto_migrate"))}}
 {{/if python.generate_immutable_types?}}
 
 

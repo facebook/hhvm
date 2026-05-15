@@ -109,6 +109,11 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_ComplexUnion()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ComplexUnion() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -182,6 +187,11 @@ class ListUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_ListUnion()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ListUnion() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -254,6 +264,11 @@ class DataUnion(metaclass=_fbthrift_python_types.UnionMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_DataUnion()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__DataUnion() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -336,6 +351,11 @@ class Val(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_Val()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Val() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -408,6 +428,11 @@ class ValUnion(metaclass=_fbthrift_python_types.UnionMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_ValUnion()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ValUnion() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -482,6 +507,11 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_VirtualComplexUnion()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__VirtualComplexUnion() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -540,6 +570,11 @@ class NonCopyableStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_NonCopyableStruct()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__NonCopyableStruct() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -602,6 +637,11 @@ class NonCopyableUnion(metaclass=_fbthrift_python_types.UnionMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_NonCopyableUnion()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__NonCopyableUnion() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -668,6 +708,13 @@ def _fbthrift_metadata__struct_NonCopyableStruct():
 
 def _fbthrift_metadata__struct_NonCopyableUnion():
     return _fbthrift__module__thrift_metadata.gen_metadata_struct_NonCopyableUnion()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("module.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

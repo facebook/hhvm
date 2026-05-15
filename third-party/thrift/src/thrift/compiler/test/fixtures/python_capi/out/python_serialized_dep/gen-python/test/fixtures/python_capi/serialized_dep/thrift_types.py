@@ -80,6 +80,11 @@ class SerializedStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_SerializedStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__SerializedStruct() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -152,6 +157,11 @@ class SerializedUnion(metaclass=_fbthrift_python_types.UnionMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_SerializedUnion()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__SerializedUnion() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -236,6 +246,11 @@ class SerializedError(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_SerializedError()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__SerializedError() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -327,6 +342,11 @@ class MarshalStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_MarshalStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MarshalStruct() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -399,6 +419,11 @@ class MarshalUnion(metaclass=_fbthrift_python_types.UnionMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_MarshalUnion()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MarshalUnion() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -484,6 +509,11 @@ class MarshalError(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_metadata__():
         return _fbthrift_metadata__exception_MarshalError()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MarshalError() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -539,6 +569,13 @@ def _fbthrift_metadata__struct_MarshalUnion():
 
 def _fbthrift_metadata__exception_MarshalError():
     return _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_metadata.gen_metadata_exception_MarshalError()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("test.fixtures.python_capi.serialized_dep.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

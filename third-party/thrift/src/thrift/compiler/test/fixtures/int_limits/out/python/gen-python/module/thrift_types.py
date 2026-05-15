@@ -124,6 +124,11 @@ class Limits(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_Limits()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Limits() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -161,6 +166,13 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__struct_Limits():
     return _fbthrift__module__thrift_metadata.gen_metadata_struct_Limits()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("module.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

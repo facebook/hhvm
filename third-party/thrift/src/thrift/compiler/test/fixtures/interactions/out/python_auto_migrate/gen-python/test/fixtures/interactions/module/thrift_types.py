@@ -165,6 +165,7 @@ def _fbthrift_metadata__struct_ShouldBeBoxed():
     return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_struct_ShouldBeBoxed()
 
 
+
 _fbthrift_all_structs = [
     CustomException,
     ShouldBeBoxed,

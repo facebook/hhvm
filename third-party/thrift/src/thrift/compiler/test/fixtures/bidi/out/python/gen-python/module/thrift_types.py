@@ -56,6 +56,11 @@ class BiDiSinkException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
     def __get_metadata__():
         return _fbthrift_metadata__exception_BiDiSinkException()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__BiDiSinkException() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -115,6 +120,11 @@ class BiDiStreamException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMe
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_BiDiStreamException()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__BiDiStreamException() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -176,6 +186,11 @@ class BiDiMethodException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMe
     def __get_metadata__():
         return _fbthrift_metadata__exception_BiDiMethodException()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__BiDiMethodException() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -219,6 +234,13 @@ def _fbthrift_metadata__exception_BiDiStreamException():
 
 def _fbthrift_metadata__exception_BiDiMethodException():
     return _fbthrift__module__thrift_metadata.gen_metadata_exception_BiDiMethodException()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("module.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

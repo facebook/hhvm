@@ -47,6 +47,11 @@ class Mixin1(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_Mixin1()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Mixin1() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -117,6 +122,11 @@ class Mixin2(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_Mixin2()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Mixin2() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -175,6 +185,11 @@ class Mixin3Base(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_Mixin3Base()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Mixin3Base() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -257,6 +272,11 @@ class Foo(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_Foo()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Foo() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -306,6 +326,13 @@ def _fbthrift_metadata__struct_Mixin3Base():
 
 def _fbthrift_metadata__struct_Foo():
     return _fbthrift__module__thrift_metadata.gen_metadata_struct_Foo()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("module.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

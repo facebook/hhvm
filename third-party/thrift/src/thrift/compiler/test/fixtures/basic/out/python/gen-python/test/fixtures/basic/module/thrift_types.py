@@ -144,6 +144,11 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_MyStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MyStruct() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -225,6 +230,11 @@ class Containers(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_Containers()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Containers() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -272,6 +282,11 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_MyDataItem()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MyDataItem() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -368,6 +383,11 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_MyUnion()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MyUnion() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -463,6 +483,11 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_metadata__():
         return _fbthrift_metadata__exception_MyException()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MyException() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -556,6 +581,11 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErro
     def __get_metadata__():
         return _fbthrift_metadata__exception_MyExceptionWithMessage()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MyExceptionWithMessage() if _mod is not None else None
+
 
     def __str__(self):
         field = self.MyStringField
@@ -620,6 +650,11 @@ class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_ReservedKeyword()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ReservedKeyword() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -681,6 +716,11 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_UnionToBeRenamed()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__UnionToBeRenamed() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -749,6 +789,13 @@ def _fbthrift_metadata__struct_ReservedKeyword():
 
 def _fbthrift_metadata__struct_UnionToBeRenamed():
     return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_struct_UnionToBeRenamed()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("test.fixtures.basic.module.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

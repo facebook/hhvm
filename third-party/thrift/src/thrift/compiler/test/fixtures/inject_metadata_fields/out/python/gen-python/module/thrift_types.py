@@ -53,6 +53,11 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_Fields()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Fields() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -111,6 +116,11 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_FieldsInjectedToEmptyStruct()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__FieldsInjectedToEmptyStruct() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -181,6 +191,11 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_FieldsInjectedToStruct()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__FieldsInjectedToStruct() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -274,6 +289,11 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
     def __get_metadata__():
         return _fbthrift_metadata__struct_FieldsInjectedWithIncludedStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__FieldsInjectedWithIncludedStruct() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -344,6 +364,11 @@ class FieldsInjectedWithFieldsWithIncludedStruct(metaclass=_fbthrift_python_type
     def __get_metadata__():
         return _fbthrift_metadata__struct_FieldsInjectedWithFieldsWithIncludedStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__FieldsInjectedWithFieldsWithIncludedStruct() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -397,6 +422,13 @@ def _fbthrift_metadata__struct_FieldsInjectedWithIncludedStruct():
 
 def _fbthrift_metadata__struct_FieldsInjectedWithFieldsWithIncludedStruct():
     return _fbthrift__module__thrift_metadata.gen_metadata_struct_FieldsInjectedWithFieldsWithIncludedStruct()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("module.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

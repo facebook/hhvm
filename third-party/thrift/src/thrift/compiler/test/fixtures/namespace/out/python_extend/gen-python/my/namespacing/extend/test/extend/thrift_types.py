@@ -25,6 +25,13 @@ import python_module_root.my.namespacing.extend.test.extend.thrift_metadata as p
 _fbthrift_all_enums = [
 ]
 
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("python_module_root.my.namespacing.extend.test.extend.thrift_reflection")
+    except ImportError:
+        return None
+
 
 _fbthrift_all_structs = [
 ]

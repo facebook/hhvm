@@ -40,6 +40,11 @@ class FooStreamEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_metadata__():
         return _fbthrift_metadata__exception_FooStreamEx()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__FooStreamEx() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -88,6 +93,11 @@ class FooEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_FooEx()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__FooEx() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -138,6 +148,11 @@ class FooEx2(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_metadata__():
         return _fbthrift_metadata__exception_FooEx2()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__FooEx2() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -181,6 +196,13 @@ def _fbthrift_metadata__exception_FooEx():
 
 def _fbthrift_metadata__exception_FooEx2():
     return _fbthrift__module__thrift_metadata.gen_metadata_exception_FooEx2()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("module.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

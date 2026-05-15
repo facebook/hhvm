@@ -47,6 +47,11 @@ class runtime_annotation(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_runtime_annotation()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__runtime_annotation() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -117,6 +122,11 @@ class structured_annotation_inline(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_structured_annotation_inline()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__structured_annotation_inline() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -175,6 +185,11 @@ class structured_annotation_with_default(metaclass=_fbthrift_python_types.Struct
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_structured_annotation_with_default()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__structured_annotation_with_default() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -257,6 +272,11 @@ class structured_annotation_recursive(metaclass=_fbthrift_python_types.StructMet
     def __get_metadata__():
         return _fbthrift_metadata__struct_structured_annotation_recursive()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__structured_annotation_recursive() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -315,6 +335,11 @@ class structured_annotation_forward(metaclass=_fbthrift_python_types.StructMeta)
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_structured_annotation_forward()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__structured_annotation_forward() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -385,6 +410,11 @@ class structured_annotation_nested(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_structured_annotation_nested()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__structured_annotation_nested() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -478,6 +508,11 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_MyStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MyStruct() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -539,6 +574,11 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_MyException()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MyException() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -611,6 +651,11 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_MyUnion()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MyUnion() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -681,6 +726,13 @@ def _fbthrift_metadata__exception_MyException():
 
 def _fbthrift_metadata__struct_MyUnion():
     return _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_metadata.gen_metadata_struct_MyUnion()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("test.fixtures.basic_structured_annotations.module.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

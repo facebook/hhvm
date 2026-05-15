@@ -106,6 +106,11 @@ class Internship(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_Internship()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Internship() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -176,6 +181,11 @@ class Range(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_Range()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Range() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -245,6 +255,11 @@ class struct1(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_struct1()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__struct1() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -338,6 +353,11 @@ class struct2(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_struct2()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__struct2() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -418,6 +438,11 @@ class struct3(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_struct3()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__struct3() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -500,6 +525,11 @@ class struct4(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_struct4()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__struct4() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -572,6 +602,11 @@ class union1(metaclass=_fbthrift_python_types.UnionMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_union1()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__union1() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -668,6 +703,11 @@ class union2(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_union2()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__union2() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -736,6 +776,13 @@ def _fbthrift_metadata__struct_union1():
 
 def _fbthrift_metadata__struct_union2():
     return _fbthrift__module__thrift_metadata.gen_metadata_struct_union2()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("module.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

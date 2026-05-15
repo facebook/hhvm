@@ -727,6 +727,20 @@ union _UnderscoreUnion {
 struct EmptyStruct {}
 exception EmptyError {}
 
+struct ReflectionAnnotation {
+  1: i32 count;
+  2: float ratio;
+}
+
+@StructuredAnnotation{second = 42}
+@ReflectionAnnotation{count = 7, ratio = 0.5}
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"depr_key": "depr_val"}}
+struct AnnotatedForReflection {
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"field_key": "field_val"}}
+  1: string annotated_field;
+  2: i32 plain_field;
+}
+
 struct StructWithMap {
   1: map<string, i32> data;
 }

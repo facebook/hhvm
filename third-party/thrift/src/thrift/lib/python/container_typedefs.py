@@ -33,7 +33,17 @@ class _HasListTypeInfo(Protocol):
     _fbthrift_list_type_info: Any
 
 
-class _ListTypedefMeta(type):
+class _ContainerTypedefMeta(type):
+    def __new__(
+        mcs, name: str, bases: tuple[type[Any], ...], namespace: dict[str, Any]
+    ) -> _ContainerTypedefMeta:
+        cls = super().__new__(mcs, name, bases, namespace)
+        if "__name__" in namespace:
+            cls.__name__ = namespace["__name__"]
+        return cls
+
+
+class _ListTypedefMeta(_ContainerTypedefMeta):
     def __instancecheck__(cls, instance: object) -> bool:
         if type.__instancecheck__(cls, instance):
             return True
@@ -67,7 +77,7 @@ class _ListTypedefBase(List, metaclass=_ListTypedefMeta):
         super().__init__(self._fbthrift_list_type_info, values)
 
 
-class _SetTypedefMeta(type):
+class _SetTypedefMeta(_ContainerTypedefMeta):
     def __instancecheck__(cls, instance: object) -> bool:
         if type.__instancecheck__(cls, instance):
             return True
@@ -98,7 +108,7 @@ class _SetTypedefBase(Set, metaclass=_SetTypedefMeta):
         super().__init__(self._fbthrift_set_type_info, values)
 
 
-class _MapTypedefMeta(type):
+class _MapTypedefMeta(_ContainerTypedefMeta):
     def __instancecheck__(cls, instance: object) -> bool:
         if type.__instancecheck__(cls, instance):
             return True

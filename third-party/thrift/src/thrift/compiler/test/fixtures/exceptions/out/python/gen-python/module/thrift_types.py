@@ -50,6 +50,11 @@ class Fiery(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_metadata__():
         return _fbthrift_metadata__exception_Fiery()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Fiery() if _mod is not None else None
+
 
     def __str__(self):
         field = self.message
@@ -116,6 +121,11 @@ class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_Serious()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Serious() if _mod is not None else None
 
 
     def __str__(self):
@@ -195,6 +205,11 @@ class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
     def __get_metadata__():
         return _fbthrift_metadata__exception_ComplexFieldNames()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ComplexFieldNames() if _mod is not None else None
+
 
     def __str__(self):
         field = self.internal_error_message
@@ -272,6 +287,11 @@ class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_CustomFieldNames()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__CustomFieldNames() if _mod is not None else None
 
 
     def __str__(self):
@@ -351,6 +371,11 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.Generate
     def __get_metadata__():
         return _fbthrift_metadata__exception_ExceptionWithPrimitiveField()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ExceptionWithPrimitiveField() if _mod is not None else None
+
 
     def __str__(self):
         field = self.message
@@ -429,6 +454,11 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.Ge
     def __get_metadata__():
         return _fbthrift_metadata__exception_ExceptionWithStructuredAnnotation()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ExceptionWithStructuredAnnotation() if _mod is not None else None
+
 
     def __str__(self):
         field = self.message_field
@@ -484,6 +514,11 @@ class Banal(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_Banal()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__Banal() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -544,6 +579,13 @@ def _fbthrift_metadata__exception_ExceptionWithStructuredAnnotation():
 
 def _fbthrift_metadata__exception_Banal():
     return _fbthrift__module__thrift_metadata.gen_metadata_exception_Banal()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("module.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

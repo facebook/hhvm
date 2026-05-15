@@ -35,6 +35,13 @@ import test.fixtures.enums.enum_typedef_only.thrift_metadata as _fbthrift__test_
 _fbthrift_all_enums = [
 ]
 
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("test.fixtures.enums.enum_typedef_only.thrift_reflection")
+    except ImportError:
+        return None
+
 
 _fbthrift_all_structs = [
 ]

@@ -93,6 +93,11 @@ class User(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_User()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__User() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -178,6 +183,11 @@ class ExampleUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_ExampleUnion()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__ExampleUnion() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -219,6 +229,13 @@ def _fbthrift_metadata__struct_User():
 
 def _fbthrift_metadata__struct_ExampleUnion():
     return _fbthrift__thrift__test__module__thrift_metadata.gen_metadata_struct_ExampleUnion()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("thrift.test.module.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

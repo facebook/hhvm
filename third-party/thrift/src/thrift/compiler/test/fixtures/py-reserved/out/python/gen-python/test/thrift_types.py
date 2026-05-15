@@ -162,6 +162,11 @@ class def_(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_def_()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__def_() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -200,6 +205,13 @@ _fbthrift_all_enums = [
 
 def _fbthrift_metadata__struct_def_():
     return _fbthrift__test__thrift_metadata.gen_metadata_struct_def_()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("test.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

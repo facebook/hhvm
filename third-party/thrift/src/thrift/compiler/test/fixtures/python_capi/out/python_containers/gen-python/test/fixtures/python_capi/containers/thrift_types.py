@@ -95,6 +95,11 @@ class TemplateLists(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_TemplateLists()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__TemplateLists() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -219,6 +224,11 @@ class TemplateSets(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_TemplateSets()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__TemplateSets() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -345,6 +355,11 @@ class TemplateMaps(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_TemplateMaps()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__TemplateMaps() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -415,6 +430,11 @@ class TWrapped(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_TWrapped()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__TWrapped() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -473,6 +493,11 @@ class IndirectionA(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_IndirectionA()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__IndirectionA() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -533,6 +558,11 @@ class IndirectionB(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_IndirectionB()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__IndirectionB() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -591,6 +621,11 @@ class IndirectionC(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_IndirectionC()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__IndirectionC() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -653,6 +688,13 @@ def _fbthrift_metadata__struct_IndirectionB():
 
 def _fbthrift_metadata__struct_IndirectionC():
     return _fbthrift__test__fixtures__python_capi__containers__thrift_metadata.gen_metadata_struct_IndirectionC()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("test.fixtures.python_capi.containers.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

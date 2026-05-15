@@ -17,569 +17,451 @@
 
 import unittest
 from types import MappingProxyType
+from typing import Any
 
+from parameterized import parameterized
+from test_thrift.thrift_types import (
+    AnnotatedForReflection,
+    Color,
+    ComplexUnion,
+    Digits,
+    easy,
+    EmptyStruct,
+    HardError,
+    I32List,
+    Integers,
+    Messy,
+    SimpleStruct,
+    StructuredAnnotation,
+)
 from thrift.python.reflection.constants_reflection import (
-    ConstantEnumSpec,
-    ConstantListSpec,
     ConstantMapSpec,
-    ConstantSetSpec,
     ConstantSpec,
     ConstantStructSpec,
-    ConstantUnionSpec,
     ThriftType,
 )
-from thrift.python.reflection.types_reflection import (
-    FieldSpec,
-    inspect,
-    inspectable,
-    ListSpec,
-    MapSpec,
-    SetSpec,
-    StructSpec,
-)
+from thrift.python.reflection.types_reflection import inspect, inspectable, StructSpec
 from thrift.python.reflection_enums import NumberType, Qualifier, StructType
+from thrift.python.types import (
+    List as _fbthrift_List,
+    Map as _fbthrift_Map,
+    Set as _fbthrift_Set,
+)
 
 
-class ConstantSpecTest(unittest.TestCase):
-    def test_primitive_bool(self) -> None:
-        spec = ConstantSpec(value=True, thrift_type=ThriftType.BOOL)
-        self.assertEqual(spec.value, True)
-        self.assertEqual(spec.thrift_type, ThriftType.BOOL)
-
-    def test_primitive_int(self) -> None:
-        spec = ConstantSpec(value=42, thrift_type=ThriftType.I32)
-        self.assertEqual(spec.value, 42)
-        self.assertEqual(spec.thrift_type, ThriftType.I32)
-
-    def test_primitive_string(self) -> None:
-        spec = ConstantSpec(value="hello", thrift_type=ThriftType.STRING)
-        self.assertEqual(spec.value, "hello")
-        self.assertEqual(spec.thrift_type, ThriftType.STRING)
-
-    def test_list_constant(self) -> None:
-        list_val = ConstantListSpec(
-            value=[
-                ConstantSpec(value=1, thrift_type=ThriftType.I32),
-                ConstantSpec(value=2, thrift_type=ThriftType.I32),
-            ]
-        )
-        spec = ConstantSpec(value=list_val, thrift_type=ThriftType.LIST)
-        val = spec.value
-        assert isinstance(val, ConstantListSpec)
-        self.assertEqual(len(val.value), 2)
-        self.assertEqual(val.value[0].value, 1)
-
-    def test_set_constant(self) -> None:
-        set_val = ConstantSetSpec(
-            value=[
-                ConstantSpec(value="a", thrift_type=ThriftType.STRING),
-                ConstantSpec(value="b", thrift_type=ThriftType.STRING),
-            ]
-        )
-        spec = ConstantSpec(value=set_val, thrift_type=ThriftType.SET)
-        val = spec.value
-        assert isinstance(val, ConstantSetSpec)
-        self.assertEqual(len(val.value), 2)
-        self.assertIsInstance(val.value, frozenset)
-
-    def test_map_constant(self) -> None:
-        key_spec = ConstantSpec(value="key", thrift_type=ThriftType.STRING)
-        val_spec = ConstantSpec(value=42, thrift_type=ThriftType.I32)
-        map_val = ConstantMapSpec(value={key_spec: val_spec})
-        spec = ConstantSpec(value=map_val, thrift_type=ThriftType.MAP)
-        val = spec.value
-        assert isinstance(val, ConstantMapSpec)
-        self.assertEqual(len(val.value), 1)
-        self.assertEqual(val.value[key_spec], val_spec)
-        self.assertIsInstance(val.value, MappingProxyType)
-
-    def test_struct_constant(self) -> None:
-        class FakeStruct:
-            pass
-
-        struct_val = ConstantStructSpec(
-            struct_type=FakeStruct,  # pyre-fixme[6]
-            fields={
-                "name": ConstantSpec(value="test", thrift_type=ThriftType.STRING),
-                "id": ConstantSpec(value=123, thrift_type=ThriftType.I32),
-            },
-        )
-        spec = ConstantSpec(value=struct_val, thrift_type=ThriftType.STRUCT)
-        val = spec.value
-        assert isinstance(val, ConstantStructSpec)
-        self.assertEqual(val.struct_type, FakeStruct)
-        self.assertEqual(val.fields["name"].value, "test")
-        self.assertEqual(val.fields["id"].value, 123)
-        self.assertIsInstance(val.fields, MappingProxyType)
-
-    def test_union_constant(self) -> None:
-        class FakeUnion:
-            pass
-
-        active_value = ConstantSpec(value=97, thrift_type=ThriftType.I32)
-        union_val = ConstantUnionSpec(
-            union_type=FakeUnion,  # pyre-fixme[6]
-            field="i",
-            value=active_value,
-        )
-        spec = ConstantSpec(value=union_val, thrift_type=ThriftType.UNION)
-        val = spec.value
-        assert isinstance(val, ConstantUnionSpec)
-        self.assertEqual(val.union_type, FakeUnion)
-        self.assertEqual(val.field, "i")
-        assert val.value is not None
-        self.assertEqual(val.value.value, 97)
-
-    def test_union_constant_empty(self) -> None:
-        class FakeUnion:
-            pass
-
-        union_val = ConstantUnionSpec(
-            union_type=FakeUnion,  # pyre-fixme[6]
-        )
-        self.assertIsNone(union_val.field)
-        self.assertIsNone(union_val.value)
-
-    def test_union_constant_validation(self) -> None:
-        class FakeUnion:
-            pass
-
-        with self.assertRaises(ValueError):
-            ConstantUnionSpec(
-                union_type=FakeUnion,  # pyre-fixme[6]
-                field="i",
-            )
-        with self.assertRaises(ValueError):
-            ConstantUnionSpec(
-                union_type=FakeUnion,  # pyre-fixme[6]
-                value=ConstantSpec(value=1, thrift_type=ThriftType.I32),
-            )
-
-    def test_enum_constant(self) -> None:
-        import enum
-
-        class Company(enum.Enum):
-            FACEBOOK = 0
-            INSTAGRAM = 3
-
-        enum_val = ConstantEnumSpec(
-            enum_type=Company,  # pyre-fixme[6]
-            value=Company.INSTAGRAM,  # pyre-fixme[6]
-        )
-        spec = ConstantSpec(value=enum_val, thrift_type=ThriftType.ENUM)
-        val = spec.value
-        assert isinstance(val, ConstantEnumSpec)
-        self.assertEqual(val.enum_type, Company)
-        self.assertEqual(val.value, Company.INSTAGRAM)
-
-    def test_equality(self) -> None:
-        a = ConstantSpec(value=42, thrift_type=ThriftType.I32)
-        b = ConstantSpec(value=42, thrift_type=ThriftType.I32)
-        c = ConstantSpec(value=42, thrift_type=ThriftType.I64)
-        self.assertEqual(a, b)
-        self.assertNotEqual(a, c)
-        self.assertNotEqual(a, "not a ConstantSpec")
-
-    def test_repr(self) -> None:
-        spec = ConstantSpec(value=42, thrift_type=ThriftType.I32)
-        self.assertIn("42", repr(spec))
-        self.assertIn("ThriftType.I32", repr(spec))
+def _inspect_struct(cls: type[Any]) -> StructSpec:
+    spec = inspect(cls)
+    assert isinstance(spec, StructSpec)
+    return spec
 
 
-class FieldSpecTest(unittest.TestCase):
-    def test_basic_field(self) -> None:
-        field = FieldSpec(
-            id=1,
-            name="my_field",
-            py_name="my_field",
-            type=int,
-            thrift_type=ThriftType.I32,
-            qualifier=Qualifier.UNQUALIFIED,
-            default=0,
-        )
-        self.assertEqual(field.id, 1)
-        self.assertEqual(field.name, "my_field")
-        self.assertEqual(field.py_name, "my_field")
-        self.assertEqual(field.type, int)
-        self.assertEqual(field.thrift_type, ThriftType.I32)
-        self.assertEqual(field.qualifier, Qualifier.UNQUALIFIED)
-        self.assertEqual(field.default, 0)
-        self.assertEqual(field.structured_annotations, {})
+class InspectSimpleStructTest(unittest.TestCase):
+    def test_returns_struct_spec(self) -> None:
+        spec = inspect(SimpleStruct)
+        self.assertIsInstance(spec, StructSpec)
 
-    def test_field_with_annotations(self) -> None:
-        annotations = {
-            "my.Annotation": ConstantSpec(value=True, thrift_type=ThriftType.BOOL),
-        }
-        field = FieldSpec(
-            id=2,
-            name="annotated",
-            py_name="annotated_",
-            type=str,
-            thrift_type=ThriftType.STRING,
-            qualifier=Qualifier.OPTIONAL,
-            structured_annotations=annotations,
-        )
-        self.assertEqual(field.py_name, "annotated_")
-        self.assertEqual(field.qualifier, Qualifier.OPTIONAL)
-        self.assertIn("my.Annotation", field.structured_annotations)
-        self.assertEqual(field.structured_annotations["my.Annotation"].value, True)
-        # structured_annotations is immutable
-        self.assertIsInstance(field.structured_annotations, MappingProxyType)
+    def test_name(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        self.assertEqual(spec.name, "SimpleStruct")
 
-    def test_equality(self) -> None:
-        f1 = FieldSpec(
-            id=1,
-            name="x",
-            py_name="x",
-            type=int,
-            thrift_type=ThriftType.I32,
-            qualifier=Qualifier.UNQUALIFIED,
-        )
-        f2 = FieldSpec(
-            id=1,
-            name="x",
-            py_name="x",
-            type=int,
-            thrift_type=ThriftType.I32,
-            qualifier=Qualifier.UNQUALIFIED,
-        )
-        self.assertEqual(f1, f2)
-
-    def test_inequality_different_thrift_type(self) -> None:
-        f1 = FieldSpec(
-            id=1,
-            name="x",
-            py_name="x",
-            type=int,
-            thrift_type=ThriftType.I32,
-            qualifier=Qualifier.UNQUALIFIED,
-        )
-        f2 = FieldSpec(
-            id=1,
-            name="x",
-            py_name="x",
-            type=int,
-            thrift_type=ThriftType.I64,
-            qualifier=Qualifier.UNQUALIFIED,
-        )
-        self.assertNotEqual(f1, f2)
-
-
-class StructSpecTest(unittest.TestCase):
-    def test_struct(self) -> None:
-        field = FieldSpec(
-            id=1,
-            name="val",
-            py_name="val",
-            type=int,
-            thrift_type=ThriftType.I32,
-            qualifier=Qualifier.UNQUALIFIED,
-            default=0,
-        )
-        spec = StructSpec(
-            name="MyStruct",
-            kind=StructType.STRUCT,
-            fields=[field],
-        )
-        self.assertEqual(spec.name, "MyStruct")
+    def test_kind(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
         self.assertEqual(spec.kind, StructType.STRUCT)
-        self.assertEqual(len(spec.fields), 1)
-        self.assertEqual(spec.fields[0].name, "val")
-        self.assertEqual(spec.structured_annotations, {})
 
-    def test_union(self) -> None:
-        spec = StructSpec(
-            name="MyUnion",
-            kind=StructType.UNION,
-        )
-        self.assertEqual(spec.kind, StructType.UNION)
-        self.assertEqual(len(spec.fields), 0)
+    def test_field_count(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        self.assertEqual(len(spec.fields), 3)
 
-    def test_exception(self) -> None:
-        spec = StructSpec(
-            name="MyError",
-            kind=StructType.EXCEPTION,
-        )
-        self.assertEqual(spec.kind, StructType.EXCEPTION)
+    def test_field_name(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        fields_by_name = {f.name: f for f in spec.fields}
 
-    def test_add_field(self) -> None:
-        spec = StructSpec(name="S", kind=StructType.STRUCT)
-        self.assertEqual(len(spec.fields), 0)
+        f = fields_by_name["name"]
+        self.assertEqual(f.id, 1)
+        self.assertEqual(f.py_name, "name")
+        self.assertEqual(f.type, str)
+        self.assertEqual(f.thrift_type, ThriftType.STRING)
+        self.assertEqual(f.qualifier, Qualifier.UNQUALIFIED)
 
-        field = FieldSpec(
-            id=1,
-            name="f",
-            py_name="f",
-            type=str,
-            thrift_type=ThriftType.STRING,
-            qualifier=Qualifier.UNQUALIFIED,
-        )
-        spec.add_field(field)
-        self.assertEqual(len(spec.fields), 1)
-        self.assertEqual(spec.fields[0].name, "f")
+    def test_field_value(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        fields_by_name = {f.name: f for f in spec.fields}
 
-    def test_fields_returns_tuple(self) -> None:
-        spec = StructSpec(name="S", kind=StructType.STRUCT)
-        self.assertIsInstance(spec.fields, tuple)
+        f = fields_by_name["value"]
+        self.assertEqual(f.id, 2)
+        self.assertEqual(f.py_name, "value")
+        self.assertEqual(f.type, int)
+        self.assertEqual(f.thrift_type, ThriftType.I32)
+        self.assertEqual(f.qualifier, Qualifier.UNQUALIFIED)
 
-    def test_structured_annotations(self) -> None:
-        annotations = {
-            "my.Ann": ConstantSpec(
-                value=ConstantStructSpec(
-                    struct_type=type,  # pyre-fixme[6]
-                    fields={"x": ConstantSpec(value=1, thrift_type=ThriftType.I32)},
-                ),
-                thrift_type=ThriftType.STRUCT,
-            ),
-        }
-        spec = StructSpec(
-            name="Annotated",
-            kind=StructType.STRUCT,
-            structured_annotations=annotations,
-        )
-        self.assertIn("my.Ann", spec.structured_annotations)
-        self.assertIsInstance(spec.structured_annotations, MappingProxyType)
+    def test_field_city(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        fields_by_name = {f.name: f for f in spec.fields}
 
-    def test_equality(self) -> None:
-        s1 = StructSpec(name="S", kind=StructType.STRUCT)
-        s2 = StructSpec(name="S", kind=StructType.STRUCT)
-        self.assertEqual(s1, s2)
+        f = fields_by_name["city"]
+        self.assertEqual(f.id, 3)
+        self.assertEqual(f.py_name, "city")
+        self.assertEqual(f.type, str)
+        self.assertEqual(f.thrift_type, ThriftType.STRING)
+        self.assertEqual(f.qualifier, Qualifier.UNQUALIFIED)
 
-        s3 = StructSpec(name="S", kind=StructType.UNION)
-        self.assertNotEqual(s1, s3)
-
-
-class ListSpecTest(unittest.TestCase):
-    def test_basic(self) -> None:
-        spec = ListSpec(value=int, thrift_type=ThriftType.I32)
-        self.assertEqual(spec.value, int)
-        self.assertEqual(spec.thrift_type, ThriftType.I32)
-
-    def test_equality(self) -> None:
-        a = ListSpec(value=int, thrift_type=ThriftType.I32)
-        b = ListSpec(value=int, thrift_type=ThriftType.I32)
-        c = ListSpec(value=int, thrift_type=ThriftType.I64)
-        self.assertEqual(a, b)
-        self.assertNotEqual(a, c)
-        self.assertNotEqual(a, "not a ListSpec")
-
-
-class SetSpecTest(unittest.TestCase):
-    def test_basic(self) -> None:
-        spec = SetSpec(value=str, thrift_type=ThriftType.STRING)
-        self.assertEqual(spec.value, str)
-        self.assertEqual(spec.thrift_type, ThriftType.STRING)
-
-    def test_equality(self) -> None:
-        a = SetSpec(value=str, thrift_type=ThriftType.STRING)
-        b = SetSpec(value=str, thrift_type=ThriftType.STRING)
-        self.assertEqual(a, b)
-
-
-class MapSpecTest(unittest.TestCase):
-    def test_basic(self) -> None:
-        spec = MapSpec(
-            key=str,
-            key_thrift_type=ThriftType.STRING,
-            value=int,
-            value_thrift_type=ThriftType.I64,
-        )
-        self.assertEqual(spec.key, str)
-        self.assertEqual(spec.key_thrift_type, ThriftType.STRING)
-        self.assertEqual(spec.value, int)
-        self.assertEqual(spec.value_thrift_type, ThriftType.I64)
-
-    def test_equality(self) -> None:
-        a = MapSpec(
-            key=str,
-            key_thrift_type=ThriftType.STRING,
-            value=int,
-            value_thrift_type=ThriftType.I64,
-        )
-        b = MapSpec(
-            key=str,
-            key_thrift_type=ThriftType.STRING,
-            value=int,
-            value_thrift_type=ThriftType.I64,
-        )
-        c = MapSpec(
-            key=str,
-            key_thrift_type=ThriftType.STRING,
-            value=int,
-            value_thrift_type=ThriftType.I32,
-        )
-        self.assertEqual(a, b)
-        self.assertNotEqual(a, c)
-
-
-class InspectTest(unittest.TestCase):
-    def test_inspect_with_get_reflection(self) -> None:
-        expected_spec = StructSpec(name="Foo", kind=StructType.STRUCT)
-
-        class FakeStruct:
-            @staticmethod
-            def __get_reflection__() -> StructSpec:
-                return expected_spec
-
-        result = inspect(FakeStruct)
-        self.assertEqual(result, expected_spec)
+    def test_fields_ordered_by_id(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        ids = [f.id for f in spec.fields]
+        self.assertEqual(ids, sorted(ids))
 
     def test_inspect_instance(self) -> None:
-        expected_spec = StructSpec(name="Foo", kind=StructType.STRUCT)
-
-        class FakeStruct:
-            @staticmethod
-            def __get_reflection__() -> StructSpec:
-                return expected_spec
-
-        result = inspect(FakeStruct())
-        self.assertEqual(result, expected_spec)
+        instance = SimpleStruct(name="test", value=42, city="NYC")
+        spec = _inspect_struct(type(instance))
+        self.assertEqual(spec.name, "SimpleStruct")
+        self.assertEqual(spec.kind, StructType.STRUCT)
 
     def test_inspect_caches(self) -> None:
-        call_count = 0
+        spec1 = inspect(SimpleStruct)
+        spec2 = inspect(SimpleStruct)
+        self.assertIs(spec1, spec2)
 
-        class FakeStruct:
-            @staticmethod
-            def __get_reflection__() -> StructSpec:
-                nonlocal call_count
-                call_count += 1
-                return StructSpec(name="Foo", kind=StructType.STRUCT)
+    def test_struct_spec_immutable(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        with self.assertRaises(AttributeError):
+            spec.name = "T"  # type: ignore[misc]
 
-        inspect(FakeStruct)
-        inspect(FakeStruct)
-        inspect(FakeStruct)
-        self.assertEqual(call_count, 1)
+    def test_field_spec_immutable(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        field = spec.fields[0]
+        with self.assertRaises(AttributeError):
+            field.name = "y"  # type: ignore[misc]
 
-    def test_inspect_not_inspectable(self) -> None:
-        with self.assertRaises(TypeError):
-            inspect(int)
+    def test_struct_spec_iter(self) -> None:
+        name, fields, kind, annotations = inspect(SimpleStruct)
+        self.assertEqual(name, "SimpleStruct")
+        self.assertIsInstance(fields, tuple)
+        self.assertEqual(kind, StructType.STRUCT)
+        self.assertIsInstance(annotations, dict)
 
-    def test_inspectable_true(self) -> None:
-        class FakeStruct:
-            @staticmethod
-            def __get_reflection__() -> StructSpec:
-                return StructSpec(name="Foo", kind=StructType.STRUCT)
+    def test_field_spec_iter(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        field = next(f for f in spec.fields if f.name == "value")
+        fid, name, typ, kind, qualifier, default, annotations = field
+        self.assertEqual(fid, 2)
+        self.assertEqual(name, "value")
+        self.assertEqual(typ, int)
+        self.assertEqual(kind, NumberType.I32)
+        self.assertEqual(qualifier, Qualifier.UNQUALIFIED)
+        self.assertIsInstance(annotations, dict)
 
-        self.assertTrue(inspectable(FakeStruct))
-        self.assertTrue(inspectable(FakeStruct()))
+    def test_fields_returns_tuple(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        self.assertIsInstance(spec.fields, tuple)
 
-    def test_inspectable_false(self) -> None:
+    def test_annotations_empty_without_structured_annotations(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        self.assertEqual(spec.annotations, {})
+        for f in spec.fields:
+            self.assertEqual(f.annotations, {})
+
+
+class InspectExceptionTest(unittest.TestCase):
+    def test_kind_is_exception(self) -> None:
+        spec = _inspect_struct(HardError)
+        self.assertEqual(spec.kind, StructType.EXCEPTION)
+
+    def test_name(self) -> None:
+        spec = _inspect_struct(HardError)
+        self.assertEqual(spec.name, "HardError")
+
+    def test_field_count(self) -> None:
+        spec = _inspect_struct(HardError)
+        self.assertEqual(len(spec.fields), 2)
+
+    def test_fields(self) -> None:
+        spec = _inspect_struct(HardError)
+        fields_by_name = {f.name: f for f in spec.fields}
+
+        errortext = fields_by_name["errortext"]
+        self.assertEqual(errortext.id, 1)
+        self.assertEqual(errortext.type, str)
+        self.assertEqual(errortext.thrift_type, ThriftType.STRING)
+
+        code = fields_by_name["code"]
+        self.assertEqual(code.id, 2)
+        self.assertEqual(code.type, int)
+        self.assertEqual(code.thrift_type, ThriftType.I32)
+
+    def test_inspect_instance(self) -> None:
+        err = HardError(errortext="boom", code=500)
+        spec = _inspect_struct(type(err))
+        self.assertEqual(spec.kind, StructType.EXCEPTION)
+
+
+class InspectUnionTest(unittest.TestCase):
+    def test_kind_is_union(self) -> None:
+        spec = _inspect_struct(Integers)
+        self.assertEqual(spec.kind, StructType.UNION)
+
+    def test_name(self) -> None:
+        spec = _inspect_struct(Integers)
+        self.assertEqual(spec.name, "Integers")
+
+    def test_field_count(self) -> None:
+        spec = _inspect_struct(Integers)
+        self.assertEqual(len(spec.fields), 7)
+
+    def test_byte_field(self) -> None:
+        spec = _inspect_struct(Integers)
+        fields_by_name = {f.name: f for f in spec.fields}
+        f = fields_by_name["tiny"]
+        self.assertEqual(f.id, 1)
+        self.assertEqual(f.type, int)
+        self.assertEqual(f.thrift_type, ThriftType.BYTE)
+
+    def test_i16_field(self) -> None:
+        spec = _inspect_struct(Integers)
+        fields_by_name = {f.name: f for f in spec.fields}
+        f = fields_by_name["small"]
+        self.assertEqual(f.id, 2)
+        self.assertEqual(f.type, int)
+        self.assertEqual(f.thrift_type, ThriftType.I16)
+
+    def test_i32_field(self) -> None:
+        spec = _inspect_struct(Integers)
+        fields_by_name = {f.name: f for f in spec.fields}
+        f = fields_by_name["medium"]
+        self.assertEqual(f.id, 3)
+        self.assertEqual(f.type, int)
+        self.assertEqual(f.thrift_type, ThriftType.I32)
+
+    def test_i64_field(self) -> None:
+        spec = _inspect_struct(Integers)
+        fields_by_name = {f.name: f for f in spec.fields}
+        f = fields_by_name["large"]
+        self.assertEqual(f.id, 4)
+        self.assertEqual(f.type, int)
+        self.assertEqual(f.thrift_type, ThriftType.I64)
+
+    def test_string_field(self) -> None:
+        spec = _inspect_struct(Integers)
+        fields_by_name = {f.name: f for f in spec.fields}
+        f = fields_by_name["unbounded"]
+        self.assertEqual(f.id, 5)
+        self.assertEqual(f.type, str)
+        self.assertEqual(f.thrift_type, ThriftType.STRING)
+
+    def test_renamed_field(self) -> None:
+        spec = _inspect_struct(Integers)
+        fields_by_name = {f.name: f for f in spec.fields}
+        f = fields_by_name["name"]
+        self.assertEqual(f.id, 6)
+        self.assertEqual(f.name, "name")
+        self.assertEqual(f.py_name, "name_")
+        self.assertEqual(f.type, str)
+        self.assertEqual(f.thrift_type, ThriftType.STRING)
+
+    def test_struct_typed_field(self) -> None:
+        spec = _inspect_struct(Integers)
+        fields_by_name = {f.name: f for f in spec.fields}
+        f = fields_by_name["digits"]
+        self.assertEqual(f.id, 7)
+        self.assertEqual(f.type, Digits)
+        self.assertEqual(f.thrift_type, ThriftType.STRUCT)
+
+    def test_fields_ordered_by_id(self) -> None:
+        spec = _inspect_struct(Integers)
+        ids = [f.id for f in spec.fields]
+        self.assertEqual(ids, sorted(ids))
+
+
+class InspectEmptyStructTest(unittest.TestCase):
+    def test_empty_struct(self) -> None:
+        spec = _inspect_struct(EmptyStruct)
+        self.assertEqual(spec.name, "EmptyStruct")
+        self.assertEqual(spec.kind, StructType.STRUCT)
+        self.assertEqual(len(spec.fields), 0)
+
+
+class InspectableTest(unittest.TestCase):
+    def test_inspectable_struct(self) -> None:
+        self.assertTrue(inspectable(SimpleStruct))
+
+    def test_inspectable_instance(self) -> None:
+        self.assertTrue(inspectable(SimpleStruct()))
+
+    def test_inspectable_union(self) -> None:
+        self.assertTrue(inspectable(Integers))
+
+    def test_inspectable_exception(self) -> None:
+        self.assertTrue(inspectable(HardError))
+
+    def test_not_inspectable_builtin(self) -> None:
         self.assertFalse(inspectable(int))
         self.assertFalse(inspectable(42))
         self.assertFalse(inspectable(None))
 
+    def test_inspect_raises_for_non_thrift(self) -> None:
+        with self.assertRaises(TypeError):
+            inspect(int)
 
-class IterTest(unittest.TestCase):
-    def test_struct_spec_iter(self) -> None:
-        field = FieldSpec(
-            id=1,
-            name="val",
-            py_name="val",
-            type=int,
-            thrift_type=ThriftType.I32,
-            qualifier=Qualifier.UNQUALIFIED,
-            default=0,
+
+class NumberTypeEnumTest(unittest.TestCase):
+    def test_i08_is_alias_for_byte(self) -> None:
+        self.assertIs(NumberType.I08, NumberType.BYTE)
+
+    def test_values(self) -> None:
+        self.assertEqual(NumberType.NOT_A_NUMBER.value, 0)
+        self.assertEqual(NumberType.BYTE.value, 1)
+        self.assertEqual(NumberType.I16.value, 2)
+        self.assertEqual(NumberType.I32.value, 3)
+        self.assertEqual(NumberType.I64.value, 4)
+        self.assertEqual(NumberType.FLOAT.value, 5)
+        self.assertEqual(NumberType.DOUBLE.value, 6)
+
+
+class InspectFieldKindTest(unittest.TestCase):
+    @parameterized.expand(
+        [
+            ("byte", Integers, "tiny", NumberType.BYTE),
+            ("i16", Integers, "small", NumberType.I16),
+            ("i32", Integers, "medium", NumberType.I32),
+            ("i64", Integers, "large", NumberType.I64),
+            ("float", ComplexUnion, "float_val", NumberType.FLOAT),
+            ("double", ComplexUnion, "double_val", NumberType.DOUBLE),
+            ("string", Integers, "unbounded", NumberType.NOT_A_NUMBER),
+            ("struct", Integers, "digits", NumberType.NOT_A_NUMBER),
+            ("enum", ComplexUnion, "color", NumberType.NOT_A_NUMBER),
+            ("bool", ComplexUnion, "truthy", NumberType.NOT_A_NUMBER),
+        ]
+    )
+    def test_field_kind(
+        self, _name: str, cls: type[Any], field_name: str, expected: NumberType
+    ) -> None:
+        spec = _inspect_struct(cls)
+        fields_by_name = {f.name: f for f in spec.fields}
+        self.assertEqual(fields_by_name[field_name].kind, expected)
+
+    def test_optional_qualifier(self) -> None:
+        spec = _inspect_struct(easy)
+        fields_by_name = {f.name: f for f in spec.fields}
+        self.assertEqual(fields_by_name["name"].qualifier, Qualifier.OPTIONAL)
+
+    @parameterized.expand(
+        [
+            ("bool", ComplexUnion, "truthy", bool, ThriftType.BOOL),
+            ("float", ComplexUnion, "float_val", float, ThriftType.FLOAT),
+            ("double", ComplexUnion, "double_val", float, ThriftType.DOUBLE),
+            ("binary", ComplexUnion, "raw", bytes, ThriftType.BINARY),
+            ("enum", ComplexUnion, "color", Color, ThriftType.ENUM),
+        ]
+    )
+    def test_field_type(
+        self,
+        _name: str,
+        cls: type[Any],
+        field_name: str,
+        expected_type: type[Any],
+        expected_thrift_type: ThriftType,
+    ) -> None:
+        spec = _inspect_struct(cls)
+        fields_by_name = {f.name: f for f in spec.fields}
+        f = fields_by_name[field_name]
+        self.assertEqual(f.type, expected_type)
+        self.assertEqual(f.thrift_type, expected_thrift_type)
+
+    def test_container_typedef_field_uses_typedef_class(self) -> None:
+        spec = _inspect_struct(easy)
+        fields_by_name = {f.name: f for f in spec.fields}
+        self.assertIs(fields_by_name["val_list"].type, I32List)
+
+    @parameterized.expand(
+        [
+            ("list", "float_list", _fbthrift_List, "List__ComplexUnion_float_list"),
+            ("set", "float_set", _fbthrift_Set, "Set__ComplexUnion_float_set"),
+            ("map", "float_map", _fbthrift_Map, "Map__ComplexUnion_float_map"),
+        ]
+    )
+    def test_raw_container_field_is_default_constructible(
+        self,
+        _name: str,
+        field_name: str,
+        base_cls: type[Any],
+        expected_type_name: str,
+    ) -> None:
+        spec = _inspect_struct(ComplexUnion)
+        fields_by_name = {f.name: f for f in spec.fields}
+        container_type = fields_by_name[field_name].type
+        self.assertTrue(issubclass(container_type, base_cls))
+        self.assertEqual(container_type.__name__, expected_type_name)
+        self.assertEqual(container_type.__module__, "test_thrift.thrift_types")
+        instance = container_type()
+        self.assertEqual(len(instance), 0)
+
+
+class InspectAnnotationsTest(unittest.TestCase):
+    def test_no_annotations(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        self.assertEqual(spec.annotations, {})
+        for f in spec.fields:
+            self.assertEqual(f.annotations, {})
+
+    def test_struct_deprecated_annotations(self) -> None:
+        spec = _inspect_struct(easy)
+        self.assertEqual(spec.annotations, {"anno1": "foo", "bar": "1"})
+
+    def test_field_deprecated_annotations(self) -> None:
+        spec = _inspect_struct(Messy)
+        fields_by_name = {f.name: f for f in spec.fields}
+        self.assertEqual(
+            fields_by_name["opt_field"].annotations,
+            {"a.b.c": "d.e.f", "some": "annotation"},
         )
-        spec = StructSpec(
-            name="MyStruct",
-            kind=StructType.STRUCT,
-            fields=[field],
+
+    def test_mixed_deprecated_and_custom(self) -> None:
+        spec = _inspect_struct(AnnotatedForReflection)
+        annotations = spec.annotations
+        self.assertEqual(annotations["depr_key"], "depr_val")
+        self.assertIn("test_thrift.StructuredAnnotation", annotations)
+        sa = annotations["test_thrift.StructuredAnnotation"]
+        assert isinstance(sa, dict)
+        self.assertEqual(sa["second"], 42)
+
+    def test_field_annotation(self) -> None:
+        spec = _inspect_struct(AnnotatedForReflection)
+        fields_by_name = {f.name: f for f in spec.fields}
+        self.assertEqual(
+            fields_by_name["annotated_field"].annotations,
+            {"field_key": "field_val"},
         )
-        name, fields, kind, annotations = spec
-        self.assertEqual(name, "MyStruct")
-        self.assertEqual(len(fields), 1)
-        self.assertEqual(kind, StructType.STRUCT)
-        self.assertEqual(annotations, {})
+        self.assertEqual(fields_by_name["plain_field"].annotations, {})
 
-    def test_field_spec_iter(self) -> None:
-        field = FieldSpec(
-            id=1,
-            name="x",
-            py_name="x",
-            type=int,
-            thrift_type=ThriftType.I32,
-            qualifier=Qualifier.UNQUALIFIED,
-            default=0,
-        )
-        fid, name, typ, kind, qualifier, default, annotations = field
-        self.assertEqual(fid, 1)
-        self.assertEqual(name, "x")
-        self.assertEqual(typ, int)
-        self.assertEqual(kind, NumberType.I32)
-        self.assertEqual(qualifier, Qualifier.UNQUALIFIED)
-        self.assertEqual(default, 0)
-        self.assertEqual(annotations, {})
+    def test_structured_annotations_raw(self) -> None:
+        spec = _inspect_struct(AnnotatedForReflection)
+        raw = spec.structured_annotations
+        self.assertIsInstance(raw, MappingProxyType)
+        self.assertIn("test_thrift.StructuredAnnotation", raw)
+        sa_spec = raw["test_thrift.StructuredAnnotation"]
+        self.assertIsInstance(sa_spec, ConstantSpec)
+        self.assertEqual(sa_spec.thrift_type, ThriftType.STRUCT)
+        sa_value = sa_spec.value
+        assert isinstance(sa_value, ConstantStructSpec)
+        self.assertIs(sa_value.struct_type, StructuredAnnotation)
+        self.assertIn("second", sa_value.fields)
+        second_spec = sa_value.fields["second"]
+        self.assertIsInstance(second_spec, ConstantSpec)
+        self.assertEqual(second_spec.value, 42)
+        self.assertEqual(second_spec.thrift_type, ThriftType.I64)
 
-    def test_list_spec_iter(self) -> None:
-        spec = ListSpec(value=int, thrift_type=ThriftType.I32)
-        value, kind = spec
-        self.assertEqual(value, int)
-        self.assertEqual(kind, NumberType.I32)
-
-    def test_set_spec_iter(self) -> None:
-        spec = SetSpec(value=str, thrift_type=ThriftType.STRING)
-        value, kind = spec
-        self.assertEqual(value, str)
-        self.assertEqual(kind, NumberType.NOT_A_NUMBER)
-
-    def test_map_spec_iter(self) -> None:
-        spec = MapSpec(
-            key=str,
-            key_thrift_type=ThriftType.STRING,
-            value=int,
-            value_thrift_type=ThriftType.I64,
-        )
-        key, key_kind, value, value_kind = spec
-        self.assertEqual(key, str)
-        self.assertEqual(key_kind, NumberType.NOT_A_NUMBER)
-        self.assertEqual(value, int)
-        self.assertEqual(value_kind, NumberType.I64)
-
-
-class ImmutabilityTest(unittest.TestCase):
-    def test_constant_spec_immutable(self) -> None:
-        spec = ConstantSpec(value=42, thrift_type=ThriftType.I32)
-        with self.assertRaises(AttributeError):
-            spec.value = 99  # type: ignore[misc]
-
-    def test_field_spec_immutable(self) -> None:
-        field = FieldSpec(
-            id=1,
-            name="x",
-            py_name="x",
-            type=int,
-            thrift_type=ThriftType.I32,
-            qualifier=Qualifier.UNQUALIFIED,
-        )
-        with self.assertRaises(AttributeError):
-            field.name = "y"  # type: ignore[misc]
-
-    def test_struct_spec_immutable(self) -> None:
-        spec = StructSpec(name="S", kind=StructType.STRUCT)
-        with self.assertRaises(AttributeError):
-            spec.name = "T"  # type: ignore[misc]
-
-    def test_list_spec_immutable(self) -> None:
-        spec = ListSpec(value=int, thrift_type=ThriftType.I32)
-        with self.assertRaises(AttributeError):
-            spec.value = str  # type: ignore[misc]
-
-    def test_map_spec_immutable(self) -> None:
-        spec = MapSpec(
-            key=str,
-            key_thrift_type=ThriftType.STRING,
-            value=int,
-            value_thrift_type=ThriftType.I64,
-        )
-        with self.assertRaises(AttributeError):
-            spec.key = int  # type: ignore[misc]
-
-    def test_constant_spec_hashable(self) -> None:
-        a = ConstantSpec(value=42, thrift_type=ThriftType.I32)
-        b = ConstantSpec(value=42, thrift_type=ThriftType.I32)
-        self.assertEqual(hash(a), hash(b))
-        s = {a, b}
-        self.assertEqual(len(s), 1)
+    def test_annotation_i32_and_float_thrift_types(self) -> None:
+        spec = _inspect_struct(AnnotatedForReflection)
+        raw = spec.structured_annotations
+        self.assertIn("test_thrift.ReflectionAnnotation", raw)
+        ra_value = raw["test_thrift.ReflectionAnnotation"].value
+        assert isinstance(ra_value, ConstantStructSpec)
+        count_spec = ra_value.fields["count"]
+        self.assertEqual(count_spec.value, 7)
+        self.assertEqual(count_spec.thrift_type, ThriftType.I32)
+        ratio_spec = ra_value.fields["ratio"]
+        assert isinstance(ratio_spec.value, float)
+        self.assertAlmostEqual(ratio_spec.value, 0.5)
+        self.assertEqual(ratio_spec.thrift_type, ThriftType.FLOAT)
 
 
 class HashContractTest(unittest.TestCase):

@@ -59,6 +59,11 @@ class _fbthrift_unadapted_AnnotationWithContainers(metaclass=_fbthrift_python_ty
     def __get_metadata__():
         return _fbthrift_metadata__struct__fbthrift_unadapted_AnnotationWithContainers()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__AnnotationWithContainers() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -121,6 +126,11 @@ class _fbthrift_unadapted_MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct__fbthrift_unadapted_MyStruct()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__MyStruct() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -165,6 +175,13 @@ def _fbthrift_metadata__struct__fbthrift_unadapted_AnnotationWithContainers():
 
 def _fbthrift_metadata__struct__fbthrift_unadapted_MyStruct():
     return _fbthrift__with_containers__thrift_metadata.gen_metadata_struct__fbthrift_unadapted_MyStruct()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("with_containers.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

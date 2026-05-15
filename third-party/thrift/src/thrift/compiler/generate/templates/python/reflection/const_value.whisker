@@ -1,0 +1,59 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Renders a _ConstantSpec(value=..., thrift_type=...) for any const value.
+Context: a t_const_value (entered via scope block).
+}}{{#pragma ignore-newlines}}
+_ConstantSpec(value=
+{{#if value:bool?}}
+  {{(py_bool value:nonzero?)}}, thrift_type=_ThriftType.BOOL
+{{#else if value:integer?}}
+  {{value:integer_value}}, thrift_type={{!
+    }}{{#if value:type.byte?}}_ThriftType.BYTE{{!
+    }}{{#else if value:type.i16?}}_ThriftType.I16{{!
+    }}{{#else if value:type.i32?}}_ThriftType.I32{{!
+    }}{{#else}}_ThriftType.I64{{!
+    }}{{/if value:type.byte?}}
+{{#else if value:enum?}}
+  {{value:integer_value}}, thrift_type=_ThriftType.I32
+{{#else if value:double?}}
+  {{(float_to_string value:double_value)}}, thrift_type={{!
+    }}{{#if value:type.float?}}_ThriftType.FLOAT{{!
+    }}{{#else}}_ThriftType.DOUBLE{{!
+    }}{{/if value:type.float?}}
+{{#else if value:string?}}
+  "{{value:string_value}}", thrift_type=_ThriftType.STRING
+{{#else if value:structured?}}
+  {{> reflection/const_struct }}, thrift_type=_ThriftType.STRUCT
+{{#else if value:map?}}
+  _ConstantMapSpec(value={
+  {{#each value:map_elements as |map_elem|}}
+    {{#map_elem.key}}{{> reflection/const_value }}{{/map_elem.key}}: {{#map_elem.value}}{{> reflection/const_value }}{{/map_elem.value}},
+  {{/each}}
+  }), thrift_type=_ThriftType.MAP
+{{#else if value:list?}}
+  {{#if value:type.set?}}
+  _ConstantSetSpec(value=[
+  {{#value:list_elements}}{{> reflection/const_value }}, {{/value:list_elements}}
+  ]), thrift_type=_ThriftType.SET
+  {{#else}}
+  _ConstantListSpec(value=[
+  {{#value:list_elements}}{{> reflection/const_value }}, {{/value:list_elements}}
+  ]), thrift_type=_ThriftType.LIST
+  {{/if value:type.set?}}
+{{/if value:bool?}}
+)

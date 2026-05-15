@@ -53,6 +53,11 @@ class InitialResponse(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_InitialResponse()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__InitialResponse() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -111,6 +116,11 @@ class FinalResponse(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_FinalResponse()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__FinalResponse() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -171,6 +181,11 @@ class SinkPayload(metaclass=_fbthrift_python_types.StructMeta):
     def __get_metadata__():
         return _fbthrift_metadata__struct_SinkPayload()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__SinkPayload() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -229,6 +244,11 @@ class CompatibleWithKeywordSink(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_CompatibleWithKeywordSink()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__CompatibleWithKeywordSink() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -292,6 +312,11 @@ class InitialException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
     def __get_metadata__():
         return _fbthrift_metadata__exception_InitialException()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__InitialException() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -351,6 +376,11 @@ class SinkException1(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_SinkException1()
+
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__SinkException1() if _mod is not None else None
 
     def _to_python(self):
         return self
@@ -412,6 +442,11 @@ class SinkException2(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_metadata__():
         return _fbthrift_metadata__exception_SinkException2()
 
+    @staticmethod
+    def __get_reflection__():
+        _mod = _fbthrift_get_reflection_module()
+        return _mod.get_reflection__SinkException2() if _mod is not None else None
+
     def _to_python(self):
         return self
 
@@ -471,6 +506,13 @@ def _fbthrift_metadata__exception_SinkException1():
 
 def _fbthrift_metadata__exception_SinkException2():
     return _fbthrift__module__thrift_metadata.gen_metadata_exception_SinkException2()
+
+def _fbthrift_get_reflection_module():
+    try:
+        import importlib
+        return importlib.import_module("module.thrift_reflection")
+    except ImportError:
+        return None
 
 
 _fbthrift_all_structs = [

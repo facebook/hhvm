@@ -1435,6 +1435,7 @@ def _fbthrift_metadata__struct_AdaptedTypedefFields():
     return _fbthrift__module__thrift_metadata.gen_metadata_struct_AdaptedTypedefFields()
 
 
+
 _fbthrift_all_structs = [
     SimpleException,
     OptionalRefStruct,

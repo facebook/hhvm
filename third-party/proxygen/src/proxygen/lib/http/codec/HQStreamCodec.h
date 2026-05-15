@@ -136,10 +136,6 @@ class HQStreamCodec
     CHECK(false) << __func__ << " not supported";
   }
 
-  bool peerHasWebsockets() const {
-    return false;
-  }
-
   bool isRequest(StreamID /*id*/) const {
     CHECK(false) << __func__ << " not implemented yet";
   }

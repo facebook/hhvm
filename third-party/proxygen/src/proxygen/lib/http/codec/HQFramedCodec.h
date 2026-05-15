@@ -251,10 +251,6 @@ class HQFramedCodec : public HTTPCodec {
     return true;
   }
 
-  bool peerHasWebsockets() const {
-    return false;
-  }
-
   bool supportsExTransactions() const override {
     return false;
   }

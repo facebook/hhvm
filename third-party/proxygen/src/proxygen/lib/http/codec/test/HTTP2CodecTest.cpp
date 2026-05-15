@@ -1994,7 +1994,8 @@ TEST_F(HTTP2CodecTest, HTTP2EnableConnect) {
   // pass the buffer to be parsed by the codec and check for ingress settings.
   upstreamCodec_.generateSettings(output_);
   parseUpstream();
-  EXPECT_EQ(1, upstreamCodec_.peerHasWebsockets());
+  EXPECT_TRUE(upstreamCodec_.getIngressSettings()->getSetting(
+      SettingsId::ENABLE_CONNECT_PROTOCOL));
 }
 
 TEST_F(HTTP2CodecTest, WebsocketUpgrade) {

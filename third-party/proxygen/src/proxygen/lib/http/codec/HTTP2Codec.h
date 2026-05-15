@@ -123,9 +123,6 @@ class HTTP2Codec
            (transportDirection_ == TransportDirection::UPSTREAM &&
             egressSettings_.getSetting(SettingsId::ENABLE_PUSH, 1));
   }
-  bool peerHasWebsockets() const {
-    return ingressSettings_.getSetting(SettingsId::ENABLE_CONNECT_PROTOCOL);
-  }
   bool supportsExTransactions() const override {
     return false;
   }

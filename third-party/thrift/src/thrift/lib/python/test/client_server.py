@@ -456,6 +456,34 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
         # just rely on these for mocking
         self.assertIsInstance(ctx.read_headers, ReadHeaders)
         self.assertIsInstance(ctx.write_headers, WriteHeaders)
+        self.assertIsNone(ctx.read_headers_or_none)
+        self.assertIsNone(ctx.write_headers_or_none)
+
+    async def test_or_none_accessors(self) -> None:
+        captured_ctx: RequestContext | None = None
+
+        class CapturingHandler(Handler):
+            async def getName(self) -> str:
+                nonlocal captured_ctx
+                captured_ctx = get_context()
+                return "Testing"
+
+        async with local_server(handler=CapturingHandler()) as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(TestingService, host=ip, port=port) as client:
+                self.assertEqual("Testing", await client.getName())
+
+        assert captured_ctx is not None
+
+        self.assertIsNone(captured_ctx.priority_or_none)
+        self.assertIsNone(captured_ctx.read_headers_or_none)
+        self.assertIsNone(captured_ctx.write_headers_or_none)
+        self.assertIsNone(captured_ctx.request_timeout_or_none)
+
+        self.assertIsNotNone(captured_ctx.connection_context)
+        self.assertIsInstance(captured_ctx.request_id, str)
+        self.assertIsInstance(captured_ctx.method_name, str)
 
 
 class StackHandler(StackServiceInterface):

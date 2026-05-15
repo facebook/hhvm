@@ -61,18 +61,46 @@ class RequestContext:
     @property
     def connection_context(self) -> ConnectionContext: ...
     @property
-    def read_headers(self) -> ReadHeaders: ...
+    def read_headers(self) -> ReadHeaders:
+        """Raises RuntimeError if the request context is no longer valid when accessed."""
+        ...
     @property
-    def write_headers(self) -> WriteHeaders: ...
+    def write_headers(self) -> WriteHeaders:
+        """Raises RuntimeError if the request context is no longer valid when accessed."""
+        ...
     @property
-    def priority(self) -> Priority: ...
-    def set_header(self, key: str, value: str) -> None: ...
+    def priority(self) -> Priority:
+        """Raises RuntimeError if the request context is no longer valid."""
+        ...
+    def set_header(self, key: str, value: str) -> None:
+        """Raises RuntimeError if the request context is no longer valid."""
+        ...
     @property
     def method_name(self) -> str: ...
     @property
     def request_id(self) -> str: ...
     @property
-    def request_timeout(self) -> float: ...
+    def request_timeout(self) -> float:
+        """Raises RuntimeError if the request context is no longer valid."""
+        ...
+    @property
+    def read_headers_or_none(self) -> Optional[ReadHeaders]:
+        """Returns read headers, or None if the request context is no longer valid.
+        Validity is checked at call time but does not guard against subsequent
+        RuntimeError on header map access if the ReadHeaders outlives the
+        Cpp2RequestContext*."""
+    @property
+    def write_headers_or_none(self) -> Optional[WriteHeaders]:
+        """Returns write headers, or None if the request context is no longer valid.
+        Validity is checked at call time but does not guard against subsequent
+        RuntimeError on header map access if the WriteHeaders outlives the
+        Cpp2RequestContext*."""
+    @property
+    def priority_or_none(self) -> Optional[Priority]:
+        """Returns priority, or None if the request context is no longer valid."""
+    @property
+    def request_timeout_or_none(self) -> Optional[float]:
+        """Returns request timeout, or None if the request context is no longer valid."""
 
 class ReadHeaders(Headers): ...
 class WriteHeaders(Headers): ...

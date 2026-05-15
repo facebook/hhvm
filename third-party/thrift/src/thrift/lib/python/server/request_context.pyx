@@ -32,6 +32,16 @@ SocketAddress = collections.namedtuple('SocketAddress', 'ip port path')
 THRIFT_REQUEST_CONTEXT = ContextVar('ThriftRequestContext')
 get_context = THRIFT_REQUEST_CONTEXT.get
 
+
+def none_on_error(func):
+    @property
+    def wrapper(self):
+        try:
+            return func(self)
+        except RuntimeError:
+            return None
+    return wrapper
+
 cdef class RequestContext:
     def __cinit__(self):
         self._ctx_holder = make_shared[Cpp2RequestContextHolder](<Cpp2RequestContext*>NULL)
@@ -92,6 +102,24 @@ cdef class RequestContext:
     @property
     def request_timeout(self):
         return float(self._get_ctx().getRequestTimeout().count() / 1000)
+
+    @none_on_error
+    def read_headers_or_none(self):
+        self._get_ctx()
+        return self.read_headers
+
+    @none_on_error
+    def write_headers_or_none(self):
+        self._get_ctx()
+        return self.write_headers
+
+    @none_on_error
+    def priority_or_none(self):
+        return self.priority
+
+    @none_on_error
+    def request_timeout_or_none(self):
+        return self.request_timeout
 
 
 cdef class ClientMetadata:

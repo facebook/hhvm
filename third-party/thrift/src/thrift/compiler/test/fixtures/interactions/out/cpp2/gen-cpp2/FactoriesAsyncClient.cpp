@@ -1471,7 +1471,8 @@ folly::coro::Task<apache::thrift::ResponseAndClientSink<::std::set<::std::int32_
   if (ctx != nullptr) {
     auto interceptorResult = ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception());
     if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-      (co_await std::move(*task)).throwUnlessValue();
+      folly::Try<void> interceptorTry = co_await std::move(*task);
+      interceptorTry.throwUnlessValue();
     } else {
       std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
     }
@@ -2133,7 +2134,8 @@ folly::coro::Task<apache::thrift::ResponseAndClientSink<::std::set<::std::int32_
   if (ctx != nullptr) {
     auto interceptorResult = ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception());
     if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-      (co_await std::move(*task)).throwUnlessValue();
+      folly::Try<void> interceptorTry = co_await std::move(*task);
+      interceptorTry.throwUnlessValue();
     } else {
       std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
     }

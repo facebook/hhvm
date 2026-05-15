@@ -139,7 +139,8 @@ class Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesServi
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
       if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        (co_await std::move(*task)).throwUnlessValue();
+        folly::Try<void> interceptorTry = co_await std::move(*task);
+        interceptorTry.throwUnlessValue();
       } else {
         std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
       }
@@ -259,7 +260,8 @@ class Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesServi
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
       if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        (co_await std::move(*task)).throwUnlessValue();
+        folly::Try<void> interceptorTry = co_await std::move(*task);
+        interceptorTry.throwUnlessValue();
       } else {
         std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
       }

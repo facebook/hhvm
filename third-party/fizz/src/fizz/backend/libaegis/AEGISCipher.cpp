@@ -24,19 +24,11 @@ class LibAegisCipherBase {
       const uint8_t* ad,
       size_t adlen,
       const uint8_t* npub,
-      const uint8_t* k,
-      size_t inputLength) = 0;
-  virtual int
-  encryptUpdate(uint8_t* c, size_t* written, const uint8_t* m, size_t mlen) = 0;
-  virtual int
-  encryptFinal(uint8_t* c, size_t* written, uint8_t* m, size_t maclen) = 0;
-  virtual int
-  decryptUpdate(uint8_t* m, size_t* written, const uint8_t* c, size_t clen) = 0;
-  virtual int decryptFinal(
-      uint8_t* m,
-      size_t* written,
-      const uint8_t* mac,
-      size_t maclen) = 0;
+      const uint8_t* k) = 0;
+  virtual int encryptUpdate(uint8_t* c, const uint8_t* m, size_t mlen) = 0;
+  virtual int encryptFinal(uint8_t* m, size_t maclen) = 0;
+  virtual int decryptUpdate(uint8_t* m, const uint8_t* c, size_t clen) = 0;
+  virtual int decryptFinal(const uint8_t* mac, size_t maclen) = 0;
 };
 
 template <typename Impl>
@@ -48,42 +40,31 @@ class LibAegisCipher : public LibAegisCipherBase {
       const uint8_t* ad,
       size_t adlen,
       const uint8_t* npub,
-      const uint8_t* k,
-      size_t capacity) override {
-    capacity_ = capacity;
+      const uint8_t* k) override {
     return Impl::stateInit(&state_, ad, adlen, npub, k);
   }
-  int encryptUpdate(uint8_t* c, size_t* written, const uint8_t* m, size_t mlen)
-      override {
-    return Impl::encryptUpdate(&state_, c, capacity_, written, m, mlen);
+  int encryptUpdate(uint8_t* c, const uint8_t* m, size_t mlen) override {
+    return Impl::encryptUpdate(&state_, c, m, mlen);
   }
-  int encryptFinal(uint8_t* c, size_t* written, uint8_t* m, size_t maclen)
-      override {
-    return Impl::encryptFinal(&state_, c, capacity_, written, m, maclen);
+  int encryptFinal(uint8_t* mac, size_t maclen) override {
+    return Impl::encryptFinal(&state_, mac, maclen);
   }
-  int decryptUpdate(uint8_t* m, size_t* written, const uint8_t* c, size_t clen)
-      override {
-    return Impl::decryptUpdate(&state_, m, capacity_, written, c, clen);
+  int decryptUpdate(uint8_t* m, const uint8_t* c, size_t clen) override {
+    return Impl::decryptUpdate(&state_, m, c, clen);
   }
-  int decryptFinal(
-      uint8_t* m,
-      size_t* written,
-      const uint8_t* mac,
-      size_t maclen) override {
-    return Impl::decryptFinal(&state_, m, capacity_, written, mac, maclen);
+  int decryptFinal(const uint8_t* mac, size_t maclen) override {
+    return Impl::decryptFinal(&state_, mac, maclen);
   }
   typename Impl::stateType state_;
-  size_t capacity_{0};
 };
-#define DEFINE_LIBAEGIS_CIPHER(STRUCT_NAME, CIPHER)                            \
-  struct STRUCT_NAME {                                                         \
-    using stateType = CIPHER##_state;                                          \
-    static constexpr auto stateInit{CIPHER##_state_init};                      \
-    static constexpr auto encryptUpdate{CIPHER##_state_encrypt_update};        \
-    static constexpr auto encryptFinal{CIPHER##_state_encrypt_detached_final}; \
-    static constexpr auto decryptUpdate{                                       \
-        CIPHER##_state_decrypt_detached_update};                               \
-    static constexpr auto decryptFinal{CIPHER##_state_decrypt_detached_final}; \
+#define DEFINE_LIBAEGIS_CIPHER(STRUCT_NAME, CIPHER)                     \
+  struct STRUCT_NAME {                                                  \
+    using stateType = CIPHER##_state;                                   \
+    static constexpr auto stateInit{CIPHER##_state_init};               \
+    static constexpr auto encryptUpdate{CIPHER##_state_encrypt_update}; \
+    static constexpr auto encryptFinal{CIPHER##_state_encrypt_final};   \
+    static constexpr auto decryptUpdate{CIPHER##_state_decrypt_update}; \
+    static constexpr auto decryptFinal{CIPHER##_state_decrypt_final};   \
   };
 
 DEFINE_LIBAEGIS_CIPHER(AEGIS128L, aegis128l)
@@ -93,18 +74,13 @@ class AEGISCipher : public Aead {
  public:
   static constexpr size_t kMaxIVLength = 32;
   static constexpr size_t kTagLength = 16;
-  /* The Minimum Message Size (MMS), in bytes, that is required to perform one
-  full internal AEGIS state update. */
-  static constexpr size_t kAEGIS128LMMS = 2 * 16;
-  static constexpr size_t kAEGIS256MMS = 16;
 
   static Status create(
       std::unique_ptr<Aead>& ret,
       Error& err,
       std::unique_ptr<LibAegisCipherBase> impl,
       size_t keyLength,
-      size_t ivLength,
-      size_t mms);
+      size_t ivLength);
 
   Status setKey(Error& err, TrafficKey trafficKey) override;
   folly::Optional<TrafficKey> getKey() const override;
@@ -191,13 +167,11 @@ class AEGISCipher : public Aead {
   // set by the ctor
   size_t keyLength_;
   size_t ivLength_;
-  size_t mms_;
 
   AEGISCipher(
       std::unique_ptr<LibAegisCipherBase> impl,
       size_t keyLength,
-      size_t ivLength,
-      size_t mms);
+      size_t ivLength);
 };
 
 static_assert(
@@ -220,7 +194,7 @@ Status AEGISCipher::doEncrypt(
         Error& /* err */,
         folly::ByteRange iv,
         const folly::IOBuf* associatedData,
-        size_t plaintextLength) {
+        size_t /* plaintextLength */) {
       const uint8_t* adData = nullptr;
       size_t adLen = 0;
       std::unique_ptr<folly::IOBuf> ad;
@@ -238,41 +212,32 @@ Status AEGISCipher::doEncrypt(
       // null and adLen is 0
       // @lint-ignore CLANGTIDY facebook-hte-NullableDereference
       self.impl_->stateInit(
-          adData,
-          adLen,
-          iv.data(),
-          self.trafficKeyKey_.data(),
-          plaintextLength);
+          adData, adLen, iv.data(), self.trafficKeyKey_.data());
       return Status::Success;
     }
 
     Status
     encrypt(Error& err, folly::IOBuf& plaintext, folly::IOBuf& ciphertext) {
-      struct EVPEncImpl {
-        const AEGISCipher& self;
-        unsigned char* tag;
+      Status status = Status::Success;
+      transformBuffer(
+          plaintext,
+          ciphertext,
+          [&](uint8_t* out, const uint8_t* in, size_t len) {
+            if (status != Status::Success) {
+              return;
+            }
+            if (self.impl_->encryptUpdate(out, in, len) != 0) {
+              status = err.error("Encryption error");
+              return;
+            }
+          });
+      if (status != Status::Success) {
+        return status;
+      }
 
-        EVPEncImpl(const AEGISCipher& s, unsigned char* t) : self(s), tag(t) {}
-        bool encryptUpdate(
-            uint8_t* cipher,
-            int* outLen,
-            const uint8_t* plain,
-            size_t len) {
-          size_t tempOutLen;
-          auto ret = self.impl_->encryptUpdate(cipher, &tempOutLen, plain, len);
-          *outLen = tempOutLen;
-          return ret == 0;
-        }
-        bool encryptFinal(unsigned char* outm, int* outLen) {
-          size_t tempOutLen;
-          auto ret =
-              self.impl_->encryptFinal(outm, &tempOutLen, tag, kTagLength);
-          *outLen = tempOutLen;
-          return ret == 0;
-        }
-      };
-      FIZZ_RETURN_ON_ERROR(encFuncBlocks(
-          err, EVPEncImpl(self, tagTemp), plaintext, ciphertext, self.mms_));
+      if (self.impl_->encryptFinal(tagTemp, kTagLength) != 0) {
+        return err.error("Encryption error");
+      }
       return Status::Success;
     }
 
@@ -311,7 +276,7 @@ Status AEGISCipher::doDecrypt(
         Error& /* err */,
         folly::ByteRange iv,
         const folly::IOBuf* associatedData,
-        size_t ciphertextLength) {
+        size_t /* ciphertextLength */) {
       const uint8_t* adData = nullptr;
       size_t adLen = 0;
       std::unique_ptr<folly::IOBuf> ad;
@@ -330,11 +295,7 @@ Status AEGISCipher::doDecrypt(
       // null and adLen is 0
       // @lint-ignore CLANGTIDY facebook-hte-NullableDereference
       self.impl_->stateInit(
-          adData,
-          adLen,
-          iv.data(),
-          self.trafficKeyKey_.data(),
-          ciphertextLength);
+          adData, adLen, iv.data(), self.trafficKeyKey_.data());
       return Status::Success;
     }
 
@@ -344,42 +305,24 @@ Status AEGISCipher::doDecrypt(
         folly::IOBuf& ciphertext,
         folly::IOBuf& plaintext,
         folly::MutableByteRange tagOut) {
-      struct EVPDecImpl {
-        const AEGISCipher& self;
-        const unsigned char* expectedTag{nullptr};
-
-        explicit EVPDecImpl(const AEGISCipher& s) : self(s) {}
-        bool decryptUpdate(
-            uint8_t* plain,
-            const uint8_t* cipher,
-            size_t len,
-            int* outLen) {
-          size_t tempOutLen;
-          auto ret = self.impl_->decryptUpdate(plain, &tempOutLen, cipher, len);
-          *outLen = static_cast<int>(tempOutLen);
-          return ret == 0;
-        }
-        bool setExpectedTag(int /*tagSize*/, const unsigned char* tag) {
-          this->expectedTag = tag;
-          return true;
-        }
-        bool decryptFinal(unsigned char* outm, int* outLen) {
-          size_t tempOutLen;
-          auto ret = self.impl_->decryptFinal(
-              outm, &tempOutLen, expectedTag, kTagLength);
-          *outLen = static_cast<int>(tempOutLen);
-          return ret == 0;
-        }
-      };
-
-      FIZZ_RETURN_ON_ERROR(decFuncBlocks(
-          ret,
-          err,
-          EVPDecImpl(self),
+      Status status = Status::Success;
+      transformBuffer(
           ciphertext,
           plaintext,
-          tagOut,
-          self.mms_));
+          [&](uint8_t* out, const uint8_t* in, size_t len) {
+            if (status != Status::Success) {
+              return;
+            }
+            if (self.impl_->decryptUpdate(out, in, len) != 0) {
+              status = err.error("Decryption error");
+              return;
+            }
+          });
+      if (status != Status::Success) {
+        return status;
+      }
+
+      ret = self.impl_->decryptFinal(tagOut.data(), kTagLength) == 0;
       return Status::Success;
     }
   };
@@ -398,20 +341,15 @@ Status AEGISCipher::doDecrypt(
 AEGISCipher::AEGISCipher(
     std::unique_ptr<LibAegisCipherBase> impl,
     size_t keyLength,
-    size_t ivLength,
-    size_t mms)
-    : impl_(std::move(impl)),
-      keyLength_(keyLength),
-      ivLength_(ivLength),
-      mms_(mms) {}
+    size_t ivLength)
+    : impl_(std::move(impl)), keyLength_(keyLength), ivLength_(ivLength) {}
 
 Status AEGISCipher::create(
     std::unique_ptr<Aead>& ret,
     Error& err,
     std::unique_ptr<LibAegisCipherBase> impl,
     size_t keyLength,
-    size_t ivLength,
-    size_t mms) {
+    size_t ivLength) {
   // aegis_init is safe to call multiple times. It populates libaegis's cpu
   // feature vector
   static int initResult = aegis_init();
@@ -419,7 +357,7 @@ Status AEGISCipher::create(
     return err.error("failed to initialize libaegis");
   }
   ret = std::unique_ptr<Aead>(
-      new AEGISCipher(std::move(impl), keyLength, ivLength, mms));
+      new AEGISCipher(std::move(impl), keyLength, ivLength));
   return Status::Success;
 }
 
@@ -566,12 +504,7 @@ Status makeCipher<fizz::AEGIS128L>(std::unique_ptr<Aead>& ret, Error& err) {
   auto impl =
       std::unique_ptr<LibAegisCipherBase>(new LibAegisCipher<AEGIS128L>());
   return AEGISCipher::create(
-      ret,
-      err,
-      std::move(impl),
-      aegis128l_KEYBYTES,
-      aegis128l_NPUBBYTES,
-      AEGISCipher::kAEGIS128LMMS);
+      ret, err, std::move(impl), aegis128l_KEYBYTES, aegis128l_NPUBBYTES);
 }
 
 template <>
@@ -579,12 +512,7 @@ Status makeCipher<fizz::AEGIS256>(std::unique_ptr<Aead>& ret, Error& err) {
   auto impl =
       std::unique_ptr<LibAegisCipherBase>(new LibAegisCipher<AEGIS256>());
   return AEGISCipher::create(
-      ret,
-      err,
-      std::move(impl),
-      aegis256_KEYBYTES,
-      aegis256_NPUBBYTES,
-      AEGISCipher::kAEGIS256MMS);
+      ret, err, std::move(impl), aegis256_KEYBYTES, aegis256_NPUBBYTES);
 }
 } // namespace fizz::libaegis
 #endif

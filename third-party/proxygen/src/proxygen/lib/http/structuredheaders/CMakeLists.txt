@@ -36,6 +36,16 @@ proxygen_add_library(proxygen_http_structuredheaders_decoder
     proxygen_http_structuredheaders_structured_headers
 )
 
+proxygen_add_library(proxygen_http_structuredheaders_structured_fields
+  SRCS
+    StructuredFieldsDecoder.cpp
+    StructuredFieldsEncoder.cpp
+  DEPS
+    proxygen_utils_util_inl
+    Folly::folly_base64
+    Folly::folly_conv
+)
+
 proxygen_add_library(proxygen_http_structuredheaders_utils
   SRCS
     StructuredHeadersConstants.cpp

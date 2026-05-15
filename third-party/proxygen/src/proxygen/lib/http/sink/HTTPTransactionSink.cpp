@@ -46,4 +46,20 @@ quic::QuicSocket* HTTPTransactionSink::getQUICTransport() const {
   return nullptr;
 }
 
+void HTTPTransactionSink::sendPing(uint64_t data) noexcept {
+  if (auto* session = httpTransaction_->getTransport().getHTTPSessionBase()) {
+    session->sendPing(data);
+  }
+}
+
+bool HTTPTransactionSink::addSessionObserver(
+    HTTPSessionObserverContainer::ManagedObserver* observer) noexcept {
+  auto* session = httpTransaction_->getTransport().getHTTPSessionBase();
+  if (!session) {
+    return false;
+  }
+  session->addObserver(observer);
+  return true;
+}
+
 } // namespace proxygen

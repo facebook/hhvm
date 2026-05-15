@@ -9,6 +9,7 @@
 #pragma once
 
 #include <folly/logging/xlog.h>
+#include <proxygen/lib/http/observer/HTTPSessionObserverContainer.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 
 #include "proxygen/lib/http/sink/HTTPSink.h"
@@ -32,6 +33,18 @@ class HTTPTransactionSink : public HTTPSink {
     }
   }
   ~HTTPTransactionSink() override = default;
+
+  // Send an HTTP/2 PING control frame with the given 8-byte opaque data.
+  // No-op if there is no underlying session. The caller is expected to have
+  // verified the transport is HTTP/2 (e.g. via getCodecProtocol()).
+  void sendPing(uint64_t data) noexcept;
+
+  // Register an observer for session-level events (e.g. PingReply). Caller
+  // retains ownership of the observer; ManagedObserver auto-detaches on
+  // destruction. Returns false if there is no underlying session.
+  bool addSessionObserver(
+      HTTPSessionObserverContainer::ManagedObserver*) noexcept;
+
   [[nodiscard]] folly::Optional<HTTPCodec::StreamID> getStreamID()
       const override {
     return httpTransaction_->getID();

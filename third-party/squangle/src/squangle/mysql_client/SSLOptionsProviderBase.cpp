@@ -31,12 +31,12 @@ bool SSLOptionsProviderBase::setMysqlSSLOptions(MYSQL* mysql) {
 
 bool SSLOptionsProviderBase::storeMysqlSSLSession(MYSQL* mysql) {
   auto reused = mysql_get_ssl_session_reused(mysql);
-  if (!reused) {
-    folly::ssl::SSLSessionUniquePtr session(
-        (SSL_SESSION*)mysql_get_ssl_session(mysql));
-    if (session) {
-      storeRawSSLSession(std::move(session));
-    }
+  // Always store the session. TLS 1.3 sends new single-use tickets even on
+  // resumed connections, so we need to cache them for future connections.
+  folly::ssl::SSLSessionUniquePtr session(
+      (SSL_SESSION*)mysql_get_ssl_session(mysql));
+  if (session) {
+    storeRawSSLSession(std::move(session));
   }
   return reused;
 }

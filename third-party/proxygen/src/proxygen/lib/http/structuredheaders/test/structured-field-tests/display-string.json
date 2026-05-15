@@ -1,0 +1,123 @@
+[
+    {
+        "name": "basic display string (ascii content)",
+        "raw": ["%\"foo bar\""],
+        "header_type": "item",
+        "expected": [{"__type": "displaystring", "value": "foo bar"}, []]
+    },
+    {
+        "name": "all printable ascii",
+        "raw": ["%\" !%22#$%25&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\""],
+        "header_type": "item",
+        "expected": [{"__type": "displaystring", "value": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"}, []]
+    },
+    {
+        "name": "non-ascii display string (uppercase escaping)",
+        "raw": ["%\"f%C3%BC%C3%BC\""],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "non-ascii display string (lowercase escaping)",
+        "raw": ["%\"f%c3%bc%c3%bc\""],
+        "header_type": "item",
+        "expected": [{"__type": "displaystring", "value": "füü"}, []]
+    },
+    {
+        "name": "non-ascii display string (unescaped)",
+        "raw": ["%\"füü\""],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "tab in display string",
+        "raw": ["%\"\t\""],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "newline in display string",
+        "raw": ["%\"\n\""],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "single quoted display string",
+        "raw": ["%'foo'"],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "unquoted display string",
+        "raw": ["%foo"],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "display string missing initial quote",
+        "raw": ["%foo\""],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "unbalanced display string",
+        "raw": ["%\"foo"],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "display string quoting",
+        "raw": ["%\"foo %22bar%22 \\ baz\""],
+        "header_type": "item",
+        "expected": [{"__type": "displaystring", "value": "foo \"bar\" \\ baz"}, []]
+    },
+    {
+        "name": "bad display string escaping",
+        "raw": ["%\"foo %a"],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "bad display string utf-8 (invalid 2-byte seq)",
+        "raw": ["%\"%c3%28\""],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "bad display string utf-8 (invalid sequence id)",
+        "raw": ["%\"%a0%a1\""],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "bad display string utf-8 (invalid hex)",
+        "raw": ["%\"%g0%1w\""],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "bad display string utf-8 (invalid 3-byte seq)",
+        "raw": ["%\"%e2%28%a1\""],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "bad display string utf-8 (invalid 4-byte seq)",
+        "raw": ["%\"%f0%28%8c%28\""],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "BOM in display string",
+        "raw": ["%\"BOM: %ef%bb%bf\""],
+        "header_type": "item",
+        "expected": [{"__type": "displaystring", "value": "BOM: \uFEFF"}, []]
+    },
+    {
+        "name": "two lines display string",
+        "raw": ["%\"foo", "bar\""],
+        "header_type": "item",
+        "can_fail": true,
+        "expected": [{"__type": "displaystring", "value": "foo, bar"}, []]
+    }
+]

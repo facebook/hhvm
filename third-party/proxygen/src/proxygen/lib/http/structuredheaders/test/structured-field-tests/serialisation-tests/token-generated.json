@@ -1,0 +1,1490 @@
+[
+    {
+        "name": "0x00 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0000a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x01 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0001a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x02 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0002a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x03 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0003a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x04 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0004a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x05 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0005a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x06 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0006a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x07 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0007a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x08 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\ba"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x09 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\ta"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0a in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\na"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0b in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u000ba"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0c in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\fa"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0d in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\ra"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0e in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u000ea"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0f in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u000fa"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x10 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0010a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x11 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0011a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x12 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0012a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x13 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0013a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x14 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0014a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x15 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0015a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x16 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0016a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x17 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0017a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x18 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0018a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x19 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u0019a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1a in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u001aa"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1b in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u001ba"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1c in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u001ca"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1d in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u001da"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1e in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u001ea"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1f in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u001fa"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x20 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x22 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\"a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x28 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a(a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x29 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a)a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2c in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a,a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3b in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a;a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3c in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a<a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3d in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a=a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3e in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a>a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3f in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a?a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x40 in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a@a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5b in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a[a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5c in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\\a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5d in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a]a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7b in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a{a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7d in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a}a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7f in token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "a\u007fa"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x00 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0000a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x01 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0001a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x02 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0002a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x03 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0003a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x04 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0004a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x05 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0005a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x06 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0006a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x07 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0007a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x08 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\ba"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x09 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\ta"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0a starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\na"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0b starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u000ba"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0c starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\fa"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0d starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\ra"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0e starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u000ea"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0f starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u000fa"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x10 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0010a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x11 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0011a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x12 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0012a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x13 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0013a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x14 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0014a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x15 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0015a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x16 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0016a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x17 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0017a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x18 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0018a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x19 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u0019a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1a starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u001aa"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1b starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u001ba"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1c starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u001ca"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1d starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u001da"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1e starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u001ea"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1f starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u001fa"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x20 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": " a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x21 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "!a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x22 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\"a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x23 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "#a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x24 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "$a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x25 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "%a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x26 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "&a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x27 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "'a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x28 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "(a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x29 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": ")a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2b starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "+a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2c starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": ",a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2d starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "-a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2e starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": ".a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2f starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "/a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x30 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "0a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x31 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "1a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x32 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "2a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x33 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "3a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x34 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "4a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x35 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "5a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x36 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "6a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x37 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "7a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x38 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "8a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x39 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "9a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3a starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": ":a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3b starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": ";a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3c starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "<a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3d starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "=a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3e starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": ">a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3f starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "?a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x40 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "@a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5b starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "[a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5c starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\\a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5d starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "]a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5e starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "^a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5f starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "_a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x60 starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "`a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7b starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "{a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7c starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "|a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7d starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "}a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7e starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "~a"
+            },
+            []
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7f starting a token - serialise only",
+        "header_type": "item",
+        "expected": [
+            {
+                "__type": "token",
+                "value": "\u007fa"
+            },
+            []
+        ],
+        "must_fail": true
+    }
+]

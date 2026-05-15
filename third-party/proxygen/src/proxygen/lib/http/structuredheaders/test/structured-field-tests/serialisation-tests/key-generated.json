@@ -1,0 +1,6239 @@
+[
+    {
+        "name": "0x00 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0000a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x01 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0001a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x02 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0002a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x03 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0003a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x04 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0004a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x05 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0005a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x06 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0006a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x07 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0007a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x08 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\ba",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x09 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\ta",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x0a in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\na",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x0b in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u000ba",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x0c in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\fa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x0d in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\ra",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x0e in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u000ea",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x0f in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u000fa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x10 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0010a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x11 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0011a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x12 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0012a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x13 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0013a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x14 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0014a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x15 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0015a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x16 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0016a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x17 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0017a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x18 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0018a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x19 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u0019a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x1a in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u001aa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x1b in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u001ba",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x1c in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u001ca",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x1d in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u001da",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x1e in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u001ea",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x1f in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u001fa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x20 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x21 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a!a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x22 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\"a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x23 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a#a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x24 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a$a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x25 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a%a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x26 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a&a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x27 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a'a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x28 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a(a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x29 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a)a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x2b in dictionary key - serialise only",
+        "expected": [
+            [
+                "a+a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x2c in dictionary key - serialise only",
+        "expected": [
+            [
+                "a,a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x2f in dictionary key - serialise only",
+        "expected": [
+            [
+                "a/a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x3a in dictionary key - serialise only",
+        "expected": [
+            [
+                "a:a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x3b in dictionary key - serialise only",
+        "expected": [
+            [
+                "a;a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x3c in dictionary key - serialise only",
+        "expected": [
+            [
+                "a<a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x3d in dictionary key - serialise only",
+        "expected": [
+            [
+                "a=a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x3e in dictionary key - serialise only",
+        "expected": [
+            [
+                "a>a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x3f in dictionary key - serialise only",
+        "expected": [
+            [
+                "a?a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x40 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a@a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x41 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aAa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x42 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aBa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x43 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aCa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x44 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aDa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x45 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aEa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x46 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aFa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x47 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aGa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x48 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aHa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x49 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aIa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x4a in dictionary key - serialise only",
+        "expected": [
+            [
+                "aJa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x4b in dictionary key - serialise only",
+        "expected": [
+            [
+                "aKa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x4c in dictionary key - serialise only",
+        "expected": [
+            [
+                "aLa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x4d in dictionary key - serialise only",
+        "expected": [
+            [
+                "aMa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x4e in dictionary key - serialise only",
+        "expected": [
+            [
+                "aNa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x4f in dictionary key - serialise only",
+        "expected": [
+            [
+                "aOa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x50 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aPa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x51 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aQa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x52 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aRa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x53 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aSa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x54 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aTa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x55 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aUa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x56 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aVa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x57 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aWa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x58 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aXa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x59 in dictionary key - serialise only",
+        "expected": [
+            [
+                "aYa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x5a in dictionary key - serialise only",
+        "expected": [
+            [
+                "aZa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x5b in dictionary key - serialise only",
+        "expected": [
+            [
+                "a[a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x5c in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\\a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x5d in dictionary key - serialise only",
+        "expected": [
+            [
+                "a]a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x5e in dictionary key - serialise only",
+        "expected": [
+            [
+                "a^a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x60 in dictionary key - serialise only",
+        "expected": [
+            [
+                "a`a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x7b in dictionary key - serialise only",
+        "expected": [
+            [
+                "a{a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x7c in dictionary key - serialise only",
+        "expected": [
+            [
+                "a|a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x7d in dictionary key - serialise only",
+        "expected": [
+            [
+                "a}a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x7e in dictionary key - serialise only",
+        "expected": [
+            [
+                "a~a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x7f in dictionary key - serialise only",
+        "expected": [
+            [
+                "a\u007fa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "header_type": "dictionary",
+        "must_fail": true
+    },
+    {
+        "name": "0x00 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0000a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x01 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0001a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x02 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0002a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x03 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0003a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x04 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0004a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x05 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0005a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x06 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0006a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x07 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0007a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x08 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\ba",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x09 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\ta",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0a starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\na",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0b starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u000ba",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0c starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\fa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0d starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\ra",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0e starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u000ea",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0f starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u000fa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x10 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0010a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x11 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0011a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x12 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0012a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x13 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0013a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x14 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0014a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x15 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0015a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x16 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0016a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x17 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0017a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x18 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0018a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x19 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u0019a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1a starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u001aa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1b starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u001ba",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1c starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u001ca",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1d starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u001da",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1e starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u001ea",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1f starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u001fa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x20 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                " a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x21 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "!a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x22 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\"a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x23 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "#a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x24 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "$a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x25 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "%a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x26 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "&a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x27 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "'a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x28 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "(a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x29 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                ")a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2b starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "+a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2c starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                ",a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2d starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "-a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2e starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                ".a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2f starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "/a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x30 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "0a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x31 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "1a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x32 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "2a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x33 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "3a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x34 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "4a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x35 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "5a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x36 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "6a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x37 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "7a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x38 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "8a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x39 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "9a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3a starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                ":a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3b starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                ";a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3c starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "<a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3d starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "=a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3e starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                ">a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3f starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "?a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x40 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "@a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x41 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Aa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x42 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Ba",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x43 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Ca",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x44 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Da",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x45 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Ea",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x46 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Fa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x47 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Ga",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x48 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Ha",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x49 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Ia",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4a starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Ja",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4b starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Ka",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4c starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "La",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4d starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Ma",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4e starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Na",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4f starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Oa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x50 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Pa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x51 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Qa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x52 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Ra",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x53 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Sa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x54 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Ta",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x55 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Ua",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x56 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Va",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x57 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Wa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x58 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Xa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x59 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Ya",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5a starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "Za",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5b starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "[a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5c starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\\a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5d starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "]a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5e starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "^a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5f starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "_a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x60 starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "`a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7b starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "{a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7c starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "|a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7d starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "}a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7e starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "~a",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7f starting a dictionary key - serialise only",
+        "header_type": "dictionary",
+        "expected": [
+            [
+                "\u007fa",
+                [
+                    1,
+                    []
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x00 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0000a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x01 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0001a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x02 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0002a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x03 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0003a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x04 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0004a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x05 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0005a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x06 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0006a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x07 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0007a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x08 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\ba",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x09 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\ta",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0a in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\na",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0b in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u000ba",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0c in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\fa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0d in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\ra",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0e in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u000ea",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0f in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u000fa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x10 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0010a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x11 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0011a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x12 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0012a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x13 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0013a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x14 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0014a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x15 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0015a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x16 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0016a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x17 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0017a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x18 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0018a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x19 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u0019a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1a in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u001aa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1b in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u001ba",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1c in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u001ca",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1d in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u001da",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1e in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u001ea",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1f in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u001fa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x20 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x21 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a!a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x22 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\"a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x23 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a#a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x24 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a$a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x25 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a%a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x26 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a&a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x27 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a'a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x28 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a(a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x29 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a)a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2b in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a+a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2c in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a,a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2f in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a/a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3a in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a:a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3b in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a;a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3c in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a<a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3d in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a=a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3e in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a>a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3f in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a?a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x40 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a@a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x41 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aAa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x42 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aBa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x43 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aCa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x44 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aDa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x45 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aEa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x46 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aFa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x47 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aGa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x48 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aHa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x49 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aIa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4a in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aJa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4b in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aKa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4c in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aLa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4d in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aMa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4e in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aNa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4f in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aOa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x50 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aPa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x51 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aQa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x52 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aRa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x53 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aSa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x54 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aTa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x55 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aUa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x56 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aVa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x57 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aWa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x58 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aXa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x59 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aYa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5a in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "aZa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5b in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a[a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5c in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\\a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5d in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a]a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5e in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a^a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x60 in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a`a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7b in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a{a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7c in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a|a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7d in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a}a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7e in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a~a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7f in parameterised list key - serialise only",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "a\u007fa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x00 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0000a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x01 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0001a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x02 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0002a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x03 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0003a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x04 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0004a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x05 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0005a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x06 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0006a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x07 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0007a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x08 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\ba",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x09 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\ta",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0a starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\na",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0b starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u000ba",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0c starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\fa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0d starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\ra",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0e starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u000ea",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x0f starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u000fa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x10 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0010a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x11 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0011a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x12 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0012a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x13 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0013a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x14 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0014a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x15 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0015a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x16 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0016a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x17 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0017a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x18 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0018a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x19 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u0019a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1a starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u001aa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1b starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u001ba",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1c starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u001ca",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1d starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u001da",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1e starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u001ea",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x1f starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u001fa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x20 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        " a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x21 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "!a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x22 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\"a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x23 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "#a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x24 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "$a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x25 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "%a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x26 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "&a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x27 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "'a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x28 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "(a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x29 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        ")a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2b starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "+a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2c starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        ",a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2d starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "-a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2e starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        ".a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x2f starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "/a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x30 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "0a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x31 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "1a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x32 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "2a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x33 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "3a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x34 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "4a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x35 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "5a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x36 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "6a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x37 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "7a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x38 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "8a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x39 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "9a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3a starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        ":a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3b starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        ";a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3c starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "<a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3d starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "=a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3e starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        ">a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x3f starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "?a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x40 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "@a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x41 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Aa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x42 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Ba",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x43 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Ca",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x44 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Da",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x45 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Ea",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x46 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Fa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x47 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Ga",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x48 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Ha",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x49 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Ia",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4a starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Ja",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4b starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Ka",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4c starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "La",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4d starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Ma",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4e starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Na",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x4f starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Oa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x50 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Pa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x51 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Qa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x52 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Ra",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x53 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Sa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x54 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Ta",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x55 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Ua",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x56 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Va",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x57 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Wa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x58 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Xa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x59 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Ya",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5a starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "Za",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5b starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "[a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5c starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\\a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5d starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "]a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5e starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "^a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x5f starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "_a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x60 starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "`a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7b starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "{a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7c starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "|a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7d starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "}a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7e starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "~a",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    },
+    {
+        "name": "0x7f starting a parameterised list key",
+        "header_type": "list",
+        "expected": [
+            [
+                {
+                    "__type": "token",
+                    "value": "foo"
+                },
+                [
+                    [
+                        "\u007fa",
+                        1
+                    ]
+                ]
+            ]
+        ],
+        "must_fail": true
+    }
+]

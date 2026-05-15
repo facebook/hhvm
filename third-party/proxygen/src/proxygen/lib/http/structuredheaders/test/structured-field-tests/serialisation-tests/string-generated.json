@@ -1,0 +1,299 @@
+[
+    {
+        "name": "0x00 in string - serialise only",
+        "expected": [
+            "\u0000",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x01 in string - serialise only",
+        "expected": [
+            "\u0001",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x02 in string - serialise only",
+        "expected": [
+            "\u0002",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x03 in string - serialise only",
+        "expected": [
+            "\u0003",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x04 in string - serialise only",
+        "expected": [
+            "\u0004",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x05 in string - serialise only",
+        "expected": [
+            "\u0005",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x06 in string - serialise only",
+        "expected": [
+            "\u0006",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x07 in string - serialise only",
+        "expected": [
+            "\u0007",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x08 in string - serialise only",
+        "expected": [
+            "\b",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x09 in string - serialise only",
+        "expected": [
+            "\t",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x0a in string - serialise only",
+        "expected": [
+            "\n",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x0b in string - serialise only",
+        "expected": [
+            "\u000b",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x0c in string - serialise only",
+        "expected": [
+            "\f",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x0d in string - serialise only",
+        "expected": [
+            "\r",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x0e in string - serialise only",
+        "expected": [
+            "\u000e",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x0f in string - serialise only",
+        "expected": [
+            "\u000f",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x10 in string - serialise only",
+        "expected": [
+            "\u0010",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x11 in string - serialise only",
+        "expected": [
+            "\u0011",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x12 in string - serialise only",
+        "expected": [
+            "\u0012",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x13 in string - serialise only",
+        "expected": [
+            "\u0013",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x14 in string - serialise only",
+        "expected": [
+            "\u0014",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x15 in string - serialise only",
+        "expected": [
+            "\u0015",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x16 in string - serialise only",
+        "expected": [
+            "\u0016",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x17 in string - serialise only",
+        "expected": [
+            "\u0017",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x18 in string - serialise only",
+        "expected": [
+            "\u0018",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x19 in string - serialise only",
+        "expected": [
+            "\u0019",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x1a in string - serialise only",
+        "expected": [
+            "\u001a",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x1b in string - serialise only",
+        "expected": [
+            "\u001b",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x1c in string - serialise only",
+        "expected": [
+            "\u001c",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x1d in string - serialise only",
+        "expected": [
+            "\u001d",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x1e in string - serialise only",
+        "expected": [
+            "\u001e",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x1f in string - serialise only",
+        "expected": [
+            "\u001f",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    },
+    {
+        "name": "0x7f in string - serialise only",
+        "expected": [
+            "\u007f",
+            []
+        ],
+        "header_type": "item",
+        "must_fail": true
+    }
+]

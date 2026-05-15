@@ -1,0 +1,50 @@
+[
+    {
+        "name": "date - 1970-01-01 00:00:00",
+        "raw": ["@0"],
+        "header_type": "item",
+        "expected": [{"__type": "date", "value": 0}, []]
+    },
+    {
+        "name": "date - 2022-08-04 01:57:13",
+        "raw": ["@1659578233"],
+        "header_type": "item",
+        "expected": [{"__type": "date", "value": 1659578233}, []]
+    },
+    {
+        "name": "date - 1917-05-30 22:02:47",
+        "raw": ["@-1659578233"],
+        "header_type": "item",
+        "expected": [{"__type": "date", "value": -1659578233}, []]
+    },
+    {
+        "name": "date - 2^31",
+        "raw": ["@2147483648"],
+        "header_type": "item",
+        "expected": [{"__type": "date", "value": 2147483648}, []]
+    },
+    {
+        "name": "date - 2^32",
+        "raw": ["@4294967296"],
+        "header_type": "item",
+        "expected": [{"__type": "date", "value": 4294967296}, []]
+    },
+    {
+        "name": "large date - 9999-12-31 00:00:00",
+        "raw": ["@253402214400"],
+        "header_type": "item",
+        "expected": [{"__type": "date", "value": 253402214400}, []]
+    },
+    {
+        "name": "small date - 0001-01-01 00:00:00",
+        "raw": ["@-62135596800"],
+        "header_type": "item",
+        "expected": [{"__type": "date", "value": -62135596800}, []]
+    },
+    {
+        "name": "date - decimal",
+        "raw": ["@1659578233.12"],
+        "header_type": "item",
+        "must_fail": true
+    }
+]

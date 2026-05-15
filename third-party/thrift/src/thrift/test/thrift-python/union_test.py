@@ -1198,6 +1198,7 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
                 self.fail("Expected match, got none.")
 
         # Re-assign different field
+        # pyrefly: ignore [bad-assignment]
         u.string_field = "world!"
         match u:
             case TestUnionMutable(fbthrift_current_value=None):

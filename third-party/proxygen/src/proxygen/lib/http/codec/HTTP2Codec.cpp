@@ -233,13 +233,11 @@ ErrorCode HTTP2Codec::parseFrame(folly::io::Cursor& cursor) {
       break;
     case http2::FrameType::RFC9218_PRIORITY:
       return parseRFC9218Priority(cursor);
-    case http2::FrameType::CERTIFICATE_REQUEST:
-      return parseCertificateRequest(cursor);
-    case http2::FrameType::CERTIFICATE:
-      return parseCertificate(cursor);
     // The following frame types are defined in the enum but not handled here:
     case http2::FrameType::PRIORITY:
     case http2::FrameType::PADDING:
+    case http2::FrameType::CERTIFICATE_REQUEST:
+    case http2::FrameType::CERTIFICATE:
     case http2::FrameType::CERTIFICATE_NEEDED:
     case http2::FrameType::USE_CERTIFICATE:
     default:
@@ -968,48 +966,6 @@ ErrorCode HTTP2Codec::parseWindowUpdate(Cursor& cursor) {
   return ErrorCode::NO_ERROR;
 }
 
-ErrorCode HTTP2Codec::parseCertificateRequest(Cursor& cursor) {
-  VLOG(4) << "parsing CERTIFICATE_REQUEST frame length=" << curHeader_.length;
-  uint16_t requestId = 0;
-  std::unique_ptr<IOBuf> authRequest;
-
-  auto err = http2::parseCertificateRequest(
-      cursor, curHeader_, requestId, authRequest);
-  RETURN_IF_ERROR(err);
-  if (callback_) {
-    callback_->onCertificateRequest(requestId, std::move(authRequest));
-  }
-  return ErrorCode::NO_ERROR;
-}
-
-ErrorCode HTTP2Codec::parseCertificate(Cursor& cursor) {
-  VLOG(4) << "parsing CERTIFICATE frame length=" << curHeader_.length;
-  uint16_t certId = 0;
-  std::unique_ptr<IOBuf> authData;
-  auto err = http2::parseCertificate(cursor, curHeader_, certId, authData);
-  RETURN_IF_ERROR(err);
-  if (curAuthenticatorBlock_.empty()) {
-    curCertId_ = certId;
-  } else if (certId != curCertId_) {
-    // Received CERTIFICATE frame with different Cert-ID.
-    return ErrorCode::PROTOCOL_ERROR;
-  }
-  curAuthenticatorBlock_.append(std::move(authData));
-  if (curAuthenticatorBlock_.chainLength() > http2::kMaxAuthenticatorBufSize) {
-    // Received excessively long authenticator.
-    return ErrorCode::PROTOCOL_ERROR;
-  }
-  if (!(curHeader_.flags & http2::TO_BE_CONTINUED)) {
-    auto authenticator = curAuthenticatorBlock_.move();
-    if (callback_) {
-      callback_->onCertificate(certId, std::move(authenticator));
-    } else {
-      curAuthenticatorBlock_.reset();
-    }
-  }
-  return ErrorCode::NO_ERROR;
-}
-
 ErrorCode HTTP2Codec::checkNewStream(uint32_t streamId, bool trailersAllowed) {
   bool existingStream = (streamId <= lastStreamID_);
   if (streamId == 0 || (!trailersAllowed && existingStream)) {
@@ -1581,34 +1537,6 @@ size_t HTTP2Codec::generatePriority(folly::IOBufQueue& writeBuf,
       stream,
       http2::FrameType::RFC9218_PRIORITY,
       http2::writeRFC9218Priority(writeBuf, stream, httpPri));
-}
-
-size_t HTTP2Codec::generateCertificateRequest(
-    folly::IOBufQueue& writeBuf,
-    uint16_t requestId,
-    std::unique_ptr<folly::IOBuf> certificateRequestData) {
-  VLOG(4) << "generating CERTIFICATE_REQUEST with Request-ID=" << requestId;
-  return http2::writeCertificateRequest(
-      writeBuf, requestId, std::move(certificateRequestData));
-}
-
-size_t HTTP2Codec::generateCertificate(folly::IOBufQueue& writeBuf,
-                                       uint16_t certId,
-                                       std::unique_ptr<folly::IOBuf> certData) {
-  size_t written = 0;
-  VLOG(4) << "sending CERTIFICATE with Cert-ID=" << certId << "for stream=0";
-  IOBufQueue queue(IOBufQueue::cacheChainLength());
-  queue.append(std::move(certData));
-  // The maximum size of an autenticator fragment, combined with the Cert-ID can
-  // not exceed the maximal allowable size of a sent frame.
-  size_t maxChunkSize = maxSendFrameSize() - sizeof(certId);
-  while (queue.chainLength() > maxChunkSize) {
-    auto chunk = queue.splitAtMost(maxChunkSize);
-    written +=
-        http2::writeCertificate(writeBuf, certId, std::move(chunk), true);
-  }
-  return written +
-         http2::writeCertificate(writeBuf, certId, queue.move(), false);
 }
 
 bool HTTP2Codec::checkConnectionError(ErrorCode err, const folly::IOBuf* buf) {

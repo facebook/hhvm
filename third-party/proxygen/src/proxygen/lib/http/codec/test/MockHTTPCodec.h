@@ -116,30 +116,6 @@ class MockHTTPCodec : public HTTPCodec {
   MOCK_METHOD(size_t,
               generateWindowUpdate,
               (folly::IOBufQueue&, StreamID, uint32_t));
-  MOCK_METHOD(size_t,
-              generateCertificateRequest,
-              (folly::IOBufQueue&, uint16_t, std::shared_ptr<folly::IOBuf>));
-  size_t generateCertificateRequest(
-      folly::IOBufQueue& writeBuf,
-      uint16_t requestId,
-      std::unique_ptr<folly::IOBuf> authRequest) override {
-    return generateCertificateRequest(
-        writeBuf,
-        requestId,
-        std::shared_ptr<folly::IOBuf>(authRequest.release()));
-  }
-  MOCK_METHOD(size_t,
-              generateCertificate,
-              (folly::IOBufQueue&, uint16_t, std::shared_ptr<folly::IOBuf>));
-  size_t generateCertificate(
-      folly::IOBufQueue& writeBuf,
-      uint16_t certId,
-      std::unique_ptr<folly::IOBuf> authenticator) override {
-    return generateCertificate(
-        writeBuf,
-        certId,
-        std::shared_ptr<folly::IOBuf>(authenticator.release()));
-  }
   MOCK_METHOD(HTTPSettings*, getEgressSettings, ());
   MOCK_METHOD(const HTTPSettings*, getIngressSettings, (), (const));
   MOCK_METHOD(void, enableDoubleGoawayDrain, ());
@@ -214,20 +190,6 @@ class MockHTTPCodecCallback : public HTTPCodec::Callback {
               onPriority,
               (HTTPCodec::StreamID, const HTTPMessage::HTTP2Priority&));
   MOCK_METHOD(void, onPriority, (HTTPCodec::StreamID, const HTTPPriority&));
-  MOCK_METHOD(void,
-              onCertificateRequest,
-              (uint16_t, std::shared_ptr<folly::IOBuf>));
-  void onCertificateRequest(
-      uint16_t requestId,
-      std::unique_ptr<folly::IOBuf> certRequestData) override {
-    onCertificateRequest(
-        requestId, std::shared_ptr<folly::IOBuf>(certRequestData.release()));
-  }
-  MOCK_METHOD(void, onCertificate, (uint16_t, std::shared_ptr<folly::IOBuf>));
-  void onCertificate(uint16_t certId,
-                     std::unique_ptr<folly::IOBuf> certData) override {
-    onCertificate(certId, std::shared_ptr<folly::IOBuf>(certData.release()));
-  }
   MOCK_METHOD(void,
               onGenerateFrameHeader,
               (HTTPCodec::StreamID, uint8_t, uint64_t, uint16_t));

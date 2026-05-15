@@ -1176,18 +1176,6 @@ void HTTPSession::onPriority(HTTPCodec::StreamID streamID,
   }
 }
 
-void HTTPSession::onCertificateRequest(uint16_t requestId,
-                                       std::unique_ptr<IOBuf> /*authRequest*/) {
-  DestructorGuard dg(this);
-  VLOG(4) << "CERTIFICATE_REQUEST on" << *this << ", requestId=" << requestId;
-}
-
-void HTTPSession::onCertificate(uint16_t certId,
-                                std::unique_ptr<IOBuf> /*authenticator*/) {
-  DestructorGuard dg(this);
-  VLOG(4) << "CERTIFICATE on" << *this << ", certId=" << certId;
-}
-
 void HTTPSession::onSetSendWindow(uint32_t windowSize) {
   VLOG(4) << *this << " got send window size adjustment. new=" << windowSize;
   invokeOnAllTransactions([windowSize](HTTPTransaction* txn) {

@@ -100,13 +100,6 @@ class HTTP2Codec
                           StreamID /* stream */,
                           HTTPPriority /* priority */) override;
 
-  size_t generateCertificateRequest(
-      folly::IOBufQueue& writeBuf,
-      uint16_t requestId,
-      std::unique_ptr<folly::IOBuf> certificateRequestData) override;
-  size_t generateCertificate(folly::IOBufQueue& writeBuf,
-                             uint16_t certId,
-                             std::unique_ptr<folly::IOBuf> certData) override;
   const HTTPSettings* getIngressSettings() const override {
     return &ingressSettings_;
   }
@@ -213,8 +206,6 @@ class HTTP2Codec
   ErrorCode parseGoaway(folly::io::Cursor& cursor);
   ErrorCode parseContinuation(folly::io::Cursor& cursor);
   ErrorCode parseWindowUpdate(folly::io::Cursor& cursor);
-  ErrorCode parseCertificateRequest(folly::io::Cursor& cursor);
-  ErrorCode parseCertificate(folly::io::Cursor& cursor);
   ErrorCode parseHeadersImpl(folly::io::Cursor& cursor,
                              std::unique_ptr<folly::IOBuf> headerBuf,
                              const folly::Optional<uint32_t>& promisedStream);
@@ -290,10 +281,6 @@ class HTTP2Codec
   bool ingressWebsocketUpgrade_{false};
 
   std::unordered_set<StreamID> upgradedStreams_;
-
-  uint16_t curCertId_{0};
-  folly::IOBufQueue curAuthenticatorBlock_{
-      folly::IOBufQueue::cacheChainLength()};
 
   folly::IOBufQueue curHeaderBlock_{folly::IOBufQueue::cacheChainLength()};
   HTTPSettings ingressSettings_{

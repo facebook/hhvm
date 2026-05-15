@@ -286,22 +286,6 @@ void fakeMockCodec(MockHTTPCodec& codec) {
         writeBuf.append(makeBuf(6));
         return 6;
       }));
-
-  EXPECT_CALL(codec, generateCertificateRequest(_, _, _))
-      .WillRepeatedly(Invoke([](folly::IOBufQueue& writeBuf,
-                                uint16_t /*requestId*/,
-                                std::shared_ptr<folly::IOBuf>) {
-        writeBuf.append(makeBuf(6));
-        return 6;
-      }));
-
-  EXPECT_CALL(codec, generateCertificate(_, _, _))
-      .WillRepeatedly(Invoke([](folly::IOBufQueue& writeBuf,
-                                uint16_t /*certId*/,
-                                std::shared_ptr<folly::IOBuf>) {
-        writeBuf.append(makeBuf(6));
-        return 6;
-      }));
 }
 
 void WtCapsuleCodecCallback::onResetStream(

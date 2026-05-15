@@ -676,14 +676,6 @@ class HTTPCoroSession
                   const HTTPPriority& /*pri*/) override {
   }
 
-  void onCertificateRequest(
-      uint16_t /*requestId*/,
-      std::unique_ptr<folly::IOBuf> /*authRequest*/) override {
-  }
-  void onCertificate(uint16_t /*certId*/,
-                     std::unique_ptr<folly::IOBuf> /*authenticator*/) override {
-  }
-
   void timeoutExpired() noexcept override {
     /* ignore, we have our own timeouts? */
   }

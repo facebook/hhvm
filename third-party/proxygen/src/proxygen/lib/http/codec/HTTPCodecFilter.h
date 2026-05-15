@@ -90,12 +90,6 @@ class PassThroughHTTPCodecFilter : public HTTPCodecFilter {
                              uint64_t length,
                              uint16_t version) override;
 
-  void onCertificateRequest(uint16_t requestId,
-                            std::unique_ptr<folly::IOBuf> authRequest) override;
-
-  void onCertificate(uint16_t certId,
-                     std::unique_ptr<folly::IOBuf> authenticator) override;
-
   [[nodiscard]] uint32_t numOutgoingStreams() const override;
 
   [[nodiscard]] uint32_t numIncomingStreams() const override;
@@ -213,15 +207,6 @@ class PassThroughHTTPCodecFilter : public HTTPCodecFilter {
   size_t generatePushPriority(folly::IOBufQueue& writeBuf,
                               StreamID pushId,
                               HTTPPriority priority) override;
-
-  size_t generateCertificateRequest(
-      folly::IOBufQueue& writeBuf,
-      uint16_t requestId,
-      std::unique_ptr<folly::IOBuf> chain) override;
-
-  size_t generateCertificate(folly::IOBufQueue& writeBuf,
-                             uint16_t certId,
-                             std::unique_ptr<folly::IOBuf> certData) override;
 
   HTTPSettings* getEgressSettings() override;
 

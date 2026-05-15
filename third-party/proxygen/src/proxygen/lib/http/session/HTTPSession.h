@@ -430,10 +430,6 @@ class HTTPSession
   void onSettings(const SettingsList& settings) override;
   void onSettingsAck() override;
   void onPriority(HTTPCodec::StreamID, const HTTPPriority&) override;
-  void onCertificateRequest(uint16_t requestId,
-                            std::unique_ptr<folly::IOBuf> authRequest) override;
-  void onCertificate(uint16_t certId,
-                     std::unique_ptr<folly::IOBuf> authenticator) override;
   uint32_t numOutgoingStreams() const override {
     return outgoingStreams_;
   }

@@ -239,20 +239,6 @@ class FakeHTTPCodecCallback : public HTTPCodec::Callback {
     settingsAcks++;
   }
 
-  void onCertificateRequest(
-      uint16_t requestId, std::unique_ptr<folly::IOBuf> authRequest) override {
-    certificateRequests++;
-    lastCertRequestId = requestId;
-    data_.append(std::move(authRequest));
-  }
-
-  void onCertificate(uint16_t certId,
-                     std::unique_ptr<folly::IOBuf> authenticator) override {
-    certificates++;
-    lastCertId = certId;
-    data_.append(std::move(authenticator));
-  }
-
   uint32_t numOutgoingStreams() const override {
     return 0;
   }
@@ -329,10 +315,6 @@ class FakeHTTPCodecCallback : public HTTPCodec::Callback {
     settings = 0;
     numSettings = 0;
     settingsAcks = 0;
-    certificateRequests = 0;
-    lastCertRequestId = 0;
-    certificates = 0;
-    lastCertId = 0;
     windowSize = 0;
     maxStreams = 0;
     wtInitialMaxData = 0;
@@ -374,10 +356,6 @@ class FakeHTTPCodecCallback : public HTTPCodec::Callback {
     VLOG(verbosity) << "windowUpdateCalls: " << windowUpdateCalls;
     VLOG(verbosity) << "settings: " << settings;
     VLOG(verbosity) << "settingsAcks: " << settingsAcks;
-    VLOG(verbosity) << "certificateRequests: " << certificateRequests;
-    VLOG(verbosity) << "lastCertRequestId: " << lastCertRequestId;
-    VLOG(verbosity) << "certificates: " << certificates;
-    VLOG(verbosity) << "lastCertId: " << lastCertId;
     VLOG(verbosity) << "windowSize: " << windowSize;
     VLOG(verbosity) << "maxStreams: " << maxStreams;
     VLOG(verbosity) << "datagramEnabled: " << datagramEnabled;
@@ -409,10 +387,6 @@ class FakeHTTPCodecCallback : public HTTPCodec::Callback {
   uint32_t settings{0};
   uint64_t numSettings{0};
   uint32_t settingsAcks{0};
-  uint32_t certificateRequests{0};
-  uint16_t lastCertRequestId{0};
-  uint32_t certificates{0};
-  uint16_t lastCertId{0};
   uint64_t windowSize{0};
   uint64_t maxStreams{0};
   uint64_t wtInitialMaxData{0};

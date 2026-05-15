@@ -96,7 +96,7 @@ impl Hasher {
             .collect();
 
         self.hash(&(sorted.len() as u32));
-        sorted.sort_by(|a, b| a.0.cmp(&b.0));
+        sorted.sort_by_key(|a| a.0);
         for (_, item) in &sorted {
             entry_hash_fn(self, item);
         }

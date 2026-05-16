@@ -3809,51 +3809,6 @@ bool fold_offset_into_instr(Vinstr& instr, int64_t offset) {
   }
 }
 
-// Calculate the abstract memory locations that the given instruction
-// may write to. We don't have memory effects on the vasm level, so we
-// use the HHIR ones. We get the origin HHIR instruction corresponding
-// to the vasm instruction, and get the memory effects of that. This
-// is necessarily an overly conservative estimate, but it's better
-// than nothing.
-//
-// Note: this means that we need to keep the origin field properly up
-// to date!
-AliasClass mem_writes_for_inst(const Vinstr& inst) {
-  if (!inst.origin) {
-    // The instruction has no origin, so we have no way to get any
-    // memory effects for it. If the vasm instruction writes to
-    // memory, we act conservatively and assume it can write to
-    // anything (this covers most cases). The exception are the
-    // inlinestart and inlineend instructions, which don't actually do
-    // anything, but mark the transition of stack slots to locals. We
-    // treat these pessimistically as well.
-    if (inst.op == Vinstr::inlinestart ||
-        inst.op == Vinstr::inlineend ||
-        writesMemory(inst.op)) {
-      return AUnknown;
-    }
-    return AEmpty;
-  }
-  // Get the memory effects and use to calculate an aggregated set of
-  // locations that may be written to (for our purposes, killed is
-  // treated as a write).
-  auto const effects = memory_effects(*inst.origin);
-  return match<AliasClass>(
-    effects,
-    [] (const GeneralEffects& e)  { return e.stores | e.kills | e.inout; },
-    [] (const PureLoad&)          { return AEmpty; },
-    [] (const PureStore& a)       { return a.dst; },
-    [] (const PureInlineCall& a)  { return a.base; },
-    [] (const CallEffects& e)     {
-      return e.kills | e.uninits | e.actrec | e.outputs | AHeapAny | ARdsAny;
-    },
-    [] (const ReturnEffects& e)   { return e.kills; },
-    [] (const ExitEffects& e)     { return e.kills | e.uninits; },
-    [] (const IrrelevantEffects&) { return AEmpty; },
-    [] (const UnknownEffects&)    { return AUnknown; }
-  );
-}
-
 // Aggregate all of the abstract locations that may be written to
 // within a block.
 AliasClass mem_writes_for_block(State& state, Vlabel b) {

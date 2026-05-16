@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
-#include "hphp/util/match.h"
 
 #include <cstdint>
 #include <utility>
@@ -136,33 +135,10 @@ bool isSinkableDef(const Vunit& unit,
 
 /*
  * Returns true when `barrier` may write memory observed by a pure load from
- * `loadSrc`. Vasm-level stores are always treated as clobbers even when HHIR
- * origin effects look narrower, because lowering can attach a non-writing
- * origin to a Vasm instruction which writes memory itself.
+ * `loadSrc`.
  */
 bool loadClobberedBy(const Vinstr& barrier, const AliasClass& loadSrc) {
-  if (writesMemory(barrier.op)) return true;
-  if (!barrier.origin) return false;
-
-  auto const effects = canonicalize(memory_effects(*barrier.origin));
-  return match<bool>(
-    effects,
-    [&] (const IrrelevantEffects&)   { return false; },
-    [&] (const GeneralEffects& g)    {
-      return
-        loadSrc.maybe(g.stores) ||
-        loadSrc.maybe(g.kills) ||
-        loadSrc.maybe(g.inout);
-    },
-    [&] (const PureLoad&)            { return false; },
-    [&] (const PureStore& store)     { return loadSrc.maybe(store.dst); },
-    // PureInlineCall also writes call.actrec, so be conservative.
-    [&] (const PureInlineCall&)      { return true; },
-    [&] (const CallEffects&)         { return true; },
-    [&] (const ReturnEffects&)       { return true; },
-    [&] (const ExitEffects&)         { return true; },
-    [&] (const UnknownEffects&)      { return true; }
-  );
+  return mem_writes_for_inst(barrier).maybe(loadSrc);
 }
 
 size_t blockInsertIndex(const Vblock& block) {

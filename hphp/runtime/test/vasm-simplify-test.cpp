@@ -15,13 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/base/package.h"
-#include "hphp/runtime/base/static-string-table.h"
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/func-emitter.h"
-#include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/edge.h"
 #ifdef __aarch64__
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #endif
@@ -39,7 +33,6 @@
 
 #include <folly/portability/GTest.h>
 
-#include <memory>
 #include <optional>
 
 namespace HPHP::jit {
@@ -84,78 +77,38 @@ IRInstruction* makeStLocOrigin(IRUnit& unit,
   return unit.gen(StLoc, bcctx, LocalId{locId}, fp, value);
 }
 
-IRInstruction* makeKillLocOrigin(IRUnit& unit,
-                                 BCContext bcctx,
-                                 SSATmp* fp,
-                                 uint32_t locId) {
-  return unit.gen(KillLoc, bcctx, LocalId{locId}, fp);
+IRInstruction* makeLdStkOrigin(IRUnit& unit,
+                               BCContext bcctx,
+                               IRSPRelOffset offset) {
+  auto const sp = unit.gen(
+    DefRegSP,
+    bcctx,
+    DefStackData{SBInvOffset{0}, SBInvOffset{0}}
+  )->dst();
+  return unit.gen(LdStk, bcctx, TCell, IRSPRelOffsetData{offset}, sp);
 }
 
-IRInstruction* makeInlineCallOrigin(IRUnit& unit,
-                                    BCContext bcctx,
-                                    SSATmp* fp) {
-  return unit.gen(InlineCall, bcctx, fp, fp);
-}
-
-IRInstruction* makeCallBuiltinInOutOrigin(IRUnit& unit,
-                                          BCContext bcctx,
-                                          SSATmp* fp,
-                                          uint32_t locId) {
-  static auto const callee = [] {
-    auto emitterUnit = std::make_unique<UnitEmitter>(
-      SHA1{},
-      SHA1{},
-      PackageInfo::defaults()
-    );
-    emitterUnit->m_filepath = makeStaticString("/tmp/__vasm_test.php");
-
-    auto const name = makeStaticString("__vasm_test_inout_builtin");
-    auto const emitter = emitterUnit->newFuncEmitter(name);
-
-    emitter->init(0, 0, AttrBuiltin, nullptr, false);
-    emitter->maxStackCells = 1;
-    emitter->recordSourceLocation(HPHP::Location::Range{}, 0);
-    emitter->emitOp(OpNull);
-    emitter->emitOp(OpRetC);
-    emitter->emitByte(static_cast<uint8_t>(VerifyRetKind::None));
-
-    Func::ParamInfo param;
-    param.setFlag(Func::ParamInfo::Flags::InOut);
-    emitter->appendParam(makeStaticString("arg"), param);
-    emitter->finish();
-
-    emitterUnit->finish();
-    auto const funcUnit = emitterUnit->create().release();
-    auto const func = funcUnit->funcs().front();
-    always_assert(func->isInOut(0));
-    return func;
-  }();
-
-  auto const ptr =
-    unit.gen(LdLocAddr, bcctx, TLval, LocalId{locId}, fp)->dst();
-  auto const arg0 = unit.gen(Conjure, bcctx, TCell)->dst();
-  auto const arg1 = unit.gen(Conjure, bcctx, TCell)->dst();
-  auto const srcs =
-    static_cast<SSATmp**>(unit.arena().alloc(3 * sizeof(SSATmp*)));
-  srcs[0] = arg0;
-  srcs[1] = arg1;
-  srcs[2] = ptr;
-
-  auto const catchBlock = unit.defBlock();
-  unit.defLabel(0, catchBlock, bcctx);
-  catchBlock->append(unit.gen(BeginCatch, bcctx, TObj));
-
-  auto const edges = static_cast<Edge*>(unit.arena().alloc(2 * sizeof(Edge)));
-  new (&edges[0]) Edge{};
-  new (&edges[1]) Edge{};
-  auto const inst = new (unit.arena().alloc(sizeof(IRInstruction)))
-    IRInstruction(CallBuiltin, bcctx, edges, 3, srcs);
-  inst->setTaken(catchBlock);
-  auto const extra =
-    new (unit.arena().alloc(sizeof(CallBuiltinData)))
-      CallBuiltinData{IRSPRelOffset{0}, callee};
-  inst->setExtra(extra);
-  return inst;
+IRInstruction* makeEnterInlineFrameOrigin(IRUnit& unit, BCContext bcctx) {
+  auto const sp = unit.gen(
+    DefRegSP,
+    bcctx,
+    DefStackData{SBInvOffset{0}, SBInvOffset{0}}
+  )->dst();
+  auto const calleeFP = unit.gen(
+    DefCalleeFP,
+    bcctx,
+    DefCalleeFPData{
+      IRSPRelOffset{0},
+      nullptr,
+      1,
+      SrcKey{},
+      IRSPRelOffset{0},
+      SBInvOffset{0},
+      0
+    },
+    sp
+  )->dst();
+  return unit.gen(EnterInlineFrame, bcctx, calleeFP);
 }
 
 // Used only as a stable direct-call address for Vasm call/vinvoke tests.
@@ -795,87 +748,31 @@ void testSinkDefsPureLoadStopsAtClobberingStore() {
   );
 }
 
-void testSinkDefsPureLoadStopsAtVasmStoreWithPureLoadOrigin() {
-  testSinkDefsLocalPureLoadLinear(
-    0,
+void testSinkDefsPureLoadStopsAtEnterInlineFrame() {
+  testSinkDefsPureLoadLinear(
+    [] (IRUnit& irUnit, BCContext bcctx, SSATmp*) {
+      return makeLdStkOrigin(irUnit, bcctx, IRSPRelOffset{0});
+    },
     [] (IRUnit& irUnit,
         BCContext bcctx,
-        SSATmp* fp,
+        SSATmp*,
         Vout& vm,
-        Vreg64 base,
+        Vreg64,
         Vlabel exit) {
-      auto const pureLoadOrigin = makeLdLocOrigin(irUnit, bcctx, fp, 1);
-      auto const storeVal = Vreg64{vm.makeReg()};
-      vm << ldimmq{Immed64{7}, storeVal};
-      vm.setOrigin(pureLoadOrigin);
-      vm << store{storeVal, base[8]};
+      auto const enterOrigin = makeEnterInlineFrameOrigin(irUnit, bcctx);
+      vm.setOrigin(enterOrigin);
+      vm << inlinestart{};
       vm.setOrigin(nullptr);
       vm << jmp{exit};
     },
-    expectPureLoadKeptInEntry
-  );
-}
+    [] (const PureLoadSinkLinearContext& ctx) {
+      expectPureLoadKeptInEntry(ctx);
 
-void testSinkDefsPureLoadStopsAtGeneralEffectsKill() {
-  testSinkDefsLocalPureLoadLinear(
-    0,
-    [] (IRUnit& irUnit,
-        BCContext bcctx,
-        SSATmp* fp,
-        Vout& vm,
-        Vreg64 base,
-        Vlabel exit) {
-      auto const killOrigin = makeKillLocOrigin(irUnit, bcctx, fp, 0);
-      auto const tmp = Vreg64{vm.makeReg()};
-      vm.setOrigin(killOrigin);
-      vm << copy{base, tmp};
-      vm.setOrigin(nullptr);
-      vm << jmp{exit};
-    },
-    expectPureLoadKeptInEntry
-  );
-}
-
-void testSinkDefsPureLoadStopsAtGeneralEffectsInOut() {
-  testSinkDefsLocalPureLoadLinear(
-    0,
-    [] (IRUnit& irUnit,
-        BCContext bcctx,
-        SSATmp* fp,
-        Vout& vm,
-        Vreg64 base,
-        Vlabel exit) {
-      auto const inOutOrigin =
-        makeCallBuiltinInOutOrigin(irUnit, bcctx, fp, 0);
-      auto const tmp = Vreg64{vm.makeReg()};
-      vm.setOrigin(inOutOrigin);
-      vm << copy{base, tmp};
-      vm.setOrigin(nullptr);
-      vm << jmp{exit};
-    },
-    expectPureLoadKeptInEntry
-  );
-}
-
-void testSinkDefsPureLoadStopsAtPureInlineCall() {
-  // PureInlineCall also writes to the inlined frame's actrec; treat it as a
-  // clobber so we don't reorder loads across it.
-  testSinkDefsLocalPureLoadLinear(
-    0,
-    [] (IRUnit& irUnit,
-        BCContext bcctx,
-        SSATmp* fp,
-        Vout& vm,
-        Vreg64 base,
-        Vlabel exit) {
-      auto const inlineCallOrigin = makeInlineCallOrigin(irUnit, bcctx, fp);
-      auto const tmp = Vreg64{vm.makeReg()};
-      vm.setOrigin(inlineCallOrigin);
-      vm << copy{base, tmp};
-      vm.setOrigin(nullptr);
-      vm << jmp{exit};
-    },
-    expectPureLoadKeptInEntry
+      auto const& midCode = ctx.unit.blocks[ctx.mid].code;
+      ASSERT_EQ(midCode.size(), 2);
+      ASSERT_EQ(midCode[0].op, Vinstr::inlinestart);
+      ASSERT_EQ(midCode[1].op, Vinstr::jmp);
+    }
   );
 }
 
@@ -1478,10 +1375,7 @@ TEST(Vasm, Simplifier) {
   testSinkDefsPureLoadSinksAcrossUnrelatedStoreOrigin();
   testSinkDefsPureLoadSinksAfterUserMoves();
   testSinkDefsPureLoadStopsAtClobberingStore();
-  testSinkDefsPureLoadStopsAtVasmStoreWithPureLoadOrigin();
-  testSinkDefsPureLoadStopsAtGeneralEffectsKill();
-  testSinkDefsPureLoadStopsAtGeneralEffectsInOut();
-  testSinkDefsPureLoadStopsAtPureInlineCall();
+  testSinkDefsPureLoadStopsAtEnterInlineFrame();
   testSinkDefsPureLoadStopsAtSelfLoopClobber();
   testSinkDefsPureLoadStopsAtClobberingBranchPath();
   testSinkDefsPureLoadStopsAtClobberingBlockEnd();

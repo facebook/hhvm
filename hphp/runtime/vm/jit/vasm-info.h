@@ -25,6 +25,7 @@ namespace HPHP::jit {
 
 struct Vreg;
 struct Vinstr;
+struct AliasClass;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -51,6 +52,13 @@ bool touchesMemory(Vinstr::Opcode op);
 bool writesMemory(Vinstr::Opcode op);
 
 /*
+ * Return the abstract memory locations the instruction may write to. This uses
+ * Vasm memory behavior when no HHIR origin is available, and HHIR memory
+ * effects otherwise.
+ */
+AliasClass mem_writes_for_inst(const Vinstr& inst);
+
+/*
  * Returns true if the instruction has some side-effect beyond writing to its
  * declared outputs (It may still read from memory, for example).
  */
@@ -65,4 +73,3 @@ bool isPure(const Vinstr& inst);
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

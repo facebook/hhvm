@@ -153,6 +153,12 @@ size_t blockInsertIndex(const Vblock& block) {
   return idx;
 }
 
+bool targetIsHotter(const Vblock& src, const Vblock& target) {
+  // AreaIndex is ordered from hottest to coldest. Block weights are scaled by
+  // area and model relative execution frequency within the Vunit.
+  return target.area_idx < src.area_idx || target.weight > src.weight;
+}
+
 bool pathClobbersLoad(const Vunit& unit,
                       const SinkAnalysis& analysis,
                       Vlabel src,
@@ -265,6 +271,7 @@ jit::vector<SinkMove> collectSinkMoves(const Vunit& unit,
       }
       if (!target.isValid() || target == b) continue;
       if (!dominates(b, target, analysis.idoms)) continue;
+      if (targetIsHotter(block, unit.blocks[target])) continue;
       if (info.isPureLoad &&
           pathClobbersLoad(
             unit,

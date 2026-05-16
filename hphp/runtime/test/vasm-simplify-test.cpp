@@ -473,6 +473,55 @@ void testSinkDefsKeepsJoinPointDefsInPlace() {
   }
 }
 
+void testSinkDefsKeepsDefsOutOfHotterBlocks() {
+  auto const test = [] (AreaIndex srcArea,
+                        uint64_t srcWeight,
+                        AreaIndex targetArea,
+                        uint64_t targetWeight) {
+    for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+      SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+      Vunit unit;
+      unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+      auto const src = unit.makeBlock(srcArea, srcWeight);
+      auto const target = unit.makeBlock(targetArea, targetWeight);
+
+      Vout v(unit, unit.entry);
+      Vout vs(unit, src);
+      Vout vt(unit, target);
+
+      auto const cand = Vreg64{vs.makeReg()};
+      auto const out = Vreg64{vt.makeReg()};
+
+      v << jmp{src};
+
+      vs << ldimmq{Immed64{42}, cand};
+      vs << jmp{target};
+
+      vt << copy{cand, out};
+      vt << ret{};
+
+      sinkDefs(unit, abi(kind));
+
+      auto const& srcCode = unit.blocks[src].code;
+      ASSERT_EQ(srcCode.size(), 2);
+      ASSERT_EQ(srcCode[0].op, Vinstr::ldimmq);
+      EXPECT_EQ(static_cast<uint64_t>(srcCode[0].ldimmq_.s.q()), 42);
+      EXPECT_EQ(srcCode[0].ldimmq_.d, cand);
+      ASSERT_EQ(srcCode[1].op, Vinstr::jmp);
+
+      auto const& targetCode = unit.blocks[target].code;
+      ASSERT_EQ(targetCode.size(), 2);
+      ASSERT_EQ(targetCode[0].op, Vinstr::copy);
+      EXPECT_EQ(targetCode[0].copy_.s, Vreg{cand});
+      ASSERT_EQ(targetCode[1].op, Vinstr::ret);
+    }
+  };
+
+  test(AreaIndex::Main, 1, AreaIndex::Main, 10);
+  test(AreaIndex::Cold, 10, AreaIndex::Main, 10);
+}
+
 void testSinkDefsMovesDefsWithDeadSF() {
   for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
     SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
@@ -1371,6 +1420,7 @@ TEST(Vasm, Simplifier) {
   testPostRACopyFold();
   testSinkDefsMovesIntoMergeAfterPhidef();
   testSinkDefsKeepsJoinPointDefsInPlace();
+  testSinkDefsKeepsDefsOutOfHotterBlocks();
   testSinkDefsMovesDefsWithDeadSF();
   testSinkDefsPureLoadSinksAcrossUnrelatedStoreOrigin();
   testSinkDefsPureLoadSinksAfterUserMoves();

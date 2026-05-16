@@ -275,16 +275,13 @@ bool simplify_shifted_bit_test(Env& env,
     return false;
   }
 
-  return simplify_impl(env, b, xorIdx, [&] (Vout& v) {
-    v << xorqi64{Immed64{static_cast<int64_t>(shiftedXor)},
-                 extract.src, vxor.dst, vxor.sf, vxor.fl};
-    for (auto i = xorIdx + 1; i < testIdx; ++i) {
-      v << code[i];
-    }
-    v << testqi64{Immed64{static_cast<int64_t>(shiftedTest)},
-                  vxor.dst, vtest.sf, vtest.fl};
-    return testIdx - xorIdx + 1;
-  });
+  simplify_impl(env, b, xorIdx,
+                xorqi64{Immed64{static_cast<int64_t>(shiftedXor)},
+                        extract.src, vxor.dst, vxor.sf, vxor.fl});
+  simplify_impl(env, b, testIdx,
+                testqi64{Immed64{static_cast<int64_t>(shiftedTest)},
+                         vxor.dst, vtest.sf, vtest.fl});
+  return true;
 }
 
 bool simplify(Env& env, const testbi& inst, Vlabel b, size_t i) {
@@ -480,12 +477,22 @@ bool simplify(Env& env, const store& inst, Vlabel b, size_t i) {
     if (!st.s.isGP()) return false;
     const auto rv = is_adjacent_vptr64(inst.d, st.d, 8, -512, 504);
     if (rv != 0) {
+      // If the pair combines stores from different IR instructions, clear the
+      // origin on the merged store so later alias/rematerialization logic
+      // treats it conservatively as an unknown memory write, rather than
+      // attributing both stores to only the first origin.
+      auto const sameOrigin =
+        env.unit.blocks[b].code[i].origin ==
+        env.unit.blocks[b].code[i + 1].origin;
       return simplify_impl(env, b, i, [&] (Vout& v) {
+        auto const saved = v.irctx();
+        if (!sameOrigin) v.setIrctx({nullptr, Vinstr::kInvalidVoff});
         if (rv < 0) {
           v << storepair{inst.s, st.s, inst.d};
         } else {
           v << storepair{st.s, inst.s, st.d};
         }
+        if (!sameOrigin) v.setIrctx(saved);
         return 2;
       });
     }
@@ -502,12 +509,18 @@ bool simplify(Env& env, const storel& inst, Vlabel b, size_t i) {
     if (!st.s.isGP()) return false;
     const auto rv = is_adjacent_vptr64(inst.m, st.m, 4, -256, 252);
     if (rv != 0) {
+      auto const sameOrigin =
+        env.unit.blocks[b].code[i].origin ==
+        env.unit.blocks[b].code[i + 1].origin;
       return simplify_impl(env, b, i, [&] (Vout& v) {
+        auto const saved = v.irctx();
+        if (!sameOrigin) v.setIrctx({nullptr, Vinstr::kInvalidVoff});
         if (rv < 0) {
           v << storepairl{inst.s, st.s, inst.m};
         } else {
           v << storepairl{st.s, inst.s, st.m};
         }
+        if (!sameOrigin) v.setIrctx(saved);
         return 2;
       });
     }
@@ -544,12 +557,18 @@ bool simplify(Env& env, const load& inst, Vlabel b, size_t i) {
 
     const auto rv = is_adjacent_vptr64(inst.s, ld.s, 8, -512, 504);
     if (rv != 0) {
+      auto const sameOrigin =
+        env.unit.blocks[b].code[i].origin ==
+        env.unit.blocks[b].code[i + 1].origin;
       return simplify_impl(env, b, i, [&] (Vout& v) {
+        auto const saved = v.irctx();
+        if (!sameOrigin) v.setIrctx({nullptr, Vinstr::kInvalidVoff});
         if (rv < 0) {
           v << loadpair{inst.s, inst.d, ld.d};
         } else {
           v << loadpair{ld.s, ld.d, inst.d};
         }
+        if (!sameOrigin) v.setIrctx(saved);
         return 2;
       });
     }
@@ -586,12 +605,18 @@ bool simplify(Env& env, const loadl& inst, Vlabel b, size_t i) {
     if (hasDependentUse) return false;
     const auto rv = is_adjacent_vptr64(inst.s, ld.s, 4, -256, 252);
     if (rv != 0) {
+      auto const sameOrigin =
+        env.unit.blocks[b].code[i].origin ==
+        env.unit.blocks[b].code[i + 1].origin;
       return simplify_impl(env, b, i, [&] (Vout& v) {
+        auto const saved = v.irctx();
+        if (!sameOrigin) v.setIrctx({nullptr, Vinstr::kInvalidVoff});
         if (rv < 0) {
           v << loadpairl{inst.s, inst.d, ld.d};
         } else {
           v << loadpairl{ld.s, ld.d, inst.d};
         }
+        if (!sameOrigin) v.setIrctx(saved);
         return 2;
       });
     }

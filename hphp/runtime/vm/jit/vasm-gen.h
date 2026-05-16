@@ -96,6 +96,9 @@ struct Vout {
 
   const IRInstruction* getOrigin() const { return m_irctx.origin; }
 
+  Vinstr::ir_context irctx() const { return m_irctx; }
+  void setIrctx(Vinstr::ir_context ctx) { m_irctx = ctx; }
+
   /*
    * Add a scaling factor. The weight of the current block and all
    * future blocks created from this Vout will be multiplied by the

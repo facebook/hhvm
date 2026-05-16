@@ -290,7 +290,7 @@ static std::atomic<bool> s_TCisFull{false};
 
 TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind,
                                          bool noThreshold) {
-  if (threadIsFull()) {
+  if (threadIsFull() || tcIsFull()) {
     return TranslationResult::Scope::Process;
   }
 

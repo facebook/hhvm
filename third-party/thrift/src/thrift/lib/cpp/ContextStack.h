@@ -20,8 +20,6 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Try.h>
-#include <folly/coro/BlockingWait.h>
-#include <folly/coro/Task.h>
 #include <thrift/lib/cpp/BiDiEventHandler.h>
 #include <thrift/lib/cpp/SerializedMessage.h>
 #include <thrift/lib/cpp/StreamEventHandler.h>
@@ -31,6 +29,11 @@
 #include <thrift/lib/cpp2/async/ClientInterceptorBase.h>
 #include <thrift/lib/cpp2/async/ClientInterceptorStorage.h>
 #include <thrift/lib/cpp2/util/AllocationColocator.h>
+
+namespace folly::coro {
+template <typename T>
+class Task;
+} // namespace folly::coro
 
 namespace apache::thrift {
 
@@ -193,46 +196,23 @@ class ContextStack {
   template <typename T>
   [[nodiscard]] InterceptorResult<T> processClientInterceptorsOnResponse(
       const apache::thrift::transport::THeader* headers,
-      folly::Try<T>&& result) noexcept {
-    folly::exception_wrapper exceptionWrapper;
-    if (result.hasException()) {
-      exceptionWrapper = result.exception();
-    }
-    apache::thrift::util::TypeErasedRef resultRef = [&]() {
-      if (!result.hasValue()) {
-        return apache::thrift::util::TypeErasedRef::of<folly::Unit>(
-            folly::unit);
-      }
-      return apache::thrift::util::TypeErasedRef::of<T>(result.value());
-    }();
-    auto interceptorResult = processClientInterceptorsOnResponse(
-        headers, exceptionWrapper, resultRef);
-    if (auto* syncResult = std::get_if<folly::Try<void>>(&interceptorResult)) {
-      if (syncResult->hasException()) {
-        return folly::Try<T>(syncResult->exception());
-      }
-      return std::move(result);
-    }
-    return [](folly::coro::Task<folly::Try<void>> task,
-              folly::Try<T> r) -> folly::coro::Task<folly::Try<T>> {
-      auto interceptorTry = co_await std::move(task);
-      if (interceptorTry.hasException()) {
-        co_return folly::Try<T>(interceptorTry.exception());
-      }
-      co_return std::move(r);
-    }(std::move(std::get<folly::coro::Task<folly::Try<void>>>(
-                                   std::move(interceptorResult))),
-                               std::move(result));
-  }
+      folly::Try<T>&& result) noexcept;
 
   template <typename T>
   static folly::Try<T> blockingWaitInterceptorResult(
-      InterceptorResult<T>&& result) {
-    if (auto* task = std::get_if<folly::coro::Task<folly::Try<T>>>(&result)) {
-      return folly::coro::blockingWait(std::move(*task));
+      InterceptorResult<T>&& result);
+
+  static folly::Try<void> resolveInterceptorResult(
+      InterceptorResult<void>&& result) {
+    if (auto* syncResult = std::get_if<folly::Try<void>>(&result)) {
+      return *syncResult;
     }
-    return std::get<folly::Try<T>>(std::move(result));
+    return resolveInterceptorResultAsync(std::move(result));
   }
+
+ private:
+  static folly::Try<void> resolveInterceptorResultAsync(
+      InterceptorResult<void>&& result);
 
   // Async continuation for processClientInterceptorsOnResponse.
   //
@@ -306,5 +286,51 @@ class ContextStack {
   std::unique_ptr<folly::IOBuf> getInterceptorFrameworkMetadata(
       const RpcOptions& rpcOptions);
 };
+
+template <typename T>
+ContextStack::InterceptorResult<T>
+ContextStack::processClientInterceptorsOnResponse(
+    const apache::thrift::transport::THeader* headers,
+    folly::Try<T>&& result) noexcept {
+  folly::exception_wrapper exceptionWrapper;
+  if (result.hasException()) {
+    exceptionWrapper = result.exception();
+  }
+  apache::thrift::util::TypeErasedRef resultRef = [&]() {
+    if constexpr (std::is_same_v<T, void>) {
+      return apache::thrift::util::TypeErasedRef::of<folly::Unit>(folly::unit);
+    } else {
+      if (!result.hasValue()) {
+        return apache::thrift::util::TypeErasedRef::of<folly::Unit>(
+            folly::unit);
+      }
+      return apache::thrift::util::TypeErasedRef::of<T>(result.value());
+    }
+  }();
+  auto interceptorResult =
+      processClientInterceptorsOnResponse(headers, exceptionWrapper, resultRef);
+  auto voidTry = resolveInterceptorResult(std::move(interceptorResult));
+  if (voidTry.hasException()) {
+    return folly::Try<T>(voidTry.exception());
+  }
+  return std::move(result);
+}
+
+template <typename T>
+folly::Try<T> ContextStack::blockingWaitInterceptorResult(
+    InterceptorResult<T>&& result) {
+  if constexpr (std::is_same_v<T, void>) {
+    return resolveInterceptorResult(std::move(result));
+  } else {
+    return std::get<folly::Try<T>>(std::move(result));
+  }
+}
+
+extern template ContextStack::InterceptorResult<void>
+ContextStack::processClientInterceptorsOnResponse(
+    const apache::thrift::transport::THeader*, folly::Try<void>&&) noexcept;
+
+extern template folly::Try<void> ContextStack::blockingWaitInterceptorResult(
+    InterceptorResult<void>&&);
 
 } // namespace apache::thrift

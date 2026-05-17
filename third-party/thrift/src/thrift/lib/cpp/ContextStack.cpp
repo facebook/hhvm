@@ -18,6 +18,9 @@
 #include <iterator>
 #include <thrift/lib/cpp/ContextStack.h>
 
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Task.h>
+
 #include <folly/tracing/StaticTracepoint.h>
 
 #include <thrift/lib/cpp/StreamEventHandler.h>
@@ -967,5 +970,19 @@ ContextStackUnsafeAPI::getInterceptorFrameworkMetadata(
   return contextStack_.getInterceptorFrameworkMetadata(rpcOptions);
 }
 } // namespace detail
+
+folly::Try<void> ContextStack::resolveInterceptorResultAsync(
+    InterceptorResult<void>&& result) {
+  return folly::coro::blockingWait(
+      std::move(
+          std::get<folly::coro::Task<folly::Try<void>>>(std::move(result))));
+}
+
+template ContextStack::InterceptorResult<void>
+ContextStack::processClientInterceptorsOnResponse(
+    const apache::thrift::transport::THeader*, folly::Try<void>&&) noexcept;
+
+template folly::Try<void> ContextStack::blockingWaitInterceptorResult(
+    InterceptorResult<void>&&);
 
 } // namespace apache::thrift

@@ -1,8 +1,6 @@
 //// base-a.php
 <?hh
 
-<<file:__EnableUnstableFeatures('require_class')>>
-
 trait A {
   require class D;
 
@@ -26,8 +24,6 @@ final class D extends C {
 }
 //// changed-a.php
 <?hh
-
-<<file:__EnableUnstableFeatures('require_class')>>
 
 trait A {
   require class D;

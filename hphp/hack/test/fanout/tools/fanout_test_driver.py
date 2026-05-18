@@ -7,8 +7,8 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
+import time
 from typing import Any, Dict, List, Optional, Tuple
 
 import attr
@@ -46,12 +46,38 @@ DEFAULT_HH_SERVER_FLAGS: List[str] = [
     "current_saved_state_rollout_flag_index=7",
 ]
 
+FANOUT_LOG_POLL_INTERVAL_SECONDS = 0.1
+FANOUT_LOG_TIMEOUT_SECONDS = 10.0
+
 
 @attr.s(auto_attribs=True)
 class Binaries:
     hh_client: str
     hh_server: str
     hh_single_type_check: str
+    hh_distc: str
+    hh_distc_worker: str
+
+    @staticmethod
+    def from_paths(
+        hh_client: str,
+        hh_server: str,
+        hh_single_type_check: str,
+        hh_distc: str,
+        hh_distc_worker: str,
+    ) -> "Binaries":
+        binary_dir = tempfile.mkdtemp(prefix="fanout-bins-", dir=os.getenv("TEMP"))
+        wrapped_hh_client = os.path.join(binary_dir, "hh_client")
+        wrapped_hh_server = os.path.join(binary_dir, "hh_server")
+        os.symlink(hh_client, wrapped_hh_client)
+        os.symlink(hh_server, wrapped_hh_server)
+        return Binaries(
+            hh_client=wrapped_hh_client,
+            hh_server=wrapped_hh_server,
+            hh_single_type_check=hh_single_type_check,
+            hh_distc=hh_distc,
+            hh_distc_worker=hh_distc_worker,
+        )
 
     def validate(self) -> None:
         if os.path.join(os.path.dirname(self.hh_client), "hh_server") != self.hh_server:
@@ -81,8 +107,10 @@ class Binaries:
             r.check_returncode()
         return r
 
-    def exec_hh_stop(self, repo_root: str) -> subprocess.CompletedProcess[str]:
-        return self.exec_hh(["stop", repo_root])
+    def exec_hh_stop(
+        self, repo_root: str, check: bool = True
+    ) -> subprocess.CompletedProcess[str]:
+        return self.exec_hh(["stop", repo_root], check=check)
 
     def exec_hh_single_type_check(
         self, args: List[str], **kwargs: Any
@@ -100,6 +128,9 @@ class RepoRoot:
     def hhconfig_file(self) -> str:
         return os.path.join(self.path, ".hhconfig")
 
+    def watchmanconfig_file(self) -> str:
+        return os.path.join(self.path, ".watchmanconfig")
+
 
 @attr.s(auto_attribs=True)
 class SavedStateDir:
@@ -115,13 +146,23 @@ class SavedStateDir:
         return os.path.join(self.path, "hh_mini")
 
     def naming_table_sqlite_file(self) -> str:
-        return os.path.join(self.path, "hh_naming.sql")
+        return self.naming_table_blob_file() + "_naming.sql"
+
+    def compressed_dep_graph_file(self) -> str:
+        return self.naming_table_blob_file() + "_64bit_dep_graph.zhhdg"
+
+    def dep_graph_file(self) -> str:
+        return os.path.join(
+            self.path,
+            "hh_mini_saved_state_64bit_dep_graph_decompressed.hhdg",
+        )
 
     def saved_state_spec(self, changed_files: List[str]) -> str:
         return json.dumps(
             {
                 "data_dump": {
                     "state": self.naming_table_blob_file(),
+                    "deptable": self.dep_graph_file(),
                     "changes": changed_files,
                     "prechecked_changes": [],
                     "corresponding_base_revision": "-1",
@@ -180,6 +221,8 @@ def _prepare_repo_root(test: FanoutTest) -> RepoRoot:
     repo_root = RepoRoot(_create_temporary_directory("repo", test.filename))
     logging.debug("Preparing repo root in %s", repo_root.path)
     os.mknod(repo_root.hhconfig_file())
+    with open(repo_root.watchmanconfig_file(), "w") as f:
+        f.write("{}")
     test.prepare_base_php_contents(repo_root.path)
     return repo_root
 
@@ -197,39 +240,37 @@ def _create_saved_state(
         "Generating saved-state for %s in %s", repo_root.path, saved_state_dir.path
     )
 
-    logging.debug("Step 1/3: Generating edges to %s", saved_state_dir.edges_dir())
+    logging.debug("Step 1/3: Generating saved state in %s", saved_state_dir.path)
     _exec(["mkdir", "-p", saved_state_dir.edges_dir()])
-    bins.exec_hh(
+    hh_result = _exec(
         [
-            "--no-load",
-            "--save-64bit",
-            saved_state_dir.edges_dir(),
+            bins.hh_distc,
+            "--cmd",
+            "worker={}".format(bins.hh_distc_worker),
+            "check",
+            "--use-local-execution",
+            "--root",
+            repo_root.path,
             "--save-state",
             saved_state_dir.naming_table_blob_file(),
-            "--gen-saved-ignore-type-errors",
-            "--error-format",
-            "raw",
-            "--config",
-            "store_decls_in_saved_state=true",
+            "--save-64bit",
+            saved_state_dir.edges_dir(),
+            "--write-compressed-depgraph",
+            saved_state_dir.compressed_dep_graph_file(),
         ]
-        + DEFAULT_HH_SERVER_FLAGS
-        + [
-            repo_root.path,
-        ]
+        + DEFAULT_HH_SERVER_FLAGS,
+        check=False,
     )
-    hh_result = bins.exec_hh(["--error-format", "raw", repo_root.path])
-    logging.debug(
-        "Step 2/3: Writing naming table to %s",
-        saved_state_dir.naming_table_sqlite_file(),
-    )
-    bins.exec_hh(
+    if hh_result.returncode not in (0, 2):
+        hh_result.check_returncode()
+    _exec(
         [
-            "--save-naming",
-            saved_state_dir.naming_table_sqlite_file(),
-            repo_root.path,
+            bins.hh_client,
+            "decompress-zhhdg",
+            "--path",
+            saved_state_dir.compressed_dep_graph_file(),
         ]
     )
-    bins.exec_hh_stop(repo_root.path)
     _exec(["rm", "-rf", saved_state_dir.edges_dir()])
     return (hh_result, saved_state_dir)
 
@@ -273,6 +314,7 @@ def _launch_hh_from_saved_state(
             "enable_naming_table_fallback=true",
             "--config",
             "log_categories=fanout_tests",
+            "--ignore-hh-version",
             "--error-format",
             "raw",
         ]
@@ -284,13 +326,57 @@ def _launch_hh_from_saved_state(
     return hh_result
 
 
-def _extract_fanout_information(
-    bins: Binaries, repo_root: RepoRoot, tags: List[str]
+def _get_server_log_file(bins: Binaries, repo_root: RepoRoot) -> str:
+    return bins.exec_hh(["--logname", repo_root.path]).stdout.strip()
+
+
+def _extract_fanout_information_from_log_file(
+    server_log_file: str, tags: List[str]
 ) -> List[FanoutInformation]:
-    server_log_file = bins.exec_hh(["--logname", repo_root.path]).stdout.strip()
     logging.debug("Extracting fanout information from %s", server_log_file)
     fis = FanoutInformation.extract_from_log_file(server_log_file)
     return [fi for fi in fis if fi.tag in tags]
+
+
+def _extract_fanout_information(
+    bins: Binaries, repo_root: RepoRoot, tags: List[str]
+) -> List[FanoutInformation]:
+    return _extract_fanout_information_from_log_file(
+        _get_server_log_file(bins, repo_root), tags
+    )
+
+
+def _wait_for_fanout_information(
+    server_log_file: str,
+    tags: List[str],
+    timeout_seconds: float = FANOUT_LOG_TIMEOUT_SECONDS,
+) -> List[FanoutInformation]:
+    deadline = time.monotonic() + timeout_seconds
+    last_error: Optional[Exception] = None
+    while time.monotonic() < deadline:
+        try:
+            fanout_information = _extract_fanout_information_from_log_file(
+                server_log_file, tags
+            )
+            if fanout_information:
+                return fanout_information
+        except FileNotFoundError as e:
+            last_error = e
+        time.sleep(FANOUT_LOG_POLL_INTERVAL_SECONDS)
+
+    message = "Timed out waiting for fanout information with tags {} in {}".format(
+        tags, server_log_file
+    )
+    if last_error is not None:
+        message += ": {}".format(last_error)
+    raise AssertionError(message)
+
+
+def _stop_hh_best_effort(bins: Binaries, repo_root: RepoRoot) -> None:
+    try:
+        bins.exec_hh_stop(repo_root.path, check=False)
+    except Exception:
+        logging.exception("Failed to stop hh_server for %s", repo_root.path)
 
 
 def _strip_repo_root_from_output(repo_root: str, output: str) -> str:
@@ -318,35 +404,39 @@ def run_scenario_saved_state_init(bins: Binaries, test: FanoutTest) -> None:
     includes the following steps:
 
     1. Build a saved-state for the base version
-    2. Kill hack
-    3. Make the repo changes
-    4. Initialize from the saved-state
-    5. Extract saved-state fanout
+    2. Make the repo changes
+    3. Initialize from the saved-state
+    4. Extract saved-state fanout
+    5. Stop hack
     """
     repo_root = _prepare_repo_root(test)
-    fanout_hash_map = _build_fanout_hash_map(bins, test)
+    saved_state_dir: Optional[SavedStateDir] = None
+    try:
+        fanout_hash_map = _build_fanout_hash_map(bins, test)
 
-    (hh_result_base, saved_state_dir) = _create_saved_state(bins, repo_root, test)
-    changed_files = _make_repo_change(repo_root, test)
-    _launch_hh_from_saved_state(
-        bins,
-        repo_root,
-        saved_state_dir,
-        changed_files=changed_files,
-    )
-    bins.exec_hh_stop(repo_root.path)
+        (hh_result_base, saved_state_dir) = _create_saved_state(bins, repo_root, test)
+        changed_files = _make_repo_change(repo_root, test)
+        _launch_hh_from_saved_state(
+            bins,
+            repo_root,
+            saved_state_dir,
+            changed_files=changed_files,
+        )
 
-    fanout_information = _extract_fanout_information(
-        bins, repo_root, tags=["saved_state_init_fanout"]
-    )
+        server_log_file = _get_server_log_file(bins, repo_root)
+        fanout_information = _wait_for_fanout_information(
+            server_log_file, tags=["saved_state_init_fanout"]
+        )
 
-    _format_result(
-        fanout_information=fanout_information,
-        fanout_hash_map=fanout_hash_map,
-    )
-
-    repo_root.cleanup()
-    saved_state_dir.cleanup()
+        _format_result(
+            fanout_information=fanout_information,
+            fanout_hash_map=fanout_hash_map,
+        )
+    finally:
+        _stop_hh_best_effort(bins, repo_root)
+        repo_root.cleanup()
+        if saved_state_dir is not None:
+            saved_state_dir.cleanup()
 
 
 def run_scenario_incremental_no_old_decls(bins: Binaries, test: FanoutTest) -> None:

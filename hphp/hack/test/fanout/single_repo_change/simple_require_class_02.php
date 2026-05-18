@@ -1,8 +1,6 @@
 //// base-a.php
 <?hh
 
-<<file:__EnableUnstableFeatures('require_class')>>
-
 trait A {
   require class C;
 
@@ -22,8 +20,6 @@ final class C {
 
 //// changed-a.php
 <?hh
-
-<<file:__EnableUnstableFeatures('require_class')>>
 
 trait A {
   require class C;

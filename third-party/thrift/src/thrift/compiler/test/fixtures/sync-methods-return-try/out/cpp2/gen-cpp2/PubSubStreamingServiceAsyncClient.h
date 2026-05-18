@@ -136,12 +136,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_returnstream(_return, returnState);
     if (returnState.ctx()) {
-      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
-      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        (co_await std::move(*task)).throwUnlessValue();
-      } else {
-        std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
-      }
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {
@@ -260,12 +255,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_streamthrows(_return, returnState);
     if (returnState.ctx()) {
-      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
-      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        (co_await std::move(*task)).throwUnlessValue();
-      } else {
-        std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
-      }
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {
@@ -384,12 +374,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_servicethrows(_return, returnState);
     if (returnState.ctx()) {
-      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
-      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        (co_await std::move(*task)).throwUnlessValue();
-      } else {
-        std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
-      }
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {
@@ -508,12 +493,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_servicethrows2(_return, returnState);
     if (returnState.ctx()) {
-      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
-      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        (co_await std::move(*task)).throwUnlessValue();
-      } else {
-        std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
-      }
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {
@@ -632,12 +612,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_boththrows(_return, returnState);
     if (returnState.ctx()) {
-      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
-      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        (co_await std::move(*task)).throwUnlessValue();
-      } else {
-        std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
-      }
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {
@@ -756,12 +731,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_responseandstreamstreamthrows(_return, returnState);
     if (returnState.ctx()) {
-      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
-      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        (co_await std::move(*task)).throwUnlessValue();
-      } else {
-        std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
-      }
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {
@@ -880,12 +850,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_responseandstreamservicethrows(_return, returnState);
     if (returnState.ctx()) {
-      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
-      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        (co_await std::move(*task)).throwUnlessValue();
-      } else {
-        std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
-      }
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {
@@ -1004,12 +969,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_responseandstreamboththrows(_return, returnState);
     if (returnState.ctx()) {
-      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
-      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        (co_await std::move(*task)).throwUnlessValue();
-      } else {
-        std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
-      }
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {

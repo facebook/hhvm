@@ -80,7 +80,7 @@ class TracingClientInterceptor
     return requestData;
   }
 
-  std::optional<folly::coro::Task<void>> onResponse(
+  void onResponse(
       std::int64_t* requestData, ResponseInfo responseInfo) override {
     if (responseInfo.result.hasException()) {
       responseExceptions_.emplace_back(
@@ -92,7 +92,7 @@ class TracingClientInterceptor
         std::string(responseInfo.methodName),
         *requestData,
         responseInfo.headers->getHeaders());
-    return std::nullopt;
+    return;
   }
 
  private:

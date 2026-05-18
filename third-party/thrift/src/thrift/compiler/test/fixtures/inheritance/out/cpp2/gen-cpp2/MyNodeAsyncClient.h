@@ -133,13 +133,7 @@ class Client<::cpp2::MyNode> : public ::cpp2::MyRootAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_do_mid(returnState);
     if (returnState.ctx()) {
-      auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
-      folly::Try<void> tryObj;
-      if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        tryObj = co_await std::move(*task);
-      } else {
-        tryObj = std::get<folly::Try<void>>(std::move(interceptorResult));
-      }
+      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }

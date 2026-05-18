@@ -45,10 +45,7 @@ class ClientInterceptor : public ClientInterceptorBase {
   virtual std::optional<RequestState> onRequest(RequestInfo) {
     return std::nullopt;
   }
-  virtual std::optional<folly::coro::Task<void>> onResponse(
-      RequestState*, ResponseInfo) {
-    return std::nullopt;
-  }
+  virtual void onResponse(RequestState*, ResponseInfo) {}
 
   // Stream lifecycle hooks - override in derived classes to handle streams.
   // RequestState created in onRequest is available in all stream callbacks.
@@ -64,10 +61,9 @@ class ClientInterceptor : public ClientInterceptorBase {
     }
   }
 
-  std::optional<folly::coro::Task<void>> internal_onResponse(
-      ResponseInfo responseInfo) final {
+  void internal_onResponse(ResponseInfo responseInfo) final {
     auto* requestState = getValueAsType<RequestState>(*responseInfo.storage);
-    return onResponse(requestState, std::move(responseInfo));
+    onResponse(requestState, std::move(responseInfo));
   }
 
   void internal_onStreamBegin(

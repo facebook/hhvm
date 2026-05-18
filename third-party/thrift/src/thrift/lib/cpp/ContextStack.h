@@ -20,8 +20,6 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Try.h>
-#include <folly/coro/BlockingWait.h>
-#include <folly/coro/Task.h>
 #include <thrift/lib/cpp/BiDiEventHandler.h>
 #include <thrift/lib/cpp/SerializedMessage.h>
 #include <thrift/lib/cpp/StreamEventHandler.h>
@@ -169,8 +167,7 @@ class ContextStack {
       RpcOptions& options) noexcept;
 
   template <typename T>
-  using InterceptorResult =
-      std::variant<folly::Try<T>, folly::coro::Task<folly::Try<T>>>;
+  using InterceptorResult = std::variant<folly::Try<T>>;
 
   [[nodiscard]] InterceptorResult<void> processClientInterceptorsOnResponse(
       const apache::thrift::transport::THeader* headers,
@@ -207,49 +204,18 @@ class ContextStack {
     }();
     auto interceptorResult = processClientInterceptorsOnResponse(
         headers, exceptionWrapper, resultRef);
-    if (auto* syncResult = std::get_if<folly::Try<void>>(&interceptorResult)) {
-      if (syncResult->hasException()) {
-        return folly::Try<T>(syncResult->exception());
-      }
-      return std::move(result);
+    auto& interceptorTry = std::get<folly::Try<void>>(interceptorResult);
+    if (interceptorTry.hasException()) {
+      return folly::Try<T>(interceptorTry.exception());
     }
-    return [](folly::coro::Task<folly::Try<void>> task,
-              folly::Try<T> r) -> folly::coro::Task<folly::Try<T>> {
-      auto interceptorTry = co_await std::move(task);
-      if (interceptorTry.hasException()) {
-        co_return folly::Try<T>(interceptorTry.exception());
-      }
-      co_return std::move(r);
-    }(std::move(std::get<folly::coro::Task<folly::Try<void>>>(
-                                   std::move(interceptorResult))),
-                               std::move(result));
+    return std::move(result);
   }
 
   template <typename T>
   static folly::Try<T> blockingWaitInterceptorResult(
       InterceptorResult<T>&& result) {
-    if (auto* task = std::get_if<folly::coro::Task<folly::Try<T>>>(&result)) {
-      return folly::coro::blockingWait(std::move(*task));
-    }
     return std::get<folly::Try<T>>(std::move(result));
   }
-
-  // Async continuation for processClientInterceptorsOnResponse.
-  //
-  // processClientInterceptorsOnResponse is deliberately NOT a coroutine —
-  // when all interceptors return std::nullopt (the common case), it returns
-  // Try<void> directly with zero coroutine frame allocation.
-  //
-  // When an interceptor returns a Task, processClientInterceptorsOnResponse
-  // calls this method to co_await it and process remaining interceptors.
-  // Once inside this coroutine, subsequent Tasks are co_awaited directly.
-  static folly::coro::Task<folly::Try<void>> processRemainingInterceptorsAsync(
-      folly::coro::Task<void> currentTask,
-      std::ptrdiff_t index,
-      ContextStack* self,
-      const apache::thrift::transport::THeader* headers,
-      ClientInterceptorOnResponseResult result,
-      std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions);
 
  private:
   std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>

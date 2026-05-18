@@ -65,32 +65,27 @@ class RandomSelector {
 };
 } // namespace
 
-OuterECHClientHello generateGreaseECH(
+Status generateGreaseECH(
+    OuterECHClientHello& ret,
+    Error& err,
     const GreaseECHSetting& setting,
     const Factory& factory,
     size_t encodedChloSize) {
   RandomSelector selector{RandomNumberGenerator{factory}};
-  OuterECHClientHello echExtension;
-  echExtension.cipher_suite = HpkeSymmetricCipherSuite{
+  ret.cipher_suite = HpkeSymmetricCipherSuite{
       selector.select(setting.kdfs), selector.select(setting.aeads)};
-  echExtension.config_id =
-      selector.genNumber(setting.minConfigId, setting.maxConfigId);
-  echExtension.enc = factory.makeRandomIOBuf(selector.select(setting.keySizes));
+  ret.config_id = selector.genNumber(setting.minConfigId, setting.maxConfigId);
+  ret.enc = factory.makeRandomIOBuf(selector.select(setting.keySizes));
   size_t payloadSize =
       selector.genNumber(setting.minPayloadSize, setting.maxPayloadSize);
   if (setting.payloadStrategy == PayloadGenerationStrategy::Computed) {
     size_t cipherOverhead;
-    Error cipherOverheadErr;
-    FIZZ_THROW_ON_ERROR(
-        hpke::getCipherOverhead(
-            cipherOverhead,
-            cipherOverheadErr,
-            echExtension.cipher_suite.aead_id),
-        cipherOverheadErr);
+    FIZZ_RETURN_ON_ERROR(
+        hpke::getCipherOverhead(cipherOverhead, err, ret.cipher_suite.aead_id));
     payloadSize += encodedChloSize + cipherOverhead;
   }
-  echExtension.payload = factory.makeRandomIOBuf(payloadSize);
-  return echExtension;
+  ret.payload = factory.makeRandomIOBuf(payloadSize);
+  return Status::Success;
 }
 } // namespace ech
 } // namespace fizz

@@ -208,18 +208,19 @@ void FizzBase<Derived, ActionMoveVisitor, StateMachine>::
 }
 
 template <typename Derived, typename ActionMoveVisitor, typename StateMachine>
-Buf FizzBase<Derived, ActionMoveVisitor, StateMachine>::
-    getExportedKeyingMaterial(
-        const Factory& factory,
-        folly::StringPiece label,
-        Buf context,
-        uint16_t length) const {
+Status
+FizzBase<Derived, ActionMoveVisitor, StateMachine>::getExportedKeyingMaterial(
+    Buf& ret,
+    Error& err,
+    const Factory& factory,
+    folly::StringPiece label,
+    Buf context,
+    uint16_t length) const {
   if (!state_.cipher() || !state_.exporterMasterSecret()) {
-    return nullptr;
+    ret = nullptr;
+    return Status::Success;
   }
-  Buf ret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
+  FIZZ_RETURN_ON_ERROR(
       Exporter::getExportedKeyingMaterial(
           ret,
           err,
@@ -228,8 +229,7 @@ Buf FizzBase<Derived, ActionMoveVisitor, StateMachine>::
           (*state_.exporterMasterSecret())->coalesce(),
           label,
           std::move(context),
-          length),
-      err);
-  return ret;
+          length));
+  return Status::Success;
 }
 } // namespace fizz

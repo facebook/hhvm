@@ -918,13 +918,14 @@ TEST(EncryptionTest, TestSetShloAcceptance) {
   auto context = std::make_unique<MockHandshakeContext>();
   auto scheduler = std::make_unique<MockKeyScheduler>();
   auto acceptSecret = std::vector<uint8_t>(kEchAcceptConfirmationSize, 0xAC);
-  EXPECT_CALL(*context, appendToTranscript(DummyShloMatch(&shlo)));
-  EXPECT_CALL(*context, getHandshakeContext()).WillOnce(Invoke([]() {
+  EXPECT_CALL(*context, _appendToTranscript(DummyShloMatch(&shlo)));
+  EXPECT_CALL(*context, _getHandshakeContext()).WillOnce(Invoke([]() {
     return folly::IOBuf::copyBuffer("dummyshlo");
   }));
   EXPECT_CALL(
       *scheduler,
-      getSecret(EarlySecrets::ECHAcceptConfirmation, RangeMatches("dummyshlo")))
+      _getSecret(
+          EarlySecrets::ECHAcceptConfirmation, RangeMatches("dummyshlo")))
       .WillOnce(InvokeWithoutArgs([&]() {
         return DerivedSecret(acceptSecret, EarlySecrets::ECHAcceptConfirmation);
       }));
@@ -954,13 +955,13 @@ TEST(EncryptionTest, TestSetHRRAcceptance) {
   auto context = std::make_unique<MockHandshakeContext>();
   auto scheduler = std::make_unique<MockKeyScheduler>();
   auto acceptSecret = std::vector<uint8_t>(kEchAcceptConfirmationSize, 0xAC);
-  EXPECT_CALL(*context, appendToTranscript(DummyHrrMatch(&hrr)));
-  EXPECT_CALL(*context, getHandshakeContext()).WillOnce(Invoke([]() {
+  EXPECT_CALL(*context, _appendToTranscript(DummyHrrMatch(&hrr)));
+  EXPECT_CALL(*context, _getHandshakeContext()).WillOnce(Invoke([]() {
     return folly::IOBuf::copyBuffer("dummyhrr");
   }));
   EXPECT_CALL(
       *scheduler,
-      getSecret(
+      _getSecret(
           EarlySecrets::HRRECHAcceptConfirmation, RangeMatches("dummyhrr")))
       .WillOnce(InvokeWithoutArgs([&]() {
         return DerivedSecret(
@@ -987,13 +988,14 @@ TEST(EncryptionTest, TestCheckShloAcceptance) {
   auto acceptSecret = std::vector<uint8_t>(kEchAcceptConfirmationSize, 0xAC);
   std::fill(
       shlo.random.end() - kEchAcceptConfirmationSize, shlo.random.end(), 0xAC);
-  EXPECT_CALL(*context, appendToTranscript(DummyShloMatch(&shlo)));
-  EXPECT_CALL(*context, getHandshakeContext()).WillOnce(Invoke([]() {
+  EXPECT_CALL(*context, _appendToTranscript(DummyShloMatch(&shlo)));
+  EXPECT_CALL(*context, _getHandshakeContext()).WillOnce(Invoke([]() {
     return folly::IOBuf::copyBuffer("dummyshlo");
   }));
   EXPECT_CALL(
       *scheduler,
-      getSecret(EarlySecrets::ECHAcceptConfirmation, RangeMatches("dummyshlo")))
+      _getSecret(
+          EarlySecrets::ECHAcceptConfirmation, RangeMatches("dummyshlo")))
       .WillOnce(InvokeWithoutArgs([&]() {
         return DerivedSecret(acceptSecret, EarlySecrets::ECHAcceptConfirmation);
       }));
@@ -1013,13 +1015,13 @@ TEST(EncryptionTest, TestCheckHrrAcceptance) {
   auto context = std::make_unique<MockHandshakeContext>();
   auto scheduler = std::make_unique<MockKeyScheduler>();
   auto acceptSecret = std::vector<uint8_t>(kEchAcceptConfirmationSize, 0xAC);
-  EXPECT_CALL(*context, appendToTranscript(DummyHrrMatch(&hrr)));
-  EXPECT_CALL(*context, getHandshakeContext()).WillOnce(Invoke([]() {
+  EXPECT_CALL(*context, _appendToTranscript(DummyHrrMatch(&hrr)));
+  EXPECT_CALL(*context, _getHandshakeContext()).WillOnce(Invoke([]() {
     return folly::IOBuf::copyBuffer("dummyhrr");
   }));
   EXPECT_CALL(
       *scheduler,
-      getSecret(
+      _getSecret(
           EarlySecrets::HRRECHAcceptConfirmation, RangeMatches("dummyhrr")))
       .WillOnce(InvokeWithoutArgs([&]() {
         return DerivedSecret(

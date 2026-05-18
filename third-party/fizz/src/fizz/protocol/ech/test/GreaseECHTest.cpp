@@ -32,7 +32,9 @@ TEST(GreaseECHTest, TestGenerateRandomGreaseECH) {
 
   GreaseECHSetting setting{};
   setting.maxPayloadSize = 100;
-  auto greaseEch = generateGreaseECH(setting, factory, 0);
+  OuterECHClientHello greaseEch;
+  EXPECT_EQ(
+      generateGreaseECH(greaseEch, err, setting, factory, 0), Status::Success);
 
   std::array<hpke::KDFId, 3> kdfs{
       hpke::KDFId::Sha256, hpke::KDFId::Sha384, hpke::KDFId::Sha512};
@@ -82,7 +84,10 @@ TEST(GreaseECHTest, TestGenerateComputedGreaseECH) {
       /* keySizes = */ {32},
       /* kdfs = */ {hpke::KDFId::Sha256},
       /* aeads = */ {hpke::AeadId::TLS_AES_128_GCM_SHA256}};
-  auto greaseEch = generateGreaseECH(setting, factory, encodedChloSize);
+  OuterECHClientHello greaseEch;
+  EXPECT_EQ(
+      generateGreaseECH(greaseEch, err, setting, factory, encodedChloSize),
+      Status::Success);
 
   EXPECT_EQ(hpke::KDFId::Sha256, greaseEch.cipher_suite.kdf_id);
   EXPECT_EQ(

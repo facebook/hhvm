@@ -347,11 +347,16 @@ Status calculateAcceptConfirmation(
   Buf encodedShloEch;
   FIZZ_RETURN_ON_ERROR(
       encodeHandshake(encodedShloEch, err, std::move(shloEch)));
-  context->appendToTranscript(encodedShloEch);
+  FIZZ_RETURN_ON_ERROR(context->appendToTranscript(err, encodedShloEch));
 
-  auto hsc = context->getHandshakeContext();
-  auto echAcceptance = scheduler->getSecret(
-      EarlySecrets::ECHAcceptConfirmation, hsc->coalesce());
+  Buf hsc;
+  FIZZ_RETURN_ON_ERROR(context->getHandshakeContext(hsc, err));
+  DerivedSecret echAcceptance;
+  FIZZ_RETURN_ON_ERROR(scheduler->getSecret(
+      echAcceptance,
+      err,
+      EarlySecrets::ECHAcceptConfirmation,
+      hsc->coalesce()));
 
   ret = std::move(echAcceptance.secret);
   return Status::Success;
@@ -368,11 +373,16 @@ Status calculateAcceptConfirmation(
   auto hrrEch = makeDummyHRR(hrr);
   Buf encodedHrrEch;
   FIZZ_RETURN_ON_ERROR(encodeHandshake(encodedHrrEch, err, std::move(hrrEch)));
-  context->appendToTranscript(encodedHrrEch);
+  FIZZ_RETURN_ON_ERROR(context->appendToTranscript(err, encodedHrrEch));
 
-  auto hsc = context->getHandshakeContext();
-  auto echAcceptance = scheduler->getSecret(
-      EarlySecrets::HRRECHAcceptConfirmation, hsc->coalesce());
+  Buf hsc2;
+  FIZZ_RETURN_ON_ERROR(context->getHandshakeContext(hsc2, err));
+  DerivedSecret echAcceptance;
+  FIZZ_RETURN_ON_ERROR(scheduler->getSecret(
+      echAcceptance,
+      err,
+      EarlySecrets::HRRECHAcceptConfirmation,
+      hsc2->coalesce()));
 
   if (echAcceptance.secret.size() < kEchAcceptConfirmationSize) {
     FIZZ_VLOG(8) << "ECH acceptance secret too small?";

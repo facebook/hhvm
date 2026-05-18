@@ -14,7 +14,9 @@
 
 namespace fizz {
 namespace ech {
-OuterECHClientHello generateGreaseECH(
+Status generateGreaseECH(
+    OuterECHClientHello& ret,
+    Error& err,
     const GreaseECHSetting& setting,
     const Factory& factory,
     size_t encodedChloSize);

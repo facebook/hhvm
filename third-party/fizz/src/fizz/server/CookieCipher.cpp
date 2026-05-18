@@ -125,8 +125,12 @@ CookieState getCookieState(
   std::unique_ptr<HandshakeContext> handshakeContext;
   FIZZ_THROW_ON_ERROR(
       factory.makeHandshakeContext(handshakeContext, err, *cipher), err);
-  handshakeContext->appendToTranscript(*chlo.originalEncoding);
-  state.chloHash = handshakeContext->getHandshakeContext();
+  FIZZ_THROW_ON_ERROR(
+      handshakeContext->appendToTranscript(err, *chlo.originalEncoding), err);
+  Buf chloHash;
+  FIZZ_THROW_ON_ERROR(
+      handshakeContext->getHandshakeContext(chloHash, err), err);
+  state.chloHash = std::move(chloHash);
 
   return state;
 }

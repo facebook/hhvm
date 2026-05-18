@@ -39,8 +39,9 @@ class Protocol {
       CipherSuite cipher,
       folly::ByteRange secret) {
     FIZZ_RETURN_ON_ERROR(factory.makeAead(ret, err, cipher));
-    auto trafficKey =
-        scheduler.getTrafficKey(secret, ret->keyLength(), ret->ivLength());
+    TrafficKey trafficKey;
+    FIZZ_RETURN_ON_ERROR(scheduler.getTrafficKey(
+        trafficKey, err, secret, ret->keyLength(), ret->ivLength()));
     FIZZ_RETURN_ON_ERROR(ret->setKey(err, std::move(trafficKey)));
     return Status::Success;
   }
@@ -55,8 +56,15 @@ class Protocol {
       folly::StringPiece keyLabel,
       folly::StringPiece ivLabel) {
     FIZZ_RETURN_ON_ERROR(factory.makeAead(ret, err, cipher));
-    auto trafficKey = scheduler.getTrafficKeyWithLabel(
-        secret, keyLabel, ivLabel, ret->keyLength(), ret->ivLength());
+    TrafficKey trafficKey;
+    FIZZ_RETURN_ON_ERROR(scheduler.getTrafficKeyWithLabel(
+        trafficKey,
+        err,
+        secret,
+        keyLabel,
+        ivLabel,
+        ret->keyLength(),
+        ret->ivLength()));
     FIZZ_RETURN_ON_ERROR(ret->setKey(err, std::move(trafficKey)));
     return Status::Success;
   }
@@ -67,10 +75,10 @@ class Protocol {
       folly::ByteRange handshakeWriteSecret,
       HandshakeContext& handshakeContext) {
     Finished finished;
-    finished.verify_data =
-        handshakeContext.getFinishedData(handshakeWriteSecret);
+    FIZZ_RETURN_ON_ERROR(handshakeContext.getFinishedData(
+        finished.verify_data, err, handshakeWriteSecret));
     FIZZ_RETURN_ON_ERROR(encodeHandshake(ret, err, std::move(finished)));
-    handshakeContext.appendToTranscript(ret);
+    FIZZ_RETURN_ON_ERROR(handshakeContext.appendToTranscript(err, ret));
     return Status::Success;
   }
 

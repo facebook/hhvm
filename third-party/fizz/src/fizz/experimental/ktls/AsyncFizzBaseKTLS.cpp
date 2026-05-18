@@ -29,8 +29,15 @@ static void setPskAndSecret(
     CachedPsk& psk,
     NewSessionTicket& nst,
     folly::ByteRange resumptionSecret) {
-  auto derivedResumptionSecret =
-      ks.getResumptionSecret(resumptionSecret, nst.ticket_nonce->coalesce());
+  Buf derivedResumptionSecret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      ks.getResumptionSecret(
+          derivedResumptionSecret,
+          err,
+          resumptionSecret,
+          nst.ticket_nonce->coalesce()),
+      err);
 
   auto pskRange = nst.ticket->coalesce();
   auto secretRange = derivedResumptionSecret->coalesce();

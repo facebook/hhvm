@@ -31,9 +31,12 @@ AsyncSelfCert::getCertificateAndSign(
     FIZZ_THROW_ON_ERROR(
         encodeHandshake(encodedCertificate, err, std::move(certMsg)), err);
   }
-  handshakeContext->appendToTranscript(encodedCertificate);
+  FIZZ_THROW_ON_ERROR(
+      handshakeContext->appendToTranscript(err, encodedCertificate), err);
 
-  auto toBeSigned = handshakeContext->getHandshakeContext();
+  Buf toBeSigned;
+  FIZZ_THROW_ON_ERROR(
+      handshakeContext->getHandshakeContext(toBeSigned, err), err);
   return signFuture(sigScheme, verifyContext, std::move(toBeSigned))
       .deferValue(
           [encodedCertificate =

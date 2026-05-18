@@ -196,8 +196,18 @@ Buf AsyncFizzServerT<SM>::getExportedKeyingMaterial(
     folly::StringPiece label,
     Buf context,
     uint16_t length) const {
-  return fizzServer_.getExportedKeyingMaterial(
-      *fizzContext_->getFactory(), label, std::move(context), length);
+  Buf ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizzServer_.getExportedKeyingMaterial(
+          ret,
+          err,
+          *fizzContext_->getFactory(),
+          label,
+          std::move(context),
+          length),
+      err);
+  return ret;
 }
 
 template <typename SM>

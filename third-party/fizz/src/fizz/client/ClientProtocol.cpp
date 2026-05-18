@@ -684,10 +684,13 @@ static Status encodeAndAddBinders(
     const Clock& clock) {
   TRY(scheduler.deriveEarlySecret(err, folly::range(psk.secret)));
 
-  auto binderKey = scheduler.getSecret(
+  DerivedSecret binderKey;
+  TRY(scheduler.getSecret(
+      binderKey,
+      err,
       psk.type == PskType::External ? EarlySecrets::ExternalPskBinder
                                     : EarlySecrets::ResumptionPskBinder,
-      handshakeContext.getBlankContext());
+      handshakeContext.getBlankContext()));
 
   ClientPresharedKey pskExt;
   TRY(getPskExtension(pskExt, err, psk, clock));
@@ -706,12 +709,12 @@ static Status encodeAndAddBinders(
     folly::IOBufQueue chloQueue(folly::IOBufQueue::cacheChainLength());
     chloQueue.append(std::move(preEncoded));
     auto chloPrefix = chloQueue.split(chloQueue.chainLength() - binderLength);
-    handshakeContext.appendToTranscript(chloPrefix);
+    TRY(handshakeContext.appendToTranscript(err, chloPrefix));
   }
 
   PskBinder binder;
-  binder.binder =
-      handshakeContext.getFinishedData(folly::range(binderKey.secret));
+  TRY(handshakeContext.getFinishedData(
+      binder.binder, err, folly::range(binderKey.secret)));
   pskExt.binders.clear();
   pskExt.binders.push_back(std::move(binder));
 
@@ -727,7 +730,7 @@ static Status encodeAndAddBinders(
   folly::IOBufQueue chloQueue(folly::IOBufQueue::cacheChainLength());
   chloQueue.append(encoded->clone());
   chloQueue.split(chloQueue.chainLength() - binderLength);
-  handshakeContext.appendToTranscript(chloQueue.move());
+  TRY(handshakeContext.appendToTranscript(err, chloQueue.move()));
   ret = std::move(encoded);
   return Status::Success;
 }
@@ -1050,8 +1053,13 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
       context->getGreaseECHSetting().hasValue() &&
       context->getGreaseECHSetting()->payloadStrategy ==
           ech::PayloadGenerationStrategy::UniformRandom) {
-    auto greaseECH = ech::generateGreaseECH(
-        *context->getGreaseECHSetting(), *context->getFactory(), 0);
+    ech::OuterECHClientHello greaseECH;
+    TRY(ech::generateGreaseECH(
+        greaseECH,
+        ctx.err,
+        *context->getGreaseECHSetting(),
+        *context->getFactory(),
+        0));
     Extension greaseExt;
     TRY(encodeExtension(greaseExt, ctx.err, greaseECH));
     chlo.extensions.push_back(std::move(greaseExt));
@@ -1082,9 +1090,15 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
         *context->getClock()));
 
     if (earlyDataParams) {
-      auto earlyWriteSecret = keyScheduler->getSecret(
+      Buf earlyHandshakeContext;
+      TRY(handshakeContext->getHandshakeContext(
+          earlyHandshakeContext, ctx.err));
+      DerivedSecret earlyWriteSecret;
+      TRY(keyScheduler->getSecret(
+          earlyWriteSecret,
+          ctx.err,
           EarlySecrets::ClientEarlyTraffic,
-          handshakeContext->getHandshakeContext()->coalesce());
+          earlyHandshakeContext->coalesce()));
       if (!context->getOmitEarlyRecordLayer()) {
         earlyWriteRecordLayer =
             context->getFactory()->makeEncryptedWriteRecordLayer(
@@ -1100,9 +1114,15 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
       }
       earlyWriteSecretAvailable = SecretAvailable(std::move(earlyWriteSecret));
 
-      earlyExporterVector = keyScheduler->getSecret(
+      Buf earlyExporterContext;
+      TRY(handshakeContext->getHandshakeContext(earlyExporterContext, ctx.err));
+      DerivedSecret earlyExporterVectorVal;
+      TRY(keyScheduler->getSecret(
+          earlyExporterVectorVal,
+          ctx.err,
           EarlySecrets::EarlyExporter,
-          handshakeContext->getHandshakeContext()->coalesce());
+          earlyExporterContext->coalesce()));
+      earlyExporterVector = std::move(earlyExporterVectorVal);
       earlyDataParams->earlyExporterSecret =
           folly::IOBuf::copyBuffer(earlyExporterVector->secret);
 
@@ -1155,10 +1175,13 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
       context->getGreaseECHSetting().hasValue() &&
       context->getGreaseECHSetting()->payloadStrategy ==
           ech::PayloadGenerationStrategy::Computed) {
-    auto greaseECH = ech::generateGreaseECH(
+    ech::OuterECHClientHello greaseECH;
+    TRY(ech::generateGreaseECH(
+        greaseECH,
+        ctx.err,
         *context->getGreaseECHSetting(),
         *context->getFactory(),
-        encodedClientHello->computeChainDataLength());
+        encodedClientHello->computeChainDataLength()));
     Extension greaseExt;
     TRY(encodeExtension(greaseExt, ctx.err, greaseECH));
     chlo.extensions.push_back(std::move(greaseExt));
@@ -1519,10 +1542,10 @@ Status sm::EventHandler<
     TRY(kex->generateSharedSecret(
         sharedSecret, ctx.err, serverShare->coalesce()));
     FOLLY_POP_WARNING
-    scheduler->deriveHandshakeSecret(sharedSecret->coalesce());
+    TRY(scheduler->deriveHandshakeSecret(ctx.err, sharedSecret->coalesce()));
   } else {
     keyExchangeType = KeyExchangeType::None;
-    scheduler->deriveHandshakeSecret();
+    TRY(scheduler->deriveHandshakeSecret(ctx.err));
   }
 
   // At this point there are two possible contexts at play: the main one (which
@@ -1548,9 +1571,11 @@ Status sm::EventHandler<
     if (state.echState().has_value()) {
       TRY(state.context()->getFactory()->makeHandshakeContext(
           echHandshakeContext, ctx.err, cipher));
-      echHandshakeContext->appendToTranscript(state.echState()->encodedECH);
+      TRY(echHandshakeContext->appendToTranscript(
+          ctx.err, state.echState()->encodedECH));
     }
-    handshakeContext->appendToTranscript(state.encodedClientHello());
+    TRY(handshakeContext->appendToTranscript(
+        ctx.err, state.encodedClientHello()));
   }
 
   folly::Optional<ECHStatus> echStatus;
@@ -1563,11 +1588,13 @@ Status sm::EventHandler<
     TRY(echScheduler->deriveEarlySecret(
         ctx.err, folly::range(state.echState()->random)));
     bool acceptedECH = false;
+    std::unique_ptr<HandshakeContext> echHandshakeContextClone;
+    TRY(echHandshakeContext->clone(echHandshakeContextClone, ctx.err));
     TRY(ech::checkECHAccepted(
         acceptedECH,
         ctx.err,
         shlo,
-        echHandshakeContext->clone(),
+        std::move(echHandshakeContextClone),
         std::move(echScheduler)));
     if (state.echState()->status != ECHStatus::Requested &&
         acceptedECH != (state.echState()->status == ECHStatus::Accepted)) {
@@ -1593,7 +1620,7 @@ Status sm::EventHandler<
         AlertDescription::illegal_parameter);
   }
 
-  handshakeContext->appendToTranscript(*shlo.originalEncoding);
+  TRY(handshakeContext->appendToTranscript(ctx.err, *shlo.originalEncoding));
 
   if (state.readRecordLayer()->hasUnparsedHandshakeData()) {
     return ctx.err.error(
@@ -1604,9 +1631,14 @@ Status sm::EventHandler<
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
           EncryptionLevel::Handshake);
   TRY(handshakeWriteRecordLayer->setProtocolVersion(ctx.err, version));
-  auto handshakeWriteSecret = scheduler->getSecret(
+  Buf handshakeWriteContext;
+  TRY(handshakeContext->getHandshakeContext(handshakeWriteContext, ctx.err));
+  DerivedSecret handshakeWriteSecret;
+  TRY(scheduler->getSecret(
+      handshakeWriteSecret,
+      ctx.err,
       HandshakeSecrets::ClientHandshakeTraffic,
-      handshakeContext->getHandshakeContext()->coalesce());
+      handshakeWriteContext->coalesce()));
   TRY(Protocol::setAead(
       ctx.err,
       *handshakeWriteRecordLayer,
@@ -1619,9 +1651,14 @@ Status sm::EventHandler<
       state.context()->getFactory()->makeEncryptedReadRecordLayer(
           EncryptionLevel::Handshake);
   TRY(handshakeReadRecordLayer->setProtocolVersion(ctx.err, version));
-  auto handshakeReadSecret = scheduler->getSecret(
+  Buf handshakeReadContext;
+  TRY(handshakeContext->getHandshakeContext(handshakeReadContext, ctx.err));
+  DerivedSecret handshakeReadSecret;
+  TRY(scheduler->getSecret(
+      handshakeReadSecret,
+      ctx.err,
       HandshakeSecrets::ServerHandshakeTraffic,
-      handshakeContext->getHandshakeContext()->coalesce());
+      handshakeReadContext->coalesce()));
   TRY(Protocol::setAead(
       ctx.err,
       *handshakeReadRecordLayer,
@@ -1867,18 +1904,19 @@ Status EventHandler<
   std::unique_ptr<HandshakeContext> firstHandshakeContext;
   TRY(state.context()->getFactory()->makeHandshakeContext(
       firstHandshakeContext, ctx.err, cipher));
-  firstHandshakeContext->appendToTranscript(state.encodedClientHello());
+  TRY(firstHandshakeContext->appendToTranscript(
+      ctx.err, state.encodedClientHello()));
 
   message_hash chloHash;
-  chloHash.hash = firstHandshakeContext->getHandshakeContext();
+  TRY(firstHandshakeContext->getHandshakeContext(chloHash.hash, ctx.err));
 
   Buf encodedChloHash;
   TRY(encodeHandshake(encodedChloHash, ctx.err, std::move(chloHash)));
   std::unique_ptr<HandshakeContext> handshakeContext;
   TRY(state.context()->getFactory()->makeHandshakeContext(
       handshakeContext, ctx.err, cipher));
-  handshakeContext->appendToTranscript(encodedChloHash);
-  handshakeContext->appendToTranscript(*hrr.originalEncoding);
+  TRY(handshakeContext->appendToTranscript(ctx.err, encodedChloHash));
+  TRY(handshakeContext->appendToTranscript(ctx.err, *hrr.originalEncoding));
 
   // Now, in the ECH case, the context above is the outer context. We have to
   // construct the inner context using the inner client hello we sent before.
@@ -1889,16 +1927,18 @@ Status EventHandler<
     std::unique_ptr<HandshakeContext> firstEchHandshakeContext;
     TRY(state.context()->getFactory()->makeHandshakeContext(
         firstEchHandshakeContext, ctx.err, cipher));
-    firstEchHandshakeContext->appendToTranscript(state.echState()->encodedECH);
+    TRY(firstEchHandshakeContext->appendToTranscript(
+        ctx.err, state.echState()->encodedECH));
 
     message_hash echChloHash;
-    echChloHash.hash = firstEchHandshakeContext->getHandshakeContext();
+    TRY(firstEchHandshakeContext->getHandshakeContext(
+        echChloHash.hash, ctx.err));
 
     Buf encodedEchChloHash;
     TRY(encodeHandshake(encodedEchChloHash, ctx.err, std::move(echChloHash)));
     TRY(state.context()->getFactory()->makeHandshakeContext(
         echHandshakeContext, ctx.err, cipher));
-    echHandshakeContext->appendToTranscript(encodedEchChloHash);
+    TRY(echHandshakeContext->appendToTranscript(ctx.err, encodedEchChloHash));
 
     // Check for acceptance. We'll still generate another ECH per the RFC, but
     // the server will already let us know here.
@@ -1908,11 +1948,13 @@ Status EventHandler<
     TRY(echScheduler->deriveEarlySecret(
         ctx.err, folly::range(state.echState()->random)));
     bool echAccepted = false;
+    std::unique_ptr<HandshakeContext> echHandshakeContextClone;
+    TRY(echHandshakeContext->clone(echHandshakeContextClone, ctx.err));
     TRY(ech::checkECHAccepted(
         echAccepted,
         ctx.err,
         hrr,
-        echHandshakeContext->clone(),
+        std::move(echHandshakeContextClone),
         std::move(echScheduler)));
     if (echAccepted) {
       echStatus = ECHStatus::Accepted;
@@ -1929,7 +1971,8 @@ Status EventHandler<
 
     // Now that ECH acceptance check is done, we can append the real HRR to the
     // transcript
-    echHandshakeContext->appendToTranscript(*hrr.originalEncoding);
+    TRY(echHandshakeContext->appendToTranscript(
+        ctx.err, *hrr.originalEncoding));
   }
 
   Buf encodedClientHello;
@@ -1940,8 +1983,9 @@ Status EventHandler<
         keyScheduler, ctx.err, cipher));
 
     // PSK is applied to inner client hello (in ECH case)
-    auto pskContext =
-        (echHandshakeContext ? echHandshakeContext : handshakeContext)->clone();
+    std::unique_ptr<HandshakeContext> pskContext;
+    TRY((echHandshakeContext ? echHandshakeContext : handshakeContext)
+            ->clone(pskContext, ctx.err));
 
     TRY(encodeAndAddBinders(
         encodedClientHello,
@@ -1979,10 +2023,10 @@ Status EventHandler<
     TRY(encodeHandshake(encodedClientHello, ctx.err, chlo));
 
     // Write to ECH transcript
-    echHandshakeContext->appendToTranscript(encodedECH);
+    TRY(echHandshakeContext->appendToTranscript(ctx.err, encodedECH));
   }
 
-  handshakeContext->appendToTranscript(encodedClientHello);
+  TRY(handshakeContext->appendToTranscript(ctx.err, encodedClientHello));
 
   auto earlyDataType = state.earlyDataType() == EarlyDataType::Attempted
       ? EarlyDataType::Rejected
@@ -2092,7 +2136,8 @@ Status EventHandler<
   TRY(Protocol::checkAllowedExtensions(
       ctx.err, ee, *state.requestedExtensions()));
 
-  state.handshakeContext()->appendToTranscript(*ee.originalEncoding);
+  TRY(state.handshakeContext()->appendToTranscript(
+      ctx.err, *ee.originalEncoding));
 
   Optional<std::string> appProto;
   folly::Optional<ProtocolNameList> alpn;
@@ -2234,7 +2279,8 @@ Status EventHandler<
   }
 
   auto certRequest = std::move(*param.asCertificateRequest());
-  state.handshakeContext()->appendToTranscript(*certRequest.originalEncoding);
+  TRY(state.handshakeContext()->appendToTranscript(
+      ctx.err, *certRequest.originalEncoding));
 
   if (!certRequest.certificate_request_context->empty()) {
     return ctx.err.error(
@@ -2365,7 +2411,8 @@ Status EventHandler<
   }
 
   auto compCert = std::move(*param.asCompressedCertificate());
-  state.handshakeContext()->appendToTranscript(*compCert.originalEncoding);
+  TRY(state.handshakeContext()->appendToTranscript(
+      ctx.err, *compCert.originalEncoding));
 
   auto algos = state.context()->getSupportedCertDecompressionAlgorithms();
   if (std::find(algos.begin(), algos.end(), compCert.algorithm) ==
@@ -2410,7 +2457,8 @@ EventHandler<ClientTypes, StateEnum::ExpectingCertificate, Event::Certificate>::
         Param& param) {
   auto certMsg = std::move(*param.asCertificateMsg());
 
-  state.handshakeContext()->appendToTranscript(*certMsg.originalEncoding);
+  TRY(state.handshakeContext()->appendToTranscript(
+      ctx.err, *certMsg.originalEncoding));
   MutateState statIn;
   TRY(handleCertMsg(statIn, ctx, state, std::move(certMsg), folly::none));
   ret = actions(
@@ -2445,11 +2493,13 @@ Status EventHandler<
   CHECK(!state.unverifiedCertChain().empty());
   auto leaf = state.unverifiedCertChain().front();
 
+  Buf verifyContext;
+  TRY(state.handshakeContext()->getHandshakeContext(verifyContext, ctx.err));
   TRY(leaf->verify(
       ctx.err,
       certVerify.algorithm,
       CertificateVerifyContext::Server,
-      state.handshakeContext()->getHandshakeContext()->coalesce(),
+      verifyContext->coalesce(),
       certVerify.signature->coalesce()));
 
   std::shared_ptr<const Cert> newCert;
@@ -2479,7 +2529,8 @@ Status EventHandler<
     newCert = std::move(leaf);
   }
 
-  state.handshakeContext()->appendToTranscript(*certVerify.originalEncoding);
+  TRY(state.handshakeContext()->appendToTranscript(
+      ctx.err, *certVerify.originalEncoding));
 
   ret = actions(
       MutateState([sigScheme = certVerify.algorithm,
@@ -2506,24 +2557,29 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
         "data after finished", AlertDescription::unexpected_message);
   }
 
-  auto expectedFinished = state.handshakeContext()->getFinishedData(
-      state.serverHandshakeSecret()->coalesce());
+  Buf expectedFinished;
+  TRY(state.handshakeContext()->getFinishedData(
+      expectedFinished, ctx.err, state.serverHandshakeSecret()->coalesce()));
   if (!CryptoUtils::equal(
           expectedFinished->coalesce(), finished.verify_data->coalesce())) {
     return ctx.err.error(
         "server finished verify failure", AlertDescription::bad_record_mac);
   }
 
-  state.handshakeContext()->appendToTranscript(*finished.originalEncoding);
-  auto clientFinishedContext = state.handshakeContext()->getHandshakeContext();
-  state.keyScheduler()->deriveMasterSecret();
+  TRY(state.handshakeContext()->appendToTranscript(
+      ctx.err, *finished.originalEncoding));
+  Buf clientFinishedContext;
+  TRY(state.handshakeContext()->getHandshakeContext(
+      clientFinishedContext, ctx.err));
+  TRY(state.keyScheduler()->deriveMasterSecret(ctx.err));
 
   folly::Optional<TLSContent> eoedWrite;
   if (state.earlyDataType() == EarlyDataType::Accepted &&
       !state.context()->getOmitEarlyRecordLayer()) {
     Buf encodedEndOfEarly;
     TRY(encodeHandshake(encodedEndOfEarly, ctx.err, EndOfEarlyData()));
-    state.handshakeContext()->appendToTranscript(encodedEndOfEarly);
+    TRY(state.handshakeContext()->appendToTranscript(
+        ctx.err, encodedEndOfEarly));
     FIZZ_DCHECK(state.earlyWriteRecordLayer());
     TLSContent content;
     TRY(state.earlyWriteRecordLayer()->writeHandshake(
@@ -2543,7 +2599,8 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
       Buf msg;
       TRY(encodeHandshake(msg, ctx.err, CertificateMsg()));
       encodedCertMessage = std::move(msg);
-      state.handshakeContext()->appendToTranscript(*encodedCertMessage);
+      TRY(state.handshakeContext()->appendToTranscript(
+          ctx.err, *encodedCertMessage));
       break;
     }
     case ClientAuthType::Sent: {
@@ -2553,10 +2610,12 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
       Buf certMsg;
       TRY(encodeHandshake(certMsg, ctx.err, std::move(certMsgContent)));
       encodedCertMessage = std::move(certMsg);
-      state.handshakeContext()->appendToTranscript(*encodedCertMessage);
+      TRY(state.handshakeContext()->appendToTranscript(
+          ctx.err, *encodedCertMessage));
 
       auto sigScheme = *state.clientAuthSigScheme();
-      auto toSign = state.handshakeContext()->getHandshakeContext();
+      Buf toSign;
+      TRY(state.handshakeContext()->getHandshakeContext(toSign, ctx.err));
       Buf signature;
       TRY(selectedCert->sign(
           signature,
@@ -2571,7 +2630,8 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
       Buf verifyMsg;
       TRY(encodeHandshake(verifyMsg, ctx.err, std::move(verify)));
       encodedCertVerify = std::move(verifyMsg);
-      state.handshakeContext()->appendToTranscript(*encodedCertVerify);
+      TRY(state.handshakeContext()->appendToTranscript(
+          ctx.err, *encodedCertVerify));
 
       clientCert = selectedCert;
       break;
@@ -2580,8 +2640,12 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
       break;
   }
 
-  auto exporterMasterVector = state.keyScheduler()->getSecret(
-      MasterSecrets::ExporterMaster, clientFinishedContext->coalesce());
+  DerivedSecret exporterMasterVector;
+  TRY(state.keyScheduler()->getSecret(
+      exporterMasterVector,
+      ctx.err,
+      MasterSecrets::ExporterMaster,
+      clientFinishedContext->coalesce()));
   auto exporterMaster = folly::IOBuf::copyBuffer(exporterMasterVector.secret);
 
   Buf encodedFinished;
@@ -2590,9 +2654,15 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
       ctx.err,
       state.clientHandshakeSecret()->coalesce(),
       *state.handshakeContext()));
-  auto resumptionVector = state.keyScheduler()->getSecret(
+  Buf resumptionContext;
+  TRY(state.handshakeContext()->getHandshakeContext(
+      resumptionContext, ctx.err));
+  DerivedSecret resumptionVector;
+  TRY(state.keyScheduler()->getSecret(
+      resumptionVector,
+      ctx.err,
       MasterSecrets::ResumptionMaster,
-      state.handshakeContext()->getHandshakeContext()->coalesce());
+      resumptionContext->coalesce()));
   auto resumptionSecret = folly::IOBuf::copyBuffer(resumptionVector.secret);
 
   WriteToSocket clientFlight;
@@ -2630,8 +2700,8 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
   }
   clientFlight.contents.emplace_back(std::move(content));
 
-  state.keyScheduler()->deriveAppTrafficSecrets(
-      clientFinishedContext->coalesce());
+  TRY(state.keyScheduler()->deriveAppTrafficSecrets(
+      ctx.err, clientFinishedContext->coalesce()));
   TRY(state.keyScheduler()->clearMasterSecret(ctx.err));
 
   auto writeRecordLayer =
@@ -2737,8 +2807,12 @@ EventHandler<ClientTypes, StateEnum::Established, Event::NewSessionTicket>::
         Param& param) {
   auto nst = std::move(*param.asNewSessionTicket());
 
-  auto derivedResumptionSecret = state.keyScheduler()->getResumptionSecret(
-      state.resumptionSecret()->coalesce(), nst.ticket_nonce->coalesce());
+  Buf derivedResumptionSecret;
+  TRY(state.keyScheduler()->getResumptionSecret(
+      derivedResumptionSecret,
+      ctx.err,
+      state.resumptionSecret()->coalesce(),
+      nst.ticket_nonce->coalesce()));
 
   auto pskRange = nst.ticket->coalesce();
   auto secretRange = derivedResumptionSecret->coalesce();
@@ -2828,7 +2902,8 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdateInitiation>::
   WriteToSocket write;
   write.contents.emplace_back(std::move(content));
 
-  state.keyScheduler()->clientKeyUpdate();
+  uint32_t unusedKeyUpdate;
+  TRY(state.keyScheduler()->clientKeyUpdate(unusedKeyUpdate, ctx.err));
 
   auto writeRecordLayer =
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
@@ -2866,7 +2941,8 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdate>::handle(
         "data after key_update", AlertDescription::unexpected_message);
   }
 
-  state.keyScheduler()->serverKeyUpdate();
+  uint32_t unusedServerKeyUpdate;
+  TRY(state.keyScheduler()->serverKeyUpdate(unusedServerKeyUpdate, ctx.err));
   auto readRecordLayer =
       state.context()->getFactory()->makeEncryptedReadRecordLayer(
           EncryptionLevel::AppTraffic);
@@ -2902,7 +2978,8 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdate>::handle(
   WriteToSocket write;
   write.contents.emplace_back(std::move(content));
 
-  state.keyScheduler()->clientKeyUpdate();
+  uint32_t unusedClientKeyUpdate2;
+  TRY(state.keyScheduler()->clientKeyUpdate(unusedClientKeyUpdate2, ctx.err));
 
   auto writeRecordLayer =
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(

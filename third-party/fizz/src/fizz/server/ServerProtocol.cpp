@@ -731,16 +731,21 @@ static std::
     Buf encodedChloHash;
     FIZZ_THROW_ON_ERROR(
         encodeHandshake(encodedChloHash, err, std::move(chloHash)), err);
-    handshakeContext->appendToTranscript(encodedChloHash);
+    FIZZ_THROW_ON_ERROR(
+        handshakeContext->appendToTranscript(err, encodedChloHash), err);
 
     folly::Optional<Cookie> cookie;
     FIZZ_THROW_ON_ERROR(
         getExtension<Cookie>(cookie, err, chlo.extensions), err);
-    handshakeContext->appendToTranscript(getStatelessHelloRetryRequest(
-        cookieState->version,
-        cookieState->cipher,
-        cookieState->group,
-        std::move(cookie->cookie)));
+    FIZZ_THROW_ON_ERROR(
+        handshakeContext->appendToTranscript(
+            err,
+            getStatelessHelloRetryRequest(
+                cookieState->version,
+                cookieState->cipher,
+                cookieState->group,
+                std::move(cookie->cookie))),
+        err);
   } else if (!handshakeContext) {
     FIZZ_THROW_ON_ERROR(
         factory.makeHandshakeContext(handshakeContext, err, cipher), err);
@@ -752,20 +757,24 @@ static std::
             err, resState->resumptionSecret->coalesce()),
         err);
 
-    auto binderKey = scheduler
-                         ->getSecret(
-                             pskType == PskType::External
-                                 ? EarlySecrets::ExternalPskBinder
-                                 : EarlySecrets::ResumptionPskBinder,
-                             handshakeContext->getBlankContext())
-                         .secret;
+    DerivedSecret binderKeySecret;
+    FIZZ_THROW_ON_ERROR(
+        scheduler->getSecret(
+            binderKeySecret,
+            err,
+            pskType == PskType::External ? EarlySecrets::ExternalPskBinder
+                                         : EarlySecrets::ResumptionPskBinder,
+            handshakeContext->getBlankContext()),
+        err);
+    auto binderKey = binderKeySecret.secret;
 
     folly::IOBufQueue chloQueue(folly::IOBufQueue::cacheChainLength());
     chloQueue.append((*chlo.originalEncoding)->clone());
     size_t binderLength;
     FIZZ_THROW_ON_ERROR(getBinderLength(binderLength, err, chlo), err);
     auto chloPrefix = chloQueue.split(chloQueue.chainLength() - binderLength);
-    handshakeContext->appendToTranscript(chloPrefix);
+    FIZZ_THROW_ON_ERROR(
+        handshakeContext->appendToTranscript(err, chloPrefix), err);
 
     folly::Optional<ClientPresharedKey> psks;
     FIZZ_THROW_ON_ERROR(
@@ -773,8 +782,11 @@ static std::
     if (!psks || psks->binders.size() <= kPskIndex) {
       throw FizzException("no binders", AlertDescription::illegal_parameter);
     }
-    auto expectedBinder =
-        handshakeContext->getFinishedData(folly::range(binderKey));
+    Buf expectedBinder;
+    FIZZ_THROW_ON_ERROR(
+        handshakeContext->getFinishedData(
+            expectedBinder, err, folly::range(binderKey)),
+        err);
     if (!CryptoUtils::equal(
             expectedBinder->coalesce(),
             psks->binders[kPskIndex].binder->coalesce())) {
@@ -782,10 +794,12 @@ static std::
           "binder does not match", AlertDescription::bad_record_mac);
     }
 
-    handshakeContext->appendToTranscript(chloQueue.move());
+    FIZZ_THROW_ON_ERROR(
+        handshakeContext->appendToTranscript(err, chloQueue.move()), err);
     return std::make_pair(std::move(scheduler), std::move(handshakeContext));
   } else {
-    handshakeContext->appendToTranscript(*chlo.originalEncoding);
+    FIZZ_THROW_ON_ERROR(
+        handshakeContext->appendToTranscript(err, *chlo.originalEncoding), err);
     return std::make_pair(std::move(scheduler), std::move(handshakeContext));
   }
 }
@@ -1105,7 +1119,8 @@ static Buf getEncryptedExt(
   Buf encodedEncryptedExt;
   FIZZ_THROW_ON_ERROR(
       encodeHandshake(encodedEncryptedExt, err, std::move(encryptedExt)), err);
-  handshakeContext.appendToTranscript(encodedEncryptedExt);
+  FIZZ_THROW_ON_ERROR(
+      handshakeContext.appendToTranscript(err, encodedEncryptedExt), err);
   return encodedEncryptedExt;
 }
 
@@ -1171,7 +1186,8 @@ static Buf getCertificate(
     FIZZ_THROW_ON_ERROR(
         encodeHandshake(encodedCertificate, err, std::move(certMsg)), err);
   }
-  handshakeContext.appendToTranscript(encodedCertificate);
+  FIZZ_THROW_ON_ERROR(
+      handshakeContext.appendToTranscript(err, encodedCertificate), err);
   return encodedCertificate;
 }
 
@@ -1186,7 +1202,8 @@ static Buf getCertificateVerify(
   Error err;
   FIZZ_THROW_ON_ERROR(
       encodeHandshake(encodedCertificateVerify, err, std::move(verify)), err);
-  handshakeContext.appendToTranscript(encodedCertificateVerify);
+  FIZZ_THROW_ON_ERROR(
+      handshakeContext.appendToTranscript(err, encodedCertificateVerify), err);
   return encodedCertificateVerify;
 }
 
@@ -1216,7 +1233,8 @@ static std::pair<std::vector<ExtensionType>, Buf> getCertificateRequest(
   Buf encodedCertificateRequest;
   FIZZ_THROW_ON_ERROR(
       encodeHandshake(encodedCertificateRequest, err, std::move(request)), err);
-  handshakeContext.appendToTranscript(encodedCertificateRequest);
+  FIZZ_THROW_ON_ERROR(
+      handshakeContext.appendToTranscript(err, encodedCertificateRequest), err);
   return std::make_pair(
       std::move(certReqExtensions), std::move(encodedCertificateRequest));
 }
@@ -1592,9 +1610,17 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
         Buf earlyExporterMaster;
         folly::Optional<SecretAvailable> earlyReadSecretAvailable;
         if (earlyDataType == EarlyDataType::Accepted) {
-          auto earlyContext = handshakeContext->getHandshakeContext();
-          auto earlyReadSecret = scheduler->getSecret(
-              EarlySecrets::ClientEarlyTraffic, earlyContext->coalesce());
+          Buf earlyContext;
+          FIZZ_THROW_ON_ERROR(
+              handshakeContext->getHandshakeContext(earlyContext, err), err);
+          DerivedSecret earlyReadSecret;
+          FIZZ_THROW_ON_ERROR(
+              scheduler->getSecret(
+                  earlyReadSecret,
+                  err,
+                  EarlySecrets::ClientEarlyTraffic,
+                  earlyContext->coalesce()),
+              err);
           if (!state.context()->getOmitEarlyRecordLayer()) {
             earlyReadRecordLayer =
                 state.context()->getFactory()->makeEncryptedReadRecordLayer(
@@ -1614,11 +1640,16 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
 
           earlyReadSecretAvailable =
               SecretAvailable(std::move(earlyReadSecret));
-          earlyExporterMaster = folly::IOBuf::copyBuffer(
-              scheduler
-                  ->getSecret(
-                      EarlySecrets::EarlyExporter, earlyContext->coalesce())
-                  .secret);
+          DerivedSecret earlyExporterSecret;
+          FIZZ_THROW_ON_ERROR(
+              scheduler->getSecret(
+                  earlyExporterSecret,
+                  err,
+                  EarlySecrets::EarlyExporter,
+                  earlyContext->coalesce()),
+              err);
+          earlyExporterMaster =
+              folly::IOBuf::copyBuffer(earlyExporterSecret.secret);
         }
 
         Optional<NamedGroup> group;
@@ -1648,7 +1679,8 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
             }
 
             message_hash chloHash;
-            chloHash.hash = handshakeContext->getHandshakeContext();
+            FIZZ_THROW_ON_ERROR(
+                handshakeContext->getHandshakeContext(chloHash.hash, err), err);
             FIZZ_THROW_ON_ERROR(
                 state.context()->getFactory()->makeHandshakeContext(
                     handshakeContext, err, cipher),
@@ -1657,7 +1689,9 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
             FIZZ_THROW_ON_ERROR(
                 encodeHandshake(encodedChloHash, err, std::move(chloHash)),
                 err);
-            handshakeContext->appendToTranscript(encodedChloHash);
+            FIZZ_THROW_ON_ERROR(
+                handshakeContext->appendToTranscript(err, encodedChloHash),
+                err);
 
             auto hrr = getHelloRetryRequest(
                 version,
@@ -1678,12 +1712,11 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                       err, folly::range(chlo.random)),
                   err);
               // Add acceptance extension
+              std::unique_ptr<HandshakeContext> hcClone;
+              FIZZ_THROW_ON_ERROR(handshakeContext->clone(hcClone, err), err);
               FIZZ_THROW_ON_ERROR(
                   ech::setAcceptConfirmation(
-                      err,
-                      hrr,
-                      handshakeContext->clone(),
-                      std::move(echScheduler)),
+                      err, hrr, std::move(hcClone), std::move(echScheduler)),
                   err);
             }
 
@@ -1691,7 +1724,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
             FIZZ_THROW_ON_ERROR(
                 encodeHandshake(encodedHelloRetryRequest, err, std::move(hrr)),
                 err);
-            handshakeContext->appendToTranscript(encodedHelloRetryRequest);
+            FIZZ_THROW_ON_ERROR(
+                handshakeContext->appendToTranscript(
+                    err, encodedHelloRetryRequest),
+                err);
 
             TLSContent content;
             FIZZ_THROW_ON_ERROR(
@@ -1798,11 +1834,13 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
               Optional<Buf> serverShare;
               if (kexResult.hasValue()) {
                 serverShare = std::move(kexResult.value().ourKeyShare);
-                scheduler->deriveHandshakeSecret(
-                    kexResult.value().sharedSecret->coalesce());
+                FIZZ_THROW_ON_ERROR(
+                    scheduler->deriveHandshakeSecret(
+                        err, kexResult.value().sharedSecret->coalesce()),
+                    err);
               } else {
                 FIZZ_DCHECK(keyExchangeType == KeyExchangeType::None);
-                scheduler->deriveHandshakeSecret();
+                FIZZ_THROW_ON_ERROR(scheduler->deriveHandshakeSecret(err), err);
               }
               std::vector<Extension> additionalExtensions;
               if (state.extensions()) {
@@ -1856,11 +1894,13 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                         err, folly::range(chlo.random)),
                     err);
                 // Add acceptance extension
+                std::unique_ptr<HandshakeContext> hcClone;
+                FIZZ_THROW_ON_ERROR(handshakeContext->clone(hcClone, err), err);
                 FIZZ_THROW_ON_ERROR(
                     ech::setAcceptConfirmation(
                         err,
                         serverHello,
-                        handshakeContext->clone(),
+                        std::move(hcClone),
                         std::move(echScheduler)),
                     err);
               } else if (echStatus == ECHStatus::Rejected) {
@@ -1880,7 +1920,9 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                   encodeHandshake(
                       encodedServerHello, err, std::move(serverHello)),
                   err);
-              handshakeContext->appendToTranscript(encodedServerHello);
+              FIZZ_THROW_ON_ERROR(
+                  handshakeContext->appendToTranscript(err, encodedServerHello),
+                  err);
 
               // Derive handshake keys.
               auto handshakeWriteRecordLayer =
@@ -1889,9 +1931,19 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
               FIZZ_THROW_ON_ERROR(
                   handshakeWriteRecordLayer->setProtocolVersion(err, version),
                   err);
-              auto handshakeWriteSecret = scheduler->getSecret(
-                  HandshakeSecrets::ServerHandshakeTraffic,
-                  handshakeContext->getHandshakeContext()->coalesce());
+              Buf serverHandshakeContext;
+              FIZZ_THROW_ON_ERROR(
+                  handshakeContext->getHandshakeContext(
+                      serverHandshakeContext, err),
+                  err);
+              DerivedSecret handshakeWriteSecret;
+              FIZZ_THROW_ON_ERROR(
+                  scheduler->getSecret(
+                      handshakeWriteSecret,
+                      err,
+                      HandshakeSecrets::ServerHandshakeTraffic,
+                      serverHandshakeContext->coalesce()),
+                  err);
               FIZZ_THROW_ON_ERROR(
                   Protocol::setAead(
                       err,
@@ -1910,9 +1962,19 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                   err);
               handshakeReadRecordLayer->setSkipFailedDecryption(
                   earlyDataType == EarlyDataType::Rejected);
-              auto handshakeReadSecret = scheduler->getSecret(
-                  HandshakeSecrets::ClientHandshakeTraffic,
-                  handshakeContext->getHandshakeContext()->coalesce());
+              Buf clientHandshakeContext;
+              FIZZ_THROW_ON_ERROR(
+                  handshakeContext->getHandshakeContext(
+                      clientHandshakeContext, err),
+                  err);
+              DerivedSecret handshakeReadSecret;
+              FIZZ_THROW_ON_ERROR(
+                  scheduler->getSecret(
+                      handshakeReadSecret,
+                      err,
+                      HandshakeSecrets::ClientHandshakeTraffic,
+                      clientHandshakeContext->coalesce()),
+                  err);
               FIZZ_THROW_ON_ERROR(
                   Protocol::setAead(
                       err,
@@ -1974,7 +2036,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                     dynamic_cast<const AsyncSelfCert*>(originalSelfCert.get());
                 if (asyncSelfCert) {
                   usedAsyncCert = true;
-                  auto clonedHandshakeContext = handshakeContext->clone();
+                  std::unique_ptr<HandshakeContext> clonedHandshakeContext;
+                  FIZZ_THROW_ON_ERROR(
+                      handshakeContext->clone(clonedHandshakeContext, err),
+                      err);
                   certAndSignature = asyncSelfCert->getCertificateAndSign(
                       certCompressionAlgo,
                       *sigScheme,
@@ -1984,7 +2049,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                   auto encodedCertificate = getCertificate(
                       originalSelfCert, certCompressionAlgo, *handshakeContext);
 
-                  auto toBeSigned = handshakeContext->getHandshakeContext();
+                  Buf toBeSigned;
+                  FIZZ_THROW_ON_ERROR(
+                      handshakeContext->getHandshakeContext(toBeSigned, err),
+                      err);
                   Buf sig;
                   FIZZ_THROW_ON_ERROR(
                       originalSelfCert->sign(
@@ -2059,8 +2127,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                       encodedCertificate =
                           std::move(certAndSig->encodedCertificate);
                       if (usedAsyncCert) {
-                        handshakeContext->appendToTranscript(
-                            *encodedCertificate);
+                        FIZZ_THROW_ON_ERROR(
+                            handshakeContext->appendToTranscript(
+                                err, *encodedCertificate),
+                            err);
                       }
                       encodedCertificateVerify = getCertificateVerify(
                           *sigScheme,
@@ -2136,17 +2206,28 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                     serverFlight.contents.emplace_back(
                         std::move(serverEncrypted));
 
-                    scheduler->deriveMasterSecret();
-                    auto clientFinishedContext =
-                        handshakeContext->getHandshakeContext();
-                    auto exporterMasterVector = scheduler->getSecret(
-                        MasterSecrets::ExporterMaster,
-                        clientFinishedContext->coalesce());
+                    FIZZ_THROW_ON_ERROR(
+                        scheduler->deriveMasterSecret(err), err);
+                    Buf clientFinishedContext;
+                    FIZZ_THROW_ON_ERROR(
+                        handshakeContext->getHandshakeContext(
+                            clientFinishedContext, err),
+                        err);
+                    DerivedSecret exporterMasterVector;
+                    FIZZ_THROW_ON_ERROR(
+                        scheduler->getSecret(
+                            exporterMasterVector,
+                            err,
+                            MasterSecrets::ExporterMaster,
+                            clientFinishedContext->coalesce()),
+                        err);
                     auto exporterMaster = folly::IOBuf::copyBuffer(
                         folly::range(exporterMasterVector.secret));
 
-                    scheduler->deriveAppTrafficSecrets(
-                        clientFinishedContext->coalesce());
+                    FIZZ_THROW_ON_ERROR(
+                        scheduler->deriveAppTrafficSecrets(
+                            err, clientFinishedContext->coalesce()),
+                        err);
                     auto appTrafficWriteRecordLayer =
                         state.context()
                             ->getFactory()
@@ -2375,7 +2456,10 @@ Status EventHandler<
         "data after eoed", AlertDescription::unexpected_message);
   }
 
-  state.handshakeContext()->appendToTranscript(*eoed.originalEncoding);
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      state.handshakeContext()->appendToTranscript(err, *eoed.originalEncoding),
+      err);
 
   auto readRecordLayer = std::move(state.handshakeReadRecordLayer());
 
@@ -2457,8 +2541,14 @@ static SemiFuture<Optional<WriteToSocket>> generateTicket(
 
   Buf resumptionSecret;
   auto ticketNonce = folly::IOBuf::create(0);
-  resumptionSecret = state.keyScheduler()->getResumptionSecret(
-      folly::range(resumptionMasterSecret), ticketNonce->coalesce());
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      state.keyScheduler()->getResumptionSecret(
+          resumptionSecret,
+          err,
+          folly::range(resumptionMasterSecret),
+          ticketNonce->coalesce()),
+      err);
 
   uint32_t ticketAgeAdd{};
   state.context()->getFactory()->makeRandomBytes(
@@ -2506,7 +2596,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingCertificate, Event::Certificate>::
         Param& param) {
   auto certMsg = std::move(*param.asCertificateMsg());
 
-  state.handshakeContext()->appendToTranscript(*certMsg.originalEncoding);
+  FIZZ_THROW_ON_ERROR(
+      state.handshakeContext()->appendToTranscript(
+          ctx.err, *certMsg.originalEncoding),
+      ctx.err);
 
   if (!certMsg.certificate_request_context->empty()) {
     throw FizzException(
@@ -2581,12 +2674,15 @@ Status EventHandler<
   const auto& certs = *state.unverifiedCertChain();
   auto leafCert = certs.front();
   Error err;
+  Buf verifyContext;
+  FIZZ_THROW_ON_ERROR(
+      state.handshakeContext()->getHandshakeContext(verifyContext, err), err);
   FIZZ_THROW_ON_ERROR(
       leafCert->verify(
           err,
           certVerify.algorithm,
           CertificateVerifyContext::Client,
-          state.handshakeContext()->getHandshakeContext()->coalesce(),
+          verifyContext->coalesce(),
           certVerify.signature->coalesce()),
       err);
 
@@ -2618,7 +2714,10 @@ Status EventHandler<
         AlertDescription::bad_certificate);
   }
 
-  state.handshakeContext()->appendToTranscript(*certVerify.originalEncoding);
+  FIZZ_THROW_ON_ERROR(
+      state.handshakeContext()->appendToTranscript(
+          err, *certVerify.originalEncoding),
+      err);
 
   ret = actions(
       MutateState([cert = std::move(newCert)](State& newState) {
@@ -2638,8 +2737,12 @@ EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::Finished>::
         Param& param) {
   auto& finished = *param.asFinished();
 
-  auto expectedFinished = state.handshakeContext()->getFinishedData(
-      state.clientHandshakeSecret()->coalesce());
+  Error err;
+  Buf expectedFinished;
+  FIZZ_THROW_ON_ERROR(
+      state.handshakeContext()->getFinishedData(
+          expectedFinished, err, state.clientHandshakeSecret()->coalesce()),
+      err);
   if (!CryptoUtils::equal(
           expectedFinished->coalesce(), finished.verify_data->coalesce())) {
     throw FizzException("client finished verify failure", folly::none);
@@ -2652,7 +2755,6 @@ EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::Finished>::
   auto readRecordLayer =
       state.context()->getFactory()->makeEncryptedReadRecordLayer(
           EncryptionLevel::AppTraffic);
-  Error err;
   FIZZ_THROW_ON_ERROR(
       readRecordLayer->setProtocolVersion(err, *state.version()), err);
   if (state.extensions()) {
@@ -2670,14 +2772,24 @@ EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::Finished>::
           *state.keyScheduler()),
       err);
 
-  state.handshakeContext()->appendToTranscript(*finished.originalEncoding);
+  FIZZ_THROW_ON_ERROR(
+      state.handshakeContext()->appendToTranscript(
+          err, *finished.originalEncoding),
+      err);
 
-  auto resumptionMasterSecret =
-      state.keyScheduler()
-          ->getSecret(
-              MasterSecrets::ResumptionMaster,
-              state.handshakeContext()->getHandshakeContext()->coalesce())
-          .secret;
+  Buf resumptionContext;
+  FIZZ_THROW_ON_ERROR(
+      state.handshakeContext()->getHandshakeContext(resumptionContext, err),
+      err);
+  DerivedSecret resumptionMasterSecretDerived;
+  FIZZ_THROW_ON_ERROR(
+      state.keyScheduler()->getSecret(
+          resumptionMasterSecretDerived,
+          err,
+          MasterSecrets::ResumptionMaster,
+          resumptionContext->coalesce()),
+      err);
+  auto resumptionMasterSecret = resumptionMasterSecretDerived.secret;
   FIZZ_THROW_ON_ERROR(state.keyScheduler()->clearMasterSecret(err), err);
 
   MutateState saveState([readRecordLayer = std::move(readRecordLayer),
@@ -2812,7 +2924,9 @@ Status EventHandler<
   WriteToSocket write;
   write.contents.emplace_back(std::move(content));
 
-  state.keyScheduler()->serverKeyUpdate();
+  uint32_t unusedServerKeyUpdate;
+  FIZZ_THROW_ON_ERROR(
+      state.keyScheduler()->serverKeyUpdate(unusedServerKeyUpdate, err), err);
 
   auto writeRecordLayer =
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
@@ -2856,11 +2970,13 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
     throw FizzException("data after key_update", folly::none);
   }
 
-  state.keyScheduler()->clientKeyUpdate();
+  uint32_t unusedClientKeyUpdate;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      state.keyScheduler()->clientKeyUpdate(unusedClientKeyUpdate, err), err);
   auto readRecordLayer =
       state.context()->getFactory()->makeEncryptedReadRecordLayer(
           EncryptionLevel::AppTraffic);
-  Error err;
   FIZZ_THROW_ON_ERROR(
       readRecordLayer->setProtocolVersion(err, *state.version()), err);
   auto readSecret =
@@ -2898,7 +3014,9 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
   WriteToSocket write;
   write.contents.emplace_back(std::move(content));
 
-  state.keyScheduler()->serverKeyUpdate();
+  uint32_t unusedServerKeyUpdate2;
+  FIZZ_THROW_ON_ERROR(
+      state.keyScheduler()->serverKeyUpdate(unusedServerKeyUpdate2, err), err);
 
   auto writeRecordLayer =
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(

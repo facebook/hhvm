@@ -47,6 +47,8 @@ struct DerivedSecret {
   std::vector<uint8_t> secret;
   SecretType type;
 
+  DerivedSecret() : type(EarlySecrets::ExternalPskBinder) {}
+
   DerivedSecret(std::vector<uint8_t> secretIn, SecretType typeIn)
       : secret(std::move(secretIn)), type(typeIn) {}
 
@@ -79,24 +81,26 @@ class KeyScheduler {
   /**
    * Derives the master secert. Must be in early secret state.
    */
-  virtual void deriveHandshakeSecret();
+  virtual Status deriveHandshakeSecret(Error& err);
 
   /**
    * Derives the master secret with a DH secret. Must be in uninitialized or
    * early secret state.
    */
-  virtual void deriveHandshakeSecret(folly::ByteRange ecdhe);
+  virtual Status deriveHandshakeSecret(Error& err, folly::ByteRange ecdhe);
 
   /**
    * Derives the master secert. Must be in handshake secret state.
    */
-  virtual void deriveMasterSecret();
+  virtual Status deriveMasterSecret(Error& err);
 
   /**
    * Derives the app traffic secrets given the handshake context. Must be in
    * master secret state. Note that this does not clear the master secret.
    */
-  virtual void deriveAppTrafficSecrets(folly::ByteRange transcript);
+  virtual Status deriveAppTrafficSecrets(
+      Error& err,
+      folly::ByteRange transcript);
 
   /**
    * Clears the master secret. Must be in master secret state.
@@ -107,30 +111,40 @@ class KeyScheduler {
    * Performs a key update on the client traffic key. Traffic secrets must be
    * derived.
    */
-  virtual uint32_t clientKeyUpdate();
+  virtual Status clientKeyUpdate(uint32_t& ret, Error& err);
 
   /**
    * Performs a key update on the server traffic key. Traffic secrets must be
    * derived.
    */
-  virtual uint32_t serverKeyUpdate();
+  virtual Status serverKeyUpdate(uint32_t& ret, Error& err);
 
   /**
    * Retreive a secret from the scheduler. Must be in the appropriate state.
    */
-  virtual DerivedSecret getSecret(EarlySecrets s, folly::ByteRange transcript)
-      const;
-  virtual DerivedSecret getSecret(
+  virtual Status getSecret(
+      DerivedSecret& ret,
+      Error& err,
+      EarlySecrets s,
+      folly::ByteRange transcript) const;
+  virtual Status getSecret(
+      DerivedSecret& ret,
+      Error& err,
       HandshakeSecrets s,
       folly::ByteRange transcript) const;
-  virtual DerivedSecret getSecret(MasterSecrets s, folly::ByteRange transcript)
-      const;
+  virtual Status getSecret(
+      DerivedSecret& ret,
+      Error& err,
+      MasterSecrets s,
+      folly::ByteRange transcript) const;
   virtual DerivedSecret getSecret(AppTrafficSecrets s) const;
 
   /**
    * Derive a traffic key and iv from a traffic secret.
    */
-  virtual TrafficKey getTrafficKey(
+  virtual Status getTrafficKey(
+      TrafficKey& ret,
+      Error& err,
       folly::ByteRange trafficSecret,
       size_t keyLength,
       size_t ivLength) const;
@@ -138,7 +152,9 @@ class KeyScheduler {
   /**
    * Derive a traffic key and iv from a traffic secret with the label supplied.
    */
-  virtual TrafficKey getTrafficKeyWithLabel(
+  virtual Status getTrafficKeyWithLabel(
+      TrafficKey& ret,
+      Error& err,
       folly::ByteRange trafficSecret,
       folly::StringPiece keyLabel,
       folly::StringPiece ivLabel,
@@ -149,7 +165,9 @@ class KeyScheduler {
    * Derive a resumption secret with a particular ticket nonce. Does not require
    * being in master secret state.
    */
-  virtual Buf getResumptionSecret(
+  virtual Status getResumptionSecret(
+      Buf& ret,
+      Error& err,
       folly::ByteRange resumptionMasterSecret,
       folly::ByteRange ticketNonce) const;
 

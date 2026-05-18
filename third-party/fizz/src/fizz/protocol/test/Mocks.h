@@ -38,87 +38,157 @@ class MockKeyScheduler : public KeyScheduler {
   }
 
   MOCK_METHOD(Status, deriveEarlySecret, (Error & err, folly::ByteRange psk));
-  MOCK_METHOD(void, deriveHandshakeSecret, ());
-  MOCK_METHOD(void, deriveHandshakeSecret, (folly::ByteRange ecdhe));
-  MOCK_METHOD(void, deriveMasterSecret, ());
-  MOCK_METHOD(void, deriveAppTrafficSecrets, (folly::ByteRange transcript));
+  MOCK_METHOD(void, _deriveHandshakeSecret, ());
+  Status deriveHandshakeSecret(Error& err) override {
+    FIZZ_THROW_TO_ERROR(_deriveHandshakeSecret());
+  }
+  MOCK_METHOD(void, _deriveHandshakeSecret, (folly::ByteRange ecdhe));
+  Status deriveHandshakeSecret(Error& err, folly::ByteRange ecdhe) override {
+    FIZZ_THROW_TO_ERROR(_deriveHandshakeSecret(ecdhe));
+  }
+  MOCK_METHOD(void, _deriveMasterSecret, ());
+  Status deriveMasterSecret(Error& err) override {
+    FIZZ_THROW_TO_ERROR(_deriveMasterSecret());
+  }
+  MOCK_METHOD(void, _deriveAppTrafficSecrets, (folly::ByteRange transcript));
+  Status deriveAppTrafficSecrets(Error& err, folly::ByteRange transcript)
+      override {
+    FIZZ_THROW_TO_ERROR(_deriveAppTrafficSecrets(transcript));
+  }
   MOCK_METHOD(Status, clearMasterSecret, (Error & err));
-  MOCK_METHOD(uint32_t, clientKeyUpdate, ());
-  MOCK_METHOD(uint32_t, serverKeyUpdate, ());
+  MOCK_METHOD(uint32_t, _clientKeyUpdate, ());
+  Status clientKeyUpdate(uint32_t& ret, Error& err) override {
+    FIZZ_THROW_TO_ERROR(ret, _clientKeyUpdate());
+  }
+  MOCK_METHOD(uint32_t, _serverKeyUpdate, ());
+  Status serverKeyUpdate(uint32_t& ret, Error& err) override {
+    FIZZ_THROW_TO_ERROR(ret, _serverKeyUpdate());
+  }
   MOCK_METHOD(
       DerivedSecret,
-      getSecret,
+      _getSecret,
       (EarlySecrets s, folly::ByteRange transcript),
       (const));
+  Status getSecret(
+      DerivedSecret& ret,
+      Error& err,
+      EarlySecrets s,
+      folly::ByteRange transcript) const override {
+    FIZZ_THROW_TO_ERROR(ret, _getSecret(s, transcript));
+  }
   MOCK_METHOD(
       DerivedSecret,
-      getSecret,
+      _getSecret,
       (HandshakeSecrets s, folly::ByteRange transcript),
       (const));
+  Status getSecret(
+      DerivedSecret& ret,
+      Error& err,
+      HandshakeSecrets s,
+      folly::ByteRange transcript) const override {
+    FIZZ_THROW_TO_ERROR(ret, _getSecret(s, transcript));
+  }
   MOCK_METHOD(
       DerivedSecret,
-      getSecret,
+      _getSecret,
       (MasterSecrets s, folly::ByteRange transcript),
       (const));
+  Status getSecret(
+      DerivedSecret& ret,
+      Error& err,
+      MasterSecrets s,
+      folly::ByteRange transcript) const override {
+    FIZZ_THROW_TO_ERROR(ret, _getSecret(s, transcript));
+  }
   MOCK_METHOD(DerivedSecret, getSecret, (AppTrafficSecrets s), (const));
   MOCK_METHOD(
       TrafficKey,
-      getTrafficKey,
+      _getTrafficKey,
       (folly::ByteRange trafficSecret, size_t keyLength, size_t ivLength),
       (const));
+  Status getTrafficKey(
+      TrafficKey& ret,
+      Error& err,
+      folly::ByteRange trafficSecret,
+      size_t keyLength,
+      size_t ivLength) const override {
+    FIZZ_THROW_TO_ERROR(
+        ret, _getTrafficKey(trafficSecret, keyLength, ivLength));
+  }
   MOCK_METHOD(
       TrafficKey,
-      getTrafficKeyWithLabel,
+      _getTrafficKeyWithLabel,
       (folly::ByteRange trafficSecret,
        folly::StringPiece keyLabel,
        folly::StringPiece ivLabel,
        size_t keyLength,
        size_t ivLength),
       (const));
+  Status getTrafficKeyWithLabel(
+      TrafficKey& ret,
+      Error& err,
+      folly::ByteRange trafficSecret,
+      folly::StringPiece keyLabel,
+      folly::StringPiece ivLabel,
+      size_t keyLength,
+      size_t ivLength) const override {
+    FIZZ_THROW_TO_ERROR(
+        ret,
+        _getTrafficKeyWithLabel(
+            trafficSecret, keyLabel, ivLabel, keyLength, ivLength));
+  }
   MOCK_METHOD(
       Buf,
-      getResumptionSecret,
+      _getResumptionSecret,
       (folly::ByteRange, folly::ByteRange),
       (const));
+  Status getResumptionSecret(
+      Buf& ret,
+      Error& err,
+      folly::ByteRange resumptionMasterSecret,
+      folly::ByteRange ticketNonce) const override {
+    FIZZ_THROW_TO_ERROR(
+        ret, _getResumptionSecret(resumptionMasterSecret, ticketNonce));
+  }
 
   void setDefaults() {
     ON_CALL(*this, deriveEarlySecret(_, _))
         .WillByDefault(Return(Status::Success));
-    ON_CALL(*this, getTrafficKey(_, _, _))
+    ON_CALL(*this, _getTrafficKey(_, _, _))
         .WillByDefault(InvokeWithoutArgs([]() {
           return TrafficKey{
               folly::IOBuf::copyBuffer("key"), folly::IOBuf::copyBuffer("iv")};
         }));
-    ON_CALL(*this, getTrafficKeyWithLabel(_, _, _, _, _))
+    ON_CALL(*this, _getTrafficKeyWithLabel(_, _, _, _, _))
         .WillByDefault(InvokeWithoutArgs([]() {
           return TrafficKey{
               folly::IOBuf::copyBuffer("key_with_label"),
               folly::IOBuf::copyBuffer("iv_with_label")};
         }));
-    ON_CALL(*this, getResumptionSecret(_, _))
+    ON_CALL(*this, _getResumptionSecret(_, _))
         .WillByDefault(InvokeWithoutArgs(
             []() { return folly::IOBuf::copyBuffer("resumesecret"); }));
-    ON_CALL(*this, getSecret(An<EarlySecrets>(), _))
+    ON_CALL(*this, _getSecret(An<EarlySecrets>(), _))
         .WillByDefault(Invoke([](EarlySecrets type, folly::ByteRange) {
           return DerivedSecret(std::vector<uint8_t>(), type);
         }));
-    ON_CALL(*this, getSecret(An<HandshakeSecrets>(), _))
+    ON_CALL(*this, _getSecret(An<HandshakeSecrets>(), _))
         .WillByDefault(Invoke([](HandshakeSecrets type, folly::ByteRange) {
           return DerivedSecret(std::vector<uint8_t>(), type);
         }));
-    ON_CALL(*this, getSecret(EarlySecrets::ECHAcceptConfirmation, _))
+    ON_CALL(*this, _getSecret(EarlySecrets::ECHAcceptConfirmation, _))
         .WillByDefault(InvokeWithoutArgs([]() {
           return DerivedSecret(
               std::vector<uint8_t>({'e', 'c', 'h', 'a', 'c', 'c', 'p', 't'}),
               EarlySecrets::ECHAcceptConfirmation);
         }));
-    ON_CALL(*this, getSecret(EarlySecrets::HRRECHAcceptConfirmation, _))
+    ON_CALL(*this, _getSecret(EarlySecrets::HRRECHAcceptConfirmation, _))
         .WillByDefault(InvokeWithoutArgs([]() {
           return DerivedSecret(
               std::vector<uint8_t>({'e', 'c', 'h', 'a', 'c', 'c', 'p', 't'}),
               EarlySecrets::HRRECHAcceptConfirmation);
         }));
-    ON_CALL(*this, getSecret(An<MasterSecrets>(), _))
+    ON_CALL(*this, _getSecret(An<MasterSecrets>(), _))
         .WillByDefault(Invoke([](MasterSecrets type, folly::ByteRange) {
           return DerivedSecret(std::vector<uint8_t>(), type);
         }));
@@ -137,22 +207,40 @@ class MockKeyScheduler : public KeyScheduler {
 
 class MockHandshakeContext : public HandshakeContext {
  public:
-  MOCK_METHOD(void, appendToTranscript, (const Buf& transcript));
-  MOCK_METHOD(Buf, getHandshakeContext, (), (const));
-  MOCK_METHOD(Buf, getFinishedData, (folly::ByteRange baseKey), (const));
+  MOCK_METHOD(void, _appendToTranscript, (const Buf& transcript));
+  MOCK_METHOD(Buf, _getHandshakeContext, (), (const));
+  MOCK_METHOD(Buf, _getFinishedData, (folly::ByteRange baseKey), (const));
   MOCK_METHOD(folly::ByteRange, getBlankContext, (), (const));
-  MOCK_METHOD(std::unique_ptr<HandshakeContext>, clone, (), (const));
+  MOCK_METHOD(std::unique_ptr<HandshakeContext>, _clone, (), (const));
+
+  Status appendToTranscript(Error& err, const Buf& transcript) override {
+    FIZZ_THROW_TO_ERROR(_appendToTranscript(transcript));
+  }
+
+  Status getHandshakeContext(Buf& ret, Error& err) const override {
+    FIZZ_THROW_TO_ERROR(ret, _getHandshakeContext());
+  }
+
+  Status getFinishedData(Buf& ret, Error& err, folly::ByteRange baseKey)
+      const override {
+    FIZZ_THROW_TO_ERROR(ret, _getFinishedData(baseKey));
+  }
+
+  Status clone(std::unique_ptr<HandshakeContext>& ret, Error& err)
+      const override {
+    FIZZ_THROW_TO_ERROR(ret, _clone());
+  }
 
   void setDefaults() {
-    ON_CALL(*this, getHandshakeContext()).WillByDefault(InvokeWithoutArgs([]() {
-      return folly::IOBuf::copyBuffer("context");
-    }));
+    ON_CALL(*this, _getHandshakeContext())
+        .WillByDefault(InvokeWithoutArgs(
+            []() { return folly::IOBuf::copyBuffer("context"); }));
 
-    ON_CALL(*this, getFinishedData(_)).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, _getFinishedData(_)).WillByDefault(InvokeWithoutArgs([]() {
       return folly::IOBuf::copyBuffer("verifydata");
     }));
 
-    ON_CALL(*this, clone()).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, _clone()).WillByDefault(InvokeWithoutArgs([]() {
       auto ret = std::make_unique<MockHandshakeContext>();
       ret->setDefaults();
       return ret;

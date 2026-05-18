@@ -66,9 +66,9 @@ TEST_F(GetCookieStateTest, TestBasic) {
       }));
   EXPECT_CALL(
       *mockHandshakeContext,
-      appendToTranscript(BufMatches("clienthelloencoding")))
+      _appendToTranscript(BufMatches("clienthelloencoding")))
       .InSequence(seq);
-  EXPECT_CALL(*mockHandshakeContext, getHandshakeContext())
+  EXPECT_CALL(*mockHandshakeContext, _getHandshakeContext())
       .WillOnce(Invoke([]() { return folly::IOBuf::copyBuffer("context"); }));
   auto state = getCookieState(
       factory_,

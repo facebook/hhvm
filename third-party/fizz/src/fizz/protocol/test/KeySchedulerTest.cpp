@@ -41,27 +41,59 @@ TEST_F(KeySchedulerTest, TestEarly) {
   Error err;
   EXPECT_EQ(ks_->deriveEarlySecret(err, psk), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(4);
-  ks_->getSecret(EarlySecrets::ExternalPskBinder, transcript_);
-  ks_->getSecret(EarlySecrets::ResumptionPskBinder, transcript_);
-  ks_->getSecret(EarlySecrets::ResumptionPskBinder, transcript_);
-  ks_->getSecret(EarlySecrets::EarlyExporter, transcript_);
+  DerivedSecret secret1, secret2, secret3, secret4;
+  EXPECT_EQ(
+      ks_->getSecret(
+          secret1, err, EarlySecrets::ExternalPskBinder, transcript_),
+      Status::Success);
+  EXPECT_EQ(
+      ks_->getSecret(
+          secret2, err, EarlySecrets::ResumptionPskBinder, transcript_),
+      Status::Success);
+  EXPECT_EQ(
+      ks_->getSecret(
+          secret3, err, EarlySecrets::ResumptionPskBinder, transcript_),
+      Status::Success);
+  EXPECT_EQ(
+      ks_->getSecret(secret4, err, EarlySecrets::EarlyExporter, transcript_),
+      Status::Success);
 
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
   EXPECT_CALL(*kd_, hkdfExtract(_, _));
-  ks_->deriveHandshakeSecret();
+  EXPECT_EQ(ks_->deriveHandshakeSecret(err), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
-  ks_->getSecret(HandshakeSecrets::ClientHandshakeTraffic, transcript_);
-  ks_->getSecret(HandshakeSecrets::ServerHandshakeTraffic, transcript_);
+  DerivedSecret hsSecret1, hsSecret2;
+  EXPECT_EQ(
+      ks_->getSecret(
+          hsSecret1,
+          err,
+          HandshakeSecrets::ClientHandshakeTraffic,
+          transcript_),
+      Status::Success);
+  EXPECT_EQ(
+      ks_->getSecret(
+          hsSecret2,
+          err,
+          HandshakeSecrets::ServerHandshakeTraffic,
+          transcript_),
+      Status::Success);
 
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
   EXPECT_CALL(*kd_, hkdfExtract(_, _));
-  ks_->deriveMasterSecret();
+  EXPECT_EQ(ks_->deriveMasterSecret(err), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
-  ks_->getSecret(MasterSecrets::ExporterMaster, transcript_);
-  ks_->getSecret(MasterSecrets::ResumptionMaster, transcript_);
+  DerivedSecret msSecret1, msSecret2;
+  EXPECT_EQ(
+      ks_->getSecret(
+          msSecret1, err, MasterSecrets::ExporterMaster, transcript_),
+      Status::Success);
+  EXPECT_EQ(
+      ks_->getSecret(
+          msSecret2, err, MasterSecrets::ResumptionMaster, transcript_),
+      Status::Success);
 
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
-  ks_->deriveAppTrafficSecrets(transcript_);
+  EXPECT_EQ(ks_->deriveAppTrafficSecrets(err, transcript_), Status::Success);
   ks_->getSecret(AppTrafficSecrets::ClientAppTraffic);
   ks_->getSecret(AppTrafficSecrets::ServerAppTraffic);
 }
@@ -72,28 +104,60 @@ TEST_F(KeySchedulerTest, TestEarlyEcdhe) {
   Error err;
   EXPECT_EQ(ks_->deriveEarlySecret(err, psk), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(4);
-  ks_->getSecret(EarlySecrets::ExternalPskBinder, transcript_);
-  ks_->getSecret(EarlySecrets::ResumptionPskBinder, transcript_);
-  ks_->getSecret(EarlySecrets::ResumptionPskBinder, transcript_);
-  ks_->getSecret(EarlySecrets::EarlyExporter, transcript_);
+  DerivedSecret secret1, secret2, secret3, secret4;
+  EXPECT_EQ(
+      ks_->getSecret(
+          secret1, err, EarlySecrets::ExternalPskBinder, transcript_),
+      Status::Success);
+  EXPECT_EQ(
+      ks_->getSecret(
+          secret2, err, EarlySecrets::ResumptionPskBinder, transcript_),
+      Status::Success);
+  EXPECT_EQ(
+      ks_->getSecret(
+          secret3, err, EarlySecrets::ResumptionPskBinder, transcript_),
+      Status::Success);
+  EXPECT_EQ(
+      ks_->getSecret(secret4, err, EarlySecrets::EarlyExporter, transcript_),
+      Status::Success);
 
   StringPiece ecdhe{"ecdhe"};
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
   EXPECT_CALL(*kd_, hkdfExtract(_, _));
-  ks_->deriveHandshakeSecret(ecdhe);
+  EXPECT_EQ(ks_->deriveHandshakeSecret(err, ecdhe), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
-  ks_->getSecret(HandshakeSecrets::ClientHandshakeTraffic, transcript_);
-  ks_->getSecret(HandshakeSecrets::ServerHandshakeTraffic, transcript_);
+  DerivedSecret hsSecret1, hsSecret2;
+  EXPECT_EQ(
+      ks_->getSecret(
+          hsSecret1,
+          err,
+          HandshakeSecrets::ClientHandshakeTraffic,
+          transcript_),
+      Status::Success);
+  EXPECT_EQ(
+      ks_->getSecret(
+          hsSecret2,
+          err,
+          HandshakeSecrets::ServerHandshakeTraffic,
+          transcript_),
+      Status::Success);
 
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
   EXPECT_CALL(*kd_, hkdfExtract(_, _));
-  ks_->deriveMasterSecret();
+  EXPECT_EQ(ks_->deriveMasterSecret(err), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
-  ks_->getSecret(MasterSecrets::ExporterMaster, transcript_);
-  ks_->getSecret(MasterSecrets::ResumptionMaster, transcript_);
+  DerivedSecret msSecret1, msSecret2;
+  EXPECT_EQ(
+      ks_->getSecret(
+          msSecret1, err, MasterSecrets::ExporterMaster, transcript_),
+      Status::Success);
+  EXPECT_EQ(
+      ks_->getSecret(
+          msSecret2, err, MasterSecrets::ResumptionMaster, transcript_),
+      Status::Success);
 
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
-  ks_->deriveAppTrafficSecrets(transcript_);
+  EXPECT_EQ(ks_->deriveAppTrafficSecrets(err, transcript_), Status::Success);
   ks_->getSecret(AppTrafficSecrets::ClientAppTraffic);
   ks_->getSecret(AppTrafficSecrets::ServerAppTraffic);
 }
@@ -102,45 +166,76 @@ TEST_F(KeySchedulerTest, TestNoEarly) {
   StringPiece ecdhe{"ecdhe"};
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
   EXPECT_CALL(*kd_, hkdfExtract(_, _)).Times(2);
-  ks_->deriveHandshakeSecret(ecdhe);
+  Error err;
+  EXPECT_EQ(ks_->deriveHandshakeSecret(err, ecdhe), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
-  ks_->getSecret(HandshakeSecrets::ClientHandshakeTraffic, transcript_);
-  ks_->getSecret(HandshakeSecrets::ServerHandshakeTraffic, transcript_);
+  DerivedSecret hsSecret1, hsSecret2;
+  EXPECT_EQ(
+      ks_->getSecret(
+          hsSecret1,
+          err,
+          HandshakeSecrets::ClientHandshakeTraffic,
+          transcript_),
+      Status::Success);
+  EXPECT_EQ(
+      ks_->getSecret(
+          hsSecret2,
+          err,
+          HandshakeSecrets::ServerHandshakeTraffic,
+          transcript_),
+      Status::Success);
 
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
   EXPECT_CALL(*kd_, hkdfExtract(_, _));
-  ks_->deriveMasterSecret();
+  EXPECT_EQ(ks_->deriveMasterSecret(err), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
-  ks_->getSecret(MasterSecrets::ExporterMaster, transcript_);
-  ks_->getSecret(MasterSecrets::ResumptionMaster, transcript_);
+  DerivedSecret msSecret1, msSecret2;
+  EXPECT_EQ(
+      ks_->getSecret(
+          msSecret1, err, MasterSecrets::ExporterMaster, transcript_),
+      Status::Success);
+  EXPECT_EQ(
+      ks_->getSecret(
+          msSecret2, err, MasterSecrets::ResumptionMaster, transcript_),
+      Status::Success);
 
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
-  ks_->deriveAppTrafficSecrets(transcript_);
+  EXPECT_EQ(ks_->deriveAppTrafficSecrets(err, transcript_), Status::Success);
   ks_->getSecret(AppTrafficSecrets::ClientAppTraffic);
   ks_->getSecret(AppTrafficSecrets::ServerAppTraffic);
 }
 
 TEST_F(KeySchedulerTest, TestKeyUpdate) {
   StringPiece ecdhe{"ecdhe"};
-  ks_->deriveHandshakeSecret(ecdhe);
-  ks_->deriveMasterSecret();
-  ks_->deriveAppTrafficSecrets(transcript_);
+  Error err;
+  EXPECT_EQ(ks_->deriveHandshakeSecret(err, ecdhe), Status::Success);
+  EXPECT_EQ(ks_->deriveMasterSecret(err), Status::Success);
+  EXPECT_EQ(ks_->deriveAppTrafficSecrets(err, transcript_), Status::Success);
 
+  uint32_t clientUpdate;
   EXPECT_CALL(*kd_, _expandLabel(_, _, _, _));
-  EXPECT_EQ(ks_->clientKeyUpdate(), 1);
+  EXPECT_EQ(ks_->clientKeyUpdate(clientUpdate, err), Status::Success);
+  EXPECT_EQ(clientUpdate, 1);
   EXPECT_CALL(*kd_, _expandLabel(_, _, _, _));
-  EXPECT_EQ(ks_->clientKeyUpdate(), 2);
+  EXPECT_EQ(ks_->clientKeyUpdate(clientUpdate, err), Status::Success);
+  EXPECT_EQ(clientUpdate, 2);
 
+  uint32_t serverUpdate;
   EXPECT_CALL(*kd_, _expandLabel(_, _, _, _));
-  EXPECT_EQ(ks_->serverKeyUpdate(), 1);
+  EXPECT_EQ(ks_->serverKeyUpdate(serverUpdate, err), Status::Success);
+  EXPECT_EQ(serverUpdate, 1);
   EXPECT_CALL(*kd_, _expandLabel(_, _, _, _));
-  EXPECT_EQ(ks_->serverKeyUpdate(), 2);
+  EXPECT_EQ(ks_->serverKeyUpdate(serverUpdate, err), Status::Success);
+  EXPECT_EQ(serverUpdate, 2);
 }
 
 TEST_F(KeySchedulerTest, TestTrafficKey) {
   EXPECT_CALL(*kd_, _expandLabel(_, _, _, _)).Times(2);
   StringPiece trafficSecret{"secret"};
-  ks_->getTrafficKey(trafficSecret, 10, 10);
+  Error err;
+  TrafficKey tk;
+  EXPECT_EQ(
+      ks_->getTrafficKey(tk, err, trafficSecret, 10, 10), Status::Success);
 }
 
 TEST_F(KeySchedulerTest, TestTrafficKeyWithLabel) {
@@ -167,7 +262,12 @@ TEST_F(KeySchedulerTest, TestTrafficKeyWithLabel) {
             res->append(len);
             return res;
           }));
-  ks_->getTrafficKeyWithLabel(trafficSecret, keyLabel, ivLabel, 10, 10);
+  Error err;
+  TrafficKey tk;
+  EXPECT_EQ(
+      ks_->getTrafficKeyWithLabel(
+          tk, err, trafficSecret, keyLabel, ivLabel, 10, 10),
+      Status::Success);
 }
 
 TEST_F(KeySchedulerTest, TestClonability) {
@@ -180,7 +280,8 @@ TEST_F(KeySchedulerTest, TestClonability) {
     return kd;
   }));
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
-  ks_->deriveHandshakeSecret(ecdhe);
+  Error err;
+  EXPECT_EQ(ks_->deriveHandshakeSecret(err, ecdhe), Status::Success);
 
   auto cloned = ks_->clone();
   ASSERT_NE(newKeyDerivation, nullptr);
@@ -194,14 +295,24 @@ TEST_F(KeySchedulerTest, TestClonability) {
   EXPECT_CALL(*kd_, _deriveSecret(_, _, Eq(folly::ByteRange(transcript1)), _))
       .Times(2);
 
-  auto t1sh =
-      ks_->getSecret(HandshakeSecrets::ServerHandshakeTraffic, transcript1);
-  auto t1ch =
-      ks_->getSecret(HandshakeSecrets::ClientHandshakeTraffic, transcript1);
-  auto t2sh =
-      cloned->getSecret(HandshakeSecrets::ServerHandshakeTraffic, transcript2);
-  auto t2ch =
-      cloned->getSecret(HandshakeSecrets::ClientHandshakeTraffic, transcript2);
+  DerivedSecret t1sh, t1ch, t2sh, t2ch;
+  EXPECT_EQ(
+      ks_->getSecret(
+          t1sh, err, HandshakeSecrets::ServerHandshakeTraffic, transcript1),
+      Status::Success);
+  EXPECT_EQ(
+      ks_->getSecret(
+          t1ch, err, HandshakeSecrets::ClientHandshakeTraffic, transcript1),
+      Status::Success);
+  Error err2;
+  EXPECT_EQ(
+      cloned->getSecret(
+          t2sh, err2, HandshakeSecrets::ServerHandshakeTraffic, transcript2),
+      Status::Success);
+  EXPECT_EQ(
+      cloned->getSecret(
+          t2ch, err2, HandshakeSecrets::ClientHandshakeTraffic, transcript2),
+      Status::Success);
   EXPECT_EQ(t1sh, t2sh);
   EXPECT_EQ(t1ch, t2ch);
 }

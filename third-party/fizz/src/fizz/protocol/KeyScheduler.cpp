@@ -44,26 +44,24 @@ Status KeyScheduler::deriveEarlySecret(Error& err, folly::ByteRange psk) {
   return Status::Success;
 }
 
-void KeyScheduler::deriveHandshakeSecret() {
+Status KeyScheduler::deriveHandshakeSecret(Error& err) {
   auto& earlySecret = *secret_->asEarlySecret();
   auto zeros = std::vector<uint8_t>(deriver_->hashLength(), 0);
   std::vector<uint8_t> preSecret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      deriver_->deriveSecret(
-          preSecret,
-          err,
-          folly::range(earlySecret.secret),
-          kDerivedSecret,
-          deriver_->blankHash(),
-          deriver_->hashLength()),
-      err);
+  FIZZ_RETURN_ON_ERROR(deriver_->deriveSecret(
+      preSecret,
+      err,
+      folly::range(earlySecret.secret),
+      kDerivedSecret,
+      deriver_->blankHash(),
+      deriver_->hashLength()));
   secret_.emplace(
       HandshakeSecret{
           deriver_->hkdfExtract(folly::range(preSecret), folly::range(zeros))});
+  return Status::Success;
 }
 
-void KeyScheduler::deriveHandshakeSecret(folly::ByteRange ecdhe) {
+Status KeyScheduler::deriveHandshakeSecret(Error& err, folly::ByteRange ecdhe) {
   if (!secret_) {
     auto zeros = std::vector<uint8_t>(deriver_->hashLength(), 0);
     secret_.emplace(
@@ -73,62 +71,56 @@ void KeyScheduler::deriveHandshakeSecret(folly::ByteRange ecdhe) {
 
   auto& earlySecret = secret_->tryAsEarlySecret();
   std::vector<uint8_t> preSecret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      deriver_->deriveSecret(
-          preSecret,
-          err,
-          folly::range(earlySecret.secret),
-          kDerivedSecret,
-          deriver_->blankHash(),
-          deriver_->hashLength()),
-      err);
+  FIZZ_RETURN_ON_ERROR(deriver_->deriveSecret(
+      preSecret,
+      err,
+      folly::range(earlySecret.secret),
+      kDerivedSecret,
+      deriver_->blankHash(),
+      deriver_->hashLength()));
   secret_.emplace(
       HandshakeSecret{deriver_->hkdfExtract(folly::range(preSecret), ecdhe)});
+  return Status::Success;
 }
 
-void KeyScheduler::deriveMasterSecret() {
+Status KeyScheduler::deriveMasterSecret(Error& err) {
   auto zeros = std::vector<uint8_t>(deriver_->hashLength(), 0);
   auto& handshakeSecret = secret_->tryAsHandshakeSecret();
   std::vector<uint8_t> preSecret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      deriver_->deriveSecret(
-          preSecret,
-          err,
-          folly::range(handshakeSecret.secret),
-          kDerivedSecret,
-          deriver_->blankHash(),
-          deriver_->hashLength()),
-      err);
+  FIZZ_RETURN_ON_ERROR(deriver_->deriveSecret(
+      preSecret,
+      err,
+      folly::range(handshakeSecret.secret),
+      kDerivedSecret,
+      deriver_->blankHash(),
+      deriver_->hashLength()));
   secret_.emplace(
       MasterSecret{
           deriver_->hkdfExtract(folly::range(preSecret), folly::range(zeros))});
+  return Status::Success;
 }
 
-void KeyScheduler::deriveAppTrafficSecrets(folly::ByteRange transcript) {
+Status KeyScheduler::deriveAppTrafficSecrets(
+    Error& err,
+    folly::ByteRange transcript) {
   auto& masterSecret = *secret_->asMasterSecret();
   AppTrafficSecret trafficSecret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      deriver_->deriveSecret(
-          trafficSecret.client,
-          err,
-          folly::range(masterSecret.secret),
-          kClientAppTraffic,
-          transcript,
-          deriver_->hashLength()),
-      err);
-  FIZZ_THROW_ON_ERROR(
-      deriver_->deriveSecret(
-          trafficSecret.server,
-          err,
-          folly::range(masterSecret.secret),
-          kServerAppTraffic,
-          transcript,
-          deriver_->hashLength()),
-      err);
+  FIZZ_RETURN_ON_ERROR(deriver_->deriveSecret(
+      trafficSecret.client,
+      err,
+      folly::range(masterSecret.secret),
+      kClientAppTraffic,
+      transcript,
+      deriver_->hashLength()));
+  FIZZ_RETURN_ON_ERROR(deriver_->deriveSecret(
+      trafficSecret.server,
+      err,
+      folly::range(masterSecret.secret),
+      kServerAppTraffic,
+      transcript,
+      deriver_->hashLength()));
   appTrafficSecret_ = std::move(trafficSecret);
+  return Status::Success;
 }
 
 Status KeyScheduler::clearMasterSecret(Error& err) {
@@ -139,43 +131,41 @@ Status KeyScheduler::clearMasterSecret(Error& err) {
   return Status::Success;
 }
 
-uint32_t KeyScheduler::clientKeyUpdate() {
+Status KeyScheduler::clientKeyUpdate(uint32_t& ret, Error& err) {
   auto& appTrafficSecret = *appTrafficSecret_;
   Buf buf;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      deriver_->expandLabel(
-          buf,
-          err,
-          folly::range(appTrafficSecret.client),
-          kTrafficKeyUpdate,
-          folly::IOBuf::create(0),
-          deriver_->hashLength()),
-      err);
+  FIZZ_RETURN_ON_ERROR(deriver_->expandLabel(
+      buf,
+      err,
+      folly::range(appTrafficSecret.client),
+      kTrafficKeyUpdate,
+      folly::IOBuf::create(0),
+      deriver_->hashLength()));
   buf->coalesce();
   appTrafficSecret.client = std::vector<uint8_t>(buf->data(), buf->tail());
-  return ++appTrafficSecret.clientGeneration;
+  ret = ++appTrafficSecret.clientGeneration;
+  return Status::Success;
 }
 
-uint32_t KeyScheduler::serverKeyUpdate() {
+Status KeyScheduler::serverKeyUpdate(uint32_t& ret, Error& err) {
   auto& appTrafficSecret = *appTrafficSecret_;
   Buf buf;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      deriver_->expandLabel(
-          buf,
-          err,
-          folly::range(appTrafficSecret.server),
-          kTrafficKeyUpdate,
-          folly::IOBuf::create(0),
-          deriver_->hashLength()),
-      err);
+  FIZZ_RETURN_ON_ERROR(deriver_->expandLabel(
+      buf,
+      err,
+      folly::range(appTrafficSecret.server),
+      kTrafficKeyUpdate,
+      folly::IOBuf::create(0),
+      deriver_->hashLength()));
   buf->coalesce();
   appTrafficSecret.server = std::vector<uint8_t>(buf->data(), buf->tail());
-  return ++appTrafficSecret.serverGeneration;
+  ret = ++appTrafficSecret.serverGeneration;
+  return Status::Success;
 }
 
-DerivedSecret KeyScheduler::getSecret(
+Status KeyScheduler::getSecret(
+    DerivedSecret& ret,
+    Error& err,
     EarlySecrets s,
     folly::ByteRange transcript) const {
   StringPiece label;
@@ -207,20 +197,20 @@ DerivedSecret KeyScheduler::getSecret(
 
   auto& earlySecret = *secret_->asEarlySecret();
   std::vector<uint8_t> secret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      deriver_->deriveSecret(
-          secret,
-          err,
-          folly::range(earlySecret.secret),
-          label,
-          transcript,
-          secretLength),
-      err);
-  return DerivedSecret(std::move(secret), SecretType(s));
+  FIZZ_RETURN_ON_ERROR(deriver_->deriveSecret(
+      secret,
+      err,
+      folly::range(earlySecret.secret),
+      label,
+      transcript,
+      secretLength));
+  ret = DerivedSecret(std::move(secret), SecretType(s));
+  return Status::Success;
 }
 
-DerivedSecret KeyScheduler::getSecret(
+Status KeyScheduler::getSecret(
+    DerivedSecret& ret,
+    Error& err,
     HandshakeSecrets s,
     folly::ByteRange transcript) const {
   StringPiece label;
@@ -242,20 +232,20 @@ DerivedSecret KeyScheduler::getSecret(
 
   auto& handshakeSecret = *secret_->asHandshakeSecret();
   std::vector<uint8_t> secret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      deriver_->deriveSecret(
-          secret,
-          err,
-          folly::range(handshakeSecret.secret),
-          label,
-          transcript,
-          secretLength),
-      err);
-  return DerivedSecret(std::move(secret), SecretType(s));
+  FIZZ_RETURN_ON_ERROR(deriver_->deriveSecret(
+      secret,
+      err,
+      folly::range(handshakeSecret.secret),
+      label,
+      transcript,
+      secretLength));
+  ret = DerivedSecret(std::move(secret), SecretType(s));
+  return Status::Success;
 }
 
-DerivedSecret KeyScheduler::getSecret(
+Status KeyScheduler::getSecret(
+    DerivedSecret& ret,
+    Error& err,
     MasterSecrets s,
     folly::ByteRange transcript) const {
   StringPiece label;
@@ -272,17 +262,15 @@ DerivedSecret KeyScheduler::getSecret(
 
   auto& masterSecret = *secret_->asMasterSecret();
   std::vector<uint8_t> secret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      deriver_->deriveSecret(
-          secret,
-          err,
-          folly::range(masterSecret.secret),
-          label,
-          transcript,
-          deriver_->hashLength()),
-      err);
-  return DerivedSecret(std::move(secret), SecretType(s));
+  FIZZ_RETURN_ON_ERROR(deriver_->deriveSecret(
+      secret,
+      err,
+      folly::range(masterSecret.secret),
+      label,
+      transcript,
+      deriver_->hashLength()));
+  ret = DerivedSecret(std::move(secret), SecretType(s));
+  return Status::Success;
 }
 
 DerivedSecret KeyScheduler::getSecret(AppTrafficSecrets s) const {
@@ -301,58 +289,49 @@ DerivedSecret KeyScheduler::getSecret(AppTrafficSecrets s) const {
   }
 }
 
-TrafficKey KeyScheduler::getTrafficKey(
+Status KeyScheduler::getTrafficKey(
+    TrafficKey& ret,
+    Error& err,
     folly::ByteRange trafficSecret,
     size_t keyLength,
     size_t ivLength) const {
   return getTrafficKeyWithLabel(
-      trafficSecret, kTrafficKey, kTrafficIv, keyLength, ivLength);
+      ret, err, trafficSecret, kTrafficKey, kTrafficIv, keyLength, ivLength);
 }
 
-TrafficKey KeyScheduler::getTrafficKeyWithLabel(
+Status KeyScheduler::getTrafficKeyWithLabel(
+    TrafficKey& ret,
+    Error& err,
     folly::ByteRange trafficSecret,
     folly::StringPiece keyLabel,
     folly::StringPiece ivLabel,
     size_t keyLength,
     size_t ivLength) const {
-  TrafficKey trafficKey;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      deriver_->expandLabel(
-          trafficKey.key,
-          err,
-          trafficSecret,
-          keyLabel,
-          folly::IOBuf::create(0),
-          keyLength),
-      err);
-  FIZZ_THROW_ON_ERROR(
-      deriver_->expandLabel(
-          trafficKey.iv,
-          err,
-          trafficSecret,
-          ivLabel,
-          folly::IOBuf::create(0),
-          ivLength),
-      err);
-  return trafficKey;
+  FIZZ_RETURN_ON_ERROR(deriver_->expandLabel(
+      ret.key,
+      err,
+      trafficSecret,
+      keyLabel,
+      folly::IOBuf::create(0),
+      keyLength));
+  FIZZ_RETURN_ON_ERROR(deriver_->expandLabel(
+      ret.iv, err, trafficSecret, ivLabel, folly::IOBuf::create(0), ivLength));
+  return Status::Success;
 }
 
-Buf KeyScheduler::getResumptionSecret(
+Status KeyScheduler::getResumptionSecret(
+    Buf& ret,
+    Error& err,
     folly::ByteRange resumptionMasterSecret,
     folly::ByteRange ticketNonce) const {
-  Buf ret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      deriver_->expandLabel(
-          ret,
-          err,
-          resumptionMasterSecret,
-          kResumption,
-          folly::IOBuf::wrapBuffer(ticketNonce),
-          deriver_->hashLength()),
-      err);
-  return ret;
+  FIZZ_RETURN_ON_ERROR(deriver_->expandLabel(
+      ret,
+      err,
+      resumptionMasterSecret,
+      kResumption,
+      folly::IOBuf::wrapBuffer(ticketNonce),
+      deriver_->hashLength()));
+  return Status::Success;
 }
 
 std::unique_ptr<KeyScheduler> KeyScheduler::clone() const {

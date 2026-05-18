@@ -791,8 +791,7 @@ folly::Try<void> ContextStack::processClientInterceptorsOnRequest(
   return {};
 }
 
-ContextStack::InterceptorResult<void>
-ContextStack::processClientInterceptorsOnResponse(
+folly::Try<void> ContextStack::processClientInterceptorsOnResponse(
     const apache::thrift::transport::THeader* headers,
     folly::exception_wrapper exceptionWrapper,
     apache::thrift::util::TypeErasedRef resultRaw) noexcept {
@@ -800,7 +799,7 @@ ContextStack::processClientInterceptorsOnResponse(
     if (exceptionWrapper.has_exception_ptr()) {
       return folly::Try<void>(std::move(exceptionWrapper));
     }
-    return folly::Try<void>();
+    return {};
   }
 
   ClientInterceptorOnResponseResult result;
@@ -836,7 +835,7 @@ ContextStack::processClientInterceptorsOnResponse(
             ClientInterceptorException::CallbackKind::ON_RESPONSE,
             std::move(exceptions)));
   }
-  return folly::Try<void>();
+  return {};
 }
 
 void*& ContextStack::contextAt(size_t i) {

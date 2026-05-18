@@ -142,7 +142,7 @@ void apache::thrift::Client<::cpp2::MyServicePrioParent>::sync_ping(apache::thri
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_ping(returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -333,7 +333,7 @@ void apache::thrift::Client<::cpp2::MyServicePrioParent>::sync_pong(apache::thri
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_pong(returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

@@ -229,7 +229,7 @@ bool apache::thrift::Client<::extra::svc::ExtraService>::sync_simple_function(ap
     bool _return;
     folly::exception_wrapper ew = recv_wrapped_simple_function(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -423,7 +423,7 @@ void apache::thrift::Client<::extra::svc::ExtraService>::sync_throws_function(ap
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_throws_function(returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -616,7 +616,7 @@ bool apache::thrift::Client<::extra::svc::ExtraService>::sync_throws_function2(a
     bool _return;
     folly::exception_wrapper ew = recv_wrapped_throws_function2(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -812,7 +812,7 @@ void apache::thrift::Client<::extra::svc::ExtraService>::sync_throws_function3(a
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_throws_function3(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

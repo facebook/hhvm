@@ -142,7 +142,7 @@ void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MySe
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_first(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -335,7 +335,7 @@ bool apache::thrift::Client<::test::fixtures::basic_structured_annotations::MySe
     bool _return;
     folly::exception_wrapper ew = recv_wrapped_second(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

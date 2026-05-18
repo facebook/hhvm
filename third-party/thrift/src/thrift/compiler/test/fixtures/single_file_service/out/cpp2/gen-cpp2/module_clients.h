@@ -139,7 +139,7 @@ class I final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_interact(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -252,7 +252,7 @@ class I final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_foo(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -405,7 +405,7 @@ class Client<::cpp2::B> : public ::cpp2::AAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_bar(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -520,7 +520,7 @@ class Client<::cpp2::B> : public ::cpp2::AAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_stream_stuff(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {
@@ -700,7 +700,7 @@ class I final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_interact(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }

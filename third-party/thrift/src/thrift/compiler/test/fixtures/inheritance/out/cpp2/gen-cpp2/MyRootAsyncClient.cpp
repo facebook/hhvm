@@ -129,7 +129,7 @@ void apache::thrift::Client<::cpp2::MyRoot>::sync_do_root(apache::thrift::RpcOpt
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_do_root(returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

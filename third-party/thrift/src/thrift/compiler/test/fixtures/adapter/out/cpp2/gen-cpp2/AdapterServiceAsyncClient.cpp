@@ -142,7 +142,7 @@ void apache::thrift::Client<::facebook::thrift::test::fixtures::adapter::Adapter
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_count(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -334,7 +334,7 @@ void apache::thrift::Client<::facebook::thrift::test::fixtures::adapter::Adapter
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_adaptedTypes(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

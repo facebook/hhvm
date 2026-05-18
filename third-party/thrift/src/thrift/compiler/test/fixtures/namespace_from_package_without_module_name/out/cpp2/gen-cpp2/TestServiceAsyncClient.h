@@ -131,7 +131,7 @@ class Client<::test::namespace_from_package_without_module_name::TestService> : 
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_init(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

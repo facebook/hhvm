@@ -206,7 +206,7 @@ void apache::thrift::Client<::cpp2::MyService>::sync_ping(apache::thrift::RpcOpt
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_ping(returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -397,7 +397,7 @@ void apache::thrift::Client<::cpp2::MyService>::sync_getRandomData(apache::thrif
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getRandomData(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -590,7 +590,7 @@ bool apache::thrift::Client<::cpp2::MyService>::sync_hasDataById(apache::thrift:
     bool _return;
     folly::exception_wrapper ew = recv_wrapped_hasDataById(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -785,7 +785,7 @@ void apache::thrift::Client<::cpp2::MyService>::sync_getDataById(apache::thrift:
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getDataById(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -978,7 +978,7 @@ void apache::thrift::Client<::cpp2::MyService>::sync_putDataById(apache::thrift:
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_putDataById(returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -1319,7 +1319,7 @@ void apache::thrift::Client<::cpp2::MyService>::sync_cppDoNothing(apache::thrift
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_cppDoNothing(returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

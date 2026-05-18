@@ -134,7 +134,7 @@ class Client<::py3::simple::DerivedService> : public ::py3::simple::SimpleServic
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_six(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

@@ -143,7 +143,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_frobnicate(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -320,7 +320,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_truthify(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {
@@ -456,7 +456,7 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_init(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -557,7 +557,7 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_do_something(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -657,7 +657,7 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_tear_down(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -768,7 +768,7 @@ class SharedInteraction final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_do_some_similar_things(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

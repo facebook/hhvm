@@ -245,7 +245,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::sync_ping(apach
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_ping(returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -436,7 +436,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::sync_getRandomD
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getRandomData(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -628,7 +628,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::sync_sink(apach
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_sink(returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -821,7 +821,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::sync_putDataByI
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_putDataById(returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -1014,7 +1014,7 @@ bool apache::thrift::Client<::test::fixtures::basic::MyService>::sync_hasDataByI
     bool _return;
     folly::exception_wrapper ew = recv_wrapped_hasDataById(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -1209,7 +1209,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::sync_getDataByI
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getDataById(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -1401,7 +1401,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::sync_deleteData
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_deleteDataById(returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -1742,7 +1742,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::sync_invalid_re
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_invalid_return_for_hack(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -1933,7 +1933,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::sync_rpc_skippe
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_rpc_skipped_codegen(returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

@@ -95,15 +95,14 @@ class FutureCallbackHelper {
   }
 
   static folly::Try<Result> processClientInterceptorsAndExtractResult(
-      PromiseResult&& result) {
+      PromiseResult&& result) noexcept {
     auto [rpcTryResult, clientReceiveState] =
         extractResultWrapped(std::move(result));
     auto* contextStack = clientReceiveState.ctx();
     auto* header = clientReceiveState.header();
     if (contextStack != nullptr) {
-      return ContextStack::blockingWaitInterceptorResult(
-          contextStack->processClientInterceptorsOnResponse(
-              header, std::move(rpcTryResult)));
+      return contextStack->processClientInterceptorsOnResponse(
+          header, std::move(rpcTryResult));
     }
     return std::move(rpcTryResult);
   }
@@ -115,9 +114,8 @@ inline void runClientInterceptorsInHeaderSemiFutureCallback(
   auto* contextStack = state.ctx();
   auto* header = state.header();
   if (contextStack != nullptr) {
-    ContextStack::blockingWaitInterceptorResult(
-        contextStack->processClientInterceptorsOnResponse(
-            header, state.exception(), result))
+    contextStack
+        ->processClientInterceptorsOnResponse(header, state.exception(), result)
         .throwUnlessValue();
   }
 }

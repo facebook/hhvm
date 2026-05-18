@@ -338,10 +338,10 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
           // TODO: OmniClient does not currently pass the response buffer into
           // processClientInterceptorsOnResponse. This wasn't implemented for
           // caution as no current interceptor required it in python clients.
-          auto interceptorTry = ContextStack::blockingWaitInterceptorResult(
-              ctx->processClientInterceptorsOnResponse(state.header(), ew));
-          if (interceptorTry.hasException()) {
-            resp.buf = folly::makeUnexpected(interceptorTry.exception());
+          auto interceptorResult =
+              ctx->processClientInterceptorsOnResponse(state.header(), ew);
+          if (interceptorResult.hasException()) {
+            resp.buf = folly::makeUnexpected(interceptorResult.exception());
           }
         }
 

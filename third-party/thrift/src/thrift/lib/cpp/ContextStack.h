@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <variant>
-
 #include <folly/ExceptionWrapper.h>
 #include <folly/Try.h>
 #include <thrift/lib/cpp/BiDiEventHandler.h>
@@ -166,10 +164,12 @@ class ContextStack {
       apache::thrift::transport::THeader* headers,
       RpcOptions& options) noexcept;
 
-  template <typename T>
-  using InterceptorResult = std::variant<folly::Try<T>>;
-
-  [[nodiscard]] InterceptorResult<void> processClientInterceptorsOnResponse(
+  // RPC responses may be exceptions or values. If exception_wrapper has
+  // a valid exception "result" is ignored. If exception_wrapper is empty
+  // "result" is used as the response.
+  // This formulation, requiring this method to resolve this, simplifies client
+  // stub code generation.
+  [[nodiscard]] folly::Try<void> processClientInterceptorsOnResponse(
       const apache::thrift::transport::THeader* headers,
       folly::exception_wrapper exceptionWrapper,
       apache::thrift::util::TypeErasedRef result =
@@ -177,7 +177,7 @@ class ContextStack {
               folly::unit)) noexcept;
 
   template <typename T>
-  [[nodiscard]] InterceptorResult<void> processClientInterceptorsOnResponse(
+  [[nodiscard]] folly::Try<void> processClientInterceptorsOnResponse(
       const apache::thrift::transport::THeader* headers,
       folly::exception_wrapper exceptionWrapper,
       T& result) noexcept {
@@ -188,7 +188,7 @@ class ContextStack {
   }
 
   template <typename T>
-  [[nodiscard]] InterceptorResult<T> processClientInterceptorsOnResponse(
+  [[nodiscard]] folly::Try<T> processClientInterceptorsOnResponse(
       const apache::thrift::transport::THeader* headers,
       folly::Try<T>&& result) noexcept {
     folly::exception_wrapper exceptionWrapper;
@@ -202,19 +202,12 @@ class ContextStack {
       }
       return apache::thrift::util::TypeErasedRef::of<T>(result.value());
     }();
-    auto interceptorResult = processClientInterceptorsOnResponse(
+    auto interceptorTry = processClientInterceptorsOnResponse(
         headers, exceptionWrapper, resultRef);
-    auto& interceptorTry = std::get<folly::Try<void>>(interceptorResult);
     if (interceptorTry.hasException()) {
       return folly::Try<T>(interceptorTry.exception());
     }
     return std::move(result);
-  }
-
-  template <typename T>
-  static folly::Try<T> blockingWaitInterceptorResult(
-      InterceptorResult<T>&& result) {
-    return std::get<folly::Try<T>>(std::move(result));
   }
 
  private:

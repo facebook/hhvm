@@ -135,7 +135,7 @@ class Client<::cpp2::test::BasicService> : public apache::thrift::GeneratedAsync
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_ping(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -252,7 +252,7 @@ class Client<::cpp2::test::BasicService> : public apache::thrift::GeneratedAsync
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_add(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -367,7 +367,7 @@ class Client<::cpp2::test::BasicService> : public apache::thrift::GeneratedAsync
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_buildItem(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -482,7 +482,7 @@ class Client<::cpp2::test::BasicService> : public apache::thrift::GeneratedAsync
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_lookup(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -597,7 +597,7 @@ class Client<::cpp2::test::BasicService> : public apache::thrift::GeneratedAsync
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_secureLookup(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

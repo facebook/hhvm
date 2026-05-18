@@ -148,7 +148,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_add(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -256,7 +256,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_processIOBuf(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -373,7 +373,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getStruct(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -487,7 +487,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_setStruct(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -603,7 +603,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_setStructList(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -720,7 +720,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getStructList(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -835,7 +835,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getNestedContainer(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -950,7 +950,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getTypedefStruct(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -1065,7 +1065,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getTypedefList(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -1180,7 +1180,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getUnion(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -1294,7 +1294,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getCalculator(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -1402,7 +1402,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_streamStructs(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {
@@ -1518,7 +1518,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_streamWithSinkInitial(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {
@@ -1634,7 +1634,7 @@ class Calculator final : public apache::thrift::InteractionHandle {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_streamWithSinkException(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {

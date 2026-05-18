@@ -220,7 +220,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
   }
 
   if (ctx != nullptr) {
-    apache::thrift::ContextStack::blockingWaitInterceptorResult(ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception())).throwUnlessValue();
+    ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception()).throwUnlessValue();
   }
   if (returnState.isException()) {
     co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -347,7 +347,7 @@ folly::coro::Task<apache::thrift::ResponseAndClientSink<::cpp2::InitialResponse,
   }
 
   if (ctx != nullptr) {
-    apache::thrift::ContextStack::blockingWaitInterceptorResult(ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception())).throwUnlessValue();
+    ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception()).throwUnlessValue();
   }
   if (returnState.isException()) {
     co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -474,7 +474,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
   }
 
   if (ctx != nullptr) {
-    apache::thrift::ContextStack::blockingWaitInterceptorResult(ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception())).throwUnlessValue();
+    ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception()).throwUnlessValue();
   }
   if (returnState.isException()) {
     co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -601,7 +601,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
   }
 
   if (ctx != nullptr) {
-    apache::thrift::ContextStack::blockingWaitInterceptorResult(ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception())).throwUnlessValue();
+    ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception()).throwUnlessValue();
   }
   if (returnState.isException()) {
     co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -728,7 +728,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
   }
 
   if (ctx != nullptr) {
-    apache::thrift::ContextStack::blockingWaitInterceptorResult(ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception())).throwUnlessValue();
+    ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception()).throwUnlessValue();
   }
   if (returnState.isException()) {
     co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -855,7 +855,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
   }
 
   if (ctx != nullptr) {
-    apache::thrift::ContextStack::blockingWaitInterceptorResult(ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception())).throwUnlessValue();
+    ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception()).throwUnlessValue();
   }
   if (returnState.isException()) {
     co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -982,7 +982,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
   }
 
   if (ctx != nullptr) {
-    apache::thrift::ContextStack::blockingWaitInterceptorResult(ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception())).throwUnlessValue();
+    ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception()).throwUnlessValue();
   }
   if (returnState.isException()) {
     co_yield folly::coro::co_error(std::move(returnState.exception()));

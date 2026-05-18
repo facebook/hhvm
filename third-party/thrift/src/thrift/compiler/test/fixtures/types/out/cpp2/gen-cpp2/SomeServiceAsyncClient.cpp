@@ -143,7 +143,7 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::syn
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_bounce_map(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -335,7 +335,7 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::syn
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_binary_keyed_map(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

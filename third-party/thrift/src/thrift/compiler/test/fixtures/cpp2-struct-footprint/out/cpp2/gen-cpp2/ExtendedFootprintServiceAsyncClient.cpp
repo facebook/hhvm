@@ -129,7 +129,7 @@ void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getComplexMap(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

@@ -143,7 +143,7 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_getDataByKey0(a
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getDataByKey0(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -382,7 +382,7 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_getDataByKey1(a
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getDataByKey1(_return, returnState);
     if (contextStack != nullptr) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

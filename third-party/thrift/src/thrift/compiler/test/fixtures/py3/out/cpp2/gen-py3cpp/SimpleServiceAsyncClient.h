@@ -171,7 +171,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_five(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -286,7 +286,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_add_five(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -400,7 +400,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_do_nothing(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -517,7 +517,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_concat(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -632,7 +632,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_value(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -747,7 +747,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_negate(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -862,7 +862,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_tiny(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -977,7 +977,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_small(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -1092,7 +1092,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_big(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -1207,7 +1207,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_two(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -1321,7 +1321,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_expected_exception(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -1438,7 +1438,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_unexpected_exception(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -1553,7 +1553,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_sum_i16_list(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -1668,7 +1668,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_sum_i32_list(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -1783,7 +1783,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_sum_i64_list(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -1898,7 +1898,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_concat_many(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -2013,7 +2013,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_count_structs(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -2128,7 +2128,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_sum_set(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -2243,7 +2243,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_contains_word(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -2358,7 +2358,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_map_value(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -2473,7 +2473,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_map_length(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -2588,7 +2588,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_sum_map_values(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -2703,7 +2703,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_complex_sum_i32(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -2818,7 +2818,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_repeat_name(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -2933,7 +2933,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_struct(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -3048,7 +3048,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_fib(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -3163,7 +3163,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_unique_words(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -3278,7 +3278,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_words_count(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -3393,7 +3393,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_set_enum(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -3508,7 +3508,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_list_of_lists(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -3623,7 +3623,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_word_character_frequency(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -3738,7 +3738,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_list_of_sets(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -3853,7 +3853,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_nested_map_argument(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -3968,7 +3968,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_make_sentence(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -4083,7 +4083,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_union(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -4198,7 +4198,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_keys(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -4313,7 +4313,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_lookup_double(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -4428,7 +4428,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_retrieve_binary(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -4543,7 +4543,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_contain_binary(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -4658,7 +4658,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_contain_enum(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -4773,7 +4773,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_binary_union_struct(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
@@ -4888,7 +4888,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_struct_hidden(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

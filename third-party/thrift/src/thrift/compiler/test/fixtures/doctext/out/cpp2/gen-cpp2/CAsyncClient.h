@@ -135,7 +135,7 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_f(returnState);
     if (returnState.ctx()) {
-      auto tryObj = apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew));
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
       if (tryObj.hasException()) {
         ew = std::move(tryObj.exception());
       }
@@ -250,7 +250,7 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_numbers(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     // Attach interceptor context to stream for automatic interception
     if (returnState.ctx()) {
@@ -368,7 +368,7 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_thing(_return, returnState);
     if (returnState.ctx()) {
-      apache::thrift::ContextStack::blockingWaitInterceptorResult(returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     if (ew) {
       co_yield folly::coro::co_error(std::move(ew));

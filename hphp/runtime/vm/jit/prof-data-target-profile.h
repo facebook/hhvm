@@ -54,19 +54,22 @@ struct ProfDataTargetProfile {
   hphp_fast_map<const rds::Profile, T*, RdsProfileHasher, RdsProfileEquals> m_map ## T; \
                                                                \
  public:                                                       \
-  template <>                                                  \
-  const T* get<T>(const rds::Profile& key) const {             \
-    auto it = m_map##T.find(key);                              \
-    if (it == m_map##T.end()) return nullptr;                  \
-    return it->second;                                         \
-  }                                                            \
-                                                               \
   void add(const rds::Profile& key, T* value) {                \
     m_map##T.emplace(key, value);                              \
   }
   RDS_PROFILE_SYMBOLS
 #undef PR
 };
+
+#define PR(T)                                                  \
+template <>                                                    \
+inline const T* ProfDataTargetProfile::get<T>(const rds::Profile& key) const { \
+  auto it = m_map##T.find(key);                                \
+  if (it == m_map##T.end()) return nullptr;                    \
+  return it->second;                                           \
+}
+RDS_PROFILE_SYMBOLS
+#undef PR
 
 }
 

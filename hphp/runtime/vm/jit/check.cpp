@@ -316,7 +316,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
   if (opHasExtraData(inst->op()) != (bool)inst->rawExtra()) {
     bail(folly::format("opcode {} should{} have an ExtraData struct "
                        "but instruction {} does{}",
-                       inst->op(),
+                       opcodeName(inst->op()),
                        opHasExtraData(inst->op()) ? "" : "n't",
                        *inst,
                        inst->rawExtra() ? "" : "n't").str());

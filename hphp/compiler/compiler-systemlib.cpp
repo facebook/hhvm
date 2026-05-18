@@ -36,6 +36,7 @@
 #include "hphp/util/timer.h"
 
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/string_file.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>

@@ -75,6 +75,12 @@
 
 namespace HPHP {
 
+// libheif >= 1.13 renamed heif_reader_grow_status_error
+#if LIBHEIF_NUMERIC_VERSION >= ((1<<24) | (13<<16))
+static constexpr auto heif_reader_grow_status_error =
+    heif_reader_grow_status_size_beyond_eof;
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define HAS_GDIMAGESETANTIALIASED
@@ -1563,7 +1569,7 @@ static heif_reader_grow_status heif_wait_for_file_size(
     return heif_reader_grow_status_error;
   }
   if (targetSize > fileSize) {
-    return heif_reader_grow_status_size_beyond_eof;
+    return heif_reader_grow_status_error;
   }
   return heif_reader_grow_status_size_reached;
 }

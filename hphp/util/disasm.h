@@ -15,6 +15,8 @@
 */
 #pragma once
 
+#include <cstdint>
+
 #if defined(__x86_64__)
 extern "C" {
 #include <xed-interface.h>

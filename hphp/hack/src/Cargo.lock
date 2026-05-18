@@ -3495,9 +3495,9 @@ dependencies = [
 
 [[package]]
 name = "packedvec"
-version = "1.2.4"
+version = "1.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bde3c690ec20e4a2b4fb46f0289a451181eb50011a1e2acc8d85e2fde9062a45"
+checksum = "a69e0a534dd2e6aefce319af62a0aa0066a76bdfcec0201dfe02df226bc9ec70"
 dependencies = [
  "num-traits",
  "serde",

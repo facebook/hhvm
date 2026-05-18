@@ -1161,7 +1161,7 @@ func (p *simpleJSONFormat) ParseListEnd() error {
 		return err
 	}
 	cxt, _ := p.parseContextStack.peek()
-	if cxt != _CONTEXT_IN_LIST {
+	if cxt != _CONTEXT_IN_LIST && cxt != _CONTEXT_IN_LIST_FIRST {
 		e := fmt.Errorf("Expected to be in the List Context, but not in List Context (%d)", cxt)
 		return types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
 	}

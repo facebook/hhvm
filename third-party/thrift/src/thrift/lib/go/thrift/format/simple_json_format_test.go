@@ -27,6 +27,7 @@ import (
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestWriteSimpleJSONProtocolBool(t *testing.T) {
@@ -811,4 +812,47 @@ func TestJSONContextStack(t *testing.T) {
 
 func TestSimpleJSONProtocolUnmatchedBeginEnd(t *testing.T) {
 	UnmatchedBeginEndProtocolTest(t, NewSimpleJSONFormat)
+}
+
+// TestSimpleJSONV2ReadEmptyContainers verifies that the V2 SimpleJSON
+// deserializer can read empty container literals.
+//
+// Regression test: previously, ParseListEnd required the parse context to be
+// _CONTEXT_IN_LIST. For empty lists ("[]") V2 never transitions out of
+// _CONTEXT_IN_LIST_FIRST (no element is read, so ParsePostValue never advances
+// the state), so end-of-list parsing failed with
+// `Expected to be in the List Context, but not in List Context (2)`.
+// V1 SimpleJSON masked this because it always wrote a "[elemType,size,...]"
+// prefix, guaranteeing the transition.
+func TestSimpleJSONV2ReadEmptyContainers(t *testing.T) {
+	t.Run("list", func(t *testing.T) {
+		trans := bytes.NewBufferString("[]")
+		p := newSimpleJSONFormatV2(trans)
+		_, _, err := p.ReadListBegin()
+		require.NoError(t, err)
+		require.NoError(t, p.ReadListEnd())
+	})
+	t.Run("set", func(t *testing.T) {
+		trans := bytes.NewBufferString("[]")
+		p := newSimpleJSONFormatV2(trans)
+		_, _, err := p.ReadSetBegin()
+		require.NoError(t, err)
+		require.NoError(t, p.ReadSetEnd())
+	})
+	t.Run("struct-with-empty-list-field", func(t *testing.T) {
+		// Mimics the failure mode that surfaced via the reflect codec when
+		// deserializing a Thrift struct containing an empty list field.
+		trans := bytes.NewBufferString(`{"foo":[]}`)
+		p := newSimpleJSONFormatV2(trans)
+		_, err := p.ReadStructBegin()
+		require.NoError(t, err)
+		name, _, _, err := p.ReadFieldBegin()
+		require.NoError(t, err)
+		require.Equal(t, "foo", name)
+		_, _, err = p.ReadListBegin()
+		require.NoError(t, err)
+		require.NoError(t, p.ReadListEnd())
+		require.NoError(t, p.ReadFieldEnd())
+		require.NoError(t, p.ReadStructEnd())
+	})
 }

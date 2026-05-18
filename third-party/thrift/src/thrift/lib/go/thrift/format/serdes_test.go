@@ -24,6 +24,7 @@ import (
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
+	mytest "github.com/facebook/fbthrift/thrift/test/go/if/my_test_struct"
 	"github.com/stretchr/testify/require"
 )
 
@@ -43,6 +44,44 @@ func TestBasicSerDes(t *testing.T) {
 		data, err := encodeFn(val)
 		require.NoError(t, err)
 		var res dummyif.DummyStruct1
+		err = decodeFn(data, &res)
+		require.NoError(t, err)
+		require.Equal(t, *val, res)
+	}
+
+	t.Run("Binary", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeBinary, DecodeBinary)
+	})
+	t.Run("Compact", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeCompact, DecodeCompact)
+	})
+	t.Run("CompactJSON", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeCompactJSON, DecodeCompactJSON)
+	})
+	t.Run("SimpleJSON", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeSimpleJSON, DecodeSimpleJSON)
+	})
+	t.Run("SimpleJSONV2", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeSimpleJSONV2, DecodeSimpleJSONV2)
+	})
+}
+
+// TestEmptyContainersSerDes round-trips a struct whose list/set/map fields
+// are empty, across every supported format. SimpleJSON V2 previously
+// rejected the resulting "[]" / "{}" payloads with
+// `Expected to be in the List Context, but not in List Context (2)`
+// (see TestSimpleJSONV2ReadEmptyContainers for the underlying fix).
+func TestEmptyContainersSerDes(t *testing.T) {
+	val := mytest.NewMyTestStruct().
+		SetStringList([]string{}).
+		SetStringSet([]string{}).
+		SetStringMap(map[string]string{}).
+		SetSt("hello")
+
+	encodeDecodeTestFn := func(t *testing.T, encodeFn func(types.WritableStruct) ([]byte, error), decodeFn func([]byte, types.ReadableStruct) error) {
+		data, err := encodeFn(val)
+		require.NoError(t, err)
+		var res mytest.MyTestStruct
 		err = decodeFn(data, &res)
 		require.NoError(t, err)
 		require.Equal(t, *val, res)

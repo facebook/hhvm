@@ -9,6 +9,7 @@
 #pragma once
 #include <fizz/protocol/KeyScheduler.h>
 #include <fizz/protocol/Types.h>
+#include <fizz/util/Status.h>
 #include <fmt/format.h>
 #include <folly/Range.h>
 #include <fstream>
@@ -52,14 +53,19 @@ class KeyLogWriter {
   };
 
   /**
-   * Instantiate a KeyLogWriter.
+   * Create a KeyLogWriter.
    * @param fileName, input, name of the file to keep key logs.
    */
-  KeyLogWriter(const std::string& fileName) {
-    outputFile_.open(fileName.c_str(), std::ios_base::app);
-    if (outputFile_.fail()) {
-      throw std::runtime_error("Error opening NSS key log output file");
+  static Status create(
+      std::unique_ptr<KeyLogWriter>& ret,
+      Error& err,
+      const std::string& fileName) {
+    ret = std::unique_ptr<KeyLogWriter>(new KeyLogWriter(fileName));
+    if (ret->outputFile_.fail()) {
+      ret.reset();
+      return err.error("Error opening NSS key log output file");
     }
+    return Status::Success;
   }
 
   /**
@@ -161,6 +167,10 @@ class KeyLogWriter {
   }
 
  private:
+  KeyLogWriter(const std::string& fileName) {
+    outputFile_.open(fileName.c_str(), std::ios_base::app);
+  }
+
   /**
    * Convert the Label enumerate to string.
    */

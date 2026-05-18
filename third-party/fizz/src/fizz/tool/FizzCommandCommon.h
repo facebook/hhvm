@@ -124,8 +124,12 @@ inline std::vector<T> splitParse(
   std::vector<folly::StringPiece> pieces;
   std::vector<T> output;
   folly::split(sep, arg, pieces);
-  std::transform(
-      pieces.begin(), pieces.end(), std::back_inserter(output), parse<T>);
+  for (const auto& piece : pieces) {
+    T val;
+    Error err;
+    FIZZ_THROW_ON_ERROR(parse<T>(val, err, piece), err);
+    output.push_back(std::move(val));
+  }
   return output;
 }
 

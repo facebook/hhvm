@@ -7,12 +7,13 @@
  */
 
 #pragma once
+#include <fizz/util/Status.h>
 #include <folly/Range.h>
 
 namespace fizz {
 
 template <class T>
-T parse(folly::StringPiece s);
+Status parse(T& ret, Error& err, folly::StringPiece s);
 
 } // namespace fizz
 

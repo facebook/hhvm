@@ -11,7 +11,7 @@
 
 namespace fizz {
 template <>
-inline CipherSuite parse(folly::StringPiece s) {
+inline Status parse(CipherSuite& ret, Error& err, folly::StringPiece s) {
   static const std::map<folly::StringPiece, CipherSuite> stringToCiphers = {
       {"TLS_AES_128_GCM_SHA256", CipherSuite::TLS_AES_128_GCM_SHA256},
       {"TLS_AES_256_GCM_SHA384", CipherSuite::TLS_AES_256_GCM_SHA384},
@@ -24,14 +24,15 @@ inline CipherSuite parse(folly::StringPiece s) {
 
   auto location = stringToCiphers.find(s);
   if (location != stringToCiphers.end()) {
-    return location->second;
+    ret = location->second;
+    return Status::Success;
   }
 
-  throw std::runtime_error(folly::to<std::string>("Unknown cipher suite: ", s));
+  return err.error(folly::to<std::string>("Unknown cipher suite: ", s));
 }
 
 template <>
-inline SignatureScheme parse(folly::StringPiece s) {
+inline Status parse(SignatureScheme& ret, Error& err, folly::StringPiece s) {
   static const std::map<folly::StringPiece, SignatureScheme> stringToSchemes = {
       {"ecdsa_secp256r1_sha256", SignatureScheme::ecdsa_secp256r1_sha256},
       {"ecdsa_secp384r1_sha384", SignatureScheme::ecdsa_secp384r1_sha384},
@@ -44,15 +45,15 @@ inline SignatureScheme parse(folly::StringPiece s) {
 
   auto location = stringToSchemes.find(s);
   if (location != stringToSchemes.end()) {
-    return location->second;
+    ret = location->second;
+    return Status::Success;
   }
 
-  throw std::runtime_error(
-      folly::to<std::string>("Unknown signature scheme: ", s));
+  return err.error(folly::to<std::string>("Unknown signature scheme: ", s));
 }
 
 template <>
-inline NamedGroup parse(folly::StringPiece s) {
+inline Status parse(NamedGroup& ret, Error& err, folly::StringPiece s) {
   static const std::map<folly::StringPiece, NamedGroup> stringToGroups = {
       {"secp256r1", NamedGroup::secp256r1},
       {"secp384r1", NamedGroup::secp384r1},
@@ -66,14 +67,16 @@ inline NamedGroup parse(folly::StringPiece s) {
 
   auto location = stringToGroups.find(s);
   if (location != stringToGroups.end()) {
-    return location->second;
+    ret = location->second;
+    return Status::Success;
   }
 
-  throw std::runtime_error(folly::to<std::string>("Unknown named group: ", s));
+  return err.error(folly::to<std::string>("Unknown named group: ", s));
 }
 
 template <>
-inline CertificateCompressionAlgorithm parse(folly::StringPiece s) {
+inline Status
+parse(CertificateCompressionAlgorithm& ret, Error& err, folly::StringPiece s) {
   static const std::map<folly::StringPiece, CertificateCompressionAlgorithm>
       stringToAlgos = {
           {"zlib", CertificateCompressionAlgorithm::zlib},
@@ -82,10 +85,11 @@ inline CertificateCompressionAlgorithm parse(folly::StringPiece s) {
 
   auto location = stringToAlgos.find(s);
   if (location != stringToAlgos.end()) {
-    return location->second;
+    ret = location->second;
+    return Status::Success;
   }
 
-  throw std::runtime_error(
+  return err.error(
       folly::to<std::string>("Unknown compression algorithm: ", s));
 }
 } // namespace fizz

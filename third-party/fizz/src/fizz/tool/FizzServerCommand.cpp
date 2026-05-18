@@ -1222,7 +1222,13 @@ int fizzServerCommand(const std::vector<std::string>& args) {
 
   FizzServerAcceptor acceptor(port, serverContext, loop, &evb, sslContext);
   if (!keyLogFile.empty()) {
-    acceptor.setKeyLogWriter(std::make_unique<KeyLogWriter>(keyLogFile));
+    {
+      std::unique_ptr<KeyLogWriter> keyLogWriter;
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          KeyLogWriter::create(keyLogWriter, err, keyLogFile), err);
+      acceptor.setKeyLogWriter(std::move(keyLogWriter));
+    }
   }
   acceptor.setHttpEnabled(http);
   evb.loop();

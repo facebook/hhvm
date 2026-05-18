@@ -59,10 +59,18 @@ int fizzGenerateDelegatedCredentialCommand(
     {"-credkey", {true, [&credKeyPath](const std::string& arg) { credKeyPath = arg; }}},
     {"-credpass", {true, [&credKeyPass](const std::string& arg) { credKeyPass = arg; }}},
     {"-signscheme", {true, [&credSignScheme](const std::string& arg) {
-        credSignScheme = parse<SignatureScheme>(arg);
+        SignatureScheme scheme;
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            parse<SignatureScheme>(scheme, err, arg), err);
+        credSignScheme = scheme;
     }}},
     {"-verifscheme", {true, [&credVerifScheme](const std::string& arg) {
-        credVerifScheme = parse<SignatureScheme>(arg);
+        SignatureScheme scheme;
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            parse<SignatureScheme>(scheme, err, arg), err);
+        credVerifScheme = scheme;
     }}},
     {"-validsec", {true, [&validSec](const std::string& arg) {
         validSec = std::chrono::seconds(std::stoul(arg));

@@ -850,7 +850,13 @@ int fizzClientCommand(const std::vector<std::string>& args) {
       clientContext->setPskCache(pskCache);
     }
     if (!keyLogFile.empty()) {
-      conn.setKeyLogWriter(std::make_unique<KeyLogWriter>(keyLogFile));
+      {
+        std::unique_ptr<KeyLogWriter> keyLogWriter;
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            KeyLogWriter::create(keyLogWriter, err, keyLogFile), err);
+        conn.setKeyLogWriter(std::move(keyLogWriter));
+      }
     }
     TerminalInputHandler input(&evb, inputTarget);
     conn.connect(addr);

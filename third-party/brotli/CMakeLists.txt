@@ -1,4 +1,19 @@
 add_library(brotli INTERFACE)
+
+find_library(BROTLIDEC_LIBRARY brotlidec)
+find_library(BROTLIENC_LIBRARY brotlienc)
+find_library(BROTLICOMMON_LIBRARY brotlicommon)
+find_path(BROTLI_INCLUDE_DIR brotli/decode.h)
+
+if(BROTLIDEC_LIBRARY AND BROTLIENC_LIBRARY AND BROTLICOMMON_LIBRARY AND BROTLI_INCLUDE_DIR)
+  message(STATUS "Using system brotli: ${BROTLIDEC_LIBRARY}")
+  target_include_directories(brotli INTERFACE "${BROTLI_INCLUDE_DIR}")
+  target_link_libraries(brotli INTERFACE
+    "${BROTLIDEC_LIBRARY}" "${BROTLIENC_LIBRARY}" "${BROTLICOMMON_LIBRARY}")
+  return()
+endif()
+
+message(STATUS "Using third-party bundled brotli")
 include(ExternalProject)
 
 include(HPHPFunctions)

@@ -5,7 +5,12 @@ auto_sources(files "*.cpp" "")
 list(APPEND CXX_SOURCES ${files})
 
 option(ENABLE_LD_GOLD "Enable Hot Linker script using ld-gold" On)
-set(SECTION_ORDERING_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../tools/oss_hot_section_ordering CACHE FILEPATH "File used by ld-gold for the relocation of sections")
+set(
+  SECTION_ORDERING_FILE
+  ${CMAKE_CURRENT_SOURCE_DIR}/../tools/oss_hot_section_ordering
+  CACHE FILEPATH
+  "File used by ld-gold for the relocation of sections"
+)
 
 if (MAP_TEXT_HUGE_PAGES)
     file(STRINGS "${SECTION_ORDERING_FILE}" SECTION_ORDERING_CONTENTS)
@@ -23,7 +28,9 @@ endif()
 
 get_object_libraries_objects(additionalObjects ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
 add_executable(hhvm ${CXX_SOURCES} ${additionalObjects})
-target_link_libraries(hhvm ${HHVM_LINK_LIBRARIES} ${EZC_LINK_LIBRARIES} ${HRE_LINK_LIBRARIES})
+target_link_libraries(
+  hhvm ${HHVM_LINK_LIBRARIES} ${EZC_LINK_LIBRARIES} ${HRE_LINK_LIBRARIES}
+)
 link_object_libraries(hhvm ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
 if (GOLD_FOUND AND ENABLE_LD_GOLD)
   if (CMAKE_CONFIGURATION_TYPES)
@@ -37,19 +44,29 @@ if (GOLD_FOUND AND ENABLE_LD_GOLD)
 endif()
 hphp_link(hhvm)
 HHVM_CONFIGURE_TARGET_FOR_EXTENSION_DEPENDENCIES(hhvm)
+if (NOT WINDOWS)
+  target_link_libraries(
+    hhvm ${LIBELF_LIBRARIES} ${LIBDWARF_LIBRARIES} ${ZLIB_LIBRARIES}
+  )
+endif()
 
 # These mocks need to be added for the rust/ocaml FFI to work properly
 target_sources(hhvm PUBLIC ../hack/src/utils/ocaml_ffi_mock/ocaml.c)
 
 if (ENABLE_SPLIT_DWARF)
   if (NOT GOLD_FOUND)
-    message(FATAL_ERROR "ENABLE_SPLIT_DWARF was specified but the gold linker was not found")
+    message(
+      FATAL_ERROR
+      "ENABLE_SPLIT_DWARF was specified but the gold linker was not found"
+    )
   endif()
   message(STATUS "Enabled split DWARF files")
   target_link_libraries(hhvm debug "-Wl,--gdb-index")
 endif()
 
-embed_all_systemlibs(hhvm "${CMAKE_CURRENT_BINARY_DIR}/.." "${CMAKE_CURRENT_BINARY_DIR}/hhvm")
+embed_all_systemlibs(
+  hhvm "${CMAKE_CURRENT_BINARY_DIR}/.." "${CMAKE_CURRENT_BINARY_DIR}/hhvm"
+)
 add_dependencies(hhvm systemlib)
 
 if (CMAKE_HOST_UNIX)

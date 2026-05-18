@@ -1,19 +1,14 @@
-if (NOT CLANG_FORCE_LIBCPP)
-  find_package(gflags CONFIG)
+find_package(gflags CONFIG)
 
-  if (TARGET gflags::gflags)
-    message(STATUS "Using system gflags")
-
+if(TARGET gflags OR TARGET gflags::gflags)
+  if(NOT TARGET gflags)
     add_library(gflags INTERFACE)
-    add_dependencies(gflags gflags::gflags)
     target_link_libraries(gflags INTERFACE gflags::gflags)
-
     get_target_property(GFLAGS_INCLUDE_DIR gflags::gflags INTERFACE_INCLUDE_DIRECTORIES)
-
     target_include_directories(gflags INTERFACE ${GFLAGS_INCLUDE_DIR})
-
-    return()
   endif()
+  message(STATUS "Using system gflags")
+  return()
 endif()
 
 message(STATUS "Using third-party bundled gflags")

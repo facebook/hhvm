@@ -1,3 +1,12 @@
+find_package(LibAfdt)
+if(LibAfdt_FOUND)
+  message(STATUS "Using system libafdt: ${LibAfdt_LIBS}")
+  add_library(afdt INTERFACE)
+  target_include_directories(afdt INTERFACE ${LibAfdt_INCLUDE_DIR})
+  target_link_libraries(afdt INTERFACE ${LibAfdt_LIBS})
+  return()
+endif()
+
 cmake_minimum_required(VERSION 2.6)
 project(libafdt CXX C)
 
@@ -34,8 +43,6 @@ CHECK_TYPE_SIZE("uint8_t" HAVE_UINT8_T)
 CHECK_SYMBOL_EXISTS("AF_LOCAL" "sys/socket.h" HAVE_DECL_AF_LOCAL)
 CHECK_SYMBOL_EXISTS("PF_LOCAL" "sys/socket.h" HAVE_DECL_PF_LOCAL)
 
-# need to check malloc
-
 CHECK_FUNCTION_EXISTS("memset" HAVE_MEMSET)
 CHECK_FUNCTION_EXISTS("socket" HAVE_SOCKET)
 CHECK_FUNCTION_EXISTS("strerror" HAVE_STRERROR)
@@ -45,10 +52,10 @@ find_package(LibEvent)
 IF(LibEvent_FOUND)
   set(CMAKE_REQUIRED_INCLUDES "${LIBEVENT_INCLUDE_DIR}")
   set(CMAKE_REQUIRED_LIBRARIES "${LIBEVENT_LIB}")
-  file(READ ${CMAKE_CURRENT_SOURCE_DIR}/CMake/CheckLibeventVersion.c 
+  file(READ ${CMAKE_CURRENT_SOURCE_DIR}/CMake/CheckLibeventVersion.c
        VERSION_CHECK_SOURCE)
 
-  CHECK_SYMBOL_EXISTS("event_get_version_number" "event.h" 
+  CHECK_SYMBOL_EXISTS("event_get_version_number" "event.h"
                       HAVE_EVENT_GET_VERSION_NUMBER)
 
   IF(HAVE_EVENT_GET_VERSION_NUMBER)
@@ -60,7 +67,6 @@ IF(LibEvent_FOUND)
     set(HAVE_LIBEVENT_143 1)
     message(STATUS "Found libevent 2.0.9+")
   ELSE()
-    # < version 2
     SET(CMAKE_REQUIRED_DEFINITIONS
       -DEVENT_VERSION_WANTED=0x1040500)
     CHECK_C_SOURCE_COMPILES("${VERSION_CHECK_SOURCE}" HAVE_LIBEVENT_145)

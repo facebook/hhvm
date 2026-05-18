@@ -13,7 +13,11 @@ macro(mcrouter_thrift1_impl GEN_ARGS SOURCE SOURCE_SUBDIR)
   set(OUTPUTS
     "${CODEGEN_SOURCES_DIR}/${SOURCE_SUBDIR}/gen-cpp2/${BASENAME}_constants.cpp"
     "${CODEGEN_SOURCES_DIR}/${SOURCE_SUBDIR}/gen-cpp2/${BASENAME}_data.cpp"
+    "${CODEGEN_SOURCES_DIR}/${SOURCE_SUBDIR}/gen-cpp2/${BASENAME}_sinit.cpp"
     "${CODEGEN_SOURCES_DIR}/${SOURCE_SUBDIR}/gen-cpp2/${BASENAME}_types.cpp"
+    "${CODEGEN_SOURCES_DIR}/${SOURCE_SUBDIR}/gen-cpp2/${BASENAME}_types_binary.cpp"
+    "${CODEGEN_SOURCES_DIR}/${SOURCE_SUBDIR}/gen-cpp2/${BASENAME}_types_compact.cpp"
+    "${CODEGEN_SOURCES_DIR}/${SOURCE_SUBDIR}/gen-cpp2/${BASENAME}_types_serialization.cpp"
     "${CODEGEN_SOURCES_DIR}/${SOURCE_SUBDIR}/gen-cpp2/${BASENAME}_metadata.cpp"
   )
   if("${BASENAME}" MATCHES "Service$")
@@ -33,7 +37,7 @@ macro(mcrouter_thrift1_impl GEN_ARGS SOURCE SOURCE_SUBDIR)
     FBThrift::thrift1 --gen
     "${GEN_ARGS},include-prefix=${SOURCE_SUBDIR}"
     -o "${CODEGEN_SOURCES_DIR}/${SOURCE_SUBDIR}"
-    -I "${SOURCE_SUBDIR}" -I "${CMAKE_CURRENT_SOURCE_DIR}"
+    -I "${SOURCE_SUBDIR}" -I "${CMAKE_CURRENT_SOURCE_DIR}" -I "${FBTHRIFT_INCLUDE_DIR}"
     "${SOURCE_SUBDIR}/${SOURCE}"
     BYPRODUCTS ${OUTPUTS}
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"

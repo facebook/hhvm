@@ -5,8 +5,26 @@
 # WATCHMANCLIENT_LIBRARIES
 #
 
-find_package(PkgConfig)
-pkg_check_modules(WATCHMANCLIENT watchmanclient)
+find_path(
+  WATCHMANCLIENT_INCLUDE_DIRS
+  NAMES watchman/cppclient/WatchmanClient.h
+  PATHS ${CMAKE_PREFIX_PATH}
+  PATH_SUFFIXES include
+  NO_DEFAULT_PATH
+)
+find_library(
+  WATCHMANCLIENT_LIBRARY
+  NAMES watchmanclient
+  PATHS ${CMAKE_PREFIX_PATH}
+  PATH_SUFFIXES lib lib64
+  NO_DEFAULT_PATH
+)
+if(WATCHMANCLIENT_INCLUDE_DIRS AND WATCHMANCLIENT_LIBRARY)
+  set(WATCHMANCLIENT_LIBRARIES "${WATCHMANCLIENT_LIBRARY}")
+else()
+  find_package(PkgConfig)
+  pkg_check_modules(WATCHMANCLIENT QUIET watchmanclient)
+endif()
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(

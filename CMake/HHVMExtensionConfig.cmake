@@ -444,7 +444,11 @@ function (HHVM_EXTENSION_INTERNAL_SORT_OUT_SOURCES rootDir)
     elseif (${fileExtension} STREQUAL ".s")
       list(APPEND ASM_SOURCES "${rootDir}/${fileName}")
     elseif (${fileExtension} STREQUAL ".php")
-      list(APPEND PHP_SOURCES "${rootDir}/${fileName}")
+      if(IS_ABSOLUTE "${fileName}")
+        list(APPEND PHP_SOURCES "${fileName}")
+      else()
+        list(APPEND PHP_SOURCES "${rootDir}/${fileName}")
+      endif()
     elseif (${fileExtension} STREQUAL ".hack")
       # .hack files are used by typechecked systemlib; there's a directory,
       # and the actual .hack file is generated. As such, it's in the build

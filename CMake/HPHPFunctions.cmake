@@ -500,13 +500,39 @@ macro(SET_HHVM_THIRD_PARTY_SOURCE_ARGS VAR_NAME)
       )
     endif()
   else()
-    list(
-      APPEND "${VAR_NAME}"
-      URL
+    set(
+      _CACHE_URL
       "${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}${_arg_FILENAME_PREFIX}${_URL_NAME}${HHVM_THIRD_PARTY_SOURCE_CACHE_SUFFIX}"
     )
-    if (NOT ${HHVM_THIRD_PARTY_SOURCE_ONLY_USE_CACHE})
-      list(APPEND "${VAR_NAME}" "${_URL}")
+    set(_CACHE_PATH "")
+
+    # CMake 3.31 rejects mixed URL lists if one entry is local. For local caches,
+    # pick a single source at configure time instead of passing both cache and
+    # remote URLs to ExternalProject_Add.
+    if ("${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}" MATCHES "^file://")
+      string(REGEX REPLACE "^file://" "" _CACHE_PATH "${_CACHE_URL}")
+    elseif ("${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}" MATCHES "^/")
+      set(_CACHE_PATH "${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}${_arg_FILENAME_PREFIX}${_URL_NAME}${HHVM_THIRD_PARTY_SOURCE_CACHE_SUFFIX}")
+      set(_CACHE_URL "file://${_CACHE_PATH}")
+    endif()
+
+    if (NOT "${_CACHE_PATH}" STREQUAL "")
+      if (EXISTS "${_CACHE_PATH}")
+        list(APPEND "${VAR_NAME}" URL "${_CACHE_URL}")
+      elseif (${HHVM_THIRD_PARTY_SOURCE_ONLY_USE_CACHE})
+        message(
+          FATAL_ERROR
+          "HHVM_THIRD_PARTY_ONLY_USE_CACHE is set, but cache entry is missing:\n"
+          "  ${_CACHE_PATH}"
+        )
+      else()
+        list(APPEND "${VAR_NAME}" URL "${_URL}")
+      endif()
+    else()
+      list(APPEND "${VAR_NAME}" URL "${_CACHE_URL}")
+      if (NOT ${HHVM_THIRD_PARTY_SOURCE_ONLY_USE_CACHE})
+        list(APPEND "${VAR_NAME}" "${_URL}")
+      endif()
     endif()
   endif()
   list(APPEND "${VAR_NAME}" DOWNLOAD_NAME "${_arg_FILENAME_PREFIX}${_URL_NAME}")

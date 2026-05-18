@@ -4,13 +4,19 @@
 # LibAfdt_LIBS, LibAfdt libraries
 # LibAfdt_FOUND, If false, do not try to use LibAfdt
 
-find_path(LibAfdt_INCLUDE_DIR afdt.h PATHS
-    /usr/local/include
-    /opt/local/include
-  )
+find_path(
+  LibAfdt_INCLUDE_DIR
+  NAMES afdt.h
+  PATHS ${CMAKE_PREFIX_PATH}
+  PATH_SUFFIXES include
+)
 
-set(LibAfdt_LIB_PATHS /usr/local/lib /opt/local/lib)
-find_library(LibAfdt_LIB NAMES afdt PATHS ${LibAfdt_LIB_PATHS})
+find_library(
+  LibAfdt_LIB
+  NAMES afdt
+  PATHS ${CMAKE_PREFIX_PATH}
+  PATH_SUFFIXES lib lib64
+)
 
 if (LibAfdt_LIB AND LibAfdt_INCLUDE_DIR)
   set(LibAfdt_FOUND TRUE)

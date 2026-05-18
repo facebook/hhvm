@@ -1,65 +1,56 @@
 add_library(libwatchmanclient INTERFACE)
 
-include(ExternalProject)
-include(HPHPFunctions)
-
-
-get_target_property(BOOST_INCLUDE_DIR boost INTERFACE_INCLUDE_DIRECTORIES)
-get_target_property(DOUBLE_CONVERSION_INCLUDE_DIR double-conversion INTERFACE_INCLUDE_DIRECTORIES)
-get_target_property(FMT_INCLUDE_DIR fmt INTERFACE_INCLUDE_DIRECTORIES)
-get_target_property(FOLLY_INCLUDE_DIR folly INTERFACE_INCLUDE_DIRECTORIES)
-get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
-
-set(WATCHMAN_DEPS folly boost fmt jemalloc double-conversion)
-
-ExternalProject_Add(
-  bundled_watchman
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
-  BUILD_ALWAYS ON
-  PATCH_COMMAND
-    "${CMAKE_COMMAND}" -E copy
-    "${CMAKE_CURRENT_SOURCE_DIR}/cppclient-CMakeLists.txt"
-    "watchman/cppclient/CMakeLists.txt"
-  SOURCE_SUBDIR watchman/cppclient
-  CMAKE_ARGS
-    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-    -DCMAKE_INSTALL_INCLUDEDIR=include
-    -DCMAKE_INSTALL_LIBDIR=lib
-
-    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-    -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
-    -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
-    -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-
-    "-DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}"
-    "-DBOOST_INCLUDE_DIR=${BOOST_INCLUDE_DIR}"
-    "-DDOUBLE_CONVERSION_INCLUDE_DIR=${DOUBLE_CONVERSION_INCLUDE_DIR}"
-    "-DFMT_INCLUDE_DIR=${FMT_INCLUDE_DIR}"
-    "-DFOLLY_INCLUDE_DIR=${FOLLY_INCLUDE_DIR}"
-    "-DGLOG_INCLUDE_DIR=${GLOG_INCLUDE_DIR}"
-    "-DJEMALLOC_INCLUDE_DIR=${JEMALLOC_INCLUDE_DIR}"
-    "-DLIBEVENT_INCLUDE_DIR=${LIBEVENT_INCLUDE_DIR}"
-    "-DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}"
-  DEPENDS ${WATCHMAN_DEPS}
-  EXCLUDE_FROM_ALL
-)
-
 find_package(libWatchmanClient)
 if(WATCHMANCLIENT_INCLUDE_DIRS AND WATCHMANCLIENT_LIBRARIES)
+  message(STATUS "Using system libwatchmanclient")
   target_include_directories(libwatchmanclient INTERFACE "${WATCHMANCLIENT_INCLUDE_DIRS}")
   target_link_libraries(libwatchmanclient INTERFACE "${WATCHMANCLIENT_LIBRARIES}")
-else()
-  add_dependencies(libwatchmanclient bundled_watchman)
-  ExternalProject_Get_Property(bundled_watchman INSTALL_DIR)
-  target_include_directories(libwatchmanclient INTERFACE "${INSTALL_DIR}/include")
-  add_library(watchman_deps INTERFACE)
-  target_link_libraries(watchman_deps INTERFACE ${WATCHMAN_DEPS})
-  target_link_libraries(
-    libwatchmanclient
-    INTERFACE
-    "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}watchmanclient${CMAKE_STATIC_LIBRARY_SUFFIX}"
-    watchman_deps
-  )
+  return()
 endif()
+
+set(WATCHMAN_SOURCE_ROOT "")
+foreach(WATCHMAN_SOURCE_CANDIDATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/watchman"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src")
+  if(EXISTS "${WATCHMAN_SOURCE_CANDIDATE}/cppclient/WatchmanClient.cpp")
+    set(WATCHMAN_SOURCE_ROOT "${WATCHMAN_SOURCE_CANDIDATE}")
+    break()
+  endif()
+endforeach()
+
+if(NOT WATCHMAN_SOURCE_ROOT)
+  message(STATUS "Watchman client source not found and system libwatchmanclient not available")
+  message(STATUS "Extensions requiring watchman will be disabled")
+  return()
+endif()
+
+set(WATCHMAN_CPPCLIENT_DIR "${WATCHMAN_SOURCE_ROOT}/cppclient")
+file(GLOB WATCHMANCLIENT_SOURCES "${WATCHMAN_CPPCLIENT_DIR}/*.cpp")
+list(REMOVE_ITEM WATCHMANCLIENT_SOURCES "${WATCHMAN_CPPCLIENT_DIR}/CLI.cpp")
+
+set(WATCHMAN_DEPS folly boost fmt jemalloc double-conversion)
+set(WATCHMAN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include")
+
+add_custom_target(
+  watchmanclient_include_dir_symlink
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${WATCHMAN_INCLUDE_DIR}"
+  COMMAND ${CMAKE_COMMAND} -E remove -f "${WATCHMAN_INCLUDE_DIR}/watchman"
+  COMMAND
+    ${CMAKE_COMMAND} -E create_symlink
+    "${WATCHMAN_SOURCE_ROOT}"
+    "${WATCHMAN_INCLUDE_DIR}/watchman"
+)
+
+add_library(watchmanclient STATIC ${WATCHMANCLIENT_SOURCES})
+set_target_properties(watchmanclient PROPERTIES POSITION_INDEPENDENT_CODE ON)
+add_dependencies(watchmanclient watchmanclient_include_dir_symlink)
+target_include_directories(
+  watchmanclient
+  PUBLIC
+  "${WATCHMAN_CPPCLIENT_DIR}"
+  "${WATCHMAN_INCLUDE_DIR}"
+)
+target_link_libraries(watchmanclient PUBLIC ${WATCHMAN_DEPS})
+
+target_include_directories(libwatchmanclient INTERFACE "${WATCHMAN_INCLUDE_DIR}")
+target_link_libraries(libwatchmanclient INTERFACE watchmanclient)

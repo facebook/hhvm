@@ -5,16 +5,13 @@ if (NOT FORCE_BUNDLED_ZSTD)
   find_library(ZSTD_LIB NAMES zstd)
   find_path(ZSTD_INCLUDE_DIR NAMES zstd.h)
 
-  if(NOT DEFINED CAN_USE_SYSTEM_ZSTD)
-    set(CAN_USE_SYSTEM_ZSTD OFF)
+  if(ZSTD_LIB AND ZSTD_INCLUDE_DIR)
     set(CMAKE_REQUIRED_INCLUDES "${ZSTD_INCLUDE_DIR}")
     check_cxx_source_compiles("
   #include <zstd.h>
-
-
     int main() {
-    static_assert(ZSTD_VERSION_MAJOR == 1);
-    static_assert(ZSTD_VERSION_MINOR >= 4);
+    static_assert(ZSTD_VERSION_MAJOR == 1, \"\");
+    static_assert(ZSTD_VERSION_MINOR >= 4, \"\");
       return 0;
     }
     " CAN_USE_SYSTEM_ZSTD)

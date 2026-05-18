@@ -1,6 +1,6 @@
 add_library(lz4 INTERFACE)
 
-option(FORCE_BUNDLED_LZ4 "Always build lz4, instead of using the system version" ON)
+option(FORCE_BUNDLED_LZ4 "Always build lz4, instead of using the system version" OFF)
 
 if (NOT FORCE_BUNDLED_LZ4)
   find_package(LZ4)  # also checks minimum required version

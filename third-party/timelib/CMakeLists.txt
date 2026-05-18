@@ -11,6 +11,16 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   # Look for timelib-YYYY.MM.tar.gz in download cache, not just YYYY.MM.tar.gz
   FILENAME_PREFIX "timelib-"
 )
+set(TIMELIB_LOCAL_CACHE "${CMAKE_SOURCE_DIR}/oss-deps-install/timelib-cache/timelib-2021.07.tar.gz")
+if(EXISTS "${TIMELIB_LOCAL_CACHE}")
+  set(
+    TIMELIB_DOWNLOAD_ARGS
+    URL "${TIMELIB_LOCAL_CACHE}"
+    URL_HASH "SHA512=7bc56d20360937af10f63960e443cc8bd4d24c5369f697241e54da21465d4512bd16cfa6f0efcf2b847cc19781e1cecf93c9e19a1efa4f1a7012c9fa442eeabe"
+    DOWNLOAD_NAME "timelib-2021.07.tar.gz"
+  )
+  message(STATUS "Using local timelib cache: ${TIMELIB_LOCAL_CACHE}")
+endif()
 
 if(USE_BUNDLED_TZDATA)
   set(HAVE_SYSTEM_TZDATA OFF)

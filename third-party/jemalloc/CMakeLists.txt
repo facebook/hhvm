@@ -2,11 +2,11 @@ include(ExternalProject)
 
 ExternalProject_add(
   bundled_jemalloc
-  URL "https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2"
-  URL_HASH SHA512=0bbb77564d767cef0c6fe1b97b705d368ddb360d55596945aea8c3ba5889fbce10479d85ad492c91d987caacdbbdccc706aa3688e321460069f00c05814fae02
+  URL "https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2"
+  URL_HASH SHA256=2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa
   PREFIX "${JEMALLOC_PREFIX}"
   PATCH_COMMAND
-    patch -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/mac-sys-nothrow.patch"
+    ${CMAKE_COMMAND} -E echo "Skipping mac-sys-nothrow patch (not needed on Linux, incompatible with 5.3.0)"
   CONFIGURE_COMMAND
     "<SOURCE_DIR>/configure"
       --prefix=<INSTALL_DIR>
@@ -39,11 +39,13 @@ endif()
 if (JEMALLOC_VERSION_MINIMUM)
   message(STATUS "Found jemalloc: ${JEMALLOC_LIB} ${JEMALLOC_INCLUDE_DIR}")
   target_include_directories(jemalloc INTERFACE "${JEMALLOC_INCLUDE_DIR}")
+  include_directories(BEFORE "${JEMALLOC_INCLUDE_DIR}")
 else()
   message(STATUS "Using third-party bundled jemalloc")
 
   ExternalProject_Get_Property(bundled_jemalloc INSTALL_DIR)
-  target_include_directories(jemalloc INTERFACE "${INSTALL_DIR}/include")
+  target_include_directories(jemalloc BEFORE INTERFACE "${INSTALL_DIR}/include")
+  include_directories(BEFORE "${INSTALL_DIR}/include")
   set(JEMALLOC_LIB "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}jemalloc_pic${CMAKE_STATIC_LIBRARY_SUFFIX}")
   add_dependencies(jemalloc bundled_jemalloc)
 endif()

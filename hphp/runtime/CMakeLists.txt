@@ -6,11 +6,21 @@ foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 list(APPEND HEADER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/version.h")
 
+# Exclude Meta-internal code
+HHVM_REMOVE_MATCHES_FROM_LISTS(CXX_SOURCES HEADER_SOURCES
+  MATCHES "/facebook/")
+
 if(NOT LINUX)
   list(REMOVE_ITEM CXX_SOURCES
        ${CMAKE_CURRENT_SOURCE_DIR}/vm/debug/elfwriter.cpp)
   list(REMOVE_ITEM HEADER_SOURCES
        ${CMAKE_CURRENT_SOURCE_DIR}/vm/debug/elfwriter.h)
+endif()
+
+# Exclude ARM JIT files on non-ARM architectures
+if(NOT IS_AARCH64)
+  HHVM_REMOVE_MATCHES_FROM_LISTS(CXX_SOURCES HEADER_SOURCES
+    MATCHES "-arm\\.")
 endif()
 
 if(NOT ENABLE_FASTCGI)

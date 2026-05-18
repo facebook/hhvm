@@ -28,19 +28,18 @@ if(RUSTC_EXECUTABLE)
 else()
   message(STATUS "Using bundled Rust")
 
-  set(RUST_NIGHTLY_VERSION "2024-10-14")
+  if (NOT "${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
+    message(FATAL_ERROR "Bundled Rust in the OSS build is only supported on Linux")
+  endif()
+
+  set(RUST_NIGHTLY_VERSION "2025-05-04")
 
   SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
     RUST_DOWNLOAD_ARGS
-    Linux_URL
+    SOURCE_URL
     "https://static.rust-lang.org/dist/${RUST_NIGHTLY_VERSION}/rust-nightly-x86_64-unknown-linux-gnu.tar.gz"
-    Darwin_URL
-    "https://static.rust-lang.org/dist/${RUST_NIGHTLY_VERSION}/rust-nightly-x86_64-apple-darwin.tar.gz"
-    Linux_HASH
-    "SHA512=a4d6006d413022c72f6da8043affae0883fcfb0c8b7269933e90f1ec3238f0d14fa41a4656fa6069a2ee12956d0de09d6e2badf3d7be3e66de8902a075c6df83"
-    Darwin_HASH
-    "SHA512=f1e36f0adaa8e0c7c7504ae68b39545a45b5e2025e97309499f06295db89be9bafae5fb6c143a5214e95730fcd7f639a30250553f3bef435ebc86505d809223c"
-    # The original filename doesn't contain any version information, so add the version information as a prefix to avoid cache collisions when updating later
+    SOURCE_HASH
+    "SHA512=e69b219553b5a23b6b9e4974d0dd88e88a1c2bfcf885e73af68729ae8687ad96cec0fefee00a7fdc70c7c504d41b903b966065eee09db24d516fee653778ad5a"
     FILENAME_PREFIX "rustc-${RUST_NIGHTLY_VERSION}-"
   )
 

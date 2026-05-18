@@ -50,6 +50,7 @@ list(APPEND THIRD_PARTY_MODULES timelib)
 # Required by folly
 add_subdirectory(double-conversion)
 add_subdirectory(boost)
+add_subdirectory(blake3)
 add_subdirectory(fmt)
 add_subdirectory(jemalloc)
 add_subdirectory(libsodium)
@@ -57,21 +58,84 @@ add_subdirectory(zstd)
 add_subdirectory(gflags)
 add_subdirectory(glog)
 
-add_subdirectory(folly)
+# Meta first-party deps: use pre-built libraries via find_package().
+# These are built by getdeps.py and found via CMAKE_PREFIX_PATH.
+find_package(folly CONFIG REQUIRED)
+if(NOT TARGET folly)
+  add_library(folly INTERFACE)
+  target_link_libraries(folly INTERFACE Folly::folly)
+endif()
 
-# Fatal is a header-only library, so there's nothing to build.
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fatal")
+# Fatal is header-only. Prefer a getdeps/system install so the devserver flow
+# does not need to clone the source tree just for headers.
+find_path(
+  FATAL_INCLUDE_DIR
+  NAMES fatal/portability.h
+  PATHS ${CMAKE_PREFIX_PATH}
+  PATH_SUFFIXES "" include
+)
+if(FATAL_INCLUDE_DIR)
+  message(STATUS "Using fatal headers from: ${FATAL_INCLUDE_DIR}")
+  list(APPEND EXTRA_INCLUDE_PATHS "${FATAL_INCLUDE_DIR}")
+elseif(EXISTS "${TP_DIR}/fatal/fatal/portability.h")
+  list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fatal")
+else()
+  message(FATAL_ERROR
+    "Could not find fatal headers. Build/install fatal via getdeps or "
+    "populate third-party/fatal in the assembled source tree."
+  )
+endif()
 
 add_subdirectory(brotli) # Required by fizz
-add_subdirectory(fizz)
-add_subdirectory(wangle)
-add_subdirectory(mvfst)
-add_subdirectory(proxygen)
-add_subdirectory(thrift)
+
+find_package(fizz CONFIG REQUIRED)
+if(NOT TARGET fizz)
+  add_library(fizz INTERFACE)
+  target_link_libraries(fizz INTERFACE fizz::fizz)
+endif()
+
+find_package(wangle CONFIG REQUIRED)
+if(NOT TARGET wangle)
+  add_library(wangle INTERFACE)
+  target_link_libraries(wangle INTERFACE wangle::wangle)
+endif()
+
+find_package(mvfst CONFIG REQUIRED)
+if(NOT TARGET mvfst)
+  add_library(mvfst INTERFACE)
+  target_link_libraries(mvfst INTERFACE mvfst::mvfst_transport mvfst::mvfst_client mvfst::mvfst_server mvfst::mvfst_codec_types)
+endif()
+
+# proxygen headers are needed even when FASTCGI is OFF (transport.h includes them)
+find_package(proxygen CONFIG REQUIRED)
+if(NOT TARGET proxygen)
+  add_library(proxygen INTERFACE)
+  target_link_libraries(proxygen INTERFACE proxygen::proxygen)
+endif()
+
+find_package(FLEX REQUIRED)
+find_package(BISON 3.0 REQUIRED)
+find_package(FBThrift CONFIG REQUIRED)
+add_library(thrift INTERFACE)
+target_link_libraries(thrift INTERFACE FBThrift::thriftcpp2 FBThrift::thriftprotocol FBThrift::transport FBThrift::async FBThrift::concurrency FBThrift::rpcmetadata FBThrift::thriftmetadata FBThrift::thriftannotation FBThrift::thrift-core FBThrift::thriftfrozen2)
+if(TARGET FBThrift::thrifttyperep)
+  target_link_libraries(thrift INTERFACE FBThrift::thrifttyperep)
+endif()
+if(TARGET FBThrift::thrifttype)
+  target_link_libraries(thrift INTERFACE FBThrift::thrifttype)
+endif()
+if(TARGET FBThrift::thriftanyrep)
+  target_link_libraries(thrift INTERFACE FBThrift::thriftanyrep)
+endif()
+add_executable(thrift1 IMPORTED GLOBAL)
+set_target_properties(thrift1 PROPERTIES IMPORTED_LOCATION "${FBTHRIFT_COMPILER}")
 
 if (NOT MSVC)
-  list(APPEND THIRD_PARTY_MODULES libafdt)
-  list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/libafdt/src/src")
+  add_subdirectory(libafdt)
+  get_target_property(AFDT_INCLUDE_DIRS afdt INTERFACE_INCLUDE_DIRECTORIES)
+  if(AFDT_INCLUDE_DIRS AND NOT "${AFDT_INCLUDE_DIRS}" STREQUAL "AFDT_INCLUDE_DIRS-NOTFOUND")
+    list(APPEND EXTRA_INCLUDE_PATHS ${AFDT_INCLUDE_DIRS})
+  endif()
 endif()
 
 add_subdirectory(lz4)
@@ -82,9 +146,6 @@ add_subdirectory(fb-mysql)
 add_subdirectory(squangle)
 
 if (ENABLE_MCROUTER)
-  # Build dependency of mcrouter
-  add_subdirectory(forks/ragel)
-
   add_subdirectory(mcrouter)
 endif()
 
@@ -117,13 +178,24 @@ if(ENABLE_XED AND NOT LibXed_FOUND)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/xed/xed/build/include/xed")
 endif()
 
-# Add bundled TBB
-list(APPEND THIRD_PARTY_MODULES tbb)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/tbb/src/include")
+# TBB (prefers system package, falls back to bundled)
+add_subdirectory(tbb)
 
 ##### rustc #####
 
 add_subdirectory("rustc")
+
+# Use the real xplat/usdt implementation for the Linux-only OSS build so
+# verification doesn't silently compile away probes.
+if(EXISTS "${CMAKE_SOURCE_DIR}/xplat/usdt/usdt.h")
+  list(APPEND EXTRA_INCLUDE_PATHS "${CMAKE_SOURCE_DIR}/xplat")
+else()
+  message(FATAL_ERROR
+    "Could not find xplat/usdt/usdt.h for this Linux OSS build. "
+    "Populate xplat/usdt in the assembled source tree instead of using the "
+    "no-op fallback header."
+  )
+endif()
 
 ##### --- footer --- #####
 

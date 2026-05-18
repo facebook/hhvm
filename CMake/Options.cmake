@@ -46,5 +46,21 @@ IF (NOT DEFAULT_CONFIG_DIR)
     "Default directory to find php.ini")
 ENDIF()
 
-option(ENABLE_XED "Use the XED library for HHVM. If ON, tc-print will be built for X86." OFF)
+string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" HHVM_SYSTEM_PROCESSOR)
+set(HHVM_REQUIRE_XED OFF)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
+   HHVM_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64)$")
+  set(HHVM_REQUIRE_XED ON)
+endif()
+
+if(HHVM_REQUIRE_XED)
+  option(ENABLE_XED
+         "Use the XED library for HHVM. Required for x86_64 OSS builds."
+         ON)
+  if(NOT ENABLE_XED)
+    message(FATAL_ERROR "ENABLE_XED=OFF is not supported for x86_64 OSS builds.")
+  endif()
+else()
+  option(ENABLE_XED "Use the XED library for HHVM. If ON, tc-print will be built for X86." OFF)
+endif()
 option(ENABLE_SYSTEM_LOCALE_ARCHIVE "Use system locale archive as the default LOCALE_ARCHIVE for nix patched glibc." OFF)

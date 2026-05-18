@@ -126,6 +126,88 @@ if(DEFINED ENV{HACKDEBUG})
 else()
   set(PROFILE "release")
 endif()
+set(RUST_FFI_CARGO_TARGET_DIR "${RUST_FFI_BUILD_ROOT}/hphp/hack/rust_ffi")
+set(HHVM_RUST_FFI_STATICLIB_NAME "hhvm_ffi_bridge")
+set(
+  HHVM_RUST_FFI_WORKSPACE_DIR
+  "${RUST_FFI_BUILD_ROOT}/hphp/hack/${HHVM_RUST_FFI_STATICLIB_NAME}"
+)
+set(HHVM_RUST_FFI_CARGO_TOML "${HHVM_RUST_FFI_WORKSPACE_DIR}/Cargo.toml")
+set(HHVM_RUST_FFI_LIB_RS "${HHVM_RUST_FFI_WORKSPACE_DIR}/lib.rs")
+set(
+  HHVM_RUST_FFI_STATICLIB
+  "${RUST_FFI_CARGO_TARGET_DIR}/${PROFILE}/${CMAKE_STATIC_LIBRARY_PREFIX}${HHVM_RUST_FFI_STATICLIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+)
+if(DEFINED ENV{HACKDEBUG})
+  set(HHVM_RUST_FFI_PROFILE_ARGS)
+else()
+  set(HHVM_RUST_FFI_PROFILE_ARGS --release)
+endif()
+file(MAKE_DIRECTORY "${HHVM_RUST_FFI_WORKSPACE_DIR}")
+set(COMPILER_FFI_CARGO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/ffi_bridge")
+set(HDF_CARGO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/hdf")
+set(
+  HHVM_HHBC_DEFS_FFI_CARGO_PATH
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_hhbc_defs"
+)
+set(
+  HHVM_TYPES_FFI_CARGO_PATH
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_types"
+)
+set(PACKAGE_FFI_CARGO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/package/ffi_bridge")
+set(PARSER_FFI_CARGO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/parser/ffi_bridge")
+set(
+  COMPILER_FFI_EXTRA_SRC
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/ffi_bridge/external_decl_provider.cpp"
+)
+set(
+  HHVM_TYPES_FFI_EXTRA_SRC
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_types/as-base-ffi.cpp"
+)
+set(
+  HHVM_HHBC_DEFS_FFI_EXTRA_SRC
+  "${HHVM_HHBC_DEFS_FFI_CARGO_PATH}/as-hhbc-ffi.cpp"
+)
+string(CONCAT HHVM_RUST_FFI_CARGO_TOML_CONTENT
+  "[package]\n"
+  "name = \"${HHVM_RUST_FFI_STATICLIB_NAME}\"\n"
+  "version = \"0.0.0\"\n"
+  "edition = \"2024\"\n"
+  "\n"
+  "[lib]\n"
+  "path = \"lib.rs\"\n"
+  "crate-type = [\"staticlib\"]\n"
+  "\n"
+  "[dependencies]\n"
+  "compiler_ffi = { path = \"${COMPILER_FFI_CARGO_PATH}\" }\n"
+  "hdf = { path = \"${HDF_CARGO_PATH}\" }\n"
+  "hhvm_hhbc_defs_ffi = { path = \"${HHVM_HHBC_DEFS_FFI_CARGO_PATH}\" }\n"
+  "hhvm_types_ffi = { path = \"${HHVM_TYPES_FFI_CARGO_PATH}\" }\n"
+  "package_ffi = { path = \"${PACKAGE_FFI_CARGO_PATH}\" }\n"
+  "parser_ffi = { path = \"${PARSER_FFI_CARGO_PATH}\" }\n"
+)
+string(CONCAT HHVM_RUST_FFI_LIB_RS_CONTENT
+  "#![allow(unused_extern_crates)]\n"
+  "\n"
+  "// cxx expects a single Rust staticlib when the final "
+  "link is done by CMake.\n"
+  "extern crate compiler_ffi;\n"
+  "extern crate hdf;\n"
+  "extern crate hhvm_hhbc_defs_ffi;\n"
+  "extern crate hhvm_types_ffi;\n"
+  "extern crate package_ffi;\n"
+  "extern crate parser_ffi;\n"
+)
+file(
+  GENERATE
+  OUTPUT "${HHVM_RUST_FFI_CARGO_TOML}"
+  CONTENT "${HHVM_RUST_FFI_CARGO_TOML_CONTENT}"
+)
+file(
+  GENERATE
+  OUTPUT "${HHVM_RUST_FFI_LIB_RS}"
+  CONTENT "${HHVM_RUST_FFI_LIB_RS_CONTENT}"
+)
 
 set(RUST_OPCODES_DIR "${CMAKE_BINARY_DIR}/hphp/hack/src/hackc")
 set(RUST_OPCODES "${RUST_OPCODES_DIR}/opcodes.rs")
@@ -163,9 +245,9 @@ set(NAMING_SPECIAL_NAMES_SRCS
    "${NAMING_SPECIAL_NAMES_PREFIX}/naming_special_names_ffi_cbindgen.rs"
 )
 
-set(FFI_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/ffi")
+set(FFI_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/ffi")
 set(FFI_SRCS
-   "${FFI_PREFIX}/ffi.rs"
+   "${FFI_PREFIX}/lib.rs"
    "${FFI_PREFIX}/ffi_ffi_cbindgen.rs"
 )
 
@@ -177,18 +259,28 @@ add_custom_command(
     ${INVOKE_CARGO} dump-opcodes dump-opcodes --exe &&
     ${INVOKE_CARGO} dump-opcodes dump-opcodes --bin dump_opcodes
       -o "${RUST_OPCODES}"
-  COMMENT "Generating Rust opcode struct for cbindgen to use to generate hhbc-unit.h"
+  COMMENT "Generating Rust opcodes for cbindgen"
   DEPENDS "${OPCODE_DATA}"
 )
 
 set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hackc/hhbc-unit.h")
-set(FFI_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/utils/ffi.h")
-set(NAMING_SPECIAL_NAMES_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/naming/naming-special-names.h")
-set(TYPE_CONSTRAINT_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/type-constraint-flags.h")
+set(FFI_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hackc/ffi.h")
+set(
+  NAMING_SPECIAL_NAMES_HEADER
+  "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/naming/naming-special-names.h"
+)
+set(
+  TYPE_CONSTRAINT_HEADER
+  "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/type-constraint-flags.h"
+)
 set(FCALL_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/fcall-args-flags.h")
 set(HHBC_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/hhbc-shared.h")
+set(
+  ITER_ARGS_FLAGS_HEADER
+  "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/iter-args-flags.h"
+)
 set(ATTR_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/base/attr.h")
-set(FFI_EXTRA_HEADER "${CMAKE_SOURCE_DIR}/hphp/hack/src/utils/ffi/ffi_extra.h")
+set(FFI_EXTRA_HEADER "${CMAKE_SOURCE_DIR}/hphp/hack/src/hackc/ffi/ffi_extra.h")
 
 add_custom_command(
   OUTPUT ${HHBC_AST_HEADER}
@@ -204,7 +296,7 @@ add_custom_command(
       ${NAMING_SPECIAL_NAMES_SRCS} &&
     ${INVOKE_CARGO} ffi_cbindgen ffi_cbindgen --bin ffi_cbindgen
       --header "${HHBC_AST_HEADER}" --namespaces "HPHP,hackc,hhbc"
-      --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${FCALL_HEADER},${HHBC_HEADER}"
+      --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${FCALL_HEADER},${HHBC_HEADER},${ITER_ARGS_FLAGS_HEADER}"
       ${HHBC_AST_SRCS}
   DEPENDS rustc cargo "${RUST_OPCODES}"
   COMMENT "Generating hhbc-unit.h"
@@ -242,6 +334,7 @@ HHVM_RENDER_CONFIG_SPECIFICATION(
 #   `src` are extra source files to include in the bridge.
 #   `lib` are extra link libraries to include in the bridge.
 #
+
 function(build_cxx_bridge NAME)
   cmake_parse_arguments(CXX_BRIDGE "" "DIR" "EXTRA_SRCS;LINK_LIBS" ${ARGN})
 
@@ -249,60 +342,88 @@ function(build_cxx_bridge NAME)
     message(FATAL_ERROR "Missing DIR parameter")
   endif()
   if (NOT "${CXX_BRIDGE_UNPARSED_ARGUMENTS}" STREQUAL "")
-    message(FATAL_ERROR "Unexpected parameters: ${CXX_BRIDGE_UNPARSED_ARGUMENTS}")
+    message(
+      FATAL_ERROR
+      "Unexpected parameters: ${CXX_BRIDGE_UNPARSED_ARGUMENTS}"
+    )
   endif()
 
   set(FFI_BRIDGE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/${CXX_BRIDGE_DIR}")
   set(FFI_BRIDGE_BIN "${RUST_FFI_BUILD_ROOT}/hphp/hack/${CXX_BRIDGE_DIR}")
-
-  set(RUST_PART_LIB "${FFI_BRIDGE_BIN}/${PROFILE}/${CMAKE_STATIC_LIBRARY_PREFIX}${NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
   set(RUST_PART_CXX "${FFI_BRIDGE_BIN}/${NAME}.cpp")
   set(RUST_PART_HEADER "${FFI_BRIDGE_BIN}/${NAME}.rs.h")
-  set(GENERATED "${FFI_BRIDGE_BIN}/cxxbridge/${NAME}/${NAME}")
-  set(GENERATED_CXXBRIDGE "${FFI_BRIDGE_BIN}/cxxbridge")
+  set(GENERATED "${RUST_FFI_CARGO_TARGET_DIR}/cxxbridge/${NAME}/${NAME}")
+  set(GENERATED_CXX "${GENERATED}.rs.cc")
+  set(GENERATED_HEADER "${GENERATED}.rs.h")
+  set(GENERATED_CXXBRIDGE "${RUST_FFI_CARGO_TARGET_DIR}/cxxbridge")
 
   add_custom_command(
       OUTPUT
         ${RUST_PART_CXX}
         ${RUST_PART_HEADER}
-        ${RUST_PART_LIB}
-        ${GENERATED_CXXBRIDGE}
       COMMAND
-        ${CMAKE_COMMAND} -E make_directory "${FFI_BRIDGE_BIN}" &&
-        . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-        ${INVOKE_CARGO} "${NAME}" "${NAME}" --target-dir "${FFI_BRIDGE_BIN}" &&
-        ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.cc" "${RUST_PART_CXX}" &&
-        ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.h" "${RUST_PART_HEADER}"
-      WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
-      DEPENDS rustc cargo "${OPCODE_DATA}"
+        ${CMAKE_COMMAND} -E make_directory "${FFI_BRIDGE_BIN}"
+      COMMAND
+        ${CMAKE_COMMAND} -E copy_if_different
+        "${GENERATED_CXX}"
+        "${RUST_PART_CXX}"
+      COMMAND
+        ${CMAKE_COMMAND} -E copy_if_different
+        "${GENERATED_HEADER}"
+        "${RUST_PART_HEADER}"
+      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+      DEPENDS
+        hack_rust_ffi_bridge
+        ${GENERATED_CXX}
+        ${GENERATED_HEADER}
   )
   add_custom_target(
     "${NAME}_cxx"
-    DEPENDS ${RUST_PART_LIB}
+    DEPENDS ${RUST_PART_CXX} ${RUST_PART_HEADER}
   )
   add_library("${NAME}" STATIC ${RUST_PART_CXX} ${CXX_BRIDGE_EXTRA_SRCS} )
   add_dependencies(hack_rust_ffi_bridge_targets "${NAME}")
-  add_library("${NAME}_rust_part" STATIC IMPORTED)
-  add_dependencies("${NAME}_rust_part" "${NAME}_cxx")
-
-  # Intentionally create link-time cyclic dependency between ${NAME}_rust_part
-  # and ${NAME} so that CMake will automatically construct the link line so
-  # that the linker will scan through involved static libraries multiple times.
-  set_target_properties(
-    "${NAME}_rust_part"
-    PROPERTIES
-    IMPORTED_LOCATION ${RUST_PART_LIB}
-    IMPORTED_LINK_DEPENDENT_LIBRARIES "${NAME}"
-  )
+  add_dependencies("${NAME}" "${NAME}_cxx")
   target_link_libraries(
     "${NAME}"
     PUBLIC
-      "${NAME}_rust_part"
       ${CXX_BRIDGE_LINK_LIBS}
   )
   target_include_directories("${NAME}" INTERFACE "${RUST_FFI_BUILD_ROOT}")
   target_include_directories("${NAME}" PRIVATE "${GENERATED_CXXBRIDGE}")
 endfunction()
+
+add_custom_command(
+  OUTPUT ${HHVM_RUST_FFI_STATICLIB}
+  COMMAND
+    ${CMAKE_COMMAND} -E make_directory "${RUST_FFI_CARGO_TARGET_DIR}"
+  COMMAND
+    . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
+    cd "${HHVM_RUST_FFI_WORKSPACE_DIR}" &&
+    "${CARGO_EXE}" build
+      --quiet
+      --package "${HHVM_RUST_FFI_STATICLIB_NAME}"
+      --target-dir "${RUST_FFI_CARGO_TARGET_DIR}"
+      ${HHVM_RUST_FFI_PROFILE_ARGS}
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  DEPENDS
+    rustc
+    cargo
+    hackc_options
+    "${OPCODE_DATA}"
+    "${HHVM_RUST_FFI_CARGO_TOML}"
+    "${HHVM_RUST_FFI_LIB_RS}"
+)
+add_custom_target(hack_rust_ffi_bridge DEPENDS ${HHVM_RUST_FFI_STATICLIB})
+add_library(hack_rust_ffi STATIC IMPORTED GLOBAL)
+add_dependencies(hack_rust_ffi hack_rust_ffi_bridge)
+set_target_properties(
+  hack_rust_ffi
+  PROPERTIES
+  IMPORTED_LOCATION "${HHVM_RUST_FFI_STATICLIB}"
+)
+
+add_custom_target(hack_rust_ffi_bridge_targets)
 
 build_cxx_bridge(
   package_ffi
@@ -315,7 +436,8 @@ build_cxx_bridge(
 build_cxx_bridge(
   compiler_ffi
   DIR "src/hackc/ffi_bridge"
-  EXTRA_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/ffi_bridge/external_decl_provider.cpp"
+  EXTRA_SRCS
+    "${COMPILER_FFI_EXTRA_SRC}"
   LINK_LIBS hdf
 )
 build_cxx_bridge(
@@ -327,12 +449,14 @@ build_cxx_bridge(
 build_cxx_bridge(
   hhvm_types_ffi
   DIR "src/hackc/hhvm_cxx/hhvm_types"
-  EXTRA_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_types/as-base-ffi.cpp"
+  EXTRA_SRCS
+    "${HHVM_TYPES_FFI_EXTRA_SRC}"
 )
 build_cxx_bridge(
  hhvm_hhbc_defs_ffi
  DIR "src/hackc/hhvm_cxx/hhvm_hhbc_defs"
- EXTRA_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.cpp"
+ EXTRA_SRCS
+   "${HHVM_HHBC_DEFS_FFI_EXTRA_SRC}"
 )
 
 if (NOT LZ4_FOUND)
@@ -343,8 +467,16 @@ endif()
 
 # Intentionally not using `hack_dune_debug` as it generates output files of a
 # different format (bytecode instead of raw executables, which is useful if
-# you're working with Hack. Keep it around, but require it to be explicitly used
-add_custom_target(hack ALL DEPENDS hack_dune "${OPCODE_DATA}")
+# you're working with Hack). Keep it around, but require it to be explicitly
+# used.
+# hack_dune builds the typechecker (hh_server) via OCaml/dune.
+# Excluded from ALL because it requires shipit file transformations
+# (internal .ml files don't match OSS .mli stubs).
+# The hhvm binary doesn't need hack_dune — it only needs the Rust FFI bridges.
+add_custom_target(
+  hack
+  DEPENDS hack_dune hack_rust_ffi_bridge_targets "${OPCODE_DATA}"
+)
 add_custom_target(hack_test DEPENDS hack_dune_test "${OPCODE_DATA}")
 
 configure_file(dev_env.sh.in dev_env.sh ESCAPE_QUOTES @ONLY)

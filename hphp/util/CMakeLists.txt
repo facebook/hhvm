@@ -10,6 +10,10 @@ set(HEADER_SOURCES)
 auto_sources(files "*.h" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND HEADER_SOURCES ${files})
 
+# Exclude Meta-internal code
+HHVM_REMOVE_MATCHES_FROM_LISTS(ASM_SOURCES CXX_SOURCES HEADER_SOURCES
+  MATCHES "/facebook/")
+
 # Disable Channeled JSON until we're sure it's going to stick
 # sgolemon(2014-02-19)
 HHVM_REMOVE_MATCHES_FROM_LISTS(ASM_SOURCES CXX_SOURCES HEADER_SOURCES

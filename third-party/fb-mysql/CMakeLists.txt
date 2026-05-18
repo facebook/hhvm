@@ -3,6 +3,13 @@ add_library(fbmysqlclient INTERFACE)
 cmake_minimum_required(VERSION 2.8.0)
 include(ExternalProject)
 
+set(
+  HHVM_OSS_FBMYSQL_BOOST_ROOT
+  "${HHVM_OSS_FBMYSQL_BOOST_ROOT}"
+  CACHE PATH
+  "Directory containing boost_1_77_0.tar.bz2 for bundled fb-mysql builds"
+)
+
 MYSQL_SOCKET_SEARCH()
 if (NOT MYSQL_UNIX_SOCK_ADDR)
   message(FATAL_ERROR "Could not find MySQL socket path - if you install a MySQL server, this should be automatically detected. Alternatively, specify -DMYSQL_UNIX_SOCK_ADDR=/path/to/mysql.socket ; if you don't care about unix socket support for MySQL, specify -DMYSQL_UNIX_SOCK_ADDR=/dev/null")
@@ -10,14 +17,7 @@ endif ()
 
 include(HPHPFunctions)
 
-ExternalProject_Add(
-  bundled_fbmysqlclient
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
-  BUILD_ALWAYS ON
-  PATCH_COMMAND
-  "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
-  "${CMAKE_CURRENT_SOURCE_DIR}/patches"
-  CMAKE_ARGS
+set(FBMYSQL_CMAKE_ARGS
   -DWITHOUT_SERVER=TRUE
   -DDISABLE_SHARED=TRUE
   -DWITH_PERFSCHEMA_STORAGE_ENGINE=ON
@@ -42,7 +42,40 @@ ExternalProject_Add(
   -DWITH_ZSTD=system
   "-DZSTD_SYSTEM_LIBRARY=$<TARGET_PROPERTY:zstd,INTERFACE_LINK_LIBRARIES>"
   "-DPATH_TO_ZSTD=$<TARGET_PROPERTY:zstd,INTERFACE_INCLUDE_DIRECTORIES>"
-  ${EXTRA_ARGS}
+)
+
+if (HHVM_OSS_FBMYSQL_BOOST_ROOT)
+  list(APPEND FBMYSQL_CMAKE_ARGS
+    -DDOWNLOAD_BOOST=1
+    "-DWITH_BOOST=${HHVM_OSS_FBMYSQL_BOOST_ROOT}"
+  )
+endif ()
+
+if (EXTRA_ARGS)
+  list(APPEND FBMYSQL_CMAKE_ARGS ${EXTRA_ARGS})
+endif ()
+
+set(FBMYSQL_PATCH_COMMAND)
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/patches/series")
+  file(READ "${CMAKE_CURRENT_SOURCE_DIR}/patches/series" FBMYSQL_PATCH_SERIES)
+  string(STRIP "${FBMYSQL_PATCH_SERIES}" FBMYSQL_PATCH_SERIES)
+  if (NOT "${FBMYSQL_PATCH_SERIES}" STREQUAL "")
+    set(
+      FBMYSQL_PATCH_COMMAND
+      PATCH_COMMAND
+      "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
+      "${CMAKE_CURRENT_SOURCE_DIR}/patches"
+    )
+  endif ()
+endif ()
+
+ExternalProject_Add(
+  bundled_fbmysqlclient
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  BUILD_ALWAYS ON
+  ${FBMYSQL_PATCH_COMMAND}
+  CMAKE_ARGS
+  ${FBMYSQL_CMAKE_ARGS}
 )
 
 set(DEPS lz4 re2 zstd)
@@ -55,8 +88,31 @@ target_link_libraries(fbmysqlclient_deps INTERFACE ${DEPS})
 
 ExternalProject_Get_Property(bundled_fbmysqlclient INSTALL_DIR)
 
+set(FBMYSQL_SOURCE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/include")
+set(FBMYSQL_COMPAT_ROOT "${CMAKE_CURRENT_BINARY_DIR}/mysql-compat")
+set(FBMYSQL_COMPAT_INCLUDE_DIR "${FBMYSQL_COMPAT_ROOT}/mysql/server/include")
+file(MAKE_DIRECTORY "${FBMYSQL_COMPAT_ROOT}/mysql/server")
+if (EXISTS "${FBMYSQL_COMPAT_INCLUDE_DIR}" OR IS_SYMLINK "${FBMYSQL_COMPAT_INCLUDE_DIR}")
+  file(REMOVE_RECURSE "${FBMYSQL_COMPAT_INCLUDE_DIR}")
+endif ()
+execute_process(
+  COMMAND "${CMAKE_COMMAND}" -E create_symlink
+    "${FBMYSQL_SOURCE_INCLUDE_DIR}"
+    "${FBMYSQL_COMPAT_INCLUDE_DIR}"
+  RESULT_VARIABLE FBMYSQL_SYMLINK_RESULT
+)
+if (NOT FBMYSQL_SYMLINK_RESULT EQUAL 0)
+  message(FATAL_ERROR "Failed to create fb-mysql compatibility include symlink")
+endif ()
+
 add_dependencies(fbmysqlclient bundled_fbmysqlclient)
-target_include_directories(fbmysqlclient INTERFACE "${INSTALL_DIR}/include")
+target_include_directories(
+  fbmysqlclient
+  INTERFACE
+  "${INSTALL_DIR}/include"
+  "${FBMYSQL_SOURCE_INCLUDE_DIR}"
+  "${FBMYSQL_COMPAT_ROOT}"
+)
 target_link_libraries(fbmysqlclient INTERFACE
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}mysqlclient${CMAKE_STATIC_LIBRARY_SUFFIX}"
   fbmysqlclient_deps

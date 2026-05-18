@@ -860,7 +860,9 @@ RequestSetupMetadata RocketClientChannelBase::populateSetupMetadata(
       DCHECK(clientMetadata.otherMetadata());
       // append values from hostMetadata.otherMetadata to
       // clientMetadata.otherMetadata
-      clientMetadata.otherMetadata()->insert(
+      auto& existing = *clientMetadata.otherMetadata();
+      existing.reserve(existing.size() + hostMetadata->otherMetadata->size());
+      existing.insert(
           hostMetadata->otherMetadata->begin(),
           hostMetadata->otherMetadata->end());
     }

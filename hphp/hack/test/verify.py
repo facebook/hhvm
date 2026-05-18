@@ -560,7 +560,7 @@ def check_included(test_case: TestCase, output: str) -> Result:
     sections = output.split("--\n")
     expected_sections = test_case.expected.split("--\n")
     is_failure = False
-    output = ""
+    matched_output = ""
     for section, expected_section in zip(sections, expected_sections):
         elts = set(section.splitlines())
         expected_elts = set(expected_section.splitlines())
@@ -569,9 +569,9 @@ def check_included(test_case: TestCase, output: str) -> Result:
                 is_failure = True
                 break
         for elt in expected_elts.intersection(elts):
-            output += elt + "\n"
-        output += "--\n"
-    return Result(test_case, output, is_failure)
+            matched_output += elt + "\n"
+        matched_output += "--\n"
+    return Result(test_case, output if is_failure else matched_output, is_failure)
 
 
 def record_results(results: List[Result], out_ext: str) -> None:

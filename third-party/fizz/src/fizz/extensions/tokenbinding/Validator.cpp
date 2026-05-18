@@ -95,10 +95,13 @@ Status Validator::verify(
     FIZZ_RETURN_ON_ERROR(
         fizz::DefaultFactory().makeHasherFactory(
             hasherFactory, err, fizz::HashFunction::Sha256));
-    fizz::hash(
-        hasherFactory,
-        *message,
-        folly::MutableByteRange(hashedMessage.data(), hashedMessage.size()));
+    FIZZ_RETURN_ON_ERROR(
+        fizz::hash(
+            err,
+            hasherFactory,
+            *message,
+            folly::MutableByteRange(
+                hashedMessage.data(), hashedMessage.size())));
     if (ECDSA_do_verify(
             hashedMessage.data(),
             hashedMessage.size(),

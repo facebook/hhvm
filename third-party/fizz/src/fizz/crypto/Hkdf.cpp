@@ -19,11 +19,15 @@ std::vector<uint8_t> Hkdf::extract(folly::ByteRange salt, folly::ByteRange ikm)
   // Extraction step HMAC-HASH(salt, IKM)
   std::vector<uint8_t> extractedKey(hlen);
   salt = salt.empty() ? folly::range(zeros) : salt;
-  hmac(
-      makeHasher_,
-      salt,
-      folly::IOBuf::wrapBufferAsValue(ikm),
-      folly::range(extractedKey));
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      hmac(
+          err,
+          makeHasher_,
+          salt,
+          folly::IOBuf::wrapBufferAsValue(ikm),
+          folly::range(extractedKey)),
+      err);
   return extractedKey;
 }
 
@@ -54,11 +58,12 @@ Status Hkdf::expand(
     in->prependChain(std::move(roundNum));
 
     size_t outputStartIdx = (round - 1) * hlen;
-    hmac(
+    FIZZ_RETURN_ON_ERROR(hmac(
+        err,
         makeHasher_,
         folly::range(extractedKey),
         *in,
-        {expanded->writableData() + outputStartIdx, hlen});
+        {expanded->writableData() + outputStartIdx, hlen}));
     expanded->append(hlen);
 
     in = expanded->clone();

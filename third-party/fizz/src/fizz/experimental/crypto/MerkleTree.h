@@ -348,10 +348,12 @@ class BatchSignatureMerkleTree
     std::array<uint8_t, Hash::HashLen> result;
     auto hasher = ::fizz::openssl::makeHasher<Hash>();
     constexpr std::array<uint8_t, 1> prefix = {0x01};
-    hasher->hash_update(folly::range(prefix));
-    hasher->hash_update(leftChild);
-    hasher->hash_update(rightChild);
-    hasher->hash_final(folly::range(result));
+    Error err;
+    FIZZ_THROW_ON_ERROR(hasher->hash_update(err, folly::range(prefix)), err);
+    FIZZ_THROW_ON_ERROR(hasher->hash_update(err, leftChild), err);
+
+    FIZZ_THROW_ON_ERROR(hasher->hash_update(err, rightChild), err);
+    FIZZ_THROW_ON_ERROR(hasher->hash_final(err, folly::range(result)), err);
     return result;
   }
 
@@ -365,9 +367,10 @@ class BatchSignatureMerkleTree
     std::array<uint8_t, Hash::HashLen> result;
     auto hasher = ::fizz::openssl::makeHasher<Hash>();
     constexpr std::array<uint8_t, 1> prefix = {0x00};
-    hasher->hash_update(folly::range(prefix));
-    hasher->hash_update(msg);
-    hasher->hash_final(folly::range(result));
+    Error err;
+    FIZZ_THROW_ON_ERROR(hasher->hash_update(err, folly::range(prefix)), err);
+    FIZZ_THROW_ON_ERROR(hasher->hash_update(err, msg), err);
+    FIZZ_THROW_ON_ERROR(hasher->hash_final(err, folly::range(result)), err);
     return result;
   }
 };

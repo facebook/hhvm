@@ -27,17 +27,18 @@ class Hasher {
  public:
   virtual ~Hasher() = default;
 
-  virtual void hash_update(folly::ByteRange data) = 0;
+  virtual Status hash_update(Error& err, folly::ByteRange data) = 0;
 
-  void hash_update(const folly::IOBuf& data) {
+  Status hash_update(Error& err, const folly::IOBuf& data) {
     for (auto chunk : data) {
-      hash_update(chunk);
+      FIZZ_RETURN_ON_ERROR(hash_update(err, chunk));
     }
+    return Status::Success;
   }
 
-  virtual void hash_final(folly::MutableByteRange out) = 0;
+  virtual Status hash_final(Error& err, folly::MutableByteRange out) = 0;
 
-  virtual std::unique_ptr<Hasher> clone() const = 0;
+  virtual Status clone(std::unique_ptr<Hasher>& ret, Error& err) const = 0;
 
   virtual size_t getHashLen() const = 0;
 
@@ -104,7 +105,8 @@ struct HasherFactoryWithMetadata {
  * Puts `Hash(in)` into `out`.
  * `out` must be at least of size HashLen.
  */
-void hash(
+Status hash(
+    Error& err,
     const HasherFactoryWithMetadata* makeHasher,
     const folly::IOBuf& in,
     folly::MutableByteRange out);

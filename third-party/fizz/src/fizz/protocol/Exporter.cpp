@@ -33,7 +33,7 @@ Status Exporter::getExportedKeyingMaterial(
   const HasherFactoryWithMetadata* hasherFactory = nullptr;
   FIZZ_RETURN_ON_ERROR(getHashFunction(hash, err, cipher));
   FIZZ_RETURN_ON_ERROR(factory.makeHasherFactory(hasherFactory, err, hash));
-  fizz::hash(hasherFactory, *context, hashedContext);
+  FIZZ_RETURN_ON_ERROR(fizz::hash(err, hasherFactory, *context, hashedContext));
 
   std::vector<uint8_t> secret;
   FIZZ_RETURN_ON_ERROR(deriver->deriveSecret(

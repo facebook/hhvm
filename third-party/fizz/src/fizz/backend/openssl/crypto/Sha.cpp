@@ -14,14 +14,17 @@ namespace openssl {
 Sha::Sha(const EVP_MD* md) {
   digest_.hash_init(md);
 }
-void Sha::hash_update(folly::ByteRange data) {
+Status Sha::hash_update(Error& /*err*/, folly::ByteRange data) {
   digest_.hash_update(data);
+  return Status::Success;
 }
-void Sha::hash_final(folly::MutableByteRange out) {
+Status Sha::hash_final(Error& /*err*/, folly::MutableByteRange out) {
   digest_.hash_final(out);
+  return Status::Success;
 }
-std::unique_ptr<fizz::Hasher> Sha::clone() const {
-  return std::make_unique<Sha>(*this);
+Status Sha::clone(std::unique_ptr<fizz::Hasher>& ret, Error& /*err*/) const {
+  ret = std::make_unique<Sha>(*this);
+  return Status::Success;
 }
 
 size_t Sha::getHashLen() const {

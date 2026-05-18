@@ -17,16 +17,26 @@ namespace fizz {
 
 class MockHasher : public Hasher {
  public:
-  MOCK_METHOD(void, hash_update, (folly::ByteRange), ());
-  MOCK_METHOD(void, hash_final, (folly::MutableByteRange), ());
-  MOCK_METHOD(std::unique_ptr<Hasher>, clone, (), (const));
+  MOCK_METHOD(void, _hash_update, (folly::ByteRange));
+  MOCK_METHOD(void, _hash_final, (folly::MutableByteRange));
+  MOCK_METHOD(std::unique_ptr<Hasher>, _clone, (), (const));
   MOCK_METHOD(size_t, getHashLen, (), (const));
   MOCK_METHOD(size_t, getBlockSize, (), (const));
+
+  Status hash_update(Error& err, folly::ByteRange data) override {
+    FIZZ_THROW_TO_ERROR(_hash_update(data));
+  }
+  Status hash_final(Error& err, folly::MutableByteRange out) override {
+    FIZZ_THROW_TO_ERROR(_hash_final(out));
+  }
+  Status clone(std::unique_ptr<Hasher>& ret, Error& err) const override {
+    FIZZ_THROW_TO_ERROR(ret, _clone());
+  }
 
   void setDefaults() {
     ON_CALL(*this, getHashLen()).WillByDefault(::testing::Return(32));
     ON_CALL(*this, getBlockSize()).WillByDefault(::testing::Return(64));
-    ON_CALL(*this, clone()).WillByDefault(::testing::InvokeWithoutArgs([] {
+    ON_CALL(*this, _clone()).WillByDefault(::testing::InvokeWithoutArgs([] {
       auto h = std::make_unique<::testing::NiceMock<MockHasher>>();
       h->setDefaults();
       return h;

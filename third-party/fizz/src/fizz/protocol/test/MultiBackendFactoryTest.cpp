@@ -87,9 +87,13 @@ TEST_P(MultiBackendFactoryDigestTest, Test) {
   folly::unhexlify(testCase.expectedHexDigest, expectedOutput);
   ASSERT_EQ(expectedOutput.size(), out.size());
 
-  hasher->hash_update(
-      folly::IOBuf::wrapBufferAsValue(input.data(), input.size()));
-  hasher->hash_final(folly::MutableByteRange(out.data(), out.size()));
+  EXPECT_EQ(
+      hasher->hash_update(
+          err, folly::IOBuf::wrapBufferAsValue(input.data(), input.size())),
+      Status::Success);
+  EXPECT_EQ(
+      hasher->hash_final(err, folly::MutableByteRange(out.data(), out.size())),
+      Status::Success);
 
   EXPECT_EQ(memcmp(out.data(), expectedOutput.data(), out.size()), 0);
 }

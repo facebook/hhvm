@@ -66,8 +66,11 @@ class HandshakeContextImpl : public HandshakeContext {
   }
 
   virtual std::unique_ptr<HandshakeContext> clone() const override {
+    Error err;
+    std::unique_ptr<Hasher> clonedHasher;
+    FIZZ_THROW_ON_ERROR(hashState_->clone(clonedHasher, err), err);
     return std::make_unique<HandshakeContextImpl>(
-        makeHasher_, hashState_->clone());
+        makeHasher_, std::move(clonedHasher));
   }
 
  private:

@@ -11,7 +11,8 @@
 
 namespace fizz {
 
-void hash(
+Status hash(
+    Error& err,
     const HasherFactoryWithMetadata* makeHasher,
     const folly::IOBuf& in,
     folly::MutableByteRange out) {
@@ -19,8 +20,9 @@ void hash(
 
   FIZZ_CHECK_GE(out.size(), hasher->getHashLen());
 
-  hasher->hash_update(in);
-  hasher->hash_final(out);
+  FIZZ_RETURN_ON_ERROR(hasher->hash_update(err, in));
+  FIZZ_RETURN_ON_ERROR(hasher->hash_final(err, out));
+  return Status::Success;
 }
 
 } // namespace fizz

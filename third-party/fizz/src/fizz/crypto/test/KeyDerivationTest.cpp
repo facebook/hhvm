@@ -78,10 +78,14 @@ TEST(KeyDerivation, DeriveSecret) {
 TEST(KeyDerivation, Sha256BlankHash) {
   std::vector<uint8_t> computed(createKeyDerivationImpl<Sha256>().hashLength());
   folly::IOBuf blankBuf;
-  fizz::hash(
-      openssl::hasherFactory<Sha256>(),
-      blankBuf,
-      MutableByteRange(computed.data(), computed.size()));
+  Error err;
+  EXPECT_EQ(
+      fizz::hash(
+          err,
+          openssl::hasherFactory<Sha256>(),
+          blankBuf,
+          MutableByteRange(computed.data(), computed.size())),
+      Status::Success);
   EXPECT_EQ(
       StringPiece(createKeyDerivationImpl<Sha256>().blankHash()),
       StringPiece(folly::range(computed)));

@@ -166,7 +166,9 @@ void runHmacTest(const fizz::HasherFactoryWithMetadata* makeHasher) {
     std::vector<unsigned char> out(hashLen, 0);
     folly::MutableByteRange outRange(out.data(), out.size());
 
-    fizz::hmac(makeHasher, key, messageBuf, outRange);
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        fizz::hmac(err, makeHasher, key, messageBuf, outRange), err);
 
     if (testVector.truncatedOutSize) {
       out.resize(*testVector.truncatedOutSize);

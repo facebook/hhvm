@@ -24,9 +24,9 @@ class Sha : public fizz::Hasher {
   explicit Sha(const EVP_MD* md);
 
   using fizz::Hasher::hash_update;
-  void hash_update(folly::ByteRange data) override;
-  void hash_final(folly::MutableByteRange out) override;
-  std::unique_ptr<fizz::Hasher> clone() const override;
+  Status hash_update(Error& err, folly::ByteRange data) override;
+  Status hash_final(Error& err, folly::MutableByteRange out) override;
+  Status clone(std::unique_ptr<fizz::Hasher>& ret, Error& err) const override;
 
   size_t getHashLen() const override;
   size_t getBlockSize() const override;

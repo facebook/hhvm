@@ -352,8 +352,11 @@ Buf computeTranscriptHash(
   data->append(hashLength);
   auto transcriptHash =
       folly::MutableByteRange(data->writableData(), data->length());
-  hasher->hash_update(*toBeHashed);
-  hasher->hash_final(transcriptHash);
+  {
+    Error err;
+    FIZZ_THROW_ON_ERROR(hasher->hash_update(err, *toBeHashed), err);
+    FIZZ_THROW_ON_ERROR(hasher->hash_final(err, transcriptHash), err);
+  }
   return data;
 }
 
@@ -398,8 +401,17 @@ Buf getFinishedData(
   auto data = folly::IOBuf::create(hashLength);
   data->append(hashLength);
   auto outRange = folly::MutableByteRange(data->writableData(), data->length());
-  fizz::hmac(
-      makeHasher, finishedMacKey->coalesce(), *finishedTranscript, outRange);
+  {
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        fizz::hmac(
+            err,
+            makeHasher,
+            finishedMacKey->coalesce(),
+            *finishedTranscript,
+            outRange),
+        err);
+  }
   return data;
 }
 

@@ -14,16 +14,19 @@
 namespace fizz {
 
 void HandshakeContextImpl::appendToTranscript(const Buf& data) {
-  hashState_->hash_update(*data);
+  Error err;
+  FIZZ_THROW_ON_ERROR(hashState_->hash_update(err, *data), err);
 }
 
 Buf HandshakeContextImpl::getHandshakeContext() const {
-  auto copied = hashState_->clone();
+  Error err;
+  std::unique_ptr<Hasher> copied;
+  FIZZ_THROW_ON_ERROR(hashState_->clone(copied, err), err);
   size_t len = copied->getHashLen();
   auto out = folly::IOBuf::create(len);
   out->append(len);
   folly::MutableByteRange outRange(out->writableData(), out->length());
-  copied->hash_final(outRange);
+  FIZZ_THROW_ON_ERROR(copied->hash_final(err, outRange), err);
   return out;
 }
 
@@ -45,7 +48,8 @@ Buf HandshakeContextImpl::getFinishedData(folly::ByteRange baseKey) const {
   auto data = folly::IOBuf::create(hashLen);
   data->append(hashLen);
   auto outRange = folly::MutableByteRange(data->writableData(), data->length());
-  hmac(makeHasher_, finishedKey->coalesce(), *context, outRange);
+  FIZZ_THROW_ON_ERROR(
+      hmac(err, makeHasher_, finishedKey->coalesce(), *context, outRange), err);
   return data;
 }
 } // namespace fizz

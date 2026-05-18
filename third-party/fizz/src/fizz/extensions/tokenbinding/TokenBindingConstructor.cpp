@@ -60,10 +60,12 @@ Status TokenBindingConstructor::signWithEcKey(
     const EcKeyUniquePtr& key,
     const Buf& message) {
   std::array<uint8_t, fizz::Sha256::HashLen> hashedMessage;
-  fizz::hash(
-      fizz::openssl::hasherFactory<fizz::Sha256>(),
-      *message,
-      folly::MutableByteRange(hashedMessage.data(), hashedMessage.size()));
+  FIZZ_RETURN_ON_ERROR(
+      fizz::hash(
+          err,
+          fizz::openssl::hasherFactory<fizz::Sha256>(),
+          *message,
+          folly::MutableByteRange(hashedMessage.data(), hashedMessage.size())));
 
   EcdsaSigUniquePtr ecSignature(
       ECDSA_do_sign(hashedMessage.data(), hashedMessage.size(), key.get()));

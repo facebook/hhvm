@@ -56,7 +56,8 @@ void doHashFinal(
   std::vector<unsigned char> out(len, 0);
   folly::MutableByteRange outRange(out.data(), out.size());
 
-  hasher->hash_final(outRange);
+  Error err;
+  FIZZ_THROW_ON_ERROR(hasher->hash_final(err, outRange), err);
 
   ASSERT_EQ(folly::hexlify(out), expectedDigest);
 }
@@ -74,7 +75,8 @@ void runHashTestWithFizzHasher(
     std::vector<unsigned char> out(hashLen, 0);
     folly::MutableByteRange outRange(out.data(), out.size());
 
-    fizz::hash(makeHasher, messageBuf, outRange);
+    Error err;
+    FIZZ_THROW_ON_ERROR(fizz::hash(err, makeHasher, messageBuf, outRange), err);
 
     ASSERT_EQ(folly::hexlify(out), testVector.digest.at(makeHasher->id()));
   }
@@ -93,10 +95,12 @@ void runHashTestWithCloning(const fizz::HasherFactoryWithMetadata* makeHasher) {
           reinterpret_cast<const uint8_t*>(testVector.message.c_str()),
           testVector.message.size());
 
-      ogHasher->hash_update(messageBuf);
+      Error err;
+      FIZZ_THROW_ON_ERROR(ogHasher->hash_update(err, messageBuf), err);
 
       {
-        auto hasherCopy = ogHasher->clone();
+        std::unique_ptr<Hasher> hasherCopy;
+        FIZZ_THROW_ON_ERROR(ogHasher->clone(hasherCopy, err), err);
         doHashFinal(
             hasherCopy, hashLen, testVector.digest.at(makeHasher->id()));
 
@@ -105,7 +109,7 @@ void runHashTestWithCloning(const fizz::HasherFactoryWithMetadata* makeHasher) {
         // ogHasher
       }
 
-      outlivedHasher = ogHasher->clone();
+      FIZZ_THROW_ON_ERROR(ogHasher->clone(outlivedHasher, err), err);
 
       doHashFinal(ogHasher, hashLen, testVector.digest.at(makeHasher->id()));
 

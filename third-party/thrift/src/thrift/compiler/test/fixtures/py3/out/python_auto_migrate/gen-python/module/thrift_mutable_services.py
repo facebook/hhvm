@@ -84,6 +84,10 @@ class SimpleServiceInterface(
         return "module.SimpleService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x34\x9d\x3a\x35\x8a\x49\x1f\xd2\xe4\xfd\x03\x8c\x2a\x57\xa0\x57"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__module__thrift_metadata.gen_metadata_service_SimpleService()
 
@@ -662,6 +666,10 @@ SimpleServiceInterface,
         return "module.DerivedService"
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xf9\xe3\xb4\x9c\x85\xde\xf0\x61\x9b\xf3\x0f\x7b\x27\x8d\x62\xb2"
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__module__thrift_metadata.gen_metadata_service_DerivedService()
 
@@ -700,6 +708,10 @@ DerivedServiceInterface,
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.RederivedService"
+
+    @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x07\x40\xfb\x24\x78\x1b\x64\xe4\x82\x89\x2c\xe9\xa1\x74\x01\x87"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

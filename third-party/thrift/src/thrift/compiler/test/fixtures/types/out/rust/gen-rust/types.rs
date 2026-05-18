@@ -1143,8 +1143,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for decorated_struct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -1379,11 +1377,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            12 => {
-            },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Type>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "std::list".to_owned(),
@@ -1396,7 +1393,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Type>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "std::deque".to_owned(),
@@ -1409,7 +1407,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
             },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Type>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "folly::fbvector".to_owned(),
@@ -1422,7 +1421,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
             },
             5 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Type>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "folly::small_vector".to_owned(),
@@ -1433,11 +1433,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
                     return r.take();
                 }
             },
-            6 => {
-            },
             7 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Type>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "folly::sorted_vector_map".to_owned(),
@@ -1447,8 +1446,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
-            },
-            8 => {
             },
             _ => {}
         }
@@ -1575,7 +1572,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for CppTypeStruct {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Type>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Type {
                         name: "std::list<int32_t>".to_owned(),
                         template: ::std::default::Default::default(),
@@ -1733,8 +1731,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for VirtualStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -1872,10 +1868,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStructWithForwardRefEnum {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 
@@ -2013,10 +2005,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for TrivialNumeric {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 
@@ -2158,10 +2146,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for TrivialNestedWithDefault {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 
@@ -2299,10 +2283,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexString {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 
@@ -2454,10 +2434,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexNestedWithDefault {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 
@@ -2648,7 +2624,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPadding {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -2659,7 +2636,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPadding {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -2670,7 +2648,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPadding {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -2681,7 +2660,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPadding {
             },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -2692,7 +2672,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPadding {
             },
             5 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -2911,13 +2892,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPaddingWithCustomType {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Adapter>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
@@ -2931,13 +2909,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPaddingWithCustomType {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
-            },
-            4 => {
-            },
-            5 => {
             },
             _ => {}
         }
@@ -3128,14 +3103,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
             _ => {}
         }
 
@@ -3408,7 +3375,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Renaming {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Name>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Name>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Name {
                         value: "bar".to_owned(),
                         ..::std::default::Default::default()
@@ -3418,7 +3386,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Renaming {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <cpp__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <cpp__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
             },
@@ -3572,10 +3541,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AnnotatedTypes {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 
@@ -3717,11 +3682,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ForwardUsageRoot {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -3858,7 +3822,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ForwardUsageStruct {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -3995,7 +3960,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ForwardUsageByRef {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -4130,8 +4096,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for IncompleteMap {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -4381,7 +4345,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for CompleteMap {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Type>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "std::unordered_map".to_owned(),
@@ -4628,7 +4593,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for IncompleteList {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Type>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "::std::list".to_owned(),
@@ -4875,7 +4841,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for CompleteList {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Type>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Type>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Type {
                         name: ::std::default::Default::default(),
                         template: "folly::small_vector".to_owned(),
@@ -5120,8 +5087,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedList {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -5263,8 +5228,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedListDep {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -5390,8 +5353,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for DependentAdaptedList {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -5537,7 +5498,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for DependentAdaptedListDep {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::Box>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
@@ -5777,19 +5739,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AllocatorAware {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
-            5 => {
-            },
             6 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -5799,7 +5752,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AllocatorAware {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -5810,7 +5764,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AllocatorAware {
             },
             7 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::SharedMutable,
                         ..::std::default::Default::default()
@@ -5820,7 +5775,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AllocatorAware {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -5992,11 +5948,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AllocatorAware2 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::Box>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
@@ -6156,12 +6111,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for TypedefStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
             _ => {}
         }
 
@@ -6285,8 +6234,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithDoubleUnderscores {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 

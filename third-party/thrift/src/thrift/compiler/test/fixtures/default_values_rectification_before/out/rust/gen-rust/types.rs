@@ -367,17 +367,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for TestStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
             5 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeOptionalCustomDefaultValue>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeOptionalCustomDefaultValue>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeOptionalCustomDefaultValue {
                         ..::std::default::Default::default()
                     });
@@ -388,7 +381,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for TestStruct {
             },
             6 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeOptionalCustomDefaultValue>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeOptionalCustomDefaultValue>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeOptionalCustomDefaultValue {
                         ..::std::default::Default::default()
                     });
@@ -399,7 +393,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for TestStruct {
             },
             7 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeOptionalCustomDefaultValue>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeOptionalCustomDefaultValue>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeOptionalCustomDefaultValue {
                         ..::std::default::Default::default()
                     });
@@ -410,7 +405,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for TestStruct {
             },
             8 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeOptionalCustomDefaultValue>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeOptionalCustomDefaultValue>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeOptionalCustomDefaultValue {
                         ..::std::default::Default::default()
                     });

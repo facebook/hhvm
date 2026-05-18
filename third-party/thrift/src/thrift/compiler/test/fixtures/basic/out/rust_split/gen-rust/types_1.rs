@@ -305,12 +305,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Containers {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
             _ => {}
         }
 

@@ -144,11 +144,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ThereAreNoPascalCaseKeywords {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<rust__types::Name>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<rust__types::Name>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(rust__types::Name {
                         name: "super_".to_owned(),
                         ..::std::default::Default::default()
@@ -158,7 +157,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ThereAreNoPascalCaseKeywords {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
             },

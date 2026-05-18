@@ -340,8 +340,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for A {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -464,10 +462,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for U {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 
@@ -584,8 +578,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bang {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 

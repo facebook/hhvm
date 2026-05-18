@@ -179,12 +179,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            3 => {
-            },
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 
@@ -330,12 +324,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo2 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            3 => {
-            },
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 

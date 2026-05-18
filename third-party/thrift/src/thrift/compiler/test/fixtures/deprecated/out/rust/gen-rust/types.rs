@@ -212,11 +212,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for User {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::Deprecated>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::Deprecated>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::Deprecated {
                         message: "Use 'full_name' instead".to_owned(),
                         ..::std::default::Default::default()
@@ -226,11 +225,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for User {
                     return r.take();
                 }
             },
-            3 => {
-            },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::Deprecated>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::Deprecated>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::Deprecated {
                         message: "This field is no longer used".to_owned(),
                         ..::std::default::Default::default()
@@ -239,8 +237,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for User {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
-            },
-            5 => {
             },
             _ => {}
         }
@@ -382,11 +378,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExampleUnion {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::Deprecated>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::Deprecated>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::Deprecated {
                         message: "Use stringValue instead".to_owned(),
                         ..::std::default::Default::default()
@@ -395,8 +390,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExampleUnion {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
-            },
-            3 => {
             },
             _ => {}
         }

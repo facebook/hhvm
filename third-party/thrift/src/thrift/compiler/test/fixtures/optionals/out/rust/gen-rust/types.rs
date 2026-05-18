@@ -352,14 +352,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Color {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
             _ => {}
         }
 
@@ -541,17 +533,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Vehicle {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
             5 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeOptionalCustomDefaultValue>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeOptionalCustomDefaultValue>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeOptionalCustomDefaultValue {
                         ..::std::default::Default::default()
                     });
@@ -819,26 +804,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
-            5 => {
-            },
-            6 => {
-            },
-            7 => {
-            },
-            8 => {
-            },
-            9 => {
-            },
-            10 => {
-            },
             _ => {}
         }
 

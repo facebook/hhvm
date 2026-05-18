@@ -41,6 +41,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x34\x9d\x3a\x35\x8a\x49\x1f\xd2\xe4\xfd\x03\x8c\x2a\x57\xa0\x57"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -57,6 +61,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x34\x9d\x3a\x35\x8a\x49\x1f\xd2\xe4\xfd\x03\x8c\x2a\x57\xa0\x57"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1197,6 +1205,10 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x34\x9d\x3a\x35\x8a\x49\x1f\xd2\xe4\xfd\x03\x8c\x2a\x57\xa0\x57"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__module__thrift_metadata.gen_metadata_service_SimpleService()
 
@@ -2208,6 +2220,10 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\xf9\xe3\xb4\x9c\x85\xde\xf0\x61\x9b\xf3\x0f\x7b\x27\x8d\x62\xb2"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
             """bar""": """1""",
@@ -2226,6 +2242,10 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xf9\xe3\xb4\x9c\x85\xde\xf0\x61\x9b\xf3\x0f\x7b\x27\x8d\x62\xb2"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -2272,6 +2292,10 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
             return None
 
         @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\xf9\xe3\xb4\x9c\x85\xde\xf0\x61\x9b\xf3\x0f\x7b\x27\x8d\x62\xb2"
+
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return _fbthrift__module__thrift_metadata.gen_metadata_service_DerivedService()
 
@@ -2310,6 +2334,10 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
         return None
 
     @staticmethod
+    def __get_thrift_definition_key__() -> bytes:
+        return b"\x07\x40\xfb\x24\x78\x1b\x64\xe4\x82\x89\x2c\xe9\xa1\x74\x01\x87"
+
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -2326,6 +2354,10 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x07\x40\xfb\x24\x78\x1b\x64\xe4\x82\x89\x2c\xe9\xa1\x74\x01\x87"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -2370,6 +2402,10 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
             return None
+
+        @staticmethod
+        def __get_thrift_definition_key__() -> bytes:
+            return b"\x07\x40\xfb\x24\x78\x1b\x64\xe4\x82\x89\x2c\xe9\xa1\x74\x01\x87"
 
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

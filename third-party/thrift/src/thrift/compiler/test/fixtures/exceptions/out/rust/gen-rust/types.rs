@@ -319,7 +319,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Fiery {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
@@ -328,7 +329,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Fiery {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -458,7 +460,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Serious {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
@@ -467,7 +470,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Serious {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<python__types::Name>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<python__types::Name>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(python__types::Name {
                         name: "not_sonnet".to_owned(),
                         ..::std::default::Default::default()
@@ -477,7 +481,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Serious {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <python__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <python__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
             },
@@ -612,11 +617,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexFieldNames {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
@@ -756,11 +760,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for CustomFieldNames {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::DeprecatedUnvalidatedAnnotations>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::DeprecatedUnvalidatedAnnotations>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::DeprecatedUnvalidatedAnnotations {
                         items: {
                             let mut map = ::std::collections::BTreeMap::new();
@@ -780,11 +783,13 @@ impl ::fbthrift::metadata::ThriftAnnotations for CustomFieldNames {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <thrift__types::DeprecatedUnvalidatedAnnotations as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <thrift__types::DeprecatedUnvalidatedAnnotations as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
@@ -926,7 +931,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithPrimitiveField {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
@@ -934,8 +940,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithPrimitiveField {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
-            },
-            2 => {
             },
             _ => {}
         }
@@ -1070,7 +1074,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithStructuredAnnotati
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
@@ -1078,8 +1083,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithStructuredAnnotati
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
-            },
-            2 => {
             },
             _ => {}
         }

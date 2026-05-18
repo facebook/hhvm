@@ -149,7 +149,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReservedKeyword {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<hack__types::Name>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<hack__types::Name>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(hack__types::Name {
                         name: "renamed_field".to_owned(),
                         reason: ::std::default::Default::default(),
@@ -160,7 +161,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReservedKeyword {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <hack__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
             },

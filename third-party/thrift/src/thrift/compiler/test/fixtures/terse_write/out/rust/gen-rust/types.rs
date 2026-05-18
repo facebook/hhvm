@@ -671,34 +671,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
-            5 => {
-            },
-            6 => {
-            },
-            7 => {
-            },
-            8 => {
-            },
-            9 => {
-            },
-            10 => {
-            },
-            11 => {
-            },
-            12 => {
-            },
-            13 => {
-            },
-            14 => {
-            },
             _ => {}
         }
 
@@ -821,8 +793,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStructWithCustomDefault {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -1151,36 +1121,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructLevelTerseStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
-            5 => {
-            },
-            6 => {
-            },
-            7 => {
-            },
-            8 => {
-            },
-            9 => {
-            },
-            10 => {
-            },
-            11 => {
-            },
-            12 => {
-            },
-            13 => {
-            },
-            14 => {
-            },
-            15 => {
-            },
             _ => {}
         }
 
@@ -1712,7 +1652,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1723,7 +1664,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1734,7 +1676,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1745,7 +1688,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1756,7 +1700,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             5 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1767,7 +1712,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             6 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1778,7 +1724,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             7 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1789,7 +1736,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             8 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1800,7 +1748,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             9 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1811,7 +1760,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             10 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1822,7 +1772,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             11 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1833,7 +1784,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             12 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1844,7 +1796,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             13 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1855,7 +1808,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             14 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1866,7 +1820,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
             },
             29 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -1874,36 +1829,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
-            },
-            15 => {
-            },
-            16 => {
-            },
-            17 => {
-            },
-            18 => {
-            },
-            19 => {
-            },
-            20 => {
-            },
-            21 => {
-            },
-            22 => {
-            },
-            23 => {
-            },
-            24 => {
-            },
-            25 => {
-            },
-            26 => {
-            },
-            27 => {
-            },
-            28 => {
-            },
-            30 => {
             },
             _ => {}
         }
@@ -2065,11 +1990,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<hack__types::Adapter>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<hack__types::Adapter>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(hack__types::Adapter {
                         name: "\\Adapter1".to_owned(),
                         ..::std::default::Default::default()
@@ -2079,7 +2003,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Adapter>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
@@ -2093,13 +2018,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Adapter>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter".to_owned(),
                         adaptedType: ::std::default::Default::default(),
@@ -2113,7 +2040,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
             },
@@ -2251,7 +2179,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseException {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });

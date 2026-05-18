@@ -648,7 +648,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -658,7 +659,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -669,7 +671,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -679,7 +682,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -799,7 +803,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for NonTriviallyDestructibleUnion {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::SharedMutable,
                         ..::std::default::Default::default()
@@ -809,7 +814,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for NonTriviallyDestructibleUnion {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -1054,7 +1060,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1066,7 +1073,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1076,7 +1084,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -1087,7 +1096,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1097,7 +1107,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -1106,7 +1117,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -1117,7 +1129,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
             },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1129,7 +1142,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
             },
             5 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1139,7 +1153,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -1150,7 +1165,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
             },
             6 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1160,7 +1176,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -1169,7 +1186,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -1180,7 +1198,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
             },
             7 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1192,7 +1211,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
             },
             8 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1202,7 +1222,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -1213,7 +1234,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
             },
             9 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1223,7 +1245,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -1232,7 +1255,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -1390,7 +1414,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1402,7 +1427,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1412,7 +1438,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -1423,7 +1450,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1433,7 +1461,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -1442,7 +1471,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -1598,7 +1628,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithUnion {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1608,7 +1639,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithUnion {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -1619,7 +1651,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithUnion {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1629,7 +1662,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithUnion {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -1637,8 +1671,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithUnion {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
-            },
-            3 => {
             },
             _ => {}
         }
@@ -1761,7 +1793,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for RecursiveStruct {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<java__types::Recursive>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<java__types::Recursive>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(java__types::Recursive {
                         ..::std::default::Default::default()
                     });
@@ -1959,7 +1992,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1969,7 +2003,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -1980,7 +2015,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -1990,7 +2026,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -2001,7 +2038,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -2011,7 +2049,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -2022,7 +2061,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
             },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -2032,7 +2072,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -2043,7 +2084,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
             },
             5 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::SharedMutable,
                         ..::std::default::Default::default()
@@ -2053,7 +2095,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -2064,7 +2107,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
             },
             6 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Shared,
                         ..::std::default::Default::default()
@@ -2074,7 +2118,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -2232,7 +2277,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithSharedConst {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Shared,
                         ..::std::default::Default::default()
@@ -2244,7 +2290,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithSharedConst {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Shared,
                         ..::std::default::Default::default()
@@ -2254,7 +2301,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithSharedConst {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -2265,7 +2313,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithSharedConst {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Shared,
                         ..::std::default::Default::default()
@@ -2275,7 +2324,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithSharedConst {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -2284,7 +2334,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithSharedConst {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -2545,7 +2596,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRef {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -2555,7 +2607,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRef {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -2566,7 +2619,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRef {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -2578,7 +2632,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRef {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -2588,7 +2643,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRef {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -2597,7 +2653,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRef {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -2759,7 +2816,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithBox {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::Box>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
@@ -2770,7 +2828,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithBox {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::Box>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
@@ -2781,7 +2840,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithBox {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::Box>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
@@ -2923,7 +2983,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithInternBox {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::InternBox>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
                         ..::std::default::Default::default()
                     });
@@ -2934,7 +2995,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithInternBox {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::InternBox>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
                         ..::std::default::Default::default()
                     });
@@ -3089,7 +3151,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithTerseInternBox {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::InternBox>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
                         ..::std::default::Default::default()
                     });
@@ -3098,7 +3161,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithTerseInternBox {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -3109,7 +3173,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithTerseInternBox {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::InternBox>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
                         ..::std::default::Default::default()
                     });
@@ -3118,7 +3183,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithTerseInternBox {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -3260,7 +3326,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Adapter>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
@@ -3274,11 +3341,13 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::InternBox>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
                         ..::std::default::Default::default()
                     });
@@ -3289,7 +3358,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Adapter>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
@@ -3303,11 +3373,13 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::InternBox>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
                         ..::std::default::Default::default()
                     });
@@ -3462,7 +3534,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithTerseInternBox
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Adapter>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
@@ -3476,11 +3549,13 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithTerseInternBox
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::InternBox>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
                         ..::std::default::Default::default()
                     });
@@ -3489,7 +3564,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithTerseInternBox
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -3500,7 +3576,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithTerseInternBox
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Adapter>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
                         name: "::my::Adapter1".to_owned(),
                         adaptedType: ::std::default::Default::default(),
@@ -3514,11 +3591,13 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithTerseInternBox
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::InternBox>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
                         ..::std::default::Default::default()
                     });
@@ -3527,7 +3606,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithTerseInternBox
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
                         ..::std::default::Default::default()
                     });
@@ -3685,7 +3765,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeUnique {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -3695,7 +3776,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeUnique {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -3706,7 +3788,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeUnique {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -3718,7 +3801,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeUnique {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -3728,7 +3812,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeUnique {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -3737,7 +3822,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeUnique {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -3895,7 +3981,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeShared {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::SharedMutable,
                         ..::std::default::Default::default()
@@ -3905,7 +3992,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeShared {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -3916,7 +4004,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeShared {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::SharedMutable,
                         ..::std::default::Default::default()
@@ -3928,7 +4017,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeShared {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::SharedMutable,
                         ..::std::default::Default::default()
@@ -3938,7 +4028,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeShared {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -3947,7 +4038,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeShared {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -4105,7 +4197,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeSharedConst {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Shared,
                         ..::std::default::Default::default()
@@ -4115,7 +4208,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeSharedConst {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -4126,7 +4220,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeSharedConst {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Shared,
                         ..::std::default::Default::default()
@@ -4138,7 +4233,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeSharedConst {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Shared,
                         ..::std::default::Default::default()
@@ -4148,7 +4244,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeSharedConst {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -4157,7 +4254,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeSharedConst {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -4285,7 +4383,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefAndAnnotCppNoexcep
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -4295,7 +4394,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefAndAnnotCppNoexcep
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -4479,7 +4579,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -4489,7 +4590,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -4500,7 +4602,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::SharedMutable,
                         ..::std::default::Default::default()
@@ -4510,7 +4613,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -4521,7 +4625,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Shared,
                         ..::std::default::Default::default()
@@ -4531,7 +4636,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -4542,7 +4648,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
             },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -4552,7 +4659,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
@@ -4563,7 +4671,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
             },
             5 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::SharedMutable,
                         ..::std::default::Default::default()
@@ -4573,7 +4682,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });

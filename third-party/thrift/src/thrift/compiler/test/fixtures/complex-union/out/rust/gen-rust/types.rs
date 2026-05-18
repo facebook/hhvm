@@ -240,19 +240,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexUnion {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            5 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            9 => {
-            },
             14 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Ref>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
                         ..::std::default::Default::default()
@@ -383,10 +374,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ListUnion {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            2 => {
-            },
-            3 => {
-            },
             _ => {}
         }
 
@@ -508,10 +495,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for DataUnion {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 
@@ -656,12 +639,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Val {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            9 => {
-            },
             _ => {}
         }
 
@@ -784,10 +761,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ValUnion {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 
@@ -933,10 +906,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for VirtualComplexUnion {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 
@@ -1077,8 +1046,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for NonCopyableStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -1213,8 +1180,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for NonCopyableUnion {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 

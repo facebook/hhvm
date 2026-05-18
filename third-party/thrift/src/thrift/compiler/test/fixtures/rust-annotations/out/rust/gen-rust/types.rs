@@ -809,8 +809,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for T0 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -930,7 +928,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for T1 {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<rust__types::Type>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<rust__types::Type>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(rust__types::Type {
                         name: "OrderedFloat<f64>".to_owned(),
                         ..::std::default::Default::default()
@@ -1057,8 +1056,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for T2 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -1178,7 +1175,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for T3 {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<rust__types::Type>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<rust__types::Type>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(rust__types::Type {
                         name: "sorted_vector_map::SortedVectorMap".to_owned(),
                         ..::std::default::Default::default()
@@ -1307,7 +1305,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for T4 {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<rust__types::Type>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<rust__types::Type>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(rust__types::Type {
                         name: "HashMap".to_owned(),
                         ..::std::default::Default::default()
@@ -1443,8 +1442,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for T5 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -1676,7 +1673,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for T7 {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<rust__types::Box>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<rust__types::Box>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(rust__types::Box {
                         ..::std::default::Default::default()
                     });
@@ -1820,7 +1818,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for T8 {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<rust__types::Arc>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<rust__types::Arc>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(rust__types::Arc {
                         ..::std::default::Default::default()
                     });
@@ -1831,7 +1830,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for T8 {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<rust__types::Arc>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<rust__types::Arc>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(rust__types::Arc {
                         ..::std::default::Default::default()
                     });
@@ -1840,7 +1840,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for T8 {
                     return r.take();
                 }
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::Box>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
@@ -1975,8 +1976,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for T9 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -2104,8 +2103,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for T12 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -2233,8 +2230,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for T13 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -2368,7 +2363,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for U10 {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<rust__types::Name>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<rust__types::Name>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(rust__types::Name {
                         name: "string".to_owned(),
                         ..::std::default::Default::default()
@@ -2378,7 +2374,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for U10 {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
             },
@@ -2541,7 +2538,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for U11 {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<rust__types::Name>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<rust__types::Name>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(rust__types::Name {
                         name: "string".to_owned(),
                         ..::std::default::Default::default()
@@ -2551,15 +2549,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for U11 {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
             },
-            2 => {
-            },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeNonSealedKeyType>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeNonSealedKeyType>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeNonSealedKeyType {
                         ..::std::default::Default::default()
                     });
@@ -3049,7 +3047,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<rust__types::Name>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<rust__types::Name>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(rust__types::Name {
                         name: "Annotated".to_owned(),
                         ..::std::default::Default::default()
@@ -3059,11 +3058,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
-            },
-            2 => {
             },
             _ => {}
         }

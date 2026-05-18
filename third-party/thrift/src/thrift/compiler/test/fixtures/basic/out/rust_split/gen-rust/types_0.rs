@@ -482,23 +482,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
-            5 => {
-            },
-            6 => {
-            },
-            7 => {
-            },
             8 => {
 
-                if type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(hack__types::SkipCodegen {
                         reason: "Invalid key type".to_owned(),
                         ..::std::default::Default::default()
@@ -510,7 +497,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             },
             9 => {
 
-                if type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(hack__types::SkipCodegen {
                         reason: "skip field codegen for deprecation".to_owned(),
                         ..::std::default::Default::default()
@@ -781,15 +769,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(hack__types::SkipCodegen {
                         reason: "Invalid key type".to_owned(),
                         ..::std::default::Default::default()
@@ -963,14 +946,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyException {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
             _ => {}
         }
 
@@ -1136,11 +1111,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyExceptionWithMessage {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::ExceptionMessage>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::ExceptionMessage {
                         ..::std::default::Default::default()
                     });
@@ -1148,10 +1122,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyExceptionWithMessage {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
-            },
-            3 => {
-            },
-            4 => {
             },
             _ => {}
         }

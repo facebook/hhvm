@@ -176,8 +176,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Fields {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            100 => {
-            },
             _ => {}
         }
 
@@ -305,8 +303,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedToEmptyStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            -1100 => {
-            },
             _ => {}
         }
 
@@ -448,10 +444,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedToStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            -1100 => {
-            },
             _ => {}
         }
 
@@ -625,13 +617,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedWithIncludedStruc
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            -1100 => {
-            },
             -1101 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::Box>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
@@ -642,7 +631,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedWithIncludedStruc
             },
             -1102 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::Box>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
@@ -792,10 +782,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedWithFieldsWithInc
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            -1001 => {
-            },
             _ => {}
         }
 

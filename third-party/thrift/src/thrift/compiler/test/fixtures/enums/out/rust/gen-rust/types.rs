@@ -1287,14 +1287,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for SomeStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
             _ => {}
         }
 
@@ -1460,14 +1452,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            4 => {
-            },
-            6 => {
-            },
             _ => {}
         }
 

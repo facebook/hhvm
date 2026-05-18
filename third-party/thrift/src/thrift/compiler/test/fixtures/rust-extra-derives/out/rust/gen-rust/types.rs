@@ -154,8 +154,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for WithCustomDerives {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 

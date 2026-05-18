@@ -157,8 +157,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for CustomException {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -276,8 +274,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ShouldBeBoxed {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 

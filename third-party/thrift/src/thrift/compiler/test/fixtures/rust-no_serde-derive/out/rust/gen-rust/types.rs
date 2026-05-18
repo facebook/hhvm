@@ -152,8 +152,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for NoSerde {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -271,8 +269,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Serde {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 

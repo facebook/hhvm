@@ -176,7 +176,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -185,13 +186,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     return r.take();
                 }
             },
-            2 => {
-            },
-            3 => {
-            },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });

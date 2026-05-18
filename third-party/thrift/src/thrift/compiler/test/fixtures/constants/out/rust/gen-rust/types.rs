@@ -720,7 +720,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Internship {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -728,14 +729,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Internship {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
-            5 => {
             },
             _ => {}
         }
@@ -870,7 +863,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Range {
         match field_id {
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -881,7 +875,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Range {
             },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::AllowUnsafeRequiredFieldQualifier>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::AllowUnsafeRequiredFieldQualifier {
                         ..::std::default::Default::default()
                     });
@@ -1021,10 +1016,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for struct1 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 
@@ -1184,14 +1175,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for struct2 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
             _ => {}
         }
 
@@ -1337,12 +1320,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for struct3 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
             _ => {}
         }
 
@@ -1492,12 +1469,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for struct4 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
             _ => {}
         }
 
@@ -1620,10 +1591,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for union1 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
             _ => {}
         }
 
@@ -1769,14 +1736,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for union2 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
-            2 => {
-            },
-            3 => {
-            },
-            4 => {
-            },
             _ => {}
         }
 

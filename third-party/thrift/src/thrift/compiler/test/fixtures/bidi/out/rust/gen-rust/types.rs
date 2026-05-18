@@ -202,8 +202,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for BiDiSinkException {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -321,8 +319,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for BiDiStreamException {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -440,8 +436,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for BiDiMethodException {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 

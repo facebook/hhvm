@@ -246,8 +246,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for InitialResponse {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -365,8 +363,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for FinalResponse {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -484,8 +480,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for SinkPayload {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -603,8 +597,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for CompatibleWithKeywordSink {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -722,8 +714,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for InitialException {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -841,8 +831,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for SinkException1 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -960,8 +948,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for SinkException2 {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 

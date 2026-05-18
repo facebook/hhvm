@@ -345,8 +345,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStructNestedAnnotation {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             _ => {}
         }
 
@@ -938,7 +936,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         match field_id {
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<cpp__types::Name>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<cpp__types::Name>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Name {
                         value: "majorVer".to_owned(),
                         ..::std::default::Default::default()
@@ -948,11 +947,13 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <cpp__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <cpp__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
 
-                if type_id == ::std::any::TypeId::of::<go__types::Name>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<go__types::Name>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(go__types::Name {
                         name: "MajorVer".to_owned(),
                         ..::std::default::Default::default()
@@ -962,13 +963,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <go__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <go__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
             },
             1 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::DeprecatedUnvalidatedAnnotations>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::DeprecatedUnvalidatedAnnotations>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::DeprecatedUnvalidatedAnnotations {
                         items: {
                             let mut map = ::std::collections::BTreeMap::new();
@@ -988,11 +991,13 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <thrift__types::DeprecatedUnvalidatedAnnotations as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <thrift__types::DeprecatedUnvalidatedAnnotations as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
 
-                if type_id == ::std::any::TypeId::of::<go__types::Name>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<go__types::Name>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(go__types::Name {
                         name: "AbstractName".to_owned(),
                         ..::std::default::Default::default()
@@ -1002,11 +1007,13 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <go__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <go__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
 
-                if type_id == ::std::any::TypeId::of::<go__types::Tag>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<go__types::Tag>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(go__types::Tag {
                         tag: "tag:\"some_abstract\"".to_owned(),
                         ..::std::default::Default::default()
@@ -1018,7 +1025,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             },
             3 => {
 
-                if type_id == ::std::any::TypeId::of::<go__types::Tag>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<go__types::Tag>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(go__types::Tag {
                         tag: "tag:\"somevalue\"".to_owned(),
                         ..::std::default::Default::default()
@@ -1030,7 +1038,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             },
             4 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::DeprecatedUnvalidatedAnnotations>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::DeprecatedUnvalidatedAnnotations>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::DeprecatedUnvalidatedAnnotations {
                         items: {
                             let mut map = ::std::collections::BTreeMap::new();
@@ -1050,13 +1059,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <thrift__types::DeprecatedUnvalidatedAnnotations as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <thrift__types::DeprecatedUnvalidatedAnnotations as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
             },
             5 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::DeprecatedUnvalidatedAnnotations>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::DeprecatedUnvalidatedAnnotations>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::DeprecatedUnvalidatedAnnotations {
                         items: {
                             let mut map = ::std::collections::BTreeMap::new();
@@ -1076,17 +1087,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <thrift__types::DeprecatedUnvalidatedAnnotations as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <thrift__types::DeprecatedUnvalidatedAnnotations as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
-            },
-            6 => {
-            },
-            7 => {
-            },
-            8 => {
-            },
-            9 => {
             },
             _ => {}
         }
@@ -1219,11 +1223,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for SecretStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            1 => {
-            },
             2 => {
 
-                if type_id == ::std::any::TypeId::of::<thrift__types::DeprecatedUnvalidatedAnnotations>() {
+                let matches_type = type_id == ::std::any::TypeId::of::<thrift__types::DeprecatedUnvalidatedAnnotations>();
+                if matches_type {
                     let mut tmp = ::std::option::Option::Some(thrift__types::DeprecatedUnvalidatedAnnotations {
                         items: {
                             let mut map = ::std::collections::BTreeMap::new();
@@ -1243,7 +1246,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for SecretStruct {
                     return r.take();
                 }
 
-                if let ::std::option::Option::Some(r) = <thrift__types::DeprecatedUnvalidatedAnnotations as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                let r = <thrift__types::DeprecatedUnvalidatedAnnotations as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>();
+                if let ::std::option::Option::Some(r) = r {
                     return ::std::option::Option::Some(r);
                 }
             },

@@ -170,7 +170,12 @@ module Find_my_tests = struct
 
   type provenance = { root_indices: int list } [@@deriving yojson]
 
-  type selected_test_method = { method_name: string } [@@deriving yojson]
+  type selected_test_method = {
+    method_name: string;
+    uses_cldp: bool option; [@default None]
+    cldp_members: string list option; [@default None]
+  }
+  [@@deriving yojson]
 
   type selected_test_class = {
     class_name: string;
@@ -233,6 +238,7 @@ module Find_my_tests = struct
         of files, we skip searching those files for references entirely. *)
     enclosing_class_all_methods: bool; [@default true]
         (** Should we go from any method to the enclosing class, or just for root methods? *)
+    cldp_member_selection: bool; [@default false]
   }
   [@@deriving yojson, show]
 
@@ -247,6 +253,7 @@ module Find_my_tests = struct
       parent_max_fanout_files = None;
       non_parent_max_fanout_files = None;
       enclosing_class_all_methods = true;
+      cldp_member_selection = false;
     }
 
   type json_input = {

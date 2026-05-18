@@ -72,6 +72,10 @@ class RequestCommon : public MessageCommon {
 
   void setClientIdentifier(folly::StringPiece clientIdentifier) noexcept;
 
+  const std::optional<std::string>& getPrivacyLibAgenticContext() const;
+
+  void setPrivacyLibAgenticContext(std::string&& context);
+
   const std::optional<folly::IPAddress>& getSourceIpAddr() const noexcept;
 
   void setSourceIpAddr(const folly::IPAddress& sourceIpAddr) noexcept;
@@ -95,6 +99,8 @@ class RequestCommon : public MessageCommon {
   std::optional<std::string> cryptoAuthToken_;
   // Hash string of primary (non-host) tls client identities
   std::optional<std::string> clientIdentifier_;
+  // Privacylib agentic context in base64-encoded serialized format
+  std::optional<std::string> privacyLibAgenticContext_;
   // Source ip address.
   std::optional<folly::IPAddress> sourceIpAddr_;
   // write timestamp

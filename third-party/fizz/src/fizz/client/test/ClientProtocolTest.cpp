@@ -4705,7 +4705,7 @@ TEST_F(ClientProtocolTest, TestCompressedCertificateFlow) {
   decompressionMgr->setDecompressors(
       {std::static_pointer_cast<CertificateDecompressor>(decompressor)});
   context_->setCertDecompressionManager(std::move(decompressionMgr));
-  EXPECT_CALL(*decompressor, decompress(_))
+  EXPECT_CALL(*decompressor, _decompress(_))
       .WillOnce(Invoke([](const CompressedCertificate& cc) {
         EXPECT_TRUE(
             folly::IOBufEqualTo()(
@@ -4744,7 +4744,7 @@ TEST_F(ClientProtocolTest, TestCompressedCertificate) {
   decompressionMgr->setDecompressors(
       {std::static_pointer_cast<CertificateDecompressor>(decompressor)});
   context_->setCertDecompressionManager(std::move(decompressionMgr));
-  EXPECT_CALL(*decompressor, decompress(_))
+  EXPECT_CALL(*decompressor, _decompress(_))
       .WillOnce(Invoke([](const CompressedCertificate& cc) {
         auto certificate = TestMessages::certificate();
         CertificateEntry entry;
@@ -4784,7 +4784,7 @@ TEST_F(ClientProtocolTest, TestCompressedCertificateDecompressionFailed) {
   setupExpectingCertificate();
   auto decompressor = std::make_shared<MockCertificateDecompressor>();
   decompressor->setDefaults();
-  EXPECT_CALL(*decompressor, decompress(_))
+  EXPECT_CALL(*decompressor, _decompress(_))
       .WillOnce(Invoke([](const CompressedCertificate& cc) -> CertificateMsg {
         throw std::runtime_error("foo");
       }));
@@ -4807,7 +4807,7 @@ TEST_F(ClientProtocolTest, TestCompressedCertificateWithRequestContext) {
   decompressionMgr->setDecompressors(
       {std::static_pointer_cast<CertificateDecompressor>(decompressor)});
   context_->setCertDecompressionManager(std::move(decompressionMgr));
-  EXPECT_CALL(*decompressor, decompress(_))
+  EXPECT_CALL(*decompressor, _decompress(_))
       .WillOnce(Invoke([](const CompressedCertificate& cc) {
         auto certificate = TestMessages::certificate();
         certificate.certificate_request_context =
@@ -4829,7 +4829,7 @@ TEST_F(ClientProtocolTest, TestCompressedCertificateEmpty) {
   setupExpectingCertificate();
   auto decompressor = std::make_shared<MockCertificateDecompressor>();
   decompressor->setDefaults();
-  EXPECT_CALL(*decompressor, decompress(_))
+  EXPECT_CALL(*decompressor, _decompress(_))
       .WillOnce(Invoke([](const CompressedCertificate& cc) {
         return TestMessages::certificate();
       }));

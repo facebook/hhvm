@@ -15,16 +15,19 @@ using namespace folly;
 namespace fizz {
 
 namespace {
-size_t brotliDecompressImpl(
+Status brotliDecompressImpl(
+    size_t& ret,
+    Error& err,
     folly::ByteRange input,
     uint8_t* output,
     size_t outputSize) {
   auto status =
       BrotliDecoderDecompress(input.size(), input.data(), &outputSize, output);
   if (status != BrotliDecoderResult::BROTLI_DECODER_RESULT_SUCCESS) {
-    throw std::runtime_error("Decompressing certificate failed");
+    return err.error("Decompressing certificate failed");
   }
-  return outputSize;
+  ret = outputSize;
+  return Status::Success;
 }
 } // namespace
 
@@ -33,33 +36,38 @@ CertificateCompressionAlgorithm BrotliCertificateDecompressor::getAlgorithm()
   return CertificateCompressionAlgorithm::brotli;
 }
 
-CertificateMsg BrotliCertificateDecompressor::decompress(
+Status BrotliCertificateDecompressor::decompress(
+    CertificateMsg& ret,
+    Error& err,
     const CompressedCertificate& cc) {
   if (cc.algorithm != getAlgorithm()) {
-    throw std::runtime_error(
+    return err.error(
         "Compressed certificate uses non-brotli algorithm: " +
         toString(cc.algorithm));
   }
 
   if (cc.uncompressed_length > kMaxHandshakeSize) {
-    throw std::runtime_error(
+    return err.error(
         "Compressed certificate exceeds maximum certificate message size");
   }
 
   auto rawCertMessage = IOBuf::create(cc.uncompressed_length);
   auto compRange = cc.compressed_certificate_message->coalesce();
-  auto decompressedSize = brotliDecompressImpl(
-      compRange, rawCertMessage->writableData(), cc.uncompressed_length);
+  size_t decompressedSize = 0;
+  FIZZ_RETURN_ON_ERROR(brotliDecompressImpl(
+      decompressedSize,
+      err,
+      compRange,
+      rawCertMessage->writableData(),
+      cc.uncompressed_length));
   if (decompressedSize != cc.uncompressed_length) {
-    throw std::runtime_error("Uncompressed length incorrect");
+    return err.error("Uncompressed length incorrect");
   }
 
   rawCertMessage->append(decompressedSize);
-  CertificateMsg msg;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      decode<CertificateMsg>(msg, err, std::move(rawCertMessage)), err);
-  return msg;
+  FIZZ_RETURN_ON_ERROR(
+      decode<CertificateMsg>(ret, err, std::move(rawCertMessage)));
+  return Status::Success;
 }
 
 } // namespace fizz

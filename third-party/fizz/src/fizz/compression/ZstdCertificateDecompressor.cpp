@@ -18,16 +18,18 @@ CertificateCompressionAlgorithm ZstdCertificateDecompressor::getAlgorithm()
   return CertificateCompressionAlgorithm::zstd;
 }
 
-CertificateMsg ZstdCertificateDecompressor::decompress(
+Status ZstdCertificateDecompressor::decompress(
+    CertificateMsg& ret,
+    Error& err,
     const CompressedCertificate& cc) {
   if (cc.algorithm != getAlgorithm()) {
-    throw std::runtime_error(
+    return err.error(
         "Compressed certificate uses non-zstd algorithm: " +
         toString(cc.algorithm));
   }
 
   if (cc.uncompressed_length > kMaxHandshakeSize) {
-    throw std::runtime_error(
+    return err.error(
         "Compressed certificate exceeds maximum certificate message size");
   }
 
@@ -42,24 +44,22 @@ CertificateMsg ZstdCertificateDecompressor::decompress(
   if (ZSTD_isError(status)) {
     std::string errorMsg("Failed to decompress cert with zstd: ");
     errorMsg += ZSTD_getErrorName(status);
-    throw std::runtime_error(std::move(errorMsg));
+    return err.error(std::move(errorMsg));
   }
 
   if (status != cc.uncompressed_length) {
-    throw std::runtime_error("Uncompressed length incorrect");
+    return err.error("Uncompressed length incorrect");
   }
 
   if (status == 0) {
-    throw std::runtime_error("Compressed certificate is zero-length");
+    return err.error("Compressed certificate is zero-length");
   }
 
   // with successful decompression, status holds uncompressed size
   rawCertMessage->append(status);
-  CertificateMsg msg;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      decode<CertificateMsg>(msg, err, std::move(rawCertMessage)), err);
-  return msg;
+  FIZZ_RETURN_ON_ERROR(
+      decode<CertificateMsg>(ret, err, std::move(rawCertMessage)));
+  return Status::Success;
 }
 
 } // namespace fizz

@@ -24,8 +24,7 @@ class MockCertificateCompressor : public CertificateCompressor {
       CompressedCertificate& ret,
       Error& err,
       const CertificateMsg& cert) override {
-    ret = _compress(cert);
-    return Status::Success;
+    FIZZ_THROW_TO_ERROR(ret, _compress(cert));
   }
   void setDefaults() {
     ON_CALL(*this, getAlgorithm()).WillByDefault(InvokeWithoutArgs([]() {
@@ -37,7 +36,13 @@ class MockCertificateCompressor : public CertificateCompressor {
 class MockCertificateDecompressor : public CertificateDecompressor {
  public:
   MOCK_METHOD(CertificateCompressionAlgorithm, getAlgorithm, (), (const));
-  MOCK_METHOD(CertificateMsg, decompress, (const CompressedCertificate&));
+  MOCK_METHOD(CertificateMsg, _decompress, (const CompressedCertificate&));
+  Status decompress(
+      CertificateMsg& ret,
+      Error& err,
+      const CompressedCertificate& cc) override {
+    FIZZ_THROW_TO_ERROR(ret, _decompress(cc));
+  }
   void setDefaults() {
     ON_CALL(*this, getAlgorithm()).WillByDefault(InvokeWithoutArgs([]() {
       return CertificateCompressionAlgorithm::zlib;

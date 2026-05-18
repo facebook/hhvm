@@ -17,16 +17,18 @@ CertificateCompressionAlgorithm ZlibCertificateDecompressor::getAlgorithm()
   return CertificateCompressionAlgorithm::zlib;
 }
 
-CertificateMsg ZlibCertificateDecompressor::decompress(
+Status ZlibCertificateDecompressor::decompress(
+    CertificateMsg& ret,
+    Error& err,
     const CompressedCertificate& cc) {
   if (cc.algorithm != getAlgorithm()) {
-    throw std::runtime_error(
+    return err.error(
         "Compressed certificate uses non-zlib algorithm: " +
         toString(cc.algorithm));
   }
 
   if (cc.uncompressed_length > kMaxHandshakeSize) {
-    throw std::runtime_error(
+    return err.error(
         "Compressed certificate exceeds maximum certificate message size");
   }
 
@@ -41,27 +43,24 @@ CertificateMsg ZlibCertificateDecompressor::decompress(
   switch (status) {
     case Z_OK:
       if (size != cc.uncompressed_length) {
-        throw std::runtime_error("Uncompressed length incorrect");
+        return err.error("Uncompressed length incorrect");
       }
       break;
     case Z_MEM_ERROR:
-      throw std::runtime_error("Insufficient memory to decompress cert");
+      return err.error("Insufficient memory to decompress cert");
     case Z_BUF_ERROR:
-      throw std::runtime_error(
+      return err.error(
           "The uncompressed length given is too small to hold uncompressed data");
     case Z_DATA_ERROR:
-      throw std::runtime_error(
+      return err.error(
           "The compressed certificate data was incomplete or invalid");
     default:
-      throw std::runtime_error(
-          "Failed to decompress: " + to<std::string>(status));
+      return err.error("Failed to decompress: " + to<std::string>(status));
   }
   rawCertMessage->append(size);
-  CertificateMsg msg;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      decode<CertificateMsg>(msg, err, std::move(rawCertMessage)), err);
-  return msg;
+  FIZZ_RETURN_ON_ERROR(
+      decode<CertificateMsg>(ret, err, std::move(rawCertMessage)));
+  return Status::Success;
 }
 
 } // namespace fizz

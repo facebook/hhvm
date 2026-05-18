@@ -2382,7 +2382,12 @@ Status EventHandler<
 
   CertificateMsg msg;
   try {
-    msg = decompressor->decompress(compCert);
+    if (decompressor->decompress(msg, ctx.err, compCert) == Status::Fail) {
+      return ctx.err.error(
+          folly::to<std::string>(
+              "certificate decompression failed: ", ctx.err.msg()),
+          AlertDescription::bad_certificate);
+    }
   } catch (const std::exception& e) {
     return ctx.err.error(
         folly::to<std::string>("certificate decompression failed: ", e.what()),

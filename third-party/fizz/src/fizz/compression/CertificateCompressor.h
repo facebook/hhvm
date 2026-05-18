@@ -35,9 +35,10 @@ class CertificateDecompressor {
   virtual CertificateCompressionAlgorithm getAlgorithm() const = 0;
 
   /*
-   * Decompress a given compressed certificate message. Throws an exception
-   * if decompression fails or if it fails parse the CertificateMessage.
+   * Decompress a given compressed certificate message. Returns Status::Fail
+   * on error.
    */
-  virtual CertificateMsg decompress(const CompressedCertificate&) = 0;
+  virtual Status
+  decompress(CertificateMsg& ret, Error& err, const CompressedCertificate&) = 0;
 };
 } // namespace fizz

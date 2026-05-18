@@ -105,7 +105,10 @@ TEST_F(BrotliCertificateCompressorTest, TestCompressDecompress) {
   EXPECT_EQ(
       compressedCertMsg.algorithm, CertificateCompressionAlgorithm::brotli);
 
-  auto decompressedCertMsg = decompressor_->decompress(compressedCertMsg);
+  CertificateMsg decompressedCertMsg;
+  EXPECT_EQ(
+      decompressor_->decompress(decompressedCertMsg, err, compressedCertMsg),
+      Status::Success);
   EXPECT_TRUE(decompressedCertMsg.certificate_request_context->empty());
   EXPECT_EQ(decompressedCertMsg.certificate_list.size(), 1);
   auto& certEntry = decompressedCertMsg.certificate_list.at(0);
@@ -127,10 +130,12 @@ TEST_F(BrotliCertificateCompressorTest, TestCompressDecompress) {
 }
 
 TEST_F(BrotliCertificateCompressorTest, TestHugeCompressedCert) {
+  Error err;
   auto cc = decodeHex<CompressedCertificate>(tooLargeCompressedCertificate);
 
   try {
-    decompressor_->decompress(cc);
+    CertificateMsg ret;
+    FIZZ_THROW_ON_ERROR(decompressor_->decompress(ret, err, cc), err);
     FAIL() << "Decompressor decompressed excessively large cert";
   } catch (const std::exception& e) {
     EXPECT_THAT(
@@ -141,7 +146,8 @@ TEST_F(BrotliCertificateCompressorTest, TestHugeCompressedCert) {
   cc.uncompressed_length = 64;
 
   try {
-    decompressor_->decompress(cc);
+    CertificateMsg ret;
+    FIZZ_THROW_ON_ERROR(decompressor_->decompress(ret, err, cc), err);
     FAIL() << "Decompressor decompressed cert erroneously";
   } catch (const std::exception& e) {
     EXPECT_THAT(e.what(), HasSubstr("Decompressing certificate failed"));
@@ -149,13 +155,16 @@ TEST_F(BrotliCertificateCompressorTest, TestHugeCompressedCert) {
 }
 
 TEST_F(BrotliCertificateCompressorTest, TestCompressedLengthTooBig) {
+  Error err;
   auto compressedCert =
       decodeHex<CompressedCertificate>(exampleCompressedCertificate);
 
   // Lie about having a larger cert.
   compressedCert.uncompressed_length += 1;
   try {
-    decompressor_->decompress(compressedCert);
+    CertificateMsg ret;
+    FIZZ_THROW_ON_ERROR(
+        decompressor_->decompress(ret, err, compressedCert), err);
     FAIL() << "Decompressor decompressed cert erroneously";
   } catch (const std::exception& e) {
     EXPECT_THAT(e.what(), HasSubstr("Uncompressed length incorrect"));
@@ -163,13 +172,16 @@ TEST_F(BrotliCertificateCompressorTest, TestCompressedLengthTooBig) {
 }
 
 TEST_F(BrotliCertificateCompressorTest, TestCompressedCertTruncated) {
+  Error err;
   auto compressedCert =
       decodeHex<CompressedCertificate>(exampleCompressedCertificate);
 
   // Truncate length
   compressedCert.uncompressed_length -= 1;
   try {
-    decompressor_->decompress(compressedCert);
+    CertificateMsg ret;
+    FIZZ_THROW_ON_ERROR(
+        decompressor_->decompress(ret, err, compressedCert), err);
     FAIL() << "Decompressor decompressed cert erroneously";
   } catch (const std::exception& e) {
     EXPECT_THAT(e.what(), HasSubstr("Decompressing certificate failed"));
@@ -177,12 +189,15 @@ TEST_F(BrotliCertificateCompressorTest, TestCompressedCertTruncated) {
 }
 
 TEST_F(BrotliCertificateCompressorTest, TestCompressedCertEmpty) {
+  Error err;
   CompressedCertificate compressedCert;
   compressedCert.uncompressed_length = 0;
   compressedCert.algorithm = CertificateCompressionAlgorithm::brotli;
   compressedCert.compressed_certificate_message = IOBuf::create(0);
   try {
-    decompressor_->decompress(compressedCert);
+    CertificateMsg ret;
+    FIZZ_THROW_ON_ERROR(
+        decompressor_->decompress(ret, err, compressedCert), err);
     FAIL() << "Decompressor decompressed cert erroneously";
   } catch (const std::exception& e) {
     EXPECT_THAT(e.what(), HasSubstr("Decompressing certificate failed"));
@@ -190,6 +205,7 @@ TEST_F(BrotliCertificateCompressorTest, TestCompressedCertEmpty) {
 }
 
 TEST_F(BrotliCertificateCompressorTest, TestCompressedCertBadAlgo) {
+  Error err;
   auto compressedCert =
       decodeHex<CompressedCertificate>(exampleCompressedCertificate);
 
@@ -197,7 +213,9 @@ TEST_F(BrotliCertificateCompressorTest, TestCompressedCertBadAlgo) {
   compressedCert.algorithm =
       static_cast<CertificateCompressionAlgorithm>(0xdead);
   try {
-    decompressor_->decompress(compressedCert);
+    CertificateMsg ret;
+    FIZZ_THROW_ON_ERROR(
+        decompressor_->decompress(ret, err, compressedCert), err);
     FAIL() << "Decompressor decompressed cert erroneously";
   } catch (const std::exception& e) {
     EXPECT_THAT(e.what(), HasSubstr("non-brotli algorithm"));

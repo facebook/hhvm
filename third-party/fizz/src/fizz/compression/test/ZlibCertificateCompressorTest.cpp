@@ -246,7 +246,10 @@ TEST_F(ZlibCertificateCompressorTest, TestCompressDecompress) {
       compressor_->compress(compressedCertMsg, err, certMsg), Status::Success);
   EXPECT_EQ(compressedCertMsg.algorithm, CertificateCompressionAlgorithm::zlib);
 
-  auto decompressedCertMsg = decompressor_->decompress(compressedCertMsg);
+  CertificateMsg decompressedCertMsg;
+  EXPECT_EQ(
+      decompressor_->decompress(decompressedCertMsg, err, compressedCertMsg),
+      Status::Success);
   EXPECT_TRUE(decompressedCertMsg.certificate_request_context->empty());
   EXPECT_EQ(decompressedCertMsg.certificate_list.size(), 1);
   auto& certEntry = decompressedCertMsg.certificate_list.at(0);
@@ -268,10 +271,12 @@ TEST_F(ZlibCertificateCompressorTest, TestCompressDecompress) {
 }
 
 TEST_F(ZlibCertificateCompressorTest, TestHugeCompressedCert) {
+  Error err;
   auto cc = decodeHex<CompressedCertificate>(tooLargeCompressedCertificate);
 
   try {
-    decompressor_->decompress(cc);
+    CertificateMsg ret;
+    FIZZ_THROW_ON_ERROR(decompressor_->decompress(ret, err, cc), err);
     FAIL() << "Decompressor decompressed excessively large cert";
   } catch (const std::exception& e) {
     EXPECT_THAT(
@@ -282,7 +287,8 @@ TEST_F(ZlibCertificateCompressorTest, TestHugeCompressedCert) {
   cc.uncompressed_length = 64;
 
   try {
-    decompressor_->decompress(cc);
+    CertificateMsg ret;
+    FIZZ_THROW_ON_ERROR(decompressor_->decompress(ret, err, cc), err);
     FAIL() << "Decompressor decompressed cert erroneously";
   } catch (const std::exception& e) {
     EXPECT_THAT(e.what(), HasSubstr("uncompressed length given is too small"));
@@ -290,6 +296,7 @@ TEST_F(ZlibCertificateCompressorTest, TestHugeCompressedCert) {
 }
 
 TEST_F(ZlibCertificateCompressorTest, TestBadMessages) {
+  Error err;
   auto compressedCert =
       decodeHex<CompressedCertificate>(exampleCompressedCertificate);
   auto actual = compressedCert.uncompressed_length;
@@ -297,7 +304,9 @@ TEST_F(ZlibCertificateCompressorTest, TestBadMessages) {
   // Lie about having a larger cert.
   compressedCert.uncompressed_length = actual + 1;
   try {
-    decompressor_->decompress(compressedCert);
+    CertificateMsg ret;
+    FIZZ_THROW_ON_ERROR(
+        decompressor_->decompress(ret, err, compressedCert), err);
     FAIL() << "Decompressor decompressed cert erroneously";
   } catch (const std::exception& e) {
     EXPECT_THAT(e.what(), HasSubstr("Uncompressed length incorrect"));
@@ -306,7 +315,9 @@ TEST_F(ZlibCertificateCompressorTest, TestBadMessages) {
   // Truncate length
   compressedCert.uncompressed_length = actual - 1;
   try {
-    decompressor_->decompress(compressedCert);
+    CertificateMsg ret;
+    FIZZ_THROW_ON_ERROR(
+        decompressor_->decompress(ret, err, compressedCert), err);
     FAIL() << "Decompressor decompressed cert erroneously";
   } catch (const std::exception& e) {
     EXPECT_THAT(e.what(), HasSubstr("uncompressed length given is too small"));
@@ -316,7 +327,9 @@ TEST_F(ZlibCertificateCompressorTest, TestBadMessages) {
   compressedCert.uncompressed_length = actual;
   compressedCert.algorithm = (CertificateCompressionAlgorithm)0xdead;
   try {
-    decompressor_->decompress(compressedCert);
+    CertificateMsg ret;
+    FIZZ_THROW_ON_ERROR(
+        decompressor_->decompress(ret, err, compressedCert), err);
     FAIL() << "Decompressor decompressed cert erroneously";
   } catch (const std::exception& e) {
     EXPECT_THAT(e.what(), HasSubstr("non-zlib algorithm"));

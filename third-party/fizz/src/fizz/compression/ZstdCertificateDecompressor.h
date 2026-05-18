@@ -17,6 +17,9 @@ class ZstdCertificateDecompressor : public CertificateDecompressor {
 
   CertificateCompressionAlgorithm getAlgorithm() const override;
 
-  CertificateMsg decompress(const CompressedCertificate&) override;
+  Status decompress(
+      CertificateMsg& ret,
+      Error& err,
+      const CompressedCertificate&) override;
 };
 } // namespace fizz

@@ -147,8 +147,7 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
       if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        folly::Try<void> interceptorTry = co_await std::move(*task);
-        interceptorTry.throwUnlessValue();
+        (co_await std::move(*task)).throwUnlessValue();
       } else {
         std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
       }
@@ -390,8 +389,7 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
       if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        folly::Try<void> interceptorTry = co_await std::move(*task);
-        interceptorTry.throwUnlessValue();
+        (co_await std::move(*task)).throwUnlessValue();
       } else {
         std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
       }
@@ -511,8 +509,7 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
       if (auto* task = std::get_if<folly::coro::Task<folly::Try<void>>>(&interceptorResult)) {
-        folly::Try<void> interceptorTry = co_await std::move(*task);
-        interceptorTry.throwUnlessValue();
+        (co_await std::move(*task)).throwUnlessValue();
       } else {
         std::get<folly::Try<void>>(interceptorResult).throwUnlessValue();
       }

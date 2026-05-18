@@ -56,6 +56,10 @@ folly::Try<apache::thrift::RpcResponseComplete<hellogoodbye::GoodbyeReply>> send
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kClientIdentifierHeader}, request.getClientIdentifier().value());
   }
+  if (FOLLY_UNLIKELY(request.getPrivacyLibAgenticContext().has_value())) {
+    rpcOptions.setWriteHeader(
+        std::string{carbon::MessageCommon::kPrivacyLibAgenticContextHeader}, request.getPrivacyLibAgenticContext().value());
+  }
   rpcOptions.setContextPropMask(0);
 
 #ifndef LIBMC_FBTRACE_DISABLE
@@ -95,6 +99,10 @@ folly::Try<apache::thrift::RpcResponseComplete<hellogoodbye::HelloReply>> sendSy
   if (FOLLY_UNLIKELY(request.getClientIdentifier().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kClientIdentifierHeader}, request.getClientIdentifier().value());
+  }
+  if (FOLLY_UNLIKELY(request.getPrivacyLibAgenticContext().has_value())) {
+    rpcOptions.setWriteHeader(
+        std::string{carbon::MessageCommon::kPrivacyLibAgenticContextHeader}, request.getPrivacyLibAgenticContext().value());
   }
   rpcOptions.setContextPropMask(0);
 
@@ -138,6 +146,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McVersionReply>> sendSyncHelper(
   if (FOLLY_UNLIKELY(request.getClientIdentifier().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kClientIdentifierHeader}, request.getClientIdentifier().value());
+  }
+  if (FOLLY_UNLIKELY(request.getPrivacyLibAgenticContext().has_value())) {
+    rpcOptions.setWriteHeader(
+        std::string{carbon::MessageCommon::kPrivacyLibAgenticContextHeader}, request.getPrivacyLibAgenticContext().value());
   }
   rpcOptions.setContextPropMask(0);
 

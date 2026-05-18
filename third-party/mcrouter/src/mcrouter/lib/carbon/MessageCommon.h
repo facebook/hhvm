@@ -40,6 +40,8 @@ class MessageCommon {
   static constexpr std::string_view kClientIdentifierHeader =
       "client_identifier";
 
+  static constexpr std::string_view kKcbIdentityHeader = "kcb_identity";
+
  protected:
   std::string traceContext_;
 };

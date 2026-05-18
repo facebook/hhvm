@@ -187,7 +187,11 @@ class ZlibCertificateCompressorTest : public testing::Test {
  public:
   void SetUp() override {
     OpenSSL_add_all_algorithms();
-    compressor_ = std::make_unique<ZlibCertificateCompressor>(9);
+    std::unique_ptr<ZlibCertificateCompressor> compressor;
+    Error err;
+    EXPECT_EQ(
+        ZlibCertificateCompressor::create(compressor, err, 9), Status::Success);
+    compressor_ = std::move(compressor);
     decompressor_ = std::make_unique<ZlibCertificateDecompressor>();
   }
 
@@ -237,7 +241,9 @@ TEST_F(ZlibCertificateCompressorTest, TestCompressDecompress) {
   EXPECT_EQ(encodeExtension(ext, err, auth), Status::Success);
   certMsg.certificate_list[0].extensions.push_back(std::move(ext));
 
-  auto compressedCertMsg = compressor_->compress(certMsg);
+  CompressedCertificate compressedCertMsg;
+  EXPECT_EQ(
+      compressor_->compress(compressedCertMsg, err, certMsg), Status::Success);
   EXPECT_EQ(compressedCertMsg.algorithm, CertificateCompressionAlgorithm::zlib);
 
   auto decompressedCertMsg = decompressor_->decompress(compressedCertMsg);

@@ -21,11 +21,12 @@ CertificateCompressionAlgorithm ZstdCertificateCompressor::getAlgorithm()
   return CertificateCompressionAlgorithm::zstd;
 }
 
-CompressedCertificate ZstdCertificateCompressor::compress(
+Status ZstdCertificateCompressor::compress(
+    CompressedCertificate& ret,
+    Error& err,
     const CertificateMsg& cert) {
   Buf encoded;
-  Error err;
-  FIZZ_THROW_ON_ERROR(encode(encoded, err, cert), err);
+  FIZZ_RETURN_ON_ERROR(encode(encoded, err, cert));
   auto certRange = encoded->coalesce();
   auto compressedCert = IOBuf::create(ZSTD_compressBound(certRange.size()));
 
@@ -39,17 +40,16 @@ CompressedCertificate ZstdCertificateCompressor::compress(
   if (ZSTD_isError(status)) {
     std::string errorMsg("Failed to compress cert with zstd: ");
     errorMsg += ZSTD_getErrorName(status);
-    throw std::runtime_error(std::move(errorMsg));
+    return err.error(std::move(errorMsg));
   }
 
   // with successful compression, status holds compressed size
   compressedCert->append(status);
 
-  CompressedCertificate cc;
-  cc.uncompressed_length = certRange.size();
-  cc.algorithm = getAlgorithm();
-  cc.compressed_certificate_message = std::move(compressedCert);
-  return cc;
+  ret.uncompressed_length = certRange.size();
+  ret.algorithm = getAlgorithm();
+  ret.compressed_certificate_message = std::move(compressedCert);
+  return Status::Success;
 }
 
 } // namespace fizz

@@ -51,7 +51,8 @@ template <KeyType T>
     CertificateMsg certMsg;
     FIZZ_RETURN_ON_ERROR(
         CertUtils::getCertMessage(certMsg, err, certs, nullptr));
-    compressedCerts[compressor->getAlgorithm()] = compressor->compress(certMsg);
+    FIZZ_RETURN_ON_ERROR(compressor->compress(
+        compressedCerts[compressor->getAlgorithm()], err, certMsg));
   }
   OpenSSLSignature<T> signature;
   FIZZ_RETURN_ON_ERROR(signature.setKey(err, std::move(pkey)));

@@ -20,10 +20,10 @@ class CertificateCompressor {
   virtual CertificateCompressionAlgorithm getAlgorithm() const = 0;
 
   /*
-   * Compress a given certificate message. Throws an exception if the
-   * compression fails.
+   * Compress a given certificate message. Returns Status::Fail on error.
    */
-  virtual CompressedCertificate compress(const CertificateMsg&) = 0;
+  virtual Status
+  compress(CompressedCertificate& ret, Error& err, const CertificateMsg&) = 0;
 };
 
 class CertificateDecompressor {

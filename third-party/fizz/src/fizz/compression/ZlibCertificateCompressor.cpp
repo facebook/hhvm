@@ -13,14 +13,22 @@ using namespace folly;
 namespace fizz {
 
 ZlibCertificateCompressor::ZlibCertificateCompressor(int compressLevel)
-    : level_(compressLevel) {
+    : level_(compressLevel) {}
+
+Status ZlibCertificateCompressor::create(
+    std::unique_ptr<ZlibCertificateCompressor>& ret,
+    Error& err,
+    int compressLevel) {
   if (compressLevel != Z_DEFAULT_COMPRESSION &&
       !(compressLevel >= Z_NO_COMPRESSION &&
         compressLevel <= Z_BEST_COMPRESSION)) {
-    throw std::runtime_error(
+    return err.error(
         "Invalid compression level requested:" +
         to<std::string>(compressLevel));
   }
+  ret = std::unique_ptr<ZlibCertificateCompressor>(
+      new ZlibCertificateCompressor(compressLevel));
+  return Status::Success;
 }
 
 CertificateCompressionAlgorithm ZlibCertificateCompressor::getAlgorithm()
@@ -28,11 +36,12 @@ CertificateCompressionAlgorithm ZlibCertificateCompressor::getAlgorithm()
   return CertificateCompressionAlgorithm::zlib;
 }
 
-CompressedCertificate ZlibCertificateCompressor::compress(
+Status ZlibCertificateCompressor::compress(
+    CompressedCertificate& ret,
+    Error& err,
     const CertificateMsg& cert) {
   Buf encoded;
-  Error err;
-  FIZZ_THROW_ON_ERROR(encode(encoded, err, cert), err);
+  FIZZ_RETURN_ON_ERROR(encode(encoded, err, cert));
   auto certRange = encoded->coalesce();
   auto compressedCert = IOBuf::create(compressBound(certRange.size()));
   unsigned long size = compressedCert->capacity();
@@ -48,22 +57,19 @@ CompressedCertificate ZlibCertificateCompressor::compress(
       compressedCert->append(size);
       break;
     case Z_MEM_ERROR:
-      throw std::runtime_error("Insufficient memory to compress cert");
+      return err.error("Insufficient memory to compress cert");
     case Z_BUF_ERROR:
-      throw std::runtime_error("Buffer too small for compressed cert");
+      return err.error("Buffer too small for compressed cert");
     case Z_STREAM_ERROR:
-      throw std::runtime_error(
-          "Compression level invalid: " + to<std::string>(level_));
+      return err.error("Compression level invalid: " + to<std::string>(level_));
     default:
-      throw std::runtime_error(
-          "Failed to compress: " + to<std::string>(status));
+      return err.error("Failed to compress: " + to<std::string>(status));
   }
 
-  CompressedCertificate cc;
-  cc.uncompressed_length = certRange.size();
-  cc.algorithm = getAlgorithm();
-  cc.compressed_certificate_message = std::move(compressedCert);
-  return cc;
+  ret.uncompressed_length = certRange.size();
+  ret.algorithm = getAlgorithm();
+  ret.compressed_certificate_message = std::move(compressedCert);
+  return Status::Success;
 }
 
 } // namespace fizz

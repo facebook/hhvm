@@ -99,7 +99,9 @@ TEST_F(BrotliCertificateCompressorTest, TestCompressDecompress) {
   EXPECT_EQ(encodeExtension(ext, err, auth), Status::Success);
   certMsg.certificate_list[0].extensions.push_back(std::move(ext));
 
-  auto compressedCertMsg = compressor_->compress(certMsg);
+  CompressedCertificate compressedCertMsg;
+  EXPECT_EQ(
+      compressor_->compress(compressedCertMsg, err, certMsg), Status::Success);
   EXPECT_EQ(
       compressedCertMsg.algorithm, CertificateCompressionAlgorithm::brotli);
 

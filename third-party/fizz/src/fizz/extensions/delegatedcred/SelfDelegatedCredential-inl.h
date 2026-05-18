@@ -90,7 +90,8 @@ template <openssl::KeyType T>
     Extension ext;
     FIZZ_RETURN_ON_ERROR(encodeExtension(ext, err, credential));
     certMsg.certificate_list.at(0).extensions.push_back(std::move(ext));
-    compressedCerts[compressor->getAlgorithm()] = compressor->compress(certMsg);
+    FIZZ_RETURN_ON_ERROR(compressor->compress(
+        compressedCerts[compressor->getAlgorithm()], err, certMsg));
   }
 
   ret = std::unique_ptr<SelfDelegatedCredentialImpl<T>>(

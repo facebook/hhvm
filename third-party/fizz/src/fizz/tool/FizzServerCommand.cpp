@@ -840,10 +840,15 @@ int fizzServerCommand(const std::vector<std::string>& args) {
   if (compAlgos) {
     for (const auto& algo : *compAlgos) {
       switch (algo) {
-        case CertificateCompressionAlgorithm::zlib:
-          compressors.push_back(std::make_shared<ZlibCertificateCompressor>(9));
+        case CertificateCompressionAlgorithm::zlib: {
+          std::unique_ptr<ZlibCertificateCompressor> zlibCompressor;
+          Error err;
+          FIZZ_THROW_ON_ERROR(
+              ZlibCertificateCompressor::create(zlibCompressor, err, 9), err);
+          compressors.push_back(std::move(zlibCompressor));
           finalAlgos.push_back(algo);
           break;
+        }
 #ifdef FIZZ_TOOL_ENABLE_BROTLI
         case CertificateCompressionAlgorithm::brotli:
           compressors.push_back(

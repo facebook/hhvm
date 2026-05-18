@@ -92,10 +92,9 @@ class AsyncSelfCertWrapper : public AsyncSelfCert {
       CertificateVerifyContext context,
       std::unique_ptr<folly::IOBuf> toBeSigned) const override {
     Buf sig;
-    Error signErr;
+    Error err;
     FIZZ_THROW_ON_ERROR(
-        cert_->sign(sig, signErr, scheme, context, toBeSigned->coalesce()),
-        signErr);
+        cert_->sign(sig, err, scheme, context, toBeSigned->coalesce()), err);
     return folly::makeSemiFuture<folly::Optional<Buf>>(std::move(sig));
   }
 
@@ -141,9 +140,12 @@ class HandshakeTest : public Test {
         {NamedGroup::x25519, NamedGroup::secp256r1});
     clientContext_->setDefaultShares({NamedGroup::x25519});
     auto certManager = std::make_shared<server::DefaultCertManager>();
+    std::unique_ptr<ZlibCertificateCompressor> zlibCompressor;
+    ASSERT_EQ(
+        ZlibCertificateCompressor::create(zlibCompressor, err, 9),
+        Status::Success);
     std::vector<std::shared_ptr<CertificateCompressor>> compressors = {
-        std::make_shared<ZlibCertificateCompressor>(9)};
-    Error certErr;
+        std::move(zlibCompressor)};
 
     std::vector<ssl::X509UniquePtr> rsaCerts;
     rsaCerts.emplace_back(getCert(kRSACertificate));
@@ -152,7 +154,7 @@ class HandshakeTest : public Test {
     ASSERT_EQ(
         openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>::create(
             rsaCert,
-            certErr,
+            err,
             getPrivateKey(kRSAKey),
             std::move(rsaCerts),
             compressors),
@@ -171,7 +173,7 @@ class HandshakeTest : public Test {
     ASSERT_EQ(
         openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
             p256Cert,
-            certErr,
+            err,
             getPrivateKey(kP256Key),
             std::move(p256Certs),
             compressors),
@@ -183,7 +185,7 @@ class HandshakeTest : public Test {
     ASSERT_EQ(
         openssl::OpenSSLSelfCertImpl<openssl::KeyType::P384>::create(
             p384Cert,
-            certErr,
+            err,
             getPrivateKey(kP384Key),
             std::move(p384Certs),
             compressors),
@@ -195,7 +197,7 @@ class HandshakeTest : public Test {
     ASSERT_EQ(
         openssl::OpenSSLSelfCertImpl<openssl::KeyType::P521>::create(
             p521Cert,
-            certErr,
+            err,
             getPrivateKey(kP521Key),
             std::move(p521Certs),
             compressors),

@@ -28,11 +28,15 @@ CertificateCompressionAlgorithm BrotliCertificateCompressor::getAlgorithm()
 
 namespace {
 namespace brotli1 {
-std::unique_ptr<IOBuf>
-brotliCompressImpl(int level, int windowSize, folly::ByteRange input) {
+Status brotliCompressImpl(
+    std::unique_ptr<IOBuf>& ret,
+    Error& err,
+    int level,
+    int windowSize,
+    folly::ByteRange input) {
   size_t upperBound = ::BrotliEncoderMaxCompressedSize(input.size());
   if (upperBound == 0) {
-    throw std::runtime_error(
+    return err.error(
         "Failed to compress certificate: could not calculate upper bound");
   }
 
@@ -46,31 +50,34 @@ brotliCompressImpl(int level, int windowSize, folly::ByteRange input) {
           input.data(),
           &size,
           compressed->writableTail())) {
-    throw std::runtime_error("Failed to compress certificate");
+    return err.error("Failed to compress certificate");
   }
 
   // |size|, if the BrotliEncoderCompress call succeeds, is modified to contain
   // the compressed size.
   compressed->append(size);
-  return compressed;
+  ret = std::move(compressed);
+  return Status::Success;
 }
 } // namespace brotli1
 using brotli1::brotliCompressImpl;
 } // namespace
 
-CompressedCertificate BrotliCertificateCompressor::compress(
+Status BrotliCertificateCompressor::compress(
+    CompressedCertificate& ret,
+    Error& err,
     const CertificateMsg& cert) {
   Buf encoded;
-  Error err;
-  FIZZ_THROW_ON_ERROR(encode(encoded, err, cert), err);
+  FIZZ_RETURN_ON_ERROR(encode(encoded, err, cert));
   auto encodedRange = encoded->coalesce();
-  auto compressedCert = brotliCompressImpl(level_, windowSize_, encodedRange);
+  std::unique_ptr<IOBuf> compressedCert;
+  FIZZ_RETURN_ON_ERROR(brotliCompressImpl(
+      compressedCert, err, level_, windowSize_, encodedRange));
 
-  CompressedCertificate cc;
-  cc.uncompressed_length = encodedRange.size();
-  cc.algorithm = getAlgorithm();
-  cc.compressed_certificate_message = std::move(compressedCert);
-  return cc;
+  ret.uncompressed_length = encodedRange.size();
+  ret.algorithm = getAlgorithm();
+  ret.compressed_certificate_message = std::move(compressedCert);
+  return Status::Success;
 }
 
 } // namespace fizz

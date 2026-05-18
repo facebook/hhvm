@@ -19,7 +19,14 @@ using namespace testing;
 class MockCertificateCompressor : public CertificateCompressor {
  public:
   MOCK_METHOD(CertificateCompressionAlgorithm, getAlgorithm, (), (const));
-  MOCK_METHOD(CompressedCertificate, compress, (const CertificateMsg&));
+  MOCK_METHOD(CompressedCertificate, _compress, (const CertificateMsg&));
+  Status compress(
+      CompressedCertificate& ret,
+      Error& err,
+      const CertificateMsg& cert) override {
+    ret = _compress(cert);
+    return Status::Success;
+  }
   void setDefaults() {
     ON_CALL(*this, getAlgorithm()).WillByDefault(InvokeWithoutArgs([]() {
       return CertificateCompressionAlgorithm::zlib;

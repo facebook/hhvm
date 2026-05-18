@@ -18,7 +18,8 @@ class ZstdCertificateCompressor : public CertificateCompressor {
 
   CertificateCompressionAlgorithm getAlgorithm() const override;
 
-  CompressedCertificate compress(const CertificateMsg&) override;
+  Status compress(CompressedCertificate& ret, Error& err, const CertificateMsg&)
+      override;
 
  private:
   const int level_;

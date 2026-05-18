@@ -584,8 +584,12 @@ std::shared_ptr<ech::Decrypter> setupDecrypterFromInputs(
   folly::ByteRange privKeyBuf(folly::trimWhitespace(privKeyStrHex));
 
   // Create a key exchange and set the private key
-  auto kexWithPrivateKey =
-      fizz::FizzUtil::createKeyExchangeFromBuf(kemId, privKeyBuf);
+  std::unique_ptr<KeyExchange> kexWithPrivateKey;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizz::FizzUtil::createKeyExchangeFromBuf(
+          kexWithPrivateKey, err, kemId, privKeyBuf),
+      err);
   if (!kexWithPrivateKey) {
     FIZZ_LOG(ERROR)
         << "Unable to create a key exchange and set a private key for it.";

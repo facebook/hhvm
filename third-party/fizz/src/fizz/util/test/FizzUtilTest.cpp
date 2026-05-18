@@ -112,36 +112,61 @@ TEST(UtilTest, CreateTokenCipher) {
 }
 
 TEST(UtilTest, ReadPKey) {
+  Error err;
   {
     folly::test::TemporaryFile testFile("test");
     folly::writeFileAtomic(testFile.path().string(), kP256Key);
-    FizzUtil::readPrivateKey(testFile.path().string(), "");
+    folly::ssl::EvpPkeyUniquePtr pkey;
+    EXPECT_EQ(
+        FizzUtil::readPrivateKey(pkey, err, testFile.path().string(), ""),
+        Status::Success);
   }
   {
     folly::test::TemporaryFile testFile("test");
     folly::writeFileAtomic(
         testFile.path().string(), folly::StringPiece("test"));
     EXPECT_THROW(
-        FizzUtil::readPrivateKey(testFile.path().string(), ""),
+        {
+          folly::ssl::EvpPkeyUniquePtr pkey;
+          FIZZ_THROW_ON_ERROR(
+              FizzUtil::readPrivateKey(pkey, err, testFile.path().string(), ""),
+              err);
+        },
         std::runtime_error);
   }
 }
 
 TEST(UtilTest, ReadChainFile) {
+  Error err;
   {
     folly::test::TemporaryFile testFile("test");
     folly::writeFileAtomic(testFile.path().string(), kP256Certificate);
-    EXPECT_EQ(FizzUtil::readChainFile(testFile.path().string()).size(), 1);
+    std::vector<folly::ssl::X509UniquePtr> certs;
+    EXPECT_EQ(
+        FizzUtil::readChainFile(certs, err, testFile.path().string()),
+        Status::Success);
+    EXPECT_EQ(certs.size(), 1);
   }
   {
     folly::test::TemporaryFile testFile("test");
     folly::writeFileAtomic(testFile.path().string(), kP384Key);
     EXPECT_THROW(
-        FizzUtil::readChainFile(testFile.path().string()), std::runtime_error);
+        {
+          std::vector<folly::ssl::X509UniquePtr> certs;
+          FIZZ_THROW_ON_ERROR(
+              FizzUtil::readChainFile(certs, err, testFile.path().string()),
+              err);
+        },
+        std::runtime_error);
   }
   {
     EXPECT_THROW(
-        FizzUtil::readChainFile("test_file_does_not_exist"),
+        {
+          std::vector<folly::ssl::X509UniquePtr> certs;
+          FIZZ_THROW_ON_ERROR(
+              FizzUtil::readChainFile(certs, err, "test_file_does_not_exist"),
+              err);
+        },
         std::runtime_error);
   }
 }
@@ -150,11 +175,15 @@ TEST(UtilTest, createKeyExchangeFromBuf) {
   Error err;
   {
     // Test X25519 KEM
-    auto keys = FizzUtil::generateKeypairCurve25519();
+    std::tuple<std::string, std::string> keys;
+    EXPECT_EQ(FizzUtil::generateKeypairCurve25519(keys, err), Status::Success);
     auto privKey = std::get<0>(keys);
     folly::ByteRange privKeyBuf((folly::StringPiece(privKey)));
-    auto kex =
-        FizzUtil::createKeyExchangeFromBuf(hpke::KEMId::x25519, privKeyBuf);
+    std::unique_ptr<KeyExchange> kex;
+    EXPECT_EQ(
+        FizzUtil::createKeyExchangeFromBuf(
+            kex, err, hpke::KEMId::x25519, privKeyBuf),
+        Status::Success);
     EXPECT_TRUE(kex != nullptr);
     std::unique_ptr<folly::IOBuf> keyShare;
     EXPECT_EQ(kex->getKeyShare(keyShare, err), Status::Success);
@@ -164,8 +193,11 @@ TEST(UtilTest, createKeyExchangeFromBuf) {
   {
     // Test openssl::P256 KEM
     folly::ByteRange privKeyBuf((folly::StringPiece(kP256Key)));
-    auto kex =
-        FizzUtil::createKeyExchangeFromBuf(hpke::KEMId::secp256r1, privKeyBuf);
+    std::unique_ptr<KeyExchange> kex;
+    EXPECT_EQ(
+        FizzUtil::createKeyExchangeFromBuf(
+            kex, err, hpke::KEMId::secp256r1, privKeyBuf),
+        Status::Success);
     EXPECT_TRUE(kex != nullptr);
     std::unique_ptr<folly::IOBuf> keyShare;
     EXPECT_EQ(kex->getKeyShare(keyShare, err), Status::Success);

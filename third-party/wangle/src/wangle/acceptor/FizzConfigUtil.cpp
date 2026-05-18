@@ -48,7 +48,9 @@ bool FizzConfigUtil::addCertsToManager(
                   selfCert, err, cert.certPath, cert.keyPath),
               err);
         } else {
-          auto x509Chain = FizzUtil::readChainFile(cert.certPath);
+          std::vector<folly::ssl::X509UniquePtr> x509Chain;
+          FIZZ_THROW_ON_ERROR(
+              FizzUtil::readChainFile(x509Chain, err, cert.certPath), err);
           std::shared_ptr<folly::PasswordInFile> pw;
           if (pwFactory) {
             pw = pwFactory->getPasswordCollector(cert.passwordPath);
@@ -56,7 +58,9 @@ bool FizzConfigUtil::addCertsToManager(
             pw = std::make_shared<folly::PasswordInFile>(cert.passwordPath);
           }
 
-          auto pkey = FizzUtil::readPrivateKey(cert.keyPath, pw);
+          folly::ssl::EvpPkeyUniquePtr pkey;
+          FIZZ_THROW_ON_ERROR(
+              FizzUtil::readPrivateKey(pkey, err, cert.keyPath, pw), err);
           FIZZ_THROW_ON_ERROR(
               CertUtils::makeSelfCert(
                   selfCert, err, std::move(x509Chain), std::move(pkey)),

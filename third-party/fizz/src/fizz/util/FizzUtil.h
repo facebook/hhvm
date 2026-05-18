@@ -24,18 +24,26 @@ namespace fizz {
 class FizzUtil {
  public:
   // Read a vector of certs from a file
-  static std::vector<folly::ssl::X509UniquePtr> readChainFile(
+  static Status readChainFile(
+      std::vector<folly::ssl::X509UniquePtr>& ret,
+      Error& err,
       const std::string& filename);
 
-  static folly::ssl::EvpPkeyUniquePtr readPrivateKeyFromBuf(
+  static Status readPrivateKeyFromBuf(
+      folly::ssl::EvpPkeyUniquePtr& ret,
+      Error& err,
       folly::ByteRange privateKey,
       const std::string& passwordFilename);
 
-  static folly::ssl::EvpPkeyUniquePtr readPrivateKey(
+  static Status readPrivateKey(
+      folly::ssl::EvpPkeyUniquePtr& ret,
+      Error& err,
       const std::string& filename,
       const std::shared_ptr<folly::PasswordInFile>& pf);
 
-  static folly::ssl::EvpPkeyUniquePtr readPrivateKey(
+  static Status readPrivateKey(
+      folly::ssl::EvpPkeyUniquePtr& ret,
+      Error& err,
       const std::string& filename,
       const std::string& passwordFilename);
 
@@ -45,11 +53,15 @@ class FizzUtil {
       const std::list<folly::SSLContext::NextProtocolsItem>& list);
 
   // TODO richardsonnick Fix callsites that use std::string version
-  static folly::ssl::EvpPkeyUniquePtr decryptPrivateKey(
+  static Status decryptPrivateKey(
+      folly::ssl::EvpPkeyUniquePtr& ret,
+      Error& err,
       const std::string& data,
       folly::PasswordInFile* pf);
 
-  static folly::ssl::EvpPkeyUniquePtr decryptPrivateKey(
+  static Status decryptPrivateKey(
+      folly::ssl::EvpPkeyUniquePtr& ret,
+      Error& err,
       folly::ByteRange data,
       folly::PasswordInFile* pf);
 
@@ -65,11 +77,15 @@ class FizzUtil {
    *
    */
 
-  static std::unique_ptr<KeyExchange> createKeyExchangeFromBuf(
+  static Status createKeyExchangeFromBuf(
+      std::unique_ptr<KeyExchange>& ret,
+      Error& err,
       hpke::KEMId kemId,
       folly::ByteRange privKey);
 
-  static std::tuple<std::string, std::string> generateKeypairCurve25519();
+  static Status generateKeypairCurve25519(
+      std::tuple<std::string, std::string>& ret,
+      Error& err);
 
   // Creates a TicketCipherT with given params
   template <class TicketCipherT>

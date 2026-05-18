@@ -124,8 +124,8 @@ class TestServiceHandler
     const auto& readHeaders = getRequestContext()->getHeader()->getHeaders();
     value = getRequestContext()->getHeader()->getHeaders().at(*key);
 
-    for (const auto& [header, value] : readHeaders) {
-      getRequestContext()->getHeader()->setHeader(header, value);
+    for (const auto& [header, headerValue] : readHeaders) {
+      getRequestContext()->getHeader()->setHeader(header, headerValue);
     }
   }
   ServerStream<SimpleResponse> nums(int f, int t) override {

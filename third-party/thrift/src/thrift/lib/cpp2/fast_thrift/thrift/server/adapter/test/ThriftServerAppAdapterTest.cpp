@@ -28,6 +28,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockHandler.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
+#include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
@@ -224,6 +225,10 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
             .build();
 
     adapter->setPipeline(pipeline.get());
+    // Move adapter into Open so onRead/writeResponse are accepted. In real
+    // server flows this happens via TransportHandler::onConnect -> pipeline
+    // activate -> handler onPipelineActive.
+    adapter->onPipelineActive();
 
     return {std::move(transportHandler), std::move(pipeline), rawHandler};
   }
@@ -869,6 +874,154 @@ TEST_F(ThriftServerAppAdapterTest, WriteFrameworkErrorEmitsErrorFrame) {
       *rpcError.code(),
       apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE);
   EXPECT_EQ(*rpcError.what_utf8(), "bad bytes");
+}
+
+// =============================================================================
+// State Machine Tests
+// =============================================================================
+
+TEST_F(ThriftServerAppAdapterTest, StateTransitionsHappyPath) {
+  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Created);
+
+  auto built = buildPipeline(adapter.get());
+  // buildPipeline calls setPipeline (-> Ready) and onPipelineActive (-> Open).
+  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Open);
+
+  // Benign exception transitions Open -> Closing.
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->onException(
+        folly::make_exception_wrapper<
+            apache::thrift::transport::TTransportException>(
+            apache::thrift::transport::TTransportException::END_OF_FILE,
+            "peer FIN"));
+  });
+  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closing);
+
+  // onPipelineInactive transitions to Closed.
+  adapter->onPipelineInactive();
+  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closed);
+}
+
+TEST_F(ThriftServerAppAdapterTest, OnExceptionHardErrorGoesStraightToClosed) {
+  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+  auto built = buildPipeline(adapter.get());
+  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Open);
+
+  // Non-benign exception (e.g. protocol parse error) skips Closing.
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->onException(
+        folly::make_exception_wrapper<std::runtime_error>("protocol error"));
+  });
+  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closed);
+}
+
+TEST_F(ThriftServerAppAdapterTest, OnReadRejectedOutsideOpen) {
+  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+  // Created: no pipeline, no Open.
+  auto rejected = adapter->onRead(erase_and_box(makeRequestMessage(1, "x")));
+  EXPECT_EQ(rejected, Result::Error);
+
+  auto built = buildPipeline(adapter.get());
+  // Open: onRead is accepted (will hit Unknown method, but that returns
+  // Success because writeFrameworkError fires the error frame inline).
+  adapter->registerMethod(
+      "x",
+      +[](ThriftServerAppAdapter*,
+          uint32_t,
+          std::unique_ptr<folly::IOBuf>,
+          apache::thrift::ProtocolId) noexcept -> Result {
+        return Result::Success;
+      });
+  EXPECT_EQ(
+      adapter->onRead(erase_and_box(makeRequestMessage(2, "x"))),
+      Result::Success);
+
+  // Closing: onRead rejected.
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->onException(
+        folly::make_exception_wrapper<
+            apache::thrift::transport::TTransportException>(
+            apache::thrift::transport::TTransportException::END_OF_FILE,
+            "peer FIN"));
+  });
+  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closing);
+  EXPECT_EQ(
+      adapter->onRead(erase_and_box(makeRequestMessage(3, "x"))),
+      Result::Error);
+
+  // Closed: onRead rejected.
+  adapter->onPipelineInactive();
+  EXPECT_EQ(
+      adapter->onRead(erase_and_box(makeRequestMessage(4, "x"))),
+      Result::Error);
+}
+
+TEST_F(
+    ThriftServerAppAdapterTest, WriteResponseAllowedInClosingRejectedInClosed) {
+  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+
+  int writeCount = 0;
+  auto built = buildPipeline(
+      adapter.get(),
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&&) {
+        ++writeCount;
+        return Result::Success;
+      });
+
+  // Open: write succeeds.
+  EXPECT_EQ(
+      adapter->writeResponse(1, folly::IOBuf::copyBuffer("a"), nullptr),
+      Result::Success);
+  EXPECT_EQ(writeCount, 1);
+
+  // Closing: write still allowed (in-flight handler callback can complete).
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->onException(
+        folly::make_exception_wrapper<
+            apache::thrift::transport::TTransportException>(
+            apache::thrift::transport::TTransportException::END_OF_FILE,
+            "peer FIN"));
+  });
+  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closing);
+  EXPECT_EQ(
+      adapter->writeResponse(2, folly::IOBuf::copyBuffer("b"), nullptr),
+      Result::Success);
+  EXPECT_EQ(writeCount, 2);
+
+  // Closed: write rejected — wire is gone.
+  adapter->onPipelineInactive();
+  EXPECT_EQ(
+      adapter->writeResponse(3, folly::IOBuf::copyBuffer("c"), nullptr),
+      Result::Error);
+  EXPECT_EQ(writeCount, 2);
+}
+
+TEST_F(ThriftServerAppAdapterTest, OnPipelineInactiveAlwaysClosesFromAnyState) {
+  // From Open
+  {
+    TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+    auto built = buildPipeline(adapter.get());
+    EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Open);
+    adapter->onPipelineInactive();
+    EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closed);
+  }
+  // From Closing
+  {
+    TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+    auto built = buildPipeline(adapter.get());
+    evb_->runInEventBaseThreadAndWait([&] {
+      adapter->onException(
+          folly::make_exception_wrapper<
+              apache::thrift::transport::TTransportException>(
+              apache::thrift::transport::TTransportException::NOT_OPEN,
+              "drain"));
+    });
+    EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closing);
+    adapter->onPipelineInactive();
+    EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closed);
+  }
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

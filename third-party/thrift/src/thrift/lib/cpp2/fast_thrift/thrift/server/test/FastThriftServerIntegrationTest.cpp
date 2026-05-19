@@ -282,6 +282,9 @@ class FastThriftServerIntegrationTest : public ::testing::Test {
             .addNextDuplex<MockHandler>(test_handler_tag, std::move(handlerPtr))
             .build();
     adapter_->setPipeline(pipeline_.get());
+    // Move adapter into Open so onRead is accepted. Real server flow does
+    // this via thriftPipeline->activate() in FastThriftServer.
+    adapter_->onPipelineActive();
   }
 
   ThriftServerResponseMessage drive(ThriftServerRequestMessage&& msg) {

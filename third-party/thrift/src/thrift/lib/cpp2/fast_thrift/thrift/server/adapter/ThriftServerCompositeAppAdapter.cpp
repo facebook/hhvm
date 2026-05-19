@@ -87,4 +87,26 @@ void ThriftServerCompositeAppAdapter::setPipeline(
   }
 }
 
+void ThriftServerCompositeAppAdapter::onPipelineActive() noexcept {
+  ThriftServerAppAdapter::onPipelineActive();
+  for (auto& child : children_) {
+    child->onPipelineActive();
+  }
+}
+
+void ThriftServerCompositeAppAdapter::onPipelineInactive() noexcept {
+  ThriftServerAppAdapter::onPipelineInactive();
+  for (auto& child : children_) {
+    child->onPipelineInactive();
+  }
+}
+
+void ThriftServerCompositeAppAdapter::onException(
+    folly::exception_wrapper&& e) noexcept {
+  ThriftServerAppAdapter::onException(folly::exception_wrapper{e});
+  for (auto& child : children_) {
+    child->onException(folly::exception_wrapper{e});
+  }
+}
+
 } // namespace apache::thrift::fast_thrift::thrift

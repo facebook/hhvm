@@ -19,8 +19,10 @@
 #include <string>
 #include <utility>
 
+#include <folly/io/async/AsyncSocketException.h>
 #include <folly/logging/xlog.h>
 
+#include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 
@@ -39,12 +41,29 @@ void ThriftServerAppAdapter::setCloseCallback(std::function<void()> cb) {
 
 void ThriftServerAppAdapter::setPipeline(
     channel_pipeline::PipelineImpl* pipeline) noexcept {
+  DCHECK(pipeline);
+  DCHECK(state_ == State::Created);
   pipeline_ = pipeline;
   evb_ = pipeline_->eventBase();
+  state_ = State::Ready;
+}
+
+void ThriftServerAppAdapter::onPipelineActive() noexcept {
+  DCHECK(state_ == State::Ready);
+  state_ = State::Open;
+}
+
+void ThriftServerAppAdapter::onPipelineInactive() noexcept {
+  // Pipeline disconnect is the canonical "no longer accepting writes" edge.
+  // Whether we got here via graceful close or hard error, we're done.
+  state_ = State::Closed;
 }
 
 channel_pipeline::Result ThriftServerAppAdapter::onRead(
     channel_pipeline::TypeErasedBox&& msg) noexcept {
+  if (FOLLY_UNLIKELY(state_ != State::Open)) {
+    return channel_pipeline::Result::Error;
+  }
   auto request = msg.take<ThriftServerRequestMessage>();
   DCHECK(request.streamId != 0) << "Invalid stream ID";
   return handleRequestResponse(std::move(request));
@@ -52,7 +71,29 @@ channel_pipeline::Result ThriftServerAppAdapter::onRead(
 
 void ThriftServerAppAdapter::onException(
     folly::exception_wrapper&& e) noexcept {
-  XLOG(ERR) << "Pipeline exception: " << e.what();
+  // Routine connection close (peer FIN/RST, idle timeout, server-initiated
+  // drop) propagates here as an exception. Match legacy thrift's
+  // RocketServerConnection: TTransportException(END_OF_FILE/NOT_OPEN/...) is
+  // the signal to start a graceful drain — let in-flight handler callbacks
+  // try to write final responses; refuse new requests. Real protocol /
+  // server faults still log and skip the drain (go straight to Closed).
+  using TX = apache::thrift::transport::TTransportException;
+  bool benign = false;
+  e.with_exception([&](const TX& ex) {
+    benign = ex.getType() == TX::END_OF_FILE || ex.getType() == TX::NOT_OPEN ||
+        ex.getType() == TX::INTERRUPTED || ex.getType() == TX::TIMED_OUT;
+  });
+  e.with_exception([&](const folly::AsyncSocketException& ex) {
+    benign = benign || ex.getType() == folly::AsyncSocketException::END_OF_FILE;
+  });
+  if (!benign) {
+    XLOG(ERR) << "Pipeline exception: " << e.what();
+  }
+
+  if (state_ == State::Open) {
+    state_ = benign ? State::Closing : State::Closed;
+  }
+
   auto cb = closeCallback_.withWLock([](auto& fn) { return std::move(fn); });
   if (cb && pipeline_) {
     pipeline_->eventBase()->runInEventBaseThread(std::move(cb));
@@ -157,8 +198,11 @@ channel_pipeline::Result ThriftServerAppAdapter::writeFrameworkError(
 
 channel_pipeline::Result ThriftServerAppAdapter::fireResponse(
     ThriftServerResponseMessage&& response) noexcept {
-  if (FOLLY_UNLIKELY(!pipeline_)) {
-    XLOG(ERR) << "Pipeline not set, cannot send response";
+  // Refuse writes once we're Closed. Open and Closing both still try — in
+  // Closing the pipeline may swallow the write if the wire is gone, but
+  // an in-flight handler callback completing during graceful drain should
+  // be allowed to push a final response toward the wire.
+  if (FOLLY_UNLIKELY(state_ == State::Closed || !pipeline_)) {
     return channel_pipeline::Result::Error;
   }
   return pipeline_->fireWrite(

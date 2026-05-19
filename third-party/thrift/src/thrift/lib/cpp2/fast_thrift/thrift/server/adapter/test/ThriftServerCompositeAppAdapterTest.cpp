@@ -187,6 +187,9 @@ class ThriftServerCompositeAppAdapterTest : public ::testing::Test {
             .build();
 
     composite->setPipeline(pipeline.get());
+    // Move composite (and forwarded children) into Open so onRead is
+    // accepted. Real server flow does this via thriftPipeline->activate().
+    composite->onPipelineActive();
 
     return {std::move(transportHandler), std::move(pipeline)};
   }
@@ -335,6 +338,79 @@ TEST_F(ThriftServerCompositeAppAdapterTest, SetPipelineForwardsToBothChildren) {
       << "setPipeline must propagate to user child so it can write responses";
   EXPECT_EQ(monitoringRaw->pipeline(), composite->pipeline())
       << "setPipeline must propagate to monitoring child";
+}
+
+TEST_F(
+    ThriftServerCompositeAppAdapterTest,
+    OnPipelineActiveForwardsToBothChildren) {
+  auto* userRaw = new TestChildAdapter("user");
+  auto* monitoringRaw = new TestChildAdapter("monitoring");
+  ThriftServerAppAdapter::Ptr user{userRaw};
+  ThriftServerAppAdapter::Ptr monitoring{monitoringRaw};
+
+  ThriftServerCompositeAppAdapter::Ptr composite{
+      new ThriftServerCompositeAppAdapter()};
+  composite->addChild(std::move(user));
+  composite->addChild(std::move(monitoring));
+
+  // buildPipeline calls setPipeline (Created -> Ready) then onPipelineActive
+  // (Ready -> Open). After it returns every adapter should be Open.
+  auto built = buildPipeline(composite.get());
+
+  EXPECT_EQ(composite->state(), ThriftServerAppAdapter::State::Open);
+  EXPECT_EQ(userRaw->state(), ThriftServerAppAdapter::State::Open)
+      << "onPipelineActive must fan out to user child";
+  EXPECT_EQ(monitoringRaw->state(), ThriftServerAppAdapter::State::Open)
+      << "onPipelineActive must fan out to monitoring child";
+}
+
+TEST_F(
+    ThriftServerCompositeAppAdapterTest,
+    OnPipelineInactiveForwardsToBothChildren) {
+  auto* userRaw = new TestChildAdapter("user");
+  auto* monitoringRaw = new TestChildAdapter("monitoring");
+  ThriftServerAppAdapter::Ptr user{userRaw};
+  ThriftServerAppAdapter::Ptr monitoring{monitoringRaw};
+
+  ThriftServerCompositeAppAdapter::Ptr composite{
+      new ThriftServerCompositeAppAdapter()};
+  composite->addChild(std::move(user));
+  composite->addChild(std::move(monitoring));
+
+  auto built = buildPipeline(composite.get());
+
+  evb_->runInEventBaseThreadAndWait([&] { composite->onPipelineInactive(); });
+
+  EXPECT_EQ(composite->state(), ThriftServerAppAdapter::State::Closed);
+  EXPECT_EQ(userRaw->state(), ThriftServerAppAdapter::State::Closed)
+      << "onPipelineInactive must fan out to user child";
+  EXPECT_EQ(monitoringRaw->state(), ThriftServerAppAdapter::State::Closed)
+      << "onPipelineInactive must fan out to monitoring child";
+}
+
+TEST_F(ThriftServerCompositeAppAdapterTest, OnExceptionForwardsToBothChildren) {
+  auto* userRaw = new TestChildAdapter("user");
+  auto* monitoringRaw = new TestChildAdapter("monitoring");
+  ThriftServerAppAdapter::Ptr user{userRaw};
+  ThriftServerAppAdapter::Ptr monitoring{monitoringRaw};
+
+  ThriftServerCompositeAppAdapter::Ptr composite{
+      new ThriftServerCompositeAppAdapter()};
+  composite->addChild(std::move(user));
+  composite->addChild(std::move(monitoring));
+
+  auto built = buildPipeline(composite.get());
+
+  evb_->runInEventBaseThreadAndWait([&] {
+    composite->onException(
+        folly::make_exception_wrapper<std::runtime_error>("boom"));
+  });
+
+  EXPECT_EQ(composite->state(), ThriftServerAppAdapter::State::Closed);
+  EXPECT_EQ(userRaw->state(), ThriftServerAppAdapter::State::Closed)
+      << "onException must fan out to user child";
+  EXPECT_EQ(monitoringRaw->state(), ThriftServerAppAdapter::State::Closed)
+      << "onException must fan out to monitoring child";
 }
 
 // The composite forwards the inbound box to the chosen child's onRead, so

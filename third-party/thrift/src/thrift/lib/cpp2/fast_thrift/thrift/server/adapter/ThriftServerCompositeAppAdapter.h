@@ -78,6 +78,14 @@ class ThriftServerCompositeAppAdapter : public ThriftServerAppAdapter {
   // the same pipeline.
   void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept;
 
+  // Shadow base lifecycle hooks so the composite drives all children
+  // through the same state transitions. Children share the pipeline; their
+  // gates (onRead reject when not Open, writeResponse reject when Closed)
+  // need consistent state with the composite.
+  void onPipelineActive() noexcept;
+  void onPipelineInactive() noexcept;
+  void onException(folly::exception_wrapper&& e) noexcept;
+
  private:
   std::vector<ThriftServerAppAdapter::Ptr> children_;
   folly::F14FastMap<std::string, ThriftServerAppAdapter*> methodMap_;

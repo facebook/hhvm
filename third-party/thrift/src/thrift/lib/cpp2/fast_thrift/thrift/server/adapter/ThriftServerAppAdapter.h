@@ -51,6 +51,23 @@ class ThriftServerCompositeAppAdapter;
  * integration, metadata deserialization, and response writing.
  *
  * Satisfies TailEndpointHandler concept (onRead / onException).
+ *
+ * State machine (one-directional; adapter is per-connection and never reused):
+ *   Created   --setPipeline-->        Ready
+ *   Ready     --onPipelineActive-->   Open
+ *   Open      --onException(NOT_OPEN
+ *               | END_OF_FILE
+ *               | INTERRUPTED
+ *               | TIMED_OUT)-->       Closing
+ *   Open      --onException(other)--> Closed
+ *   Closing   --onPipelineInactive--> Closed
+ *   Open      --onPipelineInactive--> Closed
+ *
+ *   onRead is accepted only in Open. Closing/Closed reject new requests.
+ *   writeResponse / writeError / writeFrameworkError are accepted in Open
+ *   and Closing (in-flight handler callbacks may still try to send a final
+ *   response; the pipeline may swallow it if the wire is gone). Closed
+ *   refuses all writes.
  */
 class ThriftServerAppAdapter : public folly::DelayedDestruction {
   // ThriftServerCompositeAppAdapter reads each child's method names at ctor
@@ -82,6 +99,16 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
       std::unique_ptr<folly::IOBuf> data,
       apache::thrift::ProtocolId protocol) noexcept;
 
+  enum class State : uint8_t {
+    Created,
+    Ready,
+    Open,
+    Closing,
+    Closed,
+  };
+
+  State state() const noexcept { return state_; }
+
   ThriftServerAppAdapter() = default;
   ThriftServerAppAdapter(ThriftServerAppAdapter&&) = delete;
   ThriftServerAppAdapter& operator=(ThriftServerAppAdapter&&) = delete;
@@ -103,8 +130,8 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
 
   void handlerAdded() noexcept {}
   void handlerRemoved() noexcept {}
-  void onPipelineActive() noexcept {}
-  void onPipelineInactive() noexcept {}
+  void onPipelineActive() noexcept;
+  void onPipelineInactive() noexcept;
   void onWriteReady() noexcept {}
 
   // Sends a PAYLOAD frame. Caller (codegen / framework) is responsible for
@@ -222,6 +249,7 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   folly::EventBase* evb_{nullptr};
   folly::F14FastMap<std::string, RequestResponseProcessFn> dispatch_;
   folly::Synchronized<std::function<void()>> closeCallback_;
+  State state_{State::Created};
 
   [[nodiscard]] channel_pipeline::Result fireResponse(
       ThriftServerResponseMessage&& response) noexcept;

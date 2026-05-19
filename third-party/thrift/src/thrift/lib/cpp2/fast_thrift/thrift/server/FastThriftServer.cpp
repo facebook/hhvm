@@ -136,6 +136,11 @@ FastThriftServer::createConnectionFactory() {
 
     ctx.transportAdapter->setPipeline(thriftPipeline.get());
     ctx.adapter->setPipeline(thriftPipeline.get());
+    // The thrift pipeline doesn't have an explicit activation trigger like
+    // the rocket pipeline (driven by TransportHandler::onConnect). Activate
+    // it here so the AppAdapter transitions Ready -> Open and starts
+    // accepting onRead.
+    thriftPipeline->activate();
 
     auto* adapterKey = ctx.adapter.get();
     ctx.pipeline = std::move(thriftPipeline);

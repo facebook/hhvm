@@ -27,8 +27,8 @@
 #include <fizz/tool/FizzCommandCommon.h>
 #include <fizz/util/KeyLogWriter.h>
 #include <fizz/util/Parse.h>
+#include <fmt/core.h>
 #include <folly/FileUtil.h>
-#include <folly/Format.h>
 #include <folly/io/async/SSLContext.h>
 #include <folly/io/async/ssl/OpenSSLTransportCertificate.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
@@ -141,11 +141,13 @@ class Connection : public AsyncSocket::ConnectCallback,
     if (!proxyTarget_.empty()) {
       auto connectCommand = IOBuf::create(0);
       folly::io::Appender appender(connectCommand.get(), 10);
-      folly::format(
-          "CONNECT {} HTTP/1.1\r\n"
-          "Host: {}\r\n\r\n",
-          proxyTarget_,
-          proxyTarget_)(appender);
+      appender.push(
+          folly::StringPiece(
+              fmt::format(
+                  "CONNECT {} HTTP/1.1\r\n"
+                  "Host: {}\r\n\r\n",
+                  proxyTarget_,
+                  proxyTarget_)));
       sock_->setReadCB(this);
       sock_->writeChain(nullptr, std::move(connectCommand));
     } else {

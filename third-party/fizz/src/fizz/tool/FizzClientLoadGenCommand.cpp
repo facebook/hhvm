@@ -10,7 +10,7 @@
 #include <fizz/client/PskSerializationUtils.h>
 #include <fizz/experimental/protocol/BatchSignatureFactory.h>
 #include <fizz/tool/FizzCommandCommon.h>
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/SSLContext.h>
@@ -140,7 +140,7 @@ std::string getJsonStr(
     const ClientLoadgenConfig& config) {
   dynamic percentile = dynamic::object;
   for (const auto& percent : config.percentiles) {
-    percentile[folly::sformat("{0:3.1f}%", percent * 100)] =
+    percentile[fmt::format("{0:3.1f}%", percent * 100)] =
         histo.getPercentileEstimate(percent);
   }
   size_t avg_latency = 0;

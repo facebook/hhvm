@@ -30,7 +30,7 @@
 #include <fizz/util/FizzUtil.h>
 #include <fizz/util/KeyLogWriter.h>
 #include <fizz/util/Parse.h>
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncServerSocket.h>
 #include <fstream>
@@ -412,13 +412,15 @@ class FizzHTTPServer : public FizzExampleServer {
         folly::io::Appender appender(response.get(), 10);
         std::string responseBody =
             transport_ ? respondHandshakeSuccess() : respondFallbackSuccess();
-        folly::format(
-            "HTTP/1.0 200 OK\r\n"
-            "Content-Type: text/plain\r\n"
-            "Content-Length: {}\r\n\r\n"
-            "{}",
-            responseBody.length(),
-            responseBody)(appender);
+        appender.push(
+            folly::StringPiece(
+                fmt::format(
+                    "HTTP/1.0 200 OK\r\n"
+                    "Content-Type: text/plain\r\n"
+                    "Content-Length: {}\r\n\r\n"
+                    "{}",
+                    responseBody.length(),
+                    responseBody)));
         if (transport_) {
           transport_->writeChain(nullptr, std::move(response));
           transport_->close();

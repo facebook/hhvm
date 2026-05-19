@@ -618,14 +618,7 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 				payloadMetadata := rpcmetadata.NewPayloadMetadata()
 				var exceptionMetadataBase *rpcmetadata.PayloadExceptionMetadataBase
 				if appEx, ok := streamStruct.(*types.ApplicationException); ok {
-					exceptionMetadataBase = rocket.NewPayloadExceptionMetadataBase(
-						"ApplicationException",
-						appEx.Error(),
-						rocket.RocketExceptionAppUnknown,
-						rpcmetadata.ErrorKind_UNSPECIFIED,
-						rpcmetadata.ErrorBlame_UNSPECIFIED,
-						rpcmetadata.ErrorSafety_UNSPECIFIED,
-					)
+					exceptionMetadataBase = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
 					// Response should be empty to adhere to spec
 					dataBytes = nil
 					s.observer.UndeclaredException()
@@ -633,14 +626,7 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 					s.observer.AnyExceptionForFunction(rpcFuncName)
 				} else if streamResult, ok := streamStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
 					declaredErr := streamResult.Exception()
-					exceptionMetadataBase = rocket.NewPayloadExceptionMetadataBase(
-						declaredErr.TypeName(),
-						declaredErr.Error(),
-						rocket.RocketExceptionDeclared,
-						rpcmetadata.ErrorKind_UNSPECIFIED,
-						rpcmetadata.ErrorBlame_UNSPECIFIED,
-						rpcmetadata.ErrorSafety_UNSPECIFIED,
-					)
+					exceptionMetadataBase = rocket.NewPayloadExceptionMetadataBaseV2(declaredErr)
 					s.observer.DeclaredException()
 					s.observer.AnyExceptionForFunction(rpcFuncName)
 				}
@@ -766,28 +752,14 @@ func (s *rocketServerSocket) requestChannelSink(
 			// Build exception metadata if applicable
 			var exceptionMetadata *rpcmetadata.PayloadExceptionMetadataBase
 			if appEx, ok := respStruct.(*types.ApplicationException); ok {
-				exceptionMetadata = rocket.NewPayloadExceptionMetadataBase(
-					"ApplicationException",
-					appEx.Error(),
-					rocket.RocketExceptionAppUnknown,
-					rpcmetadata.ErrorKind_UNSPECIFIED,
-					rpcmetadata.ErrorBlame_UNSPECIFIED,
-					rpcmetadata.ErrorSafety_UNSPECIFIED,
-				)
+				exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
 				dataBytes = nil
 				s.observer.UndeclaredException()
 				s.observer.UndeclaredExceptionForFunction(rpcFuncName)
 				s.observer.AnyExceptionForFunction(rpcFuncName)
 			} else if streamResult, ok := respStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
 				declaredErr := streamResult.Exception()
-				exceptionMetadata = rocket.NewPayloadExceptionMetadataBase(
-					declaredErr.TypeName(),
-					declaredErr.Error(),
-					rocket.RocketExceptionDeclared,
-					rpcmetadata.ErrorKind_UNSPECIFIED,
-					rpcmetadata.ErrorBlame_UNSPECIFIED,
-					rpcmetadata.ErrorSafety_UNSPECIFIED,
-				)
+				exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(declaredErr)
 				s.observer.DeclaredException()
 				s.observer.AnyExceptionForFunction(rpcFuncName)
 			}
@@ -976,28 +948,14 @@ func (s *rocketServerSocket) requestChannelBiDi(
 			// Build exception metadata if applicable
 			var exceptionMetadata *rpcmetadata.PayloadExceptionMetadataBase
 			if appEx, ok := respStruct.(*types.ApplicationException); ok {
-				exceptionMetadata = rocket.NewPayloadExceptionMetadataBase(
-					"ApplicationException",
-					appEx.Error(),
-					rocket.RocketExceptionAppUnknown,
-					rpcmetadata.ErrorKind_UNSPECIFIED,
-					rpcmetadata.ErrorBlame_UNSPECIFIED,
-					rpcmetadata.ErrorSafety_UNSPECIFIED,
-				)
+				exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
 				dataBytes = nil
 				s.observer.UndeclaredException()
 				s.observer.UndeclaredExceptionForFunction(rpcFuncName)
 				s.observer.AnyExceptionForFunction(rpcFuncName)
 			} else if streamResult, ok := respStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
 				declaredErr := streamResult.Exception()
-				exceptionMetadata = rocket.NewPayloadExceptionMetadataBase(
-					declaredErr.TypeName(),
-					declaredErr.Error(),
-					rocket.RocketExceptionDeclared,
-					rpcmetadata.ErrorKind_UNSPECIFIED,
-					rpcmetadata.ErrorBlame_UNSPECIFIED,
-					rpcmetadata.ErrorSafety_UNSPECIFIED,
-				)
+				exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(declaredErr)
 				s.observer.DeclaredException()
 				s.observer.AnyExceptionForFunction(rpcFuncName)
 			}

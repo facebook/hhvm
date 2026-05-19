@@ -397,25 +397,11 @@ func (r *rsocketClient) RequestSink(
 				var finalErr error
 				payloadMetadata := rpcmetadata.NewPayloadMetadata()
 				if itemErr != nil {
-					exceptionMetadataBase := rocket.NewPayloadExceptionMetadataBase(
-						"ApplicationException",
-						itemErr.Error(),
-						rocket.RocketExceptionAppUnknown,
-						rpcmetadata.ErrorKind_UNSPECIFIED,
-						rpcmetadata.ErrorBlame_UNSPECIFIED,
-						rpcmetadata.ErrorSafety_UNSPECIFIED,
-					)
+					exceptionMetadataBase := rocket.NewPayloadExceptionMetadataBaseV2(itemErr)
 					payloadMetadata.SetExceptionMetadata(exceptionMetadataBase)
 					finalErr = itemErr
 				} else if declaredException := item.Exception(); declaredException != nil {
-					exceptionMetadataBase := rocket.NewPayloadExceptionMetadataBase(
-						declaredException.TypeName(),
-						declaredException.Error(),
-						rocket.RocketExceptionDeclared,
-						rpcmetadata.ErrorKind_UNSPECIFIED,
-						rpcmetadata.ErrorBlame_UNSPECIFIED,
-						rpcmetadata.ErrorSafety_UNSPECIFIED,
-					)
+					exceptionMetadataBase := rocket.NewPayloadExceptionMetadataBaseV2(declaredException)
 					payloadMetadata.SetExceptionMetadata(exceptionMetadataBase)
 					finalErr = declaredException
 				} else {
@@ -554,25 +540,11 @@ func (r *rsocketClient) RequestBiDiStream(
 			var finalErr error
 			payloadMetadata := rpcmetadata.NewPayloadMetadata()
 			if itemErr != nil {
-				exceptionMetadataBase := rocket.NewPayloadExceptionMetadataBase(
-					"ApplicationException",
-					itemErr.Error(),
-					rocket.RocketExceptionAppUnknown,
-					rpcmetadata.ErrorKind_UNSPECIFIED,
-					rpcmetadata.ErrorBlame_UNSPECIFIED,
-					rpcmetadata.ErrorSafety_UNSPECIFIED,
-				)
+				exceptionMetadataBase := rocket.NewPayloadExceptionMetadataBaseV2(itemErr)
 				payloadMetadata.SetExceptionMetadata(exceptionMetadataBase)
 				finalErr = itemErr
 			} else if declaredException := item.Exception(); declaredException != nil {
-				exceptionMetadataBase := rocket.NewPayloadExceptionMetadataBase(
-					declaredException.TypeName(),
-					declaredException.Error(),
-					rocket.RocketExceptionDeclared,
-					rpcmetadata.ErrorKind_UNSPECIFIED,
-					rpcmetadata.ErrorBlame_UNSPECIFIED,
-					rpcmetadata.ErrorSafety_UNSPECIFIED,
-				)
+				exceptionMetadataBase := rocket.NewPayloadExceptionMetadataBaseV2(declaredException)
 				payloadMetadata.SetExceptionMetadata(exceptionMetadataBase)
 				finalErr = declaredException
 			} else {

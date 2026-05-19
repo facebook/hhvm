@@ -19,6 +19,7 @@ package rocket
 import (
 	"encoding/json"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 )
 
@@ -165,6 +166,74 @@ func NewPayloadExceptionMetadataBase(
 		SetWhatUTF8(&what).
 		SetMetadata(metadata)
 	return base
+}
+
+// NewPayloadExceptionMetadataBaseV2 creates a new PayloadExceptionMetadataBase
+// from an error, deriving the name, exception type, and error-classification
+// (kind/blame/safety) from the error type's entry in the error registry.
+//
+// Generated code populates the registry via init() for every Thrift exception
+// type:
+//   - If err is registered, the metadata is built as a declared exception
+//     using the registered TypeName and classification.
+//   - Otherwise the metadata is built as an AppUnknown exception with the
+//     name "ApplicationException" and UNSPECIFIED classification.
+func NewPayloadExceptionMetadataBaseV2(err error) *rpcmetadata.PayloadExceptionMetadataBase {
+	name := "ApplicationException"
+	exType := RocketExceptionAppUnknown
+	kind := rpcmetadata.ErrorKind_UNSPECIFIED
+	blame := rpcmetadata.ErrorBlame_UNSPECIFIED
+	safety := rpcmetadata.ErrorSafety_UNSPECIFIED
+
+	if spec := types.InternalErrorRegistryGet(err); spec != nil {
+		name = spec.TypeName
+		exType = RocketExceptionDeclared
+		kind = toRPCMetadataErrorKind(spec.Kind)
+		blame = toRPCMetadataErrorBlame(spec.Blame)
+		safety = toRPCMetadataErrorSafety(spec.Safety)
+	}
+
+	return NewPayloadExceptionMetadataBase(
+		name,
+		err.Error(),
+		exType,
+		kind,
+		blame,
+		safety,
+	)
+}
+
+func toRPCMetadataErrorKind(k types.ErrorKind) rpcmetadata.ErrorKind {
+	switch k {
+	case types.ErrorKindTransient:
+		return rpcmetadata.ErrorKind_TRANSIENT
+	case types.ErrorKindStateful:
+		return rpcmetadata.ErrorKind_STATEFUL
+	case types.ErrorKindPermanent:
+		return rpcmetadata.ErrorKind_PERMANENT
+	default:
+		return rpcmetadata.ErrorKind_UNSPECIFIED
+	}
+}
+
+func toRPCMetadataErrorBlame(b types.ErrorBlame) rpcmetadata.ErrorBlame {
+	switch b {
+	case types.ErrorBlameServer:
+		return rpcmetadata.ErrorBlame_SERVER
+	case types.ErrorBlameClient:
+		return rpcmetadata.ErrorBlame_CLIENT
+	default:
+		return rpcmetadata.ErrorBlame_UNSPECIFIED
+	}
+}
+
+func toRPCMetadataErrorSafety(s types.ErrorSafety) rpcmetadata.ErrorSafety {
+	switch s {
+	case types.ErrorSafetySafe:
+		return rpcmetadata.ErrorSafety_SAFE
+	default:
+		return rpcmetadata.ErrorSafety_UNSPECIFIED
+	}
 }
 
 // Error implements the error interface.

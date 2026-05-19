@@ -75,15 +75,14 @@ class IOBufTests(unittest.TestCase):
         self.assertEqual(bytes(m.opt_ptr), bytes(m2.opt_ptr))
         self.assertEqual(b"pqr", bytes(m.opt_ptr))
 
-    def test_non_owning_iobuf_dropped_on_serialize(self) -> None:
-        """Documents current trunk behavior: non-owning IOBuf (e.g. from
-        chained IOBuf iteration) is silently dropped during thrift-python
-        serialization.
+    def test_non_owning_iobuf_survives_serialize(self) -> None:
+        """Regression test: non-owning IOBuf (e.g. from chained IOBuf
+        iteration) must survive thrift-python serialization round-trip.
 
-        The thrift-python serializer's getIOBuf() checks IOBuf._ours (the
-        owning unique_ptr), but non-owning IOBufs created via IOBuf.create()
-        only set _this. The serializer sees _ours as NULL and silently skips
-        the field."""
+        Non-owning IOBufs created via IOBuf.create() only set _this, not
+        _ours. IOBufTypeInfo.to_internal_data copies them to produce an
+        owning IOBuf so that the serializer's getIOBuf() can find the
+        data via _ours."""
         # Create a chained IOBuf: [b"hello"] -> [b"world"]
         head = WritableIOBuf(bytearray(b"hello"))
         tail = WritableIOBuf(bytearray(b"world"))
@@ -95,15 +94,14 @@ class IOBufTests(unittest.TestCase):
         self.assertEqual(bytes(non_owning), b"world")
 
         m = self.Moo(val=42, buf=non_owning)
-        self.assertEqual(bytes(m.buf), b"world")
 
         serialized = self._serialize(m)
         deserialized = self._deserialize(type(m), serialized)
 
         self.assertEqual(deserialized.val, 42)
-        # BUG: IOBuf data is silently dropped because getIOBuf() returns NULL
-        # for non-owning IOBufs (IOBuf._ours is not set).
-        self.assertEqual(bytes(deserialized.buf), b"")
+        # cloneCoalesced() from the "world" node yields the full chain
+        # starting at that position: "world" + "hello".
+        self.assertEqual(bytes(deserialized.buf), b"worldhello")
 
     def test_chained_iobuf_serialize_round_trip(self) -> None:
         """Documents current trunk behavior for an owning chained IOBuf passed

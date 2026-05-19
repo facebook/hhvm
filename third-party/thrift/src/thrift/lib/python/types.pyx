@@ -344,7 +344,21 @@ cdef class IOBufTypeInfo(TypeInfoBase):
         return inst
 
     cpdef to_internal_data(self, object value):
-        return <IOBuf?>value
+        cdef IOBuf buf = <IOBuf?>value
+        # if buf._ours is NULL but buf._this is non-NULL, then the IOBuf is a
+        # non-owning view. Serialization relies on buf._ours, so must copy to
+        # avoid silent data loss on serialize.
+        if buf._ours.get() == NULL and buf._this != NULL:
+            if cFollyIsDebug:
+                warnings.warn(
+                    "Non-owning IOBuf passed to a thrift-python struct field. "
+                    "The IOBuf will be copied via cloneCoalesced(). "
+                    "This may have unpredictable behavior if the IOBuf is chained. "
+                    "To clear this warning, use IOBuf.clone() or .cloneCoalesced()",
+                    stacklevel=2,
+                )
+            buf = buf.cloneCoalesced()
+        return buf
 
     cpdef to_python_value(self, object value):
         return value

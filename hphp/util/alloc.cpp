@@ -357,6 +357,7 @@ void setup_auto_arenas(PageSpec s) {
                                (bool)s.n2MPages, s.n2MPages,
                                false,   // don't use normal pages
                                numa_node_set, 0);
+  if (!mapper) return;
   range.setLowMapper(mapper);
   unsigned auto_arenas = 0;
   mallctlRead<unsigned>("opt.narenas", &auto_arenas);

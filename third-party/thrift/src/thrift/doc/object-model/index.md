@@ -764,6 +764,242 @@ For quicker reference, the table below summarizes the correspondence between Thr
 
 </CenterHorizontally>
 
+### Record Tree
+
+A <KW>record</KW> naturally forms a **tree structure**, where every node is a <KW>record</KW> of some kind.
+
+*Leaf nodes* are <KW>records</KW> with no child edges in the <KW>record tree</KW>:
+  * primitive <KW>record kinds</KW>: `Bool`, `Int{N}`, `Float{N}`, `Text`, `ByteArray`
+  * `Any`-kind <KW>records</KW>
+  * empty composite <KW>records</KW>: `List()`, `Set()`, `Map()`, `FieldSet()`
+
+```python title="Leaf Nodes"
+Int32(42)
+Text("hello")
+Bool(True)
+Any(type=Text("i32"), protocol=..., cipher=...)
+List() # empty list is a leaf
+FieldSet()
+```
+
+*Internal nodes* are non-empty composite <KW>records</KW> (`List`, `Set`, `Map`, `FieldSet`).
+
+```python title="Internal Nodes"
+# root List with two children
+List(
+  Int32(1),
+  Int32(2)
+)
+
+# root Map with one key-value pair
+Map(Text("key") → Int64(100))
+
+# root FieldSet with one field
+FieldSet((Int16(1), Text("x")) → Int32(5))
+
+# root List → two List children → Int32 leaves
+List(
+  List(Int32(1)),
+  List(Int32(2))
+)
+```
+
+:::info Record Tree
+A <KW>record tree</KW> is simply a <KW>record</KW>.
+The "tree" suffix highlights this property; it does not introduce a separate concept.
+
+When a <KW>record</KW> is viewed as a <KW>record tree</KW>, that <KW>record</KW> is the <KW>root record</KW> of the tree.
+:::
+
+## Path
+
+A **<KW>Thrift Path</KW>** is a [path](https://en.wikipedia.org/wiki/Path_\(graph_theory\)) through a [<KW>record tree</KW>](#record-tree).
+Given a <KW>root record</KW>, a <KW>path</KW> describes a sequence of adjacent edges starting from the root.
+
+:::info <Bookmark id="path-existence">Path Existence</Bookmark>
+A <KW>path</KW> **exists** for a <KW>root record</KW> if the <KW>record tree</KW> contains every edge described by the <KW>path</KW>, in order, starting at the root.
+
+If any described edge is absent, the <KW>path</KW> does **not exist** for that <KW>root record</KW> and has no <KW>target</KW>.
+:::
+
+:::info <Bookmark id="path-target">Path Target</Bookmark>
+When a <KW>path</KW> [exists](#path-existence) for a <KW>root record</KW>, the <KW>record</KW> reached after the final edge is called the **target** of the <KW>path</KW>.
+
+The <KW>target</KW> is itself a <KW>record</KW>.
+:::
+
+:::info <Bookmark id="path-uniqueness">Path Uniqueness</Bookmark>
+Given a <KW>root record</KW> and any descendant <KW>record</KW> of that root, including the root itself, there exists **exactly one path** from the root to that descendant.
+:::
+
+:::info <Bookmark id="path-emptiness">Empty Path</Bookmark>
+A <KW>path</KW> with no edges is said to be **empty**.
+
+Given a <KW>root record</KW>, the <KW>target</KW> of an empty <KW>path</KW> is the <KW>root record</KW> itself.
+Therefore, an empty <KW>path</KW> always exists.
+:::
+
+### Path Components
+
+A <KW>Thrift Path</KW> is defined as an ordered sequence of <KW>path components</KW>.
+
+A <KW>path component</KW> describes one potential parent-child edge in a [<KW>record tree</KW>](#record-tree), such as "the field with this <KW>field identity</KW>" or "the list element at this index".
+A component does not, on its own, identify a concrete edge; the edge it describes may or may not be present in a particular <KW>record tree</KW>.
+
+A <KW>path</KW> [exists](#path-existence) for a <KW>root record</KW> only when, starting at the root and considering its components in order, every described edge is present.
+
+There are multiple <KW>path component kinds</KW>, each describing a different kind of potential parent-child edge.
+
+#### FieldIdentity
+
+A **`FieldIdentity`-kind <KW>path component</KW>** describes the potential edge from a `FieldSet`-kind <KW>record</KW> (i.e. a <KW>struct</KW> or <KW>union</KW>) to the field with a given [<KW>field identity</KW>](#field-identity).
+
+Examples:
+```python
+# Given:
+FieldSet((Int16(1), Text("name")) → Text("Alice"))
+
+✅ Path(FieldIdentity(1, "name")) # exists; target is Text("Alice")
+```
+
+#### ListElement
+
+A **`ListElement`-kind <KW>path component</KW>** describes the potential edge from a `List`-kind <KW>record</KW> to the element at a given zero-based index.
+
+Examples:
+```python
+# Given:
+List(Int32(10), Int32(20), Int32(30))
+
+✅ Path(ListElement(0)) # exists; target is Int32(10)
+✅ Path(ListElement(2)) # exists; target is Int32(30)
+❌ Path(ListElement(5)) # does not exist; index out of bounds
+```
+
+#### SetElement
+
+A **`SetElement`-kind <KW>path component</KW>** describes the potential edge from a [`Set`-kind <KW>record</KW>](#set) to the element with a given value.
+
+Examples:
+```python
+# Given:
+Set(Text("apple"), Text("banana"), Text("cherry"))
+
+✅ Path(SetElement(Text("banana"))) # exists; target is Text("banana")
+❌ Path(SetElement(Text("grape")))  # does not exist; element not found
+```
+
+#### MapKey
+
+A **`MapKey`-kind <KW>path component</KW>** describes the potential edge from a [`Map`-kind <KW>record</KW>](#map) to a given key.
+
+Examples:
+```python
+# Given:
+Map(Text("x") → Int32(1), Text("y") → Int32(2))
+
+✅ Path(MapKey(Text("x"))) # exists; target is the key Text("x")
+❌ Path(MapKey(Text("z"))) # does not exist; key not found
+```
+
+#### MapValue
+
+A **`MapValue`-kind <KW>path component</KW>** describes the potential edge from a [`Map`-kind <KW>record</KW>](#map) to the value associated with a given key.
+
+Examples:
+```python
+# Given:
+Map(Text("x") → Int32(1), Text("y") → Int32(2))
+
+✅ Path(MapValue(Text("x"))) # exists; target is Int32(1)
+✅ Path(MapValue(Text("y"))) # exists; target is Int32(2)
+❌ Path(MapValue(Text("z"))) # does not exist; key not found
+```
+
+#### *Path Component Examples*
+
+```python
+# Given:
+FieldSet(
+  (Int16(1), Text("users")) → Map(
+    Text("alice") → FieldSet(
+      (Int16(1), Text("scores")) → List(Int32(100), Int32(95), Int32(88))
+    )
+  )
+)
+
+# Empty path (zero components) — target is the root FieldSet itself
+✅ Path()
+
+# exists; target is the Map
+✅ Path(FieldIdentity(1, "users"))
+
+# exists; target is the inner FieldSet
+✅ Path(
+     FieldIdentity(1, "users"),
+     MapValue(Text("alice"))
+   )
+
+# exists; target is the List
+✅ Path(
+     FieldIdentity(1, "users"),
+     MapValue(Text("alice")),
+     FieldIdentity(1, "scores")
+   )
+
+# exists; target is Int32(100)
+✅ Path(
+     FieldIdentity(1, "users"),
+     MapValue(Text("alice")),
+     FieldIdentity(1, "scores"),
+     ListElement(0)
+   )
+
+# does not exist; key "bob" not found in Map
+❌ Path(
+     FieldIdentity(1, "users"),
+     MapValue(Text("bob")),
+     FieldIdentity(1, "scores"),
+   )
+```
+
+### Path Validity for Thrift Types
+
+A <KW>Thrift type</KW> `T` constrains the possible <KW>records</KW> of its <KW>values</KW> through `dataset(T)`.
+A <KW>path</KW> may therefore be considered in two related ways:
+
+* <KW>path existence</KW>: whether a <KW>path</KW> exists for one concrete <KW>root record</KW>
+* <KW>path validity</KW>: whether a <KW>path</KW> exists for <b>at least one</b> <KW>record</KW> corresponding to a <KW>value</KW> of <code>T</code>.
+
+<Requirement>
+
+**Given**,
+
+* `T` — a <KW>type</KW> in a <KW>type system</KW> `S`
+* `P` — a <KW>path</KW>
+* for a given <KW>datum</KW> `d ∈ dataset(T)`, <code>r<sub>T</sub> = <a href="#notation-record-ofv">record-of(Value(T, d))</a></code>
+
+**When**,
+
+* There exists `d ∈ dataset(T)` such that `P` [exists](#path-existence) for <code>r<sub>T</sub></code>
+
+**Then**,
+
+* `P` is **<KW>valid</KW>** for `T`
+
+</Requirement>
+
+Common cases where a path is invalid include:
+* a `FieldIdentity` component references a <KW>field identity</KW> that does not exist in the relevant <KW>struct</KW> or <KW>union</KW> type
+* a <KW>path component kind</KW> is incompatible with the current type, such as `ListElement` for a `map` or `MapValue` for a `list`
+* a path continues beyond a leaf type, such as `i32` or `any`
+
+:::info Target <KW>Value</KW>
+A <KW>valid</KW> <KW>path</KW> for a <KW>Thrift type</KW> `T` determines a unique <KW>target type</KW> `T'` within the <KW>type system</KW>.
+
+When the <KW>path</KW> [exists](#path-existence) for such an <code>r<sub>T</sub></code>, its <Bookmark id="path-target-value"><KW>target value</KW></Bookmark> is `Value(T', r')`, where `r'` is the <KW>target record</KW>.
+:::
+
 ## Operations
 
 ### Inputs and Outcomes
@@ -1017,6 +1253,14 @@ export const RecordOfNotationAnyRecordDescription = () => {
 | <CenteredDitto/> | <RecordOfNotationAnyDatumDescription /> | <RecordOfNotationAnyRecordDescription /> |
 
 </CenterHorizontally>
+
+#### Notation: `target-of(r, p)`
+
+The [<KW>target</KW>](#path-target) of the <KW>path</KW> `p` in the <KW>record</KW> `r`. Note that the <KW>target</KW> of a <KW>path</KW> may not [exist](#path-existence).
+
+#### Notation: `target-value-of(v, p)`
+
+The [<KW>target value</KW>](#path-target-value) of the <KW>path</KW> `p` in the <KW>value</KW> `v`. Note that the <KW>target value</KW> of a <KW>path</KW> may not [exist](#path-existence), but `p` must be [valid](#path-validity).
 
 #### Notation: <code>type<sub>S</sub>(v)</code> → `T`
 
@@ -2088,6 +2332,7 @@ Equivalent to **<code><a href="#operation-materialize">materialize<sub>S,P</sub>
 | April 21, 2026    | 1.3.0   | [`MINOR`](#versioning-minor):<ol><li>Added [`isStableLessThan`](#operation-isstablelessthan) and [`isRecordStableLessThan`](#operation-isrecordstablelessthan) operations.</li><li>`Any`-kind records: defined <KW>protocol descriptor</KW> invariants and operations.</li><li>Defined <KW>Thrift Runtime Environment</KW> and added [`resolveProtocol`](#operation-resolveprotocol) for resolving protocol descriptors to concrete protocols.</li></ol>[`PATCH`](#versioning-patch): <ol><li>Clarified `string` and `Text`-kind records as sequences of Unicode scalar values (excluding surrogates).</li></ol>
 | April 21, 2026    | 1.3.1   | [`PATCH`](#versioning-patch): <ol><li>Threaded <KW>runtime environment</KW> `E` through [`areEqual`](#operation-areequal), [`isStableLessThan`](#operation-isstablelessthan), and [`isRecordStableLessThan`](#operation-isrecordstablelessthan) operations, and their [`anyUnpack`](#operation-anyunpack) calls.</li></ol>
 | May 12, 2026      | 1.3.2   | [`PATCH`](#versioning-patch): <ol><li>Added [`areRecordsEqual`](#operation-arerecordsequal) operation formalizing record equality.</li></ol>
+| May 12, 2026      | 1.4.0   | [`MINOR`](#versioning-minor): <ol><li>Added [Path](#path) definition.</li></ol>
 
 ### Versioning
 

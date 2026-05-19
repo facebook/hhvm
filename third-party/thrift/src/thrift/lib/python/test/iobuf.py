@@ -19,18 +19,23 @@
 from __future__ import annotations
 
 import unittest
-from typing import Type
+from typing import Any, Callable, Type
 
 import iobuf.thrift_mutable_types as mutable_types
-import iobuf.thrift_types as immutable_ypes
-from folly.iobuf import IOBuf
+import iobuf.thrift_types as immutable_types
+from folly.iobuf import IOBuf, WritableIOBuf
 from iobuf.thrift_types import Moo as MooType
 from parameterized import parameterized_class
+from thrift.python.mutable_serializer import (
+    deserialize as mutable_deserialize,
+    serialize_iobuf as mutable_serialize_iobuf,
+)
+from thrift.python.serializer import deserialize, serialize_iobuf
 
 
 @parameterized_class(
     ("test_types"),
-    [(immutable_ypes,), (mutable_types,)],
+    [(immutable_types,), (mutable_types,)],
 )
 class IOBufTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -41,6 +46,12 @@ class IOBufTests(unittest.TestCase):
         """
         # pyre-ignore[16]: has no attribute `sets_types`
         self.Moo: Type[MooType] = self.test_types.Moo
+        if self.test_types is mutable_types:
+            self._serialize: Callable[..., Any] = mutable_serialize_iobuf
+            self._deserialize: Callable[..., Any] = mutable_deserialize
+        else:
+            self._serialize = serialize_iobuf
+            self._deserialize = deserialize
 
     def test_get_set_struct_field(self) -> None:
         m = self.Moo(
@@ -63,3 +74,33 @@ class IOBufTests(unittest.TestCase):
 
         self.assertEqual(bytes(m.opt_ptr), bytes(m2.opt_ptr))
         self.assertEqual(b"pqr", bytes(m.opt_ptr))
+
+    def test_non_owning_iobuf_dropped_on_serialize(self) -> None:
+        """Documents current trunk behavior: non-owning IOBuf (e.g. from
+        chained IOBuf iteration) is silently dropped during thrift-python
+        serialization.
+
+        The thrift-python serializer's getIOBuf() checks IOBuf._ours (the
+        owning unique_ptr), but non-owning IOBufs created via IOBuf.create()
+        only set _this. The serializer sees _ours as NULL and silently skips
+        the field."""
+        # Create a chained IOBuf: [b"hello"] -> [b"world"]
+        head = WritableIOBuf(bytearray(b"hello"))
+        tail = WritableIOBuf(bytearray(b"world"))
+        head.append_to_chain(tail)
+
+        # .next returns a non-owning IOBuf (IOBuf.create: _this set, _ours not)
+        non_owning = head.next
+        assert non_owning is not None
+        self.assertEqual(bytes(non_owning), b"world")
+
+        m = self.Moo(val=42, buf=non_owning)
+        self.assertEqual(bytes(m.buf), b"world")
+
+        serialized = self._serialize(m)
+        deserialized = self._deserialize(type(m), serialized)
+
+        self.assertEqual(deserialized.val, 42)
+        # BUG: IOBuf data is silently dropped because getIOBuf() returns NULL
+        # for non-owning IOBufs (IOBuf._ours is not set).
+        self.assertEqual(bytes(deserialized.buf), b"")

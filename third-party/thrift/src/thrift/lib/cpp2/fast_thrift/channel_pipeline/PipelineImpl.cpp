@@ -24,6 +24,16 @@
 #define PIPELINE_HOT_PATH
 #endif
 
+// After close(), handlers have been removed and the head/tail raw pointers
+// may dangle (their owning structs can be destroyed without nulling our
+// raw pointers). Refuse all dispatches.
+#define RETURN_IF_CLOSED(...)      \
+  do {                             \
+    if (FOLLY_UNLIKELY(closed_)) { \
+      return __VA_ARGS__;          \
+    }                              \
+  } while (0)
+
 namespace {
 
 using apache::thrift::fast_thrift::channel_pipeline::PipelineImpl;
@@ -201,14 +211,16 @@ void PipelineImpl::deactivateFromIndex(size_t index) noexcept {
 }
 
 PIPELINE_HOT_PATH Result PipelineImpl::fireRead(TypeErasedBox&& msg) noexcept {
-  if (FOLLY_UNLIKELY(closed_ || !firstReadFn_)) {
+  RETURN_IF_CLOSED(Result::Error);
+  if (FOLLY_UNLIKELY(!firstReadFn_)) {
     return fireReadToTailHandler(std::move(msg));
   }
   return firstReadFn_(firstHandler_, *firstCtx_, std::move(msg));
 }
 
 PIPELINE_HOT_PATH Result PipelineImpl::fireWrite(TypeErasedBox&& msg) noexcept {
-  if (FOLLY_UNLIKELY(closed_ || !lastWriteFn_)) {
+  RETURN_IF_CLOSED(Result::Error);
+  if (FOLLY_UNLIKELY(!lastWriteFn_)) {
     return fireWriteToHeadHandler(std::move(msg));
   }
   return lastWriteFn_(lastHandler_, *lastCtx_, std::move(msg));
@@ -216,7 +228,8 @@ PIPELINE_HOT_PATH Result PipelineImpl::fireWrite(TypeErasedBox&& msg) noexcept {
 
 PIPELINE_HOT_PATH void PipelineImpl::fireException(
     folly::exception_wrapper&& e) noexcept {
-  if (FOLLY_UNLIKELY(closed_ || !firstExceptionFn_)) {
+  RETURN_IF_CLOSED();
+  if (FOLLY_UNLIKELY(!firstExceptionFn_)) {
     fireExceptionToTailHandler(std::move(e));
     return;
   }

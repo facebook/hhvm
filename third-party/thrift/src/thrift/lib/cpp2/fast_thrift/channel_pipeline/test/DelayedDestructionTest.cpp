@@ -460,18 +460,16 @@ TEST_F(DelayedDestructionTest, PipelineOperationAfterCloseReturnsEarly) {
 
   pipeline->close();
 
-  // Further operations on closed pipeline should be handled gracefully
+  // Further operations on closed pipeline should return early without
+  // touching anything — head/tail raw pointers may dangle after close().
   (void)pipeline->fireRead(TypeErasedBox(42));
   auto bytes = folly::IOBuf::copyBuffer("test");
   (void)pipeline->fireWrite(TypeErasedBox(std::move(bytes)));
 
-  // Read count should still be 0 since pipeline is closed
   EXPECT_EQ(handler_ptr_->readCount(), 0);
   EXPECT_EQ(handler_ptr_->writeCount(), 0);
-
-  // Results go directly to app/transport since handlers are bypassed
-  EXPECT_EQ(app_.readCount(), 1);
-  EXPECT_EQ(transport_.writeCount(), 1);
+  EXPECT_EQ(app_.readCount(), 0);
+  EXPECT_EQ(transport_.writeCount(), 0);
 }
 
 TEST_F(DelayedDestructionTest, RecursiveFireReadDuringCloseIsSafe) {

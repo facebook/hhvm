@@ -1,0 +1,11 @@
+test_wildcard_shape
+x=int(1)
+test_wildcard_tuple
+b=string(5) "hello"
+test_all_wildcards
+ok
+test_foreach_wildcard
+x=int(1)
+x=int(2)
+test_wildcard_accesses_field
+threw

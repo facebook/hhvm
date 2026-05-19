@@ -169,22 +169,33 @@ fn emit_assign<'a>(
     if bop.is_none() {
         if let Some(e_await) = rhs.2.as_await() {
             let await_pos = &rhs.1;
-            if let Some(l) = lhs.2.as_list() {
+            let has_elements = match &lhs.2 {
+                ast::Expr_::List(l) => Some(l.iter().any(|e| !e.2.is_omitted())),
+                ast::Expr_::DestructureShape(ds) => Some(!ds.fields.is_empty()),
+                ast::Expr_::DestructureTuple(dt) => Some(!dt.entries.is_empty()),
+                _ => None,
+            };
+            if let Some(has_elements) = has_elements {
                 let awaited_instrs = emit_await(e, env, await_pos, e_await)?;
-                let has_elements = l.iter().any(|e| !e.2.is_omitted());
                 if has_elements {
                     scope::with_unnamed_local(e, |e, temp| {
-                        let (init, assign) = emit_expr::emit_lval_op_destructure(
-                            e,
-                            env,
-                            pos,
-                            Some(&temp),
-                            &[],
-                            lhs,
-                            false,
-                            is_readonly_expr(rhs),
-                            false,
-                        )?;
+                        let (init, assign) = if matches!(
+                            lhs.2,
+                            ast::Expr_::DestructureShape(_) | ast::Expr_::DestructureTuple(_)
+                        ) {
+                            emit_expr::emit_destructure(e, env, pos, &temp, lhs)?
+                        } else {
+                            emit_expr::emit_lval_op_list(
+                                e,
+                                env,
+                                pos,
+                                Some(&temp),
+                                &[],
+                                lhs,
+                                false,
+                                is_readonly_expr(rhs),
+                            )?
+                        };
                         Ok((
                             InstrSeq::gather(vec![awaited_instrs, instr::pop_l(temp)]),
                             InstrSeq::gather(vec![init, assign]),
@@ -1033,12 +1044,8 @@ fn check_l_iter<'a>(
                     let name = local_id::get_name(&lid.1);
                     *name == *self.arr_loc || self.is_key(name)
                 }
-                ast::Expr_::List(exprs) | ast::Expr_::Tuple(exprs) => {
-                    exprs.iter().any(|expr| self.check_lval(expr, is_unset))
-                }
-                ast::Expr_::Shape(exprs) => exprs
-                    .iter()
-                    .any(|(_, expr)| self.check_lval(expr, is_unset)),
+                // DestructureShape/DestructureTuple only bind variables, so they can't mutate the iterated array.
+                ast::Expr_::List(exprs) => exprs.iter().any(|expr| self.check_lval(expr, is_unset)),
                 ast::Expr_::ArrayGet(box (base, Some(index))) => {
                     let ast::Expr(_, _, b) = base;
                     let ast::Expr(_, _, i) = index;
@@ -1479,37 +1486,12 @@ fn emit_iterator_lvalue_storage<'a>(
             &lvalue.1,
             "Can't use return value in write context",
         )),
-        ast::Expr_::DestructureShape(_) => {
-            let (init, assign) = emit_expr::emit_lval_op_destructure(
-                e,
-                env,
-                &lvalue.1,
-                Some(&local),
-                &[],
-                lvalue,
-                false,
-                false,
-                false,
-            )?;
+        ast::Expr_::DestructureShape(_) | ast::Expr_::DestructureTuple(_) => {
+            let (init, assign) = emit_expr::emit_destructure(e, env, &lvalue.1, &local, lvalue)?;
             let load_values = vec![init, assign, instr::unset_l(local)];
             Ok((vec![], load_values))
         }
-        ast::Expr_::DestructureTuple(_) => {
-            let (init, assign) = emit_expr::emit_lval_op_destructure(
-                e,
-                env,
-                &lvalue.1,
-                Some(&local),
-                &[],
-                lvalue,
-                false,
-                false,
-                false,
-            )?;
-            let load_values = vec![init, assign, instr::unset_l(local)];
-            Ok((vec![], load_values))
-        }
-        ast::Expr_::List(_) | ast::Expr_::Tuple(_) | ast::Expr_::Shape(_) => {
+        ast::Expr_::List(_) => {
             let idx_exps = VecDictIndex::add_indices_to_lval_exp(&lvalue.2);
             let load_values = emit_load_list_elements(
                 e,
@@ -1613,47 +1595,17 @@ fn emit_load_list_element<'a>(
                 InstrSeq::gather(vec![query_value(path, index_prefix), instr::pop_c()]);
             vec![load_value]
         }
-        ast::Expr_::DestructureShape(_) => {
+        ast::Expr_::DestructureShape(_) | ast::Expr_::DestructureTuple(_) => {
             let temp = e.local_gen_mut().get_unnamed();
             let store = InstrSeq::gather(vec![
                 query_value(path, index_prefix),
                 instr::set_l(temp.clone()),
                 instr::pop_c(),
             ]);
-            let (init, assign) = emit_expr::emit_lval_op_destructure(
-                e,
-                env,
-                &elem.1,
-                Some(&temp),
-                &[],
-                elem,
-                false,
-                false,
-                false,
-            )?;
+            let (init, assign) = emit_expr::emit_destructure(e, env, &elem.1, &temp, elem)?;
             vec![store, init, assign, instr::unset_l(temp)]
         }
-        ast::Expr_::DestructureTuple(_) => {
-            let temp = e.local_gen_mut().get_unnamed();
-            let store = InstrSeq::gather(vec![
-                query_value(path, index_prefix),
-                instr::set_l(temp.clone()),
-                instr::pop_c(),
-            ]);
-            let (init, assign) = emit_expr::emit_lval_op_destructure(
-                e,
-                env,
-                &elem.1,
-                Some(&temp),
-                &[],
-                elem,
-                false,
-                false,
-                false,
-            )?;
-            vec![store, init, assign, instr::unset_l(temp)]
-        }
-        ast::Expr_::List(_) | ast::Expr_::Tuple(_) | ast::Expr_::Shape(_) => {
+        ast::Expr_::List(_) => {
             let instr_dim = instr::dim(MOpMode::Warn, mk);
             path.push(instr_dim);
             let indexed_exprs = VecDictIndex::add_indices_to_lval_exp(&elem.2);
@@ -1723,17 +1675,36 @@ fn emit_foreach_await_lvalue_storage<'a>(
     keep_on_stack: bool,
 ) -> Result<InstrSeq> {
     scope::with_unnamed_local(e, |e, local| {
-        let (init, assign) = emit_expr::emit_lval_op_destructure(
-            e,
-            env,
-            &lvalue.1,
-            Some(&local),
-            indices,
-            lvalue,
-            false,
-            false,
-            false,
-        )?;
+        let (init, assign) = match &lvalue.2 {
+            ast::Expr_::DestructureShape(ds) => emit_expr::emit_destructure_shape_fields(
+                e,
+                env,
+                &lvalue.1,
+                Some(&local),
+                indices,
+                ds,
+                false,
+            )?,
+            ast::Expr_::DestructureTuple(dt) => emit_expr::emit_destructure_tuple_entries(
+                e,
+                env,
+                &lvalue.1,
+                Some(&local),
+                indices,
+                dt,
+                false,
+            )?,
+            ast::Expr_::List(_) | _ => emit_expr::emit_lval_op_list(
+                e,
+                env,
+                &lvalue.1,
+                Some(&local),
+                indices,
+                lvalue,
+                false,
+                false,
+            )?,
+        };
         Ok((
             instr::pop_l(local),
             InstrSeq::gather(vec![init, assign]),

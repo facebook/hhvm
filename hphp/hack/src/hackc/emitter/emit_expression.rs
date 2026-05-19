@@ -5963,19 +5963,23 @@ fn emit_lval_op<'a>(
     match (op, &expr1.2, expr2) {
         (
             LValOp::Set,
-            ast::Expr_::List(_)
-            | ast::Expr_::Tuple(_)
-            | ast::Expr_::Shape(_)
-            | ast::Expr_::DestructureShape(_)
-            | ast::Expr_::DestructureTuple(_),
+            ast::Expr_::DestructureShape(_) | ast::Expr_::DestructureTuple(_),
             Some(expr2),
         ) => {
             let instr_rhs = emit_expr(e, env, expr2)?;
+            scope::with_unnamed_local(e, |e, local| {
+                let (instr_lhs, instr_assign) = emit_destructure(e, env, pos, &local, expr1)?;
+                Ok((
+                    InstrSeq::gather(vec![instr_lhs, instr_rhs, instr::pop_l(local)]),
+                    instr_assign,
+                    instr::push_l(local),
+                ))
+            })
+        }
+        (LValOp::Set, ast::Expr_::List(_), Some(expr2)) => {
+            let instr_rhs = emit_expr(e, env, expr2)?;
             let has_elements = match &expr1.2 {
-                ast::Expr_::List(l) | ast::Expr_::Tuple(l) => l.iter().any(|e| !e.2.is_omitted()),
-                ast::Expr_::Shape(l) => l.iter().any(|e| !e.1.2.is_omitted()),
-                ast::Expr_::DestructureShape(ds) => !ds.fields.is_empty(),
-                ast::Expr_::DestructureTuple(dt) => !dt.entries.is_empty(),
+                ast::Expr_::List(l) => l.iter().any(|e| !e.2.is_omitted()),
                 _ => false,
             };
             if !has_elements {
@@ -5987,7 +5991,7 @@ fn emit_lval_op<'a>(
                     } else {
                         None
                     };
-                    let (instr_lhs, instr_assign) = emit_lval_op_destructure(
+                    let (instr_lhs, instr_assign) = emit_lval_op_list(
                         e,
                         env,
                         pos,
@@ -5996,7 +6000,6 @@ fn emit_lval_op<'a>(
                         expr1,
                         false,
                         is_readonly_expr(expr2),
-                        false,
                     )?;
                     Ok((
                         InstrSeq::gather(vec![instr_lhs, instr_rhs, instr::pop_l(local)]),
@@ -6206,6 +6209,26 @@ impl<'a> VecDictIndex<'a> {
     }
 }
 
+pub fn emit_destructure<'a>(
+    e: &mut Emitter,
+    env: &Env<'a>,
+    pos: &Pos,
+    local: &Local,
+    expr: &ast::Expr,
+) -> Result<(InstrSeq, InstrSeq)> {
+    match &expr.2 {
+        ast::Expr_::DestructureShape(ds) => {
+            emit_destructure_shape_fields(e, env, pos, Some(local), &[], ds, false)
+        }
+        ast::Expr_::DestructureTuple(dt) => {
+            emit_destructure_tuple_entries(e, env, pos, Some(local), &[], dt, false)
+        }
+        _ => Err(Error::unrecoverable(
+            "emit_destructure: expected DestructureShape or DestructureTuple",
+        )),
+    }
+}
+
 fn emit_shape_field_key_instr<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
@@ -6228,7 +6251,6 @@ fn emit_destructure_target_idx<'a>(
     container_local: &Local,
     key_instr: InstrSeq,
     target: &ast::DestructureTarget,
-    rhs_readonly: bool,
 ) -> Result<InstrSeq> {
     let ast::DestructureTarget(_, _, target_) = target;
     match target_ {
@@ -6261,16 +6283,8 @@ fn emit_destructure_target_idx<'a>(
                 instr::set_l(temp.clone()),
                 instr::pop_c(),
             ]);
-            let (_, inner_set) = emit_destructure_shape_fields(
-                e,
-                env,
-                outer_pos,
-                Some(&temp),
-                &[],
-                inner_ds,
-                rhs_readonly,
-                true,
-            )?;
+            let (_, inner_set) =
+                emit_destructure_shape_fields(e, env, outer_pos, Some(&temp), &[], inner_ds, true)?;
             Ok(InstrSeq::gather(vec![
                 access,
                 inner_set,
@@ -6295,7 +6309,6 @@ fn emit_destructure_target_idx<'a>(
                 Some(&temp),
                 &[],
                 inner_dt,
-                rhs_readonly,
                 true,
             )?;
             Ok(InstrSeq::gather(vec![
@@ -6315,7 +6328,6 @@ fn emit_destructure_target_required<'a>(
     container_local: &Local,
     indices: &[VecDictIndex<'_>],
     target: &ast::DestructureTarget,
-    rhs_readonly: bool,
 ) -> Result<InstrSeq> {
     let ast::DestructureTarget(_, _, target_) = target;
     match target_ {
@@ -6342,7 +6354,6 @@ fn emit_destructure_target_required<'a>(
                 Some(container_local),
                 indices,
                 inner_ds,
-                rhs_readonly,
                 false,
             )?;
             Ok(InstrSeq::gather(vec![lhs, set]))
@@ -6355,7 +6366,6 @@ fn emit_destructure_target_required<'a>(
                 Some(container_local),
                 indices,
                 inner_dt,
-                rhs_readonly,
                 false,
             )?;
             Ok(InstrSeq::gather(vec![lhs, set]))
@@ -6363,18 +6373,15 @@ fn emit_destructure_target_required<'a>(
     }
 }
 
-fn emit_destructure_shape_fields<'a>(
+pub fn emit_destructure_shape_fields<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     outer_pos: &Pos,
     local: Option<&Local>,
     indices: &[VecDictIndex<'_>],
     ds: &ast::DestructureShape,
-    rhs_readonly: bool,
     under_optional: bool,
 ) -> Result<(InstrSeq, InstrSeq)> {
-    let is_ltr = e.options().hhbc.ltr_assign;
-
     let (container_local, need_cleanup, setup_instrs) = if !indices.is_empty() {
         let temp = e.local_gen_mut().get_unnamed();
         let loc =
@@ -6402,7 +6409,6 @@ fn emit_destructure_shape_fields<'a>(
                 &container_local,
                 key_instr,
                 &dsf.target,
-                rhs_readonly,
             )?;
             set_instrs_vec.push(field_set);
         } else {
@@ -6414,14 +6420,9 @@ fn emit_destructure_shape_fields<'a>(
                 &container_local,
                 indices,
                 &dsf.target,
-                rhs_readonly,
             )?;
             set_instrs_vec.push(field_set);
         }
-    }
-
-    if !is_ltr {
-        set_instrs_vec.reverse();
     }
 
     let cleanup = if need_cleanup {
@@ -6440,18 +6441,15 @@ fn emit_destructure_shape_fields<'a>(
     ))
 }
 
-fn emit_destructure_tuple_entries<'a>(
+pub fn emit_destructure_tuple_entries<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     outer_pos: &Pos,
     local: Option<&Local>,
     indices: &[VecDictIndex<'_>],
     dt: &ast::DestructureTuple,
-    rhs_readonly: bool,
     under_optional: bool,
 ) -> Result<(InstrSeq, InstrSeq)> {
-    let is_ltr = e.options().hhbc.ltr_assign;
-
     let (container_local, need_cleanup, setup_instrs) = if !indices.is_empty() {
         let temp = e.local_gen_mut().get_unnamed();
         let loc =
@@ -6479,7 +6477,6 @@ fn emit_destructure_tuple_entries<'a>(
                 &container_local,
                 key_instr,
                 &dte.target,
-                rhs_readonly,
             )?;
             set_instrs_vec.push(field_set);
         } else {
@@ -6491,14 +6488,9 @@ fn emit_destructure_tuple_entries<'a>(
                 &container_local,
                 indices,
                 &dte.target,
-                rhs_readonly,
             )?;
             set_instrs_vec.push(field_set);
         }
-    }
-
-    if !is_ltr {
-        set_instrs_vec.reverse();
     }
 
     let cleanup = if need_cleanup {
@@ -6528,7 +6520,7 @@ fn emit_destructure_tuple_entries<'a>(
 //  this is necessary to handle cases like:
 //  list($a[$f()]) = b();
 //  here f() should be invoked before b()
-pub fn emit_lval_op_destructure<'a>(
+pub fn emit_lval_op_list<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     outer_pos: &Pos,
@@ -6537,37 +6529,12 @@ pub fn emit_lval_op_destructure<'a>(
     expr: &ast::Expr,
     last_usage: bool,
     rhs_readonly: bool,
-    under_optional: bool,
 ) -> Result<(InstrSeq, InstrSeq)> {
     use ast::Expr_;
 
     let is_ltr = e.options().hhbc.ltr_assign;
     match &expr.2 {
-        Expr_::DestructureShape(ds) => {
-            return emit_destructure_shape_fields(
-                e,
-                env,
-                outer_pos,
-                local,
-                indices,
-                ds,
-                rhs_readonly,
-                under_optional,
-            );
-        }
-        Expr_::DestructureTuple(dt) => {
-            return emit_destructure_tuple_entries(
-                e,
-                env,
-                outer_pos,
-                local,
-                indices,
-                dt,
-                rhs_readonly,
-                under_optional,
-            );
-        }
-        Expr_::List(_) | Expr_::Tuple(_) | Expr_::Shape(_) => {
+        Expr_::List(_) => {
             let indexed_exprs = VecDictIndex::add_indices_to_lval_exp(&expr.2);
             let last_non_omitted = if last_usage {
                 // last usage of the local will happen when processing last non-omitted
@@ -6591,7 +6558,7 @@ pub fn emit_lval_op_destructure<'a>(
                 .map(|(i, (index, expr))| {
                     let mut new_indices = vec![index];
                     new_indices.extend_from_slice(indices);
-                    emit_lval_op_destructure(
+                    emit_lval_op_list(
                         e,
                         env,
                         outer_pos,
@@ -6600,7 +6567,6 @@ pub fn emit_lval_op_destructure<'a>(
                         expr,
                         last_non_omitted.is_some_and(|j| j == i),
                         rhs_readonly,
-                        under_optional,
                     )
                 })
                 .collect::<Result<Vec<_>>>()?

@@ -1,0 +1,14 @@
+test_basic_punning
+x=int(1)
+y=int(2)
+test_mixed_punning
+a=int(10)
+b=int(20)
+cc=int(30)
+test_punning_with_ellipsis
+x=int(1)
+test_optional_punning
+x=int(1)
+y=int(2)
+a=int(10)
+b=NULL

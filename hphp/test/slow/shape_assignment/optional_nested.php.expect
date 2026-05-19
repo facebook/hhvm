@@ -1,0 +1,10 @@
+test_nested_present
+name=string(5) "Alice"
+city=string(3) "NYC"
+zip=string(5) "10001"
+test_nested_absent
+name=string(3) "Bob"
+city=NULL
+test_nested_double_optional
+name=string(3) "Eve"
+zip=NULL

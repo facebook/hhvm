@@ -1,0 +1,17 @@
+test_basic_tuple
+a=int(1)
+b=string(5) "hello"
+test_three_elements
+a=int(10)
+b=int(20)
+c=int(30)
+test_tuple_nesting
+a=int(1)
+b=int(2)
+c=int(3)
+d=int(4)
+test_tuple_foreach
+n=int(1)
+s=string(1) "a"
+n=int(2)
+s=string(1) "b"

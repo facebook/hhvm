@@ -1,0 +1,6 @@
+=== shape key, tuple value ===
+id=1 tag=a num=10 name=ten
+id=2 tag=b num=20 name=twenty
+=== tuple key, shape value ===
+id=1 label=one ok=true
+id=2 label=two ok=false

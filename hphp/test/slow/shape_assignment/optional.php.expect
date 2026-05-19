@@ -1,0 +1,6 @@
+test_optional_present
+x=int(1)
+y=int(2)
+test_optional_absent
+x=int(1)
+y=NULL

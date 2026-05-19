@@ -1,0 +1,6 @@
+f()=string(2) "ab"
+g()=string(11) "hello world"
+h()=vec(2) {
+  string(1) "a"
+  NULL
+}

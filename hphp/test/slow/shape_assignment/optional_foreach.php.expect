@@ -1,0 +1,6 @@
+x=int(1)
+y=int(10)
+x=int(2)
+y=NULL
+x=int(3)
+y=int(30)

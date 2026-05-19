@@ -1,0 +1,7 @@
+test_shape_literal_rhs
+x=int(10)
+test_shape_await
+x=int(20)
+test_tuple_await
+n=int(30)
+label=string(6) "thirty"

@@ -1,0 +1,7 @@
+test_three_level_shape
+val=int(42)
+test_mixed_nesting
+name=string(5) "Alice"
+count=int(100)
+test_tuple_three_level
+val=int(99)

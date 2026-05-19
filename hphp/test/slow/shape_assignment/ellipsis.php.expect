@@ -1,0 +1,14 @@
+test_shape_ellipsis
+x=int(1)
+test_tuple_ellipsis
+a=int(1)
+test_nested_ellipsis
+a=int(1)
+test_empty_shape_ellipsis
+ok
+test_foreach_shape_ellipsis
+x=int(1)
+x=int(2)
+test_foreach_tuple_ellipsis
+n=int(1)
+n=int(2)

@@ -11,7 +11,13 @@ from thrift.util.Recursive import fix_spec
 from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef
 from thrift.protocol.TProtocol import TProtocolException
 
+try:
+    from thrift.Thrift import warn_thrift_py_deprecated
+except ImportError:
+    def warn_thrift_py_deprecated(name):
+        pass
 
 
 from .ttypes import UTF8STRINGS, RpcPriority, Experimental, ReserveIds, RequiresBackwardCompatibility, TerseWrite, Box, Mixin, SerializeInFieldIdOrder, BitmaskEnum, ExceptionMessage, InternBox, Serial, Uri, Priority, Sealed, DeprecatedUnvalidatedAnnotations, AllowReservedIdentifier, AllowReservedFilename, RuntimeAnnotation, AllowLegacyTypedefUri, AllowUnsafeOptionalCustomDefaultValue, AllowUnsafeUnionFieldCustomDefaultValue, AllowUnsafeRequiredFieldQualifier, AllowLegacyMissingUris, AllowUnsafeNonSealedKeyType, Deprecated
+warn_thrift_py_deprecated(__name__)
 

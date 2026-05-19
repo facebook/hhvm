@@ -15,9 +15,15 @@ from json import loads
 import sys
 if sys.version_info[0] >= 3:
   long = int
+try:
+    from thrift.Thrift import warn_thrift_py_deprecated
+except ImportError:
+    def warn_thrift_py_deprecated(name):
+        pass
 
 
 from .ttypes import UTF8STRINGS, MyEnum, MyStructNestedAnnotation, MyUnion, MyException, MyStruct, SecretStruct, AwesomeStruct, FantasticStruct, list_string_6884
+warn_thrift_py_deprecated(__name__)
 
 myStruct = MyStruct(**{
   "major" : 42,

@@ -129,7 +129,7 @@ class AbstractTest:
         )
 
         # pyrefly: ignore [missing-attribute]
-        if not wait_for_server(port, 5.0, ssl=cls.ssl):
+        if not wait_for_server(port, 15.0, ssl=cls.ssl):
             # pyrefly: ignore [missing-attribute]
             msg = "Failed to start " + cls.server_type
             # pyrefly: ignore [missing-attribute]

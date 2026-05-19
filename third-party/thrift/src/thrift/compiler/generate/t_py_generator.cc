@@ -841,12 +841,14 @@ void t_py_generator::init_generator() {
 
   // Define __all__ for ttypes
   f_types_ << "__all__ = [" << render_ttype_declarations("'") << "]" << endl
+           << "warn_thrift_py_deprecated(__name__)" << endl
            << endl;
 
   f_consts_ << py_autogen_comment() << endl
             << py_imports() << endl
             << render_includes() << endl
             << "from .ttypes import " << render_ttype_declarations("") << endl
+            << "warn_thrift_py_deprecated(__name__)" << endl
             << endl;
 }
 
@@ -1034,6 +1036,17 @@ string t_py_generator::py_imports() {
     imports += "if sys.version_info[0] >= 3:\n";
     imports += "  long = int\n";
   }
+
+  // Defensive guard against version skew: a binary built with this generated
+  // code may ship against an older `thrift.Thrift` that does not yet define
+  // `warn_thrift_py_deprecated`. Wrap the import in try/except + no-op
+  // fallback so the generated module still loads cleanly. Once the helper is
+  // universally deployed the except branch is dead code.
+  imports += "try:\n";
+  imports += "    from thrift.Thrift import warn_thrift_py_deprecated\n";
+  imports += "except ImportError:\n";
+  imports += "    def warn_thrift_py_deprecated(name):\n";
+  imports += "        pass\n";
 
   return imports;
 }
@@ -2207,7 +2220,7 @@ void t_py_generator::generate_service(const t_service* tservice) {
              << "  write_results_after_future," << endl
              << ")" << endl;
 
-  f_service_ << endl;
+  f_service_ << endl << "warn_thrift_py_deprecated(__name__)" << endl << endl;
 
   // Generate the three main parts of the service (well, two for now in PHP)
   generate_service_interface(tservice, false);

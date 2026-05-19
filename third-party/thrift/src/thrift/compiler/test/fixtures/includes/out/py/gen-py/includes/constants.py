@@ -11,11 +11,17 @@ from thrift.util.Recursive import fix_spec
 from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef
 from thrift.protocol.TProtocol import TProtocolException
 
+try:
+    from thrift.Thrift import warn_thrift_py_deprecated
+except ImportError:
+    def warn_thrift_py_deprecated(name):
+        pass
 
 import transitive.ttypes
 
 
 from .ttypes import UTF8STRINGS, Included, IncludedInt64, TransitiveFoo
+warn_thrift_py_deprecated(__name__)
 
 ExampleIncluded = Included(**{
   "MyIntField" : 2,

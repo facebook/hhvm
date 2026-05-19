@@ -15,6 +15,11 @@ from json import loads
 import sys
 if sys.version_info[0] >= 3:
   long = int
+try:
+    from thrift.Thrift import warn_thrift_py_deprecated
+except ImportError:
+    def warn_thrift_py_deprecated(name):
+        pass
 
 import included_enum.ttypes
 
@@ -55,6 +60,7 @@ all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
 __all__ = ['UTF8STRINGS', 'Metasyntactic', 'MyEnum1', 'MyEnum2', 'MyEnum3', 'MyEnum4', 'MyBitmaskEnum1', 'MyBitmaskEnum2', 'SomeStruct', 'MyStruct', 'IncludedEnumAlias']
+warn_thrift_py_deprecated(__name__)
 
 class Metasyntactic:
   def __getattr__(self, name): raise AttributeError(name)

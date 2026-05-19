@@ -15,6 +15,11 @@ from json import loads
 import sys
 if sys.version_info[0] >= 3:
   long = int
+try:
+    from thrift.Thrift import warn_thrift_py_deprecated
+except ImportError:
+    def warn_thrift_py_deprecated(name):
+        pass
 
 from .ttypes import UTF8STRINGS, from_PY_RESERVED_KEYWORD, def_PY_RESERVED_KEYWORD, and_PY_RESERVED_KEYWORD
 from thrift.Thrift import TProcessor
@@ -62,6 +67,8 @@ from thrift.util.Decorators import (
   should_run_on_thread,
   write_results_after_future,
 )
+
+warn_thrift_py_deprecated(__name__)
 
 class Iface:
   def global_PY_RESERVED_KEYWORD(self, raise_PY_RESERVED_KEYWORD=None):

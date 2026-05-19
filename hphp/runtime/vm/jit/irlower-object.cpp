@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/ext/core/ext_core_closure.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
@@ -199,12 +200,29 @@ void implInitObjMemoSlots(Vout& v, IRLS& env, const IRInstruction* inst,
 
   auto const nslots = cls->numMemoSlots();
   if (nslots < 8) {
-    for (Slot i = 0; i < nslots; ++i) {
-      static_assert(sizeof(MemoSlot) == 16, "");
-      auto const offset = -(sizeof(MemoSlot) * (nslots - i));
-      auto const dt = static_cast<data_type_t>(KindOfUninit);
-      emitImmStoreq(v, 0, obj[offset + TVOFF(m_data)]);
-      v << storebi{dt, obj[offset + TVOFF(m_type)]};
+    static_assert(sizeof(MemoSlot) == 16, "");
+    auto const dt = static_cast<data_type_t>(KindOfUninit);
+    if (arch::any<arch::ARM>()) {
+      // Store each slot as data+type with a single stp. The type constant is
+      // still materialized as a register, since stp has no immediate form.
+      auto const zeroReg = v.cns(0);
+      auto const dtReg = v.cns(dt);
+      for (Slot i = 0; i < nslots; ++i) {
+        auto const offset = -(sizeof(MemoSlot) * (nslots - i));
+        v << storepair{
+          zeroReg,
+          dtReg,
+          obj[offset + TVOFF(m_data)]
+        };
+      }
+    } else {
+      for (Slot i = 0; i < nslots; ++i) {
+        auto const offset = -(sizeof(MemoSlot) * (nslots - i));
+        emitImmStoreq(v, 0, obj[offset + TVOFF(m_data)]);
+        // On x64, storebi encodes shorter than materializing a register and
+        // using a full-width store.
+        v << storebi{dt, obj[offset + TVOFF(m_type)]};
+      }
     }
     return;
   }

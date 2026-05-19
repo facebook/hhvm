@@ -171,6 +171,27 @@ struct ImmFolder {
   void fold(store& in, Vinstr& out) {
     if (zero_imm(in.s)) out = store{PhysReg(vixl::xzr), in.d};
   }
+  template<typename storepairT>
+  void fold_storepair(storepairT& in, Vinstr& out, PhysReg zero) {
+    auto s0 = in.s0;
+    auto s1 = in.s1;
+    auto changed = false;
+    if (zero_imm(s0)) {
+      s0 = zero;
+      changed = true;
+    }
+    if (zero_imm(s1)) {
+      s1 = zero;
+      changed = true;
+    }
+    if (changed) out = storepairT{s0, s1, in.d};
+  }
+  void fold(storepair& in, Vinstr& out) {
+    fold_storepair(in, out, PhysReg(vixl::xzr));
+  }
+  void fold(storepairl& in, Vinstr& out) {
+    fold_storepair(in, out, PhysReg(vixl::wzr));
+  }
   void fold(storeqi& in, Vinstr& out) {
     if (in.s.q() == 0) out = store{PhysReg(vixl::xzr), in.m};
   }

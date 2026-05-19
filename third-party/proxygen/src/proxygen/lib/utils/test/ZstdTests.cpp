@@ -284,14 +284,15 @@ TEST_F(ZstdTests, MaxDecompressionRatio_PassesWhenRatioLargeEnough) {
   EXPECT_EQ(decompressed->computeChainDataLength(), kOrigSize);
 }
 
-TEST_F(ZstdTests, MaxDecompressionRatio_PassesWhenUnspecified) {
+TEST_F(ZstdTests, MaxDecompressionRatio_PassesWhenExplicitlyUnlimited) {
   constexpr size_t kOrigSize = 1024 * 1024;
   auto original = makeCompressibleBuf(kOrigSize);
   auto compressed = compress(original);
   ASSERT_NE(compressed, nullptr);
 
-  // Default: no ratio limit.
-  auto zd = std::make_unique<ZstdStreamDecompressor>(/*reuseOutBuf=*/false);
+  // Explicitly opt out of ratio limit.
+  auto zd = std::make_unique<ZstdStreamDecompressor>(
+      /*reuseOutBuf=*/false, /*maxDecompressionRatio=*/std::nullopt);
 
   auto decompressed = zd->decompress(compressed.get());
   EXPECT_FALSE(zd->hasError());

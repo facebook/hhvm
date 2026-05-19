@@ -430,10 +430,16 @@ TEST_F(DecompressionFilterTest, FactoryCreatesFilterForGzip) {
 
 // Test: Large data decompression
 TEST_F(DecompressionFilterTest, LargeDataDecompression) {
-  // Create a large string (100KB)
-  std::string largeData(100UL * 1024, 'X');
-  for (size_t i = 0; i < largeData.size(); i += 100) {
-    largeData[i] = static_cast<char>('A' + (i % 26));
+  // Create a large string (100KB) with pseudo-random content that zstd
+  // cannot compress significantly, keeping well within the default
+  // maxDecompressionRatio limit (1000:1).
+  std::string largeData(100UL * 1024, '\0');
+  uint32_t state = 2654435761u;
+  for (char& c : largeData) {
+    state ^= state << 13;
+    state ^= state >> 17;
+    state ^= state << 5;
+    c = static_cast<char>(state & 0xFF);
   }
 
   EXPECT_CALL(*requestHandler_, setResponseHandler(_))

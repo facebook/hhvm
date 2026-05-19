@@ -28,11 +28,14 @@
 
 namespace proxygen {
 
+constexpr uint64_t kDefaultMaxZstdDecompressionRatio = 1000;
+
 class ZstdStreamDecompressor : public StreamDecompressor {
  public:
   explicit ZstdStreamDecompressor(
       bool reuseOutBuf = false,
-      std::optional<uint64_t> maxDecompressionRatio = std::nullopt);
+      std::optional<uint64_t> maxDecompressionRatio =
+          kDefaultMaxZstdDecompressionRatio);
 
   // May return nullptr on error / no output.
   std::unique_ptr<folly::IOBuf> decompress(const folly::IOBuf* in) override;

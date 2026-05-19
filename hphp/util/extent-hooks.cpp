@@ -148,11 +148,11 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
   constexpr size_t kAlign = 2u << 20;
   if (addr != nullptr || alignment > kAlign) {
     // Let the default hook handle weird cases.
-    return fallback_hooks->alloc(extent_hooks, addr, size, alignment,
+    return fallback_hooks->alloc(fallback_hooks, addr, size, alignment,
                                  zero, commit, arena_ind);
   }
   if (auto addr = extAlloc->m_mapper->alloc(size, alignment)) return addr;
-  return fallback_hooks->alloc(extent_hooks, addr, size, alignment,
+  return fallback_hooks->alloc(fallback_hooks, addr, size, alignment,
                                zero, commit, arena_ind);
 }
 
@@ -162,7 +162,7 @@ extent_destroy(extent_hooks_t* extent_hooks, void* addr, size_t size,
   auto extAlloc = GetByArenaId<RangeFallbackExtentAllocator>(arena_ind);
   if (extAlloc->inRange(addr)) return;
   auto fallback_hooks = extAlloc->m_fallback_hooks;
-  return fallback_hooks->destroy(extent_hooks, addr, size,
+  return fallback_hooks->destroy(fallback_hooks, addr, size,
                                  committed, arena_ind);
 }
 
@@ -172,7 +172,7 @@ extent_commit(extent_hooks_t* extent_hooks, void* addr, size_t size,
   auto extAlloc = GetByArenaId<RangeFallbackExtentAllocator>(arena_ind);
   if (extAlloc->inRange(addr)) return false;
   auto fallback_hooks = extAlloc->m_fallback_hooks;
-  return fallback_hooks->commit(extent_hooks, addr, size,
+  return fallback_hooks->commit(fallback_hooks, addr, size,
                                 offset, length, arena_ind);
 }
 
@@ -184,7 +184,7 @@ extent_purge_lazy(extent_hooks_t* extent_hooks, void* addr, size_t size,
   auto fallback_hooks = extAlloc->m_fallback_hooks;
   auto fallback_purge = fallback_hooks->purge_lazy;
   if (!fallback_purge) return true;
-  return fallback_purge(extent_hooks, addr, size, offset, length, arena_ind);
+  return fallback_purge(fallback_hooks, addr, size, offset, length, arena_ind);
 }
 
 bool RangeFallbackExtentAllocator::
@@ -195,7 +195,7 @@ extent_purge(extent_hooks_t* extent_hooks, void* addr, size_t size,
   auto fallback_hooks = extAlloc->m_fallback_hooks;
   auto fallback_purge = fallback_hooks->purge_forced;
   if (!fallback_purge) return true;
-  return fallback_purge(extent_hooks, addr, size, offset, length, arena_ind);
+  return fallback_purge(fallback_hooks, addr, size, offset, length, arena_ind);
 }
 
 }

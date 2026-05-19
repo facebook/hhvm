@@ -1787,10 +1787,6 @@ func (x *MyException) Error() string {
     return x.String()
 }
 
-func (x *MyException) TypeName() string {
-    return "MyException"
-}
-
 type MyExceptionWithMessage struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
     MyStringField string `thrift:"MyStringField,2" json:"MyStringField" db:"MyStringField"`
@@ -2085,10 +2081,6 @@ func (x *MyExceptionWithMessage) GetThriftStructMetadata() *metadata.ThriftExcep
 
 func (x *MyExceptionWithMessage) Error() string {
     return x.String()
-}
-
-func (x *MyExceptionWithMessage) TypeName() string {
-    return "MyExceptionWithMessage"
 }
 
 type ReservedKeyword struct {

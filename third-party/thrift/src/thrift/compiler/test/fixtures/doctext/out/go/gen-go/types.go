@@ -562,10 +562,6 @@ func (x *Bang) Error() string {
     return x.String()
 }
 
-func (x *Bang) TypeName() string {
-    return "Bang"
-}
-
 type reqCF struct {
 }
 // Compile time interface enforcer

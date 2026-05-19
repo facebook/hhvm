@@ -104,13 +104,6 @@ func (x *{{struct.go_name}}) String() string {
 }
 {{/let partial}}
 
-{{! TypeName() }}
-{{#let export partial type_name |struct|}}
-func (x *{{struct.go_name}}) TypeName() string {
-    return "{{struct.name}}"
-}
-{{/let partial}}
-
 {{! Write() (v2) }}
 {{#let export partial write_v2 |struct|}}
 func (x *{{struct.go_name}}) Write(p thrift.Encoder) error {
@@ -236,7 +229,7 @@ func (x *{{struct.go_name}}) setDefaults() *{{struct.go_name}} {
 {{/let partial}}
 
 {{! This partial generates a complete Thrift struct. }}
-{{#let export partial struct |s| captures |m_field definition new count_set_fields exception write_v2 write read_v2 read string set_defaults get_spec get_thrift_metadata error type_name|}}
+{{#let export partial struct |s| captures |m_field definition new count_set_fields exception write_v2 write read_v2 read string set_defaults get_spec get_thrift_metadata error|}}
 {{! type definition }}
 {{#partial definition struct=s}}
 
@@ -307,8 +300,5 @@ func (x *{{struct.go_name}}) setDefaults() *{{struct.go_name}} {
 
 {{! error }}
 {{#partial error struct=s}}
-
-{{! TypeName }}
-{{#partial type_name struct=s}}
 {{/if s.exception?}}
 {{/let partial}}

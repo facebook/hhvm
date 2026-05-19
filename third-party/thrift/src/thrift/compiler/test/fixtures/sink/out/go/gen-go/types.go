@@ -649,10 +649,6 @@ func (x *InitialException) Error() string {
     return x.String()
 }
 
-func (x *InitialException) TypeName() string {
-    return "InitialException"
-}
-
 type SinkException1 struct {
     Reason string `thrift:"reason,1" json:"reason" db:"reason"`
 }
@@ -783,10 +779,6 @@ func (x *SinkException1) Error() string {
     return x.String()
 }
 
-func (x *SinkException1) TypeName() string {
-    return "SinkException1"
-}
-
 type SinkException2 struct {
     Reason int64 `thrift:"reason,1" json:"reason" db:"reason"`
 }
@@ -915,10 +907,6 @@ func (x *SinkException2) GetThriftStructMetadata() *metadata.ThriftException {
 
 func (x *SinkException2) Error() string {
     return x.String()
-}
-
-func (x *SinkException2) TypeName() string {
-    return "SinkException2"
 }
 
 type reqSinkServiceMethod struct {

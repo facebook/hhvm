@@ -151,10 +151,6 @@ func (x *CustomException) Error() string {
     return x.String()
 }
 
-func (x *CustomException) TypeName() string {
-    return "CustomException"
-}
-
 type ShouldBeBoxed struct {
     SessionId string `thrift:"sessionId,1" json:"sessionId" db:"sessionId"`
 }

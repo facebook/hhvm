@@ -149,10 +149,6 @@ func (x *Fiery) Error() string {
     return x.String()
 }
 
-func (x *Fiery) TypeName() string {
-    return "Fiery"
-}
-
 type Serious struct {
     Sonnet *string `thrift:"sonnet,1,optional" json:"sonnet,omitempty" db:"sonnet"`
 }
@@ -290,10 +286,6 @@ func (x *Serious) GetThriftStructMetadata() *metadata.ThriftException {
 
 func (x *Serious) Error() string {
     return x.String()
-}
-
-func (x *Serious) TypeName() string {
-    return "Serious"
 }
 
 type ComplexFieldNames struct {
@@ -474,10 +466,6 @@ func (x *ComplexFieldNames) Error() string {
     return x.String()
 }
 
-func (x *ComplexFieldNames) TypeName() string {
-    return "ComplexFieldNames"
-}
-
 type CustomFieldNames struct {
     ErrorMessage string `thrift:"error_message,1" json:"error_message" db:"error_message"`
     InternalErrorMessage string `thrift:"internal_error_message,2" json:"internal_error_message" db:"internal_error_message"`
@@ -654,10 +642,6 @@ func (x *CustomFieldNames) GetThriftStructMetadata() *metadata.ThriftException {
 
 func (x *CustomFieldNames) Error() string {
     return x.String()
-}
-
-func (x *CustomFieldNames) TypeName() string {
-    return "CustomFieldNames"
 }
 
 type ExceptionWithPrimitiveField struct {
@@ -838,10 +822,6 @@ func (x *ExceptionWithPrimitiveField) Error() string {
     return x.String()
 }
 
-func (x *ExceptionWithPrimitiveField) TypeName() string {
-    return "ExceptionWithPrimitiveField"
-}
-
 type ExceptionWithStructuredAnnotation struct {
     MessageField string `thrift:"message_field,1" json:"message_field" db:"message_field"`
     ErrorCode int32 `thrift:"error_code,2" json:"error_code" db:"error_code"`
@@ -1020,10 +1000,6 @@ func (x *ExceptionWithStructuredAnnotation) Error() string {
     return x.String()
 }
 
-func (x *ExceptionWithStructuredAnnotation) TypeName() string {
-    return "ExceptionWithStructuredAnnotation"
-}
-
 type Banal struct {
 }
 // Compile time interface enforcer
@@ -1104,10 +1080,6 @@ func (x *Banal) GetThriftStructMetadata() *metadata.ThriftException {
 
 func (x *Banal) Error() string {
     return x.String()
-}
-
-func (x *Banal) TypeName() string {
-    return "Banal"
 }
 
 type reqRaiserDoBland struct {

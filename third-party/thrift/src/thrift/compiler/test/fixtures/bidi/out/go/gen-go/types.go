@@ -149,10 +149,6 @@ func (x *BiDiSinkException) Error() string {
     return x.String()
 }
 
-func (x *BiDiSinkException) TypeName() string {
-    return "BiDiSinkException"
-}
-
 type BiDiStreamException struct {
     Message string `thrift:"message,1" json:"message" db:"message"`
 }
@@ -283,10 +279,6 @@ func (x *BiDiStreamException) Error() string {
     return x.String()
 }
 
-func (x *BiDiStreamException) TypeName() string {
-    return "BiDiStreamException"
-}
-
 type BiDiMethodException struct {
     Message string `thrift:"message,1" json:"message" db:"message"`
 }
@@ -415,10 +407,6 @@ func (x *BiDiMethodException) GetThriftStructMetadata() *metadata.ThriftExceptio
 
 func (x *BiDiMethodException) Error() string {
     return x.String()
-}
-
-func (x *BiDiMethodException) TypeName() string {
-    return "BiDiMethodException"
 }
 
 type reqBiDiServiceSimple struct {

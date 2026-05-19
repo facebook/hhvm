@@ -4436,10 +4436,6 @@ func (x *TerseException) Error() string {
     return x.String()
 }
 
-func (x *TerseException) TypeName() string {
-    return "TerseException"
-}
-
 
 func init() {
     thrift.InternalRegisterType("facebook.com/thrift/test/fixtures/terse_write/MyStruct", premadeCodecTypeSpec_terse_write_MyStruct)

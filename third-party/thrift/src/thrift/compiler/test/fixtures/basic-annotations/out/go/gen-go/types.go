@@ -457,10 +457,6 @@ func (x *MyException) Error() string {
     return x.String()
 }
 
-func (x *MyException) TypeName() string {
-    return "MyException"
-}
-
 type MyStruct struct {
     AbstractName string `thrift:"abstract,1" tag:"some_abstract"`
     MajorVer int64 `thrift:"major,2" json:"major" db:"major"`

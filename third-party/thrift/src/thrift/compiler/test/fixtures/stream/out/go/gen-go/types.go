@@ -101,10 +101,6 @@ func (x *FooStreamEx) Error() string {
     return x.String()
 }
 
-func (x *FooStreamEx) TypeName() string {
-    return "FooStreamEx"
-}
-
 type FooEx struct {
 }
 // Compile time interface enforcer
@@ -187,10 +183,6 @@ func (x *FooEx) Error() string {
     return x.String()
 }
 
-func (x *FooEx) TypeName() string {
-    return "FooEx"
-}
-
 type FooEx2 struct {
 }
 // Compile time interface enforcer
@@ -271,10 +263,6 @@ func (x *FooEx2) GetThriftStructMetadata() *metadata.ThriftException {
 
 func (x *FooEx2) Error() string {
     return x.String()
-}
-
-func (x *FooEx2) TypeName() string {
-    return "FooEx2"
 }
 
 type reqPubSubStreamingServiceReturnstream struct {

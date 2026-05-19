@@ -225,6 +225,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::cvtsi2sd:
     case Vinstr::cvtsi2sdm:
     case Vinstr::unpcklpd:
+    case Vinstr::pack2q:
     // x64 instructions
     case Vinstr::cqo:
     case Vinstr::idiv:

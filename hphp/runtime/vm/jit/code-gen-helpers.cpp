@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/immed.h"
@@ -172,6 +173,10 @@ void emitStPtr<64>(Vout& v, Vreg src, Vptr dst) {
 }
 
 void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0) {
+  if (arch::any<arch::ARM>()) {
+    v << pack2q{s0, s1, d0}; // s0,s1 -> d0[0],d0[1]
+    return;
+  }
   auto prep = [&] (Vreg r) {
     if (VregDbl::allowable(r)) return r;
     auto t = v.makeReg();

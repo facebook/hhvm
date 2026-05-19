@@ -311,6 +311,10 @@ struct Vgen {
   void emit(const trap& i);
   void emit(const ucomisd& i) { a.ucomisd(i.s0, i.s1); }
   void emit(unpcklpd i) { noncommute(i); a.unpcklpd(i.s0, i.d); }
+  void emit(const pack2q&) {
+    // pack2q is ARM-only; pack2() routes x64 through unpcklpd.
+    not_implemented();
+  }
   void emit(xorb i) { commuteSF(i); a.xorb(i.s0, i.d); }
   void emit(xorbi i) { binary(i); a.xorb(i.s0, i.d); }
   void emit(xorw i) { commuteSF(i); a.xorw(i.s0, i.d); }

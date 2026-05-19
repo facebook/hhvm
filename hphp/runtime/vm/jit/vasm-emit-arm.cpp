@@ -455,6 +455,7 @@ struct Vgen {
   void emit(const trap& /*i*/);
   void emit(const ucomisd& i) { a->Fcmp(D(i.s0), D(i.s1)); }
   void emit(const unpcklpd&);
+  void emit(const pack2q&);
   void emit(const xorb& i);
   void emit(const xorbi& i);
   void emit(const xorw& i);
@@ -1301,10 +1302,21 @@ void Vgen::emit(const trap& i) {
 }
 
 void Vgen::emit(const unpcklpd& i) {
-  // i.d and i.s1 can be same, i.s0 is unique.
+  // s0 is an across use: d may equal s1, but must not equal s0 because
+  // inserting lane 1 reads s0 after d is initialized from s1.
   if (i.d != i.s1) a->fmov(D(i.d), D(i.s1));
-  a->fmov(rAsm, D(i.s0));
-  a->fmov(D(i.d), 1, rAsm);
+  a->Ins(V(i.d).V2D(), 1, V(i.s0).V2D(), 0);
+}
+
+void Vgen::emit(const pack2q& i) {
+  if (i.s0 == i.s1) {
+    a->dup(V(i.d).V2D(), X(i.s0));
+    return;
+  }
+
+  a->fmov(D(i.d), X(i.s0));
+  // Select VIXL's INS (general) form: ins vD.d[1], xS1.
+  a->Ins(V(i.d).V2D(), 1, X(i.s1));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

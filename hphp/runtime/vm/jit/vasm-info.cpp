@@ -329,6 +329,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::ubfmliq:
     case Vinstr::ucomisd:
     case Vinstr::unpcklpd:
+    case Vinstr::pack2q:
     case Vinstr::xorb:
     case Vinstr::xorbi:
     case Vinstr::xorw:

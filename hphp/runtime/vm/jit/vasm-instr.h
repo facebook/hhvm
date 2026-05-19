@@ -337,6 +337,7 @@ struct Vunit;
   O(cvtsi2sd, Inone, U(s), D(d))\
   O(cvtsi2sdm, Inone, U(s), D(d))\
   O(unpcklpd, Inone, UA(s0) U(s1), D(d))\
+  O(pack2q, Inone, U(s0) U(s1), D(d))\
   /* other floating-point */\
   O(absdbl, Inone, UH(s,d), DH(d,s))\
   O(divsd, Inone, UA(s0) UH(s1,d), DH(d,s1))      \
@@ -1239,6 +1240,7 @@ struct cvttsd2siq { VregDbl s; Vreg64 d; };
 struct cvtsi2sd { Vreg64 s; VregDbl d; };
 struct cvtsi2sdm { Vptr s; VregDbl d; };
 struct unpcklpd { VregDbl s0, s1; Vreg128 d; };
+struct pack2q { Vreg64 s0, s1; Vreg128 d; };
 
 /*
  * Undocumented floating-point instructions.

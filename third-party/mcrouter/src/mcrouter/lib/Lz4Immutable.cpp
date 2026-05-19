@@ -505,7 +505,6 @@ std::unique_ptr<folly::IOBuf> Lz4Immutable::decompress(
   // Lower and upper limit to where the output buffer can go.
   const uint8_t* outputStart = output;
   const uint8_t* outputLimit = output + uncompressedSize;
-  (void)outputLimit;
 
   IovecCursor source(iov, iovcnt);
   IovecCursor match = dicCursor;
@@ -555,6 +554,9 @@ std::unique_ptr<folly::IOBuf> Lz4Immutable::decompress(
     matchLength += kMinMatch;
 
     // Copy match
+    if (FOLLY_UNLIKELY(output + matchLength > outputLimit)) {
+      return nullptr;
+    }
     match.seek(matchPos);
     safeCopy(output, match, matchLength);
     output += matchLength;

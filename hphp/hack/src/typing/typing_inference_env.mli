@@ -47,6 +47,14 @@ val fresh_type_invariant : t -> Tvid.provider -> Pos.t -> t * locl_ty
 val fresh_type_invariant_with_rank :
   t -> Tvid.provider -> int -> Pos.t -> t * locl_ty
 
+(** Create a shadow type variable — a type variable that only accumulates upper
+    bounds and is excluded from solving. Used for dynamic inference: tracks how
+    dynamic-typed expressions are used, building a constraint set that describes
+    their inferred use-type. *)
+val fresh_shadow_tyvar : t -> Tvid.provider -> Pos.t -> t * Tvid.t
+
+val is_shadow : t -> Tvid.t -> bool
+
 val open_tyvars : t -> Pos.t -> t
 
 val get_current_tyvars : t -> Tvid.t list

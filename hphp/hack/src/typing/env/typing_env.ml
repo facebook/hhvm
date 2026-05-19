@@ -301,6 +301,8 @@ module M = struct
   let get_tyvar_upper_bounds env var =
     Inf.get_tyvar_upper_bounds env.inference_env var
 
+  let is_shadow_tyvar env var = Inf.is_shadow env.inference_env var
+
   let set_tyvar_upper_bounds env var tys =
     {
       env with

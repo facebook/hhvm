@@ -736,9 +736,13 @@ let solve_all_unsolved_tyvars env =
       (Env.get_all_tyvars env)
       ~init:(env, [])
       ~f:(fun (env, ty_errs) var ->
-        match always_solve_tyvar env Reason.none var with
-        | (env, Some ty_err) -> (env, ty_err :: ty_errs)
-        | (env, _) -> (env, ty_errs))
+        (* Skip shadow type variables — they collect constraints but are never solved *)
+        if Env.is_shadow_tyvar env var then
+          (env, ty_errs)
+        else
+          match always_solve_tyvar env Reason.none var with
+          | (env, Some ty_err) -> (env, ty_err :: ty_errs)
+          | (env, _) -> (env, ty_errs))
   in
   let env = Env.log_env_change "solve_all_unsolved_tyvars" old_env env in
   log_remaining_prop env;

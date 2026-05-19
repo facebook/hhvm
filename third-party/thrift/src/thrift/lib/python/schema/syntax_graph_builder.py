@@ -100,12 +100,24 @@ class IncrementalGraphBuilder:
         return self._syntax_graph
 
     def merge_schema(self, schema: _schema_types.Schema) -> None:
-        """Merge a deserialized Schema, tracking what's new since last build."""
+        """Merge a deserialized Schema, tracking what's new since last build.
+
+        Raises:
+            RuntimeError: if a previously-merged ``definition_key`` arrives with
+            a different serialized ``Definition``. This catches inconsistent
+            partial schema syncs that would otherwise be silently masked by
+            keeping whichever copy arrived first.
+        """
         if schema.definitionsMap:
             for key, defn in schema.definitionsMap.items():
-                if key not in self._merged_definitions:
+                existing = self._merged_definitions.get(key)
+                if existing is None:
                     self._merged_definitions[key] = defn
                     self._new_definition_keys.add(key)
+                elif existing != defn:
+                    raise RuntimeError(
+                        f"Conflicting definitions merged for definition_key {key!r}"
+                    )
 
         if schema.programs:
             for prog in schema.programs:
@@ -121,6 +133,9 @@ class IncrementalGraphBuilder:
 
     def get_definition_by_uri(self, uri: str) -> Definition | None:
         return self._resolver.get_by_uri(uri)
+
+    def get_definition_by_definition_key(self, key: bytes) -> Definition | None:
+        return self._resolver.get_by_key(key)
 
     def build_pending(self) -> IncrementalBuildResult:
         """Build definitions and programs added since the last build."""

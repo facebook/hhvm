@@ -16,11 +16,16 @@ import sys
 import unittest
 
 import thrift.lib.python.schema.tests.schema_registry_dep.thrift_types as DepModule
+import thrift.lib.python.schema.tests.schema_registry_legacy_uri.thrift_clients as LegacyClients
+import thrift.lib.python.schema.tests.schema_registry_legacy_uri.thrift_services as LegacyServices
+import thrift.lib.python.schema.tests.schema_registry_legacy_uri.thrift_types as LegacyModule
 import thrift.lib.python.schema.tests.schema_registry_test.thrift_types as TestModule
 from thrift.lib.python.schema.schema_registry import SchemaRegistry
 from thrift.lib.python.schema.syntax_graph import (
     EnumNode,
     ExceptionNode,
+    InteractionNode,
+    ServiceNode,
     StructNode,
     StructTypeRef,
     UnionNode,
@@ -247,6 +252,180 @@ class SchemaRegistryTest(unittest.TestCase):
         )
         self.assertIsInstance(defn, StructNode)
         self.assertEqual(defn.name, "LazyStruct")
+
+    # -- URI-less types ---------------------------------------------
+
+    def test_get_node_struct_without_uri(self) -> None:
+        registry = SchemaRegistry()
+        defn = registry.get_node(LegacyModule.LegacyStruct)
+        assert isinstance(defn, StructNode)
+        self.assertEqual(defn.name, "LegacyStruct")
+        self.assertEqual(defn.uri, "")
+
+    def test_get_node_union_without_uri(self) -> None:
+        registry = SchemaRegistry()
+        defn = registry.get_node(LegacyModule.LegacyUnion)
+        assert isinstance(defn, UnionNode)
+        self.assertEqual(defn.name, "LegacyUnion")
+        self.assertEqual(defn.uri, "")
+
+    def test_get_node_exception_without_uri(self) -> None:
+        registry = SchemaRegistry()
+        defn = registry.get_node(LegacyModule.LegacyException)
+        assert isinstance(defn, ExceptionNode)
+        self.assertEqual(defn.name, "LegacyException")
+        self.assertEqual(defn.uri, "")
+
+    def test_get_node_enum_without_uri(self) -> None:
+        registry = SchemaRegistry()
+        defn = registry.get_node(LegacyModule.LegacyEnum)
+        assert isinstance(defn, EnumNode)
+        self.assertEqual(defn.name, "LegacyEnum")
+        self.assertEqual(defn.uri, "")
+
+    def test_get_node_service_handler_without_uri(self) -> None:
+        registry = SchemaRegistry()
+        defn = registry.get_node(LegacyServices.LegacyServiceInterface)
+        assert isinstance(defn, ServiceNode)
+        self.assertEqual(defn.name, "LegacyService")
+        self.assertEqual(defn.uri, "")
+
+    def test_get_node_service_client_without_uri(self) -> None:
+        registry = SchemaRegistry()
+        handler_defn = registry.get_node(LegacyServices.LegacyServiceInterface)
+        client_defn = registry.get_node(LegacyClients.LegacyService)
+        # Handler and client should resolve to the same ServiceNode.
+        self.assertIs(handler_defn, client_defn)
+
+    def test_get_node_interaction_without_uri(self) -> None:
+        registry = SchemaRegistry()
+        defn = registry.get_node(LegacyClients.LegacyService_LegacyInteraction)
+        assert isinstance(defn, InteractionNode)
+        self.assertEqual(defn.name, "LegacyInteraction")
+        self.assertEqual(defn.uri, "")
+
+    def test_get_node_caches_uri_less_type(self) -> None:
+        registry = SchemaRegistry()
+        defn1 = registry.get_node(LegacyModule.LegacyStruct)
+        defn2 = registry.get_node(LegacyModule.LegacyStruct)
+        self.assertIs(defn1, defn2)
+
+    def test_uri_less_field_resolution(self) -> None:
+        registry = SchemaRegistry()
+        struct_defn = registry.get_node(LegacyModule.LegacyStruct)
+        assert isinstance(struct_defn, StructNode)
+        # Field 'kind' references LegacyEnum, also URI-less. Resolution should
+        # not depend on URI at any point.
+        kind_field = struct_defn.fields[2]
+        self.assertEqual(kind_field.name, "kind")
+        resolved = kind_field.type.true_type
+        self.assertIsInstance(resolved.node, EnumNode)  # type: ignore[attr-defined]
+        self.assertEqual(resolved.node.name, "LegacyEnum")  # type: ignore[attr-defined]
+
+    def test_get_definition_by_uri_empty_string_fails(self) -> None:
+        registry = SchemaRegistry()
+        # Even after registering URI-less definitions, the empty-string URI
+        # must not auto-discover them.
+        registry.get_node(LegacyModule.LegacyStruct)
+        with self.assertRaises(KeyError):
+            registry.get_definition_by_uri("")
+
+    # -- definition_key lookup --------------------------------------
+
+    def test_get_definition_by_definition_key(self) -> None:
+        registry = SchemaRegistry()
+        struct_defn = registry.get_node(TestModule.MyStruct)
+        key = struct_defn.definition_key
+        self.assertIsInstance(key, bytes)
+        self.assertNotEqual(key, b"")
+        looked_up = registry._builder.get_definition_by_definition_key(key)
+        self.assertIs(looked_up, struct_defn)
+
+    def test_get_node_falls_back_to_uri_when_definition_key_method_absent(
+        self,
+    ) -> None:
+        registry = SchemaRegistry()
+        cls = TestModule.MyStruct
+        original = getattr(cls, "__get_thrift_definition_key__", None)
+        self.assertIsNotNone(original)
+        try:
+            delattr(cls, "__get_thrift_definition_key__")
+            defn = registry.get_node(cls)
+            self.assertIsInstance(defn, StructNode)
+            self.assertEqual(defn.name, "MyStruct")
+        finally:
+            setattr(cls, "__get_thrift_definition_key__", original)
+
+    def test_get_node_invalid_definition_key_raises(self) -> None:
+        registry = SchemaRegistry()
+        cls = TestModule.MyStruct
+        original = getattr(cls, "__get_thrift_definition_key__", None)
+        self.assertIsNotNone(original)
+        try:
+            setattr(cls, "__get_thrift_definition_key__", staticmethod(lambda: b""))
+            with self.assertRaises(RuntimeError):
+                registry.get_node(cls)
+
+            setattr(
+                cls,
+                "__get_thrift_definition_key__",
+                staticmethod(lambda: "not-bytes"),
+            )
+            with self.assertRaises(RuntimeError):
+                registry.get_node(cls)
+
+            # Present but unknown bytes — should raise KeyError, not silently
+            # fall back to URI.
+            SchemaRegistry._reset()
+            registry2 = SchemaRegistry()
+            setattr(
+                cls,
+                "__get_thrift_definition_key__",
+                staticmethod(lambda: b"\xde\xad\xbe\xef"),
+            )
+            with self.assertRaises(KeyError):
+                registry2.get_node(cls)
+        finally:
+            setattr(cls, "__get_thrift_definition_key__", original)
+
+    def test_merge_schema_idempotent(self) -> None:
+        """Merging the same schema bytes twice is a no-op, not a conflict."""
+        from thrift.lib.python.schema.schema_registry import _extract_schema_bytes
+
+        registry = SchemaRegistry()
+        registry.get_node(TestModule.MyStruct)
+        # Re-merge the same schema bytes — must not raise.
+        data = _extract_schema_bytes(TestModule)
+        schema = registry._deserialize_schema(data)
+        registry._builder.merge_schema(schema)
+
+    def test_merge_schema_duplicate_key_with_different_payload_raises(self) -> None:
+        from thrift.lib.python.schema.schema_registry import _extract_schema_bytes
+
+        registry = SchemaRegistry()
+        registry.get_node(TestModule.MyStruct)
+        schema = registry._deserialize_schema(_extract_schema_bytes(TestModule))
+        defns_map = dict(schema.definitionsMap or {})
+        # Pick two distinct keys whose definitions differ, then point key_a at
+        # defn_b. Re-merging this tampered schema must trip the conflict guard.
+        keys = list(defns_map.keys())
+        key_a, key_b = next(
+            (a, b)
+            for a in keys
+            for b in keys
+            if a != b and defns_map[a] != defns_map[b]
+        )
+        defns_map[key_a] = defns_map[key_b]
+        tampered_schema = schema(definitionsMap=defns_map)
+        with self.assertRaises(RuntimeError):
+            registry._builder.merge_schema(tampered_schema)
+
+    def test_get_definition_by_definition_key_unknown_returns_none(self) -> None:
+        registry = SchemaRegistry()
+        registry.get_node(TestModule.MyStruct)
+        self.assertIsNone(
+            registry._builder.get_definition_by_definition_key(b"\xde\xad\xbe\xef")
+        )
 
     def test_dynamic_import_transitively_registers_deps(self) -> None:
         """When a module is dynamically imported via uri_to_module_map,

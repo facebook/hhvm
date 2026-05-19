@@ -69,6 +69,30 @@ def _get_uri(thrift_type: type[Any]) -> str:
     return uri
 
 
+def _get_definition_key(thrift_type: type[Any]) -> bytes | None:
+    """Extract the DefinitionKey bytes from a Python thrift type, if available.
+
+    Returns None when the codegen predates `__get_thrift_definition_key__`. Raises
+    `RuntimeError` when the method is present but returns invalid data — that signals
+    a codegen bug and must not silently fall back to URI lookup.
+    """
+    get_key = getattr(thrift_type, "__get_thrift_definition_key__", None)
+    if get_key is None:
+        return None
+    key = get_key()
+    if not isinstance(key, bytes):
+        raise RuntimeError(
+            f"Type {thrift_type.__name__}.__get_thrift_definition_key__ "
+            f"returned non-bytes: {type(key).__name__}"
+        )
+    if not key:
+        raise RuntimeError(
+            f"Type {thrift_type.__name__}.__get_thrift_definition_key__ "
+            "returned empty bytes"
+        )
+    return key
+
+
 class SchemaRegistry:
     """Pure Python registry for looking up SyntaxGraph Definitions by type or URI."""
 
@@ -118,15 +142,25 @@ class SchemaRegistry:
     def get_node(self, thrift_type: type[Any]) -> Definition:
         """Look up a SyntaxGraph Definition by Python thrift type.
 
-        Auto-registers the type's module if not already registered.
-        Raises KeyError if type has no URI or definition not found.
+        Auto-registers the type's module if not already registered. Prefers the
+        type's `__get_thrift_definition_key__` bytes; falls back to URI lookup
+        only when the codegen predates that static method.
+
+        Raises:
+            KeyError: if neither key is available, or no definition is found.
+            RuntimeError: if `__get_thrift_definition_key__` returns invalid data.
         """
         cached = self._type_to_definition.get(thrift_type)
         if cached is not None:
             return cached
 
-        # Validate URI first before attempting module registration
-        uri = _get_uri(thrift_type)
+        defn_key = _get_definition_key(thrift_type)
+        if defn_key is None:
+            # Old codegen path: validate URI before module registration so we
+            # surface a clear error for plain (non-Thrift) Python types.
+            uri = _get_uri(thrift_type)
+        else:
+            uri = None
 
         # Auto-register the thrift_types module (schema bytes live there).
         # Types like enums/exceptions may live in sibling modules
@@ -138,9 +172,18 @@ class SchemaRegistry:
         ):
             self._register_module(types_module)
 
-        defn = self._builder.get_definition_by_uri(uri)
-        if defn is None:
-            raise KeyError(f"Definition not found for URI {uri!r}")
+        if defn_key is not None:
+            defn = self._builder.get_definition_by_definition_key(defn_key)
+            if defn is None:
+                raise KeyError(
+                    f"Definition not found for {thrift_type.__name__} "
+                    f"(definition_key={defn_key!r})"
+                )
+        else:
+            assert uri is not None
+            defn = self._builder.get_definition_by_uri(uri)
+            if defn is None:
+                raise KeyError(f"Definition not found for URI {uri!r}")
 
         self._type_to_definition[thrift_type] = defn
         return defn

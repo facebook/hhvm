@@ -88,6 +88,9 @@ class _Resolver:
     def get_by_uri(self, uri: str) -> Definition | None:
         return self._uri_to_definition.get(uri)
 
+    def get_by_key(self, key: bytes) -> Definition | None:
+        return self._definitions.get(key)
+
     def __contains__(self, key: bytes) -> bool:
         return key in self._definitions
 

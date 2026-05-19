@@ -10,12 +10,18 @@
 #include <boost/filesystem/operations.hpp>
 #include <fmt/format.h>
 #include <folly/executors/thread_factory/InitThreadFactory.h>
+#include <folly/executors/thread_factory/PriorityThreadFactory.h>
 #include <folly/io/async/MuxIOThreadPoolExecutor.h>
 
 #include "mcrouter/FileObserver.h"
 #include "mcrouter/McrouterLogFailure.h"
 #include "mcrouter/config.h"
 #include "mcrouter/lib/RuntimeVarsData.h"
+
+DEFINE_int32(
+    mcrouter_web_proxy_thread_niceness,
+    0,
+    "Thread niceness for mcrouter web proxy threads (mcrpxy-web only)");
 
 namespace facebook {
 namespace memcache {
@@ -44,6 +50,11 @@ std::unique_ptr<folly::IOThreadPoolExecutorBase> createProxyThreadsExecutor(
   auto threadPrefix = folly::to<std::string>("mcrpxy-", opts.router_name);
   std::shared_ptr<folly::ThreadFactory> threadFactory =
       std::make_shared<folly::NamedThreadFactory>(threadPrefix);
+  if (FLAGS_mcrouter_web_proxy_thread_niceness != 0 &&
+      opts.router_name == "web") {
+    threadFactory = std::make_shared<folly::PriorityThreadFactory>(
+        std::move(threadFactory), FLAGS_mcrouter_web_proxy_thread_niceness);
+  }
   threadFactory = std::make_shared<folly::InitThreadFactory>(
       std::move(threadFactory), [] { ProxyBase::registerProxyThread(); });
 

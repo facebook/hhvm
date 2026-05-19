@@ -4243,4 +4243,25 @@ func (x *streamPubSubStreamingServiceReturnstreamFast) setDefaults() *streamPubS
 
 
 func init() {
+    thrift.InternalRegisterError(
+        (*FooStreamEx)(nil),
+        "FooStreamEx",
+        thrift.ErrorBlameServer,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetySafe,
+    )
+    thrift.InternalRegisterError(
+        (*FooEx)(nil),
+        "FooEx",
+        thrift.ErrorBlameServer,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetySafe,
+    )
+    thrift.InternalRegisterError(
+        (*FooEx2)(nil),
+        "FooEx2",
+        thrift.ErrorBlameServer,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetySafe,
+    )
 }

@@ -5529,4 +5529,18 @@ func init() {
     thrift.InternalRegisterType("test.dev/fixtures/basic/MyDataItemAlias", premadeCodecTypeSpec_module_MyDataItemAlias)
     thrift.InternalRegisterType("test.dev/fixtures/basic/MyEnum", premadeCodecTypeSpec_module_MyEnum)
     thrift.InternalRegisterType("test.dev/fixtures/basic/HackEnum", premadeCodecTypeSpec_module_HackEnum)
+    thrift.InternalRegisterError(
+        (*MyException)(nil),
+        "MyException",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
+    thrift.InternalRegisterError(
+        (*MyExceptionWithMessage)(nil),
+        "MyExceptionWithMessage",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
 }

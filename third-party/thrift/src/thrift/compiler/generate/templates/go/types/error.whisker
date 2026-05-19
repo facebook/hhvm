@@ -1,0 +1,46 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{!
+  Inline partials that map a t_exception's blame/kind/safety enum string
+  (as emitted by t_whisker_generator) to the matching Go runtime constant.
+  Unknown values fall back to the Unspecified constant.
+}}
+
+{{#let export partial blame |exception|}}
+  {{#pragma ignore-newlines}}
+{{#if (object.eq? exception.blame "SERVER")}}thrift.ErrorBlameServer
+{{#else if (object.eq? exception.blame "CLIENT")}}thrift.ErrorBlameClient
+{{#else}}thrift.ErrorBlameUnspecified
+{{/if (object.eq? exception.blame "SERVER")}}
+{{/let partial}}
+
+{{#let export partial kind |exception|}}
+  {{#pragma ignore-newlines}}
+{{#if (object.eq? exception.kind "TRANSIENT")}}thrift.ErrorKindTransient
+{{#else if (object.eq? exception.kind "STATEFUL")}}thrift.ErrorKindStateful
+{{#else if (object.eq? exception.kind "PERMANENT")}}thrift.ErrorKindPermanent
+{{#else}}thrift.ErrorKindUnspecified
+{{/if (object.eq? exception.kind "TRANSIENT")}}
+{{/let partial}}
+
+{{#let export partial safety |exception|}}
+  {{#pragma ignore-newlines}}
+{{#if (object.eq? exception.safety "SAFE")}}thrift.ErrorSafetySafe
+{{#else}}thrift.ErrorSafetyUnspecified
+{{/if (object.eq? exception.safety "SAFE")}}
+{{/let partial}}

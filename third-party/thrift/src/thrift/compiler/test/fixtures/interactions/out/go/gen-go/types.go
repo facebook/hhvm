@@ -5587,4 +5587,11 @@ func (x *respBoxedInteractionGetABox) setDefaults() *respBoxedInteractionGetABox
 
 
 func init() {
+    thrift.InternalRegisterError(
+        (*CustomException)(nil),
+        "CustomException",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
 }

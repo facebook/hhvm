@@ -4331,4 +4331,25 @@ func (x *respFinalSinkServiceMethodFast) setDefaults() *respFinalSinkServiceMeth
 
 
 func init() {
+    thrift.InternalRegisterError(
+        (*InitialException)(nil),
+        "InitialException",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
+    thrift.InternalRegisterError(
+        (*SinkException1)(nil),
+        "SinkException1",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
+    thrift.InternalRegisterError(
+        (*SinkException2)(nil),
+        "SinkException2",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
 }

@@ -2220,4 +2220,53 @@ func (x *respRaiserGet500) setDefaults() *respRaiserGet500 {
 
 
 func init() {
+    thrift.InternalRegisterError(
+        (*Fiery)(nil),
+        "Fiery",
+        thrift.ErrorBlameServer,
+        thrift.ErrorKindTransient,
+        thrift.ErrorSafetyUnspecified,
+    )
+    thrift.InternalRegisterError(
+        (*Serious)(nil),
+        "Serious",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindStateful,
+        thrift.ErrorSafetySafe,
+    )
+    thrift.InternalRegisterError(
+        (*ComplexFieldNames)(nil),
+        "ComplexFieldNames",
+        thrift.ErrorBlameClient,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
+    thrift.InternalRegisterError(
+        (*CustomFieldNames)(nil),
+        "CustomFieldNames",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
+    thrift.InternalRegisterError(
+        (*ExceptionWithPrimitiveField)(nil),
+        "ExceptionWithPrimitiveField",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
+    thrift.InternalRegisterError(
+        (*ExceptionWithStructuredAnnotation)(nil),
+        "ExceptionWithStructuredAnnotation",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
+    thrift.InternalRegisterError(
+        (*Banal)(nil),
+        "Banal",
+        thrift.ErrorBlameClient,
+        thrift.ErrorKindPermanent,
+        thrift.ErrorSafetySafe,
+    )
 }

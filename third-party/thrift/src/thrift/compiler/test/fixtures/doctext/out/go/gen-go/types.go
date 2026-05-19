@@ -1475,4 +1475,11 @@ func (x *respCThing) setDefaults() *respCThing {
 
 
 func init() {
+    thrift.InternalRegisterError(
+        (*Bang)(nil),
+        "Bang",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
 }

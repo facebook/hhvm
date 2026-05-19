@@ -1962,4 +1962,25 @@ func (x *sinkBiDiServiceCanThrow) setDefaults() *sinkBiDiServiceCanThrow {
 
 
 func init() {
+    thrift.InternalRegisterError(
+        (*BiDiSinkException)(nil),
+        "BiDiSinkException",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
+    thrift.InternalRegisterError(
+        (*BiDiStreamException)(nil),
+        "BiDiStreamException",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
+    thrift.InternalRegisterError(
+        (*BiDiMethodException)(nil),
+        "BiDiMethodException",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
 }

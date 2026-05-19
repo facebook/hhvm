@@ -4451,4 +4451,11 @@ func init() {
     thrift.InternalRegisterType("facebook.com/thrift/test/fixtures/terse_write/TerseException", premadeCodecTypeSpec_terse_write_TerseException)
     thrift.InternalRegisterType("facebook.com/thrift/test/fixtures/terse_write/MyInteger", premadeCodecTypeSpec_terse_write_MyInteger)
     thrift.InternalRegisterType("facebook.com/thrift/test/fixtures/terse_write/MyEnum", premadeCodecTypeSpec_terse_write_MyEnum)
+    thrift.InternalRegisterError(
+        (*TerseException)(nil),
+        "TerseException",
+        thrift.ErrorBlameUnspecified,
+        thrift.ErrorKindUnspecified,
+        thrift.ErrorSafetyUnspecified,
+    )
 }

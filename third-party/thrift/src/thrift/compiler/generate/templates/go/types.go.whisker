@@ -18,6 +18,7 @@
 {{#import "common/type" as types}}
 {{#import "codec/codec" as codec}}
 {{#import "types/enum" as m_enum}}
+{{#import "types/error" as m_error}}
 {{#import "types/field" as m_field}}
 {{#import "types/struct" as m_struct}}
 {{#import "types/typedef" as m_typedef}}
@@ -83,5 +84,17 @@ func init() {
     {{#if enum.uri}}
     thrift.InternalRegisterType("{{enum.uri}}", {{enum.codec_type_spec_name}})
     {{/if enum.uri}}
+    {{/each}}
+    {{! Register exception metadata (blame/kind/safety) for all exception types. }}
+    {{#each root_program.structured_definitions as |struct|}}
+    {{#if struct.exception?}}
+    thrift.InternalRegisterError(
+        (*{{struct.go_name}})(nil),
+        "{{struct.name}}",
+        {{#partial m_error.blame exception=struct}},
+        {{#partial m_error.kind exception=struct}},
+        {{#partial m_error.safety exception=struct}},
+    )
+    {{/if struct.exception?}}
     {{/each}}
 }

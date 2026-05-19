@@ -42,6 +42,9 @@ class MessageCommon {
 
   static constexpr std::string_view kKcbIdentityHeader = "kcb_identity";
 
+  static constexpr std::string_view kPrivacyLibAgenticContextHeader =
+      "privacylib-propagation";
+
  protected:
   std::string traceContext_;
 };

@@ -22,6 +22,7 @@ RequestCommon::RequestCommon(const RequestCommon& other)
   cryptoAuthToken_ = other.cryptoAuthToken_;
   replyBitMask_ = other.replyBitMask_;
   clientIdentifier_ = other.clientIdentifier_;
+  privacyLibAgenticContext_ = other.privacyLibAgenticContext_;
 }
 
 RequestCommon& RequestCommon::operator=(const RequestCommon& other) {
@@ -30,6 +31,7 @@ RequestCommon& RequestCommon::operator=(const RequestCommon& other) {
     cryptoAuthToken_ = other.cryptoAuthToken_;
     replyBitMask_ = other.replyBitMask_;
     clientIdentifier_ = other.clientIdentifier_;
+    privacyLibAgenticContext_ = other.privacyLibAgenticContext_;
     uniqueId_ = other.uniqueId_;
   }
   return *this;
@@ -79,6 +81,15 @@ const std::optional<std::string>& RequestCommon::getClientIdentifier()
 void RequestCommon::setClientIdentifier(
     folly::StringPiece clientIdentifier) noexcept {
   clientIdentifier_ = clientIdentifier.str();
+}
+
+const std::optional<std::string>& RequestCommon::getPrivacyLibAgenticContext()
+    const {
+  return privacyLibAgenticContext_;
+}
+
+void RequestCommon::setPrivacyLibAgenticContext(std::string&& context) {
+  privacyLibAgenticContext_.emplace(std::move(context));
 }
 
 const std::optional<folly::IPAddress>& RequestCommon::getSourceIpAddr()

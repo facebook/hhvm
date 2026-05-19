@@ -74,7 +74,7 @@ def _inspect_impl(cls):
 
 def inspect(cls):
     klass = cls if isinstance(cls, type) else type(cls)
-    if hasattr(klass, '__get_reflection__'):
+    if hasattr(klass, '__get_reflection__') and klass not in (python_Map, python_List, python_Set):
         return _inspect_impl(klass)
     if isinstance(cls, python_Container):
         return _fbthrift_python_container_inst(cls)

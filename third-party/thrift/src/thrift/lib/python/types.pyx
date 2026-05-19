@@ -2393,6 +2393,12 @@ cdef class List(Container):
     def _fbthrift_same_type(List self, other_elem_type):
         return self._fbthrift_val_info.same_as(other_elem_type)
 
+    def __get_reflection__(List self):
+        from thrift.python.container_typedefs import _type_and_thrift_type_from_typeinfo
+        from thrift.python.reflection.types_reflection import ListSpec
+        py_type, thrift_type = _type_and_thrift_type_from_typeinfo(self._fbthrift_val_info)
+        return ListSpec(value=py_type, thrift_type=thrift_type)
+
 tag_object_as_sequence(<PyTypeObject*>List)
 Sequence.register(List)
 
@@ -2537,6 +2543,12 @@ cdef class Set(Container):
 
     def _fbthrift_same_type(Set self, other_elem_type):
         return self._fbthrift_val_info.same_as(other_elem_type)
+
+    def __get_reflection__(Set self):
+        from thrift.python.container_typedefs import _type_and_thrift_type_from_typeinfo
+        from thrift.python.reflection.types_reflection import SetSpec
+        py_type, thrift_type = _type_and_thrift_type_from_typeinfo(self._fbthrift_val_info)
+        return SetSpec(value=py_type, thrift_type=thrift_type)
 
     cdef frozenset _fbthrift_get_elements(Set self):
         """
@@ -2709,6 +2721,13 @@ cdef class Map(Container):
             self._fbthrift_key_info.same_as(other_key_type) and
             self._fbthrift_val_info.same_as(other_val_type)
         )
+
+    def __get_reflection__(Map self):
+        from thrift.python.container_typedefs import _type_and_thrift_type_from_typeinfo
+        from thrift.python.reflection.types_reflection import MapSpec
+        key_type, key_tt = _type_and_thrift_type_from_typeinfo(self._fbthrift_key_info)
+        val_type, val_tt = _type_and_thrift_type_from_typeinfo(self._fbthrift_val_info)
+        return MapSpec(key=key_type, key_thrift_type=key_tt, value=val_type, value_thrift_type=val_tt)
 
     cdef dict _fbthrift_get_elements(Map self):
         """

@@ -142,8 +142,10 @@ class ReflectionTests(unittest.TestCase):
         self.assertTrue(inspectable(x))
         r = inspect(x)
         self.assertEqual(r.key, str)
-        expected_val_klass = python_Map if is_auto_migrated() else StrI32ListMap
-        self.assertEqual(r.value, expected_val_klass)
+        if is_auto_migrated():
+            self.assertTrue(issubclass(r.value, python_Map))
+        else:
+            self.assertEqual(r.value, StrI32ListMap)
         self.assertEqual(r.key_kind, NumberType.NOT_A_NUMBER)
         self.assertEqual(r.value_kind, NumberType.NOT_A_NUMBER)
 

@@ -732,13 +732,18 @@ struct ReflectionAnnotation {
   2: float ratio;
 }
 
-@StructuredAnnotation{second = 42}
+@StructuredAnnotation{second = 42, third = ["hello", "world"]}
 @ReflectionAnnotation{count = 7, ratio = 0.5}
 @thrift.DeprecatedUnvalidatedAnnotations{items = {"depr_key": "depr_val"}}
 struct AnnotatedForReflection {
   @thrift.DeprecatedUnvalidatedAnnotations{items = {"field_key": "field_val"}}
   1: string annotated_field;
   2: i32 plain_field;
+}
+
+struct CrossModuleRef {
+  1: sub_dependency.Basic basic;
+  2: sub_dependency.IncludedColour colour;
 }
 
 struct StructWithMap {

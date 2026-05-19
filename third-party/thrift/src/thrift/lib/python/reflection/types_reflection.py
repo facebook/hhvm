@@ -20,8 +20,9 @@ import builtins
 import threading
 from functools import wraps
 from types import MappingProxyType
-from typing import Any, Callable, Iterator, Sequence, TypeVar
+from typing import Any, Callable, Iterator, overload, Sequence, Type, TypeVar, Union
 
+from thrift.python.exceptions import GeneratedError
 from thrift.python.reflection.constants_reflection import (
     _ImmutableMeta,
     ConstantMapSpec,
@@ -30,6 +31,16 @@ from thrift.python.reflection.constants_reflection import (
     ThriftType,
 )
 from thrift.python.reflection_enums import NumberType, Qualifier, StructType
+from thrift.python.types import (
+    ImmutableList,
+    ImmutableMap,
+    ImmutableSet,
+    List,
+    Map,
+    Set,
+    Struct,
+    Union as Union_,
+)
 
 
 _THRIFT_TYPE_TO_NUMBER_TYPE: dict[ThriftType, NumberType] = {
@@ -338,10 +349,40 @@ def _inspect_impl(cls: type[Any]) -> StructSpec | ListSpec | SetSpec | MapSpec:
     return cls.__get_reflection__()  # type: ignore[attr-defined]
 
 
+@overload
 def inspect(
-    cls: Any,
+    cls_or_instance: Union[ImmutableList[Any], Type[ImmutableList[Any]]],
+) -> ListSpec: ...
+
+
+@overload
+def inspect(
+    cls_or_instance: Union[ImmutableSet[Any], Type[ImmutableSet[Any]]],
+) -> SetSpec: ...
+
+
+@overload
+def inspect(
+    cls_or_instance: Union[ImmutableMap[Any, Any], Type[ImmutableMap[Any, Any]]],
+) -> MapSpec: ...
+
+
+@overload
+def inspect(
+    cls_or_instance: Union[
+        Struct, Type[Struct], Union_, Type[Union_], GeneratedError, Type[GeneratedError]
+    ],
+) -> StructSpec: ...
+
+
+def inspect(
+    cls_or_instance: Any,
 ) -> StructSpec | ListSpec | SetSpec | MapSpec:
-    klass = cls if isinstance(cls, type) else type(cls)
+    if isinstance(cls_or_instance, (List, Set, Map)):
+        return cls_or_instance.__get_reflection__()  # type: ignore[attr-defined]
+    klass = (
+        cls_or_instance if isinstance(cls_or_instance, type) else type(cls_or_instance)
+    )
     if hasattr(klass, "__get_reflection__"):
         return _inspect_impl(klass)
     raise TypeError(
@@ -349,7 +390,9 @@ def inspect(
     )
 
 
-def inspectable(cls: Any) -> bool:
-    if not isinstance(cls, type):
-        cls = type(cls)
-    return hasattr(cls, "__get_reflection__")
+def inspectable(cls_or_instance: Any) -> bool:
+    if not isinstance(cls_or_instance, type):
+        if isinstance(cls_or_instance, (List, Set, Map)):
+            return True
+        cls_or_instance = type(cls_or_instance)
+    return hasattr(cls_or_instance, "__get_reflection__")

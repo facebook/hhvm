@@ -24,23 +24,36 @@ from test_thrift.thrift_types import (
     AnnotatedForReflection,
     Color,
     ComplexUnion,
+    CrossModuleRef,
     Digits,
     easy,
     EmptyStruct,
     HardError,
     I32List,
     Integers,
+    ListTypes,
     Messy,
+    SetI32,
     SimpleStruct,
+    StrI32ListMap,
     StructuredAnnotation,
 )
+from testing.sub_dependency.thrift_types import Basic as SubDepBasic
 from thrift.python.reflection.constants_reflection import (
+    ConstantListSpec,
     ConstantMapSpec,
     ConstantSpec,
     ConstantStructSpec,
     ThriftType,
 )
-from thrift.python.reflection.types_reflection import inspect, inspectable, StructSpec
+from thrift.python.reflection.types_reflection import (
+    inspect,
+    inspectable,
+    ListSpec,
+    MapSpec,
+    SetSpec,
+    StructSpec,
+)
 from thrift.python.reflection_enums import NumberType, Qualifier, StructType
 from thrift.python.types import (
     List as _fbthrift_List,
@@ -58,6 +71,7 @@ def _inspect_struct(cls: type[Any]) -> StructSpec:
 class InspectSimpleStructTest(unittest.TestCase):
     def test_returns_struct_spec(self) -> None:
         spec = inspect(SimpleStruct)
+        # structured_annotations is immutable
         self.assertIsInstance(spec, StructSpec)
 
     def test_name(self) -> None:
@@ -299,7 +313,7 @@ class InspectableTest(unittest.TestCase):
 
     def test_inspect_raises_for_non_thrift(self) -> None:
         with self.assertRaises(TypeError):
-            inspect(int)
+            inspect(int)  # pyre-fixme[6]: intentionally invalid
 
 
 class NumberTypeEnumTest(unittest.TestCase):
@@ -373,26 +387,143 @@ class InspectFieldKindTest(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ("list", "float_list", _fbthrift_List, "List__ComplexUnion_float_list"),
-            ("set", "float_set", _fbthrift_Set, "Set__ComplexUnion_float_set"),
-            ("map", "float_map", _fbthrift_Map, "Map__ComplexUnion_float_map"),
+            (
+                "list",
+                "float_list",
+                _fbthrift_List,
+                "List__ComplexUnion_float_list",
+                ThriftType.LIST,
+            ),
+            (
+                "set",
+                "float_set",
+                _fbthrift_Set,
+                "Set__ComplexUnion_float_set",
+                ThriftType.SET,
+            ),
+            (
+                "map",
+                "float_map",
+                _fbthrift_Map,
+                "Map__ComplexUnion_float_map",
+                ThriftType.MAP,
+            ),
         ]
     )
-    def test_raw_container_field_is_default_constructible(
+    def test_raw_container_field(
         self,
         _name: str,
         field_name: str,
         base_cls: type[Any],
         expected_type_name: str,
+        expected_thrift_type: ThriftType,
     ) -> None:
         spec = _inspect_struct(ComplexUnion)
         fields_by_name = {f.name: f for f in spec.fields}
-        container_type = fields_by_name[field_name].type
-        self.assertTrue(issubclass(container_type, base_cls))
-        self.assertEqual(container_type.__name__, expected_type_name)
-        self.assertEqual(container_type.__module__, "test_thrift.thrift_types")
-        instance = container_type()
+        f = fields_by_name[field_name]
+        self.assertTrue(issubclass(f.type, base_cls))
+        self.assertEqual(f.type.__name__, expected_type_name)
+        self.assertEqual(f.type.__module__, "test_thrift.thrift_types")
+        self.assertEqual(f.thrift_type, expected_thrift_type)
+        instance = f.type()
         self.assertEqual(len(instance), 0)
+
+    def test_nested_container_inspect_returns_list_spec(self) -> None:
+        spec = _inspect_struct(ListTypes)
+        fields_by_name = {f.name: f for f in spec.fields}
+        outer_type = fields_by_name["third"].type
+        outer_spec = inspect(outer_type)
+        self.assertIsInstance(outer_spec, ListSpec)
+
+    def test_nested_container_inner_type_is_default_constructible(self) -> None:
+        spec = _inspect_struct(ListTypes)
+        fields_by_name = {f.name: f for f in spec.fields}
+        outer_type = fields_by_name["third"].type
+        outer_spec = inspect(outer_type)
+        assert isinstance(outer_spec, ListSpec)
+        self.assertEqual(outer_spec.thrift_type, ThriftType.LIST)
+        inner_type = outer_spec.value
+        self.assertTrue(issubclass(inner_type, _fbthrift_List))
+        inner_instance = inner_type()
+        self.assertEqual(len(inner_instance), 0)
+
+    def test_container_typedef_thrift_type(self) -> None:
+        spec = _inspect_struct(easy)
+        fields_by_name = {f.name: f for f in spec.fields}
+        self.assertEqual(fields_by_name["val_list"].thrift_type, ThriftType.LIST)
+
+    def test_cross_module_field_type(self) -> None:
+        spec = _inspect_struct(CrossModuleRef)
+        fields_by_name = {f.name: f for f in spec.fields}
+        f = fields_by_name["basic"]
+        self.assertIs(f.type, SubDepBasic)
+        self.assertEqual(f.thrift_type, ThriftType.STRUCT)
+
+
+class InspectContainerTypedefTest(unittest.TestCase):
+    def test_inspect_list_typedef(self) -> None:
+        spec = inspect(I32List)
+        self.assertIsInstance(spec, ListSpec)
+        self.assertEqual(spec.value, int)
+        self.assertEqual(spec.thrift_type, ThriftType.I32)
+        self.assertEqual(spec.kind, NumberType.I32)
+        value, kind = spec
+        self.assertEqual(value, int)
+        self.assertEqual(kind, NumberType.I32)
+
+    def test_inspect_list_typedef_instance(self) -> None:
+        spec = inspect(I32List([1, 2, 3]))
+        self.assertIsInstance(spec, ListSpec)
+        self.assertEqual(spec.value, int)
+
+    def test_inspect_set_typedef(self) -> None:
+        spec = inspect(SetI32)
+        self.assertIsInstance(spec, SetSpec)
+        self.assertEqual(spec.value, int)
+        self.assertEqual(spec.thrift_type, ThriftType.I32)
+        self.assertEqual(spec.kind, NumberType.I32)
+        value, kind = spec
+        self.assertEqual(value, int)
+        self.assertEqual(kind, NumberType.I32)
+
+    def test_inspect_map_typedef(self) -> None:
+        spec = inspect(StrI32ListMap)
+        assert isinstance(spec, MapSpec)
+        self.assertEqual(spec.key, str)
+        self.assertEqual(spec.key_thrift_type, ThriftType.STRING)
+        self.assertEqual(spec.key_kind, NumberType.NOT_A_NUMBER)
+        self.assertTrue(issubclass(spec.value, _fbthrift_List))
+        self.assertEqual(spec.value_thrift_type, ThriftType.LIST)
+        self.assertEqual(spec.value_kind, NumberType.NOT_A_NUMBER)
+        inner = inspect(spec.value)
+        self.assertIsInstance(inner, ListSpec)
+        self.assertEqual(inner.value, int)
+        self.assertEqual(inner.thrift_type, ThriftType.I32)
+        self.assertEqual(inner.kind, NumberType.I32)
+        key, key_kind, value, value_kind = spec
+        self.assertEqual(key, str)
+        self.assertEqual(key_kind, NumberType.NOT_A_NUMBER)
+        self.assertTrue(issubclass(value, _fbthrift_List))
+        self.assertEqual(value_kind, NumberType.NOT_A_NUMBER)
+
+    def test_inspect_caches_container(self) -> None:
+        spec1 = inspect(I32List)
+        spec2 = inspect(I32List)
+        self.assertIs(spec1, spec2)
+
+    def test_inspect_container_field_value(self) -> None:
+        val_list = easy().val_list
+        spec = inspect(val_list)
+        self.assertIsInstance(spec, ListSpec)
+        self.assertEqual(spec.value, int)
+        self.assertEqual(spec.thrift_type, ThriftType.I32)
+
+    def test_inspectable_container(self) -> None:
+        self.assertTrue(inspectable(I32List))
+        self.assertTrue(inspectable(SetI32))
+        self.assertTrue(inspectable(StrI32ListMap))
+        self.assertTrue(inspectable(I32List()))
+        self.assertTrue(inspectable(easy().val_list))
 
 
 class InspectAnnotationsTest(unittest.TestCase):
@@ -449,6 +580,20 @@ class InspectAnnotationsTest(unittest.TestCase):
         self.assertEqual(second_spec.value, 42)
         self.assertEqual(second_spec.thrift_type, ThriftType.I64)
 
+    def test_annotation_with_list_value(self) -> None:
+        spec = _inspect_struct(AnnotatedForReflection)
+        raw = spec.structured_annotations
+        sa_value = raw["test_thrift.StructuredAnnotation"].value
+        assert isinstance(sa_value, ConstantStructSpec)
+        third_spec = sa_value.fields["third"]
+        self.assertEqual(third_spec.thrift_type, ThriftType.LIST)
+        third_value = third_spec.value
+        assert isinstance(third_value, ConstantListSpec)
+        self.assertEqual(len(third_value.value), 2)
+        self.assertEqual(third_value.value[0].value, "hello")
+        self.assertEqual(third_value.value[0].thrift_type, ThriftType.STRING)
+        self.assertEqual(third_value.value[1].value, "world")
+
     def test_annotation_i32_and_float_thrift_types(self) -> None:
         spec = _inspect_struct(AnnotatedForReflection)
         raw = spec.structured_annotations
@@ -504,3 +649,32 @@ class HashContractTest(unittest.TestCase):
         self.assertEqual(a, b)
         self.assertEqual(hash(a), hash(b))
         self.assertEqual(len({a, b}), 1)
+
+
+class SpecImmutabilityTest(unittest.TestCase):
+    def test_constant_spec_immutable(self) -> None:
+        spec = ConstantSpec(value=42, thrift_type=ThriftType.I32)
+        with self.assertRaises(AttributeError):
+            spec.value = 99  # type: ignore[misc]
+
+    def test_list_spec_immutable(self) -> None:
+        spec = ListSpec(value=int, thrift_type=ThriftType.I32)
+        with self.assertRaises(AttributeError):
+            spec.value = str  # type: ignore[misc]
+
+    def test_map_spec_immutable(self) -> None:
+        spec = MapSpec(
+            key=str,
+            key_thrift_type=ThriftType.STRING,
+            value=int,
+            value_thrift_type=ThriftType.I64,
+        )
+        with self.assertRaises(AttributeError):
+            spec.key = int  # type: ignore[misc]
+
+    def test_constant_spec_hashable(self) -> None:
+        a = ConstantSpec(value=42, thrift_type=ThriftType.I32)
+        b = ConstantSpec(value=42, thrift_type=ThriftType.I32)
+        self.assertEqual(hash(a), hash(b))
+        s = {a, b}
+        self.assertEqual(len(s), 1)

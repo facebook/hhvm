@@ -248,14 +248,14 @@ cdef class MapTypeInfo(TypeInfoBase):
 
 cdef class StructTypeInfo(TypeInfoBase):
     cdef cTypeInfo cpp_obj
-    cdef object _class
+    cdef readonly object _class
     cdef const cTypeInfo* get_cTypeInfo(self)
     cdef bint is_union
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
 
 cdef class EnumTypeInfo(TypeInfoBase):
-    cdef object _class
+    cdef readonly object _class
     cdef unique_ptr[cEnumTypeInfo] cpp_obj
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)

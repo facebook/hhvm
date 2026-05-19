@@ -49,7 +49,7 @@ struct WriteToSocket {
 };
 
 /**
- * Reports that a fatal error has occured on the connection.
+ * Reports that a fatal error has occurred on the connection.
  */
 struct ReportError {
   folly::exception_wrapper error;

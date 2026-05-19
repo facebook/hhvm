@@ -104,3 +104,24 @@ class IOBufTests(unittest.TestCase):
         # BUG: IOBuf data is silently dropped because getIOBuf() returns NULL
         # for non-owning IOBufs (IOBuf._ours is not set).
         self.assertEqual(bytes(deserialized.buf), b"")
+
+    def test_chained_iobuf_serialize_round_trip(self) -> None:
+        """Documents current trunk behavior for an owning chained IOBuf passed
+        as a struct field through serialize-deserialize."""
+        head = WritableIOBuf(bytearray(b"hello"))
+        tail = WritableIOBuf(bytearray(b"world"))
+        head.append_to_chain(tail)
+
+        self.assertTrue(head.is_chained)
+        self.assertEqual(b"".join(head), b"helloworld")
+
+        m = self.Moo(val=1, buf=head)
+        serialized = self._serialize(m)
+        deserialized = self._deserialize(type(m), serialized)
+
+        self.assertEqual(deserialized.val, 1)
+        result_buf = deserialized.buf
+        self.assertIsInstance(result_buf, IOBuf)
+        self.assertFalse(result_buf.is_chained)
+        self.assertEqual(bytes(result_buf), b"helloworld")
+        self.assertEqual(b"".join(result_buf), b"helloworld")

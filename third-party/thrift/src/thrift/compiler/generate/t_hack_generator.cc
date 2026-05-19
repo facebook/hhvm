@@ -166,9 +166,6 @@ class t_hack_generator : public t_concat_generator {
       throw std::runtime_error("Don't use legacy_arrays with strict_types");
     } else if (!legacy_arrays_ && arraysets_ && !hack_collections_) {
       throw std::runtime_error("Don't use arraysets without hack_collections");
-    } else if (mangled_services_ && has_hack_namespace) {
-      throw std::runtime_error(
-          "Don't use mangledsvcs with hack namespaces or package.");
     }
 
     out_dir_base_ = "gen-hack";
@@ -6160,10 +6157,28 @@ void t_hack_generator::generate_service(const t_service* tservice) {
   if (mangled_services_) {
     auto [_, ns_type] = get_namespace(tservice);
     if (ns_type != HackThriftNamespaceType::PHP) {
-      throw std::runtime_error(
-          "cannot generate mangled services for " + tservice->name() +
-          "; no php namespace found");
+      if (get_hack_service_prefix(tservice).empty()) {
+        // No NamePrefix: preserve the historical error messages exactly,
+        // dispatched by namespace type.
+        if (has_hack_namespace) {
+          throw std::runtime_error(
+              "Don't use mangledsvcs with hack namespaces or package.");
+        }
+        throw std::runtime_error(
+            "cannot generate mangled services for " + tservice->name() +
+            "; no php namespace or @hack.NamePrefix found");
+      }
+      // PACKAGE or EMPTY + `@hack.NamePrefix`: treat `mangledsvcs` as
+      // a no-op program-wide. NamePrefix supplies the disambiguator and
+      // (for PACKAGE) the namespace itself already disambiguates classes
+      // across thrift files. Disabling the option here ensures inner
+      // call sites that read `mangled_services_` directly (e.g.
+      // `_generate_sendImplHelper`) also emit unmangled output rather
+      // than identifiers/filenames that embed namespace separators.
+      mangled_services_ = false;
     }
+  }
+  if (mangled_services_) {
     // Note: Because calling generate_service again "uses up" tmp variables,
     //   generating a mangled service has the effect of changing the files of
     //   unmangled services declared in the same thrift file (i.e., with

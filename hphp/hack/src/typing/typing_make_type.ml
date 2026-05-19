@@ -105,11 +105,11 @@ let null r = prim_type r Nast.Tnull
 
 let nonnull r = mk (r, Tnonnull)
 
-let dynamic r = mk (r, Tdynamic)
+let dynamic r = mk (r, Tdynamic None)
 
 let is_dynamic_or_like_or_mixed ty =
   match get_node ty with
-  | Tdynamic
+  | Tdynamic _
   | Tlike _
   | Tmixed ->
     true
@@ -132,7 +132,7 @@ let like r ty =
    wrapping through predicate-based refinement. *)
 let rec is_locl_supertype_of_dynamic ty =
   match get_node ty with
-  | Tdynamic -> true
+  | Tdynamic _ -> true
   | Tany _ -> true
   | Toption inner -> is_locl_supertype_of_dynamic inner
   | Tnewtype (n, [inner], _)
@@ -154,7 +154,7 @@ let supportdyn r ty =
   match get_node ty with
   | Tnewtype (c, _, _) when String.equal c SN.Classes.cSupportDyn -> ty
   | Tunion []
-  | Tdynamic
+  | Tdynamic _
   | Tprim _ ->
     ty
   | _ -> mk (r, Tnewtype (SN.Classes.cSupportDyn, [ty], ty))

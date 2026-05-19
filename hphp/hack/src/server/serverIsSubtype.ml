@@ -72,7 +72,7 @@ let rec validate_free_type env locl_ty =
     validate_l env tyargs
   | Toption locl_ty -> validate_free_type env locl_ty
   | Tnonnull
-  | Tdynamic
+  | Tdynamic _
   | Tprim _
   | Tany _ ->
     []

@@ -326,7 +326,7 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
     else
       empty
   | Tnonnull
-  | Tdynamic
+  | Tdynamic _
   | Tprim _
   | Tany _
   | Tthis

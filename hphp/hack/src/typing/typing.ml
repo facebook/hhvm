@@ -398,7 +398,7 @@ let get_value_collection_inst env p vc_kind ty =
    * is a set-like one. *)
   | Tnonnull -> arraykey_on (MakeType.mixed (get_reason ty))
   | Tany _ -> Some (env, ty)
-  | Tdynamic when Tast.is_under_dynamic_assumptions env.checked ->
+  | Tdynamic _ when Tast.is_under_dynamic_assumptions env.checked ->
     (* interpret dynamic as Traversable<dynamic> or keyset<arraykey> *)
     arraykey_on ty
   | _ -> None
@@ -423,7 +423,7 @@ let get_key_value_collection_inst env p ty =
     let mixed = MakeType.mixed (Reason.witness p) in
     Some (env, arraykey, mixed)
   | Tany _ -> Some (env, ty, ty)
-  | Tdynamic when Tast.is_under_dynamic_assumptions env.checked ->
+  | Tdynamic _ when Tast.is_under_dynamic_assumptions env.checked ->
     (* interpret dynamic as KeyedTraversable<arraykey, dynamic> *)
     let arraykey = MakeType.arraykey (Reason.key_value_collection_key p) in
     Some (env, arraykey, ty)
@@ -4460,7 +4460,7 @@ end = struct
       let send =
         match get_node expected_return with
         | Tclass (_, _, _ :: _ :: send :: _) -> send
-        | Tdynamic when Tast.is_under_dynamic_assumptions env.checked ->
+        | Tdynamic _ when Tast.is_under_dynamic_assumptions env.checked ->
           expected_return
         | _ ->
           Diagnostics.internal_error p "Return type is not a generator";
@@ -5489,7 +5489,7 @@ end = struct
     in
     let class_types_and_ctor_types =
       let r = Reason.dynamic_construct p in
-      let dyn = (mk (r, Tdynamic), mk (r, Tdynamic)) in
+      let dyn = (mk (r, Tdynamic None), mk (r, Tdynamic None)) in
       if had_dynamic then
         dyn :: class_types_and_ctor_types
       else
@@ -6355,7 +6355,7 @@ end = struct
       let rec should_use_constraint seen env ty =
         let (env, ty) = Env.expand_type env ty in
         match get_node ty with
-        | Tdynamic
+        | Tdynamic _
         | Tprim _
         | Ttuple _
         | Tfun _
@@ -6920,7 +6920,7 @@ end = struct
           unpacked_element
       | _ ->
         (match deref efty with
-        | (r, Tdynamic) ->
+        | (r, Tdynamic _) ->
           let ty = MakeType.dynamic (Reason.dynamic_call expr_pos) in
           let el =
             (* Need to check that the type of the unpacked_element can be,
@@ -7019,7 +7019,8 @@ end = struct
           let (env, ty) =
             match ty with
             | Tprim Tnull -> (env, mk (r, Tprim Tnull))
-            | Tdynamic -> (env, MakeType.dynamic (Reason.dynamic_call expr_pos))
+            | Tdynamic _ ->
+              (env, MakeType.dynamic (Reason.dynamic_call expr_pos))
             | Tvar _ when TUtils.is_tyvar_error env efty ->
               Env.fresh_type_error env expr_pos
             | Tunion []
@@ -8910,7 +8911,7 @@ end = struct
         end
       end
     end
-    | (_, (Tdynamic | Tany _)) ->
+    | (_, (Tdynamic _ | Tany _)) ->
       (* For [dynamic] ([any]) give the method type as [dynamic] ([any]) *)
       let method_ty =
         map_reason class_ty ~f:(fun class_reason ->
@@ -10132,7 +10133,7 @@ end = struct
       let (env, ty) = Env.expand_type env ty in
       match get_node ty with
       | Tprim (Tnull | Tbool | Tint | Tfloat | Tnum | Tarraykey) -> (env, acc)
-      | Tdynamic -> (env, acc)
+      | Tdynamic _ -> (env, acc)
       | Tclass ((_, id), _, _) when String.equal id SN.Classes.cString ->
         (env, acc)
       | Tunion tyl ->
@@ -11893,7 +11894,7 @@ end = struct
               (env, Error (ty_actual, ty_expect))
           in
           ((env, Option.merge ty_err1 ty_err2 ~f:Typing_error.both), (ty, err))
-        | (_, Tdynamic) -> ((env, None), (base_ty, Ok base_ty))
+        | (_, Tdynamic _) -> ((env, None), (base_ty, Ok base_ty))
         | (r, Tvar _) ->
           let ty_err2 =
             if TUtils.is_tyvar_error env base_ty then
@@ -11967,7 +11968,7 @@ end = struct
            * type `ty` must be preserved. *)
           let (env, base_type) = TUtils.get_base_type env ty in
           (match get_node base_type with
-          | Tdynamic -> get_info (`Dynamic :: res) tyl
+          | Tdynamic _ -> get_info (`Dynamic :: res) tyl
           | Tclass (sid, _, _) ->
             let class_ = Env.get_class env (snd sid) in
             (match class_ with
@@ -13260,7 +13261,7 @@ end = struct
       Option.map ~f:(fun (_, _, ty) -> Ok ty) coerce_from_ty
     in
     match deref cty with
-    | (_, (Tdynamic | Tany _)) -> (env, (cty, []), dflt_rval_err)
+    | (_, (Tdynamic _ | Tany _)) -> (env, (cty, []), dflt_rval_err)
     | (_, Tunion tyl) ->
       let (env, pairs, rval_err_opts) =
         List.fold_left

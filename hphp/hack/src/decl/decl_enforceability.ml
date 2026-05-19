@@ -369,7 +369,7 @@ end = struct
       | Tprim _ -> Enforced ty
       | Tany _ -> Enforced ty
       | Tnonnull -> Enforced ty
-      | Tdynamic ->
+      | Tdynamic _ ->
         if is_dynamic_enforceable then
           Enforced ty
         else

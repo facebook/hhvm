@@ -54,7 +54,7 @@ let rec is_dynamic_or_intersection_with_dynamic ~accept_intersections env ty =
     List.exists
       tyl
       ~f:(is_dynamic_or_intersection_with_dynamic ~accept_intersections env)
-  | Tdynamic -> true
+  | Tdynamic _ -> true
   | _ -> false
 
 let rec try_strip_dynamic_from_union ?(accept_intersections = false) env tyl =

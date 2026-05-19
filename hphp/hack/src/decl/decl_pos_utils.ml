@@ -40,7 +40,7 @@ struct
     mk (map_pos pos pos_or_decl r, ty_ x)
 
   and ty_ : decl_phase ty_ -> decl_phase ty_ = function
-    | (Tany _ | Tthis | Tmixed | Twildcard | Tnonnull | Tdynamic) as x -> x
+    | (Tany _ | Tthis | Tmixed | Twildcard | Tnonnull | Tdynamic _) as x -> x
     | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (ty ty1, ty ty2)
     | Tprim _ as x -> x
     | Tgeneric _ as x -> x

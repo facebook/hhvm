@@ -343,7 +343,8 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
   | Trefinement (root, cr) ->
     let ((env, err, cycles), ty) = localize_refinement ~ety_env env r root cr in
     ((env, err, cycles), ty)
-  | (Tnonnull | Tprim _ | Tdynamic | Tany _) as x -> ((env, None, []), mk (r, x))
+  | (Tnonnull | Tprim _ | Tdynamic _ | Tany _) as x ->
+    ((env, None, []), mk (r, x))
   | Tmixed -> ((env, None, []), MakeType.mixed r)
   | Tthis ->
     let ty =

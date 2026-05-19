@@ -829,7 +829,7 @@ module Full = struct
     | Tthis -> (fuel, text SN.Typehints.this)
     | Tmixed -> (fuel, text "mixed")
     | Twildcard -> (fuel, text "_")
-    | Tdynamic -> (fuel, text "dynamic")
+    | Tdynamic _ -> (fuel, text "dynamic")
     | Tnonnull -> (fuel, text "nonnull")
     | Tvec_or_dict (x, y) -> list ~fuel "vec_or_dict<" k [x; y] ">"
     | Tapply ((_, s), []) ->
@@ -970,7 +970,7 @@ module Full = struct
     let k ~fuel x = ty ~fuel ~hide_internals to_doc st (Loclenv env) x in
     match x with
     | Tany _ -> (fuel, text "_")
-    | Tdynamic -> (fuel, text "dynamic")
+    | Tdynamic _ -> (fuel, text "dynamic")
     | Tnonnull -> (fuel, text "nonnull")
     | Tvec_or_dict (x, y) -> list ~fuel "vec_or_dict<" k [x; y] ">"
     | Toption ty -> begin
@@ -1095,7 +1095,7 @@ module Full = struct
       let (dynamic, null, nonnull) =
         List.partition3_map tyl ~f:(fun t ->
             match get_node t with
-            | Tdynamic -> `Fst t
+            | Tdynamic _ -> `Fst t
             | Tprim Nast.Tnull -> `Snd t
             | _ -> `Trd t)
       in
@@ -1698,7 +1698,7 @@ module ErrorString = struct
     in
     match get_node ety with
     | Tany _ -> (fuel, "an untyped value")
-    | Tdynamic -> (fuel, "a dynamic value")
+    | Tdynamic _ -> (fuel, "a dynamic value")
     | Tunion l when ignore_dynamic ->
       union ~fuel env (List.filter l ~f:(fun x -> not (is_dynamic x)))
     | Tunion l -> union ~fuel env l
@@ -2058,7 +2058,7 @@ let coeffects env ty =
     | Tunion [ty] -> desugar_simple_intersection ~fuel ty
     | Tunion _
     | Tnonnull
-    | Tdynamic ->
+    | Tdynamic _ ->
       raise (UndesugarableCoeffect ty)
     | Toption ty' -> begin
       match deref ty' with

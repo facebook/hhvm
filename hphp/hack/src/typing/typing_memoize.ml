@@ -41,7 +41,7 @@ let check_param : env -> Nast.fun_param -> unit =
         | Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tnum) -> ()
         | Tnonnull
         | Tany _
-        | Tdynamic
+        | Tdynamic _
         | Tneg _ ->
           let (_ : env) = Typing_local_ops.enforce_memoize_object pos env in
           ()

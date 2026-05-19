@@ -41,7 +41,7 @@ let add_require_dynamic_bounds env cls =
 
 let is_dynamic_decl env ty =
   match get_node ty with
-  | Tdynamic -> true
+  | Tdynamic _ -> true
   | Tgeneric name when Env.get_require_dynamic env name -> true
   | _ -> false
 

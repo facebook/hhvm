@@ -32,7 +32,7 @@ let classify_type env ty =
       (Analyze_list_logger_types.Misc, ty)
   | Typing_defs.Tunion _ -> (Analyze_list_logger_types.Union, ty)
   | Typing_defs.Tintersection _ -> (Analyze_list_logger_types.Intersection, ty)
-  | Typing_defs.Tdynamic -> (Analyze_list_logger_types.Dynamic, ty)
+  | Typing_defs.Tdynamic _ -> (Analyze_list_logger_types.Dynamic, ty)
   | Typing_defs.Tgeneric _ -> (Analyze_list_logger_types.Generic, ty)
   | _ -> (Analyze_list_logger_types.Misc, ty)
 
@@ -40,7 +40,7 @@ let ty_node_kind ty =
   match Typing_defs.get_node ty with
   | Typing_defs.Tany _ -> "Tany"
   | Typing_defs.Tnonnull -> "Tnonnull"
-  | Typing_defs.Tdynamic -> "Tdynamic"
+  | Typing_defs.Tdynamic _ -> "Tdynamic"
   | Typing_defs.Toption _ -> "Toption"
   | Typing_defs.Tprim _ -> "Tprim"
   | Typing_defs.Tfun _ -> "Tfun"

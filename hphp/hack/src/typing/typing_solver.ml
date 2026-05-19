@@ -89,7 +89,7 @@ let rec freshen_inside_ty env ty :
   match ty_ with
   | Tany _
   | Tnonnull
-  | Tdynamic
+  | Tdynamic _
   | Tprim _
   | Tlabel _
   | Tneg _ ->
@@ -396,7 +396,7 @@ let ty_equal_shallow env ty1 ty2 =
     match (get_node ty1, get_node ty2) with
     | (Tany _, Tany _)
     | (Tnonnull, Tnonnull)
-    | (Tdynamic, Tdynamic)
+    | (Tdynamic _, Tdynamic _)
     | (Ttuple _, Ttuple _) ->
       true
     | (Tprim p1, Tprim p2) -> Aast_defs.equal_tprim p1 p2

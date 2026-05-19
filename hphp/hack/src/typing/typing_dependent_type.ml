@@ -165,8 +165,8 @@ module ExprDepTy = struct
         let (env, ty) = make ~seen env ty in
         (env, mk (r, Tclass_ptr ty))
       | ( _,
-          ( Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic | Tvec_or_dict _
-          | Tfun _ | Tany _ | Tvar _ | Tneg _ | Tlabel _ ) ) ->
+          ( Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic _
+          | Tvec_or_dict _ | Tfun _ | Tany _ | Tvar _ | Tneg _ | Tlabel _ ) ) ->
         (env, ty)
     in
     make ~seen:SSet.empty env ty

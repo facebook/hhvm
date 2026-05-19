@@ -33,7 +33,7 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
   | Tneg _ ->
     raise Non_denotable
   | Tnonnull -> "nonnull"
-  | Tdynamic -> "dynamic"
+  | Tdynamic _ -> "dynamic"
   | Tgeneric s -> s
   | Toption ty -> begin
     match get_node ty with

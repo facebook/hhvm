@@ -140,7 +140,7 @@ module TyPredicate = struct
     | Tprim Aast.Tnoreturn -> Result.Error "noreturn"
     | Tnonnull ->
       Result.Ok (next_wildcard_id, IsNot (get_reason ty, IsTag NullTag))
-    | Tdynamic -> Result.Error "dynamic"
+    | Tdynamic _ -> Result.Error "dynamic"
     | Tany _ -> Result.Error "any"
     | Toption ty_opt -> begin
       let open Hh_prelude.Result.Let_syntax in
@@ -959,7 +959,7 @@ and split_ty
        partitions. *)
     | Tvar _
     | Tany _
-    | Tdynamic
+    | Tdynamic _
     | Taccess _ ->
       (env, TyPartition.mk_span ~env ~predicate ty)
     | Tclass_ptr _ ->

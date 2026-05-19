@@ -1644,7 +1644,7 @@ module M = struct
       | Tvar v -> (env, Tvid.Set.singleton v, Tvid.Set.empty)
       | Tany _
       | Tnonnull
-      | Tdynamic
+      | Tdynamic _
       | Tprim _
       | Tneg _ ->
         (env, Tvid.Set.empty, Tvid.Set.empty)

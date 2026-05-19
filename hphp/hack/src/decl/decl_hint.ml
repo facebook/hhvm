@@ -100,7 +100,7 @@ and hint_ p env = function
   | Hwildcard -> Twildcard
   | Hnonnull -> Tnonnull
   | Hthis -> Tthis
-  | Hdynamic -> Tdynamic
+  | Hdynamic -> Tdynamic None
   | Hnothing -> Tunion []
   | Hvec_or_dict (h1, h2) ->
     let t1 =

@@ -117,13 +117,13 @@ let derive_instantiation
     | (Taccess (lty, (_, lname)), Taccess (rty, (_, rname)))
       when String.equal lname rname ->
       derive_instantiation lty rty (env, subst_acc)
-    | ( ( Tapply _ | Tmixed | Twildcard | Tany _ | Tnonnull | Tdynamic
+    | ( ( Tapply _ | Tmixed | Twildcard | Tany _ | Tnonnull | Tdynamic _
         | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tunion _
         | Tintersection _ | Tvec_or_dict _ | Taccess _ | Tclass_ptr _ ),
-        ( Tany _ | Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
-        | Tshape _ | Tgeneric _ | Tunion _ | Tintersection _ | Tvec_or_dict _
-        | Taccess _ | Tclass_ptr _ | Tvar _ | Tnewtype _ | Tclass _
-        | Tdependent _ | Tneg _ | Tlabel _ ) ) ->
+        ( Tany _ | Tnonnull | Tdynamic _ | Toption _ | Tprim _ | Tfun _
+        | Ttuple _ | Tshape _ | Tgeneric _ | Tunion _ | Tintersection _
+        | Tvec_or_dict _ | Taccess _ | Tclass_ptr _ | Tvar _ | Tnewtype _
+        | Tclass _ | Tdependent _ | Tneg _ | Tlabel _ ) ) ->
       (env, subst_acc)
   and derive_instantiation_list utyl ityl (env, subst_acc) =
     let ulen = List.length utyl in

@@ -145,7 +145,7 @@ let enum_class_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error
     | Tshape { s_fields = shapemap; _ } ->
       TShapeMap.for_all (fun _name sfty -> is_valid_base sfty.sft_ty) shapemap
     | Tany _
-    | Tdynamic
+    | Tdynamic _
     | Tfun _
     | Tvar _
     | Tgeneric _

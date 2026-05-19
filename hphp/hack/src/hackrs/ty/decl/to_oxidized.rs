@@ -140,7 +140,7 @@ impl<R: Reason> ToOxidized for Ty_<R> {
             Ty_::Tlike(x) => typing_defs::Ty_::Tlike(x.to_oxidized()),
             Ty_::Tany => typing_defs::Ty_::Tany(o::tany_sentinel::TanySentinel),
             Ty_::Tnonnull => typing_defs::Ty_::Tnonnull,
-            Ty_::Tdynamic => typing_defs::Ty_::Tdynamic,
+            Ty_::Tdynamic => typing_defs::Ty_::Tdynamic(None),
             Ty_::Toption(x) => typing_defs::Ty_::Toption(x.to_oxidized()),
             Ty_::Tprim(x) => typing_defs::Ty_::Tprim(x),
             Ty_::Tfun(x) => typing_defs::Ty_::Tfun(x.to_oxidized()),

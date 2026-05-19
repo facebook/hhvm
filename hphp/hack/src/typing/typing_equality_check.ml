@@ -184,10 +184,10 @@ let rec assert_nontrivial p bop env ty1 ty2 ~as_warning =
       when String.equal Naming_special_names.Classes.cString id ->
       assert_nontrivial p bop env ty1 ty2 ~as_warning
     | ( ( _,
-          ( Tany _ | Tnonnull | Tvec_or_dict _ | Tprim _ | Toption _ | Tdynamic
-          | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _
-          | Ttuple _ | Tunion _ | Tintersection _ | Tshape _ | Taccess _
-          | Tneg _ | Tlabel _ | Tclass_ptr _ ) ),
+          ( Tany _ | Tnonnull | Tvec_or_dict _ | Tprim _ | Toption _
+          | Tdynamic _ | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _
+          | Tdependent _ | Tclass _ | Ttuple _ | Tunion _ | Tintersection _
+          | Tshape _ | Taccess _ | Tneg _ | Tlabel _ | Tclass_ptr _ ) ),
         _ ) ->
       ())
 

@@ -86,7 +86,7 @@ let coerce_type_impl
   else
     let (env, ety_expect) = Typing_env.expand_type env ty_expect in
     match get_node ety_expect with
-    | Tdynamic ->
+    | Tdynamic _ ->
       Typing_utils.sub_type
         ~is_dynamic_aware:true
         ~ignore_readonly

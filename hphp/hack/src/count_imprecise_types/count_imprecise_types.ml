@@ -47,7 +47,7 @@ let bad_type_visitor_per_def =
                (Typing_defs.get_node ty)
                Typing_defs.Tnonnull ->
         { (self#zero) with mixed_count = 1 }
-      | Typing_defs.Tdynamic -> { (self#zero) with dynamic_count = 1 }
+      | Typing_defs.Tdynamic _ -> { (self#zero) with dynamic_count = 1 }
       | Typing_defs.Tnonnull -> { (self#zero) with nonnull_count = 1 }
       | _ -> self#zero
   end

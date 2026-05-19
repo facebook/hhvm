@@ -101,7 +101,7 @@ impl std::fmt::Debug for Ty_ {
             Tlike(ty) => f.debug_tuple("Tlike").field(ty).finish(),
             Tany(_) => write!(f, "Tany"),
             Tnonnull => write!(f, "Tnonnull"),
-            Tdynamic => write!(f, "Tdynamic"),
+            Tdynamic(_) => write!(f, "Tdynamic"),
             Toption(ty) => f.debug_tuple("Toption").field(ty).finish(),
             Tprim(tprim) => write!(f, "Tprim({:?})", tprim),
             Tfun(fun_type) => f.debug_tuple("Tfun").field(fun_type).finish(),

@@ -111,7 +111,7 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
           match get_node ty with
           | Tclass ((_, id), _, _) when String.equal id SN.Classes.cString ->
             None
-          | Tdynamic -> None
+          | Tdynamic _ -> None
           | _ -> Some ty
         in
         (env, Some (pars, ty_opt))

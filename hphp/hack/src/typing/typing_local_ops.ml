@@ -136,7 +136,7 @@ let rec is_byval_collection_or_string_or_any_type env ty =
     | Tvec_or_dict _
     | Ttuple _
     | Tshape _
-    | Tdynamic
+    | Tdynamic _
     | Tany _ ->
       true
     | Tunion tyl ->

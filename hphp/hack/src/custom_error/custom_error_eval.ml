@@ -410,7 +410,7 @@ let matches_locl_ty ?(env = Env.empty) t ~scrut =
     | (Prim Num, Ty.Tprim Ast_defs.Tnum)
     | (Prim Arraykey, Ty.Tprim Ast_defs.Tarraykey)
     | (Prim Noreturn, Ty.Tprim Ast_defs.Tnoreturn)
-    | (Dynamic, Ty.Tdynamic)
+    | (Dynamic, Ty.Tdynamic _)
     | (Nonnull, Ty.Tnonnull) ->
       Match.matched env
     | (Prim String, Ty.Tclass ((_, name), _, _))

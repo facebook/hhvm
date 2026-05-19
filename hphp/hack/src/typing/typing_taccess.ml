@@ -731,7 +731,7 @@ let rec expand ctx env root =
     | Ttuple _
     | Tvec_or_dict _
     | Tfun _
-    | Tdynamic
+    | Tdynamic _
     | Toption _
     | Tlabel _
     | Tneg _

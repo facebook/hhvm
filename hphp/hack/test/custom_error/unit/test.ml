@@ -191,8 +191,8 @@ let test_patt_string_exactly _ =
       {
         is_coeffect = false;
         cstrs = [(pod_none, (pod_none, name))];
-        ty_sub = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic));
-        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic));
+        ty_sub = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None));
+        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None));
       }
   in
   let err =
@@ -243,16 +243,16 @@ let test_patt_tysub _ =
       Tshape
         {
           s_origin = Missing_origin;
-          s_unknown_value = mk_ty Tdynamic;
+          s_unknown_value = mk_ty (Tdynamic None);
           s_fields =
             TShapeMap.of_list
               [
                 ( TSFlit_str (pod_none, "c"),
-                  { sft_optional = false; sft_ty = mk_ty Tdynamic } );
+                  { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
                 ( TSFlit_str (pod_none, "a"),
-                  { sft_optional = false; sft_ty = mk_ty Tdynamic } );
+                  { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
                 ( TSFlit_str (pod_none, "b"),
-                  { sft_optional = false; sft_ty = mk_ty Tdynamic } );
+                  { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
               ];
         })
   in
@@ -265,7 +265,7 @@ let test_patt_tysub _ =
         is_coeffect = false;
         cstrs = [(pod_none, (pod_none, param_name))];
         ty_sub = LoclType (Ty.mk (Typing_reason.none, ty_locl_sub));
-        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic));
+        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None));
       }
   in
   let err =
@@ -329,7 +329,7 @@ let test_patt_tysub _ =
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
     (Eval.eval_typing_error custom_config ~err)
-    [Either.[First "Ok:"; Second (Eval.Value.Ty (mk_ty Ty.Tdynamic))]]
+    [Either.[First "Ok:"; Second (Eval.Value.Ty (mk_ty Ty.(Tdynamic None)))]]
 
 (* Pattern match over the [tysub] contained in a `Violated_constraint` error;
    the type match requires an exact match on the class name and for it to
@@ -347,16 +347,16 @@ let test_patt_tysub_or_pattern _ =
       Tshape
         {
           s_origin = Missing_origin;
-          s_unknown_value = mk_ty Tdynamic;
+          s_unknown_value = mk_ty (Tdynamic None);
           s_fields =
             TShapeMap.of_list
               [
                 ( TSFlit_str (pod_none, "c"),
-                  { sft_optional = false; sft_ty = mk_ty Tdynamic } );
+                  { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
                 ( TSFlit_str (pod_none, "a"),
-                  { sft_optional = false; sft_ty = mk_ty Tdynamic } );
+                  { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
                 ( TSFlit_str (pod_none, "b"),
-                  { sft_optional = false; sft_ty = mk_ty Tdynamic } );
+                  { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
               ];
         })
   in
@@ -369,7 +369,7 @@ let test_patt_tysub_or_pattern _ =
         is_coeffect = false;
         cstrs = [(pod_none, (pod_none, param_name))];
         ty_sub = LoclType (Ty.mk (Typing_reason.none, ty_locl_sub));
-        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic));
+        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None));
       }
   in
   let err =
@@ -438,7 +438,7 @@ let test_patt_tysub_or_pattern _ =
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
     (Eval.eval_typing_error custom_config ~err)
-    [Either.[First "Ok:"; Second (Eval.Value.Ty (mk_ty Ty.Tdynamic))]]
+    [Either.[First "Ok:"; Second (Eval.Value.Ty (mk_ty Ty.(Tdynamic None)))]]
 
 let test_namespace _ =
   let pod_none = Pos_or_decl.none in
@@ -485,7 +485,7 @@ let test_namespace _ =
         is_coeffect = false;
         cstrs = [(pod_none, (pod_none, param_name))];
         ty_sub = LoclType (Ty.mk (Typing_reason.none, ty));
-        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic));
+        ty_sup = LoclType (Ty.mk (Typing_reason.none, Ty.Tdynamic None));
       }
   in
   let err =

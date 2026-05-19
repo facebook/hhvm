@@ -168,7 +168,7 @@ impl<R: Reason> From<o::typing_defs::Ty> for Ty<R> {
             typing_defs_core::Ty_::Tlike(ty) => Tlike(ty.into()),
             typing_defs_core::Ty_::Tany(_) => Tany,
             typing_defs_core::Ty_::Tnonnull => Tnonnull,
-            typing_defs_core::Ty_::Tdynamic => Tdynamic,
+            typing_defs_core::Ty_::Tdynamic(_) => Tdynamic,
             typing_defs_core::Ty_::Toption(ty) => Toption(ty.into()),
             typing_defs_core::Ty_::Tprim(prim) => Tprim(prim),
             typing_defs_core::Ty_::Tfun(ft) => Tfun(Box::new(ft.into())),

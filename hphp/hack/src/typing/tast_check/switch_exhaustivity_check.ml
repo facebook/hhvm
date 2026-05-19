@@ -273,7 +273,7 @@ module AlternativeSet = struct
       let (dynamic_tyl, other_tyl) =
         List.partition_tf tyl ~f:(fun ty ->
             match T.get_node ty with
-            | T.Tdynamic -> true
+            | T.Tdynamic _ -> true
             | _ -> false)
       in
       let r = T.get_reason ty in

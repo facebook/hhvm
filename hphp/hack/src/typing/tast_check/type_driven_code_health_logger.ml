@@ -91,7 +91,7 @@ let is_toplevelish_dynamic env (ty, hint_opt) =
       let ty = Tast_env.strip_dynamic env ty in
       let (_env, ty) = Tast_env.expand_type env ty in
       match T.get_node ty with
-      | T.Tdynamic -> true
+      | T.Tdynamic _ -> true
       | T.Toption ty -> is_toplevelish_dynamic ty
       | T.Tclass ((_, id), _, [ty]) when String.equal id SN.Classes.cAwaitable
         ->

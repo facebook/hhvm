@@ -20,7 +20,7 @@ let rec strip_ty ty =
     match ty with
     | Tany _
     | Tnonnull
-    | Tdynamic ->
+    | Tdynamic _ ->
       ty
     | Tprim _ -> ty
     | Tvar _ -> ty

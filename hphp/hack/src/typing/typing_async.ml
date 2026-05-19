@@ -61,7 +61,7 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
       ( (env, Option.merge e1 e2 ~f:Typing_error.both),
         MakeType.intersection r rtyl )
     | Tprim Aast.Tnull -> ((env, e1), e_opt_ty)
-    | Tdynamic ->
+    | Tdynamic _ ->
       (* Awaiting a dynamic results in a new dynamic *)
       ((env, e1), MakeType.dynamic r)
     | Tany _
@@ -90,7 +90,7 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
       let return_type =
         match get_node e_opt_ty with
         | Tany _ -> mk (r, Typing_defs.make_tany ())
-        | Tdynamic -> MakeType.dynamic r
+        | Tdynamic _ -> MakeType.dynamic r
         | Tnonnull
         | Tvec_or_dict _
         | Tprim _

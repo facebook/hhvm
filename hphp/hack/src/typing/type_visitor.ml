@@ -174,7 +174,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tmixed -> this#on_tmixed acc r
       | Twildcard -> this#on_twildcard acc r
       | Tnonnull -> this#on_tnonnull acc r
-      | Tdynamic -> this#on_tdynamic acc r
+      | Tdynamic _ -> this#on_tdynamic acc r
       | Tthis -> this#on_tthis acc r
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict acc r ty1 ty2
       | Tgeneric s -> this#on_tgeneric acc r s
@@ -381,7 +381,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       match x with
       | Tany _ -> this#on_tany acc r
       | Tnonnull -> this#on_tnonnull acc r
-      | Tdynamic -> this#on_tdynamic acc r
+      | Tdynamic _ -> this#on_tdynamic acc r
       | Toption ty -> this#on_toption acc r ty
       | Tprim prim -> this#on_tprim acc r prim
       | Tvar id -> this#on_tvar acc r id

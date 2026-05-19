@@ -316,7 +316,7 @@ and _ ty_ =
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : (TanySentinel.t[@transform.opaque]) -> 'phase ty_
   | Tnonnull : 'phase ty_
-  | Tdynamic : 'phase ty_
+  | Tdynamic : (Tvid.t option[@transform.opaque]) -> 'phase ty_
       (** A dynamic type is a special type which sometimes behaves as if it were a
        * top type; roughly speaking, where a specific value of a particular type is
        * expected and that type is dynamic, anything can be given. We call this
@@ -326,6 +326,13 @@ and _ ty_ =
        *
        * it captures dynamicism within function scope.
        * See tests in typecheck/dynamic/ for more examples.
+       *
+       * The optional Tvid.t is a "shadow type variable" used for dynamic inference.
+       * When present (Some v), every subtype check [dynamic <: T] also records
+       * T as an upper bound on v. After type checking, v's accumulated upper bounds
+       * describe how the dynamic value was actually used, enabling use-type inference.
+       * Shadow type variables are never solved; they only collect constraints.
+       * None in all contexts where inference is disabled or for declared types.
        *)
   | Toption : 'phase ty -> 'phase ty_
       (** Nullable, called "option" in the ML parlance. *)

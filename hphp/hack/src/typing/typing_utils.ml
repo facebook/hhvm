@@ -820,7 +820,7 @@ let rec is_supportdyn ~visited_tyvars ~visited_typarams env ty =
   let recurse ty = is_supportdyn ~visited_tyvars ~visited_typarams env ty in
   match get_node ty with
   | Tprim _
-  | Tdynamic
+  | Tdynamic _
   | Tlabel _
   | Tany _ ->
     true
@@ -934,7 +934,7 @@ let make_supportdyn_decl_type p r ty =
 let make_like ?reason env ty =
   let (_env, _) = Env.expand_type env ty in
   match get_node ty with
-  | Tdynamic -> ty
+  | Tdynamic _ -> ty
   | Tunion tyl when List.exists tyl ~f:Typing_defs.is_dynamic -> ty
   | _ ->
     let r =

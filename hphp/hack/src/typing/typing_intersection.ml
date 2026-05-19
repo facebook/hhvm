@@ -175,7 +175,7 @@ let recompose_atomic env r tyl =
         match deref ty with
         | (r, Toption ty) -> traverse (Some r) dynamic (ty :: tyl_acc) tyl
         | (r, Tprim Aast.Tnull) -> traverse (Some r) dynamic tyl_acc tyl
-        | (r, Tdynamic) -> traverse nullable (Some r) tyl_acc tyl
+        | (r, Tdynamic _) -> traverse nullable (Some r) tyl_acc tyl
         | (_, Tunion tyl') -> traverse nullable dynamic tyl_acc (tyl' @ tyl)
         | _ -> traverse nullable dynamic (ty :: tyl_acc) tyl
       )

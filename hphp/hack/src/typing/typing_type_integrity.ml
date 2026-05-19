@@ -57,8 +57,8 @@ module Locl_Inst = struct
       let ty1 = instantiate subst ty1 in
       let ty2 = instantiate subst ty2 in
       Tvec_or_dict (ty1, ty2)
-    | (Tvar _ | Tdynamic | Tnonnull | Tany _ | Tprim _ | Tneg _ | Tlabel _) as x
-      ->
+    | (Tvar _ | Tdynamic _ | Tnonnull | Tany _ | Tprim _ | Tneg _ | Tlabel _) as
+      x ->
       x
     | Ttuple { t_required; t_optional; t_extra } ->
       let t_extra = instantiate_tuple_extra subst t_extra in
@@ -260,7 +260,7 @@ and check_type_integrity
   | Tany _
   | Tnonnull
   | Tprim _
-  | Tdynamic
+  | Tdynamic _
   | Tmixed
   | Twildcard
   | Tthis ->

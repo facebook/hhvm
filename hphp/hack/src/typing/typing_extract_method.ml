@@ -81,7 +81,7 @@ end = struct
     | Twildcard
     | Tany _
     | Tnonnull
-    | Tdynamic
+    | Tdynamic _
     | Tprim _
     | Tgeneric _
     | Taccess _ ->
@@ -346,7 +346,7 @@ end = struct
     | Twildcard
     | Tany _
     | Tnonnull
-    | Tdynamic
+    | Tdynamic _
     | Tprim _
     | Tgeneric _
     | Taccess _
@@ -419,7 +419,7 @@ end = struct
     | Twildcard
     | Tany _
     | Tnonnull
-    | Tdynamic
+    | Tdynamic _
     | Tprim _
     | Tgeneric _
     | Taccess _

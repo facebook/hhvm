@@ -191,7 +191,7 @@ let type_index ~read env p ty_have ty_expect enforced reason =
 let widen_for_assign_array_append ~expr_pos env ty =
   match deref ty with
   (* dynamic is valid for array append *)
-  | (_, Tdynamic) -> (env, Some ty)
+  | (_, Tdynamic _) -> (env, Some ty)
   | (r, Tclass (((_, cn) as id), _, tyl))
     when String.equal cn SN.Collections.cVec
          || String.equal cn SN.Collections.cKeyset
@@ -324,7 +324,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
             (env, ty_mismatch)
         in
         (env, (ty1, Ok ty1, err_res))
-      | (_, Tdynamic) -> got_dynamic ()
+      | (_, Tdynamic _) -> got_dynamic ()
       | (_, Tprim Tnull)
         when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
         got_dynamic ()
@@ -355,7 +355,7 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
           [Log_head ("widen_for_assign_array_get", [Log_type ("ty", ty)])]));
   match deref ty with
   (* dynamic is valid for assign array get *)
-  | (_, Tdynamic) -> (env, Some ty)
+  | (_, Tdynamic _) -> (env, Some ty)
   | (r, Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic }) ->
   begin
     (* requires integer literal *)
@@ -672,7 +672,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         let (env, ty) = Env.fresh_type_error env expr_pos in
         let (env, ty) = maybe_make_supportdyn r env ~supportdyn ty in
         (env, (ty, Ok ty, Ok tkey, Ok ty2))
-      | Tdynamic -> got_dynamic ()
+      | Tdynamic _ -> got_dynamic ()
       | Tany _ -> (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
       | Tprim Tnull
         when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->

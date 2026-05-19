@@ -51,7 +51,7 @@ let rec is_stringish env ty =
     Option.is_none (Decl_entry.to_option @@ Env.get_class env (snd x))
   (* TODO akenn: error tyvar? *)
   | Tany _
-  | Tdynamic
+  | Tdynamic _
   | Tnonnull
   | Tprim _
   | Tneg _ ->

@@ -340,7 +340,7 @@ let rec make_nullable_member_type env ~is_method id_pos pos ty =
                 make_nullable_member_type ~is_method env id_pos pos ty)
           in
           Inter.intersect_list env r tyl
-        | (_, (Tdynamic | Tany _)) -> (env, ty)
+        | (_, (Tdynamic _ | Tany _)) -> (env, ty)
         | (_, Tunion []) -> (env, MakeType.null (Reason.nullsafe_op pos))
         | _ ->
           (* Shouldn't happen *)
@@ -405,7 +405,7 @@ let rec this_appears_covariantly ~contra env ty =
   | Twildcard
   | Tany _
   | Tnonnull
-  | Tdynamic
+  | Tdynamic _
   | Tprim _
   | Tgeneric _ ->
     false
@@ -440,7 +440,7 @@ let rec obj_get_concrete_ty
       class_name
       paraml
       on_error
-  | (_, Tdynamic) ->
+  | (_, Tdynamic _) ->
     let err_opt = sound_dynamic_err_opt args env id read_context in
     let ty = MakeType.dynamic (Reason.dynamic_prop id_pos) in
     (env, err_opt, (ty, []), dflt_lval_mismatch, dflt_rval_mismatch)

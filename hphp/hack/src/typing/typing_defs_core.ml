@@ -290,7 +290,7 @@ and _ ty_ =
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : (TanySentinel.t[@transform.opaque]) -> 'phase ty_
   | Tnonnull : 'phase ty_
-  | Tdynamic : 'phase ty_
+  | Tdynamic : (Tvid.t option[@transform.opaque]) -> 'phase ty_
   | Toption : 'phase ty -> 'phase ty_
   | Tprim : (Ast_defs.tprim[@transform.opaque]) -> 'phase ty_
   | Tfun : 'phase ty fun_type -> 'phase ty_
@@ -471,7 +471,7 @@ module Pp = struct
     | Tthis -> Format.pp_print_string fmt "Tthis"
     | Tmixed -> Format.pp_print_string fmt "Tmixed"
     | Twildcard -> Format.pp_print_string fmt "Twildcard"
-    | Tdynamic -> Format.pp_print_string fmt "Tdynamic"
+    | Tdynamic _ -> Format.pp_print_string fmt "Tdynamic"
     | Tnonnull -> Format.pp_print_string fmt "Tnonnull"
     | Tapply (a0, a1) ->
       Format.fprintf fmt "(@[<2>Tapply (@,";
@@ -825,7 +825,7 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
     | _ -> 4
   end
   | Tnonnull -> 2
-  | Tdynamic -> 3
+  | Tdynamic _ -> 3
   | Tprim _ -> 5
   | Tfun _ -> 6
   | Ttuple _ -> 7
@@ -941,12 +941,12 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     end
     | (Tneg neg1, Tneg neg2) -> compare_type_predicate neg1 neg2
     | (Tnonnull, Tnonnull) -> 0
-    | (Tdynamic, Tdynamic) -> 0
+    | (Tdynamic _, Tdynamic _) -> 0
     | (Tlabel name1, Tlabel name2) -> String.compare name1 name2
     | (Tclass_ptr ty1, Tclass_ptr ty2) -> ty_compare ty1 ty2
     | ( ( Tprim _ | Toption _ | Tvec_or_dict _ | Tfun _ | Tintersection _
         | Tunion _ | Ttuple _ | Tgeneric _ | Tnewtype _ | Tdependent _
-        | Tclass _ | Tshape _ | Tvar _ | Tnonnull | Tdynamic | Taccess _
+        | Tclass _ | Tshape _ | Tvar _ | Tnonnull | Tdynamic _ | Taccess _
         | Tany _ | Tneg _ | Trefinement _ | Tlabel _ | Tclass_ptr _ ),
         _ ) ->
       ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
@@ -1393,8 +1393,9 @@ module Locl_subst = struct
             ( id,
               apply_exact exact ~subst ~combine_reasons,
               List.map tys ~f:(apply_ty ~subst ~combine_reasons) ) )
-    | (_, (Tvar _ | Tany _ | Tnonnull | Tdynamic | Tprim _ | Tlabel _ | Tneg _))
-      ->
+    | ( _,
+        (Tvar _ | Tany _ | Tnonnull | Tdynamic _ | Tprim _ | Tlabel _ | Tneg _)
+      ) ->
       ty
 
   and apply_tuple { t_required; t_optional; t_extra } ~subst ~combine_reasons =
@@ -1537,7 +1538,7 @@ module Find_locl = struct
       | Tvar _
       | Tany _
       | Tnonnull
-      | Tdynamic
+      | Tdynamic _
       | Tprim _
       | Tlabel _
       | Tneg _ ->
@@ -1689,7 +1690,7 @@ module Transform_top_down_decl = struct
   and traverse ty ~on_ty ~on_rc_bound ~ctx =
     match deref ty with
     | ( _,
-        ( Tthis | Tmixed | Twildcard | Tany _ | Tnonnull | Tdynamic | Tprim _
+        ( Tthis | Tmixed | Twildcard | Tany _ | Tnonnull | Tdynamic _ | Tprim _
         | Tgeneric _ ) ) ->
       ty
     | (r, Tlike ty) -> mk (r, Tlike (transform ty ~on_ty ~on_rc_bound ~ctx))

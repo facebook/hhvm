@@ -1538,7 +1538,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                                 Ty_::Tnonnull
                             }
                         }
-                        "dynamic" => Ty_::Tdynamic,
+                        "dynamic" => Ty_::Tdynamic(None),
                         "_" => Ty_::Twildcard,
                         _ => {
                             let name = self.elaborate_raw_id(&name);
@@ -2390,7 +2390,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             }
             Ty_::Taccess(_)
             | Ty_::Tany(_)
-            | Ty_::Tdynamic
+            | Ty_::Tdynamic(_)
             | Ty_::Tgeneric(_)
             | Ty_::Tmixed
             | Ty_::Twildcard

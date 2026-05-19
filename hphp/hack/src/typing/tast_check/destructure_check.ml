@@ -82,7 +82,7 @@ let rec walk_shapes
   match Typing_defs.get_node ety with
   | Tshape { s_fields; s_unknown_value; _ } ->
     on_shape (extract_shape_info s_fields s_unknown_value)
-  | Tdynamic -> ()
+  | Tdynamic _ -> ()
   | Tunion [] -> ()
   | Tunion tyl -> List.iter tyl ~f:(fun ty -> walk_shapes env ty ~on_shape)
   | Tintersection tyl ->
@@ -137,7 +137,7 @@ let rec walk_tuples
   match Typing_defs.get_node ety with
   | Ttuple { t_required; t_optional; t_extra } ->
     on_tuple (extract_tuple_info t_required t_optional t_extra)
-  | Tdynamic -> ()
+  | Tdynamic _ -> ()
   | Tunion [] -> ()
   | Tunion tyl -> List.iter tyl ~f:(fun ty -> walk_tuples env ty ~on_tuple)
   | Tintersection tyl ->

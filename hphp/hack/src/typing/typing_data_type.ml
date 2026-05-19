@@ -751,7 +751,7 @@ module Make (Set : SET) = struct
     match get_node ty with
     | Tprim prim -> (env, prim_to_datatypes ~trail prim)
     | Tnonnull -> (env, nonnull_to_datatypes ~trail)
-    | Tdynamic -> (env, mixed ~reason)
+    | Tdynamic _ -> (env, mixed ~reason)
     | Tany _ -> (env, mixed ~reason)
     | Toption ty ->
       let (env, data_types) = fromTy ctx env ty in

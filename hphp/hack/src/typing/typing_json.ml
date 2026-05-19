@@ -153,7 +153,7 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> Yojson.Safe.t =
     @ extra_arg t_extra
   | (p, Tany _) -> obj @@ kind p "any"
   | (p, Tnonnull) -> obj @@ kind p "nonnull"
-  | (p, Tdynamic) -> obj @@ kind p "dynamic"
+  | (p, Tdynamic _) -> obj @@ kind p "dynamic"
   | (p, Tgeneric s) -> obj @@ kind p "generic" @ name s
   | (_, Tnewtype (s, [ty], _))
     when String.equal s SN.Classes.cSupportDyn && not (show_supportdyn env) ->
@@ -428,7 +428,7 @@ let to_locl_ty
       | "any" -> ty (Typing_defs.make_tany ())
       | "mixed" -> ty (Toption (mk (reason, Tnonnull)))
       | "nonnull" -> ty Tnonnull
-      | "dynamic" -> ty Tdynamic
+      | "dynamic" -> ty (Tdynamic None)
       | "label" ->
         get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
         ty (Tlabel name)

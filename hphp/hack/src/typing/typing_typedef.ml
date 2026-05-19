@@ -129,7 +129,7 @@ let check_invalid_recursive_case_type
     | Tshape _
     | Tnonnull
     | Tvec_or_dict _
-    | Tdynamic
+    | Tdynamic _
     | Tvar _
     | Tclass _
     | Tany _ ->

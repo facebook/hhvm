@@ -255,7 +255,7 @@ let next_missing_types
     | Trefinement _
     | Twildcard
     | Tnonnull
-    | Tdynamic
+    | Tdynamic _
     | Tprim _
     | Tgeneric _
     | Tshape _

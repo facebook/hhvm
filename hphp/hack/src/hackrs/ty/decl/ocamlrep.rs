@@ -408,60 +408,64 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
                 block.build()
             }
             Ty_::Tnonnull => ocamlrep::Value::int(3),
-            Ty_::Tdynamic => ocamlrep::Value::int(4),
-            Ty_::Toption(x) => {
+            Ty_::Tdynamic => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 4u8);
-                alloc.set_field(&mut block, 0, alloc.add(x));
+                alloc.set_field(&mut block, 0, alloc.add(&None::<isize>));
                 block.build()
             }
-            Ty_::Tprim(x) => {
+            Ty_::Toption(x) => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 5u8);
                 alloc.set_field(&mut block, 0, alloc.add(x));
                 block.build()
             }
-            Ty_::Tfun(x) => {
+            Ty_::Tprim(x) => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 6u8);
-                alloc.set_field(&mut block, 0, alloc.add(&**x));
+                alloc.set_field(&mut block, 0, alloc.add(x));
                 block.build()
             }
-            Ty_::Ttuple(x) => {
+            Ty_::Tfun(x) => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 7u8);
                 alloc.set_field(&mut block, 0, alloc.add(&**x));
                 block.build()
             }
-            Ty_::Tshape(shape) => {
+            Ty_::Ttuple(x) => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 8u8);
+                alloc.set_field(&mut block, 0, alloc.add(&**x));
+                block.build()
+            }
+            Ty_::Tshape(shape) => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 9u8);
                 alloc.set_field(&mut block, 0, alloc.add(&**shape));
                 block.build()
             }
             Ty_::Tgeneric(x) => {
-                let mut block = alloc.block_with_size_and_tag(1usize, 9u8);
+                let mut block = alloc.block_with_size_and_tag(1usize, 10u8);
                 alloc.set_field(&mut block, 0, alloc.add(x));
                 block.build()
             }
             Ty_::Tunion(x) => {
-                let mut block = alloc.block_with_size_and_tag(1usize, 10u8);
-                alloc.set_field(&mut block, 0, alloc.add(&**x));
-                block.build()
-            }
-            Ty_::Tintersection(x) => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 11u8);
                 alloc.set_field(&mut block, 0, alloc.add(&**x));
                 block.build()
             }
+            Ty_::Tintersection(x) => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 12u8);
+                alloc.set_field(&mut block, 0, alloc.add(&**x));
+                block.build()
+            }
             Ty_::TvecOrDict(x) => {
-                let mut block = alloc.block_with_size_and_tag(2usize, 12u8);
+                let mut block = alloc.block_with_size_and_tag(2usize, 13u8);
                 alloc.set_field(&mut block, 0, alloc.add(&x.0));
                 alloc.set_field(&mut block, 1, alloc.add(&x.1));
                 block.build()
             }
             Ty_::Taccess(x) => {
-                let mut block = alloc.block_with_size_and_tag(1usize, 13u8);
+                let mut block = alloc.block_with_size_and_tag(1usize, 14u8);
                 alloc.set_field(&mut block, 0, alloc.add(&**x));
                 block.build()
             }
             Ty_::TclassPtr(x) => {
-                let mut block = alloc.block_with_size_and_tag(1usize, 14u8);
+                let mut block = alloc.block_with_size_and_tag(1usize, 15u8);
                 alloc.set_field(&mut block, 0, alloc.add(x));
                 block.build()
             }
@@ -479,8 +483,7 @@ impl<R: Reason> FromOcamlRep for Ty_<R> {
                 1 => Ok(Ty_::Tmixed),
                 2 => Ok(Ty_::Twildcard),
                 3 => Ok(Ty_::Tnonnull),
-                4 => Ok(Ty_::Tdynamic),
-                t => Err(ocamlrep::FromError::NullaryVariantTagOutOfRange { max: 4, actual: t }),
+                t => Err(ocamlrep::FromError::NullaryVariantTagOutOfRange { max: 3, actual: t }),
             }
         } else {
             let block = ocamlrep::from::expect_block(value)?;
@@ -510,52 +513,57 @@ impl<R: Reason> FromOcamlRep for Ty_<R> {
                 }
                 4 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
-                    Ok(Ty_::Toption(ocamlrep::from::field(block, 0)?))
+                    let _shadow: Option<isize> = ocamlrep::from::field(block, 0)?;
+                    Ok(Ty_::Tdynamic)
                 }
                 5 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
-                    Ok(Ty_::Tprim(ocamlrep::from::field(block, 0)?))
+                    Ok(Ty_::Toption(ocamlrep::from::field(block, 0)?))
                 }
                 6 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
-                    Ok(Ty_::Tfun(ocamlrep::from::field(block, 0)?))
+                    Ok(Ty_::Tprim(ocamlrep::from::field(block, 0)?))
                 }
                 7 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
-                    Ok(Ty_::Ttuple(ocamlrep::from::field(block, 0)?))
+                    Ok(Ty_::Tfun(ocamlrep::from::field(block, 0)?))
                 }
                 8 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
-                    Ok(Ty_::Tshape(ocamlrep::from::field(block, 0)?))
+                    Ok(Ty_::Ttuple(ocamlrep::from::field(block, 0)?))
                 }
                 9 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
-                    Ok(Ty_::Tgeneric(ocamlrep::from::field(block, 0)?))
+                    Ok(Ty_::Tshape(ocamlrep::from::field(block, 0)?))
                 }
                 10 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
-                    Ok(Ty_::Tunion(ocamlrep::from::field(block, 0)?))
+                    Ok(Ty_::Tgeneric(ocamlrep::from::field(block, 0)?))
                 }
                 11 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
-                    Ok(Ty_::Tintersection(ocamlrep::from::field(block, 0)?))
+                    Ok(Ty_::Tunion(ocamlrep::from::field(block, 0)?))
                 }
                 12 => {
+                    ocamlrep::from::expect_block_size(block, 1)?;
+                    Ok(Ty_::Tintersection(ocamlrep::from::field(block, 0)?))
+                }
+                13 => {
                     ocamlrep::from::expect_block_size(block, 2)?;
                     Ok(Ty_::TvecOrDict(Box::new((
                         ocamlrep::from::field(block, 0)?,
                         ocamlrep::from::field(block, 1)?,
                     ))))
                 }
-                13 => {
+                14 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
                     Ok(Ty_::Taccess(ocamlrep::from::field(block, 0)?))
                 }
-                14 => {
+                15 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
                     Ok(Ty_::TclassPtr(ocamlrep::from::field(block, 0)?))
                 }
-                t => Err(ocamlrep::FromError::BlockTagOutOfRange { max: 14, actual: t }),
+                t => Err(ocamlrep::FromError::BlockTagOutOfRange { max: 15, actual: t }),
             }
         }
     }

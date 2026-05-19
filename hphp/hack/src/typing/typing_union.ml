@@ -117,7 +117,7 @@ let dest_union_list env tyl =
       dest_union env ty tyl tyl_res (orr r_null r) r_union r_dyn
     | (r, Tprim Aast.Tnull) ->
       dest_union_list env tyl tyl_res (orr r_null r) r_union r_dyn
-    | (r, Tdynamic) ->
+    | (r, Tdynamic _) ->
       dest_union_list env tyl tyl_res r_null r_union (orr r_dyn r)
     | _ -> dest_union_list env tyl (ty :: tyl_res) r_null r_union r_dyn
   and dest_union_list env tyl tyl_res r_null r_union r_dyn =
@@ -520,7 +520,7 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
         (env, Some (MakeType.mixed r))
       | _ -> ty_equiv env ty1 ty2 ~are_ty_param:false)
     | ( ( _,
-          ( Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _ | Tdependent _
+          ( Tprim _ | Tdynamic _ | Tgeneric _ | Tnewtype _ | Tdependent _
           | Tclass _ | Ttuple _ | Tfun _ | Tshape _ | Tvar _ | Tvec_or_dict _
           (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
            * to say whether a given T can be null - e.g. opaque newtypes, dependent
@@ -845,7 +845,7 @@ let normalize_union env ?on_tyvar tyl :
           normalize_union env [ty] (orr r_null r) r_union r_dyn
         | ((r, Tunion tyl'), _) ->
           normalize_union env tyl' r_null (orr r_union r) r_dyn
-        | ((r, Tdynamic), _) ->
+        | ((r, Tdynamic _), _) ->
           normalize_union env [] r_null r_union (orr r_dyn r)
         | ((r, Tnewtype (n, [ty], _)), _)
           when String.equal n Naming_special_names.Classes.cSupportDyn ->

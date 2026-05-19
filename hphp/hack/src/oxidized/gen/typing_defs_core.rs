@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4f66a39fc73459ae62e772e9baf1e67f>>
+// @generated SignedSource<<51e5d95db99f3adbb48518b3999b196d>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -596,7 +596,14 @@ pub enum Ty_ {
     ///
     /// it captures dynamicism within function scope.
     /// See tests in typecheck/dynamic/ for more examples.
-    Tdynamic,
+    ///
+    /// The optional Tvid.t is a "shadow type variable" used for dynamic inference.
+    /// When present (Some v), every subtype check [dynamic <: T] also records
+    /// T as an upper bound on v. After type checking, v's accumulated upper bounds
+    /// describe how the dynamic value was actually used, enabling use-type inference.
+    /// Shadow type variables are never solved; they only collect constraints.
+    /// None in all contexts where inference is disabled or for declared types.
+    Tdynamic(Option<isize>),
     /// Nullable, called "option" in the ML parlance.
     Toption(Ty),
     /// All the primitive types: int, string, void, etc.

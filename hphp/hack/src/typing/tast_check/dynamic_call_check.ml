@@ -17,7 +17,7 @@ let error_codes = Typing_warning_utils.codes warning_kind
 let rec is_dynamic_or_intersects_dynamic env ty =
   let (env, ty) = Tast_env.expand_type env ty in
   match get_node ty with
-  | Tdynamic -> Some (env, ty)
+  | Tdynamic _ -> Some (env, ty)
   | Tintersection tyl ->
     List.find_map tyl ~f:(is_dynamic_or_intersects_dynamic env)
   | Tnewtype (name, [tyarg], _)

@@ -66,7 +66,7 @@ let rec of_decl_ty (ty : decl_ty) : string =
   | Tany _ ->
     "mixed"
   | Tnonnull -> "nonnull"
-  | Tdynamic -> "dynamic"
+  | Tdynamic _ -> "dynamic"
   | Tthis -> "this"
   | Toption ty ->
     (* TODO: when we start supporting NoAutoDynamic, revisit this *)

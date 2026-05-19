@@ -39,7 +39,7 @@ let widen_for_array_get_ci
   (* The null type is valid only with a null-coalescing use of array get *)
   | (_, Tprim Tnull) when lhs_of_null_coalesce -> (env, Some ty)
   (* dynamic is valid for array get *)
-  | (_, Tdynamic) -> (env, Some ty)
+  | (_, Tdynamic _) -> (env, Some ty)
   (* All class-based containers, and keyset, vec and dict, are subtypes of
    * some instantiation of KeyedContainer
    *)

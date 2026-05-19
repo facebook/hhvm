@@ -100,7 +100,7 @@ let rec truthiness env ty =
   let (env, ty) = Env.expand_type env ty in
   match get_node ty with
   | Tany _
-  | Tdynamic
+  | Tdynamic _
   | Tvar _ ->
     Unknown
   | Tnonnull
@@ -247,7 +247,7 @@ let rec find_sketchy_types env acc ty =
     List.fold tyl ~init:acc ~f:(find_sketchy_types env)
   | Tany _
   | Tnonnull
-  | Tdynamic
+  | Tdynamic _
   | Tprim _
   | Tfun _
   | Ttuple _

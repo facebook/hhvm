@@ -358,7 +358,7 @@ let is_generic t =
 
 let is_dynamic t =
   match get_node t with
-  | Tdynamic -> true
+  | Tdynamic _ -> true
   | _ -> false
 
 let is_nothing t =
@@ -415,7 +415,7 @@ let is_union_or_inter_type (ty : locl_ty) =
     true
   | Tnonnull
   | Tneg _
-  | Tdynamic
+  | Tdynamic _
   | Tany _
   | Tprim _
   | Tfun _
@@ -523,7 +523,7 @@ let rec is_denotable ty =
   | Tunion [] (* Possible encodings of nothing *)
   | Tintersection [] (* Possible encodings of mixed *)
   | Tnonnull
-  | Tdynamic
+  | Tdynamic _
   | Tprim _
   | Tnewtype _ ->
     true

@@ -28,7 +28,7 @@ let expand_ty ?var_hook ?pos env ty =
     let ety =
       match deref ety with
       | ( _,
-          ( Tany _ | Tnonnull | Tprim _ | Tdynamic | Tneg _ | Tlabel _
+          ( Tany _ | Tnonnull | Tprim _ | Tdynamic _ | Tneg _ | Tlabel _
           | Tgeneric _ ) ) ->
         ety
       | (p, Tclass (n, e, tyl)) -> mk (p, Tclass (n, e, exp_tys tyl))

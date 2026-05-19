@@ -332,7 +332,7 @@ module Type_string = struct
     let open Typing_defs_core in
     let is_not_dynamic ty =
       match get_node ty with
-      | Tdynamic -> false
+      | Tdynamic _ -> false
       | _ -> true
     in
     let id = Pass.identity () in

@@ -161,7 +161,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   | Tclass _
   | Ttuple _
   | Tshape _
-  | Tdynamic
+  | Tdynamic _
   | Tany _
   | Tnewtype _
   | Tdependent _

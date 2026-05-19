@@ -67,7 +67,7 @@ and instantiate_ subst x =
     let ty1 = instantiate subst ty1 in
     let ty2 = instantiate subst ty2 in
     Tvec_or_dict (ty1, ty2)
-  | (Tthis | Tmixed | Twildcard | Tdynamic | Tnonnull | Tany _ | Tprim _) as x
+  | (Tthis | Tmixed | Twildcard | Tdynamic _ | Tnonnull | Tany _ | Tprim _) as x
     ->
     x
   | Ttuple { t_required; t_optional; t_extra } ->

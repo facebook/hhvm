@@ -716,7 +716,7 @@ fn build_type_structure(outer_ty: &Ty) -> ExtDeclTypeStructure {
         Ty_::Taccess(_)
         | Ty_::Tthis
         | Ty_::Tany(_)
-        | Ty_::Tdynamic
+        | Ty_::Tdynamic(_)
         | Ty_::Tgeneric(..)
         | Ty_::Tmixed
         | Ty_::Twildcard

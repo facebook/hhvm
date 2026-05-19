@@ -21,7 +21,12 @@ Tests for handling LSP request/response and converting between position represen
 |}
 
 let run_hackfmt filename : string =
-  let cmd = Exec_command.Hackfmt Build_options.default_hackfmt_path in
+  let path =
+    match Sys.getenv_opt "HACKFMT_TEST_PATH" with
+    | Some p when Sys.file_exists p -> p
+    | _ -> Build_options.default_hackfmt_path
+  in
+  let cmd = Exec_command.Hackfmt path in
   let lwt_result = Lwt_utils.exec_checked cmd [| filename |] in
   match Lwt_main.run lwt_result with
   | Ok Lwt_utils.Process_success.{ stdout; _ } -> stdout

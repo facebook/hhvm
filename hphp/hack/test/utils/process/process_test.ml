@@ -202,9 +202,7 @@ let test_future_continue_and_map_err_ok () =
 
 let test_future_continue_and_map_err_error () =
   let fail_proc =
-    Process.exec
-      (Exec_command.For_use_in_testing_only "command_that_doesnt_exist")
-      []
+    Process.exec (Exec_command.For_use_in_testing_only "false") []
   in
   let future = FutureProcess.make fail_proc String.strip in
   let future =
@@ -451,6 +449,26 @@ let tests =
     ("test_chdir", assert_no_fd_leaked test_chdir);
   ]
 
+let close_inherited_fds () =
+  let dir = Unix.opendir "/proc/self/fd" in
+  let fds_to_close = ref [] in
+  (try
+     while true do
+       let entry = Unix.readdir dir in
+       match int_of_string_opt entry with
+       | Some fd_int when fd_int > 2 -> fds_to_close := fd_int :: !fds_to_close
+       | _ -> ()
+     done
+   with
+  | End_of_file -> ());
+  Unix.closedir dir;
+  List.iter
+    ~f:(fun fd_int ->
+      try Unix.close (Obj.magic fd_int : Unix.file_descr) with
+      | Unix.Unix_error _ -> ())
+    !fds_to_close
+
 let () =
   Daemon.check_entry_point ();
+  close_inherited_fds ();
   Unit_test.run_all tests

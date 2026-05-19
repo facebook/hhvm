@@ -349,17 +349,27 @@ let exec_no_chdir
   Unix.set_close_on_exec stderr_parent;
 
   let pid =
-    match env_to_array env with
-    | None ->
-      Unix.create_process prog args stdin_child stdout_child stderr_child
-    | Some env ->
-      Unix.create_process_env
-        prog
-        args
-        env
-        stdin_child
-        stdout_child
-        stderr_child
+    try
+      match env_to_array env with
+      | None ->
+        Unix.create_process prog args stdin_child stdout_child stderr_child
+      | Some env ->
+        Unix.create_process_env
+          prog
+          args
+          env
+          stdin_child
+          stdout_child
+          stderr_child
+    with
+    | exn ->
+      Unix.close stdin_child;
+      Unix.close stdout_child;
+      Unix.close stderr_child;
+      Unix.close stdin_parent;
+      Unix.close stdout_parent;
+      Unix.close stderr_parent;
+      raise exn
   in
   Unix.close stdin_child;
   Unix.close stdout_child;

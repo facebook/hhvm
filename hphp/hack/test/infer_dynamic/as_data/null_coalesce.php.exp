@@ -1,0 +1,32 @@
+{
+  "function": "\\test_null_coalesce_string",
+  "solutions": [
+    {
+      "name": "$d",
+      "pos": "File \"null_coalesce.php\", line 3, characters 44-45:",
+      "type": "shape(?'ip' => string, ...)"
+    }
+  ]
+}
+{
+  "function": "\\test_null_coalesce_int",
+  "solutions": [
+    {
+      "name": "$d",
+      "pos": "File \"null_coalesce.php\", line 8, characters 41-42:",
+      "type": "shape(?'count' => int, ...)"
+    }
+  ]
+}
+{
+  "function": "\\test_null_coalesce_idx",
+  "solutions": [
+    {
+      "name": "$d",
+      "pos": "File \"null_coalesce.php\", line 13, characters 41-42:",
+      "type": "shape(?'name' => string, ...)"
+    }
+  ]
+}
+{ "function": "\\takes_string", "solutions": [] }
+{ "function": "\\takes_int", "solutions": [] }

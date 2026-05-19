@@ -12495,6 +12495,17 @@ end = struct
       in
       let lenv2 = env.lenv in
       let env = LEnv.union_lenvs ~join_pos:p env parent_lenv lenv1 lenv2 in
+      (* Dynamic inference: when $lhs ?? $rhs and $lhs is dynamic with a
+         shadow tyvar, the RHS type constrains what the dynamic value must be
+         when non-null. Add ty2 as an upper bound on the shadow. *)
+      let env =
+        if TypecheckerOptions.tco_dynamic_inference (Env.get_tcopt env) then
+          match get_node ty1 with
+          | Tdynamic (Some v) -> Env.add_tyvar_upper_bound env v (LoclType ty2)
+          | _ -> env
+        else
+          env
+      in
       (* There are two cases: either the left argument was null in which case we
          evaluate the second argument which gets as ty2, or that ty1 wasn't null.
          The following intersection adds the nonnull information. *)

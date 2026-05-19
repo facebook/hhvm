@@ -130,6 +130,7 @@ let solve ~as_data (env : Typing_env_types.env) inf_env dynamic_locals =
     match get_node ty with
     | Tdynamic _ -> true
     | Tnonnull -> true
+    | Tprim Aast.Tnull -> true
     | Toption ty' ->
       (match get_node ty' with
       | Tnonnull -> true

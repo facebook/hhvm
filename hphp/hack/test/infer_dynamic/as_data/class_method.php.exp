@@ -1,0 +1,21 @@
+{ "function": "\\takes_string", "solutions": [] }
+{
+  "function": "\\MyClass::staticFromDynamic",
+  "solutions": [
+    {
+      "name": "$d",
+      "pos": "File \"class_method.php\", line 10, characters 52-53:",
+      "type": "int"
+    }
+  ]
+}
+{
+  "function": "\\MyClass::fromDynamic",
+  "solutions": [
+    {
+      "name": "$d",
+      "pos": "File \"class_method.php\", line 6, characters 39-40:",
+      "type": "string"
+    }
+  ]
+}

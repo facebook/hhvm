@@ -5,7 +5,7 @@
     {
       "name": "$d",
       "pos": "File \"chain_index_call.php\", line 5, characters 29-30:",
-      "type": "KeyedContainer<string, int>"
+      "type": "shape('key' => int, ...)"
     }
   ]
 }

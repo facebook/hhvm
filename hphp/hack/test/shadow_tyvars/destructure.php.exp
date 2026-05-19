@@ -1,0 +1,12 @@
+{ "function": "\\takes_int", "solutions": [] }
+{ "function": "\\takes_string", "solutions": [] }
+{
+  "function": "\\test_destructure",
+  "solutions": [
+    {
+      "name": "$d",
+      "pos": "File \"destructure.php\", line 6, characters 35-36:",
+      "type": "(dynamic, dynamic)"
+    }
+  ]
+}

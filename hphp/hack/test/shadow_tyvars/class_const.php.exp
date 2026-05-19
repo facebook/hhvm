@@ -1,0 +1,16 @@
+{ "function": "\\takes_int", "solutions": [] }
+{
+  "function": "\\test_class_const",
+  "solutions": [
+    {
+      "name": "$x",
+      "pos": "File \"class_const.php\", line 6, characters 3-19:",
+      "type": "int"
+    },
+    {
+      "name": "$d",
+      "pos": "File \"class_const.php\", line 5, characters 35-36:",
+      "type": "int"
+    }
+  ]
+}

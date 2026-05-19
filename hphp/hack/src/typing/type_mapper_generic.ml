@@ -30,7 +30,7 @@ class type ['env] type_mapper_type =
 
     method on_tnonnull : 'env -> Reason.t -> 'env * locl_ty
 
-    method on_tdynamic : 'env -> Reason.t -> 'env * locl_ty
+    method on_tdynamic : 'env -> Reason.t -> Tvid.t option -> 'env * locl_ty
 
     method on_tany : 'env -> Reason.t -> 'env * locl_ty
 
@@ -83,7 +83,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tnonnull env r = (env, mk (r, Tnonnull))
 
-    method on_tdynamic env r = (env, mk (r, Tdynamic None))
+    method on_tdynamic env r sv = (env, mk (r, Tdynamic sv))
 
     method on_tany env r = (env, mk (r, Typing_defs.make_tany ()))
 
@@ -150,7 +150,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tnewtype (x, tyl, ty) -> this#on_tnewtype env r x tyl ty
       | Tdependent (x, ty) -> this#on_tdependent env r x ty
       | Tclass (x, e, tyl) -> this#on_tclass env r x e tyl
-      | Tdynamic _ -> this#on_tdynamic env r
+      | Tdynamic sv -> this#on_tdynamic env r sv
       | Tshape s -> this#on_tshape env r s
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict env r ty1 ty2
       | Taccess (ty, id) -> this#on_taccess env r ty id

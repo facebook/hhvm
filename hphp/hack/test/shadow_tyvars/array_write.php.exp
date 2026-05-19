@@ -1,0 +1,20 @@
+{
+  "function": "\\test_array_write",
+  "solutions": [
+    {
+      "name": "$d",
+      "pos": "File \"array_write.php\", line 4, characters 3-16:",
+      "type": "KeyedContainer<string, int>"
+    }
+  ]
+}
+{
+  "function": "\\test_array_append",
+  "solutions": [
+    {
+      "name": "$d",
+      "pos": "File \"array_write.php\", line 8, characters 3-16:",
+      "type": "Container<string>"
+    }
+  ]
+}

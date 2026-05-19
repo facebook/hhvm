@@ -234,9 +234,14 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
            for the element to track its inferred element type. *)
         let (env, result_shadow) =
           match get_node ty1 with
-          | Tdynamic (Some _shadow_v) ->
-            let (env, v_val) = Env.fresh_shadow_tyvar env expr_pos in
-            (env, Some v_val)
+          | Tdynamic (Some shadow_v) ->
+            let container_ty =
+              Typing_make_type.container (get_reason ty1) ty2
+            in
+            let env =
+              Env.add_tyvar_upper_bound env shadow_v (LoclType container_ty)
+            in
+            (env, Some shadow_v)
           | _ -> (env, None)
         in
         let tv = mk (get_reason ty1, Tdynamic result_shadow) in
@@ -446,14 +451,11 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         let (env, result_shadow) =
           match ety1_ with
           | Tdynamic (Some shadow_v) ->
-            let (env, v_val) = Env.fresh_shadow_tyvar env expr_pos in
-            let container_ty =
-              MakeType.keyed_container r tkey (mk (r, Tvar v_val))
-            in
+            let container_ty = MakeType.keyed_container r tkey ty2 in
             let env =
               Env.add_tyvar_upper_bound env shadow_v (LoclType container_ty)
             in
-            (env, Some v_val)
+            (env, Some shadow_v)
           | _ -> (env, None)
         in
         let tv = mk (r, Tdynamic result_shadow) in

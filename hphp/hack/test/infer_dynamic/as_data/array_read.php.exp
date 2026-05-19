@@ -6,7 +6,7 @@
     {
       "name": "$d",
       "pos": "File \"array_read.php\", line 6, characters 34-35:",
-      "type": "(KeyedContainer<string, int> & KeyedContainer<string, string>)"
+      "type": "shape('key1' => int, 'key2' => string, ...)"
     }
   ]
 }

@@ -4690,7 +4690,7 @@ end = struct
         (Aast.New (tc, tal, tel, typed_unpack_element, ctor_fty))
         ty
     | Cast (hint, e) ->
-      let (env, te, _ty2) =
+      let (env, te, ty2) =
         expr
           ~expected:None
           ~ctxt:
@@ -4710,6 +4710,13 @@ end = struct
         Phase.localize_hint_no_subst env ~ignore_errors:false hint
       in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+      let env =
+        if TypecheckerOptions.tco_dynamic_inference (Env.get_tcopt env) then
+          let (env, _) = SubType.sub_type env ty2 ty None in
+          env
+        else
+          env
+      in
       make_result env p (Aast.Cast (hint, te)) ty
     | ExpressionTree et -> Expression_tree.expression_tree env p et
     | Is (e, hint) ->

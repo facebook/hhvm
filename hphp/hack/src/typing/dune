@@ -165,7 +165,8 @@
   tast_utils
   tast_visitor
   typing_env_from_def
-  typing_equality_check)
+  typing_equality_check
+  typing_shadow_solver)
  (libraries
   derive_type_instantiation
   typing

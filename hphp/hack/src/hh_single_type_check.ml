@@ -80,7 +80,7 @@ type mode =
   | CountImpreciseTypes
   | Map_reduce_mode
   | Dump_classish_positions
-  | Dump_dynamic_inference
+  | Dump_dynamic_inference of { as_data: bool }
 
 type options = {
   files: string list;
@@ -491,8 +491,12 @@ let parse_options () =
       ("--nast", Arg.Unit (set_mode Dump_nast), " Print out the named AST");
       ("--tast", Arg.Unit (set_mode Dump_tast), " Print out the typed AST");
       ( "--infer-dynamic",
-        Arg.Unit (set_mode Dump_dynamic_inference),
+        Arg.Unit (set_mode (Dump_dynamic_inference { as_data = false })),
         " Infer types for dynamic locals" );
+      ( "--infer-dynamic-as-data",
+        Arg.Unit (set_mode (Dump_dynamic_inference { as_data = true })),
+        " Infer types for dynamic locals, interpreting indexed access as shapes/vecs"
+      );
       ( "--stripped-tast",
         Arg.Unit (set_mode Dump_stripped_tast),
         " Print out the typed AST, stripped of type information."
@@ -1996,114 +2000,56 @@ let handle_mode
     in
     print_errors_if_present (Diagnostics.merge parse_errors errors);
     print_tasts ~should_print_position tasts ctx
-  | Dump_dynamic_inference ->
+  | Dump_dynamic_inference { as_data } ->
     let ctx =
       Provider_context.map_tcopt ctx ~f:(fun tcopt ->
           GlobalOptions.{ tcopt with tco_dynamic_inference = true })
     in
     let (_errors, tasts) = compute_tasts ctx files_info files_contents in
-    let rec rewrite_shadows ty =
-      let open Typing_defs in
-      match get_node ty with
-      | Tdynamic (Some v) ->
-        mk
-          ( get_reason ty,
-            Tclass
-              ( (Pos_or_decl.none, Printf.sprintf "\\dynamic#%s" (Tvid.show v)),
-                nonexact,
-                [] ) )
-      | Tfun ft ->
-        mk
-          ( get_reason ty,
-            Tfun
-              {
-                ft with
-                ft_params =
-                  List.map ft.ft_params ~f:(fun p ->
-                      { p with fp_type = rewrite_shadows p.fp_type });
-                ft_ret = rewrite_shadows ft.ft_ret;
-              } )
-      (* Recurse into type arguments to expose shadow type variables nested
-         inside compound types like Awaitable<Tdynamic(Some v)> *)
-      | Tclass (id, exact, tyl) ->
-        mk (get_reason ty, Tclass (id, exact, List.map tyl ~f:rewrite_shadows))
-      | _ -> ty
-    in
-    let print_ty_with_shadows env ty =
-      Tast_env.print_ty env (rewrite_shadows ty)
-    in
-    let print_bound env ity =
-      match ity with
-      | Typing_defs_constraints.LoclType ty -> print_ty_with_shadows env ty
-      | Typing_defs_constraints.ConstraintType cty ->
-        let (_, cty_) = Typing_defs_constraints.deref_constraint_type cty in
-        (match cty_ with
-        | Typing_defs_constraints.Thas_member hm ->
-          Printf.sprintf
-            "has_member(%s, %s)"
-            (snd hm.Typing_defs_constraints.hm_name)
-            (print_ty_with_shadows env hm.Typing_defs_constraints.hm_type)
-        | Typing_defs_constraints.Tcan_index ci ->
-          let expr_str =
-            let (_, _, e) = ci.Typing_defs_constraints.ci_index_expr in
-            match e with
-            | Aast.String s -> Printf.sprintf "'%s'" s
-            | Aast.Int s -> s
-            | _ -> "<expr>"
-          in
-          Printf.sprintf
-            "can_index(%s, key=%s, val=%s)"
-            expr_str
-            (print_ty_with_shadows env ci.Typing_defs_constraints.ci_key)
-            (print_ty_with_shadows env ci.Typing_defs_constraints.ci_val)
-        | Typing_defs_constraints.Tcan_traverse ct ->
-          let key_str =
-            match ct.Typing_defs_constraints.ct_key with
-            | Some k -> Printf.sprintf "key=%s, " (print_ty_with_shadows env k)
-            | None -> ""
-          in
-          Printf.sprintf
-            "can_traverse(%sval=%s)"
-            key_str
-            (print_ty_with_shadows env ct.Typing_defs_constraints.ct_val)
-        | _ -> "<constraint>")
-    in
     Relative_path.Map.iter tasts ~f:(fun _fn tast ->
+        let Equal = Tast_env.eq_typing_env in
+        let print_json json =
+          Printf.printf "%s\n" (Hh_json_helpers.Out.pretty_to_string json)
+        in
+        let solve_def ~name env =
+          let inf_env = env.Typing_env_types.inference_env in
+          let dynamic_locals =
+            match env.Typing_env_types.fun_tast_info with
+            | Some info -> info.Tast.dynamic_locals
+            | None -> []
+          in
+          let typing_env : Typing_env_types.env = env in
+          let solutions =
+            Typing_shadow_solver.solve
+              ~as_data
+              typing_env
+              inf_env
+              dynamic_locals
+          in
+          print_json
+            (`Assoc
+              [
+                ("function", `String name);
+                ( "solutions",
+                  `List
+                    (List.map
+                       solutions
+                       ~f:(Typing_shadow_solver.solution_to_json env)) );
+              ])
+        in
         List.iter tast ~f:(fun def ->
-            let env = Tast_env.def_env ctx def in
-            let Equal = Tast_env.eq_typing_env in
-            let inf_env = env.Typing_env_types.inference_env in
-            let name =
-              match def with
-              | Aast.Fun { Aast.fd_name; _ } -> snd fd_name
-              | Aast.Class { Aast.c_name; _ } -> snd c_name
-              | _ -> "<unknown>"
-            in
-            Printf.printf "function %s:\n" name;
-            let dynamic_locals =
-              match env.Typing_env_types.fun_tast_info with
-              | Some info -> info.Tast.dynamic_locals
-              | None -> []
-            in
-            Printf.printf "  Locals:\n";
-            List.iter dynamic_locals ~f:(fun dl ->
-                Printf.printf
-                  "    %s %s : dynamic#%s\n"
-                  dl.Tast.dl_name
-                  (Pos.string (Pos.to_absolute dl.Tast.dl_pos))
-                  (Tvid.show dl.Tast.dl_shadow_tvid));
-            Printf.printf "  Constraints:\n";
-            Typing_inference_env.iter_shadow_tyvars inf_env (fun v ->
-                let upper_bounds =
-                  Typing_inference_env.get_tyvar_upper_bounds inf_env v
-                in
-                if not (Internal_type_set.is_empty upper_bounds) then begin
-                  Printf.printf "    #%s:\n" (Tvid.show v);
-                  Internal_type_set.iter
-                    (fun ity ->
-                      Printf.printf "      <: %s\n" (print_bound env ity))
-                    upper_bounds
-                end)))
+            match def with
+            | Aast.Fun { Aast.fd_name; _ } ->
+              let env = Tast_env.def_env ctx def in
+              solve_def ~name:(snd fd_name) env
+            | Aast.Class { Aast.c_name; c_methods; _ } ->
+              let class_env = Tast_env.def_env ctx def in
+              let class_name = snd c_name in
+              List.iter c_methods ~f:(fun m ->
+                  let env = Tast_env.restore_method_env class_env m in
+                  let name = class_name ^ "::" ^ snd m.Aast.m_name in
+                  solve_def ~name env)
+            | _ -> ()))
   | Dump_stripped_tast ->
     iter_over_files (fun filename ->
         let files_contents =

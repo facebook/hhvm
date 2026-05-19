@@ -78,6 +78,8 @@ type rollout_flags = {
           and distance (in globalrevs) for telemetry *)
   fetch_remote_old_decls: bool;
       (** POC: @bobren - Fetching old decls remotely to reduce fanout *)
+  only_fetch_remote_old_decl_during_init: bool;
+      (** POC: @mojpc2, whether remote old decl fetches are restricted to init *)
   specify_manifold_api_key: bool;
       (** POC: @nzthomas, whether the API key in hh.conf should be used for saved state downloads *)
   populate_member_heaps: bool;

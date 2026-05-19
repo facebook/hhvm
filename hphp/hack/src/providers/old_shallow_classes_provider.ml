@@ -12,8 +12,13 @@ open Shallow_decl_defs
 let fetch_remote_old_decl_flag (ctx : Provider_context.t) =
   TypecheckerOptions.fetch_remote_old_decls (Provider_context.get_tcopt ctx)
 
+let only_fetch_remote_old_decl_during_init (ctx : Provider_context.t) =
+  TypecheckerOptions.only_fetch_remote_old_decl_during_init
+    (Provider_context.get_tcopt ctx)
+
 let fetch_remote_old_decls ctx ~during_init =
-  fetch_remote_old_decl_flag ctx && during_init
+  fetch_remote_old_decl_flag ctx
+  && ((not (only_fetch_remote_old_decl_during_init ctx)) || during_init)
 
 let fetch_missing_old_classes_remotely ctx ~during_init old_classes =
   if fetch_remote_old_decls ctx ~during_init then

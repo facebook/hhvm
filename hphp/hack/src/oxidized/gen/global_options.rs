@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f5af8f21d4b3affe2ae12d9f78936c91>>
+// @generated SignedSource<<5402b9d702303b1092e546ad3b2f411a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -206,6 +206,8 @@ pub struct GlobalOptions {
     pub log_levels: s_map::SMap<isize>,
     /// Fetch old decls from CAS instead of memcache/manifold
     pub tco_fetch_remote_old_decls: bool,
+    /// Restrict remote old decl fetching to init-time fanout.
+    pub tco_only_fetch_remote_old_decl_during_init: bool,
     /// Populate the member signature heaps.
     ///
     /// If disabled, instead load lazily from shallow classes.

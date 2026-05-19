@@ -397,6 +397,8 @@ impl HhConfig {
                 .get_str("log_levels")
                 .map_or(Ok(default.log_levels), parse_json)?,
             tco_fetch_remote_old_decls: default.tco_fetch_remote_old_decls,
+            tco_only_fetch_remote_old_decl_during_init: default
+                .tco_only_fetch_remote_old_decl_during_init,
             tco_populate_member_heaps: default.tco_populate_member_heaps,
             tco_skip_hierarchy_checks: default.tco_skip_hierarchy_checks,
             tco_silence_errors_under_dynamic: hhconfig.get_bool_or(

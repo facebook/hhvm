@@ -65,6 +65,9 @@ let log_levels t = t.GlobalOptions.log_levels
 
 let fetch_remote_old_decls t = t.GlobalOptions.tco_fetch_remote_old_decls
 
+let only_fetch_remote_old_decl_during_init t =
+  t.GlobalOptions.tco_only_fetch_remote_old_decl_during_init
+
 let populate_member_heaps t = t.GlobalOptions.tco_populate_member_heaps
 
 let enable_legacy_experimental t feature =

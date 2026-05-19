@@ -110,6 +110,7 @@ type t = {
   allowed_fixme_codes_strict: ISet.t;
   log_levels: int SMap.t;
   tco_fetch_remote_old_decls: bool;
+  tco_only_fetch_remote_old_decl_during_init: bool;
   tco_populate_member_heaps: bool;
   tco_skip_hierarchy_checks: bool;
   tco_silence_errors_under_dynamic: bool;
@@ -222,6 +223,7 @@ let default =
     allowed_fixme_codes_strict = ISet.empty;
     log_levels = SMap.empty;
     tco_fetch_remote_old_decls = true;
+    tco_only_fetch_remote_old_decl_during_init = true;
     tco_populate_member_heaps = true;
     tco_skip_hierarchy_checks = false;
     tco_silence_errors_under_dynamic = false;
@@ -333,6 +335,7 @@ let set
     ?allowed_fixme_codes_strict
     ?log_levels
     ?tco_fetch_remote_old_decls
+    ?tco_only_fetch_remote_old_decl_during_init
     ?tco_populate_member_heaps
     ?tco_skip_hierarchy_checks
     ?tco_silence_errors_under_dynamic
@@ -482,6 +485,10 @@ let set
     log_levels = setting log_levels options.log_levels;
     tco_fetch_remote_old_decls =
       setting tco_fetch_remote_old_decls options.tco_fetch_remote_old_decls;
+    tco_only_fetch_remote_old_decl_during_init =
+      setting
+        tco_only_fetch_remote_old_decl_during_init
+        options.tco_only_fetch_remote_old_decl_during_init;
     tco_populate_member_heaps =
       setting tco_populate_member_heaps options.tco_populate_member_heaps;
     tco_skip_hierarchy_checks =

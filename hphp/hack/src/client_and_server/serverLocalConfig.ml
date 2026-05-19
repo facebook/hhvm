@@ -282,6 +282,8 @@ type t = {
       If disabled, instead load lazily from shallow classes. *)
   fetch_remote_old_decls: bool;
       (** Option to fetch old decls from remote decl store *)
+  only_fetch_remote_old_decl_during_init: bool;
+      (** Restrict remote old decl fetches to init-time fanout. *)
   skip_hierarchy_checks: bool;
       (** Skip checks on hierarchy e.g. overrides, require extend, etc.
       Set to true only for debugging purposes! *)

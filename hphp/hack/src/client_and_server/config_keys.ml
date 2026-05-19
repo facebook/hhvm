@@ -530,6 +530,9 @@ module Hhconf = struct
 
   let fetch_remote_old_decls = hhconf_key "fetch_remote_old_decls"
 
+  let only_fetch_remote_old_decl_during_init =
+    hhconf_key "only_fetch_remote_old_decl_during_init"
+
   let heartbeat_interval = hhconf_key "heartbeat_interval"
 
   let hg_aware = hhconf_key "hg_aware"

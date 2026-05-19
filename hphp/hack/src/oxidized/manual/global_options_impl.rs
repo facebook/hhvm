@@ -60,6 +60,7 @@ impl Default for GlobalOptions {
             allowed_fixme_codes_strict: i_set::ISet::new(),
             log_levels: s_map::SMap::new(),
             tco_fetch_remote_old_decls: true,
+            tco_only_fetch_remote_old_decl_during_init: true,
             tco_populate_member_heaps: true,
             tco_skip_hierarchy_checks: false,
             tco_silence_errors_under_dynamic: false,

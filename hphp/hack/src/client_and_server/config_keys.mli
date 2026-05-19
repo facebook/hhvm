@@ -481,6 +481,8 @@ module Hhconf : sig
 
   val fetch_remote_old_decls : string
 
+  val only_fetch_remote_old_decl_during_init : string
+
   val heartbeat_interval : string
 
   val hg_aware : string

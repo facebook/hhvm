@@ -68,6 +68,7 @@ let default =
     idle_gc_slice = 0;
     populate_member_heaps = true;
     fetch_remote_old_decls = true;
+    only_fetch_remote_old_decl_during_init = true;
     skip_hierarchy_checks = false;
     skip_tast_checks = false;
     silence_errors_under_dynamic = false;
@@ -584,6 +585,13 @@ let load_
       ~current_version
       config
   in
+  let only_fetch_remote_old_decl_during_init =
+    bool_if_min_version
+      Config_keys.Hhconf.only_fetch_remote_old_decl_during_init
+      ~default:default.only_fetch_remote_old_decl_during_init
+      ~current_version
+      config
+  in
   let skip_hierarchy_checks =
     bool_if_min_version
       Config_keys.Hhconf.skip_hierarchy_checks
@@ -1072,6 +1080,7 @@ let load_
     idle_gc_slice;
     populate_member_heaps;
     fetch_remote_old_decls;
+    only_fetch_remote_old_decl_during_init;
     skip_hierarchy_checks;
     skip_tast_checks;
     silence_errors_under_dynamic;
@@ -1171,6 +1180,8 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         GlobalOptions.(
           options.saved_state.loading.log_saved_state_age_and_distance);
       fetch_remote_old_decls = options.fetch_remote_old_decls;
+      only_fetch_remote_old_decl_during_init =
+        options.only_fetch_remote_old_decl_during_init;
       specify_manifold_api_key = options.specify_manifold_api_key;
       populate_member_heaps = options.populate_member_heaps;
       shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;

@@ -6,6 +6,7 @@ let debug_describe_t : type a. a t -> string = function
   | STATUS_SINGLE _ -> "STATUS_SINGLE"
   | LOG_ERRORS _ -> "LOG_ERRORS"
   | INFER_TYPE _ -> "INFER_TYPE"
+  | INFER_DYNAMIC _ -> "INFER_DYNAMIC"
   | ENFORCEMENT_AT_POS_BATCH _ -> "ENFORCEMENT_AT_POS_BATCH"
   | INFER_TYPE_BATCH _ -> "INFER_TYPE_BATCH"
   | INFER_TYPE_ERROR _ -> "INFER_TYPE_ERROR"

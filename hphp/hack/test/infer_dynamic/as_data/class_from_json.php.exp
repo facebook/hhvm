@@ -5,7 +5,7 @@
     {
       "name": "$data",
       "pos": "File \"class_from_json.php\", line 17, characters 5-41:",
-      "type": "shape(?'app_id' => int, ?'carrier_id' => int, ?'method' => string, 'request' => shape('headers' => dict<string, string>, 'parameters' => mixed, ...), ?'source_ip' => string, ...)"
+      "type": "shape(?'app_id' => int, ?'carrier_id' => ?int, ?'method' => ?string, 'request' => shape('headers' => dict<string, string>, 'parameters' => mixed, ...), ?'source_ip' => ?string, ...)"
     }
   ]
 }

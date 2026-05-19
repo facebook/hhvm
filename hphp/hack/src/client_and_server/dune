@@ -191,11 +191,12 @@
 (library
  (name server_infer_type)
  (wrapped false)
- (modules serverInferType serverInferTypeBatch serverInferTypeError serverCollectTastHoles)
+ (modules serverInferType serverInferTypeBatch serverInferTypeError serverCollectTastHoles serverInferDynamic)
  (libraries
   annotated_ast
   ast
   hh_json
+  naming_provider
   pos
   provider_context
   server_command_types

@@ -588,6 +588,12 @@ let main_internal
     in
     ClientTypeAtPos.go ty args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
+  | ClientEnv.MODE_INFER_DYNAMIC (arg, as_data) ->
+    let%lwt (json, telemetry) =
+      rpc args @@ ServerCommandTypes.INFER_DYNAMIC (arg, as_data)
+    in
+    Printf.printf "%s\n" (Yojson.Safe.pretty_to_string json);
+    Lwt.return (Exit_status.No_error, telemetry)
   | ClientEnv.MODE_ENFORCEMENT_AT_POS_BATCH positions ->
     let positions =
       List.map positions ~f:(fun pos ->

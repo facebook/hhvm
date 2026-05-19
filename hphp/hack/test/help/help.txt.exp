@@ -35,6 +35,8 @@ WWW-ROOT is assumed to be current directory if unspecified
   --stats                                                 display some server statistics
   --status                                                (mode) show a human readable list of errors (default)
   --timeout                                               set the timeout in seconds (default: no timeout)
+  --infer-dynamic                                         (mode) infer types for dynamic locals [function_name or ClassName::method_name]
+  --infer-dynamic-as-data                                 (mode) infer types for dynamic locals as data [function_name or ClassName::method_name]
   --type-at-pos-batch                                     (mode) show types at multiple positions [file:line:character list]
   --type-error-at-pos                                     (mode) show type error at a given position in file [line:character]
   --is-subtype                                            (mode) take a JSON list of subtype queries via stdin

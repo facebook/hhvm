@@ -4712,8 +4712,9 @@ end = struct
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       let env =
         if TypecheckerOptions.tco_dynamic_inference (Env.get_tcopt env) then
-          let (env, _) = SubType.sub_type env ty2 ty None in
-          env
+          match get_node ty2 with
+          | Tdynamic (Some v) -> Env.add_tyvar_upper_bound env v (LoclType ty)
+          | _ -> env
         else
           env
       in
@@ -6119,10 +6120,10 @@ end = struct
               then
                 match tel with
                 | Anormal (input_ty, _, _) :: _ ->
-                  let (env, _ty_err_opt) =
-                    SubType.sub_type env input_ty ty_to None
-                  in
-                  env
+                  (match get_node input_ty with
+                  | Tdynamic (Some v) ->
+                    Env.add_tyvar_upper_bound env v (LoclType ty_to)
+                  | _ -> env)
                 | _ -> env
               else
                 env

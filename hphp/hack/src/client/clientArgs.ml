@@ -883,6 +883,14 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
         Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x)),
         " (mode) show type at a given position in file [file:line:character]",
         (* can use --type-at-pos-batch *) Arg_non_user_facing );
+      ( "--infer-dynamic",
+        Arg.String (fun x -> set_mode (MODE_INFER_DYNAMIC (x, false))),
+        " (mode) infer types for dynamic locals [function_name or ClassName::method_name]",
+        Arg_user_facing );
+      ( "--infer-dynamic-as-data",
+        Arg.String (fun x -> set_mode (MODE_INFER_DYNAMIC (x, true))),
+        " (mode) infer types for dynamic locals as data [function_name or ClassName::method_name]",
+        Arg_user_facing );
       ( "--type-at-pos-batch",
         Arg.Rest
           begin

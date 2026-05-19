@@ -475,6 +475,7 @@ type _ t =
   | INFER_TYPE :
       file_input * File_content.Position.t
       -> InferAtPosService.result t
+  | INFER_DYNAMIC : string * bool -> Yojson.Safe.t t
   | ENFORCEMENT_AT_POS_BATCH :
       (string * File_content.Position.t) list
       -> string list t
@@ -613,6 +614,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | STATUS_SINGLE _ -> false
   | LOG_ERRORS _ -> false
   | INFER_TYPE _ -> false
+  | INFER_DYNAMIC _ -> false
   | ENFORCEMENT_AT_POS_BATCH _ -> false
   | INFER_TYPE_BATCH _ -> false
   | INFER_TYPE_ERROR _ -> false

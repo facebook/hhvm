@@ -155,6 +155,17 @@ let handle :
           ServerInferType.go_ctx ~ctx ~entry pos)
     in
     (env, result)
+  | ServerCommandTypes.INFER_DYNAMIC (identifier, as_data) ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    let ctx =
+      Provider_context.map_tcopt ctx ~f:(fun tcopt ->
+          GlobalOptions.{ tcopt with tco_dynamic_inference = true })
+    in
+    let result =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerInferDynamic.go ~ctx ~identifier ~as_data)
+    in
+    (env, result)
   | ServerCommandTypes.ENFORCEMENT_AT_POS_BATCH positions ->
     let ctx = Provider_utils.ctx_from_server_env env in
     let results =

@@ -29,10 +29,19 @@ type val_kind = Typing_defs.val_kind
 (* Contains information about a specific function that we
     a) want to make available to TAST checks
     b) isn't otherwise (space-efficiently) present in the saved typing env *)
+type dynamic_local_info = {
+  dl_name: string;
+  dl_pos: Pos.t;
+  dl_shadow_tvid: Tvid.t;
+}
+[@@deriving hash, show]
+
 type fun_tast_info = {
   has_implicit_return: bool;
   has_readonly: bool;
       (** True if there are leaves of the function's imaginary CFG without a return statement *)
+  dynamic_locals: dynamic_local_info list;
+      (** Locals with type dynamic and their shadow tyvars *)
 }
 [@@deriving hash, show]
 

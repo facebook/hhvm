@@ -303,6 +303,12 @@ module M = struct
 
   let is_shadow_tyvar env var = Inf.is_shadow env.inference_env var
 
+  let fresh_shadow_tyvar env pos =
+    let (inference_env, v) =
+      Inf.fresh_shadow_tyvar env.inference_env env.tvar_id_provider pos
+    in
+    ({ env with inference_env }, v)
+
   let set_tyvar_upper_bounds env var tys =
     {
       env with
@@ -1224,6 +1230,37 @@ module M = struct
           Expression_id.make_immutable expr_id
         else
           expr_id
+      in
+      (* Dynamic inference: when a local is assigned type `dynamic`, allocate a
+         fresh shadow type variable and attach it via Tdynamic(Some v). The shadow
+         type variable tracks how the local is used by accumulating upper bounds.
+         If the local is re-assigned to a non-dynamic type, we preserve the existing
+         shadow type variable from the previous binding so constraints aren't lost. *)
+      let (env, new_type) =
+        match get_node new_type with
+        | Tdynamic None
+          when TypecheckerOptions.tco_dynamic_inference (get_tcopt env) ->
+          let local_name = Local_id.to_string x in
+          let (inference_env, v) =
+            Inf.fresh_shadow_tyvar
+              env.inference_env
+              env.tvar_id_provider
+              ~local_name
+              pos
+          in
+          let env = { env with inference_env } in
+          (env, mk (get_reason new_type, Tdynamic (Some v)))
+        | Tdynamic (Some _) -> (env, new_type)
+        | _ ->
+          if TypecheckerOptions.tco_dynamic_inference (get_tcopt env) then
+            match LID.Map.find_opt x next_cont.LEnvC.local_types with
+            | Some local ->
+              (match get_node local.Typing_local_types.ty with
+              | Tdynamic (Some _) -> (env, local.Typing_local_types.ty)
+              | _ -> (env, new_type))
+            | None -> (env, new_type)
+          else
+            (env, new_type)
       in
       let local =
         Typing_local_types.

@@ -440,9 +440,38 @@ let rec obj_get_concrete_ty
       class_name
       paraml
       on_error
-  | (_, Tdynamic _) ->
+  | (_, Tdynamic shadow_v_opt) ->
     let err_opt = sound_dynamic_err_opt args env id read_context in
-    let ty = MakeType.dynamic (Reason.dynamic_prop id_pos) in
+    (* Dynamic inference: when accessing a property on a dynamic with a shadow
+       type variable, create a fresh shadow type variable for the result and
+       record a has_member constraint on the receiver's shadow. This tracks that
+       the dynamic value was used as an object with property `id`. *)
+    let (env, result_shadow) =
+      match shadow_v_opt with
+      | Some shadow_v ->
+        let (env, v_prop) = Env.fresh_shadow_tyvar env id_pos in
+        let prop_ty = mk (Reason.none, Tdynamic (Some v_prop)) in
+        let hm =
+          Typing_defs_constraints.
+            {
+              hm_name = id;
+              hm_type = prop_ty;
+              hm_class_id = Aast.CI (id_pos, "");
+              hm_method = None;
+            }
+        in
+        let env =
+          Env.add_tyvar_upper_bound
+            env
+            shadow_v
+            (ConstraintType
+               (Typing_defs_constraints.mk_constraint_type
+                  (Reason.none, Thas_member hm)))
+        in
+        (env, Some v_prop)
+      | None -> (env, None)
+    in
+    let ty = mk (Reason.dynamic_prop id_pos, Tdynamic result_shadow) in
     (env, err_opt, (ty, []), dflt_lval_mismatch, dflt_rval_mismatch)
   | (_, Tany _) ->
     (env, None, (concrete_ty, []), dflt_lval_mismatch, dflt_rval_mismatch)

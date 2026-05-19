@@ -499,6 +499,8 @@ val get_tyvar_upper_bounds : env -> Tvid.t -> Internal_type_set.t
 
 val is_shadow_tyvar : env -> Tvid.t -> bool
 
+val fresh_shadow_tyvar : env -> Pos.t -> env * Tvid.t
+
 val set_tyvar_lower_bounds : env -> Tvid.t -> Internal_type_set.t -> env
 
 val set_tyvar_upper_bounds : env -> Tvid.t -> Internal_type_set.t -> env

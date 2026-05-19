@@ -573,7 +573,7 @@ let fun_tast_info_as_map = function
   | None -> make_map []
   | Some r ->
     let open Tast in
-    let { has_implicit_return; has_readonly } = r in
+    let { has_implicit_return; has_readonly; dynamic_locals = _ } = r in
     make_map
       [
         ("has_implicit_return", bool_as_value has_implicit_return);

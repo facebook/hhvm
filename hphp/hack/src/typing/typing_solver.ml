@@ -723,10 +723,17 @@ let solve_to_equal_bound_or_wrt_variance env r var =
   solve_until_concrete_ty env [] var
 
 let always_solve_tyvar env r var =
-  let (env, ty_err_opt1) = solve_to_equal_bound_or_wrt_variance env r var in
-  let (env, ty_err_opt2) = always_solve_tyvar_down ~freshen:false env r var in
-  let ty_err_opt = Option.merge ty_err_opt1 ty_err_opt2 ~f:Typing_error.both in
-  (env, ty_err_opt)
+  (* Shadow type variables are never solved — they exist only to accumulate
+     upper-bound constraints for dynamic inference. *)
+  if Env.is_shadow_tyvar env var then
+    (env, None)
+  else
+    let (env, ty_err_opt1) = solve_to_equal_bound_or_wrt_variance env r var in
+    let (env, ty_err_opt2) = always_solve_tyvar_down ~freshen:false env r var in
+    let ty_err_opt =
+      Option.merge ty_err_opt1 ty_err_opt2 ~f:Typing_error.both
+    in
+    (env, ty_err_opt)
 
 (* Force solve all type variables in the environment *)
 let solve_all_unsolved_tyvars env =

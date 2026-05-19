@@ -1,0 +1,14 @@
+function \takes_int:
+  Locals:
+  Constraints:
+function \test_call_dynamic:
+  Locals:
+    $d File "function_call.php", line 5, characters 36-37: : dynamic#0
+  Constraints:
+    #0:
+      <: (function(int, string): dynamic#1)
+    #1:
+      <: mixed
+      <: dynamic
+      <: ~int
+      <: mixed

@@ -1,0 +1,16 @@
+function \takes_string:
+  Locals:
+  Constraints:
+function \test_method_call:
+  Locals:
+    $d File "method_call.php", line 5, characters 35-36: : dynamic#0
+  Constraints:
+    #0:
+      <: has_member(bar, dynamic#1)
+    #1:
+      <: (function(int): dynamic#2)
+    #2:
+      <: mixed
+      <: dynamic
+      <: ~string
+      <: mixed

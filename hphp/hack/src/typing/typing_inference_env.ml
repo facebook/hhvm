@@ -50,6 +50,9 @@ type tyvar_info = {
   is_shadow: bool;
       (** Shadow type variables collect upper-bound constraints for dynamic
           inference but are never solved. Attached to Tdynamic(Some v) types. *)
+  shadow_local_name: string option;
+      (** If this shadow type variable was created for a local variable, stores
+          the variable name (e.g., "$d") for diagnostic output. *)
   rank: int;
 }
 
@@ -99,6 +102,7 @@ module Log = struct
       solving_info;
       is_error;
       is_shadow;
+      shadow_local_name = _;
       rank;
     } =
       tvinfo
@@ -180,6 +184,7 @@ module Log = struct
           solving_info;
           is_error;
           is_shadow;
+          shadow_local_name = _;
           rank;
         } ->
       `Assoc
@@ -222,6 +227,7 @@ let empty_tyvar_info tyvar_pos rank =
     solving_info = TVIConstraints empty_tyvar_constraints;
     is_error = false;
     is_shadow = false;
+    shadow_local_name = None;
   }
 
 let get_tyvar_info_opt env v = Tvid.Map.find_opt v env.tvenv
@@ -396,6 +402,7 @@ let fresh_unsolved_tyvar env v rank ?variance ?(is_error = false) tyvar_pos =
       eager_solve_failed = false;
       is_error;
       is_shadow = false;
+      shadow_local_name = None;
       rank;
     }
   in
@@ -405,7 +412,7 @@ let fresh_unsolved_tyvar env v rank ?variance ?(is_error = false) tyvar_pos =
     bounds and is excluded from solving. Used for dynamic inference: tracks how
     dynamic-typed expressions are used, building a constraint set that describes
     their inferred use-type. *)
-let fresh_shadow_tyvar env id_provider pos =
+let fresh_shadow_tyvar env id_provider ?local_name pos =
   let v = Tvid.make id_provider in
   let solving_info = create_tyvar_constraints (Some Ast_defs.Invariant) in
   let tvinfo =
@@ -415,6 +422,7 @@ let fresh_shadow_tyvar env id_provider pos =
       eager_solve_failed = false;
       is_error = false;
       is_shadow = true;
+      shadow_local_name = local_name;
       rank = 0;
     }
   in
@@ -425,6 +433,18 @@ let is_shadow env v =
   match get_tyvar_info_opt env v with
   | Some tvinfo -> tvinfo.is_shadow
   | None -> false
+
+let iter_shadow_tyvars env f =
+  Tvid.Map.iter (fun v tvinfo -> if tvinfo.is_shadow then f v) env.tvenv
+
+let collect_shadow_locals env =
+  Tvid.Map.fold
+    (fun v tvinfo acc ->
+      match tvinfo.shadow_local_name with
+      | Some name -> (name, tvinfo.tyvar_pos, v) :: acc
+      | None -> acc)
+    env.tvenv
+    []
 
 let add_current_tyvar ?variance ?is_error env p v rank =
   let env = fresh_unsolved_tyvar env v rank ?variance ?is_error p in
@@ -473,6 +493,7 @@ let wrap_ty_in_var env id_provider r ty =
       solving_info = TVIType ty;
       is_error = false;
       is_shadow = false;
+      shadow_local_name = None;
       rank = 0;
     }
   in
@@ -842,6 +863,7 @@ module Size = struct
       eager_solve_failed = _;
       is_error = _;
       is_shadow = _;
+      shadow_local_name = _;
       rank = _;
     } =
       tvinfo
@@ -922,6 +944,7 @@ let merge_tyvar_infos tvinfo1 tvinfo2 =
     solving_info = sinfo1;
     is_error = is_error1;
     is_shadow = is_shadow1;
+    shadow_local_name = sln1;
     rank = rank1;
   } =
     tvinfo1
@@ -932,6 +955,7 @@ let merge_tyvar_infos tvinfo1 tvinfo2 =
     solving_info = sinfo2;
     is_error = is_error2;
     is_shadow = is_shadow2;
+    shadow_local_name = sln2;
     rank = rank2;
   } =
     tvinfo2
@@ -946,6 +970,7 @@ let merge_tyvar_infos tvinfo1 tvinfo2 =
     solving_info = merge_solving_infos sinfo1 sinfo2;
     is_error = is_error1 || is_error2;
     is_shadow = is_shadow1 || is_shadow2;
+    shadow_local_name = Option.first_some sln1 sln2;
     rank = min rank1 rank2;
   }
 
@@ -998,6 +1023,7 @@ let simple_merge env1 env2 =
             solving_info = sinfo1;
             is_error = is_error1;
             is_shadow = is_shadow1;
+            shadow_local_name = sln1;
             rank = rank1;
           } =
             tvinfo1
@@ -1008,6 +1034,7 @@ let simple_merge env1 env2 =
             solving_info = sinfo2;
             is_error = is_error2;
             is_shadow = is_shadow2;
+            shadow_local_name = sln2;
             rank = rank2;
           } =
             tvinfo2
@@ -1030,6 +1057,7 @@ let simple_merge env1 env2 =
                   sinfo1);
               is_error = is_error1 || is_error2;
               is_shadow = is_shadow1 || is_shadow2;
+              shadow_local_name = Option.first_some sln1 sln2;
               rank = min rank1 rank2;
             }
           in
@@ -1087,6 +1115,7 @@ let tyvar_info_carries_information tvinfo =
     eager_solve_failed = _;
     is_error = _;
     is_shadow = _;
+    shadow_local_name = _;
     rank;
   } =
     tvinfo

@@ -229,7 +229,17 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
         | _ -> ty1
       in
       let got_dynamic () =
-        let tv = MakeType.dynamic (get_reason ty1) in
+        (* Dynamic inference: propagate shadow type variables through array
+           append. If the container carries a shadow type variable, create one
+           for the element to track its inferred element type. *)
+        let (env, result_shadow) =
+          match get_node ty1 with
+          | Tdynamic (Some _shadow_v) ->
+            let (env, v_val) = Env.fresh_shadow_tyvar env expr_pos in
+            (env, Some v_val)
+          | _ -> (env, None)
+        in
+        let tv = mk (get_reason ty1, Tdynamic result_shadow) in
         let (env, val_ty_err_opt) =
           TUtils.supports_dynamic env ty2
           @@ Some (Typing_error.Reasons_callback.unify_error_at expr_pos)
@@ -429,7 +439,24 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
                  { pos = expr_pos; name; decl_pos = Reason.to_pos r })
       in
       let got_dynamic () =
-        let tv = MakeType.dynamic r in
+        (* Dynamic inference: propagate shadow type variables through array
+           assignment. Create a shadow for the value type and record a
+           KeyedContainer upper bound on the container's shadow, capturing the
+           key type used at this access. *)
+        let (env, result_shadow) =
+          match ety1_ with
+          | Tdynamic (Some shadow_v) ->
+            let (env, v_val) = Env.fresh_shadow_tyvar env expr_pos in
+            let container_ty =
+              MakeType.keyed_container r tkey (mk (r, Tvar v_val))
+            in
+            let env =
+              Env.add_tyvar_upper_bound env shadow_v (LoclType container_ty)
+            in
+            (env, Some v_val)
+          | _ -> (env, None)
+        in
+        let tv = mk (r, Tdynamic result_shadow) in
         let (env, ty_err1) =
           TUtils.supports_dynamic env tkey
           @@ Some (Typing_error.Reasons_callback.unify_error_at expr_pos)

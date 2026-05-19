@@ -1,0 +1,15 @@
+function \takes_int:
+  Locals:
+  Constraints:
+function \test_member:
+  Locals:
+    $d File "member_access.php", line 5, characters 30-31: : dynamic#0
+  Constraints:
+    #0:
+      <: has_member(foo, dynamic#2)
+    #2:
+      <: mixed
+      <: dynamic
+      <: dynamic
+      <: ~int
+      <: mixed

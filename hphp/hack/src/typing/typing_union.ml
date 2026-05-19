@@ -117,8 +117,13 @@ let dest_union_list env tyl =
       dest_union env ty tyl tyl_res (orr r_null r) r_union r_dyn
     | (r, Tprim Aast.Tnull) ->
       dest_union_list env tyl tyl_res (orr r_null r) r_union r_dyn
-    | (r, Tdynamic _) ->
+    | (r, Tdynamic None) ->
       dest_union_list env tyl tyl_res r_null r_union (orr r_dyn r)
+    (* Dynamic types carrying shadow type variables must not be collapsed into
+       the union's single dynamic slot — they remain as distinct types to
+       preserve their per-local shadow type variables and constraint sets. *)
+    | (_, Tdynamic (Some _)) ->
+      dest_union_list env tyl (ty :: tyl_res) r_null r_union r_dyn
     | _ -> dest_union_list env tyl (ty :: tyl_res) r_null r_union r_dyn
   and dest_union_list env tyl tyl_res r_null r_union r_dyn =
     match tyl with
@@ -845,8 +850,10 @@ let normalize_union env ?on_tyvar tyl :
           normalize_union env [ty] (orr r_null r) r_union r_dyn
         | ((r, Tunion tyl'), _) ->
           normalize_union env tyl' r_null (orr r_union r) r_dyn
-        | ((r, Tdynamic _), _) ->
+        | ((r, Tdynamic None), _) ->
           normalize_union env [] r_null r_union (orr r_dyn r)
+        (* See comment in dest_union above *)
+        | ((_, Tdynamic (Some _)), _) -> proceed env ty
         | ((r, Tnewtype (n, [ty], _)), _)
           when String.equal n Naming_special_names.Classes.cSupportDyn ->
           let (_, env, ty) = Utils.strip_supportdyn env ty in

@@ -61,9 +61,25 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
       ( (env, Option.merge e1 e2 ~f:Typing_error.both),
         MakeType.intersection r rtyl )
     | Tprim Aast.Tnull -> ((env, e1), e_opt_ty)
-    | Tdynamic _ ->
-      (* Awaiting a dynamic results in a new dynamic *)
-      ((env, e1), MakeType.dynamic r)
+    | Tdynamic shadow_v_opt ->
+      (* Dynamic inference: awaiting a dynamic with a shadow type variable.
+         Create a fresh shadow for the result, and record Awaitable<dynamic#v>
+         as an upper bound on the input shadow. This tracks that the value was
+         used as an Awaitable. *)
+      let (env, result_shadow) =
+        match shadow_v_opt with
+        | Some shadow_v ->
+          let (env, v_result) = Env.fresh_shadow_tyvar env p in
+          let awaitable_ty =
+            MakeType.awaitable r (mk (r, Tdynamic (Some v_result)))
+          in
+          let env =
+            Env.add_tyvar_upper_bound env shadow_v (LoclType awaitable_ty)
+          in
+          (env, Some v_result)
+        | None -> (env, None)
+      in
+      ((env, e1), mk (r, Tdynamic result_shadow))
     | Tany _
     | Tvec_or_dict _
     | Tnonnull
@@ -87,10 +103,10 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
           Env.fresh_type env p
       in
       let expected_type = MakeType.awaitable r type_var in
-      let return_type =
+      let (env, return_type) =
         match get_node e_opt_ty with
-        | Tany _ -> mk (r, Typing_defs.make_tany ())
-        | Tdynamic _ -> MakeType.dynamic r
+        | Tany _ -> (env, mk (r, Typing_defs.make_tany ()))
+        | Tdynamic _
         | Tnonnull
         | Tvec_or_dict _
         | Tprim _
@@ -109,7 +125,7 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
         | Tlabel _
         | Tneg _
         | Tclass_ptr _ ->
-          type_var
+          (env, type_var)
       in
       let (env, e2) =
         Type.sub_type

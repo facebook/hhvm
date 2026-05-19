@@ -114,6 +114,7 @@ impl Default for GlobalOptions {
             tco_record_fine_grained_dependencies: false,
             tco_loop_iteration_upper_bound: None,
             tco_populate_dead_unsafe_cast_heap: false,
+            tco_dynamic_inference: false,
             dump_tast_hashes: false,
             dump_tasts: vec![],
             tco_autocomplete_mode: false,

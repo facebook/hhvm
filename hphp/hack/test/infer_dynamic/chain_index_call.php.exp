@@ -1,0 +1,14 @@
+function \takes_int:
+  Locals:
+  Constraints:
+function \test_chain:
+  Locals:
+    $d File "chain_index_call.php", line 5, characters 29-30: : dynamic#0
+  Constraints:
+    #0:
+      <: can_index('key', key=string, val=dynamic#3)
+    #3:
+      <: mixed
+      <: dynamic
+      <: ~int
+      <: mixed

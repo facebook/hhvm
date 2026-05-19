@@ -1,0 +1,24 @@
+function \takes_int:
+  Locals:
+  Constraints:
+function \takes_string:
+  Locals:
+  Constraints:
+function \get_dynamic:
+  Locals:
+  Constraints:
+function \test_reassign:
+  Locals:
+    $x File "reassign.php", line 10, characters 3-20: : dynamic#1
+    $x File "reassign.php", line 8, characters 3-20: : dynamic#0
+  Constraints:
+    #0:
+      <: mixed
+      <: dynamic
+      <: ~int
+      <: mixed
+    #1:
+      <: mixed
+      <: dynamic
+      <: ~string
+      <: mixed

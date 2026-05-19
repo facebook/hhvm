@@ -504,6 +504,7 @@ impl HhConfig {
             tco_record_fine_grained_dependencies: default.tco_record_fine_grained_dependencies,
             tco_loop_iteration_upper_bound: default.tco_loop_iteration_upper_bound,
             tco_populate_dead_unsafe_cast_heap: default.tco_populate_dead_unsafe_cast_heap,
+            tco_dynamic_inference: default.tco_dynamic_inference,
             dump_tast_hashes: hhconfig
                 .get_bool("dump_tast_hashes")
                 .or_else(|| hh_conf.get_bool("dump_tast_hashes"))

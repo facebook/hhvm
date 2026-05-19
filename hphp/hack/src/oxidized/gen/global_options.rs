@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5402b9d702303b1092e546ad3b2f411a>>
+// @generated SignedSource<<428757c0ebaed0a6f1795ba11b3db0ec>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -330,6 +330,9 @@ pub struct GlobalOptions {
     /// heap. This is only needed in dead UNSAFE_CAST removal mode. This option
     /// controls whether the heap will be populated or not.
     pub tco_populate_dead_unsafe_cast_heap: bool,
+    /// When set, dynamic locals get shadow tyvars that collect upper-bound
+    /// constraints for use-type inference
+    pub tco_dynamic_inference: bool,
     /// Dump tast hashes in /tmp/hh_server/tast_hashes
     pub dump_tast_hashes: bool,
     /// List of paths whose TASTs to be dumped in /tmp/hh_server/tasts

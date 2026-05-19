@@ -1,0 +1,12 @@
+function \takes_int:
+  Locals:
+  Constraints:
+function \test_while_loop:
+  Locals:
+    $d File "loop.php", line 5, characters 34-35: : dynamic#0
+  Constraints:
+    #0:
+      <: mixed
+      <: dynamic
+      <: ~int
+      <: mixed

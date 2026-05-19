@@ -3276,6 +3276,17 @@ end = struct
       else
         (env, ty_sub)
     in
+    (* Dynamic inference: when the subtype is a dynamic with a shadow type
+       variable, record the supertype as an upper bound on the shadow. This is
+       the core mechanism — every [dynamic <: T] check contributes T to the
+       shadow's constraint set, building a use-type profile of the dynamic
+       expression. *)
+    let env =
+      match get_node ty_sub with
+      | Tdynamic (Some shadow_v) ->
+        Env.add_tyvar_upper_bound env shadow_v (LoclType ty_super)
+      | _ -> env
+    in
     match (deref ty_sub, deref ty_super) with
     (* (...t) <: t *)
     | ( (_, Ttuple { t_required = []; t_optional = []; t_extra = Tsplat ty_sub }),
@@ -9388,6 +9399,32 @@ end = struct
 
   let dispatch_constraint
       ~subtype_env ~this_ty ~sub_supportdyn ity_sub ity_super env =
+    (* Dynamic inference: record constraint-type upper bounds on shadow type
+       variables so they accumulate structural use-type information.
+       Skip Thas_member — it has a dedicated shadow-aware handler in
+       typing_object_get.ml that creates a fresh shadow for the member type.
+       Recording the raw constraint here would produce a duplicate without
+       proper shadow linkage. *)
+    let env =
+      match ity_sub with
+      | LoclType ty_sub ->
+        (match get_node ty_sub with
+        | Tdynamic (Some shadow_v) ->
+          let dominated_by_shadow_handler =
+            match ity_super with
+            | ConstraintType cty ->
+              (match snd (deref_constraint_type cty) with
+              | Thas_member _ -> true
+              | _ -> false)
+            | _ -> false
+          in
+          if dominated_by_shadow_handler then
+            env
+          else
+            Env.add_tyvar_upper_bound env shadow_v ity_super
+        | _ -> env)
+      | _ -> env
+    in
     match (ity_sub, ity_super) with
     | (LoclType ty_sub, LoclType ty_super) ->
       Subtype.(

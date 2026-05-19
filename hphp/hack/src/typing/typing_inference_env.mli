@@ -51,9 +51,14 @@ val fresh_type_invariant_with_rank :
     bounds and is excluded from solving. Used for dynamic inference: tracks how
     dynamic-typed expressions are used, building a constraint set that describes
     their inferred use-type. *)
-val fresh_shadow_tyvar : t -> Tvid.provider -> Pos.t -> t * Tvid.t
+val fresh_shadow_tyvar :
+  t -> Tvid.provider -> ?local_name:string -> Pos.t -> t * Tvid.t
 
 val is_shadow : t -> Tvid.t -> bool
+
+val iter_shadow_tyvars : t -> (Tvid.t -> unit) -> unit
+
+val collect_shadow_locals : t -> (string * Pos.t * Tvid.t) list
 
 val open_tyvars : t -> Pos.t -> t
 

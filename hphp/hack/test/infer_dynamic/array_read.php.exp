@@ -1,0 +1,23 @@
+function \takes_int:
+  Locals:
+  Constraints:
+function \takes_string:
+  Locals:
+  Constraints:
+function \test_array_read:
+  Locals:
+    $d File "array_read.php", line 6, characters 34-35: : dynamic#0
+  Constraints:
+    #0:
+      <: can_index('key1', key=string, val=dynamic#3)
+      <: can_index('key2', key=string, val=dynamic#6)
+    #3:
+      <: mixed
+      <: dynamic
+      <: ~int
+      <: mixed
+    #6:
+      <: mixed
+      <: dynamic
+      <: ~string
+      <: mixed

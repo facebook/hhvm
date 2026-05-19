@@ -611,22 +611,58 @@ let as_expr env ty1 pe e =
     else
       Env.fresh_type env pe
   in
+  (* Dynamic inference: if the collection has a shadow type variable, create
+     fresh shadows for the iteration value (and key) types. This ensures the
+     loop variable gets its own shadow rather than sharing the collection's,
+     so constraints from using the loop variable are attributed to it, not
+     the collection. *)
+  let has_shadow =
+    TypecheckerOptions.tco_dynamic_inference (Env.get_tcopt env)
+    &&
+    let ty_check =
+      match get_node ty1 with
+      | Toption ty -> ty
+      | _ -> ty1
+    in
+    match get_node ty_check with
+    | Tdynamic (Some _) -> true
+    | _ -> false
+  in
+  let (env, shadow_val) =
+    if has_shadow then
+      let (env, v) = Env.fresh_shadow_tyvar env pe in
+      (env, Some v)
+    else
+      (env, None)
+  in
+  let shadow_tv =
+    match shadow_val with
+    | Some v -> mk (get_reason tv, Tdynamic (Some v))
+    | None -> tv
+  in
   let (env, ct) =
     match e with
     | As_v _ ->
       ( env,
         {
           ct_key = None;
-          ct_val = tv;
+          ct_val = shadow_tv;
           ct_is_await = false;
           ct_reason = Reason.foreach pe;
         } )
     | As_kv _ ->
       let (env, tk) = Env.fresh_type env pe in
+      let (env, shadow_key) =
+        if has_shadow then
+          let (env, v) = Env.fresh_shadow_tyvar env pe in
+          (env, mk (get_reason tk, Tdynamic (Some v)))
+        else
+          (env, tk)
+      in
       ( env,
         {
-          ct_key = Some tk;
-          ct_val = tv;
+          ct_key = Some shadow_key;
+          ct_val = shadow_tv;
           ct_is_await = false;
           ct_reason = Reason.foreach pe;
         } )
@@ -634,16 +670,23 @@ let as_expr env ty1 pe e =
       ( env,
         {
           ct_key = None;
-          ct_val = tv;
+          ct_val = shadow_tv;
           ct_is_await = true;
           ct_reason = Reason.asyncforeach pe;
         } )
     | Await_as_kv _ ->
       let (env, tk) = Env.fresh_type env pe in
+      let (env, shadow_key) =
+        if has_shadow then
+          let (env, v) = Env.fresh_shadow_tyvar env pe in
+          (env, mk (get_reason tk, Tdynamic (Some v)))
+        else
+          (env, tk)
+      in
       ( env,
         {
-          ct_key = Some tk;
-          ct_val = tv;
+          ct_key = Some shadow_key;
+          ct_val = shadow_tv;
           ct_is_await = true;
           ct_reason = Reason.asyncforeach pe;
         } )
@@ -716,7 +759,7 @@ let as_expr env ty1 pe e =
     | None -> MakeType.mixed Reason.none
     | Some tk -> tk
   in
-  (Typing_solver.close_tyvars_and_solve env, tk, tv, ty_mismatch_opt)
+  (Typing_solver.close_tyvars_and_solve env, tk, shadow_tv, ty_mismatch_opt)
 
 (* These functions invoke special printing functions for Typing_env. They do not
  * appear in user code, but we still check top level function calls against their
@@ -3927,6 +3970,22 @@ end = struct
       in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       let (env, val_ty) = Env.fresh_type env p in
+      (* Dynamic inference: if the array expression carries a shadow type
+         variable, create a fresh shadow for the element type and emit a
+         can_index constraint on the array's shadow. This records "$d['key']"
+         as: shadow($d) <: can_index(key, val=shadow). *)
+      let (env, shadow_val_opt) =
+        match get_node ty1 with
+        | Tdynamic (Some _) ->
+          let (env, v_val) = Env.fresh_shadow_tyvar env p in
+          (env, Some v_val)
+        | _ -> (env, None)
+      in
+      let ci_val =
+        match shadow_val_opt with
+        | Some v_val -> mk (get_reason val_ty, Tdynamic (Some v_val))
+        | None -> val_ty
+      in
       let (env, ty_err_opt) =
         SubType.sub_type_i
           env
@@ -3937,7 +3996,7 @@ end = struct
                   Tcan_index
                     {
                       ci_key = key_ty;
-                      ci_val = val_ty;
+                      ci_val;
                       ci_index_expr = e2;
                       ci_access_kind =
                         (if lhs_of_null_coalesce then
@@ -3952,10 +4011,14 @@ end = struct
       in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       let val_ty =
-        Typing_env.update_reason env val_ty ~f:(fun def ->
-            Typing_reason.flow_array_get ~def ~access:(Typing_reason.witness p))
+        match shadow_val_opt with
+        | Some v_val -> mk (get_reason val_ty, Tdynamic (Some v_val))
+        | None ->
+          Typing_env.update_reason env val_ty ~f:(fun def ->
+              Typing_reason.flow_array_get
+                ~def
+                ~access:(Typing_reason.witness p))
       in
-      (* Note that we are no longer generating holes - it is unclear how to do so in subtyping. *)
       make_result env p (Aast.Array_get (te1, Some te2)) val_ty
     | Call
         { func = (_, pos_id, Id (_, s)) as e; targs; args; unpacked_arg = None }
@@ -5783,6 +5846,49 @@ end = struct
           el
           unpacked_element
       in
+      (* Dynamic inference: special-case idx()/Readonly\idx() on dynamic
+         containers with shadow type variables. Create a shadow for the result
+         value and emit a can_index constraint, mirroring what array_get does
+         for $d['key']. idx() goes through function dispatch rather than
+         array_get, so we handle it here. *)
+      let (env, ty) =
+        if
+          TypecheckerOptions.tco_dynamic_inference (Env.get_tcopt env)
+          && (String.equal (snd id) SN.FB.idx
+             || String.equal (snd id) SN.Readonly.idx)
+        then
+          match (tel, el) with
+          | ( Anormal (container_ty, _, _) :: Anormal (key_ty, _, _) :: _,
+              _ :: Anormal (_, key_pos, key_expr_) :: _ ) ->
+            (match get_node container_ty with
+            | Tdynamic (Some shadow_v) ->
+              let (env, v_val) = Env.fresh_shadow_tyvar env p in
+              let ci_val = mk (get_reason ty, Tdynamic (Some v_val)) in
+              let ci =
+                Typing_defs_constraints.
+                  {
+                    ci_key = key_ty;
+                    ci_val;
+                    ci_index_expr = ((), key_pos, key_expr_);
+                    ci_access_kind = Ci_lhs_of_null_coalesce;
+                    ci_expr_pos = p;
+                    ci_array_pos = fpos;
+                    ci_index_pos = key_pos;
+                  }
+              in
+              let env =
+                Env.add_tyvar_upper_bound
+                  env
+                  shadow_v
+                  (ConstraintType
+                     (mk_constraint_type (Reason.witness p, Tcan_index ci)))
+              in
+              (env, ci_val)
+            | _ -> (env, ty))
+          | _ -> (env, ty)
+        else
+          (env, ty)
+      in
       let (env, inner_te) =
         Typing_helpers.make_simplify_typed_expr env fpos fty (Aast.Id id)
       in
@@ -5997,6 +6103,22 @@ end = struct
               | (ty_from, _) :: (ty_to, _) :: _ -> (ty_from, ty_to)
               | (ty, _) :: _ -> (ty, ty)
               | _ -> (dflt_ty, dflt_ty)
+            in
+            (* Dynamic inference: subtype the input against the cast target so
+               that the target type is recorded as an upper bound on any shadow
+               type variables, capturing "this dynamic was cast to T". *)
+            let env =
+              if TypecheckerOptions.tco_dynamic_inference (Env.get_tcopt env)
+              then
+                match tel with
+                | Anormal (input_ty, _, _) :: _ ->
+                  let (env, _ty_err_opt) =
+                    SubType.sub_type env input_ty ty_to None
+                  in
+                  env
+                | _ -> env
+              else
+                env
             in
             let hole_source =
               if String.equal unsafe_cast SN.PseudoFunctions.unsafe_cast then
@@ -6920,8 +7042,20 @@ end = struct
           unpacked_element
       | _ ->
         (match deref efty with
-        | (r, Tdynamic _) ->
-          let ty = MakeType.dynamic (Reason.dynamic_call expr_pos) in
+        | (r, Tdynamic shadow_v_opt) ->
+          (* Dynamic inference: calling a dynamic value — create a fresh shadow
+             type variable for the return type, and record a function-type upper
+             bound on the callee's shadow. The bound captures the argument types
+             actually passed:
+             shadow($d) <: (function(arg_tys...): shadow_ret). *)
+          let (env, v_ret_opt) =
+            match shadow_v_opt with
+            | Some _ ->
+              let (env, v_ret) = Env.fresh_shadow_tyvar env expr_pos in
+              (env, Some v_ret)
+            | None -> (env, None)
+          in
+          let ty = mk (Reason.dynamic_call expr_pos, Tdynamic v_ret_opt) in
           let el =
             (* Need to check that the type of the unpacked_element can be,
              * coerced to dynamic, just like all of the other arguments, in addition
@@ -6980,6 +7114,65 @@ end = struct
           let should_forget_fakes = true in
           let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+          (* Dynamic inference: record the function-type upper bound on the
+             callee's shadow type variable, capturing the actual arg types. *)
+          let env =
+            match (shadow_v_opt, v_ret_opt) with
+            | (Some shadow_v, Some v_ret) ->
+              let arg_tys =
+                List.filter_map tel ~f:(fun arg ->
+                    match arg with
+                    | Aast_defs.Anormal (ty, _, _)
+                    | Aast_defs.Ainout (_, (ty, _, _))
+                    | Aast_defs.Anamed (_, (ty, _, _)) ->
+                      Some ty)
+              in
+              let params =
+                List.map arg_tys ~f:(fun arg_ty ->
+                    Typing_defs.
+                      {
+                        fp_pos = Pos_or_decl.none;
+                        fp_name = None;
+                        fp_type = arg_ty;
+                        fp_flags =
+                          Typing_defs_flags.FunParam.make
+                            ~inout:false
+                            ~accept_disposable:false
+                            ~is_optional:false
+                            ~readonly:false
+                            ~ignore_readonly_error:false
+                            ~splat:false
+                            ~named:false;
+                        fp_def_value = None;
+                      })
+              in
+              let ft =
+                Typing_defs.
+                  {
+                    ft_tparams = [];
+                    ft_where_constraints = [];
+                    ft_params = params;
+                    ft_implicit_params =
+                      { capability = CapDefaults Pos_or_decl.none };
+                    ft_ret = mk (r, Tdynamic (Some v_ret));
+                    ft_flags =
+                      Typing_defs_flags.Fun.make
+                        Ast_defs.FSync
+                        ~return_disposable:false
+                        ~returns_readonly:false
+                        ~readonly_this:false
+                        ~support_dynamic_type:false
+                        ~is_memoized:false
+                        ~variadic:false;
+                    ft_instantiated = false;
+                  }
+              in
+              Env.add_tyvar_upper_bound
+                env
+                shadow_v
+                (LoclType (mk (r, Tfun ft)))
+            | _ -> env
+          in
           (env, (tel, None, ty, should_forget_fakes))
         | (r, ((Tprim Tnull | Tany _ | Tunion [] | Tvar _) as ty))
           when match ty with
@@ -7019,8 +7212,71 @@ end = struct
           let (env, ty) =
             match ty with
             | Tprim Tnull -> (env, mk (r, Tprim Tnull))
-            | Tdynamic _ ->
-              (env, MakeType.dynamic (Reason.dynamic_call expr_pos))
+            | Tdynamic shadow_v_opt ->
+              (* Dynamic inference: same as the Tdynamic call case above — record
+                 a function-type upper bound capturing arg types and return shadow. *)
+              let (env, result_shadow) =
+                match shadow_v_opt with
+                | Some shadow_v ->
+                  let (env, v_ret) = Env.fresh_shadow_tyvar env expr_pos in
+                  let arg_tys =
+                    List.filter_map tel ~f:(fun arg ->
+                        match arg with
+                        | Aast_defs.Anormal (ty, _, _)
+                        | Aast_defs.Ainout (_, (ty, _, _))
+                        | Aast_defs.Anamed (_, (ty, _, _)) ->
+                          Some ty)
+                  in
+                  let params =
+                    List.map arg_tys ~f:(fun arg_ty ->
+                        Typing_defs.
+                          {
+                            fp_pos = Pos_or_decl.none;
+                            fp_name = None;
+                            fp_type = arg_ty;
+                            fp_flags =
+                              Typing_defs_flags.FunParam.make
+                                ~inout:false
+                                ~accept_disposable:false
+                                ~is_optional:false
+                                ~readonly:false
+                                ~ignore_readonly_error:false
+                                ~splat:false
+                                ~named:false;
+                            fp_def_value = None;
+                          })
+                  in
+                  let ft =
+                    Typing_defs.
+                      {
+                        ft_tparams = [];
+                        ft_where_constraints = [];
+                        ft_params = params;
+                        ft_implicit_params =
+                          { capability = CapDefaults Pos_or_decl.none };
+                        ft_ret = mk (r, Tdynamic (Some v_ret));
+                        ft_flags =
+                          Typing_defs_flags.Fun.make
+                            Ast_defs.FSync
+                            ~return_disposable:false
+                            ~returns_readonly:false
+                            ~readonly_this:false
+                            ~support_dynamic_type:false
+                            ~is_memoized:false
+                            ~variadic:false;
+                        ft_instantiated = false;
+                      }
+                  in
+                  let env =
+                    Env.add_tyvar_upper_bound
+                      env
+                      shadow_v
+                      (LoclType (mk (r, Tfun ft)))
+                  in
+                  (env, Some v_ret)
+                | None -> (env, None)
+              in
+              (env, mk (Reason.dynamic_call expr_pos, Tdynamic result_shadow))
             | Tvar _ when TUtils.is_tyvar_error env efty ->
               Env.fresh_type_error env expr_pos
             | Tunion []
@@ -10572,8 +10828,20 @@ end = struct
           else
             Typing_return.fun_implicit_return env pos ret f_kind
         in
+        (* Collect all locals that carry shadow type variables for the TAST,
+           so downstream consumers can inspect which dynamic locals exist and
+           query their accumulated constraints. *)
+        let dynamic_locals =
+          let shadow_locals =
+            Typing_inference_env.collect_shadow_locals env.inference_env
+          in
+          List.map shadow_locals ~f:(fun (name, pos, v) ->
+              Tast.{ dl_name = name; dl_pos = pos; dl_shadow_tvid = v })
+        in
         let env =
-          Env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
+          Env.set_fun_tast_info
+            env
+            Tast.{ has_implicit_return; has_readonly; dynamic_locals }
         in
         let env = restore_pos env in
         debug_last_pos := Pos.none;
@@ -10999,7 +11267,9 @@ end = struct
     in
     let has_readonly = Env.get_readonly env in
     let env =
-      Env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
+      Env.set_fun_tast_info
+        env
+        Tast.{ has_implicit_return; has_readonly; dynamic_locals = [] }
     in
     let env =
       if sdt_dynamic_check_required && not had_errors then begin

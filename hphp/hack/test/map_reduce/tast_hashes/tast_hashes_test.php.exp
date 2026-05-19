@@ -2,7 +2,7 @@
   "tast_hashes": {
     "tast_hashes_test.php": {
       "tast_hashes": {
-        "class_tast_hashes": { "\\A": 499090279, "\\B": 505670158 },
+        "class_tast_hashes": { "\\A": 499090279, "\\B": 189219977 },
         "gconst_tast_hashes": { "\\B": 203054604 }
       },
       "error_hashes": []

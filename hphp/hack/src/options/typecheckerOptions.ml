@@ -220,6 +220,8 @@ let log_fanout t ~fanout_cardinal =
 let populate_dead_unsafe_cast_heap t =
   t.GlobalOptions.tco_populate_dead_unsafe_cast_heap
 
+let tco_dynamic_inference t = t.GlobalOptions.tco_dynamic_inference
+
 let locl_cache_capacity t = t.GlobalOptions.tco_locl_cache_capacity
 
 let locl_cache_node_threshold t = t.GlobalOptions.tco_locl_cache_node_threshold

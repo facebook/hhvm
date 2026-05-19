@@ -1,0 +1,14 @@
+function \takes_int:
+  Locals:
+  Constraints:
+function \test_await:
+  Locals:
+    $d File "await.php", line 5, characters 35-36: : dynamic#0
+  Constraints:
+    #0:
+      <: Awaitable<dynamic#1>
+    #1:
+      <: mixed
+      <: dynamic
+      <: ~int
+      <: mixed

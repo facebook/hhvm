@@ -1,0 +1,16 @@
+function \takes_int:
+  Locals:
+  Constraints:
+function \takes_string:
+  Locals:
+  Constraints:
+function \test_try_catch:
+  Locals:
+    $d File "try_catch.php", line 6, characters 33-34: : dynamic#0
+  Constraints:
+    #0:
+      <: mixed
+      <: dynamic
+      <: ~int
+      <: ~string
+      <: mixed

@@ -1,0 +1,16 @@
+function \takes_int:
+  Locals:
+  Constraints:
+function \takes_string:
+  Locals:
+  Constraints:
+function \test_if_else:
+  Locals:
+    $d File "control_flow.php", line 6, characters 31-32: : dynamic#0
+  Constraints:
+    #0:
+      <: mixed
+      <: dynamic
+      <: ~int
+      <: ~string
+      <: mixed

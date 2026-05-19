@@ -1,0 +1,16 @@
+function \takes_int:
+  Locals:
+  Constraints:
+function \takes_string:
+  Locals:
+  Constraints:
+function \test_basic:
+  Locals:
+    $d File "basic_subtype.php", line 6, characters 29-30: : dynamic#0
+  Constraints:
+    #0:
+      <: mixed
+      <: dynamic
+      <: ~int
+      <: ~string
+      <: mixed

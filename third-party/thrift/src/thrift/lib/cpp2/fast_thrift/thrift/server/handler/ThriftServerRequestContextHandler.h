@@ -16,43 +16,31 @@
 
 #pragma once
 
+#include <memory>
 #include <utility>
 
-#include <boost/intrusive_ptr.hpp>
-
-#include <glog/logging.h>
 #include <folly/ExceptionWrapper.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftRequestContext.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
 /**
- * ThriftServerConnectionContextHandler — duplex pipeline handler that owns
- * the per-connection ThriftConnContext and writes it into the per-request
- * ThriftRequestContext as each inbound message passes through.
+ * ThriftServerRequestContextHandler — duplex pipeline handler that creates a
+ * fresh ThriftRequestContext for every inbound request and stamps it onto
+ * the message. Subsequent handlers (ConnectionContextHandler, metadata
+ * handler, etc.) populate individual fields on the per-request context.
  *
- * Lives in the thrift pipeline between ThriftServerTransportAdapter (head)
- * and the tail app adapter. The handler is the lifecycle owner of record
- * for the ThriftConnContext: it is constructed when the connection is
- * accepted and destroyed when the pipeline tears down. Per-request
- * ThriftRequestContexts reference the conn context via intrusive pointer
- * so any in-flight async work keeps it alive past connection close.
- *
- * Pipeline order: MUST sit downstream of ThriftServerRequestContextHandler
- * (which creates the per-request ThriftRequestContext object). This handler
- * only populates a field; it does not allocate the request context itself.
+ * Must sit upstream of any handler that wants to write into the request's
+ * context (i.e. between ThriftServerTransportAdapter and any handler that
+ * sets fields on ThriftRequestContext).
  */
 template <typename Context>
-class ThriftServerConnectionContextHandler {
+class ThriftServerRequestContextHandler {
  public:
-  explicit ThriftServerConnectionContextHandler(
-      boost::intrusive_ptr<ThriftConnContext> connContext) noexcept
-      : connContext_(std::move(connContext)) {}
-
   // HandlerLifecycle
   void handlerAdded(Context& /*ctx*/) noexcept {}
   void handlerRemoved(Context& /*ctx*/) noexcept {}
@@ -61,10 +49,7 @@ class ThriftServerConnectionContextHandler {
   channel_pipeline::Result onRead(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto& request = msg.get<ThriftServerRequestMessage>();
-    DCHECK(request.requestContext)
-        << "request.requestContext not found "
-           "ThriftServerRequestContextHandler must run upstream";
-    request.requestContext->setConnectionContext(connContext_);
+    request.requestContext = std::make_unique<ThriftRequestContext>();
     return ctx.fireRead(std::move(msg));
   }
 
@@ -85,15 +70,6 @@ class ThriftServerConnectionContextHandler {
   void onWriteReady(Context& /*ctx*/) noexcept {}
 
   void onPipelineInactive(Context& /*ctx*/) noexcept {}
-
-  // Accessor for tests / future extension points (TLS handshake info, etc.).
-  const boost::intrusive_ptr<ThriftConnContext>& getConnectionContext()
-      const noexcept {
-    return connContext_;
-  }
-
- private:
-  boost::intrusive_ptr<ThriftConnContext> connContext_;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

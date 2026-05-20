@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include <boost/intrusive_ptr.hpp>
+#include <memory>
 
 #include <folly/ExceptionWrapper.h>
 #include <thrift/lib/cpp2/fast_thrift/common/CompactVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/PayloadVariants.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftRequestContext.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RocketFrameDecoder.h>
 
 #include <cstdint>
@@ -39,12 +39,13 @@ namespace apache::thrift::fast_thrift::thrift {
 // `payload` is the typed wire-derived inbound payload produced by
 // `fromRocketFrame` at the transport bridge.
 //
-// `connContext` is stamped by ConnectionContextHandler as the message
-// traverses the thrift pipeline, so every inbound request carries a handle
-// to its connection's context without the tail adapter having to look it up.
+// `requestContext` is stamped by RequestContextHandler as the message
+// traverses the thrift pipeline, so every inbound request carries its own
+// per-request context (which itself holds a handle to the connection
+// context) without the tail adapter having to look it up.
 #pragma pack(push, 1)
 struct ThriftServerRequestMessage {
-  boost::intrusive_ptr<ThriftConnContext> connContext;
+  std::unique_ptr<ThriftRequestContext> requestContext;
   ThriftServerInboundPayloadVariant payload;
   uint32_t streamId{0};
 };

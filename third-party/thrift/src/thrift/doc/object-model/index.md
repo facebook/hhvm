@@ -1262,6 +1262,23 @@ The [<KW>target</KW>](#path-target) of the <KW>path</KW> `p` in the <KW>record</
 
 The [<KW>target value</KW>](#path-target-value) of the <KW>path</KW> `p` in the <KW>value</KW> `v`. Note that the <KW>target value</KW> of a <KW>path</KW> may not [exist](#path-existence), but `p` must be [valid](#path-validity).
 
+#### Notation: <code>target-type-of<sub>S</sub>(T, p)</code> → `T'`
+
+**Environment**:
+* `S` — a <KW>type system</KW>
+
+**Inputs**:
+* `T` — a <KW>type</KW> in `S`
+* `p` — a <KW>path</KW> that is [<KW>valid</KW>](#path-validity-for-thrift-types) for `T`
+
+**Outputs**:
+* `T'` — the unique <KW>target type</KW> determined by `p` and `T`
+
+**Outcome**:
+* If `p` is empty, produces `T`.
+* Otherwise, produces the <KW>type</KW> reached by following each <KW>path component</KW> from `T` through the <KW>type system</KW> `S`.
+* FAILS if `p` is not <KW>valid</KW> for `T`.
+
 #### Notation: <code>type<sub>S</sub>(v)</code> → `T`
 
 **Environment**:
@@ -1699,19 +1716,20 @@ Formally:
 * <S0 /> and <S1 /> — <KW>type systems</KW>
 * <T0 /> and <T1 /> — <KW>structured types</KW> in <S0 /> and <S1 /> respectively, with the same <KW>type identity</KW> <code>T</code>
 * <V0 /> ∈ <code>dataset(T<sub>0</sub>)</code> — a <KW>value</KW> of <KW>type</KW> <T0 />
-* <V1 /> = <code><a href="#operation-embed">embed<sub>S<sub>1</sub></sub></a>(T<sub>1</sub>, <a href="#operation-project">project<sub>S<sub>0</sub></sub></a>(v<sub>0</sub>))</code> — the value of <KW>type</KW> <T1 /> obtained by the *project-embed* round trip of <V0 />
+* <V1 /> = <code><a href="#operation-embed">embed<sub>S<sub>1</sub></sub></a>(T<sub>1</sub>, <a href="#operation-project">project<sub>S<sub>0</sub></sub></a>(v<sub>0</sub>))</code> — the value of <KW>type</KW> <T1 /> obtained by the <KW>project-embed</KW> round trip of <V0 />
 
 **Then**,
 
 The **<KW>schema change</KW> <T0 /> → <T1 /> is said to be <KW>common field preserving</KW>** if, for any <V0 />:
-* Let <code>I</code> be the set of <KW>field identities</KW> that exist in both <code>record-of(v<sub>0</sub>)</code> and <code>record-of(v<sub>1</sub>)</code>
-* For each <KW>field identity</KW> <code>id</code> in <code>I</code>:
+* For each [<KW>path</KW>](#path) `p` = `Path(FieldIdentity(id, name))` that is [<KW>valid</KW>](#path-validity) for both <T0 /> and <T1 />, and [exists](#path-existence) in <code>record-of(v<sub>0</sub>)</code>:
   * Let:
-    * <F0 /> and <F1 /> be the <KW>records</KW> of the field with <KW>identity</KW> <code>id</code> in <V0 /> and <V1 />, respectively
-    * <code>F<sub>1</sub></code> be the <KW>type</KW> of the field with <KW>identity</KW> <code>id</code> in <T1 />
-  * The following succeeds: <code>vf<sub>0→1</sub></code> = <code>embed<sub>S<sub>1</sub></sub>(F<sub>1</sub>, f<sub>0</sub>)</code>
-    * (<code>vf<sub>0→1</sub></code> is the <KW>value</KW> of field <code>id</code>, embedded from the original <KW>type system</KW> <S0 /> to the new <KW>type system</KW> <S1 />)
-  * <code><a href="#operation-areequal">areEqual<sub>S<sub>1</sub></sub></a>(Value(F<sub>1</sub>, f<sub>1</sub>), vf<sub>0→1</sub>)</code> produces <code>Value(bool, True)</code>
+    * <code>vf<sub>0</sub></code> = <code>target-value-of(v<sub>0</sub>, p)</code> — the <KW>target value</KW> at <KW>path</KW> <code>p</code> in <V0 />
+    * <code>vf<sub>1</sub></code> = <code>target-value-of(v<sub>1</sub>, p)</code> — the <KW>target value</KW> at <KW>path</KW> <code>p</code> in <V1 />
+    * <code>F<sub>1</sub></code> = <code>target-type-of<sub>S<sub>1</sub></sub>(T<sub>1</sub>, p)</code>
+  * Then <code>vf<sub>1</sub></code> must [exist](#path-existence). And,
+  * The following succeeds: <code>vf<sub>0→1</sub></code> = <code>embed<sub>S<sub>1</sub></sub>(F<sub>1</sub>, record-of(vf<sub>0</sub>))</code>
+    * (<code>vf<sub>0→1</sub></code> is the <KW>target value</KW> at <KW>path</KW> `p`, embedded from the original <KW>type system</KW> <S0 /> to the new <KW>type system</KW> <S1 />)
+  * <code><a href="#operation-areequal">areEqual<sub>S<sub>1</sub></sub></a>(vf<sub>1</sub>, vf<sub>0→1</sub>)</code> produces <code>Value(bool, True)</code>
 
 </Requirement>
 
@@ -1802,14 +1820,14 @@ v<sub>1</sub>
     )
 </pre>
 
-The set `I` of <KW>field identities</KW> in common between values of <T0 /> and <T1 /> is exactly: `(Int16(1), Text("a"))`.
+The only single-component [<KW>path</KW>](#path) that is [<KW>valid</KW>](#path-validity) for both <T0 /> and <T1 /> is `p` = `Path(FieldIdentity(1, "a"))`, which [exists](#path-existence) in <code>record-of(v<sub>0</sub>)</code>.
 
-Let:
+The <KW>target</KW> of `p` in each <KW>record</KW> is:
 
 <pre>
-f<sub>0</sub> = Int32(x)
+f<sub>0</sub> = Int32(x)  (target of p in record-of(v<sub>0</sub>))
 <br />
-f<sub>1</sub> = Int32(x)
+f<sub>1</sub> = Int32(x)  (target of p in record-of(v<sub>1</sub>))
 <br />
 F<sub>1</sub> = i32
 <br />

@@ -1315,35 +1315,20 @@ The [<KW>target value</KW>](#path-target-value) of the <KW>path</KW> `p` in the 
 export const CreateStandardDefaultFieldSetDescription = () => {
   return (
     <>
-      <code>FieldSet(fields...)</code> where <code>fields</code> is the set of <KW>field values</KW> where for each field <code>f</code> in <code>T</code>...
+      <code>FieldSet(fields...)</code> where, for each field <code>f</code> in <code>T</code>, given the <KW>path</KW> <code>p = Path(FieldIdentity(f.id, f.name))</code>...
       <br />
       <ul>
         <li>
-          if <code>f</code> has a <KW>custom default value</KW> <code>d</code>, then <code>fields</code> has the entry
-          <ul>
-            <li>
-              (<KW>field identity</KW> of <code>f</code> → <code>d</code>), else
-            </li>
-          </ul>
+          if <code>f</code> has a <KW>custom default value</KW> <code>d</code>, then <code>p</code> exists in <code>fields</code> and <code>target-of(fields, p) = record-of(d)</code>.
         </li>
         <li>
-          if <code>f</code> is <KW>always-present</KW>, then <code>fields</code> has the entry
-          <ul>
-            <li>
-              (<KW>field identity</KW> of <code>f</code> → <code>createStandardDefault<sub>S</sub>(<i>field type</i> of f)</code>)
-            </li>
-          </ul>
-          <li>
-            if <code>f</code> is <KW>optional</KW> (without <KW>custom default value</KW>)
-            <ul>
-              <li>
-                <code>fields</code> does not have any entry for <KW>field identity</KW> of <code>f</code>
-              </li>
-            </ul>
-          </li>
-          <li>
-            <code>fields</code> has no other entries.
-          </li>
+          otherwise, if <code>f</code> is <KW>always-present</KW> or <KW>terse</KW>, then <code>p</code> exists in <code>fields</code> and <code>target-of(fields, p) = record-of(createStandardDefault<sub>S</sub>(<i>field type</i> of f))</code>.
+        </li>
+        <li>
+          otherwise, if <code>f</code> is <KW>optional</KW>, then <code>p</code> does not exist in <code>fields</code>.
+        </li>
+        <li>
+          <code>fields</code> has no other <code>FieldIdentity</code> paths.
         </li>
       </ul>
     </>
@@ -1366,7 +1351,7 @@ export const CreateStandardDefaultFieldSetDescription = () => {
 | <KW>struct</KW> | <CreateStandardDefaultFieldSetDescription/> |
 | <KW>union</KW> | `FieldSet()` — *empty* |
 | <KW>enum</KW> | `Int32(0)` |
-| <KW>opaque alias</KW> | <code>createStandardDefault<sub>S</sub>(<i>target type</i>)</code> |
+| <KW>opaque alias</KW> | <code>record-of(createStandardDefault<sub>S</sub>(<i>target type</i>))</code> |
 | `list<V>` | `List()` — *empty* |
 | `set<K>` | `Set()` — *empty* |
 | `map<K, V>` | `Map()` — *empty* |
@@ -1694,7 +1679,8 @@ The relationship between a given <KW>value</KW> in two distinct <KW>type systems
 
 These transformations use <KW>partial records</KW> as intermediate <KW>value</KW> representations that are not associated with any <KW>type system</KW>.
 
-A <Bookmark id="partial-record"><KW>partial record</KW></Bookmark> is a [<KW>record</KW>](#records) where [`FieldSet`-kind <KW>records</KW>](#fieldset) may have missing or extraneous <KW>field values</KW> when compared to the canonical record representation (i.e., [`record-of`](#notation-record-ofv)) of the same <KW>value</KW>.
+A <Bookmark id="partial-record"><KW>partial record</KW></Bookmark> is a [<KW>record</KW>](#records) whose shape may differ from the canonical [`record-of(v)`](#notation-record-ofv) representation only at [`FieldSet`-kind <KW>records</KW>](#fieldset): field edges may be absent, or field edges not present in the canonical representation may be present.
+More precisely, any <KW>path</KW> that exists in one representation but not the other must diverge at a [`FieldIdentity`](#fieldidentity) component; list, set, map, and primitive record structure is otherwise unchanged.
 Notably, like all <KW>records</KW>, **<KW>partial records</KW>** **are not associated with a <KW>type system</KW>**.
 
 First, a <KW>value</KW> (in a <KW>type system</KW>) is **<KW>projected</KW>** to a <KW>partial record</KW>.
@@ -1933,22 +1919,22 @@ Despite this, it allows (with varying levels of target language support) using (
 * `S` — a <KW>type system</KW>
 
 **Inputs**:
-* `v = Value(T, r)` — a <KW>value</KW> whose <KW>type</KW> `L` exists in `S`, with <KW>datum</KW> `r`
+* `v = Value(T, r)` — a <KW>value</KW> whose <KW>type</KW> `T` exists in `S`, with <KW>record</KW> `r`
 
 **Outputs**:
 * a <KW>partial record</KW> — with omissions that are recoverable with schema information in [<code>embed<sub>S</sub></code>](#operation-embed).
 
 **Outcome**:
 * If `T` is not a <KW>structured type</KW>, produces `r` unchanged.
-* If `T` is a <KW>structured type</KW>, produces a `FieldSet`-kind record `o`, where for each <KW>field</KW> `f` in `T`...
-  * If `f` is <KW>always-present</KW>, then `o` contains the corresponding <KW>field value</KW> from `r`.
-  * If `f` is <KW>optional</KW>, then `o` contains the corresponding <KW>field value</KW> from `r` if it is present.
-    Otherwise, `o` does not contain a <KW>field value</KW> for `f`.
-  * If `f` is <KW>terse</KW>, then given `e` = <code>project<sub>S</sub>(<i>field value</i> of f)</code>...
+* If `T` is a <KW>structured type</KW>, produces a `FieldSet`-kind record `o`, where for each <KW>field</KW> `f` in `T`, given the [<KW>path</KW>](#path) `p` = `Path(FieldIdentity(f.id, f.name))`...
+  * If `f` is <KW>always-present</KW>, then `p` exists in `o` and `target-of(o, p)` = `target-of(r, p)`.
+  * If `f` is <KW>optional</KW>, then `p` exists in `o` and `target-of(o, p)` = `target-of(r, p)` if `p` [exists](#path-existence) in `r`.
+    Otherwise, `p` does not exist in `o`.
+  * If `f` is <KW>terse</KW>, then given `vf` = `target-value-of(v, p)` and `e` = <code>project<sub>S</sub>(vf)</code>...
     * If the <KW>type</KW> of `f` is a <KW>structured type</KW>...
-      * If `e` is the empty `FieldSet`, then `o` does not contain a <KW>field value</KW> for `f`.
-      * Otherwise, `o` contains the <KW>field value</KW> `e` for `f`.
-    * Otherwise, `o` contains the corresponding <KW>field value</KW> from `r` iff <code><a href="#operation-areequal">areEqual<sub>S</sub></a>(e, <a href="#operation-createstandarddefault">createStandardDefault<sub>S</sub></a>(<i>type</i> of f))</code> produces `Value(bool, False)`.
+      * If `e` is the empty `FieldSet`, then `p` does not exist in `o`.
+      * Otherwise, `p` exists in `o` and `target-of(o, p)` = `e`.
+    * Otherwise, `p` exists in `o` and `target-of(o, p)` = `target-of(r, p)` iff <code><a href="#operation-areequal">areEqual<sub>S</sub></a>(vf, <a href="#operation-createstandarddefault">createStandardDefault<sub>S</sub></a>(<i>type</i> of f))</code> produces `Value(bool, False)`.
 
 </Operation>
 
@@ -1994,14 +1980,14 @@ If `T` is...
 * `list<V>`...
   * If `r` is `List`-kind, produces `Value(list<V>, result)` where...
     * For each <KW>record</KW> `e` in `r` (in order),
-      * `result` has the element <code>embed<sub>S</sub>(V, e)</code>.
+      * `result` has the element <code>record-of(embed<sub>S</sub>(V, e))</code>.
     * `result` has no other entries.
     * FAILS if the aforementioned `embed` fails.
   * FAILS otherwise.
 * `set<V>`...
   * If `r` is `Set`-kind, produces `Value(set<V>, result)` where...
     * For each <KW>record</KW> `e` in `r`,
-      * `result` has the element <code>embed<sub>S</sub>(V, e)</code>.
+      * `result` has the element <code>record-of(embed<sub>S</sub>(V, e))</code>.
     * `result` has no other entries.
     * FAILS if the aforementioned `embed` fails.
   * FAILS otherwise.
@@ -2009,8 +1995,8 @@ If `T` is...
   * If `r` is `Map`-kind, produces `Value(map<K, V>, result)` where...
     * `result` is a `Map` where for each element (<code>m<sub>key</sub></code>, <code>m<sub>value</sub></code>) in `r`...
       * `result` contains the entry (<code>result<sub>key</sub></code>, <code>result<sub>value</sub></code>) where,
-        * <code>result<sub>key</sub></code> = <code>embed<sub>S</sub>(K, m<sub>key</sub>)</code>
-        * <code>result<sub>value</sub></code> = <code>embed<sub>S</sub>(V, m<sub>value</sub>)</code>
+        * <code>result<sub>key</sub></code> = <code>record-of(embed<sub>S</sub>(K, m<sub>key</sub>))</code>
+        * <code>result<sub>value</sub></code> = <code>record-of(embed<sub>S</sub>(V, m<sub>value</sub>))</code>
         * FAILS if either aforementioned `embed` fails.
     * `result` has no other entries.
   * FAILS otherwise.
@@ -2022,16 +2008,14 @@ If `T` is...
   * FAILS if the aforementioned `embed` fails.
 * a [<KW>struct</KW>](#struct)...
   * If `r` is `FieldSet`-kind, produces `Value(T, result)` where...
-    * `result` is a `FieldSet` where for each <KW>field</KW> `f` in `T`...
-      * If `r` contains <KW>field identity</KW> of `f`, with <KW>record</KW> `u`,
-        * Given `v` = <code>embed<sub>S</sub>(<i>type</i> of f, u)</code>, `result` contains the entry:
-          * (<KW>field identity</KW> of `f`, `v`).
+    * `result` is a `FieldSet` where for each <KW>field</KW> `f` in `T`, given the [<KW>path</KW>](#path) `p` = `Path(FieldIdentity(f.id, f.name))`...
+      * If `p` [exists](#path-existence) in `r`, with <KW>target</KW> `u`,
+        * Given `v` = <code>embed<sub>S</sub>(<i>type</i> of f, u)</code>, `target-of(result, p)` = `record-of(v)`.
         * FAILS if the aforementioned `embed` fails.
-      * If `r` does not contain <KW>field identity</KW> of `f`,
-        * If `f` is <KW>optional</KW>, then `f` is absent in `result`.
-        * If `f` is <KW>always-present</KW>, then `result` contains the entry:
-          * (<KW>field identity</KW> of `f`, <code><a href="#operation-createstandarddefault">createStandardDefault<sub>S</sub></a>(<i>type</i> of f)</code>).
-    * FAILS if `T` is [<KW>sealed</KW>](#sealed-types) and there are <KW>field values</KW> in `r` that are not in `T`.
+      * If `p` does not [exist](#path-existence) in `r`,
+        * If `f` is <KW>optional</KW>, then `p` does not exist in `result`.
+        * If `f` is <KW>always-present</KW>, then `p` exists in `result` and <code>target-of(result, p) = record-of(<a href="#operation-createstandarddefault">createStandardDefault<sub>S</sub></a>(<i>type</i> of f))</code>.
+    * FAILS if `T` is [<KW>sealed</KW>](#sealed-types) and there are <KW>field values</KW> in `r` whose [<KW>field identities</KW>](#field-identity) do not correspond to any <KW>field</KW> in `T`.
     * Otherwise, remaining <KW>field values</KW> in `r` are dropped.
   * FAILS otherwise.
 * a [<KW>union</KW>](#union)...

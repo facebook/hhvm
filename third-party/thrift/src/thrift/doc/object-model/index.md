@@ -1436,8 +1436,8 @@ export const CreateStandardDefaultFieldSetDescription = () => {
   * **`Map`**: equal key sets and pairwise equal values
     * Produces `True` if the key sets of `lhs` and `rhs` are equal (as defined for `Set` above), and for each key `k`, `areRecordsEqual(lhs[k], rhs[k])` produces `True`.
     * Otherwise, produces `False`.
-  * **`FieldSet`**: same set of <KW>field identities</KW> and pairwise equal <KW>field values</KW>
-    * Produces `True` if `lhs` and `rhs` have the same set of <KW>field identities</KW>, and for each <KW>field identity</KW> `f`, `areRecordsEqual(lhs[f], rhs[f])` produces `True`.
+  * **`FieldSet`**: same set of single-component <code>FieldIdentity</code> paths and pairwise equal targets
+    * Produces `True` if the same single-component <code>FieldIdentity</code> paths exist in `lhs` and `rhs`, and for each such path `p`, <code>areRecordsEqual(target-of(lhs, p), target-of(rhs, p))</code> produces `True`.
     * Otherwise, produces `False`.
   * **`Any`**:
     * Produces `True` if both `lhs` and `rhs` are empty
@@ -1547,10 +1547,10 @@ export const CreateStandardDefaultFieldSetDescription = () => {
         List(FieldSet((Int16(1), Text("key")) → k, (Int16(2), Text("value")) → v) for k, v in rhs),
       )
       ```
-  * **`FieldSet`**: For each <KW>field identity</KW> `f` in the **union of field identities in `lhs` and `rhs`**, ordered by <KW>field id</KW>:
-    * If `f` is not in `lhs` ⇒ produces `False`.
-    * If `f` is not in `rhs` ⇒ produces `True`.
-    * Let `lf`, `rf` be the <KW>records</KW> corresponding to field `f` in `lhs`, `rhs` respectively.
+  * **`FieldSet`**: For each single-component <code>FieldIdentity</code> path `p` in the **union of paths that exist in `lhs` and `rhs`**, ordered by the path's <KW>field id</KW>:
+    * If `p` does not exist in `lhs` ⇒ produces `False`.
+    * If `p` does not exist in `rhs` ⇒ produces `True`.
+    * Let `lf = target-of(lhs, p)` and `rf = target-of(rhs, p)`.
       * If [`areRecordsEqual`](#operation-arerecordsequal)`(lf, rf)` produces `False`:
         * Produces `isRecordStableLessThan(lf, rf)`.
     * Finally, produces `False` (`lhs` and `rhs` are equal).

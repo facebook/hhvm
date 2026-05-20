@@ -38,6 +38,7 @@
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/ThriftTlsConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftChannelServer.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServerRegistry.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapterFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
@@ -244,6 +245,12 @@ class FastThriftServer {
   // different thread from serve().
   std::mutex lifecycleMutex_;
   State state_{State::kNotStarted};
+  // Process-wide registration. Mutable nowhere — declared last so it is
+  // destroyed first (its destructor blocks until any in-flight
+  // forEachServer callback that observed this server returns, after which
+  // the rest of FastThriftServer can tear down without UAF risk).
+  instrumentation::ServerTracker tracker_{
+      instrumentation::kFastThriftServerTrackerKey, *this};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

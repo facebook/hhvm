@@ -204,6 +204,11 @@ class FastThriftServer {
   const FastThriftServerConfig config_;
   std::shared_ptr<ThriftServerAppAdapterFactory> handler_;
   AuxiliaryInterfaces auxInterfaces_;
+  // Cached ThriftServiceMetadataResponse for the user's service. Built once
+  // at start() when config_.enableMetadataService is set; null otherwise.
+  // Shared across every per-connection MetadataAppAdapter.
+  std::shared_ptr<const apache::thrift::metadata::ThriftServiceMetadataResponse>
+      metadataResponse_;
   std::optional<security::FizzServerCertConfig> sslConfig_;
   security::ThriftTlsConfig thriftConfig_{};
   // IO thread pool. Either embedder-supplied via setIOThreadPool or

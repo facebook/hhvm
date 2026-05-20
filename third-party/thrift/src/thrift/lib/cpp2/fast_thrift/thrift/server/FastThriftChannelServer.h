@@ -52,6 +52,18 @@ struct FastThriftServerConfig {
 
   // Minimum payload size in bytes for MSG_ZEROCOPY. 0 disables zero-copy.
   size_t zeroCopyThreshold{0};
+
+  // When true, FastThriftServer auto-mounts the ThriftMetadataService
+  // alongside the user handler so introspection tools (e.g. Thrift Fiddle)
+  // can discover the service schema. Calls handler->getServiceMetadata(...)
+  // once at start() and serves the cached response on every
+  // getThriftServiceMetadata() RPC.
+  //
+  // For the response to be non-empty, the underlying thrift_library must be
+  // built with `with_schema = True` so the per-service schema bundle is
+  // available at runtime. With the flag off (or the schema not bundled),
+  // Fiddle will report no functions for the service. Default off.
+  bool enableMetadataService{false};
 };
 
 /**

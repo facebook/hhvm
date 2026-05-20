@@ -21,6 +21,7 @@
 #include <folly/io/async/DelayedDestruction.h>
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
+#include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -45,6 +46,15 @@ class ThriftServerAppAdapterFactory {
   // generated <Service>AppAdapter ctor without enable_shared_from_this.
   virtual ThriftServerAppAdapter::Ptr getAppAdapter(
       std::shared_ptr<ThriftServerAppAdapterFactory> self) = 0;
+
+  // Populate `response` with the static metadata for the service this
+  // factory serves. Generated ServiceFastHandler<S> overrides this to call
+  // detail::md::ServiceMetadata<S>::gen(response). FastThriftServer invokes
+  // it once at start() when enableMetadataService is set; the cached
+  // response is then served on every getThriftServiceMetadata() RPC.
+  // Default no-op so non-generated factories don't need to participate.
+  virtual void getServiceMetadata(
+      apache::thrift::metadata::ThriftServiceMetadataResponse& /*response*/) {}
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

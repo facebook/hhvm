@@ -31,6 +31,11 @@ FastServiceHandler<::cpp2::test::BasicService>::getAppAdapter(
           std::move(typed)));
 }
 
+void FastServiceHandler<::cpp2::test::BasicService>::getServiceMetadata(
+    ::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::test::BasicService>>::gen(response);
+}
+
 } // namespace apache::thrift
 
 namespace cpp2::test {

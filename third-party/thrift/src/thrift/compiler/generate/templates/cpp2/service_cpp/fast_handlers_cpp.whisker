@@ -36,6 +36,11 @@ FastServiceHandler<{{service.qualified_name}}>::getAppAdapter(
           std::move(typed)));
 }
 
+void FastServiceHandler<{{service.qualified_name}}>::getServiceMetadata(
+    ::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<{{service.qualified_name}}>>::gen(response);
+}
+
 } // namespace apache::thrift
 
 namespace {{service.cpp_qualified_namespace}} {

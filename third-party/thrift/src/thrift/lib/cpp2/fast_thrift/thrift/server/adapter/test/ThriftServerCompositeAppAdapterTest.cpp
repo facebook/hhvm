@@ -245,7 +245,7 @@ TEST_F(ThriftServerCompositeAppAdapterTest, UserWinsOnMethodNameConflict) {
   TestChildAdapter::Ptr userChild{userRaw};
   TestChildAdapter::Ptr monitoringChild{monitoringRaw};
 
-  // Both register the same method name; user is passed first to the
+  // Both register the same method name; user is added first to the
   // composite, so user must win.
   userChild->registerMethod("ping");
   monitoringChild->registerMethod("ping");

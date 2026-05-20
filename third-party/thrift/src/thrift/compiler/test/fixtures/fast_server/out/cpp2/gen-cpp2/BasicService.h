@@ -23,6 +23,14 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
+namespace apache::thrift::detail {
+template <> struct TSchemaAssociation<::cpp2::test::BasicService, false> {
+  static ::folly::Range<const ::std::string_view*> bundle();
+  static constexpr int64_t programId = -4328462459938241469;
+  static constexpr ::std::string_view definitionKey = {"\x04\x3f\x8c\x84\x82\xa4\x1b\x33\x79\xa6\x80\x56\x33\x20\x0c\x86", 16};
+};
+} // namespace apache::thrift::detail
+
 namespace apache::thrift {
 
 /**
@@ -55,6 +63,12 @@ class FastServiceHandler<::cpp2::test::BasicService>
           std::shared_ptr<
               ::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapterFactory>
               self) override;
+
+  // Populate `response` with the static metadata for ::cpp2::test::BasicService.
+  // Reuses the legacy detail::md::ServiceMetadata<S> table — same source of
+  // truth as <Service>AsyncProcessor::getServiceMetadata.
+  void getServiceMetadata(
+      ::apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
 
   virtual void async_eb_ping(
       ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<void> callback) {

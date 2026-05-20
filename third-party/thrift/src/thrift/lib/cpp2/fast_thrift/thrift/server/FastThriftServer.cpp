@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/MetadataAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 
@@ -112,12 +113,21 @@ FastThriftServer::createConnectionFactory() {
     //    generated <Service>FastHandler<S>::getAppAdapter is satisfied.
     FastConnection ctx;
     ThriftServerCompositeAppAdapter* compositePtr = nullptr;
-    if (auxInterfaces_.monitoringHandler) {
+    const bool needsComposite =
+        auxInterfaces_.monitoringHandler || metadataResponse_;
+    if (needsComposite) {
       ThriftServerCompositeAppAdapter::Ptr composite{
           new ThriftServerCompositeAppAdapter()};
       composite->addChild(handler_->getAppAdapter(handler_));
-      composite->addChild(auxInterfaces_.monitoringHandler->getAppAdapter(
-          auxInterfaces_.monitoringHandler));
+      if (auxInterfaces_.monitoringHandler) {
+        composite->addChild(auxInterfaces_.monitoringHandler->getAppAdapter(
+            auxInterfaces_.monitoringHandler));
+      }
+      if (metadataResponse_) {
+        composite->addChild(
+            ThriftServerAppAdapter::Ptr{
+                new MetadataAppAdapter(metadataResponse_)});
+      }
       compositePtr = composite.get();
       ctx.adapter = std::move(composite);
     } else {
@@ -264,6 +274,16 @@ void FastThriftServer::start() {
          "registered";
   if (state_ != State::kNotStarted) {
     return;
+  }
+
+  // Build the metadata response once if enabled, before accepting any
+  // connections. Java does the same (eager build at startup); the cached
+  // response is then served from every per-connection MetadataAppAdapter.
+  if (config_.enableMetadataService) {
+    auto resp = std::make_shared<
+        apache::thrift::metadata::ThriftServiceMetadataResponse>();
+    handler_->getServiceMetadata(*resp);
+    metadataResponse_ = std::move(resp);
   }
 
   security::BuiltFizzServerContext fizzBuilt;

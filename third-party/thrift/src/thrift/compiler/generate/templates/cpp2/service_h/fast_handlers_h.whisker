@@ -16,6 +16,11 @@
 
 }}
 {{#import "common/server" as server}}
+{{#import "types/schema_association" as schema_association}}
+namespace apache::thrift::detail {
+{{#partial schema_association.declaration node=service}}
+} // namespace apache::thrift::detail
+
 namespace apache::thrift {
 
 /**
@@ -48,6 +53,12 @@ class FastServiceHandler<{{service.qualified_name}}>
           std::shared_ptr<
               ::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapterFactory>
               self) override;
+
+  // Populate `response` with the static metadata for {{service.qualified_name}}.
+  // Reuses the legacy detail::md::ServiceMetadata<S> table — same source of
+  // truth as <Service>AsyncProcessor::getServiceMetadata.
+  void getServiceMetadata(
+      ::apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
 
   {{#each service.functions as |function|}}
   {{#if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}

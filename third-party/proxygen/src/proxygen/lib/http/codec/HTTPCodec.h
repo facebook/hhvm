@@ -499,23 +499,6 @@ class HTTPCodec {
                               bool eom) = 0;
 
   /**
-   * Write egress message body with fixed length. This is used in DSR where the
-   * actual body bytes are held elsewhere and take an express path.
-   *
-   * @param padding Optionally add padding bytes to the body if possible
-   * @param eom implicitly generate the EOM marker with this body frame
-   *
-   * @return number of bytes written
-   */
-  virtual size_t generateBodyDSR(StreamID,
-                                 size_t,
-                                 folly::Optional<uint8_t>,
-                                 bool) {
-    LOG(FATAL) << __func__ << " not supported on this codec";
-    folly::assume_unreachable();
-  }
-
-  /**
    * Write a body chunk header, if relevant.
    */
   virtual size_t generateChunkHeader(folly::IOBufQueue& writeBuf,

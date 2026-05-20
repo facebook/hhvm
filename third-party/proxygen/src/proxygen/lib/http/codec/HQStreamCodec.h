@@ -103,11 +103,6 @@ class HQStreamCodec
                       folly::Optional<uint8_t> padding,
                       bool eom) override;
 
-  size_t generateBodyDSR(StreamID stream,
-                         size_t length,
-                         folly::Optional<uint8_t> padding,
-                         bool eom) override;
-
   size_t generateChunkHeader(folly::IOBufQueue& /*writeBuf*/,
                              StreamID /*stream*/,
                              size_t /*length*/) override {

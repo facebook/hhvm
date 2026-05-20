@@ -132,60 +132,48 @@ class IntrusiveSharedPtr {
     return *this;
   }
 
-  template <
-      class U,
-      class = std::enable_if_t<
-          std::is_convertible_v<typename std::unique_ptr<U>::pointer, pointer>>>
+  template <class U>
+    requires std::convertible_to<typename std::unique_ptr<U>::pointer, pointer>
   /* implicit */ IntrusiveSharedPtr(std::unique_ptr<U>&& other) noexcept
       : IntrusiveSharedPtr(other.release()) {}
 
-  template <
-      class U,
-      class = std::enable_if_t<
-          std::is_convertible_v<typename std::unique_ptr<U>::pointer, pointer>>>
+  template <class U>
+    requires std::convertible_to<typename std::unique_ptr<U>::pointer, pointer>
   IntrusiveSharedPtr& operator=(std::unique_ptr<U>&& other) noexcept {
     this->resetImpl(other.release());
     return *this;
   }
 
-  template <
-      class U,
-      class UAccess,
-      class = std::enable_if_t<std::is_convertible_v<
-          typename IntrusiveSharedPtr<U, UAccess>::pointer,
-          pointer>>>
+  template <class U, class UAccess>
+    requires std::convertible_to<
+        typename IntrusiveSharedPtr<U, UAccess>::pointer,
+        pointer>
   /* implicit */ IntrusiveSharedPtr(
       const IntrusiveSharedPtr<U, UAccess>& other) noexcept
       : IntrusiveSharedPtr(other.ptr_) {}
 
-  template <
-      class U,
-      class UAccess,
-      class = std::enable_if_t<std::is_convertible_v<
-          typename IntrusiveSharedPtr<U, UAccess>::pointer,
-          pointer>>>
+  template <class U, class UAccess>
+    requires std::convertible_to<
+        typename IntrusiveSharedPtr<U, UAccess>::pointer,
+        pointer>
   /* implicit */ IntrusiveSharedPtr(
       IntrusiveSharedPtr<U, UAccess>&& other) noexcept
       : ptr_(std::exchange(other.ptr_, nullptr)) {}
 
-  template <
-      class U,
-      class UAccess,
-      class = std::enable_if_t<std::is_convertible_v<
-          typename IntrusiveSharedPtr<U, UAccess>::pointer,
-          pointer>>>
+  template <class U, class UAccess>
+    requires std::convertible_to<
+        typename IntrusiveSharedPtr<U, UAccess>::pointer,
+        pointer>
   IntrusiveSharedPtr& operator=(
       const IntrusiveSharedPtr<U, UAccess>& other) noexcept {
     this->resetImpl(other.ptr_);
     return *this;
   }
 
-  template <
-      class U,
-      class UAccess,
-      class = std::enable_if_t<std::is_convertible_v<
-          typename IntrusiveSharedPtr<U, UAccess>::pointer,
-          pointer>>>
+  template <class U, class UAccess>
+    requires std::convertible_to<
+        typename IntrusiveSharedPtr<U, UAccess>::pointer,
+        pointer>
   IntrusiveSharedPtr& operator=(
       IntrusiveSharedPtr<U, UAccess>&& other) noexcept {
     this->reset();

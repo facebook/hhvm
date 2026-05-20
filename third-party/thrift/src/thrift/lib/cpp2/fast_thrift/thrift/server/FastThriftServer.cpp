@@ -84,6 +84,19 @@ void FastThriftServer::setStatusInterface(
   auxInterfaces_.statusHandler = std::move(handler);
 }
 
+void FastThriftServer::setDebugInterface(
+    std::shared_ptr<fast_thrift::DebugServerInterface> handler) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::setDebugInterface must be called before "
+         "start()/serve()";
+  CHECK(handler)
+      << "FastThriftServer::setDebugInterface requires a non-null handler";
+  CHECK(!auxInterfaces_.debugHandler)
+      << "FastThriftServer::setDebugInterface called more than once";
+  auxInterfaces_.debugHandler = std::move(handler);
+}
+
 void FastThriftServer::setSSLConfig(security::FizzServerCertConfig cfg) {
   std::lock_guard<std::mutex> lock(lifecycleMutex_);
   CHECK(state_ == State::kNotStarted)
@@ -127,7 +140,8 @@ FastThriftServer::createConnectionFactory() {
     FastConnection ctx;
     ThriftServerCompositeAppAdapter* compositePtr = nullptr;
     const bool needsComposite = auxInterfaces_.monitoringHandler ||
-        auxInterfaces_.statusHandler || metadataResponse_;
+        auxInterfaces_.statusHandler || auxInterfaces_.debugHandler ||
+        metadataResponse_;
     if (needsComposite) {
       ThriftServerCompositeAppAdapter::Ptr composite{
           new ThriftServerCompositeAppAdapter()};
@@ -139,6 +153,10 @@ FastThriftServer::createConnectionFactory() {
       if (auxInterfaces_.statusHandler) {
         composite->addChild(auxInterfaces_.statusHandler->getAppAdapter(
             auxInterfaces_.statusHandler));
+      }
+      if (auxInterfaces_.debugHandler) {
+        composite->addChild(auxInterfaces_.debugHandler->getAppAdapter(
+            auxInterfaces_.debugHandler));
       }
       if (metadataResponse_) {
         composite->addChild(
@@ -293,12 +311,32 @@ void FastThriftServer::start() {
     return;
   }
 
-  // Build the metadata response once if enabled, before accepting any
-  // connections. Java does the same (eager build at startup); the cached
-  // response is then served from every per-connection MetadataAppAdapter.
+  // Build the merged metadata response once if enabled, before accepting
+  // any connections. Java does the same (eager build at startup); the
+  // cached response is then served from every per-connection
+  // MetadataAppAdapter and from DefaultDebug.dumpThriftServiceMetadata.
+  //
+  // Merge order matters. genServiceMetadataResponse() is additive for the
+  // metadata maps + `services` list but *overwrites* the deprecated
+  // `context` field. Call extra interfaces first, user handler last, so
+  // the response's `context` reflects the user service (matching legacy
+  // multiplex behaviour — extras are siblings, not the primary).
+  //
+  // Without the merge, thriftdbg sendRequest <monitor-method> fails with
+  // "Function not found" because the metadata lookup misses Monitor /
+  // Status / Debug methods even though they are dispatchable on the wire.
   if (config_.enableMetadataService) {
     auto resp = std::make_shared<
         apache::thrift::metadata::ThriftServiceMetadataResponse>();
+    if (auxInterfaces_.monitoringHandler) {
+      auxInterfaces_.monitoringHandler->getServiceMetadata(*resp);
+    }
+    if (auxInterfaces_.statusHandler) {
+      auxInterfaces_.statusHandler->getServiceMetadata(*resp);
+    }
+    if (auxInterfaces_.debugHandler) {
+      auxInterfaces_.debugHandler->getServiceMetadata(*resp);
+    }
     handler_->getServiceMetadata(*resp);
     metadataResponse_ = std::move(resp);
   }
@@ -387,6 +425,10 @@ void FastThriftServer::stop() {
 }
 
 folly::SocketAddress FastThriftServer::getAddress() const {
+  CHECK(connectionManager_)
+      << "FastThriftServer::getAddress called before start() — use "
+         "isRunning() to gate this call when iterating servers via "
+         "FastThriftServerRegistry";
   return connectionManager_->getAddress();
 }
 

@@ -30,6 +30,7 @@
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/interface/debug/DebugServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/monitor/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/status/StatusServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
@@ -131,6 +132,22 @@ class FastThriftServer {
       std::shared_ptr<fast_thrift::StatusServerInterface> handler);
 
   /**
+   * Attach a Debug handler. Methods on the debug handler are dispatched
+   * on the same connection as the user handler; routing is by method name
+   * with the user handler winning on conflict (mirrors
+   * ThriftServer::setDebugInterface). Must be called before
+   * start()/serve().
+   *
+   * thriftdbg's `sendRequest`, `getServerDbgInfo`, and `info` TUI call
+   * into this interface.
+   *
+   * The handler must derive from fast_thrift::DebugServerInterface — a
+   * marker base that exists purely as a type-system guardrail.
+   */
+  void setDebugInterface(
+      std::shared_ptr<fast_thrift::DebugServerInterface> handler);
+
+  /**
    * Configure TLS. After this is called, every accepted connection is wrapped
    * in a fizz::server::AsyncFizzServer; the connection factory only sees
    * fully-handshaked transports. Must be called before start()/serve().
@@ -167,8 +184,41 @@ class FastThriftServer {
   /// Stop accepting new connections and shut down.
   void stop();
 
-  /// Get the bound server address. Useful when binding to port 0.
+  /// Get the bound server address. Useful when binding to port 0. Must be
+  /// called after start() — CHECK-fails otherwise. Gate with isRunning()
+  /// when iterating via FastThriftServerRegistry, which exposes unstarted
+  /// servers too.
   folly::SocketAddress getAddress() const;
+
+  /// True iff start() has been called and stop() has not yet. Cheap, lock-
+  /// free read of the lifecycle state — intended for debug introspection
+  /// (gating accessors that require the server to be running).
+  bool isRunning() const noexcept { return state_ == State::kRunning; }
+
+  /**
+   * Returns the cached ThriftServiceMetadataResponse if
+   * config.enableMetadataService was set and the server has been start()ed,
+   * else nullptr. Read-only handle suitable for sharing — the response is
+   * built once at start() and never mutated.
+   *
+   * Used by debug / introspection handlers that want to expose service
+   * metadata without re-deriving it. Safe to call from any thread.
+   */
+  std::shared_ptr<const apache::thrift::metadata::ThriftServiceMetadataResponse>
+  getMetadataResponse() const noexcept {
+    return metadataResponse_;
+  }
+
+  /// Snapshot of which auxiliary slots are wired (for debug introspection).
+  bool hasMonitoringHandler() const noexcept {
+    return static_cast<bool>(auxInterfaces_.monitoringHandler);
+  }
+  bool hasStatusHandler() const noexcept {
+    return static_cast<bool>(auxInterfaces_.statusHandler);
+  }
+  bool hasDebugHandler() const noexcept {
+    return static_cast<bool>(auxInterfaces_.debugHandler);
+  }
 
  private:
   using ServerConnectionManager = rocket::server::connection::ConnectionManager;
@@ -205,6 +255,7 @@ class FastThriftServer {
     std::shared_ptr<fast_thrift::MonitoringServerInterface> monitoringHandler{
         nullptr};
     std::shared_ptr<fast_thrift::StatusServerInterface> statusHandler{nullptr};
+    std::shared_ptr<fast_thrift::DebugServerInterface> debugHandler{nullptr};
   };
 
   rocket::server::connection::ConnectionFactory createConnectionFactory();

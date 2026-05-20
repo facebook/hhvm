@@ -1913,11 +1913,14 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
         callbackInstalledBaton_.wait();
       }
 
-      // Write a response that is
-      // a) much larger than the send buffer, and
-      // b) random to mitigate undesired effects of (possible) compression at
-      //    lower points in the networking stack
-      std::generate_n(std::back_inserter(ret), bufsize_ * 100, []() -> char {
+      // Ensure the response is at least 2MB for slow-read tests to overwhelm
+      // macOS kernel auto-tuned buffers (kern.ipc.tcp_autosndbufmax, ~1MB).
+      auto responseSize = static_cast<size_t>(bufsize_) * 100;
+      if (block > 0) {
+        responseSize = std::max<size_t>(responseSize, 2 * 1024 * 1024);
+      }
+      ret.reserve(responseSize);
+      std::generate_n(std::back_inserter(ret), responseSize, []() -> char {
         return 32 + (folly::Random::rand32() % 95);
       });
     }
@@ -1943,7 +1946,8 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
           [this]() {
             wrapped_ = socket_->getReadCallback();
             socket_->setMaxReadsPerEvent(1);
-            socket_->setRecvBufSize(0); // smallest possible size
+            int result = socket_->setRecvBufSize(folly::kIsLinux ? 0 : 1);
+            EXPECT_EQ(result, 0);
             socket_->setReadCB(this);
           });
     }
@@ -2018,11 +2022,12 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
       std::make_shared<TestHandler>(
           requestReceivedBaton, callbackInstalledBaton));
 
-  // Set maxResponseWriteTime to 1 second.
+  // Set maxResponseWriteTime to 200ms, well below the time needed to drain
+  // a 2MB+ response through a slow reader (~10KB/s).
   auto& config =
       apache::thrift::detail::getThriftServerConfig(ssit.getThriftServer());
   config.setMaxResponseWriteTime_Deprecated(
-      folly::observer::makeStaticObserver(std::make_optional(1000ms)));
+      folly::observer::makeStaticObserver(std::make_optional(200ms)));
 
   std::unique_ptr<SlowReadCallback> readCallback;
 

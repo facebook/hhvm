@@ -70,7 +70,7 @@ def get_reflection__structured_annotation_inline():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -83,7 +83,7 @@ def get_reflection__structured_annotation_inline():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  "abacaba",
             structured_annotations={
             },
         ),
@@ -108,7 +108,7 @@ def get_reflection__structured_annotation_with_default():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  "abacabadabacaba",
             structured_annotations={
             },
         ),
@@ -134,7 +134,7 @@ def get_reflection__structured_annotation_recursive():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -161,7 +161,7 @@ def get_reflection__structured_annotation_recursive():
             type=_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types.structured_annotation_forward,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types.structured_annotation_forward(),
             structured_annotations={
             },
         ),
@@ -186,7 +186,7 @@ def get_reflection__structured_annotation_forward():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -211,7 +211,7 @@ def get_reflection__structured_annotation_nested():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -224,7 +224,7 @@ def get_reflection__structured_annotation_nested():
             type=_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types.structured_annotation_with_default,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types.structured_annotation_with_default(),
             structured_annotations={
             },
         ),
@@ -265,7 +265,7 @@ def get_reflection__MyStruct():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
                 "module.structured_annotation_inline": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types.structured_annotation_inline, fields={  "count": _ConstantSpec(value=  1, thrift_type=_ThriftType.I64),  "name": _ConstantSpec(value=  "counter", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
                 "module.runtime_annotation": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types.runtime_annotation, fields={}), thrift_type=_ThriftType.STRUCT),
@@ -280,7 +280,7 @@ def get_reflection__MyStruct():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -293,7 +293,7 @@ def get_reflection__MyStruct():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
                 "module.structured_annotation_recursive": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types.structured_annotation_recursive, fields={  "name": _ConstantSpec(value=  "abc", thrift_type=_ThriftType.STRING),  "recurse": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types.structured_annotation_recursive, fields={  "name": _ConstantSpec(value=  "cba", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),  "forward": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types.structured_annotation_forward, fields={  "count": _ConstantSpec(value=  3, thrift_type=_ThriftType.I64),}), thrift_type=_ThriftType.STRUCT),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -307,7 +307,7 @@ def get_reflection__MyStruct():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
                 "module.structured_annotation_nested": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types.structured_annotation_nested, fields={  "name": _ConstantSpec(value=  "nesty", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -336,7 +336,7 @@ def get_reflection__MyException():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
                 "module.structured_annotation_with_default": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types.structured_annotation_with_default, fields={}), thrift_type=_ThriftType.STRUCT),
             },
@@ -366,7 +366,7 @@ def get_reflection__MyUnion():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
                 "module.structured_annotation_with_default": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types.structured_annotation_with_default, fields={}), thrift_type=_ThriftType.STRUCT),
             },
@@ -380,7 +380,7 @@ def get_reflection__MyUnion():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
                 "module.structured_annotation_with_default": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types.structured_annotation_with_default, fields={  "name": _ConstantSpec(value=  "aba", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },

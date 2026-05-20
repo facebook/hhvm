@@ -60,7 +60,7 @@ def get_reflection__def_():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -73,7 +73,7 @@ def get_reflection__def_():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -86,7 +86,7 @@ def get_reflection__def_():
             type=int,
             thrift_type=_ThriftType.I32,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -99,7 +99,7 @@ def get_reflection__def_():
             type=bool,
             thrift_type=_ThriftType.BOOL,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=False,
             structured_annotations={
             },
         ),
@@ -112,7 +112,7 @@ def get_reflection__def_():
             type=_fbthrift_field_5_type,
             thrift_type=_ThriftType.LIST,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_5_type(),
             structured_annotations={
             },
         ),
@@ -125,7 +125,7 @@ def get_reflection__def_():
             type=int,
             thrift_type=_ThriftType.I32,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -138,7 +138,7 @@ def get_reflection__def_():
             type=int,
             thrift_type=_ThriftType.I32,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -151,7 +151,7 @@ def get_reflection__def_():
             type=bool,
             thrift_type=_ThriftType.BOOL,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=False,
             structured_annotations={
             },
         ),
@@ -164,7 +164,7 @@ def get_reflection__def_():
             type=bool,
             thrift_type=_ThriftType.BOOL,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=False,
             structured_annotations={
             },
         ),
@@ -177,7 +177,7 @@ def get_reflection__def_():
             type=bool,
             thrift_type=_ThriftType.BOOL,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=False,
             structured_annotations={
             },
         ),
@@ -190,7 +190,7 @@ def get_reflection__def_():
             type=bool,
             thrift_type=_ThriftType.BOOL,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=False,
             structured_annotations={
             },
         ),

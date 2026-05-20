@@ -57,7 +57,7 @@ def get_reflection__SerializedStruct():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -70,7 +70,7 @@ def get_reflection__SerializedStruct():
             type=int,
             thrift_type=_ThriftType.I32,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -96,7 +96,7 @@ def get_reflection__SerializedStruct():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.REQUIRED,
-            default=None,
+            default="",
             structured_annotations={
                 "thrift.AllowUnsafeRequiredFieldQualifier": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__thrift__thrift_types.AllowUnsafeRequiredFieldQualifier, fields={}), thrift_type=_ThriftType.STRUCT),
             },
@@ -124,7 +124,7 @@ def get_reflection__SerializedUnion():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -137,7 +137,7 @@ def get_reflection__SerializedUnion():
             type=int,
             thrift_type=_ThriftType.I32,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -165,7 +165,7 @@ def get_reflection__SerializedError():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -191,7 +191,7 @@ def get_reflection__SerializedError():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.REQUIRED,
-            default=None,
+            default="",
             structured_annotations={
                 "thrift.AllowUnsafeRequiredFieldQualifier": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__thrift__thrift_types.AllowUnsafeRequiredFieldQualifier, fields={}), thrift_type=_ThriftType.STRUCT),
             },
@@ -220,7 +220,7 @@ def get_reflection__MarshalStruct():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -233,7 +233,7 @@ def get_reflection__MarshalStruct():
             type=int,
             thrift_type=_ThriftType.I32,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -259,7 +259,7 @@ def get_reflection__MarshalStruct():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.REQUIRED,
-            default=None,
+            default="",
             structured_annotations={
                 "thrift.AllowUnsafeRequiredFieldQualifier": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__thrift__thrift_types.AllowUnsafeRequiredFieldQualifier, fields={}), thrift_type=_ThriftType.STRUCT),
             },
@@ -287,7 +287,7 @@ def get_reflection__MarshalUnion():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -300,7 +300,7 @@ def get_reflection__MarshalUnion():
             type=int,
             thrift_type=_ThriftType.I32,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -328,7 +328,7 @@ def get_reflection__MarshalError():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -354,7 +354,7 @@ def get_reflection__MarshalError():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.REQUIRED,
-            default=None,
+            default="",
             structured_annotations={
                 "thrift.AllowUnsafeRequiredFieldQualifier": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__thrift__thrift_types.AllowUnsafeRequiredFieldQualifier, fields={}), thrift_type=_ThriftType.STRUCT),
             },

@@ -67,7 +67,7 @@ def get_reflection__ComplexUnion():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -80,7 +80,7 @@ def get_reflection__ComplexUnion():
             type=_fbthrift_field_2_type,
             thrift_type=_ThriftType.LIST,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_2_type(),
             structured_annotations={
             },
         ),
@@ -93,7 +93,7 @@ def get_reflection__ComplexUnion():
             type=_fbthrift_field_3_type,
             thrift_type=_ThriftType.LIST,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_3_type(),
             structured_annotations={
             },
         ),
@@ -106,7 +106,7 @@ def get_reflection__ComplexUnion():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -119,7 +119,7 @@ def get_reflection__ComplexUnion():
             type=_fbthrift__module__thrift_types.containerTypedef,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__module__thrift_types.containerTypedef(),
             structured_annotations={
             },
         ),
@@ -132,7 +132,7 @@ def get_reflection__ComplexUnion():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
                 "cpp.Ref": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Ref, fields={  "type": _ConstantSpec(value=  0, thrift_type=_ThriftType.I32),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -170,7 +170,7 @@ def get_reflection__ListUnion():
             type=_fbthrift_field_2_type,
             thrift_type=_ThriftType.LIST,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_2_type(),
             structured_annotations={
             },
         ),
@@ -183,7 +183,7 @@ def get_reflection__ListUnion():
             type=_fbthrift_field_3_type,
             thrift_type=_ThriftType.LIST,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_3_type(),
             structured_annotations={
             },
         ),
@@ -208,7 +208,7 @@ def get_reflection__DataUnion():
             type=bytes,
             thrift_type=_ThriftType.BINARY,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=b"",
             structured_annotations={
             },
         ),
@@ -221,7 +221,7 @@ def get_reflection__DataUnion():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -246,7 +246,7 @@ def get_reflection__Val():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -259,7 +259,7 @@ def get_reflection__Val():
             type=int,
             thrift_type=_ThriftType.I32,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -272,7 +272,7 @@ def get_reflection__Val():
             type=_fbthrift__module__thrift_types.containerTypedef,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__module__thrift_types.containerTypedef(),
             structured_annotations={
             },
         ),
@@ -297,7 +297,7 @@ def get_reflection__ValUnion():
             type=_fbthrift__module__thrift_types.Val,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__module__thrift_types.Val(),
             structured_annotations={
             },
         ),
@@ -310,7 +310,7 @@ def get_reflection__ValUnion():
             type=_fbthrift__module__thrift_types.Val,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__module__thrift_types.Val(),
             structured_annotations={
             },
         ),
@@ -337,7 +337,7 @@ def get_reflection__VirtualComplexUnion():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -350,7 +350,7 @@ def get_reflection__VirtualComplexUnion():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -377,7 +377,7 @@ def get_reflection__NonCopyableStruct():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -404,7 +404,7 @@ def get_reflection__NonCopyableUnion():
             type=_fbthrift__module__thrift_types.NonCopyableStruct,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__module__thrift_types.NonCopyableStruct(),
             structured_annotations={
             },
         ),

@@ -56,7 +56,7 @@ def get_reflection__MyStruct():
             type=_fbthrift__b__thrift_types._fbthrift_unadapted_B,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__b__thrift_types._fbthrift_unadapted_B(),
             structured_annotations={
             },
         ),
@@ -69,7 +69,7 @@ def get_reflection__MyStruct():
             type=_fbthrift__c__thrift_types._fbthrift_unadapted_C1,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__c__thrift_types._fbthrift_unadapted_C1(),
             structured_annotations={
             },
         ),
@@ -82,7 +82,7 @@ def get_reflection__MyStruct():
             type=_fbthrift__c__thrift_types.C2,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__c__thrift_types.C2(),
             structured_annotations={
             },
         ),

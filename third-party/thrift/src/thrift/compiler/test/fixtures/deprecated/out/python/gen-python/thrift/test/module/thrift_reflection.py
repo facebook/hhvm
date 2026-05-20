@@ -56,7 +56,7 @@ def get_reflection__User():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -69,7 +69,7 @@ def get_reflection__User():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
                 "thrift.Deprecated": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__thrift__thrift_types.Deprecated, fields={  "message": _ConstantSpec(value=  "Use 'full_name' instead", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -83,7 +83,7 @@ def get_reflection__User():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -136,7 +136,7 @@ def get_reflection__ExampleUnion():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -149,7 +149,7 @@ def get_reflection__ExampleUnion():
             type=int,
             thrift_type=_ThriftType.I32,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
                 "thrift.Deprecated": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__thrift__thrift_types.Deprecated, fields={  "message": _ConstantSpec(value=  "Use stringValue instead", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -163,7 +163,7 @@ def get_reflection__ExampleUnion():
             type=float,
             thrift_type=_ThriftType.DOUBLE,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0.0,
             structured_annotations={
             },
         ),

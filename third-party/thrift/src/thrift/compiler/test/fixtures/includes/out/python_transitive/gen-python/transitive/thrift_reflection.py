@@ -54,7 +54,7 @@ def get_reflection__Foo():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  2,
             structured_annotations={
             },
         ),

@@ -98,7 +98,7 @@ def get_reflection__TemplateLists():
             type=_fbthrift_field_2_type,
             thrift_type=_ThriftType.LIST,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_2_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "std::deque", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -112,7 +112,7 @@ def get_reflection__TemplateLists():
             type=_fbthrift__test__fixtures__python_capi__containers__thrift_types.small_vector_iobuf,
             thrift_type=_ThriftType.LIST,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__test__fixtures__python_capi__containers__thrift_types.small_vector_iobuf(),
             structured_annotations={
             },
         ),
@@ -125,7 +125,7 @@ def get_reflection__TemplateLists():
             type=_fbthrift_field_4_type,
             thrift_type=_ThriftType.LIST,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_4_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "folly::small_vector", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -139,7 +139,7 @@ def get_reflection__TemplateLists():
             type=_fbthrift_field_5_type,
             thrift_type=_ThriftType.LIST,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_5_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "folly::fbvector", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -216,7 +216,7 @@ def get_reflection__TemplateSets():
             type=_fbthrift_field_1_type,
             thrift_type=_ThriftType.SET,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_1_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "std::set", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -230,7 +230,7 @@ def get_reflection__TemplateSets():
             type=_fbthrift_field_2_type,
             thrift_type=_ThriftType.SET,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_2_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "std::unordered_set", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -244,7 +244,7 @@ def get_reflection__TemplateSets():
             type=_fbthrift_field_3_type,
             thrift_type=_ThriftType.SET,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_3_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "folly::F14FastSet", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -258,7 +258,7 @@ def get_reflection__TemplateSets():
             type=_fbthrift_field_4_type,
             thrift_type=_ThriftType.SET,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_4_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "folly::F14NodeSet", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -272,7 +272,7 @@ def get_reflection__TemplateSets():
             type=_fbthrift_field_5_type,
             thrift_type=_ThriftType.SET,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_5_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "folly::F14ValueSet", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -286,7 +286,7 @@ def get_reflection__TemplateSets():
             type=_fbthrift_field_6_type,
             thrift_type=_ThriftType.SET,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_6_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "folly::F14VectorSet", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -300,7 +300,7 @@ def get_reflection__TemplateSets():
             type=_fbthrift_field_7_type,
             thrift_type=_ThriftType.SET,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_7_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "folly::sorted_vector_set", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -384,7 +384,7 @@ def get_reflection__TemplateMaps():
             type=_fbthrift_field_1_type,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_1_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "std::map", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -398,7 +398,7 @@ def get_reflection__TemplateMaps():
             type=_fbthrift_field_2_type,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_2_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "std::unordered_map", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -412,7 +412,7 @@ def get_reflection__TemplateMaps():
             type=_fbthrift_field_3_type,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_3_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "folly::F14FastMap", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -426,7 +426,7 @@ def get_reflection__TemplateMaps():
             type=_fbthrift_field_4_type,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_4_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "folly::F14NodeMap", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -440,7 +440,7 @@ def get_reflection__TemplateMaps():
             type=_fbthrift_field_5_type,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_5_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "folly::F14ValueMap", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -454,7 +454,7 @@ def get_reflection__TemplateMaps():
             type=_fbthrift_field_6_type,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_6_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "folly::F14VectorMap", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -468,7 +468,7 @@ def get_reflection__TemplateMaps():
             type=_fbthrift_field_7_type,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_7_type(),
             structured_annotations={
                 "cpp.Type": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Type, fields={  "template": _ConstantSpec(value=  "folly::sorted_vector_map", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
@@ -494,7 +494,7 @@ def get_reflection__TWrapped():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -507,7 +507,7 @@ def get_reflection__TWrapped():
             type=bytes,
             thrift_type=_ThriftType.BINARY,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=b"",
             structured_annotations={
             },
         ),
@@ -532,7 +532,7 @@ def get_reflection__IndirectionA():
             type=_fbthrift__test__fixtures__python_capi__containers__thrift_types.ListOfWrapped,
             thrift_type=_ThriftType.LIST,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__test__fixtures__python_capi__containers__thrift_types.ListOfWrapped(),
             structured_annotations={
             },
         ),
@@ -557,7 +557,7 @@ def get_reflection__IndirectionB():
             type=_fbthrift__test__fixtures__python_capi__containers__thrift_types.VecOfWrapped,
             thrift_type=_ThriftType.LIST,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__test__fixtures__python_capi__containers__thrift_types.VecOfWrapped(),
             structured_annotations={
             },
         ),
@@ -582,7 +582,7 @@ def get_reflection__IndirectionC():
             type=_fbthrift__test__fixtures__python_capi__containers__thrift_types.ListOfWrappedAlias,
             thrift_type=_ThriftType.LIST,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__test__fixtures__python_capi__containers__thrift_types.ListOfWrappedAlias(),
             structured_annotations={
             },
         ),

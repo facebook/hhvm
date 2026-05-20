@@ -175,7 +175,32 @@ def get_reflection__{{struct.py_name}}():
                 }}{{#if field.required?}}REQUIRED{{!
                 }}{{#else if field.optional?}}OPTIONAL{{!
                 }}{{#else}}UNQUALIFIED{{/if field.required?}},
-            default=None,
+            default={{!
+                }}{{#if field.optional?}}None{{!
+                }}{{#else if field.default_value}}{{!
+                    }}{{#if field.type.container?}}{{!
+                        }}{{#if field.type.typedef?}}{{!
+                            }}{{#partial python_type_class type=field.type}}{{!
+                        }}{{#else}}{{!
+                            }}{{#partial field_container_var field=field}}{{!
+                        }}{{/if field.type.typedef?}}({{!
+                    }}{{/if field.type.container?}}{{!
+                    }}{{#field.default_value}}{{> reflection/default_value }}{{/field.default_value}}{{!
+                    }}{{#if field.type.container?}}){{/if}}{{!
+                }}{{#else if field.type.bool?}}False{{!
+                }}{{#else if (or field.type.byte? field.type.i16? field.type.i32? field.type.i64?)}}0{{!
+                }}{{#else if (or field.type.float? field.type.double?)}}0.0{{!
+                }}{{#else if field.type.string?}}""{{!
+                }}{{#else if field.type.binary?}}b""{{!
+                }}{{#else if field.type.enum?}}{{#partial python_type_class type=field.type}}(0){{!
+                }}{{#else if field.type.structured?}}{{#partial python_type_class type=field.type}}(){{!
+                }}{{#else if field.type.container?}}{{!
+                    }}{{#if field.type.typedef?}}{{!
+                        }}{{#partial python_type_class type=field.type}}{{!
+                    }}{{#else}}{{!
+                        }}{{#partial field_container_var field=field}}{{!
+                    }}{{/if field.type.typedef?}}(){{!
+                }}{{/if field.optional?}},
             structured_annotations={
                 {{#each field.structured_annotations as |annotation|}}
                   {{#if annotation.type.structured?}}

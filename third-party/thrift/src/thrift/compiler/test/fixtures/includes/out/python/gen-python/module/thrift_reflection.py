@@ -55,7 +55,7 @@ def get_reflection__MyStruct():
             type=_fbthrift__includes__thrift_types.Included,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  _fbthrift__includes__thrift_types.Included(    MyIntField=  2,    MyTransitiveField=  _fbthrift__transitive__thrift_types.Foo(    a=  2,  ),  ),
             structured_annotations={
             },
         ),
@@ -68,7 +68,7 @@ def get_reflection__MyStruct():
             type=_fbthrift__includes__thrift_types.Included,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__includes__thrift_types.Included(),
             structured_annotations={
             },
         ),
@@ -81,7 +81,7 @@ def get_reflection__MyStruct():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  42,
             structured_annotations={
             },
         ),

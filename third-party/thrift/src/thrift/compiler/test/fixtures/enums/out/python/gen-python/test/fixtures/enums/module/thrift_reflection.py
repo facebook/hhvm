@@ -61,7 +61,7 @@ def get_reflection__SomeStruct():
             type=_fbthrift__test__fixtures__enums__module__thrift_types.Metasyntactic,
             thrift_type=_ThriftType.ENUM,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  _fbthrift__test__fixtures__enums__module__thrift_types.Metasyntactic(1),
             structured_annotations={
             },
         ),
@@ -74,7 +74,7 @@ def get_reflection__SomeStruct():
             type=_fbthrift__test__fixtures__enums__module__thrift_types.Metasyntactic,
             thrift_type=_ThriftType.ENUM,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  _fbthrift__test__fixtures__enums__module__thrift_types.Metasyntactic(2),
             structured_annotations={
             },
         ),
@@ -87,7 +87,7 @@ def get_reflection__SomeStruct():
             type=_fbthrift__test__fixtures__enums__module__thrift_types.Metasyntactic,
             thrift_type=_ThriftType.ENUM,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  _fbthrift__test__fixtures__enums__module__thrift_types.Metasyntactic(-1),
             structured_annotations={
             },
         ),
@@ -100,7 +100,7 @@ def get_reflection__SomeStruct():
             type=_fbthrift_field_4_type,
             thrift_type=_ThriftType.SET,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_4_type(  [    ]),
             structured_annotations={
             },
         ),
@@ -125,7 +125,7 @@ def get_reflection__MyStruct():
             type=_fbthrift__test__fixtures__enums__module__thrift_types.MyEnum2,
             thrift_type=_ThriftType.ENUM,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  _fbthrift__test__fixtures__enums__module__thrift_types.MyEnum2(3),
             structured_annotations={
             },
         ),
@@ -138,7 +138,7 @@ def get_reflection__MyStruct():
             type=_fbthrift__test__fixtures__enums__module__thrift_types.MyEnum3,
             thrift_type=_ThriftType.ENUM,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  _fbthrift__test__fixtures__enums__module__thrift_types.MyEnum3(-3),
             structured_annotations={
             },
         ),
@@ -151,7 +151,7 @@ def get_reflection__MyStruct():
             type=_fbthrift__test__fixtures__enums__module__thrift_types.MyEnum1,
             thrift_type=_ThriftType.ENUM,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  _fbthrift__test__fixtures__enums__module__thrift_types.MyEnum1(1),
             structured_annotations={
             },
         ),
@@ -164,7 +164,7 @@ def get_reflection__MyStruct():
             type=_fbthrift__test__fixtures__enums__module__thrift_types.MyEnum1,
             thrift_type=_ThriftType.ENUM,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  _fbthrift__test__fixtures__enums__module__thrift_types.MyEnum1(1),
             structured_annotations={
             },
         ),

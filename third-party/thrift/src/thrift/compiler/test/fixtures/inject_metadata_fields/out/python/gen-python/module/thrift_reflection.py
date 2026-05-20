@@ -56,7 +56,7 @@ def get_reflection__Fields():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -83,7 +83,7 @@ def get_reflection__FieldsInjectedToEmptyStruct():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -110,7 +110,7 @@ def get_reflection__FieldsInjectedToStruct():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -123,7 +123,7 @@ def get_reflection__FieldsInjectedToStruct():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -180,7 +180,7 @@ def get_reflection__FieldsInjectedWithIncludedStruct():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -193,7 +193,7 @@ def get_reflection__FieldsInjectedWithIncludedStruct():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -220,7 +220,7 @@ def get_reflection__FieldsInjectedWithFieldsWithIncludedStruct():
             type=_fbthrift__injected_field__thrift_types.InjectedField,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__injected_field__thrift_types.InjectedField(),
             structured_annotations={
             },
         ),
@@ -233,7 +233,7 @@ def get_reflection__FieldsInjectedWithFieldsWithIncludedStruct():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),

@@ -55,7 +55,7 @@ def get_reflection__Included():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  0,
             structured_annotations={
             },
         ),
@@ -68,7 +68,7 @@ def get_reflection__Included():
             type=_fbthrift__transitive__thrift_types.Foo,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  _fbthrift__transitive__thrift_types.Foo(    a=  2,  ),
             structured_annotations={
             },
         ),

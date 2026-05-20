@@ -532,6 +532,30 @@ struct Messy {
   };
 }
 
+struct NestedDefaultStruct {
+  1: Messy nested = {
+    "struct_field": {"bool_val": false, "enum_val": Color.red},
+  };
+  2: list<SimpleStruct> struct_list = [
+    {"name": "Alice", "value": 1},
+    {"name": "Bob", "value": 2},
+  ];
+  3: map<string, SimpleStruct> struct_map = {
+    "first": {"name": "Charlie", "value": 3},
+  };
+}
+
+struct CustomScalarDefaults {
+  1: i32 int_field = 42;
+  2: bool bool_field = true;
+  3: double double_field = 3.14;
+  4: binary binary_field = "hello";
+  5: list<i32> int_list = [1, 2, 3];
+  6: set<string> string_set = ["a", "b"];
+  7: map<string, i32> string_int_map = {"x": 1, "y": 2};
+  8: list<list<i32>> nested_list = [[1, 2], [3, 4]];
+}
+
 struct SortedSets {
   @python.DeprecatedSortSetOnSerialize
   1: set<i32> ints;

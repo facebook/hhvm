@@ -25,14 +25,20 @@ from test_thrift.thrift_types import (
     Color,
     ComplexUnion,
     CrossModuleRef,
+    CustomScalarDefaults,
     Digits,
     easy,
     EmptyStruct,
+    File,
+    hard,
     HardError,
     I32List,
     Integers,
     ListTypes,
     Messy,
+    mixed,
+    NestedDefaultStruct,
+    Runtime,
     SetI32,
     SimpleStruct,
     StrI32ListMap,
@@ -47,6 +53,7 @@ from thrift.python.reflection.constants_reflection import (
     ThriftType,
 )
 from thrift.python.reflection.types_reflection import (
+    FieldSpec,
     inspect,
     inspectable,
     ListSpec,
@@ -66,6 +73,11 @@ def _inspect_struct(cls: type[Any]) -> StructSpec:
     spec = inspect(cls)
     assert isinstance(spec, StructSpec)
     return spec
+
+
+def _get_field_spec(spec: StructSpec, field_name: str) -> FieldSpec:
+    fields_by_name = {f.name: f for f in spec.fields}
+    return fields_by_name[field_name]
 
 
 class InspectSimpleStructTest(unittest.TestCase):
@@ -88,9 +100,7 @@ class InspectSimpleStructTest(unittest.TestCase):
 
     def test_field_name(self) -> None:
         spec = _inspect_struct(SimpleStruct)
-        fields_by_name = {f.name: f for f in spec.fields}
-
-        f = fields_by_name["name"]
+        f = _get_field_spec(spec, "name")
         self.assertEqual(f.id, 1)
         self.assertEqual(f.py_name, "name")
         self.assertEqual(f.type, str)
@@ -99,9 +109,7 @@ class InspectSimpleStructTest(unittest.TestCase):
 
     def test_field_value(self) -> None:
         spec = _inspect_struct(SimpleStruct)
-        fields_by_name = {f.name: f for f in spec.fields}
-
-        f = fields_by_name["value"]
+        f = _get_field_spec(spec, "value")
         self.assertEqual(f.id, 2)
         self.assertEqual(f.py_name, "value")
         self.assertEqual(f.type, int)
@@ -110,14 +118,17 @@ class InspectSimpleStructTest(unittest.TestCase):
 
     def test_field_city(self) -> None:
         spec = _inspect_struct(SimpleStruct)
-        fields_by_name = {f.name: f for f in spec.fields}
-
-        f = fields_by_name["city"]
+        f = _get_field_spec(spec, "city")
         self.assertEqual(f.id, 3)
         self.assertEqual(f.py_name, "city")
         self.assertEqual(f.type, str)
         self.assertEqual(f.thrift_type, ThriftType.STRING)
         self.assertEqual(f.qualifier, Qualifier.UNQUALIFIED)
+
+    def test_py_name_equals_name(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        for f in spec.fields:
+            self.assertEqual(f.py_name, f.name)
 
     def test_fields_ordered_by_id(self) -> None:
         spec = _inspect_struct(SimpleStruct)
@@ -190,14 +201,13 @@ class InspectExceptionTest(unittest.TestCase):
 
     def test_fields(self) -> None:
         spec = _inspect_struct(HardError)
-        fields_by_name = {f.name: f for f in spec.fields}
 
-        errortext = fields_by_name["errortext"]
+        errortext = _get_field_spec(spec, "errortext")
         self.assertEqual(errortext.id, 1)
         self.assertEqual(errortext.type, str)
         self.assertEqual(errortext.thrift_type, ThriftType.STRING)
 
-        code = fields_by_name["code"]
+        code = _get_field_spec(spec, "code")
         self.assertEqual(code.id, 2)
         self.assertEqual(code.type, int)
         self.assertEqual(code.thrift_type, ThriftType.I32)
@@ -223,48 +233,42 @@ class InspectUnionTest(unittest.TestCase):
 
     def test_byte_field(self) -> None:
         spec = _inspect_struct(Integers)
-        fields_by_name = {f.name: f for f in spec.fields}
-        f = fields_by_name["tiny"]
+        f = _get_field_spec(spec, "tiny")
         self.assertEqual(f.id, 1)
         self.assertEqual(f.type, int)
         self.assertEqual(f.thrift_type, ThriftType.BYTE)
 
     def test_i16_field(self) -> None:
         spec = _inspect_struct(Integers)
-        fields_by_name = {f.name: f for f in spec.fields}
-        f = fields_by_name["small"]
+        f = _get_field_spec(spec, "small")
         self.assertEqual(f.id, 2)
         self.assertEqual(f.type, int)
         self.assertEqual(f.thrift_type, ThriftType.I16)
 
     def test_i32_field(self) -> None:
         spec = _inspect_struct(Integers)
-        fields_by_name = {f.name: f for f in spec.fields}
-        f = fields_by_name["medium"]
+        f = _get_field_spec(spec, "medium")
         self.assertEqual(f.id, 3)
         self.assertEqual(f.type, int)
         self.assertEqual(f.thrift_type, ThriftType.I32)
 
     def test_i64_field(self) -> None:
         spec = _inspect_struct(Integers)
-        fields_by_name = {f.name: f for f in spec.fields}
-        f = fields_by_name["large"]
+        f = _get_field_spec(spec, "large")
         self.assertEqual(f.id, 4)
         self.assertEqual(f.type, int)
         self.assertEqual(f.thrift_type, ThriftType.I64)
 
     def test_string_field(self) -> None:
         spec = _inspect_struct(Integers)
-        fields_by_name = {f.name: f for f in spec.fields}
-        f = fields_by_name["unbounded"]
+        f = _get_field_spec(spec, "unbounded")
         self.assertEqual(f.id, 5)
         self.assertEqual(f.type, str)
         self.assertEqual(f.thrift_type, ThriftType.STRING)
 
     def test_renamed_field(self) -> None:
         spec = _inspect_struct(Integers)
-        fields_by_name = {f.name: f for f in spec.fields}
-        f = fields_by_name["name"]
+        f = _get_field_spec(spec, "name")
         self.assertEqual(f.id, 6)
         self.assertEqual(f.name, "name")
         self.assertEqual(f.py_name, "name_")
@@ -273,8 +277,7 @@ class InspectUnionTest(unittest.TestCase):
 
     def test_struct_typed_field(self) -> None:
         spec = _inspect_struct(Integers)
-        fields_by_name = {f.name: f for f in spec.fields}
-        f = fields_by_name["digits"]
+        f = _get_field_spec(spec, "digits")
         self.assertEqual(f.id, 7)
         self.assertEqual(f.type, Digits)
         self.assertEqual(f.thrift_type, ThriftType.STRUCT)
@@ -349,13 +352,11 @@ class InspectFieldKindTest(unittest.TestCase):
         self, _name: str, cls: type[Any], field_name: str, expected: NumberType
     ) -> None:
         spec = _inspect_struct(cls)
-        fields_by_name = {f.name: f for f in spec.fields}
-        self.assertEqual(fields_by_name[field_name].kind, expected)
+        self.assertEqual(_get_field_spec(spec, field_name).kind, expected)
 
     def test_optional_qualifier(self) -> None:
         spec = _inspect_struct(easy)
-        fields_by_name = {f.name: f for f in spec.fields}
-        self.assertEqual(fields_by_name["name"].qualifier, Qualifier.OPTIONAL)
+        self.assertEqual(_get_field_spec(spec, "name").qualifier, Qualifier.OPTIONAL)
 
     @parameterized.expand(
         [
@@ -375,15 +376,13 @@ class InspectFieldKindTest(unittest.TestCase):
         expected_thrift_type: ThriftType,
     ) -> None:
         spec = _inspect_struct(cls)
-        fields_by_name = {f.name: f for f in spec.fields}
-        f = fields_by_name[field_name]
+        f = _get_field_spec(spec, field_name)
         self.assertEqual(f.type, expected_type)
         self.assertEqual(f.thrift_type, expected_thrift_type)
 
     def test_container_typedef_field_uses_typedef_class(self) -> None:
         spec = _inspect_struct(easy)
-        fields_by_name = {f.name: f for f in spec.fields}
-        self.assertIs(fields_by_name["val_list"].type, I32List)
+        self.assertIs(_get_field_spec(spec, "val_list").type, I32List)
 
     @parameterized.expand(
         [
@@ -419,8 +418,7 @@ class InspectFieldKindTest(unittest.TestCase):
         expected_thrift_type: ThriftType,
     ) -> None:
         spec = _inspect_struct(ComplexUnion)
-        fields_by_name = {f.name: f for f in spec.fields}
-        f = fields_by_name[field_name]
+        f = _get_field_spec(spec, field_name)
         self.assertTrue(issubclass(f.type, base_cls))
         self.assertEqual(f.type.__name__, expected_type_name)
         self.assertEqual(f.type.__module__, "test_thrift.thrift_types")
@@ -430,15 +428,13 @@ class InspectFieldKindTest(unittest.TestCase):
 
     def test_nested_container_inspect_returns_list_spec(self) -> None:
         spec = _inspect_struct(ListTypes)
-        fields_by_name = {f.name: f for f in spec.fields}
-        outer_type = fields_by_name["third"].type
+        outer_type = _get_field_spec(spec, "third").type
         outer_spec = inspect(outer_type)
         self.assertIsInstance(outer_spec, ListSpec)
 
     def test_nested_container_inner_type_is_default_constructible(self) -> None:
         spec = _inspect_struct(ListTypes)
-        fields_by_name = {f.name: f for f in spec.fields}
-        outer_type = fields_by_name["third"].type
+        outer_type = _get_field_spec(spec, "third").type
         outer_spec = inspect(outer_type)
         assert isinstance(outer_spec, ListSpec)
         self.assertEqual(outer_spec.thrift_type, ThriftType.LIST)
@@ -449,13 +445,11 @@ class InspectFieldKindTest(unittest.TestCase):
 
     def test_container_typedef_thrift_type(self) -> None:
         spec = _inspect_struct(easy)
-        fields_by_name = {f.name: f for f in spec.fields}
-        self.assertEqual(fields_by_name["val_list"].thrift_type, ThriftType.LIST)
+        self.assertEqual(_get_field_spec(spec, "val_list").thrift_type, ThriftType.LIST)
 
     def test_cross_module_field_type(self) -> None:
         spec = _inspect_struct(CrossModuleRef)
-        fields_by_name = {f.name: f for f in spec.fields}
-        f = fields_by_name["basic"]
+        f = _get_field_spec(spec, "basic")
         self.assertIs(f.type, SubDepBasic)
         self.assertEqual(f.thrift_type, ThriftType.STRUCT)
 
@@ -526,6 +520,120 @@ class InspectContainerTypedefTest(unittest.TestCase):
         self.assertTrue(inspectable(easy().val_list))
 
 
+class InspectDefaultsTest(unittest.TestCase):
+    def test_unqualified_fields_have_typed_defaults(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        for f in spec.fields:
+            self.assertIsNotNone(f.default)
+            self.assertIsInstance(f.default, f.type)
+
+    def test_optional_field_default_is_none(self) -> None:
+        spec = _inspect_struct(easy)
+        self.assertIsNone(_get_field_spec(spec, "name").default)
+
+    def test_optional_field_with_custom_default_is_none(self) -> None:
+        spec = _inspect_struct(mixed)
+        self.assertIsNone(_get_field_spec(spec, "opt_field").default)
+        self.assertIsNone(_get_field_spec(spec, "opt_int").default)
+
+    def test_string_default(self) -> None:
+        spec = _inspect_struct(hard)
+        self.assertEqual(_get_field_spec(spec, "other").default, "some default")
+
+    def test_zero_value_defaults(self) -> None:
+        spec = _inspect_struct(SimpleStruct)
+        self.assertEqual(_get_field_spec(spec, "name").default, "")
+        self.assertEqual(_get_field_spec(spec, "value").default, 0)
+
+    def test_enum_default(self) -> None:
+        spec = _inspect_struct(File)
+        self.assertEqual(_get_field_spec(spec, "type").default, 8)
+
+    def test_struct_default(self) -> None:
+        spec = _inspect_struct(Messy)
+        self.assertEqual(
+            _get_field_spec(spec, "struct_field").default,
+            Runtime(bool_val=True, enum_val=Color.blue, int_list_val=[10, 20, 30]),
+        )
+
+    def test_container_default(self) -> None:
+        spec = _inspect_struct(easy)
+        default = _get_field_spec(spec, "val_list").default
+        self.assertIsInstance(default, I32List)
+        self.assertEqual(len(default), 0)
+
+    def test_struct_typed_field_intrinsic_default(self) -> None:
+        spec = _inspect_struct(Integers)
+        default = _get_field_spec(spec, "digits").default
+        self.assertEqual(default, Digits())
+
+    def test_nested_struct_default(self) -> None:
+        spec = _inspect_struct(NestedDefaultStruct)
+        default = _get_field_spec(spec, "nested").default
+        self.assertIsInstance(default, Messy)
+        self.assertEqual(
+            default.struct_field,
+            Runtime(bool_val=False, enum_val=Color.red),
+        )
+
+    def test_list_of_structs_default(self) -> None:
+        spec = _inspect_struct(NestedDefaultStruct)
+        default = _get_field_spec(spec, "struct_list").default
+        self.assertEqual(len(default), 2)
+        self.assertEqual(default[0], SimpleStruct(name="Alice", value=1))
+        self.assertEqual(default[1], SimpleStruct(name="Bob", value=2))
+
+    def test_map_of_structs_default(self) -> None:
+        spec = _inspect_struct(NestedDefaultStruct)
+        default = _get_field_spec(spec, "struct_map").default
+        self.assertEqual(len(default), 1)
+        self.assertEqual(default["first"], SimpleStruct(name="Charlie", value=3))
+
+    def test_custom_int_default(self) -> None:
+        spec = _inspect_struct(CustomScalarDefaults)
+        self.assertEqual(_get_field_spec(spec, "int_field").default, 42)
+
+    def test_custom_bool_default(self) -> None:
+        spec = _inspect_struct(CustomScalarDefaults)
+        self.assertIs(_get_field_spec(spec, "bool_field").default, True)
+
+    def test_custom_double_default(self) -> None:
+        spec = _inspect_struct(CustomScalarDefaults)
+        self.assertAlmostEqual(_get_field_spec(spec, "double_field").default, 3.14)
+
+    def test_custom_binary_default(self) -> None:
+        spec = _inspect_struct(CustomScalarDefaults)
+        self.assertEqual(_get_field_spec(spec, "binary_field").default, b"hello")
+
+    def test_custom_primitive_list_default(self) -> None:
+        spec = _inspect_struct(CustomScalarDefaults)
+        default = _get_field_spec(spec, "int_list").default
+        self.assertIsInstance(default, _fbthrift_List)
+        self.assertEqual(list(default), [1, 2, 3])
+
+    def test_custom_primitive_set_default(self) -> None:
+        spec = _inspect_struct(CustomScalarDefaults)
+        default = _get_field_spec(spec, "string_set").default
+        self.assertIsInstance(default, _fbthrift_Set)
+        self.assertEqual(set(default), {"a", "b"})
+
+    def test_custom_primitive_map_default(self) -> None:
+        spec = _inspect_struct(CustomScalarDefaults)
+        default = _get_field_spec(spec, "string_int_map").default
+        self.assertIsInstance(default, _fbthrift_Map)
+        self.assertEqual(dict(default), {"x": 1, "y": 2})
+
+    def test_custom_nested_list_default(self) -> None:
+        spec = _inspect_struct(CustomScalarDefaults)
+        default = _get_field_spec(spec, "nested_list").default
+        self.assertIsInstance(default, _fbthrift_List)
+        self.assertEqual(len(default), 2)
+        self.assertIsInstance(default[0], _fbthrift_List)
+        self.assertEqual(list(default[0]), [1, 2])
+        self.assertIsInstance(default[1], _fbthrift_List)
+        self.assertEqual(list(default[1]), [3, 4])
+
+
 class InspectAnnotationsTest(unittest.TestCase):
     def test_no_annotations(self) -> None:
         spec = _inspect_struct(SimpleStruct)
@@ -539,9 +647,8 @@ class InspectAnnotationsTest(unittest.TestCase):
 
     def test_field_deprecated_annotations(self) -> None:
         spec = _inspect_struct(Messy)
-        fields_by_name = {f.name: f for f in spec.fields}
         self.assertEqual(
-            fields_by_name["opt_field"].annotations,
+            _get_field_spec(spec, "opt_field").annotations,
             {"a.b.c": "d.e.f", "some": "annotation"},
         )
 
@@ -556,12 +663,11 @@ class InspectAnnotationsTest(unittest.TestCase):
 
     def test_field_annotation(self) -> None:
         spec = _inspect_struct(AnnotatedForReflection)
-        fields_by_name = {f.name: f for f in spec.fields}
         self.assertEqual(
-            fields_by_name["annotated_field"].annotations,
+            _get_field_spec(spec, "annotated_field").annotations,
             {"field_key": "field_val"},
         )
-        self.assertEqual(fields_by_name["plain_field"].annotations, {})
+        self.assertEqual(_get_field_spec(spec, "plain_field").annotations, {})
 
     def test_structured_annotations_raw(self) -> None:
         spec = _inspect_struct(AnnotatedForReflection)

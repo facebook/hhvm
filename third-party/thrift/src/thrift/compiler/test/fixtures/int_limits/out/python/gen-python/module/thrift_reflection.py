@@ -54,7 +54,7 @@ def get_reflection__Limits():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  9223372036854775807,
             structured_annotations={
             },
         ),
@@ -67,7 +67,7 @@ def get_reflection__Limits():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  -9223372036854775808,
             structured_annotations={
             },
         ),
@@ -80,7 +80,7 @@ def get_reflection__Limits():
             type=int,
             thrift_type=_ThriftType.I32,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  2147483647,
             structured_annotations={
             },
         ),
@@ -93,7 +93,7 @@ def get_reflection__Limits():
             type=int,
             thrift_type=_ThriftType.I32,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  -2147483648,
             structured_annotations={
             },
         ),
@@ -106,7 +106,7 @@ def get_reflection__Limits():
             type=int,
             thrift_type=_ThriftType.I16,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  32767,
             structured_annotations={
             },
         ),
@@ -119,7 +119,7 @@ def get_reflection__Limits():
             type=int,
             thrift_type=_ThriftType.I16,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  -32768,
             structured_annotations={
             },
         ),
@@ -132,7 +132,7 @@ def get_reflection__Limits():
             type=int,
             thrift_type=_ThriftType.BYTE,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  127,
             structured_annotations={
             },
         ),
@@ -145,7 +145,7 @@ def get_reflection__Limits():
             type=int,
             thrift_type=_ThriftType.BYTE,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=  -128,
             structured_annotations={
             },
         ),

@@ -54,7 +54,7 @@ def get_reflection__StructForInvariantTypes():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -79,7 +79,7 @@ def get_reflection__UnionForInvariantTypes():
             type=int,
             thrift_type=_ThriftType.I32,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -92,7 +92,7 @@ def get_reflection__UnionForInvariantTypes():
             type=int,
             thrift_type=_ThriftType.I64,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
             },
         ),
@@ -133,7 +133,7 @@ def get_reflection__InvariantTypes():
             type=_fbthrift_field_1_type,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_1_type(),
             structured_annotations={
                 "thrift.AllowUnsafeNonSealedKeyType": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__thrift__thrift_types.AllowUnsafeNonSealedKeyType, fields={}), thrift_type=_ThriftType.STRUCT),
             },
@@ -147,7 +147,7 @@ def get_reflection__InvariantTypes():
             type=_fbthrift_field_2_type,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_2_type(),
             structured_annotations={
                 "thrift.AllowUnsafeNonSealedKeyType": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__thrift__thrift_types.AllowUnsafeNonSealedKeyType, fields={}), thrift_type=_ThriftType.STRUCT),
             },

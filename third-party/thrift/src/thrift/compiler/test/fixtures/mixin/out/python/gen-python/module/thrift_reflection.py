@@ -54,7 +54,7 @@ def get_reflection__Mixin1():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -80,7 +80,7 @@ def get_reflection__Mixin2():
             type=_fbthrift__module__thrift_types.Mixin1,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__module__thrift_types.Mixin1(),
             structured_annotations={
                 "thrift.Mixin": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__thrift__thrift_types.Mixin, fields={}), thrift_type=_ThriftType.STRUCT),
             },
@@ -119,7 +119,7 @@ def get_reflection__Mixin3Base():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -146,7 +146,7 @@ def get_reflection__Foo():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -159,7 +159,7 @@ def get_reflection__Foo():
             type=_fbthrift__module__thrift_types.Mixin2,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__module__thrift_types.Mixin2(),
             structured_annotations={
                 "thrift.Mixin": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__thrift__thrift_types.Mixin, fields={}), thrift_type=_ThriftType.STRUCT),
             },
@@ -173,7 +173,7 @@ def get_reflection__Foo():
             type=_fbthrift__module__thrift_types.Mixin3Base,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__module__thrift_types.Mixin3Base(),
             structured_annotations={
                 "thrift.Mixin": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__thrift__thrift_types.Mixin, fields={}), thrift_type=_ThriftType.STRUCT),
             },

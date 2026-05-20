@@ -57,7 +57,7 @@ def get_reflection__Fields():
             type=str,
             thrift_type=_ThriftType.STRING,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default="",
             structured_annotations={
             },
         ),
@@ -110,7 +110,7 @@ def get_reflection__FieldsWithIncludedStruct():
             type=_fbthrift__injected_field__thrift_types.InjectedField,
             thrift_type=_ThriftType.STRUCT,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift__injected_field__thrift_types.InjectedField(),
             structured_annotations={
             },
         ),

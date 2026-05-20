@@ -71,7 +71,7 @@ def get_reflection__AnnotationWithContainers():
             type=_fbthrift_field_1_type,
             thrift_type=_ThriftType.LIST,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_1_type(),
             structured_annotations={
             },
         ),
@@ -84,7 +84,7 @@ def get_reflection__AnnotationWithContainers():
             type=_fbthrift_field_2_type,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=_fbthrift_field_2_type(),
             structured_annotations={
             },
         ),
@@ -112,7 +112,7 @@ def get_reflection__MyStruct():
             type=int,
             thrift_type=_ThriftType.I32,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=None,
+            default=0,
             structured_annotations={
                 "with_containers._fbthrift_unadapted_AnnotationWithContainers": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__with_containers__thrift_types._fbthrift_unadapted_AnnotationWithContainers, fields={  "names": _ConstantSpec(value=  _ConstantListSpec(value=[  _ConstantSpec(value=  "bar", thrift_type=_ThriftType.STRING), _ConstantSpec(value=  "baz", thrift_type=_ThriftType.STRING),   ]), thrift_type=_ThriftType.LIST),  "counts": _ConstantSpec(value=  _ConstantMapSpec(value={    _ConstantSpec(value=  "c", thrift_type=_ThriftType.STRING): _ConstantSpec(value=  3, thrift_type=_ThriftType.I32),  }), thrift_type=_ThriftType.MAP),}), thrift_type=_ThriftType.STRUCT),
             },

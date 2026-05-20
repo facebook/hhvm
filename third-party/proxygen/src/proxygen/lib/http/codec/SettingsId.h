@@ -26,11 +26,6 @@ enum class SettingsId : uint64_t {
 
   ENABLE_CONNECT_PROTOCOL = 8,
 
-  THRIFT_CHANNEL_ID_DEPRECATED = 100,
-
-  // 0xf000 and 0xffff being reserved for Experimental Use
-  THRIFT_CHANNEL_ID = 0xf100,
-
   WT_MAX_SESSIONS = 0x2b60,
   WT_INITIAL_MAX_DATA = 0x2b61,
   WT_INITIAL_MAX_STREAM_DATA_UNI = 0x2b62,

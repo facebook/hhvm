@@ -828,9 +828,6 @@ ErrorCode HTTP2Codec::handleSettings(const std::deque<SettingPair>& settings) {
           return ErrorCode::PROTOCOL_ERROR;
         }
         break;
-      case SettingsId::THRIFT_CHANNEL_ID:
-      case SettingsId::THRIFT_CHANNEL_ID_DEPRECATED:
-        break;
       case SettingsId::WT_MAX_SESSIONS:
       case SettingsId::_HQ_QPACK_BLOCKED_STREAMS:
       case SettingsId::_HQ_DATAGRAM:
@@ -1465,9 +1462,6 @@ size_t HTTP2Codec::generateSettings(folly::IOBufQueue& writeBuf) {
         if (setting.value == 0) {
           continue;
         }
-        break;
-      case SettingsId::THRIFT_CHANNEL_ID:
-      case SettingsId::THRIFT_CHANNEL_ID_DEPRECATED:
         break;
       case SettingsId::WT_MAX_SESSIONS:
       case SettingsId::_HQ_QPACK_BLOCKED_STREAMS:

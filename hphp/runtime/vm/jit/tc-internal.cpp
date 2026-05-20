@@ -889,7 +889,7 @@ void setTcIsFull() {
   tl_threadIsFull = true;
   codeViews().setFull(pthread_self());
 
-  if (codeViews().numThreadsFull() >= codeViews().maxViews()) {
+  if (codeViews().numThreadsFull() >= Cfg::Eval::MaxConcurrentCodeViews) {
     s_TCisFull.store(true, std::memory_order_release);
   }
 }

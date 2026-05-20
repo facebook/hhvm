@@ -93,6 +93,7 @@ class TestServerAppAdapter : public ThriftServerAppAdapter {
   bool handlerCalled{false};
   uint32_t capturedStreamId{0};
   apache::thrift::ProtocolId capturedProtocol{};
+  ThriftRequestContext* capturedRequestContext{nullptr};
   int method1Count{0};
   int method2Count{0};
 };
@@ -250,7 +251,8 @@ TEST_F(ThriftServerAppAdapterTest, OnReadDispatchesToRegisteredHandler) {
       +[](ThriftServerAppAdapter* self,
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId) noexcept -> Result {
+          apache::thrift::ProtocolId,
+          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
         auto* t = static_cast<TestServerAppAdapter*>(self);
         t->handlerCalled = true;
         t->capturedStreamId = streamId;
@@ -307,7 +309,8 @@ TEST_F(ThriftServerAppAdapterTest, OnReadPassesProtocolId) {
       +[](ThriftServerAppAdapter* self,
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId protocol) noexcept -> Result {
+          apache::thrift::ProtocolId protocol,
+          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
         static_cast<TestServerAppAdapter*>(self)->capturedProtocol = protocol;
         return Result::Success;
       });
@@ -321,6 +324,34 @@ TEST_F(ThriftServerAppAdapterTest, OnReadPassesProtocolId) {
   EXPECT_EQ(adapter->capturedProtocol, apache::thrift::ProtocolId::BINARY);
 }
 
+TEST_F(ThriftServerAppAdapterTest, OnReadForwardsRequestContextToHandler) {
+  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+
+  adapter->registerMethod(
+      "testMethod",
+      +[](ThriftServerAppAdapter* self,
+          uint32_t,
+          std::unique_ptr<folly::IOBuf>,
+          apache::thrift::ProtocolId,
+          std::unique_ptr<ThriftRequestContext> requestContext) noexcept
+          -> Result {
+        static_cast<TestServerAppAdapter*>(self)->capturedRequestContext =
+            requestContext.get();
+        return Result::Success;
+      });
+
+  auto built = buildPipeline(adapter.get());
+
+  auto msg = makeRequestMessage(1, "testMethod");
+  auto* stampedContext = new ThriftRequestContext();
+  msg.requestContext.reset(stampedContext);
+
+  auto result = adapter->onRead(erase_and_box(std::move(msg)));
+
+  EXPECT_EQ(result, Result::Success);
+  EXPECT_EQ(adapter->capturedRequestContext, stampedContext);
+}
+
 TEST_F(ThriftServerAppAdapterTest, OnReadMultipleMethodsDispatched) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
 
@@ -329,7 +360,8 @@ TEST_F(ThriftServerAppAdapterTest, OnReadMultipleMethodsDispatched) {
       +[](ThriftServerAppAdapter* self,
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId) noexcept -> Result {
+          apache::thrift::ProtocolId,
+          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
         static_cast<TestServerAppAdapter*>(self)->method1Count++;
         return Result::Success;
       });
@@ -339,7 +371,8 @@ TEST_F(ThriftServerAppAdapterTest, OnReadMultipleMethodsDispatched) {
       +[](ThriftServerAppAdapter* self,
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId) noexcept -> Result {
+          apache::thrift::ProtocolId,
+          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
         static_cast<TestServerAppAdapter*>(self)->method2Count++;
         return Result::Success;
       });

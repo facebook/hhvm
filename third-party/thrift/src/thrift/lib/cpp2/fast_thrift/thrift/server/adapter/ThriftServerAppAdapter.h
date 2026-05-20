@@ -89,16 +89,21 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   // The dispatcher pre-extracts the components codegen actually needs from
   // the inbound frame so the handler doesn't have to reach back into
   // ThriftServerRequestMessage / ParsedFrame.
-  //   streamId — Rocket stream id; echo into the response so the client can
-  //              match it to the in-flight request.
-  //   data     — request payload IOBuf, ready to feed into a protocol reader
-  //              for argument deserialization.
-  //   protocol — wire protocol id (Binary / Compact / ...) for the codec.
+  //   streamId       — Rocket stream id; echo into the response so the client
+  //                    can match it to the in-flight request.
+  //   data           — request payload IOBuf, ready to feed into a protocol
+  //                    reader for argument deserialization.
+  //   protocol       — wire protocol id (Binary / Compact / ...) for the
+  //                    codec.
+  //   requestContext — per-request context stamped by
+  //                    ThriftServerRequestContextHandler; ownership moves into
+  //                    the FastHandlerCallback so it outlives async handlers.
   using RequestResponseProcessFn = channel_pipeline::Result (*)(
       ThriftServerAppAdapter*,
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
-      apache::thrift::ProtocolId protocol) noexcept;
+      apache::thrift::ProtocolId protocol,
+      std::unique_ptr<ThriftRequestContext> requestContext) noexcept;
 
   enum class State : uint8_t {
     Created,

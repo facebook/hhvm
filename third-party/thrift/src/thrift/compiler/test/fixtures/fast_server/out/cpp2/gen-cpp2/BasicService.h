@@ -151,65 +151,95 @@ class BasicServiceAppAdapter
   ::apache::thrift::fast_thrift::channel_pipeline::Result process_ping(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
-      ::apache::thrift::ProtocolId protocolId) noexcept;
+      ::apache::thrift::ProtocolId protocolId,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
 
   template <typename ProtocolReader, typename ProtocolWriter>
   ::apache::thrift::fast_thrift::channel_pipeline::Result
   process_ping_impl(
       uint32_t streamId,
-      std::unique_ptr<folly::IOBuf> data) noexcept;
+      std::unique_ptr<folly::IOBuf> data,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
   // Per-method dispatcher: switches on protocolId into the templated impl.
   // Wrapped by a captureless-lambda thunk in the ctor when registered with
   // the base's dispatch table.
   ::apache::thrift::fast_thrift::channel_pipeline::Result process_add(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
-      ::apache::thrift::ProtocolId protocolId) noexcept;
+      ::apache::thrift::ProtocolId protocolId,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
 
   template <typename ProtocolReader, typename ProtocolWriter>
   ::apache::thrift::fast_thrift::channel_pipeline::Result
   process_add_impl(
       uint32_t streamId,
-      std::unique_ptr<folly::IOBuf> data) noexcept;
+      std::unique_ptr<folly::IOBuf> data,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
   // Per-method dispatcher: switches on protocolId into the templated impl.
   // Wrapped by a captureless-lambda thunk in the ctor when registered with
   // the base's dispatch table.
   ::apache::thrift::fast_thrift::channel_pipeline::Result process_buildItem(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
-      ::apache::thrift::ProtocolId protocolId) noexcept;
+      ::apache::thrift::ProtocolId protocolId,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
 
   template <typename ProtocolReader, typename ProtocolWriter>
   ::apache::thrift::fast_thrift::channel_pipeline::Result
   process_buildItem_impl(
       uint32_t streamId,
-      std::unique_ptr<folly::IOBuf> data) noexcept;
+      std::unique_ptr<folly::IOBuf> data,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
   // Per-method dispatcher: switches on protocolId into the templated impl.
   // Wrapped by a captureless-lambda thunk in the ctor when registered with
   // the base's dispatch table.
   ::apache::thrift::fast_thrift::channel_pipeline::Result process_lookup(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
-      ::apache::thrift::ProtocolId protocolId) noexcept;
+      ::apache::thrift::ProtocolId protocolId,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
 
   template <typename ProtocolReader, typename ProtocolWriter>
   ::apache::thrift::fast_thrift::channel_pipeline::Result
   process_lookup_impl(
       uint32_t streamId,
-      std::unique_ptr<folly::IOBuf> data) noexcept;
+      std::unique_ptr<folly::IOBuf> data,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
   // Per-method dispatcher: switches on protocolId into the templated impl.
   // Wrapped by a captureless-lambda thunk in the ctor when registered with
   // the base's dispatch table.
   ::apache::thrift::fast_thrift::channel_pipeline::Result process_secureLookup(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
-      ::apache::thrift::ProtocolId protocolId) noexcept;
+      ::apache::thrift::ProtocolId protocolId,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
 
   template <typename ProtocolReader, typename ProtocolWriter>
   ::apache::thrift::fast_thrift::channel_pipeline::Result
   process_secureLookup_impl(
       uint32_t streamId,
-      std::unique_ptr<folly::IOBuf> data) noexcept;
+      std::unique_ptr<folly::IOBuf> data,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
 };
 
 } // namespace cpp2::test

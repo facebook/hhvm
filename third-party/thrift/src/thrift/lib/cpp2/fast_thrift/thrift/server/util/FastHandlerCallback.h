@@ -34,6 +34,7 @@
 #include <thrift/lib/cpp2/SerializationSwitch.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftRequestContext.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseSerializer.h>
@@ -103,12 +104,14 @@ class FastHandlerCallback : public folly::DelayedDestruction {
       ExceptionFn exceptionFn,
       ThriftServerAppAdapter* handler,
       uint32_t streamId,
-      folly::EventBase* evb)
+      folly::EventBase* evb,
+      std::unique_ptr<ThriftRequestContext> requestContext)
       : resultFn_(resultFn),
         exceptionFn_(exceptionFn),
         handler_(handler),
         streamId_(streamId),
-        evb_(evb) {}
+        evb_(evb),
+        requestContext_(std::move(requestContext)) {}
 
   FastHandlerCallback(const FastHandlerCallback&) = delete;
   FastHandlerCallback& operator=(const FastHandlerCallback&) = delete;
@@ -131,6 +134,10 @@ class FastHandlerCallback : public folly::DelayedDestruction {
   bool isCompleted() const noexcept { return completed_; }
 
   folly::EventBase* getEventBase() const { return evb_; }
+
+  ThriftRequestContext* requestContext() const noexcept {
+    return requestContext_.get();
+  }
 
   // ---- Codegen-targeted static helpers ----
   // Codegen instantiates these with the per-method Presult / ProtocolWriter
@@ -187,6 +194,7 @@ class FastHandlerCallback : public folly::DelayedDestruction {
   ThriftServerAppAdapter* handler_;
   uint32_t streamId_;
   folly::EventBase* evb_;
+  std::unique_ptr<ThriftRequestContext> requestContext_;
   bool completed_{false};
 };
 
@@ -202,12 +210,14 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
       ExceptionFn exceptionFn,
       ThriftServerAppAdapter* handler,
       uint32_t streamId,
-      folly::EventBase* evb)
+      folly::EventBase* evb,
+      std::unique_ptr<ThriftRequestContext> requestContext)
       : doneFn_(doneFn),
         exceptionFn_(exceptionFn),
         handler_(handler),
         streamId_(streamId),
-        evb_(evb) {}
+        evb_(evb),
+        requestContext_(std::move(requestContext)) {}
 
   FastHandlerCallback(const FastHandlerCallback&) = delete;
   FastHandlerCallback& operator=(const FastHandlerCallback&) = delete;
@@ -230,6 +240,10 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
   bool isCompleted() const noexcept { return completed_; }
 
   folly::EventBase* getEventBase() const { return evb_; }
+
+  ThriftRequestContext* requestContext() const noexcept {
+    return requestContext_.get();
+  }
 
   // ---- Codegen-targeted static helpers (void return) ----
 
@@ -274,6 +288,7 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
   ThriftServerAppAdapter* handler_;
   uint32_t streamId_;
   folly::EventBase* evb_;
+  std::unique_ptr<ThriftRequestContext> requestContext_;
   bool completed_{false};
 };
 

@@ -77,7 +77,7 @@ TEST(FastHandlerCallbackTest, ResultInvokesResultFnAndSuppressesDestructor) {
   folly::EventBase evb;
   {
     auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
-        &onResult, &onException, asAdapter(&rec), kStreamId, &evb);
+        &onResult, &onException, asAdapter(&rec), kStreamId, &evb, nullptr);
     cb->result(123);
   }
   // Single success invocation, no synthetic destructor exception.
@@ -94,7 +94,7 @@ TEST(
   folly::EventBase evb;
   {
     auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
-        &onResult, &onException, asAdapter(&rec), kStreamId, &evb);
+        &onResult, &onException, asAdapter(&rec), kStreamId, &evb, nullptr);
     cb->exception(
         folly::make_exception_wrapper<TApplicationException>(
             TApplicationException::UNKNOWN_METHOD, "boom"));
@@ -110,7 +110,7 @@ TEST(FastHandlerCallbackTest, DestructorFiresExceptionWhenNotCompleted) {
   folly::EventBase evb;
   {
     auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
-        &onResult, &onException, asAdapter(&rec), kStreamId, &evb);
+        &onResult, &onException, asAdapter(&rec), kStreamId, &evb, nullptr);
     // Drop without completing — destructor must synthesize an error so the
     // peer never hangs.
   }
@@ -125,7 +125,7 @@ TEST(FastHandlerCallbackTest, VoidDoneInvokesDoneFnAndSuppressesDestructor) {
   folly::EventBase evb;
   {
     auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<void>>(
-        &onDone, &onException, asAdapter(&rec), kStreamId, &evb);
+        &onDone, &onException, asAdapter(&rec), kStreamId, &evb, nullptr);
     cb->done();
   }
   EXPECT_EQ(rec.doneCount, 1);
@@ -138,7 +138,7 @@ TEST(FastHandlerCallbackTest, VoidDestructorFiresExceptionWhenNotCompleted) {
   folly::EventBase evb;
   {
     auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<void>>(
-        &onDone, &onException, asAdapter(&rec), kStreamId, &evb);
+        &onDone, &onException, asAdapter(&rec), kStreamId, &evb, nullptr);
   }
   EXPECT_EQ(rec.doneCount, 0);
   EXPECT_EQ(rec.exceptionCount, 1);
@@ -149,8 +149,24 @@ TEST(FastHandlerCallbackTest, GetEventBaseReturnsConfiguredEventBase) {
   CallRecorder rec;
   folly::EventBase evb;
   auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
-      &onResult, &onException, asAdapter(&rec), kStreamId, &evb);
+      &onResult, &onException, asAdapter(&rec), kStreamId, &evb, nullptr);
   EXPECT_EQ(cb->getEventBase(), &evb);
+  cb->result(0); // suppress destructor exception
+}
+
+TEST(FastHandlerCallbackTest, RequestContextAccessorReturnsStoredPointer) {
+  CallRecorder rec;
+  folly::EventBase evb;
+  auto requestContext = std::make_unique<ThriftRequestContext>();
+  auto* requestContextPtr = requestContext.get();
+  auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
+      &onResult,
+      &onException,
+      asAdapter(&rec),
+      kStreamId,
+      &evb,
+      std::move(requestContext));
+  EXPECT_EQ(cb->requestContext(), requestContextPtr);
   cb->result(0); // suppress destructor exception
 }
 

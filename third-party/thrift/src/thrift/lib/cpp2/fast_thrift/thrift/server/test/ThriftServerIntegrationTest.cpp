@@ -64,6 +64,9 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionContextHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestContextHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RocketFrameDecoder.h>
 
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -684,6 +687,8 @@ HANDLER_TAG(server_setup_frame_handler);
 HANDLER_TAG(server_request_response_frame_handler);
 HANDLER_TAG(server_stream_state_handler);
 HANDLER_TAG(rocket_thrift_interface_handler);
+HANDLER_TAG(thrift_server_request_context_handler);
+HANDLER_TAG(thrift_server_connection_context_handler);
 
 namespace {
 
@@ -775,6 +780,8 @@ class TestServerAppAdapter : public ThriftServerAppAdapter {
   apache::thrift::ProtocolId capturedProtocol{};
   int method1Count{0};
   int method2Count{0};
+  bool capturedRequestContextNonNull{false};
+  ThriftConnContext* capturedConnContext{nullptr};
 };
 
 std::unique_ptr<folly::IOBuf> serializeRequestMetadata(
@@ -937,7 +944,8 @@ TEST_F(
       +[](ThriftServerAppAdapter* self,
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId) noexcept -> Result {
+          apache::thrift::ProtocolId,
+          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
         auto* t = static_cast<TestServerAppAdapter*>(self);
         t->handlerCalled = true;
         t->capturedStreamId = streamId;
@@ -961,7 +969,8 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, MultipleRequestsDispatched) {
       +[](ThriftServerAppAdapter* self,
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId) noexcept -> Result {
+          apache::thrift::ProtocolId,
+          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
         static_cast<TestServerAppAdapter*>(self)->method1Count++;
         return Result::Success;
       });
@@ -971,7 +980,8 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, MultipleRequestsDispatched) {
       +[](ThriftServerAppAdapter* self,
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId) noexcept -> Result {
+          apache::thrift::ProtocolId,
+          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
         static_cast<TestServerAppAdapter*>(self)->method2Count++;
         return Result::Success;
       });
@@ -1017,7 +1027,8 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, SetupFrameConsumed) {
       +[](ThriftServerAppAdapter* self,
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId) noexcept -> Result {
+          apache::thrift::ProtocolId,
+          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
         static_cast<TestServerAppAdapter*>(self)->handlerCalled = true;
         return Result::Success;
       });
@@ -1040,7 +1051,8 @@ TEST_F(
       +[](ThriftServerAppAdapter* self,
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId) noexcept -> Result {
+          apache::thrift::ProtocolId,
+          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
         // writeResponse returning Backpressure is a write-side flow-control
         // signal; the request was handled successfully so we report Success
         // back into the read chain. Only Error (connection dead) propagates.
@@ -1076,7 +1088,8 @@ TEST_F(
       +[](ThriftServerAppAdapter* self,
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId) noexcept -> Result {
+          apache::thrift::ProtocolId,
+          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
         auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
         fillSuccessResponseMetadata(*md);
         auto writeResult = self->writeResponse(
@@ -1132,7 +1145,8 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, ProtocolIdPassedToHandler) {
       +[](ThriftServerAppAdapter* self,
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId protocol) noexcept -> Result {
+          apache::thrift::ProtocolId protocol,
+          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
         static_cast<TestServerAppAdapter*>(self)->capturedProtocol = protocol;
         return Result::Success;
       });
@@ -1143,6 +1157,115 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, ProtocolIdPassedToHandler) {
   injectFrame(createRequestFrame(1, rpcMeta, folly::IOBuf::copyBuffer("req")));
 
   EXPECT_EQ(adapter_->capturedProtocol, apache::thrift::ProtocolId::BINARY);
+}
+
+// =============================================================================
+// Per-request Context Plumbing Tests
+//
+// Exercises the per-request context flow end-to-end: a real wire frame
+// traverses the rocket pipeline, hits ThriftServerRequestContextHandler
+// (which stamps a fresh ThriftRequestContext on the message), then
+// ThriftServerConnectionContextHandler (which writes the per-connection
+// context into it), and finally arrives at the app adapter's registered
+// thunk — which must receive that exact context with its conn context
+// field populated.
+//
+// Production FastThriftServer.cpp does not yet wire these handlers in;
+// this fixture builds the documented chain itself so the wiring contract
+// is locked down before the production pipeline change lands.
+// =============================================================================
+
+class ThriftRequestContextIntegrationTest
+    : public ThriftServerAppAdapterIntegrationTest {
+ protected:
+  void SetUp() override {
+    ThriftServerAppAdapterIntegrationTest::SetUp();
+    connContext_ = new ThriftConnContext();
+  }
+
+  void setupPipelineWithContextHandlers() {
+    auto transport =
+        folly::AsyncTransport::UniquePtr(new TestAsyncTransport(&evb_));
+    testTransport_ = static_cast<TestAsyncTransport*>(transport.get());
+
+    transportHandler_ =
+        apache::thrift::fast_thrift::transport::TransportHandler::create(
+            std::move(transport));
+
+    using ReqCtxHandler = ThriftServerRequestContextHandler<
+        apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl>;
+    using ConnCtxHandler = ThriftServerConnectionContextHandler<
+        apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl>;
+
+    pipeline_ =
+        PipelineBuilder<
+            apache::thrift::fast_thrift::transport::TransportHandler,
+            TestServerAppAdapter,
+            TestAllocator>()
+            .setEventBase(&evb_)
+            .setHead(transportHandler_.get())
+            .setTail(adapter_.get())
+            .setAllocator(&allocator_)
+            .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
+                                FrameLengthParserHandler>(
+                frame_length_parser_handler_tag)
+            .addNextOutbound<apache::thrift::fast_thrift::frame::write::
+                                 handler::FrameLengthEncoderHandler>(
+                frame_length_encoder_handler_tag)
+            .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                               handler::RocketServerFrameCodecHandler>(
+                rocket_server_frame_codec_handler_tag)
+            .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                               handler::RocketServerSetupFrameHandler>(
+                server_setup_frame_handler_tag)
+            .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                               handler::RocketServerStreamStateHandler>(
+                server_stream_state_handler_tag)
+            .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                               handler::RocketServerRequestResponseHandler>(
+                server_request_response_frame_handler_tag)
+            .addNextDuplex<RocketThriftServerInterfaceHandler>(
+                rocket_thrift_interface_handler_tag)
+            .addNextDuplex<ReqCtxHandler>(
+                thrift_server_request_context_handler_tag)
+            .addNextDuplex<ConnCtxHandler>(
+                thrift_server_connection_context_handler_tag, connContext_)
+            .build();
+
+    adapter_->setPipeline(pipeline_.get());
+    transportHandler_->setPipeline(pipeline_.get());
+    transportHandler_->onConnect();
+  }
+
+  boost::intrusive_ptr<ThriftConnContext> connContext_;
+};
+
+TEST_F(
+    ThriftRequestContextIntegrationTest,
+    RequestContextReachesHandlerWithConnContext) {
+  adapter_->registerMethod(
+      "testMethod",
+      +[](ThriftServerAppAdapter* self,
+          uint32_t,
+          std::unique_ptr<folly::IOBuf>,
+          apache::thrift::ProtocolId,
+          std::unique_ptr<ThriftRequestContext> requestContext) noexcept
+          -> Result {
+        auto* t = static_cast<TestServerAppAdapter*>(self);
+        t->capturedRequestContextNonNull = requestContext != nullptr;
+        t->capturedConnContext =
+            requestContext ? requestContext->getConnectionContext() : nullptr;
+        return Result::Success;
+      });
+
+  setupPipelineWithContextHandlers();
+  injectSetupFrame();
+
+  auto rpcMeta = createMinimalRequestMetadata("testMethod");
+  injectFrame(createRequestFrame(1, rpcMeta, folly::IOBuf::copyBuffer("req")));
+
+  EXPECT_TRUE(adapter_->capturedRequestContextNonNull);
+  EXPECT_EQ(adapter_->capturedConnContext, connContext_.get());
 }
 
 } // namespace apache::thrift::fast_thrift::thrift::server::app_adapter_test

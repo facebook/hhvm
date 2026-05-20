@@ -113,13 +113,19 @@ class {{service.cpp_name}}AppAdapter
   ::apache::thrift::fast_thrift::channel_pipeline::Result process_{{function.cpp_name}}(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
-      ::apache::thrift::ProtocolId protocolId) noexcept;
+      ::apache::thrift::ProtocolId protocolId,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
 
   template <typename ProtocolReader, typename ProtocolWriter>
   ::apache::thrift::fast_thrift::channel_pipeline::Result
   process_{{function.cpp_name}}_impl(
       uint32_t streamId,
-      std::unique_ptr<folly::IOBuf> data) noexcept;
+      std::unique_ptr<folly::IOBuf> data,
+      std::unique_ptr<
+          ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+          requestContext) noexcept;
   {{/if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
   {{/each}}
 };

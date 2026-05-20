@@ -57,9 +57,13 @@ namespace {{service.cpp_qualified_namespace}} {
       +[](::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter* a,
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf> data,
-          ::apache::thrift::ProtocolId p) noexcept {
+          ::apache::thrift::ProtocolId p,
+          std::unique_ptr<
+              ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+              requestContext) noexcept {
         return static_cast<{{service.cpp_name}}AppAdapter*>(a)
-            ->process_{{function.cpp_name}}(streamId, std::move(data), p);
+            ->process_{{function.cpp_name}}(
+                streamId, std::move(data), p, std::move(requestContext));
       });
   {{/if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
   {{/each}}
@@ -71,16 +75,20 @@ namespace {{service.cpp_qualified_namespace}} {
 {{service.cpp_name}}AppAdapter::process_{{function.cpp_name}}(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
-    ::apache::thrift::ProtocolId protocolId) noexcept {
+    ::apache::thrift::ProtocolId protocolId,
+    std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+        requestContext) noexcept {
   switch (protocolId) {
     case ::apache::thrift::ProtocolId::COMPACT:
       return process_{{function.cpp_name}}_impl<
           ::apache::thrift::CompactProtocolReader,
-          ::apache::thrift::CompactProtocolWriter>(streamId, std::move(data));
+          ::apache::thrift::CompactProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
     case ::apache::thrift::ProtocolId::BINARY:
       return process_{{function.cpp_name}}_impl<
           ::apache::thrift::BinaryProtocolReader,
-          ::apache::thrift::BinaryProtocolWriter>(streamId, std::move(data));
+          ::apache::thrift::BinaryProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
     default: {
       auto err = ::apache::thrift::fast_thrift::thrift::serializeResponseRpcError(
           ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
@@ -94,12 +102,18 @@ template ::apache::thrift::fast_thrift::channel_pipeline::Result
 {{service.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl<
     ::apache::thrift::CompactProtocolReader,
     ::apache::thrift::CompactProtocolWriter>(
-    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 template ::apache::thrift::fast_thrift::channel_pipeline::Result
 {{service.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl<
     ::apache::thrift::BinaryProtocolReader,
     ::apache::thrift::BinaryProtocolWriter>(
-    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 
 {{/if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
 {{/each}}

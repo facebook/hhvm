@@ -28,7 +28,9 @@ template <typename ProtocolReader, typename ProtocolWriter>
 ::apache::thrift::fast_thrift::channel_pipeline::Result
 {{interface.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl(
     uint32_t streamId,
-    std::unique_ptr<folly::IOBuf> data) noexcept {
+    std::unique_ptr<folly::IOBuf> data,
+    std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+        requestContext) noexcept {
   // Local args storage so the user handler can take ownership of complex
   // values (move-semantics) and primitives by value.
   struct ArgsState {
@@ -81,7 +83,8 @@ template <typename ProtocolReader, typename ProtocolWriter>
       &Cb::template writeException<PresultT, ProtocolWriter>,
       this,
       streamId,
-      getEventBase());
+      getEventBase(),
+      std::move(requestContext));
 
   // Dispatch to the user-implemented FastServiceHandler<Service> method.
   // The handler may complete synchronously or asynchronously; either way

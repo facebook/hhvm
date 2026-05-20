@@ -50,45 +50,65 @@ BasicServiceAppAdapter::BasicServiceAppAdapter(
       +[](::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter* a,
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf> data,
-          ::apache::thrift::ProtocolId p) noexcept {
+          ::apache::thrift::ProtocolId p,
+          std::unique_ptr<
+              ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+              requestContext) noexcept {
         return static_cast<BasicServiceAppAdapter*>(a)
-            ->process_ping(streamId, std::move(data), p);
+            ->process_ping(
+                streamId, std::move(data), p, std::move(requestContext));
       });
   addMethodHandler(
       "add",
       +[](::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter* a,
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf> data,
-          ::apache::thrift::ProtocolId p) noexcept {
+          ::apache::thrift::ProtocolId p,
+          std::unique_ptr<
+              ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+              requestContext) noexcept {
         return static_cast<BasicServiceAppAdapter*>(a)
-            ->process_add(streamId, std::move(data), p);
+            ->process_add(
+                streamId, std::move(data), p, std::move(requestContext));
       });
   addMethodHandler(
       "buildItem",
       +[](::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter* a,
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf> data,
-          ::apache::thrift::ProtocolId p) noexcept {
+          ::apache::thrift::ProtocolId p,
+          std::unique_ptr<
+              ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+              requestContext) noexcept {
         return static_cast<BasicServiceAppAdapter*>(a)
-            ->process_buildItem(streamId, std::move(data), p);
+            ->process_buildItem(
+                streamId, std::move(data), p, std::move(requestContext));
       });
   addMethodHandler(
       "lookup",
       +[](::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter* a,
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf> data,
-          ::apache::thrift::ProtocolId p) noexcept {
+          ::apache::thrift::ProtocolId p,
+          std::unique_ptr<
+              ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+              requestContext) noexcept {
         return static_cast<BasicServiceAppAdapter*>(a)
-            ->process_lookup(streamId, std::move(data), p);
+            ->process_lookup(
+                streamId, std::move(data), p, std::move(requestContext));
       });
   addMethodHandler(
       "secureLookup",
       +[](::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter* a,
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf> data,
-          ::apache::thrift::ProtocolId p) noexcept {
+          ::apache::thrift::ProtocolId p,
+          std::unique_ptr<
+              ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+              requestContext) noexcept {
         return static_cast<BasicServiceAppAdapter*>(a)
-            ->process_secureLookup(streamId, std::move(data), p);
+            ->process_secureLookup(
+                streamId, std::move(data), p, std::move(requestContext));
       });
 }
 
@@ -96,16 +116,20 @@ BasicServiceAppAdapter::BasicServiceAppAdapter(
 BasicServiceAppAdapter::process_ping(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
-    ::apache::thrift::ProtocolId protocolId) noexcept {
+    ::apache::thrift::ProtocolId protocolId,
+    std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+        requestContext) noexcept {
   switch (protocolId) {
     case ::apache::thrift::ProtocolId::COMPACT:
       return process_ping_impl<
           ::apache::thrift::CompactProtocolReader,
-          ::apache::thrift::CompactProtocolWriter>(streamId, std::move(data));
+          ::apache::thrift::CompactProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
     case ::apache::thrift::ProtocolId::BINARY:
       return process_ping_impl<
           ::apache::thrift::BinaryProtocolReader,
-          ::apache::thrift::BinaryProtocolWriter>(streamId, std::move(data));
+          ::apache::thrift::BinaryProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
     default: {
       auto err = ::apache::thrift::fast_thrift::thrift::serializeResponseRpcError(
           ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
@@ -119,27 +143,37 @@ template ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_ping_impl<
     ::apache::thrift::CompactProtocolReader,
     ::apache::thrift::CompactProtocolWriter>(
-    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 template ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_ping_impl<
     ::apache::thrift::BinaryProtocolReader,
     ::apache::thrift::BinaryProtocolWriter>(
-    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 
 ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_add(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
-    ::apache::thrift::ProtocolId protocolId) noexcept {
+    ::apache::thrift::ProtocolId protocolId,
+    std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+        requestContext) noexcept {
   switch (protocolId) {
     case ::apache::thrift::ProtocolId::COMPACT:
       return process_add_impl<
           ::apache::thrift::CompactProtocolReader,
-          ::apache::thrift::CompactProtocolWriter>(streamId, std::move(data));
+          ::apache::thrift::CompactProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
     case ::apache::thrift::ProtocolId::BINARY:
       return process_add_impl<
           ::apache::thrift::BinaryProtocolReader,
-          ::apache::thrift::BinaryProtocolWriter>(streamId, std::move(data));
+          ::apache::thrift::BinaryProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
     default: {
       auto err = ::apache::thrift::fast_thrift::thrift::serializeResponseRpcError(
           ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
@@ -153,27 +187,37 @@ template ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_add_impl<
     ::apache::thrift::CompactProtocolReader,
     ::apache::thrift::CompactProtocolWriter>(
-    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 template ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_add_impl<
     ::apache::thrift::BinaryProtocolReader,
     ::apache::thrift::BinaryProtocolWriter>(
-    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 
 ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_buildItem(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
-    ::apache::thrift::ProtocolId protocolId) noexcept {
+    ::apache::thrift::ProtocolId protocolId,
+    std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+        requestContext) noexcept {
   switch (protocolId) {
     case ::apache::thrift::ProtocolId::COMPACT:
       return process_buildItem_impl<
           ::apache::thrift::CompactProtocolReader,
-          ::apache::thrift::CompactProtocolWriter>(streamId, std::move(data));
+          ::apache::thrift::CompactProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
     case ::apache::thrift::ProtocolId::BINARY:
       return process_buildItem_impl<
           ::apache::thrift::BinaryProtocolReader,
-          ::apache::thrift::BinaryProtocolWriter>(streamId, std::move(data));
+          ::apache::thrift::BinaryProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
     default: {
       auto err = ::apache::thrift::fast_thrift::thrift::serializeResponseRpcError(
           ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
@@ -187,27 +231,37 @@ template ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_buildItem_impl<
     ::apache::thrift::CompactProtocolReader,
     ::apache::thrift::CompactProtocolWriter>(
-    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 template ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_buildItem_impl<
     ::apache::thrift::BinaryProtocolReader,
     ::apache::thrift::BinaryProtocolWriter>(
-    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 
 ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_lookup(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
-    ::apache::thrift::ProtocolId protocolId) noexcept {
+    ::apache::thrift::ProtocolId protocolId,
+    std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+        requestContext) noexcept {
   switch (protocolId) {
     case ::apache::thrift::ProtocolId::COMPACT:
       return process_lookup_impl<
           ::apache::thrift::CompactProtocolReader,
-          ::apache::thrift::CompactProtocolWriter>(streamId, std::move(data));
+          ::apache::thrift::CompactProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
     case ::apache::thrift::ProtocolId::BINARY:
       return process_lookup_impl<
           ::apache::thrift::BinaryProtocolReader,
-          ::apache::thrift::BinaryProtocolWriter>(streamId, std::move(data));
+          ::apache::thrift::BinaryProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
     default: {
       auto err = ::apache::thrift::fast_thrift::thrift::serializeResponseRpcError(
           ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
@@ -221,27 +275,37 @@ template ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_lookup_impl<
     ::apache::thrift::CompactProtocolReader,
     ::apache::thrift::CompactProtocolWriter>(
-    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 template ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_lookup_impl<
     ::apache::thrift::BinaryProtocolReader,
     ::apache::thrift::BinaryProtocolWriter>(
-    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 
 ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_secureLookup(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
-    ::apache::thrift::ProtocolId protocolId) noexcept {
+    ::apache::thrift::ProtocolId protocolId,
+    std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
+        requestContext) noexcept {
   switch (protocolId) {
     case ::apache::thrift::ProtocolId::COMPACT:
       return process_secureLookup_impl<
           ::apache::thrift::CompactProtocolReader,
-          ::apache::thrift::CompactProtocolWriter>(streamId, std::move(data));
+          ::apache::thrift::CompactProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
     case ::apache::thrift::ProtocolId::BINARY:
       return process_secureLookup_impl<
           ::apache::thrift::BinaryProtocolReader,
-          ::apache::thrift::BinaryProtocolWriter>(streamId, std::move(data));
+          ::apache::thrift::BinaryProtocolWriter>(
+          streamId, std::move(data), std::move(requestContext));
     default: {
       auto err = ::apache::thrift::fast_thrift::thrift::serializeResponseRpcError(
           ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
@@ -255,12 +319,18 @@ template ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_secureLookup_impl<
     ::apache::thrift::CompactProtocolReader,
     ::apache::thrift::CompactProtocolWriter>(
-    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 template ::apache::thrift::fast_thrift::channel_pipeline::Result
 BasicServiceAppAdapter::process_secureLookup_impl<
     ::apache::thrift::BinaryProtocolReader,
     ::apache::thrift::BinaryProtocolWriter>(
-    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+    uint32_t,
+    std::unique_ptr<folly::IOBuf>,
+    std::unique_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 
 
 } // namespace cpp2::test

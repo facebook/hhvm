@@ -57,6 +57,7 @@ namespace {
 
 using apache::thrift::fast_thrift::channel_pipeline::erase_and_box;
 using apache::thrift::fast_thrift::channel_pipeline::Result;
+using apache::thrift::fast_thrift::thrift::ThriftRequestContext;
 using apache::thrift::fast_thrift::thrift::ThriftRequestResponsePayload;
 using apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter;
 using apache::thrift::fast_thrift::thrift::ThriftServerCompositeAppAdapter;
@@ -76,9 +77,9 @@ class NoOpAdapter : public ThriftServerAppAdapter {
         +[](ThriftServerAppAdapter* /*self*/,
             uint32_t /*streamId*/,
             std::unique_ptr<folly::IOBuf> /*data*/,
-            apache::thrift::ProtocolId /*protocol*/) noexcept -> Result {
-          return Result::Success;
-        });
+            apache::thrift::ProtocolId /*protocol*/,
+            std::unique_ptr<ThriftRequestContext> /*requestContext*/) noexcept
+            -> Result { return Result::Success; });
   }
 };
 

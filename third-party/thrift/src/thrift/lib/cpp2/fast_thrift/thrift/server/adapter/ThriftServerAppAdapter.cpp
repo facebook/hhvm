@@ -164,7 +164,12 @@ channel_pipeline::Result ThriftServerAppAdapter::handleRequestResponse(
   auto it = dispatch_.find(methodName);
   if (FOLLY_LIKELY(it != dispatch_.end())) {
     apache::thrift::ProtocolId protocol = metadata.protocol().value_or(0);
-    return it->second(this, request.streamId, std::move(rr.data), protocol);
+    return it->second(
+        this,
+        request.streamId,
+        std::move(rr.data),
+        protocol,
+        std::move(request.requestContext));
   }
 
   return handleUnknownMethod(request.streamId, methodName);

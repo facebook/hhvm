@@ -73,7 +73,7 @@ class ConnectionManager : public folly::DelayedDestruction {
 
   static Ptr create(
       folly::SocketAddress address,
-      folly::Executor::KeepAlive<folly::IOThreadPoolExecutor> executor,
+      folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor,
       ConnectionFactory connectionFactory,
       std::shared_ptr<const fizz::server::FizzServerContext> fizzContext =
           nullptr,
@@ -119,7 +119,7 @@ class ConnectionManager : public folly::DelayedDestruction {
  protected:
   ConnectionManager(
       folly::SocketAddress address,
-      folly::Executor::KeepAlive<folly::IOThreadPoolExecutor> executor,
+      folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor,
       ConnectionFactory connectionFactory,
       std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
       std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
@@ -181,7 +181,7 @@ class ConnectionManager : public folly::DelayedDestruction {
 
   std::atomic<State> state_{State::NONE};
   folly::SocketAddress address_;
-  folly::Executor::KeepAlive<folly::IOThreadPoolExecutor> executor_;
+  folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor_;
   ConnectionFactory connectionFactory_;
   std::shared_ptr<const fizz::server::FizzServerContext> fizzContext_;
   std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams_;

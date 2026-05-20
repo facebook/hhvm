@@ -41,10 +41,7 @@ using channel_pipeline::PipelineImpl;
 using channel_pipeline::SimpleBufferAllocator;
 
 FastThriftServer::FastThriftServer(FastThriftServerConfig config)
-    : config_(std::move(config)),
-      executor_(
-          std::make_shared<folly::IOThreadPoolExecutor>(config_.numIOThreads)) {
-}
+    : config_(std::move(config)) {}
 
 void FastThriftServer::setInterface(
     std::shared_ptr<ThriftServerAppAdapterFactory> handler) {
@@ -71,6 +68,16 @@ void FastThriftServer::setThriftConfig(security::ThriftTlsConfig cfg) {
   CHECK(state_ == State::kNotStarted)
       << "FastThriftServer::setThriftConfig must be called before start()/serve()";
   thriftConfig_ = cfg;
+}
+
+void FastThriftServer::setIOThreadPool(
+    std::shared_ptr<folly::IOThreadPoolExecutorBase> pool) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::setIOThreadPool must be called before "
+         "start()/serve()";
+  CHECK(pool) << "FastThriftServer::setIOThreadPool requires a non-null pool";
+  ioThreadPool_ = std::move(pool);
 }
 
 rocket::server::connection::ConnectionFactory
@@ -200,11 +207,11 @@ void FastThriftServer::registerConnection(
 FastThriftServer::~FastThriftServer() {
   stop();
 
-  // Same lifetime ordering as FastThriftChannelServer: destroy the
-  // connection manager before joining the executor so deferred
-  // ConnectionHandler destruction happens while `this` is still alive.
+  // Destroy the connection manager first: its IOObserver removal fans
+  // unregisterEventBase across every IO thread synchronously, draining
+  // per-EVB ConnectionHandlers (and the ConnectionFactory closure that
+  // captures `this`) before we return.
   connectionManager_.reset();
-  executor_->join();
 }
 
 void FastThriftServer::start() {
@@ -222,9 +229,30 @@ void FastThriftServer::start() {
     fizzBuilt = security::buildFizzServerContext(*sslConfig_, thriftConfig_);
     tlsHandshakeTimeout = sslConfig_->handshakeTimeout;
   }
+
+  // Materialize the default IO pool only when the embedder didn't supply
+  // one via setIOThreadPool.
+  //
+  // Fixed-size pool: minThreads == maxThreads so threads cannot idle out.
+  // The single-arg IOThreadPoolExecutor(N) constructor sets minThreads=0
+  // when FLAGS_dynamic_iothreadpoolexecutor is true (the default in many
+  // production configs), causing threads to time out and join when their
+  // EventBase has no work. Each fast_thrift IO thread only ever does
+  // accept() on its own SO_REUSEPORT listening socket, so an EVB that
+  // the kernel happens not to route accepts to looks idle and dies —
+  // collapsing the configured numIOThreads to a small fraction (~8 of
+  // 188 observed in production) and permanently bottlenecking the
+  // server. The two-arg constructor with min == max disables this
+  // dynamic-shrink behavior and pins the pool size for the process
+  // lifetime.
+  if (!ioThreadPool_) {
+    ioThreadPool_ = std::make_shared<folly::IOThreadPoolExecutor>(
+        /*maxThreads=*/config_.numIOThreads,
+        /*minThreads=*/config_.numIOThreads);
+  }
   connectionManager_ = ServerConnectionManager::create(
       config_.address,
-      folly::getKeepAliveToken(executor_.get()),
+      folly::getKeepAliveToken(ioThreadPool_.get()),
       createConnectionFactory(),
       std::move(fizzBuilt.fizzContext),
       std::move(fizzBuilt.thriftParams),

@@ -110,6 +110,21 @@ class FastThriftServer {
    */
   void setThriftConfig(security::ThriftTlsConfig cfg);
 
+  /**
+   * Supply an IO thread pool to use instead of constructing one from
+   * config_.numIOThreads. Lets multiple servers/subsystems share the same
+   * IO threads (e.g., AsyncMcServer + FastThriftServer in ucache).
+   *
+   *
+   * The pool MUST be constructed with min == max threads (the two-arg
+   * IOThreadPoolExecutor ctor) — see the default-pool construction site
+   * in start() for the rationale.
+   *
+   * Must be called before start()/serve(). When set, config_.numIOThreads
+   * is ignored.
+   */
+  void setIOThreadPool(std::shared_ptr<folly::IOThreadPoolExecutorBase> pool);
+
   /// Start accepting connections without blocking.
   void start();
 
@@ -168,7 +183,10 @@ class FastThriftServer {
   std::shared_ptr<ThriftServerAppAdapterFactory> handler_;
   std::optional<security::FizzServerCertConfig> sslConfig_;
   security::ThriftTlsConfig thriftConfig_{};
-  std::shared_ptr<folly::IOThreadPoolExecutor> executor_;
+  // IO thread pool. Either embedder-supplied via setIOThreadPool or
+  // constructed in start() from config_.numIOThreads. Released on
+  // destruction; the pool's own dtor joins when the last ref drops.
+  std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool_;
   ServerConnectionManager::Ptr connectionManager_;
   channel_pipeline::SimpleBufferAllocator rocketAllocator_;
   folly::Synchronized<

@@ -656,4 +656,116 @@ TEST_F(FastThriftServerStopTlsTest, RoundTripAfterStopTLSDowngrade) {
   evb->runInEventBaseThreadAndWait([&] { client.reset(); });
 }
 
+// ---------------------------------------------------------------------------
+// Shared IO thread pool — embedder-supplied pool via setIOThreadPool.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+ftt::FastThriftServerConfig makeLoopbackConfig() {
+  ftt::FastThriftServerConfig config;
+  config.address = folly::SocketAddress("::1", 0);
+  // Set to a value distinct from the embedder pool's size to make it obvious
+  // in tests that the supplied pool is what gets used, not
+  // config_.numIOThreads.
+  config.numIOThreads = 4;
+  return config;
+}
+
+// Build a min==max IO pool. setIOThreadPool requires this shape; encoding
+// the convention in a test helper keeps the test sites tight.
+std::shared_ptr<folly::IOThreadPoolExecutor> makeFixedSizePool(size_t threads) {
+  return std::make_shared<folly::IOThreadPoolExecutor>(
+      /*maxThreads=*/threads, /*minThreads=*/threads);
+}
+
+} // namespace
+
+// Embedder pool actually drives accept + dispatch end-to-end.
+TEST(FastThriftServerSharedPoolTest, RoundTripWithEmbedderPool) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<TestHandler>();
+  auto pool = makeFixedSizePool(2);
+
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  server.setIOThreadPool(pool);
+  server.setInterface(handler);
+  server.start();
+
+  folly::ScopedEventBaseThread clientThread;
+  auto* evb = clientThread.getEventBase();
+  std::unique_ptr<apache::thrift::Client<integration::FastThriftServer>> client;
+  evb->runInEventBaseThreadAndWait([&] {
+    auto socket = folly::AsyncSocket::newSocket(evb, server.getAddress());
+    auto channel =
+        apache::thrift::RocketClientChannel::newChannel(std::move(socket));
+    client =
+        std::make_unique<apache::thrift::Client<integration::FastThriftServer>>(
+            std::move(channel));
+  });
+
+  folly::Baton<> done;
+  int64_t sum = 0;
+  evb->runInEventBaseThread([&] {
+    client->semifuture_add(7, 35)
+        .via(evb)
+        .thenValue([&](int64_t v) {
+          sum = v;
+          done.post();
+        })
+        .thenError([&](const folly::exception_wrapper& ew) {
+          ADD_FAILURE() << "RPC failed: " << folly::exceptionStr(ew);
+          done.post();
+        });
+  });
+  ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
+  EXPECT_EQ(sum, 42);
+  evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+}
+
+// Server holds a reference to the embedder pool while running and releases
+// it on destruction. The dtor joins the pool, so embedders must shut down
+// all consumers of a shared pool together (same contract as ThriftServer).
+TEST(FastThriftServerSharedPoolTest, ServerReleasesPoolOnDestroy) {
+  auto pool = makeFixedSizePool(1);
+  ASSERT_EQ(pool.use_count(), 1);
+
+  {
+    auto handler = std::make_shared<TestHandler>();
+    ftt::FastThriftServer server(makeLoopbackConfig());
+    server.setIOThreadPool(pool);
+    server.setInterface(handler);
+    server.start();
+    EXPECT_EQ(pool.use_count(), 2);
+    server.stop();
+  }
+
+  EXPECT_EQ(pool.use_count(), 1);
+}
+
+TEST(FastThriftServerSharedPoolTest, NullPoolCrashes) {
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  EXPECT_DEATH(
+      server.setIOThreadPool(nullptr),
+      "FastThriftServer::setIOThreadPool requires a non-null pool");
+}
+
+TEST(FastThriftServerSharedPoolTest, AfterStartCrashes) {
+  // start() spawns IO worker threads. Default "fast" death-test style only
+  // forks; any glog/folly logging mutex held by a worker at fork time stays
+  // locked in the child and the CHECK message never reaches stderr, so the
+  // regex match fails even though the child does abort. "threadsafe" style
+  // forks + execs, which re-runs the binary clean.
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
+  auto handler = std::make_shared<TestHandler>();
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  server.setInterface(handler);
+  server.start();
+  EXPECT_DEATH(
+      server.setIOThreadPool(makeFixedSizePool(1)),
+      "FastThriftServer::setIOThreadPool must be called before");
+  server.stop();
+}
+
 } // namespace apache::thrift::fast_thrift::thrift::test::integration::test

@@ -71,6 +71,19 @@ void FastThriftServer::setMonitoringInterface(
   auxInterfaces_.monitoringHandler = std::move(handler);
 }
 
+void FastThriftServer::setStatusInterface(
+    std::shared_ptr<fast_thrift::StatusServerInterface> handler) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::setStatusInterface must be called before "
+         "start()/serve()";
+  CHECK(handler)
+      << "FastThriftServer::setStatusInterface requires a non-null handler";
+  CHECK(!auxInterfaces_.statusHandler)
+      << "FastThriftServer::setStatusInterface called more than once";
+  auxInterfaces_.statusHandler = std::move(handler);
+}
+
 void FastThriftServer::setSSLConfig(security::FizzServerCertConfig cfg) {
   std::lock_guard<std::mutex> lock(lifecycleMutex_);
   CHECK(state_ == State::kNotStarted)
@@ -113,8 +126,8 @@ FastThriftServer::createConnectionFactory() {
     //    generated <Service>FastHandler<S>::getAppAdapter is satisfied.
     FastConnection ctx;
     ThriftServerCompositeAppAdapter* compositePtr = nullptr;
-    const bool needsComposite =
-        auxInterfaces_.monitoringHandler || metadataResponse_;
+    const bool needsComposite = auxInterfaces_.monitoringHandler ||
+        auxInterfaces_.statusHandler || metadataResponse_;
     if (needsComposite) {
       ThriftServerCompositeAppAdapter::Ptr composite{
           new ThriftServerCompositeAppAdapter()};
@@ -122,6 +135,10 @@ FastThriftServer::createConnectionFactory() {
       if (auxInterfaces_.monitoringHandler) {
         composite->addChild(auxInterfaces_.monitoringHandler->getAppAdapter(
             auxInterfaces_.monitoringHandler));
+      }
+      if (auxInterfaces_.statusHandler) {
+        composite->addChild(auxInterfaces_.statusHandler->getAppAdapter(
+            auxInterfaces_.statusHandler));
       }
       if (metadataResponse_) {
         composite->addChild(

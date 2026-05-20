@@ -55,7 +55,7 @@ namespace apache::thrift::fast_thrift::thrift {
  * this type for onRead to fire. FastThriftServer handles both when any
  * auxiliary handler is registered.
  */
-class ThriftServerCompositeAppAdapter : public ThriftServerAppAdapter {
+class ThriftServerCompositeAppAdapter final : public ThriftServerAppAdapter {
  public:
   // Mirrors the base's `Ptr` convention so the composite can be held in any
   // slot typed as ThriftServerAppAdapter::Ptr.

@@ -31,6 +31,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/monitor/MonitoringServerInterface.h>
+#include <thrift/lib/cpp2/fast_thrift/interface/status/StatusServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
@@ -114,6 +115,21 @@ class FastThriftServer {
       std::shared_ptr<fast_thrift::MonitoringServerInterface> handler);
 
   /**
+   * Attach a Status handler. Methods on the status handler are dispatched
+   * on the same connection as the user handler; routing is by method name
+   * with the user handler winning on conflict (mirrors
+   * ThriftServer::setStatusInterface). Must be called before
+   * start()/serve().
+   *
+   * Tupperware health checks call `getStatus()` on this interface.
+   *
+   * The handler must derive from fast_thrift::StatusServerInterface — a
+   * marker base that exists purely as a type-system guardrail.
+   */
+  void setStatusInterface(
+      std::shared_ptr<fast_thrift::StatusServerInterface> handler);
+
+  /**
    * Configure TLS. After this is called, every accepted connection is wrapped
    * in a fizz::server::AsyncFizzServer; the connection factory only sees
    * fully-handshaked transports. Must be called before start()/serve().
@@ -187,6 +203,7 @@ class FastThriftServer {
   struct AuxiliaryInterfaces {
     std::shared_ptr<fast_thrift::MonitoringServerInterface> monitoringHandler{
         nullptr};
+    std::shared_ptr<fast_thrift::StatusServerInterface> statusHandler{nullptr};
   };
 
   rocket::server::connection::ConnectionFactory createConnectionFactory();

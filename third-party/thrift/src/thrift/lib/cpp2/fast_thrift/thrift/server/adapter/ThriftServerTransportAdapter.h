@@ -17,6 +17,7 @@
 #pragma once
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/Portability.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
@@ -120,27 +121,8 @@ class ThriftServerTransportAdapter {
     auto decoded = fromRocketFrame(std::move(request.frame), metadataProtocol_);
 
     if (FOLLY_UNLIKELY(!decoded.hasValue())) {
-      // Per-request decode failure: synthesize a REQUEST_PARSING_FAILURE
-      // ERROR frame and write it outbound through the rocket pipeline.
-      // Don't propagate as a connection-level exception or push a valueless
-      // payload downstream — the connection itself is healthy. The error
-      // body is Compact-serialized regardless of negotiated metadata
-      // protocol (matches legacy: ResponseRpcError is a control-frame body
-      // with its own wire contract, not application metadata).
-      auto serialized = serializeResponseRpcError(
-          apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-          decoded.error().what().toStdString());
-      ThriftErrorPayload errorPayload{
-          .data = std::move(serialized.data),
-          .metadata = nullptr,
-          .streamId = request.streamId,
-          .errorCode = static_cast<uint32_t>(serialized.errorCode),
-      };
-      return appAdapter_.write(
-          rocket::server::RocketResponseMessage{
-              .frame = std::move(errorPayload).toRocketFrame(metadataProtocol_),
-              .streamType = request.streamType,
-          });
+      return handleDecodeFailure(
+          request.streamId, request.streamType, decoded.error());
     }
 
     ThriftServerRequestMessage thriftMsg;
@@ -195,6 +177,33 @@ class ThriftServerTransportAdapter {
   void onReadReady() noexcept {}
 
  private:
+  FOLLY_NOINLINE channel_pipeline::Result handleDecodeFailure(
+      uint32_t streamId,
+      apache::thrift::fast_thrift::frame::FrameType streamType,
+      const folly::exception_wrapper& error) noexcept {
+    // Per-request decode failure: synthesize a REQUEST_PARSING_FAILURE
+    // ERROR frame and write it outbound through the rocket pipeline.
+    // Don't propagate as a connection-level exception or push a valueless
+    // payload downstream — the connection itself is healthy. The error
+    // body is Compact-serialized regardless of negotiated metadata
+    // protocol (matches legacy: ResponseRpcError is a control-frame body
+    // with its own wire contract, not application metadata).
+    auto serialized = serializeResponseRpcError(
+        apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
+        error.what().toStdString());
+    ThriftErrorPayload errorPayload{
+        .data = std::move(serialized.data),
+        .metadata = nullptr,
+        .streamId = streamId,
+        .errorCode = static_cast<uint32_t>(serialized.errorCode),
+    };
+    return appAdapter_.write(
+        rocket::server::RocketResponseMessage{
+            .frame = std::move(errorPayload).toRocketFrame(metadataProtocol_),
+            .streamType = streamType,
+        });
+  }
+
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
   rocket::server::RocketServerAppAdapter& appAdapter_;
   rocket::server::MetadataProtocol metadataProtocol_{

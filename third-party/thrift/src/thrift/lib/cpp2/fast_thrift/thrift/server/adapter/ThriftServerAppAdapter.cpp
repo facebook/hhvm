@@ -154,16 +154,11 @@ channel_pipeline::Result ThriftServerAppAdapter::handleRequestResponse(
     methodName = metadata.name()->view();
   }
 
-  auto kind =
+  const auto kind =
       metadata.kind().value_or(static_cast<apache::thrift::RpcKind>(-1));
   if (FOLLY_UNLIKELY(
           kind != apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    XLOG(ERR) << "Unsupported RPC kind: " << static_cast<int>(kind);
-    return writeFrameworkError(
-        request.streamId,
-        apache::thrift::ResponseRpcErrorCode::WRONG_RPC_KIND,
-        std::string("Unsupported RPC kind: ") +
-            std::to_string(static_cast<int>(kind)));
+    return handleWrongRpcKind(request.streamId, kind);
   }
 
   auto it = dispatch_.find(methodName);
@@ -172,8 +167,23 @@ channel_pipeline::Result ThriftServerAppAdapter::handleRequestResponse(
     return it->second(this, request.streamId, std::move(rr.data), protocol);
   }
 
+  return handleUnknownMethod(request.streamId, methodName);
+}
+
+channel_pipeline::Result ThriftServerAppAdapter::handleWrongRpcKind(
+    uint32_t streamId, apache::thrift::RpcKind kind) noexcept {
+  XLOG(ERR) << "Unsupported RPC kind: " << static_cast<int>(kind);
   return writeFrameworkError(
-      request.streamId,
+      streamId,
+      apache::thrift::ResponseRpcErrorCode::WRONG_RPC_KIND,
+      std::string("Unsupported RPC kind: ") +
+          std::to_string(static_cast<int>(kind)));
+}
+
+channel_pipeline::Result ThriftServerAppAdapter::handleUnknownMethod(
+    uint32_t streamId, std::string_view methodName) noexcept {
+  return writeFrameworkError(
+      streamId,
       apache::thrift::ResponseRpcErrorCode::UNKNOWN_METHOD,
       std::string("Unknown method: ") + std::string(methodName));
 }
@@ -202,11 +212,20 @@ channel_pipeline::Result ThriftServerAppAdapter::fireResponse(
   // Closing the pipeline may swallow the write if the wire is gone, but
   // an in-flight handler callback completing during graceful drain should
   // be allowed to push a final response toward the wire.
-  if (FOLLY_UNLIKELY(state_ == State::Closed || !pipeline_)) {
+  if (FOLLY_UNLIKELY(state_ == State::Closed)) {
     return channel_pipeline::Result::Error;
+  }
+  if (FOLLY_UNLIKELY(!pipeline_)) {
+    return handleMissingPipeline();
   }
   return pipeline_->fireWrite(
       channel_pipeline::erase_and_box(std::move(response)));
+}
+
+channel_pipeline::Result
+ThriftServerAppAdapter::handleMissingPipeline() noexcept {
+  XLOG(ERR) << "Pipeline not set, cannot send response";
+  return channel_pipeline::Result::Error;
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

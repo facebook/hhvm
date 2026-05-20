@@ -20,6 +20,7 @@
 #include <string_view>
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/Portability.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/logging/xlog.h>
@@ -130,6 +131,14 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
 
   void submitWrite(ThriftRequestMessage msg) noexcept;
   void submitWriteOnEventBase(ThriftRequestMessage msg) noexcept;
+
+  FOLLY_NOINLINE void handleMissingPipeline(
+      RequestResponseHandler handler) noexcept;
+  FOLLY_NOINLINE void handleNullContext() noexcept;
+  FOLLY_NOINLINE void handleResponseError(
+      RequestResponseHandler handler, folly::exception_wrapper ew) noexcept;
+  FOLLY_NOINLINE void handleNotOpen(ThriftRequestMessage msg) noexcept;
+  FOLLY_NOINLINE void handleWriteError() noexcept;
 
   apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline_{
       nullptr};

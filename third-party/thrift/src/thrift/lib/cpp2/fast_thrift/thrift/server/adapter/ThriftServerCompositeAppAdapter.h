@@ -18,8 +18,10 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
+#include <folly/Portability.h>
 #include <folly/container/F14Map.h>
 #include <folly/io/async/DelayedDestruction.h>
 
@@ -87,6 +89,9 @@ class ThriftServerCompositeAppAdapter final : public ThriftServerAppAdapter {
   void onException(folly::exception_wrapper&& e) noexcept;
 
  private:
+  FOLLY_NOINLINE channel_pipeline::Result handleUnknownMethod(
+      uint32_t streamId, std::string_view methodName) noexcept;
+
   std::vector<ThriftServerAppAdapter::Ptr> children_;
   folly::F14FastMap<std::string, ThriftServerAppAdapter*> methodMap_;
 };

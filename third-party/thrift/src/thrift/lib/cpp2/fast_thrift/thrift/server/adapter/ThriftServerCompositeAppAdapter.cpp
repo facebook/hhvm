@@ -70,13 +70,18 @@ channel_pipeline::Result ThriftServerCompositeAppAdapter::onRead(
 
   auto it = methodMap_.find(methodName);
   if (FOLLY_UNLIKELY(it == methodMap_.end())) {
-    return writeFrameworkError(
-        request.streamId,
-        apache::thrift::ResponseRpcErrorCode::UNKNOWN_METHOD,
-        std::string("Unknown method: ") + std::string(methodName));
+    return handleUnknownMethod(request.streamId, methodName);
   }
 
   return it->second->onRead(std::move(msg));
+}
+
+channel_pipeline::Result ThriftServerCompositeAppAdapter::handleUnknownMethod(
+    uint32_t streamId, std::string_view methodName) noexcept {
+  return writeFrameworkError(
+      streamId,
+      apache::thrift::ResponseRpcErrorCode::UNKNOWN_METHOD,
+      std::string("Unknown method: ") + std::string(methodName));
 }
 
 void ThriftServerCompositeAppAdapter::setPipeline(

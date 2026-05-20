@@ -17,6 +17,7 @@
 #pragma once
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/Portability.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
@@ -173,6 +174,20 @@ class ThriftClientChannel : public apache::thrift::RequestChannel {
   void handleRequestResponse(
       ThriftResponseMessage&& response,
       apache::thrift::RequestClientCallback::Ptr callback);
+
+  // Error handling helpers (moved out of line to keep hot path small)
+  FOLLY_NOINLINE void handleMissingPipeline(
+      apache::thrift::RequestClientCallback::Ptr callbackPtr) noexcept;
+  FOLLY_NOINLINE void handleNotOpen(
+      apache::thrift::RequestClientCallback::Ptr callbackPtr) noexcept;
+  FOLLY_NOINLINE void handleWriteError() noexcept;
+  FOLLY_NOINLINE void handleMetadataError(
+      apache::thrift::RequestClientCallback::Ptr callback,
+      folly::exception_wrapper error) noexcept;
+  FOLLY_NOINLINE void handleNullContext() noexcept;
+  FOLLY_NOINLINE void handleResponseError(
+      apache::thrift::RequestClientCallback::Ptr callback,
+      folly::exception_wrapper ew) noexcept;
 
   // Per-request context allocated on the outbound path and consumed on the
   // inbound path. Transported opaquely as a TypeErasedPtr on the message

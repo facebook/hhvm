@@ -25,6 +25,7 @@
 #include <vector>
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/Portability.h>
 #include <folly/Synchronized.h>
 #include <folly/container/F14Map.h>
 #include <folly/io/IOBuf.h>
@@ -245,6 +246,11 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   std::vector<std::string_view> methodNames() const noexcept;
   channel_pipeline::Result handleRequestResponse(
       ThriftServerRequestMessage&& request) noexcept;
+  FOLLY_NOINLINE channel_pipeline::Result handleWrongRpcKind(
+      uint32_t streamId, apache::thrift::RpcKind kind) noexcept;
+  FOLLY_NOINLINE channel_pipeline::Result handleUnknownMethod(
+      uint32_t streamId, std::string_view methodName) noexcept;
+  FOLLY_NOINLINE channel_pipeline::Result handleMissingPipeline() noexcept;
 
   folly::EventBase* evb_{nullptr};
   folly::F14FastMap<std::string, RequestResponseProcessFn> dispatch_;

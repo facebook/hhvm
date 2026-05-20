@@ -85,22 +85,12 @@ void ThriftClientChannel::sendRequestInternal(
   evb_->dcheckIsInEventBaseThread();
 
   if (FOLLY_UNLIKELY(!pipeline_)) {
-    callbackPtr.release()->onResponseError(
-        folly::make_exception_wrapper<apache::thrift::TApplicationException>(
-            apache::thrift::TApplicationException::INTERNAL_ERROR,
-            "Pipeline not set"));
+    handleMissingPipeline(std::move(callbackPtr));
     return;
   }
 
   if (FOLLY_UNLIKELY(state_ != State::Open)) {
-    callbackPtr.release()->onResponseError(
-        folly::make_exception_wrapper<
-            apache::thrift::transport::TTransportException>(
-            apache::thrift::transport::TTransportException::NOT_OPEN,
-            lastError_ ? fmt::format(
-                             "Connection not open: {}",
-                             lastError_.what().toStdString())
-                       : "Connection not open"));
+    handleNotOpen(std::move(callbackPtr));
     return;
   }
 
@@ -132,13 +122,7 @@ void ThriftClientChannel::sendRequestInternal(
   if (FOLLY_UNLIKELY(
           result ==
           apache::thrift::fast_thrift::channel_pipeline::Result::Error)) {
-    // Close the channel. Subsequent sends will be rejected; pending
-    // streams will be failed.
-    onException(
-        folly::make_exception_wrapper<
-            apache::thrift::transport::TTransportException>(
-            apache::thrift::transport::TTransportException::UNKNOWN,
-            "Failed to write request to pipeline"));
+    handleWriteError();
   }
 }
 
@@ -187,7 +171,7 @@ void ThriftClientChannel::handleRequestResponse(
 
     if (auto error = processPayloadMetadata(metadata);
         FOLLY_UNLIKELY(!!error)) {
-      callback.release()->onResponseError(std::move(error));
+      handleMetadataError(std::move(callback), std::move(error));
       return;
     }
 
@@ -257,7 +241,7 @@ ThriftClientChannel::onRead(
   auto response = msg.take<ThriftResponseMessage>();
   auto ctx = response.requestContext.release_as<ChannelCallbackContext>();
   if (FOLLY_UNLIKELY(!ctx)) {
-    XLOG(WARN) << "Response with null requestContext";
+    handleNullContext();
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
   auto callback = std::move(ctx->cb);
@@ -267,7 +251,8 @@ ThriftClientChannel::onRead(
   // serialize failure). Fail just this callback; channel stays Open for
   // subsequent requests.
   if (FOLLY_UNLIKELY(response.payload.is<ThriftClientResponseError>())) {
-    callback.release()->onResponseError(
+    handleResponseError(
+        std::move(callback),
         std::move(response.payload.get<ThriftClientResponseError>().ew));
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
@@ -302,6 +287,52 @@ void ThriftClientChannel::onException(folly::exception_wrapper&& e) noexcept {
   }
 
   state_ = State::Closed;
+}
+
+void ThriftClientChannel::handleMissingPipeline(
+    apache::thrift::RequestClientCallback::Ptr callbackPtr) noexcept {
+  callbackPtr.release()->onResponseError(
+      folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+          apache::thrift::TApplicationException::INTERNAL_ERROR,
+          "Pipeline not set"));
+}
+
+void ThriftClientChannel::handleNotOpen(
+    apache::thrift::RequestClientCallback::Ptr callbackPtr) noexcept {
+  callbackPtr.release()->onResponseError(
+      folly::make_exception_wrapper<
+          apache::thrift::transport::TTransportException>(
+          apache::thrift::transport::TTransportException::NOT_OPEN,
+          lastError_
+              ? fmt::format(
+                    "Connection not open: {}", lastError_.what().toStdString())
+              : "Connection not open"));
+}
+
+void ThriftClientChannel::handleWriteError() noexcept {
+  // Close the channel. Subsequent sends will be rejected; pending
+  // streams will be failed.
+  onException(
+      folly::make_exception_wrapper<
+          apache::thrift::transport::TTransportException>(
+          apache::thrift::transport::TTransportException::UNKNOWN,
+          "Failed to write request to pipeline"));
+}
+
+void ThriftClientChannel::handleMetadataError(
+    apache::thrift::RequestClientCallback::Ptr callback,
+    folly::exception_wrapper error) noexcept {
+  callback.release()->onResponseError(std::move(error));
+}
+
+void ThriftClientChannel::handleNullContext() noexcept {
+  XLOG(WARN) << "Response with null requestContext";
+}
+
+void ThriftClientChannel::handleResponseError(
+    apache::thrift::RequestClientCallback::Ptr callback,
+    folly::exception_wrapper ew) noexcept {
+  callback.release()->onResponseError(std::move(ew));
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

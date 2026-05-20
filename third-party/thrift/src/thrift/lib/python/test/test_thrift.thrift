@@ -754,10 +754,17 @@ exception EmptyError {}
 struct ReflectionAnnotation {
   1: i32 count;
   2: float ratio;
+  3: set<string> tags;
+  4: Color color;
 }
 
 @StructuredAnnotation{second = 42, third = ["hello", "world"]}
-@ReflectionAnnotation{count = 7, ratio = 0.5}
+@ReflectionAnnotation{
+  count = 7,
+  ratio = 0.5,
+  tags = ["x", "y"],
+  color = Color.blue,
+}
 @thrift.DeprecatedUnvalidatedAnnotations{items = {"depr_key": "depr_val"}}
 struct AnnotatedForReflection {
   @thrift.DeprecatedUnvalidatedAnnotations{items = {"field_key": "field_val"}}

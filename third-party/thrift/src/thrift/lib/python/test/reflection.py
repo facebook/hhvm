@@ -48,6 +48,7 @@ from testing.sub_dependency.thrift_types import Basic as SubDepBasic
 from thrift.python.reflection.constants_reflection import (
     ConstantListSpec,
     ConstantMapSpec,
+    ConstantSetSpec,
     ConstantSpec,
     ConstantStructSpec,
     ThriftType,
@@ -365,6 +366,7 @@ class InspectFieldKindTest(unittest.TestCase):
             ("double", ComplexUnion, "double_val", float, ThriftType.DOUBLE),
             ("binary", ComplexUnion, "raw", bytes, ThriftType.BINARY),
             ("enum", ComplexUnion, "color", Color, ThriftType.ENUM),
+            ("union", easy, "an_int", Integers, ThriftType.UNION),
         ]
     )
     def test_field_type(
@@ -713,6 +715,27 @@ class InspectAnnotationsTest(unittest.TestCase):
         assert isinstance(ratio_spec.value, float)
         self.assertAlmostEqual(ratio_spec.value, 0.5)
         self.assertEqual(ratio_spec.thrift_type, ThriftType.FLOAT)
+
+    def test_annotation_with_set_value(self) -> None:
+        spec = _inspect_struct(AnnotatedForReflection)
+        raw = spec.structured_annotations
+        ra_value = raw["test_thrift.ReflectionAnnotation"].value
+        assert isinstance(ra_value, ConstantStructSpec)
+        tags_spec = ra_value.fields["tags"]
+        self.assertEqual(tags_spec.thrift_type, ThriftType.SET)
+        tags_value = tags_spec.value
+        assert isinstance(tags_value, ConstantSetSpec)
+        element_values = {elem.value for elem in tags_value.value}
+        self.assertEqual(element_values, {"x", "y"})
+
+    def test_annotation_with_enum_value(self) -> None:
+        spec = _inspect_struct(AnnotatedForReflection)
+        raw = spec.structured_annotations
+        ra_value = raw["test_thrift.ReflectionAnnotation"].value
+        assert isinstance(ra_value, ConstantStructSpec)
+        color_spec = ra_value.fields["color"]
+        self.assertEqual(color_spec.thrift_type, ThriftType.I32)
+        self.assertEqual(color_spec.value, 1)
 
 
 class HashContractTest(unittest.TestCase):

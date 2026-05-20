@@ -831,8 +831,6 @@ ErrorCode HTTP2Codec::handleSettings(const std::deque<SettingPair>& settings) {
       case SettingsId::THRIFT_CHANNEL_ID:
       case SettingsId::THRIFT_CHANNEL_ID_DEPRECATED:
         break;
-      case SettingsId::SETTINGS_HTTP_CERT_AUTH:
-        break;
       case SettingsId::WT_MAX_SESSIONS:
       case SettingsId::_HQ_QPACK_BLOCKED_STREAMS:
       case SettingsId::_HQ_DATAGRAM:
@@ -1471,7 +1469,6 @@ size_t HTTP2Codec::generateSettings(folly::IOBufQueue& writeBuf) {
       case SettingsId::THRIFT_CHANNEL_ID:
       case SettingsId::THRIFT_CHANNEL_ID_DEPRECATED:
         break;
-      case SettingsId::SETTINGS_HTTP_CERT_AUTH:
       case SettingsId::WT_MAX_SESSIONS:
       case SettingsId::_HQ_QPACK_BLOCKED_STREAMS:
       case SettingsId::_HQ_DATAGRAM:

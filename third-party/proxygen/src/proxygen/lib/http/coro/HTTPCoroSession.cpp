@@ -1569,8 +1569,6 @@ void HTTPUniplexTransportSession::onSettings(const SettingsList& settings) {
       bool didSupport = supportsMoreTransactions();
       maxConcurrentOutgoingStreamsRemote_ = maxStreams;
       onSetMaxInitiatedStreams(didSupport);
-    } else if (setting.id == SettingsId::SETTINGS_HTTP_CERT_AUTH) {
-      // TODO
     }
   }
 

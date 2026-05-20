@@ -31,9 +31,6 @@ enum class SettingsId : uint64_t {
   // 0xf000 and 0xffff being reserved for Experimental Use
   THRIFT_CHANNEL_ID = 0xf100,
 
-  // For secondary authentication in HTTP/2
-  SETTINGS_HTTP_CERT_AUTH = 0xff00,
-
   WT_MAX_SESSIONS = 0x2b60,
   WT_INITIAL_MAX_DATA = 0x2b61,
   WT_INITIAL_MAX_STREAM_DATA_UNI = 0x2b62,

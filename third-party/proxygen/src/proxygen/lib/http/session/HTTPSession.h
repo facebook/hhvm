@@ -753,8 +753,6 @@ class HTTPSession
   void onSetSendWindow(uint32_t windowSize);
   void onSetMaxInitiatedStreams(uint32_t maxTxns);
 
-  bool verifyCertAuthSetting(uint32_t value);
-
   void addLastByteEvent(HTTPTransaction* txn, uint64_t byteNo) noexcept;
 
   void addAckToLastByteEvent(HTTPTransaction* txn,

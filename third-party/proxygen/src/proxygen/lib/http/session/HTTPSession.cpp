@@ -44,11 +44,6 @@ static const uint32_t kWriteReadyMax = 65536;
 // Higher = lower latency, less prioritization
 static const uint32_t kMaxWritesPerLoop = 32;
 
-static constexpr folly::StringPiece kClientLabel =
-    "EXPORTER HTTP CERTIFICATE client";
-static constexpr folly::StringPiece kServerLabel =
-    "EXPORTER HTTP CERTIFICATE server";
-
 } // anonymous namespace
 
 namespace proxygen {
@@ -136,38 +131,6 @@ HTTPSession::HTTPSession(const WheelTimerInstance& wheelTimer,
     sock_->setReplaySafetyCallback(this);
   }
   initCodecHeaderIndexingStrategy();
-}
-
-bool HTTPSession::verifyCertAuthSetting(uint32_t value) {
-  uint32_t certAuthSettingVal = 0;
-  constexpr uint16_t settingLen = 4;
-  std::unique_ptr<folly::IOBuf> ekm;
-  folly::StringPiece label;
-  if (isUpstream()) {
-    label = kServerLabel;
-  } else {
-    label = kClientLabel;
-  }
-  auto fizzBase = getTransport()->getUnderlyingTransport<AsyncFizzBase>();
-  if (fizzBase) {
-    ekm = fizzBase->getExportedKeyingMaterial(label, nullptr, settingLen);
-  } else {
-    VLOG(4) << "Underlying transport does not support secondary "
-               "authentication.";
-    return false;
-  }
-  if (ekm && ekm->computeChainDataLength() == settingLen) {
-    folly::io::Cursor cursor(ekm.get());
-    auto ekmVal = cursor.readBE<uint32_t>();
-    certAuthSettingVal = (ekmVal & 0x3fffffff) | 0x80000000;
-  } else {
-    return false;
-  }
-  if (certAuthSettingVal == value) {
-    return true;
-  } else {
-    return false;
-  }
 }
 
 void HTTPSession::setupCodec() {
@@ -1146,10 +1109,6 @@ void HTTPSession::onSettings(const SettingsList& settings) {
       onSetSendWindow(setting.value);
     } else if (setting.id == SettingsId::MAX_CONCURRENT_STREAMS) {
       onSetMaxInitiatedStreams(setting.value);
-    } else if (setting.id == SettingsId::SETTINGS_HTTP_CERT_AUTH) {
-      if (!(verifyCertAuthSetting(setting.value))) {
-        return;
-      }
     }
   }
   if (codec_->generateSettingsAck(writeBuf_) > 0) {

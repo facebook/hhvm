@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -54,6 +55,19 @@ void FastThriftServer::setInterface(
       << "FastThriftServer::setInterface called more than once; only a single "
          "handler is supported today";
   handler_ = std::move(handler);
+}
+
+void FastThriftServer::setMonitoringInterface(
+    std::shared_ptr<fast_thrift::MonitoringServerInterface> handler) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::setMonitoringInterface must be called before "
+         "start()/serve()";
+  CHECK(handler)
+      << "FastThriftServer::setMonitoringInterface requires a non-null handler";
+  CHECK(!auxInterfaces_.monitoringHandler)
+      << "FastThriftServer::setMonitoringInterface called more than once";
+  auxInterfaces_.monitoringHandler = std::move(handler);
 }
 
 void FastThriftServer::setSSLConfig(security::FizzServerCertConfig cfg) {
@@ -91,9 +105,24 @@ FastThriftServer::createConnectionFactory() {
     rocket::server::connection::RocketServerConnection conn;
 
     // 1. Build the thrift adapter first so the rocket pipeline's SETUP
-    //    handler can capture a callback into it.
+    //    handler can capture a callback into it. When monitoring is wired
+    //    up, wrap the user adapter and a fresh monitoring adapter in a
+    //    composite — that becomes the pipeline tail. Each child factory
+    //    receives its own typed `self` so the static_pointer_cast in
+    //    generated <Service>FastHandler<S>::getAppAdapter is satisfied.
     FastConnection ctx;
-    ctx.adapter = handler_->getAppAdapter(handler_);
+    ThriftServerCompositeAppAdapter* compositePtr = nullptr;
+    if (auxInterfaces_.monitoringHandler) {
+      ThriftServerCompositeAppAdapter::Ptr composite{
+          new ThriftServerCompositeAppAdapter()};
+      composite->addChild(handler_->getAppAdapter(handler_));
+      composite->addChild(auxInterfaces_.monitoringHandler->getAppAdapter(
+          auxInterfaces_.monitoringHandler));
+      compositePtr = composite.get();
+      ctx.adapter = std::move(composite);
+    } else {
+      ctx.adapter = handler_->getAppAdapter(handler_);
+    }
     ctx.transportAdapter =
         std::make_unique<server::ThriftServerTransportAdapter>(
             *conn.appAdapter);
@@ -101,9 +130,7 @@ FastThriftServer::createConnectionFactory() {
     // 2. Build rocket pipeline. The SETUP handler publishes the negotiated
     //    metadata protocol into the transport adapter, which uses it for
     //    both inbound request-metadata deserialization and outbound
-    //    response-metadata serialization. Capture by raw pointer is safe —
-    //    the transport adapter and pipeline share connection-level lifetime
-    //    via FastConnection.
+    //    response-metadata serialization.
     auto* transportAdapter = ctx.transportAdapter.get();
     auto rocketPipeline = buildRocketPipeline(
         evb,
@@ -126,23 +153,39 @@ FastThriftServer::createConnectionFactory() {
     conn.transportHandler = std::move(transportHandler);
     conn.pipeline = std::move(rocketPipeline);
 
-    // 3. Build thrift pipeline. PipelineBuilder is templated on the BASE
-    //    ThriftServerAppAdapter — works because generated FastSvAppAdapter
-    //    subclasses don't override base virtuals (they only populate
-    //    dispatch_ via addMethodHandler in their ctor). If a subclass starts
-    //    overriding, this needs revisiting.
-    auto thriftPipeline = PipelineBuilder<
-                              server::ThriftServerTransportAdapter,
-                              ThriftServerAppAdapter,
-                              SimpleBufferAllocator>()
-                              .setEventBase(evb)
-                              .setHead(ctx.transportAdapter.get())
-                              .setTail(ctx.adapter.get())
-                              .setAllocator(ctx.allocator.get())
-                              .build();
-
-    ctx.transportAdapter->setPipeline(thriftPipeline.get());
-    ctx.adapter->setPipeline(thriftPipeline.get());
+    // 3. Build thrift pipeline. Default path templates on the base
+    //    ThriftServerAppAdapter (works because generated FastSvAppAdapter
+    //    subclasses only populate dispatch_ via addMethodHandler in their
+    //    ctor and don't override base methods). The composite path
+    //    templates on ThriftServerCompositeAppAdapter so its shadowing
+    //    onRead is resolved as the tail; setPipeline on the typed pointer
+    //    also fans out to both children.
+    PipelineImpl::Ptr thriftPipeline;
+    if (compositePtr) {
+      thriftPipeline = PipelineBuilder<
+                           server::ThriftServerTransportAdapter,
+                           ThriftServerCompositeAppAdapter,
+                           SimpleBufferAllocator>()
+                           .setEventBase(evb)
+                           .setHead(ctx.transportAdapter.get())
+                           .setTail(compositePtr)
+                           .setAllocator(ctx.allocator.get())
+                           .build();
+      ctx.transportAdapter->setPipeline(thriftPipeline.get());
+      compositePtr->setPipeline(thriftPipeline.get());
+    } else {
+      thriftPipeline = PipelineBuilder<
+                           server::ThriftServerTransportAdapter,
+                           ThriftServerAppAdapter,
+                           SimpleBufferAllocator>()
+                           .setEventBase(evb)
+                           .setHead(ctx.transportAdapter.get())
+                           .setTail(ctx.adapter.get())
+                           .setAllocator(ctx.allocator.get())
+                           .build();
+      ctx.transportAdapter->setPipeline(thriftPipeline.get());
+      ctx.adapter->setPipeline(thriftPipeline.get());
+    }
     // The thrift pipeline doesn't have an explicit activation trigger like
     // the rocket pipeline (driven by TransportHandler::onConnect). Activate
     // it here so the AppAdapter transitions Ready -> Open and starts

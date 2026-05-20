@@ -40,7 +40,7 @@ namespace apache::thrift {
  */
 template <>
 class FastServiceHandler<::cpp2::test::BasicService>
-    : public ::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapterFactory {
+    : public virtual ::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapterFactory {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::test::BasicService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
 
  public:

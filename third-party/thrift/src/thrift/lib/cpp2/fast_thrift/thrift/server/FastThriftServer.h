@@ -30,6 +30,7 @@
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/interface/monitor/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
@@ -98,6 +99,21 @@ class FastThriftServer {
   void setInterface(std::shared_ptr<ThriftServerAppAdapterFactory> handler);
 
   /**
+   * Attach an additional monitoring/debug handler. Methods on the monitoring
+   * handler are dispatched on the same connection as the user handler;
+   * routing is by method name with the user handler winning on conflict
+   * (mirrors ThriftServer::setMonitoringInterface). Must be called before
+   * start()/serve().
+   *
+   * The handler must derive from fast_thrift::MonitoringServerInterface — a
+   * marker base that exists purely as a type-system guardrail to prevent
+   * accidentally passing a user-facing handler here.
+   *
+   */
+  void setMonitoringInterface(
+      std::shared_ptr<fast_thrift::MonitoringServerInterface> handler);
+
+  /**
    * Configure TLS. After this is called, every accepted connection is wrapped
    * in a fizz::server::AsyncFizzServer; the connection factory only sees
    * fully-handshaked transports. Must be called before start()/serve().
@@ -157,14 +173,20 @@ class FastThriftServer {
    * removed when the adapter's close callback fires.
    */
   struct FastConnection {
-    std::unique_ptr<
-        ThriftServerAppAdapter,
-        folly::DelayedDestruction::Destructor>
-        adapter;
+    ThriftServerAppAdapter::Ptr adapter;
     std::unique_ptr<server::ThriftServerTransportAdapter> transportAdapter;
     channel_pipeline::PipelineImpl::Ptr pipeline;
     std::unique_ptr<channel_pipeline::SimpleBufferAllocator> allocator =
         std::make_unique<channel_pipeline::SimpleBufferAllocator>();
+  };
+
+  /**
+   * Auxiliary interfaces like monitoring, status, debugging, etc. will live
+   * here.
+   */
+  struct AuxiliaryInterfaces {
+    std::shared_ptr<fast_thrift::MonitoringServerInterface> monitoringHandler{
+        nullptr};
   };
 
   rocket::server::connection::ConnectionFactory createConnectionFactory();
@@ -181,6 +203,7 @@ class FastThriftServer {
 
   const FastThriftServerConfig config_;
   std::shared_ptr<ThriftServerAppAdapterFactory> handler_;
+  AuxiliaryInterfaces auxInterfaces_;
   std::optional<security::FizzServerCertConfig> sslConfig_;
   security::ThriftTlsConfig thriftConfig_{};
   // IO thread pool. Either embedder-supplied via setIOThreadPool or

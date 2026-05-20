@@ -41,7 +41,8 @@ class Xxh64Hasher {
   }
 
   template <typename T>
-  constexpr std::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val) {
+    requires std::is_arithmetic_v<T>
+  constexpr void combine(const T& val) {
     XXH3_64bits_update(state_.get(), (const unsigned char*)&val, sizeof(val));
   }
   void combine(const folly::IOBuf& value) {

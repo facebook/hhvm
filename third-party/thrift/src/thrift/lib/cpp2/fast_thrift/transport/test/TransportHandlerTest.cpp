@@ -545,6 +545,9 @@ TEST_F(TransportHandlerTest, CloseWithNoCallback) {
 
 // Test: setPipeline without reset triggers FATAL
 TEST_F(TransportHandlerTest, SetPipelineWithoutResetDeath) {
+#ifdef NDEBUG
+  GTEST_SKIP() << "DCHECK is a no-op in opt mode";
+#else
   auto [handler, pipeline] = createHandlerAndPipeline();
 
   // Create a second pipeline
@@ -560,14 +563,19 @@ TEST_F(TransportHandlerTest, SetPipelineWithoutResetDeath) {
   // Attempting to set a second pipeline without resetting should trigger FATAL
   // (state machine: setPipeline is only valid in Created state).
   EXPECT_DEBUG_DEATH(handler->setPipeline(pipeline2.get()), "");
+#endif
 }
 
 // Test: write with null bytes triggers DCHECK
 TEST_F(TransportHandlerTest, WriteWithNullBytesDeath) {
+#ifdef NDEBUG
+  GTEST_SKIP() << "DCHECK is a no-op in opt mode";
+#else
   auto [handler, pipeline] = createHandlerAndPipeline();
 
   EXPECT_DEBUG_DEATH(
       (void)handler->onWrite(TypeErasedBox(BytesPtr{})), "bytes");
+#endif
 }
 
 // Test: isBufferMovable returns true
@@ -927,6 +935,9 @@ TEST_F(TransportHandlerTest, OnWriteAcceptedInReadyRejectedInClosed) {
 }
 
 TEST_F(TransportHandlerTest, OnConnectFromCreatedDeath) {
+#ifdef NDEBUG
+  GTEST_SKIP() << "DCHECK is a no-op in opt mode";
+#else
   auto socket = folly::AsyncTransport::UniquePtr(
       new NiceMock<folly::test::MockAsyncTransport>());
   auto* mockSocket =
@@ -937,22 +948,31 @@ TEST_F(TransportHandlerTest, OnConnectFromCreatedDeath) {
   auto handler = TransportHandler::create(std::move(socket), 256, 4096);
   // state == Created (no setPipeline yet)
   EXPECT_DEBUG_DEATH(handler->onConnect(), "");
+#endif
 }
 
 TEST_F(TransportHandlerTest, OnConnectTwiceDeath) {
+#ifdef NDEBUG
+  GTEST_SKIP() << "DCHECK is a no-op in opt mode";
+#else
   auto [handler, pipeline] = createHandlerAndPipeline();
   handler->onConnect();
   EXPECT_DEBUG_DEATH(handler->onConnect(), "");
   // Don't call resetPipeline directly — destructor handles it (forces close
   // from Open first). resetPipeline on Open would DCHECK-fail by design.
+#endif
 }
 
 TEST_F(TransportHandlerTest, ResetPipelineDeathFromOpen) {
+#ifdef NDEBUG
+  GTEST_SKIP() << "DCHECK is a no-op in opt mode";
+#else
   auto [handler, pipeline] = createHandlerAndPipeline();
   handler->onConnect();
   // resetPipeline is a destruction helper, not a public state-machine entry.
   // Calling it while still Open / Closing must DCHECK-fail.
   EXPECT_DEBUG_DEATH(handler->resetPipeline(), "");
+#endif
 }
 
 // --- Drain Tests ---

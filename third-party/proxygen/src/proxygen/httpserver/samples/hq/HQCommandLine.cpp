@@ -41,6 +41,16 @@ DEFINE_string(httpversion, "1.1", "HTTP version string");
 DEFINE_string(protocol, "", "HQ protocol version e.g. h3-29 or hq-fb-05");
 DEFINE_int64(quic_version, 0, "QUIC version to use. 0 is default");
 DEFINE_bool(use_version, true, "Use set QUIC version as first version");
+DEFINE_bool(use_wrapper_recvmmsg,
+            true,
+            "Sets transportSettings.shouldUseWrapperRecvmmsgForBatchRecv.");
+DEFINE_bool(use_recvmmsg_for_batch_recv,
+            true,
+            "Sets transportSettings.shouldUseRecvmmsgForBatchRecv.");
+DEFINE_bool(network_data_per_socket_read,
+            false,
+            "Sets transportSettings.networkDataPerSocketRead. Client-only: "
+            "selects single-packet recvmsg loop read path.");
 DEFINE_string(logdir, "/tmp/logs", "Directory to store connection logs");
 DEFINE_string(outdir, "", "Directory to store responses");
 DEFINE_bool(log_response,
@@ -317,7 +327,12 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
         static_cast<uint16_t>(FLAGS_quic_experiment);
   }
   hqParams.transportSettings.maxRecvBatchSize = 32;
-  hqParams.transportSettings.shouldUseRecvmmsgForBatchRecv = true;
+  hqParams.transportSettings.shouldUseRecvmmsgForBatchRecv =
+      FLAGS_use_recvmmsg_for_batch_recv;
+  hqParams.transportSettings.shouldUseWrapperRecvmmsgForBatchRecv =
+      FLAGS_use_wrapper_recvmmsg;
+  hqParams.transportSettings.networkDataPerSocketRead =
+      FLAGS_network_data_per_socket_read;
   hqParams.transportSettings.advertisedInitialMaxStreamsBidi = 100;
   hqParams.transportSettings.advertisedInitialMaxStreamsUni = 100;
 

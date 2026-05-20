@@ -333,10 +333,8 @@ class AllocationColocator<detail::AllocationColocatorInternals> {
 
   class Builder {
    public:
-    template <
-        typename Locator,
-        typename =
-            std::enable_if_t<std::is_base_of_v<detail::LocatorBase, Locator>>>
+    template <typename Locator>
+      requires std::is_base_of_v<detail::LocatorBase, Locator>
     std::byte* uninitialized(Locator locator) const noexcept {
       return buffer_ + locator.offset;
     }
@@ -375,10 +373,8 @@ class AllocationColocator<detail::AllocationColocatorInternals> {
       return AllocationColocator<>::ArrayPtr<T>(array, {size});
     }
 
-    template <
-        typename T,
-        typename... Args,
-        typename = std::enable_if_t<std::is_trivially_destructible_v<T>>>
+    template <typename T, typename... Args>
+      requires std::is_trivially_destructible_v<T>
     T* object(ObjectLocator<T>&& locator, Args&&... args) const
         noexcept(noexcept(std::is_nothrow_constructible_v<T, Args...>)) {
       return new (this->uninitialized(std::move(locator)))
@@ -522,10 +518,8 @@ class AllocationColocator {
   using Ptr = std::unique_ptr<Root, Deleter>;
   static_assert(sizeof(Ptr) == sizeof(Root*));
 
-  template <
-      typename F,
-      typename TRoot = Root,
-      std::enable_if_t<std::is_void_v<TRoot>, int> = 0>
+  template <typename F, typename TRoot = Root>
+    requires std::is_void_v<TRoot>
   Ptr allocate(F&& build) const {
     auto buffer = new std::byte[bytes_];
     FOLLY_SAFE_DCHECK(

@@ -57,6 +57,7 @@
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/jit/vasm-block-counters.h"
+#include "hphp/runtime/vm/live-func-stats.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/property-profile.h"
@@ -2469,13 +2470,8 @@ std::string deserializeProfData(const std::string& filename,
     }
 
     if (Cfg::Eval::LogJitProfileLiveness) {
-      auto const prodTimestamp = TimeStamp::Current();
       auto const logFunc = [&](auto const& func) {
-        StructuredLogEntry entry;
-        entry.force_init = true;
-        entry.setStr("function_name", func->fullName()->data());
-        entry.setInt("last_prod_timestamp", prodTimestamp);
-        StructuredLog::log("hhvm_live_functions", entry);
+        markFunctionAsLive(func, LiveFunctionKind::RepoAuthoritative);
       };
       pd->forEachProfilingFunc(logFunc);
     }

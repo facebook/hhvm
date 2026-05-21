@@ -94,6 +94,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/iter.h"
+#include "hphp/runtime/vm/live-func-stats.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/method-lookup.h"
@@ -3562,6 +3563,13 @@ void doFCall(PrologueFlags prologueFlags, const Func* func,
              const ArrayData* namedArgNames,
              uint32_t numPositionalArgs, void* ctx, TCA retAddr) {
   TRACE(3, "FCall: pc %p func %p\n", vmpc(), vmfp()->func()->entry());
+  if (Cfg::Eval::LogJitFunctionLivenessSampleRate > 0) {
+    if (!func->atomicFlags().check(Func::Flags::WasCalled)
+        && !func->atomicFlags().set(Func::Flags::WasCalled)
+        && folly::Random::oneIn(Cfg::Eval::LogJitFunctionLivenessSampleRate)) {
+      markFunctionAsLive(func);
+    }
+  }
 
   assertx(numPositionalArgs <= func->numPositionalParams() + 1);
   assertx(kNumActRecCells == 2);

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/live-func-stats.h"
 #include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
@@ -856,6 +857,16 @@ void Translator::publishMetaInternal() {
   }
   if (isProfiling(kind)) {
     profData()->setProfiling(sk.func());
+  }
+  if (Cfg::Eval::LogJitFunctionLivenessSampleRate > 0) {
+    auto const prevWasCalled =
+      sk.func()->atomicFlags().check(Func::Flags::WasCalled)
+      || sk.func()->atomicFlags().set(Func::Flags::WasCalled);
+    bool markKindAsLive = isLive(kind) || Cfg::Eval::LogAllTranslationsForLiveness;
+    if (markKindAsLive && !prevWasCalled &&
+        folly::Random::oneIn(Cfg::Eval::LogJitFunctionLivenessSampleRate)) {
+      markFunctionAsLive(sk.func());
+    }
   }
 }
 

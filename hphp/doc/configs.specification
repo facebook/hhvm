@@ -1135,6 +1135,20 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.LogJitProfileLiveness = false, UNKNOWN
 
+- uint32_t Eval.LogJitFunctionLivenessSampleRate = 0, UNKNOWN
+
+  Logs the first time a function is translated as a live translation
+  or called in the interpreter with probability 1/sample rate.
+  Subsequent calls to a function will *not* result in increased probability
+  of logging. Setting the sample rate to 0 disables logging. Whether
+  profiling and optimized translations are logged is controlled by the
+  Eval.LogAllTranslationsForLiveness flag.
+
+- bool Eval.LogAllTranslationsForLiveness = false, UNKNOWN
+
+  If set and Eval.LogJitFunctionLivenessSampleRate is > 0, *all* translations
+  will be logged, instead of only live ones.
+
 - bool Eval.DumpJitEnableRenameFunctionStats = false, UNKNOWN
 
 - bool Eval.MapTgtCacheHuge = false, UNKNOWN

@@ -1716,6 +1716,7 @@ public:
     // is treadmilled for destruction.
     Zombie = 1 << 4,
     LockedForAsyncJit = 1 << 5,
+    WasCalled = 1 << 6,
   };
 
  /*

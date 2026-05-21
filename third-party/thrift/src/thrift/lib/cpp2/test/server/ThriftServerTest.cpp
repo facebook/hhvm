@@ -72,7 +72,6 @@
 #include <thrift/lib/cpp2/server/Cpp2Connection.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
-#include <thrift/lib/cpp2/server/ServerFlags.h>
 #include <thrift/lib/cpp2/server/StatusServerInterface.h>
 #include <thrift/lib/cpp2/server/ThriftQuicServer.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
@@ -621,16 +620,12 @@ void doLoadHeaderTest(bool isRocket) {
     baton.wait();
 
     // Check that request was actually rejected due to server overload
-    const bool matched =
-        ew.with_exception([](const TApplicationException& tae) {
-          ASSERT_EQ(
-              TApplicationException::TApplicationExceptionType::LOADSHEDDING,
-              tae.getType());
-        });
+    ew.with_exception([](const TApplicationException& tae) {
+      ASSERT_EQ(
+          TApplicationException::TApplicationExceptionType::LOADSHEDDING,
+          tae.getType());
+    });
 
-    if (!useResourcePoolsFlagsSet(/* no isOverloaded with resource pools*/)) {
-      ASSERT_TRUE(matched);
-    }
     checkLoadHeader(header, kLoadMetric);
   }
 
@@ -933,73 +928,9 @@ TEST(ThriftServer, SocketWriteTimeout) {
   }
 }
 
-class ResourcePoolsFlagsTest : public testing::Test,
-                               public ::testing::WithParamInterface<bool> {
- public:
-  auto expected() {
-    return std::make_tuple(expectedResourcePoolsEnabled_, expectedExplanation_);
-  }
-
-  void SetUp() override {
-    auto gFlag = FLAGS_thrift_experimental_use_resource_pools;
-    auto thriftFlag = GetParam();
-    THRIFT_FLAG_SET_MOCK(experimental_use_resource_pools, thriftFlag);
-    expectedResourcePoolsEnabled_ = thriftFlag || gFlag;
-
-    // Tests provide visibility into expected behavior.
-    // To make it obvious what the explanation looks like for various
-    // combinations of the thrift flag and gflag, this code explicitly
-    // enumerates the various cases and the complete text of the explanation.
-    if (thriftFlag && !gFlag) {
-      expectedExplanation_ =
-          "thrift flag: true, enable gflag: false, disable gflag: false, runtime actions: ";
-    } else if (!thriftFlag && gFlag) {
-      expectedExplanation_ =
-          "thrift flag: false, enable gflag: true, disable gflag: false, runtime actions: thriftFlagNotSet, ";
-    } else if (thriftFlag && gFlag) {
-      expectedExplanation_ =
-          "thrift flag: true, enable gflag: true, disable gflag: false, runtime actions: ";
-    } else {
-      expectedExplanation_ =
-          "runtime: thriftFlagNotSet, , thrift flag: false, enable gflag: false, disable gflag: false";
-    }
-  }
-
- private:
-  bool expectedResourcePoolsEnabled_;
-  std::string expectedExplanation_;
-};
-
-TEST_P(ResourcePoolsFlagsTest, ResourcePoolsFlags) {
-  auto handler = std::make_shared<TestHandler>();
-  class TestObserver : public apache::thrift::server::TServerObserver {
-   public:
-    explicit TestObserver(std::string& explanation)
-        : explanation_(explanation) {}
-    void resourcePoolsEnabled(const std::string& explanation) override {
-      explanation_ = explanation;
-    }
-    void resourcePoolsDisabled(const std::string& explanation) override {
-      explanation_ = explanation;
-    }
-
-    std::string& explanation_;
-  };
-
-  std::string actualExplanation;
-  auto observer = std::make_shared<TestObserver>(actualExplanation);
-  ScopedServerInterfaceThread runner(
-      handler, "::1", 0, [&](auto& thriftServer) {
-        thriftServer.setObserver(observer);
-      });
-
-  auto actual = std::make_tuple(
-      runner.getThriftServer().resourcePoolEnabled(), actualExplanation);
-  EXPECT_EQ(actual, expected());
-}
-
-INSTANTIATE_TEST_SUITE_P(
-    ThriftServer, ResourcePoolsFlagsTest, testing::Values(true, false));
+// ResourcePoolsFlagsTest removed: tested flag interaction between
+// THRIFT_FLAG(experimental_use_resource_pools) and the gflag, which is
+// no longer relevant since ResourcePools are always enabled.
 
 namespace long_shutdown {
 namespace {
@@ -1475,54 +1406,28 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterManyPools) {
   int callCount = 0;
   class TestHandler : public apache::thrift::ServiceHandler<TestService> {
     int& callCount_;
-    std::array<std::array<std::string, 3>, 2> prefixes = {
-        {{"tm-1-", "tm-4-", "cpu0"}, {"tm.H", "tm.BE", "tm.N"}}};
 
    public:
     explicit TestHandler(int& callCount) : callCount_(callCount) {}
     void priorityHigh() override {
       callCount_++;
-      EXPECT_THAT(
-          *folly::getCurrentThreadName(),
-          testing::StartsWith(prefixes[useResourcePoolsFlagsSet() ? 1 : 0][0]));
+      EXPECT_THAT(*folly::getCurrentThreadName(), testing::StartsWith("tm.H"));
     }
     void priorityBestEffort() override {
       callCount_++;
-      EXPECT_THAT(
-          *folly::getCurrentThreadName(),
-          testing::StartsWith(prefixes[useResourcePoolsFlagsSet() ? 1 : 0][1]));
+      EXPECT_THAT(*folly::getCurrentThreadName(), testing::StartsWith("tm.BE"));
     }
     void voidResponse() override {
       callCount_++;
-      EXPECT_THAT(
-          *folly::getCurrentThreadName(),
-          testing::StartsWith(prefixes[useResourcePoolsFlagsSet() ? 1 : 0][2]));
+      EXPECT_THAT(*folly::getCurrentThreadName(), testing::StartsWith("tm.N"));
     }
   };
 
   ScopedServerInterfaceThread runner(
       std::make_shared<TestHandler>(callCount), "::1", 0, [](auto& ts) {
-        if (!useResourcePoolsFlagsSet()) {
-          auto tm = std::shared_ptr<ThreadManagerExecutorAdapter>(
-              new ThreadManagerExecutorAdapter(
-                  {nullptr,
-                   nullptr,
-                   nullptr,
-                   std::make_shared<folly::CPUThreadPoolExecutor>(
-                       1, std::make_shared<folly::NamedThreadFactory>("cpu")),
-                   nullptr}));
-          tm->setNamePrefix("tm");
-          tm->threadFactory(
-              std::make_shared<PosixThreadFactory>(
-                  PosixThreadFactory::ATTACHED));
-          tm->start();
-          ts.setThreadManager(tm);
-        } else {
-          ts.setCPUWorkerThreadName("tm");
-          ts.setThreadManagerType(
-              apache::thrift::ThriftServer::ThreadManagerType::PRIORITY);
-          // Just allow the defaults to happen
-        }
+        ts.setCPUWorkerThreadName("tm");
+        ts.setThreadManagerType(
+            apache::thrift::ThriftServer::ThreadManagerType::PRIORITY);
       });
   folly::EventBase base;
   auto client = makeClient(runner, &base);
@@ -1536,49 +1441,29 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterSinglePool) {
   int callCount = 0;
   class TestHandler : public apache::thrift::ServiceHandler<TestService> {
     int& callCount_;
-    std::array<std::string, 2> threadNames{{"cpu0", "cpu.N0"}};
 
    public:
     explicit TestHandler(int& callCount) : callCount_(callCount) {}
     void priorityHigh() override {
       callCount_++;
-      EXPECT_EQ(
-          threadNames[useResourcePoolsFlagsSet() ? 1 : 0],
-          *folly::getCurrentThreadName());
+      EXPECT_EQ("cpu.N0", *folly::getCurrentThreadName());
     }
     void priorityBestEffort() override {
       callCount_++;
-      EXPECT_EQ(
-          threadNames[useResourcePoolsFlagsSet() ? 1 : 0],
-          *folly::getCurrentThreadName());
+      EXPECT_EQ("cpu.N0", *folly::getCurrentThreadName());
     }
     void voidResponse() override {
       callCount_++;
-      EXPECT_EQ(
-          threadNames[useResourcePoolsFlagsSet() ? 1 : 0],
-          *folly::getCurrentThreadName());
+      EXPECT_EQ("cpu.N0", *folly::getCurrentThreadName());
     }
   };
 
   ScopedServerInterfaceThread runner(
       std::make_shared<TestHandler>(callCount), "::1", 0, [](auto& ts) {
-        if (!useResourcePoolsFlagsSet()) {
-          auto tm = std::shared_ptr<ThreadManagerExecutorAdapter>(
-              new ThreadManagerExecutorAdapter(
-                  std::make_shared<folly::CPUThreadPoolExecutor>(
-                      1, std::make_shared<folly::NamedThreadFactory>("cpu"))));
-          tm->setNamePrefix("tm");
-          tm->threadFactory(
-              std::make_shared<PosixThreadFactory>(
-                  PosixThreadFactory::ATTACHED));
-          tm->start();
-          ts.setThreadManager(tm);
-        } else {
-          ts.setThreadManagerType(
-              apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
-          ts.setCPUWorkerThreadName("cpu");
-          ts.setNumCPUWorkerThreads(1);
-        }
+        ts.setThreadManagerType(
+            apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
+        ts.setCPUWorkerThreadName("cpu");
+        ts.setNumCPUWorkerThreads(1);
       });
   folly::EventBase base;
   auto client = makeClient(runner, &base);
@@ -1769,20 +1654,15 @@ TEST_P(HeaderOrRocket, QueueTimeoutOnServerShutdown) {
 
   auto blockIf = std::make_shared<BlockInterface>();
   auto runner = std::make_unique<ScopedServerInterfaceThread>(blockIf);
-  if (useResourcePoolsFlagsSet()) {
-    // Limit active requests to 1 for this test and ensure we have two threads
-    // in the worker pool.
-    auto& resourcePool =
-        runner->getThriftServer().resourcePoolSet().resourcePool(
-            ResourcePoolHandle::defaultAsync());
-    resourcePool.concurrencyController()
-        .value()
-        .get()
-        .setExecutionLimitRequests(1);
-    dynamic_cast<folly::ThreadPoolExecutor&>(
-        resourcePool.executor().value().get())
-        .setNumThreads(2);
-  }
+  // Limit active requests to 1 for this test and ensure we have two threads
+  // in the worker pool.
+  auto& resourcePool = runner->getThriftServer().resourcePoolSet().resourcePool(
+      ResourcePoolHandle::defaultAsync());
+  resourcePool.concurrencyController().value().get().setExecutionLimitRequests(
+      1);
+  dynamic_cast<folly::ThreadPoolExecutor&>(
+      resourcePool.executor().value().get())
+      .setNumThreads(2);
 
   auto client = runner->newStickyClient<TestServiceAsyncClient>(
       folly::getGlobalIOExecutor()->getEventBase(),

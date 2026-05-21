@@ -43,7 +43,6 @@
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
-#include <thrift/lib/cpp2/server/ServerFlags.h>
 #include <thrift/lib/cpp2/server/ServerInstrumentation.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/DebugTestService.h>
@@ -203,40 +202,29 @@ class DebuggingFrameHandler : public rocket::SetupFrameHandler {
  public:
   explicit DebuggingFrameHandler(ThriftServer& server)
       : origServer_(server),
-        reqRegistry_([] { return RequestsRegistry(0, 0, 0); }) {
-    auto tf =
-        std::make_shared<PosixThreadFactory>(PosixThreadFactory::ATTACHED);
-    tm_ = std::make_shared<SimpleThreadManager>(1);
-    tm_->setNamePrefix("DebugInterface");
-    tm_->threadFactory(std::move(tf));
-    tm_->start();
-  }
+        reqRegistry_([] { return RequestsRegistry(0, 0, 0); }) {}
   std::optional<rocket::ProcessorInfo> tryHandle(
       const RequestSetupMetadata& meta) override {
     if (meta.interfaceKind().has_value() &&
         meta.interfaceKind().value() == InterfaceKind::DEBUGGING) {
-      if (apache::thrift::useResourcePoolsFlagsSet()) {
-        auto asyncHandle = apache::thrift::ResourcePoolHandle::defaultAsync();
-        // Ensure there is an async handler set up in the resource pool.
-        if (!resourcePoolSet_.hasResourcePool(asyncHandle)) {
-          auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
-              1, std::make_shared<folly::NamedThreadFactory>("DebugInterface"));
-          apache::thrift::RoundRobinRequestPile::Options options;
-          auto requestPile =
-              std::make_unique<apache::thrift::RoundRobinRequestPile>(options);
-          auto concurrencyController =
-              std::make_unique<apache::thrift::ParallelConcurrencyController>(
-                  *requestPile.get(), *executor.get());
-          resourcePoolSet_.setResourcePool(
-              asyncHandle,
-              std::move(requestPile),
-              executor,
-              std::move(concurrencyController));
-        }
-        return rocket::ProcessorInfo(debug_, nullptr, reqRegistry_.get());
-      } else {
-        return rocket::ProcessorInfo(debug_, tm_, reqRegistry_.get());
+      auto asyncHandle = apache::thrift::ResourcePoolHandle::defaultAsync();
+      // Ensure there is an async handler set up in the resource pool.
+      if (!resourcePoolSet_.hasResourcePool(asyncHandle)) {
+        auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
+            1, std::make_shared<folly::NamedThreadFactory>("DebugInterface"));
+        apache::thrift::RoundRobinRequestPile::Options options;
+        auto requestPile =
+            std::make_unique<apache::thrift::RoundRobinRequestPile>(options);
+        auto concurrencyController =
+            std::make_unique<apache::thrift::ParallelConcurrencyController>(
+                *requestPile.get(), *executor.get());
+        resourcePoolSet_.setResourcePool(
+            asyncHandle,
+            std::move(requestPile),
+            executor,
+            std::move(concurrencyController));
       }
+      return rocket::ProcessorInfo(debug_, nullptr, reqRegistry_.get());
     }
     return std::nullopt;
   }
@@ -244,7 +232,6 @@ class DebuggingFrameHandler : public rocket::SetupFrameHandler {
  private:
   ThriftServer& origServer_;
   DebugInterface debug_;
-  std::shared_ptr<ThreadManager> tm_;
   folly::ThreadLocal<RequestsRegistry> reqRegistry_;
   apache::thrift::ResourcePoolSet resourcePoolSet_;
 };
@@ -537,12 +524,6 @@ TEST_F(RequestInstrumentationTest, debugInterfaceTest) {
   for (size_t i = 0; i < reqNum; i++) {
     client->semifuture_sendStreamingRequest();
     client->semifuture_sendRequest();
-  }
-
-  if (!useResourcePoolsFlagsSet()) {
-    auto echoed = debugClient->semifuture_echo("echome").get();
-    EXPECT_TRUE(
-        folly::StringPiece(echoed).startsWith("echome:DebugInterface-"));
   }
 
   for (auto& reqSnapshot : getRequestSnapshots(2 * reqNum)) {

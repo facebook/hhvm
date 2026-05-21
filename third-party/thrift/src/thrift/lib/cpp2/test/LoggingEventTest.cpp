@@ -233,9 +233,7 @@ class TestServiceHandler
 
 TEST_F(ServerEventLogTest, serverTest) {
   expectServerEventCall(kServe, 1);
-  if (apache::thrift::useResourcePoolsFlagsSet()) {
-    expectServerEventCall(kResourcePoolsEnabled, 1);
-  }
+  expectServerEventCall(kResourcePoolsEnabled, 1);
   auto handler = std::make_shared<TestServiceHandler>();
   apache::thrift::ScopedServerInterfaceThread server(handler);
 }

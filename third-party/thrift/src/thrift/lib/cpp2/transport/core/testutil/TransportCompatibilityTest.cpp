@@ -34,7 +34,6 @@
 #include <thrift/lib/cpp2/async/PooledRequestChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
-#include <thrift/lib/cpp2/server/ServerFlags.h>
 #include <thrift/lib/cpp2/transport/core/ThriftClient.h>
 #include <thrift/lib/cpp2/transport/core/ThriftClientCallback.h>
 #include <thrift/lib/cpp2/transport/core/testutil/MockCallback.h>
@@ -156,18 +155,14 @@ void SampleServer<Service>::setupServer() {
   server_->setPort(0);
   server_->setNumIOWorkerThreads(numIOThreads_);
   server_->setNumCPUWorkerThreads(numWorkerThreads_);
-  if (useResourcePoolsFlagsSet()) {
-    server_->ensureResourcePools();
-    auto& resourcePool = server_->resourcePoolSet().resourcePool(
-        ResourcePoolHandle::defaultAsync());
-    dynamic_cast<folly::ThreadPoolExecutor&>(
-        resourcePool.executor().value().get())
-        .setNumThreads(numWorkerThreads_);
-    resourcePool.concurrencyController()
-        .value()
-        .get()
-        .setExecutionLimitRequests(numWorkerThreads_);
-  }
+  server_->ensureResourcePools();
+  auto& resourcePool = server_->resourcePoolSet().resourcePool(
+      ResourcePoolHandle::defaultAsync());
+  dynamic_cast<folly::ThreadPoolExecutor&>(
+      resourcePool.executor().value().get())
+      .setNumThreads(numWorkerThreads_);
+  resourcePool.concurrencyController().value().get().setExecutionLimitRequests(
+      numWorkerThreads_);
   server_->setInterface(handler_);
   server_->setGetLoad(
       [](const std::string& metric) { return metric.empty() ? 123 : -1; });

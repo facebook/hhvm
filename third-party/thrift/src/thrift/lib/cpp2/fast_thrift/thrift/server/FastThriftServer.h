@@ -178,6 +178,19 @@ class FastThriftServer {
    */
   void setIOThreadPool(std::shared_ptr<folly::IOThreadPoolExecutorBase> pool);
 
+  /**
+   * Attach a cBPF program to the SO_REUSEPORT group that replaces the
+   * kernel's default 4-tuple hash selection with uniform random across
+   * worker listening sockets. Mitigates per-worker pile-up when client
+   * source IPs / ports are concentrated (a single hash bucket would
+   * funnel most conns to one worker). Linux-only; silently no-op'd at
+   * startAccepting() time on platforms where SO_ATTACH_REUSEPORT_CBPF
+   * isn't available.
+   *
+   * Must be called before start()/serve().
+   */
+  void setEnableReusePortBpfSpread(bool enable);
+
   /// Start accepting connections without blocking.
   void start();
 
@@ -301,6 +314,7 @@ class FastThriftServer {
       metadataResponse_;
   std::optional<security::FizzServerCertConfig> sslConfig_;
   security::ThriftTlsConfig thriftConfig_{};
+  bool enableReusePortBpfSpread_{false};
   // IO thread pool. Either embedder-supplied via setIOThreadPool or
   // constructed in start() from config_.numIOThreads. Released on
   // destruction; the pool's own dtor joins when the last ref drops.

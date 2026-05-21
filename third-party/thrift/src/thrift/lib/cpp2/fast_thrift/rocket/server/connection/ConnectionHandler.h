@@ -16,16 +16,19 @@
 
 #pragma once
 
+#include <chrono>
 #include <functional>
 #include <memory>
+#include <optional>
+#include <vector>
 
 #include <fizz/server/FizzServerContext.h>
+#include <folly/Executor.h>
 #include <folly/io/async/AsyncServerSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
+#include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
-#include <folly/io/async/EventBaseManager.h>
-#include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzHandshakeHelper.h>
 #include <thrift/lib/cpp2/fast_thrift/security/PendingHandshakes.h>
@@ -64,187 +67,56 @@ class ConnectionHandler : public folly::DelayedDestruction,
           nullptr,
       std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams =
           nullptr,
-      std::chrono::milliseconds tlsHandshakeTimeout = std::chrono::seconds{5})
-      : evb_(folly::getKeepAliveToken(&evb)),
-        socket_(new folly::AsyncServerSocket(evb_.get())),
-        connectionFactory_(std::move(connectionFactory)),
-        fizzContext_(std::move(fizzContext)),
-        thriftParams_(std::move(thriftParams)),
-        tlsHandshakeTimeout_(tlsHandshakeTimeout) {}
+      std::chrono::milliseconds tlsHandshakeTimeout = std::chrono::seconds{5});
 
   ConnectionHandler(const ConnectionHandler&) = delete;
   ConnectionHandler& operator=(const ConnectionHandler&) = delete;
   ConnectionHandler(ConnectionHandler&&) = delete;
   ConnectionHandler& operator=(ConnectionHandler&&) = delete;
 
+  // Attach a cBPF program on the SO_REUSEPORT group at startAccepting()
+  // time to replace the kernel's default 4-tuple-hash selection with
+  // uniform random across worker listening sockets. Must be called before
+  // startAccepting(); reading after that is a no-op.
+  void setEnableReusePortBpfSpread(bool e) noexcept {
+    enableReusePortBpfSpread_ = e;
+  }
+
   // AcceptCallback interface
   void connectionAccepted(
       folly::NetworkSocket fd,
       const folly::SocketAddress& clientAddr,
-      AcceptInfo) noexcept override {
-    if (state_ != State::ACCEPTING) {
-      folly::netops::close(fd);
-      return;
-    }
+      AcceptInfo) noexcept override;
 
-    XLOG(DBG3) << "Connection accepted from " << clientAddr.describe();
+  void acceptError(folly::exception_wrapper ew) noexcept override;
 
-    auto socket = folly::AsyncSocket::newSocket(evb_.get(), fd);
+  void acceptStopped() noexcept override;
 
-    if (!fizzContext_) {
-      installConnection(folly::AsyncTransport::UniquePtr(socket.release()));
-      return;
-    }
+  void startAccepting(const folly::SocketAddress& address);
 
-    security::PendingHandshakes::HelperPtr helper(
-        new security::FizzHandshakeHelper(
-            std::move(socket),
-            fizzContext_,
-            thriftParams_,
-            tlsHandshakeTimeout_,
-            pendingHandshakes_,
-            [this](
-                folly::AsyncTransport::UniquePtr negotiated,
-                const folly::exception_wrapper& ex) noexcept {
-              if (ex || !negotiated) {
-                XLOG(DBG3) << "TLS handshake failed: "
-                           << (ex ? ex.what().toStdString()
-                                  : std::string("null"));
-                return;
-              }
-              if (state_ != State::ACCEPTING) {
-                return;
-              }
-              installConnection(std::move(negotiated));
-            }));
-    auto* rawHelper = helper.get();
-    pendingHandshakes_.add(std::move(helper));
-    rawHelper->start();
-  }
+  void stopAccepting();
 
-  void acceptError(folly::exception_wrapper ew) noexcept override {
-    XLOG(ERR) << "Accept error: " << ew.what();
-  }
+  void closeAllConnections();
 
-  void acceptStopped() noexcept override {
-    DestructorGuard dg(this);
-    XLOG(DBG3) << "Accept stopped";
-    state_ = State::STOPPED;
-    pendingHandshakes_.cancelAll();
-    closeAllConnections();
+  size_t connectionCount();
 
-    // Release the guard - this may trigger deferred destruction
-    stoppingDestroyGuard_.reset();
-  }
-
-  void startAccepting(const folly::SocketAddress& address) {
-    DestructorGuard dg(this);
-
-    DCHECK(state_ == State::NONE);
-    DCHECK(socket_);
-    socket_->setReusePortEnabled(true);
-    socket_->bind(address);
-    socket_->listen(1024);
-    socket_->addAcceptCallback(this, evb_.get());
-    socket_->startAccepting();
-    state_ = State::ACCEPTING;
-  }
-
-  void stopAccepting() {
-    if (state_ != State::ACCEPTING) {
-      return;
-    }
-
-    DCHECK(socket_);
-    state_ = State::STOPPING;
-
-    // Hold a guard to keep the object alive until acceptStopped() is called
-    stoppingDestroyGuard_.emplace(this);
-
-    socket_->removeAcceptCallback(this, evb_.get());
-  }
-
-  void closeAllConnections() {
-    for (auto& conn : connections_) {
-      conn.close(folly::exception_wrapper{});
-    }
-    connections_.clear();
-  }
-
-  size_t connectionCount() {
-    size_t count = 0;
-    evb_->runImmediatelyOrRunInEventBaseThreadAndWait(
-        [&count, this] { count = connections_.size(); });
-    return count;
-  }
-
-  void getAddress(folly::SocketAddress* address) const {
-    socket_->getAddress(address);
-  }
+  void getAddress(folly::SocketAddress* address) const;
 
  protected:
-  ~ConnectionHandler() override {
-    if (FOLLY_LIKELY(socket_)) {
-      evb_->runImmediatelyOrRunInEventBaseThreadAndWait(
-          [socket = std::move(socket_)]() mutable { socket.reset(); });
-    }
-  }
+  ~ConnectionHandler() override;
 
-  void destroy() override {
-    if (state_ == State::STOPPED || state_ == State::NONE) {
-      onDelayedDestroy(false);
-    } else {
-      destroyPending_ = true;
-      if (state_ == State::ACCEPTING) {
-        // Schedule destruction after acceptStopped callback completes
-        evb_->runInEventBaseThread([this] { stopAccepting(); });
-        return;
-      }
-      if (state_ == State::STOPPING) {
-        // Still waiting for acceptStopped callback
-        return;
-      }
-    }
-  }
+  void destroy() override;
 
-  void onDelayedDestroy(bool delayed) override {
-    if (delayed && !destroyPending_) {
-      return;
-    }
-    // State is STOPPED or NONE - safe to delete
-    delete this;
-  }
+  void onDelayedDestroy(bool delayed) override;
 
  private:
   enum class State { NONE, ACCEPTING, STOPPING, STOPPED };
 
-  void installConnection(folly::AsyncTransport::UniquePtr socket) {
-    auto conn = connectionFactory_(std::move(socket));
+  void installConnection(folly::AsyncTransport::UniquePtr socket);
 
-    auto* rawTransportHandler = conn.transportHandler.get();
-    conn.transportHandler->setCloseCallback([this, rawTransportHandler]() {
-      removeConnection(rawTransportHandler);
-    });
+  void removeConnection(transport::TransportHandler* transportHandler);
 
-    connections_.emplace_back(std::move(conn));
-
-    rawTransportHandler->onConnect();
-  }
-
-  void removeConnection(transport::TransportHandler* transportHandler) {
-    DestructorGuard dg(this);
-
-    auto it = std::find_if(
-        connections_.begin(),
-        connections_.end(),
-        [transportHandler](const RocketServerConnection& conn) {
-          return conn.transportHandler.get() == transportHandler;
-        });
-    if (it != connections_.end()) {
-      it->close(folly::exception_wrapper{});
-      connections_.erase(it);
-    }
-  }
+  void attachReusePortBpfSpread();
 
   State state_{State::NONE};
   folly::Executor::KeepAlive<folly::EventBase> evb_;
@@ -258,6 +130,7 @@ class ConnectionHandler : public folly::DelayedDestruction,
   std::optional<folly::DelayedDestruction::DestructorGuard>
       stoppingDestroyGuard_;
   bool destroyPending_{false};
+  bool enableReusePortBpfSpread_{false};
 };
 
 } // namespace apache::thrift::fast_thrift::rocket::server::connection

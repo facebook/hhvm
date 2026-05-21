@@ -102,6 +102,13 @@ class ConnectionManager : public folly::DelayedDestruction {
     executor_->removeObserver(observer_);
   }
 
+  // Toggle SO_REUSEPORT cBPF random-spread attachment for newly registered
+  // EventBases. Must be called before start(); the flag is read by
+  // registerEventBase() and applied to each handler before startAccepting().
+  void setEnableReusePortBpfSpread(bool e) noexcept {
+    enableReusePortBpfSpread_ = e;
+  }
+
   /**
    * Get the server's bound address from the first connection handler.
    * Returns the address of any listening socket, useful when binding to port 0.
@@ -157,6 +164,7 @@ class ConnectionManager : public folly::DelayedDestruction {
           fizzContext_,
           thriftParams_,
           tlsHandshakeTimeout_));
+      connectionHandler->setEnableReusePortBpfSpread(enableReusePortBpfSpread_);
       auto [it, inserted] =
           handlerMap.emplace(&evb, std::move(connectionHandler));
       if (inserted) {
@@ -191,6 +199,9 @@ class ConnectionManager : public folly::DelayedDestruction {
   folly::Synchronized<
       folly::F14FastMap<folly::EventBase*, ConnectionHandler::Ptr>>
       connectionHandlers_;
+  // Set-once before start(); consumed by registerEventBase to apply at each
+  // new handler's startAccepting() time.
+  bool enableReusePortBpfSpread_{false};
 };
 
 } // namespace apache::thrift::fast_thrift::rocket::server::connection

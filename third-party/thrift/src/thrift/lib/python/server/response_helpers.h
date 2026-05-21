@@ -142,10 +142,12 @@ apache::thrift::detail::ServerSinkFactory toServerSinkFactory(
       [innerConsumer = std::move(sinkConsumer.consumer)](
           folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> gen) mutable
       -> folly::coro::Task<folly::Try<StreamPayload>> {
+    // Move into coroutine frame to avoid dangling this pointer to lambda
+    auto consumer = std::move(innerConsumer);
     folly::exception_wrapper ew;
     PythonStreamElementEncoder<ProtocolWriter> encoder;
     try {
-      std::unique_ptr<folly::IOBuf> finalResponse = co_await innerConsumer(
+      std::unique_ptr<folly::IOBuf> finalResponse = co_await consumer(
           [](folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> gen_)
               -> folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> {
             while (auto item = co_await gen_.next()) {

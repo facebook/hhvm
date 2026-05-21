@@ -5874,6 +5874,8 @@ TEST_F(ClientProtocolTest, TestAppWrite) {
 
 TEST_F(ClientProtocolTest, TestKeyUpdateNotRequested) {
   setupAcceptingData();
+  auto ext = std::make_shared<MockClientExtensions>();
+  state_.extensions() = ext;
   EXPECT_CALL(*mockKeyScheduler_, _serverKeyUpdate());
   EXPECT_CALL(*mockRead_, hasUnparsedHandshakeData()).WillOnce(Return(false));
 
@@ -5897,7 +5899,13 @@ TEST_F(ClientProtocolTest, TestKeyUpdateNotRequested) {
 
   expectAeadCreation({{"serverkey", &raead}});
   expectEncryptedReadRecordLayerCreation(
-      &rrl, &raead, folly::StringPiece("sat"));
+      &rrl,
+      &raead,
+      folly::StringPiece("sat"),
+      folly::none,
+      nullptr,
+      true,
+      false);
 
   fizz::Param param(TestMessages::keyUpdate(false));
   auto actions = detail::processEvent(state_, param);
@@ -5929,6 +5937,8 @@ TEST_F(ClientProtocolTest, TestKeyUpdateExtraData) {
 
 TEST_F(ClientProtocolTest, TestKeyUpdateRequestFlow) {
   setupAcceptingData();
+  auto ext = std::make_shared<MockClientExtensions>();
+  state_.extensions() = ext;
   EXPECT_CALL(*mockKeyScheduler_, _serverKeyUpdate());
   EXPECT_CALL(*mockRead_, hasUnparsedHandshakeData()).WillOnce(Return(false));
 
@@ -5989,9 +5999,15 @@ TEST_F(ClientProtocolTest, TestKeyUpdateRequestFlow) {
 
   expectAeadCreation(&waead, &raead);
   expectEncryptedReadRecordLayerCreation(
-      &rrl, &raead, folly::StringPiece("sat"));
+      &rrl,
+      &raead,
+      folly::StringPiece("sat"),
+      folly::none,
+      nullptr,
+      true,
+      false);
   expectEncryptedWriteRecordLayerCreation(
-      &wrl, &waead, folly::StringPiece("cat"));
+      &wrl, &waead, folly::StringPiece("cat"), nullptr, nullptr, true, false);
 
   fizz::Param param(TestMessages::keyUpdate(true));
   auto actions = detail::processEvent(state_, param);
@@ -6021,6 +6037,54 @@ TEST_F(ClientProtocolTest, TestKeyUpdateRequestFlow) {
   EXPECT_EQ(
       state_.handshakeTime(),
       std::chrono::system_clock::time_point(std::chrono::minutes(4)));
+}
+
+TEST_F(ClientProtocolTest, TestClientInitiatedKeyUpdate) {
+  setupAcceptingData();
+  auto ext = std::make_shared<MockClientExtensions>();
+  state_.extensions() = ext;
+  EXPECT_CALL(*mockKeyScheduler_, _clientKeyUpdate());
+  EXPECT_CALL(*mockRead_, hasUnparsedHandshakeData()).WillOnce(Return(false));
+
+  EXPECT_CALL(*mockWrite_, _write(_, _))
+      .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
+        TLSContent content;
+        content.contentType = msg.type;
+        content.encryptionLevel = mockWrite_->getEncryptionLevel();
+        EXPECT_EQ(msg.type, ContentType::handshake);
+        content.data = folly::IOBuf::copyBuffer("clientkeyupdated");
+        return content;
+      }));
+
+  EXPECT_CALL(
+      *mockKeyScheduler_, getSecret(AppTrafficSecrets::ClientAppTraffic))
+      .WillOnce(InvokeWithoutArgs([]() {
+        return DerivedSecret(
+            std::vector<uint8_t>({'c', 'a', 't'}),
+            AppTrafficSecrets::ClientAppTraffic);
+      }));
+
+  EXPECT_CALL(*mockKeyScheduler_, _getTrafficKey(RangeMatches("cat"), _, _))
+      .WillOnce(InvokeWithoutArgs([]() {
+        return TrafficKey{
+            folly::IOBuf::copyBuffer("clientkey"),
+            folly::IOBuf::copyBuffer("clientiv")};
+      }));
+
+  MockAead* waead;
+  MockEncryptedWriteRecordLayer* wrl;
+  expectAeadCreation({{"clientkey", &waead}});
+  expectEncryptedWriteRecordLayerCreation(
+      &wrl, &waead, folly::StringPiece("cat"), nullptr, nullptr, true, false);
+
+  KeyUpdateInitiation kui;
+  kui.request_update = KeyUpdateRequest::update_not_requested;
+  fizz::Param param(std::move(kui));
+  auto actions = detail::processEvent(state_, param);
+  expectActions<MutateState, SecretAvailable, WriteToSocket>(actions);
+  processStateMutations(actions);
+  EXPECT_EQ(state_.writeRecordLayer().get(), wrl);
+  EXPECT_EQ(state_.state(), StateEnum::Established);
 }
 
 TEST_F(ClientProtocolTest, TestInvalidEarlyWrite) {

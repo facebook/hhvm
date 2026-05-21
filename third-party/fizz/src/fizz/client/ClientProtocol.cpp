@@ -2917,6 +2917,9 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdateInitiation>::
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
           EncryptionLevel::AppTraffic);
   TRY(writeRecordLayer->setProtocolVersion(ctx.err, *state.version()));
+  if (state.extensions()) {
+    writeRecordLayer->configureClientRecordLayer(state.extensions());
+  }
   auto writeSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ClientAppTraffic);
   TRY(Protocol::setAead(
@@ -2955,6 +2958,9 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdate>::handle(
       state.context()->getFactory()->makeEncryptedReadRecordLayer(
           EncryptionLevel::AppTraffic);
   TRY(readRecordLayer->setProtocolVersion(ctx.err, *state.version()));
+  if (state.extensions()) {
+    readRecordLayer->configureClientRecordLayer(state.extensions());
+  }
   auto readSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ServerAppTraffic);
   TRY(Protocol::setAead(
@@ -2993,6 +2999,9 @@ EventHandler<ClientTypes, StateEnum::Established, Event::KeyUpdate>::handle(
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
           EncryptionLevel::AppTraffic);
   TRY(writeRecordLayer->setProtocolVersion(ctx.err, *state.version()));
+  if (state.extensions()) {
+    writeRecordLayer->configureClientRecordLayer(state.extensions());
+  }
   auto writeSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ClientAppTraffic);
   TRY(Protocol::setAead(

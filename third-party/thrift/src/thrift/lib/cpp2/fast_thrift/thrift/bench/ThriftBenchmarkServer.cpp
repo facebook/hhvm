@@ -181,7 +181,11 @@ class FastThriftBenchmarkServer {
     connectionManager_ = rocket::server::connection::ConnectionManager::create(
         std::move(address),
         folly::getKeepAliveToken(executor_.get()),
-        std::move(connectionFactory));
+        std::move(connectionFactory),
+        nullptr,
+        nullptr,
+        std::chrono::seconds{5},
+        rocket::server::connection::SocketOptions{});
   }
 
   void serve() {

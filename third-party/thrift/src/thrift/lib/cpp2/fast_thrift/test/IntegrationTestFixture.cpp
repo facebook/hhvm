@@ -77,7 +77,11 @@ void IntegrationTestFixture::SetUp() {
   connectionManager_ = TestConnectionManager::create(
       folly::SocketAddress("::1", 0),
       folly::getKeepAliveToken(executor_.get()),
-      std::move(connectionFactory));
+      std::move(connectionFactory),
+      nullptr,
+      nullptr,
+      std::chrono::seconds{5},
+      apache::thrift::fast_thrift::rocket::server::connection::SocketOptions{});
   connectionManager_->start();
 
   serverAddress_ = connectionManager_->getAddress();

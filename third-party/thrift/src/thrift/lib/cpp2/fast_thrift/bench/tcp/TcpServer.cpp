@@ -132,7 +132,11 @@ TcpServer::TcpServer(
   connectionManager_ = TcpConnectionManager::create(
       std::move(address),
       folly::getKeepAliveToken(executor_.get()),
-      std::move(connectionFactory));
+      std::move(connectionFactory),
+      nullptr,
+      nullptr,
+      std::chrono::seconds{5},
+      apache::thrift::fast_thrift::rocket::server::connection::SocketOptions{});
 }
 
 TcpServer::~TcpServer() = default;

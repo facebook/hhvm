@@ -30,6 +30,7 @@
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/SocketOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzHandshakeHelper.h>
 #include <thrift/lib/cpp2/fast_thrift/security/PendingHandshakes.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
@@ -63,11 +64,10 @@ class ConnectionHandler : public folly::DelayedDestruction,
   ConnectionHandler(
       folly::EventBase& evb,
       ConnectionFactory connectionFactory,
-      std::shared_ptr<const fizz::server::FizzServerContext> fizzContext =
-          nullptr,
-      std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams =
-          nullptr,
-      std::chrono::milliseconds tlsHandshakeTimeout = std::chrono::seconds{5});
+      std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
+      std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
+      std::chrono::milliseconds tlsHandshakeTimeout,
+      SocketOptions socketOptions);
 
   ConnectionHandler(const ConnectionHandler&) = delete;
   ConnectionHandler& operator=(const ConnectionHandler&) = delete;
@@ -125,6 +125,7 @@ class ConnectionHandler : public folly::DelayedDestruction,
   std::shared_ptr<const fizz::server::FizzServerContext> fizzContext_;
   std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams_;
   std::chrono::milliseconds tlsHandshakeTimeout_;
+  SocketOptions socketOptions_;
   security::PendingHandshakes pendingHandshakes_;
   std::vector<RocketServerConnection> connections_;
   std::optional<folly::DelayedDestruction::DestructorGuard>

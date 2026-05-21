@@ -39,13 +39,15 @@ ConnectionHandler::ConnectionHandler(
     ConnectionFactory connectionFactory,
     std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
     std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-    std::chrono::milliseconds tlsHandshakeTimeout)
+    std::chrono::milliseconds tlsHandshakeTimeout,
+    SocketOptions socketOptions)
     : evb_(folly::getKeepAliveToken(&evb)),
       socket_(new folly::AsyncServerSocket(evb_.get())),
       connectionFactory_(std::move(connectionFactory)),
       fizzContext_(std::move(fizzContext)),
       thriftParams_(std::move(thriftParams)),
-      tlsHandshakeTimeout_(tlsHandshakeTimeout) {}
+      tlsHandshakeTimeout_(tlsHandshakeTimeout),
+      socketOptions_(socketOptions) {}
 
 ConnectionHandler::~ConnectionHandler() {
   if (FOLLY_LIKELY(socket_)) {
@@ -66,6 +68,7 @@ void ConnectionHandler::connectionAccepted(
   XLOG(DBG3) << "Connection accepted from " << clientAddr.describe();
 
   auto socket = folly::AsyncSocket::newSocket(evb_.get(), fd);
+  socket->setMaxReadsPerEvent(socketOptions_.maxReadsPerEvent);
 
   if (!fizzContext_) {
     installConnection(folly::AsyncTransport::UniquePtr(socket.release()));
@@ -119,8 +122,11 @@ void ConnectionHandler::startAccepting(const folly::SocketAddress& address) {
   DCHECK(state_ == State::NONE);
   DCHECK(socket_);
   socket_->setReusePortEnabled(true);
+  if (socketOptions_.tfoEnabled) {
+    socket_->setTFOEnabled(true, socketOptions_.tfoQueueSize);
+  }
   socket_->bind(address);
-  socket_->listen(1024);
+  socket_->listen(static_cast<int>(socketOptions_.listenBacklog));
   if (enableReusePortBpfSpread_) {
     attachReusePortBpfSpread();
   }

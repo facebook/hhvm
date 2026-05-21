@@ -84,8 +84,13 @@ class ConnectionHandlerTest : public ::testing::Test {
   }
 
   ConnectionHandler::Ptr createConnectionHandler() {
-    return ConnectionHandler::Ptr(
-        new ConnectionHandler(*evb_, createConnectionFactory()));
+    return ConnectionHandler::Ptr(new ConnectionHandler(
+        *evb_,
+        createConnectionFactory(),
+        nullptr,
+        nullptr,
+        std::chrono::seconds{5},
+        SocketOptions{}));
   }
 
   std::pair<folly::NetworkSocket, folly::NetworkSocket> createSocketPair() {

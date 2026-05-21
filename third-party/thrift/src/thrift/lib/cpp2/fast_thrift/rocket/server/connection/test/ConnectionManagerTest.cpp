@@ -48,7 +48,11 @@ class ConnectionManagerTest : public ::testing::Test {
     connectionManager_ = ConnectionManager::create(
         folly::SocketAddress("::1", 0),
         folly::getKeepAliveToken(executor_),
-        createConnectionFactory());
+        createConnectionFactory(),
+        nullptr,
+        nullptr,
+        std::chrono::seconds{5},
+        SocketOptions{});
     connectionManager_->start();
   }
 
@@ -234,7 +238,13 @@ TEST_F(ConnectionManagerTest, StopClosesConnections) {
 TEST_F(ConnectionManagerTest, ConnectionHandlerRegistration) {
   folly::SocketAddress address("::1", 0);
   connectionManager_ = ConnectionManager::create(
-      address, folly::getKeepAliveToken(executor_), createConnectionFactory());
+      address,
+      folly::getKeepAliveToken(executor_),
+      createConnectionFactory(),
+      nullptr,
+      nullptr,
+      std::chrono::seconds{5},
+      SocketOptions{});
 
   // Before start, no handlers should be registered
   {
@@ -255,7 +265,13 @@ TEST_F(ConnectionManagerTest, ConnectionHandlerRegistration) {
 TEST_F(ConnectionManagerTest, DestructorStopsServer) {
   folly::SocketAddress address("::1", 0);
   auto manager = ConnectionManager::create(
-      address, folly::getKeepAliveToken(executor_), createConnectionFactory());
+      address,
+      folly::getKeepAliveToken(executor_),
+      createConnectionFactory(),
+      nullptr,
+      nullptr,
+      std::chrono::seconds{5},
+      SocketOptions{});
   manager->start();
 
   // Verify handlers are registered

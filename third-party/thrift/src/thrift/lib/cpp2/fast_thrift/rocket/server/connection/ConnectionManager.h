@@ -75,18 +75,18 @@ class ConnectionManager : public folly::DelayedDestruction {
       folly::SocketAddress address,
       folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor,
       ConnectionFactory connectionFactory,
-      std::shared_ptr<const fizz::server::FizzServerContext> fizzContext =
-          nullptr,
-      std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams =
-          nullptr,
-      std::chrono::milliseconds tlsHandshakeTimeout = std::chrono::seconds{5}) {
+      std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
+      std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
+      std::chrono::milliseconds tlsHandshakeTimeout,
+      SocketOptions socketOptions) {
     return Ptr(new ConnectionManager(
         std::move(address),
         std::move(executor),
         std::move(connectionFactory),
         std::move(fizzContext),
         std::move(thriftParams),
-        tlsHandshakeTimeout));
+        tlsHandshakeTimeout,
+        socketOptions));
   }
 
   void start() {
@@ -130,13 +130,15 @@ class ConnectionManager : public folly::DelayedDestruction {
       ConnectionFactory connectionFactory,
       std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
       std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-      std::chrono::milliseconds tlsHandshakeTimeout)
+      std::chrono::milliseconds tlsHandshakeTimeout,
+      SocketOptions socketOptions)
       : address_(std::move(address)),
         executor_(std::move(executor)),
         connectionFactory_(std::move(connectionFactory)),
         fizzContext_(std::move(fizzContext)),
         thriftParams_(std::move(thriftParams)),
         tlsHandshakeTimeout_(tlsHandshakeTimeout),
+        socketOptions_(socketOptions),
         observer_(std::make_shared<IOObserver>(*this)) {}
 
   ~ConnectionManager() override = default;
@@ -163,7 +165,8 @@ class ConnectionManager : public folly::DelayedDestruction {
           connectionFactory_,
           fizzContext_,
           thriftParams_,
-          tlsHandshakeTimeout_));
+          tlsHandshakeTimeout_,
+          socketOptions_));
       connectionHandler->setEnableReusePortBpfSpread(enableReusePortBpfSpread_);
       auto [it, inserted] =
           handlerMap.emplace(&evb, std::move(connectionHandler));
@@ -194,6 +197,7 @@ class ConnectionManager : public folly::DelayedDestruction {
   std::shared_ptr<const fizz::server::FizzServerContext> fizzContext_;
   std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams_;
   std::chrono::milliseconds tlsHandshakeTimeout_;
+  SocketOptions socketOptions_;
   std::shared_ptr<IOObserver> observer_;
 
   folly::Synchronized<

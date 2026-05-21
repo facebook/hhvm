@@ -31,6 +31,7 @@
 #include <thrift/lib/cpp2/fast_thrift/common/Stats.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/SocketOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/ThriftTlsConfig.h>
@@ -140,6 +141,14 @@ class FastThriftServerT {
   // (StopTLS, params negotiation, etc.). Must be called before start()/serve().
   void setThriftConfig(security::ThriftTlsConfig cfg);
 
+  // Listening-socket tuning knobs (listen backlog, TCP Fast Open, max
+  // accepts per event). Applied by ConnectionHandler at startAccepting
+  // time on every IO thread's listening socket. When unset, defaults from
+  // SocketOptions.h apply.
+  //
+  // Must be called before start()/serve().
+  void setSocketOptions(rocket::server::connection::SocketOptions opts);
+
   /**
    * Start accepting connections without blocking.
    */
@@ -208,6 +217,9 @@ class FastThriftServerT {
   std::optional<security::FizzServerCertConfig> sslConfig_;
   security::ThriftTlsConfig thriftConfig_{};
   std::shared_ptr<folly::IOThreadPoolExecutor> executor_;
+  // Listening-socket tuning. Defaults from SocketOptions.h apply unless the
+  // embedder calls setSocketOptions before start().
+  rocket::server::connection::SocketOptions socketOptions_{};
   ServerConnectionManager::Ptr connectionManager_;
   channel_pipeline::SimpleBufferAllocator rocketAllocator_;
   folly::Synchronized<
@@ -290,6 +302,15 @@ void FastThriftServerT<Stats>::setThriftConfig(security::ThriftTlsConfig cfg) {
   CHECK(state_ == State::kNotStarted)
       << "FastThriftChannelServer::setThriftConfig must be called before start()";
   thriftConfig_ = cfg;
+}
+
+template <typename Stats>
+void FastThriftServerT<Stats>::setSocketOptions(
+    rocket::server::connection::SocketOptions opts) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftChannelServer::setSocketOptions must be called before start()";
+  socketOptions_ = opts;
 }
 
 template <typename Stats>
@@ -503,7 +524,8 @@ void FastThriftServerT<Stats>::start() {
       createConnectionFactory(),
       std::move(fizzContext),
       std::move(thriftParams),
-      tlsHandshakeTimeout);
+      tlsHandshakeTimeout,
+      socketOptions_);
 
   connectionManager_->start();
   state_ = State::kRunning;

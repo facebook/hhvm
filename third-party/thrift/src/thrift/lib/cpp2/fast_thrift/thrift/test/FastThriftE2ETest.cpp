@@ -273,7 +273,12 @@ class FastThriftE2ETest : public ::testing::Test {
         connection::ConnectionManager::create(
             folly::SocketAddress("::1", 0),
             folly::getKeepAliveToken(executor_.get()),
-            std::move(connectionFactory));
+            std::move(connectionFactory),
+            nullptr,
+            nullptr,
+            std::chrono::seconds{5},
+            apache::thrift::fast_thrift::rocket::server::connection::
+                SocketOptions{});
     connectionManager_->start();
 
     clientThread_ = std::make_unique<folly::ScopedEventBaseThread>();
@@ -654,7 +659,11 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
     connectionManager_ = rocket::server::connection::ConnectionManager::create(
         folly::SocketAddress("::1", 0),
         folly::getKeepAliveToken(executor_.get()),
-        std::move(connectionFactory));
+        std::move(connectionFactory),
+        nullptr,
+        nullptr,
+        std::chrono::seconds{5},
+        rocket::server::connection::SocketOptions{});
     connectionManager_->start();
 
     clientThread_ = std::make_unique<folly::ScopedEventBaseThread>();

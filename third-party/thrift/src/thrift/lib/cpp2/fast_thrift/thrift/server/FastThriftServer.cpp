@@ -129,6 +129,15 @@ void FastThriftServer::setEnableReusePortBpfSpread(bool enable) {
   enableReusePortBpfSpread_ = enable;
 }
 
+void FastThriftServer::setSocketOptions(
+    rocket::server::connection::SocketOptions opts) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::setSocketOptions must be called before "
+         "start()/serve()";
+  socketOptions_ = opts;
+}
+
 rocket::server::connection::ConnectionFactory
 FastThriftServer::createConnectionFactory() {
   return [this](folly::AsyncTransport::UniquePtr socket)
@@ -424,7 +433,8 @@ void FastThriftServer::start() {
       createConnectionFactory(),
       std::move(fizzBuilt.fizzContext),
       std::move(fizzBuilt.thriftParams),
-      tlsHandshakeTimeout);
+      tlsHandshakeTimeout,
+      socketOptions_);
   connectionManager_->setEnableReusePortBpfSpread(enableReusePortBpfSpread_);
 
   connectionManager_->start();

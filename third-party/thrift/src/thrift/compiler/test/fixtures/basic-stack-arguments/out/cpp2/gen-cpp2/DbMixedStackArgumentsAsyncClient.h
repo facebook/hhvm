@@ -90,9 +90,8 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channelShared->getProtocolId();
-    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = getDataByKey0Ctx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -131,9 +130,7 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    if (auto channel = channelWeak.lock()) {
-      channel->decompressResponse(returnState);
-    }
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getDataByKey0(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -211,9 +208,8 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channelShared->getProtocolId();
-    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = getDataByKey1Ctx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -252,9 +248,7 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    if (auto channel = channelWeak.lock()) {
-      channel->decompressResponse(returnState);
-    }
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getDataByKey1(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();

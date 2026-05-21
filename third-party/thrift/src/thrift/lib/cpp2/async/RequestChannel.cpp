@@ -231,11 +231,6 @@ class RequestClientCallbackWrapper
     tHeader->fds = std::move(firstResponse.fds.dcheckReceivedOrEmpty());
     detail::fillTHeaderFromResponseRpcMetadata(
         firstResponse.metadata, *tHeader);
-    if (apache::thrift::clientCompressRequestOnCpu()) {
-      if (auto compression = firstResponse.metadata.compression()) {
-        tHeader->setResponseCompressionAlgorithm(*compression);
-      }
-    }
     requestCallback_.release()->onResponse(
         ClientReceiveState::create(
             std::move(firstResponse.payload),

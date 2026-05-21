@@ -89,9 +89,8 @@ class Client<::facebook::thrift::test::fixtures::adapter::AdapterService> : publ
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channelShared->getProtocolId();
-    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = countCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -130,9 +129,7 @@ class Client<::facebook::thrift::test::fixtures::adapter::AdapterService> : publ
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    if (auto channel = channelWeak.lock()) {
-      channel->decompressResponse(returnState);
-    }
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_count(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -207,9 +204,8 @@ class Client<::facebook::thrift::test::fixtures::adapter::AdapterService> : publ
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channelShared->getProtocolId();
-    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = adaptedTypesCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -248,9 +244,7 @@ class Client<::facebook::thrift::test::fixtures::adapter::AdapterService> : publ
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    if (auto channel = channelWeak.lock()) {
-      channel->decompressResponse(returnState);
-    }
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_adaptedTypes(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();

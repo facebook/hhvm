@@ -102,8 +102,6 @@ class RocketClientChannelBase : public ClientChannel {
       BiDiClientCallback* clientCallback,
       std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
-  void decompressResponse(ClientReceiveState& state) override;
-
   folly::EventBase* getEventBase() const override { return evb_; }
 
   uint16_t getProtocolId() override { return protocolId_; }

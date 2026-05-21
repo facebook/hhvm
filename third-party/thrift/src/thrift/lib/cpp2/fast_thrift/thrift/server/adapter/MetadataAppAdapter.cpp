@@ -68,7 +68,8 @@ channel_pipeline::Result MetadataAppAdapter::handleGetThriftServiceMetadata(
     ThriftServerAppAdapter* self,
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> /*requestData*/,
-    apache::thrift::ProtocolId protocol) noexcept {
+    apache::thrift::ProtocolId protocol,
+    std::unique_ptr<ThriftRequestContext> /*requestContext*/) noexcept {
   auto* impl = static_cast<MetadataAppAdapter*>(self);
   switch (protocol) {
     case apache::thrift::ProtocolId::COMPACT:

@@ -43,15 +43,14 @@
 
 namespace apache::thrift::fast_thrift::thrift {
 
-class ThriftServerCompositeAppAdapter;
-
 /**
  * ThriftServerAppAdapter — base class for generated fast server handlers.
  *
  * The generated <Service>AppAdapter extends this class, inheriting pipeline
  * integration, metadata deserialization, and response writing.
  *
- * Satisfies TailEndpointHandler concept (onRead / onException).
+ * Satisfies TailEndpointHandler concept (onRead / onException) and the
+ * ThriftAppAdapter concept consumed by ThriftServerCompositeAppAdapter.
  *
  * State machine (one-directional; adapter is per-connection and never reused):
  *   Created   --setPipeline-->        Ready
@@ -71,12 +70,6 @@ class ThriftServerCompositeAppAdapter;
  *   refuses all writes.
  */
 class ThriftServerAppAdapter : public folly::DelayedDestruction {
-  // ThriftServerCompositeAppAdapter reads each child's method names at ctor
-  // (methodNames) to build a merged name -> owner map, then on each request
-  // forwards the inbound message into the chosen child's onRead. Friend-only
-  // — not part of the public adapter API.
-  friend class ThriftServerCompositeAppAdapter;
-
  public:
   // Canonical owning-pointer alias. Adapters are folly::DelayedDestruction
   // objects, so they can't be deleted with plain delete. Every site that
@@ -235,6 +228,10 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
       apache::thrift::ResponseRpcErrorCode code,
       std::string message) noexcept;
 
+  // Methods registered via addMethodHandler — consumed by the composite
+  // to build its name -> owner routing map.
+  std::vector<std::string_view> methodNames() const noexcept;
+
  protected:
   void addMethodHandler(
       std::string_view name, RequestResponseProcessFn handler);
@@ -246,9 +243,6 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   folly::EventBase* getEventBase() const { return evb_; }
 
  private:
-  // Routing surface for the composite (befriended above). Composite calls
-  // methodNames() at ctor to discover what each child owns.
-  std::vector<std::string_view> methodNames() const noexcept;
   channel_pipeline::Result handleRequestResponse(
       ThriftServerRequestMessage&& request) noexcept;
   FOLLY_NOINLINE channel_pipeline::Result handleWrongRpcKind(

@@ -67,7 +67,8 @@ class MetadataAppAdapter final : public ThriftServerAppAdapter {
       ThriftServerAppAdapter* self,
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> requestData,
-      apache::thrift::ProtocolId protocol) noexcept;
+      apache::thrift::ProtocolId protocol,
+      std::unique_ptr<ThriftRequestContext> requestContext) noexcept;
 
   template <typename Writer>
   channel_pipeline::Result writeMetadataResponse(uint32_t streamId) noexcept;

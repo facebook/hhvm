@@ -17,34 +17,18 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
 
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include <folly/logging/xlog.h>
 
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftRequestPayloads.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftResponsePayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
-
-void ThriftServerCompositeAppAdapter::addChild(
-    ThriftServerAppAdapter::Ptr child) {
-  CHECK(child) << "ThriftServerCompositeAppAdapter::addChild: null child";
-
-  // First-wins: try_emplace keeps the existing entry, so methods registered
-  // by an earlier child shadow same-named methods on a later child.
-  auto* raw = child.get();
-  for (auto name : child->methodNames()) {
-    auto [_, inserted] = methodMap_.try_emplace(std::string(name), raw);
-    if (!inserted) {
-      XLOG(WARN) << "ThriftServerCompositeAppAdapter: method '" << name
-                 << "' already claimed by an earlier child; dropping from new "
-                    "child (index "
-                 << children_.size() << ")";
-    }
-  }
-
-  children_.push_back(std::move(child));
-}
 
 channel_pipeline::Result ThriftServerCompositeAppAdapter::onRead(
     channel_pipeline::TypeErasedBox&& msg) noexcept {
@@ -53,13 +37,6 @@ channel_pipeline::Result ThriftServerCompositeAppAdapter::onRead(
   const auto& request = msg.get<ThriftServerRequestMessage>();
   DCHECK(request.streamId != 0) << "Invalid stream ID";
 
-  // Routing only depends on the request's method name, which every
-  // initial-request payload alternative exposes via getRequestRpcMetadata
-  // (the accessor is constrained on ThriftRequestPayloadConcept, so adding
-  // stream/sink/fnf/bidi init payloads to the inbound variant Just Works
-  // here). Continuation frames (RequestN, Cancel, sink chunks) never reach
-  // the composite — the rocket pipeline tracks per-stream subscriptions
-  // below us and only initial-request messages bubble up.
   const auto* metadata = request.payload.getRequestRpcMetadata();
   DCHECK(metadata != nullptr);
 
@@ -70,48 +47,83 @@ channel_pipeline::Result ThriftServerCompositeAppAdapter::onRead(
 
   auto it = methodMap_.find(methodName);
   if (FOLLY_UNLIKELY(it == methodMap_.end())) {
-    return handleUnknownMethod(request.streamId, methodName);
+    return writeUnknownMethodError(request.streamId, methodName);
   }
-
-  return it->second->onRead(std::move(msg));
-}
-
-channel_pipeline::Result ThriftServerCompositeAppAdapter::handleUnknownMethod(
-    uint32_t streamId, std::string_view methodName) noexcept {
-  return writeFrameworkError(
-      streamId,
-      apache::thrift::ResponseRpcErrorCode::UNKNOWN_METHOD,
-      std::string("Unknown method: ") + std::string(methodName));
-}
-
-void ThriftServerCompositeAppAdapter::setPipeline(
-    channel_pipeline::PipelineImpl* pipeline) noexcept {
-  ThriftServerAppAdapter::setPipeline(pipeline);
-  for (auto& child : children_) {
-    child->setPipeline(pipeline);
-  }
-}
-
-void ThriftServerCompositeAppAdapter::onPipelineActive() noexcept {
-  ThriftServerAppAdapter::onPipelineActive();
-  for (auto& child : children_) {
-    child->onPipelineActive();
-  }
-}
-
-void ThriftServerCompositeAppAdapter::onPipelineInactive() noexcept {
-  ThriftServerAppAdapter::onPipelineInactive();
-  for (auto& child : children_) {
-    child->onPipelineInactive();
-  }
+  return it->second.invoke(it->second.owner, std::move(msg));
 }
 
 void ThriftServerCompositeAppAdapter::onException(
     folly::exception_wrapper&& e) noexcept {
-  ThriftServerAppAdapter::onException(folly::exception_wrapper{e});
+  XLOG(ERR) << "Pipeline exception: " << e.what();
   for (auto& child : children_) {
-    child->onException(folly::exception_wrapper{e});
+    child.vtable->onException(child.owner, folly::exception_wrapper{e});
   }
+}
+
+void ThriftServerCompositeAppAdapter::setPipeline(
+    channel_pipeline::PipelineImpl* pipeline) noexcept {
+  pipeline_ = pipeline;
+  for (auto& child : children_) {
+    child.vtable->setPipeline(child.owner, pipeline);
+  }
+}
+
+void ThriftServerCompositeAppAdapter::handlerAdded() noexcept {
+  for (auto& child : children_) {
+    child.vtable->handlerAdded(child.owner);
+  }
+}
+
+void ThriftServerCompositeAppAdapter::handlerRemoved() noexcept {
+  for (auto& child : children_) {
+    child.vtable->handlerRemoved(child.owner);
+  }
+}
+
+void ThriftServerCompositeAppAdapter::onPipelineActive() noexcept {
+  for (auto& child : children_) {
+    child.vtable->onPipelineActive(child.owner);
+  }
+}
+
+void ThriftServerCompositeAppAdapter::onPipelineInactive() noexcept {
+  for (auto& child : children_) {
+    child.vtable->onPipelineInactive(child.owner);
+  }
+}
+
+void ThriftServerCompositeAppAdapter::onWriteReady() noexcept {
+  for (auto& child : children_) {
+    child.vtable->onWriteReady(child.owner);
+  }
+}
+
+void ThriftServerCompositeAppAdapter::warnDuplicateMethod(
+    std::string_view name) const {
+  XLOG(WARN) << "ThriftServerCompositeAppAdapter: method '" << name
+             << "' already claimed by an earlier child; dropping from new "
+                "child (index "
+             << children_.size() << ")";
+}
+
+channel_pipeline::Result
+ThriftServerCompositeAppAdapter::writeUnknownMethodError(
+    uint32_t streamId, std::string_view methodName) noexcept {
+  if (FOLLY_UNLIKELY(!pipeline_)) {
+    XLOG(ERR) << "Pipeline not set, cannot send unknown-method error";
+    return channel_pipeline::Result::Error;
+  }
+  auto err = serializeResponseRpcError(
+      apache::thrift::ResponseRpcErrorCode::UNKNOWN_METHOD,
+      std::string("Unknown method: ") + std::string(methodName));
+  ThriftServerResponseMessage response{
+      .payload = ThriftErrorPayload{
+          .data = std::move(err.data),
+          .metadata = nullptr,
+          .streamId = streamId,
+          .errorCode = static_cast<uint32_t>(err.errorCode)}};
+  return pipeline_->fireWrite(
+      channel_pipeline::erase_and_box(std::move(response)));
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

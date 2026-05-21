@@ -21,6 +21,8 @@
 #include <mutex>
 #include <optional>
 #include <unordered_map>
+#include <variant>
+#include <vector>
 
 #include <folly/SocketAddress.h>
 #include <folly/Synchronized.h>
@@ -42,6 +44,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServerRegistry.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapterFactory.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -234,18 +237,33 @@ class FastThriftServer {
   };
 
   /**
-   * Per-connection thrift-layer state.
-   * Owns the per-connection app adapter, its pipeline, and the buffer
-   * allocator the pipeline uses. Lifetime is server's; entries are
+   * Per-connection thrift-layer state when the tail is a single generated
+   * FastSvAppAdapter. Owns the adapter, its pipeline, and the buffer
+   * allocator the pipeline uses. Lifetime is the server's; entries are
    * removed when the adapter's close callback fires.
    */
-  struct FastConnection {
+  struct SimpleConnection {
     ThriftServerAppAdapter::Ptr adapter;
     std::unique_ptr<server::ThriftServerTransportAdapter> transportAdapter;
     channel_pipeline::PipelineImpl::Ptr pipeline;
-    std::unique_ptr<channel_pipeline::SimpleBufferAllocator> allocator =
-        std::make_unique<channel_pipeline::SimpleBufferAllocator>();
+    std::unique_ptr<channel_pipeline::SimpleBufferAllocator> allocator;
   };
+
+  /**
+   * Per-connection thrift-layer state when the tail is a composite fronting
+   * multiple user adapters. The composite borrows raw T* into its children,
+   * so children must outlive it. Member dtors run in reverse declaration
+   * order: `children` is declared first → destroyed last.
+   */
+  struct CompositeConnection {
+    std::vector<ThriftServerAppAdapter::Ptr> children;
+    ThriftServerCompositeAppAdapter::Ptr adapter;
+    std::unique_ptr<server::ThriftServerTransportAdapter> transportAdapter;
+    channel_pipeline::PipelineImpl::Ptr pipeline;
+    std::unique_ptr<channel_pipeline::SimpleBufferAllocator> allocator;
+  };
+
+  using ConnectionVariant = std::variant<SimpleConnection, CompositeConnection>;
 
   /**
    * Auxiliary interfaces like monitoring, status, debugging, etc. will live
@@ -268,7 +286,10 @@ class FastThriftServer {
           onSetupComplete);
 
   void registerConnection(
-      ThriftServerAppAdapter* key, FastConnection connection);
+      ThriftServerAppAdapter* key, SimpleConnection connection);
+
+  void registerConnection(
+      ThriftServerCompositeAppAdapter* key, CompositeConnection connection);
 
   const FastThriftServerConfig config_;
   std::shared_ptr<ThriftServerAppAdapterFactory> handler_;
@@ -286,8 +307,7 @@ class FastThriftServer {
   std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool_;
   ServerConnectionManager::Ptr connectionManager_;
   channel_pipeline::SimpleBufferAllocator rocketAllocator_;
-  folly::Synchronized<
-      std::unordered_map<ThriftServerAppAdapter*, FastConnection>>
+  folly::Synchronized<std::unordered_map<void*, ConnectionVariant>>
       thriftConnections_;
   folly::Baton<> stopBaton_;
   // Guards state_ and serializes lifecycle transitions so that stop()

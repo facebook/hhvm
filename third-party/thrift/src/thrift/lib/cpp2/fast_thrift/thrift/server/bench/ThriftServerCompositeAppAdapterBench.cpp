@@ -98,10 +98,12 @@ ThriftServerRequestMessage makeRequest(
   return msg;
 }
 
-// Build N children, each owning four distinct methods. Returns the composite
-// plus the method names registered for child indices the bench wants to hit.
+// Build N children, each owning four distinct methods. Returns the composite,
+// the child owners (composite borrows; caller keeps them alive), and the
+// method names registered for child indices the bench wants to hit.
 struct CompositeFixture {
   ThriftServerCompositeAppAdapter::Ptr composite;
+  std::vector<NoOpAdapter::Ptr> children;
   std::vector<std::string> methodNames; // one method name per child
 };
 
@@ -109,6 +111,7 @@ CompositeFixture makeComposite(size_t numChildren) {
   CompositeFixture fixture;
   fixture.composite = ThriftServerCompositeAppAdapter::Ptr{
       new ThriftServerCompositeAppAdapter()};
+  fixture.children.reserve(numChildren);
   fixture.methodNames.reserve(numChildren);
 
   for (size_t i = 0; i < numChildren; ++i) {
@@ -120,7 +123,8 @@ CompositeFixture makeComposite(size_t numChildren) {
           "child" + std::to_string(i) + "_method" + std::to_string(m));
     }
     fixture.methodNames.push_back("child" + std::to_string(i) + "_method0");
-    fixture.composite->addChild(ThriftServerAppAdapter::Ptr{child.release()});
+    fixture.composite->addChild(child.get());
+    fixture.children.push_back(std::move(child));
   }
   return fixture;
 }
@@ -235,6 +239,142 @@ BENCHMARK_RELATIVE(Composite_FourChildren_HitLast, iters) {
   folly::BenchmarkSuspender suspender;
   auto fixture = makeComposite(/*numChildren=*/4);
   auto requests = prebuildRequests(iters, fixture.methodNames[3]);
+  suspender.dismiss();
+
+  for (size_t i = 0; i < iters; ++i) {
+    auto result =
+        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    folly::doNotOptimizeAway(result);
+  }
+}
+
+BENCHMARK_DRAW_LINE();
+
+// =============================================================================
+// Larger child counts — confirm F14 lookup stays flat (regression guard).
+// =============================================================================
+
+BENCHMARK(Composite_EightChildren_HitLast, iters) {
+  folly::BenchmarkSuspender suspender;
+  auto fixture = makeComposite(/*numChildren=*/8);
+  auto requests = prebuildRequests(iters, fixture.methodNames[7]);
+  suspender.dismiss();
+
+  for (size_t i = 0; i < iters; ++i) {
+    auto result =
+        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    folly::doNotOptimizeAway(result);
+  }
+}
+
+BENCHMARK_RELATIVE(Composite_SixteenChildren_HitLast, iters) {
+  folly::BenchmarkSuspender suspender;
+  auto fixture = makeComposite(/*numChildren=*/16);
+  auto requests = prebuildRequests(iters, fixture.methodNames[15]);
+  suspender.dismiss();
+
+  for (size_t i = 0; i < iters; ++i) {
+    auto result =
+        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    folly::doNotOptimizeAway(result);
+  }
+}
+
+BENCHMARK_DRAW_LINE();
+
+// =============================================================================
+// Heterogeneous children — concept-based design's headline capability.
+// Two distinct concrete child types share the composite. Per-T thunks
+// dispatch correctly without inheriting from a common base. Expect parity
+// with the homogeneous Composite_TwoChildren benches.
+// =============================================================================
+
+// Second adapter type whose runtime shape matches NoOpAdapter but whose
+// concrete C++ type is distinct — proves the composite stores heterogeneous
+// children via per-T thunks, not via shared base inheritance.
+class OtherNoOpAdapter : public ThriftServerAppAdapter {
+ public:
+  using Ptr = std::unique_ptr<OtherNoOpAdapter, Destructor>;
+
+  void registerMethod(std::string_view name) {
+    addMethodHandler(
+        name,
+        +[](ThriftServerAppAdapter* /*self*/,
+            uint32_t /*streamId*/,
+            std::unique_ptr<folly::IOBuf> /*data*/,
+            apache::thrift::ProtocolId /*protocol*/,
+            std::unique_ptr<ThriftRequestContext> /*requestContext*/) noexcept
+            -> Result { return Result::Success; });
+  }
+};
+
+struct HeterogeneousFixture {
+  ThriftServerCompositeAppAdapter::Ptr composite;
+  NoOpAdapter::Ptr firstChild;
+  OtherNoOpAdapter::Ptr secondChild;
+  std::string firstMethod;
+  std::string secondMethod;
+};
+
+HeterogeneousFixture makeHeterogeneousComposite() {
+  HeterogeneousFixture fixture;
+  fixture.composite = ThriftServerCompositeAppAdapter::Ptr{
+      new ThriftServerCompositeAppAdapter()};
+  fixture.firstChild = NoOpAdapter::Ptr{new NoOpAdapter()};
+  fixture.secondChild = OtherNoOpAdapter::Ptr{new OtherNoOpAdapter()};
+  for (int m = 0; m < 4; ++m) {
+    fixture.firstChild->registerMethod("first_method" + std::to_string(m));
+    fixture.secondChild->registerMethod("second_method" + std::to_string(m));
+  }
+  fixture.firstMethod = "first_method0";
+  fixture.secondMethod = "second_method0";
+  fixture.composite->addChild(fixture.firstChild.get());
+  fixture.composite->addChild(fixture.secondChild.get());
+  return fixture;
+}
+
+BENCHMARK(Composite_HeterogeneousChildren_HitFirst, iters) {
+  folly::BenchmarkSuspender suspender;
+  auto fixture = makeHeterogeneousComposite();
+  auto requests = prebuildRequests(iters, fixture.firstMethod);
+  suspender.dismiss();
+
+  for (size_t i = 0; i < iters; ++i) {
+    auto result =
+        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    folly::doNotOptimizeAway(result);
+  }
+}
+
+BENCHMARK_RELATIVE(Composite_HeterogeneousChildren_HitSecond, iters) {
+  folly::BenchmarkSuspender suspender;
+  auto fixture = makeHeterogeneousComposite();
+  auto requests = prebuildRequests(iters, fixture.secondMethod);
+  suspender.dismiss();
+
+  for (size_t i = 0; i < iters; ++i) {
+    auto result =
+        fixture.composite->onRead(erase_and_box(std::move(requests[i])));
+    folly::doNotOptimizeAway(result);
+  }
+}
+
+BENCHMARK_DRAW_LINE();
+
+// =============================================================================
+// Failure path: unknown method → framework-error fire. Establishes a ceiling
+// for the failure path so future regressions in serializeResponseRpcError or
+// the error fire surface in this microbench.
+// =============================================================================
+
+BENCHMARK(Composite_UnknownMethod, iters) {
+  folly::BenchmarkSuspender suspender;
+  auto fixture = makeComposite(/*numChildren=*/4);
+  // Use a method name no child registered. Cannot share buildPipeline here
+  // (bench has no pipeline wiring); composite's writeUnknownMethodError
+  // returns Result::Error early when pipeline_ is unset. The hot work
+  // exercised here is still the methodMap miss probe.
+  auto requests = prebuildRequests(iters, "nobody_owns_this");
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {

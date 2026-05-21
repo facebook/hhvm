@@ -76,7 +76,11 @@ apache::thrift::ResponseRpcError deserializeResponseRpcError(
 
 // Test child adapter: exposes addMethodHandler + tracks dispatch + records the
 // std::string identifier set at registration so tests can prove which child
-// served a request.
+// served a request. Also counts lifecycle hooks via shadowing — the
+// composite's vtable templates on T so `static_cast<TestChildAdapter*>(p)`
+// resolves to these shadows. State-bearing base methods (onPipelineActive,
+// onPipelineInactive, onException) must be chained from the shadows;
+// otherwise the child never reaches Open and onRead rejects with Error.
 class TestChildAdapter : public ThriftServerAppAdapter {
  public:
   using Ptr = std::unique_ptr<TestChildAdapter, Destructor>;
@@ -99,10 +103,76 @@ class TestChildAdapter : public ThriftServerAppAdapter {
         });
   }
 
+  // Lifecycle shadows — bump counters so tests can verify fan-out, then
+  // chain to base for state-bearing methods. The composite's vtable resolves
+  // on T = TestChildAdapter, so without chaining the base's state machine
+  // (Created→Ready→Open and onException close) never runs and downstream
+  // onRead rejects with Result::Error.
+  //
+  // onPipelineActive's base DCHECKs state==Ready, so guard the chain — some
+  // tests exercise fan-out without a real pipeline setup and never reach
+  // Ready. onPipelineInactive / onException have no such precondition.
+  void handlerAdded() noexcept { ++handlerAddedCount; }
+  void handlerRemoved() noexcept { ++handlerRemovedCount; }
+  void onPipelineActive() noexcept {
+    ++onPipelineActiveCount;
+    if (state() == State::Ready) {
+      ThriftServerAppAdapter::onPipelineActive();
+    }
+  }
+  void onPipelineInactive() noexcept {
+    ++onPipelineInactiveCount;
+    ThriftServerAppAdapter::onPipelineInactive();
+  }
+  void onWriteReady() noexcept { ++onWriteReadyCount; }
+  void onException(folly::exception_wrapper&& e) noexcept {
+    ++onExceptionCount;
+    lastException = e;
+    ThriftServerAppAdapter::onException(folly::exception_wrapper{e});
+  }
+
   std::string id_;
   std::string dispatchedTo;
   uint32_t capturedStreamId{0};
   apache::thrift::ProtocolId capturedProtocol{};
+
+  int handlerAddedCount{0};
+  int handlerRemovedCount{0};
+  int onPipelineActiveCount{0};
+  int onPipelineInactiveCount{0};
+  int onWriteReadyCount{0};
+  int onExceptionCount{0};
+  folly::exception_wrapper lastException;
+};
+
+// Second concrete child type — proves heterogeneous children that satisfy
+// the concepts can coexist in the same composite without sharing a
+// derived type. Identical surface to TestChildAdapter; the distinct C++
+// type is the point.
+class OtherChildAdapter : public ThriftServerAppAdapter {
+ public:
+  using Ptr = std::unique_ptr<OtherChildAdapter, Destructor>;
+
+  explicit OtherChildAdapter(std::string id) : id_(std::move(id)) {}
+
+  void registerMethod(std::string_view name) {
+    addMethodHandler(
+        name,
+        +[](ThriftServerAppAdapter* self,
+            uint32_t streamId,
+            std::unique_ptr<folly::IOBuf>,
+            apache::thrift::ProtocolId,
+            std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+          auto* t = static_cast<OtherChildAdapter*>(self);
+          t->dispatchedTo = t->id_;
+          t->capturedStreamId = streamId;
+          return Result::Success;
+        });
+  }
+
+  std::string id_;
+  std::string dispatchedTo;
+  uint32_t capturedStreamId{0};
 };
 
 // Construct a request in the post-pipeline shape: metadata is already
@@ -205,21 +275,16 @@ class ThriftServerCompositeAppAdapterTest : public ::testing::Test {
 // =============================================================================
 
 TEST_F(ThriftServerCompositeAppAdapterTest, RoutesByMethodNameToOwningChild) {
-  auto* userRaw = new TestChildAdapter("user");
-  auto* monitoringRaw = new TestChildAdapter("monitoring");
-  TestChildAdapter::Ptr userChild{userRaw};
-  TestChildAdapter::Ptr monitoringChild{monitoringRaw};
+  TestChildAdapter::Ptr userChild{new TestChildAdapter("user")};
+  TestChildAdapter::Ptr monitoringChild{new TestChildAdapter("monitoring")};
 
   userChild->registerMethod("userMethod");
   monitoringChild->registerMethod("getStatus");
 
-  ThriftServerAppAdapter::Ptr user{userChild.release()};
-  ThriftServerAppAdapter::Ptr monitoring{monitoringChild.release()};
-
   ThriftServerCompositeAppAdapter::Ptr composite{
       new ThriftServerCompositeAppAdapter()};
-  composite->addChild(std::move(user));
-  composite->addChild(std::move(monitoring));
+  composite->addChild(userChild.get());
+  composite->addChild(monitoringChild.get());
 
   auto built = buildPipeline(composite.get());
 
@@ -227,63 +292,60 @@ TEST_F(ThriftServerCompositeAppAdapterTest, RoutesByMethodNameToOwningChild) {
   auto userMsg = makeRequestMessage(1, "userMethod");
   EXPECT_EQ(
       composite->onRead(erase_and_box(std::move(userMsg))), Result::Success);
-  EXPECT_EQ(userRaw->dispatchedTo, "user");
-  EXPECT_EQ(userRaw->capturedStreamId, 1u);
-  EXPECT_EQ(monitoringRaw->dispatchedTo, "")
+  EXPECT_EQ(userChild->dispatchedTo, "user");
+  EXPECT_EQ(userChild->capturedStreamId, 1u);
+  EXPECT_EQ(monitoringChild->dispatchedTo, "")
       << "monitoring child must not be invoked for a user-only method";
 
   // getStatus → monitoring
   auto monMsg = makeRequestMessage(3, "getStatus");
   EXPECT_EQ(
       composite->onRead(erase_and_box(std::move(monMsg))), Result::Success);
-  EXPECT_EQ(monitoringRaw->dispatchedTo, "monitoring");
-  EXPECT_EQ(monitoringRaw->capturedStreamId, 3u);
+  EXPECT_EQ(monitoringChild->dispatchedTo, "monitoring");
+  EXPECT_EQ(monitoringChild->capturedStreamId, 3u);
+  // Symmetric cross-pollination check: monitoring's request must not have
+  // also been delivered to user. (TestChildAdapter records the last
+  // dispatch, so a leak would surface as user's captured streamId moving
+  // to 3 or dispatchedTo flipping.)
+  EXPECT_EQ(userChild->capturedStreamId, 1u)
+      << "user child must not see monitoring's request";
+  EXPECT_EQ(userChild->dispatchedTo, "user");
 }
 
 TEST_F(ThriftServerCompositeAppAdapterTest, UserWinsOnMethodNameConflict) {
-  auto* userRaw = new TestChildAdapter("user");
-  auto* monitoringRaw = new TestChildAdapter("monitoring");
-  TestChildAdapter::Ptr userChild{userRaw};
-  TestChildAdapter::Ptr monitoringChild{monitoringRaw};
+  TestChildAdapter::Ptr userChild{new TestChildAdapter("user")};
+  TestChildAdapter::Ptr monitoringChild{new TestChildAdapter("monitoring")};
 
   // Both register the same method name; user is added first to the
   // composite, so user must win.
   userChild->registerMethod("ping");
   monitoringChild->registerMethod("ping");
 
-  ThriftServerAppAdapter::Ptr user{userChild.release()};
-  ThriftServerAppAdapter::Ptr monitoring{monitoringChild.release()};
-
   ThriftServerCompositeAppAdapter::Ptr composite{
       new ThriftServerCompositeAppAdapter()};
-  composite->addChild(std::move(user));
-  composite->addChild(std::move(monitoring));
+  composite->addChild(userChild.get());
+  composite->addChild(monitoringChild.get());
 
   auto built = buildPipeline(composite.get());
 
   auto msg = makeRequestMessage(7, "ping");
   EXPECT_EQ(composite->onRead(erase_and_box(std::move(msg))), Result::Success);
 
-  EXPECT_EQ(userRaw->dispatchedTo, "user");
-  EXPECT_EQ(monitoringRaw->dispatchedTo, "");
+  EXPECT_EQ(userChild->dispatchedTo, "user");
+  EXPECT_EQ(monitoringChild->dispatchedTo, "");
 }
 
 TEST_F(ThriftServerCompositeAppAdapterTest, UnknownMethodEmitsFrameworkError) {
-  auto* userRaw = new TestChildAdapter("user");
-  auto* monitoringRaw = new TestChildAdapter("monitoring");
-  TestChildAdapter::Ptr userChild{userRaw};
-  TestChildAdapter::Ptr monitoringChild{monitoringRaw};
+  TestChildAdapter::Ptr userChild{new TestChildAdapter("user")};
+  TestChildAdapter::Ptr monitoringChild{new TestChildAdapter("monitoring")};
 
   userChild->registerMethod("knownUserMethod");
   monitoringChild->registerMethod("knownMonitoringMethod");
 
-  ThriftServerAppAdapter::Ptr user{userChild.release()};
-  ThriftServerAppAdapter::Ptr monitoring{monitoringChild.release()};
-
   ThriftServerCompositeAppAdapter::Ptr composite{
       new ThriftServerCompositeAppAdapter()};
-  composite->addChild(std::move(user));
-  composite->addChild(std::move(monitoring));
+  composite->addChild(userChild.get());
+  composite->addChild(monitoringChild.get());
 
   apache::thrift::ResponseRpcErrorCode capturedRpcErrorCode{};
   bool writeCalled = false;
@@ -308,8 +370,8 @@ TEST_F(ThriftServerCompositeAppAdapterTest, UnknownMethodEmitsFrameworkError) {
   EXPECT_EQ(
       capturedRpcErrorCode,
       apache::thrift::ResponseRpcErrorCode::UNKNOWN_METHOD);
-  EXPECT_EQ(userRaw->dispatchedTo, "");
-  EXPECT_EQ(monitoringRaw->dispatchedTo, "");
+  EXPECT_EQ(userChild->dispatchedTo, "");
+  EXPECT_EQ(monitoringChild->dispatchedTo, "");
 }
 
 // =============================================================================
@@ -317,27 +379,25 @@ TEST_F(ThriftServerCompositeAppAdapterTest, UnknownMethodEmitsFrameworkError) {
 // =============================================================================
 
 TEST_F(ThriftServerCompositeAppAdapterTest, SetPipelineForwardsToBothChildren) {
-  auto* userRaw = new TestChildAdapter("user");
-  auto* monitoringRaw = new TestChildAdapter("monitoring");
-  ThriftServerAppAdapter::Ptr user{userRaw};
-  ThriftServerAppAdapter::Ptr monitoring{monitoringRaw};
+  TestChildAdapter::Ptr userChild{new TestChildAdapter("user")};
+  TestChildAdapter::Ptr monitoringChild{new TestChildAdapter("monitoring")};
 
   ThriftServerCompositeAppAdapter::Ptr composite{
       new ThriftServerCompositeAppAdapter()};
-  composite->addChild(std::move(user));
-  composite->addChild(std::move(monitoring));
+  composite->addChild(userChild.get());
+  composite->addChild(monitoringChild.get());
 
   // Sanity: children start with no pipeline.
-  EXPECT_EQ(userRaw->pipeline(), nullptr);
-  EXPECT_EQ(monitoringRaw->pipeline(), nullptr);
+  EXPECT_EQ(userChild->pipeline(), nullptr);
+  EXPECT_EQ(monitoringChild->pipeline(), nullptr);
 
-  // buildPipeline calls composite->setPipeline; the shadow should propagate.
+  // buildPipeline calls composite->setPipeline; should fan out to children.
   auto built = buildPipeline(composite.get());
 
   EXPECT_NE(composite->pipeline(), nullptr);
-  EXPECT_EQ(userRaw->pipeline(), composite->pipeline())
+  EXPECT_EQ(userChild->pipeline(), composite->pipeline())
       << "setPipeline must propagate to user child so it can write responses";
-  EXPECT_EQ(monitoringRaw->pipeline(), composite->pipeline())
+  EXPECT_EQ(monitoringChild->pipeline(), composite->pipeline())
       << "setPipeline must propagate to monitoring child";
 }
 
@@ -351,14 +411,13 @@ TEST_F(
 
   ThriftServerCompositeAppAdapter::Ptr composite{
       new ThriftServerCompositeAppAdapter()};
-  composite->addChild(std::move(user));
-  composite->addChild(std::move(monitoring));
+  composite->addChild(userRaw);
+  composite->addChild(monitoringRaw);
 
   // buildPipeline calls setPipeline (Created -> Ready) then onPipelineActive
   // (Ready -> Open). After it returns every adapter should be Open.
   auto built = buildPipeline(composite.get());
 
-  EXPECT_EQ(composite->state(), ThriftServerAppAdapter::State::Open);
   EXPECT_EQ(userRaw->state(), ThriftServerAppAdapter::State::Open)
       << "onPipelineActive must fan out to user child";
   EXPECT_EQ(monitoringRaw->state(), ThriftServerAppAdapter::State::Open)
@@ -375,14 +434,13 @@ TEST_F(
 
   ThriftServerCompositeAppAdapter::Ptr composite{
       new ThriftServerCompositeAppAdapter()};
-  composite->addChild(std::move(user));
-  composite->addChild(std::move(monitoring));
+  composite->addChild(userRaw);
+  composite->addChild(monitoringRaw);
 
   auto built = buildPipeline(composite.get());
 
   evb_->runInEventBaseThreadAndWait([&] { composite->onPipelineInactive(); });
 
-  EXPECT_EQ(composite->state(), ThriftServerAppAdapter::State::Closed);
   EXPECT_EQ(userRaw->state(), ThriftServerAppAdapter::State::Closed)
       << "onPipelineInactive must fan out to user child";
   EXPECT_EQ(monitoringRaw->state(), ThriftServerAppAdapter::State::Closed)
@@ -397,8 +455,8 @@ TEST_F(ThriftServerCompositeAppAdapterTest, OnExceptionForwardsToBothChildren) {
 
   ThriftServerCompositeAppAdapter::Ptr composite{
       new ThriftServerCompositeAppAdapter()};
-  composite->addChild(std::move(user));
-  composite->addChild(std::move(monitoring));
+  composite->addChild(userRaw);
+  composite->addChild(monitoringRaw);
 
   auto built = buildPipeline(composite.get());
 
@@ -407,7 +465,6 @@ TEST_F(ThriftServerCompositeAppAdapterTest, OnExceptionForwardsToBothChildren) {
         folly::make_exception_wrapper<std::runtime_error>("boom"));
   });
 
-  EXPECT_EQ(composite->state(), ThriftServerAppAdapter::State::Closed);
   EXPECT_EQ(userRaw->state(), ThriftServerAppAdapter::State::Closed)
       << "onException must fan out to user child";
   EXPECT_EQ(monitoringRaw->state(), ThriftServerAppAdapter::State::Closed)
@@ -418,20 +475,15 @@ TEST_F(ThriftServerCompositeAppAdapterTest, OnExceptionForwardsToBothChildren) {
 // the RPC-kind reject lives in the child's handleRequestResponse. Verify
 // it's still enforced end-to-end through the composite.
 TEST_F(ThriftServerCompositeAppAdapterTest, RejectsUnsupportedRpcKind) {
-  auto* userRaw = new TestChildAdapter("user");
-  auto* monitoringRaw = new TestChildAdapter("monitoring");
-  TestChildAdapter::Ptr userChild{userRaw};
-  TestChildAdapter::Ptr monitoringChild{monitoringRaw};
+  TestChildAdapter::Ptr userChild{new TestChildAdapter("user")};
+  TestChildAdapter::Ptr monitoringChild{new TestChildAdapter("monitoring")};
 
   userChild->registerMethod("streamingMethod");
 
-  ThriftServerAppAdapter::Ptr user{userChild.release()};
-  ThriftServerAppAdapter::Ptr monitoring{monitoringChild.release()};
-
   ThriftServerCompositeAppAdapter::Ptr composite{
       new ThriftServerCompositeAppAdapter()};
-  composite->addChild(std::move(user));
-  composite->addChild(std::move(monitoring));
+  composite->addChild(userChild.get());
+  composite->addChild(monitoringChild.get());
 
   apache::thrift::ResponseRpcErrorCode capturedRpcErrorCode{};
   bool writeCalled = false;
@@ -462,8 +514,122 @@ TEST_F(ThriftServerCompositeAppAdapterTest, RejectsUnsupportedRpcKind) {
   EXPECT_EQ(
       capturedRpcErrorCode,
       apache::thrift::ResponseRpcErrorCode::WRONG_RPC_KIND);
-  EXPECT_EQ(userRaw->dispatchedTo, "")
+  EXPECT_EQ(userChild->dispatchedTo, "")
       << "user thunk must NOT be invoked when RPC kind is wrong";
+}
+
+// =============================================================================
+// Lifecycle fan-out
+// =============================================================================
+
+TEST_F(ThriftServerCompositeAppAdapterTest, OnExceptionFansOutToBothChildren) {
+  TestChildAdapter::Ptr userChild{new TestChildAdapter("user")};
+  TestChildAdapter::Ptr monitoringChild{new TestChildAdapter("monitoring")};
+
+  ThriftServerCompositeAppAdapter::Ptr composite{
+      new ThriftServerCompositeAppAdapter()};
+  composite->addChild(userChild.get());
+  composite->addChild(monitoringChild.get());
+
+  auto built = buildPipeline(composite.get());
+
+  composite->onException(
+      folly::make_exception_wrapper<std::runtime_error>("boom"));
+
+  EXPECT_EQ(userChild->onExceptionCount, 1)
+      << "onException must fan out to user child";
+  EXPECT_EQ(monitoringChild->onExceptionCount, 1)
+      << "onException must fan out to monitoring child";
+  EXPECT_TRUE(userChild->lastException);
+  EXPECT_TRUE(monitoringChild->lastException);
+}
+
+TEST_F(
+    ThriftServerCompositeAppAdapterTest, LifecycleHooksFanOutToBothChildren) {
+  TestChildAdapter::Ptr userChild{new TestChildAdapter("user")};
+  TestChildAdapter::Ptr monitoringChild{new TestChildAdapter("monitoring")};
+
+  ThriftServerCompositeAppAdapter::Ptr composite{
+      new ThriftServerCompositeAppAdapter()};
+  composite->addChild(userChild.get());
+  composite->addChild(monitoringChild.get());
+
+  composite->handlerAdded();
+  composite->onPipelineActive();
+  composite->onWriteReady();
+  composite->onPipelineInactive();
+  composite->handlerRemoved();
+
+  for (auto* c : {userChild.get(), monitoringChild.get()}) {
+    EXPECT_EQ(c->handlerAddedCount, 1) << c->id_ << " handlerAdded";
+    EXPECT_EQ(c->onPipelineActiveCount, 1) << c->id_ << " onPipelineActive";
+    EXPECT_EQ(c->onWriteReadyCount, 1) << c->id_ << " onWriteReady";
+    EXPECT_EQ(c->onPipelineInactiveCount, 1) << c->id_ << " onPipelineInactive";
+    EXPECT_EQ(c->handlerRemovedCount, 1) << c->id_ << " handlerRemoved";
+  }
+}
+
+// =============================================================================
+// Heterogeneous children — the concept-based design's headline capability
+// =============================================================================
+
+TEST_F(
+    ThriftServerCompositeAppAdapterTest, RoutesAcrossHeterogeneousChildTypes) {
+  TestChildAdapter::Ptr userChild{new TestChildAdapter("user")};
+  OtherChildAdapter::Ptr otherChild{new OtherChildAdapter("other")};
+
+  userChild->registerMethod("userMethod");
+  otherChild->registerMethod("otherMethod");
+
+  ThriftServerCompositeAppAdapter::Ptr composite{
+      new ThriftServerCompositeAppAdapter()};
+  composite->addChild(userChild.get());
+  composite->addChild(otherChild.get());
+
+  auto built = buildPipeline(composite.get());
+
+  auto userMsg = makeRequestMessage(1, "userMethod");
+  EXPECT_EQ(
+      composite->onRead(erase_and_box(std::move(userMsg))), Result::Success);
+  EXPECT_EQ(userChild->dispatchedTo, "user");
+  EXPECT_EQ(otherChild->dispatchedTo, "");
+
+  auto otherMsg = makeRequestMessage(3, "otherMethod");
+  EXPECT_EQ(
+      composite->onRead(erase_and_box(std::move(otherMsg))), Result::Success);
+  EXPECT_EQ(otherChild->dispatchedTo, "other");
+  EXPECT_EQ(otherChild->capturedStreamId, 3u);
+}
+
+// =============================================================================
+// Edge cases
+// =============================================================================
+
+TEST_F(
+    ThriftServerCompositeAppAdapterTest, EmptyCompositeLifecycleHooksAreSafe) {
+  ThriftServerCompositeAppAdapter::Ptr composite{
+      new ThriftServerCompositeAppAdapter()};
+  // No children. None of these should crash.
+  composite->setPipeline(nullptr);
+  composite->handlerAdded();
+  composite->onPipelineActive();
+  composite->onWriteReady();
+  composite->onException(
+      folly::make_exception_wrapper<std::runtime_error>("x"));
+  composite->onPipelineInactive();
+  composite->handlerRemoved();
+}
+
+TEST_F(
+    ThriftServerCompositeAppAdapterTest,
+    UnknownMethodReturnsErrorWhenPipelineUnset) {
+  ThriftServerCompositeAppAdapter::Ptr composite{
+      new ThriftServerCompositeAppAdapter()};
+  // Intentionally do NOT call setPipeline. The unknown-method path tries to
+  // fire a framework error through the pipeline; with no pipeline it must
+  // surface Result::Error instead of crashing.
+  auto msg = makeRequestMessage(1, "nobodyOwnsThis");
+  EXPECT_EQ(composite->onRead(erase_and_box(std::move(msg))), Result::Error);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

@@ -963,7 +963,8 @@ TEST_F(ThriftServerAppAdapterTest, OnReadRejectedOutsideOpen) {
       +[](ThriftServerAppAdapter*,
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId) noexcept -> Result {
+          apache::thrift::ProtocolId,
+          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
         return Result::Success;
       });
   EXPECT_EQ(

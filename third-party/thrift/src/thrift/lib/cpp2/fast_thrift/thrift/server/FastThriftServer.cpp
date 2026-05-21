@@ -132,115 +132,140 @@ FastThriftServer::createConnectionFactory() {
     rocket::server::connection::RocketServerConnection conn;
 
     // 1. Build the thrift adapter first so the rocket pipeline's SETUP
-    //    handler can capture a callback into it. When monitoring is wired
-    //    up, wrap the user adapter and a fresh monitoring adapter in a
-    //    composite — that becomes the pipeline tail. Each child factory
-    //    receives its own typed `self` so the static_pointer_cast in
-    //    generated <Service>FastHandler<S>::getAppAdapter is satisfied.
-    FastConnection ctx;
-    ThriftServerCompositeAppAdapter* compositePtr = nullptr;
+    //    handler can capture a callback into it. When any auxiliary
+    //    interface (monitoring/status/metadata) is wired up, the tail is a
+    //    composite fronting the user adapter + aux adapters; otherwise the
+    //    tail is the user adapter directly.
     const bool needsComposite = auxInterfaces_.monitoringHandler ||
         auxInterfaces_.statusHandler || auxInterfaces_.debugHandler ||
         metadataResponse_;
+
     if (needsComposite) {
-      ThriftServerCompositeAppAdapter::Ptr composite{
-          new ThriftServerCompositeAppAdapter()};
-      composite->addChild(handler_->getAppAdapter(handler_));
+      CompositeConnection ctx;
+      ctx.allocator = std::make_unique<SimpleBufferAllocator>();
+      ctx.transportAdapter =
+          std::make_unique<server::ThriftServerTransportAdapter>(
+              *conn.appAdapter);
+
+      // 2. Build rocket pipeline.
+      auto* transportAdapter = ctx.transportAdapter.get();
+      auto rocketPipeline = buildRocketPipeline(
+          evb,
+          transportHandler.get(),
+          conn.appAdapter.get(),
+          [transportAdapter](
+              const rocket::server::handler::SetupParameters& p) noexcept {
+            transportAdapter->setMetadataProtocol(p.metadataProtocol);
+          });
+      conn.appAdapter->setPipeline(rocketPipeline.get());
+      transportHandler->setPipeline(rocketPipeline.get());
+
+      if (config_.zeroCopyThreshold > 0) {
+        if (!transportHandler->setZeroCopy(true)) {
+          XLOG(WARN) << "MSG_ZEROCOPY not supported on this socket";
+        }
+        transportHandler->setZeroCopyEnableThreshold(config_.zeroCopyThreshold);
+      }
+      conn.transportHandler = std::move(transportHandler);
+      conn.pipeline = std::move(rocketPipeline);
+
+      // Children live in ctx.children (owned); composite borrows raw
+      // pointers. Declaration order in CompositeConnection ensures children
+      // outlive the composite.
+      ctx.children.push_back(handler_->getAppAdapter(handler_));
       if (auxInterfaces_.monitoringHandler) {
-        composite->addChild(auxInterfaces_.monitoringHandler->getAppAdapter(
+        ctx.children.push_back(auxInterfaces_.monitoringHandler->getAppAdapter(
             auxInterfaces_.monitoringHandler));
       }
       if (auxInterfaces_.statusHandler) {
-        composite->addChild(auxInterfaces_.statusHandler->getAppAdapter(
+        ctx.children.push_back(auxInterfaces_.statusHandler->getAppAdapter(
             auxInterfaces_.statusHandler));
       }
       if (auxInterfaces_.debugHandler) {
-        composite->addChild(auxInterfaces_.debugHandler->getAppAdapter(
+        ctx.children.push_back(auxInterfaces_.debugHandler->getAppAdapter(
             auxInterfaces_.debugHandler));
       }
       if (metadataResponse_) {
-        composite->addChild(
+        ctx.children.push_back(
             ThriftServerAppAdapter::Ptr{
                 new MetadataAppAdapter(metadataResponse_)});
       }
-      compositePtr = composite.get();
-      ctx.adapter = std::move(composite);
-    } else {
-      ctx.adapter = handler_->getAppAdapter(handler_);
-    }
-    ctx.transportAdapter =
-        std::make_unique<server::ThriftServerTransportAdapter>(
-            *conn.appAdapter);
-
-    // 2. Build rocket pipeline. The SETUP handler publishes the negotiated
-    //    metadata protocol into the transport adapter, which uses it for
-    //    both inbound request-metadata deserialization and outbound
-    //    response-metadata serialization.
-    auto* transportAdapter = ctx.transportAdapter.get();
-    auto rocketPipeline = buildRocketPipeline(
-        evb,
-        transportHandler.get(),
-        conn.appAdapter.get(),
-        [transportAdapter](
-            const rocket::server::handler::SetupParameters& p) noexcept {
-          transportAdapter->setMetadataProtocol(p.metadataProtocol);
-        });
-    conn.appAdapter->setPipeline(rocketPipeline.get());
-    transportHandler->setPipeline(rocketPipeline.get());
-
-    if (config_.zeroCopyThreshold > 0) {
-      if (!transportHandler->setZeroCopy(true)) {
-        XLOG(WARN) << "MSG_ZEROCOPY not supported on this socket";
+      ctx.adapter = ThriftServerCompositeAppAdapter::Ptr{
+          new ThriftServerCompositeAppAdapter()};
+      for (auto& child : ctx.children) {
+        ctx.adapter->addChild(child.get());
       }
-      transportHandler->setZeroCopyEnableThreshold(config_.zeroCopyThreshold);
-    }
 
-    conn.transportHandler = std::move(transportHandler);
-    conn.pipeline = std::move(rocketPipeline);
-
-    // 3. Build thrift pipeline. Default path templates on the base
-    //    ThriftServerAppAdapter (works because generated FastSvAppAdapter
-    //    subclasses only populate dispatch_ via addMethodHandler in their
-    //    ctor and don't override base methods). The composite path
-    //    templates on ThriftServerCompositeAppAdapter so its shadowing
-    //    onRead is resolved as the tail; setPipeline on the typed pointer
-    //    also fans out to both children.
-    PipelineImpl::Ptr thriftPipeline;
-    if (compositePtr) {
-      thriftPipeline = PipelineBuilder<
-                           server::ThriftServerTransportAdapter,
-                           ThriftServerCompositeAppAdapter,
-                           SimpleBufferAllocator>()
-                           .setEventBase(evb)
-                           .setHead(ctx.transportAdapter.get())
-                           .setTail(compositePtr)
-                           .setAllocator(ctx.allocator.get())
-                           .build();
-      ctx.transportAdapter->setPipeline(thriftPipeline.get());
-      compositePtr->setPipeline(thriftPipeline.get());
-    } else {
-      thriftPipeline = PipelineBuilder<
-                           server::ThriftServerTransportAdapter,
-                           ThriftServerAppAdapter,
-                           SimpleBufferAllocator>()
-                           .setEventBase(evb)
-                           .setHead(ctx.transportAdapter.get())
-                           .setTail(ctx.adapter.get())
-                           .setAllocator(ctx.allocator.get())
-                           .build();
+      // 3. Build thrift pipeline templated on the composite so its onRead
+      //    is the resolved tail; setPipeline on the typed pointer also
+      //    fans out to every child.
+      auto thriftPipeline = PipelineBuilder<
+                                server::ThriftServerTransportAdapter,
+                                ThriftServerCompositeAppAdapter,
+                                SimpleBufferAllocator>()
+                                .setEventBase(evb)
+                                .setHead(ctx.transportAdapter.get())
+                                .setTail(ctx.adapter.get())
+                                .setAllocator(ctx.allocator.get())
+                                .build();
       ctx.transportAdapter->setPipeline(thriftPipeline.get());
       ctx.adapter->setPipeline(thriftPipeline.get());
+      thriftPipeline->activate();
+
+      auto* adapterKey = ctx.adapter.get();
+      ctx.pipeline = std::move(thriftPipeline);
+      registerConnection(adapterKey, std::move(ctx));
+    } else {
+      SimpleConnection ctx;
+      ctx.adapter = handler_->getAppAdapter(handler_);
+      ctx.allocator = std::make_unique<SimpleBufferAllocator>();
+      ctx.transportAdapter =
+          std::make_unique<server::ThriftServerTransportAdapter>(
+              *conn.appAdapter);
+
+      // 2. Build rocket pipeline.
+      auto* transportAdapter = ctx.transportAdapter.get();
+      auto rocketPipeline = buildRocketPipeline(
+          evb,
+          transportHandler.get(),
+          conn.appAdapter.get(),
+          [transportAdapter](
+              const rocket::server::handler::SetupParameters& p) noexcept {
+            transportAdapter->setMetadataProtocol(p.metadataProtocol);
+          });
+      conn.appAdapter->setPipeline(rocketPipeline.get());
+      transportHandler->setPipeline(rocketPipeline.get());
+
+      if (config_.zeroCopyThreshold > 0) {
+        if (!transportHandler->setZeroCopy(true)) {
+          XLOG(WARN) << "MSG_ZEROCOPY not supported on this socket";
+        }
+        transportHandler->setZeroCopyEnableThreshold(config_.zeroCopyThreshold);
+      }
+      conn.transportHandler = std::move(transportHandler);
+      conn.pipeline = std::move(rocketPipeline);
+
+      // 3. Build thrift pipeline templated on the base adapter. Works
+      //    because generated FastSvAppAdapter subclasses only populate
+      //    dispatch_ via addMethodHandler in their ctor and don't override
+      //    base methods.
+      auto thriftPipeline = PipelineBuilder<
+                                server::ThriftServerTransportAdapter,
+                                ThriftServerAppAdapter,
+                                SimpleBufferAllocator>()
+                                .setEventBase(evb)
+                                .setHead(ctx.transportAdapter.get())
+                                .setTail(ctx.adapter.get())
+                                .setAllocator(ctx.allocator.get())
+                                .build();
+      ctx.transportAdapter->setPipeline(thriftPipeline.get());
+      ctx.adapter->setPipeline(thriftPipeline.get());
+      thriftPipeline->activate();
+
+      auto* adapterKey = ctx.adapter.get();
+      ctx.pipeline = std::move(thriftPipeline);
+      registerConnection(adapterKey, std::move(ctx));
     }
-    // The thrift pipeline doesn't have an explicit activation trigger like
-    // the rocket pipeline (driven by TransportHandler::onConnect). Activate
-    // it here so the AppAdapter transitions Ready -> Open and starts
-    // accepting onRead.
-    thriftPipeline->activate();
-
-    auto* adapterKey = ctx.adapter.get();
-    ctx.pipeline = std::move(thriftPipeline);
-
-    registerConnection(adapterKey, std::move(ctx));
 
     return conn;
   };
@@ -279,12 +304,29 @@ PipelineImpl::Ptr FastThriftServer::buildRocketPipeline(
 }
 
 void FastThriftServer::registerConnection(
-    ThriftServerAppAdapter* key, FastConnection connection) {
-  auto* rawPtr = key;
+    ThriftServerAppAdapter* key, SimpleConnection connection) {
+  void* rawPtr = key;
   // Close callback fires from ThriftServerAppAdapter::onException when the
   // pipeline propagates an exception (typically connection drop). Removes the
   // entry from the map, releasing the per-connection adapter + pipeline.
   connection.adapter->setCloseCallback([this, rawPtr]() {
+    thriftConnections_.withWLock(
+        [rawPtr](auto& conns) { conns.erase(rawPtr); });
+  });
+  thriftConnections_.withWLock(
+      [&](auto& conns) { conns.emplace(rawPtr, std::move(connection)); });
+}
+
+void FastThriftServer::registerConnection(
+    ThriftServerCompositeAppAdapter* key, CompositeConnection connection) {
+  void* rawPtr = key;
+  // The composite itself doesn't expose setCloseCallback (it derives from
+  // DelayedDestruction, not the adapter base). Hook the first child's
+  // close callback — on connection drop, the pipeline's onException
+  // propagates to the composite, which fans it out to every child via
+  // vtable, so the first child's callback reliably fires.
+  DCHECK(!connection.children.empty());
+  connection.children.front()->setCloseCallback([this, rawPtr]() {
     thriftConnections_.withWLock(
         [rawPtr](auto& conns) { conns.erase(rawPtr); });
   });
@@ -416,10 +458,10 @@ void FastThriftServer::stop() {
   connectionManager_->stop();
 
   // Drain the map under the lock, then destroy entries outside it.
-  // ~FastConnection runs ~ThriftServerAppAdapter, which fires the close
+  // ~SimpleConnection runs ~ThriftServerAppAdapter, which fires the close
   // callback synchronously; that callback re-acquires this same write lock,
   // so clearing under the lock would deadlock folly::SharedMutex.
-  std::unordered_map<ThriftServerAppAdapter*, FastConnection> drained;
+  std::unordered_map<void*, ConnectionVariant> drained;
   thriftConnections_.withWLock([&](auto& conns) { drained.swap(conns); });
   stopBaton_.post();
 }

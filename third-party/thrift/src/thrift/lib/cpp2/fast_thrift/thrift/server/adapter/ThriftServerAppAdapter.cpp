@@ -23,10 +23,21 @@
 #include <folly/logging/xlog.h>
 
 #include <thrift/lib/cpp/transport/TTransportException.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 
 namespace apache::thrift::fast_thrift::thrift {
+
+static_assert(
+    ServerInboundAppAdapter<ThriftServerAppAdapter>,
+    "ThriftServerAppAdapter must satisfy ServerInboundAppAdapter");
+static_assert(
+    ServerOutboundAppAdapter<ThriftServerAppAdapter>,
+    "ThriftServerAppAdapter must satisfy ServerOutboundAppAdapter");
+static_assert(
+    ServerComposableAppAdapter<ThriftServerAppAdapter>,
+    "ThriftServerAppAdapter must satisfy ServerComposableAppAdapter");
 
 ThriftServerAppAdapter::~ThriftServerAppAdapter() {
   auto cb = closeCallback_.withWLock([](auto& fn) { return std::move(fn); });

@@ -21,6 +21,7 @@
 #include <string_view>
 #include <vector>
 
+#include <folly/ExceptionWrapper.h>
 #include <folly/Portability.h>
 #include <folly/container/F14Map.h>
 #include <folly/io/async/DelayedDestruction.h>
@@ -28,72 +29,122 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ServerAppAdapter.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
 /**
- * ThriftServerCompositeAppAdapter — pipeline tail that fans inbound requests
- * across an ordered list of ThriftServerAppAdapter children, dispatched by
- * method name. Mirrors Java's CompositeRpcServerHandler structurally.
+ * ThriftServerCompositeAppAdapter — non-owning pipeline tail that routes
+ * inbound requests across an ordered list of child adapters, dispatched by
+ * method name.
  *
- * Routing is method-name only. addChild populates a flat name -> child map
- * (first-wins on duplicates, matching MultiplexAsyncProcessorFactory and
- * intentionally different from Java which throws). On each inbound message
- * the composite peeks the request metadata, looks up the owning child, and
- * forwards the box to that child's onRead unchanged.
+ * Children are borrowed. The caller owns each child through its concrete
+ * `T::Ptr` and is responsible for keeping children alive at least until
+ * the composite is destroyed. The composite holds raw pointers + a per-T
+ * thunk pair (onRead + setPipeline) so storage is heterogeneous without
+ * requiring children to share a base class — they only need to satisfy
+ * the ServerAppAdapter concept.
  *
- * No streamId routing is needed: aux interfaces (Status / Monitoring /
- * Control / Security) are restricted by their marker base classes to
- * req-resp + oneway, and the rocket layer below the composite tracks
- * per-stream subscriptions on its own — RequestN, Cancel, sink chunks, etc.
- * never bubble up here.
+ * Routing is method-name only. addChild merges each child's method names
+ * into a flat map (first-wins on duplicates). Unknown methods are
+ * answered with a ResponseRpcErrorCode::UNKNOWN_METHOD framework error
+ * fired through the composite's own pipeline reference.
  *
- * Pipeline integration: onRead and setPipeline shadow the base's
- * non-virtual methods. Callers must hold the composite by its typed pointer
- * (not as ThriftServerAppAdapter*) at the pipeline-wiring sites so the
- * shadowing setter resolves; the pipeline itself must also be templated on
- * this type for onRead to fire. FastThriftServer handles both when any
- * auxiliary handler is registered.
+ * Satisfies TailEndpointHandler. The pipeline itself must be templated on
+ * ThriftServerCompositeAppAdapter so the tail concept resolves.
  */
-class ThriftServerCompositeAppAdapter final : public ThriftServerAppAdapter {
+class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
  public:
-  // Mirrors the base's `Ptr` convention so the composite can be held in any
-  // slot typed as ThriftServerAppAdapter::Ptr.
   using Ptr = std::unique_ptr<
       ThriftServerCompositeAppAdapter,
       folly::DelayedDestruction::Destructor>;
 
   ThriftServerCompositeAppAdapter() = default;
 
-  // Append a child and merge its method names into the routing map.
-  // Duplicate names are dropped with a WARN — first writer wins. All
-  // children must be added before the composite is wired into a pipeline.
-  void addChild(ThriftServerAppAdapter::Ptr child);
+  // Register a child. Caller retains ownership.
+  template <typename T>
+    requires ServerInboundAppAdapter<T> && ServerComposableAppAdapter<T>
+  void addChild(T* child) {
+    DCHECK(child != nullptr);
+    for (auto name : child->methodNames()) {
+      auto [_, inserted] = methodMap_.try_emplace(
+          std::string(name), Entry{child, &invokeOnRead<T>});
+      if (!inserted) {
+        warnDuplicateMethod(name);
+      }
+    }
+    children_.push_back(ChildHook{child, &kLifecycleVTable<T>});
+  }
 
-  // === TailEndpointHandler interface ===
+  // === TailEndpointHandler ===
   channel_pipeline::Result onRead(
       channel_pipeline::TypeErasedBox&& msg) noexcept;
-
-  // Shadows base. Forwards to every child so they write responses through
-  // the same pipeline.
+  void onException(folly::exception_wrapper&& e) noexcept;
   void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept;
-
-  // Shadow base lifecycle hooks so the composite drives all children
-  // through the same state transitions. Children share the pipeline; their
-  // gates (onRead reject when not Open, writeResponse reject when Closed)
-  // need consistent state with the composite.
+  channel_pipeline::PipelineImpl* pipeline() const noexcept {
+    return pipeline_;
+  }
+  void handlerAdded() noexcept;
+  void handlerRemoved() noexcept;
   void onPipelineActive() noexcept;
   void onPipelineInactive() noexcept;
-  void onException(folly::exception_wrapper&& e) noexcept;
+  void onWriteReady() noexcept;
+
+ protected:
+  ~ThriftServerCompositeAppAdapter() override = default;
 
  private:
-  FOLLY_NOINLINE channel_pipeline::Result handleUnknownMethod(
+  // Per-child dispatch surfaces. Two thunk groups:
+  //   - invokeOnRead<T>     : per-request, looked up by method name
+  //   - kLifecycleVTable<T> : pipeline -> child wiring + lifecycle fan-out
+  template <typename T>
+  static channel_pipeline::Result invokeOnRead(
+      void* p, channel_pipeline::TypeErasedBox&& msg) noexcept {
+    return static_cast<T*>(p)->onRead(std::move(msg));
+  }
+
+  struct LifecycleVTable {
+    void (*setPipeline)(void*, channel_pipeline::PipelineImpl*) noexcept;
+    void (*onException)(void*, folly::exception_wrapper&&) noexcept;
+    void (*handlerAdded)(void*) noexcept;
+    void (*handlerRemoved)(void*) noexcept;
+    void (*onPipelineActive)(void*) noexcept;
+    void (*onPipelineInactive)(void*) noexcept;
+    void (*onWriteReady)(void*) noexcept;
+  };
+
+  template <typename T>
+  static constexpr LifecycleVTable kLifecycleVTable{
+      +[](void* p, channel_pipeline::PipelineImpl* pipe) noexcept {
+        static_cast<T*>(p)->setPipeline(pipe);
+      },
+      +[](void* p, folly::exception_wrapper&& e) noexcept {
+        static_cast<T*>(p)->onException(std::move(e));
+      },
+      +[](void* p) noexcept { static_cast<T*>(p)->handlerAdded(); },
+      +[](void* p) noexcept { static_cast<T*>(p)->handlerRemoved(); },
+      +[](void* p) noexcept { static_cast<T*>(p)->onPipelineActive(); },
+      +[](void* p) noexcept { static_cast<T*>(p)->onPipelineInactive(); },
+      +[](void* p) noexcept { static_cast<T*>(p)->onWriteReady(); },
+  };
+
+  void warnDuplicateMethod(std::string_view name) const;
+  FOLLY_NOINLINE channel_pipeline::Result writeUnknownMethodError(
       uint32_t streamId, std::string_view methodName) noexcept;
 
-  std::vector<ThriftServerAppAdapter::Ptr> children_;
-  folly::F14FastMap<std::string, ThriftServerAppAdapter*> methodMap_;
+  struct Entry {
+    void* owner;
+    channel_pipeline::Result (*invoke)(
+        void*, channel_pipeline::TypeErasedBox&&) noexcept;
+  };
+  struct ChildHook {
+    void* owner;
+    const LifecycleVTable* vtable;
+  };
+
+  std::vector<ChildHook> children_;
+  folly::F14FastMap<std::string, Entry> methodMap_;
+  channel_pipeline::PipelineImpl* pipeline_{nullptr};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

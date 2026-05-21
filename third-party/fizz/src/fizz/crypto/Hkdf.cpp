@@ -12,23 +12,24 @@
 
 namespace fizz {
 
-std::vector<uint8_t> Hkdf::extract(folly::ByteRange salt, folly::ByteRange ikm)
-    const {
+Status Hkdf::extract(
+    std::vector<uint8_t>& ret,
+    Error& err,
+    folly::ByteRange salt,
+    folly::ByteRange ikm) const {
   auto hlen = hashLength();
   auto zeros = std::vector<uint8_t>(hlen, 0);
   // Extraction step HMAC-HASH(salt, IKM)
   std::vector<uint8_t> extractedKey(hlen);
   salt = salt.empty() ? folly::range(zeros) : salt;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      hmac(
-          err,
-          makeHasher_,
-          salt,
-          folly::IOBuf::wrapBufferAsValue(ikm),
-          folly::range(extractedKey)),
-      err);
-  return extractedKey;
+  FIZZ_RETURN_ON_ERROR(hmac(
+      err,
+      makeHasher_,
+      salt,
+      folly::IOBuf::wrapBufferAsValue(ikm),
+      folly::range(extractedKey)));
+  ret = std::move(extractedKey);
+  return Status::Success;
 }
 
 Status Hkdf::expand(
@@ -81,8 +82,10 @@ Status Hkdf::hkdf(
     folly::ByteRange salt,
     const folly::IOBuf& info,
     size_t outputBytes) const {
+  std::vector<uint8_t> extracted;
+  FIZZ_RETURN_ON_ERROR(extract(extracted, err, salt, ikm));
   FIZZ_RETURN_ON_ERROR(
-      expand(ret, err, folly::range(extract(salt, ikm)), info, outputBytes));
+      expand(ret, err, folly::range(extracted), info, outputBytes));
   return Status::Success;
 }
 } // namespace fizz

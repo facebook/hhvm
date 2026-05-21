@@ -49,8 +49,16 @@ class HandshakeContext {
 
 class HandshakeContextImpl : public HandshakeContext {
  public:
-  explicit HandshakeContextImpl(const HasherFactoryWithMetadata* makeHasher)
-      : HandshakeContextImpl(makeHasher, makeHasher->make()) {}
+  static Status create(
+      std::unique_ptr<HandshakeContextImpl>& ret,
+      Error& err,
+      const HasherFactoryWithMetadata* makeHasher) {
+    std::unique_ptr<Hasher> hashState;
+    FIZZ_RETURN_ON_ERROR(makeHasher->make(hashState, err));
+    ret = std::unique_ptr<HandshakeContextImpl>(
+        new HandshakeContextImpl(makeHasher, std::move(hashState)));
+    return Status::Success;
+  }
 
   HandshakeContextImpl(
       const HasherFactoryWithMetadata* makeHasher,

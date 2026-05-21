@@ -40,7 +40,10 @@ Status KeyScheduler::deriveEarlySecret(Error& err, folly::ByteRange psk) {
   }
 
   auto zeros = std::vector<uint8_t>(deriver_->hashLength(), 0);
-  secret_.emplace(EarlySecret{deriver_->hkdfExtract(folly::range(zeros), psk)});
+  std::vector<uint8_t> extracted;
+  FIZZ_RETURN_ON_ERROR(
+      deriver_->hkdfExtract(extracted, err, folly::range(zeros), psk));
+  secret_.emplace(EarlySecret{std::move(extracted)});
   return Status::Success;
 }
 
@@ -55,18 +58,20 @@ Status KeyScheduler::deriveHandshakeSecret(Error& err) {
       kDerivedSecret,
       deriver_->blankHash(),
       deriver_->hashLength()));
-  secret_.emplace(
-      HandshakeSecret{
-          deriver_->hkdfExtract(folly::range(preSecret), folly::range(zeros))});
+  std::vector<uint8_t> extracted;
+  FIZZ_RETURN_ON_ERROR(deriver_->hkdfExtract(
+      extracted, err, folly::range(preSecret), folly::range(zeros)));
+  secret_.emplace(HandshakeSecret{std::move(extracted)});
   return Status::Success;
 }
 
 Status KeyScheduler::deriveHandshakeSecret(Error& err, folly::ByteRange ecdhe) {
   if (!secret_) {
     auto zeros = std::vector<uint8_t>(deriver_->hashLength(), 0);
-    secret_.emplace(
-        EarlySecret{
-            deriver_->hkdfExtract(folly::range(zeros), folly::range(zeros))});
+    std::vector<uint8_t> extracted;
+    FIZZ_RETURN_ON_ERROR(deriver_->hkdfExtract(
+        extracted, err, folly::range(zeros), folly::range(zeros)));
+    secret_.emplace(EarlySecret{std::move(extracted)});
   }
 
   auto& earlySecret = secret_->tryAsEarlySecret();
@@ -78,8 +83,10 @@ Status KeyScheduler::deriveHandshakeSecret(Error& err, folly::ByteRange ecdhe) {
       kDerivedSecret,
       deriver_->blankHash(),
       deriver_->hashLength()));
-  secret_.emplace(
-      HandshakeSecret{deriver_->hkdfExtract(folly::range(preSecret), ecdhe)});
+  std::vector<uint8_t> hsExtracted;
+  FIZZ_RETURN_ON_ERROR(
+      deriver_->hkdfExtract(hsExtracted, err, folly::range(preSecret), ecdhe));
+  secret_.emplace(HandshakeSecret{std::move(hsExtracted)});
   return Status::Success;
 }
 
@@ -94,9 +101,10 @@ Status KeyScheduler::deriveMasterSecret(Error& err) {
       kDerivedSecret,
       deriver_->blankHash(),
       deriver_->hashLength()));
-  secret_.emplace(
-      MasterSecret{
-          deriver_->hkdfExtract(folly::range(preSecret), folly::range(zeros))});
+  std::vector<uint8_t> msExtracted;
+  FIZZ_RETURN_ON_ERROR(deriver_->hkdfExtract(
+      msExtracted, err, folly::range(preSecret), folly::range(zeros)));
+  secret_.emplace(MasterSecret{std::move(msExtracted)});
   return Status::Success;
 }
 

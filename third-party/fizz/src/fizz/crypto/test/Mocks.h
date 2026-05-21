@@ -94,8 +94,15 @@ class MockKeyDerivation : public KeyDerivation {
   }
   MOCK_METHOD(
       std::vector<uint8_t>,
-      hkdfExtract,
+      _hkdfExtract,
       (folly::ByteRange salt, folly::ByteRange ikm));
+  Status hkdfExtract(
+      std::vector<uint8_t>& ret,
+      Error& err,
+      folly::ByteRange salt,
+      folly::ByteRange ikm) override {
+    FIZZ_THROW_TO_ERROR(ret, _hkdfExtract(salt, ikm));
+  }
   MOCK_METHOD(
       void,
       hash,

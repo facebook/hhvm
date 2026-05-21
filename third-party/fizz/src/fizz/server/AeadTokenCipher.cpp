@@ -50,9 +50,15 @@ bool Aead128GCMTokenCipher::setSecrets(
   for (const auto& tokenSecret : tokenSecrets) {
     Secret extracted(tokenSecret.begin(), tokenSecret.end());
     for (const auto& contextString : contextStrings_) {
-      extracted =
+      Error err;
+      FIZZ_THROW_ON_ERROR(
           Hkdf(openssl::hasherFactory<HashType>())
-              .extract(folly::range(contextString), folly::range(extracted));
+              .extract(
+                  extracted,
+                  err,
+                  folly::range(contextString),
+                  folly::range(extracted)),
+          err);
     }
     secrets_.push_back(std::move(extracted));
   }

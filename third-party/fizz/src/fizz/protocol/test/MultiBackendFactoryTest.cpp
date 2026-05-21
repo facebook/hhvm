@@ -74,7 +74,8 @@ TEST_P(MultiBackendFactoryDigestTest, Test) {
   EXPECT_EQ(
       factory_.makeHasherFactory(makeHasher, err, testCase.algorithm),
       Status::Success);
-  auto hasher = makeHasher->make();
+  std::unique_ptr<Hasher> hasher;
+  EXPECT_EQ(makeHasher->make(hasher, err), Status::Success);
   ASSERT_NE(hasher, nullptr);
 
   std::vector<uint8_t> out;

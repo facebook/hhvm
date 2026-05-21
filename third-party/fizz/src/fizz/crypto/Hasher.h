@@ -53,7 +53,7 @@ class Hasher {
  * for each hashing algorithm the backend supports.
  */
 struct HasherFactoryWithMetadata {
-  using FactoryFn = std::unique_ptr<Hasher>();
+  using FactoryFn = Status(std::unique_ptr<Hasher>&, Error&);
 
   constexpr explicit HasherFactoryWithMetadata(
       FactoryFn* fn,
@@ -73,8 +73,8 @@ struct HasherFactoryWithMetadata {
         fn, Hash::HashId, Hash::HashLen, Hash::BlockSize, Hash::BlankHash);
   }
 
-  std::unique_ptr<Hasher> make() const {
-    return fn_();
+  Status make(std::unique_ptr<Hasher>& ret, Error& err) const {
+    return fn_(ret, err);
   }
 
   folly::ByteRange blankHash() const {

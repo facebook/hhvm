@@ -37,7 +37,7 @@ class KeySchedulerTest : public testing::Test {
 
 TEST_F(KeySchedulerTest, TestEarly) {
   StringPiece psk{"psk"};
-  EXPECT_CALL(*kd_, hkdfExtract(_, _));
+  EXPECT_CALL(*kd_, _hkdfExtract(_, _));
   Error err;
   EXPECT_EQ(ks_->deriveEarlySecret(err, psk), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(4);
@@ -59,7 +59,7 @@ TEST_F(KeySchedulerTest, TestEarly) {
       Status::Success);
 
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
-  EXPECT_CALL(*kd_, hkdfExtract(_, _));
+  EXPECT_CALL(*kd_, _hkdfExtract(_, _));
   EXPECT_EQ(ks_->deriveHandshakeSecret(err), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
   DerivedSecret hsSecret1, hsSecret2;
@@ -79,7 +79,7 @@ TEST_F(KeySchedulerTest, TestEarly) {
       Status::Success);
 
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
-  EXPECT_CALL(*kd_, hkdfExtract(_, _));
+  EXPECT_CALL(*kd_, _hkdfExtract(_, _));
   EXPECT_EQ(ks_->deriveMasterSecret(err), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
   DerivedSecret msSecret1, msSecret2;
@@ -100,7 +100,7 @@ TEST_F(KeySchedulerTest, TestEarly) {
 
 TEST_F(KeySchedulerTest, TestEarlyEcdhe) {
   StringPiece psk{"psk"};
-  EXPECT_CALL(*kd_, hkdfExtract(_, _));
+  EXPECT_CALL(*kd_, _hkdfExtract(_, _));
   Error err;
   EXPECT_EQ(ks_->deriveEarlySecret(err, psk), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(4);
@@ -123,7 +123,7 @@ TEST_F(KeySchedulerTest, TestEarlyEcdhe) {
 
   StringPiece ecdhe{"ecdhe"};
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
-  EXPECT_CALL(*kd_, hkdfExtract(_, _));
+  EXPECT_CALL(*kd_, _hkdfExtract(_, _));
   EXPECT_EQ(ks_->deriveHandshakeSecret(err, ecdhe), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
   DerivedSecret hsSecret1, hsSecret2;
@@ -143,7 +143,7 @@ TEST_F(KeySchedulerTest, TestEarlyEcdhe) {
       Status::Success);
 
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
-  EXPECT_CALL(*kd_, hkdfExtract(_, _));
+  EXPECT_CALL(*kd_, _hkdfExtract(_, _));
   EXPECT_EQ(ks_->deriveMasterSecret(err), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
   DerivedSecret msSecret1, msSecret2;
@@ -165,7 +165,7 @@ TEST_F(KeySchedulerTest, TestEarlyEcdhe) {
 TEST_F(KeySchedulerTest, TestNoEarly) {
   StringPiece ecdhe{"ecdhe"};
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
-  EXPECT_CALL(*kd_, hkdfExtract(_, _)).Times(2);
+  EXPECT_CALL(*kd_, _hkdfExtract(_, _)).Times(2);
   Error err;
   EXPECT_EQ(ks_->deriveHandshakeSecret(err, ecdhe), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
@@ -186,7 +186,7 @@ TEST_F(KeySchedulerTest, TestNoEarly) {
       Status::Success);
 
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(1);
-  EXPECT_CALL(*kd_, hkdfExtract(_, _));
+  EXPECT_CALL(*kd_, _hkdfExtract(_, _));
   EXPECT_EQ(ks_->deriveMasterSecret(err), Status::Success);
   EXPECT_CALL(*kd_, _deriveSecret(_, _, _, _)).Times(2);
   DerivedSecret msSecret1, msSecret2;

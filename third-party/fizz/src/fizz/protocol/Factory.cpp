@@ -47,7 +47,9 @@ Status Factory::makeHandshakeContext(
   const HasherFactoryWithMetadata* hasherFactory = nullptr;
   FIZZ_RETURN_ON_ERROR(getHashFunction(hash, err, cipher));
   FIZZ_RETURN_ON_ERROR(makeHasherFactory(hasherFactory, err, hash));
-  ret = std::make_unique<HandshakeContextImpl>(hasherFactory);
+  std::unique_ptr<HandshakeContextImpl> impl;
+  FIZZ_RETURN_ON_ERROR(HandshakeContextImpl::create(impl, err, hasherFactory));
+  ret = std::move(impl);
   return Status::Success;
 }
 

@@ -32,12 +32,16 @@ class Hkdf {
       folly::ByteRange prefix,
       const HasherFactoryWithMetadata* hash);
 
-  std::vector<uint8_t> labeledExtract(
+  Status labeledExtract(
+      std::vector<uint8_t>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf> salt,
       folly::ByteRange label,
       std::unique_ptr<folly::IOBuf> ikm,
       std::unique_ptr<folly::IOBuf> suiteId);
-  std::vector<uint8_t> extract(
+  Status extract(
+      std::vector<uint8_t>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf> salt,
       std::unique_ptr<folly::IOBuf> ikm);
   Status labeledExpand(
@@ -54,6 +58,38 @@ class Hkdf {
       folly::ByteRange prk,
       std::unique_ptr<folly::IOBuf> label,
       size_t L);
+
+  // TODO: Deprecate. Use the Status-returning labeledExtract overload instead.
+  std::vector<uint8_t> labeledExtract(
+      std::unique_ptr<folly::IOBuf> salt,
+      folly::ByteRange label,
+      std::unique_ptr<folly::IOBuf> ikm,
+      std::unique_ptr<folly::IOBuf> suiteId) {
+    std::vector<uint8_t> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        labeledExtract(
+            ret,
+            err,
+            std::move(salt),
+            label,
+            std::move(ikm),
+            std::move(suiteId)),
+        err);
+    return ret;
+  }
+
+  // TODO: Deprecate. Use the Status-returning extract overload instead.
+  std::vector<uint8_t> extract(
+      std::unique_ptr<folly::IOBuf> salt,
+      std::unique_ptr<folly::IOBuf> ikm) {
+    std::vector<uint8_t> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        extract(ret, err, std::move(salt), std::move(ikm)), err);
+    return ret;
+  }
+
   size_t hashLength();
 
  private:

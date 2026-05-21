@@ -42,26 +42,35 @@ Status keySchedule(
       : PskInputs::getDefaultId();
 
   // Generate hashes for key schedule context
-  std::vector<uint8_t> pskIdHash = hkdf->labeledExtract(
+  std::vector<uint8_t> pskIdHash;
+  FIZZ_RETURN_ON_ERROR(hkdf->labeledExtract(
+      pskIdHash,
+      err,
       folly::IOBuf::copyBuffer(""),
       folly::ByteRange(folly::StringPiece("psk_id_hash")),
       std::move(pskId),
-      params.suiteId->clone());
-  std::vector<uint8_t> infoHash = hkdf->labeledExtract(
+      params.suiteId->clone()));
+  std::vector<uint8_t> infoHash;
+  FIZZ_RETURN_ON_ERROR(hkdf->labeledExtract(
+      infoHash,
+      err,
       folly::IOBuf::copyBuffer(""),
       folly::ByteRange(folly::StringPiece("info_hash")),
       std::move(params.info),
-      params.suiteId->clone());
+      params.suiteId->clone()));
   std::unique_ptr<folly::IOBuf> keyScheduleContext;
   FIZZ_RETURN_ON_ERROR(writeKeyScheduleContext(
       keyScheduleContext, err, params.mode, pskIdHash, infoHash));
 
   // Generate hashes for cipher key
-  std::vector<uint8_t> secret = hkdf->labeledExtract(
+  std::vector<uint8_t> secret;
+  FIZZ_RETURN_ON_ERROR(hkdf->labeledExtract(
+      secret,
+      err,
       std::move(params.sharedSecret),
       folly::ByteRange(folly::StringPiece("secret")),
       std::move(psk),
-      params.suiteId->clone());
+      params.suiteId->clone()));
 
   // Generate additional values needed for contructing context
   std::unique_ptr<folly::IOBuf> key;

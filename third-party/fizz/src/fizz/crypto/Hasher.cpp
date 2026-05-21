@@ -16,7 +16,8 @@ Status hash(
     const HasherFactoryWithMetadata* makeHasher,
     const folly::IOBuf& in,
     folly::MutableByteRange out) {
-  auto hasher = makeHasher->make();
+  std::unique_ptr<Hasher> hasher;
+  FIZZ_RETURN_ON_ERROR(makeHasher->make(hasher, err));
 
   FIZZ_CHECK_GE(out.size(), hasher->getHashLen());
 

@@ -345,18 +345,17 @@ Status decodeAuthRequest(
 Buf computeTranscriptHash(
     const HasherFactoryWithMetadata* makeHasher,
     const Buf& toBeHashed) {
-  auto hasher = makeHasher->make();
+  std::unique_ptr<Hasher> hasher;
+  Error err;
+  FIZZ_THROW_ON_ERROR(makeHasher->make(hasher, err), err);
 
   auto hashLength = hasher->getHashLen();
   auto data = folly::IOBuf::create(hashLength);
   data->append(hashLength);
   auto transcriptHash =
       folly::MutableByteRange(data->writableData(), data->length());
-  {
-    Error err;
-    FIZZ_THROW_ON_ERROR(hasher->hash_update(err, *toBeHashed), err);
-    FIZZ_THROW_ON_ERROR(hasher->hash_final(err, transcriptHash), err);
-  }
+  FIZZ_THROW_ON_ERROR(hasher->hash_update(err, *toBeHashed), err);
+  FIZZ_THROW_ON_ERROR(hasher->hash_final(err, transcriptHash), err);
   return data;
 }
 

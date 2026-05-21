@@ -88,7 +88,9 @@ void runHashTestWithCloning(const fizz::HasherFactoryWithMetadata* makeHasher) {
   for (auto& testVector : kHashTestVectors) {
     std::unique_ptr<Hasher> outlivedHasher;
     {
-      auto ogHasher = makeHasher->make();
+      std::unique_ptr<Hasher> ogHasher;
+      Error makeErr;
+      FIZZ_THROW_ON_ERROR(makeHasher->make(ogHasher, makeErr), makeErr);
 
       folly::IOBuf messageBuf(
           folly::IOBuf::COPY_BUFFER,

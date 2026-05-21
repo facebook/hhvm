@@ -54,9 +54,21 @@ class KeyDerivation {
       Buf info,
       uint16_t length) = 0;
 
-  virtual std::vector<uint8_t> hkdfExtract(
+  virtual Status hkdfExtract(
+      std::vector<uint8_t>& ret,
+      Error& err,
       folly::ByteRange salt,
       folly::ByteRange ikm) = 0;
+
+  // TODO: Deprecate. Use the Status-returning hkdfExtract overload instead.
+  std::vector<uint8_t> hkdfExtract(
+      folly::ByteRange salt,
+      folly::ByteRange ikm) {
+    std::vector<uint8_t> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(hkdfExtract(ret, err, salt, ikm), err);
+    return ret;
+  }
 
   virtual std::unique_ptr<KeyDerivation> clone() const = 0;
 };
@@ -96,9 +108,12 @@ class KeyDerivationImpl : public KeyDerivation {
       Buf info,
       uint16_t length) override;
 
-  std::vector<uint8_t> hkdfExtract(folly::ByteRange salt, folly::ByteRange ikm)
-      override {
-    return hkdf_.extract(salt, ikm);
+  Status hkdfExtract(
+      std::vector<uint8_t>& ret,
+      Error& err,
+      folly::ByteRange salt,
+      folly::ByteRange ikm) override {
+    return hkdf_.extract(ret, err, salt, ikm);
   }
 
   std::unique_ptr<KeyDerivation> clone() const override {

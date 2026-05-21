@@ -63,11 +63,14 @@ Status DHKEM::extractAndExpand(
     std::unique_ptr<folly::IOBuf> kemContext) {
   Buf suiteId;
   FIZZ_RETURN_ON_ERROR(generateSuiteId(suiteId, err, group_));
-  std::vector<uint8_t> eae_prkVec = hkdf_->labeledExtract(
+  std::vector<uint8_t> eae_prkVec;
+  FIZZ_RETURN_ON_ERROR(hkdf_->labeledExtract(
+      eae_prkVec,
+      err,
       folly::IOBuf::copyBuffer(""),
       folly::ByteRange(folly::StringPiece("eae_prk")),
       std::move(dh),
-      suiteId->clone());
+      suiteId->clone()));
   folly::ByteRange eaePrk(eae_prkVec.data(), eae_prkVec.size());
   FIZZ_RETURN_ON_ERROR(hkdf_->labeledExpand(
       ret,

@@ -23,8 +23,10 @@ Status hmac(
     folly::ByteRange key,
     const folly::IOBuf& in,
     folly::MutableByteRange out) {
-  auto inner = makeHasher->make();
-  auto outer = makeHasher->make();
+  std::unique_ptr<Hasher> inner;
+  FIZZ_RETURN_ON_ERROR(makeHasher->make(inner, err));
+  std::unique_ptr<Hasher> outer;
+  FIZZ_RETURN_ON_ERROR(makeHasher->make(outer, err));
 
   size_t L = outer->getHashLen();
   FIZZ_CHECK_GE(out.size(), L);
@@ -41,7 +43,8 @@ Status hmac(
 
   // first hash the key if it's length is greater than B
   if (key.size() > B) {
-    auto keyHasher = makeHasher->make();
+    std::unique_ptr<Hasher> keyHasher;
+    FIZZ_RETURN_ON_ERROR(makeHasher->make(keyHasher, err));
     FIZZ_RETURN_ON_ERROR(
         keyHasher->hash_update(err, folly::ByteRange(key.data(), key.size())));
     FIZZ_RETURN_ON_ERROR(keyHasher->hash_final(

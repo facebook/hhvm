@@ -26,7 +26,9 @@ Hkdf Hkdf::withPrefix(
   return Hkdf(prefix, hash);
 }
 
-std::vector<uint8_t> Hkdf::labeledExtract(
+Status Hkdf::labeledExtract(
+    std::vector<uint8_t>& ret,
+    Error& err,
     Buf salt,
     folly::ByteRange label,
     Buf ikm,
@@ -41,11 +43,15 @@ std::vector<uint8_t> Hkdf::labeledExtract(
   writeBufWithoutLength(folly::IOBuf::wrapBuffer(label), appender);
   writeBufWithoutLength(ikm, appender);
 
-  return hkdf_.extract(salt->coalesce(), labeledIkm->coalesce());
+  FIZZ_RETURN_ON_ERROR(
+      hkdf_.extract(ret, err, salt->coalesce(), labeledIkm->coalesce()));
+  return Status::Success;
 }
 
-std::vector<uint8_t> Hkdf::extract(Buf salt, Buf ikm) {
-  return hkdf_.extract(salt->coalesce(), ikm->coalesce());
+Status Hkdf::extract(std::vector<uint8_t>& ret, Error& err, Buf salt, Buf ikm) {
+  FIZZ_RETURN_ON_ERROR(
+      hkdf_.extract(ret, err, salt->coalesce(), ikm->coalesce()));
+  return Status::Success;
 }
 
 Status Hkdf::labeledExpand(

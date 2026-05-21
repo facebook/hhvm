@@ -499,8 +499,10 @@ class MockFactory : public ::fizz::DefaultFactory {
             InvokeWithoutArgs([]() -> const fizz::HasherFactoryWithMetadata* {
               const static HasherFactoryWithMetadata instance =
                   HasherFactoryWithMetadata::bind<::fizz::Sha256>(
-                      []() -> std::unique_ptr<::fizz::Hasher> {
-                        return std::make_unique<NiceMock<MockHasher>>();
+                      [](std::unique_ptr<::fizz::Hasher>& ret,
+                         Error& /*err*/) -> Status {
+                        ret = std::make_unique<NiceMock<MockHasher>>();
+                        return Status::Success;
                       });
               return &instance;
             }));

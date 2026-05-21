@@ -69,12 +69,13 @@ std::shared_ptr<Cert> Factory::makeIdentityOnlyCert(std::string ident) const {
   return std::make_shared<IdentityCert>(std::move(ident));
 }
 
-Buf Factory::makeRandomIOBuf(size_t size) const {
+Status Factory::makeRandomIOBuf(Buf& ret, Error& err, size_t size) const {
   auto buf = folly::IOBuf::create(size);
   if (size > 0) {
-    makeRandomBytes(buf->writableData(), size);
+    FIZZ_RETURN_ON_ERROR(makeRandomBytes(err, buf->writableData(), size));
     buf->append(size);
   }
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 } // namespace fizz

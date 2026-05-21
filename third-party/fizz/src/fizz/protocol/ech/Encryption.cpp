@@ -488,7 +488,9 @@ namespace {
 // GREASE PSKs are essentially the same size as the source PSK with the actual
 // contents of all fields replaced with random data. For the HRR case, the PSK
 // identity is preserved.
-ClientPresharedKey generateGreasePskCommon(
+Status generateGreasePskCommon(
+    ClientPresharedKey& ret,
+    Error& err,
     const ClientPresharedKey& source,
     const Factory* factory,
     bool keepIdentity) {
@@ -499,22 +501,25 @@ ClientPresharedKey generateGreasePskCommon(
     if (keepIdentity) {
       greaseIdentity.psk_identity = identity.psk_identity->clone();
     } else {
-      greaseIdentity.psk_identity =
-          factory->makeRandomIOBuf(kGreasePSKIdentitySize);
+      FIZZ_RETURN_ON_ERROR(factory->makeRandomIOBuf(
+          greaseIdentity.psk_identity, err, kGreasePSKIdentitySize));
     }
 
-    factory->makeRandomBytes(
+    FIZZ_RETURN_ON_ERROR(factory->makeRandomBytes(
+        err,
         reinterpret_cast<unsigned char*>(&greaseIdentity.obfuscated_ticket_age),
-        sizeof(greaseIdentity.obfuscated_ticket_age));
+        sizeof(greaseIdentity.obfuscated_ticket_age)));
     grease.identities.push_back(std::move(greaseIdentity));
 
     const auto& binder = source.binders.at(i);
     PskBinder greaseBinder;
     size_t binderSize = binder.binder->computeChainDataLength();
-    greaseBinder.binder = factory->makeRandomIOBuf(binderSize);
+    FIZZ_RETURN_ON_ERROR(
+        factory->makeRandomIOBuf(greaseBinder.binder, err, binderSize));
     grease.binders.push_back(std::move(greaseBinder));
   }
-  return grease;
+  ret = std::move(grease);
+  return Status::Success;
 }
 } // namespace
 
@@ -532,16 +537,21 @@ Status generateGreasePSK(
   }
 
   // For client hello, don't preserve identity.
-  ret = generateGreasePskCommon(*innerPsk, factory, false);
+  ClientPresharedKey greasePsk;
+  FIZZ_RETURN_ON_ERROR(
+      generateGreasePskCommon(greasePsk, err, *innerPsk, factory, false));
+  ret = std::move(greasePsk);
   return Status::Success;
 }
 
-ClientPresharedKey generateGreasePSKForHRR(
+Status generateGreasePSKForHRR(
+    ClientPresharedKey& ret,
+    Error& err,
     const ClientPresharedKey& previousPsk,
     const Factory* factory) {
   // This PSK was the one sent before (i.e. with a random identity). We want to
   // keep it.
-  return generateGreasePskCommon(previousPsk, factory, true);
+  return generateGreasePskCommon(ret, err, previousPsk, factory, true);
 }
 
 Status calculateECHPadding(

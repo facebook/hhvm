@@ -50,7 +50,9 @@ Status generateGreasePSK(
     const ClientHello& chloInner,
     const Factory* factory);
 
-ClientPresharedKey generateGreasePSKForHRR(
+Status generateGreasePSKForHRR(
+    ClientPresharedKey& ret,
+    Error& err,
     const ClientPresharedKey& previousPsk,
     const Factory* factory);
 

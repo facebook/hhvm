@@ -448,7 +448,16 @@ class MockFactory : public ::fizz::DefaultFactory {
       makeRandomBytes,
       std::unique_ptr<folly::IOBuf>(size_t count));
 
-  MOCK_METHOD(void, makeRandomBytes, (unsigned char*, size_t), (const));
+  MOCK_METHOD(void, _makeRandomBytes, (unsigned char*, size_t), (const));
+  Status makeRandomBytes(Error& err, unsigned char* out, size_t count)
+      const override {
+    FIZZ_THROW_TO_ERROR(_makeRandomBytes(out, count));
+  }
+
+  MOCK_METHOD(Buf, _makeRandomIOBuf, (size_t count), (const));
+  Status makeRandomIOBuf(Buf& ret, Error& err, size_t size) const {
+    FIZZ_THROW_TO_ERROR(ret, _makeRandomIOBuf(size));
+  }
 
   void setDefaults() {
     ON_CALL(*this, makePlaintextReadRecordLayer())
@@ -517,7 +526,13 @@ class MockFactory : public ::fizz::DefaultFactory {
       random->append(count);
       return random;
     }));
-    ON_CALL(*this, makeRandomBytes(_, _))
+    ON_CALL(*this, _makeRandomIOBuf(_)).WillByDefault(Invoke([](size_t count) {
+      auto random = folly::IOBuf::create(count);
+      memset(random->writableData(), 0x44, count);
+      random->append(count);
+      return random;
+    }));
+    ON_CALL(*this, _makeRandomBytes(_, _))
         .WillByDefault(Invoke([](unsigned char* out, size_t count) {
           memset(out, 0x44, count);
         }));

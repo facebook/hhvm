@@ -693,7 +693,7 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, _deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -984,7 +984,7 @@ TEST_F(ServerProtocolTest, TestClientHelloAsyncCertFullHandshakeFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, _deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -1292,7 +1292,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, _deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -1635,7 +1635,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, _deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -1981,7 +1981,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, _deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -2300,7 +2300,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, _deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -2594,7 +2594,7 @@ TEST_F(ServerProtocolTest, TestClientHelloPskFlow) {
       .WillRepeatedly(
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(*mockKeyScheduler_, _deriveHandshakeSecret());
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -2848,7 +2848,7 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, _deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -3150,7 +3150,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, _deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -3441,7 +3441,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloPskDheFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, _deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -3705,7 +3705,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, _deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -4010,7 +4010,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, _deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -4346,7 +4346,7 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheEarlyFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, _deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -4640,7 +4640,7 @@ TEST_F(ServerProtocolTest, TestClientHelloPskEarlyFlow) {
       .WillRepeatedly(
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(*mockKeyScheduler_, _deriveHandshakeSecret());
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -6578,7 +6578,7 @@ TEST_F(ServerProtocolTest, TestFullHandshakeFinished) {
       nullptr,
       false,
       true);
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 4))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 4))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
@@ -6655,7 +6655,7 @@ TEST_F(ServerProtocolTest, TestFinishedTicketEarly) {
   acceptEarlyData();
   setUpExpectingFinished();
 
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 4))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 4))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
@@ -6776,7 +6776,7 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicket) {
       .WillOnce(InvokeWithoutArgs(
           []() { return folly::IOBuf::copyBuffer("derivedrsec"); }));
 
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 4))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 4))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
@@ -6856,7 +6856,7 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicketWithAppToken) {
 
   std::string appToken("appToken");
 
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 4))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 4))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
@@ -6885,7 +6885,7 @@ TEST_F(
   context_->setSendNewSessionTicket(true);
 
   // ExpectingFinished -> AcceptingData
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 4))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 4))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
@@ -6909,7 +6909,7 @@ TEST_F(
 
   // AcceptingData: WriteNewSessionTicket
   std::string appToken("appToken");
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 4))
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 4))
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))

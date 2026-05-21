@@ -88,8 +88,9 @@ class BatchSignatureFactory : public Factory {
     return original_->makeAead(ret, err, cipher);
   }
 
-  void makeRandomBytes(unsigned char* out, size_t count) const override {
-    return original_->makeRandomBytes(out, count);
+  Status makeRandomBytes(Error& err, unsigned char* out, size_t count)
+      const override {
+    return original_->makeRandomBytes(err, out, count);
   }
 
   /**

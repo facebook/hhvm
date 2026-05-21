@@ -1869,8 +1869,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
               }
 
               Random random;
-              state.context()->getFactory()->makeRandomBytes(
-                  random.data(), random.size());
+              FIZZ_THROW_ON_ERROR(
+                  state.context()->getFactory()->makeRandomBytes(
+                      err, random.data(), random.size()),
+                  err);
 
               auto serverHello = getServerHello(
                   version,
@@ -2551,8 +2553,12 @@ static SemiFuture<Optional<WriteToSocket>> generateTicket(
       err);
 
   uint32_t ticketAgeAdd{};
-  state.context()->getFactory()->makeRandomBytes(
-      reinterpret_cast<unsigned char*>(&ticketAgeAdd), sizeof(ticketAgeAdd));
+  FIZZ_THROW_ON_ERROR(
+      state.context()->getFactory()->makeRandomBytes(
+          err,
+          reinterpret_cast<unsigned char*>(&ticketAgeAdd),
+          sizeof(ticketAgeAdd)),
+      err);
 
   ResumptionState resState;
   resState.version = *state.version();

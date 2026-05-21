@@ -125,9 +125,12 @@ Status MultiBackendFactory::makeHasherFactory(
   }
 }
 
-void MultiBackendFactory::makeRandomBytes(unsigned char* out, size_t count)
-    const {
+Status MultiBackendFactory::makeRandomBytes(
+    Error& /*err*/,
+    unsigned char* out,
+    size_t count) const {
   libsodium::random(out, count);
+  return Status::Success;
 }
 
 Status MultiBackendFactory::makePeerCert(

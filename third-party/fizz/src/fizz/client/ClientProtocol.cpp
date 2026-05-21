@@ -971,7 +971,8 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
       validatePsk(*context, std::move(connect.cachedPsk));
 
   Random random;
-  context->getFactory()->makeRandomBytes(random.data(), random.size());
+  TRY(context->getFactory()->makeRandomBytes(
+      ctx.err, random.data(), random.size()));
 
   // If we have a saved PSK, use the group to choose which groups to
   // send by default
@@ -998,7 +999,8 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
   Buf legacySessionId;
   if (context->getCompatibilityMode()) {
     constexpr size_t kRandomSize = Random().size();
-    legacySessionId = context->getFactory()->makeRandomIOBuf(kRandomSize);
+    TRY(context->getFactory()->makeRandomIOBuf(
+        legacySessionId, ctx.err, kRandomSize));
   } else {
     legacySessionId = folly::IOBuf::create(0);
   }
@@ -1142,7 +1144,8 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
 
   if (echParams.has_value()) {
     echRandom = random;
-    context->getFactory()->makeRandomBytes(random.data(), random.size());
+    TRY(context->getFactory()->makeRandomBytes(
+        ctx.err, random.data(), random.size()));
 
     // Generate GREASE PSK (if needed)
     TRY(ech::generateGreasePSK(
@@ -1965,8 +1968,13 @@ Status EventHandler<
 
     // Generate GREASE PSK if needed
     if (state.echState()->greasePsk.has_value()) {
-      greasePsk = ech::generateGreasePSKForHRR(
-          state.echState()->greasePsk.value(), state.context()->getFactory());
+      ClientPresharedKey greasePskValue;
+      TRY(ech::generateGreasePSKForHRR(
+          greasePskValue,
+          ctx.err,
+          state.echState()->greasePsk.value(),
+          state.context()->getFactory()));
+      greasePsk = std::move(greasePskValue);
     }
 
     // Now that ECH acceptance check is done, we can append the real HRR to the

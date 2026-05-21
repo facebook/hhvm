@@ -6,8 +6,6 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <random>
-
 #include <fizz/protocol/ech/GreaseECH.h>
 
 #include <fizz/crypto/hpke/Utils.h>
@@ -17,28 +15,19 @@ namespace ech {
 namespace {
 
 /**
- * A random number generator adaptor based on the Factory.
+ * A random number generator based on the Factory.
  * Current usage is limited to type size_t.
  */
 class RandomNumberGenerator {
  public:
-  using result_type = size_t;
-
-  static constexpr size_t min() {
-    return 0;
-  }
-
-  static constexpr size_t max() {
-    return std::numeric_limits<size_t>::max();
-  }
-
   explicit RandomNumberGenerator(const Factory& factory) : factory_{factory} {}
 
-  size_t operator()() const {
+  Status generate(size_t& ret, Error& err) const {
     size_t number = 0;
-    factory_.makeRandomBytes(
-        reinterpret_cast<unsigned char*>(&number), sizeof(number));
-    return number;
+    FIZZ_RETURN_ON_ERROR(factory_.makeRandomBytes(
+        err, reinterpret_cast<unsigned char*>(&number), sizeof(number)));
+    ret = number;
+    return Status::Success;
   }
 
  private:
@@ -50,14 +39,26 @@ class RandomSelector {
   explicit RandomSelector(RandomNumberGenerator&& generator)
       : generator_{std::move(generator)} {}
 
-  size_t genNumber(size_t min, size_t max) const {
-    std::uniform_int_distribution<size_t> distribution(min, max);
-    return distribution(generator_);
+  Status genNumber(size_t& ret, Error& err, size_t min, size_t max) const {
+    if (min > max) {
+      return err.error("min > max");
+    }
+    if (max - min == std::numeric_limits<size_t>::max()) {
+      return err.error("The range exeeds size_t");
+    }
+    size_t raw;
+    FIZZ_RETURN_ON_ERROR(generator_.generate(raw, err));
+    size_t range = max - min + 1;
+    ret = min + (raw % range);
+    return Status::Success;
   }
 
   template <typename T>
-  T select(const std::vector<T>& elems) const {
-    return elems[genNumber(0, elems.size() - 1)];
+  Status select(T& ret, Error& err, const std::vector<T>& elems) const {
+    size_t idx;
+    FIZZ_RETURN_ON_ERROR(genNumber(idx, err, 0, elems.size() - 1));
+    ret = elems[idx];
+    return Status::Success;
   }
 
  private:
@@ -72,19 +73,31 @@ Status generateGreaseECH(
     const Factory& factory,
     size_t encodedChloSize) {
   RandomSelector selector{RandomNumberGenerator{factory}};
-  ret.cipher_suite = HpkeSymmetricCipherSuite{
-      selector.select(setting.kdfs), selector.select(setting.aeads)};
-  ret.config_id = selector.genNumber(setting.minConfigId, setting.maxConfigId);
-  ret.enc = factory.makeRandomIOBuf(selector.select(setting.keySizes));
-  size_t payloadSize =
-      selector.genNumber(setting.minPayloadSize, setting.maxPayloadSize);
+  hpke::KDFId kdf;
+  FIZZ_RETURN_ON_ERROR(selector.select(kdf, err, setting.kdfs));
+  hpke::AeadId aead;
+  FIZZ_RETURN_ON_ERROR(selector.select(aead, err, setting.aeads));
+  ret.cipher_suite = HpkeSymmetricCipherSuite{kdf, aead};
+
+  size_t configId;
+  FIZZ_RETURN_ON_ERROR(selector.genNumber(
+      configId, err, setting.minConfigId, setting.maxConfigId));
+  ret.config_id = static_cast<uint8_t>(configId);
+
+  uint16_t keySize;
+  FIZZ_RETURN_ON_ERROR(selector.select(keySize, err, setting.keySizes));
+  FIZZ_RETURN_ON_ERROR(factory.makeRandomIOBuf(ret.enc, err, keySize));
+
+  size_t payloadSize;
+  FIZZ_RETURN_ON_ERROR(selector.genNumber(
+      payloadSize, err, setting.minPayloadSize, setting.maxPayloadSize));
   if (setting.payloadStrategy == PayloadGenerationStrategy::Computed) {
     size_t cipherOverhead;
     FIZZ_RETURN_ON_ERROR(
         hpke::getCipherOverhead(cipherOverhead, err, ret.cipher_suite.aead_id));
     payloadSize += encodedChloSize + cipherOverhead;
   }
-  ret.payload = factory.makeRandomIOBuf(payloadSize);
+  FIZZ_RETURN_ON_ERROR(factory.makeRandomIOBuf(ret.payload, err, payloadSize));
   return Status::Success;
 }
 } // namespace ech

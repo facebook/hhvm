@@ -1077,7 +1077,11 @@ TEST(EncryptionTest, TestGenerateGreasePsk) {
   }
 
   // Check HRR GREASE. Same as above, but preserves identities.
-  auto hrrGreasePsk = generateGreasePSKForHRR(*psk, &factory);
+  ClientPresharedKey hrrGreasePsk;
+  Error hrrErr;
+  EXPECT_EQ(
+      generateGreasePSKForHRR(hrrGreasePsk, hrrErr, *psk, &factory),
+      Status::Success);
   EXPECT_EQ(hrrGreasePsk.identities.size(), psk->identities.size());
   EXPECT_EQ(hrrGreasePsk.binders.size(), psk->binders.size());
   for (size_t i = 0; i < hrrGreasePsk.identities.size(); i++) {

@@ -37,6 +37,7 @@ class MultiBackendFactory : public Factory {
       CertificateEntry certEntry,
       bool leaf) const override;
 
-  void makeRandomBytes(unsigned char* out, size_t count) const override;
+  Status makeRandomBytes(Error& err, unsigned char* out, size_t count)
+      const override;
 };
 } // namespace fizz

@@ -1116,7 +1116,7 @@ TEST_F(ClientProtocolTest, TestConnectECH) {
 
   // Two randoms should be generated, 1 for the client hello inner and 1 for
   // the client hello outer.
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32)).Times(2);
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32)).Times(2);
 
   fizz::Param param = std::move(connect);
   auto actions = detail::processEvent(state_, param);
@@ -1198,7 +1198,7 @@ TEST_F(ClientProtocolTest, TestConnectECHWithHybridSupportedGroup) {
 
   // Two randoms should be generated, 1 for the client hello inner and 1 for
   // the client hello outer.
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32)).Times(2);
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32)).Times(2);
 
   fizz::Param param = std::move(connect);
   auto actions = detail::processEvent(state_, param);
@@ -1281,7 +1281,7 @@ TEST_F(ClientProtocolTest, TestConnectECHWithAEGIS) {
 
   // Two randoms should be generated, 1 for the client hello inner and 1 for
   // the client hello outer.
-  EXPECT_CALL(*factory_, makeRandomBytes(_, 32)).Times(2);
+  EXPECT_CALL(*factory_, _makeRandomBytes(_, 32)).Times(2);
 
   fizz::Param param = std::move(connect);
   auto actions = detail::processEvent(state_, param);

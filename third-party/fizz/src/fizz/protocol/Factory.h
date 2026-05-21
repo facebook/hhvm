@@ -100,7 +100,8 @@ class Factory {
       Error& err,
       CipherSuite cipher) const = 0;
 
-  virtual void makeRandomBytes(unsigned char* out, size_t count) const = 0;
+  virtual Status makeRandomBytes(Error& err, unsigned char* out, size_t count)
+      const = 0;
 
   virtual Status makePeerCert(
       std::unique_ptr<PeerCert>& ret,
@@ -124,6 +125,6 @@ class Factory {
    */
   virtual std::shared_ptr<Cert> makeIdentityOnlyCert(std::string ident) const;
 
-  Buf makeRandomIOBuf(size_t size) const;
+  Status makeRandomIOBuf(Buf& ret, Error& err, size_t size) const;
 };
 } // namespace fizz

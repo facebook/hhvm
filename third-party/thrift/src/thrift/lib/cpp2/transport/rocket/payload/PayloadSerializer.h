@@ -122,10 +122,8 @@ class PayloadSerializer {
   }
 
  public:
-  template <
-      typename Strategy,
-      typename = std::enable_if_t<
-          std::is_base_of_v<PayloadSerializerStrategy<Strategy>, Strategy>>>
+  template <typename Strategy>
+    requires std::is_base_of_v<PayloadSerializerStrategy<Strategy>, Strategy>
   explicit PayloadSerializer(Strategy s) : strategy_(std::move(s)) {}
 
   /**
@@ -149,9 +147,8 @@ class PayloadSerializer {
    */
   template <
       typename Strategy = DefaultPayloadSerializerStrategy,
-      typename... Args,
-      typename = std::enable_if_t<
-          std::is_base_of_v<PayloadSerializerStrategy<Strategy>, Strategy>>>
+      typename... Args>
+    requires std::is_base_of_v<PayloadSerializerStrategy<Strategy>, Strategy>
   static FOLLY_ALWAYS_INLINE PayloadSerializer make(Args... args) {
     if constexpr (std::is_same_v<Strategy, DefaultPayloadSerializerStrategy>) {
       return PayloadSerializer{DefaultPayloadSerializerStrategy(args...)};

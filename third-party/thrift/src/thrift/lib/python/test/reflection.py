@@ -79,8 +79,9 @@ def _inspect_struct(cls: type[Any]) -> StructSpec:
 
 
 def _get_field_spec(spec: StructSpec, field_name: str) -> FieldSpec:
-    fields_by_name = {f.name: f for f in spec.fields}
-    return fields_by_name[field_name]
+    field = spec.get_field(field_name)
+    assert field is not None, f"field {field_name!r} not found in {spec.name}"
+    return field
 
 
 class InspectSimpleStructTest(unittest.TestCase):

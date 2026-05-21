@@ -160,9 +160,10 @@ class FieldSpec(metaclass=_ImmutableMeta):
 
 
 class StructSpec(metaclass=_ImmutableMeta):
-    __slots__ = ("name", "_fields", "kind", "structured_annotations")
+    __slots__ = ("name", "_fields", "_fields_by_name", "kind", "structured_annotations")
     name: str
     _fields: list[FieldSpec]
+    _fields_by_name: MappingProxyType[str, FieldSpec] | None
     kind: StructType
     structured_annotations: MappingProxyType[str, ConstantSpec]
 
@@ -177,14 +178,29 @@ class StructSpec(metaclass=_ImmutableMeta):
         self.name = name
         self.kind = kind
         self._fields = list(fields) if fields else []
+        self._fields_by_name = None
         self.structured_annotations = MappingProxyType(structured_annotations or {})
 
     @property
     def fields(self) -> tuple[FieldSpec, ...]:
         return tuple(self._fields)
 
+    @property
+    def fields_by_name(self) -> MappingProxyType[str, FieldSpec]:
+        result = self._fields_by_name
+        if result is None:
+            result = MappingProxyType({f.py_name: f for f in self._fields})
+            object.__setattr__(self, "_fields_by_name", result)
+        return result
+
+    def get_field(self, name: str) -> FieldSpec | None:
+        if (field := self.fields_by_name.get(name)) is not None:
+            return field
+        return next((f for f in self._fields if f.name == name), None)
+
     def add_field(self, field: FieldSpec) -> None:
         self._fields.append(field)
+        object.__setattr__(self, "_fields_by_name", None)
 
     @property
     def annotations(self) -> dict[str, str | dict[str, object]]:

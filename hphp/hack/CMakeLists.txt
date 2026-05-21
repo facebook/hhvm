@@ -154,7 +154,7 @@ set(
   HHVM_TYPES_FFI_CARGO_PATH
   "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_types"
 )
-set(PACKAGE_FFI_CARGO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/package/ffi_bridge")
+set(PACKAGE_FFI_CARGO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/packages/ffi_bridge")
 set(PARSER_FFI_CARGO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/parser/ffi_bridge")
 set(
   COMPILER_FFI_EXTRA_SRC
@@ -183,7 +183,7 @@ string(CONCAT HHVM_RUST_FFI_CARGO_TOML_CONTENT
   "hdf = { path = \"${HDF_CARGO_PATH}\" }\n"
   "hhvm_hhbc_defs_ffi = { path = \"${HHVM_HHBC_DEFS_FFI_CARGO_PATH}\" }\n"
   "hhvm_types_ffi = { path = \"${HHVM_TYPES_FFI_CARGO_PATH}\" }\n"
-  "package_ffi = { path = \"${PACKAGE_FFI_CARGO_PATH}\" }\n"
+  "packages_ffi = { path = \"${PACKAGE_FFI_CARGO_PATH}\" }\n"
   "parser_ffi = { path = \"${PARSER_FFI_CARGO_PATH}\" }\n"
 )
 string(CONCAT HHVM_RUST_FFI_LIB_RS_CONTENT
@@ -195,7 +195,7 @@ string(CONCAT HHVM_RUST_FFI_LIB_RS_CONTENT
   "extern crate hdf;\n"
   "extern crate hhvm_hhbc_defs_ffi;\n"
   "extern crate hhvm_types_ffi;\n"
-  "extern crate package_ffi;\n"
+  "extern crate packages_ffi;\n"
   "extern crate parser_ffi;\n"
 )
 file(
@@ -426,8 +426,8 @@ set_target_properties(
 add_custom_target(hack_rust_ffi_bridge_targets)
 
 build_cxx_bridge(
-  package_ffi
-  DIR "src/package/ffi_bridge"
+  packages_ffi
+  DIR "src/packages/ffi_bridge"
 )
 build_cxx_bridge(
   parser_ffi

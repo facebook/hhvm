@@ -2298,7 +2298,7 @@ dependencies = [
  "config_file",
  "ocamlrep",
  "oxidized",
- "package",
+ "packages",
  "serde",
  "serde_json",
  "sha1",
@@ -3442,7 +3442,7 @@ dependencies = [
  "naming_types",
  "no_pos_hash",
  "ocamlrep",
- "package",
+ "packages",
  "parser_core_types",
  "pretty_assertions",
  "rc_pos",
@@ -3457,7 +3457,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "package"
+name = "packages"
 version = "0.0.0"
 dependencies = [
  "anyhow",
@@ -3470,21 +3470,21 @@ dependencies = [
 ]
 
 [[package]]
-name = "package_ffi"
+name = "packages_ffi"
 version = "0.0.0"
 dependencies = [
  "cxx",
  "cxx-build",
- "package",
+ "packages",
 ]
 
 [[package]]
-name = "package_ocaml_ffi"
+name = "packages_ocaml_ffi"
 version = "0.0.0"
 dependencies = [
  "ocamlrep_ocamlpool",
  "oxidized",
- "package",
+ "packages",
 ]
 
 [[package]]

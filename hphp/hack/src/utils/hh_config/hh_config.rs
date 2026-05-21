@@ -24,7 +24,7 @@ use oxidized::global_options::SavedState;
 use oxidized::global_options::SavedStateLoading;
 use oxidized::parser_options::ParserOptions;
 use oxidized::saved_state_rollouts::SavedStateRollouts;
-use package::PackageInfo;
+use packages::PackageInfo;
 use serde_json::json;
 use sha1::Digest;
 use sha1::Sha1;

@@ -20,7 +20,7 @@ pub type Errors = Vec<(Pos, String, Vec<(Pos, String)>)>;
 
 pub fn package_info_to_vec(
     filename: &str,
-    info: package::PackageInfo,
+    info: packages::PackageInfo,
 ) -> Result<Vec<Package>, Errors> {
     let pos_from_span = |span: (usize, usize)| {
         let (start_offset, end_offset) = span;
@@ -62,7 +62,7 @@ pub fn package_info_to_vec(
                 let id = x.to_owned().into_inner();
                 PosId(pos, id)
             };
-            let convert_many = |xs: &Option<package::NameSet>| -> Vec<PosId> {
+            let convert_many = |xs: &Option<packages::NameSet>| -> Vec<PosId> {
                 xs.as_ref()
                     .unwrap_or_default()
                     .iter()
@@ -81,9 +81,9 @@ pub fn package_info_to_vec(
     Ok(packages)
 }
 
-impl TryFrom<package::PackageInfo> for PackageInfo {
+impl TryFrom<packages::PackageInfo> for PackageInfo {
     type Error = Errors;
-    fn try_from(info: package::PackageInfo) -> Result<Self, Errors> {
+    fn try_from(info: packages::PackageInfo) -> Result<Self, Errors> {
         let result = package_info_to_vec("PACKAGES.toml", info);
         match result {
             Ok(packages) => {

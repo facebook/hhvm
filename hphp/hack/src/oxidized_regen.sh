@@ -160,8 +160,8 @@ run_hh_oxidize \
   hphp/hack/src/options/parserOptions.ml                                      \
   hphp/hack/src/options/saved_state_rollouts.ml                               \
   hphp/hack/src/options/typecheckerOptions.ml                                 \
-  hphp/hack/src/package/package.ml                                            \
-  hphp/hack/src/package/package_info.ml                                      \
+  hphp/hack/src/packages/package.ml                                            \
+  hphp/hack/src/packages/package_info.ml                                      \
   hphp/hack/src/parser/full_fidelity_parser_env.ml                             \
   hphp/hack/src/search/utils/searchTypes.ml                                   \
   hphp/hack/src/typing/service/reason_collector.ml                            \

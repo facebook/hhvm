@@ -41,10 +41,10 @@ mod ffi {
 
 pub fn package_info(packages_toml: &CxxString) -> ffi::PackageInfo {
     // HHVM should not perform validation of include_paths, so invoking from_text_non_strict
-    let s = package::PackageInfo::from_text_non_strict(&packages_toml.to_string());
+    let s = packages::PackageInfo::from_text_non_strict(&packages_toml.to_string());
     match s {
         Ok(info) => {
-            let convert = |v: Option<&package::NameSet>| {
+            let convert = |v: Option<&packages::NameSet>| {
                 v.map(|v| v.iter().map(|v| v.get_ref().clone()).collect())
                     .unwrap_or_default()
             };

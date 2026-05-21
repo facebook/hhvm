@@ -120,9 +120,7 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context
     {{#if func.params.fields?}}
     args := reqStruct.(*req{{svc.go_name}}{{func.go_name}})
     {{/if func.params.fields?}}
-    {{#if (not func.oneway?)}}
     result := newResp{{svc.go_name}}{{func.go_name}}()
-    {{/if (not func.oneway?)}}
     {{#if func.creates_interaction?}}fbthriftInteraction, {{/if func.creates_interaction?}}{{#if (not func.return_type.void?)}}retval, {{/if (not func.return_type.void?)}}err := p.handler.{{func.go_name}}(
         {{~ ! }}ctx{{#if func.params.fields?}}, {{/if ~}}
         {{#each func.params.fields as |field| separator=", " ~}}
@@ -155,12 +153,21 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context
     {{#if (not func.return_type.void?)}}
     result.{{func.retval_field_name}} = {{#if (not func.return_type.nilable?)}}&{{/if (not func.return_type.nilable?)}}retval
     {{/if (not func.return_type.void?)}}
-    {{#if func.oneway?}}
-    return nil, nil
-    {{/if func.oneway?}}
-    {{#if (not func.oneway?)}}
     return result, nil
-    {{/if (not func.oneway?)}}
+}
+{{/let partial}}
+
+{{#let export partial server_func_oneway |func svc|}}
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunOnewayContext(ctx context.Context, reqStruct thrift.ReadableStruct) {
+    {{#if func.params.fields?}}
+    args := reqStruct.(*req{{svc.go_name}}{{func.go_name}})
+    {{/if func.params.fields?}}
+
+    p.handler.{{func.go_name}}(
+        {{~ ! }}ctx{{#if func.params.fields?}}, {{/if ~}}
+        {{#each func.params.fields as |field| separator=", " ~}}
+          args.{{field.go_name}}
+        {{~ /each}})
 }
 {{/let partial}}
 
@@ -378,7 +385,7 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunBiDiContext(
 }
 {{/let partial}}
 
-{{#let export partial processor_function |func svc| captures |server_func_stream server_func_response server_func_sink server_func_bidi|}}
+{{#let export partial processor_function |func svc| captures |server_func_stream server_func_response server_func_oneway server_func_sink server_func_bidi|}}
 type procFunc{{svc.go_name}}{{func.go_name}} struct {
     handler {{svc.go_name}}
 }
@@ -407,6 +414,14 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context
 }
 
 {{#partial server_func_sink func=func svc=svc}}
+{{#else if func.oneway?}}
+{{! NOTE: temporary workaround to match interface }}
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    p.RunOnewayContext(ctx, reqStruct)
+    return nil, nil
+}
+
+{{#partial server_func_oneway func=func svc=svc}}
 {{#else}}
 {{#partial server_func_response func=func svc=svc}}
 {{/if func.bidirectional_stream?}}

@@ -502,15 +502,14 @@ func (p *procFuncMyServiceLobDataById) NewReqArgs() thrift.ReadableStruct {
 }
 
 func (p *procFuncMyServiceLobDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    args := reqStruct.(*reqMyServiceLobDataById)
-    err := p.handler.LobDataById(ctx, args.Id, args.Data)
-    if err != nil {
-        internalErr := fmt.Errorf("Internal error processing LobDataById: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
-    }
-
+    p.RunOnewayContext(ctx, reqStruct)
     return nil, nil
+}
+
+func (p *procFuncMyServiceLobDataById) RunOnewayContext(ctx context.Context, reqStruct thrift.ReadableStruct) {
+    args := reqStruct.(*reqMyServiceLobDataById)
+
+    p.handler.LobDataById(ctx, args.Id, args.Data)
 }
 
 type procFuncMyServiceGoDoNothing struct {

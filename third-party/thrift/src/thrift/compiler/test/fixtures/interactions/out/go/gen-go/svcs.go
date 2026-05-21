@@ -271,14 +271,13 @@ func (p *procFuncMyInteractionPing) NewReqArgs() thrift.ReadableStruct {
 }
 
 func (p *procFuncMyInteractionPing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    err := p.handler.Ping(ctx)
-    if err != nil {
-        internalErr := fmt.Errorf("Internal error processing Ping: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
-    }
-
+    p.RunOnewayContext(ctx, reqStruct)
     return nil, nil
+}
+
+func (p *procFuncMyInteractionPing) RunOnewayContext(ctx context.Context, reqStruct thrift.ReadableStruct) {
+
+    p.handler.Ping(ctx)
 }
 
 type procFuncMyInteractionTruthify struct {
@@ -646,14 +645,13 @@ func (p *procFuncMyInteractionFastPing) NewReqArgs() thrift.ReadableStruct {
 }
 
 func (p *procFuncMyInteractionFastPing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    err := p.handler.Ping(ctx)
-    if err != nil {
-        internalErr := fmt.Errorf("Internal error processing Ping: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
-    }
-
+    p.RunOnewayContext(ctx, reqStruct)
     return nil, nil
+}
+
+func (p *procFuncMyInteractionFastPing) RunOnewayContext(ctx context.Context, reqStruct thrift.ReadableStruct) {
+
+    p.handler.Ping(ctx)
 }
 
 type procFuncMyInteractionFastTruthify struct {

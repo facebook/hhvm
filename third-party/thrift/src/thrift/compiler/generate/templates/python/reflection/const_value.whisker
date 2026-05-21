@@ -29,7 +29,7 @@ _ConstantSpec(value=
     }}{{#else}}_ThriftType.I64{{!
     }}{{/if value:type.byte?}}
 {{#else if value:enum?}}
-  {{value:integer_value}}, thrift_type=_ThriftType.I32
+  _ConstantEnumSpec(enum_type={{value:type.module_mangle}}.{{value:type.true_type.py_name}}, value={{value:type.module_mangle}}.{{value:type.true_type.py_name}}({{value:integer_value}})), thrift_type=_ThriftType.ENUM
 {{#else if value:double?}}
   {{(float_to_string value:double_value)}}, thrift_type={{!
     }}{{#if value:type.float?}}_ThriftType.FLOAT{{!
@@ -37,6 +37,10 @@ _ConstantSpec(value=
     }}{{/if value:type.float?}}
 {{#else if value:string?}}
   "{{value:string_value}}", thrift_type=_ThriftType.STRING
+{{#else if value:type.union?}}
+  _ConstantUnionSpec(union_type={{value:type.module_mangle}}.{{#value:type.true_type}}{{> structs/unadapted_name}}{{/value:type.true_type}}{{!
+  }}{{#each value:structured_elements as |elem|}}, field="{{elem.field.name}}", value={{#elem.value}}{{> reflection/const_value }}{{/elem.value}}{{/each}}{{!
+  }}), thrift_type=_ThriftType.UNION
 {{#else if value:structured?}}
   {{> reflection/const_struct }}, thrift_type=_ThriftType.STRUCT
 {{#else if value:map?}}

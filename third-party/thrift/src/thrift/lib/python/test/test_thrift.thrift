@@ -756,6 +756,8 @@ struct ReflectionAnnotation {
   2: float ratio;
   3: set<string> tags;
   4: Color color;
+  5: Integers int_union;
+  6: Integers empty_union;
 }
 
 @StructuredAnnotation{second = 42, third = ["hello", "world"]}
@@ -764,6 +766,8 @@ struct ReflectionAnnotation {
   ratio = 0.5,
   tags = ["x", "y"],
   color = Color.blue,
+  int_union = Integers{medium = 42},
+  empty_union = Integers{},
 }
 @thrift.DeprecatedUnvalidatedAnnotations{items = {"depr_key": "depr_val"}}
 struct AnnotatedForReflection {

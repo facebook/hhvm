@@ -22,6 +22,8 @@ try:
     from thrift.python.reflection.constants_reflection import (
         ConstantSpec as _ConstantSpec,
         ConstantStructSpec as _ConstantStructSpec,
+        ConstantUnionSpec as _ConstantUnionSpec,
+        ConstantEnumSpec as _ConstantEnumSpec,
         ConstantMapSpec as _ConstantMapSpec,
         ConstantListSpec as _ConstantListSpec,
         ConstantSetSpec as _ConstantSetSpec,

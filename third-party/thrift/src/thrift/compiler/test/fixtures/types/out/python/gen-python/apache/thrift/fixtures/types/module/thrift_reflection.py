@@ -22,6 +22,8 @@ try:
     from thrift.python.reflection.constants_reflection import (
         ConstantSpec as _ConstantSpec,
         ConstantStructSpec as _ConstantStructSpec,
+        ConstantUnionSpec as _ConstantUnionSpec,
+        ConstantEnumSpec as _ConstantEnumSpec,
         ConstantMapSpec as _ConstantMapSpec,
         ConstantListSpec as _ConstantListSpec,
         ConstantSetSpec as _ConstantSetSpec,
@@ -850,7 +852,7 @@ def get_reflection__ForwardUsageRoot():
             qualifier=_Qualifier.OPTIONAL,
             default=None,
             structured_annotations={
-                "cpp.Ref": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Ref, fields={  "type": _ConstantSpec(value=  0, thrift_type=_ThriftType.I32),}), thrift_type=_ThriftType.STRUCT),
+                "cpp.Ref": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Ref, fields={  "type": _ConstantSpec(value=  _ConstantEnumSpec(enum_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.RefType, value=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.RefType(0)), thrift_type=_ThriftType.ENUM),}), thrift_type=_ThriftType.STRUCT),
             },
         ),
     )
@@ -877,7 +879,7 @@ def get_reflection__ForwardUsageStruct():
             qualifier=_Qualifier.OPTIONAL,
             default=None,
             structured_annotations={
-                "cpp.Ref": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Ref, fields={  "type": _ConstantSpec(value=  0, thrift_type=_ThriftType.I32),}), thrift_type=_ThriftType.STRUCT),
+                "cpp.Ref": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Ref, fields={  "type": _ConstantSpec(value=  _ConstantEnumSpec(enum_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.RefType, value=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.RefType(0)), thrift_type=_ThriftType.ENUM),}), thrift_type=_ThriftType.STRUCT),
             },
         ),
     )
@@ -904,7 +906,7 @@ def get_reflection__ForwardUsageByRef():
             qualifier=_Qualifier.OPTIONAL,
             default=None,
             structured_annotations={
-                "cpp.Ref": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Ref, fields={  "type": _ConstantSpec(value=  0, thrift_type=_ThriftType.I32),}), thrift_type=_ThriftType.STRUCT),
+                "cpp.Ref": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Ref, fields={  "type": _ConstantSpec(value=  _ConstantEnumSpec(enum_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.RefType, value=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.RefType(0)), thrift_type=_ThriftType.ENUM),}), thrift_type=_ThriftType.STRUCT),
             },
         ),
     )
@@ -1301,7 +1303,7 @@ def get_reflection__AllocatorAware():
             qualifier=_Qualifier.UNQUALIFIED,
             default=0,
             structured_annotations={
-                "cpp.Ref": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Ref, fields={  "type": _ConstantSpec(value=  0, thrift_type=_ThriftType.I32),}), thrift_type=_ThriftType.STRUCT),
+                "cpp.Ref": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Ref, fields={  "type": _ConstantSpec(value=  _ConstantEnumSpec(enum_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.RefType, value=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.RefType(0)), thrift_type=_ThriftType.ENUM),}), thrift_type=_ThriftType.STRUCT),
                 "cpp.AllowLegacyNonOptionalRef": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.AllowLegacyNonOptionalRef, fields={}), thrift_type=_ThriftType.STRUCT),
             },
         ),
@@ -1316,7 +1318,7 @@ def get_reflection__AllocatorAware():
             qualifier=_Qualifier.UNQUALIFIED,
             default=0,
             structured_annotations={
-                "cpp.Ref": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Ref, fields={  "type": _ConstantSpec(value=  2, thrift_type=_ThriftType.I32),}), thrift_type=_ThriftType.STRUCT),
+                "cpp.Ref": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.Ref, fields={  "type": _ConstantSpec(value=  _ConstantEnumSpec(enum_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.RefType, value=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.RefType(2)), thrift_type=_ThriftType.ENUM),}), thrift_type=_ThriftType.STRUCT),
                 "cpp.AllowLegacyNonOptionalRef": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__cpp__thrift_types.AllowLegacyNonOptionalRef, fields={}), thrift_type=_ThriftType.STRUCT),
             },
         ),

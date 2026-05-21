@@ -46,11 +46,13 @@ from test_thrift.thrift_types import (
 )
 from testing.sub_dependency.thrift_types import Basic as SubDepBasic
 from thrift.python.reflection.constants_reflection import (
+    ConstantEnumSpec,
     ConstantListSpec,
     ConstantMapSpec,
     ConstantSetSpec,
     ConstantSpec,
     ConstantStructSpec,
+    ConstantUnionSpec,
     ThriftType,
 )
 from thrift.python.reflection.types_reflection import (
@@ -734,8 +736,40 @@ class InspectAnnotationsTest(unittest.TestCase):
         ra_value = raw["test_thrift.ReflectionAnnotation"].value
         assert isinstance(ra_value, ConstantStructSpec)
         color_spec = ra_value.fields["color"]
-        self.assertEqual(color_spec.thrift_type, ThriftType.I32)
-        self.assertEqual(color_spec.value, 1)
+        self.assertEqual(color_spec.thrift_type, ThriftType.ENUM)
+        color_value = color_spec.value
+        assert isinstance(color_value, ConstantEnumSpec)
+        self.assertIs(color_value.enum_type, Color)
+        self.assertEqual(color_value.value, Color.blue)
+
+    def test_annotation_with_union_value(self) -> None:
+        spec = _inspect_struct(AnnotatedForReflection)
+        raw = spec.structured_annotations
+        ra_value = raw["test_thrift.ReflectionAnnotation"].value
+        assert isinstance(ra_value, ConstantStructSpec)
+        union_spec = ra_value.fields["int_union"]
+        self.assertEqual(union_spec.thrift_type, ThriftType.UNION)
+        union_value = union_spec.value
+        assert isinstance(union_value, ConstantUnionSpec)
+        self.assertIs(union_value.union_type, Integers)
+        self.assertEqual(union_value.field, "medium")
+        inner = union_value.value
+        assert inner is not None
+        self.assertEqual(inner.value, 42)
+        self.assertEqual(inner.thrift_type, ThriftType.I32)
+
+    def test_annotation_with_empty_union_value(self) -> None:
+        spec = _inspect_struct(AnnotatedForReflection)
+        raw = spec.structured_annotations
+        ra_value = raw["test_thrift.ReflectionAnnotation"].value
+        assert isinstance(ra_value, ConstantStructSpec)
+        union_spec = ra_value.fields["empty_union"]
+        self.assertEqual(union_spec.thrift_type, ThriftType.UNION)
+        union_value = union_spec.value
+        assert isinstance(union_value, ConstantUnionSpec)
+        self.assertIs(union_value.union_type, Integers)
+        self.assertIsNone(union_value.field)
+        self.assertIsNone(union_value.value)
 
 
 class HashContractTest(unittest.TestCase):

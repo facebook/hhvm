@@ -6992,6 +6992,7 @@ TEST_F(ServerProtocolTest, TestAppWrite) {
 
 TEST_F(ServerProtocolTest, TestKeyUpdateNotRequested) {
   setUpAcceptingData();
+  state_.extensions() = extensions_;
   EXPECT_CALL(*mockKeyScheduler_, _clientKeyUpdate());
   EXPECT_CALL(*appRead_, hasUnparsedHandshakeData()).WillOnce(Return(false));
 
@@ -7015,7 +7016,13 @@ TEST_F(ServerProtocolTest, TestKeyUpdateNotRequested) {
 
   expectAeadCreation({{"clientkey", &raead}});
   expectEncryptedReadRecordLayerCreation(
-      &rrl, &raead, folly::StringPiece("cat"));
+      &rrl,
+      &raead,
+      folly::StringPiece("cat"),
+      folly::none,
+      nullptr,
+      false,
+      true);
 
   fizz::Param param = TestMessages::keyUpdate(false);
   auto actions = getActions(detail::processEvent(state_, param));
@@ -7042,6 +7049,7 @@ TEST_F(ServerProtocolTest, TestKeyUpdateExtraData) {
 
 TEST_F(ServerProtocolTest, TestKeyUpdateRequest) {
   setUpAcceptingData();
+  state_.extensions() = extensions_;
   EXPECT_CALL(*mockKeyScheduler_, _clientKeyUpdate());
   EXPECT_CALL(*appRead_, hasUnparsedHandshakeData()).WillOnce(Return(false));
 
@@ -7101,9 +7109,15 @@ TEST_F(ServerProtocolTest, TestKeyUpdateRequest) {
 
   expectAeadCreation(&raead, &waead);
   expectEncryptedReadRecordLayerCreation(
-      &rrl, &raead, folly::StringPiece("cat"));
+      &rrl,
+      &raead,
+      folly::StringPiece("cat"),
+      folly::none,
+      nullptr,
+      false,
+      true);
   expectEncryptedWriteRecordLayerCreation(
-      &wrl, &waead, folly::StringPiece("sat"));
+      &wrl, &waead, folly::StringPiece("sat"), nullptr, nullptr, false, true);
   fizz::Param param = TestMessages::keyUpdate(true);
   auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);

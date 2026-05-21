@@ -2985,6 +2985,9 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
           EncryptionLevel::AppTraffic);
   FIZZ_THROW_ON_ERROR(
       readRecordLayer->setProtocolVersion(err, *state.version()), err);
+  if (state.extensions()) {
+    readRecordLayer->configureServerRecordLayer(state.extensions());
+  }
   auto readSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ClientAppTraffic);
   FIZZ_THROW_ON_ERROR(
@@ -3029,6 +3032,9 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
           EncryptionLevel::AppTraffic);
   FIZZ_THROW_ON_ERROR(
       writeRecordLayer->setProtocolVersion(err, *state.version()), err);
+  if (state.extensions()) {
+    writeRecordLayer->configureServerRecordLayer(state.extensions());
+  }
   auto writeSecret =
       state.keyScheduler()->getSecret(AppTrafficSecrets::ServerAppTraffic);
   FIZZ_THROW_ON_ERROR(

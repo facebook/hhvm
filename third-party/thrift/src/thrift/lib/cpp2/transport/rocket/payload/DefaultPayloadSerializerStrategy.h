@@ -16,10 +16,16 @@
 
 #pragma once
 
+#include <type_traits>
+
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializerStrategy.h>
+
+namespace apache::thrift {
+struct StreamPayload;
+} // namespace apache::thrift
 
 namespace apache::thrift::rocket {
 
@@ -54,6 +60,15 @@ class DefaultPayloadSerializerStrategy final
             compressionAlgorithm != CompressionAlgorithm::CUSTOM) {
           t.payload =
               uncompressBuffer(std::move(t.payload), compressionAlgorithm);
+          // Clear compression only for StreamPayload. This signals to
+          // decompressStreamPayload() that IO-thread decompression already
+          // happened, preventing double decompression without a racy flag
+          // check. FirstResponsePayload must retain compression metadata so
+          // fillTHeaderFromResponseRpcMetadata() can set TTransforms for
+          // ServiceRouter Scuba logging.
+          if constexpr (std::is_same_v<T, StreamPayload>) {
+            t.metadata.compression().reset();
+          }
         }
       }
       return t;

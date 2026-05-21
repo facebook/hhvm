@@ -21,6 +21,10 @@
 
 #include <folly/MapUtil.h>
 
+// Controls both request compression and response decompression offloading
+// from IO thread to caller/consumer thread.
+THRIFT_FLAG_DEFINE_bool(thrift_client_compress_request_on_cpu, false);
+
 namespace {
 using namespace apache::thrift;
 using namespace apache::thrift::detail;

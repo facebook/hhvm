@@ -235,3 +235,11 @@ struct ThriftFlagInfo {
 
 std::vector<ThriftFlagInfo> getAllThriftFlags();
 } // namespace apache::thrift
+
+THRIFT_FLAG_DECLARE_bool(thrift_client_compress_request_on_cpu);
+
+namespace apache::thrift {
+inline bool clientCompressRequestOnCpu() {
+  return THRIFT_FLAG(thrift_client_compress_request_on_cpu);
+}
+} // namespace apache::thrift

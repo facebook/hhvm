@@ -1058,7 +1058,8 @@ void RocketClientChannelBase::sendThriftRequest(
             requestSerializedSize,
             std::move(requestPayload),
             std::move(clientCallback),
-            /*skipDecompression=*/false);
+            /*skipDecompression=*/
+            apache::thrift::clientCompressRequestOnCpu());
         break;
 
       default:

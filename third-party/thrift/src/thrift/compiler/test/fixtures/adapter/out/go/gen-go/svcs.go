@@ -143,8 +143,7 @@ func (p *procFuncServiceFunc) RunContext(ctx context.Context, reqStruct thrift.R
     retval, err := p.handler.Func(ctx, args.Arg1, args.Arg2, args.Arg3)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Func: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = &retval
@@ -283,8 +282,7 @@ func (p *procFuncAdapterServiceCount) RunContext(ctx context.Context, reqStruct 
     retval, err := p.handler.Count(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Count: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = retval
@@ -307,8 +305,7 @@ func (p *procFuncAdapterServiceAdaptedTypes) RunContext(ctx context.Context, req
     retval, err := p.handler.AdaptedTypes(ctx, args.Arg)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing AdaptedTypes: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = retval

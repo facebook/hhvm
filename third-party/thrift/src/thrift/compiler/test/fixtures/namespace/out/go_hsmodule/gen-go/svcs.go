@@ -141,8 +141,7 @@ func (p *procFuncHsTestServiceInit) RunContext(ctx context.Context, reqStruct th
     retval, err := p.handler.Init(ctx, args.Int1)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Init: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = &retval

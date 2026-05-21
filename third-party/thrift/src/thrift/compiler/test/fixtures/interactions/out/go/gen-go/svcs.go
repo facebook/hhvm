@@ -251,8 +251,7 @@ func (p *procFuncMyInteractionFrobnicate) RunContext(ctx context.Context, reqStr
             return result, nil
         default:
             internalErr := fmt.Errorf("Internal error processing Frobnicate: %w", err)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            return x, internalErr
+            return nil, internalErr
         }
     }
 
@@ -626,8 +625,7 @@ func (p *procFuncMyInteractionFastFrobnicate) RunContext(ctx context.Context, re
     retval, err := p.handler.Frobnicate(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Frobnicate: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = &retval
@@ -894,8 +892,7 @@ func (p *procFuncSerialInteractionFrobnicate) RunContext(ctx context.Context, re
     err := p.handler.Frobnicate(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Frobnicate: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -1018,8 +1015,7 @@ func (p *procFuncBoxedInteractionGetABox) RunContext(ctx context.Context, reqStr
     retval, err := p.handler.GetABox(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing GetABox: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = retval
@@ -1242,8 +1238,7 @@ func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.
     err := p.handler.Foo(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Foo: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -1265,8 +1260,7 @@ func (p *procFuncMyServiceInteract) RunContext(ctx context.Context, reqStruct th
     fbthriftInteraction, err := p.handler.Interact(ctx, args.Arg)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Interact: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
@@ -1288,8 +1282,7 @@ func (p *procFuncMyServiceInteractFast) RunContext(ctx context.Context, reqStruc
     fbthriftInteraction, retval, err := p.handler.InteractFast(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing InteractFast: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
@@ -1565,8 +1558,7 @@ func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.
     err := p.handler.Foo(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Foo: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -1588,8 +1580,7 @@ func (p *procFuncFactoriesInteract) RunContext(ctx context.Context, reqStruct th
     fbthriftInteraction, err := p.handler.Interact(ctx, args.Arg)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Interact: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
@@ -1611,8 +1602,7 @@ func (p *procFuncFactoriesInteractFast) RunContext(ctx context.Context, reqStruc
     fbthriftInteraction, retval, err := p.handler.InteractFast(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing InteractFast: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
@@ -1794,8 +1784,7 @@ func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.Re
     err := p.handler.Foo(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Foo: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -1914,8 +1903,7 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.C
     retval, err := p.handler.DoSomeSimilarThings(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing DoSomeSimilarThings: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = retval
@@ -2037,8 +2025,7 @@ func (p *procFuncBoxServiceGetABoxSession) RunContext(ctx context.Context, reqSt
     fbthriftInteraction, retval, err := p.handler.GetABoxSession(ctx, args.Req)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing GetABoxSession: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)

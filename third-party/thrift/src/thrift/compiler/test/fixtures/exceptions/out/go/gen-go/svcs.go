@@ -202,8 +202,7 @@ func (p *procFuncRaiserDoBland) RunContext(ctx context.Context, reqStruct thrift
     err := p.handler.DoBland(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing DoBland: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -235,8 +234,7 @@ func (p *procFuncRaiserDoRaise) RunContext(ctx context.Context, reqStruct thrift
             return result, nil
         default:
             internalErr := fmt.Errorf("Internal error processing DoRaise: %w", err)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            return x, internalErr
+            return nil, internalErr
         }
     }
 
@@ -258,8 +256,7 @@ func (p *procFuncRaiserGet200) RunContext(ctx context.Context, reqStruct thrift.
     retval, err := p.handler.Get200(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Get200: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = &retval
@@ -292,8 +289,7 @@ func (p *procFuncRaiserGet500) RunContext(ctx context.Context, reqStruct thrift.
             return result, nil
         default:
             internalErr := fmt.Errorf("Internal error processing Get500: %w", err)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            return x, internalErr
+            return nil, internalErr
         }
     }
 

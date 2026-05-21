@@ -139,8 +139,7 @@ func (p *procFuncMyRootDoRoot) RunContext(ctx context.Context, reqStruct thrift.
     err := p.handler.DoRoot(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing DoRoot: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -241,8 +240,7 @@ func (p *procFuncMyNodeDoMid) RunContext(ctx context.Context, reqStruct thrift.R
     err := p.handler.DoMid(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing DoMid: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -343,8 +341,7 @@ func (p *procFuncMyLeafDoLeaf) RunContext(ctx context.Context, reqStruct thrift.
     err := p.handler.DoLeaf(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing DoLeaf: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil

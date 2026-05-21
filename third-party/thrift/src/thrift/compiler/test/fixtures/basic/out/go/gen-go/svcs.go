@@ -139,8 +139,7 @@ func (p *procFuncFooServiceSimpleRPC) RunContext(ctx context.Context, reqStruct 
     err := p.handler.SimpleRPC(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing SimpleRPC: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -258,8 +257,7 @@ func (p *procFuncFB303ServiceSimpleRPC) RunContext(ctx context.Context, reqStruc
     retval, err := p.handler.SimpleRPC(ctx, args.IntParameter)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing SimpleRPC: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = retval
@@ -562,8 +560,7 @@ func (p *procFuncMyServicePing) RunContext(ctx context.Context, reqStruct thrift
     err := p.handler.Ping(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Ping: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -584,8 +581,7 @@ func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStru
     retval, err := p.handler.GetRandomData(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing GetRandomData: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = &retval
@@ -608,8 +604,7 @@ func (p *procFuncMyServiceSink) RunContext(ctx context.Context, reqStruct thrift
     err := p.handler.Sink(ctx, args.Sink)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Sink: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -631,8 +626,7 @@ func (p *procFuncMyServicePutDataById) RunContext(ctx context.Context, reqStruct
     err := p.handler.PutDataById(ctx, args.Id, args.Data)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing PutDataById: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -654,8 +648,7 @@ func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct
     retval, err := p.handler.HasDataById(ctx, args.Id)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing HasDataById: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = &retval
@@ -678,8 +671,7 @@ func (p *procFuncMyServiceGetDataById) RunContext(ctx context.Context, reqStruct
     retval, err := p.handler.GetDataById(ctx, args.Id)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing GetDataById: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = &retval
@@ -702,8 +694,7 @@ func (p *procFuncMyServiceDeleteDataById) RunContext(ctx context.Context, reqStr
     err := p.handler.DeleteDataById(ctx, args.Id)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing DeleteDataById: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -745,8 +736,7 @@ func (p *procFuncMyServiceInvalidReturnForHack) RunContext(ctx context.Context, 
     retval, err := p.handler.InvalidReturnForHack(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing InvalidReturnForHack: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = retval
@@ -768,8 +758,7 @@ func (p *procFuncMyServiceRpcSkippedCodegen) RunContext(ctx context.Context, req
     err := p.handler.RpcSkippedCodegen(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing RpcSkippedCodegen: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -909,8 +898,7 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey0) RunContext(ctx context.Cont
     retval, err := p.handler.GetDataByKey0(ctx, args.Key)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing GetDataByKey0: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = retval
@@ -933,8 +921,7 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey1) RunContext(ctx context.Cont
     retval, err := p.handler.GetDataByKey1(ctx, args.Key)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing GetDataByKey1: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = retval

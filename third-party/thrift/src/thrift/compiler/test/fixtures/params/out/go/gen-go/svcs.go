@@ -229,8 +229,7 @@ func (p *procFuncNestedContainersMapList) RunContext(ctx context.Context, reqStr
     err := p.handler.MapList(ctx, args.Foo)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing MapList: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -252,8 +251,7 @@ func (p *procFuncNestedContainersMapSet) RunContext(ctx context.Context, reqStru
     err := p.handler.MapSet(ctx, args.Foo)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing MapSet: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -275,8 +273,7 @@ func (p *procFuncNestedContainersListMap) RunContext(ctx context.Context, reqStr
     err := p.handler.ListMap(ctx, args.Foo)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing ListMap: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -298,8 +295,7 @@ func (p *procFuncNestedContainersListSet) RunContext(ctx context.Context, reqStr
     err := p.handler.ListSet(ctx, args.Foo)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing ListSet: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -321,8 +317,7 @@ func (p *procFuncNestedContainersTurtles) RunContext(ctx context.Context, reqStr
     err := p.handler.Turtles(ctx, args.Foo)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Turtles: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil

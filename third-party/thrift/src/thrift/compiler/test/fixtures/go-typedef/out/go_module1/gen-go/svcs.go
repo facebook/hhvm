@@ -189,8 +189,7 @@ func (p *procFuncFinderByPlate) RunContext(ctx context.Context, reqStruct thrift
     retval, err := p.handler.ByPlate(ctx, args.Plate)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing ByPlate: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = retval
@@ -213,8 +212,7 @@ func (p *procFuncFinderAliasByPlate) RunContext(ctx context.Context, reqStruct t
     retval, err := p.handler.AliasByPlate(ctx, args.Plate)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing AliasByPlate: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = retval
@@ -237,8 +235,7 @@ func (p *procFuncFinderPreviousPlate) RunContext(ctx context.Context, reqStruct 
     retval, err := p.handler.PreviousPlate(ctx, args.Plate)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing PreviousPlate: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = &retval

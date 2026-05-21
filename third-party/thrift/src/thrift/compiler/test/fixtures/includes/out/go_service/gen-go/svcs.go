@@ -169,8 +169,7 @@ func (p *procFuncMyServiceQuery) RunContext(ctx context.Context, reqStruct thrif
     err := p.handler.Query(ctx, args.S, args.I)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Query: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -192,8 +191,7 @@ func (p *procFuncMyServiceHasArgDocs) RunContext(ctx context.Context, reqStruct 
     err := p.handler.HasArgDocs(ctx, args.S, args.I)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing HasArgDocs: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil

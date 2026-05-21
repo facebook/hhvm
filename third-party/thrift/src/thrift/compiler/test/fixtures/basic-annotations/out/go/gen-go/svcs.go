@@ -138,8 +138,7 @@ func (p *procFuncBadInteractionFoo) RunContext(ctx context.Context, reqStruct th
     err := p.handler.Foo(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Foo: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -389,8 +388,7 @@ func (p *procFuncMyServicePing) RunContext(ctx context.Context, reqStruct thrift
             return result, nil
         default:
             internalErr := fmt.Errorf("Internal error processing Ping: %w", err)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            return x, internalErr
+            return nil, internalErr
         }
     }
 
@@ -412,8 +410,7 @@ func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStru
     retval, err := p.handler.GetRandomData(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing GetRandomData: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = &retval
@@ -436,8 +433,7 @@ func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct
     retval, err := p.handler.HasDataById(ctx, args.Id)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing HasDataById: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = &retval
@@ -460,8 +456,7 @@ func (p *procFuncMyServiceGoGetDataById) RunContext(ctx context.Context, reqStru
     retval, err := p.handler.GoGetDataById(ctx, args.Id)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing GoGetDataById: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = &retval
@@ -484,8 +479,7 @@ func (p *procFuncMyServicePutDataById) RunContext(ctx context.Context, reqStruct
     err := p.handler.PutDataById(ctx, args.Id, args.Data)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing PutDataById: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -527,8 +521,7 @@ func (p *procFuncMyServiceGoDoNothing) RunContext(ctx context.Context, reqStruct
     err := p.handler.GoDoNothing(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing GoDoNothing: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -665,8 +658,7 @@ func (p *procFuncMyServicePrioParentPing) RunContext(ctx context.Context, reqStr
     err := p.handler.Ping(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Ping: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -687,8 +679,7 @@ func (p *procFuncMyServicePrioParentPong) RunContext(ctx context.Context, reqStr
     err := p.handler.Pong(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Pong: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -789,8 +780,7 @@ func (p *procFuncMyServicePrioChildPang) RunContext(ctx context.Context, reqStru
     err := p.handler.Pang(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Pang: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -908,8 +898,7 @@ func (p *procFuncBadServiceBar) RunContext(ctx context.Context, reqStruct thrift
     retval, err := p.handler.Bar(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Bar: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     result.Success = &retval
@@ -1068,8 +1057,7 @@ func (p *procFuncFooBarBazServiceFooStructured) RunContext(ctx context.Context, 
     err := p.handler.FooStructured(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing FooStructured: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -1090,8 +1078,7 @@ func (p *procFuncFooBarBazServiceBarNonStructured) RunContext(ctx context.Contex
     err := p.handler.BarNonStructured(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing BarNonStructured: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -1112,8 +1099,7 @@ func (p *procFuncFooBarBazServiceBaz) RunContext(ctx context.Context, reqStruct 
     err := p.handler.Baz(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing Baz: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil

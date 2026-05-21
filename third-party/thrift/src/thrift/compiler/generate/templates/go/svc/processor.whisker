@@ -136,14 +136,12 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context
         {{/each}}
         default:
             internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", err)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            return x, internalErr
+            return nil, internalErr
         }
         {{/if func.exceptions?}}
         {{#if (not func.exceptions?)}}
         internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
         {{/if (not func.exceptions?)}}
     }
 

@@ -212,8 +212,7 @@ func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.ReadableSt
     err := p.handler.F(ctx)
     if err != nil {
         internalErr := fmt.Errorf("Internal error processing F: %w", err)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        return x, internalErr
+        return nil, internalErr
     }
 
     return result, nil
@@ -298,8 +297,7 @@ func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.Readab
             return result, nil
         default:
             internalErr := fmt.Errorf("Internal error processing Thing: %w", err)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            return x, internalErr
+            return nil, internalErr
         }
     }
 

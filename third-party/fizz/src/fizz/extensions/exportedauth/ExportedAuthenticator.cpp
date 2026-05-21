@@ -179,7 +179,10 @@ Status ExportedAuthenticator::makeAuthenticator(
   // Compute CertificateVerify.
   auto transcript = detail::computeTranscript(
       handshakeContext, authenticatorRequest, encodedCertMsg);
-  auto transcriptHash = detail::computeTranscriptHash(makeHasher, transcript);
+  Buf transcriptHash;
+  FIZZ_RETURN_ON_ERROR(
+      detail::computeTranscriptHash(
+          transcriptHash, err, makeHasher, transcript));
   Buf sig;
   FIZZ_RETURN_ON_ERROR(
       cert.sign(sig, err, *scheme, context, transcriptHash->coalesce()));
@@ -192,10 +195,14 @@ Status ExportedAuthenticator::makeAuthenticator(
   // Compute Finished.
   auto finishedTranscript =
       detail::computeFinishedTranscript(transcript, encodedCertificateVerify);
-  auto finishedTranscriptHash =
-      detail::computeTranscriptHash(makeHasher, finishedTranscript);
-  auto verifyData = detail::getFinishedData(
-      makeHasher, finishedMacKey, finishedTranscriptHash);
+  Buf finishedTranscriptHash;
+  FIZZ_RETURN_ON_ERROR(
+      detail::computeTranscriptHash(
+          finishedTranscriptHash, err, makeHasher, finishedTranscript));
+  Buf verifyData;
+  FIZZ_RETURN_ON_ERROR(
+      detail::getFinishedData(
+          verifyData, err, makeHasher, finishedMacKey, finishedTranscriptHash));
   Finished finished;
   finished.verify_data = std::move(verifyData);
   Buf encodedFinished;
@@ -285,7 +292,10 @@ Status ExportedAuthenticator::validate(
       encodeHandshake(encodedCertMsg, err, std::move(*certMsg)));
   auto transcript = detail::computeTranscript(
       handshakeContext, authenticatorRequest, encodedCertMsg);
-  auto transcriptHash = detail::computeTranscriptHash(makeHasher, transcript);
+  Buf transcriptHash;
+  FIZZ_RETURN_ON_ERROR(
+      detail::computeTranscriptHash(
+          transcriptHash, err, makeHasher, transcript));
   try {
     if (peerCert->verify(
             err,
@@ -306,10 +316,14 @@ Status ExportedAuthenticator::validate(
       encodeHandshake(encodedCertVerify, err, std::move(*certVerify)));
   auto finishedTranscript =
       detail::computeFinishedTranscript(transcript, encodedCertVerify);
-  auto finishedTranscriptHash =
-      detail::computeTranscriptHash(makeHasher, finishedTranscript);
-  auto verifyData = detail::getFinishedData(
-      makeHasher, finishedMacKey, finishedTranscriptHash);
+  Buf finishedTranscriptHash;
+  FIZZ_RETURN_ON_ERROR(
+      detail::computeTranscriptHash(
+          finishedTranscriptHash, err, makeHasher, finishedTranscript));
+  Buf verifyData;
+  FIZZ_RETURN_ON_ERROR(
+      detail::getFinishedData(
+          verifyData, err, makeHasher, finishedMacKey, finishedTranscriptHash));
 
   if (CryptoUtils::equal(
           finished->verify_data->coalesce(), verifyData->coalesce())) {
@@ -342,21 +356,23 @@ Status decodeAuthRequest(
   return Status::Success;
 }
 
-Buf computeTranscriptHash(
+Status computeTranscriptHash(
+    Buf& ret,
+    Error& err,
     const HasherFactoryWithMetadata* makeHasher,
     const Buf& toBeHashed) {
   std::unique_ptr<Hasher> hasher;
-  Error err;
-  FIZZ_THROW_ON_ERROR(makeHasher->make(hasher, err), err);
+  FIZZ_RETURN_ON_ERROR(makeHasher->make(hasher, err));
 
   auto hashLength = hasher->getHashLen();
   auto data = folly::IOBuf::create(hashLength);
   data->append(hashLength);
   auto transcriptHash =
       folly::MutableByteRange(data->writableData(), data->length());
-  FIZZ_THROW_ON_ERROR(hasher->hash_update(err, *toBeHashed), err);
-  FIZZ_THROW_ON_ERROR(hasher->hash_final(err, transcriptHash), err);
-  return data;
+  FIZZ_RETURN_ON_ERROR(hasher->hash_update(err, *toBeHashed));
+  FIZZ_RETURN_ON_ERROR(hasher->hash_final(err, transcriptHash));
+  ret = std::move(data);
+  return Status::Success;
 }
 
 void writeBuf(const Buf& buf, folly::io::Appender& out) {
@@ -392,7 +408,9 @@ Buf computeFinishedTranscript(const Buf& crTranscript, const Buf& certVerify) {
   return out;
 }
 
-Buf getFinishedData(
+Status getFinishedData(
+    Buf& ret,
+    Error& err,
     const HasherFactoryWithMetadata* makeHasher,
     Buf& finishedMacKey,
     const Buf& finishedTranscript) {
@@ -400,18 +418,15 @@ Buf getFinishedData(
   auto data = folly::IOBuf::create(hashLength);
   data->append(hashLength);
   auto outRange = folly::MutableByteRange(data->writableData(), data->length());
-  {
-    Error err;
-    FIZZ_THROW_ON_ERROR(
-        fizz::hmac(
-            err,
-            makeHasher,
-            finishedMacKey->coalesce(),
-            *finishedTranscript,
-            outRange),
-        err);
-  }
-  return data;
+  FIZZ_RETURN_ON_ERROR(
+      fizz::hmac(
+          err,
+          makeHasher,
+          finishedMacKey->coalesce(),
+          *finishedTranscript,
+          outRange));
+  ret = std::move(data);
+  return Status::Success;
 }
 
 Status getRequestedSchemes(
@@ -492,10 +507,14 @@ Status getEmptyAuthenticator(
       encodeHandshake(encodedEmptyCertMsg, err, std::move(emptyCertMsg)));
   auto emptyAuthTranscript = detail::computeTranscript(
       handshakeContext, authRequest, encodedEmptyCertMsg);
-  auto emptyAuthTranscriptHash =
-      detail::computeTranscriptHash(makeHasher, emptyAuthTranscript);
-  auto finVerify = detail::getFinishedData(
-      makeHasher, finishedMacKey, emptyAuthTranscriptHash);
+  Buf emptyAuthTranscriptHash;
+  FIZZ_RETURN_ON_ERROR(
+      detail::computeTranscriptHash(
+          emptyAuthTranscriptHash, err, makeHasher, emptyAuthTranscript));
+  Buf finVerify;
+  FIZZ_RETURN_ON_ERROR(
+      detail::getFinishedData(
+          finVerify, err, makeHasher, finishedMacKey, emptyAuthTranscriptHash));
   Finished emptyAuth;
   emptyAuth.verify_data = std::move(finVerify);
   FIZZ_RETURN_ON_ERROR(encodeHandshake(ret, err, std::move(emptyAuth)));

@@ -21,7 +21,9 @@ Status decodeAuthRequest(
     Error& err,
     const Buf& authRequest);
 
-Buf computeTranscriptHash(
+Status computeTranscriptHash(
+    Buf& ret,
+    Error& err,
     const HasherFactoryWithMetadata* makeHasher,
     const Buf& toBeHashed);
 
@@ -34,7 +36,9 @@ Buf computeTranscript(
 
 Buf computeFinishedTranscript(const Buf& crTranscript, const Buf& certVerify);
 
-Buf getFinishedData(
+Status getFinishedData(
+    Buf& ret,
+    Error& err,
     const HasherFactoryWithMetadata* makeHasher,
     Buf& finishedMacKey,
     const Buf& finishedTranscript);

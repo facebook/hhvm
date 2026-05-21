@@ -27,6 +27,7 @@ import (
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/klauspost/compress/zstd"
+	lz4 "github.com/pierrec/lz4/v4"
 )
 
 const (
@@ -265,26 +266,47 @@ func applyTransforms(buf *bytes.Buffer, transforms []TransformID) (*bytes.Buffer
 			zwr := zlib.NewWriter(tmpbuf)
 			_, err := buf.WriteTo(zwr)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("zlib compress write: %w", err)
 			}
 			err = zwr.Close()
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("zlib compress close: %w", err)
 			}
 			buf, tmpbuf = tmpbuf, buf
 			tmpbuf.Reset()
 		case TransformZstd:
 			zwr, err := zstd.NewWriter(tmpbuf)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("zstd compress init: %w", err)
 			}
 			_, err = buf.WriteTo(zwr)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("zstd compress write: %w", err)
 			}
 			err = zwr.Close()
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("zstd compress close: %w", err)
+			}
+			buf, tmpbuf = tmpbuf, buf
+			tmpbuf.Reset()
+		case TransformLz4:
+			data := buf.Bytes()
+			bound := lz4.CompressBlockBound(len(data))
+			compressed := make([]byte, binary.MaxVarintLen64+bound)
+			n := binary.PutUvarint(compressed, uint64(len(data)))
+			var c lz4.Compressor
+			written, err := c.CompressBlock(data, compressed[n:n+bound])
+			if err != nil {
+				return nil, fmt.Errorf("lz4 compress: %w", err)
+			}
+			if written == 0 {
+				// CompressBlock returns 0 for incompressible data.
+				// Emit a valid literal-only LZ4 block so the receiver
+				// can still decompress it (matching C++ behavior).
+				tmpbuf.Write(compressed[:n])
+				tmpbuf.Write(lz4LiteralOnlyBlock(data))
+			} else {
+				tmpbuf.Write(compressed[:n+written])
 			}
 			buf, tmpbuf = tmpbuf, buf
 			tmpbuf.Reset()
@@ -295,6 +317,31 @@ func applyTransforms(buf *bytes.Buffer, transforms []TransformID) (*bytes.Buffer
 		}
 	}
 	return buf, nil
+}
+
+// lz4LiteralOnlyBlock builds a valid LZ4 block containing a single
+// literal-only sequence (no match section). This is the correct encoding
+// when the pierrec/lz4 CompressBlock reports data as incompressible.
+func lz4LiteralOnlyBlock(src []byte) []byte {
+	litLen := len(src)
+	headerSize := 1
+	if litLen >= 15 {
+		headerSize += (litLen-15)/255 + 1
+	}
+	block := make([]byte, 0, headerSize+litLen)
+	if litLen < 15 {
+		block = append(block, byte(litLen<<4))
+	} else {
+		block = append(block, 0xF0)
+		remaining := litLen - 15
+		for remaining >= 255 {
+			block = append(block, 0xFF)
+			remaining -= 255
+		}
+		block = append(block, byte(remaining))
+	}
+	block = append(block, src...)
+	return block
 }
 
 func (t *headerTransport) flushHeader() error {

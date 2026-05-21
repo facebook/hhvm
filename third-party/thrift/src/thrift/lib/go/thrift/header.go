@@ -22,6 +22,7 @@ import (
 	"compress/zlib"
 	"encoding/binary"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -30,6 +31,7 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/klauspost/compress/zstd"
+	lz4 "github.com/pierrec/lz4/v4"
 )
 
 // Header keys
@@ -130,6 +132,8 @@ const (
 	TransformQLZ TransformID = 4
 	// TransformZstd Apply zstd compression
 	TransformZstd TransformID = 5
+	// TransformLz4 Apply lz4 compression
+	TransformLz4 TransformID = 6
 )
 
 func (c TransformID) String() string {
@@ -146,10 +150,19 @@ func (c TransformID) String() string {
 		return "qlz"
 	case TransformZstd:
 		return "zstd"
+	case TransformLz4:
+		return "lz4"
 	default:
 		return "unknown"
 	}
 }
+
+// maxLz4DecompressionRatio caps the ratio between the declared uncompressed
+// size and the actual compressed payload size. LZ4 block format has a
+// theoretical max ratio around 255:1; we use a generous multiplier to reject
+// crafted/corrupted inputs whose varint header would trigger an oversized
+// allocation, while still admitting any legitimately compressible payload.
+const maxLz4DecompressionRatio = 256
 
 var supportedTransforms = map[TransformID]bool{
 	TransformNone:   true,
@@ -158,6 +171,7 @@ var supportedTransforms = map[TransformID]bool{
 	TransformSnappy: false,
 	TransformQLZ:    false,
 	TransformZstd:   true,
+	TransformLz4:    true,
 }
 
 // Untransformer will find a transform function to wrap a reader with to transformed the data.
@@ -171,7 +185,7 @@ func (c TransformID) Untransformer() (func(byteReader) (byteReader, error), erro
 		return func(rd byteReader) (byteReader, error) {
 			zlrd, err := zlib.NewReader(rd)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("zlib decompress: %w", err)
 			}
 			return ensureByteReader(zlrd), nil
 		}, nil
@@ -179,9 +193,33 @@ func (c TransformID) Untransformer() (func(byteReader) (byteReader, error), erro
 		return func(rd byteReader) (byteReader, error) {
 			zlrd, err := zstd.NewReader(rd)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("zstd decompress: %w", err)
 			}
 			return ensureByteReader(zlrd), nil
+		}, nil
+	case TransformLz4:
+		return func(rd byteReader) (byteReader, error) {
+			compressed, err := io.ReadAll(rd)
+			if err != nil {
+				return nil, fmt.Errorf("lz4 decompress read: %w", err)
+			}
+			uncompressedLen, n := binary.Uvarint(compressed)
+			if n <= 0 {
+				return nil, errors.New("lz4: invalid varint size prefix")
+			}
+			payloadLen := uint64(len(compressed) - n)
+			if uncompressedLen > payloadLen*maxLz4DecompressionRatio+maxLz4DecompressionRatio {
+				return nil, errors.New("lz4: declared uncompressed size exceeds plausible bound")
+			}
+			dst := make([]byte, uncompressedLen)
+			written, err := lz4.UncompressBlock(compressed[n:], dst)
+			if err != nil {
+				return nil, fmt.Errorf("lz4 decompress: %w", err)
+			}
+			if uint64(written) != uncompressedLen {
+				return nil, errors.New("lz4: uncompressed size mismatch")
+			}
+			return ensureByteReader(bytes.NewReader(dst)), nil
 		}, nil
 	default:
 		return nil, types.NewProtocolExceptionWithType(

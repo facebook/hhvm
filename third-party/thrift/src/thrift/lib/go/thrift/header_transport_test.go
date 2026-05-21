@@ -245,57 +245,37 @@ func TestHeaderRWSmall(t *testing.T) {
 }
 
 func TestHeaderZlib(t *testing.T) {
-	n := 1
 	tmb := newMockSocket()
 	trans := newHeaderTransport(tmb, types.ProtocolIDCompact)
 	data := []byte("ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDF")
-	uncompressedlen := 30
 
 	err := trans.AddTransform(TransformSnappy)
-	if err == nil {
-		t.Fatalf("should have failed adding unsupported transform")
-	}
+	require.Error(t, err, "should have failed adding unsupported transform")
 
 	err = trans.AddTransform(TransformZlib)
-	if err != nil {
-		t.Fatalf("failed to add transform to frame %d: %s", n, err)
-	}
+	require.NoError(t, err)
 
 	_, err = trans.Write(data)
-	if err != nil {
-		t.Fatalf("failed to write frame %d: %s", n, err)
-	}
+	require.NoError(t, err)
+
 	err = trans.Flush()
-	if err != nil {
-		t.Fatalf("failed to xmit frame %d: %s", n, err)
-	}
+	require.NoError(t, err)
+
+	// Verify the on-wire representation differs from the raw data.
+	require.False(t, bytes.Equal(data, tmb.Bytes()))
 
 	err = trans.ResetProtocol()
-	if err != nil {
-		t.Fatalf("failed to reset proto for frame %d: %s", n, err)
-	}
+	require.NoError(t, err)
 
 	frame, err := io.ReadAll(trans)
-	if err != nil {
-		t.Fatalf("failed to read frame %d: %s", n, err)
-	}
-
-	if bytes.Compare(data, frame) != 0 {
-		t.Fatalf("data sent does not match receieve on frame %d", n)
-	}
-
-	// This is a bit of a stupid test, but make sure that the data
-	// got changed somehow
-	if len(frame) == uncompressedlen {
-		t.Fatalf("data sent was not compressed on frame %d", n)
-	}
+	require.NoError(t, err)
+	require.Equal(t, data, frame)
 }
 
 func TestHeaderZstd(t *testing.T) {
 	tmb := newMockSocket()
 	trans := newHeaderTransport(tmb, types.ProtocolIDCompact)
 	data := []byte("ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDF")
-	uncompressedlen := 30
 
 	err := trans.AddTransform(TransformSnappy)
 	require.Error(t, err, "should have failed adding unsupported transform")
@@ -309,15 +289,40 @@ func TestHeaderZstd(t *testing.T) {
 	err = trans.Flush()
 	require.NoError(t, err)
 
+	// Verify the on-wire representation differs from the raw data.
+	require.False(t, bytes.Equal(data, tmb.Bytes()))
+
 	err = trans.ResetProtocol()
 	require.NoError(t, err)
 
 	frame, err := io.ReadAll(trans)
 	require.NoError(t, err)
 	require.Equal(t, data, frame)
-	// This is a bit of a stupid test, but make sure that the data
-	// got changed somehow
-	require.NotEqual(t, uncompressedlen, len(frame))
+}
+
+func TestHeaderLz4(t *testing.T) {
+	tmb := newMockSocket()
+	trans := newHeaderTransport(tmb, types.ProtocolIDCompact)
+	data := []byte("ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDF")
+
+	err := trans.AddTransform(TransformLz4)
+	require.NoError(t, err)
+
+	_, err = trans.Write(data)
+	require.NoError(t, err)
+
+	err = trans.Flush()
+	require.NoError(t, err)
+
+	// Verify the on-wire representation differs from the raw data.
+	require.False(t, bytes.Equal(data, tmb.Bytes()))
+
+	err = trans.ResetProtocol()
+	require.NoError(t, err)
+
+	frame, err := io.ReadAll(trans)
+	require.NoError(t, err)
+	require.Equal(t, data, frame)
 }
 
 func testRWOnce(t *testing.T, n int, data []byte, trans *headerTransport) {

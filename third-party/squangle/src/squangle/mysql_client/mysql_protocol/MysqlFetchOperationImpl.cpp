@@ -45,6 +45,16 @@ void MysqlFetchOperationImpl::specializedRunImpl() {
     return;
   }
 
+  if (callbacks_.post_render_callback_ && rendered_query_) {
+    if (!callbacks_.post_render_callback_(*rendered_query_)) {
+      getOp().setAsyncClientError(
+          static_cast<uint16_t>(SquangleErrno::SQ_INVALID_API_USAGE),
+          "Post-render callback rejected the query");
+      completeOperation(OperationResult::Failed);
+      return;
+    }
+  }
+
   auto* mysql_conn = getMysqlConnection();
   if (setupQueryAttributes(*mysql_conn)) {
     completeOperation(OperationResult::Failed);

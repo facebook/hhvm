@@ -8,6 +8,7 @@
 
 #include <gtest/gtest.h>
 
+#include "squangle/mysql_client/Query.h"
 #include "squangle/mysql_client/test/MockConnection.h"
 
 namespace facebook::common::mysql_client::test {
@@ -369,6 +370,72 @@ TEST_F(MockConnectionTest, QueryMetadataReturnsFieldInfo) {
   EXPECT_EQ(metadata->getFieldName(0), "id");
   EXPECT_EQ(metadata->getFieldName(1), "name");
   EXPECT_EQ(metadata->getTableName(0), "users");
+}
+
+// -----------------------------------------------------------------------------
+// PostRenderCallback Tests
+// -----------------------------------------------------------------------------
+
+TEST(PostRenderCallbackTest, CallbackTypeAcceptsAndRejects) {
+  PostRenderCallback cb = [](std::string_view rendered) {
+    return rendered.find("42") != std::string_view::npos;
+  };
+
+  EXPECT_TRUE(cb("SELECT 42 FROM users"));
+  EXPECT_FALSE(cb("SELECT 99 FROM users"));
+}
+
+TEST(PostRenderCallbackTest, CallbackCapturesRenderedQuery) {
+  std::string captured;
+  PostRenderCallback cb = [&](std::string_view rendered) {
+    captured = rendered;
+    return true;
+  };
+
+  Query q("SELECT %d FROM %T WHERE id = %d", 42, "users", 7);
+  auto rendered = q.renderInsecure();
+  EXPECT_TRUE(cb(rendered));
+  EXPECT_EQ(captured, "SELECT 42 FROM `users` WHERE id = 7");
+}
+
+TEST(PostRenderCallbackTest, ConnectionStoresCallback) {
+  auto client = std::make_unique<MockMysqlClient>();
+  auto connKey = MockMysqlClient::createTestConnectionKey();
+  auto conn = client->createMockConnection(connKey);
+
+  bool called = false;
+  conn->setPostRenderCallback([&](std::string_view) {
+    called = true;
+    return true;
+  });
+
+  EXPECT_FALSE(called);
+}
+
+TEST(PostRenderCallbackTest, FbstringToStringViewConversion) {
+  std::string_view captured;
+  PostRenderCallback cb = [&](std::string_view rendered) {
+    captured = rendered;
+    return rendered.find("lvid") != std::string_view::npos;
+  };
+
+  folly::fbstring fbstr("INSERT INTO evermeta (lvid, fbid) VALUES (42, 100)");
+  bool accepted = cb(fbstr);
+
+  EXPECT_TRUE(accepted);
+  EXPECT_EQ(captured, "INSERT INTO evermeta (lvid, fbid) VALUES (42, 100)");
+}
+
+TEST(PostRenderCallbackTest, FbstringToStringViewRejection) {
+  PostRenderCallback cb = [](std::string_view rendered) {
+    return rendered.find("lvid=42") != std::string_view::npos;
+  };
+
+  folly::fbstring good("UPDATE evermeta SET state=1 WHERE lvid=42");
+  folly::fbstring bad("UPDATE evermeta SET state=1 WHERE lvid=0");
+
+  EXPECT_TRUE(cb(good));
+  EXPECT_FALSE(cb(bad));
 }
 
 } // namespace facebook::common::mysql_client::test

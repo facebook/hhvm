@@ -137,6 +137,10 @@ void OperationBase::setRenderPrefixCallback(RenderPrefixCallback&& callback) {
       std::move(callbacks_.render_prefix_callback_), std::move(callback));
 }
 
+void OperationBase::setPostRenderCallback(PostRenderCallback&& callback) {
+  callbacks_.post_render_callback_ = std::move(callback);
+}
+
 void OperationBase::setTimeout(Duration timeout) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);

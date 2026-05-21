@@ -42,6 +42,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <variant>
 
 #include "squangle/logger/DBEventCounter.h"
@@ -92,6 +93,10 @@ using AsyncPostQueryCallback =
 // queries for observability.  Note that the data generated should never derive
 // from the user as this would allow SQL injection attacks.
 using RenderPrefixCallback = std::function<std::string()>;
+// Callback invoked after query rendering but before query execution.
+// Receives the rendered query string. Return false to abort the operation.
+// Runs on the MySQL I/O thread — must be fast and non-blocking.
+using PostRenderCallback = std::function<bool(std::string_view rendered_query)>;
 
 enum class SquangleErrno : uint16_t {
   SQ_ERRNO_CONN_TIMEOUT = 7000,
@@ -220,6 +225,7 @@ class OperationBase {
   void setPostQueryCallback(AsyncPostQueryCallback&& callback);
 
   void setRenderPrefixCallback(RenderPrefixCallback&& callback);
+  void setPostRenderCallback(PostRenderCallback&& callback);
 
   void setAttributes(const AttributeMap& attributes);
   void setAttributes(AttributeMap&& attributes);
@@ -453,6 +459,7 @@ class OperationBase {
     AsyncPostQueryCallback post_query_callback_;
 
     RenderPrefixCallback render_prefix_callback_;
+    PostRenderCallback post_render_callback_;
   };
 
   Callbacks callbacks_;
@@ -658,6 +665,9 @@ class Operation : public std::enable_shared_from_this<Operation>,
 
   void setRenderPrefixCallback(RenderPrefixCallback&& callback) {
     impl()->setRenderPrefixCallback(std::move(callback));
+  }
+  void setPostRenderCallback(PostRenderCallback&& callback) {
+    impl()->setPostRenderCallback(std::move(callback));
   }
 
   // Save any mysql errors that occurred (since we may hand off the

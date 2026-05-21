@@ -45,12 +45,18 @@ void Connection::setupOperationCallbacks(OpType& op, Connection& conn) {
     });
   }
 
-  if ((opType == db::OperationType::Query ||
-       opType == db::OperationType::MultiQuery ||
-       opType == db::OperationType::MultiQueryStream) &&
-      conn.callbacks_.render_prefix_callback_) {
-    op.setRenderPrefixCallback(
-        [&]() { return conn.callbacks_.render_prefix_callback_(); });
+  if (opType == db::OperationType::Query ||
+      opType == db::OperationType::MultiQuery ||
+      opType == db::OperationType::MultiQueryStream) {
+    if (conn.callbacks_.render_prefix_callback_) {
+      op.setRenderPrefixCallback(
+          [&]() { return conn.callbacks_.render_prefix_callback_(); });
+    }
+    if (conn.callbacks_.post_render_callback_) {
+      op.setPostRenderCallback([&](std::string_view rendered) {
+        return conn.callbacks_.post_render_callback_(rendered);
+      });
+    }
   }
 }
 

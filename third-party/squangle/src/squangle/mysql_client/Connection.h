@@ -424,6 +424,12 @@ class Connection {
         std::move(callbacks.post_query_callback_));
     callbacks_.render_prefix_callback_ =
         std::move(callbacks.render_prefix_callback_);
+    callbacks_.post_render_callback_ =
+        std::move(callbacks.post_render_callback_);
+  }
+
+  void setPostRenderCallback(PostRenderCallback&& callback) {
+    callbacks_.post_render_callback_ = std::move(callback);
   }
 
   [[nodiscard]] const folly::EventBase* getEventBase() const {

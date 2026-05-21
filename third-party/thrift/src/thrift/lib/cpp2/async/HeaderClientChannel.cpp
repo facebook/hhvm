@@ -27,6 +27,7 @@
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/gen/client_cpp.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionAlgorithmSelector.h>
 #include <thrift/lib/thrift/gen-cpp2/RocketUpgradeAsyncClient.h>
 
 THRIFT_FLAG_DEFINE_int64(raw_client_rocket_upgrade_timeout_ms, 2000);
@@ -233,15 +234,12 @@ void HeaderClientChannel::setRequestHeaderOptions(
   if (auto compressionConfig = header->getDesiredCompressionConfig()) {
     if (auto codecRef = compressionConfig->codecConfig()) {
       if (payloadSize > compressionConfig->compressionSizeLimit().value_or(0)) {
-        switch (codecRef->getType()) {
-          case CodecConfig::Type::zlibConfig:
-            header->setTransform(THeader::ZLIB_TRANSFORM);
-            break;
-          case CodecConfig::Type::zstdConfig:
-            header->setTransform(THeader::ZSTD_TRANSFORM);
-            break;
-          default:
-            break;
+        auto algo =
+            rocket::CompressionAlgorithmSelector::fromCodecConfig(*codecRef);
+        if (algo != CompressionAlgorithm::NONE &&
+            algo != CompressionAlgorithm::CUSTOM) {
+          header->setTTransform(
+              rocket::CompressionAlgorithmSelector::toTTransform(algo));
         }
       }
     }

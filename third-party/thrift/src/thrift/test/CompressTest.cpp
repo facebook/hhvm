@@ -18,6 +18,7 @@
 #include <ctime>
 #include <gtest/gtest.h>
 #include <folly/Benchmark.h>
+#include <folly/compression/Compression.h>
 #include <folly/portability/GFlags.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
@@ -151,6 +152,16 @@ TEST(chained, zlib) {
 
 TEST(chained, zstd) {
   testChainedCompression(5, 1000);
+}
+
+TEST(chained, lz4) {
+  try {
+    folly::compression::getCodec(
+        folly::compression::CodecType::LZ4_VARINT_SIZE);
+  } catch (const std::invalid_argument&) {
+    GTEST_SKIP() << "LZ4 codec not available on this platform";
+  }
+  testChainedCompression(6, 1000);
 }
 
 TEST(sdf, sdfsd) {

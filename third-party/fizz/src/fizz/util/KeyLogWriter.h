@@ -74,9 +74,12 @@ class KeyLogWriter {
    * @return the keylog label for secretType
    */
   static folly::Optional<Label> secretToNSSLabel(SecretType secretType) {
+    Error err;
     switch (secretType.type()) {
-      case SecretType::Type::EarlySecrets_E:
-        switch (secretType.tryAsEarlySecrets()) {
+      case SecretType::Type::EarlySecrets_E: {
+        const EarlySecrets* ptr;
+        FIZZ_THROW_ON_ERROR(secretType.tryAsEarlySecrets(ptr, err), err);
+        switch (*ptr) {
           case EarlySecrets::ExternalPskBinder:
             return folly::none;
           case EarlySecrets::ResumptionPskBinder:
@@ -93,8 +96,11 @@ class KeyLogWriter {
             break;
         }
         break;
-      case SecretType::Type::HandshakeSecrets_E:
-        switch (secretType.tryAsHandshakeSecrets()) {
+      }
+      case SecretType::Type::HandshakeSecrets_E: {
+        const HandshakeSecrets* ptr;
+        FIZZ_THROW_ON_ERROR(secretType.tryAsHandshakeSecrets(ptr, err), err);
+        switch (*ptr) {
           case HandshakeSecrets::ClientHandshakeTraffic:
             return Label::CLIENT_HANDSHAKE_TRAFFIC_SECRET;
           case HandshakeSecrets::ServerHandshakeTraffic:
@@ -105,8 +111,11 @@ class KeyLogWriter {
             break;
         }
         break;
-      case SecretType::Type::MasterSecrets_E:
-        switch (secretType.tryAsMasterSecrets()) {
+      }
+      case SecretType::Type::MasterSecrets_E: {
+        const MasterSecrets* ptr;
+        FIZZ_THROW_ON_ERROR(secretType.tryAsMasterSecrets(ptr, err), err);
+        switch (*ptr) {
           case MasterSecrets::ExporterMaster:
             return Label::EXPORTER_SECRET;
           case MasterSecrets::ResumptionMaster:
@@ -115,8 +124,11 @@ class KeyLogWriter {
             break;
         }
         break;
-      case SecretType::Type::AppTrafficSecrets_E:
-        switch (secretType.tryAsAppTrafficSecrets()) {
+      }
+      case SecretType::Type::AppTrafficSecrets_E: {
+        const AppTrafficSecrets* ptr;
+        FIZZ_THROW_ON_ERROR(secretType.tryAsAppTrafficSecrets(ptr, err), err);
+        switch (*ptr) {
           case AppTrafficSecrets::ClientAppTraffic:
             return Label::CLIENT_TRAFFIC_SECRET_0;
           case AppTrafficSecrets::ServerAppTraffic:
@@ -125,6 +137,7 @@ class KeyLogWriter {
             break;
         }
         break;
+      }
       default:
         break;
     }

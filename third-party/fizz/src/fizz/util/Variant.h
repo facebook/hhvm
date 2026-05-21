@@ -14,36 +14,36 @@ namespace fizz {
 
 #define FIZZ_ENUM_TYPES(X, ...) X##_E,
 
-#define FIZZ_UNION_ACCESSOR(X, ...)                       \
-  X* as##X() {                                            \
-    if (type_ == Type::X##_E) {                           \
-      return &X##_;                                       \
-    }                                                     \
-    return nullptr;                                       \
-  }                                                       \
-                                                          \
-  X& tryAs##X() {                                         \
-    auto ptr = as##X();                                   \
-    if (!ptr) {                                           \
-      throw std::runtime_error("Mismatched access type"); \
-    }                                                     \
-    return *ptr;                                          \
+#define FIZZ_UNION_ACCESSOR(X, ...)               \
+  X* as##X() {                                    \
+    if (type_ == Type::X##_E) {                   \
+      return &X##_;                               \
+    }                                             \
+    return nullptr;                               \
+  }                                               \
+                                                  \
+  Status tryAs##X(X*& ret, Error& err) {          \
+    ret = as##X();                                \
+    if (!ret) {                                   \
+      return err.error("Mismatched access type"); \
+    }                                             \
+    return Status::Success;                       \
   }
 
-#define FIZZ_CONST_UNION_ACCESSOR(X, ...)                 \
-  const X* as##X() const {                                \
-    if (type_ == Type::X##_E) {                           \
-      return &X##_;                                       \
-    }                                                     \
-    return nullptr;                                       \
-  }                                                       \
-                                                          \
-  const X& tryAs##X() const {                             \
-    auto ptr = as##X();                                   \
-    if (!ptr) {                                           \
-      throw std::runtime_error("Mismatched access type"); \
-    }                                                     \
-    return *ptr;                                          \
+#define FIZZ_CONST_UNION_ACCESSOR(X, ...)            \
+  const X* as##X() const {                           \
+    if (type_ == Type::X##_E) {                      \
+      return &X##_;                                  \
+    }                                                \
+    return nullptr;                                  \
+  }                                                  \
+                                                     \
+  Status tryAs##X(const X*& ret, Error& err) const { \
+    ret = as##X();                                   \
+    if (!ret) {                                      \
+      return err.error("Mismatched access type");    \
+    }                                                \
+    return Status::Success;                          \
   }
 
 #define FIZZ_UNION_CTORS(X, NAME)    \

@@ -8,6 +8,7 @@
 
 #include <folly/portability/GTest.h>
 
+#include <fizz/util/Status.h>
 #include <fizz/util/Variant.h>
 
 namespace fizz {
@@ -83,11 +84,18 @@ TEST(VariantTest, Magic) {
 TEST(VariantTest, TryAs) {
   TestVariant aDog{Dog()};
   TestVariant aCat{Cat()};
-  EXPECT_THROW(aDog.tryAsCat(), std::runtime_error);
-  EXPECT_THROW(aCat.tryAsDog(), std::runtime_error);
-  auto& dogLeash = aDog.tryAsDog();
-  EXPECT_EQ("meow", aCat.tryAsCat().meow());
-  EXPECT_EQ("woof", dogLeash.woof());
+  Error err;
+  Cat* catPtr = nullptr;
+  EXPECT_THROW(
+      FIZZ_THROW_ON_ERROR(aDog.tryAsCat(catPtr, err), err), std::runtime_error);
+  Dog* dogPtr = nullptr;
+  EXPECT_THROW(
+      FIZZ_THROW_ON_ERROR(aCat.tryAsDog(dogPtr, err), err), std::runtime_error);
+
+  EXPECT_EQ(aCat.tryAsCat(catPtr, err), Status::Success);
+  EXPECT_EQ("meow", catPtr->meow());
+  EXPECT_EQ(aDog.tryAsDog(dogPtr, err), Status::Success);
+  EXPECT_EQ("woof", dogPtr->woof());
 }
 
 } // namespace test

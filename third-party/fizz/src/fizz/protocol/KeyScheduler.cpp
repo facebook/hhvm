@@ -74,7 +74,9 @@ Status KeyScheduler::deriveHandshakeSecret(Error& err, folly::ByteRange ecdhe) {
     secret_.emplace(EarlySecret{std::move(extracted)});
   }
 
-  auto& earlySecret = secret_->tryAsEarlySecret();
+  EarlySecret* earlySecretPtr;
+  FIZZ_RETURN_ON_ERROR(secret_->tryAsEarlySecret(earlySecretPtr, err));
+  auto& earlySecret = *earlySecretPtr;
   std::vector<uint8_t> preSecret;
   FIZZ_RETURN_ON_ERROR(deriver_->deriveSecret(
       preSecret,
@@ -92,7 +94,9 @@ Status KeyScheduler::deriveHandshakeSecret(Error& err, folly::ByteRange ecdhe) {
 
 Status KeyScheduler::deriveMasterSecret(Error& err) {
   auto zeros = std::vector<uint8_t>(deriver_->hashLength(), 0);
-  auto& handshakeSecret = secret_->tryAsHandshakeSecret();
+  HandshakeSecret* handshakeSecretPtr;
+  FIZZ_RETURN_ON_ERROR(secret_->tryAsHandshakeSecret(handshakeSecretPtr, err));
+  auto& handshakeSecret = *handshakeSecretPtr;
   std::vector<uint8_t> preSecret;
   FIZZ_RETURN_ON_ERROR(deriver_->deriveSecret(
       preSecret,

@@ -152,6 +152,11 @@ class PooledRequestChannel : public RequestChannel {
   using RequestChannel::sendRequestSink;
   using RequestChannel::sendRequestStream;
 
+  // Decompresses the response on the caller thread when the IO thread skipped
+  // decompression (signalled via THeader::getResponseCompressionAlgorithm()).
+  // Stateless — does not need a per-EventBase impl.
+  void decompressResponse(ClientReceiveState& state) override;
+
   void setCloseCallback(CloseCallback*) override {
     LOG(FATAL) << "Not supported";
   }

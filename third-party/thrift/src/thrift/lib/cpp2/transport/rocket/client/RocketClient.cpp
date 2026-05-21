@@ -37,6 +37,7 @@
 #include <folly/portability/GFlags.h>
 
 #include <thrift/lib/cpp/transport/TTransportException.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/core/TryUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
@@ -513,8 +514,11 @@ void RocketClient::handleFirstResponse(
     contractViolation(kErrorMsg);
     return;
   }
-  auto firstResponse = getPayloadSerializer()->unpack<FirstResponsePayload>(
-      std::move(fullPayload), encodeMetadataUsingBinary_);
+  auto firstResponse = THRIFT_FLAG(thrift_client_compress_request_on_cpu)
+      ? getPayloadSerializer()->unpackAsCompressed<FirstResponsePayload>(
+            std::move(fullPayload), encodeMetadataUsingBinary_)
+      : getPayloadSerializer()->unpack<FirstResponsePayload>(
+            std::move(fullPayload), encodeMetadataUsingBinary_);
   if (firstResponse.hasException()) {
     serverCallback.onInitialError(std::move(firstResponse.exception()));
     freeStream(streamId);

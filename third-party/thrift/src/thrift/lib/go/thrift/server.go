@@ -570,11 +570,10 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 					s.log("rocketServer requestStream sendWritableStruct error: %v", err)
 					return
 				}
-				loadMetric := s.loadFn()
 				loadMetricPtr := (*int64)(nil)
 				if metadata.IsSetLoadMetric() {
 					// SHOULD be set iff loadMetric was set in RequestRpcMetadata
-					loadMetricPtr = Pointerize(int64(loadMetric))
+					loadMetricPtr = Pointerize(int64(s.loadFn()))
 				}
 				var payload payload.Payload
 				appException, isAppException := respStruct.(*types.ApplicationException)

@@ -22,9 +22,9 @@
 #include <sstream>
 #include <thread>
 
+#include <fmt/core.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <folly/Format.h>
 #include <folly/ThreadLocal.h>
 #include <folly/coro/BlockingWait.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
@@ -98,7 +98,7 @@ class InstrumentationTestProcessor
 class DebugInterface : public apache::thrift::ServiceHandler<DebugTestService> {
  public:
   void echo(std::string& r, std::unique_ptr<::std::string> s) override {
-    r = folly::format("{}:{}", *s, folly::getCurrentThreadName().value()).str();
+    r = fmt::format("{}:{}", *s, folly::getCurrentThreadName().value());
   }
 };
 

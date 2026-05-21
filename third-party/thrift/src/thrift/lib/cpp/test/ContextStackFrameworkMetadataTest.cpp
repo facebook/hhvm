@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/async/InterceptorFlags.h>
 #include <thrift/lib/cpp2/test/util/TrackingTProcessorEventHandler.h>
@@ -40,7 +40,7 @@ THRIFT_PLUGGABLE_FUNC_SET(
     InterceptorFrameworkMetadataStorage& storage,
     const RpcOptions&) {
   storage.emplace<std::string>(
-      folly::sformat("{}_postprocessed", storage.value<std::string>()));
+      fmt::format("{}_postprocessed", storage.value<std::string>()));
 }
 
 THRIFT_PLUGGABLE_FUNC_SET_TEST(

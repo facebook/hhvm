@@ -22,9 +22,9 @@
 
 #include <gtest/gtest.h>
 
+#include <fmt/core.h>
 #include <folly/Conv.h>
 #include <folly/ExceptionWrapper.h>
-#include <folly/Format.h>
 #include <folly/Range.h>
 #include <folly/SocketAddress.h>
 #include <folly/Try.h>
@@ -1065,7 +1065,7 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiBasic) {
 
   const uint64_t numRequestedPayloads = 200;
   auto payload = folly::IOBuf::copyBuffer(
-      folly::sformat("generate:{}", numRequestedPayloads));
+      fmt::format("generate:{}", numRequestedPayloads));
 
   RpcOptions rpcOptions;
   rpcOptions.setChunkBufferSize(0);
@@ -1126,7 +1126,7 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiHeadersPush) {
   {
     const uint64_t numRequestedHeaders = 200;
     auto payload = folly::IOBuf::copyBuffer(
-        folly::sformat("generateheaders:{}", numRequestedHeaders));
+        fmt::format("generateheaders:{}", numRequestedHeaders));
 
     RpcOptions rpcOptions;
     rpcOptions.setChunkBufferSize(0);
@@ -1149,8 +1149,8 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiHeadersPush) {
 
   {
     const uint64_t numEchoHeaders = 200;
-    auto payload = folly::IOBuf::copyBuffer(
-        folly::sformat("echoheaders:{}", numEchoHeaders));
+    auto payload =
+        folly::IOBuf::copyBuffer(fmt::format("echoheaders:{}", numEchoHeaders));
 
     RpcOptions rpcOptions;
     rpcOptions.setChunkBufferSize(0);

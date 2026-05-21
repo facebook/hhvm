@@ -1288,7 +1288,7 @@ bool RocketClientChannelBase::canHandleRequest(CallbackPtr& cb) {
         cb,
         folly::make_exception_wrapper<TTransportException>(
             TTransportException::NOT_OPEN,
-            folly::sformat(
+            fmt::format(
                 "Connection not open: {}",
                 getRocketClientImpl().getLastError().what())));
     return false;

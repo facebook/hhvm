@@ -23,7 +23,6 @@
 #include <jemalloc/jemalloc.h>
 
 #include <folly/Benchmark.h>
-#include <folly/Format.h>
 #include <folly/init/Init.h>
 #include <folly/memory/MallctlHelper.h>
 #include <folly/portability/GFlags.h>
@@ -45,9 +44,9 @@ DEFINE_bool(
 static uint64_t getMemoryRequestsCounter() {
   size_t narenas = MALLCTL_ARENAS_ALL;
   std::string keySmall =
-      folly::sformat("stats.arenas.{}.small.nrequests", narenas);
+      fmt::format("stats.arenas.{}.small.nrequests", narenas);
   std::string keyLarge =
-      folly::sformat("stats.arenas.{}.large.nrequests", narenas);
+      fmt::format("stats.arenas.{}.large.nrequests", narenas);
 
   folly::mallctlCall("thread.tcache.flush");
   folly::mallctlWrite<uint64_t>("epoch", 1);

@@ -32,15 +32,6 @@ class Hkdf {
       folly::ByteRange salt,
       folly::ByteRange ikm) const;
 
-  // TODO: Deprecate. Use the Status-returning extract overload instead.
-  std::vector<uint8_t> extract(folly::ByteRange salt, folly::ByteRange ikm)
-      const {
-    std::vector<uint8_t> ret;
-    Error err;
-    FIZZ_THROW_ON_ERROR(extract(ret, err, salt, ikm), err);
-    return ret;
-  }
-
   Status expand(
       std::unique_ptr<folly::IOBuf>& ret,
       Error& err,

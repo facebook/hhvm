@@ -60,16 +60,6 @@ class KeyDerivation {
       folly::ByteRange salt,
       folly::ByteRange ikm) = 0;
 
-  // TODO: Deprecate. Use the Status-returning hkdfExtract overload instead.
-  std::vector<uint8_t> hkdfExtract(
-      folly::ByteRange salt,
-      folly::ByteRange ikm) {
-    std::vector<uint8_t> ret;
-    Error err;
-    FIZZ_THROW_ON_ERROR(hkdfExtract(ret, err, salt, ikm), err);
-    return ret;
-  }
-
   virtual std::unique_ptr<KeyDerivation> clone() const = 0;
 };
 

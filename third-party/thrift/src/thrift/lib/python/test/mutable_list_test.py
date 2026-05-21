@@ -13,7 +13,9 @@
 # limitations under the License.
 
 # pyre-strict
+import concurrent.futures
 import pickle
+import threading
 import unittest
 from collections.abc import MutableSequence
 from typing import cast
@@ -100,6 +102,25 @@ class MutableListTest(unittest.TestCase):
         mutable_list = _create_MutableList_i32([])
         with self.assertRaises(OverflowError):
             mutable_list.append(2**31)
+
+    def test_append_from_multiple_threads_preserves_all_values(self) -> None:
+        # GIVEN
+        expected_values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        mutable_list: MutableList[int] = _create_MutableList_i32([])
+        start_barrier: threading.Barrier = threading.Barrier(len(expected_values))
+
+        def append_value(value: int) -> None:
+            start_barrier.wait()
+            mutable_list.append(value)
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(expected_values)
+        ) as executor:
+            list(executor.map(append_value, expected_values))
+
+        # THEN
+        self.assertEqual(expected_values, sorted(mutable_list))
 
     def test_remove(self) -> None:
         mutable_list = _create_MutableList_i32(list(range(100)))

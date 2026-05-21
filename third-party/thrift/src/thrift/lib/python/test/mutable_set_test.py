@@ -15,7 +15,9 @@
 # pyre-strict
 
 import collections.abc
+import concurrent.futures
 import pickle
+import threading
 import unittest
 from typing import Iterable
 
@@ -229,6 +231,26 @@ class MutableSetTest(unittest.TestCase):
         mutable_set = _create_MutableSet_i32([])
         with self.assertRaises(OverflowError):
             mutable_set.add(2**31)
+
+    def test_add_from_multiple_threads_preserves_all_values(self) -> None:
+        # GIVEN
+        expected_values = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+        work_values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        mutable_set: MutableSet[int] = _create_MutableSet_i32([])
+        start_barrier: threading.Barrier = threading.Barrier(len(work_values))
+
+        def add_value(value: int) -> None:
+            start_barrier.wait()
+            mutable_set.add(value)
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(work_values)
+        ) as executor:
+            list(executor.map(add_value, work_values))
+
+        # THEN
+        self.assertEqual(expected_values, mutable_set)
 
     def test_discard(self) -> None:
         mutable_set = _create_MutableSet_i32(range(10))

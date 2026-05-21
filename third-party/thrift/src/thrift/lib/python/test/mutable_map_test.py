@@ -15,8 +15,10 @@
 # pyre-strict
 
 import collections.abc
+import concurrent.futures
 import pickle
 import string
+import threading
 import unittest
 from typing import cast, ItemsView, Iterator, KeysView, Optional, ValuesView
 
@@ -331,6 +333,40 @@ class MutableMapTest(unittest.TestCase):
         mutable_map = _create_MutableMap_str_i32({})
         with self.assertRaises(OverflowError):
             mutable_map["max"] = 2**31
+
+    def test_setitem_disjoint_keys_from_multiple_threads_preserves_all_items(
+        self,
+    ) -> None:
+        # GIVEN
+        expected_items = {
+            "key-0": 0,
+            "key-1": 1,
+            "key-2": 2,
+            "key-3": 3,
+            "key-4": 4,
+            "key-5": 5,
+            "key-6": 6,
+            "key-7": 7,
+            "key-8": 8,
+            "key-9": 9,
+        }
+        work_items = list(expected_items.items())
+        mutable_map: MutableMap[str, int] = _create_MutableMap_str_i32({})
+        start_barrier: threading.Barrier = threading.Barrier(len(work_items))
+
+        def set_item(item: tuple[str, int]) -> None:
+            key, value = item
+            start_barrier.wait()
+            mutable_map[key] = value
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(work_items)
+        ) as executor:
+            list(executor.map(set_item, work_items))
+
+        # THEN
+        self.assertEqual(expected_items, mutable_map)
 
     def test_delitem(self) -> None:
         mutable_map = _create_MutableMap_str_i32({})

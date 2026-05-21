@@ -246,6 +246,24 @@ void DebuggerSession::runDummy() {
   g_context->obSetImplicitFlush(true);
 
   // Setup sandbox variables for dummy request context.
+  // The startup document must load inside the WithRoot scope so the
+  // autoloader initializes with the user's source root, matching hphpd.
+  auto loadStartupDoc = [&]() {
+    if (!m_dummyStartupDoc.empty()) {
+      invokeDummyStartupDocument();
+    } else {
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelWarning,
+        "Dummy request started without a startup document."
+      );
+      m_debugger->sendUserMessage(
+        "No startup document was specified, not loading any Hack/PHP "
+          "types for the console.",
+        DebugTransport::OutputLevelInfo
+      );
+    }
+  };
+
   if (!m_sandboxUser.empty()) {
     SourceRootInfo::WithRoot sri(m_sandboxUser, m_sandboxName);
     auto server = php_global_exchange(s__SERVER, init_null());
@@ -258,20 +276,9 @@ void DebuggerSession::runDummy() {
     );
 
     g_context->setSandboxId(SourceRootInfo::GetSandboxInfo().id());
-  }
-
-  if (!m_dummyStartupDoc.empty()) {
-    invokeDummyStartupDocument();
+    loadStartupDoc();
   } else {
-    VSDebugLogger::Log(
-      VSDebugLogger::LogLevelWarning,
-      "Dummy request started without a startup document."
-    );
-    m_debugger->sendUserMessage(
-      "No startup document was specified, not loading any Hack/PHP "
-        "types for the console.",
-      DebugTransport::OutputLevelInfo
-    );
+    loadStartupDoc();
   }
 
   folly::dynamic event = folly::dynamic::object;

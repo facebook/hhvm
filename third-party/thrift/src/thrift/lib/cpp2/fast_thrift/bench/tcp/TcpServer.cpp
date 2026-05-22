@@ -86,47 +86,46 @@ TcpServer::TcpServer(
     size_t zeroCopyThreshold)
     : executor_(std::make_shared<folly::IOThreadPoolExecutor>(numIOThreads)),
       zeroCopyThreshold_(zeroCopyThreshold) {
-  apache::thrift::fast_thrift::rocket::server::connection::ConnectionFactory
-      connectionFactory = [this](folly::AsyncTransport::UniquePtr socket)
-      -> apache::thrift::fast_thrift::rocket::server::connection::
-          RocketServerConnection {
-            auto* evb = socket->getEventBase();
-            auto transportHandler = apache::thrift::fast_thrift::transport::
-                TransportHandler::create(std::move(socket));
+  apache::thrift::fast_thrift::connection::ConnectionFactory connectionFactory =
+      [this](folly::AsyncTransport::UniquePtr socket)
+      -> apache::thrift::fast_thrift::connection::RocketServerConnection {
+    auto* evb = socket->getEventBase();
+    auto transportHandler =
+        apache::thrift::fast_thrift::transport::TransportHandler::create(
+            std::move(socket));
 
-            auto adapter = std::make_unique<ServerAppAdapter>();
+    auto adapter = std::make_unique<ServerAppAdapter>();
 
-            auto pipeline =
-                apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder<
-                    apache::thrift::fast_thrift::transport::TransportHandler,
-                    ServerAppAdapter,
-                    apache::thrift::fast_thrift::channel_pipeline::
-                        SimpleBufferAllocator>()
-                    .setEventBase(evb)
-                    .setHead(transportHandler.get())
-                    .setTail(adapter.get())
-                    .setAllocator(&allocator_)
-                    .build();
+    auto pipeline =
+        apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder<
+            apache::thrift::fast_thrift::transport::TransportHandler,
+            ServerAppAdapter,
+            apache::thrift::fast_thrift::channel_pipeline::
+                SimpleBufferAllocator>()
+            .setEventBase(evb)
+            .setHead(transportHandler.get())
+            .setTail(adapter.get())
+            .setAllocator(&allocator_)
+            .build();
 
-            adapter->setPipeline(pipeline.get());
-            adapters_.insert(std::move(adapter));
+    adapter->setPipeline(pipeline.get());
+    adapters_.insert(std::move(adapter));
 
-            transportHandler->setPipeline(pipeline.get());
+    transportHandler->setPipeline(pipeline.get());
 
-            // Configure MSG_ZEROCOPY for large payloads
-            if (zeroCopyThreshold_ > 0) {
-              if (!transportHandler->setZeroCopy(true)) {
-                XLOG(WARN) << "MSG_ZEROCOPY not supported on this socket";
-              }
-              transportHandler->setZeroCopyEnableThreshold(zeroCopyThreshold_);
-            }
+    // Configure MSG_ZEROCOPY for large payloads
+    if (zeroCopyThreshold_ > 0) {
+      if (!transportHandler->setZeroCopy(true)) {
+        XLOG(WARN) << "MSG_ZEROCOPY not supported on this socket";
+      }
+      transportHandler->setZeroCopyEnableThreshold(zeroCopyThreshold_);
+    }
 
-            apache::thrift::fast_thrift::rocket::server::connection::
-                RocketServerConnection conn;
-            conn.transportHandler = std::move(transportHandler);
-            conn.pipeline = std::move(pipeline);
-            return conn;
-          };
+    apache::thrift::fast_thrift::connection::RocketServerConnection conn;
+    conn.transportHandler = std::move(transportHandler);
+    conn.pipeline = std::move(pipeline);
+    return conn;
+  };
 
   connectionManager_ = TcpConnectionManager::create(
       std::move(address),
@@ -135,7 +134,7 @@ TcpServer::TcpServer(
       nullptr,
       nullptr,
       std::chrono::seconds{5},
-      apache::thrift::fast_thrift::rocket::server::connection::SocketOptions{});
+      apache::thrift::fast_thrift::connection::SocketOptions{});
 }
 
 TcpServer::~TcpServer() = default;

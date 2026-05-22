@@ -44,34 +44,33 @@ class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
 void IntegrationTestFixture::SetUp() {
   executor_ = std::make_shared<folly::IOThreadPoolExecutor>(1);
 
-  apache::thrift::fast_thrift::rocket::server::connection::ConnectionFactory
-      connectionFactory = [this](folly::AsyncTransport::UniquePtr socket)
-      -> apache::thrift::fast_thrift::rocket::server::connection::
-          RocketServerConnection {
-            auto* evb = socket->getEventBase();
-            auto transportHandler = apache::thrift::fast_thrift::transport::
-                TransportHandler::create(std::move(socket));
+  apache::thrift::fast_thrift::connection::ConnectionFactory connectionFactory =
+      [this](folly::AsyncTransport::UniquePtr socket)
+      -> apache::thrift::fast_thrift::connection::RocketServerConnection {
+    auto* evb = socket->getEventBase();
+    auto transportHandler =
+        apache::thrift::fast_thrift::transport::TransportHandler::create(
+            std::move(socket));
 
-            auto pipeline =
-                apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder<
-                    ServerTransportHandler,
-                    TestServerAppAdapter,
-                    apache::thrift::fast_thrift::channel_pipeline::
-                        SimpleBufferAllocator>()
-                    .setEventBase(evb)
-                    .setHead(transportHandler.get())
-                    .setTail(&serverAppAdapter_)
-                    .setAllocator(&serverAllocator_)
-                    .build();
-            serverAppAdapter_.setPipeline(pipeline.get());
-            transportHandler->setPipeline(pipeline.get());
+    auto pipeline =
+        apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder<
+            ServerTransportHandler,
+            TestServerAppAdapter,
+            apache::thrift::fast_thrift::channel_pipeline::
+                SimpleBufferAllocator>()
+            .setEventBase(evb)
+            .setHead(transportHandler.get())
+            .setTail(&serverAppAdapter_)
+            .setAllocator(&serverAllocator_)
+            .build();
+    serverAppAdapter_.setPipeline(pipeline.get());
+    transportHandler->setPipeline(pipeline.get());
 
-            apache::thrift::fast_thrift::rocket::server::connection::
-                RocketServerConnection conn;
-            conn.transportHandler = std::move(transportHandler);
-            conn.pipeline = std::move(pipeline);
-            return conn;
-          };
+    apache::thrift::fast_thrift::connection::RocketServerConnection conn;
+    conn.transportHandler = std::move(transportHandler);
+    conn.pipeline = std::move(pipeline);
+    return conn;
+  };
 
   connectionManager_ = TestConnectionManager::create(
       folly::SocketAddress("::1", 0),
@@ -80,7 +79,7 @@ void IntegrationTestFixture::SetUp() {
       nullptr,
       nullptr,
       std::chrono::seconds{5},
-      apache::thrift::fast_thrift::rocket::server::connection::SocketOptions{});
+      apache::thrift::fast_thrift::connection::SocketOptions{});
   connectionManager_->start();
 
   serverAddress_ = connectionManager_->getAddress();

@@ -40,10 +40,10 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
@@ -119,9 +119,9 @@ class FastThriftBenchmarkServer {
       uint32_t numIOThreads)
       : handler_(std::move(handler)),
         executor_(std::make_shared<folly::IOThreadPoolExecutor>(numIOThreads)) {
-    rocket::server::connection::ConnectionFactory connectionFactory =
+    connection::ConnectionFactory connectionFactory =
         [this](folly::AsyncTransport::UniquePtr socket)
-        -> rocket::server::connection::RocketServerConnection {
+        -> connection::RocketServerConnection {
       auto* evb = socket->getEventBase();
       auto transportHandler =
           transport::TransportHandler::create(std::move(socket));
@@ -168,7 +168,7 @@ class FastThriftBenchmarkServer {
         channels.push_back(std::move(serverChannel));
       });
 
-      rocket::server::connection::RocketServerConnection conn;
+      connection::RocketServerConnection conn;
       conn.transportHandler = std::move(transportHandler);
       conn.pipeline = std::move(pipeline);
       return conn;
@@ -177,14 +177,14 @@ class FastThriftBenchmarkServer {
     folly::SocketAddress address;
     address.setFromLocalPort(port);
 
-    connectionManager_ = rocket::server::connection::ConnectionManager::create(
+    connectionManager_ = connection::ConnectionManager::create(
         std::move(address),
         folly::getKeepAliveToken(executor_.get()),
         std::move(connectionFactory),
         nullptr,
         nullptr,
         std::chrono::seconds{5},
-        rocket::server::connection::SocketOptions{});
+        connection::SocketOptions{});
   }
 
   void serve() {
@@ -200,7 +200,7 @@ class FastThriftBenchmarkServer {
  private:
   std::shared_ptr<BenchmarkServiceHandler> handler_;
   std::shared_ptr<folly::IOThreadPoolExecutor> executor_;
-  rocket::server::connection::ConnectionManager::Ptr connectionManager_;
+  connection::ConnectionManager::Ptr connectionManager_;
   channel_pipeline::SimpleBufferAllocator allocator_;
   folly::Synchronized<std::vector<std::shared_ptr<thrift::ThriftServerChannel>>>
       serverChannels_;

@@ -24,7 +24,7 @@
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/test/TestClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/test/TestServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -39,7 +39,7 @@ using ClientTransportHandler =
     apache::thrift::fast_thrift::transport::TransportHandler;
 
 using TestConnectionManager =
-    apache::thrift::fast_thrift::rocket::server::connection::ConnectionManager;
+    apache::thrift::fast_thrift::connection::ConnectionManager;
 
 /**
  * ClientConnection holds all client-side resources.

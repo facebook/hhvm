@@ -30,9 +30,9 @@
 
 #define private public
 #define protected public
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/ConnectionHandler.h>
 
-namespace apache::thrift::fast_thrift::rocket::server::connection {
+namespace apache::thrift::fast_thrift::connection {
 
 using namespace apache::thrift::fast_thrift::channel_pipeline;
 using namespace apache::thrift::fast_thrift::channel_pipeline::test;
@@ -382,4 +382,4 @@ TEST_F(ConnectionHandlerTest, ObjectStaysAliveUntilAcceptStopped) {
   });
 }
 
-} // namespace apache::thrift::fast_thrift::rocket::server::connection
+} // namespace apache::thrift::fast_thrift::connection

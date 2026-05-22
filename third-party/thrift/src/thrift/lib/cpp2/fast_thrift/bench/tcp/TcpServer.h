@@ -22,7 +22,7 @@
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/fast_thrift/bench/runner/ServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 
 #include <memory>
@@ -30,7 +30,7 @@
 namespace apache::thrift::fast_thrift::bench {
 
 using TcpConnectionManager =
-    apache::thrift::fast_thrift::rocket::server::connection::ConnectionManager;
+    apache::thrift::fast_thrift::connection::ConnectionManager;
 
 /**
  * TcpServer owns all server infrastructure for TCP-based benchmarks.

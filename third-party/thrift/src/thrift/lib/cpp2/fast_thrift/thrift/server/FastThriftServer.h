@@ -32,12 +32,12 @@
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/ConnectionManager.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/SocketOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/debug/DebugServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/monitor/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/status/StatusServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/SocketOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/ThriftTlsConfig.h>
@@ -197,11 +197,11 @@ class FastThriftServer {
    * Listening-socket tuning knobs (listen backlog, TCP Fast Open, max
    * accepts per event). Applied by ConnectionHandler at startAccepting
    * time on every IO thread's listening socket. When unset, defaults
-   * from rocket/server/connection/SocketOptions.h apply.
+   * from connection/SocketOptions.h apply.
    *
    * Must be called before start()/serve().
    */
-  void setSocketOptions(rocket::server::connection::SocketOptions opts);
+  void setSocketOptions(connection::SocketOptions opts);
 
   /**
    * Per-connection accept callback. Invoked once per accepted connection
@@ -274,7 +274,7 @@ class FastThriftServer {
   }
 
  private:
-  using ServerConnectionManager = rocket::server::connection::ConnectionManager;
+  using ServerConnectionManager = connection::ConnectionManager;
 
   // Lifecycle states. Transitions are linear: kNotStarted → kRunning →
   // kStopped. start() and stop() are idempotent — calling either outside
@@ -326,7 +326,7 @@ class FastThriftServer {
     std::shared_ptr<fast_thrift::DebugServerInterface> debugHandler{nullptr};
   };
 
-  rocket::server::connection::ConnectionFactory createConnectionFactory();
+  connection::ConnectionFactory createConnectionFactory();
 
   channel_pipeline::PipelineImpl::Ptr buildRocketPipeline(
       folly::EventBase* evb,
@@ -355,7 +355,7 @@ class FastThriftServer {
   bool enableReusePortBpfSpread_{false};
   // Listening-socket tuning. Defaults from SocketOptions.h apply unless the
   // embedder calls setSocketOptions before start().
-  rocket::server::connection::SocketOptions socketOptions_{};
+  connection::SocketOptions socketOptions_{};
   // IO thread pool. Either embedder-supplied via setIOThreadPool or
   // constructed in start() from config_.numIOThreads. Released on
   // destruction; the pool's own dtor joins when the last ref drops.

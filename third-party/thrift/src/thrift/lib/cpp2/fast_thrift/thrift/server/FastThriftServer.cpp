@@ -146,8 +146,7 @@ void FastThriftServer::setEnableReusePortBpfSpread(bool enable) {
   enableReusePortBpfSpread_ = enable;
 }
 
-void FastThriftServer::setSocketOptions(
-    rocket::server::connection::SocketOptions opts) {
+void FastThriftServer::setSocketOptions(connection::SocketOptions opts) {
   std::lock_guard<std::mutex> lock(lifecycleMutex_);
   CHECK(state_ == State::kNotStarted)
       << "FastThriftServer::setSocketOptions must be called before "
@@ -155,10 +154,9 @@ void FastThriftServer::setSocketOptions(
   socketOptions_ = opts;
 }
 
-rocket::server::connection::ConnectionFactory
-FastThriftServer::createConnectionFactory() {
+connection::ConnectionFactory FastThriftServer::createConnectionFactory() {
   return [this](folly::AsyncTransport::UniquePtr socket)
-             -> rocket::server::connection::RocketServerConnection {
+             -> connection::RocketServerConnection {
     auto* evb = socket->getEventBase();
 
     // Per-connection context. Only built when enableRequestContext is set;
@@ -192,7 +190,7 @@ FastThriftServer::createConnectionFactory() {
     auto transportHandler =
         transport::TransportHandler::create(std::move(socket));
 
-    rocket::server::connection::RocketServerConnection conn;
+    connection::RocketServerConnection conn;
 
     // 1. Build the thrift adapter first so the rocket pipeline's SETUP
     //    handler can capture a callback into it. When any auxiliary

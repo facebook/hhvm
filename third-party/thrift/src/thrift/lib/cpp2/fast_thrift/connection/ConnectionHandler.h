@@ -29,13 +29,13 @@
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/SocketOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/SocketOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzHandshakeHelper.h>
 #include <thrift/lib/cpp2/fast_thrift/security/PendingHandshakes.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 
-namespace apache::thrift::fast_thrift::rocket::server::connection {
+namespace apache::thrift::fast_thrift::connection {
 
 using RocketServerConnection = rocket::server::RocketServerConnection;
 
@@ -134,4 +134,4 @@ class ConnectionHandler : public folly::DelayedDestruction,
   bool enableReusePortBpfSpread_{false};
 };
 
-} // namespace apache::thrift::fast_thrift::rocket::server::connection
+} // namespace apache::thrift::fast_thrift::connection

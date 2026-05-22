@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-namespace apache::thrift::fast_thrift::rocket::server::connection {
+namespace apache::thrift::fast_thrift::connection {
 
 /**
  * Listening-socket tuning knobs applied by ConnectionHandler at
@@ -41,4 +41,4 @@ struct SocketOptions {
   uint32_t maxReadsPerEvent{16};
 };
 
-} // namespace apache::thrift::fast_thrift::rocket::server::connection
+} // namespace apache::thrift::fast_thrift::connection

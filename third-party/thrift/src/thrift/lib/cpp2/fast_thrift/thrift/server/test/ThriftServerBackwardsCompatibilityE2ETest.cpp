@@ -27,11 +27,11 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/ConnectionHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
@@ -128,120 +128,110 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
 
     executor_ = std::make_shared<folly::IOThreadPoolExecutor>(1);
 
-    apache::thrift::fast_thrift::rocket::server::connection::ConnectionFactory
+    apache::thrift::fast_thrift::connection::ConnectionFactory
         connectionFactory = [this](folly::AsyncTransport::UniquePtr socket)
-        -> apache::thrift::fast_thrift::rocket::server::connection::
-            RocketServerConnection {
-              auto* evb = socket->getEventBase();
-              auto transportHandler = apache::thrift::fast_thrift::transport::
-                  TransportHandler::create(std::move(socket));
+        -> apache::thrift::fast_thrift::connection::RocketServerConnection {
+      auto* evb = socket->getEventBase();
+      auto transportHandler =
+          apache::thrift::fast_thrift::transport::TransportHandler::create(
+              std::move(socket));
 
-              // Build RocketServerConnection with default appAdapter
-              apache::thrift::fast_thrift::rocket::server::connection::
-                  RocketServerConnection conn;
+      // Build RocketServerConnection with default appAdapter
+      apache::thrift::fast_thrift::connection::RocketServerConnection conn;
 
-              // 1. Build the server channel and transport adapter first so the
-              //    rocket pipeline's SETUP handler can capture callbacks into
-              //    both — channel for response serialization, transport
-              //    adapter for inbound request deserialization.
-              auto serverChannel =
-                  std::make_shared<thrift::ThriftServerChannel>(handler_);
-              auto* channel = serverChannel.get();
-              auto transportAdapter = std::make_unique<
-                  thrift::server::ThriftServerTransportAdapter>(
-                  *conn.appAdapter);
-              auto* transportAdapterPtr = transportAdapter.get();
+      // 1. Build the server channel and transport adapter first so the
+      //    rocket pipeline's SETUP handler can capture callbacks into
+      //    both — channel for response serialization, transport
+      //    adapter for inbound request deserialization.
+      auto serverChannel =
+          std::make_shared<thrift::ThriftServerChannel>(handler_);
+      auto* channel = serverChannel.get();
+      auto transportAdapter =
+          std::make_unique<thrift::server::ThriftServerTransportAdapter>(
+              *conn.appAdapter);
+      auto* transportAdapterPtr = transportAdapter.get();
 
-              // 2. Build rocket pipeline. The SETUP handler publishes the
-              //    negotiated metadata protocol into both adapters.
-              auto rocketPipeline =
-                  PipelineBuilder<
-                      apache::thrift::fast_thrift::transport::TransportHandler,
-                      apache::thrift::fast_thrift::rocket::server::
-                          RocketServerAppAdapter,
-                      SimpleBufferAllocator>()
-                      .setEventBase(evb)
-                      .setHead(transportHandler.get())
-                      .setTail(conn.appAdapter.get())
-                      .setAllocator(&rocketAllocator_)
-                      .addNextInbound<apache::thrift::fast_thrift::frame::read::
-                                          handler::FrameLengthParserHandler>(
-                          frame_length_parser_handler_tag)
-                      .addNextOutbound<
-                          apache::thrift::fast_thrift::frame::write::handler::
-                              FrameLengthEncoderHandler>(
-                          frame_length_encoder_handler_tag)
-                      .addNextDuplex<
-                          apache::thrift::fast_thrift::rocket::server::handler::
-                              RocketServerFrameCodecHandler>(
-                          rocket_server_frame_codec_handler_tag)
-                      .addNextDuplex<
-                          apache::thrift::fast_thrift::rocket::server::handler::
-                              RocketServerSetupFrameHandler>(
-                          server_setup_frame_handler_tag,
-                          [channel, transportAdapterPtr](
-                              const apache::thrift::fast_thrift::rocket::
-                                  server::handler::SetupParameters&
-                                      p) noexcept {
-                            channel->setMetadataProtocol(p.metadataProtocol);
-                            transportAdapterPtr->setMetadataProtocol(
-                                p.metadataProtocol);
-                          })
-                      .addNextDuplex<
-                          apache::thrift::fast_thrift::rocket::server::handler::
-                              RocketServerStreamStateHandler>(
-                          server_stream_state_handler_tag)
-                      .addNextDuplex<
-                          apache::thrift::fast_thrift::rocket::server::handler::
-                              RocketServerRequestResponseHandler>(
-                          server_request_response_frame_handler_tag)
-                      .build();
+      // 2. Build rocket pipeline. The SETUP handler publishes the
+      //    negotiated metadata protocol into both adapters.
+      auto rocketPipeline =
+          PipelineBuilder<
+              apache::thrift::fast_thrift::transport::TransportHandler,
+              apache::thrift::fast_thrift::rocket::server::
+                  RocketServerAppAdapter,
+              SimpleBufferAllocator>()
+              .setEventBase(evb)
+              .setHead(transportHandler.get())
+              .setTail(conn.appAdapter.get())
+              .setAllocator(&rocketAllocator_)
+              .addNextInbound<apache::thrift::fast_thrift::frame::read::
+                                  handler::FrameLengthParserHandler>(
+                  frame_length_parser_handler_tag)
+              .addNextOutbound<apache::thrift::fast_thrift::frame::write::
+                                   handler::FrameLengthEncoderHandler>(
+                  frame_length_encoder_handler_tag)
+              .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                                 handler::RocketServerFrameCodecHandler>(
+                  rocket_server_frame_codec_handler_tag)
+              .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                                 handler::RocketServerSetupFrameHandler>(
+                  server_setup_frame_handler_tag,
+                  [channel, transportAdapterPtr](
+                      const apache::thrift::fast_thrift::rocket::server::
+                          handler::SetupParameters& p) noexcept {
+                    channel->setMetadataProtocol(p.metadataProtocol);
+                    transportAdapterPtr->setMetadataProtocol(
+                        p.metadataProtocol);
+                  })
+              .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                                 handler::RocketServerStreamStateHandler>(
+                  server_stream_state_handler_tag)
+              .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                                 handler::RocketServerRequestResponseHandler>(
+                  server_request_response_frame_handler_tag)
+              .build();
 
-              conn.appAdapter->setPipeline(rocketPipeline.get());
-              transportHandler->setPipeline(rocketPipeline.get());
+      conn.appAdapter->setPipeline(rocketPipeline.get());
+      transportHandler->setPipeline(rocketPipeline.get());
 
-              conn.transportHandler = std::move(transportHandler);
-              conn.pipeline = std::move(rocketPipeline);
+      conn.transportHandler = std::move(transportHandler);
+      conn.pipeline = std::move(rocketPipeline);
 
-              // 3. Build thrift pipeline
+      // 3. Build thrift pipeline
 
-              ThriftConnectionContext ctx;
-              auto thriftPipeline =
-                  PipelineBuilder<
-                      thrift::server::ThriftServerTransportAdapter,
-                      thrift::ThriftServerChannel,
-                      SimpleBufferAllocator>()
-                      .setEventBase(evb)
-                      .setHead(transportAdapter.get())
-                      .setTail(serverChannel.get())
-                      .setAllocator(ctx.thriftAllocator.get())
-                      .build();
+      ThriftConnectionContext ctx;
+      auto thriftPipeline = PipelineBuilder<
+                                thrift::server::ThriftServerTransportAdapter,
+                                thrift::ThriftServerChannel,
+                                SimpleBufferAllocator>()
+                                .setEventBase(evb)
+                                .setHead(transportAdapter.get())
+                                .setTail(serverChannel.get())
+                                .setAllocator(ctx.thriftAllocator.get())
+                                .build();
 
-              transportAdapter->setPipeline(thriftPipeline.get());
-              serverChannel->setPipelineRef(*thriftPipeline);
-              serverChannel->setWorker(
-                  apache::thrift::Cpp2Worker::createDummy(evb));
+      transportAdapter->setPipeline(thriftPipeline.get());
+      serverChannel->setPipelineRef(*thriftPipeline);
+      serverChannel->setWorker(apache::thrift::Cpp2Worker::createDummy(evb));
 
-              ctx.serverChannel = std::move(serverChannel);
-              ctx.transportAdapter = std::move(transportAdapter);
-              ctx.thriftPipeline = std::move(thriftPipeline);
+      ctx.serverChannel = std::move(serverChannel);
+      ctx.transportAdapter = std::move(transportAdapter);
+      ctx.thriftPipeline = std::move(thriftPipeline);
 
-              thriftConnections_.withWLock(
-                  [&](auto& conns) { conns.push_back(std::move(ctx)); });
+      thriftConnections_.withWLock(
+          [&](auto& conns) { conns.push_back(std::move(ctx)); });
 
-              return conn;
-            };
+      return conn;
+    };
 
-    connectionManager_ = apache::thrift::fast_thrift::rocket::server::
-        connection::ConnectionManager::create(
+    connectionManager_ =
+        apache::thrift::fast_thrift::connection::ConnectionManager::create(
             folly::SocketAddress("::1", 0),
             folly::getKeepAliveToken(executor_.get()),
             std::move(connectionFactory),
             nullptr,
             nullptr,
             std::chrono::seconds{5},
-            apache::thrift::fast_thrift::rocket::server::connection::
-                SocketOptions{});
+            apache::thrift::fast_thrift::connection::SocketOptions{});
     connectionManager_->start();
 
     clientThread_ = std::make_unique<folly::ScopedEventBaseThread>();
@@ -290,8 +280,8 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
 
   std::shared_ptr<BackwardsCompatibilityTestHandler> handler_;
   std::shared_ptr<folly::IOThreadPoolExecutor> executor_;
-  apache::thrift::fast_thrift::rocket::server::connection::ConnectionManager::
-      Ptr connectionManager_;
+  apache::thrift::fast_thrift::connection::ConnectionManager::Ptr
+      connectionManager_;
   std::unique_ptr<folly::ScopedEventBaseThread> clientThread_;
   SimpleBufferAllocator rocketAllocator_;
   folly::Synchronized<std::vector<ThriftConnectionContext>> thriftConnections_;

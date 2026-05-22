@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/ConnectionHandler.h>
 
 #include <algorithm>
 #include <array>
@@ -32,7 +32,7 @@
 #include <folly/net/NetworkSocket.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzHandshakeHelper.h>
 
-namespace apache::thrift::fast_thrift::rocket::server::connection {
+namespace apache::thrift::fast_thrift::connection {
 
 ConnectionHandler::ConnectionHandler(
     folly::EventBase& evb,
@@ -261,4 +261,4 @@ void ConnectionHandler::attachReusePortBpfSpread() {
 #endif
 }
 
-} // namespace apache::thrift::fast_thrift::rocket::server::connection
+} // namespace apache::thrift::fast_thrift::connection

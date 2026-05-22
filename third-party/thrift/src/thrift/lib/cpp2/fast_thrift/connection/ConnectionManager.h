@@ -31,10 +31,10 @@
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/logging/xlog.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/ConnectionHandler.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 
-namespace apache::thrift::fast_thrift::rocket::server::connection {
+namespace apache::thrift::fast_thrift::connection {
 
 /**
  * ConnectionManager accepts connections using SO_REUSEPORT and delegates
@@ -208,4 +208,4 @@ class ConnectionManager : public folly::DelayedDestruction {
   bool enableReusePortBpfSpread_{false};
 };
 
-} // namespace apache::thrift::fast_thrift::rocket::server::connection
+} // namespace apache::thrift::fast_thrift::connection

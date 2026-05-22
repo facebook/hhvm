@@ -29,9 +29,9 @@
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/common/Stats.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/ConnectionManager.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/SocketOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/SocketOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/ThriftTlsConfig.h>
@@ -159,7 +159,7 @@ class FastThriftServerT {
   // SocketOptions.h apply.
   //
   // Must be called before start()/serve().
-  void setSocketOptions(rocket::server::connection::SocketOptions opts);
+  void setSocketOptions(connection::SocketOptions opts);
 
   /**
    * Start accepting connections without blocking.
@@ -185,7 +185,7 @@ class FastThriftServerT {
   folly::SocketAddress getAddress() const;
 
  private:
-  using ServerConnectionManager = rocket::server::connection::ConnectionManager;
+  using ServerConnectionManager = connection::ConnectionManager;
 
   // Lifecycle states. Transitions are linear: kNotStarted → kRunning →
   // kStopped. start() and stop() are idempotent — calling either outside
@@ -211,7 +211,7 @@ class FastThriftServerT {
     std::shared_ptr<Stats> stats;
   };
 
-  rocket::server::connection::ConnectionFactory createConnectionFactory();
+  connection::ConnectionFactory createConnectionFactory();
 
   channel_pipeline::PipelineImpl::Ptr buildRocketPipeline(
       folly::EventBase* evb,
@@ -231,7 +231,7 @@ class FastThriftServerT {
   std::shared_ptr<folly::IOThreadPoolExecutor> executor_;
   // Listening-socket tuning. Defaults from SocketOptions.h apply unless the
   // embedder calls setSocketOptions before start().
-  rocket::server::connection::SocketOptions socketOptions_{};
+  connection::SocketOptions socketOptions_{};
   ServerConnectionManager::Ptr connectionManager_;
   channel_pipeline::SimpleBufferAllocator rocketAllocator_;
   folly::Synchronized<
@@ -318,7 +318,7 @@ void FastThriftServerT<Stats>::setThriftConfig(security::ThriftTlsConfig cfg) {
 
 template <typename Stats>
 void FastThriftServerT<Stats>::setSocketOptions(
-    rocket::server::connection::SocketOptions opts) {
+    connection::SocketOptions opts) {
   std::lock_guard<std::mutex> lock(lifecycleMutex_);
   CHECK(state_ == State::kNotStarted)
       << "FastThriftChannelServer::setSocketOptions must be called before start()";
@@ -326,10 +326,10 @@ void FastThriftServerT<Stats>::setSocketOptions(
 }
 
 template <typename Stats>
-rocket::server::connection::ConnectionFactory
+connection::ConnectionFactory
 FastThriftServerT<Stats>::createConnectionFactory() {
   return [this](folly::AsyncTransport::UniquePtr socket)
-             -> rocket::server::connection::RocketServerConnection {
+             -> connection::RocketServerConnection {
     auto* evb = socket->getEventBase();
     auto transportHandler =
         transport::TransportHandler::create(std::move(socket));
@@ -341,7 +341,7 @@ FastThriftServerT<Stats>::createConnectionFactory() {
     }
 
     // Build the RocketServerConnection with default appAdapter
-    rocket::server::connection::RocketServerConnection conn;
+    connection::RocketServerConnection conn;
 
     // 1. Build the thrift channel first so the rocket pipeline's SETUP
     //    handler can capture a callback that publishes the negotiated

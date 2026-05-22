@@ -296,13 +296,24 @@ class RequestCallback : public RequestClientCallback {
         if (thriftContext_->responseDecompressor) {
           thriftContext_->responseDecompressor(state);
         }
-        try {
-          replyReceived(std::move(state));
-        } catch (...) {
-          LOG(DFATAL)
-              << "Exception thrown while executing replyReceived() callback. "
-              << "Exception: "
-              << folly::exceptionStr(folly::current_exception());
+        if (state.isException()) {
+          try {
+            requestError(std::move(state));
+          } catch (...) {
+            LOG(DFATAL)
+                << "Exception thrown while executing requestError() callback. "
+                << "Exception: "
+                << folly::exceptionStr(folly::current_exception());
+          }
+        } else {
+          try {
+            replyReceived(std::move(state));
+          } catch (...) {
+            LOG(DFATAL)
+                << "Exception thrown while executing replyReceived() callback. "
+                << "Exception: "
+                << folly::exceptionStr(folly::current_exception());
+          }
         }
       }
     }

@@ -323,6 +323,7 @@
   process
   process_types
   provider_context
+  direct_decl_parser
   shallow_decl_defs
   sys_username
   sys_utils

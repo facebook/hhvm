@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include <folly/portability/SysTime.h>
+#include <fmt/core.h>
 #include <folly/portability/SysResource.h>
 #include <folly/portability/Unistd.h>
 #include <folly/String.h>
@@ -366,7 +367,7 @@ bool HHVM_FUNCTION(pcntl_signal_dispatch) {
         std::string handlerName = "signal handler";
         try {
           auto const name = handler.toString().c_str();
-          handlerName += folly::sformat(" '{}'", name);
+          handlerName += fmt::format(" '{}'", name);
         } catch (...) {
         }
         raise_warning("%s threw %s",
@@ -376,7 +377,7 @@ bool HHVM_FUNCTION(pcntl_signal_dispatch) {
         std::string handlerName = "signal handler";
         try {
           auto const name = handler.toString().c_str();
-          handlerName += folly::sformat(" '{}'", name);
+          handlerName += fmt::format(" '{}'", name);
         } catch (...) {
         }
         raise_warning("%s threw an exception: %s",
@@ -385,7 +386,7 @@ bool HHVM_FUNCTION(pcntl_signal_dispatch) {
         std::string handlerName = "signal handler";
         try {
           auto const name = handler.toString().c_str();
-          handlerName += folly::sformat(" '{}'", name);
+          handlerName += fmt::format(" '{}'", name);
         } catch (...) {
         }
         raise_warning("%s threw and unknown exception",

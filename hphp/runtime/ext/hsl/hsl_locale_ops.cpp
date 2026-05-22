@@ -27,7 +27,7 @@ int64_t HSLLocale::Ops::normalize_offset(int64_t offset, int64_t length) {
   const auto normalized = offset >= 0 ? offset : offset + length;
   if (normalized < 0 || normalized > length) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat(
+      fmt::format(
         "Offset {} was out-of-bounds for length {}", 
         offset,
         length

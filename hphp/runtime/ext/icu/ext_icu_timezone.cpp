@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 #include <unicode/locid.h>
+#include <fmt/core.h>
 
 namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
@@ -290,9 +291,9 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getTZDataVersion) {
 static bool HHVM_METHOD(IntlTimeZone, hasSameRules, const Object& otherTimeZone) {
   if (!otherTimeZone.instanceof(s_IntlTimeZone)) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat(
+      fmt::format(
         "Invalid argument. Expected {}, received {}",
-        s_IntlTimeZone,
+        s_IntlTimeZone.c_str(),
         otherTimeZone->getClassName().c_str()
       )
     );

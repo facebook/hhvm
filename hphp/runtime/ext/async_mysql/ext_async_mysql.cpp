@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <folly/Singleton.h>
+#include <fmt/core.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 #include <squangle/mysql_client/AsyncHelpers.h>
 #include <squangle/mysql_client/ClientPool.h>
@@ -110,8 +111,8 @@ am::QueryArgument queryarg_from_variant(const Variant& arg) {
   }
 
   SystemLib::throwInvalidArgumentExceptionObject(
-    folly::sformat("Unable to serialize type '{}' for SQL",
-                   getDataTypeString(arg.getType()))
+    fmt::format("Unable to serialize type '{}' for SQL",
+                   getDataTypeString(arg.getType()).c_str())
   );
 }
 
@@ -133,9 +134,9 @@ am::Query amquery_from_queryf(const StringData* pattern,
 AsyncMysqlConnectionOptions* getConnectionOptions(const Object& opts) {
   if (!opts.instanceof(AsyncMysqlConnectionOptions::className())) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat(
+      fmt::format(
         "Invalid argument. Expected {}, received {}",
-        AsyncMysqlConnectionOptions::className(),
+        AsyncMysqlConnectionOptions::className().c_str(),
         opts->getClassName().c_str()
       )
     );
@@ -146,9 +147,9 @@ AsyncMysqlConnectionOptions* getConnectionOptions(const Object& opts) {
 MySSLContextProvider* getSSLContextProvider(const Object& ctx) {
   if (!ctx.instanceof(MySSLContextProvider::className())) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat(
+      fmt::format(
         "Invalid argument. Expected {}, received {}",
-        MySSLContextProvider::className(),
+        MySSLContextProvider::className().c_str(),
         ctx->getClassName().c_str()
       )
     );

@@ -18,7 +18,7 @@
 
 #include <iostream>
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/Likely.h>
 #include <folly/Random.h>
 
@@ -352,7 +352,7 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
                    int64_t error_type /* = ErrorMode::USER_NOTICE */) {
   std::string msg = error_msg.data(); // not toCppString()
   if (UNLIKELY(g_context->getThrowAllErrors())) {
-    throw Exception(folly::sformat("throwAllErrors: {}", error_type));
+    throw Exception(fmt::format("throwAllErrors: {}", error_type));
   }
   if (error_type == (int)ErrorMode::USER_ERROR) {
     g_context->handleError(msg, error_type, true,

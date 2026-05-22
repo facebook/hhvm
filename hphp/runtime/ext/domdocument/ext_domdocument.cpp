@@ -774,7 +774,7 @@ namespace {
 DOMNode* getDOMNode(const Object& node) {
   if (!node.instanceof(DOMNode::classof())) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat(
+      fmt::format(
         "Invalid object. Expected DOMNode, received {}",
         node->getClassName().c_str()
       )
@@ -786,7 +786,7 @@ DOMNode* getDOMNode(const Object& node) {
 DOMXPath* getDOMXPath(const Object& obj) {
   if (!obj.instanceof(DOMXPath::classof())) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat(
+      fmt::format(
         "Invalid object. Expected DOMXPath, received {}",
         obj->getClassName().c_str()
       )

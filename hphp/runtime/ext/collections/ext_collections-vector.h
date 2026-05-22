@@ -417,11 +417,11 @@ struct c_Vector : BaseVector, SystemLib::ClassLoader<"HH\\Vector"> {
         "Parameter sz must be a non-negative integer");
     }
     if (intSz > BaseVector::MaxCapacity()) {
-      auto msg = folly::format(
+      auto msg = fmt::format(
         "Parameter sz must be at most {}; {} passed",
         BaseVector::MaxCapacity(),
         intSz
-      ).str();
+      );
       SystemLib::throwInvalidArgumentExceptionObject(msg);
     }
     return intSz;

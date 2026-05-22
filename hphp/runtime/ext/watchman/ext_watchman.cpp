@@ -23,9 +23,9 @@
 #include <utility>
 
 #include <folly/json/dynamic.h>
+#include <fmt/core.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/Executor.h>
-#include <folly/Format.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
@@ -195,7 +195,7 @@ TypedValue makeTV(const folly::dynamic& data) {
             res.set(String{k.getString()}, makeTV(v));
             break;
           default:
-            SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+            SystemLib::throwInvalidOperationExceptionObject(fmt::format(
               "folly::dynamic to HPHP::Variant conversion failed! An object's "
               "key was neither an int nor a string. It was {}", k.typeName()));
         }
@@ -243,7 +243,7 @@ folly::dynamic makeDynamic(const HPHP::TypedValue& data) {
       return res;
     }
     default:
-      SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+      SystemLib::throwInvalidOperationExceptionObject(fmt::format(
         "HPHP::Variant to folly::dynamic conversion failed! Got an "
         "unconvertible Variant of type {}...", data.type()));
   }

@@ -64,15 +64,15 @@ String HHVM_FUNCTION(server_warmup_status) {
   auto const diff = end - begin;
   if (diff >= Cfg::Jit::WarmupStatusBytes) {
     // TODO(13274666) Mismatch between 'to' and 'begin' below.
-    return folly::format("Translation cache grew by {} bytes to {} bytes.",
-                         diff, begin).str();
+    return fmt::format("Translation cache grew by {} bytes to {} bytes.",
+                         diff, begin);
   }
 
   // Fail if we spent more than 0.5ms in the JIT.
   auto const jittime = jit::Timer::CounterValue(jit::Timer::mcg_translate);
   auto constexpr kMaxJitTimeNS = 500000;
   if (jittime.total > kMaxJitTimeNS) {
-    return folly::format("Spent {}us in the JIT.", jittime.total / 1000).str();
+    return fmt::format("Spent {}us in the JIT.", jittime.total / 1000);
   }
 
   if (!isStandardRequest()) {
@@ -90,7 +90,7 @@ String HHVM_FUNCTION(server_warmup_status) {
   auto tpc_diff = jit::rl_perf_counters[jit::tpc_interp_bb] -
                   jit::rl_perf_counters[jit::tpc_interp_bb_force];
   if (tpc_diff) {
-    return folly::sformat("Interpreted {} non-forced basic blocks.", tpc_diff);
+    return fmt::format("Interpreted {} non-forced basic blocks.", tpc_diff);
   }
 
   if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {

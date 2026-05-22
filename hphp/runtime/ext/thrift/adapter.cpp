@@ -39,9 +39,9 @@ Variant applyAdapter(Variant value, Class& adapter, const String& methodName) {
   }
   const auto method = adapter.lookupMethod(methodName.get());
   if (!method) {
-    thrift_error(folly::sformat("adapter method {}::{}() doesn't exist",
+    thrift_error(fmt::format("adapter method {}::{}() doesn't exist",
                                 adapter.nameStr().data(),
-                                methodName),
+                                methodName.c_str()),
                  ERR_INVALID_DATA);
   }
   try {
@@ -49,9 +49,9 @@ Variant applyAdapter(Variant value, Class& adapter, const String& methodName) {
         g_context->invokeFuncFew(method, &adapter, 1, nullptr, value.asTypedValue(),
                                 RuntimeCoeffects::fixme(), false /* dynamic */));
   } catch (const Object& o) {
-    thrift_error(folly::sformat("adapter method {}::{}() threw an exception: {}",
+    thrift_error(fmt::format("adapter method {}::{}() threw an exception: {}",
                             adapter.nameStr().data(),
-                            methodName, throwable_to_string(o.get())),
+                            methodName.c_str(), throwable_to_string(o.get()).c_str()),
               ERR_UNEXPECTED_EXCEPTION);
     return {};
   }
@@ -68,7 +68,7 @@ Class* getAdapter(const Array& spec) {
   const auto adapter = Class::load(adapterNameString.get());
   if (!adapter) {
     thrift_error(
-        folly::sformat("adapter class {} doesn't exist", adapterNameString),
+        fmt::format("adapter class {} doesn't exist", adapterNameString.c_str()),
         ERR_INVALID_DATA);
   }
   return adapter;

@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <folly/Conv.h>
+#include <fmt/core.h>
 #include <folly/portability/Sockets.h>
 
 #include "hphp/util/network.h"
@@ -602,9 +603,9 @@ Variant php_mysql_do_connect_with_ssl(
     auto ctx = sslContextProvider.toObject();
     if (!ctx.instanceof(MySSLContextProvider::className())) {
        SystemLib::throwInvalidArgumentExceptionObject(
-         folly::sformat(
+         fmt::format(
            "Invalid argument. Expected {}, received {}",
-           MySSLContextProvider::className(),
+           MySSLContextProvider::className().c_str(),
            ctx->getClassName().c_str()
          )
        );

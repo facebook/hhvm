@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <fmt/core.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -179,7 +180,7 @@ String HHVM_FUNCTION(HH_fun_get_function, TypedValue v) {
     return f->nameStr();
   } else {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Argument 1 passed to {}() must be a fun",
+      fmt::format("Argument 1 passed to {}() must be a fun",
       __FUNCTION__+5));
   }
 }

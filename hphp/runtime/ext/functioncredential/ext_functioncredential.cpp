@@ -298,7 +298,7 @@ const Func* loadFreeFunctionOrThrow(folly::StringPiece funcNamePiece) {
 
   if (!func) {
     SystemLib::throwInvalidArgumentExceptionObject(
-        folly::sformat("Unable to find function {}", funcName));
+        fmt::format("Unable to find function {}", funcName.c_str()));
   }
   return func;
 }
@@ -312,7 +312,7 @@ const Func* loadClassMethodOrThrow(
 
   if (!cls) {
     SystemLib::throwInvalidArgumentExceptionObject(
-        folly::sformat("Unable to find class {}", className));
+        fmt::format("Unable to find class {}", className.c_str()));
   }
 
   String funcName{funcNamePiece};
@@ -321,7 +321,7 @@ const Func* loadClassMethodOrThrow(
 
   if (!func) {
     SystemLib::throwInvalidArgumentExceptionObject(
-        folly::sformat("Unable to find method {}::{}", className, funcName));
+        fmt::format("Unable to find method {}::{}", className.c_str(), funcName.c_str()));
   }
   return func;
 }

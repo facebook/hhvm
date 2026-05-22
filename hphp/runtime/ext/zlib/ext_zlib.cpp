@@ -494,7 +494,7 @@ struct ChunkedDecompressor {
         m_eof = true;
         inflateEnd(&m_zstream);
         SystemLib::throwExceptionObject(
-          folly::sformat("zlib error status={} msg=\"{}\"",
+          fmt::format("zlib error status={} msg=\"{}\"",
             status,
             m_zstream.msg
           )

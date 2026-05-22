@@ -45,6 +45,7 @@
 
 #include <functional>
 #include <boost/algorithm/string/predicate.hpp>
+#include <fmt/core.h>
 
 namespace HPHP {
 
@@ -1199,9 +1200,9 @@ static String HHVM_METHOD(ReflectionFile, __init, const String& name) {
   );
 
   if (!unit) {
-    Reflection::ThrowReflectionExceptionObject(folly::sformat(
+    Reflection::ThrowReflectionExceptionObject(fmt::format(
       "File '{}' does not exist",
-      name
+      name.c_str()
     ));
   }
 
@@ -1241,9 +1242,9 @@ static void HHVM_METHOD(ReflectionModule, __init, const String& name) {
 
   const Module* module = Module::load(makeStaticString(name.get()));
   if (!module) {
-    Reflection::ThrowReflectionExceptionObject(folly::sformat(
+    Reflection::ThrowReflectionExceptionObject(fmt::format(
       "Module '{}' does not exist",
-      name
+      name.c_str()
     ));
   }
 
@@ -1579,7 +1580,7 @@ namespace {
   const Class* get_class_from_name(const String& name) {
     auto const cls = Class::load(name.get());
     if (!cls) {
-      auto message = folly::sformat(
+      auto message = fmt::format(
         "class {} could not be loaded",
         name.toCppString()
       );
@@ -1950,7 +1951,7 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
   String clsName = content.toString();
   String result = init(clsName);
   if (result.empty()) {
-    auto msg = folly::format("Class {} does not exist", clsName).str();
+    auto msg = fmt::format("Class {} does not exist", clsName.c_str());
     Reflection::ThrowReflectionExceptionObject(String(msg));
   }
 
@@ -2082,13 +2083,13 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
                         const Variant& cls_or_obj, const String& prop_name) {
   auto const cls = get_cls(cls_or_obj);
   if (!cls) {
-    Reflection::ThrowReflectionExceptionObject(folly::sformat(
+    Reflection::ThrowReflectionExceptionObject(fmt::format(
       "Class {} does not exist",
       cls_or_obj.toString().toCppString()
     ));
   }
   if (prop_name.isNull()) {
-    Reflection::ThrowReflectionExceptionObject(folly::sformat(
+    Reflection::ThrowReflectionExceptionObject(fmt::format(
       "Property {}:: does not exist",
       cls->name()->toCppString()
     ));
@@ -2144,7 +2145,7 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
     }
   }
 
-  Reflection::ThrowReflectionExceptionObject(folly::sformat(
+  Reflection::ThrowReflectionExceptionObject(fmt::format(
     "Property {}::{} does not exist",
     cls->name()->toCppString(),
     prop_name.toCppString()

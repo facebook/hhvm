@@ -87,7 +87,7 @@ HSLLocale* HSLLocale::fromObject(const Object& obj) {
   }
   if (!obj->instanceof(HSLLocale::classof())) {
     raise_typehint_error_without_first_frame(
-      folly::sformat(
+      fmt::format(
         "Expected an HSL Locale, got instance of class '{}'",
         obj->getClassName().c_str()
       )
@@ -126,7 +126,7 @@ Object HHVM_FUNCTION(newlocale_mask,
   if (!loc) {
     throw_object(
       s_InvalidLocaleException,
-      make_vec_array(folly::sformat("Invalid locale: '{}'", locale.slice()))
+      make_vec_array(fmt::format("Invalid locale: '{}'", locale.slice()))
     );
   }
   return HSLLocale::newInstance(loc);
@@ -140,7 +140,7 @@ Object HHVM_FUNCTION(newlocale_category,
   if (!loc) {
     throw_object(
       s_InvalidLocaleException,
-      make_vec_array(folly::sformat("Invalid locale: '{}'", locale.slice()))
+      make_vec_array(fmt::format("Invalid locale: '{}'", locale.slice()))
     );
   }
   return HSLLocale::newInstance(loc);

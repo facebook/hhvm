@@ -597,9 +597,9 @@ Variant HHVM_METHOD(XMLReader, expand,
     auto obj = basenode.toObject();
     if (!obj.instanceof(s_DOMNode)) {
       SystemLib::throwInvalidArgumentExceptionObject(
-        folly::sformat(
+        fmt::format(
           "Invalid argument. Expected {}, received {}",
-          s_DOMNode,
+          s_DOMNode.c_str(),
           obj->getClassName().c_str()
         )
       );

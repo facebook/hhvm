@@ -23,6 +23,7 @@
 #include <signal.h>
 
 #include <folly/String.h>
+#include <fmt/core.h>
 #include <folly/portability/Stdlib.h>
 #include <folly/portability/SysTime.h>
 #include <folly/portability/Unistd.h>
@@ -59,9 +60,9 @@ static char **build_envp(const Array& envs, std::vector<std::string> &senvs) {
   if (size) {
     envp = (char **)malloc((size + 1) * sizeof(char *));
     for (ArrayIter iter(envs); iter; ++iter) {
-      senvs.push_back(folly::sformat("{}={}",
-                                     iter.first().toString(),
-                                     iter.second().toString()));
+      senvs.push_back(fmt::format("{}={}",
+                                     iter.first().toString().c_str(),
+                                     iter.second().toString().c_str()));
     }
     int i = 0;
     for (auto& env : senvs) {
@@ -166,7 +167,7 @@ void checkExecAllowed(bool allowGated) {
         return;
       }
       SystemLib::throwRuntimeExceptionObject(
-        folly::sformat(
+        fmt::format(
           "Process execution by caller '{}' is not in the "
           "Eval.ProcOpenGatedApprovedCallers allowlist.", callerName)
       );

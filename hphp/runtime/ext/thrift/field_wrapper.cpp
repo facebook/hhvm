@@ -38,7 +38,7 @@ void setThriftType(Variant value, const Object& obj, const String& fieldName) {
         value);
   } else {
     thrift_error(
-        folly::sformat("Method {} returned a non-object.", getter_name),
+        fmt::format("Method {} returned a non-object.", getter_name.c_str()),
         ERR_INVALID_DATA);
   }
 }
@@ -55,7 +55,7 @@ Variant getThriftType(const Object& obj, const String& fieldName) {
         0);
   }
   thrift_error(
-      folly::sformat("Method {} returned a non-object.", getter_name),
+      fmt::format("Method {} returned a non-object.", getter_name.c_str()),
       ERR_INVALID_DATA);
 }
 

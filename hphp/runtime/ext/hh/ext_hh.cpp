@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/hh/ext_hh.h"
 
 #include <folly/synchronization/AtomicNotification.h>
+#include <fmt/core.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
@@ -353,11 +354,11 @@ void serialize_memoize_obj(StringBuffer& sb, int depth, ObjectData* obj) {
     serialize_memoize_code(sb, SER_MC_OBJECT);
     serialize_memoize_string_data(sb, ser.toString().get());
   } else {
-    auto msg = folly::format(
+    auto msg = fmt::format(
       "Cannot serialize object of type {} because it does not implement "
         "HH\\IMemoizeParam",
-      obj->getClassName().asString()
-    ).str();
+      obj->getClassName().asString().c_str()
+    );
     SystemLib::throwInvalidArgumentExceptionObject(msg);
   }
 }
@@ -462,10 +463,10 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       break;
 
     case KindOfResource: {
-      auto msg = folly::format(
+      auto msg = fmt::format(
         "Cannot Serialize unexpected type {}",
         tname(tv.m_type)
-      ).str();
+      );
       SystemLib::throwInvalidArgumentExceptionObject(msg);
       break;
     }
@@ -879,7 +880,7 @@ TypedValue dynamicFun(const StringData* fun) {
   auto const func = Func::resolve(fun, caller);
   if (!func) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unable to find function {}", fun->data())
+      fmt::format("Unable to find function {}", fun->data())
     );
   }
   if (func->hasReifiedGenerics()) {
@@ -890,7 +891,7 @@ TypedValue dynamicFun(const StringData* fun) {
       );
     } else {
       SystemLib::throwInvalidArgumentExceptionObject(
-        folly::sformat("Function {} is reified", fun->data())
+        fmt::format("Function {} is reified", fun->data())
       );
     }
   }
@@ -898,7 +899,7 @@ TypedValue dynamicFun(const StringData* fun) {
     auto const level = Cfg::Eval::DynamicFunLevel;
     if (level == 2) {
       SystemLib::throwInvalidArgumentExceptionObject(
-        folly::sformat("Function {} not marked dynamic", fun->data())
+        fmt::format("Function {} not marked dynamic", fun->data())
       );
     }
     if (level == 1) {
@@ -921,7 +922,7 @@ TypedValue dynamicClassMeth(TypedValue clsVal, const StringData* meth) {
           raise_str_to_class_notice(n, jit::StrToClassKind::DynamicClassMeth);
         } else {
           SystemLib::throwInvalidArgumentExceptionObject(
-            folly::sformat("Unable to find class {}", n->data())
+            fmt::format("Unable to find class {}", n->data())
           );
         }
         return cls;
@@ -932,7 +933,7 @@ TypedValue dynamicClassMeth(TypedValue clsVal, const StringData* meth) {
         auto const cls = Class::load(n);
         if (UNLIKELY(!cls)) {
           SystemLib::throwInvalidArgumentExceptionObject(
-            folly::sformat("Unable to find class {}", n->data())
+            fmt::format("Unable to find class {}", n->data())
           );
         }
         return cls;
@@ -946,19 +947,19 @@ TypedValue dynamicClassMeth(TypedValue clsVal, const StringData* meth) {
   auto const func = c->lookupMethod(meth);
   if (!func) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unable to find method {}::{}",
+      fmt::format("Unable to find method {}::{}",
                      c->name()->data(), meth->data())
     );
   }
   if (!func->isStaticInPrologue()) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Method {}::{} is not static",
+      fmt::format("Method {}::{} is not static",
                      c->name()->data(), meth->data())
     );
   }
   if (func->isAbstract()) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Method {}::{} is abstract",
+      fmt::format("Method {}::{} is abstract",
                      c->name()->data(), meth->data())
     );
   }
@@ -970,8 +971,8 @@ TypedValue dynamicClassMeth(TypedValue clsVal, const StringData* meth) {
       auto const fcls = func->cls();
       if (fcls != ctx) {
         SystemLib::throwInvalidArgumentExceptionObject(
-          folly::sformat(fcls == c ? "Method {}::{} is marked Private"
-                                   : "Unable to find method {}::{}",
+          fmt::format(fmt::runtime(fcls == c ? "Method {}::{} is marked Private"
+                                   : "Unable to find method {}::{}"),
                          c->name()->data(), meth->data())
         );
       }
@@ -979,7 +980,7 @@ TypedValue dynamicClassMeth(TypedValue clsVal, const StringData* meth) {
       auto const fcls = func->cls();
       if (!ctx || (!ctx->classof(fcls) && !fcls->classof(ctx))) {
         SystemLib::throwInvalidArgumentExceptionObject(
-          folly::sformat("Method {}::{} is marked Protected",
+          fmt::format("Method {}::{} is marked Protected",
                          c->name()->data(), meth->data())
         );
       }
@@ -994,7 +995,7 @@ TypedValue dynamicClassMeth(TypedValue clsVal, const StringData* meth) {
       );
     } else {
       SystemLib::throwInvalidArgumentExceptionObject(
-        folly::sformat("Method {}::{} is reified",
+        fmt::format("Method {}::{} is reified",
                        c->name()->data(), meth->data())
       );
     }
@@ -1003,7 +1004,7 @@ TypedValue dynamicClassMeth(TypedValue clsVal, const StringData* meth) {
     auto const level = Cfg::Eval::DynamicClsMethLevel;
     if (level == 2) {
       SystemLib::throwInvalidArgumentExceptionObject(
-        folly::sformat("Method {}::{} not marked dynamic",
+        fmt::format("Method {}::{} not marked dynamic",
                        c->name()->data(), meth->data())
       );
     }
@@ -1085,7 +1086,7 @@ Unit* loadUnit(StringData* path) {
   );
   if (!unit) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unable to open file: {}", path->data())
+      fmt::format("Unable to open file: {}", path->data())
     );
   }
   return unit;
@@ -1099,7 +1100,7 @@ std::vector<Unit*> loadUnits(ArrayData* files) {
       if (!isStringType(v.m_type)) {
         assertx(isIntType(v.m_type));
         SystemLib::throwInvalidArgumentExceptionObject(
-          folly::sformat("Invalid filepath: {}", v.m_data.num)
+          fmt::format("Invalid filepath: {}", v.m_data.num)
         );
       }
       units.push_back(loadUnit(v.m_data.pstr));
@@ -1139,7 +1140,7 @@ Array HHVM_FUNCTION(get_coverage_for_file, StringArg file) {
   auto const u = loadUnit(file.get());
   if (!u->isCoverageEnabled()) {
     SystemLib::throwInvalidOperationExceptionObject(
-      folly::sformat("Coverage not enabled for file: {}", file->data())
+      fmt::format("Coverage not enabled for file: {}", file->data())
     );
   }
   return u->reportCoverage();
@@ -1150,7 +1151,7 @@ void HHVM_FUNCTION(clear_coverage_for_file, StringArg file) {
   auto const u = loadUnit(file.get());
   if (!u->isCoverageEnabled()) {
     SystemLib::throwInvalidOperationExceptionObject(
-      folly::sformat("Coverage not enabled for file: {}", file->data())
+      fmt::format("Coverage not enabled for file: {}", file->data())
     );
   }
   u->clearCoverage();
@@ -1374,10 +1375,10 @@ void HHVM_FUNCTION(check_dynamically_callable_inst_method, StringArg cls,
                                                            StringArg meth) {
   if (is_dynamically_callable_inst_method_impl(cls.get(), meth.get())) return;
   if (Cfg::Eval::DynamicMethCallerLevel == 0) return;
-  auto const msg = folly::sformat(
+  auto const msg = fmt::format(
     "dynamic_meth_caller(): {}::{} is not a dynamically "
     "callable instance method",
-    cls.get(), meth.get());
+    cls.get()->data(), meth.get()->data());
   if (Cfg::Eval::DynamicMethCallerLevel == 1) {
     raise_warning(msg);
     return;
@@ -1389,7 +1390,7 @@ namespace {
 
 [[noreturn]] void throwGetClassError(const folly::StringPiece cls) {
   SystemLib::throwInvalidArgumentExceptionObject(
-    folly::sformat("Unable to find class: {}", cls)
+    fmt::format("Unable to find class: {}", cls)
   );
 }
 
@@ -1426,7 +1427,7 @@ Class* getClass(TypedValue cls) {
     case KindOfRClsMeth:
     case KindOfEnumClassLabel:
       SystemLib::throwInvalidArgumentExceptionObject(
-        folly::sformat(
+        fmt::format(
           "Invalid argument type passed to reflection class constructor")
       );
   }
@@ -1452,8 +1453,8 @@ TypedValue HHVM_FUNCTION(class_to_classname, TypedValue cls) {
       return make_tv<KindOfPersistentString>(cls.m_data.plazyclass.name());
     default:
       SystemLib::throwInvalidArgumentExceptionObject(
-        folly::sformat(
-          "Invalid argument type {} passed to {}", cls.m_type, __FUNCTION__+2)
+        fmt::format(
+          "Invalid argument type {} passed to {}", tname(cls.m_type), __FUNCTION__+2)
       );
   }
   not_reached();
@@ -1510,7 +1511,7 @@ TypedValue HHVM_FUNCTION(get_executable_lines, StringArg path) {
   auto const file = lookupUnit(path.get(), "", nullptr, nullptr, false);
   if (!file) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unable to find file {}", path.get()->data())
+      fmt::format("Unable to find file {}", path.get()->data())
     );
   }
 

@@ -27,6 +27,7 @@
 #endif
 
 #include <folly/String.h>
+#include <fmt/core.h>
 #include <folly/SocketAddress.h>
 #include <folly/portability/Sockets.h>
 #include <folly/portability/SysTime.h>
@@ -418,7 +419,7 @@ String HHVM_FUNCTION(socket_strerror,
 #if HAVE_HSTRERROR
     return String(hstrerror(errnum), CopyString);
 #endif
-    return folly::format("Host lookup error {}", errnum).str();
+    return fmt::format("Host lookup error {}", errnum);
   }
 
   return String(folly::errnoStr(errnum));

@@ -383,7 +383,7 @@ bool MimePart::getStructure(Enumerator *id, void *ptr) {
       buf = (char*)realloc(buf, buf_size);
       if (!buf) {
         raise_fatal_error(
-          folly::sformat("The structure buffer has been exceeded "
+          fmt::format("The structure buffer has been exceeded "
                           "({}).  Please try decreasing the nesting "
                           "depth of messages and report this to the "
                           "developers.", buf_size).c_str());

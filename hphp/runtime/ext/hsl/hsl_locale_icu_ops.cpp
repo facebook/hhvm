@@ -31,6 +31,7 @@
 #include <unicode/uvernum.h>
 
 #include <functional>
+#include <fmt/core.h>
 
 
 namespace HPHP {
@@ -300,7 +301,7 @@ icu::Collator* HSLLocaleICUOps::collator() const {
     icu::Collator::createInstance(this->m_collate, err);
   if (err.isFailure()) {
     SystemLib::throwErrorObject(
-      folly::sformat(
+      fmt::format(
         "Failed to create a collator: {}",
         err.errorName()
       )

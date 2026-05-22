@@ -642,10 +642,10 @@ bool HHVM_FUNCTION(HH_is_late_init_prop_init,
   auto const val = obj->getPropIgnoreLateInit(ctx, name.get());
   if (!val) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat(
+      fmt::format(
        "Unknown or inaccessible property '{}' on object of class {}",
-       name.get(),
-       obj->getVMClass()->name()
+       name.get()->data(),
+       obj->getVMClass()->name()->data()
       )
     );
   }
@@ -658,7 +658,7 @@ bool HHVM_FUNCTION(HH_is_late_init_sprop_init,
   auto const cls = Class::load(clsName.get());
   if (!cls) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unknown class {}", clsName)
+      fmt::format("Unknown class {}", clsName.c_str())
     );
   }
   auto const func =fromCaller(
@@ -668,10 +668,10 @@ bool HHVM_FUNCTION(HH_is_late_init_sprop_init,
   auto const lookup = cls->getSPropIgnoreLateInit(ctx, name.get());
   if (!lookup.val || !lookup.accessible) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat(
+      fmt::format(
        "Unknown or inaccessible static property '{}' on class {}",
-       name.get(),
-       clsName.get()
+       name.get()->data(),
+       clsName.get()->data()
       )
     );
   }

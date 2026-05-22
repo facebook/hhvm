@@ -54,8 +54,8 @@ Array get_tspec(const Class& cls) {
   auto lookup = cls.clsCnsGet(s_SPEC.get());
   if (lookup.m_type == KindOfUninit) {
     thrift_error(
-      folly::sformat("Class {} does not have a property named {}",
-                     cls.name(), s_SPEC),
+      fmt::format("Class {} does not have a property named {}",
+                     cls.name()->data(), s_SPEC.c_str()),
       ERR_INVALID_DATA);
   }
   Variant structSpec = tvAsVariant(&lookup);
@@ -134,13 +134,13 @@ const Func* lookupWithDefaultValuesFunc(const Class& cls) {
   auto const func = cls.lookupMethod(s_withDefaultValues.get());
   if (func == nullptr) {
     thrift_error(
-      folly::sformat("Method {}::withDefaultValues() not found", cls.name()),
+      fmt::format("Method {}::withDefaultValues() not found", cls.name()->data()),
       ERR_INVALID_DATA
     );
   }
   if (!func->isStatic()) {
     thrift_error(
-      folly::sformat("Method {}::withDefaultValues() not static", cls.name()),
+      fmt::format("Method {}::withDefaultValues() not static", cls.name()->data()),
       ERR_INVALID_DATA
     );
   }
@@ -157,7 +157,7 @@ const Func* lookupClearTerseFieldsFunc(const Class& cls) {
   }
   if (func->isStatic()) {
     thrift_error(
-      folly::sformat("Method {}::clearTerseFields() is static", cls.name()),
+      fmt::format("Method {}::clearTerseFields() is static", cls.name()->data()),
       ERR_INVALID_DATA
     );
   }
@@ -339,9 +339,9 @@ Object StructSpec::newObject(Class& cls) const {
 
   SCOPE_EXIT { tvDecRefGen(obj); };
   thrift_error(
-    folly::sformat(
+    fmt::format(
       "Method {}::withDefaultValues() returned a non-object.",
-      cls.name()
+      cls.name()->data()
     ),
     ERR_INVALID_DATA
   );

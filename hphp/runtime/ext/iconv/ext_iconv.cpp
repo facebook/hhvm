@@ -27,6 +27,7 @@
 #include "hphp/util/rds-local.h"
 
 #include <folly/lang/Assume.h>
+#include <fmt/core.h>
 #include <boost/algorithm/string/predicate.hpp>
 
 #define ICONV_SUPPORTS_ERRNO 1
@@ -1969,14 +1970,14 @@ HHVM_FUNCTION(ob_iconv_handler, const String& contents, int64_t /*status*/) {
 #ifdef _LIBICONV_VERSION
 const char* iconv_impl() { return "libiconv"; }
 std::string iconv_version() {
-  return folly::sformat("{}.{}",
+  return fmt::format("{}.{}",
                         _LIBICONV_VERSION >> 8, _LIBICONV_VERSION & 255);
 }
 #else
 const char* iconv_impl() { return "glibc"; }
 #ifdef __GLIBC__
 std::string iconv_version() {
-  return folly::sformat("{}.{}",
+  return fmt::format("{}.{}",
                         __GLIBC__, __GLIBC_MINOR__);
 }
 #else

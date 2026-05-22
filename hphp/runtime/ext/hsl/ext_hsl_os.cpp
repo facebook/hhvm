@@ -29,6 +29,7 @@
 #include "hphp/util/configs/server.h"
 
 #include <folly/functional/Invoke.h>
+#include <fmt/core.h>
 #include <type_traits>
 
 #include <fcntl.h>
@@ -70,7 +71,7 @@ void throw_errno_exception(int number, const String& message = String()) {
   throw_object(
     s_ErrnoException,
     make_vec_array(
-      message.isNull() ? folly::sformat("Errno {}: {}", number, ::strerror(number)) : message,
+      message.isNull() ? fmt::format("Errno {}: {}", number, ::strerror(number)) : message,
       number
     )
   );
@@ -190,8 +191,8 @@ void native_sockaddr_from_hsl(const Object& object, sockaddr_storage& native, so
   if (!object.instanceof(s_HSL_ ## sa)) { \
     throw_errno_exception( \
       EINVAL, \
-      folly::sformat( \
-        "Esapected an instance of type {} for {}, got type {}", \
+      fmt::format( fmt::runtime(\
+        "Esapected an instance of type {} for {}, got type {}"), \
         (s_HSL_ ## sa).c_str(), \
         #af, \
         object->getClassName().c_str() \
@@ -245,7 +246,7 @@ void native_sockaddr_from_hsl(const Object& object, sockaddr_storage& native, so
         if (addr_str->size() != in6_addr_len) {
           throw_errno_exception(
             EINVAL,
-            folly::sformat("sockaddr_in6 address must be {} bytes long", in6_addr_len)
+            fmt::format("sockaddr_in6 address must be {} bytes long", in6_addr_len)
           );
         }
         auto detail = reinterpret_cast<sockaddr_in6*>(&native);
@@ -335,7 +336,7 @@ struct HSLFileDescriptor :
     }
     if (!obj->instanceof(HSLFileDescriptor::classof())) {
       raise_typehint_error_without_first_frame(
-        folly::sformat(
+        fmt::format(
           "Expected an HSL FileDescriptor, got instance of class '{}'",
           obj->getClassName().c_str()
         )
@@ -347,7 +348,7 @@ struct HSLFileDescriptor :
   static HSLFileDescriptor* get(const Variant& var) {
     if (!var.isObject()) {
       raise_typehint_error_without_first_frame(
-        folly::sformat(
+        fmt::format(
           "Expected an HSL FileDescriptor, got {}",
           getDataTypeString(var.getType()).c_str()
         )

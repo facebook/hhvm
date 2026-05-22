@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/hh/ext_implicit_context.h"
 
 #include <cstdint>
+#include <fmt/core.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
@@ -236,7 +237,7 @@ const Class* resolveClass(TypedValue cls) {
 
     // This is possible only if the private helpers are used directly.
     SystemLib::throwInvalidOperationExceptionObject(
-      folly::sformat("Class {} does not exist", str->data())
+      fmt::format("Class {} does not exist", str->data())
     );
   };
 

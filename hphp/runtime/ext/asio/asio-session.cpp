@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/asio/asio-session.h"
 
 #include <algorithm>
+#include <fmt/core.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -43,10 +44,10 @@ namespace {
     if (!callback.isNull() &&
         (!callback.isObject() ||
          !callback.getObjectData()->instanceof(c_Closure::classof()))) {
-      auto msg = folly::format(
+      auto msg = fmt::format(
         "Unable to set {}: callback not a closure",
         name
-      ).str();
+      );
       SystemLib::throwInvalidArgumentExceptionObject(msg);
     }
     return Object{callback.getObjectDataOrNull()};

@@ -42,7 +42,7 @@
 
 #include <cstdint>
 #include <folly/Bits.h>
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/Likely.h>
 
 #include <folly/io/IOBuf.h>
@@ -653,7 +653,7 @@ struct CompactWriter {
       using limits = std::numeric_limits<T>;
       if ((n < limits::min() || n > limits::max())) {
         const auto& structName = fieldInfo.cls->nameStr();
-        std::string message = folly::sformat(
+        std::string message = fmt::format(
             "Value {} is out of range in field {} of {}",
             n,
             fieldInfo.fieldNum,

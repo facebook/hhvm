@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/vm/native-data.h"
 #include <folly/String.h>
+#include <fmt/core.h>
 
 // Don't do the do { ... } while(0) trick here because we need 'f' outside of
 // the macro
@@ -295,7 +296,7 @@ struct ChunkedBunzipper {
       } else {
         m_eof = true;
         BZ2_bzDecompressEnd(&m_bzstream);
-        SystemLib::throwExceptionObject(folly::sformat("bz2 error status={}", status));
+        SystemLib::throwExceptionObject(fmt::format("bz2 error status={}", status));
       }
     }
 

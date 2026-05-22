@@ -230,9 +230,9 @@ Variant HHVM_FUNCTION(get_parent_class, const Variant& object) {
     } else if (object.isClass()) {
       return object.toClassVal();
     } else {
-      auto msg = folly::sformat(
+      auto msg = fmt::format(
         "get_parent_class() was called with {}, expected object or string",
-        getDataTypeString(object.getType()));
+        getDataTypeString(object.getType()).c_str());
       SystemLib::throwRuntimeExceptionObject(msg);
     }
   }();
@@ -347,7 +347,7 @@ String HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v) {
     return val(v).prclsmeth->m_cls->nameStr();
   } else {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Argument 1 passed to {}() must be a class_meth",
+      fmt::format("Argument 1 passed to {}() must be a class_meth",
       __FUNCTION__+5));
   }
 }
@@ -359,7 +359,7 @@ String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
     return val(v).prclsmeth->m_func->nameStr();
   } else {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Argument 1 passed to {}() must be a class_meth",
+      fmt::format("Argument 1 passed to {}() must be a class_meth",
       __FUNCTION__+5));
   }
 }

@@ -34,3 +34,10 @@ cpdef enum StructType:
     STRUCT = 1
     UNION = 2
     EXCEPTION = 3
+
+
+cpdef enum FunctionQualifier:
+    UNSPECIFIED = 0
+    ONE_WAY = 1
+    IDEMPOTENT = 2
+    READ_ONLY = 3

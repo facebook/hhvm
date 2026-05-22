@@ -70,6 +70,7 @@
 #include <fstream>
 
 #include <folly/portability/SysStat.h>
+#include <fmt/core.h>
 
 using namespace boost::program_options;
 
@@ -129,19 +130,16 @@ void applyBuildOverrides(IniSetting::Map& ini,
        hdf.exists();
        hdf = hdf.next()) {
     if (!loggedOnce) {
-      Logger::Info(folly::sformat(
+      Logger::Info(fmt::format(
                        "Matching build overrides using: push_phases='{}'",
                        po.push_phases));
       loggedOnce = true;
     }
     if (Config::matchHdfPattern(push_phases, ini, hdf, "push_phase" , "m")) {
-      Logger::Info(folly::sformat("Matched override: {}", hdf.getName()));
-      folly::format(
-        &po.matched_overrides,
-        "{}{}",
+      Logger::Info(fmt::format("Matched override: {}", hdf.getName()));
+      po.matched_overrides += fmt::format("{}{}",
         po.matched_overrides.empty() ? "" : ",",
-        hdf.getName()
-      );
+        hdf.getName());
 
       if (hdf.exists("clear")) {
         std::vector<std::string> list;
@@ -409,10 +407,10 @@ private:
     };
 
     throw NonUnique{
-      folly::sformat(
+      fmt::format(
         "More than one {} with the name {}. In {} and {}",
         type,
-        name,
+        name ? name->data() : "",
         filename(unit1),
         filename(unit2)
       )
@@ -809,7 +807,7 @@ void logPhaseStats(const std::string& phase, const Package& package,
     "{}",
     stats.toString(
       phase,
-      folly::sformat("total package files {:,}", package.getTotalFiles())
+      fmt::format("total package files {}", package.getTotalFiles())
     )
   );
 
@@ -939,7 +937,7 @@ std::unique_ptr<UnitIndex> computeIndex(
 
   logPhaseStats("index", indexPackage, client, sample,
                 indexTimer.getMicroSeconds());
-  Logger::FInfo("index size: types={:,} funcs={:,} constants={:,} modules={:,}",
+  Logger::FInfo("index size: types={} funcs={} constants={} modules={}",
       index->types.size(),
       index->funcs.size(),
       index->constants.size(),
@@ -1426,7 +1424,7 @@ bool process(CompilerOptions &po) {
           // If you see this error in a test case, add a line to to test.php.hphp_opts:
           // --inputs=hphp/path/to/file.inc
           Package::ParseMeta bad;
-          bad.m_abort = folly::sformat("Unknown include file: {}\n", rpath.native());
+          bad.m_abort = fmt::format("Unknown include file: {}\n", rpath.native());
           parseMetas.emplace_back(std::move(bad));
           reasons.emplace_back(FileInBuildReason::unknownFile);
           continue;
@@ -1474,7 +1472,7 @@ bool process(CompilerOptions &po) {
         // If you see this error in a test case, add a line to to test.php.hphp_opts:
         // --inputs=hphp/path/to/file.inc
         Package::ParseMeta bad;
-        bad.m_abort = folly::sformat("Unknown include file: {}", rpath.native());
+        bad.m_abort = fmt::format("Unknown include file: {}", rpath.native());
         parseMetas.emplace_back(std::move(bad));
         reasons.emplace_back(FileInBuildReason::unknownFile);
         continue;

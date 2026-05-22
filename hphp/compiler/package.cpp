@@ -26,6 +26,7 @@
 #include <vector>
 
 #include <folly/String.h>
+#include <fmt/core.h>
 #include <folly/portability/Dirent.h>
 #include <folly/portability/Unistd.h>
 
@@ -349,7 +350,7 @@ Package::parseRun(const std::string& content,
                   const std::vector<UnitDecls>& decls) {
   if (s_fileMetasIdx >= s_fileMetas.size()) {
     throw Error{
-      folly::sformat("Encountered {} inputs, but only {} file metas",
+      fmt::format("Encountered {} inputs, but only {} file metas",
                      s_fileMetasIdx+1, s_fileMetas.size())
     };
   }
@@ -425,12 +426,12 @@ Package::parseRun(const std::string& content,
       return output(std::move(ue), std::move(missing), nullptr);
     } else {
       throw Error{
-        folly::sformat("Unable to compile: {}", fileName)
+        fmt::format("Unable to compile: {}", fileName)
       };
     }
   } catch (const std::exception& exn) {
     throw Error{
-      folly::sformat("While parsing `{}`: {}", fileName, exn.what())
+      fmt::format("While parsing `{}`: {}", fileName, exn.what())
     };
   }
 }
@@ -906,7 +907,7 @@ coro::Task<void> Package::parseGroup(
           assertx(!metas.empty());
           Client::ExecMetadata metadata{
             .optimistic = optimistic,
-            .job_key = folly::sformat(
+            .job_key = fmt::format(
               "parse {} {}",
               attempts,
               metas[0].m_filename
@@ -1116,7 +1117,7 @@ Package::UnitDecls IndexJob::run(
 ) {
   if (s_fileMetasIdx >= s_fileMetas.size()) {
     throw Error{
-      folly::sformat("Encountered {} inputs, but only {} file metas",
+      fmt::format("Encountered {} inputs, but only {} file metas",
                      s_fileMetasIdx+1, s_fileMetas.size())
     };
   }
@@ -1189,7 +1190,7 @@ coro::Task<void> Package::indexAll(const IndexCallback& callback) {
 
   // Compute the groups to index
   auto groups = co_await groupAll(m_directories, filterFiles, filterDirs);
-  Logger::FInfo("indexing {:,} groups", groups.size());
+  Logger::FInfo("indexing {} groups", groups.size());
 
   // Index all files
   Timer timer{Timer::WallTime, "indexing files"};
@@ -1269,7 +1270,7 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
           assertx(!metas.empty());
           Client::ExecMetadata metadata{
             .optimistic = optimistic,
-            .job_key = folly::sformat("index {}", metas[0].m_filename)
+            .job_key = fmt::format("index {}", metas[0].m_filename)
           };
 
           auto [configRef, metasRef, fileRefs, optionRefs] =

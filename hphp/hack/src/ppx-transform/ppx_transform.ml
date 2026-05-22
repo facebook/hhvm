@@ -208,7 +208,7 @@ module Core_ty = struct
           match core_type.ptyp_desc with
           | Ptyp_var nm ->
             let loc = core_type.ptyp_loc in
-            ptyp_constr ~loc { loc; txt = lident nm } []
+            ptyp_constr ~loc (Located.lident ~loc nm) []
           | _ -> core_type
       end
     in
@@ -515,7 +515,7 @@ module Decl = struct
               match ctor_decl.pcd_res with
               | Some ty -> ty
               | None ->
-                ptyp_constr ~loc { loc; txt = lident name }
+                ptyp_constr ~loc (Located.lident ~loc name)
                 @@ List.map (ptyp_var ~loc) tyvars
             in
 
@@ -899,7 +899,7 @@ end = struct
     else
       let ident = Ident.Type name in
       let ty =
-        ptyp_constr ~loc { loc; txt = lident name }
+        ptyp_constr ~loc (Located.lident ~loc name)
         @@ List.map (ptyp_var ~loc) tyvars
       in
       let ty_field =
@@ -929,7 +929,7 @@ end = struct
     else
       let ident = Ident.Type name in
       let ty =
-        ptyp_constr ~loc { loc; txt = lident name }
+        ptyp_constr ~loc (Located.lident ~loc name)
         @@ List.map (ptyp_var ~loc) tyvars
       in
       let ty_field =
@@ -981,7 +981,7 @@ end = struct
     else
       let ident = Ident.Type name in
       let ty =
-        ptyp_constr ~loc { loc; txt = lident name }
+        ptyp_constr ~loc (Located.lident ~loc name)
         @@ List.map (ptyp_var ~loc) tyvars
       in
       let ty_field =
@@ -1020,7 +1020,7 @@ end = struct
              ident;
              tyvars;
              ty =
-               ptyp_constr ~loc { loc; txt = lident name }
+               ptyp_constr ~loc (Located.lident ~loc name)
                @@ List.map (ptyp_var ~loc) tyvars;
              loc;
              definition = Core_ty ty;
@@ -1114,7 +1114,7 @@ module Gen_pass : sig
     allow_restart:Restart.t ->
     structure_item
 end = struct
-  let mk_tag txt ~ty ~loc = rtag ~loc { loc; txt } false [ty]
+  let mk_tag txt ~ty ~loc = rtag ~loc (Located.mk ~loc txt) false [ty]
 
   let gen_continuation_ty ty ~loc ~allow_restart =
     match allow_restart with
@@ -1134,14 +1134,14 @@ end = struct
       in
       ptyp_variant ~loc tags Closed None
     | Restart.(Disallow Encode_as_result) ->
-      ptyp_constr ~loc { loc; txt = Lident "result" } [ty; ty]
+      ptyp_constr ~loc (Located.lident ~loc "result") [ty; ty]
 
   let gen_transform_field_def
       Transform_field.{ ident; tyvars; ty; _ } ~loc ~allow_restart =
     let ty =
       match ident with
       | Ident.Type name ->
-        ptyp_constr ~loc { loc; txt = Lident name }
+        ptyp_constr ~loc (Located.lident ~loc name)
         @@ List.map (ptyp_var ~loc) tyvars
       | _ -> { ty with ptyp_attributes = [] }
     in
@@ -1151,11 +1151,11 @@ end = struct
       [%type: ([%t ty] -> ctx:[%t ctx] -> [%t ctx] * [%t cont_ty]) option]
     in
     let type_ =
-      ptyp_poly ~loc (List.map (fun txt -> { loc; txt }) tyvars) transform_ty
+      ptyp_poly ~loc (List.map (Located.mk ~loc) tyvars) transform_ty
     in
     label_declaration
       ~loc
-      ~name:{ loc; txt = Ident.field_name ident }
+      ~name:(Located.mk ~loc (Ident.field_name ident))
       ~mutable_:Immutable
       ~type_
 
@@ -1167,7 +1167,7 @@ end = struct
       let type_ = ptyp_extension ~loc @@ Err.unsupported_ctor_args loc in
       label_declaration
         ~loc
-        ~name:{ loc; txt = Ident.field_name ident }
+        ~name:(Located.mk ~loc (Ident.field_name ident))
         ~mutable_:Immutable
         ~type_
 
@@ -1180,10 +1180,12 @@ end = struct
         @@ List.rev ("t" :: Names.pass_module_name :: path),
         String.concat "_" (Names.pass_field_pfx :: List.rev path) )
     in
-    let pass_ty = ptyp_constr ~loc { loc; txt } [ptyp_var ~loc Names.ctx_arg] in
+    let pass_ty =
+      ptyp_constr ~loc (Located.mk ~loc txt) [ptyp_var ~loc Names.ctx_arg]
+    in
     label_declaration
       ~loc
-      ~name:{ loc; txt = field_name }
+      ~name:(Located.mk ~loc field_name)
       ~mutable_:Immutable
       ~type_:[%type: [%t pass_ty] option]
 
@@ -1203,7 +1205,7 @@ end = struct
       [
         type_declaration
           ~loc
-          ~name:{ loc; txt = "t" }
+          ~name:(Located.mk ~loc "t")
           ~params
           ~cstrs:[]
           ~private_:Public
@@ -1220,7 +1222,7 @@ end = struct
       [
         type_declaration
           ~loc
-          ~name:{ loc; txt = "t" }
+          ~name:(Located.mk ~loc "t")
           ~params
           ~cstrs:[]
           ~private_:Public
@@ -1237,7 +1239,7 @@ module Gen_identity : sig
 end = struct
   let gen_transform_field_def Transform_field.{ ident; loc; _ } =
     let fld_name = Ident.field_name ident in
-    ({ loc; txt = Lident fld_name }, [%expr None])
+    (Located.lident ~loc fld_name, [%expr None])
 
   let gen_transform_field fld =
     match fld with
@@ -1248,27 +1250,26 @@ end = struct
         | Unsupported.Abstract -> Err.unsupported_abstract loc
         | Unsupported.Open -> Err.unsupported_open loc
       in
-      ({ loc; txt = Lident (Ident.field_name ident) }, pexp_extension ~loc x)
+      (Located.lident ~loc (Ident.field_name ident), pexp_extension ~loc x)
 
   let gen_pass_field path ~loc =
     let txt =
       lident @@ String.concat "_" (Names.pass_field_pfx :: List.rev path)
     in
-    let expr = [%expr None] in
-    ({ loc; txt }, expr)
+    (Located.mk ~loc txt, [%expr None])
 
   let gen_str transform_fields pass_fields ~loc =
     let transform_exprs = List.map gen_transform_field transform_fields
     and pass_exprs = List.map (gen_pass_field ~loc) pass_fields in
-    let pat = ppat_var ~loc { loc; txt = Names.identity_name } in
+    let pat = ppat_var ~loc (Located.mk ~loc Names.identity_name) in
     let body_expr = pexp_record ~loc (transform_exprs @ pass_exprs) None in
     let expr = [%expr (fun _ -> [%e body_expr])] in
     pstr_value ~loc Nonrecursive [value_binding ~loc ~pat ~expr]
 
   let gen_sig loc =
-    let name = { loc; txt = Names.identity_name } in
+    let name = Located.mk ~loc Names.identity_name in
     let cstr_type =
-      ptyp_constr ~loc { loc; txt = lident "t" } [ptyp_var ~loc Names.ctx_arg]
+      ptyp_constr ~loc (Located.lident ~loc "t") [ptyp_var ~loc Names.ctx_arg]
     in
     let type_ = [%type: unit -> [%t cstr_type]] in
     psig_value ~loc @@ value_description ~loc ~name ~type_ ~prim:[]
@@ -1278,14 +1279,14 @@ module Gen_combine = struct
   let gen_transform_field_def
       elem1 elem2 Transform_field.{ ident; loc; _ } ~allow_restart =
     let fld_name = Ident.field_name ident in
-    let fld_lident = { loc; txt = Lident fld_name } in
-    let elem_expr = pexp_ident ~loc { loc; txt = Lident "elem" } in
-    let elem_pat = ppat_var ~loc { loc; txt = "elem" } in
-    let ctx = pexp_ident ~loc { loc; txt = Lident Names.ctx_arg } in
-    let t1 = pexp_ident ~loc { loc; txt = Lident "t1" }
-    and t2 = pexp_ident ~loc { loc; txt = Lident "t2" } in
-    let ident1 = pexp_ident ~loc { loc; txt = Lident elem1 }
-    and ident2 = pexp_ident ~loc { loc; txt = Lident elem2 } in
+    let fld_lident = Located.lident ~loc fld_name in
+    let elem_expr = pexp_ident ~loc (Located.lident ~loc "elem") in
+    let elem_pat = ppat_var ~loc (Located.mk ~loc "elem") in
+    let ctx = pexp_ident ~loc (Located.lident ~loc Names.ctx_arg) in
+    let t1 = pexp_ident ~loc (Located.lident ~loc "t1")
+    and t2 = pexp_ident ~loc (Located.lident ~loc "t2") in
+    let ident1 = pexp_ident ~loc (Located.lident ~loc elem1)
+    and ident2 = pexp_ident ~loc (Located.lident ~loc elem2) in
     let proj1 = pexp_field ~loc ident1 fld_lident
     and proj2 = pexp_field ~loc ident2 fld_lident in
     let app1 =
@@ -1299,7 +1300,7 @@ module Gen_combine = struct
       | Restart.Encode_as_variant ->
         ppat_variant ~loc Names.continue_variant_label (Some elem_pat)
       | Restart.Encode_as_result ->
-        ppat_construct ~loc { loc; txt = lident "Ok" } (Some elem_pat)
+        ppat_construct ~loc (Located.lident ~loc "Ok") (Some elem_pat)
     in
     let match_expr =
       [%expr
@@ -1308,12 +1309,12 @@ module Gen_combine = struct
         | otherwise -> otherwise]
     in
     let fn_expr =
-      pexp_fun ~loc Nolabel None (ppat_var ~loc { loc; txt = "elem" })
+      pexp_fun ~loc Nolabel None (ppat_var ~loc (Located.mk ~loc "elem"))
       @@ pexp_fun
            ~loc
            (Labelled Names.ctx_arg)
            None
-           (ppat_var ~loc { loc; txt = Names.ctx_arg })
+           (ppat_var ~loc (Located.mk ~loc Names.ctx_arg))
            match_expr
     in
     let expr =
@@ -1323,7 +1324,7 @@ module Gen_combine = struct
         | (None, _) -> [%e proj2]
         | _ -> [%e proj1]]
     in
-    ({ loc; txt = Lident fld_name }, expr)
+    (Located.lident ~loc fld_name, expr)
 
   let gen_transform_field elem1 elem2 fld ~allow_restart =
     match fld with
@@ -1337,7 +1338,7 @@ module Gen_combine = struct
         | Unsupported.Open -> Err.unsupported_open loc
       in
       let expr = pexp_extension ~loc ext in
-      ({ loc; txt = Lident fld_name }, expr)
+      (Located.lident ~loc fld_name, expr)
 
   let gen_pass_field elem1 elem2 loc path =
     let (fn_name, fld_name) =
@@ -1346,10 +1347,10 @@ module Gen_combine = struct
         @@ List.rev (Names.combine_fn_name :: Names.pass_module_name :: path),
         String.concat "_" (Names.pass_field_pfx :: List.rev path) )
     in
-    let fn_expr = pexp_ident ~loc { loc; txt = fn_name } in
-    let fld_lident = { loc; txt = Lident fld_name } in
-    let ident1 = pexp_ident ~loc { loc; txt = Lident elem1 }
-    and ident2 = pexp_ident ~loc { loc; txt = Lident elem2 } in
+    let fn_expr = pexp_ident ~loc (Located.mk ~loc fn_name) in
+    let fld_lident = Located.lident ~loc fld_name in
+    let ident1 = pexp_ident ~loc (Located.lident ~loc elem1)
+    and ident2 = pexp_ident ~loc (Located.lident ~loc elem2) in
     let proj1 = pexp_field ~loc ident1 fld_lident
     and proj2 = pexp_field ~loc ident2 fld_lident in
     let expr =
@@ -1359,24 +1360,24 @@ module Gen_combine = struct
         | (Some _, _) -> [%e proj1]
         | _ -> [%e proj2]]
     in
-    ({ loc; txt = Lident fld_name }, expr)
+    (Located.lident ~loc fld_name, expr)
 
   let gen_str transform_fields pass_fields ~loc ~allow_restart =
     let elem1 = "p1" and elem2 = "p2" in
     let transform_exprs =
       List.map (gen_transform_field elem1 elem2 ~allow_restart) transform_fields
     and pass_exprs = List.map (gen_pass_field elem1 elem2 loc) pass_fields in
-    let pat = ppat_var ~loc { loc; txt = Names.combine_fn_name }
+    let pat = ppat_var ~loc (Located.mk ~loc Names.combine_fn_name)
     and body_expr = pexp_record ~loc (transform_exprs @ pass_exprs) None in
-    let pat1 = ppat_var ~loc { loc; txt = elem1 }
-    and pat2 = ppat_var ~loc { loc; txt = elem2 } in
+    let pat1 = ppat_var ~loc (Located.mk ~loc elem1)
+    and pat2 = ppat_var ~loc (Located.mk ~loc elem2) in
     let expr = [%expr (fun [%p pat1] [%p pat2] -> [%e body_expr])] in
     pstr_value ~loc Nonrecursive [value_binding ~loc ~pat ~expr]
 
   let gen_sig loc =
-    let name = { loc; txt = Names.combine_fn_name } in
+    let name = Located.mk ~loc Names.combine_fn_name in
     let pass_ty =
-      ptyp_constr ~loc { loc; txt = lident "t" } [ptyp_var ~loc Names.ctx_arg]
+      ptyp_constr ~loc (Located.lident ~loc "t") [ptyp_var ~loc Names.ctx_arg]
     in
     let type_ = [%type: [%t pass_ty] -> [%t pass_ty] -> [%t pass_ty]] in
     psig_value ~loc @@ value_description ~loc ~name ~type_ ~prim:[]
@@ -1407,7 +1408,7 @@ module Gen_fn = struct
       element, and the body expression.
   *)
   let gen_str fn_name ty tyvars type_info elem_pat body_expr loc =
-    let fn_pat = ppat_var ~loc { loc; txt = fn_name } in
+    let fn_pat = ppat_var ~loc (Located.mk ~loc fn_name) in
     let (pat, expr) =
       match type_info with
       | Transform_field.Regular _regular ->
@@ -1429,7 +1430,7 @@ module Gen_fn = struct
           ppat_constraint
             ~loc
             fn_pat
-            (ptyp_poly ~loc (List.map (fun txt -> { loc; txt }) tyvars)
+            (ptyp_poly ~loc (List.map (Located.mk ~loc) tyvars)
             @@ gen_fun_ty ty ~loc)
         in
         (pat, expr)
@@ -1442,7 +1443,7 @@ module Gen_fn = struct
                 [%e body_expr]]
           in
           List.fold_right
-            (fun tyvar expr -> pexp_newtype ~loc { loc; txt = tyvar } expr)
+            (fun tyvar expr -> pexp_newtype ~loc (Located.mk ~loc tyvar) expr)
             tyvars
             expr
         and pat =
@@ -1453,7 +1454,7 @@ module Gen_fn = struct
           ppat_constraint
             ~loc
             fn_pat
-            (ptyp_poly ~loc (List.map (fun txt -> { loc; txt }) tyvars)
+            (ptyp_poly ~loc (List.map (Located.mk ~loc) tyvars)
             @@ gen_fun_ty ty ~loc)
         in
         (pat, expr)
@@ -1473,30 +1474,30 @@ module Gen_transform = struct
     let project_bottom =
       pexp_field
         ~loc
-        (pexp_ident ~loc { loc; txt = Lident Names.bottom_up_arg })
-        { loc; txt = field_name }
+        (pexp_ident ~loc (Located.lident ~loc Names.bottom_up_arg))
+        (Located.mk ~loc field_name)
     and project_top =
       pexp_field
         ~loc
-        (pexp_ident ~loc { loc; txt = Lident Names.top_down_arg })
-        { loc; txt = field_name }
+        (pexp_ident ~loc (Located.lident ~loc Names.top_down_arg))
+        (Located.mk ~loc field_name)
     in
     let fn_name = Ident.transform_fn_name ident in
-    let fn_ident = pexp_ident ~loc { loc; txt = lident fn_name }
+    let fn_ident = pexp_ident ~loc (Located.lident ~loc fn_name)
     and traverse_ident =
       let txt = lident @@ Ident.traverse_fn_name ident in
-      pexp_ident ~loc { loc; txt }
+      pexp_ident ~loc (Located.mk ~loc txt)
     in
     let (restart_pat, continue_pat, stop_pat, continue_stop_pat) =
-      let elem_pat = ppat_var ~loc { loc; txt = "elem" } in
+      let elem_pat = ppat_var ~loc (Located.mk ~loc "elem") in
       let (cont_pat, stop_pat) =
         match Restart.encoding allow_restart with
         | Restart.Encode_as_variant ->
           ( ppat_variant ~loc Names.continue_variant_label @@ Some elem_pat,
             ppat_variant ~loc Names.stop_variant_label @@ Some elem_pat )
         | _ ->
-          ( ppat_construct ~loc { loc; txt = lident "Ok" } @@ Some elem_pat,
-            ppat_construct ~loc { loc; txt = lident "Error" } @@ Some elem_pat
+          ( ppat_construct ~loc (Located.lident ~loc "Ok") @@ Some elem_pat,
+            ppat_construct ~loc (Located.lident ~loc "Error") @@ Some elem_pat
           )
       in
       let restart_pat =
@@ -1525,7 +1526,7 @@ module Gen_transform = struct
     in
     let (rest, ctx_pat) =
       if not should_traverse then
-        ((fun _ -> rest_match), ppat_var ~loc { loc; txt = "_ctx" })
+        ((fun _ -> rest_match), ppat_var ~loc (Located.mk ~loc "_ctx"))
       else
         ( (fun ctx_expr ->
             [%expr
@@ -1533,7 +1534,7 @@ module Gen_transform = struct
                 [%e traverse_ident] elem ~ctx:[%e ctx_expr] ~top_down ~bottom_up
               in
               [%e rest_match]]),
-          ppat_var ~loc { loc; txt = "td_ctx" } )
+          ppat_var ~loc (Located.mk ~loc "td_ctx") )
     in
     let body_expr =
       match allow_restart with
@@ -1544,10 +1545,10 @@ module Gen_transform = struct
             (match td elem ~ctx with
             | (_ctx, [%p stop_pat]) -> elem
             | ([%p ctx_pat], [%p continue_pat]) ->
-              [%e rest @@ pexp_ident ~loc { loc; txt = lident "td_ctx" }]
+              [%e rest @@ pexp_ident ~loc (Located.lident ~loc "td_ctx")]
             | (_ctx, [%p restart_pat]) ->
               [%e fn_ident] elem ~ctx ~top_down ~bottom_up)
-          | _ -> [%e rest @@ pexp_ident ~loc { loc; txt = lident "ctx" }]]
+          | _ -> [%e rest @@ pexp_ident ~loc (Located.lident ~loc "ctx")]]
       | Restart.(Disallow _) ->
         [%expr
           match [%e project_top] with
@@ -1555,10 +1556,10 @@ module Gen_transform = struct
             (match td elem ~ctx with
             | (_ctx, [%p stop_pat]) -> elem
             | ([%p ctx_pat], [%p continue_pat]) ->
-              [%e rest @@ pexp_ident ~loc { loc; txt = lident "td_ctx" }])
-          | _ -> [%e rest @@ pexp_ident ~loc { loc; txt = lident "ctx" }]]
+              [%e rest @@ pexp_ident ~loc (Located.lident ~loc "td_ctx")])
+          | _ -> [%e rest @@ pexp_ident ~loc (Located.lident ~loc "ctx")]]
     in
-    let elem_pat = ppat_var ~loc { loc; txt = "elem" } in
+    let elem_pat = ppat_var ~loc (Located.mk ~loc "elem") in
     Gen_fn.gen_str fn_name ty tyvars type_info elem_pat body_expr loc
 
   let gen_str fld ~should_traverse ~allow_restart =
@@ -1577,7 +1578,7 @@ module Gen_transform = struct
     let fn_name = Ident.transform_fn_name ident
     and type_ = Gen_fn.gen_fun_ty ty ~loc in
     psig_value ~loc
-    @@ value_description ~loc ~name:{ loc; txt = fn_name } ~type_ ~prim:[]
+    @@ value_description ~loc ~name:(Located.mk ~loc fn_name) ~type_ ~prim:[]
 
   let gen_sig fld =
     match fld with
@@ -1591,14 +1592,14 @@ module Gen_transform = struct
       in
       let type_ = ptyp_extension ~loc ext in
       psig_value ~loc
-      @@ value_description ~loc ~name:{ loc; txt = fn_name } ~type_ ~prim:[]
+      @@ value_description ~loc ~name:(Located.mk ~loc fn_name) ~type_ ~prim:[]
 end
 
 module Gen_traverse = struct
   let gen_core_ty ty ~binding ~opaque_map ~maps =
     let rec aux ty binding =
       let loc = ty.ptyp_loc in
-      let dflt_pat = ppat_var ~loc { loc; txt = binding } in
+      let dflt_pat = ppat_var ~loc (Located.mk ~loc binding) in
       let default = (dflt_pat, None) in
       let unsupported =
         (dflt_pat, Some (pexp_extension ~loc @@ Err.unsupported_ty loc))
@@ -1624,7 +1625,7 @@ module Gen_traverse = struct
         | Ptyp_package _ ->
           unsupported
     and aux_variant row_flds closed_flag lbl_opts ~binding ~loc ~ty =
-      let pat = ppat_var ~loc { loc; txt = binding } in
+      let pat = ppat_var ~loc (Located.mk ~loc binding) in
       let has_lbl =
         match lbl_opts with
         | None -> (fun _ -> true)
@@ -1657,7 +1658,7 @@ module Gen_traverse = struct
               case
                 ~lhs:pat
                 ~guard:None
-                ~rhs:(pexp_ident ~loc { loc; txt = lident binding })
+                ~rhs:(pexp_ident ~loc (Located.lident ~loc binding))
             in
             if has_untraversed then
               Some dflt_case
@@ -1673,12 +1674,12 @@ module Gen_traverse = struct
             | None -> cases
             | Some case -> case :: cases
           in
-          let scrut_expr = pexp_ident ~loc { loc; txt = lident binding } in
+          let scrut_expr = pexp_ident ~loc (Located.lident ~loc binding) in
           Some (pexp_match ~loc scrut_expr cases)
       in
       (pat, expr_opt)
     and aux_row_fld row_fld ~binding ~has_lbl ~loc ~ty =
-      let default = (ppat_var ~loc { loc; txt = binding }, None) in
+      let default = (ppat_var ~loc (Located.mk ~loc binding), None) in
       match row_fld.prf_desc with
       | Rtag (_, _, []) -> default
       | Rtag (lbl, _, _) when not @@ has_lbl lbl -> default
@@ -1694,7 +1695,7 @@ module Gen_traverse = struct
         (match aux extend_ty binding with
         | (_pat, Some expr) ->
           let ty_pat = ppat_type ~loc @@ Core_ty.ctor_longident_exn extend_ty in
-          let pat = ppat_alias ~loc ty_pat { loc; txt = binding } in
+          let pat = ppat_alias ~loc ty_pat (Located.mk ~loc binding) in
           let coerce_expr = pexp_coerce ~loc expr None ty in
           (pat, Some coerce_expr)
         | _ -> default)
@@ -1713,19 +1714,19 @@ module Gen_traverse = struct
       | (["ref"], [ty]) -> aux_ref ty binding loc
       (* -- Commom primitives ----------------------------------------------- *)
       | ([ty], []) when SSet.mem ty Core_ty.builtin_prims ->
-        (ppat_var ~loc { loc; txt = binding }, None)
+        (ppat_var ~loc (Located.mk ~loc binding), None)
       (* -- - *)
       | ([decl_name], _)
         when SMap.exists (fun nm _ -> String.equal nm decl_name) opaque_map ->
-        let pat = ppat_var ~loc { loc; txt = binding } in
+        let pat = ppat_var ~loc (Located.mk ~loc binding) in
         let opaque = SMap.find decl_name opaque_map in
         let expr_opt =
           if opaque then
             None
           else
             let fn_name = Ident.(transform_fn_name @@ Type decl_name) in
-            let fn_expr = pexp_ident ~loc { loc; txt = Lident fn_name } in
-            let binding_expr = pexp_ident ~loc { loc; txt = Lident binding } in
+            let fn_expr = pexp_ident ~loc (Located.lident ~loc fn_name) in
+            let binding_expr = pexp_ident ~loc (Located.lident ~loc binding) in
             Some
               [%expr [%e fn_expr] [%e binding_expr] ~ctx ~top_down ~bottom_up]
         in
@@ -1737,13 +1738,13 @@ module Gen_traverse = struct
         | ([ty], Some map_expr_str) ->
           (* Use configured map function *)
           let map_expr =
-            pexp_ident ~loc { loc; txt = Longident.parse map_expr_str }
+            pexp_ident ~loc (Located.mk ~loc (Longident.parse map_expr_str))
           in
           aux_functor map_expr ty binding loc
         | _ ->
           (* Default handling for external types *)
-          let pat = ppat_var ~loc { loc; txt = binding } in
-          let binding_expr = pexp_ident ~loc { loc; txt = Lident binding } in
+          let pat = ppat_var ~loc (Located.mk ~loc binding) in
+          let binding_expr = pexp_ident ~loc (Located.lident ~loc binding) in
           let (ty, path) =
             match List.rev ids with
             | ty :: path -> (ty, path)
@@ -1758,7 +1759,9 @@ module Gen_traverse = struct
             @@ String.concat "."
             @@ List.rev (Names.identity_name :: Names.pass_module_name :: path)
           in
-          let identity_expr = pexp_ident ~loc { loc; txt = identity_lident } in
+          let identity_expr =
+            pexp_ident ~loc (Located.mk ~loc identity_lident)
+          in
           let pass_fld_nm = String.concat "_" (Names.pass_field_pfx :: path) in
           let pass_fld =
             {
@@ -1774,16 +1777,16 @@ module Gen_traverse = struct
             @@ String.concat "."
             @@ List.rev (transform_fn :: path)
           in
-          let fn_expr = pexp_ident ~loc { loc; txt = fn_name }
+          let fn_expr = pexp_ident ~loc (Located.mk ~loc fn_name)
           and top_down_expr =
             pexp_field
               ~loc
-              (pexp_ident ~loc { loc; txt = Lident Names.top_down_arg })
+              (pexp_ident ~loc (Located.lident ~loc Names.top_down_arg))
               pass_fld
           and bottom_up_expr =
             pexp_field
               ~loc
-              (pexp_ident ~loc { loc; txt = Lident Names.bottom_up_arg })
+              (pexp_ident ~loc (Located.lident ~loc Names.bottom_up_arg))
               pass_fld
           in
           let expr =
@@ -1807,10 +1810,10 @@ module Gen_traverse = struct
           in
           (pat, Some expr))
     and aux_ref ty binding loc =
-      let pat = ppat_var ~loc { loc; txt = binding } in
+      let pat = ppat_var ~loc (Located.mk ~loc binding) in
       let binding_deref = binding ^ "_deref" in
-      let pat_deref = ppat_var ~loc { loc; txt = binding_deref } in
-      let expr_elem = pexp_ident ~loc { loc; txt = Lident binding } in
+      let pat_deref = ppat_var ~loc (Located.mk ~loc binding_deref) in
+      let expr_elem = pexp_ident ~loc (Located.lident ~loc binding) in
       let expr_opt =
         match aux ty binding_deref with
         | (_pat, Some expr) ->
@@ -1823,10 +1826,10 @@ module Gen_traverse = struct
       in
       (pat, expr_opt)
     and aux_lazy ty binding loc =
-      let pat = ppat_var ~loc { loc; txt = binding } in
+      let pat = ppat_var ~loc (Located.mk ~loc binding) in
       let binding_forced = binding ^ "_force" in
-      let pat_forced = ppat_var ~loc { loc; txt = binding_forced } in
-      let expr_elem = pexp_ident ~loc { loc; txt = Lident binding } in
+      let pat_forced = ppat_var ~loc (Located.mk ~loc binding_forced) in
+      let expr_elem = pexp_ident ~loc (Located.lident ~loc binding) in
       let expr_opt =
         match aux ty binding_forced with
         | (_pat, Some expr) ->
@@ -1838,8 +1841,8 @@ module Gen_traverse = struct
       in
       (pat, expr_opt)
     and aux_option ty binding loc =
-      let pat = ppat_var ~loc { loc; txt = binding } in
-      let scrut_expr = pexp_ident ~loc { loc; txt = lident binding } in
+      let pat = ppat_var ~loc (Located.mk ~loc binding) in
+      let scrut_expr = pexp_ident ~loc (Located.lident ~loc binding) in
       let expr_opt =
         match aux ty (String.concat "_" [binding; "inner"]) with
         | (pat, Some expr) ->
@@ -1852,8 +1855,8 @@ module Gen_traverse = struct
       in
       (pat, expr_opt)
     and aux_result ty_ok ty_err binding loc =
-      let pat = ppat_var ~loc { loc; txt = binding } in
-      let scrut_expr = pexp_ident ~loc { loc; txt = lident binding } in
+      let pat = ppat_var ~loc (Located.mk ~loc binding) in
+      let scrut_expr = pexp_ident ~loc (Located.lident ~loc binding) in
       let expr_opt =
         match
           ( aux ty_ok (String.concat "_" [binding; "ok"]),
@@ -1882,8 +1885,8 @@ module Gen_traverse = struct
       (pat, expr_opt)
     and aux_functor map_expr ty binding loc =
       let (inner_pat, inner_expr_opt) = aux ty binding in
-      let pat = ppat_var ~loc { loc; txt = binding } in
-      let arg_expr = pexp_ident ~loc { loc; txt = Lident binding } in
+      let pat = ppat_var ~loc (Located.mk ~loc binding) in
+      let arg_expr = pexp_ident ~loc (Located.lident ~loc binding) in
       let default = (pat, None) in
       Option.value ~default
       @@ Option.map
@@ -1897,7 +1900,7 @@ module Gen_traverse = struct
              (pat, Some expr))
            inner_expr_opt
     and aux_arrow _arg_lbl _ty_dom _ty_codom binding loc =
-      (ppat_var ~loc { loc; txt = binding }, None)
+      (ppat_var ~loc (Located.mk ~loc binding), None)
     and aux_tuple tys binding loc =
       let (pats, expr_res) =
         List.split
@@ -1914,13 +1917,13 @@ module Gen_traverse = struct
              tys
       in
       if List.for_all Result.is_error expr_res then
-        (ppat_var ~loc { loc; txt = binding }, None)
+        (ppat_var ~loc (Located.mk ~loc binding), None)
       else
         let exprs =
           List.map
             (function
               | Ok expr -> expr
-              | Error binding -> pexp_ident ~loc { loc; txt = lident binding })
+              | Error binding -> pexp_ident ~loc (Located.lident ~loc binding))
             expr_res
         in
         (ppat_tuple ~loc pats, Some (pexp_tuple ~loc exprs))
@@ -1936,14 +1939,14 @@ module Gen_traverse = struct
         (fun ((Record_field.{ label; loc; _ } as fld), annot_opt) ->
           match annot_opt with
           | Some Annot.Opaque ->
-            ((label, loc), (ppat_var ~loc { loc; txt = label }, None))
+            ((label, loc), (ppat_var ~loc (Located.mk ~loc label), None))
           | Some Annot.Explicit ->
-            let pat = ppat_var ~loc { loc; txt = label } in
+            let pat = ppat_var ~loc (Located.mk ~loc label) in
             let fn_nm =
               Ident.(transform_fn_name @@ Field (record_name, label))
             in
-            let fn_expr = pexp_ident ~loc { loc; txt = Lident fn_nm }
-            and elem_expr = pexp_ident ~loc { loc; txt = Lident label } in
+            let fn_expr = pexp_ident ~loc (Located.lident ~loc fn_nm)
+            and elem_expr = pexp_ident ~loc (Located.lident ~loc label) in
             let expr =
               [%expr [%e fn_expr] [%e elem_expr] ~ctx ~top_down ~bottom_up]
             in
@@ -1955,7 +1958,7 @@ module Gen_traverse = struct
     let (pats, exprs, partial, empty) =
       List.fold_right
         (fun ((lbl, loc), (pat, expr_opt)) (pats, exprs, partial, empty) ->
-          let ident = { loc; txt = lident lbl } in
+          let ident = Located.lident ~loc lbl in
           match expr_opt with
           | Some expr ->
             ((ident, pat) :: pats, (ident, expr) :: exprs, partial, false)
@@ -1964,13 +1967,13 @@ module Gen_traverse = struct
         ([], [], false, true)
     in
     if empty then
-      (ppat_var ~loc { loc; txt = record_name }, None)
+      (ppat_var ~loc (Located.mk ~loc record_name), None)
     else if partial then
       let rcd_pat = ppat_record ~loc pats Open in
-      ( ppat_alias ~loc rcd_pat { loc; txt = record_name },
+      ( ppat_alias ~loc rcd_pat (Located.mk ~loc record_name),
         Some
           (pexp_record ~loc exprs
-          @@ Some (pexp_ident ~loc { loc; txt = lident record_name })) )
+          @@ Some (pexp_ident ~loc (Located.lident ~loc record_name))) )
     else
       (ppat_record ~loc pats Closed, Some (pexp_record ~loc exprs None))
 
@@ -1978,34 +1981,34 @@ module Gen_traverse = struct
     let open Variant_ctor in
     match variant_ctor with
     | Constant_ctor (lbl, loc) ->
-      ( ppat_construct ~loc { loc; txt = lident lbl } None,
+      ( ppat_construct ~loc (Located.lident ~loc lbl) None,
         if explicit then
           Some (pexp_extension ~loc @@ Err.unsupported_ctor_args_empty loc)
         else
           None )
     | Single_ctor (lbl, loc, _) when explicit ->
       let pat =
-        ppat_construct ~loc { loc; txt = lident lbl }
-        @@ Some (ppat_var ~loc { loc; txt = "elem" })
+        ppat_construct ~loc (Located.lident ~loc lbl)
+        @@ Some (ppat_var ~loc (Located.mk ~loc "elem"))
       in
       let fn_nm = Ident.(transform_fn_name @@ Ctor (variant_name, lbl)) in
-      let fn_expr = pexp_ident ~loc { loc; txt = Lident fn_nm }
-      and elem_expr = pexp_ident ~loc { loc; txt = Lident "elem" } in
+      let fn_expr = pexp_ident ~loc (Located.lident ~loc fn_nm)
+      and elem_expr = pexp_ident ~loc (Located.lident ~loc "elem") in
       let apply_expr =
         [%expr [%e fn_expr] [%e elem_expr] ~ctx ~top_down ~bottom_up]
       in
       let expr =
-        pexp_construct ~loc { loc; txt = Lident lbl } @@ Some apply_expr
+        pexp_construct ~loc (Located.lident ~loc lbl) @@ Some apply_expr
       in
       (pat, Some expr)
     | Single_ctor (lbl, loc, ty) ->
       let binding = String.(concat "_" [lowercase_ascii lbl; "elem"]) in
       let (ty_pat, ty_expr_opt) = gen_core_ty ~binding ty ~opaque_map ~maps in
-      let pat = ppat_construct ~loc { loc; txt = lident lbl } @@ Some ty_pat in
+      let pat = ppat_construct ~loc (Located.lident ~loc lbl) @@ Some ty_pat in
       let expr_opt =
         Option.map
           (fun expr ->
-            pexp_construct ~loc { loc; txt = lident lbl } @@ Some expr)
+            pexp_construct ~loc (Located.lident ~loc lbl) @@ Some expr)
           ty_expr_opt
       in
       (pat, expr_opt)
@@ -2014,24 +2017,24 @@ module Gen_traverse = struct
         ppat_tuple ~loc
         @@ List.mapi
              (fun i _ ->
-               let txt = "elem_" ^ string_of_int i in
-               ppat_var ~loc { loc; txt })
+               let name = "elem_" ^ string_of_int i in
+               ppat_var ~loc (Located.mk ~loc name))
              tys
       in
       let pat =
-        ppat_construct ~loc { loc; txt = lident lbl } @@ Some tuple_pat
+        ppat_construct ~loc (Located.lident ~loc lbl) @@ Some tuple_pat
       in
       let fn_nm = Ident.(transform_fn_name @@ Ctor (variant_name, lbl)) in
-      let fn_expr = pexp_ident ~loc { loc; txt = Lident fn_nm }
+      let fn_expr = pexp_ident ~loc (Located.lident ~loc fn_nm)
       and elem_expr =
         pexp_tuple ~loc
         @@ List.mapi
              (fun i _ ->
-               pexp_ident ~loc { loc; txt = Lident ("elem_" ^ string_of_int i) })
+               pexp_ident ~loc (Located.lident ~loc ("elem_" ^ string_of_int i)))
              tys
       in
       let construct_expr =
-        pexp_construct ~loc { loc; txt = Lident lbl } @@ Some elem_expr
+        pexp_construct ~loc (Located.lident ~loc lbl) @@ Some elem_expr
       in
       let expr =
         [%expr
@@ -2045,11 +2048,11 @@ module Gen_traverse = struct
       let ty = ptyp_tuple ~loc tys in
       let binding = String.(concat "_" [lowercase_ascii lbl; "elem"]) in
       let (ty_pat, ty_expr_opt) = gen_core_ty ~binding ty ~opaque_map ~maps in
-      let pat = ppat_construct ~loc { loc; txt = lident lbl } @@ Some ty_pat in
+      let pat = ppat_construct ~loc (Located.lident ~loc lbl) @@ Some ty_pat in
       let expr_opt =
         Option.map
           (fun expr ->
-            pexp_construct ~loc { loc; txt = lident lbl } @@ Some expr)
+            pexp_construct ~loc (Located.lident ~loc lbl) @@ Some expr)
           ty_expr_opt
       in
       (pat, expr_opt)
@@ -2058,14 +2061,14 @@ module Gen_traverse = struct
       let (ty_pat, ty_expr_opt) =
         gen_record_fields binding flds ~loc ~opaque_map ~maps
       in
-      let pat = ppat_construct ~loc { loc; txt = lident lbl } @@ Some ty_pat in
+      let pat = ppat_construct ~loc (Located.lident ~loc lbl) @@ Some ty_pat in
       if explicit then
         (pat, Some (pexp_extension ~loc @@ Err.unsupported_ctor_args loc))
       else
         let expr_opt =
           Option.map
             (fun expr ->
-              pexp_construct ~loc { loc; txt = lident lbl } @@ Some expr)
+              pexp_construct ~loc (Located.lident ~loc lbl) @@ Some expr)
             ty_expr_opt
         in
         (pat, expr_opt)
@@ -2084,7 +2087,8 @@ module Gen_traverse = struct
             | Record_ctor (lbl, loc, _) -> (loc, elem lbl)
           in
           match annot_opt with
-          | Some Annot.Opaque -> ((txt, loc), (ppat_var ~loc { loc; txt }, None))
+          | Some Annot.Opaque ->
+            ((txt, loc), (ppat_var ~loc (Located.mk ~loc txt), None))
           | Some Annot.Explicit ->
             ( (txt, loc),
               gen_variant_ctor
@@ -2112,8 +2116,8 @@ module Gen_traverse = struct
         ctor_opts
         ([], [], false, true)
     in
-    let pat_variant_nm = ppat_var ~loc { loc; txt = variant_name }
-    and exp_variant_nm = pexp_ident ~loc { loc; txt = lident variant_name } in
+    let pat_variant_nm = ppat_var ~loc (Located.mk ~loc variant_name)
+    and exp_variant_nm = pexp_ident ~loc (Located.lident ~loc variant_name) in
     if empty then
       (pat_variant_nm, None)
     else
@@ -2217,11 +2221,9 @@ let gen_str ~loc ~path:_ (_rec_flag, tds) restart maps =
       strat_transform_fields
   in
   let pass_module =
-    let name = { loc; txt = Some Names.pass_module_name }
+    let name = Located.mk ~loc (Some Names.pass_module_name)
     and expr = pmod_structure ~loc [pass_ty_decl; identity; combine_fn] in
-    pstr_module
-      ~loc
-      { pmb_loc = loc; pmb_name = name; pmb_expr = expr; pmb_attributes = [] }
+    pstr_module ~loc @@ module_binding ~loc ~name ~expr
   in
   pass_module :: fns
 
@@ -2238,14 +2240,8 @@ let gen_sig ~loc ~path:_ (_rec_flag, tds) restart maps =
   let identity = Gen_identity.gen_sig loc in
   let fns = List.map Gen_transform.gen_sig transform_fields in
   let pass_module =
-    let name = { loc; txt = Some Names.pass_module_name }
-    and type_ =
-      {
-        pmty_loc = loc;
-        pmty_attributes = [];
-        pmty_desc = Pmty_signature [pass_ty; combine_fn; identity];
-      }
-    in
+    let name = Located.mk ~loc (Some Names.pass_module_name)
+    and type_ = pmty_signature ~loc [pass_ty; combine_fn; identity] in
     psig_module ~loc @@ module_declaration ~loc ~name ~type_
   in
   pass_module :: fns

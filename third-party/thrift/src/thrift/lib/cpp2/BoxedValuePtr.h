@@ -116,8 +116,8 @@ class boxed_value_ptr {
   // TODO(afuller): This implicit creation and value assignment should be
   // removed as it lets T intercept assignment, which is extremely bug prone.
   template <typename U>
-  FOLLY_ERASE std::enable_if_t<std::is_assignable_v<T&, U&&>, boxed_value_ptr&>
-  operator=(U&& value) {
+    requires std::is_assignable_v<T&, U&&>
+  FOLLY_ERASE boxed_value_ptr<T>& operator=(U&& value) {
     if (ptr_ == nullptr) {
       ptr_ = std::make_unique<T>();
     }

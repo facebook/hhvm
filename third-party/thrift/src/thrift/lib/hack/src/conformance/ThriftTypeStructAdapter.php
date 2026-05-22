@@ -254,6 +254,27 @@ final class ThriftTypeStructAdapter implements IThriftAdapter {
     return new self($type);
   }
 
+  public static function fromHackClassname(
+    classname<IThriftStruct> $class_name,
+  )[write_props]: this {
+    $name = apache_thrift_type_standard_TypeName::withDefaultValues();
+    $type_uri = apache_thrift_type_standard_TypeUri::withDefaultValues();
+    $type_uri->set_uri(
+      ThriftTypeRegistry::getxCanonicalUriForHackType($class_name),
+    );
+    $class = new ReflectionClass($class_name);
+    if ($class->isSubclassOf(TException::class)) {
+      $name->set_exceptionType($type_uri);
+    } else if ($class->isSubclassOf(IThriftUnion::class)) {
+      $name->set_unionType($type_uri);
+    } else {
+      $name->set_structType($type_uri);
+    }
+    $type = apache_thrift_type_rep_TypeStruct::withDefaultValues();
+    $type->name = $name;
+    return new self($type);
+  }
+
   public static function fromHackType<reify T>()[write_props]: this {
     $ts = HH\ReifiedGenerics\get_type_structure<T>();
     $type_struct = self::getTypeStructFromHackTypeStructure($ts);

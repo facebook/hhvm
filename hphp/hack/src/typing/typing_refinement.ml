@@ -1078,6 +1078,12 @@ and split_ty
         ~init
         ~expansions
         upper_bounds
+    | Tnewtype (name, [ty_arg], _)
+      when String.equal name Naming_special_names.Classes.cRepresentableAs ->
+      (* RepresentableAs<T> shares its runtime data type with T, so a
+       * predicate splits RepresentableAs<T> exactly as it splits T. *)
+      let expansions = SSet.add name expansions in
+      split_ty ~other_intersected_tys ~expansions ~predicate env ty_arg
     | Tnewtype (name, tyl, _) ->
       let (env, as_ty) =
         Typing_utils.get_newtype_super env (get_reason ty) name tyl
@@ -1186,15 +1192,24 @@ and split_ty
               let tyl = List.map ty_prop_pairs ~f:fst in
               split_union ~other_intersected_tys env ~expansions tyl
           in
-          let (env, partition_as_ty) =
-            split_intersection
-              ~other_intersected_tys
-              env
-              ~init
-              ~expansions
-              [as_ty]
-          in
-          (env, TyPartition.meet partition_tyl partition_as_ty)
+          (* For case types without where clauses, the variants alone
+           * fully capture all values — meeting with the upper bound's
+           * partition adds no information and introduces noisy
+           * (X & null) | (X & nonnull) shapes when the bound is the
+           * default mixed. Where-clause case types still need the meet
+           * to apply the bound to the unrefined cases. *)
+          if Typing_case_type_variant.has_where_clauses variants then
+            let (env, partition_as_ty) =
+              split_intersection
+                ~other_intersected_tys
+                env
+                ~init
+                ~expansions
+                [as_ty]
+            in
+            (env, TyPartition.meet partition_tyl partition_as_ty)
+          else
+            (env, partition_tyl)
         | _ ->
           split_intersection
             ~other_intersected_tys

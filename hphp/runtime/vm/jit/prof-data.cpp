@@ -280,7 +280,13 @@ void discardProfData() {
       Treadmill::enqueue(ProfDataTreadmillDeleter{std::move(s_profDataHolder)});
     }
   }
-  Treadmill::enqueue(VasmBlockCounters::free);
+  // Only free VasmBlockCounters when no JIT translations reference them.
+  // During jit-serialize, Optimize translations contain atomic decrements
+  // with hardcoded counter addresses that must remain valid. Freeing
+  // while these translations are live causes use-after-free corruption.
+  if (!isJitSerializing()) {
+    Treadmill::enqueue(VasmBlockCounters::free);
+  }
 }
 
 void ProfData::maybeResetCounters() {

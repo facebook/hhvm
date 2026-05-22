@@ -132,7 +132,7 @@ jobs:
       run: python build/fbcode_builder/getdeps.py fetch --no-tests wangle
 
     - name: Build fbthrift
-      run: python build/fbcode_builder/getdeps.py build --build-type RelWithDebInfo --recursive --src-dir=. fbthrift
+      run: python build/fbcode_builder/getdeps.py build --build-type RelWithDebInfo --src-dir=. fbthrift
 
     - name: Show sccache stats
       if: always()

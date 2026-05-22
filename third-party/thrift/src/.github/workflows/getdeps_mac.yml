@@ -141,7 +141,7 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests wangle
 
     - name: Build fbthrift
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --recursive --src-dir=. fbthrift --project-install-prefix fbthrift:/usr/local
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --src-dir=. fbthrift --project-install-prefix fbthrift:/usr/local
 
     - name: Show sccache stats
       if: always()

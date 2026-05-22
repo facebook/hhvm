@@ -122,7 +122,7 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests fizz
 
     - name: Build wangle
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --recursive --src-dir=. wangle --project-install-prefix wangle:/usr/local
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --src-dir=. wangle --project-install-prefix wangle:/usr/local
 
     - name: Show sccache stats
       if: always()

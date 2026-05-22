@@ -153,7 +153,7 @@ jobs:
       run: python build/fbcode_builder/getdeps.py fetch --no-tests edencommon
 
     - name: Build watchman
-      run: python build/fbcode_builder/getdeps.py build --build-type RelWithDebInfo --recursive --src-dir=. watchman
+      run: python build/fbcode_builder/getdeps.py build --build-type RelWithDebInfo --src-dir=. watchman
 
     - name: Show sccache stats
       if: always()

@@ -57,6 +57,11 @@ namespace {
     HH\FIXME\MISSING_PARAM_TYPE $handler,
   ): bool;
   <<__PHPStdLib>>
+  function fb_intercept2_named_args(
+    string $name,
+    HH\FIXME\MISSING_PARAM_TYPE $handler,
+  ): bool;
+  <<__PHPStdLib>>
   function fb_rename_function(
     string $orig_func_name,
     string $new_func_name,

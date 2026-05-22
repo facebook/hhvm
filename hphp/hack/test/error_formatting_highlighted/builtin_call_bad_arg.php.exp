@@ -8,11 +8,11 @@ builtin_call_bad_arg.php:4:25
 [1]  4 |   fb_output_compression(3);
      5 | }
 
-/tmp/q4jmlYmiHd/builtins_fb.hhi:84:5
-    82 |   <<__PHPStdLib>>
-    83 |   function fb_output_compression(
-[2] 84 |     bool $new_value,
-    85 |   ): bool;
-    86 |   <<__PHPStdLib>>
+/tmp/XHJWdJQ3gj/builtins_fb.hhi:89:5
+    87 |   <<__PHPStdLib>>
+    88 |   function fb_output_compression(
+[2] 89 |     bool $new_value,
+    90 |   ): bool;
+    91 |   <<__PHPStdLib>>
 
 1 error found

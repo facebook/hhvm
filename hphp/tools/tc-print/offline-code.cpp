@@ -24,6 +24,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fmt/core.h>
 
 #include "hphp/tools/tc-print/tc-print.h"
 
@@ -322,11 +323,11 @@ void OfflineCode::printEventStats(std::ostream& os,
     auto const event = static_cast<PerfEventType>(i);
     auto const count = events[i];
     auto const eventStr = count ?
-                          folly::sformat("{:>3}:{:>4}",
+                          fmt::format("{:>3}:{:>4}",
                                          eventTypeToSmallCaption(event),
                                          count) :
                           "";
-    os << folly::format("{:<10} ", eventStr);
+    os << fmt::format("{:<10} ", eventStr);
   }
 }
 
@@ -380,7 +381,7 @@ void OfflineCode::printRangeInfo(std::ostream& os,
     } else {
       auto const currSha1 = rangeInfo.sha1
         ? rangeInfo.sha1->toString() : "\"missing SHA1\"";
-      os << folly::format(
+      os << fmt::format(
         "<<< couldn't find unit {} to print bytecode at {} {} >>>\n",
         currSha1,
         sk.prologue() || sk.funcEntry() ? "numEntryArgs" : "offset",
@@ -399,12 +400,12 @@ void OfflineCode::printDisasmInfo(std::ostream& os,
                                   const bool printAddr,
                                   const bool printBinary) {
     if (printAddr) {
-      os << folly::format("{:>#14x}: ",
+      os << fmt::format("{:>#14x}: ",
                           reinterpret_cast<uintptr_t>(disasmInfo.ip));
     }
     if (printBinary) os << disasmInfo.binaryStr;
     printEventStats(os, disasmInfo.eventCounts);
-    os << folly::format("{}{}\n", disasmInfo.codeStr, disasmInfo.callDest);
+    os << fmt::format("{}{}\n", disasmInfo.codeStr, disasmInfo.callDest);
 }
 
 vector<TCRangeInfo> annotateRanges(const vector<TCRangeInfo>& ranges,

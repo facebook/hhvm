@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <iomanip>
 #include <sys/stat.h>
+#include <fmt/core.h>
 
 #include "hphp/tools/tc-print/tc-print.h"
 #include "hphp/tools/tc-print/offline-trans-data.h"
@@ -202,7 +203,7 @@ TCRegionInfo OfflineCode::getRegionInfoX86(const TCRegionRec& region,
       std::ostringstream binary_os;
       uint32_t i;
       for (i = 0; i < instrLen; i++) {
-        binary_os << folly::format("{:02X}", frontier[i]);
+        binary_os << fmt::format("{:02X}", frontier[i]);
       }
       for (; i < 16; i++) {
         binary_os << "  ";

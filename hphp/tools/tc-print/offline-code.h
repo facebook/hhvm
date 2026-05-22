@@ -29,6 +29,8 @@
 #include "hphp/tools/tc-print/perf-events.h"
 #include "hphp/tools/tc-print/printir-annotation.h"
 
+#include <fmt/core.h>
+
 extern "C" {
 #if defined(__x86_64__)
 #include <xed-interface.h>
@@ -79,7 +81,7 @@ struct TCDisasmInfo {
                           ("callDest", callDest)
                           ("code", codeStr)
                           ("perfEvents", eventsObj)
-                          ("ip", folly::sformat("{}", static_cast<void*>(ip)))
+                          ("ip", fmt::format("{}", static_cast<void*>(ip)))
                           ("instrLen", instrLen);
   }
 
@@ -105,7 +107,7 @@ struct TCRangeInfo {
     }
 
     auto const formatTCA = [](auto x) {
-      return folly::sformat("{}", static_cast<void*>(x));
+      return fmt::format("{}", static_cast<void*>(x));
     };
 
     auto const offset = [&]() -> folly::dynamic {

@@ -29,9 +29,10 @@
 #include <string>
 #include <vector>
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/runtime/vm/func-id.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP { namespace jit {
@@ -109,12 +110,16 @@ private:
 
   template<typename C>
   void outputAligned(C val) const {
-    std::cout << folly::format("{:>16}", val);
+    std::cout << fmt::format("{:>16}", val);
   }
 
   template<typename C>
   void outputAlignedKey(C val, uint16_t width) const {
-    std::cout << folly::format("{:<*}", width, val);
+    if constexpr (std::is_same_v<std::decay_t<C>, FuncId>) {
+      std::cout << fmt::format("{:<{}}", val.toInt(), width);
+    } else {
+      std::cout << fmt::format("{:<{}}", val, width);
+    }
   }
 
   void printColumnHeaders(std::string keyColName, uint16_t keyColWidth,
@@ -360,7 +365,7 @@ public:
 
       for (size_t i = 0; i < MAX_NUM_EVENT_TYPES; i++) {
         if (events[i]) {
-          os << folly::format("  {:<16} = {}\n",
+          os << fmt::format("  {:<16} = {}\n",
                               eventTypeToCommandLineArgument(
                                 static_cast<PerfEventType>(i)),
                               events[i]);

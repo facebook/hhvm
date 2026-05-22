@@ -21,6 +21,7 @@
 #include "hphp/util/build-info.h"
 
 #include <folly/Math.h>
+#include <fmt/core.h>
 #include <folly/gen/String.h>
 
 using std::string;
@@ -330,7 +331,7 @@ void OfflineTransData::printTransRec(TransID transId,
     return;
   }
 
-  std::cout << folly::format(
+  std::cout << fmt::format(
     "Translation {} {{\n"
     "  src.sha1 = {}\n"
     "  src.funcId = {}\n"
@@ -340,8 +341,8 @@ void OfflineTransData::printTransRec(TransID transId,
     "  src.funcEntry = {}\n"
     "  src.bcStartOffset = {}\n",
     tRec->id,
-    tRec->sha1,
-    tRec->src.funcID(),
+    tRec->sha1.toString(),
+    tRec->src.funcID().toInt(),
     tRec->funcName,
     static_cast<int32_t>(tRec->src.resumeMode()),
     tRec->src.prologue(),
@@ -351,18 +352,18 @@ void OfflineTransData::printTransRec(TransID transId,
       ? 0 : tRec->src.offset());
 
   if (tRec->src.prologue() || tRec->src.funcEntry()) {
-    std::cout << folly::format(
+    std::cout << fmt::format(
       "  src.numEntryArgs = {}\n", tRec->src.numEntryArgs());
   }
 
-  std::cout << folly::format(
+  std::cout << fmt::format(
     "  src.guards = {}\n", tRec->guards.size());
 
   for (auto& guard : tRec->guards) {
     std::cout << "    " << guard << '\n';
   }
 
-  std::cout << folly::format(
+  std::cout << fmt::format(
     "  kind = {}\n"
     "  hasLoop = {:d}\n"
     "  aStart = {}\n"
@@ -373,16 +374,16 @@ void OfflineTransData::printTransRec(TransID transId,
     "  frozenLen = {:#x}\n",
     show(tRec->kind),
     tRec->hasLoop,
-    tRec->aStart,
+    static_cast<void*>(tRec->aStart),
     tRec->aLen,
-    tRec->acoldStart,
+    static_cast<void*>(tRec->acoldStart),
     tRec->acoldLen,
-    tRec->afrozenStart,
+    static_cast<void*>(tRec->afrozenStart),
     tRec->afrozenLen);
 
   if (annotationsVerbosity > 0) {
     for (auto& annotation : tRec->annotations) {
-      std::cout << folly::format(
+      std::cout << fmt::format(
         "  annotation[\"{}\"]",
         annotation.first);
       auto const& annotationValue = annotation.second;
@@ -404,7 +405,7 @@ void OfflineTransData::printTransRec(TransID transId,
         }
         std::cout << '\n';
       } else {
-        std::cout << folly::format(" = {}\n", annotationValue);
+        std::cout << fmt::format(" = {}\n", annotationValue);
       }
     }
   }
@@ -423,7 +424,7 @@ void OfflineTransData::printTransRec(std::ostream& os,
     return;
   }
 
-  os << folly::format(
+  os << fmt::format(
     "Translation {} {{\n"
     "  src.sha1 = {}\n"
     "  src.funcId = {}\n"
@@ -433,8 +434,8 @@ void OfflineTransData::printTransRec(std::ostream& os,
     "  src.funcEntry = {}\n"
     "  src.bcStartOffset = {}\n",
     tRec->id,
-    tRec->sha1,
-    tRec->src.funcID(),
+    tRec->sha1.toString(),
+    tRec->src.funcID().toInt(),
     tRec->funcName,
     static_cast<int32_t>(tRec->src.resumeMode()),
     tRec->src.prologue(),
@@ -443,18 +444,18 @@ void OfflineTransData::printTransRec(std::ostream& os,
       ? 0 : tRec->src.offset());
 
   if (tRec->src.prologue() || tRec->src.funcEntry()) {
-    os << folly::format(
+    os << fmt::format(
       "  src.numEntryArgs = {}\n", tRec->src.numEntryArgs());
   }
 
-  os << folly::format(
+  os << fmt::format(
     "  src.guards = {}\n", tRec->guards.size());
 
   for (auto& guard : tRec->guards) {
     os << "    " << guard << '\n';
   }
 
-  os << folly::format(
+  os << fmt::format(
     "  kind = {}\n"
     "  hasLoop = {:d}\n"
     "  aStart = {}\n"
@@ -465,16 +466,16 @@ void OfflineTransData::printTransRec(std::ostream& os,
     "  frozenLen = {:#x}\n",
     show(tRec->kind),
     tRec->hasLoop,
-    tRec->aStart,
+    static_cast<void*>(tRec->aStart),
     tRec->aLen,
-    tRec->acoldStart,
+    static_cast<void*>(tRec->acoldStart),
     tRec->acoldLen,
-    tRec->afrozenStart,
+    static_cast<void*>(tRec->afrozenStart),
     tRec->afrozenLen);
 
   if (annotationsVerbosity > 0) {
     for (auto& annotation : tRec->annotations) {
-      os << folly::format(
+      os << fmt::format(
         "  annotation[\"{}\"]",
         annotation.first);
       auto const& annotationValue = annotation.second;
@@ -495,7 +496,7 @@ void OfflineTransData::printTransRec(std::ostream& os,
         }
         os << '\n';
       } else {
-        os << folly::format(" = {}\n", annotationValue);
+        os << fmt::format(" = {}\n", annotationValue);
       }
     }
   }

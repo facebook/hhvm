@@ -15,6 +15,7 @@
 */
 
 #include <iomanip>
+#include <fmt/core.h>
 
 #include "hphp/tools/tc-print/offline-code.h"
 #include "hphp/tools/tc-print/tc-print.h"
@@ -131,9 +132,9 @@ TCRegionInfo OfflineCode::getRegionInfoArm(const TCRegionRec& region,
       if (literalAddr >= codeBegin && literalAddr + literalSize < codeEnd) {
         memcpy(&literal, literalAddr, literalSize);
         if (literalSize == sizeof(uint64_t)) {
-          literalStr = folly::sformat(" [value 0x{:016x}]", literal);
+          literalStr = fmt::format(" [value 0x{:016x}]", literal);
         } else {
-          literalStr = folly::sformat(" [value 0x{:08x}]",
+          literalStr = fmt::format(" [value 0x{:08x}]",
                                       static_cast<uint32_t>(literal));
         }
       }
@@ -172,7 +173,7 @@ TCRegionInfo OfflineCode::getRegionInfoArm(const TCRegionRec& region,
 
     auto const binaryStr = [&] {
       std::ostringstream binary_os;
-      binary_os << folly::format("{:08" PRIx32 "}",
+      binary_os << fmt::format("{:08" PRIx32 "}",
                                  *reinterpret_cast<int32_t*>(frontier));
       binary_os << std::string(10, ' ');
       return binary_os.str();

@@ -18,7 +18,7 @@
 
 #include <zlib.h>
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
 
@@ -53,7 +53,7 @@ Optional<FileInfo> AnnotationCache::getFileInfo(const string& annotation) {
     }
   }
 
-  fileName = folly::sformat("{}/{}", m_dumpDir, fileName);
+  fileName = fmt::format("{}/{}", m_dumpDir, fileName);
 
   return make_optional(FileInfo{fileName, offset, length});
 }

@@ -31,7 +31,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/json/dynamic.h>
 #include <folly/json/DynamicConverter.h>
 #include <folly/json/json.h>
@@ -491,7 +491,7 @@ void loadPerfEvents() {
     if (strncmp(program, "hhvm", 4) == 0) {
       eventType = perfScriptOutputToEventType(eventCaption);
       if (eventType == EVENT_NULL) {
-        error(folly::sformat("loadProfData: invalid event caption {}",
+        error(fmt::format("loadProfData: invalid event caption {}",
                              eventCaption));
       }
 
@@ -619,7 +619,7 @@ namespace get_json {
 using folly::dynamic;
 
 std::string show(TCA tca) {
-  return folly::sformat("{}", static_cast<void*>(tca));
+  return fmt::format("{}", static_cast<void*>(tca));
 }
 
 dynamic getAnnotation(const Annotations& annotations) {
@@ -869,9 +869,9 @@ std::string generateTransOutput(TransID transId) {
       std::stringstream byteInfo;
       auto sk = block.sk;
       if (!sk.valid()) {
-        byteInfo << folly::format(
+        byteInfo << fmt::format(
           "<<< couldn't find func in {} to print bytecode range [{}{},{}) >>>\n",
-          block.sha1,
+          block.sha1.toString(),
           block.sk.prologue() || block.sk.funcEntry() ? "numEntryArgs " : "",
           block.sk.prologue() || block.sk.funcEntry()
             ? block.sk.numEntryArgs() : block.sk.offset(),
@@ -902,7 +902,7 @@ std::string generateTransOutput(TransID transId) {
     }
   }
 
-  os << folly::format("----------\n{}: main\n----------\n",
+  os << fmt::format("----------\n{}: main\n----------\n",
                        transCode->getArchName());
   os << getDisasmStr(transCode,
                      tRec->aStart,
@@ -911,7 +911,7 @@ std::string generateTransOutput(TransID transId) {
                      tcaPerfEvents,
                      hostOpcodes);
 
-  os << folly::format("----------\n{}: cold\n----------\n",
+  os << fmt::format("----------\n{}: cold\n----------\n",
                        transCode->getArchName());
   if (tRec->acoldStart != tRec->afrozenStart) {
     os << getDisasmStr(transCode,
@@ -922,7 +922,7 @@ std::string generateTransOutput(TransID transId) {
                        hostOpcodes);
   }
 
-  os << folly::format("----------\n{}: frozen\n----------\n",
+  os << fmt::format("----------\n{}: frozen\n----------\n",
                        transCode->getArchName());
   os << getDisasmStr(transCode,
                      tRec->afrozenStart,
@@ -1040,7 +1040,7 @@ void printCFG() {
     }
 
     auto const bcStart = sk.prologue() || sk.funcEntry()
-      ? folly::sformat("numEntryArgs {}", TREC(tid)->src.numEntryArgs())
+      ? fmt::format("numEntryArgs {}", TREC(tid)->src.numEntryArgs())
       : TREC(tid)->src.printableOffset();
     uint32_t bcStop = TREC(tid)->bcPast();
     auto const shape = [&] {
@@ -1074,7 +1074,7 @@ void printTopFuncs() {
     auto funcId = tRec->src.funcID();
     if (funcStrs.contains(funcId)) continue;
     auto funcName = tRec->funcName;
-    funcStrs[funcId] = folly::sformat("{:<6}: {}", funcId, funcName);
+    funcStrs[funcId] = fmt::format("{:<6}: {}", funcId.toInt(), funcName);
   }
   TransToFuncMapper funcMapper(g_transData);
   PerfEventsMap<FuncId> funcPerfEvents = transPerfEvents.mapTo(funcMapper);

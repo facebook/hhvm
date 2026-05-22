@@ -5328,6 +5328,35 @@ end = struct
               ~lhs:{ sub_supportdyn; ty_sub }
               ~rhs:
                 { super_like; super_supportdyn = false; ty_super = lty_inner }
+      | (_, Tgeneric _) when subtype_env.Subtype_env.require_completeness ->
+        (* In completeness mode (decompose_subtype), preserve the
+           constraint shape `T <: RepresentableAs<U>` so it is stored
+           as T's upper bound. The iff-U reduction would strip the RA
+           wrapper, and `simplify ||| default_subtype` would produce a
+           Disj that decompose_subtype_add_prop drops. default_subtype
+           already defers Tgeneric in completeness mode via
+           mk_issubtype_prop. *)
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super }
+          env
+      | (_, (Tnewtype (_, _, _) | Tgeneric _ | Tdependent _)) ->
+        let ( ||| ) = ( ||| ) ~fail in
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
+          env
+        ||| default_subtype
+              ~subtype_env
+              ~this_ty
+              ~fail
+              ~lhs:{ sub_supportdyn; ty_sub }
+              ~rhs:{ super_like; super_supportdyn = false; ty_super }
       | _ ->
         (* T <: RepresentableAs<U> iff T <: U *)
         simplify

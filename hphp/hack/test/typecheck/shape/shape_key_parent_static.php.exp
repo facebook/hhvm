@@ -1,0 +1,4 @@
+ERROR: File "shape_key_parent_static.php", line 10, characters 46-56:
+Cannot use `parent::` or `static::` for class constant shape keys (Parsing[1002])
+ERROR: File "shape_key_parent_static.php", line 14, characters 46-62:
+Cannot use `parent::` or `static::` for class constant shape keys (Parsing[1002])

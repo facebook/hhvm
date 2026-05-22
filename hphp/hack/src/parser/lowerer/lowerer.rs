@@ -884,6 +884,14 @@ fn p_shape_field_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFi
         }
         ScopeResolutionExpression(c) => {
             let cls_name = pos_name(&c.qualifier, env)?;
+            if string_utils::is_parent(&cls_name.1) || string_utils::is_static(&cls_name.1) {
+                raise_parsing_error(
+                    node,
+                    env,
+                    &syntax_error::invalid_parent_or_static_shape_field_name,
+                );
+                return missing_syntax("shape field name", node, env);
+            }
             let const_name = p_pstring(&c.name, env)?;
             if string_utils::is_class(&const_name.1) && env.is_typechecker() {
                 raise_parsing_error(

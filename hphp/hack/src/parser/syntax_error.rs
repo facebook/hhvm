@@ -342,6 +342,8 @@ pub const error2056: Error = Cow::Borrowed("First unbracketed namespace occurren
 pub const error2057: Error = Cow::Borrowed("First bracketed namespace occurrence here");
 pub const invalid_shape_field_name: Error =
     Cow::Borrowed("Shape field name must be a nonempty single-quoted string or a class constant");
+pub const invalid_parent_or_static_shape_field_name: Error =
+    Cow::Borrowed("Cannot use `parent::` or `static::` for class constant shape keys");
 pub fn invalid_lazy_class_shape_field(class_name: &str) -> Error {
     Cow::Owned(format!(
         "Shape field name must not be a `{}::class` expression",

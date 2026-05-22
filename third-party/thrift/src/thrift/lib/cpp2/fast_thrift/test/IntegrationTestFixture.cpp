@@ -66,12 +66,11 @@ void IntegrationTestFixture::SetUp() {
             serverAppAdapter_.setPipeline(pipeline.get());
             transportHandler->setPipeline(pipeline.get());
 
-            return apache::thrift::fast_thrift::rocket::server::connection::
-                RocketServerConnection{
-                    .transportHandler = std::move(transportHandler),
-                    .pipeline = std::move(pipeline),
-                    .allocator = {},
-                };
+            apache::thrift::fast_thrift::rocket::server::connection::
+                RocketServerConnection conn;
+            conn.transportHandler = std::move(transportHandler);
+            conn.pipeline = std::move(pipeline);
+            return conn;
           };
 
   connectionManager_ = TestConnectionManager::create(

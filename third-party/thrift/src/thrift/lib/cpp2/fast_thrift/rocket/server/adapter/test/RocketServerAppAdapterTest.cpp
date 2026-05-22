@@ -64,20 +64,6 @@ static_assert(
 // Unit tests
 // =============================================================================
 
-TEST(RocketServerAppAdapterTest, WriteWithoutPipelineReturnsError) {
-  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
-
-  RocketResponseMessage msg{
-      .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
-              .data = folly::IOBuf::copyBuffer("test"),
-              .header = {.streamId = 1},
-          },
-  };
-
-  EXPECT_EQ(adapter->write(std::move(msg)), Result::Error);
-}
-
 TEST(RocketServerAppAdapterTest, OnReadDelegatesToCallback) {
   RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
   int requestCount = 0;
@@ -141,6 +127,7 @@ TEST(RocketServerAppAdapterTest, OnPipelineInactiveFiresOnDisconnectCallback) {
       [&]() noexcept { disconnectCount++; },
       []() noexcept {});
 
+  adapter->onPipelineActive();
   adapter->onPipelineInactive();
   EXPECT_EQ(disconnectCount, 1);
 }
@@ -157,8 +144,7 @@ TEST(RocketServerAppAdapterTest, HandlerRemovedFiresOnCloseCallback) {
 }
 
 TEST(
-    RocketServerAppAdapterTest,
-    HandlerRemovedFansOutDisconnectWhenNotPreviouslyDisconnected) {
+    RocketServerAppAdapterTest, HandlerRemovedAfterDeactivateFiresOnlyOnClose) {
   RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
   int disconnectCount = 0;
   int closeCount = 0;
@@ -168,13 +154,13 @@ TEST(
       [&]() noexcept { disconnectCount++; },
       [&]() noexcept { closeCount++; });
 
-  // Pipeline made the adapter live with onPipelineActive, then was
-  // removed without a prior deactivate. The adapter must synthesize the
-  // disconnect so observers see it before close.
   adapter->onPipelineActive();
-  EXPECT_EQ(disconnectCount, 0);
+  adapter->onPipelineInactive();
+  EXPECT_EQ(disconnectCount, 1);
 
   adapter->handlerRemoved();
+  // handlerRemoved is a close signal — it must not synthesize a second
+  // disconnect.
   EXPECT_EQ(disconnectCount, 1);
   EXPECT_EQ(closeCount, 1);
 }
@@ -200,6 +186,7 @@ TEST(RocketServerAppAdapterTest, LifecycleAndErrorChannelsAreIndependent) {
       []() noexcept {}, [&]() noexcept { inactiveCount++; }, []() noexcept {});
 
   // Lifecycle event must NOT route through the error callback.
+  adapter->onPipelineActive();
   adapter->onPipelineInactive();
   EXPECT_EQ(inactiveCount, 1);
   EXPECT_EQ(errorCount, 0);

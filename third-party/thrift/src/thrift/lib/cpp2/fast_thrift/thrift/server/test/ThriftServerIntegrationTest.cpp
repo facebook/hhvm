@@ -257,6 +257,15 @@ class ThriftServerIntegrationTest : public ::testing::Test {
       transportHandler_->close(folly::exception_wrapper{});
       transportHandler_->resetPipeline();
     }
+    // Drop both endpoint pipeline guards before releasing the
+    // pipelines, mirroring RocketServerConnection::destroy() /
+    // ThriftConnectionContext teardown in production.
+    if (transportAdapter_) {
+      transportAdapter_->resetPipeline();
+    }
+    if (appAdapter_) {
+      appAdapter_->resetPipeline();
+    }
     thriftPipeline_.reset();
     rocketPipeline_.reset();
     transportAdapter_.reset();

@@ -100,6 +100,11 @@ class RocketServerIntegrationTest : public ::testing::Test {
       transportHandler_->close(folly::exception_wrapper{});
       transportHandler_->resetPipeline();
     }
+    // Both endpoints hold a DestructorGuard on the pipeline; release the
+    // app-adapter's guard explicitly so pipeline_.reset() below can
+    // complete destruction in order rather than deferring it past the
+    // transport handler's death.
+    appAdapter_->resetPipeline();
     pipeline_.reset();
     testTransport_ = nullptr;
   }

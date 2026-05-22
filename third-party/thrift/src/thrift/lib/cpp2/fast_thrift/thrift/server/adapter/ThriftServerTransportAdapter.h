@@ -16,9 +16,13 @@
 
 #pragma once
 
+#include <memory>
+
 #include <folly/ExceptionWrapper.h>
 #include <folly/Function.h>
 #include <folly/Portability.h>
+#include <folly/io/async/DelayedDestruction.h>
+#include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
@@ -93,18 +97,24 @@ class ThriftServerTransportAdapter {
       delete;
 
   void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept {
+    DCHECK(pipeline);
+    if (pipeline_) {
+      XLOG(FATAL) << "must reset pipeline before setting a new one";
+    }
     pipeline_ = pipeline;
+    pipelineGuard_ =
+        std::make_unique<folly::DelayedDestruction::DestructorGuard>(pipeline);
   }
 
   /**
-   * Release this bridge's pointer to the thrift pipeline. The bridge
-   * does NOT hold a DelayedDestruction guard on the pipeline (see the
-   * matching note in RocketServerAppAdapter): the destruction order
-   * imposed by ThriftConnectionContext (pipeline before bridge) would
-   * make a guard re-enter the bridge during deferred handlerRemoved
-   * fan-out, after the bridge had already begun destruction.
+   * Release this bridge's hold on the thrift pipeline. Called from
+   * handlerRemoved on the normal teardown path; also from the dtor as a
+   * defensive fallback.
    */
-  void resetPipeline() noexcept { pipeline_ = nullptr; }
+  void resetPipeline() noexcept {
+    pipeline_ = nullptr;
+    pipelineGuard_.reset();
+  }
 
   // Set the metadata protocol (Binary or Compact) used to deserialize
   // inbound request metadata.
@@ -142,12 +152,11 @@ class ThriftServerTransportAdapter {
    * Called when the rocket pipeline delivers an error. Propagates the
    * error up the thrift pipeline. The disconnect happens via the
    * lifecycle path (onDisconnect callback / onPipelineInactive), not from
-   * here.
+   * here. Precondition: pipeline is wired; the DestructorGuard taken by
+   * setPipeline keeps it alive.
    */
   void onTransportError(folly::exception_wrapper&& e) noexcept {
-    if (FOLLY_LIKELY(pipeline_ != nullptr)) {
-      pipeline_->fireException(std::move(e));
-    }
+    pipeline_->fireException(std::move(e));
   }
 
   // === HeadEndpointHandler interface ===
@@ -213,6 +222,7 @@ class ThriftServerTransportAdapter {
       const folly::exception_wrapper& error) noexcept;
 
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
+  std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
   rocket::server::RocketServerAppAdapter& appAdapter_;
   OnRocketDisconnectFn onRocketDisconnect_;
   OnRocketDestroyFn onRocketDestroy_;

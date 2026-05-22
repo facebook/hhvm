@@ -75,11 +75,10 @@ class ConnectionHandlerTest : public ::testing::Test {
             (*hook)();
           }
 
-          return RocketServerConnection{
-              .transportHandler = std::move(transportHandler),
-              .pipeline = std::move(pipeline),
-              .allocator = {},
-          };
+          RocketServerConnection conn;
+          conn.transportHandler = std::move(transportHandler);
+          conn.pipeline = std::move(pipeline);
+          return conn;
         };
   }
 

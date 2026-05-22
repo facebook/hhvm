@@ -217,6 +217,9 @@ TEST(
   // nulls out its action callbacks so any later invocation (e.g. from
   // the bridge's own destruction path) is a no-op rather than a UAF
   // through dangling rocket-side pointers.
+  // deactivate before close so the rocket adapter's handlerRemoved
+  // DCHECK on disconnected_ is satisfied.
+  fixture.rocketPipeline->deactivate();
   fixture.rocketPipeline->close();
   fixture.rocketPipeline.reset();
 

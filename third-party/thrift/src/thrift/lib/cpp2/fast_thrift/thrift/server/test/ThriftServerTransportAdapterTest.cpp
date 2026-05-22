@@ -121,6 +121,18 @@ struct AdapterWithRocketPipeline {
     rocketPipeline_ = std::move(rocketPipeline);
   }
 
+  ~AdapterWithRocketPipeline() {
+    // Tear down in the same order the production
+    // RocketServerConnection::destroy() does: drop the adapter's
+    // pipeline guard before closing the pipeline, so the pipeline can
+    // actually destruct when reset() runs below.
+    appAdapter->resetPipeline();
+    if (rocketPipeline_) {
+      rocketPipeline_->close();
+      rocketPipeline_.reset();
+    }
+  }
+
  private:
   PipelineImpl::Ptr rocketPipeline_;
 };
@@ -182,6 +194,10 @@ TEST(ThriftServerTransportAdapterTest, InboundRequestConvertedToThrift) {
   EXPECT_EQ(result, Result::Success);
 
   EXPECT_EQ(thriftTail.readCount(), 1);
+
+  // Release the bridge's pipeline guard before thriftPipeline goes out
+  // of scope so the pipeline can destruct in order.
+  fixture.adapter->resetPipeline();
 }
 
 TEST(ThriftServerTransportAdapterTest, OnTransportErrorPropagatesException) {
@@ -204,6 +220,10 @@ TEST(ThriftServerTransportAdapterTest, OnTransportErrorPropagatesException) {
 
   fixture.adapter->onTransportError(
       folly::make_exception_wrapper<std::runtime_error>("connection lost"));
+
+  // Release the bridge's pipeline guard before thriftPipeline goes out
+  // of scope so the pipeline can destruct in order.
+  fixture.adapter->resetPipeline();
 
   EXPECT_EQ(thriftTail.exceptionCount(), 1);
 }

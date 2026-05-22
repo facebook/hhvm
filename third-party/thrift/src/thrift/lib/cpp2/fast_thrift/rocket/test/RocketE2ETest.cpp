@@ -111,6 +111,9 @@ class RocketE2ETest : public ::testing::Test {
       if (clientAppAdapter_) {
         clientAppAdapter_->resetPipeline();
       }
+      if (serverAppAdapter_) {
+        serverAppAdapter_->resetPipeline();
+      }
       clientPipeline_.reset();
       serverPipeline_.reset();
       clientTransport_.reset();

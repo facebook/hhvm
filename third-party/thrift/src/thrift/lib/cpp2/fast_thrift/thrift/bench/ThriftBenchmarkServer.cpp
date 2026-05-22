@@ -168,11 +168,10 @@ class FastThriftBenchmarkServer {
         channels.push_back(std::move(serverChannel));
       });
 
-      return rocket::server::connection::RocketServerConnection{
-          .transportHandler = std::move(transportHandler),
-          .pipeline = std::move(pipeline),
-          .allocator = {},
-      };
+      rocket::server::connection::RocketServerConnection conn;
+      conn.transportHandler = std::move(transportHandler);
+      conn.pipeline = std::move(pipeline);
+      return conn;
     };
 
     folly::SocketAddress address;

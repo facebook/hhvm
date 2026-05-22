@@ -50,24 +50,21 @@ struct RocketServerConnection {
   using OnConnectFn = folly::Function<void() noexcept>;
   using OnDisconnectFn = folly::Function<void() noexcept>;
 
+  RocketServerConnection() = default;
+  ~RocketServerConnection() { destroy(); }
+
+  RocketServerConnection(const RocketServerConnection&) = delete;
+  RocketServerConnection& operator=(const RocketServerConnection&) = delete;
+  RocketServerConnection(RocketServerConnection&&) = default;
+  RocketServerConnection& operator=(RocketServerConnection&&) = default;
+
   rocket::server::RocketServerAppAdapter::Ptr appAdapter{
       new rocket::server::RocketServerAppAdapter()};
   transport::TransportHandler::Ptr transportHandler;
   channel_pipeline::PipelineImpl::Ptr pipeline;
   channel_pipeline::SimpleBufferAllocator allocator;
 
-  // Set true by disconnect() / close() so they are idempotent. Public so
-  // RocketServerConnection stays an aggregate (existing callers
-  // construct it with designated initializers).
   bool disconnected_{false};
-
-  // NOTE: no user-declared destructor here. Adding one would make
-  // RocketServerConnection a non-aggregate and break the designated
-  // initializers used at several call sites. Callers that need a
-  // controlled teardown (ConnectionHandler) invoke close() explicitly;
-  // benchmarks/tests that drop the struct rely on the rocket pipeline
-  // being closed via close() before drop, or accept that the implicit
-  // destructor only releases the owning unique_ptrs.
 
   /**
    * Subscribe to connection lifecycle events:
@@ -123,6 +120,12 @@ struct RocketServerConnection {
       appAdapter->resetPipeline();
     }
     if (pipeline) {
+      // Satisfy the adapter's handlerRemoved contract: deactivate before
+      // close. The transport's beginClose normally fires deactivate from
+      // disconnect(), but only when its state is Open — owner-initiated
+      // teardown that bypasses the socket lifecycle would otherwise reach
+      // close() with the adapter still flagged as connected.
+      pipeline->deactivate();
       pipeline->close();
       pipeline.reset();
     }

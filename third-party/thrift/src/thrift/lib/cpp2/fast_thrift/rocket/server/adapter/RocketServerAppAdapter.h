@@ -90,23 +90,24 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   RocketServerAppAdapter& operator=(RocketServerAppAdapter&&) = delete;
 
   void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept {
+    DCHECK(pipeline);
+    if (pipeline_) {
+      XLOG(FATAL) << "must reset pipeline before setting a new one";
+    }
     pipeline_ = pipeline;
+    pipelineGuard_ =
+        std::make_unique<folly::DelayedDestruction::DestructorGuard>(pipeline);
   }
 
   /**
-   * Release this adapter's pointer to the pipeline. After this returns,
-   * write() must not be called.
-   *
-   * Unlike the client-side adapter, this adapter does NOT hold a
-   * DelayedDestruction guard on the pipeline. The server's existing
-   * teardown paths (RocketServerConnection::close → destroy) explicitly
-   * call pipeline->close() while both endpoints are still alive; test
-   * fixtures rely on dropping the pipeline before the endpoints. Adding
-   * a guard here would defer pipeline destruction past the transport
-   * handler's death, producing UAFs when the deferred handlerRemoved
-   * fan-out reached the freed transport.
+   * Release this adapter's hold on the pipeline. After this returns,
+   * the pipeline may be destroyed (modulo other guards) and write() must
+   * not be called.
    */
-  void resetPipeline() noexcept { pipeline_ = nullptr; }
+  void resetPipeline() noexcept {
+    pipeline_ = nullptr;
+    pipelineGuard_.reset();
+  }
 
   // Test-only observer: returns the adapter's current pipeline pointer
   // (nullptr after resetPipeline). Used to verify teardown ordering
@@ -134,11 +135,11 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
 
   /**
    * Send a rocket response message into the pipeline (outbound path).
+   * Precondition: setPipeline() has been called and resetPipeline() has
+   * not. The DestructorGuard taken by setPipeline keeps the pipeline
+   * alive across calls to write().
    */
   channel_pipeline::Result write(RocketResponseMessage&& msg) noexcept {
-    if (FOLLY_UNLIKELY(!pipeline_)) {
-      return channel_pipeline::Result::Error;
-    }
     return pipeline_->fireWrite(
         channel_pipeline::erase_and_box(std::move(msg)));
   }
@@ -171,14 +172,9 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   void handlerAdded() noexcept {}
 
   void handlerRemoved() noexcept {
-    // Defensive: pipeline removed us without a prior deactivate. Fan out
-    // onDisconnect_ so the owner observes the disconnect before the close.
-    if (!disconnected_) {
-      disconnected_ = true;
-      if (onDisconnect_) {
-        onDisconnect_();
-      }
-    }
+    // Contract: the pipeline must deactivate before it closes, so by the
+    // time we are removed the owner has already observed onDisconnect.
+    DCHECK(disconnected_) << "pipeline closed without prior deactivate";
     if (onClose_) {
       onClose_();
     }
@@ -200,6 +196,13 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   }
 
   void onPipelineInactive() noexcept {
+    // Idempotent: the transport's beginClose deactivates the pipeline, and
+    // RocketServerConnection::destroy deactivates again to satisfy the
+    // handlerRemoved contract when destroy is invoked without a prior
+    // transport close. Either path may fire first; collapse the second.
+    if (disconnected_) {
+      return;
+    }
     disconnected_ = true;
     if (onDisconnect_) {
       onDisconnect_();
@@ -209,17 +212,14 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   void onWriteReady() noexcept {}
 
  protected:
-  // Release the pipeline guard if a caller dropped the connection
-  // without first running RocketServerConnection::destroy() (which would
-  // have called resetPipeline). On the server, the ownership of the
-  // connection is split between ConnectionHandler::connections_ and the
-  // benchmark/test fixtures that emplace the connection directly, so the
-  // strict client-side invariant of "pipeline_ is null at dtor" cannot
-  // be enforced here.
-  ~RocketServerAppAdapter() override { resetPipeline(); }
+  ~RocketServerAppAdapter() override {
+    DCHECK(!pipeline_);
+    resetPipeline();
+  }
 
  private:
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
+  std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
   OnRequestFn onRequest_;
   OnErrorFn onError_;
   OnConnectFn onConnect_;

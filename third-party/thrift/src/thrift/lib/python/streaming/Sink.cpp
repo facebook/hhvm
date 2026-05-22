@@ -82,6 +82,24 @@ folly::coro::AsyncGenerator<TChunk&&> toAsyncGeneratorImpl(
       });
 }
 
+folly::coro::Task<std::unique_ptr<folly::IOBuf>> invokeSinkCallback(
+    PyObject* sink_callback,
+    folly::Executor* exec,
+    IOBufSinkGenerator sink_gen,
+    folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> agen) {
+  auto [promise, future] =
+      folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
+  sink_gen.attach(std::move(agen));
+
+  const int result = invoke_server_sink_callback(
+      sink_callback, exec, std::move(sink_gen), std::move(promise));
+  if (result == -1) {
+    folly::python::handlePythonError("PythonAsyncProccessor: makeSinkCallback");
+  }
+
+  co_return co_await std::move(future);
+}
+
 folly::Function<folly::coro::Task<std::unique_ptr<folly::IOBuf>>(
     folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>)>
 makeSinkCallback(PyObject* sink_callback, folly::Executor* exec) {
@@ -95,18 +113,8 @@ makeSinkCallback(PyObject* sink_callback, folly::Executor* exec) {
           folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>
               agen) mutable
           -> folly::coro::Task<std::unique_ptr<folly::IOBuf>> {
-        auto [promise, future] =
-            folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
-        sink_gen.attach(std::move(agen));
-
-        const int result = invoke_server_sink_callback(
-            sink_callback, exec, std::move(sink_gen), std::move(promise));
-        if (result == -1) {
-          folly::python::handlePythonError(
-              "PythonAsyncProccessor: makeSinkCallback");
-        }
-
-        co_return co_await std::move(future);
+        return invokeSinkCallback(
+            sink_callback, exec, std::move(sink_gen), std::move(agen));
       };
 }
 #endif // FOLLY_HAS_COROUTINES

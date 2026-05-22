@@ -132,6 +132,31 @@ static void throw_wrapped(
   }
 }
 
+#if FOLLY_HAS_COROUTINES
+template <typename ProtocolWriter>
+folly::coro::Task<folly::Try<StreamPayload>> consumeSink(
+    folly::Function<folly::coro::Task<std::unique_ptr<folly::IOBuf>>(
+        folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>)> consumer,
+    folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> gen) {
+  folly::exception_wrapper ew;
+  PythonStreamElementEncoder<ProtocolWriter> encoder;
+  try {
+    std::unique_ptr<folly::IOBuf> finalResponse = co_await consumer(
+        [](folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> gen_)
+            -> folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> {
+          while (auto item = co_await gen_.next()) {
+            co_yield folly::coro::co_result(
+                decode_stream_element(std::move(*item)));
+          }
+        }(std::move(gen)));
+    co_return encoder(std::move(finalResponse));
+  } catch (...) {
+    ew = folly::exception_wrapper(folly::current_exception());
+  }
+  co_return encoder(std::move(ew));
+}
+#endif
+
 template <typename ProtocolWriter>
 apache::thrift::detail::ServerSinkFactory toServerSinkFactory(
     SinkConsumer<std::unique_ptr<folly::IOBuf>, std::unique_ptr<folly::IOBuf>>&&
@@ -142,24 +167,8 @@ apache::thrift::detail::ServerSinkFactory toServerSinkFactory(
       [innerConsumer = std::move(sinkConsumer.consumer)](
           folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> gen) mutable
       -> folly::coro::Task<folly::Try<StreamPayload>> {
-    // Move into coroutine frame to avoid dangling this pointer to lambda
-    auto consumer = std::move(innerConsumer);
-    folly::exception_wrapper ew;
-    PythonStreamElementEncoder<ProtocolWriter> encoder;
-    try {
-      std::unique_ptr<folly::IOBuf> finalResponse = co_await consumer(
-          [](folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> gen_)
-              -> folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> {
-            while (auto item = co_await gen_.next()) {
-              co_yield folly::coro::co_result(
-                  decode_stream_element(std::move(*item)));
-            }
-          }(std::move(gen)));
-      co_return encoder(std::move(finalResponse));
-    } catch (...) {
-      ew = folly::exception_wrapper(folly::current_exception());
-    }
-    co_return encoder(std::move(ew));
+    return consumeSink<ProtocolWriter>(
+        std::move(innerConsumer), std::move(gen));
   };
   apache::thrift::detail::ServerSinkFactory sinkFactory{
       std::move(consumer),

@@ -47,6 +47,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapterFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -202,6 +203,25 @@ class FastThriftServer {
    */
   void setSocketOptions(rocket::server::connection::SocketOptions opts);
 
+  /**
+   * Per-connection accept callback. Invoked once per accepted connection
+   * (after handshake completion when TLS is enabled), with the
+   * per-connection ThriftConnContext. Use this to attach embedder-owned
+   * per-connection state by calling
+   * `connContext.setUserData(rocket::TypeErasedPtr)` — the framework will
+   * destroy that state when the connection (and any in-flight requests
+   * holding the ThriftConnContext via intrusive_ptr) tear down.
+   *
+   * The callback runs on the IO event base that owns the connection. Must
+   * be set before start()/serve(). Optional — if unset, no per-connection
+   * hook runs and the connection goes straight into the pipeline as-is.
+   *
+   * Peer address is reachable via `connContext.getPeerAddress()`.
+   */
+  using OnConnectionAcceptedFn =
+      std::function<void(ThriftConnContext& connContext)>;
+  void setOnConnectionAccepted(OnConnectionAcceptedFn cb);
+
   /// Start accepting connections without blocking.
   void start();
 
@@ -323,6 +343,7 @@ class FastThriftServer {
   // Shared across every per-connection MetadataAppAdapter.
   std::shared_ptr<const apache::thrift::metadata::ThriftServiceMetadataResponse>
       metadataResponse_;
+  OnConnectionAcceptedFn onConnectionAccepted_;
   std::optional<security::FizzServerCertConfig> sslConfig_;
   security::ThriftTlsConfig thriftConfig_{};
   bool enableReusePortBpfSpread_{false};

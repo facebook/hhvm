@@ -41,10 +41,8 @@ class AsyncProcessorHelper {
       std::string_view methodName,
       int64_t interactionId);
 
-  template <
-      typename Metadata,
-      typename = std::enable_if_t<
-          std::is_base_of_v<AsyncProcessorFactory::MethodMetadata, Metadata>>>
+  template <typename Metadata>
+    requires std::is_base_of_v<AsyncProcessorFactory::MethodMetadata, Metadata>
   static const Metadata& expectMetadataOfType(
       const AsyncProcessorFactory::MethodMetadata& methodMetadata) {
     DCHECK(dynamic_cast<const Metadata*>(&methodMetadata) != nullptr)

@@ -432,7 +432,11 @@ void ConnectionManager::dropConnectionsRound(
         std::max(std::chrono::milliseconds(0), roundInterval - roundDurationMs);
 
     eventBase_->timer().scheduleTimeoutFn(
-        [this, targetConnsNum, timeRemaining, roundInterval]() {
+        [this,
+         dg = DestructorGuard(this),
+         targetConnsNum,
+         timeRemaining,
+         roundInterval]() {
           dropConnectionsRound(targetConnsNum, timeRemaining, roundInterval);
         },
         nextDelayMs);

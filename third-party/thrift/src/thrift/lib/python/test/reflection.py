@@ -45,6 +45,7 @@ from test_thrift.thrift_types import (
     StructuredAnnotation,
 )
 from testing.sub_dependency.thrift_types import Basic as SubDepBasic
+from thrift.python.reflection import inspect, inspectable
 from thrift.python.reflection.constants_reflection import (
     ConstantEnumSpec,
     ConstantListSpec,
@@ -57,8 +58,6 @@ from thrift.python.reflection.constants_reflection import (
 )
 from thrift.python.reflection.types_reflection import (
     FieldSpec,
-    inspect,
-    inspectable,
     ListSpec,
     MapSpec,
     SetSpec,

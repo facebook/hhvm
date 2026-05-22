@@ -32,7 +32,7 @@ from typing import Optional
 
 from parameterized import parameterized
 from test_thrift.thrift_types import SimpleStruct
-from thrift.python.reflection.types_reflection import inspect, inspectable
+from thrift.python.reflection import inspect, inspectable
 
 BLOCKED_MODULES = [
     "thrift.python.container_typedefs",

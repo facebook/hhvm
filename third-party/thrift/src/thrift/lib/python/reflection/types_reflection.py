@@ -17,12 +17,9 @@
 from __future__ import annotations
 
 import builtins
-import threading
-from functools import wraps
 from types import MappingProxyType
-from typing import Any, Callable, Iterator, overload, Sequence, Type, TypeVar, Union
+from typing import Any, Iterator, Sequence
 
-from thrift.python.exceptions import GeneratedError
 from thrift.python.reflection.constants_reflection import (
     _ImmutableMeta,
     ConstantMapSpec,
@@ -31,16 +28,6 @@ from thrift.python.reflection.constants_reflection import (
     ThriftType,
 )
 from thrift.python.reflection_enums import NumberType, Qualifier, StructType
-from thrift.python.types import (
-    ImmutableList,
-    ImmutableMap,
-    ImmutableSet,
-    List,
-    Map,
-    Set,
-    Struct,
-    Union as Union_,
-)
 
 
 _THRIFT_TYPE_TO_NUMBER_TYPE: dict[ThriftType, NumberType] = {
@@ -338,77 +325,3 @@ class MapSpec(metaclass=_ImmutableMeta):
             f"MapSpec(key={self.key!r}, key_thrift_type={self.key_thrift_type!r}, "
             f"value={self.value!r}, value_thrift_type={self.value_thrift_type!r})"
         )
-
-
-_F = TypeVar("_F", bound=Callable[..., Any])
-
-
-def _threadsafe_cached(fn: _F) -> _F:
-    cache: dict[type[Any], Any] = {}
-    lock: threading.Lock = threading.Lock()
-
-    @wraps(fn)
-    def wrapper(key: type[Any]) -> Any:
-        if key in cache:
-            return cache[key]
-        with lock:
-            if key in cache:
-                return cache[key]
-            result = cache[key] = fn(key)
-            return result
-
-    return wrapper  # type: ignore[return-value]
-
-
-@_threadsafe_cached
-def _inspect_impl(cls: type[Any]) -> StructSpec | ListSpec | SetSpec | MapSpec:
-    return cls.__get_reflection__()  # type: ignore[attr-defined]
-
-
-@overload
-def inspect(
-    cls_or_instance: Union[ImmutableList[Any], Type[ImmutableList[Any]]],
-) -> ListSpec: ...
-
-
-@overload
-def inspect(
-    cls_or_instance: Union[ImmutableSet[Any], Type[ImmutableSet[Any]]],
-) -> SetSpec: ...
-
-
-@overload
-def inspect(
-    cls_or_instance: Union[ImmutableMap[Any, Any], Type[ImmutableMap[Any, Any]]],
-) -> MapSpec: ...
-
-
-@overload
-def inspect(
-    cls_or_instance: Union[
-        Struct, Type[Struct], Union_, Type[Union_], GeneratedError, Type[GeneratedError]
-    ],
-) -> StructSpec: ...
-
-
-def inspect(
-    cls_or_instance: Any,
-) -> StructSpec | ListSpec | SetSpec | MapSpec:
-    if isinstance(cls_or_instance, (List, Set, Map)):
-        return cls_or_instance.__get_reflection__()  # type: ignore[attr-defined]
-    klass = (
-        cls_or_instance if isinstance(cls_or_instance, type) else type(cls_or_instance)
-    )
-    if hasattr(klass, "__get_reflection__"):
-        return _inspect_impl(klass)
-    raise TypeError(
-        f"No reflection information found: '{klass.__module__}.{klass.__name__}'"
-    )
-
-
-def inspectable(cls_or_instance: Any) -> bool:
-    if not isinstance(cls_or_instance, type):
-        if isinstance(cls_or_instance, (List, Set, Map)):
-            return True
-        cls_or_instance = type(cls_or_instance)
-    return hasattr(cls_or_instance, "__get_reflection__")

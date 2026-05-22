@@ -205,21 +205,27 @@ class FastThriftServer {
 
   /**
    * Per-connection accept callback. Invoked once per accepted connection
-   * (after handshake completion when TLS is enabled), with the
+   * (after handshake completion when TLS is enabled), with a pointer to the
    * per-connection ThriftConnContext. Use this to attach embedder-owned
    * per-connection state by calling
-   * `connContext.setUserData(rocket::TypeErasedPtr)` — the framework will
+   * `connContext->setUserData(rocket::TypeErasedPtr)` — the framework will
    * destroy that state when the connection (and any in-flight requests
    * holding the ThriftConnContext via intrusive_ptr) tear down.
+   *
+   * The pointer is non-null only when `FastThriftServerConfig::
+   * enableRequestContext` is true. When the flag is off, the callback still
+   * fires with `nullptr` so embedders can react to accept without context
+   * propagation; any `setUserData` call is impossible in that case.
    *
    * The callback runs on the IO event base that owns the connection. Must
    * be set before start()/serve(). Optional — if unset, no per-connection
    * hook runs and the connection goes straight into the pipeline as-is.
    *
-   * Peer address is reachable via `connContext.getPeerAddress()`.
+   * Peer address is reachable via `connContext->getPeerAddress()` when the
+   * pointer is non-null.
    */
   using OnConnectionAcceptedFn =
-      std::function<void(ThriftConnContext& connContext)>;
+      std::function<void(ThriftConnContext* connContext)>;
   void setOnConnectionAccepted(OnConnectionAcceptedFn cb);
 
   /// Start accepting connections without blocking.

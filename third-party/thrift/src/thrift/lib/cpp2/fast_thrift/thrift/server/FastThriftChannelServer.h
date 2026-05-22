@@ -65,6 +65,18 @@ struct FastThriftServerConfig {
   // available at runtime. With the flag off (or the schema not bundled),
   // Fiddle will report no functions for the service. Default off.
   bool enableMetadataService{false};
+
+  // When true, FastThriftServer constructs a per-connection ThriftConnContext
+  // on accept and wires the ThriftServerRequestContextHandler +
+  // ThriftServerConnectionContextHandler into the thrift pipeline, so each
+  // request's ThriftRequestContext is populated with the ThriftConnContext.
+  // The setOnConnectionAccepted callback receives a pointer to the
+  // ThriftConnContext (or nullptr when this flag is off).
+  //
+  // Off by default — opt in only when embedder code needs per-connection
+  // context propagation (e.g., setUserData stashing). Only takes effect on
+  // FastThriftServer; ignored by FastThriftChannelServer.
+  bool enableRequestContext{false};
 };
 
 /**

@@ -161,27 +161,32 @@ FastThriftServer::createConnectionFactory() {
              -> rocket::server::connection::RocketServerConnection {
     auto* evb = socket->getEventBase();
 
-    // Snapshot peer address before consuming the socket. After TLS this
-    // reflects the post-handshake peer.
-    folly::SocketAddress peerAddress;
-    try {
-      socket->getPeerAddress(&peerAddress);
-    } catch (const std::exception& ex) {
-      XLOG(WARN) << "Failed to read peer address on accept: " << ex.what();
+    // Per-connection context. Only built when enableRequestContext is set;
+    // otherwise the embedder hook (if any) receives nullptr and the thrift
+    // pipeline below skips the context-propagation handlers.
+    //
+    // When built, ownership is handed to ThriftServerConnectionContextHandler
+    // in the thrift pipeline; in-flight ThriftRequestContexts hold extra
+    // refs via intrusive_ptr.
+    boost::intrusive_ptr<ThriftConnContext> connContext;
+    if (config_.enableRequestContext) {
+      // Snapshot peer address before consuming the socket. After TLS this
+      // reflects the post-handshake peer.
+      folly::SocketAddress peerAddress;
+      try {
+        socket->getPeerAddress(&peerAddress);
+      } catch (const std::exception& ex) {
+        XLOG(WARN) << "Failed to read peer address on accept: " << ex.what();
+      }
+      connContext.reset(new ThriftConnContext());
+      connContext->setPeerAddress(peerAddress);
     }
-
-    // Per-connection context. Ownership is handed to
-    // ThriftServerConnectionContextHandler in the thrift pipeline below;
-    // in-flight ThriftRequestContexts hold extra refs via intrusive_ptr.
-    auto connContext =
-        boost::intrusive_ptr<ThriftConnContext>{new ThriftConnContext()};
-    connContext->setPeerAddress(peerAddress);
 
     // Embedder hook (e.g., ucache stashing a TAO connection context on the
     // ThriftConnContext via setUserData). Runs synchronously on the IO EVB
     // before any request is dispatched on this connection.
     if (onConnectionAccepted_) {
-      onConnectionAccepted_(*connContext);
+      onConnectionAccepted_(connContext.get());
     }
 
     auto transportHandler =
@@ -256,28 +261,31 @@ FastThriftServer::createConnectionFactory() {
 
       // 3. Build thrift pipeline templated on the composite so its onRead
       //    is the resolved tail; setPipeline on the typed pointer also
-      //    fans out to every child. Wire the per-connection context
-      //    handlers so each request's ThriftRequestContext is populated
-      //    with the ThriftConnContext.
+      //    fans out to every child. When enableRequestContext is set, wire
+      //    the per-connection context handlers so each request's
+      //    ThriftRequestContext is populated with the ThriftConnContext.
       using ReqCtxHandler = ThriftServerRequestContextHandler<
           channel_pipeline::detail::ContextImpl>;
       using ConnCtxHandler = ThriftServerConnectionContextHandler<
           channel_pipeline::detail::ContextImpl>;
-      auto thriftPipeline =
-          PipelineBuilder<
-              server::ThriftServerTransportAdapter,
-              ThriftServerCompositeAppAdapter,
-              SimpleBufferAllocator>()
-              .setEventBase(evb)
-              .setHead(ctx.transportAdapter.get())
-              .setTail(ctx.adapter.get())
-              .setAllocator(ctx.allocator.get())
-              .addNextInbound<ReqCtxHandler>(
-                  thrift_server_request_context_handler_tag)
-              .addNextInbound<ConnCtxHandler>(
-                  thrift_server_connection_context_handler_tag,
-                  std::move(connContext))
-              .build();
+      PipelineBuilder<
+          server::ThriftServerTransportAdapter,
+          ThriftServerCompositeAppAdapter,
+          SimpleBufferAllocator>
+          thriftPipelineBuilder;
+      thriftPipelineBuilder.setEventBase(evb)
+          .setHead(ctx.transportAdapter.get())
+          .setTail(ctx.adapter.get())
+          .setAllocator(ctx.allocator.get());
+      if (config_.enableRequestContext) {
+        thriftPipelineBuilder
+            .addNextInbound<ReqCtxHandler>(
+                thrift_server_request_context_handler_tag)
+            .addNextInbound<ConnCtxHandler>(
+                thrift_server_connection_context_handler_tag,
+                std::move(connContext));
+      }
+      auto thriftPipeline = thriftPipelineBuilder.build();
       ctx.transportAdapter->setPipeline(thriftPipeline.get());
       ctx.adapter->setPipeline(thriftPipeline.get());
       thriftPipeline->activate();
@@ -318,28 +326,31 @@ FastThriftServer::createConnectionFactory() {
       // 3. Build thrift pipeline templated on the base adapter. Works
       //    because generated FastSvAppAdapter subclasses only populate
       //    dispatch_ via addMethodHandler in their ctor and don't override
-      //    base methods. Wire the per-connection context handlers so each
-      //    request's ThriftRequestContext is populated with the
-      //    ThriftConnContext.
+      //    base methods. When enableRequestContext is set, wire the
+      //    per-connection context handlers so each request's
+      //    ThriftRequestContext is populated with the ThriftConnContext.
       using ReqCtxHandler = ThriftServerRequestContextHandler<
           channel_pipeline::detail::ContextImpl>;
       using ConnCtxHandler = ThriftServerConnectionContextHandler<
           channel_pipeline::detail::ContextImpl>;
-      auto thriftPipeline =
-          PipelineBuilder<
-              server::ThriftServerTransportAdapter,
-              ThriftServerAppAdapter,
-              SimpleBufferAllocator>()
-              .setEventBase(evb)
-              .setHead(ctx.transportAdapter.get())
-              .setTail(ctx.adapter.get())
-              .setAllocator(ctx.allocator.get())
-              .addNextInbound<ReqCtxHandler>(
-                  thrift_server_request_context_handler_tag)
-              .addNextInbound<ConnCtxHandler>(
-                  thrift_server_connection_context_handler_tag,
-                  std::move(connContext))
-              .build();
+      PipelineBuilder<
+          server::ThriftServerTransportAdapter,
+          ThriftServerAppAdapter,
+          SimpleBufferAllocator>
+          thriftPipelineBuilder;
+      thriftPipelineBuilder.setEventBase(evb)
+          .setHead(ctx.transportAdapter.get())
+          .setTail(ctx.adapter.get())
+          .setAllocator(ctx.allocator.get());
+      if (config_.enableRequestContext) {
+        thriftPipelineBuilder
+            .addNextInbound<ReqCtxHandler>(
+                thrift_server_request_context_handler_tag)
+            .addNextInbound<ConnCtxHandler>(
+                thrift_server_connection_context_handler_tag,
+                std::move(connContext));
+      }
+      auto thriftPipeline = thriftPipelineBuilder.build();
       ctx.transportAdapter->setPipeline(thriftPipeline.get());
       ctx.adapter->setPipeline(thriftPipeline.get());
       thriftPipeline->activate();

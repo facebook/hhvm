@@ -121,6 +121,96 @@ TEST(RocketServerAppAdapterTest, OnReadWithoutCallbackReturnsError) {
   EXPECT_EQ(result, Result::Error);
 }
 
+TEST(RocketServerAppAdapterTest, OnPipelineActiveFiresOnConnectCallback) {
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+  int connectCount = 0;
+
+  adapter->setLifecycleHandlers(
+      [&]() noexcept { connectCount++; }, []() noexcept {}, []() noexcept {});
+
+  adapter->onPipelineActive();
+  EXPECT_EQ(connectCount, 1);
+}
+
+TEST(RocketServerAppAdapterTest, OnPipelineInactiveFiresOnDisconnectCallback) {
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+  int disconnectCount = 0;
+
+  adapter->setLifecycleHandlers(
+      []() noexcept {},
+      [&]() noexcept { disconnectCount++; },
+      []() noexcept {});
+
+  adapter->onPipelineInactive();
+  EXPECT_EQ(disconnectCount, 1);
+}
+
+TEST(RocketServerAppAdapterTest, HandlerRemovedFiresOnCloseCallback) {
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+  int closeCount = 0;
+
+  adapter->setLifecycleHandlers(
+      []() noexcept {}, []() noexcept {}, [&]() noexcept { closeCount++; });
+
+  adapter->handlerRemoved();
+  EXPECT_EQ(closeCount, 1);
+}
+
+TEST(
+    RocketServerAppAdapterTest,
+    HandlerRemovedFansOutDisconnectWhenNotPreviouslyDisconnected) {
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+  int disconnectCount = 0;
+  int closeCount = 0;
+
+  adapter->setLifecycleHandlers(
+      []() noexcept {},
+      [&]() noexcept { disconnectCount++; },
+      [&]() noexcept { closeCount++; });
+
+  // Pipeline made the adapter live with onPipelineActive, then was
+  // removed without a prior deactivate. The adapter must synthesize the
+  // disconnect so observers see it before close.
+  adapter->onPipelineActive();
+  EXPECT_EQ(disconnectCount, 0);
+
+  adapter->handlerRemoved();
+  EXPECT_EQ(disconnectCount, 1);
+  EXPECT_EQ(closeCount, 1);
+}
+
+TEST(RocketServerAppAdapterTest, LifecycleCallbacksNoOpWhenUnset) {
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+  // No setLifecycleHandlers call.
+  adapter->onPipelineActive();
+  adapter->onPipelineInactive();
+  adapter->handlerRemoved();
+  // Reaching here without crash is the test.
+}
+
+TEST(RocketServerAppAdapterTest, LifecycleAndErrorChannelsAreIndependent) {
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+  int errorCount = 0;
+  int inactiveCount = 0;
+
+  adapter->setRequestHandlers(
+      [](TypeErasedBox&&) noexcept -> Result { return Result::Success; },
+      [&](folly::exception_wrapper&&) noexcept { errorCount++; });
+  adapter->setLifecycleHandlers(
+      []() noexcept {}, [&]() noexcept { inactiveCount++; }, []() noexcept {});
+
+  // Lifecycle event must NOT route through the error callback.
+  adapter->onPipelineInactive();
+  EXPECT_EQ(inactiveCount, 1);
+  EXPECT_EQ(errorCount, 0);
+
+  // Error event must NOT route through the lifecycle callback.
+  adapter->onException(
+      folly::make_exception_wrapper<std::runtime_error>("boom"));
+  EXPECT_EQ(errorCount, 1);
+  EXPECT_EQ(inactiveCount, 1);
+}
+
 HANDLER_TAG(mock_head_tag);
 
 TEST(RocketServerAppAdapterTest, WriteWithPipelineCallsFireWrite) {
@@ -154,6 +244,10 @@ TEST(RocketServerAppAdapterTest, WriteWithPipelineCallsFireWrite) {
   EXPECT_EQ(result, Result::Success);
   // Write goes from tail→head, so mock head should receive it
   EXPECT_EQ(head.writeCount(), 1);
+
+  pipeline->deactivate();
+  pipeline->close();
+  adapter->resetPipeline();
 }
 
 } // namespace apache::thrift::fast_thrift::rocket::server::test

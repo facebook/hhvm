@@ -336,9 +336,6 @@ FastThriftServerT<Stats>::createConnectionFactory() {
     //    metadata protocol into it.
     auto serverChannel =
         std::make_shared<ThriftServerChannel>(processorFactory_);
-    auto transportAdapter =
-        std::make_unique<server::ThriftServerTransportAdapter>(
-            *conn.appAdapter);
 
     // 2. Build rocket pipeline: TransportHandler → ... → RocketServerAppAdapter
     auto* channelPtr = serverChannel.get();
@@ -361,8 +358,35 @@ FastThriftServerT<Stats>::createConnectionFactory() {
       transportHandler->setZeroCopyEnableThreshold(config_.zeroCopyThreshold);
     }
 
+    // 3. Capture heap-stable raw pointers for the bridge's thrift→rocket
+    //    action callbacks. The owning unique_ptrs in RocketServerConnection
+    //    are address-unstable (the struct is moved into
+    //    ConnectionHandler::connections_), but the pointees they manage
+    //    live on the heap. The bridge's onClose subscription nulls these
+    //    callbacks out once the rocket side completes its handlerRemoved
+    //    fan-out, so they never invoke through dangling pointers.
+    auto* rawTransport = transportHandler.get();
+
     conn.transportHandler = std::move(transportHandler);
     conn.pipeline = std::move(rocketPipeline);
+
+    auto transportAdapter =
+        std::make_unique<server::ThriftServerTransportAdapter>(
+            *conn.appAdapter,
+            /*onRocketDisconnect=*/
+            [rawTransport]() noexcept {
+              // Triggers the close callback (set by ConnectionHandler),
+              // which runs ConnectionHandler::removeConnection →
+              // RocketServerConnection::close() → disconnect()+destroy().
+              // Idempotent in TransportHandler::close.
+              rawTransport->close({});
+            },
+            /*onRocketDestroy=*/
+            [rawTransport]() noexcept {
+              // Same teardown trigger as disconnect; the difference is
+              // intent (full teardown vs. graceful disconnect). Idempotent.
+              rawTransport->close({});
+            });
 
     ThriftConnectionContext ctx;
     ctx.stats = stats;

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <folly/Function.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
@@ -32,31 +33,94 @@ namespace apache::thrift::fast_thrift::rocket::server {
  *
  *   TransportHandler → [rocket handlers] → RocketServerAppAdapter
  *
- * The ThriftServerTransportAdapter holds a unique_ptr to this struct and
- * can close the connection when the thrift pipeline encounters an error.
+ * Lifecycle is split between disconnect() and destroy():
+ *   - disconnect(ew) closes the underlying socket. If `ew` is non-empty it
+ *     is fired up the pipeline as the reason for the disconnect; otherwise
+ *     disconnect is a pure lifecycle signal. Handlers observe
+ *     onPipelineInactive as the rocket pipeline winds down. The pipeline
+ *     structure itself is preserved (handlers stay attached).
+ *   - destroy() closes the pipeline (handlers see handlerRemoved) and
+ *     releases the transport handler + appAdapter.
+ *
+ * The pre-existing close(ew) entry point is retained as a backwards-compat
+ * shim for ConnectionHandler-driven teardown; it composes disconnect() +
+ * destroy().
  */
 struct RocketServerConnection {
+  using OnConnectFn = folly::Function<void() noexcept>;
+  using OnDisconnectFn = folly::Function<void() noexcept>;
+
   rocket::server::RocketServerAppAdapter::Ptr appAdapter{
       new rocket::server::RocketServerAppAdapter()};
   transport::TransportHandler::Ptr transportHandler;
   channel_pipeline::PipelineImpl::Ptr pipeline;
   channel_pipeline::SimpleBufferAllocator allocator;
 
+  // Set true by disconnect() / close() so they are idempotent. Public so
+  // RocketServerConnection stays an aggregate (existing callers
+  // construct it with designated initializers).
+  bool disconnected_{false};
+
+  // NOTE: no user-declared destructor here. Adding one would make
+  // RocketServerConnection a non-aggregate and break the designated
+  // initializers used at several call sites. Callers that need a
+  // controlled teardown (ConnectionHandler) invoke close() explicitly;
+  // benchmarks/tests that drop the struct rely on the rocket pipeline
+  // being closed via close() before drop, or accept that the implicit
+  // destructor only releases the owning unique_ptrs.
+
   /**
-   * Close the connection and tear down the rocket pipeline. Order
-   * matters: transport stays alive while the pipeline runs
-   * handlerRemoved, then transport and appAdapter are destroyed last.
-   * Idempotent.
+   * Subscribe to connection lifecycle events:
+   *   - onConnect:    rocket pipeline became active (socket ready)
+   *   - onDisconnect: rocket pipeline went inactive (socket down)
+   *
+   * Destroy is intentionally not exposed here — it is always
+   * owner-initiated (via destroy()) and runs synchronously.
+   *
+   * Replaces any previously-registered handlers.
    */
-  void close(folly::exception_wrapper&& e) noexcept {
+  void setLifecycleHandlers(
+      OnConnectFn onConnect, OnDisconnectFn onDisconnect) noexcept {
+    appAdapter->setLifecycleHandlers(
+        std::move(onConnect), std::move(onDisconnect), {});
+  }
+
+  /**
+   * Close the underlying socket. Idempotent. Pipeline + transport handler
+   * remain owned; call destroy() to release them. If `ew` is non-empty it
+   * is fired up the pipeline before deactivation so handlers can resolve
+   * in-flight state with the actual reason.
+   *
+   * The pre-existing close callback on the transport is cleared first to
+   * prevent reentry: close() triggers the callback, which would call back
+   * into removeConnection() and close() again.
+   */
+  void disconnect(folly::exception_wrapper ew = {}) noexcept {
+    if (disconnected_) {
+      return;
+    }
+    disconnected_ = true;
     if (transportHandler) {
-      // Clear the close callback before calling close to prevent re-entry:
-      // close() triggers the callback, which would call removeConnection(),
-      // which calls close() again — causing double-close and iterator
-      // invalidation in closeAllConnections().
       transportHandler->setCloseCallback(nullptr);
-      transportHandler->close(std::move(e));
+      transportHandler->close(std::move(ew));
+    }
+  }
+
+  /**
+   * Tear down the rocket pipeline (handlerRemoved fan-out) and release
+   * the transport + appAdapter. Implies disconnect() if not already
+   * disconnected. Idempotent.
+   *
+   * Order matters: transport stays alive while the pipeline runs
+   * handlerRemoved, then transport and appAdapter are destroyed last.
+   */
+  void destroy() noexcept {
+    disconnect();
+    if (transportHandler) {
       transportHandler->resetPipeline();
+    }
+    if (appAdapter) {
+      appAdapter->resetPipeline();
     }
     if (pipeline) {
       pipeline->close();
@@ -64,6 +128,16 @@ struct RocketServerConnection {
     }
     transportHandler.reset();
     appAdapter.reset();
+  }
+
+  /**
+   * Legacy combined path: disconnect with `e` as the reason, then destroy.
+   * Retained as a shim so ConnectionHandler-driven teardown keeps working
+   * unchanged; new callers should use disconnect(ew) + destroy().
+   */
+  void close(folly::exception_wrapper&& e) noexcept {
+    disconnect(std::move(e));
+    destroy();
   }
 };
 

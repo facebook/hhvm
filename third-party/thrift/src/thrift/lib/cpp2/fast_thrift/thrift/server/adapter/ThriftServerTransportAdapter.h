@@ -17,18 +17,17 @@
 #pragma once
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/Function.h>
 #include <folly/Portability.h>
-#include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/PayloadVariants.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RocketFrameDecoder.h>
-#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift::server {
 
@@ -36,8 +35,18 @@ namespace apache::thrift::fast_thrift::thrift::server {
  * ThriftServerTransportAdapter — head endpoint of the thrift server pipeline.
  *
  * Bridges the thrift pipeline to the rocket pipeline by converting between
- * thrift and rocket message types. Holds a reference to the
- * RocketServerAppAdapter that sits at the tail of the rocket pipeline.
+ * thrift and rocket message types and by propagating lifecycle events
+ * between the two pipelines.
+ *
+ * The bridge keeps the existing reference to the RocketServerAppAdapter at
+ * the tail of the rocket pipeline (used for request/response forwarding)
+ * and additionally:
+ *   - subscribes to the rocket adapter's lifecycle (rocket→thrift): when
+ *     the rocket pipeline becomes active/inactive, the bridge activates/
+ *     deactivates the thrift pipeline so handlers can react.
+ *   - invokes owner-supplied disconnect/destroy callbacks (thrift→rocket):
+ *     when the bridge's own pipeline goes inactive or is removed, the
+ *     callbacks tear the rocket connection down.
  *
  * Inbound path (requests):
  *   RocketServerAppAdapter delivers request → this.onTransportRequest()
@@ -49,45 +58,32 @@ namespace apache::thrift::fast_thrift::thrift::server {
  *   → converts ThriftServerResponseMessage to RocketResponseMessage
  *   → RocketServerAppAdapter.write()
  *
- * Usage:
- *   // 1. Create rocket pipeline with app adapter as tail
- *   RocketServerAppAdapter appAdapter;
- *   auto rocketPipeline = PipelineBuilder<
- *       TransportHandler, RocketServerAppAdapter, Allocator>()
- *       .setHead(transportHandler)
- *       .setTail(&appAdapter)
- *       ...
- *       .build();
+ * Lifecycle propagation:
+ *   rocket active   → bridge.onConnect()   → thrift pipeline activate
+ *   rocket inactive → bridge.onDisconnect() → thrift pipeline deactivate
+ *   thrift inactive → bridge.onPipelineInactive() → onRocketDisconnect_
+ *   thrift removed  → bridge.handlerRemoved()     → onRocketDestroy_
  *
- *   // 2. Create transport adapter referencing the app adapter
- *   ThriftServerTransportAdapter transportAdapter(appAdapter);
- *
- *   // 3. Build thrift pipeline with this adapter as head
- *   auto thriftPipeline = PipelineBuilder<
- *       ThriftServerTransportAdapter, ThriftServerChannel, Allocator>()
- *       .setHead(&transportAdapter)
- *       .setTail(serverChannel)
- *       ...
- *       .build();
- *
- *   // 4. Wire up
- *   transportAdapter.setPipeline(thriftPipeline.get());
+ * Hot/cold split: per-request methods (onTransportRequest, onWrite,
+ * onTransportError) are inlined here so callers can fuse them with the
+ * surrounding pipeline traversal. Per-connection lifecycle methods (ctor,
+ * dtor, handlerRemoved, onPipelineInactive, onConnect, onDisconnect,
+ * onRocketClosed) and per-request error fallback (handleDecodeFailure)
+ * are out-of-line and FOLLY_NOINLINE in the .cpp — they fire at most once
+ * per connection, so removing them from the inline budget keeps the hot
+ * path's icache footprint small.
  */
 class ThriftServerTransportAdapter {
  public:
-  explicit ThriftServerTransportAdapter(
-      rocket::server::RocketServerAppAdapter& appAdapter)
-      : appAdapter_(appAdapter) {
-    appAdapter_.setRequestHandlers(
-        [this](channel_pipeline::TypeErasedBox&& msg) noexcept {
-          return onTransportRequest(std::move(msg));
-        },
-        [this](folly::exception_wrapper&& e) noexcept {
-          onTransportError(std::move(e));
-        });
-  }
+  using OnRocketDisconnectFn = folly::Function<void() noexcept>;
+  using OnRocketDestroyFn = folly::Function<void() noexcept>;
 
-  ~ThriftServerTransportAdapter() = default;
+  FOLLY_NOINLINE explicit ThriftServerTransportAdapter(
+      rocket::server::RocketServerAppAdapter& appAdapter,
+      OnRocketDisconnectFn onRocketDisconnect = {},
+      OnRocketDestroyFn onRocketDestroy = {});
+
+  FOLLY_NOINLINE ~ThriftServerTransportAdapter();
 
   ThriftServerTransportAdapter(const ThriftServerTransportAdapter&) = delete;
   ThriftServerTransportAdapter& operator=(const ThriftServerTransportAdapter&) =
@@ -99,6 +95,16 @@ class ThriftServerTransportAdapter {
   void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept {
     pipeline_ = pipeline;
   }
+
+  /**
+   * Release this bridge's pointer to the thrift pipeline. The bridge
+   * does NOT hold a DelayedDestruction guard on the pipeline (see the
+   * matching note in RocketServerAppAdapter): the destruction order
+   * imposed by ThriftConnectionContext (pipeline before bridge) would
+   * make a guard re-enter the bridge during deferred handlerRemoved
+   * fan-out, after the bridge had already begun destruction.
+   */
+  void resetPipeline() noexcept { pipeline_ = nullptr; }
 
   // Set the metadata protocol (Binary or Compact) used to deserialize
   // inbound request metadata.
@@ -133,14 +139,13 @@ class ThriftServerTransportAdapter {
   }
 
   /**
-   * Called when the rocket pipeline delivers an error.
-   *
-   * Propagates the error through the thrift pipeline via
-   * fireExceptionFromIndex. Connection lifecycle is managed externally
-   * (e.g., by ConnectionHandler or the test fixture).
+   * Called when the rocket pipeline delivers an error. Propagates the
+   * error up the thrift pipeline. The disconnect happens via the
+   * lifecycle path (onDisconnect callback / onPipelineInactive), not from
+   * here.
    */
   void onTransportError(folly::exception_wrapper&& e) noexcept {
-    if (FOLLY_LIKELY(pipeline_)) {
+    if (FOLLY_LIKELY(pipeline_ != nullptr)) {
       pipeline_->fireException(std::move(e));
     }
   }
@@ -171,43 +176,49 @@ class ThriftServerTransportAdapter {
   }
 
   void handlerAdded() noexcept {}
-  void handlerRemoved() noexcept {}
-  void onPipelineActive() noexcept {}
-  void onPipelineInactive() noexcept {}
+
+  // Thrift pipeline destroyed → tear down the rocket connection.
+  FOLLY_NOINLINE void handlerRemoved() noexcept;
+
+  // Thrift pipeline went active. Just stamp our local view; the rocket
+  // side drives activation via its onConnect callback.
+  void onPipelineActive() noexcept { connected_ = true; }
+
+  // Thrift pipeline went inactive — disconnect the rocket connection.
+  // The rocket-side onDisconnect callback re-enters us; the connected_
+  // flag absorbs the loop.
+  FOLLY_NOINLINE void onPipelineInactive() noexcept;
+
   void onReadReady() noexcept {}
 
  private:
+  // Rocket pipeline became active — activate the thrift pipeline so
+  // handlers can react. Idempotent in connected_; reactivate after
+  // disconnect works.
+  FOLLY_NOINLINE void onConnect() noexcept;
+
+  // Rocket pipeline went inactive — deactivate the thrift pipeline so
+  // handlers drain in-flight state. Idempotent in connected_.
+  FOLLY_NOINLINE void onDisconnect() noexcept;
+
+  // Rocket pipeline finished tearing down (handlerRemoved fan-out on the
+  // rocket app adapter). The rocket pieces our action callbacks captured
+  // are about to go away, so drop the callbacks. Anything that ran later
+  // (e.g. bridge dtor) would UAF.
+  FOLLY_NOINLINE void onRocketClosed() noexcept;
+
   FOLLY_NOINLINE channel_pipeline::Result handleDecodeFailure(
       uint32_t streamId,
       apache::thrift::fast_thrift::frame::FrameType streamType,
-      const folly::exception_wrapper& error) noexcept {
-    // Per-request decode failure: synthesize a REQUEST_PARSING_FAILURE
-    // ERROR frame and write it outbound through the rocket pipeline.
-    // Don't propagate as a connection-level exception or push a valueless
-    // payload downstream — the connection itself is healthy. The error
-    // body is Compact-serialized regardless of negotiated metadata
-    // protocol (matches legacy: ResponseRpcError is a control-frame body
-    // with its own wire contract, not application metadata).
-    auto serialized = serializeResponseRpcError(
-        apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-        error.what().toStdString());
-    ThriftErrorPayload errorPayload{
-        .data = std::move(serialized.data),
-        .metadata = nullptr,
-        .streamId = streamId,
-        .errorCode = static_cast<uint32_t>(serialized.errorCode),
-    };
-    return appAdapter_.write(
-        rocket::server::RocketResponseMessage{
-            .frame = std::move(errorPayload).toRocketFrame(metadataProtocol_),
-            .streamType = streamType,
-        });
-  }
+      const folly::exception_wrapper& error) noexcept;
 
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
   rocket::server::RocketServerAppAdapter& appAdapter_;
+  OnRocketDisconnectFn onRocketDisconnect_;
+  OnRocketDestroyFn onRocketDestroy_;
   rocket::server::MetadataProtocol metadataProtocol_{
       rocket::server::MetadataProtocol::BINARY};
+  bool connected_{false};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift::server

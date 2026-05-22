@@ -29,7 +29,11 @@
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/test/TestCert.h>
+// Peek into FastThriftServerT::thriftConnections_ for the lifecycle
+// propagation E2E test. Keep above the FastThriftChannelServer include.
+#define private public
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftChannelServer.h>
+#undef private
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestServiceAsyncClient.h>
 
@@ -321,6 +325,50 @@ TEST_F(FastThriftChannelServerTest, MultipleClients) {
 TEST_F(FastThriftChannelServerTest, GetAddress) {
   auto address = server_->getAddress();
   EXPECT_NE(address.getPort(), 0);
+}
+
+// Validates that the production wiring in createConnectionFactory hooks
+// the bridge's lifecycle callbacks correctly: a client disconnect must
+// eventually drain the server-side per-connection thrift context.
+//
+// If createConnectionFactory regressed and passed empty action callbacks
+// to the bridge, the existing exception-driven teardown path would
+// still work — but a future change that relied on the lifecycle path
+// (e.g. graceful drain) would silently break. This test pins the
+// observable consequence: the server's thrift connection map drains.
+TEST_F(FastThriftChannelServerTest, ClientDisconnectDrainsServerConnections) {
+  auto client = createClient();
+
+  // Round-trip an RPC to ensure the connection is fully established
+  // server-side (handshake done, thrift channel registered).
+  syncCall([&] { return client->semifuture_ping(); });
+
+  // Server should now have exactly one tracked thrift connection.
+  size_t established = 0;
+  server_->thriftConnections_.withRLock(
+      [&](const auto& conns) { established = conns.size(); });
+  EXPECT_EQ(established, 1u);
+
+  // Drop the client; production teardown propagates through rocket
+  // close → bridge → ThriftServerChannel::onException → closeCallback →
+  // erase from thriftConnections_.
+  destroyClientOnEvb(client);
+
+  // Cleanup runs on the server IO thread; poll briefly. 2 seconds is
+  // generous — actual drain is sub-millisecond when the wiring is intact.
+  constexpr auto kPollInterval = std::chrono::milliseconds{10};
+  constexpr auto kDeadline = std::chrono::seconds{2};
+  auto start = std::chrono::steady_clock::now();
+  size_t remaining = established;
+  while (std::chrono::steady_clock::now() - start < kDeadline) {
+    server_->thriftConnections_.withRLock(
+        [&](const auto& conns) { remaining = conns.size(); });
+    if (remaining == 0) {
+      break;
+    }
+    /* sleep override */ std::this_thread::sleep_for(kPollInterval);
+  }
+  EXPECT_EQ(remaining, 0u);
 }
 
 TEST(FastThriftChannelServerServeTest, ServeBlocksUntilStop) {

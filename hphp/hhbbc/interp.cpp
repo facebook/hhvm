@@ -20,6 +20,7 @@
 #include <string>
 
 #include <folly/gen/Base.h>
+#include <fmt/core.h>
 #include <folly/gen/String.h>
 
 #include "hphp/util/configs/eval.h"
@@ -1218,7 +1219,7 @@ void in(ISS& env, const bc::Method&) {
   auto const fullName = [&] () -> const StringData* {
     if (!env.ctx.func->cls) return env.ctx.func->name;
     return makeStaticString(
-      folly::sformat("{}::{}", env.ctx.func->cls->name, env.ctx.func->name)
+      fmt::format("{}::{}", env.ctx.func->cls->name->data(), env.ctx.func->name->data())
     );
   }();
   constprop(env);

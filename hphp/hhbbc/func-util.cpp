@@ -201,7 +201,7 @@ php::FuncBase::FuncBase(const FuncBase& other) {
 
 std::string func_fullname(const php::Func& f) {
   if (!f.cls) return f.name->toCppString();
-  return folly::sformat("{}::{}", f.cls->name, f.name);
+  return fmt::format("{}::{}", f.cls->name->data(), f.name->data());
 }
 
 //////////////////////////////////////////////////////////////////////

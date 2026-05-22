@@ -17,6 +17,7 @@
 #include "hphp/hhbbc/options.h"
 
 #include <mutex>
+#include <fmt/core.h>
 
 #include "hphp/runtime/server/memory-stats.h"
 
@@ -46,8 +47,8 @@ std::string s_maxLowMemPhase;
 void update_memory_stats(const char* what, const char* when,
                          const std::string& extra) {
   auto const phase = extra.empty()
-    ? folly::sformat("{} {}", what, when)
-    : folly::sformat("{} {} ({})", what, when, extra);
+    ? fmt::format("{} {}", what, when)
+    : fmt::format("{} {} ({})", what, when, extra);
 
   auto const usage = Process::GetMemUsageMb();
   auto const lowMemUsage = alloc::getLowMapped() / 1024 / 1024;
@@ -88,11 +89,11 @@ void profile_memory(const char* what, const char* when,
 
   if (options.profileMemory.empty()) return;
 
-  auto name = folly::sformat(
+  auto name = fmt::format(
     "{}_{}{}_{}",
     options.profileMemory,
     what,
-    extra.empty() ? extra : folly::sformat("_{}", extra),
+    extra.empty() ? extra : fmt::format("_{}", extra),
     when
   );
 

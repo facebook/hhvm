@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <fmt/core.h>
 
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
@@ -346,12 +347,10 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
   SCOPE_ASSERT_DETAIL("do-analyze-collect-2") {
     std::string ret;
     for (auto bid : ctx.func.blockRange()) {
-      folly::format(&ret,
-                    "block #{}\nin-{}\n{}",
+      ret += fmt::format("block #{}\nin-{}\n{}",
                     bid,
                     state_string(*ctx.func, ai.bdata[bid].stateIn, collect),
-                    show(*ctx.func, *ctx.func.blocks()[bid])
-                   );
+                    show(*ctx.func, *ctx.func.blocks()[bid]));
     }
 
     return ret;
@@ -369,7 +368,7 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
     FTRACE(
       2,
       "{:.^70}\n",
-      folly::sformat(
+      fmt::format(
         "Inline Interp (context: {}, args: {}, arg names: {})",
         show(knownArgs->context),
         from(knownArgs->args)
@@ -574,33 +573,28 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
   FTRACE(2, "{}", [&] {
     auto const bsep = std::string(60, '=') + "\n";
     auto const sep = std::string(60, '-') + "\n";
-    auto ret = folly::format(
+    auto ret = fmt::format(
       "{}function {} ({} block interps):\n{}",
       bsep,
       show(ctx),
       interp_counter,
       bsep
-    ).str();
+    );
     for (auto& bd : ai.bdata) {
-      folly::format(
-        &ret,
-        "{}block {}{}:\nin {}",
+      ret += fmt::format("{}block {}{}:\nin {}",
         sep,
         ai.rpoBlocks[bd.rpoId],
         bd.noThrow ? " (no throw)" : "",
-        state_string(*ctx.func, bd.stateIn, collect)
-      );
+        state_string(*ctx.func, bd.stateIn, collect));
     }
     ret += sep + bsep;
-    folly::format(
-      &ret,
-      "{}{}: Inferred return type: {}{}\n",
+    ret += fmt::format("{}{}: Inferred return type: {}{}\n",
       show(ctx),
       [&] () -> std::string {
         using namespace folly::gen;
         if (!knownArgs) return "";
         [[maybe_unused]] auto const* argNames = knownArgs->argNames;
-        return folly::sformat(
+        return fmt::format(
           " (context: {}, args: {}, arg names: {})",
           show(knownArgs->context),
           from(knownArgs->args)
@@ -612,8 +606,7 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
         );
       }(),
       show(ai.inferredReturn),
-      ai.effectFree ? " (effect-free)" : ""
-    );
+      ai.effectFree ? " (effect-free)" : "");
     ret += bsep;
     return ret;
   }());
@@ -821,9 +814,9 @@ void resolve_type_constants(const IIndex& index,
     auto const idx = pair.second;
 
     SCOPE_ASSERT_DETAIL("resolve-type-constants") {
-      return folly::sformat(
+      return fmt::format(
         "Resolving {}::{} -> {}",
-        idx.cls, name, show(ctx)
+        idx.cls->data(), name->data(), show(ctx)
       );
     };
 
@@ -1692,25 +1685,25 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
   // For debugging, print the final state of the class analysis.
   FTRACE(2, "{}", [&] {
     auto const bsep = std::string(60, '+') + "\n";
-    auto ret = folly::format(
+    auto ret = fmt::format(
       "{}class {}:\n{}",
       bsep,
-      ctx.cls->name,
+      ctx.cls->name->data(),
       bsep
-    ).str();
+    );
     for (auto& kv : clsAnalysis.privateProperties) {
-      ret += folly::format(
+      ret += fmt::format(
         "private ${: <14} :: {}\n",
-        kv.first,
+        kv.first->data(),
         show(kv.second.ty)
-      ).str();
+      );
     }
     for (auto& kv : clsAnalysis.privateStatics) {
-      ret += folly::format(
+      ret += fmt::format(
         "private static ${: <14} :: {}\n",
-        kv.first,
+        kv.first->data(),
         show(kv.second.ty)
-      ).str();
+      );
     }
     ret += bsep;
     return ret;
@@ -1880,7 +1873,7 @@ UnitAnalysis analyze_unit(const AnalysisIndex& index, const Context& ctx) {
     if (ta.resolvedTypeStructure) continue;
 
     SCOPE_ASSERT_DETAIL("resolve-type-alias") {
-      return folly::sformat("Resolving {} {}", show(ctx), ta.name);
+      return fmt::format("Resolving {} {}", show(ctx), ta.name->data());
     };
     FTRACE(2, "{:-^70}\n-- ({}) {}\n", "Resolve", show(ctx), ta.name);
 

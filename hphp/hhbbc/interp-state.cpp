@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/Conv.h>
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
@@ -127,21 +127,21 @@ std::string show(const php::Func& f, const Iter& iter) {
     iter,
     [&] (DeadIter) { return "dead"; },
     [&] (const LiveIter& ti) {
-      auto str = folly::sformat(
+      auto str = fmt::format(
         "{}, {}",
         show(ti.types.key),
         show(ti.types.value)
       );
       if (ti.initBlock != NoBlockId) {
-        folly::format(&str, " (init=blk:{})", ti.initBlock);
+        str += fmt::format(" (init=blk:{})", ti.initBlock);
       }
       if (ti.baseLocal != NoLocalId) {
-        folly::format(&str, " (base={})", local_string(f, ti.baseLocal));
+        str += fmt::format(" (base={})", local_string(f, ti.baseLocal));
       }
       if (ti.keyLocal != NoLocalId) {
-        folly::format(&str, " (key={})", local_string(f, ti.keyLocal));
+        str += fmt::format(" (key={})", local_string(f, ti.keyLocal));
       }
-      if (ti.baseUpdated) folly::format(&str, " (updated)");
+      if (ti.baseUpdated) str += fmt::format(" (updated)");
       return str;
     }
   );
@@ -696,7 +696,7 @@ void InterpStack::peek(int numPop,
 
 std::string show(const php::Func& f, const Base& b) {
   auto const locName = [&]{
-    return b.locName ? folly::sformat("\"{}\"", b.locName) : "-";
+    return b.locName ? fmt::format("\"{}\"", b.locName->data()) : "-";
   };
   auto const local = [&]{
     return b.locLocal != NoLocalId ? local_string(f, b.locLocal) : "-";
@@ -733,14 +733,14 @@ std::string show(const php::Func& f, const Base& b) {
 
 std::string show(const php::Func& f, const CollectedInfo::MInstrState& s) {
   if (s.arrayChain.empty()) return show(f, s.base);
-  return folly::sformat(
+  return fmt::format(
     "{} ({})",
     show(f, s.base),
     [&]{
       using namespace folly::gen;
       return from(s.arrayChain)
         | map([&] (const CollectedInfo::MInstrState::ArrayChainEnt& e) {
-            return folly::sformat("<{},{}>", show(e.key), show(e.base));
+            return fmt::format("<{},{}>", show(e.key), show(e.base));
           })
         | unsplit<std::string>(" -> ");
     }()
@@ -756,27 +756,27 @@ std::string state_string(const php::Func& f, const State& st,
     return ret;
   }
 
-  folly::format(&ret, "state{}:\n", st.unreachable ? " (unreachable)" : "");
+  ret += fmt::format("state{}:\n", st.unreachable ? " (unreachable)" : "");
   if (f.cls) {
-    folly::format(&ret, "thisType({})\n", show(st.thisType));
+    ret += fmt::format("thisType({})\n", show(st.thisType));
   }
 
   if (st.thisLoc != NoLocalId) {
-    folly::format(&ret, "thisLoc({})\n", st.thisLoc);
+    ret += fmt::format("thisLoc({})\n", st.thisLoc);
   }
 
   for (auto i = size_t{0}; i < st.locals.size(); ++i) {
-    folly::format(&ret, "{: <8} :: {}\n",
+    ret += fmt::format("{: <8} :: {}\n",
                   local_string(f, i),
                   show(st.locals[i]));
   }
 
   for (auto i = size_t{0}; i < st.iters.size(); ++i) {
-    folly::format(&ret, "iter {: <2}  :: {}\n", i, show(f, st.iters[i]));
+    ret += fmt::format("iter {: <2}  :: {}\n", i, show(f, st.iters[i]));
   }
 
   for (auto i = size_t{0}; i < st.stack.size(); ++i) {
-    folly::format(&ret, "stk[{:02}] :: {} [{}]\n",
+    ret += fmt::format("stk[{:02}] :: {} [{}]\n",
                   i,
                   show(st.stack[i].type),
                   st.stack[i].equivLoc == NoLocalId ? "" :
@@ -785,7 +785,7 @@ std::string state_string(const php::Func& f, const State& st,
 
   for (auto i = size_t{0}; i < st.equivLocals.size(); ++i) {
     if (st.equivLocals[i] == NoLocalId) continue;
-    folly::format(&ret, "{: <8} ==", local_string(f, i));
+    ret += fmt::format("{: <8} ==", local_string(f, i));
     for (auto j = st.equivLocals[i]; j != i; j = st.equivLocals[j]) {
       ret += " ";
       ret += local_string(f, j);
@@ -800,10 +800,10 @@ std::string property_state_string(const PropertiesInfo& props) {
   std::string ret;
 
   for (auto const& kv : props.privatePropertiesRaw()) {
-    folly::format(&ret, "$this->{: <14} :: {}\n", kv.first, show(kv.second.ty));
+    ret += fmt::format("$this->{: <14} :: {}\n", kv.first->data(), show(kv.second.ty));
   }
   for (auto const& kv : props.privateStaticsRaw()) {
-    folly::format(&ret, "self::${: <14} :: {}\n", kv.first, show(kv.second.ty));
+    ret += fmt::format("self::${: <14} :: {}\n", kv.first->data(), show(kv.second.ty));
   }
 
   return ret;

@@ -25,6 +25,7 @@
 #include <vector>
 
 #include <folly/gen/Base.h>
+#include <fmt/core.h>
 #include <folly/gen/String.h>
 #include <folly/Memory.h>
 #include <folly/ScopeGuard.h>
@@ -788,7 +789,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   if (!RuntimeOption::ConstantFunctions.empty()) {
     auto const name = [&] {
       if (!cls) return fe.name->toCppString();
-      return folly::sformat("{}::{}", cls->name, ret->name);
+      return fmt::format("{}::{}", cls->name->data(), ret->name->data());
     }();
     auto const it = RuntimeOption::ConstantFunctions.find(func_fullname(*ret));
     if (it != RuntimeOption::ConstantFunctions.end()) {
@@ -1199,10 +1200,10 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
     php::FatalInfo fi{
       std::nullopt,
       FatalOp::Parse,
-      folly::sformat(
+      fmt::format(
         "The unoptimized unit for {} did not pass verification, "
         "bailing because Eval.AbortBuildOnVerifyError is set\n",
-        ue.m_filepath
+        ue.m_filepath->data()
       )
     };
     ret.unit->fatalInfo = std::make_unique<php::FatalInfo>(std::move(fi));

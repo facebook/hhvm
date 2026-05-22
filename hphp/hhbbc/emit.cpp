@@ -23,6 +23,7 @@
 #include <type_traits>
 
 #include <folly/gen/Base.h>
+#include <fmt/core.h>
 #include <folly/Conv.h>
 #include <folly/Memory.h>
 
@@ -278,7 +279,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
     std::string ret;
     for (auto bid : func.blockRange()) {
       auto const block = show(*func, *func.blocks()[bid]);
-      folly::format(&ret, "block #{}\n{}", bid, block);
+      ret += fmt::format("block #{}\n{}", bid, block);
     }
 
     return ret;

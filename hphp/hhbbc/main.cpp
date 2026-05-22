@@ -30,6 +30,7 @@
 #include <boost/program_options.hpp>
 
 #include <folly/ScopeGuard.h>
+#include <fmt/core.h>
 #include <folly/system/HardwareConcurrency.h>
 #include <folly/portability/Unistd.h>
 
@@ -270,7 +271,7 @@ std::pair<WholeProgramInput, Config> load_repo(TicketExecutor& executor,
   SCOPE_EXIT { RepoFile::destroy(); };
   RepoFile::loadGlobalTables(false);
   auto const units = RepoFile::enumerateUnits();
-  if (logging) std::cout << folly::format("{} units\n", units.size());
+  if (logging) std::cout << fmt::format("{} units\n", units.size());
 
   // Start this as early as possible
   auto config = Config::get(RepoFile::globalData());

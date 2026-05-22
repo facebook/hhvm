@@ -22,6 +22,7 @@
 #include <set>
 
 #include <folly/AtomicLinkedList.h>
+#include <fmt/core.h>
 #include <folly/Memory.h>
 #include <folly/ScopeGuard.h>
 
@@ -261,7 +262,7 @@ void analyze_iteratively(Index& index) {
     auto results = [&] {
       trace_time trace(
         "analyzing",
-        folly::sformat("round {} -- {} work items", round, work.size())
+        fmt::format("round {} -- {} work items", round, work.size())
       );
       return parallel::map(
         work,
@@ -698,7 +699,7 @@ AnalysisScheduler analyze_impl(Index& index) {
       (Mode == AnalysisMode::Constants)
         ? "analyze constants round"
         : "analyze round",
-      folly::sformat("round {} -- {:,} work items", round, workItems)
+      fmt::format("round {} -- {} work items", round, workItems)
     };
     // Get the work buckets from the scheduler.
     auto work = [&] {
@@ -706,7 +707,7 @@ AnalysisScheduler analyze_impl(Index& index) {
         (Mode == AnalysisMode::Constants)
           ? "analyze constants schedule"
           : "analyze schedule",
-        folly::sformat("round {}", round)
+        fmt::format("round {}", round)
       };
       trace2.ignore_client_stats();
       // TODO: Investigate enabling trace scheduling for later rounds
@@ -726,7 +727,7 @@ AnalysisScheduler analyze_impl(Index& index) {
         (Mode == AnalysisMode::Constants)
           ? "analyze constants run"
           : "analyze run",
-        folly::sformat("round {} -- {:,} jobs", round, work.size())
+        fmt::format("round {} -- {} jobs", round, work.size())
       };
       trace2.ignore_client_stats();
 
@@ -751,7 +752,7 @@ AnalysisScheduler analyze_impl(Index& index) {
         (Mode == AnalysisMode::Constants)
           ? "analyze constants deps"
           : "analyze deps",
-        folly::sformat("round {}", round)
+        fmt::format("round {}", round)
       };
       trace2.ignore_client_stats();
       scheduler.recordingDone();
@@ -917,7 +918,7 @@ UnitEmitterRefs final_pass(Index& index,
   auto work = [&] {
     trace_time trace2{
       "final-pass schedule",
-      folly::sformat("{:,} work items", workItems)
+      fmt::format("{} work items", workItems)
     };
     trace2.ignore_client_stats();
     // No traces here, we only need the immediate deps
@@ -927,7 +928,7 @@ UnitEmitterRefs final_pass(Index& index,
 
   trace_time trace2{
     "final-pass run",
-    folly::sformat("{:,} jobs", work.size())
+    fmt::format("{} jobs", work.size())
   };
   using namespace folly::gen;
   return coro::blockingWait(coro::collectAllRange(
@@ -951,7 +952,7 @@ void emit_units(Index& index,
                 const std::string& debugDump) {
   trace_time _{
     "emit-units",
-    folly::sformat("{:,} units", refs.size()),
+    fmt::format("{} units", refs.size()),
     index.sample()
   };
 

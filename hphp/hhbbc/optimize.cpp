@@ -23,6 +23,7 @@
 #include <bitset>
 
 #include <folly/gen/Base.h>
+#include <fmt/core.h>
 #include <folly/gen/String.h>
 
 #include "hphp/util/trace.h"
@@ -408,7 +409,7 @@ void visit_blocks(const char* what, VisitContext& visit, Fun&& fun) {
     if (curBlk == NoBlockId) return std::string{"\nNo block processed\n"};
     auto const& state = visit.ainfo.bdata[curBlk].stateIn;
     auto const debug = state_string(*visit.func, state, visit.collect);
-    return folly::sformat("block #{}\nin-{}", curBlk, debug);
+    return fmt::format("block #{}\nin-{}", curBlk, debug);
   };
 
   FTRACE(1, "|---- {}\n", what);
@@ -563,7 +564,7 @@ struct OptimizeIterState {
     LocalId base;  // Invariant base of the iterator
 
     std::string show(const php::Func& f) const {
-      return folly::sformat(
+      return fmt::format(
         "blk:{},{},blk:{},{}",
         block, op, init,
         base != NoLocalId ? local_string(f, base) : "-"

@@ -26,6 +26,7 @@
 #include <boost/container/flat_map.hpp>
 
 #include <folly/gen/Base.h>
+#include <fmt/core.h>
 #include <folly/CPortability.h>
 #include <folly/gen/String.h>
 
@@ -446,7 +447,7 @@ const char* show(DceAction action) {
 }
 
 std::string show(InstrId id) {
-  return folly::sformat("{}:{}", id.blk, id.idx);
+  return fmt::format("{}:{}", id.blk, id.idx);
 }
 
 inline void validate(Use u) {
@@ -469,11 +470,11 @@ const char* show(Use u) {
 }
 
 std::string show(const LocationId& id) {
-  return folly::sformat("{}:{}{}", id.blk, id.id, id.isSlot ? "(slot)" : "");
+  return fmt::format("{}:{}{}", id.blk, id.id, id.isSlot ? "(slot)" : "");
 }
 
 std::string show(const DceActionMap::value_type& elm) {
-  return folly::sformat("{}={}", show(elm.first), show(elm.second));
+  return fmt::format("{}={}", show(elm.first), show(elm.second));
 }
 
 std::string show(const DceActionMap& actions) {
@@ -485,7 +486,7 @@ std::string show(const DceActionMap& actions) {
 }
 
 std::string DEBUG_ONLY show(const UseInfo& ui) {
-  return folly::sformat("{}({})", show(ui.usage), show(ui.actions));
+  return fmt::format("{}({})", show(ui.usage), show(ui.actions));
 }
 
 std::string DEBUG_ONLY loc_bits_string(
@@ -2734,7 +2735,7 @@ bool global_dce(const IIndex& index, const FuncAnalysis& ai,
     return from(func->locals)
       | mapped(
         [&] (const php::Local& l) {
-          return folly::sformat("  {} {}\n", i++, local_string(*func, l.id));
+          return fmt::format("  {} {}\n", i++, local_string(*func, l.id));
         })
       | unsplit<std::string>("");
   }());

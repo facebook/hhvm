@@ -659,7 +659,7 @@ TypeOrReduced builtin_type_structure_class(ISS& env, const php::Func* func,
 
 bool handle_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   auto const name = func->cls
-    ? makeStaticString(folly::sformat("{}::{}", func->cls->name, func->name))
+    ? makeStaticString(fmt::format("{}::{}", func->cls->name->data(), func->name->data()))
     : func->name;
   auto result = [&]() -> TypeOrReduced {
 #define X(x, y) if (name == s_##x.get()) return builtin_##x(env, func, fca);

@@ -34,8 +34,8 @@
 #include <tbb/concurrent_hash_map.h>
 
 #include <folly/AtomicLinkedList.h>
+#include <fmt/core.h>
 #include <folly/FBVector.h>
-#include <folly/Format.h>
 #include <folly/Lazy.h>
 #include <folly/MapUtil.h>
 #include <folly/Memory.h>
@@ -344,10 +344,10 @@ uint32_t numNVArgs(const php::Func& f) {
 std::string show(const ConstIndex& idx, const IIndex& index) {
   if (auto const cls = index.lookup_class(idx.cls)) {
     assertx(idx.idx < cls->constants.size());
-    return folly::sformat(
+    return fmt::format(
       "{}::{} ({})",
-      idx.cls,
-      cls->constants[idx.idx].name,
+      idx.cls->data(),
+      cls->constants[idx.idx].name->data(),
       idx.idx
     );
   }
@@ -1187,16 +1187,16 @@ private:
 std::string show(const FuncFamilyOrSingle& fam) {
   if (auto const ff = fam.funcFamily()) {
     auto const f = ff->possibleFuncs().front().ptr();
-    return folly::sformat(
+    return fmt::format(
       "func-family {}::{}{}",
-      f->cls->name, f->name,
+      f->cls->name->data(), f->name->data(),
       fam.isIncomplete() ? " (incomplete)" : ""
     );
   }
   if (auto const f = fam.func()) {
-    return folly::sformat(
+    return fmt::format(
       "func {}::{}{}",
-      f->cls->name, f->name,
+      f->cls->name->data(), f->name->data(),
       fam.isIncomplete() ? " (incomplete)" : ""
     );
   }
@@ -5233,22 +5233,22 @@ Class::forEachSubclass(const std::function<void(SString, Attr)>& f) const {
 
 std::string show(const Class& c) {
   if (auto const n = c.opaque.right()) {
-    return folly::sformat("?\"{}\"", n);
+    return fmt::format("?\"{}\"", n->data());
   }
 
   auto const g = c.graph();
-  if (g.isMissing()) return folly::sformat("\"{}\"", g.name());
+  if (g.isMissing()) return fmt::format("\"{}\"", g.name()->data());
   if (!g.hasCompleteChildren()) {
     if (g.isConservative()) {
-      return folly::sformat(
+      return fmt::format(
         "{}*{}",
         (c.cinfo() || c.cinfo2()) ? "" : "-",
-        g.name()
+        g.name()->data()
       );
     }
-    return folly::sformat("!{}", g.name());
+    return fmt::format("!{}", g.name()->data());
   }
-  if (!c.cinfo() && !c.cinfo2()) return folly::sformat("-{}", g.name());
+  if (!c.cinfo() && !c.cinfo2()) return fmt::format("-{}", g.name()->data());
   return g.name()->toCppString();
 }
 
@@ -5427,32 +5427,32 @@ std::string Func::name() const {
     val,
     [] (FuncName s)   { return s.name->toCppString(); },
     [] (MethodName s) {
-      if (s.cls) return folly::sformat("{}::{}", s.cls, s.name);
-      return folly::sformat("???::{}", s.name);
+      if (s.cls) return fmt::format("{}::{}", s.cls->data(), s.name->data());
+      return fmt::format("???::{}", s.name->data());
     },
     [] (Fun f)        { return f.finfo->func->name->toCppString(); },
     [] (Fun2 f)       { return f.finfo->name->toCppString(); },
     [] (Method m)     { return func_fullname(*m.finfo->func); },
     [] (Method2 m)    { return func_fullname(*m.finfo->func); },
     [] (MethodFamily fam) {
-      return folly::sformat(
+      return fmt::format(
         "*::{}",
-        fam.family->possibleFuncs().front().ptr()->name
+        fam.family->possibleFuncs().front().ptr()->name->data()
       );
     },
     [] (MethodFamily2 fam)  {
-      return folly::sformat(
+      return fmt::format(
         "{}::{}",
-        fam.family->m_id,
-        fam.family->m_name
+        fam.family->m_id.toString(),
+        fam.family->m_name->data()
       );
     },
     [] (MethodOrMissing m)  { return func_fullname(*m.finfo->func); },
     [] (MethodOrMissing2 m) { return func_fullname(*m.finfo->func); },
     [] (MissingFunc m)      { return m.name->toCppString(); },
     [] (MissingMethod m)    {
-      if (m.cls) return folly::sformat("{}::{}", m.cls, m.name);
-      return folly::sformat("???::{}", m.name);
+      if (m.cls) return fmt::format("{}::{}", m.cls->data(), m.name->data());
+      return fmt::format("???::{}", m.name->data());
     },
     [] (const Isect& i) {
       assertx(i.families.size() > 1);
@@ -5461,12 +5461,12 @@ std::string Func::name() const {
     [] (const Isect2& i) {
       assertx(i.families.size() > 1);
       using namespace folly::gen;
-      return folly::sformat(
+      return fmt::format(
         "{}::{}",
         from(i.families)
           | map([] (const FuncFamily2* ff) { return ff->m_id.toString(); })
           | unsplit<std::string>("&"),
-        i.families[0]->m_name
+        i.families[0]->m_name->data()
       );
     }
   );
@@ -7034,14 +7034,14 @@ private:
 
   std::string display(ConstIndex cns) const {
     if (auto const p = from(cns)) {
-      return folly::sformat("{}::{} ({})", p->cls, p->name, cns.idx);
+      return fmt::format("{}::{} ({})", p->cls->data(), p->name->data(), cns.idx);
     }
     return show(cns, AnalysisIndexAdaptor { index.index });
   }
 
   static std::string displayAdded(Type t) {
     auto out = show(t - Type::Meta);
-    if (!out.empty()) folly::format(&out, " of ");
+    if (!out.empty()) out += fmt::format(" of ");
     return out;
   }
 
@@ -7622,7 +7622,7 @@ struct TMIOps {
       // the duplicate methods will be overridden by the class method.
       return;
     }
-    throw TMIException(folly::sformat("DuplicateMethod: {}", methName));
+    throw TMIException(fmt::format("DuplicateMethod: {}", methName->data()));
   }
 };
 
@@ -8903,7 +8903,7 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
         ITRACE_MOD(
           Trace::hhbbc, 4,
           "Retaining inferred return param information ({}) about {}\n",
-          (ret == NoLocalId) ? "-" : folly::sformat("{}", ret),
+          (ret == NoLocalId) ? "-" : fmt::format("{}", ret),
           func_fullname(func)
         );
         auto& info = rinfo->retain(finfo);
@@ -8971,7 +8971,7 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
 
   auto const error_context = [&] {
     using namespace folly::gen;
-    return folly::sformat(
+    return fmt::format(
       "{} calling {} (context: {}, args: {})",
       show(caller),
       func_fullname(func),
@@ -11937,7 +11937,7 @@ private:
     auto n = closure.name->slice();
     auto const p = n.find(';');
     if (p != std::string::npos) n = n.subpiece(0, p);
-    return makeStaticString(folly::sformat("{};{}", n, newContext.name));
+    return makeStaticString(fmt::format("{};{}", n, newContext.name->data()));
   }
 
   static std::unique_ptr<php::Class>
@@ -14587,7 +14587,7 @@ protected:
     // ClassInfo to split (it cannot be inferred otherwise).
     for (auto const& edge : edges) {
       SCOPE_ASSERT_DETAIL("Edge not present in job") {
-        return folly::sformat("{} -> {}", edge.cls, edge.split);
+        return fmt::format("{} -> {}", edge.cls->data(), edge.split->data());
       };
       assertx(index.classInfos.contains(edge.cls));
       assertx(index.splits.contains(edge.split));
@@ -16039,7 +16039,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
             // The names of a split node are arbitrary, but must be
             // unique and not collide with any actual classes.
             auto const name = makeStaticString(
-              folly::sformat("{}_{}_split;{}", round, i, cls)
+              fmt::format("{}_{}_split;{}", round, i, cls->data())
             );
 
             auto deps = std::make_unique<DepData>();
@@ -19729,8 +19729,8 @@ void make_local(IndexData& index) {
     "{}",
     index.client->getStats().toString(
       "hhbbc",
-      folly::sformat(
-        "{:,} units, {:,} classes, {:,} class-infos, {:,} funcs",
+      fmt::format(
+        "{} units, {} classes, {} class-infos, {} funcs",
         program->units.size(),
         program->classes.size(),
         remoteClassInfos.size(),
@@ -21083,7 +21083,7 @@ Index::lookup_foldable_return_type(Context ctx,
   auto showArgs DEBUG_ONLY = [] (const CompactVector<Type>& a) {
     std::string ret, sep;
     for (auto& arg : a) {
-      folly::format(&ret, "{}{}", sep, show(arg));
+      ret += fmt::format("{}{}", sep, show(arg));
       sep = ",";
     };
     return ret;
@@ -21812,13 +21812,13 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
   auto const finfo = func_info(*m_data, func);
 
   auto const error_loc = [&] {
-    return folly::sformat(
+    return fmt::format(
       "{} {}{}",
-      func->unit,
+      func->unit->data(),
       func->cls
         ? folly::to<std::string>(func->cls->name->data(), "::")
         : std::string{},
-      func->name
+      func->name->data()
     );
   };
 
@@ -22607,7 +22607,7 @@ std::string show(AnalysisDeps::Type t) {
   using T = AnalysisDeps::Type;
   std::string out;
   auto const add = [&] (const char* s) {
-    folly::format(&out, "{}{}", out.empty() ? "" : ",", s);
+    out += fmt::format("{}{}", out.empty() ? "" : ",", s);
   };
   if (t & T::Meta)          add("meta");
   if (t & T::RetType)       add("return type");
@@ -22627,84 +22627,64 @@ std::string show(const AnalysisDeps& d) {
 
   std::string out;
   if (!d.classes.empty()) {
-    folly::format(
-      &out, "  classes: {}\n",
+    out += fmt::format("  classes: {}\n",
       from(d.classes)
         | map([&] (auto const& p) {
-            return folly::sformat("{} -> [{}]", toCpp(p.first), show(p.second));
+            return fmt::format("{} -> [{}]", toCpp(p.first), show(p.second));
           })
-        | unsplit<std::string>(", ")
-    );
+        | unsplit<std::string>(", "));
   }
   if (!d.funcs.empty()) {
-    folly::format(
-      &out, "  funcs: {}\n",
+    out += fmt::format("  funcs: {}\n",
       from(d.funcs)
         | map([&] (auto const& p) {
-            return folly::sformat("{} -> [{}]", toCpp(p.first), show(p.second));
+            return fmt::format("{} -> [{}]", toCpp(p.first), show(p.second));
           })
-        | unsplit<std::string>(", ")
-    );
+        | unsplit<std::string>(", "));
   }
   if (!d.methods.empty()) {
-    folly::format(
-      &out, "  methods: {}\n",
+    out += fmt::format("  methods: {}\n",
       from(d.methods)
         | map([] (auto const& p) {
-            return folly::sformat("{} -> [{}]", show(p.first), show(p.second));
+            return fmt::format("{} -> [{}]", show(p.first), show(p.second));
           })
-        | unsplit<std::string>(", ")
-    );
+        | unsplit<std::string>(", "));
   }
   if (!d.constants.empty()) {
-    folly::format(
-      &out, "  constants: {}\n",
-      from(d.constants) | map(toCpp) | unsplit<std::string>(", ")
-    );
+    out += fmt::format("  constants: {}\n",
+      from(d.constants) | map(toCpp) | unsplit<std::string>(", "));
   }
   if (!d.clsConstants.empty()) {
-    folly::format(
-      &out, "  class-constants: {}\n",
+    out += fmt::format("  class-constants: {}\n",
       from(d.clsConstants)
         | map([] (ConstIndex idx) { return show(idx); })
-        | unsplit<std::string>(", ")
-    );
+        | unsplit<std::string>(", "));
   }
   if (!d.anyClsConstants.empty()) {
-    folly::format(
-      &out, "  any class-constants: {}\n",
-      from(d.anyClsConstants) | map(toCpp) | unsplit<std::string>(", ")
-    );
+    out += fmt::format("  any class-constants: {}\n",
+      from(d.anyClsConstants) | map(toCpp) | unsplit<std::string>(", "));
   }
   if (!d.typeCnsClsConstants.empty()) {
-    folly::format(
-      &out, "  type-cns class-constants: {}\n",
+    out += fmt::format("  type-cns class-constants: {}\n",
       from(d.typeCnsClsConstants)
         | map([] (ConstIndex idx) { return show(idx); })
-        | unsplit<std::string>(", ")
-    );
+        | unsplit<std::string>(", "));
   }
   if (!d.typeCnsAnyClsConstants.empty()) {
-    folly::format(
-      &out, "  type-cns any class-constants: {}\n",
-      from(d.typeCnsAnyClsConstants) | map(toCpp) | unsplit<std::string>(", ")
-    );
+    out += fmt::format("  type-cns any class-constants: {}\n",
+      from(d.typeCnsAnyClsConstants) | map(toCpp) | unsplit<std::string>(", "));
   }
   if (!d.properties.empty()) {
-    folly::format(
-      &out, "  properties: {}\n",
+    out += fmt::format("  properties: {}\n",
       from(d.properties)
         | map([] (auto const& p) {
-            return folly::sformat("{}::{}", p.cls, p.prop);
+            return fmt::format("{}::{}", p.cls->data(), p.prop->data());
           })
-        | unsplit<std::string>(", ")
-    );
+        | unsplit<std::string>(", "));
   }
   if (!d.anyProperties.empty()) {
-    folly::format(
-      &out, "  any properties: {}\n",
-      from(d.anyProperties) | map(toCpp) | unsplit<std::string>(", ")
-    );
+    out += fmt::format("  any properties: {}\n",
+      from(d.anyProperties) | map(toCpp) | unsplit<std::string>(", "));
   }
   if (out.empty()) out = "  (none)\n";
   return out;
@@ -28303,7 +28283,7 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
 
   auto const error_context = [&] {
     using namespace folly::gen;
-    return folly::sformat(
+    return fmt::format(
       "{} calling {} (context: {}, args: {})",
       show(caller),
       func_fullname(func),

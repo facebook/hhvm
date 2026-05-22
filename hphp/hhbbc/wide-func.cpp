@@ -22,6 +22,7 @@
 
 #ifdef __GNUG__
 #include <cxxabi.h>
+#include <fmt/core.h>
 #endif // _GNUG_
 
 namespace HPHP::HHBBC { namespace php {
@@ -484,9 +485,9 @@ bool checkBlockVecs(const Func& func, const BlockVec& a, const BlockVec& b) {
     always_assert(ai->hhbcs.size() == bi->hhbcs.size());
     for (auto j = 0; j < ai->hhbcs.size(); j++) {
       SCOPE_ASSERT_DETAIL("test_compression") {
-        return folly::format("Original:\n{}\n\nFinal:\n{}",
+        return fmt::format("Original:\n{}\n\nFinal:\n{}",
                              show(func, ai->hhbcs[j]),
-                             show(func, bi->hhbcs[j])).str();
+                             show(func, bi->hhbcs[j]));
       };
       always_assert(ai->hhbcs[j] == bi->hhbcs[j]);
     }

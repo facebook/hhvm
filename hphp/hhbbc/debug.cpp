@@ -26,6 +26,7 @@
 #include <vector>
 
 #include <folly/portability/Stdlib.h>
+#include <fmt/core.h>
 
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/func-util.h"
@@ -364,7 +365,7 @@ std::string ts(typename Clock::time_point t) {
 std::string client_stats(const extern_worker::Client::Stats& stats) {
   auto const pct = [] (size_t a, size_t b) -> std::string {
     if (!b) return "--";
-    return folly::sformat("{:.2f}%", double(a) / b * 100.0);
+    return fmt::format("{:.2f}%", double(a) / b * 100.0);
   };
 
   auto const execWorkItems = stats.execWorkItems.load();
@@ -374,11 +375,11 @@ std::string client_stats(const extern_worker::Client::Stats& stats) {
   auto const storeCalls = stats.storeCalls.load();
   auto const loadCalls = stats.loadCalls.load();
 
-  return folly::sformat(
-    "  Execs: {:,} ({:,}) total, {:,} cache-hits ({})\n"
-    "  Workers: {} usage, {:,} cores ({}/core), {} max used, {} reserved\n"
-    "  Blobs: {:,} total, {:,} uploaded ({})\n"
-    "  {:,} downloads ({}), {:,} throttles, (E: {} S: {} L: {}) avg latency\n",
+  return fmt::format(
+    "  Execs: {} ({}) total, {} cache-hits ({})\n"
+    "  Workers: {} usage, {} cores ({}/core), {} max used, {} reserved\n"
+    "  Blobs: {} total, {} uploaded ({})\n"
+    "  {} downloads ({}), {} throttles, (E: {} S: {} L: {}) avg latency\n",
     execCalls,
     execWorkItems,
     stats.execCacheHits.load(),
@@ -430,7 +431,7 @@ trace_time::trace_time(const char* what,
     "  RSS: {}\n",
     ts<clock>(start),
     what,
-    !extra.empty() ? folly::sformat(" ({})", extra) : extra,
+    !extra.empty() ? fmt::format(" ({})", extra) : extra,
     format_bytes(Process::GetMemUsageMb() * 1024 * 1024)
   );
 }
@@ -451,7 +452,7 @@ trace_time::~trace_time() {
   auto const afterRss = Process::GetMemUsageMb() * 1024 * 1024;
 
   if (logEntry) {
-    auto phase = folly::sformat("hhbbc_{}", what);
+    auto phase = fmt::format("hhbbc_{}", what);
     while (true) {
       auto const pos = phase.find_first_of(" :\"'");
       if (pos == std::string::npos) break;

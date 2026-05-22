@@ -102,7 +102,7 @@ extern_worker::Client::ExecMetadata make_exec_metadata(const std::string& job,
   extern_worker::Client::ExecMetadata meta;
   meta.max_memory = kMaxMemory;
 
-  meta.job_key = folly::sformat("{}{}{}", job, key.empty() ? "" : " ", key);
+  meta.job_key = fmt::format("{}{}{}", job, key.empty() ? "" : " ", key);
   meta.affinity_keys.emplace_back(meta.job_key);
   if (!key.empty()) meta.affinity_keys.emplace_back(job);
   return meta;
@@ -114,9 +114,9 @@ extern_worker::Client::ExecMetadata make_exec_metadata(const std::string& job,
   extern_worker::Client::ExecMetadata meta;
   meta.max_memory = kMaxMemory;
 
-  auto const jobAndRound = folly::sformat("{} round {}", job, round);
+  auto const jobAndRound = fmt::format("{} round {}", job, round);
   meta.job_key =
-    folly::sformat("{}{}{}", jobAndRound, key.empty() ? "" : " ", key);
+    fmt::format("{}{}{}", jobAndRound, key.empty() ? "" : " ", key);
   meta.affinity_keys.emplace_back(meta.job_key);
   if (!key.empty()) meta.affinity_keys.emplace_back(jobAndRound);
   meta.affinity_keys.emplace_back(job);

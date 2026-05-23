@@ -192,7 +192,7 @@ class MutableMapTypeHints(unittest.TestCase):
             )
 
             # pyre-ignore[6]: 1st positional argument, expected `str` but got `int`
-            v5: MutableList[int] = mutable_map.get(999, default_value_1)
+            v5: MutableList[int] = mutable_map.get(999, default_value_1)  # noqa
 
             ###################################################################
 
@@ -908,6 +908,46 @@ class MutableMapTest(unittest.TestCase):
             mutable_map.update({"B": 66}, x="Not an Integer")
 
         self.assertEqual({"A": 65, "a": 97, "B": 66}, mutable_map)
+
+    def test_update_invalid_keyword_from_multiple_threads_preserves_valid_prefixes(
+        self,
+    ) -> None:
+        # GIVEN
+        worker_values = [0, 1, 2, 3, 4]
+        expected_items = {"A": 65, "a": 97}
+        expected_items.update(
+            {f"key-{worker_value}": worker_value for worker_value in worker_values}
+        )
+        mutable_map: MutableMap[str, int] = _create_MutableMap_str_i32(
+            {"A": 65, "a": 97}
+        )
+        start_barrier: threading.Barrier = threading.Barrier(len(worker_values))
+
+        def update_invalid_keyword(worker_value: int) -> None:
+            start_barrier.wait()
+            mutable_map.update(
+                {f"key-{worker_value}": worker_value},
+                invalid=cast(int, "bad"),
+            )
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(worker_values)
+        ) as executor:
+            futures = [
+                executor.submit(update_invalid_keyword, worker_value)
+                for worker_value in worker_values
+            ]
+
+            for future in futures:
+                with self.assertRaisesRegex(
+                    TypeError,
+                    "not a <class 'int'>, is actually of type <class 'str'>",
+                ):
+                    future.result()
+
+        # THEN
+        self.assertEqual(expected_items, mutable_map)
 
     def test_match(self) -> None:
         mutable_map = _create_MutableMap_str_i32({})

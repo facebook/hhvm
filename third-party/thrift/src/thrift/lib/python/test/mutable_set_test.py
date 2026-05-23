@@ -19,7 +19,7 @@ import concurrent.futures
 import pickle
 import threading
 import unittest
-from typing import Iterable
+from typing import cast, Iterable
 
 from python_test.sets.thrift_mutable_types import SetI32
 from thrift.python.mutable_containers import MutableSet
@@ -363,6 +363,53 @@ class MutableSetTest(unittest.TestCase):
 
         self.assertEqual(5, len(mutable_set))
         self.assertEqual({0, 1, 2, 10, 11}, mutable_set)
+
+    def test_ior_invalid_middle_from_multiple_threads_preserves_valid_prefixes(
+        self,
+    ) -> None:
+        # GIVEN
+        worker_starts = [10, 20, 30, 40, 50]
+        expected_values = {0, 1, 2}
+        expected_values.update(
+            value
+            for worker_start in worker_starts
+            for value in (worker_start, worker_start + 1)
+        )
+        mutable_set: MutableSet[int] = _create_MutableSet_i32(range(3))
+        start_barrier: threading.Barrier = threading.Barrier(len(worker_starts))
+
+        def union_invalid_middle(worker_start: int) -> None:
+            nonlocal mutable_set
+            payload = cast(
+                list[int],
+                [
+                    worker_start,
+                    worker_start + 1,
+                    "Not an integer",
+                    worker_start + 2,
+                ],
+            )
+            start_barrier.wait()
+            mutable_set |= payload
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(worker_starts)
+        ) as executor:
+            futures = [
+                executor.submit(union_invalid_middle, worker_start)
+                for worker_start in worker_starts
+            ]
+
+            for future in futures:
+                with self.assertRaisesRegex(
+                    TypeError,
+                    "is not a <class 'int'>, is actually of type <class 'str'>",
+                ):
+                    future.result()
+
+        # THEN
+        self.assertEqual(expected_values, mutable_set)
 
     def test_iand(self) -> None:
         mutable_set_1 = _create_MutableSet_i32(range(4))

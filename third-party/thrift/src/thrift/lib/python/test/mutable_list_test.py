@@ -80,6 +80,51 @@ class MutableListTest(unittest.TestCase):
         # basic exception safety
         self.assertEqual([1, 2], mutable_list)
 
+    def test_extend_invalid_middle_from_multiple_threads_preserves_valid_prefixes(
+        self,
+    ) -> None:
+        # GIVEN
+        worker_starts = [0, 10, 20, 30, 40]
+        expected_values = sorted(
+            value
+            for worker_start in worker_starts
+            for value in (worker_start, worker_start + 1)
+        )
+        mutable_list: MutableList[int] = _create_MutableList_i32([])
+        start_barrier: threading.Barrier = threading.Barrier(len(worker_starts))
+
+        def extend_invalid_middle(worker_start: int) -> None:
+            payload = cast(
+                list[int],
+                [
+                    worker_start,
+                    worker_start + 1,
+                    "Not an integer",
+                    worker_start + 2,
+                ],
+            )
+            start_barrier.wait()
+            mutable_list.extend(payload)
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(worker_starts)
+        ) as executor:
+            futures = [
+                executor.submit(extend_invalid_middle, worker_start)
+                for worker_start in worker_starts
+            ]
+
+            for future in futures:
+                with self.assertRaisesRegex(
+                    TypeError,
+                    "is not a <class 'int'>, is actually of type <class 'str'>",
+                ):
+                    future.result()
+
+        # THEN
+        self.assertEqual(expected_values, sorted(mutable_list))
+
     def test_append(self) -> None:
         mutable_list = _create_MutableList_i32([])
         python_list = []

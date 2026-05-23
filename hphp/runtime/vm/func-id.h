@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <limits>
 #include <folly/Format.h>
+#include <fmt/core.h>
 
 #include "hphp/util/hash.h"
 #include "hphp/util/ptr.h"
@@ -108,3 +109,11 @@ template<> class FormatValue<HPHP::FuncId> {
     HPHP::FuncId m_id;
 };
 }
+
+template <>
+struct fmt::formatter<HPHP::FuncId> : fmt::formatter<HPHP::FuncId::Int> {
+  template <typename FormatContext>
+  auto format(HPHP::FuncId id, FormatContext& ctx) const {
+    return fmt::formatter<HPHP::FuncId::Int>::format(id.toInt(), ctx);
+  }
+};

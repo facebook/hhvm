@@ -116,6 +116,7 @@ const StaticString
   s_is_reified("is_reified"),
   s_is_soft("is_soft"),
   s_is_warn("is_warn"),
+  s_named("named"),
   s___construct("__construct");
 
 Class* get_cls(const Variant& class_or_object) {
@@ -947,6 +948,9 @@ static Array get_function_param_info(const Func* func) {
     }
     if (fpi.isVariadic()) {
       param.set(s_is_variadic, make_tv<KindOfBoolean>(true));
+    }
+    if (fpi.isNamed()) {
+      param.set(s_named, make_tv<KindOfBoolean>(true));
     }
     {
       DictInit userAttrs(fpi.userAttributes.size());

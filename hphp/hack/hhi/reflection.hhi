@@ -287,6 +287,7 @@ class ReflectionParameter implements Reflector {
   public function isPassedByReference()[]: bool;
   public function isInOut()[]: bool;
   public function isReadonly()[]: bool;
+  public function isNamed()[]: bool;
   public function canBePassedByValue()[]: bool;
   public function getDeclaringFunction()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getDeclaringClass()[]: ?ReflectionClass;

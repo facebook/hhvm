@@ -1,0 +1,8 @@
+a: bool(true)
+b: bool(true)
+x: bool(false)
+y: bool(false)
+
+q: bool(true)
+r: bool(true)
+p: bool(false)

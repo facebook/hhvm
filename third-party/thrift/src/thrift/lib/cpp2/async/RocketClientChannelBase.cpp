@@ -982,6 +982,7 @@ void RocketClientChannelBase::sendThriftRequest(
   preprocessHeader(header.get());
   auto timeout = getClientTimeout(rpcOptions);
   auto buf = std::move(request.buffer);
+  auto bufLength = buf->computeChainDataLength();
   auto* ioBufFactory = request.ioBufFactory;
   getRocketClientImpl().setIOBufFactory(ioBufFactory);
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
@@ -991,7 +992,7 @@ void RocketClientChannelBase::sendThriftRequest(
       timeout,
       getInteractionHandle(rpcOptions),
       getRocketClientImpl().getServerZstdSupported(),
-      buf->computeChainDataLength(),
+      bufLength,
       *header,
       std::move(frameworkMetadata),
       hasCustomCompressor());
@@ -1009,7 +1010,7 @@ void RocketClientChannelBase::sendThriftRequest(
   size_t requestSerializedSize;
   // Avoid unnecessary computation for streaming methods.
   if constexpr (std::is_same_v<Callback, RequestClientCallback::Ptr>) {
-    requestSerializedSize = buf->computeChainDataLength();
+    requestSerializedSize = bufLength;
   }
   rocket::Payload requestPayload;
   try {

@@ -59,7 +59,8 @@ class ConnectionManagerTest : public ::testing::Test {
   void TearDown() override {
     if (connectionManager_ &&
         connectionManager_->state_ == ConnectionManager::State::STARTED) {
-      connectionManager_->stop();
+      connectionManager_->stopAccepting();
+      connectionManager_->closeConnections();
     }
     clientConnections_.clear();
     connectionManager_.reset();
@@ -209,7 +210,8 @@ TEST_F(ConnectionManagerTest, StopAndRestart) {
   connectAndWait(serverAddress);
   EXPECT_EQ(getConnectionCount(), 1);
 
-  connectionManager_->stop();
+  connectionManager_->stopAccepting();
+  connectionManager_->closeConnections();
   clientConnections_.clear();
 
   connectionManager_->start();
@@ -228,7 +230,8 @@ TEST_F(ConnectionManagerTest, StopClosesConnections) {
   }
   EXPECT_EQ(getConnectionCount(), 3);
 
-  connectionManager_->stop();
+  connectionManager_->stopAccepting();
+  connectionManager_->closeConnections();
 
   auto handlerMap = connectionManager_->connectionHandlers_.rlock();
   EXPECT_TRUE(handlerMap->empty());

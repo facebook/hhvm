@@ -68,6 +68,17 @@ namespace apache::thrift::fast_thrift::thrift {
  *   and Closing (in-flight handler callbacks may still try to send a final
  *   response; the pipeline may swallow it if the wire is gone). Closed
  *   refuses all writes.
+ *
+ *   In-flight requests gate the transition to Closed and the firing of
+ *   closeCallback. Every dispatched request increments an in-flight
+ *   counter at handleRequestResponse entry; every response (success,
+ *   declared/undeclared exception, framework error, or the not-completed
+ *   exception fired by the FHC destructor) decrements via fireResponse.
+ *   When onPipelineInactive / onException fires with in-flight > 0, the
+ *   adapter stays in Closing and defers closeCallback until the last
+ *   fireResponse drains the count. Upper-layer owners must hold the
+ *   adapter Ptr until closeCallback fires — dropping earlier risks UAF
+ *   from in-flight handler callbacks still writing through the adapter.
  */
 class ThriftServerAppAdapter : public folly::DelayedDestruction {
  public:
@@ -113,6 +124,15 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   ThriftServerAppAdapter& operator=(ThriftServerAppAdapter&&) = delete;
 
   void setCloseCallback(std::function<void()> cb);
+
+  // Server-initiated graceful drain. Sends a stream-0
+  // ERROR(CONNECTION_CLOSE) so the peer stops issuing new REQUEST_*
+  // frames, then flips Open → Closing and defers closeCallback until
+  // inFlight_ drains. If the wire send fails (pipeline already dead),
+  // skips the drain wait and tears down immediately — there's no path
+  // for in-flight responses to land. Must be called on the pipeline's
+  // EventBase.
+  void startDrain() noexcept;
 
   void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept;
 
@@ -250,11 +270,23 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   FOLLY_NOINLINE channel_pipeline::Result handleUnknownMethod(
       uint32_t streamId, std::string_view methodName) noexcept;
   FOLLY_NOINLINE channel_pipeline::Result handleMissingPipeline() noexcept;
+  FOLLY_NOINLINE channel_pipeline::Result handleConnectionClosed() noexcept;
+  FOLLY_NOINLINE void handleDeferredClose() noexcept;
 
   folly::EventBase* evb_{nullptr};
   folly::F14FastMap<std::string, RequestResponseProcessFn> dispatch_;
   folly::Synchronized<std::function<void()>> closeCallback_;
   State state_{State::Created};
+  uint32_t inFlight_{0};
+  bool closeDeferred_{false};
+
+  void fireCloseCallback() noexcept;
+
+  // Pushes a stream-0 ERROR(CONNECTION_CLOSE) through the pipeline (rsocket-
+  // spec signal). Wire-only; no state mutation. Returns Error if the
+  // pipeline is unwired or the write fails — caller should treat that as
+  // the connection being already dead.
+  [[nodiscard]] channel_pipeline::Result sendConnectionCloseErr() noexcept;
 
   [[nodiscard]] channel_pipeline::Result fireResponse(
       ThriftServerResponseMessage&& response) noexcept;

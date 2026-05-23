@@ -605,7 +605,8 @@ void FastThriftServerT<Stats>::stop() {
   state_ = State::kStopped;
 
   // Stop accepting new connections first
-  connectionManager_->stop();
+  connectionManager_->stopAccepting();
+  connectionManager_->closeConnections();
 
   // Drain the map under the lock, then destroy entries outside it.
   // ~ThriftConnectionContext runs ~ThriftServerChannel, which fires the close

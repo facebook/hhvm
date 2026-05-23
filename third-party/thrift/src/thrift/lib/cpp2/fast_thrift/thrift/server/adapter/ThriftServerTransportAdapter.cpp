@@ -47,6 +47,17 @@ ThriftServerTransportAdapter::ThriftServerTransportAdapter(
 }
 
 ThriftServerTransportAdapter::~ThriftServerTransportAdapter() {
+  // Graceful-stop tears the bridge down before the rocket adapter. The
+  // ctor installed `this`-capturing lambdas on appAdapter_ via
+  // setRequestHandlers/setLifecycleHandlers; clear them so a later
+  // rocket-side close/disconnect (e.g. from ConnectionManager
+  // closeConnections after our drain) can't fire them and dereference
+  // freed memory. Skip when rocket has already torn down (onRocketClosed
+  // cleared rocketAlive_) — the reference would itself be dangling.
+  if (rocketAlive_) {
+    appAdapter_.setRequestHandlers({}, {});
+    appAdapter_.setLifecycleHandlers({}, {}, {});
+  }
   // Defensive: if the bridge is destroyed without going through the
   // thrift pipeline's handlerRemoved (which would have invoked the
   // destroy callback already), tear the rocket connection down
@@ -99,6 +110,7 @@ void ThriftServerTransportAdapter::onDisconnect() noexcept {
 }
 
 void ThriftServerTransportAdapter::onRocketClosed() noexcept {
+  rocketAlive_ = false;
   onRocketDisconnect_ = {};
   onRocketDestroy_ = {};
 }

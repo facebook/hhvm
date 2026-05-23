@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -340,6 +341,7 @@ class FastThriftServer {
 
   void registerConnection(
       ThriftServerCompositeAppAdapter* key, CompositeConnection connection);
+  void initiateConnectionDrain();
 
   const FastThriftServerConfig config_;
   std::shared_ptr<ThriftServerAppAdapterFactory> handler_;
@@ -365,6 +367,8 @@ class FastThriftServer {
   folly::Synchronized<std::unordered_map<void*, ConnectionVariant>>
       thriftConnections_;
   folly::Baton<> stopBaton_;
+  folly::Baton<> connectionsDrainedBaton_;
+  std::atomic<bool> drainingConnections_{false};
   // Guards state_ and serializes lifecycle transitions so that stop()
   // observes the connectionManager_ assignment from start() with a proper
   // happens-before. Without this, TSAN reports a race when stop() runs on a

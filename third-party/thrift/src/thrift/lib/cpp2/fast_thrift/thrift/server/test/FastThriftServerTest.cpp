@@ -20,6 +20,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <thread>
 
 #include <fizz/client/AsyncFizzClient.h>
 #include <fizz/client/FizzClientContext.h>
@@ -111,6 +112,32 @@ class TestHandler : public FastServiceHandler<integration::FastThriftServer> {
     resp->message() = "ok";
     cb->result(std::move(resp));
   }
+};
+
+// Handler that retains the ping callback instead of completing it. Tests
+// drive completion on their own schedule, after stop() has begun, to
+// reproduce the race where an in-flight FHC would write back through a
+// freed adapter.
+class DeferredPingHandler
+    : public FastServiceHandler<integration::FastThriftServer> {
+ public:
+  void async_eb_ping(ftt::FastHandlerCallbackPtr<void> cb) override {
+    evb_ = cb->getEventBase();
+    callback_ = std::move(cb);
+    pingStarted_.post();
+  }
+
+  ftt::FastHandlerCallbackPtr<void> takeCallback() {
+    return std::move(callback_);
+  }
+
+  folly::EventBase* getEventBase() const { return evb_; }
+
+  folly::Baton<> pingStarted_;
+
+ private:
+  ftt::FastHandlerCallbackPtr<void> callback_;
+  folly::EventBase* evb_{nullptr};
 };
 
 // Establishes a fizz-client connection to `address` and returns the negotiated
@@ -413,6 +440,66 @@ TEST_F(FastThriftServerTest, SecureLookupSecondExceptionPropagates) {
     return client->semifuture_secureLookup(/*id=*/5, std::string("alice"));
   });
   destroyClientOnEvb(client);
+}
+
+// Regression for the lifetime bug fixed by the inflight-tracking + connection
+// drain change in this commit. Before the fix, stop() synchronously dropped
+// per-connection FastConnection state (including the ThriftServerAppAdapter)
+// while a handler still held a FastHandlerCallbackPtr. The deferred
+// completion then wrote a response through the freed adapter — a UAF caught
+// by ASAN/TSAN. After the fix, stop() drives onException on every adapter,
+// each adapter stays Closing until its inFlight_ counter hits zero, and
+// stop() blocks on connectionsDrainedBaton_ until every adapter has fired
+// its closeCallback. The retained callback can safely complete during stop.
+TEST(
+    FastThriftServerStandaloneTest,
+    DeferredPingCallbackAfterStopDoesNotUseFreedAdapter) {
+  THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+  auto handler = std::make_shared<DeferredPingHandler>();
+  ftt::FastThriftServerConfig config;
+  config.address = folly::SocketAddress("::1", 0);
+  config.numIOThreads = 1;
+
+  ftt::FastThriftServer server(std::move(config));
+  server.setInterface(handler);
+  server.start();
+
+  folly::ScopedEventBaseThread clientThread;
+  auto* evb = clientThread.getEventBase();
+  std::unique_ptr<apache::thrift::Client<integration::FastThriftServer>> client;
+  evb->runInEventBaseThreadAndWait([&] {
+    auto socket = folly::AsyncSocket::newSocket(evb, server.getAddress());
+    auto channel =
+        apache::thrift::RocketClientChannel::newChannel(std::move(socket));
+    client =
+        std::make_unique<apache::thrift::Client<integration::FastThriftServer>>(
+            std::move(channel));
+  });
+
+  folly::Baton<> clientDone;
+  evb->runInEventBaseThread([&] {
+    client->semifuture_ping()
+        .via(evb)
+        .thenValue([&](folly::Unit) { clientDone.post(); })
+        .thenError([&](const folly::exception_wrapper&) { clientDone.post(); });
+  });
+
+  ASSERT_TRUE(handler->pingStarted_.try_wait_for(std::chrono::seconds{5}));
+
+  std::thread stopThread([&] { server.stop(); });
+
+  // stop() may close the wire, but the retained in-flight callback must not
+  // dereference a freed per-connection adapter when it completes.
+  ASSERT_NE(handler->getEventBase(), nullptr);
+  handler->getEventBase()->runInEventBaseThreadAndWait([&] {
+    auto callback = handler->takeCallback();
+    ASSERT_NE(callback, nullptr);
+    std::move(callback)->done();
+  });
+  stopThread.join();
+
+  evb->runInEventBaseThreadAndWait([&] { client.reset(); });
 }
 
 // ---------------------------------------------------------------------------

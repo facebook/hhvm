@@ -295,7 +295,8 @@ class FastThriftE2ETest : public ::testing::Test {
         baton->wait();
       }
     }
-    connectionManager_->stop();
+    connectionManager_->stopAccepting();
+    connectionManager_->closeConnections();
     // Clear thrift contexts here (before executor_.reset()) so Cpp2Worker's
     // IOWorkerContext is destroyed while the event base is alive.
     thriftConnections_.withWLock([](auto& conns) { conns.clear(); });
@@ -681,7 +682,8 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
         baton->wait();
       }
     }
-    connectionManager_->stop();
+    connectionManager_->stopAccepting();
+    connectionManager_->closeConnections();
     // Clear thrift contexts here (before executor_.reset()) so Cpp2Worker's
     // IOWorkerContext is destroyed while the event base is alive.
     thriftConnections_.withWLock([](auto& conns) { conns.clear(); });

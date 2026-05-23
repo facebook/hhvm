@@ -74,6 +74,7 @@ concept ServerOutboundAppAdapter = requires(
   {
     t.writeUnknownException(streamId, ew, blame)
   } noexcept -> std::same_as<channel_pipeline::Result>;
+  { t.startDrain() } noexcept;
 };
 
 /**

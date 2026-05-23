@@ -88,7 +88,8 @@ void IntegrationTestFixture::SetUp() {
 void IntegrationTestFixture::TearDown() {
   disconnectClient();
   if (connectionManager_) {
-    connectionManager_->stop();
+    connectionManager_->stopAccepting();
+    connectionManager_->closeConnections();
     connectionManager_.reset();
   }
   if (executor_) {

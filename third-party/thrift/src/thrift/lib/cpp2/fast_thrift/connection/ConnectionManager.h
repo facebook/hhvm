@@ -31,6 +31,7 @@
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/logging/xlog.h>
+#include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionHandler.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 
@@ -47,6 +48,11 @@ class ConnectionManager : public folly::DelayedDestruction {
  public:
   using Ptr =
       std::unique_ptr<ConnectionManager, folly::DelayedDestruction::Destructor>;
+
+  ConnectionManager(const ConnectionManager&) = delete;
+  ConnectionManager& operator=(const ConnectionManager&) = delete;
+  ConnectionManager(ConnectionManager&&) = delete;
+  ConnectionManager& operator=(ConnectionManager&&) = delete;
 
   /**
    * IOObserver handles EventBase registration/unregistration events from the
@@ -91,13 +97,46 @@ class ConnectionManager : public folly::DelayedDestruction {
 
   void start() {
     DCHECK(state_.load() != State::STARTED);
-    executor_->addObserver(observer_);
+    // Set STARTED before addObserver — addObserver synchronously invokes
+    // registerEventBase on every IO thread, and that path gates on state_.
     state_.store(State::STARTED);
+    executor_->addObserver(observer_);
   }
 
-  void stop() {
-    if (state_.exchange(State::STOPPED) != State::STARTED) {
+  // Stops accepting on every handler synchronously; existing connections
+  // stay alive until closeConnections().
+  void stopAccepting() {
+    State expected = State::STARTED;
+    if (!state_.compare_exchange_strong(
+            expected, State::STOP_ACCEPTING_CONNECTIONS)) {
       return;
+    }
+    constexpr std::chrono::seconds kAcceptStoppedTimeout{30};
+    auto snapshot = snapshotHandlers();
+    for (auto& [evb, handler] : snapshot) {
+      DCHECK(!evb->inRunningEventBaseThread())
+          << "must not be called from an IO EVB thread; would deadlock";
+      folly::Baton<> done;
+      evb->runImmediatelyOrRunInEventBaseThreadAndWait(
+          [handler, &done] { handler->stopAccepting(done); });
+      CHECK(done.try_wait_for(kAcceptStoppedTimeout))
+          << "acceptStopped did not fire within "
+          << kAcceptStoppedTimeout.count() << "s";
+    }
+  }
+
+  // Tear down every ConnectionHandler and its existing rocket connections.
+  // Caller must have stopped accept first (via stopAccepting() or stop());
+  // ConnectionHandler's dtor DCHECKs that state is STOPPED.
+  void closeConnections() {
+    State prev = state_.exchange(State::STOPPED);
+    if (prev == State::NONE || prev == State::STOPPED) {
+      return;
+    }
+    auto snapshot = snapshotHandlers();
+    for (auto& [evb, handler] : snapshot) {
+      evb->runImmediatelyOrRunInEventBaseThreadAndWait(
+          [handler] { handler->closeAllConnections(); });
     }
     executor_->removeObserver(observer_);
   }
@@ -141,23 +180,40 @@ class ConnectionManager : public folly::DelayedDestruction {
         socketOptions_(socketOptions),
         observer_(std::make_shared<IOObserver>(*this)) {}
 
-  ~ConnectionManager() override = default;
-
-  void onDelayedDestroy(bool delayed) override {
-    if (delayed && !getDestroyPending()) {
-      return;
-    }
-    stop();
-    delete this;
+  // Both calls are idempotent — safe whether the caller already invoked
+  // them explicitly or is relying on the dtor to drive shutdown.
+  ~ConnectionManager() override {
+    stopAccepting();
+    closeConnections();
   }
 
  private:
   friend class IOObserver;
 
-  enum class State { NONE, STARTED, STOPPED };
+  enum class State { NONE, STARTED, STOP_ACCEPTING_CONNECTIONS, STOPPED };
+
+  // Snapshot (evb, handler) pairs under the rlock so callers can iterate
+  // without holding the lock across EVB hops (which would deadlock).
+  std::vector<std::pair<folly::EventBase*, ConnectionHandler*>>
+  snapshotHandlers() {
+    std::vector<std::pair<folly::EventBase*, ConnectionHandler*>> snapshot;
+    connectionHandlers_.withRLock([&](const auto& handlerMap) {
+      snapshot.reserve(handlerMap.size());
+      for (const auto& [evb, handler] : handlerMap) {
+        snapshot.emplace_back(evb, handler.get());
+      }
+    });
+    return snapshot;
+  }
 
   void registerEventBase(folly::EventBase& evb) {
     DestructorGuard dg(this);
+
+    // After stopAccepting() / stop(), refuse to spin up listeners on EVBs
+    // that the executor adds during shutdown.
+    if (state_.load(std::memory_order_acquire) != State::STARTED) {
+      return;
+    }
 
     connectionHandlers_.withWLock([&](auto& handlerMap) {
       ConnectionHandler::Ptr connectionHandler(new ConnectionHandler(
@@ -184,7 +240,9 @@ class ConnectionManager : public folly::DelayedDestruction {
     connectionHandlers_.withWLock([&](auto& handlerMap) {
       if (auto handlerIt = handlerMap.find(&evb);
           handlerIt != handlerMap.end()) {
-        handlerIt->second->stopAccepting();
+        // Contract: caller has driven the handler to STOPPED via
+        // stopAccepting() and closed its connections via closeConnections()
+        // before reaching here. ConnectionHandler's dtor DCHECKs both.
         handlerMap.erase(handlerIt);
       }
     });

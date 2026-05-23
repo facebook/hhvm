@@ -295,11 +295,16 @@ TEST_F(ConnectionHandlerTest, StopAccepting) {
   EXPECT_EQ(handler->connectionCount(), 1);
 
   evb_->runInEventBaseThreadAndWait([&] { handler->stopAccepting(); });
-  // stopAccepting() calls removeAcceptCallback() which enqueues
-  // acceptStopped() via RemoteAcceptor. Drain the EVB to let
-  // acceptStopped() -> closeAllConnections() execute.
+  // Drain the EVB so acceptStopped() runs after the accept-callback
+  // removal completes via RemoteAcceptor.
   evb_->runInEventBaseThreadAndWait([&] {});
 
+  // stopAccepting() must leave existing connections alive — upper layers
+  // may still hold raw references into them while they finish their own
+  // drain. Connection teardown is a separate explicit step.
+  EXPECT_EQ(handler->connectionCount(), 1);
+
+  evb_->runInEventBaseThreadAndWait([&] { handler->closeAllConnections(); });
   EXPECT_EQ(handler->connectionCount(), 0);
 }
 
@@ -318,7 +323,10 @@ TEST_F(ConnectionHandlerTest, AcceptMutlipleConnections) {
 
   EXPECT_EQ(handler->connectionCount(), 3);
 
-  evb_->runInEventBaseThreadAndWait([&] { handler->stopAccepting(); });
+  evb_->runInEventBaseThreadAndWait([&] {
+    handler->stopAccepting();
+    handler->closeAllConnections();
+  });
   // Drain the EVB to let acceptStopped() fire before handler is destroyed.
   evb_->runInEventBaseThreadAndWait([&] {});
 }
@@ -335,6 +343,7 @@ TEST_F(ConnectionHandlerTest, DestroyInStoppedState) {
 
   evb_->runInEventBaseThreadAndWait([&] {
     handler->startAccepting(address);
+    EXPECT_EQ(handler->state_, ConnectionHandler::State::ACCEPTING);
     handler->stopAccepting();
   });
   // Drain the EVB to let acceptStopped() fire (see StopAccepting comment).
@@ -342,44 +351,6 @@ TEST_F(ConnectionHandlerTest, DestroyInStoppedState) {
 
   EXPECT_EQ(handler->state_, ConnectionHandler::State::STOPPED);
   handler.reset();
-}
-
-TEST_F(ConnectionHandlerTest, DestroyWithActiveConnections) {
-  auto handler = createConnectionHandler();
-  folly::SocketAddress address("::1", 0);
-
-  evb_->runInEventBaseThreadAndWait([&] { handler->startAccepting(address); });
-
-  folly::SocketAddress boundAddress;
-  handler->getAddress(&boundAddress);
-
-  connectAndWait(boundAddress);
-
-  EXPECT_EQ(handler->connectionCount(), 1);
-
-  evb_->runInEventBaseThreadAndWait([&] {
-    auto* rawHandler = handler.release();
-    rawHandler->destroy();
-  });
-}
-
-TEST_F(ConnectionHandlerTest, ObjectStaysAliveUntilAcceptStopped) {
-  auto handler = createConnectionHandler();
-  folly::SocketAddress address("::1", 0);
-
-  evb_->runInEventBaseThreadAndWait([&] { handler->startAccepting(address); });
-
-  EXPECT_EQ(handler->state_, ConnectionHandler::State::ACCEPTING);
-
-  evb_->runInEventBaseThreadAndWait([&] { handler->stopAccepting(); });
-  // Drain the EVB to let acceptStopped() fire (see StopAccepting comment).
-  evb_->runInEventBaseThreadAndWait([&] {});
-
-  evb_->runInEventBaseThreadAndWait([&] {
-    EXPECT_EQ(handler->state_, ConnectionHandler::State::STOPPED);
-    auto* rawHandler = handler.release();
-    rawHandler->destroy();
-  });
 }
 
 } // namespace apache::thrift::fast_thrift::connection

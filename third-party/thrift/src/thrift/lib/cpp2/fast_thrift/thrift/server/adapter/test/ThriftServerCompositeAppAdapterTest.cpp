@@ -130,6 +130,9 @@ class TestChildAdapter : public ThriftServerAppAdapter {
     lastException = e;
     ThriftServerAppAdapter::onException(folly::exception_wrapper{e});
   }
+  // No chain — base startDrain would attempt to write CONNECTION_CLOSE
+  // through the pipeline. Fan-out tests don't always wire one up.
+  void startDrain() noexcept { ++startDrainCount; }
 
   std::string id_;
   std::string dispatchedTo;
@@ -142,6 +145,7 @@ class TestChildAdapter : public ThriftServerAppAdapter {
   int onPipelineInactiveCount{0};
   int onWriteReadyCount{0};
   int onExceptionCount{0};
+  int startDrainCount{0};
   folly::exception_wrapper lastException;
 };
 
@@ -567,6 +571,25 @@ TEST_F(
     EXPECT_EQ(c->onPipelineInactiveCount, 1) << c->id_ << " onPipelineInactive";
     EXPECT_EQ(c->handlerRemovedCount, 1) << c->id_ << " handlerRemoved";
   }
+}
+
+// Composite's startDrain must reach every child via vtable — children are
+// stored as concept-erased entries, so the dispatch goes through the
+// per-T trampoline (`static_cast<T*>(p)->startDrain()`). If the vtable
+// slot were ever misrouted, graceful shutdown silently no-ops.
+TEST_F(ThriftServerCompositeAppAdapterTest, StartDrainFansOutToBothChildren) {
+  TestChildAdapter::Ptr userChild{new TestChildAdapter("user")};
+  TestChildAdapter::Ptr monitoringChild{new TestChildAdapter("monitoring")};
+
+  ThriftServerCompositeAppAdapter::Ptr composite{
+      new ThriftServerCompositeAppAdapter()};
+  composite->addChild(userChild.get());
+  composite->addChild(monitoringChild.get());
+
+  composite->startDrain();
+
+  EXPECT_EQ(userChild->startDrainCount, 1);
+  EXPECT_EQ(monitoringChild->startDrainCount, 1);
 }
 
 // =============================================================================

@@ -90,6 +90,12 @@ class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
   void onPipelineInactive() noexcept;
   void onWriteReady() noexcept;
 
+  // Server-initiated graceful drain. Fans startDrain() out to every child;
+  // each independently emits its own stream-0 ERROR(CONNECTION_CLOSE) and
+  // transitions to Closing, deferring its closeCallback until its
+  // inFlight_ drains. Must be called on the pipeline's EventBase.
+  void startDrain() noexcept;
+
  protected:
   ~ThriftServerCompositeAppAdapter() override = default;
 
@@ -111,6 +117,7 @@ class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
     void (*onPipelineActive)(void*) noexcept;
     void (*onPipelineInactive)(void*) noexcept;
     void (*onWriteReady)(void*) noexcept;
+    void (*startDrain)(void*) noexcept;
   };
 
   template <typename T>
@@ -126,6 +133,7 @@ class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
       +[](void* p) noexcept { static_cast<T*>(p)->onPipelineActive(); },
       +[](void* p) noexcept { static_cast<T*>(p)->onPipelineInactive(); },
       +[](void* p) noexcept { static_cast<T*>(p)->onWriteReady(); },
+      +[](void* p) noexcept { static_cast<T*>(p)->startDrain(); },
   };
 
   void warnDuplicateMethod(std::string_view name) const;

@@ -50,9 +50,21 @@ ConnectionHandler::ConnectionHandler(
       socketOptions_(socketOptions) {}
 
 ConnectionHandler::~ConnectionHandler() {
+  // Contract: callers must drive the handler to STOPPED (via stopAccepting
+  // + acceptStopped drain) and close all connections before destroying it.
+  // ConnectionManager::stopAccepting() / closeConnections() honor this for
+  // the production path; tests must do the same.
+  DCHECK(state_ == State::STOPPED || state_ == State::NONE)
+      << "ConnectionHandler destroyed in state " << static_cast<int>(state_)
+      << " — caller must stopAccepting() and drain acceptStopped() first";
   if (FOLLY_LIKELY(socket_)) {
     evb_->runImmediatelyOrRunInEventBaseThreadAndWait(
-        [socket = std::move(socket_)]() mutable { socket.reset(); });
+        [this, socket = std::move(socket_)]() mutable {
+          DCHECK(connections_.empty())
+              << "ConnectionHandler destroyed with active connections — "
+              << "call closeAllConnections() on the EVB first";
+          socket.reset();
+        });
   }
 }
 
@@ -106,14 +118,12 @@ void ConnectionHandler::acceptError(folly::exception_wrapper ew) noexcept {
 }
 
 void ConnectionHandler::acceptStopped() noexcept {
-  DestructorGuard dg(this);
   XLOG(DBG3) << "Accept stopped";
   state_ = State::STOPPED;
   pendingHandshakes_.cancelAll();
-  closeAllConnections();
-
-  // Release the guard - this may trigger deferred destruction
-  stoppingDestroyGuard_.reset();
+  if (auto* b = std::exchange(acceptStoppedBaton_, nullptr)) {
+    b->post();
+  }
 }
 
 void ConnectionHandler::startAccepting(const folly::SocketAddress& address) {
@@ -142,11 +152,17 @@ void ConnectionHandler::stopAccepting() {
 
   DCHECK(socket_);
   state_ = State::STOPPING;
-
-  // Hold a guard to keep the object alive until acceptStopped() is called
-  stoppingDestroyGuard_.emplace(this);
-
   socket_->removeAcceptCallback(this, evb_.get());
+}
+
+void ConnectionHandler::stopAccepting(folly::Baton<>& done) noexcept {
+  if (state_ != State::ACCEPTING) {
+    // No removeAcceptCallback → no acceptStopped; release caller now.
+    done.post();
+    return;
+  }
+  acceptStoppedBaton_ = &done;
+  stopAccepting();
 }
 
 void ConnectionHandler::closeAllConnections() {
@@ -165,31 +181,6 @@ size_t ConnectionHandler::connectionCount() {
 
 void ConnectionHandler::getAddress(folly::SocketAddress* address) const {
   socket_->getAddress(address);
-}
-
-void ConnectionHandler::destroy() {
-  if (state_ == State::STOPPED || state_ == State::NONE) {
-    onDelayedDestroy(false);
-  } else {
-    destroyPending_ = true;
-    if (state_ == State::ACCEPTING) {
-      // Schedule destruction after acceptStopped callback completes
-      evb_->runInEventBaseThread([this] { stopAccepting(); });
-      return;
-    }
-    if (state_ == State::STOPPING) {
-      // Still waiting for acceptStopped callback
-      return;
-    }
-  }
-}
-
-void ConnectionHandler::onDelayedDestroy(bool delayed) {
-  if (delayed && !destroyPending_) {
-    return;
-  }
-  // State is STOPPED or NONE - safe to delete
-  delete this;
 }
 
 void ConnectionHandler::installConnection(

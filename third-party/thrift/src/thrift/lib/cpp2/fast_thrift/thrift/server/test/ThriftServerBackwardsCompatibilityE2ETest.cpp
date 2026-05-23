@@ -239,10 +239,11 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
 
   void TearDown() override {
     clientThread_.reset();
-    connectionManager_->stop();
-    // connectionManager_->stop() is synchronous: IO thread is done by the time
-    // it returns. Clear thrift contexts here (before executor_.reset()) so
-    // Cpp2Worker's IOWorkerContext is destroyed while the event base is alive.
+    connectionManager_->stopAccepting();
+    connectionManager_->closeConnections();
+    // Synchronous: IO thread is done by the time these return. Clear thrift
+    // contexts here (before executor_.reset()) so Cpp2Worker's
+    // IOWorkerContext is destroyed while the event base is alive.
     thriftConnections_.withWLock([](auto& conns) { conns.clear(); });
     connectionManager_.reset();
     executor_->join();

@@ -16,9 +16,15 @@
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServer.h>
 
+#include <chrono>
 #include <csignal>
+#include <vector>
 
+#include <folly/Executor.h>
+#include <folly/Function.h>
 #include <folly/io/async/AsyncSignalHandler.h>
+#include <folly/io/async/DelayedDestruction.h>
+#include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/logging/xlog.h>
 
@@ -397,12 +403,34 @@ PipelineImpl::Ptr FastThriftServer::buildRocketPipeline(
 void FastThriftServer::registerConnection(
     ThriftServerAppAdapter* key, SimpleConnection connection) {
   void* rawPtr = key;
-  // Close callback fires from ThriftServerAppAdapter::onException when the
-  // pipeline propagates an exception (typically connection drop). Removes the
-  // entry from the map, releasing the per-connection adapter + pipeline.
+  // Close callback fires after ThriftServerAppAdapter reaches Closed. For
+  // graceful shutdown, in-flight callbacks keep the adapter in Closing until
+  // their final response path drains inFlight_.
   connection.adapter->setCloseCallback([this, rawPtr]() {
-    thriftConnections_.withWLock(
-        [rawPtr](auto& conns) { conns.erase(rawPtr); });
+    SimpleConnection extracted;
+    bool found = false;
+    bool drained = false;
+    thriftConnections_.withWLock([&](auto& conns) {
+      auto it = conns.find(rawPtr);
+      if (it == conns.end()) {
+        return;
+      }
+      extracted = std::move(std::get<SimpleConnection>(it->second));
+      conns.erase(it);
+      found = true;
+      drained =
+          drainingConnections_.load(std::memory_order_acquire) && conns.empty();
+    });
+    if (found && extracted.pipeline) {
+      // Deactivate before destruction so the head transport adapter sees
+      // onPipelineInactive (clearing connected_) before its handlerRemoved
+      // fires. Graceful-stop reaches here while the rocket connection is
+      // still up, so nothing else has driven the pipeline inactive yet.
+      extracted.pipeline->deactivate();
+    }
+    if (drained) {
+      connectionsDrainedBaton_.post();
+    }
   });
   thriftConnections_.withWLock(
       [&](auto& conns) { conns.emplace(rawPtr, std::move(connection)); });
@@ -418,11 +446,70 @@ void FastThriftServer::registerConnection(
   // vtable, so the first child's callback reliably fires.
   DCHECK(!connection.children.empty());
   connection.children.front()->setCloseCallback([this, rawPtr]() {
-    thriftConnections_.withWLock(
-        [rawPtr](auto& conns) { conns.erase(rawPtr); });
+    CompositeConnection extracted;
+    bool found = false;
+    bool drained = false;
+    thriftConnections_.withWLock([&](auto& conns) {
+      auto it = conns.find(rawPtr);
+      if (it == conns.end()) {
+        return;
+      }
+      extracted = std::move(std::get<CompositeConnection>(it->second));
+      conns.erase(it);
+      found = true;
+      drained =
+          drainingConnections_.load(std::memory_order_acquire) && conns.empty();
+    });
+    if (found && extracted.pipeline) {
+      extracted.pipeline->deactivate();
+    }
+    if (drained) {
+      connectionsDrainedBaton_.post();
+    }
   });
   thriftConnections_.withWLock(
       [&](auto& conns) { conns.emplace(rawPtr, std::move(connection)); });
+}
+
+void FastThriftServer::initiateConnectionDrain() {
+  struct DrainTarget {
+    folly::Executor::KeepAlive<folly::EventBase> evb;
+    folly::Function<void()> drain;
+  };
+  std::vector<DrainTarget> targets;
+  thriftConnections_.withRLock([&](const auto& conns) {
+    targets.reserve(conns.size());
+    for (const auto& [_, connection] : conns) {
+      std::visit(
+          [&](const auto& c) {
+            auto* adapter = c.adapter.get();
+            // DestructorGuard keeps the adapter alive across the EVB hop —
+            // if the peer drops between enqueue and dispatch, the close
+            // callback would otherwise erase the SimpleConnection and free
+            // the adapter under us.
+            folly::DelayedDestruction::DestructorGuard guard(adapter);
+            targets.push_back(
+                {folly::getKeepAliveToken(c.pipeline->eventBase()),
+                 [adapter, guard = std::move(guard)]() {
+                   adapter->startDrain();
+                 }});
+          },
+          connection);
+    }
+  });
+
+  // Hop to each connection's EVB to push the wire frame + mutate adapter
+  // state under the same single-threaded discipline as the request path.
+  // Move the EVB KeepAlive into the lambda so the EVB is guaranteed alive
+  // until the queued task actually runs, regardless of how the surrounding
+  // shutdown is structured.
+  for (auto& t : targets) {
+    auto* evb = t.evb.get();
+    evb->runInEventBaseThread(
+        [keepAlive = std::move(t.evb), drain = std::move(t.drain)]() mutable {
+          drain();
+        });
+  }
 }
 
 FastThriftServer::~FastThriftServer() {
@@ -542,20 +629,34 @@ void FastThriftServer::serve() {
 }
 
 void FastThriftServer::stop() {
-  std::lock_guard<std::mutex> lock(lifecycleMutex_);
-  if (state_ != State::kRunning) {
-    return;
+  {
+    std::lock_guard<std::mutex> lock(lifecycleMutex_);
+    if (state_ != State::kRunning) {
+      return;
+    }
+    state_ = State::kStopped;
   }
-  state_ = State::kStopped;
 
-  connectionManager_->stop();
+  drainingConnections_.store(true, std::memory_order_release);
+  // Stop accepting new connections but keep existing rocket connections
+  // alive — ThriftServerTransportAdapter::onWrite holds a raw reference into
+  // RocketServerAppAdapter that in-flight thrift FHCs may still traverse
+  // when they complete their deferred response.
+  connectionManager_->stopAccepting();
+  initiateConnectionDrain();
 
-  // Drain the map under the lock, then destroy entries outside it.
-  // ~SimpleConnection runs ~ThriftServerAppAdapter, which fires the close
-  // callback synchronously; that callback re-acquires this same write lock,
-  // so clearing under the lock would deadlock folly::SharedMutex.
-  std::unordered_map<void*, ConnectionVariant> drained;
-  thriftConnections_.withWLock([&](auto& conns) { drained.swap(conns); });
+  const bool drained = thriftConnections_.withRLock(
+      [](const auto& conns) { return conns.empty(); });
+  if (!drained) {
+    constexpr std::chrono::seconds kDrainTimeout{30};
+    CHECK(connectionsDrainedBaton_.try_wait_for(kDrainTimeout))
+        << "FastThriftServer::stop timed out after " << kDrainTimeout.count()
+        << "s waiting for in-flight thrift connections to drain";
+  }
+  // Now that every thrift adapter has drained its inFlight_ and fired its
+  // closeCallback, no FHC can race a rocket-adapter teardown.
+  connectionManager_->closeConnections();
+
   stopBaton_.post();
 }
 

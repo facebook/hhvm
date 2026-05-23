@@ -229,6 +229,10 @@ class ThriftServerTransportAdapter {
   rocket::server::MetadataProtocol metadataProtocol_{
       rocket::server::MetadataProtocol::BINARY};
   bool connected_{false};
+  // True until onRocketClosed fires (rocket adapter is going away). Gates
+  // the dtor's unhook of request/lifecycle handlers on appAdapter_ — if
+  // rocket has already torn down, the reference is dangling.
+  bool rocketAlive_{true};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift::server

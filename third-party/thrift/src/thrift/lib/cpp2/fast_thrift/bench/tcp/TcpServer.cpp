@@ -144,7 +144,8 @@ void TcpServer::start() {
 }
 
 void TcpServer::stop() {
-  connectionManager_->stop();
+  connectionManager_->stopAccepting();
+  connectionManager_->closeConnections();
   adapters_.clear();
 }
 

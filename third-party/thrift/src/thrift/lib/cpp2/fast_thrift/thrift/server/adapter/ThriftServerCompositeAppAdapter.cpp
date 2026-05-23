@@ -98,6 +98,12 @@ void ThriftServerCompositeAppAdapter::onWriteReady() noexcept {
   }
 }
 
+void ThriftServerCompositeAppAdapter::startDrain() noexcept {
+  for (auto& child : children_) {
+    child.vtable->startDrain(child.owner);
+  }
+}
+
 void ThriftServerCompositeAppAdapter::warnDuplicateMethod(
     std::string_view name) const {
   XLOG(WARN) << "ThriftServerCompositeAppAdapter: method '" << name

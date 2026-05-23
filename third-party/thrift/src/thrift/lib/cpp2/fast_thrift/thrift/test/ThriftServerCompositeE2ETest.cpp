@@ -398,7 +398,8 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
         baton->wait();
       }
     }
-    connectionManager_->stop();
+    connectionManager_->stopAccepting();
+    connectionManager_->closeConnections();
     serverConnections_.withWLock([](auto& conns) { conns.clear(); });
     connectionManager_.reset();
     executor_->join();

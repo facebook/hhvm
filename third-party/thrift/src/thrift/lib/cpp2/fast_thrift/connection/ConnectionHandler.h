@@ -19,7 +19,6 @@
 #include <chrono>
 #include <functional>
 #include <memory>
-#include <optional>
 #include <vector>
 
 #include <fizz/server/FizzServerContext.h>
@@ -29,6 +28,7 @@
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/SocketOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzHandshakeHelper.h>
@@ -96,6 +96,9 @@ class ConnectionHandler : public folly::DelayedDestruction,
 
   void stopAccepting();
 
+  // Stops and posts `done` once state reaches STOPPED.
+  void stopAccepting(folly::Baton<>& done) noexcept;
+
   void closeAllConnections();
 
   size_t connectionCount();
@@ -104,10 +107,6 @@ class ConnectionHandler : public folly::DelayedDestruction,
 
  protected:
   ~ConnectionHandler() override;
-
-  void destroy() override;
-
-  void onDelayedDestroy(bool delayed) override;
 
  private:
   enum class State { NONE, ACCEPTING, STOPPING, STOPPED };
@@ -128,9 +127,7 @@ class ConnectionHandler : public folly::DelayedDestruction,
   SocketOptions socketOptions_;
   security::PendingHandshakes pendingHandshakes_;
   std::vector<RocketServerConnection> connections_;
-  std::optional<folly::DelayedDestruction::DestructorGuard>
-      stoppingDestroyGuard_;
-  bool destroyPending_{false};
+  folly::Baton<>* acceptStoppedBaton_{nullptr};
   bool enableReusePortBpfSpread_{false};
 };
 

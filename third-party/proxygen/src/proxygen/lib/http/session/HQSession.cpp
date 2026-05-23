@@ -9,6 +9,7 @@
 #include <proxygen/lib/http/session/HQSession.h>
 
 #include <proxygen/lib/http/HTTPPriorityFunctions.h>
+#include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
 #include <proxygen/lib/http/codec/HQControlCodec.h>
 #include <proxygen/lib/http/codec/HQStreamCodec.h>
 #include <proxygen/lib/http/codec/HQUtils.h>
@@ -166,6 +167,12 @@ const http2::PriorityUpdate hqDefaultPriority{
 HQSession::~HQSession() {
   VLOG(3) << *this << " closing";
   runDestroyCallbacks();
+}
+
+void HQSession::setEarlyDataHandler(
+    std::unique_ptr<H3EarlyDataHandler> handler) {
+  CHECK(isUpstream(direction_));
+  earlyDataHandler_ = std::move(handler);
 }
 
 void HQSession::setSessionStats(HTTPSessionStats* stats) {
@@ -335,8 +342,14 @@ bool HQSession::onTransportReadyCommon() noexcept {
     sock_->setDatagramCallback(this);
   }
   sock_->setPingCallback(this);
-  // TODO: 0-RTT settings
-  applySettings(defaultSettings);
+  if (earlyDataHandler_ && earlyDataHandler_->hasSettings()) {
+    // Apply cached peer settings from 0-RTT session ticket.
+    // hasSettings() is true when validate() successfully parsed cached settings
+    // from the ticket. Old tickets without app params won't have settings.
+    applySettings(earlyDataHandler_->getSettings().getAllSettings());
+  } else {
+    applySettings(defaultSettings);
+  }
   // notifyPendingShutdown may be invoked before onTransportReady,
   // so we need to address that here by kicking the GOAWAY logic if needed
   if (drainState_ == DrainState::PENDING) {
@@ -1535,6 +1548,9 @@ void HQSession::headersComplete(HTTPMessage* /*msg*/) {
 
 void HQSession::onSettings(const SettingsList& settings) {
   applySettings(settings);
+  if (earlyDataHandler_) {
+    earlyDataHandler_->setCurrentSettings(settings);
+  }
   if (infoCallback_) {
     infoCallback_->onSettings(*this, settings);
   }
@@ -1585,6 +1601,8 @@ void HQSession::applySettings(const SettingsList& settings) {
       }
     }
   }
+  VLOG(3) << "Applied SETTINGS sess=" << *this << " tableSize=" << tableSize
+          << " blocked=" << blocked;
   qpackCodec_.setEncoderHeaderTableSize(tableSize);
   qpackCodec_.setMaxVulnerable(blocked);
 
@@ -1599,9 +1617,6 @@ void HQSession::applySettings(const SettingsList& settings) {
   // H3 Datagram flows are bi-directional, enable only of local and peer
   // support it
   datagramEnabled_ &= datagram;
-
-  VLOG(3) << "Applied SETTINGS sess=" << *this << " size=" << tableSize
-          << " blocked=" << blocked;
 }
 
 void HQSession::onGoaway(uint64_t minUnseenId,

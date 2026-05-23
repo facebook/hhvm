@@ -82,7 +82,7 @@ ParseResult parseCancelPush(folly::io::Cursor& cursor,
   return parseIdOnlyFrame(cursor, header, outPushId);
 }
 
-folly::Expected<folly::Optional<SettingValue>, HTTP3::ErrorCode>
+static folly::Expected<folly::Optional<SettingValue>, HTTP3::ErrorCode>
 decodeSettingValue(folly::io::Cursor& cursor,
                    uint64_t& frameLength,
                    SettingId settingId) {
@@ -215,9 +215,10 @@ WriteResult writeFrameHeader(IOBufQueue& queue,
   return *typeRes + *lengthRes;
 }
 
-WriteResult writeSimpleFrame(IOBufQueue& queue,
-                             FrameType type,
-                             std::unique_ptr<folly::IOBuf> data) noexcept {
+static WriteResult writeSimpleFrame(
+    IOBufQueue& queue,
+    FrameType type,
+    std::unique_ptr<folly::IOBuf> data) noexcept {
   DCHECK(data);
   auto payloadSize = data->computeChainDataLength();
   auto headerSize = writeFrameHeader(queue, type, payloadSize);
@@ -386,7 +387,7 @@ WriteResult writeStreamPreface(folly::IOBufQueue& writeBuf,
   return *streamPrefaceSize;
 }
 
-const char* getFrameTypeString(FrameType type) {
+static const char* getFrameTypeString(FrameType type) {
   switch (type) {
     case FrameType::DATA:
       return "DATA";

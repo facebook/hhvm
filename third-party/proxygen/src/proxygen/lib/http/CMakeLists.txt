@@ -88,6 +88,7 @@ proxygen_add_library(proxygen_http_hq_connector
   SRCS
     HQConnector.cpp
   DEPS
+    proxygen_http_codec_h3_early_data_handler
     proxygen_http_session_hq_session
     mvfst::mvfst_common_udpsocket_folly_async_udp_socket
     mvfst::mvfst_congestion_control_congestion_controller_factory

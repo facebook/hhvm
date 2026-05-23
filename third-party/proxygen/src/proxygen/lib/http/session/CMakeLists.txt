@@ -233,6 +233,7 @@ proxygen_add_library(proxygen_http_session_hq_session
     Folly::folly_scope_guard
   EXPORTED_DEPS
     proxygen_http_codec_codec_common
+    proxygen_http_codec_h3_early_data_handler
     proxygen_http_codec_hq_codec
     proxygen_http_codec_http1x_codec
     proxygen_http_codec_http2_codec

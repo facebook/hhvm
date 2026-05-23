@@ -10,6 +10,7 @@
 
 #include <folly/io/SocketOptionMap.h>
 #include <folly/logging/xlog.h>
+#include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
 #include <proxygen/lib/http/session/HQSession.h>
 #include <quic/api/QuicSocket.h>
 #include <quic/common/events/FollyQuicEventBase.h>
@@ -100,6 +101,10 @@ void HQConnector::connect(
   // Always use connected UDP sockets
   transportSettings_.connectUDP = true;
   quicClient->setTransportSettings(transportSettings_);
+  auto earlyDataHandler = transportSettings_.attemptEarlyData
+                              ? std::make_unique<H3EarlyDataHandler>()
+                              : nullptr;
+  quicClient->setEarlyDataAppParamsHandler(earlyDataHandler.get());
   if (!quicVersions_.empty()) {
     quicClient->setSupportedVersions(quicVersions_);
   }
@@ -117,6 +122,7 @@ void HQConnector::connect(
   if (h3Settings_) {
     session_->setEgressSettings(*h3Settings_);
   }
+  session_->setEarlyDataHandler(std::move(earlyDataHandler));
   session_->startNow();
 
   VLOG(4) << "connecting to " << connectAddr.describe();

@@ -9,6 +9,7 @@
 #include <proxygen/lib/http/session/test/HQUpstreamSessionTest.h>
 
 #include <proxygen/lib/http/codec/CodecUtil.h>
+#include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
 #include <proxygen/lib/http/session/HQUpstreamSession.h>
 #include <proxygen/lib/http/webtransport/test/Mocks.h>
 
@@ -3272,6 +3273,99 @@ TEST_P(H3WtUpstreamTest, IngressStreamLimitExceeded) {
 
   hqSession_->dropConnection();
 }
+
+// Tests for 0-RTT early data handler integration with HQSession.
+// This fixture overrides SetUp to install an H3EarlyDataHandler before
+// onTransportReady, verifying cached settings are applied for 0-RTT.
+class HQUpstreamSessionTestEarlyData : public HQUpstreamSessionTest {
+ public:
+  void SetUp() override {
+    // Do base setup but NOT onTransportReady — we install the handler first.
+    // Intentionally skip HQUpstreamSessionTest::SetUp to avoid the
+    // onTransportReady call it performs.
+    HQSessionTest::SetUp(); // NOLINT(bugprone-parent-virtual-call)
+    dynamic_cast<HQUpstreamSession*>(hqSession_)
+        ->setConnectCallback(&connectCb_);
+  }
+};
+
+TEST_P(HQUpstreamSessionTestEarlyData, CachedSettingsAppliedOnTransportReady) {
+  // Create handler with cached settings (as parsed from a session ticket).
+  // This simulates reconnecting with a cached PSK that has app params.
+  // Use settings that match the test infrastructure's QPACK config.
+  auto handler = std::make_unique<H3EarlyDataHandler>();
+  auto* handlerPtr = handler.get();
+  handler->setCurrentSettings(SettingsList{
+      {SettingsId::HEADER_TABLE_SIZE, kQPACKTestDecoderMaxTableSize},
+      {SettingsId::_HQ_QPACK_BLOCKED_STREAMS, 100},
+      {SettingsId::ENABLE_CONNECT_PROTOCOL, 1}});
+  hqSession_->setEarlyDataHandler(std::move(handler));
+
+  EXPECT_CALL(connectCb_, connectSuccess());
+  hqSession_->onTransportReady();
+  createControlStreams();
+  flushAndLoop();
+
+  // Verify the session started successfully with cached settings.
+  // Open a transaction to confirm the session is fully functional.
+  auto txnHandler = openTransaction();
+  txnHandler->txn_->sendHeaders(getGetRequest());
+  txnHandler->txn_->sendEOM();
+  txnHandler->expectHeaders();
+  txnHandler->expectBody();
+  txnHandler->expectEOM();
+  txnHandler->expectDetachTransaction();
+
+  auto resp = makeResponse(200, 100);
+  sendResponse(txnHandler->txn_->getID(),
+               *std::get<0>(resp),
+               std::move(std::get<1>(resp)),
+               true);
+  flushAndLoop();
+
+  // After SETTINGS arrived via the control stream, the handler should
+  // have been updated with the server's actual settings for PSK caching
+  EXPECT_TRUE(handlerPtr->hasSettings());
+  auto blob = handlerPtr->get();
+  EXPECT_NE(blob, nullptr);
+
+  hqSession_->closeWhenIdle();
+}
+
+TEST_P(HQUpstreamSessionTestEarlyData, NoHandlerUsesDefaults) {
+  // Without a handler, onTransportReady applies default settings (table size 0)
+  EXPECT_CALL(connectCb_, connectSuccess());
+  hqSession_->onTransportReady();
+  createControlStreams();
+  flushAndLoop();
+
+  // Session should work fine with defaults
+  auto txnHandler = openTransaction();
+  txnHandler->txn_->sendHeaders(getGetRequest());
+  txnHandler->txn_->sendEOM();
+  txnHandler->expectHeaders();
+  txnHandler->expectBody();
+  txnHandler->expectEOM();
+  txnHandler->expectDetachTransaction();
+
+  auto resp = makeResponse(200, 100);
+  sendResponse(txnHandler->txn_->getID(),
+               *std::get<0>(resp),
+               std::move(std::get<1>(resp)),
+               true);
+  flushAndLoop();
+
+  hqSession_->closeWhenIdle();
+}
+
+INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
+                         HQUpstreamSessionTestEarlyData,
+                         Values([] {
+                           TestParams tp;
+                           tp.alpn_ = "h3";
+                           return tp;
+                         }()),
+                         paramsToTestName);
 
 /**
  * Instantiate the Parametrized test cases

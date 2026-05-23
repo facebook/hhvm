@@ -41,6 +41,8 @@
 #include <quic/priority/HTTPPriorityQueue.h>
 #include <quic/priority/PriorityQueue.h>
 
+#include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
+
 namespace proxygen {
 
 class HTTPSessionController;
@@ -167,6 +169,8 @@ class HQSession
   std::shared_ptr<QuicProtocolInfo> getQuicInfo() {
     return quicInfo_;
   }
+
+  void setEarlyDataHandler(std::unique_ptr<H3EarlyDataHandler> handler);
 
   void setForceUpstream1_1(bool force) {
     forceUpstream1_1_ = force;
@@ -755,6 +759,10 @@ class HQSession
   std::chrono::milliseconds transactionsTimeout_;
   TimePoint transportStart_;
 
+  // earlyDataHandler_ must be declared before sock_ so it outlives sock_:
+  // QuicSocket holds a non-owning raw pointer to the handler (set via
+  // setEarlyDataAppParamsHandler) and may dereference it during teardown.
+  std::unique_ptr<H3EarlyDataHandler> earlyDataHandler_;
   std::shared_ptr<quic::QuicSocket> sock_;
 
   // Callback pointer used for correctness testing. Not used

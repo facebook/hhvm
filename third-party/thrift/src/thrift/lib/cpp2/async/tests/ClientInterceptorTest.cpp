@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+#include <optional>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <folly/Demangle.h>
 
 #include <folly/coro/GtestHelpers.h>
+#include <folly/coro/Task.h>
 
 #include <fmt/core.h>
 
@@ -603,8 +606,10 @@ class ClientInterceptorCountWithRequestState
     return 1;
   }
 
-  void onResponse(RequestState* requestState, ResponseInfo) override {
+  std::optional<folly::coro::Task<void>> onResponse(
+      RequestState* requestState, ResponseInfo) override {
     onResponseCount += *requestState;
+    return std::nullopt;
   }
 
   int onRequestCount = 0;
@@ -629,7 +634,7 @@ class ClientInterceptorThatThrowsOnResponse
   using ClientInterceptorCountWithRequestState::
       ClientInterceptorCountWithRequestState;
 
-  void onResponse(
+  std::optional<folly::coro::Task<void>> onResponse(
       RequestState* requestState, ResponseInfo responseInfo) override {
     ClientInterceptorCountWithRequestState::onResponse(
         requestState, std::move(responseInfo));
@@ -652,10 +657,12 @@ class TracingClientInterceptor : public NamedClientInterceptor<folly::Unit> {
     return folly::unit;
   }
 
-  void onResponse(folly::Unit*, ResponseInfo responseInfo) override {
+  std::optional<folly::coro::Task<void>> onResponse(
+      folly::Unit*, ResponseInfo responseInfo) override {
     responses_.emplace_back(
         std::string(responseInfo.serviceName),
         std::string(responseInfo.methodName));
+    return std::nullopt;
   }
 
  private:
@@ -685,7 +692,8 @@ class ClientInterceptorWithResponseValue
     return folly::unit;
   }
 
-  void onResponse(RequestState*, ResponseInfo responseInfo) override {
+  std::optional<folly::coro::Task<void>> onResponse(
+      RequestState*, ResponseInfo responseInfo) override {
     // Store the method name
     methodName = responseInfo.methodName;
 
@@ -731,6 +739,7 @@ class ClientInterceptorWithResponseValue
       resultType = "none";
       hadResult = false;
     }
+    return std::nullopt;
   }
 
   // Stored information about the response
@@ -768,11 +777,13 @@ class ClientInterceptorOnResponse : public NamedClientInterceptor<folly::Unit> {
     return folly::unit;
   }
 
-  void onResponse(RequestState*, ResponseInfo responseInfo) override {
+  std::optional<folly::coro::Task<void>> onResponse(
+      RequestState*, ResponseInfo responseInfo) override {
     // Call the provided callback with the response info
     if (callback_) {
       callback_(std::move(responseInfo));
     }
+    return std::nullopt;
   }
 
  private:
@@ -969,8 +980,10 @@ CO_TEST_P(ClientInterceptorTestP, IterationOrder) {
       return std::nullopt;
     }
 
-    void onResponse(RequestState*, ResponseInfo) override {
+    std::optional<folly::coro::Task<void>> onResponse(
+        RequestState*, ResponseInfo) override {
       onResponseSeq = seq_++;
+      return std::nullopt;
     }
 
     int onRequestSeq = 0;
@@ -1091,7 +1104,10 @@ CO_TEST_P(ClientInterceptorTestP, NonTrivialRequestState) {
     std::optional<RequestState> onRequest(RequestInfo) override {
       return RequestState(counts_);
     }
-    void onResponse(RequestState*, ResponseInfo) override {}
+    std::optional<folly::coro::Task<void>> onResponse(
+        RequestState*, ResponseInfo) override {
+      return std::nullopt;
+    }
 
    private:
     Counts& counts_;
@@ -1263,8 +1279,10 @@ CO_TEST_P(ClientInterceptorTestP, Headers) {
       onRequestHeader = requestInfo.headers->getWriteHeaders().at(kDummyHeader);
       return std::nullopt;
     }
-    void onResponse(RequestState*, ResponseInfo responseInfo) override {
+    std::optional<folly::coro::Task<void>> onResponse(
+        RequestState*, ResponseInfo responseInfo) override {
       onResponseHeader = responseInfo.headers->getHeaders().at(kDummyHeader);
+      return std::nullopt;
     }
 
     std::string onRequestHeader;
@@ -1840,7 +1858,10 @@ CO_TEST_P(ClientInterceptorTestP, StreamInterceptorLifecycle) {
     std::optional<RequestState> onRequest(RequestInfo) override {
       return folly::unit;
     }
-    void onResponse(RequestState*, ResponseInfo) override {}
+    std::optional<folly::coro::Task<void>> onResponse(
+        RequestState*, ResponseInfo) override {
+      return std::nullopt;
+    }
 
     void onStreamBegin(RequestState*) override { streamBeginCount++; }
 

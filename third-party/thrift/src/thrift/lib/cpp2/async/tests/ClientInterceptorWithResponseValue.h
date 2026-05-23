@@ -16,9 +16,11 @@
 
 #pragma once
 
+#include <optional>
 #include <string>
 #include <variant>
 #include <folly/Unit.h>
+#include <folly/coro/Task.h>
 #include <thrift/lib/cpp2/async/ClientInterceptor.h>
 #include <thrift/lib/cpp2/util/TypeErasedRef.h>
 
@@ -46,7 +48,8 @@ class ClientInterceptorWithResponseValue
     return folly::unit;
   }
 
-  void onResponse(RequestState*, ResponseInfo responseInfo) override {
+  std::optional<folly::coro::Task<void>> onResponse(
+      RequestState*, ResponseInfo responseInfo) override {
     // Store the method name
     methodName = responseInfo.methodName;
 
@@ -92,6 +95,7 @@ class ClientInterceptorWithResponseValue
       resultType = "none";
       hadResult = false;
     }
+    return std::nullopt;
   }
 
   // Get the result value as a string (for compatibility with existing tests)

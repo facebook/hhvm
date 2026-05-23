@@ -132,7 +132,7 @@ void apache::thrift::Client<::cpp2::A>::sync_foo(apache::thrift::RpcOptions& rpc
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_foo(_return, returnState);
     if (contextStack != nullptr) {
-      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -340,7 +340,7 @@ void apache::thrift::Client<::cpp2::A>::I::sync_interact(apache::thrift::RpcOpti
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_interact(returnState);
     if (contextStack != nullptr) {
-      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -561,7 +561,7 @@ void apache::thrift::Client<::cpp2::B>::sync_bar(apache::thrift::RpcOptions& rpc
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_bar(returnState);
     if (contextStack != nullptr) {
-      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();
@@ -921,7 +921,7 @@ folly::coro::Task<apache::thrift::ClientSink<::std::int32_t, ::std::int32_t>> ap
   }
 
   if (ctx != nullptr) {
-    ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception()).throwUnlessValue();
+    apache::thrift::ContextStack::blockingWaitInterceptorResult(ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception())).throwUnlessValue();
   }
   if (returnState.isException()) {
     co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1090,7 +1090,7 @@ void apache::thrift::Client<::cpp2::C>::I::sync_interact(apache::thrift::RpcOpti
     channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_interact(returnState);
     if (contextStack != nullptr) {
-      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew)).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <variant>
+
 #include <folly/ExceptionWrapper.h>
 #include <folly/Try.h>
 #include <thrift/lib/cpp/BiDiEventHandler.h>
@@ -164,12 +166,16 @@ class ContextStack {
       apache::thrift::transport::THeader* headers,
       RpcOptions& options) noexcept;
 
+  template <typename T>
+  using InterceptorResult =
+      std::variant<folly::Try<T>, folly::coro::Task<folly::Try<T>>>;
+
   // RPC responses may be exceptions or values. If exception_wrapper has
   // a valid exception "result" is ignored. If exception_wrapper is empty
   // "result" is used as the response.
   // This formulation, requiring this method to resolve this, simplifies client
   // stub code generation.
-  [[nodiscard]] folly::Try<void> processClientInterceptorsOnResponse(
+  [[nodiscard]] InterceptorResult<void> processClientInterceptorsOnResponse(
       const apache::thrift::transport::THeader* headers,
       folly::exception_wrapper exceptionWrapper,
       apache::thrift::util::TypeErasedRef result =
@@ -177,7 +183,7 @@ class ContextStack {
               folly::unit)) noexcept;
 
   template <typename T>
-  [[nodiscard]] folly::Try<void> processClientInterceptorsOnResponse(
+  [[nodiscard]] InterceptorResult<void> processClientInterceptorsOnResponse(
       const apache::thrift::transport::THeader* headers,
       folly::exception_wrapper exceptionWrapper,
       T& result) noexcept {
@@ -196,19 +202,51 @@ class ContextStack {
       exceptionWrapper = result.exception();
     }
     apache::thrift::util::TypeErasedRef resultRef = [&]() {
-      if (!result.hasValue()) {
+      if constexpr (std::is_same_v<T, void>) {
         return apache::thrift::util::TypeErasedRef::of<folly::Unit>(
             folly::unit);
+      } else {
+        if (!result.hasValue()) {
+          return apache::thrift::util::TypeErasedRef::of<folly::Unit>(
+              folly::unit);
+        }
+        return apache::thrift::util::TypeErasedRef::of<T>(result.value());
       }
-      return apache::thrift::util::TypeErasedRef::of<T>(result.value());
     }();
-    auto interceptorTry = processClientInterceptorsOnResponse(
+    auto interceptorResult = processClientInterceptorsOnResponse(
         headers, exceptionWrapper, resultRef);
-    if (interceptorTry.hasException()) {
-      return folly::Try<T>(interceptorTry.exception());
+    auto voidTry = blockingWaitInterceptorResult(std::move(interceptorResult));
+    if (voidTry.hasException()) {
+      return folly::Try<T>(voidTry.exception());
     }
     return std::move(result);
   }
+
+  static folly::Try<void> blockingWaitInterceptorResult(
+      InterceptorResult<void>&& result) {
+    if (auto* syncResult = std::get_if<folly::Try<void>>(&result)) {
+      return *syncResult;
+    }
+    return blockingWaitInterceptorResultAsync(std::move(result));
+  }
+
+  // Try to resolve an InterceptorResult synchronously. Returns true and
+  // writes the result to outTry if no interceptor returned an async Task.
+  // Returns false if an async Task is present — the caller must co_await
+  // the Task from the result variant. This avoids coroutine frame
+  // allocation on the common sync path in generated co_ methods.
+  static bool tryResolveInterceptorResultSync(
+      InterceptorResult<void>& result, folly::Try<void>& outTry) {
+    if (auto* syncResult = std::get_if<folly::Try<void>>(&result)) {
+      outTry = *syncResult;
+      return true;
+    }
+    return false;
+  }
+
+ private:
+  static folly::Try<void> blockingWaitInterceptorResultAsync(
+      InterceptorResult<void>&& result);
 
  private:
   std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>

@@ -130,7 +130,7 @@ void apache::thrift::Client<::test::fixtures::basic::FB303Service>::sync_simple_
     channel->decompressResponse(returnState);
     auto ew = recv_wrapped_simple_rpc(_return, returnState);
     if (contextStack != nullptr) {
-      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+      apache::thrift::ContextStack::blockingWaitInterceptorResult(contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return)).throwUnlessValue();
     }
     if (ew) {
       ew.throw_exception();

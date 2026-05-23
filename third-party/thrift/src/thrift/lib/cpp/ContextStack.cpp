@@ -18,6 +18,8 @@
 #include <iterator>
 #include <thrift/lib/cpp/ContextStack.h>
 
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Task.h>
 #include <folly/tracing/StaticTracepoint.h>
 
 #include <thrift/lib/cpp/StreamEventHandler.h>
@@ -26,6 +28,57 @@
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 
 namespace apache::thrift {
+namespace {
+
+struct RemainingInterceptor {
+  std::shared_ptr<ClientInterceptorBase> interceptor;
+  detail::ClientInterceptorOnRequestStorage* storage;
+};
+} // namespace
+
+static folly::coro::Task<folly::Try<void>> processRemainingInterceptorsAsync(
+    folly::coro::Task<void> currentTask,
+    std::string triggeringInterceptorName,
+    std::vector<RemainingInterceptor> remaining,
+    std::string serviceName,
+    std::string methodName,
+    const apache::thrift::transport::THeader* headers,
+    ClientInterceptorOnResponseResult result,
+    std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions) {
+  try {
+    co_await std::move(currentTask);
+  } catch (...) {
+    exceptions.emplace_back(
+        ClientInterceptorException::SingleExceptionInfo{
+            std::move(triggeringInterceptorName),
+            folly::exception_wrapper(folly::current_exception())});
+  }
+
+  for (auto& [interceptor, storage] : remaining) {
+    ClientInterceptorBase::ResponseInfo responseInfo{
+        storage, headers, serviceName, methodName, result};
+    try {
+      auto maybeTask =
+          interceptor->internal_onResponse(std::move(responseInfo));
+      if (maybeTask) {
+        co_await std::move(*maybeTask);
+      }
+    } catch (...) {
+      exceptions.emplace_back(
+          ClientInterceptorException::SingleExceptionInfo{
+              interceptor->getName(),
+              folly::exception_wrapper(folly::current_exception())});
+    }
+  }
+
+  if (!exceptions.empty()) {
+    co_return folly::Try<void>(
+        folly::make_exception_wrapper<ClientInterceptorException>(
+            ClientInterceptorException::CallbackKind::ON_RESPONSE,
+            std::move(exceptions)));
+  }
+  co_return folly::Try<void>();
+}
 
 namespace {
 std::string_view stripServiceNamePrefix(
@@ -791,7 +844,8 @@ folly::Try<void> ContextStack::processClientInterceptorsOnRequest(
   return {};
 }
 
-folly::Try<void> ContextStack::processClientInterceptorsOnResponse(
+ContextStack::InterceptorResult<void>
+ContextStack::processClientInterceptorsOnResponse(
     const apache::thrift::transport::THeader* headers,
     folly::exception_wrapper exceptionWrapper,
     apache::thrift::util::TypeErasedRef resultRaw) noexcept {
@@ -799,7 +853,7 @@ folly::Try<void> ContextStack::processClientInterceptorsOnResponse(
     if (exceptionWrapper.has_exception_ptr()) {
       return folly::Try<void>(std::move(exceptionWrapper));
     }
-    return {};
+    return folly::Try<void>();
   }
 
   ClientInterceptorOnResponseResult result;
@@ -820,7 +874,27 @@ folly::Try<void> ContextStack::processClientInterceptorsOnResponse(
         result,
     };
     try {
-      clientInterceptor->internal_onResponse(std::move(responseInfo));
+      auto maybeTask =
+          clientInterceptor->internal_onResponse(std::move(responseInfo));
+      if (maybeTask) {
+        auto triggeringName = clientInterceptor->getName();
+        std::vector<RemainingInterceptor> remaining;
+        remaining.reserve(i);
+        for (auto j = i - 1; j >= 0; --j) {
+          remaining.push_back(
+              {(*clientInterceptors_)[j],
+               getStorageForClientInterceptorOnRequestByIndex(j)});
+        }
+        return processRemainingInterceptorsAsync(
+            std::move(*maybeTask),
+            std::move(triggeringName),
+            std::move(remaining),
+            std::string(serviceName_),
+            std::string(methodNameUnprefixed_),
+            headers,
+            result,
+            std::move(exceptions));
+      }
     } catch (...) {
       exceptions.emplace_back(
           ClientInterceptorException::SingleExceptionInfo{
@@ -835,7 +909,7 @@ folly::Try<void> ContextStack::processClientInterceptorsOnResponse(
             ClientInterceptorException::CallbackKind::ON_RESPONSE,
             std::move(exceptions)));
   }
-  return {};
+  return folly::Try<void>();
 }
 
 void*& ContextStack::contextAt(size_t i) {
@@ -885,5 +959,12 @@ ContextStackUnsafeAPI::getInterceptorFrameworkMetadata(
   return contextStack_.getInterceptorFrameworkMetadata(rpcOptions);
 }
 } // namespace detail
+
+folly::Try<void> ContextStack::blockingWaitInterceptorResultAsync(
+    InterceptorResult<void>&& result) {
+  return folly::coro::blockingWait(
+      std::move(
+          std::get<folly::coro::Task<folly::Try<void>>>(std::move(result))));
+}
 
 } // namespace apache::thrift

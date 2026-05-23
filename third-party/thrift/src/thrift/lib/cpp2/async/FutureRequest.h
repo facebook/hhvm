@@ -114,8 +114,9 @@ inline void runClientInterceptorsInHeaderSemiFutureCallback(
   auto* contextStack = state.ctx();
   auto* header = state.header();
   if (contextStack != nullptr) {
-    contextStack
-        ->processClientInterceptorsOnResponse(header, state.exception(), result)
+    ContextStack::blockingWaitInterceptorResult(
+        contextStack->processClientInterceptorsOnResponse(
+            header, state.exception(), result))
         .throwUnlessValue();
   }
 }

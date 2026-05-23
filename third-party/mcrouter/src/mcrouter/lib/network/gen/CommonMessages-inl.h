@@ -12,6 +12,9 @@
  *
  *  @generated
  */
+#pragma once
+
+#include "mcrouter/lib/network/gen/CommonMessages-decl.h"
 
 namespace facebook {
 namespace memcache {

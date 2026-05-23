@@ -12,6 +12,9 @@
  *
  *  @generated
  */
+#pragma once
+
+#include "mcrouter/lib/carbon/example/gen/HelloGoodbyeMessages-decl.h"
 
 namespace hellogoodbye {
 namespace thrift {

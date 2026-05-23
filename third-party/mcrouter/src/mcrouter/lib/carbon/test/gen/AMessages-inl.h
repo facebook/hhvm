@@ -12,6 +12,9 @@
  *
  *  @generated
  */
+#pragma once
+
+#include "mcrouter/lib/carbon/test/gen/AMessages-decl.h"
 
 namespace carbon {
 namespace test {

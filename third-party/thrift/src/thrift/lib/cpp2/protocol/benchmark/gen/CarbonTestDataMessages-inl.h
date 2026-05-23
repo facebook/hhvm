@@ -12,6 +12,9 @@
  *
  *  @generated
  */
+#pragma once
+
+#include "thrift/lib/cpp2/protocol/benchmark/gen/CarbonTestDataMessages-decl.h"
 
 namespace benchmark {
 namespace thrift {

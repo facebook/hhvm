@@ -12,7 +12,7 @@
  *
  *  @generated
  */
-#include "CarbonTestDataMessages.h"
+#include "thrift/lib/cpp2/protocol/benchmark/gen/CarbonTestDataMessages.h"
 
 namespace benchmark {
 

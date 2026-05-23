@@ -12,6 +12,9 @@
  *
  *  @generated
  */
+#pragma once
+
+#include "mcrouter/lib/network/test/gen/CarbonTestMessages-decl.h"
 
 namespace facebook {
 namespace memcache {

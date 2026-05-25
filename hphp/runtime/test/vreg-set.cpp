@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include <folly/Lazy.h>
+#include <fmt/core.h>
 #include <folly/portability/GTest.h>
 
 namespace HPHP::jit {
@@ -38,10 +39,10 @@ std::string safeShow(const VregSet& s) {
 
 std::string safeShow(const VregList& l) {
   using namespace folly::gen;
-  return folly::sformat(
+  return fmt::format(
     "[{}]",
     from(l)
-    | map([] (Vreg r) { return folly::sformat("%{}", (size_t)r); })
+    | map([] (Vreg r) { return fmt::format("%{}", (size_t)r); })
     | unsplit<std::string>(", ")
   );
 }

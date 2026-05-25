@@ -24,6 +24,7 @@
 #include <unordered_set>
 
 #include <folly/String.h>
+#include <fmt/core.h>
 
 #include "hphp/util/logger.h"
 
@@ -36,7 +37,7 @@ std::vector<SBCCSourceFile> loadSBCCSourceFiles(
   std::ifstream in(fileListPath);
   if (!in) {
     throw std::runtime_error(
-      folly::sformat("Cannot open file list: {}", fileListPath));
+      fmt::format("Cannot open file list: {}", fileListPath));
   }
 
   std::unordered_set<std::string> seen;
@@ -50,7 +51,7 @@ std::vector<SBCCSourceFile> loadSBCCSourceFiles(
 
     // Reject absolute paths — entries must be repo-relative under sourceRoot.
     if (!line.empty() && line[0] == '/') {
-      throw std::runtime_error(folly::sformat(
+      throw std::runtime_error(fmt::format(
         "File list contains absolute path: '{}'. "
         "Entries must be repo-relative (e.g. 'flib/foo.php', not '/tmp/foo.php').",
         line));
@@ -68,7 +69,7 @@ std::vector<SBCCSourceFile> loadSBCCSourceFiles(
       continue;
     } else {
       throw std::runtime_error(
-        folly::sformat("Cannot stat file: {}", entry.absPath));
+        fmt::format("Cannot stat file: {}", entry.absPath));
     }
 
     files.push_back(std::move(entry));

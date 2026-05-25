@@ -19,6 +19,7 @@
 #include <string>
 #include <string_view>
 
+#include <fmt/core.h>
 #include <folly/ScopeGuard.h>
 #include <folly/concurrency/ConcurrentHashMap.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
@@ -2365,11 +2366,11 @@ TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {
   auto map = make("/var/www");
 
   auto makeSym = [](size_t i) -> std::string {
-    return folly::sformat("Class{}", i);
+    return fmt::format("Class{}", i);
   };
 
   auto makePath = [](size_t i) -> fs::path {
-    return folly::sformat("some/path{}.php", i);
+    return fmt::format("some/path{}.php", i);
   };
 
   size_t const numSymbols = 100;

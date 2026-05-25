@@ -23,6 +23,7 @@
 #include "hphp/util/configs/server.h"
 
 #include <folly/io/Cursor.h>
+#include <fmt/core.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 
@@ -156,12 +157,12 @@ void FastCGITransport::sendResponseHeaders(IOBufQueue& queue, int code) {
     auto info = getResponseInfo();
     auto reason = !info.empty() ? info : HttpProtocol::GetReasonString(code);
 
-    folly::format("Status: {} {}\r\n", code, reason)(appender);
+    appender(fmt::format("Status: {} {}\r\n", code, reason));
   }
 
   for (auto& header : m_responseHeaders) {
     for (auto& value : header.second) {
-      folly::format("{}: {}\r\n", header.first, value)(appender);
+      appender(fmt::format("{}: {}\r\n", header.first, value));
     }
   }
 

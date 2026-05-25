@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/sbcc/format/sbcc-file.h"
 
 #include <folly/FileUtil.h>
+#include <fmt/core.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 
@@ -70,7 +71,7 @@ void SBCCReader::init(const std::string& path) {
     auto fd = folly::openNoInt(path.c_str(), O_CLOEXEC | O_RDONLY);
     if (fd < 0) {
       throw std::runtime_error(
-        folly::sformat("Cannot open SBCC file: {}", path));
+        fmt::format("Cannot open SBCC file: {}", path));
     }
     SCOPE_EXIT { ::close(fd); };
 
@@ -78,19 +79,19 @@ void SBCCReader::init(const std::string& path) {
     unsigned char hdr[7];
     if (folly::readFull(fd, hdr, sizeof(hdr)) != sizeof(hdr)) {
       throw std::runtime_error(
-        folly::sformat("SBCC file too small: {}", path));
+        fmt::format("SBCC file too small: {}", path));
     }
 
     // Check magic
     if (memcmp(hdr, "SBCC", 4) != 0) {
       throw std::runtime_error(
-        folly::sformat("Bad magic in SBCC file: {}", path));
+        fmt::format("Bad magic in SBCC file: {}", path));
     }
 
     // Check version (network byte order)
     uint16_t version = (uint16_t(hdr[4]) << 8) | hdr[5];
     if (version != kCurrentVersion) {
-      throw std::runtime_error(folly::sformat(
+      throw std::runtime_error(fmt::format(
         "SBCC version mismatch in {} (expected {}, got {})",
         path, kCurrentVersion, version));
     }
@@ -100,11 +101,11 @@ void SBCCReader::init(const std::string& path) {
     std::string fileSchema(schemaLen, '\0');
     if (folly::readFull(fd, fileSchema.data(), schemaLen) != schemaLen) {
       throw std::runtime_error(
-        folly::sformat("Truncated schema in SBCC file: {}", path));
+        fmt::format("Truncated schema in SBCC file: {}", path));
     }
     auto rtSchema = repoSchemaId();
     if (fileSchema != rtSchema) {
-      throw std::runtime_error(folly::sformat(
+      throw std::runtime_error(fmt::format(
         "SBCC repo schema mismatch in {} (expected {}, got {})",
         path, rtSchema, fileSchema));
     }

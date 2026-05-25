@@ -29,9 +29,8 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 
-using folly::format;
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -755,7 +754,7 @@ const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
     case KindOfKeyset: {
       auto const type_2 = getDataTypeString(variable.getType());
       auto const size = variable.toArray().size();
-      return VariableValue{format("{}[{}]", type_2.data(), size).str()};
+      return VariableValue{fmt::format("{}[{}]", type_2.data(), size)};
     }
 
     case KindOfObject:

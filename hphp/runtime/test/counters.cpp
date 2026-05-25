@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include <folly/portability/GTest.h>
+#include <fmt/core.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/preg.h"
@@ -390,10 +391,10 @@ TEST(COUNTERS, allocs_frees) {
 
   const auto confirm_exists_and_zero = []() {
   jit::tc::code().forEachName([](const char* name) {
-    EXPECT_EQ(getVal(folly::sformat("jit.code.{}.allocs", name).c_str()), 0);
-    EXPECT_EQ(getVal(folly::sformat("jit.code.{}.frees", name).c_str()), 0);
-    EXPECT_EQ(getVal(folly::sformat("jit.code.{}.bytes_free", name).c_str()), 0);
-    EXPECT_EQ(getVal(folly::sformat("jit.code.{}.free_blocks", name).c_str()), 0);
+    EXPECT_EQ(getVal(fmt::format("jit.code.{}.allocs", name).c_str()), 0);
+    EXPECT_EQ(getVal(fmt::format("jit.code.{}.frees", name).c_str()), 0);
+    EXPECT_EQ(getVal(fmt::format("jit.code.{}.bytes_free", name).c_str()), 0);
+    EXPECT_EQ(getVal(fmt::format("jit.code.{}.free_blocks", name).c_str()), 0);
   });
   };
   confirm_exists_and_zero();

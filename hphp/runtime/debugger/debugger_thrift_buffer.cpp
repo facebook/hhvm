@@ -77,7 +77,7 @@ static inline int unserializeImpl(const String& sdata, Variant& data) {
   try {
     data = vu.unserialize();
   } catch (const std::exception& e) {
-    data = folly::sformat("unserialize() threw '{}'", e.what());
+    data = fmt::format("unserialize() threw '{}'", e.what());
     return DebuggerWireHelpers::ErrorMsg;
   } catch (const Object& o) {
     // Get the message property from the Exception if we can. Otherwise, use
@@ -90,15 +90,15 @@ static inline int unserializeImpl(const String& sdata, Variant& data) {
       s_message.get());
     if (info) {
       if (isStringType(info.type())) {
-        data = folly::sformat(
+        data = fmt::format(
           "unserialize() threw '{}' with message '{}'",
-          o->getVMClass()->name(), info.val().pstr
+          o->getVMClass()->name()->data(), info.val().pstr->data()
         );
         return DebuggerWireHelpers::ErrorMsg;
       }
     }
 
-    data = folly::sformat("unserialize() threw '{}'", o->getVMClass()->name());
+    data = fmt::format("unserialize() threw '{}'", o->getVMClass()->name()->data());
     return DebuggerWireHelpers::ErrorMsg;
   }
 

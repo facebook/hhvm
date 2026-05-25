@@ -17,6 +17,7 @@
 #include "hphp/runtime/debugger/debugger_command.h"
 
 #include <folly/portability/Sockets.h>
+#include <fmt/core.h>
 
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/sandbox-events.h"
@@ -30,7 +31,7 @@ namespace {
 
 void logEvent(std::string_view event, std::string_view key, uint64_t duration_us) {
   rareSboxEvent("debugger", event, key, duration_us);
-  auto msg = folly::sformat("DebuggerCommand - {}::{} took {}us\n",
+  auto msg = fmt::format("DebuggerCommand - {}::{} took {}us\n",
                             event, key, duration_us);
   TRACE(2, msg);
 }

@@ -24,6 +24,7 @@
 #include "hphp/util/string-vsnprintf.h"
 
 #include <folly/ScopeGuard.h>
+#include <fmt/core.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -292,7 +293,7 @@ struct BCMathGlobals *get_bcmath_globals() {
 void* bc_malloc(size_t total) {
   if (UNLIKELY(total > INT_MAX)) {
     HPHP::SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat(
+      fmt::format(
         "Trying to allocate {} bytes (limit {}) within bcmath",
         total, INT_MAX
       )

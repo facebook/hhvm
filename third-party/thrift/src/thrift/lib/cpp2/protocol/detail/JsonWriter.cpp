@@ -18,7 +18,6 @@
 
 #include <cstring>
 #include <fmt/format.h>
-#include <folly/Conv.h>
 #include <folly/Exception.h>
 #include <folly/json.h>
 #include <thrift/lib/cpp2/protocol/detail/JsonUtils.h>
@@ -138,22 +137,18 @@ std::uint32_t JsonWriter::writeFloatingPoint(T t) {
   CHECK_THROW(options_.allowNanInf || std::isfinite(t), std::invalid_argument);
   std::uint32_t n = 0;
   n += beginValue();
-  constexpr auto mode = std::is_same_v<T, float>
-      ? folly::DtoaMode::SHORTEST_SINGLE
-      : folly::DtoaMode::SHORTEST;
-  if (std::isnan(t) && std::signbit(t)) {
-    constexpr folly::StringPiece signedNan = "-NaN";
-    n += signedNan.size();
-    out_.value().push(signedNan);
+  if (std::isnan(t)) {
+    auto sp = std::signbit(t) ? folly::StringPiece("-NaN")
+                              : folly::StringPiece("NaN");
+    n += sp.size();
+    out_.value().push(sp);
+  } else if (std::isinf(t)) {
+    auto sp = t > 0 ? folly::StringPiece("Infinity")
+                    : folly::StringPiece("-Infinity");
+    n += sp.size();
+    out_.value().push(sp);
   } else {
-    std::string tmp;
-    folly::toAppend(
-        t,
-        &tmp,
-        mode,
-        0,
-        folly::DtoaFlags::EMIT_TRAILING_DECIMAL_POINT |
-            folly::DtoaFlags::EMIT_TRAILING_ZERO_AFTER_POINT);
+    auto tmp = fmt::format("{:#}", t);
     out_.value().push(folly::StringPiece(tmp));
     n += tmp.size();
   }

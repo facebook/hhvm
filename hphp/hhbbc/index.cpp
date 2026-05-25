@@ -11937,7 +11937,7 @@ private:
     auto n = closure.name->slice();
     auto const p = n.find(';');
     if (p != std::string::npos) n = n.subpiece(0, p);
-    return makeStaticString(fmt::format("{};{}", n, newContext.name->data()));
+    return makeStaticString(fmt::format("{};{}", std::string_view{n.data(), n.size()}, newContext.name->data()));
   }
 
   static std::unique_ptr<php::Class>

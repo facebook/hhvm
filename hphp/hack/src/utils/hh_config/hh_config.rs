@@ -66,6 +66,7 @@ pub struct HhConfig {
     pub distc_weak_edge_decl_discovery: bool,
     pub distc_min_worker_memory_gib: i64,
     pub distc_min_cpu_units: i64,
+    pub distc_parallel_decl_decode: bool,
 }
 
 impl Default for HhConfig {
@@ -91,6 +92,7 @@ impl Default for HhConfig {
             distc_weak_edge_decl_discovery: false,
             distc_min_worker_memory_gib: 0,
             distc_min_cpu_units: 0,
+            distc_parallel_decl_decode: false,
         }
     }
 }
@@ -693,6 +695,9 @@ impl HhConfig {
                 "distc_min_cpu_units" => {
                     c.distc_min_cpu_units = parse_json(&value)?;
                 }
+                "distc_parallel_decl_decode" => {
+                    c.distc_parallel_decl_decode = parse_json(&value)?;
+                }
                 _ => {}
             }
         }
@@ -707,6 +712,7 @@ impl HhConfig {
             "distc_weak_edge_decl_discovery": self.distc_weak_edge_decl_discovery,
             "distc_min_worker_memory_gib": self.distc_min_worker_memory_gib,
             "distc_min_cpu_units": self.distc_min_cpu_units,
+            "distc_parallel_decl_decode": self.distc_parallel_decl_decode,
         });
         experiments.to_string()
     }

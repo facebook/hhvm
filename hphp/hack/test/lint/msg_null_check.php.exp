@@ -1,2 +1,0 @@
-File "msg_null_check.php", line 12, characters 10-17:
-`takesInt` breaks naming conventions: Functions must be named using lower_case_with_underscores. (Lint[5520])

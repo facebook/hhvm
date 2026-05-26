@@ -2086,29 +2086,6 @@ let refine_lvalue_type env ((ty, _, _) as te) ~refine =
     set_local env lid ty
   | None -> env
 
-let rec condition_nullity ~is_sketchy ~nonnull (env : env) te =
-  match te with
-  (* assignment: both the rhs and lhs of the '=' must be made null/non-null *)
-  | (_, _, Aast.Assign (var, None, te)) ->
-    let env = condition_nullity ~is_sketchy ~nonnull env te in
-    let env = condition_nullity ~is_sketchy ~nonnull env var in
-    env
-  | (_, _, Hole (te, _, _, _)) -> condition_nullity ~is_sketchy ~nonnull env te
-  | (_, p, _) ->
-    let refine env ty =
-      if nonnull then
-        Typing_intersection.intersect_with_nonnull
-          env
-          (Pos_or_decl.of_raw_pos p)
-          ty
-      else if not is_sketchy then
-        let r = Reason.witness_from_decl (get_pos ty) in
-        Inter.intersect env ~r ty (MakeType.null r)
-      else
-        (env, ty)
-    in
-    refine_lvalue_type env te ~refine
-
 (** If we are dealing with a refinement like
       $x is MyClass<A, B>
     then class_info is the class info of MyClass and hint_tyl corresponds
@@ -8767,7 +8744,7 @@ end = struct
       (env, cond_false, cond_true)
     | _ -> default_branch env
 
-  and condition_single env tparamet ((ty, p, e) as te : Tast.expr) =
+  and condition_single env tparamet ((ty, p, e) : Tast.expr) =
     match e with
     | Aast.Hole (e, _, _, _) -> condition_single env tparamet e
     | Aast.True when not tparamet -> LEnv.drop_cont env C.Next
@@ -8782,16 +8759,6 @@ end = struct
       let env = refine_for_equality p env lhs rhs_ty in
       let env = refine_for_equality p env rhs lhs_ty in
       env
-    | Aast.Lvar _
-    | Aast.Obj_get _
-    | Aast.Class_get _
-    | Aast.Assign (_, None, _) ->
-      let (env, ety) = Env.expand_type env ty in
-      (match get_node ety with
-      | Tprim Tbool -> env
-      | _ ->
-        let env = condition_nullity ~is_sketchy:true ~nonnull:tparamet env te in
-        env)
     | Aast.Binop
         { bop = (Ast_defs.Diff | Ast_defs.Diff2) as op; lhs = e1; rhs = e2 } ->
       let op =

@@ -1,2 +1,0 @@
-File "null_check_strict2.php", line 12, characters 7-7:
-X is the only class declared in null_check_strict2.php, so that file should be named X.php instead. (Lint[5564])

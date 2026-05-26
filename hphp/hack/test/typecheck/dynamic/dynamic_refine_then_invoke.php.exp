@@ -1,5 +1,5 @@
 WARN: File "dynamic_refine_then_invoke.php--file2.php", line 5, characters 17-20:
-Property accessed on a value of type `(dynamic & nonnull)` (Warn[12042])
+Property accessed on a value of type `dynamic` (Warn[12042])
   File "dynamic_refine_then_invoke.php--file1.php", line 4, characters 25-31:
   This expression has type `dynamic`
 WARN: File "dynamic_refine_then_invoke.php--file2.php", line 6, characters 12-13:

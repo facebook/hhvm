@@ -1007,11 +1007,10 @@ void validate_structured_annotation(sema_context& ctx, const t_named& node) {
 }
 
 void validate_uri_uniqueness(sema_context& ctx, const t_program& prog) {
-  // TODO: use string_view as map key
-  std::unordered_map<std::string, const t_named*> uri_to_node;
+  std::unordered_map<std::string_view, const t_named*> uri_to_node;
   basic_ast_visitor<true> visit;
   visit.add_named_visitor([&](const t_named& node) {
-    const auto& uri = node.uri();
+    std::string_view uri = node.uri();
     if (uri.empty() || uri == kTransitiveUri) {
       return;
     }

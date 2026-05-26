@@ -761,6 +761,9 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
           local_config.ServerLocalConfig.fetch_remote_old_decls
         ~tco_only_fetch_remote_old_decl_during_init:
           local_config.ServerLocalConfig.only_fetch_remote_old_decl_during_init
+        ~tco_disable_rust_provider_shallow_decl_invalidation:
+          local_config
+            .ServerLocalConfig.disable_rust_provider_shallow_decl_invalidation
         ~tco_populate_member_heaps:
           local_config.ServerLocalConfig.populate_member_heaps
         ~tco_skip_hierarchy_checks:

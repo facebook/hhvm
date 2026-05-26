@@ -417,6 +417,12 @@ impl rust_provider_backend_ffi::ProviderBackendFfi for HhServerProviderBackend {
         self.shallow_decl_changes_store.remove_defs(names).unwrap();
     }
 
+    fn remove_folded_classes(&self, names: &Names) {
+        self.folded_classes_store
+            .remove_batch(&mut names.classes.iter().map(Into::into))
+            .unwrap();
+    }
+
     fn get_old_defs(
         &self,
         names: &Names,

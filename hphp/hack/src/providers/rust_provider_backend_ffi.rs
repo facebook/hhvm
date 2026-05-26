@@ -153,6 +153,9 @@ ocaml_ffi! {
     fn hh_rust_provider_backend_remove_defs(backend: Backend, names: file_info::Names) {
         backend.remove_defs(&names)
     }
+    fn hh_rust_provider_backend_remove_folded_classes(backend: Backend, names: file_info::Names) {
+        backend.remove_folded_classes(&names)
+    }
     fn hh_rust_provider_backend_get_old_defs(
         backend: Backend,
         names: file_info::Names,

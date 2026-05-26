@@ -340,6 +340,9 @@ module Decl = struct
   external remove_defs_ffi : t -> FileInfo.names -> unit
     = "hh_rust_provider_backend_remove_defs"
 
+  external remove_folded_classes_ffi : t -> FileInfo.names -> unit
+    = "hh_rust_provider_backend_remove_folded_classes"
+
   external get_old_defs_ffi :
     t ->
     FileInfo.names ->
@@ -374,6 +377,12 @@ module Decl = struct
   let remove_defs t names =
     set_decl_store t;
     remove_defs_ffi t names;
+    clear_caches ();
+    ()
+
+  let remove_folded_classes t names =
+    set_decl_store t;
+    remove_folded_classes_ffi t names;
     clear_caches ();
     ()
 

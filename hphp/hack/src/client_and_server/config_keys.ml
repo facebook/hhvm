@@ -531,6 +531,9 @@ module Hhconf = struct
   let only_fetch_remote_old_decl_during_init =
     hhconf_key "only_fetch_remote_old_decl_during_init"
 
+  let disable_rust_provider_shallow_decl_invalidation =
+    hhconf_key "disable_rust_provider_shallow_decl_invalidation"
+
   let heartbeat_interval = hhconf_key "heartbeat_interval"
 
   let hg_aware = hhconf_key "hg_aware"

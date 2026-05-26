@@ -70,6 +70,8 @@ module Decl : sig
 
   val remove_defs : t -> FileInfo.names -> unit
 
+  val remove_folded_classes : t -> FileInfo.names -> unit
+
   val remove_old_defs : t -> FileInfo.names -> unit
 end
 

@@ -158,6 +158,11 @@ pub trait ProviderBackendFfi {
         unimplemented!("ProviderBackendFfi::remove_defs: {UNIMPLEMENTED_MESSAGE}")
     }
 
+    /// Remove folded classes from stores without removing shallow decls.
+    fn remove_folded_classes(&self, _names: &file_info::Names) {
+        unimplemented!("ProviderBackendFfi::remove_folded_classes: {UNIMPLEMENTED_MESSAGE}")
+    }
+
     /// Fetch decls from the "old heap" for comparing with new versions.
     fn get_old_defs(
         &self,

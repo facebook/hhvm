@@ -184,8 +184,15 @@ let remove_classes ctx (names : SSet.t) ~old_members ~new_members : unit =
   | Provider_backend.Rust_provider_backend be ->
     SSet.iter Cache.remove names;
     let names = FileInfo.{ empty_names with n_classes = names } in
-    Rust_provider_backend.Decl.remove_old_defs be names;
-    Rust_provider_backend.Decl.remove_defs be names;
+    if
+      TypecheckerOptions.disable_rust_provider_shallow_decl_invalidation
+        (Provider_context.get_tcopt ctx)
+    then
+      Rust_provider_backend.Decl.remove_folded_classes be names
+    else (
+      Rust_provider_backend.Decl.remove_old_defs be names;
+      Rust_provider_backend.Decl.remove_defs be names
+    );
     ()
   | Provider_backend.Analysis
   | Provider_backend.Local_memory _ ->

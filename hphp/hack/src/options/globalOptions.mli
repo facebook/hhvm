@@ -112,6 +112,8 @@ type t = {
       (** Fetch old decls from CAS instead of memcache/manifold *)
   tco_only_fetch_remote_old_decl_during_init: bool;
       (** Restrict remote old decl fetching to init-time fanout. *)
+  tco_disable_rust_provider_shallow_decl_invalidation: bool;
+      (** Preserve Rust shallow decls when invalidating folded decls. *)
   tco_populate_member_heaps: bool;
       (** Populate the member signature heaps.
 
@@ -323,6 +325,7 @@ val set :
   ?log_levels:int SMap.t ->
   ?tco_fetch_remote_old_decls:bool ->
   ?tco_only_fetch_remote_old_decl_during_init:bool ->
+  ?tco_disable_rust_provider_shallow_decl_invalidation:bool ->
   ?tco_populate_member_heaps:bool ->
   ?tco_skip_hierarchy_checks:bool ->
   ?tco_silence_errors_under_dynamic:bool ->

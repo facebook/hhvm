@@ -69,6 +69,7 @@ let default =
     populate_member_heaps = true;
     fetch_remote_old_decls = true;
     only_fetch_remote_old_decl_during_init = true;
+    disable_rust_provider_shallow_decl_invalidation = false;
     skip_hierarchy_checks = false;
     skip_tast_checks = false;
     silence_errors_under_dynamic = false;
@@ -592,6 +593,13 @@ let load_
       ~current_version
       config
   in
+  let disable_rust_provider_shallow_decl_invalidation =
+    bool_if_min_version
+      Config_keys.Hhconf.disable_rust_provider_shallow_decl_invalidation
+      ~default:default.disable_rust_provider_shallow_decl_invalidation
+      ~current_version
+      config
+  in
   let skip_hierarchy_checks =
     bool_if_min_version
       Config_keys.Hhconf.skip_hierarchy_checks
@@ -1081,6 +1089,7 @@ let load_
     populate_member_heaps;
     fetch_remote_old_decls;
     only_fetch_remote_old_decl_during_init;
+    disable_rust_provider_shallow_decl_invalidation;
     skip_hierarchy_checks;
     skip_tast_checks;
     silence_errors_under_dynamic;

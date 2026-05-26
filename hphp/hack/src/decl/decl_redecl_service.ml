@@ -654,6 +654,11 @@ let oldify_decls_and_remove_descendants
     FileInfo.
       { empty_names with n_classes = SSet.diff descendant_classes all_classes }
   in
+  (* This path exists to invalidate folded/member state derived from oldified
+   * classes. [remove_defs] also removes descendant shallow decls, but that is
+   * likely over-broad: a descendant's shallow decl is a direct function of its
+   * own file, not of the oldified parent. If we determine there to be
+   * performance impact of this consider correcting it. *)
   remove_defs descendant_classes ~elems:SMap.empty ~collect_garbage
 
 let remove_old_defs

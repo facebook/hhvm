@@ -68,6 +68,9 @@ let fetch_remote_old_decls t = t.GlobalOptions.tco_fetch_remote_old_decls
 let only_fetch_remote_old_decl_during_init t =
   t.GlobalOptions.tco_only_fetch_remote_old_decl_during_init
 
+let disable_rust_provider_shallow_decl_invalidation t =
+  t.GlobalOptions.tco_disable_rust_provider_shallow_decl_invalidation
+
 let populate_member_heaps t = t.GlobalOptions.tco_populate_member_heaps
 
 let enable_legacy_experimental t feature =

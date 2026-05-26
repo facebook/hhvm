@@ -54,6 +54,8 @@ module Decl = struct
 
   let remove_defs _ _ : unit = failwith "unimplemented"
 
+  let remove_folded_classes _ _ : unit = failwith "unimplemented"
+
   let remove_old_defs _ _ : unit = failwith "unimplemented"
 end
 

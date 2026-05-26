@@ -111,6 +111,7 @@ type t = {
   log_levels: int SMap.t;
   tco_fetch_remote_old_decls: bool;
   tco_only_fetch_remote_old_decl_during_init: bool;
+  tco_disable_rust_provider_shallow_decl_invalidation: bool;
   tco_populate_member_heaps: bool;
   tco_skip_hierarchy_checks: bool;
   tco_silence_errors_under_dynamic: bool;
@@ -224,6 +225,7 @@ let default =
     log_levels = SMap.empty;
     tco_fetch_remote_old_decls = true;
     tco_only_fetch_remote_old_decl_during_init = true;
+    tco_disable_rust_provider_shallow_decl_invalidation = false;
     tco_populate_member_heaps = true;
     tco_skip_hierarchy_checks = false;
     tco_silence_errors_under_dynamic = false;
@@ -336,6 +338,7 @@ let set
     ?log_levels
     ?tco_fetch_remote_old_decls
     ?tco_only_fetch_remote_old_decl_during_init
+    ?tco_disable_rust_provider_shallow_decl_invalidation
     ?tco_populate_member_heaps
     ?tco_skip_hierarchy_checks
     ?tco_silence_errors_under_dynamic
@@ -489,6 +492,10 @@ let set
       setting
         tco_only_fetch_remote_old_decl_during_init
         options.tco_only_fetch_remote_old_decl_during_init;
+    tco_disable_rust_provider_shallow_decl_invalidation =
+      setting
+        tco_disable_rust_provider_shallow_decl_invalidation
+        options.tco_disable_rust_provider_shallow_decl_invalidation;
     tco_populate_member_heaps =
       setting tco_populate_member_heaps options.tco_populate_member_heaps;
     tco_skip_hierarchy_checks =

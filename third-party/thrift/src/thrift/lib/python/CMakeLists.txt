@@ -418,12 +418,30 @@ set(CYTHON_GENERATED_API_HEADERS
 log_debug(
   "At API header generation: cython_include_path='${cython_include_path}'")
 
+if(CMAKE_C_COMPILER)
+  set(_setup_py_c_compiler "${CMAKE_C_COMPILER}")
+  set(_setup_py_c_launcher "${CMAKE_C_COMPILER_LAUNCHER}")
+else()
+  set(_setup_py_c_compiler "${CMAKE_CXX_COMPILER}")
+  set(_setup_py_c_launcher "${CMAKE_CXX_COMPILER_LAUNCHER}")
+endif()
+if(_setup_py_c_launcher)
+  set(_setup_py_cc "${_setup_py_c_launcher} ${_setup_py_c_compiler}")
+else()
+  set(_setup_py_cc "${_setup_py_c_compiler}")
+endif()
+if(CMAKE_CXX_COMPILER_LAUNCHER)
+  set(_setup_py_cxx "${CMAKE_CXX_COMPILER_LAUNCHER} ${CMAKE_CXX_COMPILER}")
+else()
+  set(_setup_py_cxx "${CMAKE_CXX_COMPILER}")
+endif()
 add_custom_command(
   OUTPUT ${CYTHON_GENERATED_API_HEADERS}
   COMMAND ${CMAKE_COMMAND} -E env
     "CFLAGS=${CMAKE_C_FLAGS}"
     "CXXFLAGS=${CMAKE_CXX_FLAGS}"
-    "CXX=${CMAKE_CXX_COMPILER}"
+    "CC=${_setup_py_cc}"
+    "CXX=${_setup_py_cxx}"
     "CYTHON_INCLUDE_PATH=${cython_include_path}"
     ${Python3_EXECUTABLE} ${_lib_dir}/setup.py -v --api-only
   DEPENDS
@@ -677,16 +695,34 @@ add_custom_command(TARGET thrift_python_and_py3_bindings
     "${_cybld}/folly"
   COMMENT "Copying folly Python bindings into wheel build directory"
 )
+set(_setup_py_parallel_jobs "")
+if(DEFINED CMAKE_JOB_POOLS)
+  string(REGEX MATCH "compile=([0-9]+)" _m "${CMAKE_JOB_POOLS}")
+  if(CMAKE_MATCH_1)
+    set(_setup_py_parallel_jobs "${CMAKE_MATCH_1}")
+  endif()
+endif()
+if(NOT _setup_py_parallel_jobs AND
+    DEFINED ENV{CMAKE_BUILD_PARALLEL_LEVEL} AND
+    "$ENV{CMAKE_BUILD_PARALLEL_LEVEL}" MATCHES "^[0-9]+$")
+  set(_setup_py_parallel_jobs "$ENV{CMAKE_BUILD_PARALLEL_LEVEL}")
+endif()
+if(NOT _setup_py_parallel_jobs)
+  cmake_host_system_information(
+    RESULT _setup_py_parallel_jobs QUERY NUMBER_OF_LOGICAL_CORES)
+endif()
 add_custom_command(TARGET thrift_python_and_py3_bindings
   COMMAND ${CMAKE_COMMAND} -E env
     "CFLAGS=${CMAKE_C_FLAGS}"
     "CXXFLAGS=${CMAKE_CXX_FLAGS}"
-    "CXX=${CMAKE_CXX_COMPILER}"
+    "CC=${_setup_py_cc}"
+    "CXX=${_setup_py_cxx}"
     "LDFLAGS=${SETUP_LDFLAGS}"
     "CYTHON_INCLUDE_PATH=${cython_include_path}"
     "LIBRARY_DIRS=${library_dirs_str}"
     "THRIFT_BUILD_TESTS=${THRIFT_BUILD_TESTS}"
     ${Python3_EXECUTABLE} ${_lib_dir}/setup.py -v
+    build_ext --parallel ${_setup_py_parallel_jobs}
     bdist_wheel --libpython ${python_libname}
   WORKING_DIRECTORY ${_cybld}
 )

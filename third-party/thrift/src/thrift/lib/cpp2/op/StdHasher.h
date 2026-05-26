@@ -30,11 +30,13 @@ class StdHasher {
   size_t getResult() const { return result_; }
 
   template <typename T>
-  constexpr std::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val) {
+    requires std::is_arithmetic_v<T>
+  constexpr void combine(const T& val) {
     result_ = folly::hash::hash_combine(val, result_);
   }
   template <typename T>
-  constexpr std::enable_if_t<std::is_enum_v<T>> combine(const T& val) {
+    requires std::is_enum_v<T>
+  constexpr void combine(const T& val) {
     combine(folly::to_underlying(val));
   }
   void combine(folly::ByteRange value) {

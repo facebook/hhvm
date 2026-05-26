@@ -1050,3 +1050,29 @@ class MutableMapTypedefTest(unittest.TestCase):
 
         # THEN
         self.assertEqual(expected_exception_types, actual_exception_types)
+
+    def test_shared_python_map_mutation_during_assignment_produces_valid_values(
+        self,
+    ) -> None:
+        # GIVEN
+        allowed_outcomes = [{"a": 1, "b": 2}, {"a": 1, "b": 99}]
+        shared: dict[str, int] = {"a": 1, "b": 2}
+        start_barrier: threading.Barrier = threading.Barrier(2)
+
+        def assign_shared_map() -> MutableMap[str, int]:
+            start_barrier.wait()
+            return StrIntMap(to_thrift_map(shared))
+
+        def mutate_shared_map() -> None:
+            start_barrier.wait()
+            shared["b"] = 99
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            assign_future = executor.submit(assign_shared_map)
+            mutate_future = executor.submit(mutate_shared_map)
+            assigned = assign_future.result()
+            mutate_future.result()
+
+        # THEN
+        self.assertIn(dict(assigned), allowed_outcomes)

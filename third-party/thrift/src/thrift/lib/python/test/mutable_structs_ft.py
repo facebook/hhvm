@@ -271,6 +271,36 @@ class FreeThreading_MutableStructTests(unittest.TestCase):
         )
         self.assertEqual(expected_state, actual_state)
 
+    def test_shared_python_list_field_assignment_during_mutation_produces_valid_values(
+        self,
+    ) -> None:
+        # GIVEN
+        allowed_outcomes = [[1, 2, 3], [1, 99, 3]]
+        shared: list[int] = [1, 2, 3]
+        color_groups: OptionalColorGroups = OptionalColorGroups(
+            color_list=to_thrift_list([0])
+        )
+        start_barrier: threading.Barrier = threading.Barrier(2)
+
+        def assign_shared_list_field() -> None:
+            start_barrier.wait()
+            color_groups.color_list = to_thrift_list(shared)
+
+        def mutate_shared_list() -> None:
+            start_barrier.wait()
+            shared[1] = 99
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            assign_future = executor.submit(assign_shared_list_field)
+            mutate_future = executor.submit(mutate_shared_list)
+            assign_future.result()
+            mutate_future.result()
+
+        # THEN
+        self.assertIsNotNone(color_groups.color_list)
+        self.assertIn(list(color_groups.color_list), allowed_outcomes)
+
     def test_prebuilt_struct_elements_append_from_multiple_threads_preserves_values(
         self,
     ) -> None:

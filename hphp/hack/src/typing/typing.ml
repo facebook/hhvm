@@ -2456,38 +2456,22 @@ module Valkind = struct
 end
 
 let check_bool_for_condition env pos ty_have =
-  let tcopt = Env.get_tcopt env in
-  let check_level = TCO.check_bool_for_condition tcopt in
-  (* 0 = don't check, 1 = warning, 2 = error *)
-  if check_level = 0 then
-    env
-  else
-    let reason = Reason.witness pos in
-    let like_bool = Typing_make_type.locl_like reason (MakeType.bool reason) in
-    let (env, ty_err_opt) =
-      Typing_utils.sub_type
-        env
-        ty_have
-        like_bool
-        (Some
-           (Typing_error.Reasons_callback.with_claim
-              Typing_error.Callback.expect_bool_for_condition
-              ~claim:(lazy (pos, Reason.string_of_ureason Reason.URcondition))))
-    in
-    (match ty_err_opt with
-    | Some _ty_err when check_level = 1 ->
-      (* Convert error to warning *)
-      let ty_str = Typing_print.error env ty_have in
-      Typing_warning_utils.add
-        env
-        ( pos,
-          Typing_warning.Expect_bool_for_condition,
-          { Typing_warning.Expect_bool_for_condition.ty = ty_str } )
-    | Some ty_err ->
-      (* check_level = 2, report as error *)
-      Typing_error_utils.add_typing_error ~env ty_err
-    | None -> ());
-    env
+  let reason = Reason.witness pos in
+  let like_bool = Typing_make_type.locl_like reason (MakeType.bool reason) in
+  let (env, ty_err_opt) =
+    Typing_utils.sub_type
+      env
+      ty_have
+      like_bool
+      (Some
+         (Typing_error.Reasons_callback.with_claim
+            Typing_error.Callback.expect_bool_for_condition
+            ~claim:(lazy (pos, Reason.string_of_ureason Reason.URcondition))))
+  in
+  (match ty_err_opt with
+  | Some ty_err -> Typing_error_utils.add_typing_error ~env ty_err
+  | None -> ());
+  env
 
 (** This represents a partially-processed result of type partitioning.
    ty_trues and ty_falses take envs because they do intersections where you

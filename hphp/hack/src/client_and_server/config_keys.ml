@@ -101,8 +101,6 @@ module Hhconfig = struct
 
   let call_coeffects = key "call_coeffects"
 
-  let check_bool_for_condition = key "check_bool_for_condition"
-
   let check_redundant_generics = key "check_redundant_generics"
 
   let check_xhp_attribute = key "check_xhp_attribute"

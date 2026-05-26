@@ -543,8 +543,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (int_opt
          Config_keys.Hhconfig.require_types_tco_require_types_class_consts
          config)
-    ?tco_check_bool_for_condition:
-      (int_opt Config_keys.Hhconfig.check_bool_for_condition config)
     ?tco_type_printer_fuel:
       (int_opt Config_keys.Hhconfig.type_printer_fuel config)
     ?tco_profile_top_level_definitions:

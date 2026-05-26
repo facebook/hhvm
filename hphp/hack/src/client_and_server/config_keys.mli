@@ -96,8 +96,6 @@ module Hhconfig : sig
 
   val call_coeffects : string
 
-  val check_bool_for_condition : string
-
   val check_redundant_generics : string
 
   val check_xhp_attribute : string

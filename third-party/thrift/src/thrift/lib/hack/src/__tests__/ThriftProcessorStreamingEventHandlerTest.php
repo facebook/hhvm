@@ -46,8 +46,7 @@ final class ThriftProcessorStreamingEventHandlerTest extends WWWTest {
     self::mockFunction(PerfMetadata::get<>)->mockReturn($mock_perf_metadata);
 
     // Create input for the test
-    $args =
-      example_ExampleStreamingService_testStream_args::withDefaultValues();
+    $args = ExampleStreamingService_testStream_args::withDefaultValues();
     $input_buffer = new TMemoryBuffer();
     $temp_protocol = new \TBinaryProtocol($input_buffer);
     $args->write($temp_protocol);

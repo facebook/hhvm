@@ -33,7 +33,7 @@ final class ThriftEventHandlerMetadataTest extends WWWTest {
     $input->writeRPCMessage(
       'doNothing',
       TMessageType::CALL,
-      example_ExampleRootService_doNothing_args::withDefaultValues(),
+      ExampleRootService_doNothing_args::withDefaultValues(),
       0,
     );
     $_ = await $proc->processAsync(

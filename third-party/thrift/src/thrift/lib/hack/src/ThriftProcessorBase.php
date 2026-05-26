@@ -487,21 +487,21 @@ trait GetThriftServiceMetadata {
     if ($input is TBinaryProtocolAccelerated) {
       thrift_protocol_read_binary_struct(
         $input,
-        '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args',
+        '\ThriftMetadataService_getThriftServiceMetadata_args',
       );
     } else if ($input is TCompactProtocolAccelerated) {
       thrift_protocol_read_compact_struct(
         $input,
-        '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args',
+        '\ThriftMetadataService_getThriftServiceMetadata_args',
       );
     } else {
       $args =
-        tmeta_ThriftMetadataService_getThriftServiceMetadata_args::withDefaultValues();
+        ThriftMetadataService_getThriftServiceMetadata_args::withDefaultValues();
       $args->read($input);
     }
     $input->readMessageEnd();
     $result =
-      tmeta_ThriftMetadataService_getThriftServiceMetadata_result::withDefaultValues();
+      ThriftMetadataService_getThriftServiceMetadata_result::withDefaultValues();
     try {
       $result->success = $service_metadata_class::getServiceMetadataResponse();
     } catch (Exception $ex) {

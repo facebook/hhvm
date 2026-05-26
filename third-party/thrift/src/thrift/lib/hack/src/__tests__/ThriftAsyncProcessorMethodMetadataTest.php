@@ -45,7 +45,7 @@ final class ThriftAsyncProcessorMethodMetadataTest extends WWWTest {
     );
     $typed = $metadata as ThriftServiceRequestResponseMethod<_, _, _, _>;
     expect($typed->getArgsClass())->toEqual(
-      example_ExampleRootService_sendRequest_args::class,
+      ExampleRootService_sendRequest_args::class,
     );
   }
 
@@ -61,7 +61,7 @@ final class ThriftAsyncProcessorMethodMetadataTest extends WWWTest {
     );
     $typed = $metadata as ThriftServiceRequestResponseMethod<_, _, _, _>;
     expect($typed->getArgsClass())->toEqual(
-      example_ExampleMiddleService_sendMiddleRequest_args::class,
+      ExampleMiddleService_sendMiddleRequest_args::class,
     );
   }
 
@@ -79,7 +79,7 @@ final class ThriftAsyncProcessorMethodMetadataTest extends WWWTest {
     );
     $typed = $metadata as ThriftServiceRequestResponseMethod<_, _, _, _>;
     expect($typed->getArgsClass())->toEqual(
-      example_ExampleRootService_sendRequest_args::class,
+      ExampleRootService_sendRequest_args::class,
     );
   }
 
@@ -95,7 +95,7 @@ final class ThriftAsyncProcessorMethodMetadataTest extends WWWTest {
     );
     $typed = $metadata as ThriftServiceRequestResponseMethod<_, _, _, _>;
     expect($typed->getArgsClass())->toEqual(
-      example_ExampleChildService_sendChildRequest_args::class,
+      ExampleChildService_sendChildRequest_args::class,
     );
   }
 
@@ -112,7 +112,7 @@ final class ThriftAsyncProcessorMethodMetadataTest extends WWWTest {
     );
     $typed = $metadata as ThriftServiceRequestResponseMethod<_, _, _, _>;
     expect($typed->getArgsClass())->toEqual(
-      example_ExampleMiddleService_sendMiddleRequest_args::class,
+      ExampleMiddleService_sendMiddleRequest_args::class,
     );
   }
 
@@ -138,7 +138,7 @@ final class ThriftAsyncProcessorMethodMetadataTest extends WWWTest {
     );
     $typed = $metadata as ThriftServiceRequestResponseMethod<_, _, _, _>;
     expect($typed->getArgsClass())->toEqual(
-      example_ExampleRootService_sendRequest_args::class,
+      ExampleRootService_sendRequest_args::class,
     );
   }
 

@@ -69,7 +69,7 @@ final class TestStreamSinkAsyncHandler extends TClientAsyncHandler {
     int $_sequence_id,
   )[zoned_local]: Awaitable<HH\AsyncGenerator<null, string, void>> {
     $first_response_struct =
-      example_ExampleStreamingService_testStream_FirstResponse::fromShape(
+      ExampleStreamingService_testStream_FirstResponse::fromShape(
         shape('success' => $this->firstResponse),
       );
     $this->consumeRequestAndWriteFirstResponse(
@@ -78,7 +78,7 @@ final class TestStreamSinkAsyncHandler extends TClientAsyncHandler {
 
     $payloads = $this->streamPayloads ?? vec[];
     $encoder = ThriftStreamingSerializationHelpers::encodeStreamHelper(
-      example_ExampleStreamingService_testStream_StreamResponse::class,
+      ExampleStreamingService_testStream_StreamResponse::class,
       new TCompactProtocolAccelerated(new TMemoryBuffer()),
     );
 
@@ -97,7 +97,7 @@ final class TestStreamSinkAsyncHandler extends TClientAsyncHandler {
     (function(HH\AsyncGenerator<null, string, void>): Awaitable<string>),
   > {
     $first_response_struct =
-      example_ExampleStreamingService_testSink_FirstResponse::fromShape(
+      ExampleStreamingService_testSink_FirstResponse::fromShape(
         shape('success' => $this->firstResponse),
       );
     $this->consumeRequestAndWriteFirstResponse(
@@ -106,13 +106,13 @@ final class TestStreamSinkAsyncHandler extends TClientAsyncHandler {
 
     $sink_processor = $this->sinkProcessor;
     $decoder = ThriftStreamingSerializationHelpers::decodeStreamHelper(
-      example_ExampleStreamingService_testSink_SinkPayload::class,
+      ExampleStreamingService_testSink_SinkPayload::class,
       'testSink',
       new TCompactProtocolAccelerated(new TMemoryBuffer()),
     );
 
     $encoder = ThriftStreamingSerializationHelpers::encodeStreamHelper(
-      example_ExampleStreamingService_testSink_FinalResponse::class,
+      ExampleStreamingService_testSink_FinalResponse::class,
       new TCompactProtocolAccelerated(new TMemoryBuffer()),
     );
 
@@ -148,7 +148,7 @@ final class TestStreamPayloadOnlyHandler extends TClientAsyncHandler {
   )[zoned_local]: Awaitable<HH\AsyncGenerator<null, string, void>> {
     $payloads = $this->streamPayloads;
     $encoder = ThriftStreamingSerializationHelpers::encodeStreamHelper(
-      example_ExampleStreamingService_testStream_StreamResponse::class,
+      ExampleStreamingService_testStream_StreamResponse::class,
       new TCompactProtocolAccelerated(new TMemoryBuffer()),
     );
     return (
@@ -188,7 +188,7 @@ final class TestStreamExceptionHandler extends TClientAsyncHandler {
     $transport->resetBuffer();
 
     $first_response_struct =
-      example_ExampleStreamingService_testStream_FirstResponse::fromShape(
+      ExampleStreamingService_testStream_FirstResponse::fromShape(
         shape('success' => $this->firstResponse),
       );
     $response_bytes = TCompactSerializer::serialize($first_response_struct);
@@ -200,7 +200,7 @@ final class TestStreamExceptionHandler extends TClientAsyncHandler {
 
     // Encode a StreamException as a stream payload
     $encoder = ThriftStreamingSerializationHelpers::encodeStreamHelper(
-      example_ExampleStreamingService_testStream_StreamResponse::class,
+      ExampleStreamingService_testStream_StreamResponse::class,
       new TCompactProtocolAccelerated(new TMemoryBuffer()),
     );
     $ex = new example_StreamException();
@@ -238,7 +238,7 @@ final class TestRecvErrorTrackingHandler extends TClientAsyncHandler {
       ->readMessageBegin(inout $method_name, inout $mtype, inout $seqid);
     $transport->resetBuffer();
 
-    $result = example_ExampleRootService_sendRequest_result::fromShape(
+    $result = ExampleRootService_sendRequest_result::fromShape(
       shape(
         'ex' =>
           example_WhisperException::fromShape(shape('message' => 'recv error')),

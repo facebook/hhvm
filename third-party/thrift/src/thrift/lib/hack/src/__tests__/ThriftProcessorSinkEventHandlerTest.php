@@ -64,7 +64,7 @@ final class ThriftProcessorSinkEventHandlerTest extends WWWTest {
     self::mockFunction(PerfMetadata::get<>)->mockReturn($mock_perf_metadata);
 
     // Create input for the sink test
-    $args = example_ExampleStreamingService_testSink_args::withDefaultValues();
+    $args = ExampleStreamingService_testSink_args::withDefaultValues();
     $input_buffer = new TMemoryBuffer();
     $temp_protocol = new TBinaryProtocol($input_buffer);
     $args->write($temp_protocol);
@@ -179,7 +179,7 @@ final class ThriftProcessorSinkEventHandlerTest extends WWWTest {
     self::mockFunction(PerfMetadata::get<>)->mockReturn($mock_perf_metadata);
 
     // Create input for the sink test
-    $args = example_ExampleStreamingService_testSink_args::withDefaultValues();
+    $args = ExampleStreamingService_testSink_args::withDefaultValues();
     $input_buffer = new TMemoryBuffer();
     $temp_protocol = new TBinaryProtocol($input_buffer);
     $args->write($temp_protocol);

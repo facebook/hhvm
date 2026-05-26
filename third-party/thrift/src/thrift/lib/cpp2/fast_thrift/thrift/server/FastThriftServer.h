@@ -21,33 +21,21 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <unordered_map>
-#include <variant>
-#include <vector>
 
 #include <folly/SocketAddress.h>
-#include <folly/Synchronized.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
-#include <folly/io/async/DelayedDestruction.h>
 #include <folly/synchronization/Baton.h>
 
-#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
-#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/SocketOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/debug/DebugServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/monitor/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/status/StatusServerInterface.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/ThriftTlsConfig.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftChannelServer.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServerRegistry.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapterFactory.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -275,8 +263,6 @@ class FastThriftServer {
   }
 
  private:
-  using ServerConnectionManager = connection::ConnectionManager;
-
   // Lifecycle states. Transitions are linear: kNotStarted → kRunning →
   // kStopped. start() and stop() are idempotent — calling either outside
   // its expected source state is a no-op. All transitions and reads are
@@ -288,35 +274,6 @@ class FastThriftServer {
   };
 
   /**
-   * Per-connection thrift-layer state when the tail is a single generated
-   * FastSvAppAdapter. Owns the adapter, its pipeline, and the buffer
-   * allocator the pipeline uses. Lifetime is the server's; entries are
-   * removed when the adapter's close callback fires.
-   */
-  struct SimpleConnection {
-    ThriftServerAppAdapter::Ptr adapter;
-    std::unique_ptr<server::ThriftServerTransportAdapter> transportAdapter;
-    channel_pipeline::PipelineImpl::Ptr pipeline;
-    std::unique_ptr<channel_pipeline::SimpleBufferAllocator> allocator;
-  };
-
-  /**
-   * Per-connection thrift-layer state when the tail is a composite fronting
-   * multiple user adapters. The composite borrows raw T* into its children,
-   * so children must outlive it. Member dtors run in reverse declaration
-   * order: `children` is declared first → destroyed last.
-   */
-  struct CompositeConnection {
-    std::vector<ThriftServerAppAdapter::Ptr> children;
-    ThriftServerCompositeAppAdapter::Ptr adapter;
-    std::unique_ptr<server::ThriftServerTransportAdapter> transportAdapter;
-    channel_pipeline::PipelineImpl::Ptr pipeline;
-    std::unique_ptr<channel_pipeline::SimpleBufferAllocator> allocator;
-  };
-
-  using ConnectionVariant = std::variant<SimpleConnection, CompositeConnection>;
-
-  /**
    * Auxiliary interfaces like monitoring, status, debugging, etc. will live
    * here.
    */
@@ -326,22 +283,6 @@ class FastThriftServer {
     std::shared_ptr<fast_thrift::StatusServerInterface> statusHandler{nullptr};
     std::shared_ptr<fast_thrift::DebugServerInterface> debugHandler{nullptr};
   };
-
-  connection::ConnectionFactory createConnectionFactory();
-
-  channel_pipeline::PipelineImpl::Ptr buildRocketPipeline(
-      folly::EventBase* evb,
-      transport::TransportHandler* transportHandler,
-      rocket::server::RocketServerAppAdapter* appAdapter,
-      rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
-          onSetupComplete);
-
-  void registerConnection(
-      ThriftServerAppAdapter* key, SimpleConnection connection);
-
-  void registerConnection(
-      ThriftServerCompositeAppAdapter* key, CompositeConnection connection);
-  void initiateConnectionDrain();
 
   const FastThriftServerConfig config_;
   std::shared_ptr<ThriftServerAppAdapterFactory> handler_;
@@ -362,13 +303,8 @@ class FastThriftServer {
   // constructed in start() from config_.numIOThreads. Released on
   // destruction; the pool's own dtor joins when the last ref drops.
   std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool_;
-  ServerConnectionManager::Ptr connectionManager_;
-  channel_pipeline::SimpleBufferAllocator rocketAllocator_;
-  folly::Synchronized<std::unordered_map<void*, ConnectionVariant>>
-      thriftConnections_;
+  connection::ConnectionManager::Ptr connectionManager_;
   folly::Baton<> stopBaton_;
-  folly::Baton<> connectionsDrainedBaton_;
-  std::atomic<bool> drainingConnections_{false};
   // Guards state_ and serializes lifecycle transitions so that stop()
   // observes the connectionManager_ assignment from start() with a proper
   // happens-before. Without this, TSAN reports a race when stop() runs on a

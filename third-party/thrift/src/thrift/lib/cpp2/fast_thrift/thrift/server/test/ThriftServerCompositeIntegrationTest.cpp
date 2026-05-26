@@ -58,6 +58,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
@@ -217,27 +218,19 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
   void TearDown() override {
     evb_.loopOnce();
 
-    if (transportHandler_) {
-      transportHandler_->close(folly::exception_wrapper{});
-      transportHandler_->resetPipeline();
-    }
-    // Drop both endpoint pipeline guards before releasing the pipelines,
-    // mirroring ThriftServerIntegrationTest's teardown. Without this,
-    // ~RocketServerAppAdapter trips DCHECK(!pipeline_).
     if (transportAdapter_) {
+      // Close the transport before tearing down the pipelines, mirroring
+      // ThriftServerIntegrationTest's teardown.
+      transportHandler_()->close(folly::exception_wrapper{});
+      transportHandler_()->resetPipeline();
       transportAdapter_->resetPipeline();
-    }
-    if (appAdapter_) {
-      appAdapter_->resetPipeline();
+      appAdapter_()->resetPipeline();
     }
     thriftPipeline_.reset();
-    rocketPipeline_.reset();
-    transportAdapter_.reset();
+    transportAdapter_.reset(); // tears down rocket connection
     composite_.reset();
-    appAdapter_.reset();
     childA_.reset();
     childB_.reset();
-    transportHandler_.reset();
     testTransport_ = nullptr;
   }
 
@@ -251,21 +244,21 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
         folly::AsyncTransport::UniquePtr(new TestAsyncTransport(&evb_));
     testTransport_ = static_cast<TestAsyncTransport*>(transport.get());
 
-    transportHandler_ =
+    auto rocketConn =
+        std::make_unique<rocket::server::RocketServerConnection>();
+    rocketConn->transportHandler =
         apache::thrift::fast_thrift::transport::TransportHandler::create(
             std::move(transport));
 
-    appAdapter_.reset(new RocketServerAppAdapter());
-
     // 1. Rocket pipeline (identical to ThriftServerIntegrationTest setup).
-    rocketPipeline_ =
+    rocketConn->pipeline =
         PipelineBuilder<
             apache::thrift::fast_thrift::transport::TransportHandler,
             RocketServerAppAdapter,
             TestAllocator>()
             .setEventBase(&evb_)
-            .setHead(transportHandler_.get())
-            .setTail(appAdapter_.get())
+            .setHead(rocketConn->transportHandler.get())
+            .setTail(rocketConn->appAdapter.get())
             .setAllocator(&rocketAllocator_)
             .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
                                 FrameLengthParserHandler>(
@@ -287,7 +280,7 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
                 server_request_response_frame_handler_tag)
             .build();
 
-    appAdapter_->setPipeline(rocketPipeline_.get());
+    rocketConn->appAdapter->setPipeline(rocketConn->pipeline.get());
 
     // 2. Build children + composite. Children are added BEFORE composite is
     // wired into a pipeline (per ThriftServerCompositeAppAdapter.h doc).
@@ -304,9 +297,10 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
     composite_->addChild(childA_.get());
     composite_->addChild(childB_.get());
 
-    // 3. Thrift pipeline with composite as tail.
+    // 3. Thrift pipeline with composite as tail. ThriftServerTransportAdapter
+    //    takes ownership of the rocket connection bundle.
     transportAdapter_ =
-        std::make_unique<ThriftServerTransportAdapter>(*appAdapter_);
+        std::make_unique<ThriftServerTransportAdapter>(std::move(rocketConn));
 
     thriftPipeline_ = PipelineBuilder<
                           ThriftServerTransportAdapter,
@@ -327,8 +321,8 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
     // Result::Error because base state-checks state == Open.
     thriftPipeline_->activate();
 
-    transportHandler_->setPipeline(rocketPipeline_.get());
-    transportHandler_->onConnect();
+    transportHandler_()->setPipeline(rocketPipeline_());
+    transportHandler_()->onConnect();
   }
 
   void injectSetupFrame() {
@@ -388,17 +382,28 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
 
   folly::EventBase evb_;
   TestAsyncTransport* testTransport_{nullptr};
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-      transportHandler_;
-  RocketServerAppAdapter::Ptr appAdapter_;
+  // ThriftServerTransportAdapter owns the rocket connection (transport
+  // handler, app adapter, rocket pipeline) post-construction. Accessors
+  // below dereference it.
   std::unique_ptr<ThriftServerTransportAdapter> transportAdapter_;
   RecordingAppAdapter::Ptr childA_;
   RecordingAppAdapter::Ptr childB_;
   ThriftServerCompositeAppAdapter::Ptr composite_;
-  PipelineImpl::Ptr rocketPipeline_;
   PipelineImpl::Ptr thriftPipeline_;
   TestAllocator rocketAllocator_;
   TestAllocator thriftAllocator_;
+
+  rocket::server::RocketServerConnection& rocketConn_() {
+    return transportAdapter_->rocketConnection();
+  }
+  apache::thrift::fast_thrift::transport::TransportHandler*
+  transportHandler_() {
+    return rocketConn_().transportHandler.get();
+  }
+  RocketServerAppAdapter* appAdapter_() {
+    return rocketConn_().appAdapter.get();
+  }
+  PipelineImpl* rocketPipeline_() { return rocketConn_().pipeline.get(); }
 };
 
 // =============================================================================

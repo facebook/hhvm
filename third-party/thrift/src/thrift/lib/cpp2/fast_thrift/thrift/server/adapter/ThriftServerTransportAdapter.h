@@ -19,7 +19,6 @@
 #include <memory>
 
 #include <folly/ExceptionWrapper.h>
-#include <folly/Function.h>
 #include <folly/Portability.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/logging/xlog.h>
@@ -29,6 +28,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/PayloadVariants.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RocketFrameDecoder.h>
@@ -38,54 +38,47 @@ namespace apache::thrift::fast_thrift::thrift::server {
 /**
  * ThriftServerTransportAdapter — head endpoint of the thrift server pipeline.
  *
- * Bridges the thrift pipeline to the rocket pipeline by converting between
- * thrift and rocket message types and by propagating lifecycle events
- * between the two pipelines.
- *
- * The bridge keeps the existing reference to the RocketServerAppAdapter at
- * the tail of the rocket pipeline (used for request/response forwarding)
- * and additionally:
- *   - subscribes to the rocket adapter's lifecycle (rocket→thrift): when
- *     the rocket pipeline becomes active/inactive, the bridge activates/
- *     deactivates the thrift pipeline so handlers can react.
- *   - invokes owner-supplied disconnect/destroy callbacks (thrift→rocket):
- *     when the bridge's own pipeline goes inactive or is removed, the
- *     callbacks tear the rocket connection down.
+ * Owns a RocketServerConnection (transport handler + rocket pipeline + rocket
+ * app adapter) and bridges the thrift pipeline to it. Converts between thrift
+ * and rocket message types on the per-request path and propagates lifecycle
+ * events between the two pipelines.
  *
  * Inbound path (requests):
- *   RocketServerAppAdapter delivers request → this.onTransportRequest()
+ *   rocket app adapter delivers request → onTransportRequest()
  *   → converts RocketRequestMessage to ThriftServerRequestMessage
- *   → pipeline_->fireRead() → [thrift handlers] → ThriftServerChannel
+ *   → pipeline_->fireRead() → [thrift handlers] → tail adapter
  *
  * Outbound path (responses):
- *   ThriftServerChannel → [thrift handlers] → this.onWrite()
+ *   tail adapter → [thrift handlers] → onWrite()
  *   → converts ThriftServerResponseMessage to RocketResponseMessage
- *   → RocketServerAppAdapter.write()
+ *   → rocketConn_->appAdapter->write()
  *
  * Lifecycle propagation:
- *   rocket active   → bridge.onConnect()   → thrift pipeline activate
- *   rocket inactive → bridge.onDisconnect() → thrift pipeline deactivate
- *   thrift inactive → bridge.onPipelineInactive() → onRocketDisconnect_
- *   thrift removed  → bridge.handlerRemoved()     → onRocketDestroy_
+ *   rocket active   → onConnect()         → thrift pipeline activate
+ *   rocket inactive → onDisconnect()      → thrift pipeline deactivate
+ *   thrift inactive → onPipelineInactive() → rocketConn_->disconnect()
+ *   thrift removed  → handlerRemoved()    → rocketConn_->destroy()
+ *
+ * The connected_ flag absorbs the reentry that arises when one direction
+ * triggers the other (rocket inactive deactivates thrift, which would
+ * otherwise re-enter onPipelineInactive and disconnect again).
  *
  * Hot/cold split: per-request methods (onTransportRequest, onWrite,
  * onTransportError) are inlined here so callers can fuse them with the
  * surrounding pipeline traversal. Per-connection lifecycle methods (ctor,
- * dtor, handlerRemoved, onPipelineInactive, onConnect, onDisconnect,
- * onRocketClosed) and per-request error fallback (handleDecodeFailure)
- * are out-of-line and FOLLY_NOINLINE in the .cpp — they fire at most once
- * per connection, so removing them from the inline budget keeps the hot
- * path's icache footprint small.
+ * dtor, handlerRemoved, onPipelineInactive, onConnect, onDisconnect) and
+ * the per-request error fallback (handleDecodeFailure) are declared
+ * FOLLY_NOINLINE and defined out-of-line in the .cpp — they fire at most
+ * once per connection (or per decode failure), so keeping them off the
+ * inline path shrinks the hot path's icache footprint.
  */
 class ThriftServerTransportAdapter {
  public:
-  using OnRocketDisconnectFn = folly::Function<void() noexcept>;
-  using OnRocketDestroyFn = folly::Function<void() noexcept>;
-
+  // Takes ownership of the rocket connection. The rocket connection is
+  // torn down (disconnect + destroy) when the thrift pipeline tears down
+  // this bridge, via handlerRemoved / onPipelineInactive.
   FOLLY_NOINLINE explicit ThriftServerTransportAdapter(
-      rocket::server::RocketServerAppAdapter& appAdapter,
-      OnRocketDisconnectFn onRocketDisconnect = {},
-      OnRocketDestroyFn onRocketDestroy = {});
+      std::unique_ptr<rocket::server::RocketServerConnection> rocketConn);
 
   FOLLY_NOINLINE ~ThriftServerTransportAdapter();
 
@@ -120,6 +113,10 @@ class ThriftServerTransportAdapter {
   // inbound request metadata.
   void setMetadataProtocol(rocket::server::MetadataProtocol p) noexcept {
     metadataProtocol_ = p;
+  }
+
+  rocket::server::RocketServerConnection& rocketConnection() noexcept {
+    return *rocketConn_;
   }
 
   // === Transport-facing interface (inbound from rocket pipeline) ===
@@ -181,7 +178,7 @@ class ThriftServerTransportAdapter {
         .streamType =
             apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
     };
-    return appAdapter_.write(std::move(rocketMsg));
+    return rocketConn_->appAdapter->write(std::move(rocketMsg));
   }
 
   void handlerAdded() noexcept {}
@@ -210,12 +207,6 @@ class ThriftServerTransportAdapter {
   // handlers drain in-flight state. Idempotent in connected_.
   FOLLY_NOINLINE void onDisconnect() noexcept;
 
-  // Rocket pipeline finished tearing down (handlerRemoved fan-out on the
-  // rocket app adapter). The rocket pieces our action callbacks captured
-  // are about to go away, so drop the callbacks. Anything that ran later
-  // (e.g. bridge dtor) would UAF.
-  FOLLY_NOINLINE void onRocketClosed() noexcept;
-
   FOLLY_NOINLINE channel_pipeline::Result handleDecodeFailure(
       uint32_t streamId,
       apache::thrift::fast_thrift::frame::FrameType streamType,
@@ -223,16 +214,12 @@ class ThriftServerTransportAdapter {
 
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
   std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
-  rocket::server::RocketServerAppAdapter& appAdapter_;
-  OnRocketDisconnectFn onRocketDisconnect_;
-  OnRocketDestroyFn onRocketDestroy_;
+  // Owned rocket connection — torn down by handlerRemoved /
+  // onPipelineInactive when the thrift pipeline goes away.
+  std::unique_ptr<rocket::server::RocketServerConnection> rocketConn_;
   rocket::server::MetadataProtocol metadataProtocol_{
       rocket::server::MetadataProtocol::BINARY};
   bool connected_{false};
-  // True until onRocketClosed fires (rocket adapter is going away). Gates
-  // the dtor's unhook of request/lifecycle handlers on appAdapter_ — if
-  // rocket has already torn down, the reference is dangling.
-  bool rocketAlive_{true};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift::server

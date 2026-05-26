@@ -253,25 +253,15 @@ class ThriftServerIntegrationTest : public ::testing::Test {
     // Drain pending write callbacks before destroying
     evb_.loopOnce();
 
-    if (transportHandler_) {
-      transportHandler_->close(folly::exception_wrapper{});
-      transportHandler_->resetPipeline();
-    }
-    // Drop both endpoint pipeline guards before releasing the
-    // pipelines, mirroring RocketServerConnection::destroy() /
-    // ThriftConnectionContext teardown in production.
     if (transportAdapter_) {
+      transportHandler_()->close(folly::exception_wrapper{});
+      transportHandler_()->resetPipeline();
       transportAdapter_->resetPipeline();
-    }
-    if (appAdapter_) {
-      appAdapter_->resetPipeline();
+      appAdapter_()->resetPipeline();
     }
     thriftPipeline_.reset();
-    rocketPipeline_.reset();
-    transportAdapter_.reset();
+    transportAdapter_.reset(); // tears down rocket connection
     serverChannel_.reset();
-    appAdapter_.reset();
-    transportHandler_.reset();
     testTransport_ = nullptr;
   }
 
@@ -280,7 +270,9 @@ class ThriftServerIntegrationTest : public ::testing::Test {
         folly::AsyncTransport::UniquePtr(new TestAsyncTransport(&evb_));
     testTransport_ = static_cast<TestAsyncTransport*>(transport.get());
 
-    transportHandler_ =
+    auto rocketConn =
+        std::make_unique<rocket::server::RocketServerConnection>();
+    rocketConn->transportHandler =
         apache::thrift::fast_thrift::transport::TransportHandler::create(
             std::move(transport));
 
@@ -289,17 +281,15 @@ class ThriftServerIntegrationTest : public ::testing::Test {
     serverChannel_ =
         std::make_shared<ThriftServerChannel>(std::move(processorFactory));
 
-    appAdapter_.reset(new RocketServerAppAdapter());
-
     // 1. Build rocket pipeline: TransportHandler → ... → RocketServerAppAdapter
-    rocketPipeline_ =
+    rocketConn->pipeline =
         PipelineBuilder<
             apache::thrift::fast_thrift::transport::TransportHandler,
             RocketServerAppAdapter,
             TestAllocator>()
             .setEventBase(&evb_)
-            .setHead(transportHandler_.get())
-            .setTail(appAdapter_.get())
+            .setHead(rocketConn->transportHandler.get())
+            .setTail(rocketConn->appAdapter.get())
             .setAllocator(&rocketAllocator_)
             .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
                                 FrameLengthParserHandler>(
@@ -321,12 +311,13 @@ class ThriftServerIntegrationTest : public ::testing::Test {
                 server_request_response_frame_handler_tag)
             .build();
 
-    appAdapter_->setPipeline(rocketPipeline_.get());
+    rocketConn->appAdapter->setPipeline(rocketConn->pipeline.get());
 
     // 2. Build thrift pipeline: ThriftServerTransportAdapter →
-    // ThriftServerChannel
+    // ThriftServerChannel. Transport adapter takes ownership of the rocket
+    // connection bundle.
     transportAdapter_ =
-        std::make_unique<ThriftServerTransportAdapter>(*appAdapter_);
+        std::make_unique<ThriftServerTransportAdapter>(std::move(rocketConn));
 
     thriftPipeline_ = PipelineBuilder<
                           ThriftServerTransportAdapter,
@@ -342,8 +333,8 @@ class ThriftServerIntegrationTest : public ::testing::Test {
     serverChannel_->setPipelineRef(*thriftPipeline_);
     serverChannel_->setWorker(apache::thrift::Cpp2Worker::createDummy(&evb_));
 
-    transportHandler_->setPipeline(rocketPipeline_.get());
-    transportHandler_->onConnect();
+    transportHandler_()->setPipeline(rocketPipeline_());
+    transportHandler_()->onConnect();
   }
 
   void injectSetupFrame() {
@@ -403,16 +394,27 @@ class ThriftServerIntegrationTest : public ::testing::Test {
 
   folly::EventBase evb_;
   TestAsyncTransport* testTransport_{nullptr};
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-      transportHandler_;
-  RocketServerAppAdapter::Ptr appAdapter_;
+  // ThriftServerTransportAdapter owns the rocket connection bundle
+  // (transport handler, app adapter, rocket pipeline) post-construction;
+  // accessors below deref into it.
   std::unique_ptr<ThriftServerTransportAdapter> transportAdapter_;
   std::shared_ptr<ThriftServerChannel> serverChannel_;
-  PipelineImpl::Ptr rocketPipeline_;
   PipelineImpl::Ptr thriftPipeline_;
   TestAllocator rocketAllocator_;
   TestAllocator thriftAllocator_;
   std::shared_ptr<MockAsyncProcessor> processor_;
+
+  rocket::server::RocketServerConnection& rocketConn_() {
+    return transportAdapter_->rocketConnection();
+  }
+  apache::thrift::fast_thrift::transport::TransportHandler*
+  transportHandler_() {
+    return rocketConn_().transportHandler.get();
+  }
+  RocketServerAppAdapter* appAdapter_() {
+    return rocketConn_().appAdapter.get();
+  }
+  PipelineImpl* rocketPipeline_() { return rocketConn_().pipeline.get(); }
 };
 
 // =============================================================================

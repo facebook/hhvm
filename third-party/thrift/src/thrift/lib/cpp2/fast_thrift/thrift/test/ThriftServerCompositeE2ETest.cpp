@@ -33,7 +33,6 @@
 
 #include <gtest/gtest.h>
 
-#include <folly/Synchronized.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
@@ -56,10 +55,12 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/security/SSLPolicy.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/ThriftClientTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientChecksumHandler.h>
@@ -212,6 +213,9 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
 
   // Per-connection server context — the composite borrows its children, so
   // we have to keep them alive at least as long as the composite + pipelines.
+  // Satisfies connection::Connection (close/drain/setCloseCallback) so it
+  // can be returned directly from the connection factory; ConnectionManager
+  // keeps it alive until the connection closes.
   struct ServerConnectionContext {
     // Field order is destruction order in reverse. Tail handlers (composite,
     // children) must be declared FIRST so they outlive transportAdapter:
@@ -229,12 +233,53 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
     PipelineImpl::Ptr thriftPipeline;
     std::unique_ptr<SimpleBufferAllocator> thriftAllocator =
         std::make_unique<SimpleBufferAllocator>();
-    // Posted once the server IO thread finishes processing the EOF that
-    // propagates up from the rocket pipeline; TearDown waits on this before
-    // tearing down the context, so the IO thread cannot UAF the composite
-    // or children while still unwinding onException.
-    std::shared_ptr<folly::Baton<>> closedBaton =
-        std::make_shared<folly::Baton<>>();
+    std::unique_ptr<SimpleBufferAllocator> rocketAllocator =
+        std::make_unique<SimpleBufferAllocator>();
+
+    std::function<void()> closeCb;
+    bool closed{false};
+
+    ServerConnectionContext() = default;
+    ServerConnectionContext(ServerConnectionContext&&) noexcept = default;
+    ServerConnectionContext& operator=(ServerConnectionContext&&) noexcept =
+        default;
+    ServerConnectionContext(const ServerConnectionContext&) = delete;
+    ServerConnectionContext& operator=(const ServerConnectionContext&) = delete;
+
+    void close() noexcept {
+      if (closed) {
+        return;
+      }
+      closed = true;
+      if (thriftPipeline) {
+        thriftPipeline->close();
+        thriftPipeline.reset();
+      }
+      transportAdapter.reset();
+      if (closeCb) {
+        auto cb = std::move(closeCb);
+        cb();
+      }
+    }
+    void drain() noexcept { close(); }
+    void setCloseCallback(std::function<void()> cb) { closeCb = std::move(cb); }
+  };
+
+  class ServerConnectionFactory {
+   public:
+    using BuildFn = std::function<ServerConnectionContext(
+        folly::AsyncTransport::UniquePtr)>;
+
+    explicit ServerConnectionFactory(BuildFn build) noexcept
+        : build_(std::move(build)) {}
+
+    ServerConnectionContext getConnection(
+        folly::AsyncTransport::UniquePtr socket) {
+      return build_(std::move(socket));
+    }
+
+   private:
+    BuildFn build_;
   };
 
   void SetUp() override {
@@ -244,108 +289,105 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
     secondaryHandler_ = std::make_shared<SecondaryHandler>();
     executor_ = std::make_shared<folly::IOThreadPoolExecutor>(1);
 
-    connection::ConnectionFactory connectionFactory =
-        [this](folly::AsyncTransport::UniquePtr socket)
-        -> connection::RocketServerConnection {
-      auto* evb = socket->getEventBase();
-      auto transportHandler =
-          transport::TransportHandler::create(std::move(socket));
-
-      connection::RocketServerConnection conn;
-
-      // 1. Rocket pipeline (same as bare-server E2E)
-      auto rocketPipeline =
-          PipelineBuilder<
-              transport::TransportHandler,
-              rocket::server::RocketServerAppAdapter,
-              SimpleBufferAllocator>()
-              .setEventBase(evb)
-              .setHead(transportHandler.get())
-              .setTail(conn.appAdapter.get())
-              .setAllocator(&serverRocketAllocator_)
-              .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-                  server_frame_length_parser_handler_tag)
-              .addNextOutbound<
-                  frame::write::handler::FrameLengthEncoderHandler>(
-                  server_frame_length_encoder_handler_tag)
-              .addNextDuplex<
-                  rocket::server::handler::RocketServerFrameCodecHandler>(
-                  rocket_server_frame_codec_handler_tag)
-              .addNextDuplex<
-                  rocket::server::handler::RocketServerSetupFrameHandler>(
-                  rocket_server_setup_frame_handler_tag)
-              .addNextDuplex<
-                  rocket::server::handler::RocketServerStreamStateHandler>(
-                  rocket_server_stream_state_handler_tag)
-              .addNextDuplex<
-                  rocket::server::handler::RocketServerRequestResponseHandler>(
-                  rocket_server_request_response_handler_tag)
-              .build();
-
-      conn.appAdapter->setPipeline(rocketPipeline.get());
-      transportHandler->setPipeline(rocketPipeline.get());
-
-      conn.transportHandler = std::move(transportHandler);
-      conn.pipeline = std::move(rocketPipeline);
-
-      // 2. Thrift pipeline — composite wraps two codegen children.
-      ServerConnectionContext ctx;
-      ctx.primaryChild.reset(
-          new CompositeE2EPrimaryServiceAppAdapter(primaryHandler_));
-      ctx.secondaryChild.reset(
-          new CompositeE2ESecondaryServiceAppAdapter(secondaryHandler_));
-
-      // Composite::onException fans out to every child, and each child fires
-      // its closeCallback_ from onException. One child is enough to know
-      // the IO thread has finished unwinding the EOF.
-      ctx.primaryChild->setCloseCallback(
-          [baton = ctx.closedBaton]() { baton->post(); });
-
-      ctx.composite.reset(new thrift::ThriftServerCompositeAppAdapter());
-      ctx.composite->addChild(ctx.primaryChild.get());
-      ctx.composite->addChild(ctx.secondaryChild.get());
-
-      ctx.transportAdapter =
-          std::make_unique<thrift::server::ThriftServerTransportAdapter>(
-              *conn.appAdapter);
-
-      auto thriftPipeline = PipelineBuilder<
-                                thrift::server::ThriftServerTransportAdapter,
-                                thrift::ThriftServerCompositeAppAdapter,
-                                SimpleBufferAllocator>()
-                                .setEventBase(evb)
-                                .setHead(ctx.transportAdapter.get())
-                                .setTail(ctx.composite.get())
-                                .setAllocator(ctx.thriftAllocator.get())
-                                .build();
-
-      ctx.transportAdapter->setPipeline(thriftPipeline.get());
-      // composite's setPipeline fans out to both children so their
-      // writeResponse fires through the same thrift pipeline.
-      ctx.composite->setPipeline(thriftPipeline.get());
-      // Activate so composite's onPipelineActive fans out to children
-      // (Ready -> Open). Without this, child onRead rejects with
-      // Result::Error because base state-checks state == Open.
-      thriftPipeline->activate();
-      ctx.thriftPipeline = std::move(thriftPipeline);
-
-      serverConnections_.withWLock(
-          [&](auto& conns) { conns.push_back(std::move(ctx)); });
-
-      return conn;
-    };
-
     connectionManager_ = connection::ConnectionManager::create(
         folly::SocketAddress("::1", 0),
         folly::getKeepAliveToken(executor_.get()),
-        std::move(connectionFactory),
+        security::SSLPolicy::DISABLED,
         /*fizzContext=*/nullptr,
         /*thriftParams=*/nullptr,
         /*tlsHandshakeTimeout=*/std::chrono::seconds{5},
         connection::SocketOptions{});
+    connectionManager_->setConnectionFactory(
+        ServerConnectionFactory{
+            [this](folly::AsyncTransport::UniquePtr socket) {
+              return buildServerConnection(std::move(socket));
+            }});
     connectionManager_->start();
 
     clientThread_ = std::make_unique<folly::ScopedEventBaseThread>();
+  }
+
+  ServerConnectionContext buildServerConnection(
+      folly::AsyncTransport::UniquePtr socket) {
+    auto* evb = socket->getEventBase();
+
+    // Rocket-layer pieces live inside a rocket::server::RocketServerConnection
+    // so the thrift transport adapter can take ownership of the whole bundle.
+    auto rocketConn =
+        std::make_unique<rocket::server::RocketServerConnection>();
+    rocketConn->transportHandler =
+        transport::TransportHandler::create(std::move(socket));
+
+    ServerConnectionContext ctx;
+
+    // 1. Rocket pipeline (same as bare-server E2E)
+    rocketConn->pipeline =
+        PipelineBuilder<
+            transport::TransportHandler,
+            rocket::server::RocketServerAppAdapter,
+            SimpleBufferAllocator>()
+            .setEventBase(evb)
+            .setHead(rocketConn->transportHandler.get())
+            .setTail(rocketConn->appAdapter.get())
+            .setAllocator(ctx.rocketAllocator.get())
+            .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
+                server_frame_length_parser_handler_tag)
+            .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
+                server_frame_length_encoder_handler_tag)
+            .addNextDuplex<
+                rocket::server::handler::RocketServerFrameCodecHandler>(
+                rocket_server_frame_codec_handler_tag)
+            .addNextDuplex<
+                rocket::server::handler::RocketServerSetupFrameHandler>(
+                rocket_server_setup_frame_handler_tag)
+            .addNextDuplex<
+                rocket::server::handler::RocketServerStreamStateHandler>(
+                rocket_server_stream_state_handler_tag)
+            .addNextDuplex<
+                rocket::server::handler::RocketServerRequestResponseHandler>(
+                rocket_server_request_response_handler_tag)
+            .build();
+
+    rocketConn->appAdapter->setPipeline(rocketConn->pipeline.get());
+    rocketConn->transportHandler->setPipeline(rocketConn->pipeline.get());
+
+    // 2. Thrift pipeline — composite wraps two codegen children.
+    ctx.primaryChild.reset(
+        new CompositeE2EPrimaryServiceAppAdapter(primaryHandler_));
+    ctx.secondaryChild.reset(
+        new CompositeE2ESecondaryServiceAppAdapter(secondaryHandler_));
+
+    ctx.composite.reset(new thrift::ThriftServerCompositeAppAdapter());
+    ctx.composite->addChild(ctx.primaryChild.get());
+    ctx.composite->addChild(ctx.secondaryChild.get());
+
+    ctx.transportAdapter =
+        std::make_unique<thrift::server::ThriftServerTransportAdapter>(
+            std::move(rocketConn));
+
+    ctx.thriftPipeline = PipelineBuilder<
+                             thrift::server::ThriftServerTransportAdapter,
+                             thrift::ThriftServerCompositeAppAdapter,
+                             SimpleBufferAllocator>()
+                             .setEventBase(evb)
+                             .setHead(ctx.transportAdapter.get())
+                             .setTail(ctx.composite.get())
+                             .setAllocator(ctx.thriftAllocator.get())
+                             .build();
+
+    ctx.transportAdapter->setPipeline(ctx.thriftPipeline.get());
+    // composite's setPipeline fans out to both children so their
+    // writeResponse fires through the same thrift pipeline.
+    ctx.composite->setPipeline(ctx.thriftPipeline.get());
+    // Activate so composite's onPipelineActive fans out to children
+    // (Ready -> Open). Without this, child onRead rejects with
+    // Result::Error because base state-checks state == Open.
+    ctx.thriftPipeline->activate();
+    // Activate the rocket pipeline so it can begin reading. Mirrors
+    // ThriftServerConnectionFactory::getConnection's onConnect call.
+    ctx.transportAdapter->rocketConnection().transportHandler->onConnect();
+
+    return ctx;
   }
 
   // Per-client connection resources. Each FastClient owns its appAdapter
@@ -382,25 +424,11 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
       clientConnections_.clear();
     });
     clientThread_.reset();
-    // Wait for the server IO thread to finish processing the EOF that
-    // followed client teardown. Each child's close callback is invoked from
-    // ThriftServerAppAdapter::onException after onException returns, so by
-    // the time the baton posts, the IO thread will not touch the composite
-    // or children again.
-    {
-      std::vector<std::shared_ptr<folly::Baton<>>> batons;
-      serverConnections_.withRLock([&](const auto& conns) {
-        for (const auto& ctx : conns) {
-          batons.push_back(ctx.closedBaton);
-        }
-      });
-      for (auto& baton : batons) {
-        baton->wait();
-      }
-    }
-    connectionManager_->stopAccepting();
-    connectionManager_->closeConnections();
-    serverConnections_.withWLock([](auto& conns) { conns.clear(); });
+    // stop() drains every live connection, waits for the drain, then
+    // force-closes any stragglers. By the time it returns, every
+    // ServerConnectionContext has been destroyed on the IO thread, so the
+    // composite + children cannot UAF.
+    connectionManager_->stop();
     connectionManager_.reset();
     executor_->join();
     executor_.reset();
@@ -549,10 +577,8 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
   connection::ConnectionManager::Ptr connectionManager_;
   std::unique_ptr<folly::ScopedEventBaseThread> clientThread_;
   SimpleBufferAllocator clientAllocator_;
-  SimpleBufferAllocator serverRocketAllocator_;
   std::vector<ClientConnectionResources> clientConnections_;
   std::vector<std::function<void()>> clientDestroyers_;
-  folly::Synchronized<std::vector<ServerConnectionContext>> serverConnections_;
   std::vector<std::unique_ptr<ConnectCallback>> connectCallbacks_;
 };
 

@@ -28,30 +28,10 @@
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/logging/xlog.h>
 
-#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
-#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BatchingFrameHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/MetadataAppAdapter.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionContextHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestContextHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerConnectionFactory.h>
 
 namespace apache::thrift::fast_thrift::thrift {
-
-namespace {
-// File-local handler tags for the per-connection context handlers wired
-// into the thrift pipeline.
-HANDLER_TAG(thrift_server_request_context_handler);
-HANDLER_TAG(thrift_server_connection_context_handler);
-} // namespace
 
 using channel_pipeline::PipelineBuilder;
 using channel_pipeline::PipelineImpl;
@@ -160,358 +140,6 @@ void FastThriftServer::setSocketOptions(connection::SocketOptions opts) {
   socketOptions_ = opts;
 }
 
-connection::ConnectionFactory FastThriftServer::createConnectionFactory() {
-  return [this](folly::AsyncTransport::UniquePtr socket)
-             -> connection::RocketServerConnection {
-    auto* evb = socket->getEventBase();
-
-    // Per-connection context. Only built when enableRequestContext is set;
-    // otherwise the embedder hook (if any) receives nullptr and the thrift
-    // pipeline below skips the context-propagation handlers.
-    //
-    // When built, ownership is handed to ThriftServerConnectionContextHandler
-    // in the thrift pipeline; in-flight ThriftRequestContexts hold extra
-    // refs via intrusive_ptr.
-    boost::intrusive_ptr<ThriftConnContext> connContext;
-    if (config_.enableRequestContext) {
-      // Snapshot peer address before consuming the socket. After TLS this
-      // reflects the post-handshake peer.
-      folly::SocketAddress peerAddress;
-      try {
-        socket->getPeerAddress(&peerAddress);
-      } catch (const std::exception& ex) {
-        XLOG(WARN) << "Failed to read peer address on accept: " << ex.what();
-      }
-      connContext.reset(new ThriftConnContext());
-      connContext->setPeerAddress(peerAddress);
-    }
-
-    // Embedder hook (e.g., ucache stashing a TAO connection context on the
-    // ThriftConnContext via setUserData). Runs synchronously on the IO EVB
-    // before any request is dispatched on this connection.
-    if (onConnectionAccepted_) {
-      onConnectionAccepted_(connContext.get());
-    }
-
-    auto transportHandler =
-        transport::TransportHandler::create(std::move(socket));
-
-    connection::RocketServerConnection conn;
-
-    // 1. Build the thrift adapter first so the rocket pipeline's SETUP
-    //    handler can capture a callback into it. When any auxiliary
-    //    interface (monitoring/status/metadata) is wired up, the tail is a
-    //    composite fronting the user adapter + aux adapters; otherwise the
-    //    tail is the user adapter directly.
-    const bool needsComposite = auxInterfaces_.monitoringHandler ||
-        auxInterfaces_.statusHandler || auxInterfaces_.debugHandler ||
-        metadataResponse_;
-
-    if (needsComposite) {
-      CompositeConnection ctx;
-      ctx.allocator = std::make_unique<SimpleBufferAllocator>();
-      ctx.transportAdapter =
-          std::make_unique<server::ThriftServerTransportAdapter>(
-              *conn.appAdapter);
-
-      // 2. Build rocket pipeline.
-      auto* transportAdapter = ctx.transportAdapter.get();
-      auto rocketPipeline = buildRocketPipeline(
-          evb,
-          transportHandler.get(),
-          conn.appAdapter.get(),
-          [transportAdapter](
-              const rocket::server::handler::SetupParameters& p) noexcept {
-            transportAdapter->setMetadataProtocol(p.metadataProtocol);
-          });
-      conn.appAdapter->setPipeline(rocketPipeline.get());
-      transportHandler->setPipeline(rocketPipeline.get());
-
-      if (config_.zeroCopyThreshold > 0) {
-        if (!transportHandler->setZeroCopy(true)) {
-          XLOG(WARN) << "MSG_ZEROCOPY not supported on this socket";
-        }
-        transportHandler->setZeroCopyEnableThreshold(config_.zeroCopyThreshold);
-      }
-      conn.transportHandler = std::move(transportHandler);
-      conn.pipeline = std::move(rocketPipeline);
-
-      // Children live in ctx.children (owned); composite borrows raw
-      // pointers. Declaration order in CompositeConnection ensures children
-      // outlive the composite.
-      ctx.children.push_back(handler_->getAppAdapter(handler_));
-      if (auxInterfaces_.monitoringHandler) {
-        ctx.children.push_back(auxInterfaces_.monitoringHandler->getAppAdapter(
-            auxInterfaces_.monitoringHandler));
-      }
-      if (auxInterfaces_.statusHandler) {
-        ctx.children.push_back(auxInterfaces_.statusHandler->getAppAdapter(
-            auxInterfaces_.statusHandler));
-      }
-      if (auxInterfaces_.debugHandler) {
-        ctx.children.push_back(auxInterfaces_.debugHandler->getAppAdapter(
-            auxInterfaces_.debugHandler));
-      }
-      if (metadataResponse_) {
-        ctx.children.push_back(
-            ThriftServerAppAdapter::Ptr{
-                new MetadataAppAdapter(metadataResponse_)});
-      }
-      ctx.adapter = ThriftServerCompositeAppAdapter::Ptr{
-          new ThriftServerCompositeAppAdapter()};
-      for (auto& child : ctx.children) {
-        ctx.adapter->addChild(child.get());
-      }
-
-      // 3. Build thrift pipeline templated on the composite so its onRead
-      //    is the resolved tail; setPipeline on the typed pointer also
-      //    fans out to every child. When enableRequestContext is set, wire
-      //    the per-connection context handlers so each request's
-      //    ThriftRequestContext is populated with the ThriftConnContext.
-      using ReqCtxHandler = ThriftServerRequestContextHandler<
-          channel_pipeline::detail::ContextImpl>;
-      using ConnCtxHandler = ThriftServerConnectionContextHandler<
-          channel_pipeline::detail::ContextImpl>;
-      PipelineBuilder<
-          server::ThriftServerTransportAdapter,
-          ThriftServerCompositeAppAdapter,
-          SimpleBufferAllocator>
-          thriftPipelineBuilder;
-      thriftPipelineBuilder.setEventBase(evb)
-          .setHead(ctx.transportAdapter.get())
-          .setTail(ctx.adapter.get())
-          .setAllocator(ctx.allocator.get());
-      if (config_.enableRequestContext) {
-        thriftPipelineBuilder
-            .addNextInbound<ReqCtxHandler>(
-                thrift_server_request_context_handler_tag)
-            .addNextInbound<ConnCtxHandler>(
-                thrift_server_connection_context_handler_tag,
-                std::move(connContext));
-      }
-      auto thriftPipeline = thriftPipelineBuilder.build();
-      ctx.transportAdapter->setPipeline(thriftPipeline.get());
-      ctx.adapter->setPipeline(thriftPipeline.get());
-      thriftPipeline->activate();
-
-      auto* adapterKey = ctx.adapter.get();
-      ctx.pipeline = std::move(thriftPipeline);
-      registerConnection(adapterKey, std::move(ctx));
-    } else {
-      SimpleConnection ctx;
-      ctx.adapter = handler_->getAppAdapter(handler_);
-      ctx.allocator = std::make_unique<SimpleBufferAllocator>();
-      ctx.transportAdapter =
-          std::make_unique<server::ThriftServerTransportAdapter>(
-              *conn.appAdapter);
-
-      // 2. Build rocket pipeline.
-      auto* transportAdapter = ctx.transportAdapter.get();
-      auto rocketPipeline = buildRocketPipeline(
-          evb,
-          transportHandler.get(),
-          conn.appAdapter.get(),
-          [transportAdapter](
-              const rocket::server::handler::SetupParameters& p) noexcept {
-            transportAdapter->setMetadataProtocol(p.metadataProtocol);
-          });
-      conn.appAdapter->setPipeline(rocketPipeline.get());
-      transportHandler->setPipeline(rocketPipeline.get());
-
-      if (config_.zeroCopyThreshold > 0) {
-        if (!transportHandler->setZeroCopy(true)) {
-          XLOG(WARN) << "MSG_ZEROCOPY not supported on this socket";
-        }
-        transportHandler->setZeroCopyEnableThreshold(config_.zeroCopyThreshold);
-      }
-      conn.transportHandler = std::move(transportHandler);
-      conn.pipeline = std::move(rocketPipeline);
-
-      // 3. Build thrift pipeline templated on the base adapter. Works
-      //    because generated FastSvAppAdapter subclasses only populate
-      //    dispatch_ via addMethodHandler in their ctor and don't override
-      //    base methods. When enableRequestContext is set, wire the
-      //    per-connection context handlers so each request's
-      //    ThriftRequestContext is populated with the ThriftConnContext.
-      using ReqCtxHandler = ThriftServerRequestContextHandler<
-          channel_pipeline::detail::ContextImpl>;
-      using ConnCtxHandler = ThriftServerConnectionContextHandler<
-          channel_pipeline::detail::ContextImpl>;
-      PipelineBuilder<
-          server::ThriftServerTransportAdapter,
-          ThriftServerAppAdapter,
-          SimpleBufferAllocator>
-          thriftPipelineBuilder;
-      thriftPipelineBuilder.setEventBase(evb)
-          .setHead(ctx.transportAdapter.get())
-          .setTail(ctx.adapter.get())
-          .setAllocator(ctx.allocator.get());
-      if (config_.enableRequestContext) {
-        thriftPipelineBuilder
-            .addNextInbound<ReqCtxHandler>(
-                thrift_server_request_context_handler_tag)
-            .addNextInbound<ConnCtxHandler>(
-                thrift_server_connection_context_handler_tag,
-                std::move(connContext));
-      }
-      auto thriftPipeline = thriftPipelineBuilder.build();
-      ctx.transportAdapter->setPipeline(thriftPipeline.get());
-      ctx.adapter->setPipeline(thriftPipeline.get());
-      thriftPipeline->activate();
-
-      auto* adapterKey = ctx.adapter.get();
-      ctx.pipeline = std::move(thriftPipeline);
-      registerConnection(adapterKey, std::move(ctx));
-    }
-
-    return conn;
-  };
-}
-
-PipelineImpl::Ptr FastThriftServer::buildRocketPipeline(
-    folly::EventBase* evb,
-    transport::TransportHandler* transportHandler,
-    rocket::server::RocketServerAppAdapter* appAdapter,
-    rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
-        onSetupComplete) {
-  return PipelineBuilder<
-             transport::TransportHandler,
-             rocket::server::RocketServerAppAdapter,
-             SimpleBufferAllocator>()
-      .setEventBase(evb)
-      .setHead(transportHandler)
-      .setTail(appAdapter)
-      .setAllocator(&rocketAllocator_)
-      .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-          frame_length_parser_handler_tag)
-      .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
-          batching_frame_handler_tag)
-      .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
-          frame_length_encoder_handler_tag)
-      .addNextDuplex<rocket::server::handler::RocketServerFrameCodecHandler>(
-          rocket_server_frame_codec_handler_tag)
-      .addNextDuplex<rocket::server::handler::RocketServerSetupFrameHandler>(
-          server_setup_frame_handler_tag, std::move(onSetupComplete))
-      .addNextDuplex<
-          rocket::server::handler::RocketServerRequestResponseHandler>(
-          server_request_response_frame_handler_tag)
-      .addNextDuplex<rocket::server::handler::RocketServerStreamStateHandler>(
-          server_stream_state_handler_tag)
-      .build();
-}
-
-void FastThriftServer::registerConnection(
-    ThriftServerAppAdapter* key, SimpleConnection connection) {
-  void* rawPtr = key;
-  // Close callback fires after ThriftServerAppAdapter reaches Closed. For
-  // graceful shutdown, in-flight callbacks keep the adapter in Closing until
-  // their final response path drains inFlight_.
-  connection.adapter->setCloseCallback([this, rawPtr]() {
-    SimpleConnection extracted;
-    bool found = false;
-    bool drained = false;
-    thriftConnections_.withWLock([&](auto& conns) {
-      auto it = conns.find(rawPtr);
-      if (it == conns.end()) {
-        return;
-      }
-      extracted = std::move(std::get<SimpleConnection>(it->second));
-      conns.erase(it);
-      found = true;
-      drained =
-          drainingConnections_.load(std::memory_order_acquire) && conns.empty();
-    });
-    if (found && extracted.pipeline) {
-      // Deactivate before destruction so the head transport adapter sees
-      // onPipelineInactive (clearing connected_) before its handlerRemoved
-      // fires. Graceful-stop reaches here while the rocket connection is
-      // still up, so nothing else has driven the pipeline inactive yet.
-      extracted.pipeline->deactivate();
-    }
-    if (drained) {
-      connectionsDrainedBaton_.post();
-    }
-  });
-  thriftConnections_.withWLock(
-      [&](auto& conns) { conns.emplace(rawPtr, std::move(connection)); });
-}
-
-void FastThriftServer::registerConnection(
-    ThriftServerCompositeAppAdapter* key, CompositeConnection connection) {
-  void* rawPtr = key;
-  // The composite itself doesn't expose setCloseCallback (it derives from
-  // DelayedDestruction, not the adapter base). Hook the first child's
-  // close callback — on connection drop, the pipeline's onException
-  // propagates to the composite, which fans it out to every child via
-  // vtable, so the first child's callback reliably fires.
-  DCHECK(!connection.children.empty());
-  connection.children.front()->setCloseCallback([this, rawPtr]() {
-    CompositeConnection extracted;
-    bool found = false;
-    bool drained = false;
-    thriftConnections_.withWLock([&](auto& conns) {
-      auto it = conns.find(rawPtr);
-      if (it == conns.end()) {
-        return;
-      }
-      extracted = std::move(std::get<CompositeConnection>(it->second));
-      conns.erase(it);
-      found = true;
-      drained =
-          drainingConnections_.load(std::memory_order_acquire) && conns.empty();
-    });
-    if (found && extracted.pipeline) {
-      extracted.pipeline->deactivate();
-    }
-    if (drained) {
-      connectionsDrainedBaton_.post();
-    }
-  });
-  thriftConnections_.withWLock(
-      [&](auto& conns) { conns.emplace(rawPtr, std::move(connection)); });
-}
-
-void FastThriftServer::initiateConnectionDrain() {
-  struct DrainTarget {
-    folly::Executor::KeepAlive<folly::EventBase> evb;
-    folly::Function<void()> drain;
-  };
-  std::vector<DrainTarget> targets;
-  thriftConnections_.withRLock([&](const auto& conns) {
-    targets.reserve(conns.size());
-    for (const auto& [_, connection] : conns) {
-      std::visit(
-          [&](const auto& c) {
-            auto* adapter = c.adapter.get();
-            // DestructorGuard keeps the adapter alive across the EVB hop —
-            // if the peer drops between enqueue and dispatch, the close
-            // callback would otherwise erase the SimpleConnection and free
-            // the adapter under us.
-            folly::DelayedDestruction::DestructorGuard guard(adapter);
-            targets.push_back(
-                {folly::getKeepAliveToken(c.pipeline->eventBase()),
-                 [adapter, guard = std::move(guard)]() {
-                   adapter->startDrain();
-                 }});
-          },
-          connection);
-    }
-  });
-
-  // Hop to each connection's EVB to push the wire frame + mutate adapter
-  // state under the same single-threaded discipline as the request path.
-  // Move the EVB KeepAlive into the lambda so the EVB is guaranteed alive
-  // until the queued task actually runs, regardless of how the surrounding
-  // shutdown is structured.
-  for (auto& t : targets) {
-    auto* evb = t.evb.get();
-    evb->runInEventBaseThread(
-        [keepAlive = std::move(t.evb), drain = std::move(t.drain)]() mutable {
-          drain();
-        });
-  }
-}
-
 FastThriftServer::~FastThriftServer() {
   stop();
 
@@ -588,15 +216,40 @@ void FastThriftServer::start() {
         /*maxThreads=*/config_.numIOThreads,
         /*minThreads=*/config_.numIOThreads);
   }
-  connectionManager_ = ServerConnectionManager::create(
+  connectionManager_ = connection::ConnectionManager::create(
       config_.address,
       folly::getKeepAliveToken(ioThreadPool_.get()),
-      createConnectionFactory(),
+      sslConfig_ ? security::SSLPolicy::REQUIRED
+                 : security::SSLPolicy::DISABLED,
       std::move(fizzBuilt.fizzContext),
       std::move(fizzBuilt.thriftParams),
       tlsHandshakeTimeout,
       socketOptions_);
   connectionManager_->setEnableReusePortBpfSpread(enableReusePortBpfSpread_);
+
+  // Wire the per-connection factory. The factory carries all per-EVB-handler
+  // config (user handler, aux interfaces, metadata, zero-copy threshold,
+  // request-context wiring). The embedder onConnectionAccepted hook (if any)
+  // runs from the connection-layer ConnectionAcceptCallbackHandler, reaching
+  // the per-connection ThriftConnContext via ThriftServerConnection.
+  server::ThriftServerConnectionFactoryConfig factoryConfig{
+      .handler = handler_,
+      .monitoringHandler = auxInterfaces_.monitoringHandler,
+      .statusHandler = auxInterfaces_.statusHandler,
+      .debugHandler = auxInterfaces_.debugHandler,
+      .metadataResponse = metadataResponse_,
+      .zeroCopyThreshold = config_.zeroCopyThreshold,
+      .enableRequestContext = config_.enableRequestContext,
+  };
+  std::function<void(server::ThriftServerConnection&)> onAccept;
+  if (onConnectionAccepted_) {
+    onAccept = [this](server::ThriftServerConnection& conn) {
+      onConnectionAccepted_(conn.connContext.get());
+    };
+  }
+  connectionManager_->setConnectionFactory(
+      server::ThriftServerConnectionFactory{std::move(factoryConfig)},
+      std::move(onAccept));
 
   connectionManager_->start();
   state_ = State::kRunning;
@@ -637,26 +290,9 @@ void FastThriftServer::stop() {
     state_ = State::kStopped;
   }
 
-  drainingConnections_.store(true, std::memory_order_release);
-  // Stop accepting new connections but keep existing rocket connections
-  // alive — ThriftServerTransportAdapter::onWrite holds a raw reference into
-  // RocketServerAppAdapter that in-flight thrift FHCs may still traverse
-  // when they complete their deferred response.
-  connectionManager_->stopAccepting();
-  initiateConnectionDrain();
-
-  const bool drained = thriftConnections_.withRLock(
-      [](const auto& conns) { return conns.empty(); });
-  if (!drained) {
-    constexpr std::chrono::seconds kDrainTimeout{30};
-    CHECK(connectionsDrainedBaton_.try_wait_for(kDrainTimeout))
-        << "FastThriftServer::stop timed out after " << kDrainTimeout.count()
-        << "s waiting for in-flight thrift connections to drain";
-  }
-  // Now that every thrift adapter has drained its inFlight_ and fired its
-  // closeCallback, no FHC can race a rocket-adapter teardown.
-  connectionManager_->closeConnections();
-
+  // ConnectionManager::stop() handles the whole flow: stop accepting,
+  // drain in-flight connections, force-close any stragglers.
+  connectionManager_->stop();
   stopBaton_.post();
 }
 

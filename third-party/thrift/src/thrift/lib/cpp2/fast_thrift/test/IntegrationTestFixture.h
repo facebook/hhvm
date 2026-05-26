@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <functional>
+#include <utility>
+
 #include <gtest/gtest.h>
 
 #include <folly/SocketAddress.h>
@@ -49,6 +52,60 @@ struct ClientConnection {
   apache::thrift::fast_thrift::channel_pipeline::PipelineImpl::Ptr pipeline;
   TestClientAppAdapter appAdapter;
   std::unique_ptr<folly::AsyncSocket::ConnectCallback> connectCallback;
+};
+
+/**
+ * Per-accepted-connection server-side state. Satisfies the
+ * connection::Connection concept. Test connections have no async work,
+ * so drain() collapses to immediate close.
+ */
+struct TestServerConnection {
+  ServerTransportHandler::Ptr transportHandler;
+  apache::thrift::fast_thrift::channel_pipeline::PipelineImpl::Ptr pipeline;
+  std::function<void()> closeCb;
+  bool closed{false};
+
+  void setCloseCallback(std::function<void()> cb) { closeCb = std::move(cb); }
+
+  void drain() noexcept { close(); }
+
+  void close() noexcept {
+    if (closed) {
+      return;
+    }
+    closed = true;
+    if (transportHandler) {
+      transportHandler->close(folly::exception_wrapper{});
+      transportHandler->resetPipeline();
+    }
+    pipeline.reset();
+    transportHandler.reset();
+    if (closeCb) {
+      auto cb = std::move(closeCb);
+      cb();
+    }
+  }
+};
+
+/**
+ * Builds a TestServerConnection per accepted socket. Borrows the fixture's
+ * long-lived serverAppAdapter + allocator so every connection shares them
+ * (the fixture's tests assert on those shared objects).
+ */
+class TestServerConnectionFactory {
+ public:
+  TestServerConnectionFactory(
+      TestServerAppAdapter* appAdapter,
+      apache::thrift::fast_thrift::channel_pipeline::SimpleBufferAllocator*
+          allocator) noexcept
+      : appAdapter_(appAdapter), allocator_(allocator) {}
+
+  TestServerConnection getConnection(folly::AsyncTransport::UniquePtr socket);
+
+ private:
+  TestServerAppAdapter* appAdapter_;
+  apache::thrift::fast_thrift::channel_pipeline::SimpleBufferAllocator*
+      allocator_;
 };
 
 /**

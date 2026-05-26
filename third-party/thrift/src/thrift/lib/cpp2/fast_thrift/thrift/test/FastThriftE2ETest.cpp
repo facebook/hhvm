@@ -158,16 +158,126 @@ class TestHandler : public apache::thrift::ServiceHandler<TestService> {
  */
 class FastThriftE2ETest : public ::testing::Test {
  protected:
-  struct ThriftConnectionContext {
+  // Per-accepted-client server-side state. Owns the thrift pipeline (which
+  // owns the rocket connection via the transport adapter). Satisfies the
+  // connection::Connection concept.
+  struct ServerConnection {
     std::shared_ptr<thrift::ThriftServerChannel> serverChannel;
+    SimpleBufferAllocator thriftAllocator;
     std::unique_ptr<thrift::server::ThriftServerTransportAdapter>
         transportAdapter;
     PipelineImpl::Ptr thriftPipeline;
-    std::unique_ptr<SimpleBufferAllocator> thriftAllocator =
-        std::make_unique<SimpleBufferAllocator>();
-    std::shared_ptr<folly::Baton<>> closedBaton =
-        std::make_shared<folly::Baton<>>();
+    std::function<void()> closeCb;
+    bool closed{false};
+
+    ServerConnection() = default;
+    ServerConnection(ServerConnection&&) noexcept = default;
+    ServerConnection& operator=(ServerConnection&&) noexcept = default;
+    ServerConnection(const ServerConnection&) = delete;
+    ServerConnection& operator=(const ServerConnection&) = delete;
+
+    void close() noexcept {
+      if (closed) {
+        return;
+      }
+      closed = true;
+      if (thriftPipeline) {
+        thriftPipeline->close();
+        thriftPipeline.reset();
+      }
+      transportAdapter.reset();
+      if (closeCb) {
+        auto cb = std::move(closeCb);
+        cb();
+      }
+    }
+    void drain() noexcept { close(); }
+    void setCloseCallback(std::function<void()> cb) { closeCb = std::move(cb); }
   };
+
+  // connection::ConnectionFactory: builds a ServerConnection per accept.
+  class ServerConnectionFactory {
+   public:
+    explicit ServerConnectionFactory(FastThriftE2ETest* fixture) noexcept
+        : fixture_(fixture) {}
+    ServerConnection getConnection(folly::AsyncTransport::UniquePtr socket) {
+      return fixture_->buildServerConnection(std::move(socket));
+    }
+
+   private:
+    FastThriftE2ETest* fixture_;
+  };
+
+  ServerConnection buildServerConnection(
+      folly::AsyncTransport::UniquePtr socket) {
+    auto* evb = socket->getEventBase();
+
+    // Build rocket-layer pieces inside a rocket::server::RocketServerConnection
+    // so ThriftServerTransportAdapter can take ownership of the whole bundle.
+    auto rocketConn = std::make_unique<
+        apache::thrift::fast_thrift::rocket::server::RocketServerConnection>();
+    rocketConn->transportHandler =
+        apache::thrift::fast_thrift::transport::TransportHandler::create(
+            std::move(socket));
+
+    rocketConn->pipeline =
+        PipelineBuilder<
+            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::rocket::server::RocketServerAppAdapter,
+            SimpleBufferAllocator>()
+            .setEventBase(evb)
+            .setHead(rocketConn->transportHandler.get())
+            .setTail(rocketConn->appAdapter.get())
+            .setAllocator(&serverRocketAllocator_)
+            .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
+                                FrameLengthParserHandler>(
+                server_frame_length_parser_handler_tag)
+            .addNextOutbound<apache::thrift::fast_thrift::frame::write::
+                                 handler::FrameLengthEncoderHandler>(
+                server_frame_length_encoder_handler_tag)
+            .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                               handler::RocketServerFrameCodecHandler>(
+                rocket_server_frame_codec_handler_tag)
+            .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                               handler::RocketServerSetupFrameHandler>(
+                rocket_server_setup_frame_handler_tag)
+            .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                               handler::RocketServerStreamStateHandler>(
+                rocket_server_stream_state_handler_tag)
+            .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                               handler::RocketServerRequestResponseHandler>(
+                rocket_server_request_response_handler_tag)
+            .build();
+    rocketConn->appAdapter->setPipeline(rocketConn->pipeline.get());
+    rocketConn->transportHandler->setPipeline(rocketConn->pipeline.get());
+
+    auto serverChannel =
+        std::make_shared<thrift::ThriftServerChannel>(handler_);
+    auto transportAdapter =
+        std::make_unique<thrift::server::ThriftServerTransportAdapter>(
+            std::move(rocketConn));
+
+    ServerConnection conn;
+    conn.serverChannel = serverChannel;
+    conn.thriftPipeline = PipelineBuilder<
+                              thrift::server::ThriftServerTransportAdapter,
+                              thrift::ThriftServerChannel,
+                              SimpleBufferAllocator>()
+                              .setEventBase(evb)
+                              .setHead(transportAdapter.get())
+                              .setTail(serverChannel.get())
+                              .setAllocator(&conn.thriftAllocator)
+                              .build();
+
+    transportAdapter->setPipeline(conn.thriftPipeline.get());
+    serverChannel->setPipelineRef(*conn.thriftPipeline);
+    serverChannel->setWorker(apache::thrift::Cpp2Worker::createDummy(evb));
+    conn.transportAdapter = std::move(transportAdapter);
+    // Activate the rocket pipeline so it can begin reading. Mirrors
+    // ThriftServerConnectionFactory::getConnection's onConnect call.
+    conn.transportAdapter->rocketConnection().transportHandler->onConnect();
+    return conn;
+  }
 
   void SetUp() override {
     THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
@@ -175,133 +285,32 @@ class FastThriftE2ETest : public ::testing::Test {
     handler_ = std::make_shared<TestHandler>();
     executor_ = std::make_shared<folly::IOThreadPoolExecutor>(1);
 
-    // Server connection factory
-
-    // Server connection factory — called for each accepted connection
-    apache::thrift::fast_thrift::connection::ConnectionFactory
-        connectionFactory = [this](folly::AsyncTransport::UniquePtr socket)
-        -> apache::thrift::fast_thrift::connection::RocketServerConnection {
-      auto* evb = socket->getEventBase();
-      auto transportHandler =
-          apache::thrift::fast_thrift::transport::TransportHandler::create(
-              std::move(socket));
-
-      // Build RocketServerConnection with default appAdapter
-      apache::thrift::fast_thrift::connection::RocketServerConnection conn;
-
-      // 1. Build rocket pipeline
-      auto rocketPipeline =
-          PipelineBuilder<
-              apache::thrift::fast_thrift::transport::TransportHandler,
-              apache::thrift::fast_thrift::rocket::server::
-                  RocketServerAppAdapter,
-              SimpleBufferAllocator>()
-              .setEventBase(evb)
-              .setHead(transportHandler.get())
-              .setTail(conn.appAdapter.get())
-              .setAllocator(&serverRocketAllocator_)
-              .addNextInbound<apache::thrift::fast_thrift::frame::read::
-                                  handler::FrameLengthParserHandler>(
-                  server_frame_length_parser_handler_tag)
-              .addNextOutbound<apache::thrift::fast_thrift::frame::write::
-                                   handler::FrameLengthEncoderHandler>(
-                  server_frame_length_encoder_handler_tag)
-              .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
-                                 handler::RocketServerFrameCodecHandler>(
-                  rocket_server_frame_codec_handler_tag)
-              .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
-                                 handler::RocketServerSetupFrameHandler>(
-                  rocket_server_setup_frame_handler_tag)
-              .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
-                                 handler::RocketServerStreamStateHandler>(
-                  rocket_server_stream_state_handler_tag)
-              .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
-                                 handler::RocketServerRequestResponseHandler>(
-                  rocket_server_request_response_handler_tag)
-              .build();
-
-      conn.appAdapter->setPipeline(rocketPipeline.get());
-      transportHandler->setPipeline(rocketPipeline.get());
-
-      conn.transportHandler = std::move(transportHandler);
-      conn.pipeline = std::move(rocketPipeline);
-
-      // 2. Build thrift pipeline
-      auto serverChannel =
-          std::make_shared<thrift::ThriftServerChannel>(handler_);
-      auto transportAdapter =
-          std::make_unique<thrift::server::ThriftServerTransportAdapter>(
-              *conn.appAdapter);
-
-      ThriftConnectionContext ctx;
-      auto thriftPipeline = PipelineBuilder<
-                                thrift::server::ThriftServerTransportAdapter,
-                                thrift::ThriftServerChannel,
-                                SimpleBufferAllocator>()
-                                .setEventBase(evb)
-                                .setHead(transportAdapter.get())
-                                .setTail(serverChannel.get())
-                                .setAllocator(ctx.thriftAllocator.get())
-                                .build();
-
-      transportAdapter->setPipeline(thriftPipeline.get());
-      serverChannel->setPipelineRef(*thriftPipeline);
-      serverChannel->setWorker(apache::thrift::Cpp2Worker::createDummy(evb));
-
-      ctx.serverChannel = std::move(serverChannel);
-      ctx.transportAdapter = std::move(transportAdapter);
-      ctx.thriftPipeline = std::move(thriftPipeline);
-
-      ctx.serverChannel->setCloseCallback(
-          [baton = ctx.closedBaton]() { baton->post(); });
-
-      thriftConnections_.withWLock(
-          [&](auto& conns) { conns.push_back(std::move(ctx)); });
-
-      return conn;
-    };
-
     connectionManager_ =
         apache::thrift::fast_thrift::connection::ConnectionManager::create(
             folly::SocketAddress("::1", 0),
             folly::getKeepAliveToken(executor_.get()),
-            std::move(connectionFactory),
+            apache::thrift::fast_thrift::security::SSLPolicy::DISABLED,
             nullptr,
             nullptr,
             std::chrono::seconds{5},
             apache::thrift::fast_thrift::connection::SocketOptions{});
+    connectionManager_->setConnectionFactory(ServerConnectionFactory{this});
     connectionManager_->start();
 
     clientThread_ = std::make_unique<folly::ScopedEventBaseThread>();
   }
+
   void TearDown() override {
     clientThread_->getEventBase()->runInEventBaseThreadAndWait([&] {
       clientPipeline_.reset();
       clientTransportAdapter_.reset();
     });
     clientThread_.reset();
-    // Wait for all server connections to close. ThriftServerChannel fires its
-    // close callback after the EOF propagates through both pipelines and
-    // ThriftServerTransportAdapter::onTransportError() completes. After this,
-    // the IO thread will not access ThriftServerTransportAdapter again.
-    {
-      std::vector<std::shared_ptr<folly::Baton<>>> batons;
-      thriftConnections_.withRLock([&](const auto& conns) {
-        for (const auto& ctx : conns) {
-          batons.push_back(ctx.closedBaton);
-        }
-      });
-      for (auto& baton : batons) {
-        baton->wait();
-      }
-    }
-    connectionManager_->stopAccepting();
-    connectionManager_->closeConnections();
-    // Clear thrift contexts here (before executor_.reset()) so Cpp2Worker's
-    // IOWorkerContext is destroyed while the event base is alive.
-    thriftConnections_.withWLock([](auto& conns) { conns.clear(); });
+    // ConnectionManager::stop() drains all in-flight server connections
+    // before returning, then force-closes any stragglers. After this returns,
+    // the IO threads will not touch our connections again.
+    connectionManager_->stop();
     connectionManager_.reset();
-    thriftConnections_.withWLock([](auto& conns) { conns.clear(); });
     executor_->join();
     executor_.reset();
   }
@@ -459,7 +468,6 @@ class FastThriftE2ETest : public ::testing::Test {
   std::unique_ptr<thrift::client::ThriftClientTransportAdapter>
       clientTransportAdapter_;
   PipelineImpl::Ptr clientPipeline_;
-  folly::Synchronized<std::vector<ThriftConnectionContext>> thriftConnections_;
   std::unique_ptr<ConnectCallback> connectCallback_;
 };
 
@@ -551,16 +559,110 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
   using FastClientType = apache::thrift::
       FastClient<TestFastService, thrift::ThriftClientAppAdapter>;
 
-  struct ThriftConnectionContext {
+  // Per-accepted-client server-side state for this fixture's FastClient
+  // path. Owns the thrift pipeline (which owns the rocket connection via
+  // the transport adapter). Satisfies connection::Connection.
+  struct ServerConnection {
     std::shared_ptr<thrift::ThriftServerChannel> serverChannel;
+    SimpleBufferAllocator thriftAllocator;
     std::unique_ptr<thrift::server::ThriftServerTransportAdapter>
         transportAdapter;
     PipelineImpl::Ptr thriftPipeline;
-    std::unique_ptr<SimpleBufferAllocator> thriftAllocator =
-        std::make_unique<SimpleBufferAllocator>();
-    std::shared_ptr<folly::Baton<>> closedBaton =
-        std::make_shared<folly::Baton<>>();
+    std::function<void()> closeCb;
+    bool closed{false};
+
+    ServerConnection() = default;
+    ServerConnection(ServerConnection&&) noexcept = default;
+    ServerConnection& operator=(ServerConnection&&) noexcept = default;
+    ServerConnection(const ServerConnection&) = delete;
+    ServerConnection& operator=(const ServerConnection&) = delete;
+
+    void close() noexcept {
+      if (closed) {
+        return;
+      }
+      closed = true;
+      if (thriftPipeline) {
+        thriftPipeline->close();
+        thriftPipeline.reset();
+      }
+      transportAdapter.reset();
+      if (closeCb) {
+        auto cb = std::move(closeCb);
+        cb();
+      }
+    }
+    void drain() noexcept { close(); }
+    void setCloseCallback(std::function<void()> cb) { closeCb = std::move(cb); }
   };
+
+  class ServerConnectionFactory;
+
+  ServerConnection buildServerConnection(
+      folly::AsyncTransport::UniquePtr socket) {
+    auto* evb = socket->getEventBase();
+
+    auto rocketConn =
+        std::make_unique<rocket::server::RocketServerConnection>();
+    rocketConn->transportHandler =
+        transport::TransportHandler::create(std::move(socket));
+
+    rocketConn->pipeline =
+        PipelineBuilder<
+            transport::TransportHandler,
+            rocket::server::RocketServerAppAdapter,
+            SimpleBufferAllocator>()
+            .setEventBase(evb)
+            .setHead(rocketConn->transportHandler.get())
+            .setTail(rocketConn->appAdapter.get())
+            .setAllocator(&serverRocketAllocator_)
+            .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
+                server_frame_length_parser_handler_tag)
+            .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
+                server_frame_length_encoder_handler_tag)
+            .addNextDuplex<
+                rocket::server::handler::RocketServerFrameCodecHandler>(
+                rocket_server_frame_codec_handler_tag)
+            .addNextDuplex<
+                rocket::server::handler::RocketServerSetupFrameHandler>(
+                rocket_server_setup_frame_handler_tag)
+            .addNextDuplex<
+                rocket::server::handler::RocketServerStreamStateHandler>(
+                rocket_server_stream_state_handler_tag)
+            .addNextDuplex<
+                rocket::server::handler::RocketServerRequestResponseHandler>(
+                rocket_server_request_response_handler_tag)
+            .build();
+    rocketConn->appAdapter->setPipeline(rocketConn->pipeline.get());
+    rocketConn->transportHandler->setPipeline(rocketConn->pipeline.get());
+
+    auto serverChannel =
+        std::make_shared<thrift::ThriftServerChannel>(handler_);
+    auto transportAdapter =
+        std::make_unique<thrift::server::ThriftServerTransportAdapter>(
+            std::move(rocketConn));
+
+    ServerConnection conn;
+    conn.serverChannel = serverChannel;
+    conn.thriftPipeline = PipelineBuilder<
+                              thrift::server::ThriftServerTransportAdapter,
+                              thrift::ThriftServerChannel,
+                              SimpleBufferAllocator>()
+                              .setEventBase(evb)
+                              .setHead(transportAdapter.get())
+                              .setTail(serverChannel.get())
+                              .setAllocator(&conn.thriftAllocator)
+                              .build();
+
+    transportAdapter->setPipeline(conn.thriftPipeline.get());
+    serverChannel->setPipelineRef(*conn.thriftPipeline);
+    serverChannel->setWorker(apache::thrift::Cpp2Worker::createDummy(evb));
+    conn.transportAdapter = std::move(transportAdapter);
+    // Activate the rocket pipeline so it can begin reading. Mirrors
+    // ThriftServerConnectionFactory::getConnection's onConnect call.
+    conn.transportAdapter->rocketConnection().transportHandler->onConnect();
+    return conn;
+  }
 
   void SetUp() override {
     THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
@@ -568,94 +670,17 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
     handler_ = std::make_shared<TestHandler>();
     executor_ = std::make_shared<folly::IOThreadPoolExecutor>(1);
 
-    connection::ConnectionFactory connectionFactory =
-        [this](folly::AsyncTransport::UniquePtr socket)
-        -> connection::RocketServerConnection {
-      auto* evb = socket->getEventBase();
-      auto transportHandler =
-          transport::TransportHandler::create(std::move(socket));
-
-      // Build RocketServerConnection with default appAdapter
-      connection::RocketServerConnection conn;
-
-      // 1. Build rocket pipeline
-      auto rocketPipeline =
-          PipelineBuilder<
-              transport::TransportHandler,
-              rocket::server::RocketServerAppAdapter,
-              SimpleBufferAllocator>()
-              .setEventBase(evb)
-              .setHead(transportHandler.get())
-              .setTail(conn.appAdapter.get())
-              .setAllocator(&serverRocketAllocator_)
-              .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-                  server_frame_length_parser_handler_tag)
-              .addNextOutbound<
-                  frame::write::handler::FrameLengthEncoderHandler>(
-                  server_frame_length_encoder_handler_tag)
-              .addNextDuplex<
-                  rocket::server::handler::RocketServerFrameCodecHandler>(
-                  rocket_server_frame_codec_handler_tag)
-              .addNextDuplex<
-                  rocket::server::handler::RocketServerSetupFrameHandler>(
-                  rocket_server_setup_frame_handler_tag)
-              .addNextDuplex<
-                  rocket::server::handler::RocketServerStreamStateHandler>(
-                  rocket_server_stream_state_handler_tag)
-              .addNextDuplex<
-                  rocket::server::handler::RocketServerRequestResponseHandler>(
-                  rocket_server_request_response_handler_tag)
-              .build();
-
-      conn.appAdapter->setPipeline(rocketPipeline.get());
-      transportHandler->setPipeline(rocketPipeline.get());
-
-      conn.transportHandler = std::move(transportHandler);
-      conn.pipeline = std::move(rocketPipeline);
-
-      // 2. Build thrift pipeline
-      auto serverChannel =
-          std::make_shared<thrift::ThriftServerChannel>(handler_);
-      auto transportAdapter =
-          std::make_unique<thrift::server::ThriftServerTransportAdapter>(
-              *conn.appAdapter);
-
-      ThriftConnectionContext ctx;
-      auto thriftPipeline = PipelineBuilder<
-                                thrift::server::ThriftServerTransportAdapter,
-                                thrift::ThriftServerChannel,
-                                SimpleBufferAllocator>()
-                                .setEventBase(evb)
-                                .setHead(transportAdapter.get())
-                                .setTail(serverChannel.get())
-                                .setAllocator(ctx.thriftAllocator.get())
-                                .build();
-
-      transportAdapter->setPipeline(thriftPipeline.get());
-      serverChannel->setPipelineRef(*thriftPipeline);
-      serverChannel->setWorker(apache::thrift::Cpp2Worker::createDummy(evb));
-
-      ctx.serverChannel = std::move(serverChannel);
-      ctx.transportAdapter = std::move(transportAdapter);
-      ctx.thriftPipeline = std::move(thriftPipeline);
-
-      ctx.serverChannel->setCloseCallback(
-          [baton = ctx.closedBaton]() { baton->post(); });
-
-      thriftConnections_.withWLock(
-          [&](auto& conns) { conns.push_back(std::move(ctx)); });
-
-      return conn;
-    };
-
     connectionManager_ = connection::ConnectionManager::create(
         folly::SocketAddress("::1", 0),
         folly::getKeepAliveToken(executor_.get()),
-        std::move(connectionFactory),
+        security::SSLPolicy::DISABLED,
         nullptr,
         nullptr,
         std::chrono::seconds{5},
         connection::SocketOptions{});
+    // Factory wraps a back-pointer to the fixture; defined out-of-line
+    // below so it can refer to buildServerConnection.
+    connectionManager_->setConnectionFactory(ServerConnectionFactory{this});
     connectionManager_->start();
 
     clientThread_ = std::make_unique<folly::ScopedEventBaseThread>();
@@ -667,31 +692,23 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
       clientTransportAdapter_.reset();
     });
     clientThread_.reset();
-    // Wait for all server connections to close. ThriftServerChannel fires its
-    // close callback after the EOF propagates through both pipelines and
-    // ThriftServerTransportAdapter::onTransportError() completes. After this,
-    // the IO thread will not access ThriftServerTransportAdapter again.
-    {
-      std::vector<std::shared_ptr<folly::Baton<>>> batons;
-      thriftConnections_.withRLock([&](const auto& conns) {
-        for (const auto& ctx : conns) {
-          batons.push_back(ctx.closedBaton);
-        }
-      });
-      for (auto& baton : batons) {
-        baton->wait();
-      }
-    }
-    connectionManager_->stopAccepting();
-    connectionManager_->closeConnections();
-    // Clear thrift contexts here (before executor_.reset()) so Cpp2Worker's
-    // IOWorkerContext is destroyed while the event base is alive.
-    thriftConnections_.withWLock([](auto& conns) { conns.clear(); });
+    connectionManager_->stop();
     connectionManager_.reset();
-    thriftConnections_.withWLock([](auto& conns) { conns.clear(); });
     executor_->join();
     executor_.reset();
   }
+
+  class ServerConnectionFactory {
+   public:
+    explicit ServerConnectionFactory(FastThriftFastClientE2ETest* fixture)
+        : fixture_(fixture) {}
+    ServerConnection getConnection(folly::AsyncTransport::UniquePtr socket) {
+      return fixture_->buildServerConnection(std::move(socket));
+    }
+
+   private:
+    FastThriftFastClientE2ETest* fixture_;
+  };
 
   std::unique_ptr<FastClientType> createFastClient() {
     auto* evb = clientThread_->getEventBase();
@@ -833,7 +850,6 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
   std::unique_ptr<thrift::client::ThriftClientTransportAdapter>
       clientTransportAdapter_;
   PipelineImpl::Ptr clientPipeline_;
-  folly::Synchronized<std::vector<ThriftConnectionContext>> thriftConnections_;
   std::unique_ptr<ConnectCallback> connectCallback_;
 };
 

@@ -20,7 +20,6 @@
 #include <mutex>
 #include <optional>
 #include <type_traits>
-#include <unordered_map>
 
 #include <folly/SocketAddress.h>
 #include <folly/Synchronized.h>
@@ -125,6 +124,83 @@ struct FastThriftServerConfig {
  *   struct MyStats { ... }; // Must satisfy FastThriftStatsConcept
  *   FastThriftServerT<MyStats> server(config, handler);
  */
+/**
+ * ThriftServerChannelConnection — channel server's per-accepted-client state.
+ * Owns the thrift pipeline; the transport adapter at its head owns the
+ * underlying rocket::server::RocketServerConnection (transport handler,
+ * rocket app adapter, rocket pipeline). Satisfies connection::Connection
+ * (close, drain, setCloseCallback) so it can be returned from the
+ * connection factory directly.
+ *
+ * Move-only. Default-constructible so the factory can fill members
+ * incrementally during pipeline wiring before returning.
+ */
+struct ThriftServerChannelConnection {
+  // Tail of the thrift pipeline; outlives the pipeline because the
+  // pipeline holds a raw pointer to it.
+  std::shared_ptr<ThriftServerChannel> serverChannel;
+  // Buffer allocator used by the thrift pipeline.
+  channel_pipeline::SimpleBufferAllocator thriftAllocator;
+  // Head of the thrift pipeline. Owns the
+  // rocket::server::RocketServerConnection (transport handler + rocket app
+  // adapter + rocket pipeline) via its rocketConnection() member.
+  std::unique_ptr<server::ThriftServerTransportAdapter> transportAdapter;
+  // Thrift pipeline. Destroyed first among the owned fields here.
+  channel_pipeline::PipelineImpl::Ptr thriftPipeline;
+  // Stable indirection for the ConnectionHandler-installed close callback.
+  // The connection is moved twice (factory return → AnyConnection wrap),
+  // so storing the callback as a plain function<> means any reference to
+  // it would dangle. The shared_ptr is created in buildConnection and
+  // captured by the serverChannel's own closeCallback, so when the rocket
+  // pipeline tears down (EOF → bridge → ThriftServerChannel::onException)
+  // the channel can fire through the holder regardless of how many times
+  // the outer struct has been moved.
+  std::shared_ptr<std::function<void()>> closeCbHolder{
+      std::make_shared<std::function<void()>>()};
+  bool closed{false};
+
+  ThriftServerChannelConnection() = default;
+  ThriftServerChannelConnection(ThriftServerChannelConnection&&) noexcept =
+      default;
+  ThriftServerChannelConnection& operator=(
+      ThriftServerChannelConnection&&) noexcept = default;
+  ThriftServerChannelConnection(const ThriftServerChannelConnection&) = delete;
+  ThriftServerChannelConnection& operator=(
+      const ThriftServerChannelConnection&) = delete;
+  ~ThriftServerChannelConnection() = default;
+
+  // Connection concept: forceful synchronous teardown. Closes the thrift
+  // pipeline (which propagates handlerRemoved into the transport adapter,
+  // which in turn tears down the rocket connection) and fires the close
+  // callback installed by ConnectionHandler.
+  void close() noexcept {
+    if (closed) {
+      return;
+    }
+    closed = true;
+    if (thriftPipeline) {
+      thriftPipeline->deactivate();
+      thriftPipeline->close();
+      thriftPipeline.reset();
+    }
+    transportAdapter.reset();
+    if (closeCbHolder && *closeCbHolder) {
+      auto cb = std::move(*closeCbHolder);
+      cb();
+    }
+  }
+
+  // Connection concept: graceful drain. Channel server has no peer-
+  // disconnect frame analog here; route through close().
+  void drain() noexcept { close(); }
+
+  // Connection concept: callback fired once the connection has fully torn
+  // down. ConnectionHandler uses it to remove the entry from its bookkeeping.
+  void setCloseCallback(std::function<void()> cb) {
+    *closeCbHolder = std::move(cb);
+  }
+};
+
 template <typename Stats = NoStats>
 class FastThriftServerT {
   static_assert(
@@ -198,20 +274,26 @@ class FastThriftServerT {
   };
 
   /**
-   * Per-connection thrift-layer context.
-   * Owns the thrift pipeline and transport adapter that bridges between
-   * the rocket and thrift pipelines.
+   * ConnectionFactory implementation: satisfies connection::ConnectionFactory
+   * (has getConnection(socket)). Owned by ConnectionManager via setConnection
+   * Factory; delegates per-accept construction back to the server so it can
+   * use private state (processorFactory_, config_, allocator).
    */
-  struct ThriftConnectionContext {
-    std::shared_ptr<ThriftServerChannel> serverChannel;
-    std::unique_ptr<server::ThriftServerTransportAdapter> transportAdapter;
-    channel_pipeline::PipelineImpl::Ptr thriftPipeline;
-    std::unique_ptr<channel_pipeline::SimpleBufferAllocator> thriftAllocator =
-        std::make_unique<channel_pipeline::SimpleBufferAllocator>();
-    std::shared_ptr<Stats> stats;
+  class ConnectionFactoryImpl {
+   public:
+    explicit ConnectionFactoryImpl(FastThriftServerT* server) noexcept
+        : server_(server) {}
+    ThriftServerChannelConnection getConnection(
+        folly::AsyncTransport::UniquePtr socket) {
+      return server_->buildConnection(std::move(socket));
+    }
+
+   private:
+    FastThriftServerT* server_;
   };
 
-  connection::ConnectionFactory createConnectionFactory();
+  ThriftServerChannelConnection buildConnection(
+      folly::AsyncTransport::UniquePtr socket);
 
   channel_pipeline::PipelineImpl::Ptr buildRocketPipeline(
       folly::EventBase* evb,
@@ -220,9 +302,6 @@ class FastThriftServerT {
       rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
           onSetupComplete,
       std::shared_ptr<Stats> stats);
-
-  void registerConnection(
-      ThriftServerChannel* key, ThriftConnectionContext context);
 
   const FastThriftServerConfig config_;
   std::shared_ptr<apache::thrift::AsyncProcessorFactory> processorFactory_;
@@ -234,9 +313,6 @@ class FastThriftServerT {
   connection::SocketOptions socketOptions_{};
   ServerConnectionManager::Ptr connectionManager_;
   channel_pipeline::SimpleBufferAllocator rocketAllocator_;
-  folly::Synchronized<
-      std::unordered_map<ThriftServerChannel*, ThriftConnectionContext>>
-      thriftConnections_;
   folly::Baton<> stopBaton_;
   // Guards state_ and serializes lifecycle transitions so that stop()
   // observes the connectionManager_ assignment from start() with a proper
@@ -326,121 +402,111 @@ void FastThriftServerT<Stats>::setSocketOptions(
 }
 
 template <typename Stats>
-connection::ConnectionFactory
-FastThriftServerT<Stats>::createConnectionFactory() {
-  return [this](folly::AsyncTransport::UniquePtr socket)
-             -> connection::RocketServerConnection {
-    auto* evb = socket->getEventBase();
-    auto transportHandler =
-        transport::TransportHandler::create(std::move(socket));
+ThriftServerChannelConnection FastThriftServerT<Stats>::buildConnection(
+    folly::AsyncTransport::UniquePtr socket) {
+  auto* evb = socket->getEventBase();
 
-    // Create shared per-connection stats if enabled
-    std::shared_ptr<Stats> stats;
-    if constexpr (kStatsEnabled) {
-      stats = std::make_shared<Stats>();
+  // Build the rocket-layer pieces into a
+  // rocket::server::RocketServerConnection. ThriftServerTransportAdapter takes
+  // ownership of this whole bundle, so the rocket pipeline + transport handler
+  // + app adapter tear down together when the thrift pipeline's handlerRemoved
+  // propagates into the adapter.
+  auto rocketConn = std::make_unique<rocket::server::RocketServerConnection>();
+  rocketConn->transportHandler =
+      transport::TransportHandler::create(std::move(socket));
+
+  // Per-connection stats (when enabled).
+  std::shared_ptr<Stats> stats;
+  if constexpr (kStatsEnabled) {
+    stats = std::make_shared<Stats>();
+  }
+
+  // Build the thrift channel first so the rocket pipeline's SETUP handler can
+  // capture a callback that publishes the negotiated metadata protocol into it.
+  auto serverChannel = std::make_shared<ThriftServerChannel>(processorFactory_);
+  auto* channelPtr = serverChannel.get();
+
+  // Build the rocket pipeline:
+  //   TransportHandler → ... → RocketServerAppAdapter
+  rocketConn->pipeline = buildRocketPipeline(
+      evb,
+      rocketConn->transportHandler.get(),
+      rocketConn->appAdapter.get(),
+      [channelPtr](const rocket::server::handler::SetupParameters& p) noexcept {
+        channelPtr->setMetadataProtocol(p.metadataProtocol);
+      },
+      stats);
+  rocketConn->appAdapter->setPipeline(rocketConn->pipeline.get());
+  rocketConn->transportHandler->setPipeline(rocketConn->pipeline.get());
+
+  if (config_.zeroCopyThreshold > 0) {
+    if (!rocketConn->transportHandler->setZeroCopy(true)) {
+      XLOG(WARN) << "MSG_ZEROCOPY not supported on this socket";
     }
+    rocketConn->transportHandler->setZeroCopyEnableThreshold(
+        config_.zeroCopyThreshold);
+  }
 
-    // Build the RocketServerConnection with default appAdapter
-    connection::RocketServerConnection conn;
+  // ThriftServerTransportAdapter takes ownership of the rocket connection.
+  // Teardown is driven by the thrift pipeline's handlerRemoved fan-out.
+  auto transportAdapter =
+      std::make_unique<server::ThriftServerTransportAdapter>(
+          std::move(rocketConn));
 
-    // 1. Build the thrift channel first so the rocket pipeline's SETUP
-    //    handler can capture a callback that publishes the negotiated
-    //    metadata protocol into it.
-    auto serverChannel =
-        std::make_shared<ThriftServerChannel>(processorFactory_);
+  ThriftServerChannelConnection conn;
+  conn.serverChannel = serverChannel;
 
-    // 2. Build rocket pipeline: TransportHandler → ... → RocketServerAppAdapter
-    auto* channelPtr = serverChannel.get();
-    auto rocketPipeline = buildRocketPipeline(
-        evb,
-        transportHandler.get(),
-        conn.appAdapter.get(),
-        [channelPtr](
-            const rocket::server::handler::SetupParameters& p) noexcept {
-          channelPtr->setMetadataProtocol(p.metadataProtocol);
-        },
-        stats);
-    conn.appAdapter->setPipeline(rocketPipeline.get());
-    transportHandler->setPipeline(rocketPipeline.get());
+  if constexpr (kStatsEnabled) {
+    conn.thriftPipeline =
+        channel_pipeline::PipelineBuilder<
+            server::ThriftServerTransportAdapter,
+            ThriftServerChannel,
+            channel_pipeline::SimpleBufferAllocator>()
+            .setEventBase(evb)
+            .setHead(transportAdapter.get())
+            .setTail(serverChannel.get())
+            .setAllocator(&conn.thriftAllocator)
+            .template addNextDuplex<
+                ThriftMetricsHandler<Direction::Server, Stats>>(
+                thrift_metrics_handler_tag, stats)
+            .build();
+  } else {
+    conn.thriftPipeline = channel_pipeline::PipelineBuilder<
+                              server::ThriftServerTransportAdapter,
+                              ThriftServerChannel,
+                              channel_pipeline::SimpleBufferAllocator>()
+                              .setEventBase(evb)
+                              .setHead(transportAdapter.get())
+                              .setTail(serverChannel.get())
+                              .setAllocator(&conn.thriftAllocator)
+                              .build();
+  }
 
-    if (config_.zeroCopyThreshold > 0) {
-      if (!transportHandler->setZeroCopy(true)) {
-        XLOG(WARN) << "MSG_ZEROCOPY not supported on this socket";
-      }
-      transportHandler->setZeroCopyEnableThreshold(config_.zeroCopyThreshold);
+  transportAdapter->setPipeline(conn.thriftPipeline.get());
+  serverChannel->setPipelineRef(*conn.thriftPipeline);
+  serverChannel->setWorker(apache::thrift::Cpp2Worker::createDummy(evb));
+
+  conn.transportAdapter = std::move(transportAdapter);
+
+  // Wire the channel-level close path to fan into the connection's
+  // ConnectionHandler-installed close callback. ThriftServerChannel fires
+  // its own closeCallback_ from onException when the pipeline takes an
+  // EOF / error — that's the signal the rocket connection has gone away.
+  // Routing it through the holder lets us self-close (and therefore drain
+  // the manager's bookkeeping) without holding a back-pointer to a moved
+  // ThriftServerChannelConnection.
+  auto holder = conn.closeCbHolder;
+  serverChannel->setCloseCallback([holder]() {
+    if (holder && *holder) {
+      auto cb = std::move(*holder);
+      cb();
     }
+  });
 
-    // 3. Capture heap-stable raw pointers for the bridge's thrift→rocket
-    //    action callbacks. The owning unique_ptrs in RocketServerConnection
-    //    are address-unstable (the struct is moved into
-    //    ConnectionHandler::connections_), but the pointees they manage
-    //    live on the heap. The bridge's onClose subscription nulls these
-    //    callbacks out once the rocket side completes its handlerRemoved
-    //    fan-out, so they never invoke through dangling pointers.
-    auto* rawTransport = transportHandler.get();
-
-    conn.transportHandler = std::move(transportHandler);
-    conn.pipeline = std::move(rocketPipeline);
-
-    auto transportAdapter =
-        std::make_unique<server::ThriftServerTransportAdapter>(
-            *conn.appAdapter,
-            /*onRocketDisconnect=*/
-            [rawTransport]() noexcept {
-              // Triggers the close callback (set by ConnectionHandler),
-              // which runs ConnectionHandler::removeConnection →
-              // RocketServerConnection::close() → disconnect()+destroy().
-              // Idempotent in TransportHandler::close.
-              rawTransport->close({});
-            },
-            /*onRocketDestroy=*/
-            [rawTransport]() noexcept {
-              // Same teardown trigger as disconnect; the difference is
-              // intent (full teardown vs. graceful disconnect). Idempotent.
-              rawTransport->close({});
-            });
-
-    ThriftConnectionContext ctx;
-    ctx.stats = stats;
-
-    channel_pipeline::PipelineImpl::Ptr thriftPipeline;
-    if constexpr (kStatsEnabled) {
-      thriftPipeline = channel_pipeline::PipelineBuilder<
-                           server::ThriftServerTransportAdapter,
-                           ThriftServerChannel,
-                           channel_pipeline::SimpleBufferAllocator>()
-                           .setEventBase(evb)
-                           .setHead(transportAdapter.get())
-                           .setTail(serverChannel.get())
-                           .setAllocator(ctx.thriftAllocator.get())
-                           .template addNextDuplex<
-                               ThriftMetricsHandler<Direction::Server, Stats>>(
-                               thrift_metrics_handler_tag, ctx.stats)
-                           .build();
-    } else {
-      thriftPipeline = channel_pipeline::PipelineBuilder<
-                           server::ThriftServerTransportAdapter,
-                           ThriftServerChannel,
-                           channel_pipeline::SimpleBufferAllocator>()
-                           .setEventBase(evb)
-                           .setHead(transportAdapter.get())
-                           .setTail(serverChannel.get())
-                           .setAllocator(ctx.thriftAllocator.get())
-                           .build();
-    }
-
-    transportAdapter->setPipeline(thriftPipeline.get());
-    serverChannel->setPipelineRef(*thriftPipeline);
-    serverChannel->setWorker(apache::thrift::Cpp2Worker::createDummy(evb));
-
-    ctx.serverChannel = serverChannel;
-    ctx.transportAdapter = std::move(transportAdapter);
-    ctx.thriftPipeline = std::move(thriftPipeline);
-
-    registerConnection(serverChannel.get(), std::move(ctx));
-
-    return conn;
-  };
+  // Activate the rocket pipeline so it can begin reading. Mirrors
+  // ThriftServerConnectionFactory::getConnection's onConnect call.
+  conn.transportAdapter->rocketConnection().transportHandler->onConnect();
+  return conn;
 }
 
 template <typename Stats>
@@ -508,32 +574,15 @@ FastThriftServerT<Stats>::buildRocketPipeline(
 }
 
 template <typename Stats>
-void FastThriftServerT<Stats>::registerConnection(
-    ThriftServerChannel* key, ThriftConnectionContext context) {
-  auto* rawPtr = key;
-  // Close callback is invoked from ThriftServerChannel::onException when the
-  // connection closes (pipeline exception propagation). This removes the
-  // context from tracking, releasing the shared_ptr and destroying the
-  // thrift pipeline + transport adapter.
-  context.serverChannel->setCloseCallback([this, rawPtr]() {
-    thriftConnections_.withWLock(
-        [rawPtr](auto& conns) { conns.erase(rawPtr); });
-  });
-  thriftConnections_.withWLock(
-      [&](auto& conns) { conns.emplace(rawPtr, std::move(context)); });
-}
-
-template <typename Stats>
 FastThriftServerT<Stats>::~FastThriftServerT() {
   stop();
 
   // Destroy the connection manager before joining the executor. This triggers
   // deferred ConnectionHandler destruction on the EventBase threads.
   // We must then join the executor so those deferred callbacks run while
-  // `this` (and all its members like allocator_, thriftConnections_) is still
-  // alive. Without this, member destruction order would destroy those members
-  // before the executor joins, causing use-after-free in the pipeline factory
-  // lambda that captures `this`.
+  // `this` is still alive. Without this, member destruction order would
+  // destroy those members before the executor joins, causing use-after-free
+  // in the pipeline factory lambda that captures `this`.
   connectionManager_.reset();
   executor_->join();
 }
@@ -557,12 +606,13 @@ void FastThriftServerT<Stats>::start() {
   connectionManager_ = ServerConnectionManager::create(
       config_.address,
       folly::getKeepAliveToken(executor_.get()),
-      createConnectionFactory(),
+      sslConfig_ ? security::SSLPolicy::REQUIRED
+                 : security::SSLPolicy::DISABLED,
       std::move(fizzContext),
       std::move(thriftParams),
       tlsHandshakeTimeout,
       socketOptions_);
-
+  connectionManager_->setConnectionFactory(ConnectionFactoryImpl{this});
   connectionManager_->start();
   state_ = State::kRunning;
   XLOG(INFO) << "FastThriftChannelServer listening on "
@@ -598,22 +648,18 @@ void FastThriftServerT<Stats>::serve() {
 
 template <typename Stats>
 void FastThriftServerT<Stats>::stop() {
-  std::lock_guard<std::mutex> lock(lifecycleMutex_);
-  if (state_ != State::kRunning) {
-    return;
+  {
+    std::lock_guard<std::mutex> lock(lifecycleMutex_);
+    if (state_ != State::kRunning) {
+      return;
+    }
+    state_ = State::kStopped;
   }
-  state_ = State::kStopped;
 
-  // Stop accepting new connections first
-  connectionManager_->stopAccepting();
-  connectionManager_->closeConnections();
-
-  // Drain the map under the lock, then destroy entries outside it.
-  // ~ThriftConnectionContext runs ~ThriftServerChannel, which fires the close
-  // callback synchronously; that callback re-acquires this same write lock,
-  // so clearing under the lock would deadlock folly::SharedMutex.
-  std::unordered_map<ThriftServerChannel*, ThriftConnectionContext> drained;
-  thriftConnections_.withWLock([&](auto& conns) { drained.swap(conns); });
+  // ConnectionManager::stop() handles the whole flow: stop accepting, drain
+  // in-flight connections, force-close any stragglers. Mirrors
+  // FastThriftServer::stop.
+  connectionManager_->stop();
 
   stopBaton_.post();
 }

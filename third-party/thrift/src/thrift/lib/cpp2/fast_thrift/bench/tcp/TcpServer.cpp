@@ -16,6 +16,8 @@
 
 #include <thrift/lib/cpp2/fast_thrift/bench/tcp/TcpServer.h>
 
+#include <functional>
+
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
@@ -80,61 +82,123 @@ class TcpServer::ServerAppAdapter {
       nullptr};
 };
 
+namespace {
+
+/**
+ * TcpConnection — per-accepted-client state for the TCP benchmark server.
+ * Owns the transport handler and the byte-pipeline; satisfies the
+ * connection::Connection concept.
+ */
+struct TcpConnection {
+  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
+      transportHandler;
+  apache::thrift::fast_thrift::channel_pipeline::PipelineImpl::Ptr pipeline;
+  std::function<void()> closeCb;
+  bool closed{false};
+
+  TcpConnection() = default;
+  TcpConnection(TcpConnection&&) noexcept = default;
+  TcpConnection& operator=(TcpConnection&&) noexcept = default;
+  TcpConnection(const TcpConnection&) = delete;
+  TcpConnection& operator=(const TcpConnection&) = delete;
+  ~TcpConnection() = default;
+
+  void close() noexcept {
+    if (closed) {
+      return;
+    }
+    closed = true;
+    if (pipeline) {
+      pipeline->close();
+      pipeline.reset();
+    }
+    transportHandler.reset();
+    if (closeCb) {
+      auto cb = std::move(closeCb);
+      cb();
+    }
+  }
+
+  void drain() noexcept { close(); }
+
+  void setCloseCallback(std::function<void()> cb) { closeCb = std::move(cb); }
+};
+
+/**
+ * TcpConnectionFactory — connection::ConnectionFactory satisfying object.
+ * Delegates per-accept construction back to the TcpServer owner so the
+ * factory has access to the server's allocator + zero-copy threshold +
+ * adapter map.
+ */
+class TcpConnectionFactory {
+ public:
+  using BuildFn =
+      std::function<TcpConnection(folly::AsyncTransport::UniquePtr)>;
+  explicit TcpConnectionFactory(BuildFn build) : build_(std::move(build)) {}
+
+  TcpConnection getConnection(folly::AsyncTransport::UniquePtr socket) {
+    return build_(std::move(socket));
+  }
+
+ private:
+  BuildFn build_;
+};
+
+} // namespace
+
 TcpServer::TcpServer(
     folly::SocketAddress address,
     uint32_t numIOThreads,
     size_t zeroCopyThreshold)
     : executor_(std::make_shared<folly::IOThreadPoolExecutor>(numIOThreads)),
       zeroCopyThreshold_(zeroCopyThreshold) {
-  apache::thrift::fast_thrift::connection::ConnectionFactory connectionFactory =
-      [this](folly::AsyncTransport::UniquePtr socket)
-      -> apache::thrift::fast_thrift::connection::RocketServerConnection {
-    auto* evb = socket->getEventBase();
-    auto transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(socket));
-
-    auto adapter = std::make_unique<ServerAppAdapter>();
-
-    auto pipeline =
-        apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
-            ServerAppAdapter,
-            apache::thrift::fast_thrift::channel_pipeline::
-                SimpleBufferAllocator>()
-            .setEventBase(evb)
-            .setHead(transportHandler.get())
-            .setTail(adapter.get())
-            .setAllocator(&allocator_)
-            .build();
-
-    adapter->setPipeline(pipeline.get());
-    adapters_.insert(std::move(adapter));
-
-    transportHandler->setPipeline(pipeline.get());
-
-    // Configure MSG_ZEROCOPY for large payloads
-    if (zeroCopyThreshold_ > 0) {
-      if (!transportHandler->setZeroCopy(true)) {
-        XLOG(WARN) << "MSG_ZEROCOPY not supported on this socket";
-      }
-      transportHandler->setZeroCopyEnableThreshold(zeroCopyThreshold_);
-    }
-
-    apache::thrift::fast_thrift::connection::RocketServerConnection conn;
-    conn.transportHandler = std::move(transportHandler);
-    conn.pipeline = std::move(pipeline);
-    return conn;
-  };
-
   connectionManager_ = TcpConnectionManager::create(
       std::move(address),
       folly::getKeepAliveToken(executor_.get()),
-      std::move(connectionFactory),
+      apache::thrift::fast_thrift::security::SSLPolicy::DISABLED,
       nullptr,
       nullptr,
       std::chrono::seconds{5},
       apache::thrift::fast_thrift::connection::SocketOptions{});
+
+  connectionManager_->setConnectionFactory(
+      TcpConnectionFactory{
+          [this](folly::AsyncTransport::UniquePtr socket) -> TcpConnection {
+            auto* evb = socket->getEventBase();
+            auto transportHandler = apache::thrift::fast_thrift::transport::
+                TransportHandler::create(std::move(socket));
+
+            auto adapter = std::make_unique<ServerAppAdapter>();
+
+            auto pipeline =
+                apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder<
+                    apache::thrift::fast_thrift::transport::TransportHandler,
+                    ServerAppAdapter,
+                    apache::thrift::fast_thrift::channel_pipeline::
+                        SimpleBufferAllocator>()
+                    .setEventBase(evb)
+                    .setHead(transportHandler.get())
+                    .setTail(adapter.get())
+                    .setAllocator(&allocator_)
+                    .build();
+
+            adapter->setPipeline(pipeline.get());
+            adapters_.insert(std::move(adapter));
+
+            transportHandler->setPipeline(pipeline.get());
+
+            if (zeroCopyThreshold_ > 0) {
+              if (!transportHandler->setZeroCopy(true)) {
+                XLOG(WARN) << "MSG_ZEROCOPY not supported on this socket";
+              }
+              transportHandler->setZeroCopyEnableThreshold(zeroCopyThreshold_);
+            }
+
+            TcpConnection conn;
+            conn.transportHandler = std::move(transportHandler);
+            conn.pipeline = std::move(pipeline);
+            return conn;
+          }});
 }
 
 TcpServer::~TcpServer() = default;
@@ -144,8 +208,7 @@ void TcpServer::start() {
 }
 
 void TcpServer::stop() {
-  connectionManager_->stopAccepting();
-  connectionManager_->closeConnections();
+  connectionManager_->stop();
   adapters_.clear();
 }
 

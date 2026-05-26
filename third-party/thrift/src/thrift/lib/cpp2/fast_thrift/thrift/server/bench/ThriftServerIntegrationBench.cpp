@@ -52,6 +52,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
@@ -268,58 +269,55 @@ std::unique_ptr<folly::IOBuf> prependLengthPrefix(
 // Rocket Pipeline Builder — builds the rocket pipeline for two-pipeline mode
 // =============================================================================
 
-struct RocketPipelineResources {
-  rocket::server::RocketServerAppAdapter::Ptr appAdapter;
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-      transportHandler;
-  PipelineImpl::Ptr pipeline;
-  SimpleBufferAllocator allocator;
+// Build a rocket::server::RocketServerConnection wired with the standard
+// rocket handler stack. Caller owns the returned connection; pass it into
+// ThriftServerTransportAdapter to anchor lifecycle. The test transport
+// pointer is captured into *outTransport.
+std::unique_ptr<rocket::server::RocketServerConnection> buildRocketConnection(
+    folly::EventBase* evb, BenchAsyncTransport** outTransport) {
+  auto rocketConn = std::make_unique<rocket::server::RocketServerConnection>();
 
-  BenchAsyncTransport* setup(folly::EventBase* evb) {
-    appAdapter.reset(new rocket::server::RocketServerAppAdapter());
+  auto transport =
+      folly::AsyncTransport::UniquePtr(new BenchAsyncTransport(evb));
+  *outTransport = static_cast<BenchAsyncTransport*>(transport.get());
 
-    auto transport =
-        folly::AsyncTransport::UniquePtr(new BenchAsyncTransport(evb));
-    auto* testTransport = static_cast<BenchAsyncTransport*>(transport.get());
+  rocketConn->transportHandler =
+      apache::thrift::fast_thrift::transport::TransportHandler::create(
+          std::move(transport));
 
-    transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(transport));
+  rocketConn->pipeline =
+      PipelineBuilder<
+          apache::thrift::fast_thrift::transport::TransportHandler,
+          rocket::server::RocketServerAppAdapter,
+          SimpleBufferAllocator>()
+          .setEventBase(evb)
+          .setHead(rocketConn->transportHandler.get())
+          .setTail(rocketConn->appAdapter.get())
+          .setAllocator(&rocketConn->allocator)
+          .addNextInbound<FrameLengthParserHandler>(
+              frame_length_parser_handler_tag)
+          .addNextOutbound<FrameLengthEncoderHandler>(
+              frame_length_encoder_handler_tag)
+          .addNextDuplex<
+              rocket::server::handler::RocketServerFrameCodecHandler>(
+              rocket_server_frame_codec_handler_tag)
+          .addNextDuplex<
+              rocket::server::handler::RocketServerSetupFrameHandler>(
+              server_setup_frame_handler_tag)
+          .addNextDuplex<
+              rocket::server::handler::RocketServerStreamStateHandler>(
+              server_stream_state_handler_tag)
+          .addNextDuplex<
+              rocket::server::handler::RocketServerRequestResponseHandler>(
+              server_request_response_frame_handler_tag)
+          .build();
 
-    pipeline =
-        PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
-            rocket::server::RocketServerAppAdapter,
-            SimpleBufferAllocator>()
-            .setEventBase(evb)
-            .setHead(transportHandler.get())
-            .setTail(appAdapter.get())
-            .setAllocator(&allocator)
-            .addNextInbound<FrameLengthParserHandler>(
-                frame_length_parser_handler_tag)
-            .addNextOutbound<FrameLengthEncoderHandler>(
-                frame_length_encoder_handler_tag)
-            .addNextDuplex<
-                rocket::server::handler::RocketServerFrameCodecHandler>(
-                rocket_server_frame_codec_handler_tag)
-            .addNextDuplex<
-                rocket::server::handler::RocketServerSetupFrameHandler>(
-                server_setup_frame_handler_tag)
-            .addNextDuplex<
-                rocket::server::handler::RocketServerStreamStateHandler>(
-                server_stream_state_handler_tag)
-            .addNextDuplex<
-                rocket::server::handler::RocketServerRequestResponseHandler>(
-                server_request_response_frame_handler_tag)
-            .build();
+  rocketConn->appAdapter->setPipeline(rocketConn->pipeline.get());
+  rocketConn->transportHandler->setPipeline(rocketConn->pipeline.get());
+  rocketConn->transportHandler->onConnect();
 
-    appAdapter->setPipeline(pipeline.get());
-    transportHandler->setPipeline(pipeline.get());
-    transportHandler->onConnect();
-
-    return testTransport;
-  }
-};
+  return rocketConn;
+}
 
 // =============================================================================
 // ThriftServerChannel Benchmark Fixture (two-pipeline)
@@ -334,9 +332,6 @@ struct ChannelBenchFixture {
   folly::EventBase evb;
   BenchAsyncTransport* testTransport{nullptr};
 
-  // Rocket pipeline
-  RocketPipelineResources rocketResources;
-
   // Thrift pipeline
   std::unique_ptr<thrift::server::ThriftServerTransportAdapter>
       transportAdapter;
@@ -346,7 +341,7 @@ struct ChannelBenchFixture {
   SimpleBufferAllocator thriftAllocator;
 
   void setup() {
-    testTransport = rocketResources.setup(&evb);
+    auto rocketConn = buildRocketConnection(&evb, &testTransport);
 
     processorFactory = std::make_shared<BenchProcessorFactory<ProcessorT>>();
     serverChannel =
@@ -354,7 +349,7 @@ struct ChannelBenchFixture {
 
     transportAdapter =
         std::make_unique<thrift::server::ThriftServerTransportAdapter>(
-            *rocketResources.appAdapter);
+            std::move(rocketConn));
 
     thriftPipeline = PipelineBuilder<
                          thrift::server::ThriftServerTransportAdapter,
@@ -395,9 +390,6 @@ struct AppAdapterBenchFixture {
   folly::EventBase evb;
   BenchAsyncTransport* testTransport{nullptr};
 
-  // Rocket pipeline (transport → rocket handlers → app adapter)
-  RocketPipelineResources rocketResources;
-
   // Thrift pipeline (transport adapter → app adapter)
   std::unique_ptr<thrift::server::ThriftServerTransportAdapter>
       transportAdapter;
@@ -407,7 +399,7 @@ struct AppAdapterBenchFixture {
   boost::intrusive_ptr<thrift::ThriftConnContext> connContext;
 
   void setup(bool echo, bool withContextHandlers = false) {
-    testTransport = rocketResources.setup(&evb);
+    auto rocketConn = buildRocketConnection(&evb, &testTransport);
 
     adapter.reset(new BenchServerAppAdapter());
 
@@ -442,7 +434,7 @@ struct AppAdapterBenchFixture {
 
     transportAdapter =
         std::make_unique<thrift::server::ThriftServerTransportAdapter>(
-            *rocketResources.appAdapter);
+            std::move(rocketConn));
 
     using ReqCtxHandler = thrift::ThriftServerRequestContextHandler<
         apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl>;

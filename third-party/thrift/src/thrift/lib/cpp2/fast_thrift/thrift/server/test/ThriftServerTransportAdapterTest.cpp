@@ -36,6 +36,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
@@ -97,44 +98,34 @@ struct AdapterWithRocketPipeline {
   folly::EventBase evb;
   MockHeadHandler rocketHead;
   TestAllocator allocator;
-  rocket::server::RocketServerAppAdapter::Ptr appAdapter{
-      new rocket::server::RocketServerAppAdapter()};
+  // Non-owning — the rocket adapter lives inside the bundle that the
+  // bridge owns (adapter->rocketConnection().appAdapter).
+  rocket::server::RocketServerAppAdapter* appAdapter{nullptr};
   std::unique_ptr<ThriftServerTransportAdapter> adapter;
 
   AdapterWithRocketPipeline() {
-    adapter = std::make_unique<ThriftServerTransportAdapter>(*appAdapter);
+    auto rocketConn =
+        std::make_unique<rocket::server::RocketServerConnection>();
+    appAdapter = rocketConn->appAdapter.get();
 
     rocketHead.setOnWriteCallback(
         [](channel_pipeline::TypeErasedBox&&) { return Result::Success; });
 
-    auto rocketPipeline = PipelineBuilder<
-                              MockHeadHandler,
-                              rocket::server::RocketServerAppAdapter,
-                              TestAllocator>()
-                              .setEventBase(&evb)
-                              .setHead(&rocketHead)
-                              .setTail(appAdapter.get())
-                              .setAllocator(&allocator)
-                              .build();
+    rocketConn->pipeline = PipelineBuilder<
+                               MockHeadHandler,
+                               rocket::server::RocketServerAppAdapter,
+                               TestAllocator>()
+                               .setEventBase(&evb)
+                               .setHead(&rocketHead)
+                               .setTail(appAdapter)
+                               .setAllocator(&allocator)
+                               .build();
 
-    appAdapter->setPipeline(rocketPipeline.get());
-    rocketPipeline_ = std::move(rocketPipeline);
+    appAdapter->setPipeline(rocketConn->pipeline.get());
+
+    adapter =
+        std::make_unique<ThriftServerTransportAdapter>(std::move(rocketConn));
   }
-
-  ~AdapterWithRocketPipeline() {
-    // Tear down in the same order the production
-    // RocketServerConnection::destroy() does: drop the adapter's
-    // pipeline guard before closing the pipeline, so the pipeline can
-    // actually destruct when reset() runs below.
-    appAdapter->resetPipeline();
-    if (rocketPipeline_) {
-      rocketPipeline_->close();
-      rocketPipeline_.reset();
-    }
-  }
-
- private:
-  PipelineImpl::Ptr rocketPipeline_;
 };
 
 } // namespace

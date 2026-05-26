@@ -327,15 +327,11 @@ TEST_F(FastThriftChannelServerTest, GetAddress) {
   EXPECT_NE(address.getPort(), 0);
 }
 
-// Validates that the production wiring in createConnectionFactory hooks
-// the bridge's lifecycle callbacks correctly: a client disconnect must
-// eventually drain the server-side per-connection thrift context.
-//
-// If createConnectionFactory regressed and passed empty action callbacks
-// to the bridge, the existing exception-driven teardown path would
-// still work — but a future change that relied on the lifecycle path
-// (e.g. graceful drain) would silently break. This test pins the
-// observable consequence: the server's thrift connection map drains.
+// Validates that the production wiring drains server-side connection
+// bookkeeping when the client disconnects. The connection manager owns
+// each accepted ThriftServerChannelConnection by value; teardown propagates
+// through rocket close → bridge handlerRemoved → connection close callback,
+// which removes the entry from the manager.
 TEST_F(FastThriftChannelServerTest, ClientDisconnectDrainsServerConnections) {
   auto client = createClient();
 
@@ -343,15 +339,12 @@ TEST_F(FastThriftChannelServerTest, ClientDisconnectDrainsServerConnections) {
   // server-side (handshake done, thrift channel registered).
   syncCall([&] { return client->semifuture_ping(); });
 
-  // Server should now have exactly one tracked thrift connection.
-  size_t established = 0;
-  server_->thriftConnections_.withRLock(
-      [&](const auto& conns) { established = conns.size(); });
-  EXPECT_EQ(established, 1u);
+  // Server should now have exactly one tracked connection.
+  EXPECT_EQ(server_->connectionManager_->connectionCount(), 1u);
 
   // Drop the client; production teardown propagates through rocket
-  // close → bridge → ThriftServerChannel::onException → closeCallback →
-  // erase from thriftConnections_.
+  // close → bridge → ThriftServerChannelConnection::close → ConnectionHandler
+  // erases the connection from its bookkeeping.
   destroyClientOnEvb(client);
 
   // Cleanup runs on the server IO thread; poll briefly. 2 seconds is
@@ -359,10 +352,9 @@ TEST_F(FastThriftChannelServerTest, ClientDisconnectDrainsServerConnections) {
   constexpr auto kPollInterval = std::chrono::milliseconds{10};
   constexpr auto kDeadline = std::chrono::seconds{2};
   auto start = std::chrono::steady_clock::now();
-  size_t remaining = established;
+  size_t remaining = 1;
   while (std::chrono::steady_clock::now() - start < kDeadline) {
-    server_->thriftConnections_.withRLock(
-        [&](const auto& conns) { remaining = conns.size(); });
+    remaining = server_->connectionManager_->connectionCount();
     if (remaining == 0) {
       break;
     }

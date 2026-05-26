@@ -22,60 +22,45 @@
 namespace apache::thrift::fast_thrift::thrift::server {
 
 ThriftServerTransportAdapter::ThriftServerTransportAdapter(
-    rocket::server::RocketServerAppAdapter& appAdapter,
-    OnRocketDisconnectFn onRocketDisconnect,
-    OnRocketDestroyFn onRocketDestroy)
-    : appAdapter_(appAdapter),
-      onRocketDisconnect_(std::move(onRocketDisconnect)),
-      onRocketDestroy_(std::move(onRocketDestroy)) {
-  appAdapter_.setRequestHandlers(
+    std::unique_ptr<rocket::server::RocketServerConnection> rocketConn)
+    : rocketConn_(std::move(rocketConn)) {
+  DCHECK(rocketConn_);
+  rocketConn_->appAdapter->setRequestHandlers(
       [this](channel_pipeline::TypeErasedBox&& msg) noexcept {
         return onTransportRequest(std::move(msg));
       },
       [this](folly::exception_wrapper&& e) noexcept {
         onTransportError(std::move(e));
       });
-  // Subscribe to the rocket adapter's lifecycle. The bridge mirrors
-  // those events into the thrift pipeline's lifecycle. onClose lets
-  // the bridge observe that the rocket side has fully torn down so it
-  // can drop the action callbacks — they'd UAF if invoked later from
-  // the bridge's own teardown path.
-  appAdapter_.setLifecycleHandlers(
+  // Mirror rocket lifecycle into the thrift pipeline.
+  rocketConn_->setLifecycleHandlers(
       [this]() noexcept { onConnect(); },
-      [this]() noexcept { onDisconnect(); },
-      [this]() noexcept { onRocketClosed(); });
+      [this]() noexcept { onDisconnect(); });
 }
 
 ThriftServerTransportAdapter::~ThriftServerTransportAdapter() {
-  // Graceful-stop tears the bridge down before the rocket adapter. The
-  // ctor installed `this`-capturing lambdas on appAdapter_ via
-  // setRequestHandlers/setLifecycleHandlers; clear them so a later
-  // rocket-side close/disconnect (e.g. from ConnectionManager
-  // closeConnections after our drain) can't fire them and dereference
-  // freed memory. Skip when rocket has already torn down (onRocketClosed
-  // cleared rocketAlive_) — the reference would itself be dangling.
-  if (rocketAlive_) {
-    appAdapter_.setRequestHandlers({}, {});
-    appAdapter_.setLifecycleHandlers({}, {}, {});
-  }
   // Defensive: if the bridge is destroyed without going through the
-  // thrift pipeline's handlerRemoved (which would have invoked the
-  // destroy callback already), tear the rocket connection down
-  // explicitly. The callback is idempotent so the normal path stays a
-  // no-op.
+  // thrift pipeline's handlerRemoved, tear the rocket connection down
+  // explicitly. RocketServerConnection::destroy() is idempotent.
   resetPipeline();
-  if (onRocketDestroy_) {
-    onRocketDestroy_();
+  if (rocketConn_) {
+    rocketConn_->destroy();
   }
 }
 
 void ThriftServerTransportAdapter::handlerRemoved() noexcept {
-  // Contract: the thrift pipeline always deactivates before removing
-  // handlers, so connected_ must already be false here.
-  DCHECK(!connected_);
-  if (onRocketDestroy_) {
-    auto fn = std::move(onRocketDestroy_);
-    fn();
+  // Pipeline destruction can reach handlerRemoved without a preceding
+  // deactivate (owner-initiated destruction on the IO thread during stop
+  // is one such path). Proactively disconnect the rocket connection so
+  // its lifecycle handlers see the inactive transition before destroy.
+  if (connected_) {
+    connected_ = false;
+    if (rocketConn_) {
+      rocketConn_->disconnect();
+    }
+  }
+  if (rocketConn_) {
+    rocketConn_->destroy();
   }
 }
 
@@ -84,8 +69,8 @@ void ThriftServerTransportAdapter::onPipelineInactive() noexcept {
     return;
   }
   connected_ = false;
-  if (onRocketDisconnect_) {
-    onRocketDisconnect_();
+  if (rocketConn_) {
+    rocketConn_->disconnect();
   }
 }
 
@@ -109,23 +94,15 @@ void ThriftServerTransportAdapter::onDisconnect() noexcept {
   }
 }
 
-void ThriftServerTransportAdapter::onRocketClosed() noexcept {
-  rocketAlive_ = false;
-  onRocketDisconnect_ = {};
-  onRocketDestroy_ = {};
-}
-
 channel_pipeline::Result ThriftServerTransportAdapter::handleDecodeFailure(
     uint32_t streamId,
     apache::thrift::fast_thrift::frame::FrameType streamType,
     const folly::exception_wrapper& error) noexcept {
   // Per-request decode failure: synthesize a REQUEST_PARSING_FAILURE
-  // ERROR frame and write it outbound through the rocket pipeline.
-  // Don't propagate as a connection-level exception or push a valueless
-  // payload downstream — the connection itself is healthy. The error
-  // body is Compact-serialized regardless of negotiated metadata
-  // protocol (matches legacy: ResponseRpcError is a control-frame body
-  // with its own wire contract, not application metadata).
+  // ERROR frame and write it outbound through the rocket pipeline. The
+  // error body is Compact-serialized regardless of negotiated metadata
+  // protocol (ResponseRpcError is a control-frame body with its own wire
+  // contract, not application metadata).
   auto serialized = serializeResponseRpcError(
       apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
       error.what().toStdString());
@@ -135,7 +112,7 @@ channel_pipeline::Result ThriftServerTransportAdapter::handleDecodeFailure(
       .streamId = streamId,
       .errorCode = static_cast<uint32_t>(serialized.errorCode),
   };
-  return appAdapter_.write(
+  return rocketConn_->appAdapter->write(
       rocket::server::RocketResponseMessage{
           .frame = std::move(errorPayload).toRocketFrame(metadataProtocol_),
           .streamType = streamType,

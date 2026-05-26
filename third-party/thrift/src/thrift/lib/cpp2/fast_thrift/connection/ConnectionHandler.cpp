@@ -16,240 +16,144 @@
 
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionHandler.h>
 
-#include <algorithm>
-#include <array>
-#include <cerrno>
-#include <string>
 #include <utility>
-
-#if defined(__linux__)
-#include <linux/filter.h>
-#include <sys/socket.h>
-#endif
-
-#include <folly/String.h>
-#include <folly/logging/xlog.h>
-#include <folly/net/NetworkSocket.h>
-#include <thrift/lib/cpp2/fast_thrift/security/FizzHandshakeHelper.h>
+#include <vector>
 
 namespace apache::thrift::fast_thrift::connection {
 
 ConnectionHandler::ConnectionHandler(
     folly::EventBase& evb,
-    ConnectionFactory connectionFactory,
+    folly::SocketAddress address,
+    security::SSLPolicy sslPolicy,
     std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
     std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
     std::chrono::milliseconds tlsHandshakeTimeout,
-    SocketOptions socketOptions)
+    SocketOptions socketOptions,
+    bool enableReusePortBpfSpread)
     : evb_(folly::getKeepAliveToken(&evb)),
-      socket_(new folly::AsyncServerSocket(evb_.get())),
-      connectionFactory_(std::move(connectionFactory)),
+      address_(std::move(address)),
+      socketOptions_(socketOptions),
+      enableReusePortBpfSpread_(enableReusePortBpfSpread),
+      sslPolicy_(sslPolicy),
       fizzContext_(std::move(fizzContext)),
       thriftParams_(std::move(thriftParams)),
       tlsHandshakeTimeout_(tlsHandshakeTimeout),
-      socketOptions_(socketOptions) {}
+      listener_(
+          ConnectionListener::Ptr(new ConnectionListener(
+              evb_.get(),
+              address_,
+              socketOptions_,
+              enableReusePortBpfSpread_))) {}
 
 ConnectionHandler::~ConnectionHandler() {
-  // Contract: callers must drive the handler to STOPPED (via stopAccepting
-  // + acceptStopped drain) and close all connections before destroying it.
-  // ConnectionManager::stopAccepting() / closeConnections() honor this for
-  // the production path; tests must do the same.
-  DCHECK(state_ == State::STOPPED || state_ == State::NONE)
-      << "ConnectionHandler destroyed in state " << static_cast<int>(state_)
-      << " — caller must stopAccepting() and drain acceptStopped() first";
-  if (FOLLY_LIKELY(socket_)) {
-    evb_->runImmediatelyOrRunInEventBaseThreadAndWait(
-        [this, socket = std::move(socket_)]() mutable {
-          DCHECK(connections_.empty())
-              << "ConnectionHandler destroyed with active connections — "
-              << "call closeAllConnections() on the EVB first";
-          socket.reset();
-        });
+  // Defensive: ensure shutdown runs at least once. From the EVB we can't
+  // wait for graceful drain (would block the loop that fires close
+  // callbacks), so fall back to a synchronous teardown — same as the
+  // original behavior of this dtor.
+  if (evb_->inRunningEventBaseThread()) {
+    stopAcceptingOnEvb();
+    closeAllConnectionsOnEvb();
+    listener_.reset();
+  } else {
+    stop();
+    evb_->runInEventBaseThreadAndWait([this] { listener_.reset(); });
   }
 }
 
-void ConnectionHandler::connectionAccepted(
-    folly::NetworkSocket fd,
-    const folly::SocketAddress& clientAddr,
-    AcceptInfo) noexcept {
-  if (state_ != State::ACCEPTING) {
-    folly::netops::close(fd);
-    return;
-  }
+void ConnectionHandler::stop(std::chrono::milliseconds drainTimeout) {
+  DCHECK(!evb_->inRunningEventBaseThread())
+      << "ConnectionHandler::stop must not be called from the owning EVB; "
+      << "the drain wait would block the loop that fires close callbacks";
 
-  XLOG(DBG3) << "Connection accepted from " << clientAddr.describe();
-
-  auto socket = folly::AsyncSocket::newSocket(evb_.get(), fd);
-  socket->setMaxReadsPerEvent(socketOptions_.maxReadsPerEvent);
-
-  if (!fizzContext_) {
-    installConnection(folly::AsyncTransport::UniquePtr(socket.release()));
-    return;
-  }
-
-  security::PendingHandshakes::HelperPtr helper(
-      new security::FizzHandshakeHelper(
-          std::move(socket),
-          fizzContext_,
-          thriftParams_,
-          tlsHandshakeTimeout_,
-          pendingHandshakes_,
-          [this](
-              folly::AsyncTransport::UniquePtr negotiated,
-              const folly::exception_wrapper& ex) noexcept {
-            if (ex || !negotiated) {
-              XLOG(DBG3) << "TLS handshake failed: "
-                         << (ex ? ex.what().toStdString()
-                                : std::string("null"));
-              return;
-            }
-            if (state_ != State::ACCEPTING) {
-              return;
-            }
-            installConnection(std::move(negotiated));
-          }));
-  auto* rawHelper = helper.get();
-  pendingHandshakes_.add(std::move(helper));
-  rawHelper->start();
-}
-
-void ConnectionHandler::acceptError(folly::exception_wrapper ew) noexcept {
-  XLOG(ERR) << "Accept error: " << ew.what();
-}
-
-void ConnectionHandler::acceptStopped() noexcept {
-  XLOG(DBG3) << "Accept stopped";
-  state_ = State::STOPPED;
-  pendingHandshakes_.cancelAll();
-  if (auto* b = std::exchange(acceptStoppedBaton_, nullptr)) {
-    b->post();
-  }
-}
-
-void ConnectionHandler::startAccepting(const folly::SocketAddress& address) {
-  DestructorGuard dg(this);
-
-  DCHECK(state_ == State::NONE);
-  DCHECK(socket_);
-  socket_->setReusePortEnabled(true);
-  if (socketOptions_.tfoEnabled) {
-    socket_->setTFOEnabled(true, socketOptions_.tfoQueueSize);
-  }
-  socket_->bind(address);
-  socket_->listen(static_cast<int>(socketOptions_.listenBacklog));
-  if (enableReusePortBpfSpread_) {
-    attachReusePortBpfSpread();
-  }
-  socket_->addAcceptCallback(this, evb_.get());
-  socket_->startAccepting();
-  state_ = State::ACCEPTING;
-}
-
-void ConnectionHandler::stopAccepting() {
-  if (state_ != State::ACCEPTING) {
-    return;
-  }
-
-  DCHECK(socket_);
-  state_ = State::STOPPING;
-  socket_->removeAcceptCallback(this, evb_.get());
-}
-
-void ConnectionHandler::stopAccepting(folly::Baton<>& done) noexcept {
-  if (state_ != State::ACCEPTING) {
-    // No removeAcceptCallback → no acceptStopped; release caller now.
-    done.post();
-    return;
-  }
-  acceptStoppedBaton_ = &done;
-  stopAccepting();
-}
-
-void ConnectionHandler::closeAllConnections() {
-  for (auto& conn : connections_) {
-    conn.close(folly::exception_wrapper{});
-  }
-  connections_.clear();
-}
-
-size_t ConnectionHandler::connectionCount() {
-  size_t count = 0;
+  // Phase 1: stop accepting new connections.
   evb_->runImmediatelyOrRunInEventBaseThreadAndWait(
-      [&count, this] { count = connections_.size(); });
-  return count;
-}
+      [this] { stopAcceptingOnEvb(); });
 
-void ConnectionHandler::getAddress(folly::SocketAddress* address) const {
-  socket_->getAddress(address);
-}
+  // Phase 2: initiate graceful drain on every live connection.
+  evb_->runImmediatelyOrRunInEventBaseThreadAndWait(
+      [this] { drainAllOnEvb(); });
 
-void ConnectionHandler::installConnection(
-    folly::AsyncTransport::UniquePtr socket) {
-  auto conn = connectionFactory_(std::move(socket));
-
-  auto* rawTransportHandler = conn.transportHandler.get();
-  conn.transportHandler->setCloseCallback(
-      [this, rawTransportHandler]() { removeConnection(rawTransportHandler); });
-
-  connections_.emplace_back(std::move(conn));
-
-  rawTransportHandler->onConnect();
-}
-
-void ConnectionHandler::removeConnection(
-    transport::TransportHandler* transportHandler) {
-  DestructorGuard dg(this);
-
-  auto it = std::find_if(
-      connections_.begin(),
-      connections_.end(),
-      [transportHandler](const RocketServerConnection& conn) {
-        return conn.transportHandler.get() == transportHandler;
-      });
-  if (it != connections_.end()) {
-    it->close(folly::exception_wrapper{});
-    connections_.erase(it);
+  // Phase 3: wait for the drain to complete (close callbacks decrement
+  // connections_ and post drainedBaton_ when the last one drops). Off-EVB
+  // so the loop is free to fire those callbacks.
+  if (!drainedBaton_.try_wait_for(drainTimeout)) {
+    XLOG(WARN) << "ConnectionHandler::stop drain timed out after "
+               << drainTimeout.count() << "ms; force-closing remaining";
   }
+
+  // Phase 4: force-close any stragglers.
+  evb_->runImmediatelyOrRunInEventBaseThreadAndWait(
+      [this] { closeAllConnectionsOnEvb(); });
 }
 
-void ConnectionHandler::attachReusePortBpfSpread() {
-  // Replace the kernel's default 4-tuple-hash REUSEPORT selection with a
-  // 2-instruction cBPF program returning a random u32 — kernel mods by
-  // group size internally, so the program is group-size oblivious. Only
-  // one socket in the REUSEPORT group needs the program attached, but
-  // every worker installs the same identical program on its own fd;
-  // last-write-wins is harmless. Errors are logged but non-fatal: a
-  // failed attach leaves the kernel's default selector in place, which
-  // is exactly the pre-change behavior.
-#if defined(__linux__)
-  auto code = std::to_array<sock_filter>({
-      BPF_STMT(
-          BPF_LD | BPF_W | BPF_ABS,
-          static_cast<uint32_t>(SKF_AD_OFF + SKF_AD_RANDOM)),
-      BPF_STMT(BPF_RET | BPF_A, 0),
-  });
-  struct sock_fprog prog = {
-      .len = static_cast<unsigned short>(code.size()),
-      .filter = code.data(),
-  };
-  for (auto fd : socket_->getNetworkSockets()) {
-    if (::setsockopt(
-            fd.toFd(),
-            SOL_SOCKET,
-            SO_ATTACH_REUSEPORT_CBPF,
-            &prog,
-            sizeof(prog)) != 0) {
-      const int savedErrno = errno;
-      XLOGF_EVERY_MS(
-          ERR,
-          1000,
-          "SO_ATTACH_REUSEPORT_CBPF failed on fd {}: errno={} ({})",
-          fd.toFd(),
-          savedErrno,
-          folly::errnoStr(savedErrno));
+void ConnectionHandler::stopAcceptingOnEvb() {
+  if (!pipeline_) {
+    return;
+  }
+  listener_->stop();
+  listener_->resetPipeline();
+  pipeline_.reset();
+  installer_.reset();
+  listener_.reset();
+}
+
+void ConnectionHandler::drainAllOnEvb() {
+  draining_.store(true, std::memory_order_release);
+  if (connections_.empty()) {
+    postDrainedOnce();
+    return;
+  }
+  // Snapshot keys so iteration is safe across re-entrant erases (drain()
+  // may fire the close callback synchronously for connection types
+  // without async drain work).
+  std::vector<uint64_t> ids;
+  ids.reserve(connections_.size());
+  for (const auto& [id, _] : connections_) {
+    ids.push_back(id);
+  }
+  for (auto id : ids) {
+    auto it = connections_.find(id);
+    if (it != connections_.end()) {
+      it->second.drain();
     }
   }
-#endif
+}
+
+void ConnectionHandler::closeAllConnectionsOnEvb() {
+  // Move the map out before tearing down: each close() can synchronously
+  // fire its close callback, which re-enters onConnectionClosed and tries
+  // to erase its own entry. Reentering an erase on the entry currently
+  // being closed yields use-after-free.
+  auto victims = std::move(connections_);
+  // close() below will fire each connection's close callback, which calls
+  // onConnectionClosed and tries to erase from the (now-empty) map. The
+  // erase is a no-op, so its `> 0` branch won't run; zero the counter
+  // explicitly here to keep it in sync with the moved-out map.
+  connectionCount_.store(0, std::memory_order_relaxed);
+  for (auto& [_, conn] : victims) {
+    conn.close();
+  }
+}
+
+void ConnectionHandler::onConnectionClosed(uint64_t connId) noexcept {
+  if (connections_.erase(connId) > 0) {
+    connectionCount_.fetch_sub(1, std::memory_order_relaxed);
+  }
+  if (draining_.load(std::memory_order_acquire) && connections_.empty()) {
+    postDrainedOnce();
+  }
+}
+
+void ConnectionHandler::postDrainedOnce() noexcept {
+  bool expected = false;
+  if (drainedPosted_.compare_exchange_strong(expected, true)) {
+    drainedBaton_.post();
+  }
+}
+
+folly::SocketAddress ConnectionHandler::getAddress() const {
+  CHECK(listener_) << "ConnectionHandler::getAddress called after stop()";
+  return listener_->getAddress();
 }
 
 } // namespace apache::thrift::fast_thrift::connection

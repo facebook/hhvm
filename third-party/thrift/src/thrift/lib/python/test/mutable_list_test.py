@@ -17,9 +17,10 @@ import concurrent.futures
 import pickle
 import threading
 import unittest
-from collections.abc import MutableSequence
+from collections.abc import Callable, MutableSequence
 from typing import cast
 
+from parameterized import parameterized
 from python_test.containers.thrift_mutable_types import Foo, Lists
 from python_test.lists.thrift_mutable_types import (
     easy,
@@ -28,9 +29,9 @@ from python_test.lists.thrift_mutable_types import (
     ListOfStrToI32Map,
     StrList2D,
 )
-from thrift.python.mutable_containers import MutableList, MutableMap
-from thrift.python.mutable_typeinfos import MutableListTypeInfo
-from thrift.python.mutable_types import to_thrift_list
+from thrift.python.mutable_containers import MutableList, MutableMap, MutableSet
+from thrift.python.mutable_typeinfos import MutableListTypeInfo, MutableSetTypeInfo
+from thrift.python.mutable_types import to_thrift_list, to_thrift_set
 from thrift.python.types import typeinfo_i32
 
 
@@ -486,6 +487,49 @@ def create_MutableList_List_i32(lst: list[list[int]]) -> MutableList[MutableList
     )
 
 
+def create_MutableList_Set_i32(lst: list[set[int]]) -> MutableList[MutableSet[int]]:
+    return cast(
+        MutableList[MutableSet[int]],
+        MutableList(MutableSetTypeInfo(typeinfo_i32), lst),
+    )
+
+
+def append_nested_list_values_concurrently(
+    worker_starts: list[int],
+) -> set[tuple[int, ...]]:
+    mutable_list: MutableList[MutableList[int]] = create_MutableList_List_i32([])
+    start_barrier: threading.Barrier = threading.Barrier(len(worker_starts))
+
+    def append_nested_list(worker_start: int) -> None:
+        start_barrier.wait()
+        mutable_list.append(to_thrift_list([worker_start, worker_start + 1]))
+
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=len(worker_starts)
+    ) as executor:
+        list(executor.map(append_nested_list, worker_starts))
+
+    return {tuple(inner) for inner in mutable_list}
+
+
+def append_nested_set_values_concurrently(
+    worker_starts: list[int],
+) -> set[tuple[int, ...]]:
+    mutable_list: MutableList[MutableSet[int]] = create_MutableList_Set_i32([])
+    start_barrier: threading.Barrier = threading.Barrier(len(worker_starts))
+
+    def append_nested_set(worker_start: int) -> None:
+        start_barrier.wait()
+        mutable_list.append(to_thrift_set({worker_start, worker_start + 1}))
+
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=len(worker_starts)
+    ) as executor:
+        list(executor.map(append_nested_set, worker_starts))
+
+    return {tuple(sorted(inner)) for inner in mutable_list}
+
+
 class MutableListNestedTest(unittest.TestCase):
     """
     Tests nested containers as element types
@@ -507,6 +551,77 @@ class MutableListNestedTest(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, self.TYPE_ERROR_MESSAGE):
             # pyre-ignore[6]: Intentional for test
             mutable_list.extend([4, 5])
+
+    @parameterized.expand(
+        [
+            ("list_values", append_nested_list_values_concurrently),
+            ("set_values", append_nested_set_values_concurrently),
+        ]
+    )
+    def test_append_nested_i32_values_from_multiple_threads_preserves_all_values(
+        self,
+        _name: str,
+        append_values: Callable[[list[int]], set[tuple[int, ...]]],
+    ) -> None:
+        # GIVEN
+        worker_starts = [0, 10, 20, 30, 40]
+        expected_values = {
+            (0, 1),
+            (10, 11),
+            (20, 21),
+            (30, 31),
+            (40, 41),
+        }
+
+        # WHEN
+        observed_values = append_values(worker_starts)
+
+        # THEN
+        self.assertEqual(expected_values, observed_values)
+
+    def test_append_list_of_list_i32_invalid_value_from_multiple_threads_preserves_existing_values(
+        self,
+    ) -> None:
+        # GIVEN
+        worker_starts = [0, 10, 20, 30, 40]
+        expected_values = [[99]]
+        expected_exception_types: list[type[BaseException] | None] = [
+            TypeError,
+            TypeError,
+            TypeError,
+            TypeError,
+            TypeError,
+        ]
+        mutable_list: MutableList[MutableList[int]] = create_MutableList_List_i32(
+            expected_values
+        )
+        start_barrier: threading.Barrier = threading.Barrier(len(worker_starts))
+
+        def append_invalid_nested_list(worker_start: int) -> None:
+            start_barrier.wait()
+            mutable_list.append(to_thrift_list([worker_start, "Not an integer"]))
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(worker_starts)
+        ) as executor:
+            futures = [
+                executor.submit(append_invalid_nested_list, worker_start)
+                for worker_start in worker_starts
+            ]
+            actual_exception_types: list[type[BaseException] | None] = []
+            for future in futures:
+                try:
+                    future.result()
+                except Exception as error:
+                    actual_exception_types.append(type(error))
+                else:
+                    actual_exception_types.append(None)
+
+        # THEN
+        self.assertEqual(expected_exception_types, actual_exception_types)
+        observed_values = [list(inner) for inner in mutable_list]
+        self.assertEqual(expected_values, observed_values)
 
     def test_append(self) -> None:
         mutable_list = create_MutableList_List_i32([])

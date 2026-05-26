@@ -22,6 +22,7 @@ import threading
 import unittest
 from typing import cast, ItemsView, Iterator, KeysView, Optional, ValuesView
 
+from parameterized import parameterized
 from python_test.maps.thrift_mutable_types import StrIntMap
 from thrift.python.mutable_containers import (
     MapItemsView,
@@ -29,8 +30,9 @@ from thrift.python.mutable_containers import (
     MapValuesView,
     MutableList,
     MutableMap,
+    MutableSet,
 )
-from thrift.python.mutable_typeinfos import MutableListTypeInfo
+from thrift.python.mutable_typeinfos import MutableListTypeInfo, MutableSetTypeInfo
 from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
 from thrift.python.types import typeinfo_i32, typeinfo_string
 
@@ -42,6 +44,64 @@ def _create_MutableMap_str_i32(map: dict[str, int]) -> MutableMap[str, int]:
     """
     # pyre-ignore[6]: Incompatible parameter type
     return MutableMap(typeinfo_string, typeinfo_i32, map)
+
+
+def _create_MutableMap_i32_list_i32(
+    map: dict[int, list[int]],
+) -> MutableMap[int, MutableList[int]]:
+    return MutableMap(
+        typeinfo_i32,
+        MutableListTypeInfo(typeinfo_i32),
+        # pyre-ignore[6]: Incompatible parameter type
+        map,
+    )
+
+
+def _create_MutableMap_i32_set_i32(
+    map: dict[int, set[int]],
+) -> MutableMap[int, MutableSet[int]]:
+    return MutableMap(
+        typeinfo_i32,
+        MutableSetTypeInfo(typeinfo_i32),
+        # pyre-ignore[6]: Incompatible parameter type
+        map,
+    )
+
+
+def set_nested_list_values_concurrently(
+    worker_values: list[int],
+) -> dict[int, tuple[int, ...]]:
+    mutable_map: MutableMap[int, MutableList[int]] = _create_MutableMap_i32_list_i32({})
+    start_barrier: threading.Barrier = threading.Barrier(len(worker_values))
+
+    def set_nested_list(worker_value: int) -> None:
+        start_barrier.wait()
+        mutable_map[worker_value] = to_thrift_list([worker_value, worker_value + 1])
+
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=len(worker_values)
+    ) as executor:
+        list(executor.map(set_nested_list, worker_values))
+
+    return {key: tuple(value) for key, value in mutable_map.items()}
+
+
+def set_nested_set_values_concurrently(
+    worker_values: list[int],
+) -> dict[int, tuple[int, ...]]:
+    mutable_map: MutableMap[int, MutableSet[int]] = _create_MutableMap_i32_set_i32({})
+    start_barrier: threading.Barrier = threading.Barrier(len(worker_values))
+
+    def set_nested_set(worker_value: int) -> None:
+        start_barrier.wait()
+        mutable_map[worker_value] = to_thrift_set({worker_value, worker_value + 1})
+
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=len(worker_values)
+    ) as executor:
+        list(executor.map(set_nested_set, worker_values))
+
+    return {key: tuple(sorted(value)) for key, value in mutable_map.items()}
 
 
 class MutableMapTypeHints(unittest.TestCase):
@@ -367,6 +427,77 @@ class MutableMapTest(unittest.TestCase):
 
         # THEN
         self.assertEqual(expected_items, mutable_map)
+
+    @parameterized.expand(
+        [
+            ("list_values", set_nested_list_values_concurrently),
+            ("set_values", set_nested_set_values_concurrently),
+        ]
+    )
+    def test_setitem_i32_to_nested_i32_values_from_multiple_threads_preserves_all_items(
+        self,
+        _name: str,
+        set_values: collections.abc.Callable[[list[int]], dict[int, tuple[int, ...]]],
+    ) -> None:
+        # GIVEN
+        worker_values = [0, 1, 2, 3, 4]
+        expected_items = {
+            0: (0, 1),
+            1: (1, 2),
+            2: (2, 3),
+            3: (3, 4),
+            4: (4, 5),
+        }
+
+        # WHEN
+        observed_items = set_values(worker_values)
+
+        # THEN
+        self.assertEqual(expected_items, observed_items)
+
+    def test_setitem_i32_to_list_i32_invalid_value_from_multiple_threads_preserves_existing_items(
+        self,
+    ) -> None:
+        # GIVEN
+        worker_values = [0, 1, 2, 3, 4]
+        expected_items = {99: [99]}
+        expected_exception_types: list[type[BaseException] | None] = [
+            TypeError,
+            TypeError,
+            TypeError,
+            TypeError,
+            TypeError,
+        ]
+        mutable_map: MutableMap[int, MutableList[int]] = (
+            _create_MutableMap_i32_list_i32(expected_items)
+        )
+        start_barrier: threading.Barrier = threading.Barrier(len(worker_values))
+
+        def set_invalid_nested_list(worker_value: int) -> None:
+            start_barrier.wait()
+            mutable_map[worker_value] = to_thrift_list([worker_value, "Not an integer"])
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(worker_values)
+        ) as executor:
+            futures = [
+                executor.submit(set_invalid_nested_list, worker_value)
+                for worker_value in worker_values
+            ]
+            actual_exception_types: list[type[BaseException] | None] = []
+            for future in futures:
+                try:
+                    future.result()
+                except Exception as error:
+                    actual_exception_types.append(type(error))
+                else:
+                    actual_exception_types.append(None)
+
+        # THEN
+        self.assertEqual(expected_exception_types, actual_exception_types)
+        observed_items = {key: list(value) for key, value in mutable_map.items()}
+        self.assertEqual(expected_items, observed_items)
 
     def test_delitem(self) -> None:
         mutable_map = _create_MutableMap_str_i32({})

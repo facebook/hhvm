@@ -612,6 +612,51 @@ class MutableListTypedefTest(unittest.TestCase):
         self.assertEqual([11, 2, 3], lst)
         self.assertEqual([1, 2, 3], i32list)
 
+    def test_to_thrift_list_invalid_value_from_multiple_threads_raises_when_assigned(
+        self,
+    ) -> None:
+        # GIVEN
+        worker_starts = [0, 10, 20, 30, 40]
+        expected_exception_types: list[type[BaseException] | None] = [
+            TypeError,
+            TypeError,
+            TypeError,
+            TypeError,
+            TypeError,
+        ]
+        start_barrier: threading.Barrier = threading.Barrier(len(worker_starts))
+
+        def consume_invalid_wrapper(worker_start: int) -> MutableList[int]:
+            payload = [
+                worker_start,
+                worker_start + 1,
+                "Not an integer",
+                worker_start + 2,
+            ]
+            wrapper = to_thrift_list(payload)
+            start_barrier.wait()
+            return I32List(wrapper)
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(worker_starts)
+        ) as executor:
+            futures = [
+                executor.submit(consume_invalid_wrapper, worker_start)
+                for worker_start in worker_starts
+            ]
+            actual_exception_types: list[type[BaseException] | None] = []
+            for future in futures:
+                try:
+                    future.result()
+                except Exception as error:
+                    actual_exception_types.append(type(error))
+                else:
+                    actual_exception_types.append(None)
+
+        # THEN
+        self.assertEqual(expected_exception_types, actual_exception_types)
+
     def test_str_list_2d(self) -> None:
         """
         typedef list<list<string>> StrList2D

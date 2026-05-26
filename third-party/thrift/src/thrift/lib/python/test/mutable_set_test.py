@@ -615,3 +615,71 @@ class MutableSetTypedefTest(unittest.TestCase):
         s.remove(1)
         self.assertEqual({2, 3}, s)
         self.assertEqual({1, 2, 3}, seti32)
+
+    def test_to_thrift_set_from_multiple_threads_converts_legal_values(
+        self,
+    ) -> None:
+        # GIVEN
+        worker_starts = [0, 10, 20, 30, 40]
+        expected_values = [
+            {0, 1},
+            {10, 11},
+            {20, 21},
+            {30, 31},
+            {40, 41},
+        ]
+        start_barrier: threading.Barrier = threading.Barrier(len(worker_starts))
+
+        def consume_wrapper(worker_start: int) -> set[int]:
+            wrapper = to_thrift_set({worker_start, worker_start + 1})
+            start_barrier.wait()
+            converted: MutableSet[int] = SetI32(wrapper)
+            return set(converted)
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(worker_starts)
+        ) as executor:
+            converted_values = list(executor.map(consume_wrapper, worker_starts))
+
+        # THEN
+        self.assertEqual(expected_values, converted_values)
+
+    def test_to_thrift_set_invalid_value_from_multiple_threads_raises_when_assigned(
+        self,
+    ) -> None:
+        # GIVEN
+        worker_starts = [0, 10, 20, 30, 40]
+        expected_exception_types: list[type[BaseException] | None] = [
+            TypeError,
+            TypeError,
+            TypeError,
+            TypeError,
+            TypeError,
+        ]
+        start_barrier: threading.Barrier = threading.Barrier(len(worker_starts))
+
+        def consume_invalid_wrapper(worker_start: int) -> MutableSet[int]:
+            wrapper = to_thrift_set({worker_start, "Not an integer"})
+            start_barrier.wait()
+            return SetI32(wrapper)
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(worker_starts)
+        ) as executor:
+            futures = [
+                executor.submit(consume_invalid_wrapper, worker_start)
+                for worker_start in worker_starts
+            ]
+            actual_exception_types: list[type[BaseException] | None] = []
+            for future in futures:
+                try:
+                    future.result()
+                except Exception as error:
+                    actual_exception_types.append(type(error))
+                else:
+                    actual_exception_types.append(None)
+
+        # THEN
+        self.assertEqual(expected_exception_types, actual_exception_types)

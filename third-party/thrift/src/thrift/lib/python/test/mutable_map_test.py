@@ -1007,3 +1007,46 @@ class MutableMapTypedefTest(unittest.TestCase):
         m["a"] = 11
         self.assertEqual({"a": 11, "b": 2}, m)
         self.assertEqual({"a": 1, "b": 2}, str_int_map)
+
+    def test_to_thrift_map_invalid_value_from_multiple_threads_raises_when_assigned(
+        self,
+    ) -> None:
+        # GIVEN
+        worker_values = [0, 1, 2, 3, 4]
+        expected_exception_types: list[type[BaseException] | None] = [
+            TypeError,
+            TypeError,
+            TypeError,
+            TypeError,
+            TypeError,
+        ]
+        start_barrier: threading.Barrier = threading.Barrier(len(worker_values))
+
+        def consume_invalid_wrapper(worker_value: int) -> MutableMap[str, int]:
+            payload = {
+                f"key-{worker_value}": worker_value,
+                f"bad-{worker_value}": "Not an integer",
+            }
+            wrapper = to_thrift_map(payload)
+            start_barrier.wait()
+            return StrIntMap(wrapper)
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(worker_values)
+        ) as executor:
+            futures = [
+                executor.submit(consume_invalid_wrapper, worker_value)
+                for worker_value in worker_values
+            ]
+            actual_exception_types: list[type[BaseException] | None] = []
+            for future in futures:
+                try:
+                    future.result()
+                except Exception as error:
+                    actual_exception_types.append(type(error))
+                else:
+                    actual_exception_types.append(None)
+
+        # THEN
+        self.assertEqual(expected_exception_types, actual_exception_types)

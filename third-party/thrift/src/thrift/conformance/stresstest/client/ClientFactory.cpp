@@ -23,7 +23,6 @@
 #include <fizz/client/MultiClientExtensions.h>
 #include <folly/FileUtil.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
-#include <folly/io/async/AsyncIoUringSocket.h>
 #include <folly/io/async/AsyncIoUringSocketFactory.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
@@ -65,8 +64,6 @@ folly::AsyncTransport::UniquePtr createTLSSocket(
 folly::AsyncTransport::UniquePtr createFizzSocket(
     folly::EventBase* evb, const ClientConnectionConfig& cfg);
 #if FOLLY_HAS_LIBURING
-folly::AsyncIoUringSocket::Options getIoUringSocketOptions(
-    const ClientConnectionConfig& cfg);
 folly::AsyncTransport::UniquePtr createIOUring(
     folly::EventBase* evb, const ClientConnectionConfig& cfg);
 folly::AsyncTransport::UniquePtr createIOUringTLS(
@@ -201,9 +198,8 @@ folly::AsyncTransport::UniquePtr createSocketWithIOUring(
         try {
           auto result = std::move(fut).get(std::chrono::seconds(10));
           auto [fd, zeroCopyBufId] = connector.getSocketParams();
-          auto sock = folly::AsyncIoUringSocket::UniquePtr(
-              new folly::AsyncIoUringSocket(
-                  evb, fd, getIoUringSocketOptions(cfg)));
+          auto sock = folly::AsyncSocket::UniquePtr(
+              new folly::AsyncSocket(evb, fd, zeroCopyBufId));
           if (cfg.connectCb) {
             cfg.connectCb->connectSuccess();
           }
@@ -330,56 +326,48 @@ folly::AsyncTransport::UniquePtr createFizzSocket(
 }
 
 #if FOLLY_HAS_LIBURING
-folly::AsyncIoUringSocket::Options getIoUringSocketOptions(
-    const ClientConnectionConfig& cfg) {
-  folly::AsyncIoUringSocket::Options opts;
+void configureZeroCopyTx(
+    folly::AsyncSocket* sock, const ClientConnectionConfig& cfg) {
   if (cfg.ioUringZctx) {
-    opts.zeroCopyEnable = [](auto&&) { return true; };
+    sock->setZeroCopy(true);
+    sock->setZeroCopyEnableFunc([](auto&&) { return true; });
   }
-  return opts;
 }
 
 folly::AsyncTransport::UniquePtr createIOUring(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
-  auto ring = new folly::AsyncIoUringSocket(evb, getIoUringSocketOptions(cfg));
+  auto sock = folly::AsyncSocket::newSocket(evb);
+  configureZeroCopyTx(sock.get(), cfg);
   folly::AsyncSocketTransport::BindOptions bindOptions =
       folly::AsyncSocket::anyAddress();
   if (cfg.ioUringZcrx && cfg.ioUringZcrxSocketBind) {
     bindOptions = folly::AsyncIoUringSocketFactory::createBoundSocketForZcRx(
         evb, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());
   }
-  ring->connect(
-      cfg.connectCb,
-      cfg.serverHost,
-      std::chrono::milliseconds(0),
-      getSocketOptions(cfg),
-      bindOptions);
-  return folly::AsyncTransport::UniquePtr(ring);
+  sock->connect(
+      cfg.connectCb, cfg.serverHost, 0, getSocketOptions(cfg), bindOptions);
+  return sock;
 }
 
 folly::AsyncTransport::UniquePtr createIOUringTLS(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto sock = folly::AsyncSSLSocket::newSocket(getSslContext(cfg), evb);
-  auto ring = new folly::AsyncIoUringSocket(
-      std::move(sock), getIoUringSocketOptions(cfg));
+  configureZeroCopyTx(sock.get(), cfg);
   folly::AsyncSocketTransport::BindOptions bindOptions =
       folly::AsyncSocket::anyAddress();
   if (cfg.ioUringZcrx && cfg.ioUringZcrxSocketBind) {
     bindOptions = folly::AsyncIoUringSocketFactory::createBoundSocketForZcRx(
         evb, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());
   }
-  ring->connect(
-      cfg.connectCb,
-      cfg.serverHost,
-      std::chrono::milliseconds(0),
-      getSocketOptions(cfg),
-      bindOptions);
-  return folly::AsyncTransport::UniquePtr(ring);
+  sock->connect(
+      cfg.connectCb, cfg.serverHost, 0, getSocketOptions(cfg), bindOptions);
+  return sock;
 }
 
 folly::AsyncTransport::UniquePtr createIOUringFizz(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
-  auto sock = new folly::AsyncIoUringSocket(evb, getIoUringSocketOptions(cfg));
+  auto sock = new folly::AsyncSocket(evb);
+  configureZeroCopyTx(sock, cfg);
   folly::AsyncSocketTransport::BindOptions bindOptions =
       folly::AsyncSocket::anyAddress();
   if (cfg.ioUringZcrx && cfg.ioUringZcrxSocketBind) {

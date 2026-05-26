@@ -26,9 +26,10 @@ Status MultiClientExtensions::getClientHelloExtensions(
   for (const auto& ext : extensions_) {
     std::vector<Extension> tmp;
     FIZZ_RETURN_ON_ERROR(ext->getClientHelloExtensions(tmp, err));
-    for (auto& e : tmp) {
-      ret.push_back(std::move(e));
-    }
+    ret.insert(
+        ret.end(),
+        std::make_move_iterator(tmp.begin()),
+        std::make_move_iterator(tmp.end()));
   }
   return Status::Success;
 }

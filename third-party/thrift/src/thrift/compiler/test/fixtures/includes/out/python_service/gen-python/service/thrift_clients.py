@@ -50,6 +50,15 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("service.thrift_services_reflection")
+            return _mod.get_reflection__MyService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__service__thrift_metadata.gen_metadata_service_MyService()
 

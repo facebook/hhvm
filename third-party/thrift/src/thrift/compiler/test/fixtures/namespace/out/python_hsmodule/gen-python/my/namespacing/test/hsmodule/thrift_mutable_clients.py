@@ -50,6 +50,15 @@ class HsTestService(_fbthrift_python_Client["HsTestService.Async", "HsTestServic
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("python_module_root.my.namespacing.test.hsmodule.thrift_services_reflection")
+            return _mod.get_reflection__HsTestService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return python_module_root__my__namespacing__test__hsmodule__thrift_metadata.gen_metadata_service_HsTestService()
 

@@ -47,6 +47,15 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("python_module_root.my.namespacing.test.module.module.thrift_services_reflection")
+            return _mod.get_reflection__TestService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return python_module_root__my__namespacing__test__module__module__thrift_metadata.gen_metadata_service_TestService()
 

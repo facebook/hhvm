@@ -56,6 +56,10 @@ class RaiserInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__module__thrift_metadata._fbthrift_metadata_service_response_Raiser()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("Raiser")
+
 
 
     async def doBland(
@@ -137,3 +141,11 @@ class RaiserInterface(
             raise exp
         return serialize_iobuf(return_struct, protocol)
 
+
+def _fbthrift_get_services_reflection_module(service_name):
+    try:
+        import importlib
+        _mod = importlib.import_module("module.thrift_services_reflection")
+        return getattr(_mod, f"get_reflection__{service_name}")()
+    except (ImportError, AttributeError):
+        return None

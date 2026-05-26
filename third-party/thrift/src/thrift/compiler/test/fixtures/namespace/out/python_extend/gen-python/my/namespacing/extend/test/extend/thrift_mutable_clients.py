@@ -52,6 +52,15 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("python_module_root.my.namespacing.extend.test.extend.thrift_services_reflection")
+            return _mod.get_reflection__ExtendTestService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return python_module_root__my__namespacing__extend__test__extend__thrift_metadata.gen_metadata_service_ExtendTestService()
 

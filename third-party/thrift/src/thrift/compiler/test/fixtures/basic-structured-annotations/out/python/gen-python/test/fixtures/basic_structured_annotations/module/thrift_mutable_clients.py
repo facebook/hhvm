@@ -52,6 +52,15 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.basic_structured_annotations.module.thrift_services_reflection")
+            return _mod.get_reflection__MyService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_metadata.gen_metadata_service_MyService()
 

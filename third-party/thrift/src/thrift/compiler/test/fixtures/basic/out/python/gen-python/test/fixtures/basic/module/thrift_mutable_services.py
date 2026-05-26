@@ -54,6 +54,10 @@ class FooServiceInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__test__fixtures__basic__module__thrift_metadata._fbthrift_metadata_service_response_FooService()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("FooService")
+
 
 
     async def simple_rpc(
@@ -97,6 +101,10 @@ class FB303ServiceInterface(
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__test__fixtures__basic__module__thrift_metadata._fbthrift_metadata_service_response_FB303Service()
+
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("FB303Service")
 
 
 
@@ -151,6 +159,10 @@ class MyServiceInterface(
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__test__fixtures__basic__module__thrift_metadata._fbthrift_metadata_service_response_MyService()
+
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("MyService")
 
 
 
@@ -311,6 +323,10 @@ class DbMixedStackArgumentsInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__test__fixtures__basic__module__thrift_metadata._fbthrift_metadata_service_response_DbMixedStackArguments()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("DbMixedStackArguments")
+
 
 
     async def getDataByKey0(
@@ -338,3 +354,11 @@ class DbMixedStackArgumentsInterface(
         return_struct = _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey1_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
+
+def _fbthrift_get_services_reflection_module(service_name):
+    try:
+        import importlib
+        _mod = importlib.import_module("test.fixtures.basic.module.thrift_services_reflection")
+        return getattr(_mod, f"get_reflection__{service_name}")()
+    except (ImportError, AttributeError):
+        return None

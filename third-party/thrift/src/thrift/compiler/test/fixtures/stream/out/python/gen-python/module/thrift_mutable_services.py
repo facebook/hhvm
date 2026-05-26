@@ -62,6 +62,10 @@ class PubSubStreamingServiceInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__module__thrift_metadata._fbthrift_metadata_service_response_PubSubStreamingService()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("PubSubStreamingService")
+
 
 
     def returnstream(
@@ -333,3 +337,11 @@ class PubSubStreamingServiceInterface(
         return_stream = self._fbthrift__stream_wrapper_returnstreamFast(stream, protocol)
         return (serialize_iobuf(return_struct, protocol), return_stream)
 
+
+def _fbthrift_get_services_reflection_module(service_name):
+    try:
+        import importlib
+        _mod = importlib.import_module("module.thrift_services_reflection")
+        return getattr(_mod, f"get_reflection__{service_name}")()
+    except (ImportError, AttributeError):
+        return None

@@ -52,4 +52,16 @@ class NullServiceInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__empty__thrift_metadata._fbthrift_metadata_service_response_NullService()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("NullService")
 
+
+
+def _fbthrift_get_services_reflection_module(service_name):
+    try:
+        import importlib
+        _mod = importlib.import_module("empty.thrift_services_reflection")
+        return getattr(_mod, f"get_reflection__{service_name}")()
+    except (ImportError, AttributeError):
+        return None

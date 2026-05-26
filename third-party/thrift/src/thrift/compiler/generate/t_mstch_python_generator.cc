@@ -1211,6 +1211,7 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
       generate_metadata();
     }
     generate_reflection();
+    generate_services_reflection();
     generate_clients();
     generate_services();
   }
@@ -1255,6 +1256,7 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
   void generate_uris();
   void generate_metadata();
   void generate_reflection();
+  void generate_services_reflection();
   void generate_clients();
   void generate_services();
 
@@ -1328,6 +1330,16 @@ void t_mstch_python_generator::generate_metadata() {
 void t_mstch_python_generator::generate_reflection() {
   generate_file(
       "thrift_reflection.py",
+      types_file_kind::not_a_types_file,
+      type_kind::immutable);
+}
+
+void t_mstch_python_generator::generate_services_reflection() {
+  if (get_program()->services().empty()) {
+    return;
+  }
+  generate_file(
+      "thrift_services_reflection.py",
       types_file_kind::not_a_types_file,
       type_kind::immutable);
 }

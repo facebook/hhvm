@@ -14,6 +14,7 @@
 
 # pyre-strict
 
+import thrift.python.reflection.services_reflection  # noqa: F401
 import thrift.python.reflection.types_reflection  # noqa: F401
 from thrift.python.reflection.inspect_impl import inspect, inspectable
 

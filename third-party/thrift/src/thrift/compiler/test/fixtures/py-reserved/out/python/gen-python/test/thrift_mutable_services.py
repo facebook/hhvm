@@ -55,6 +55,10 @@ class lambdaInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__test__thrift_metadata._fbthrift_metadata_service_response_lambda()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("lambda")
+
 
 
     async def global(
@@ -81,3 +85,11 @@ class lambdaInterface(
         return_struct = _fbthrift__test__thrift_mutable_types._fbthrift_lambda_import_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
+
+def _fbthrift_get_services_reflection_module(service_name):
+    try:
+        import importlib
+        _mod = importlib.import_module("test.thrift_services_reflection")
+        return getattr(_mod, f"get_reflection__{service_name}")()
+    except (ImportError, AttributeError):
+        return None

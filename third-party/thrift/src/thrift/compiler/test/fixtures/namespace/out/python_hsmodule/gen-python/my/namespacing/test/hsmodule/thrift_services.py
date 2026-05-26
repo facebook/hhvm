@@ -53,6 +53,10 @@ class HsTestServiceInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return python_module_root__my__namespacing__test__hsmodule__thrift_metadata._fbthrift_metadata_service_response_HsTestService()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("HsTestService")
+
 
 
     async def init(
@@ -67,3 +71,11 @@ class HsTestServiceInterface(
         return_struct = python_module_root__my__namespacing__test__hsmodule__thrift_types._fbthrift_HsTestService_init_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
+
+def _fbthrift_get_services_reflection_module(service_name):
+    try:
+        import importlib
+        _mod = importlib.import_module("python_module_root.my.namespacing.test.hsmodule.thrift_services_reflection")
+        return getattr(_mod, f"get_reflection__{service_name}")()
+    except (ImportError, AttributeError):
+        return None

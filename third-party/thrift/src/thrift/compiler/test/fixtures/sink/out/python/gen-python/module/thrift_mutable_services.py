@@ -60,6 +60,10 @@ class SinkServiceInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__module__thrift_metadata._fbthrift_metadata_service_response_SinkService()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("SinkService")
+
 
 
     async def method(
@@ -372,3 +376,11 @@ class SinkServiceInterface(
         return_sink_callback = self._fbthrift__sink_wrapper_methodFast(sink_callback, protocol)
         return (serialize_iobuf(return_struct, protocol), return_sink_callback)
 
+
+def _fbthrift_get_services_reflection_module(service_name):
+    try:
+        import importlib
+        _mod = importlib.import_module("module.thrift_services_reflection")
+        return getattr(_mod, f"get_reflection__{service_name}")()
+    except (ImportError, AttributeError):
+        return None

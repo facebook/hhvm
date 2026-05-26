@@ -47,6 +47,15 @@ class lambda(_fbthrift_python_Client["lambda.Async", "lambda.Sync"]):
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.thrift_services_reflection")
+            return _mod.get_reflection__lambda()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__thrift_metadata.gen_metadata_service_lambda()
 

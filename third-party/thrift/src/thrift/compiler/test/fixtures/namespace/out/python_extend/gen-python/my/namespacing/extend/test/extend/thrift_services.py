@@ -55,6 +55,10 @@ class ExtendTestServiceInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return python_module_root__my__namespacing__extend__test__extend__thrift_metadata._fbthrift_metadata_service_response_ExtendTestService()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("ExtendTestService")
+
 
 
     async def check(
@@ -69,3 +73,11 @@ class ExtendTestServiceInterface(
         return_struct = python_module_root__my__namespacing__extend__test__extend__thrift_types._fbthrift_ExtendTestService_check_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
+
+def _fbthrift_get_services_reflection_module(service_name):
+    try:
+        import importlib
+        _mod = importlib.import_module("python_module_root.my.namespacing.extend.test.extend.thrift_services_reflection")
+        return getattr(_mod, f"get_reflection__{service_name}")()
+    except (ImportError, AttributeError):
+        return None

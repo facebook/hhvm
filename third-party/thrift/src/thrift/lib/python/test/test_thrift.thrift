@@ -686,6 +686,12 @@ service TestingService {
   @cpp.Name{value = "renamed_func_in_cpp"}
   bool renamed_func(1: bool ret);
   i32 getPriority();
+  easy echoStruct(1: easy what);
+  Color echoColor(1: Color color);
+  I32List echoList(1: I32List ints);
+  map<Color, easy> echoMap(1: map<Color, easy> m);
+  SetI32 echoSet(1: SetI32 s);
+  set<string> echoSetNoTypedef(1: set<string> s);
 }
 
 @cpp.Name{value = "TestingServiceChildRenamed"}

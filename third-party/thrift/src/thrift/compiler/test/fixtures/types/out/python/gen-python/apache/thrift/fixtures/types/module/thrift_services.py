@@ -55,6 +55,10 @@ class SomeServiceInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__apache__thrift__fixtures__types__module__thrift_metadata._fbthrift_metadata_service_response_SomeService()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("SomeService")
+
 
 
     async def bounce_map(
@@ -82,3 +86,11 @@ class SomeServiceInterface(
         return_struct = _fbthrift__apache__thrift__fixtures__types__module__thrift_types._fbthrift_SomeService_binary_keyed_map_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
+
+def _fbthrift_get_services_reflection_module(service_name):
+    try:
+        import importlib
+        _mod = importlib.import_module("apache.thrift.fixtures.types.module.thrift_services_reflection")
+        return getattr(_mod, f"get_reflection__{service_name}")()
+    except (ImportError, AttributeError):
+        return None

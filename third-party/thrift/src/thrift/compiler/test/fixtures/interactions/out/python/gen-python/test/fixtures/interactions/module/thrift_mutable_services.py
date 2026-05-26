@@ -59,6 +59,10 @@ class MyServiceInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata._fbthrift_metadata_service_response_MyService()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("MyService")
+
 
 
     async def foo(
@@ -155,6 +159,10 @@ class FactoriesInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata._fbthrift_metadata_service_response_Factories()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("Factories")
+
 
 
     async def foo(
@@ -248,6 +256,10 @@ class PerformInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata._fbthrift_metadata_service_response_Perform()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("Perform")
+
 
 
     async def foo(
@@ -291,6 +303,10 @@ class InteractWithSharedInterface(
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata._fbthrift_metadata_service_response_InteractWithShared()
+
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("InteractWithShared")
 
 
 
@@ -336,6 +352,10 @@ class BoxServiceInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata._fbthrift_metadata_service_response_BoxService()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("BoxService")
+
 
 
     async def getABoxSession(
@@ -350,3 +370,11 @@ class BoxServiceInterface(
         return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_BoxService_getABoxSession_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
+
+def _fbthrift_get_services_reflection_module(service_name):
+    try:
+        import importlib
+        _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+        return getattr(_mod, f"get_reflection__{service_name}")()
+    except (ImportError, AttributeError):
+        return None

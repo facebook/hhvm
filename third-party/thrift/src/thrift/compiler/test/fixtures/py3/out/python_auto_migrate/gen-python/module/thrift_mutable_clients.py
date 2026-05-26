@@ -50,6 +50,15 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("module.thrift_services_reflection")
+            return _mod.get_reflection__SimpleService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__module__thrift_metadata.gen_metadata_service_SimpleService()
 
@@ -2231,6 +2240,15 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("module.thrift_services_reflection")
+            return _mod.get_reflection__DerivedService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__module__thrift_metadata.gen_metadata_service_DerivedService()
 
@@ -2341,6 +2359,15 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
+
+    @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("module.thrift_services_reflection")
+            return _mod.get_reflection__RederivedService()
+        except (ImportError, AttributeError):
+            return None
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

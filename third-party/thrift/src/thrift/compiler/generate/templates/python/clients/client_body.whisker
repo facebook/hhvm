@@ -47,6 +47,15 @@ def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str,
     }
 
 @staticmethod
+def __get_reflection__():
+    try:
+        import importlib
+        _mod = importlib.import_module("{{program.module_path}}.thrift_services_reflection")
+        return _mod.get_reflection__{{service.name}}()
+    except (ImportError, AttributeError):
+        return None
+
+@staticmethod
 def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
 {{#if service.interaction?}}
     return {{program.module_mangle}}__thrift_metadata.gen_metadata_service_{{parent_service_name}}_{{service.name}}()

@@ -50,6 +50,15 @@ class NullService(_fbthrift_python_Client["NullService.Async", "NullService.Sync
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("empty.thrift_services_reflection")
+            return _mod.get_reflection__NullService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__empty__thrift_metadata.gen_metadata_service_NullService()
 

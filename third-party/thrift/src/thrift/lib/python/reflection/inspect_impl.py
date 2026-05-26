@@ -21,6 +21,7 @@ from functools import wraps
 from typing import Any, Callable, overload, Type, TypeVar, Union
 
 from thrift.python.exceptions import GeneratedError
+from thrift.python.reflection.services_reflection import ServiceSpec
 from thrift.python.reflection.types_reflection import (
     ListSpec,
     MapSpec,
@@ -33,6 +34,7 @@ from thrift.python.types import (
     ImmutableSet,
     List,
     Map,
+    ServiceInterface,
     Set,
     Struct,
     Union as Union_,
@@ -88,6 +90,12 @@ def inspect(
         Struct, Type[Struct], Union_, Type[Union_], GeneratedError, Type[GeneratedError]
     ],
 ) -> StructSpec: ...
+
+
+@overload
+def inspect(
+    cls_or_instance: Union[ServiceInterface, Type[ServiceInterface]],
+) -> ServiceSpec | None: ...
 
 
 def inspect(cls_or_instance: Any) -> Any:

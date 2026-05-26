@@ -56,6 +56,10 @@ class EchoServiceInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__meta__example__thrift__service__thrift_metadata._fbthrift_metadata_service_response_EchoService()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("EchoService")
+
 
 
     async def echo(
@@ -106,6 +110,10 @@ EchoServiceInterface,
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__meta__example__thrift__service__thrift_metadata._fbthrift_metadata_service_response_ExtendedEchoService()
+
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("ExtendedEchoService")
 
 
 
@@ -158,6 +166,10 @@ class ExtendedMyServiceInterface(
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
         return _fbthrift__meta__example__thrift__service__thrift_metadata._fbthrift_metadata_service_response_ExtendedMyService()
 
+    @staticmethod
+    def __get_reflection__():
+        return _fbthrift_get_services_reflection_module("ExtendedMyService")
+
 
 
     async def putDataById_2(
@@ -173,3 +185,11 @@ class ExtendedMyServiceInterface(
         return_struct = _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedMyService_putDataById_2_result()
         return serialize_iobuf(return_struct, protocol)
 
+
+def _fbthrift_get_services_reflection_module(service_name):
+    try:
+        import importlib
+        _mod = importlib.import_module("meta.example.thrift.service.thrift_services_reflection")
+        return getattr(_mod, f"get_reflection__{service_name}")()
+    except (ImportError, AttributeError):
+        return None

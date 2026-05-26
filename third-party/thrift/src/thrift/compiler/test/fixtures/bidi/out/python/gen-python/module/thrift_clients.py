@@ -49,6 +49,15 @@ class BiDiService(_fbthrift_python_Client["BiDiService.Async", "BiDiService.Sync
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("module.thrift_services_reflection")
+            return _mod.get_reflection__BiDiService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__module__thrift_metadata.gen_metadata_service_BiDiService()
 

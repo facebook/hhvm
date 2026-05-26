@@ -50,6 +50,15 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__MyService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService()
 
@@ -256,6 +265,15 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__MyInteraction()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_MyInteraction()
 
@@ -411,6 +429,15 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__MyInteractionFast()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_MyInteractionFast()
 
@@ -563,6 +590,15 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__SerialInteraction()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_MyService_SerialInteraction()
 
@@ -641,6 +677,15 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
+
+    @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__Factories()
+        except (ImportError, AttributeError):
+            return None
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -849,6 +894,15 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__MyInteraction()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_MyInteraction()
 
@@ -1004,6 +1058,15 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__MyInteractionFast()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_MyInteractionFast()
 
@@ -1156,6 +1219,15 @@ class Factories_SerialInteraction(_fbthrift_python_Client["Factories_SerialInter
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__SerialInteraction()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Factories_SerialInteraction()
 
@@ -1234,6 +1306,15 @@ class Perform(_fbthrift_python_Client["Perform.Async", "Perform.Sync"]):
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
+
+    @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__Perform()
+        except (ImportError, AttributeError):
+            return None
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1359,6 +1440,15 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
+
+    @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__MyInteraction()
+        except (ImportError, AttributeError):
+            return None
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1516,6 +1606,15 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__MyInteractionFast()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_MyInteractionFast()
 
@@ -1668,6 +1767,15 @@ class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteracti
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__SerialInteraction()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_Perform_SerialInteraction()
 
@@ -1746,6 +1854,15 @@ class InteractWithShared(_fbthrift_python_Client["InteractWithShared.Async", "In
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
+
+    @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__InteractWithShared()
+        except (ImportError, AttributeError):
+            return None
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -1873,6 +1990,15 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
+
+    @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__MyInteraction()
+        except (ImportError, AttributeError):
+            return None
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -2030,6 +2156,15 @@ class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWith
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__SharedInteraction()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_InteractWithShared_SharedInteraction()
 
@@ -2162,6 +2297,15 @@ class BoxService(_fbthrift_python_Client["BoxService.Async", "BoxService.Sync"])
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__BoxService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__interactions__module__thrift_metadata.gen_metadata_service_BoxService()
 
@@ -2260,6 +2404,15 @@ class BoxService_BoxedInteraction(_fbthrift_python_Client["BoxService_BoxedInter
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
+
+    @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.interactions.module.thrift_services_reflection")
+            return _mod.get_reflection__BoxedInteraction()
+        except (ImportError, AttributeError):
+            return None
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

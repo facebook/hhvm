@@ -50,6 +50,15 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.basic.module.thrift_services_reflection")
+            return _mod.get_reflection__FooService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__test__fixtures__basic__module__thrift_metadata.gen_metadata_service_FooService()
 
@@ -142,6 +151,15 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
+
+    @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.basic.module.thrift_services_reflection")
+            return _mod.get_reflection__FB303Service()
+        except (ImportError, AttributeError):
+            return None
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -254,6 +272,15 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
+
+    @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.basic.module.thrift_services_reflection")
+            return _mod.get_reflection__MyService()
+        except (ImportError, AttributeError):
+            return None
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -733,6 +760,15 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
+
+    @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("test.fixtures.basic.module.thrift_services_reflection")
+            return _mod.get_reflection__DbMixedStackArguments()
+        except (ImportError, AttributeError):
+            return None
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

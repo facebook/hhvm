@@ -52,6 +52,15 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("meta.example.thrift.service.thrift_services_reflection")
+            return _mod.get_reflection__EchoService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_EchoService()
 
@@ -170,6 +179,15 @@ class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "
         }
 
     @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("meta.example.thrift.service.thrift_services_reflection")
+            return _mod.get_reflection__ExtendedEchoService()
+        except (ImportError, AttributeError):
+            return None
+
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return _fbthrift__meta__example__thrift__service__thrift_metadata.gen_metadata_service_ExtendedEchoService()
 
@@ -286,6 +304,15 @@ class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "Exte
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
+
+    @staticmethod
+    def __get_reflection__():
+        try:
+            import importlib
+            _mod = importlib.import_module("meta.example.thrift.service.thrift_services_reflection")
+            return _mod.get_reflection__ExtendedMyService()
+        except (ImportError, AttributeError):
+            return None
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

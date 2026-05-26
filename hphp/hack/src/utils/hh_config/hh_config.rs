@@ -67,6 +67,8 @@ pub struct HhConfig {
     pub distc_min_worker_memory_gib: i64,
     pub distc_min_cpu_units: i64,
     pub distc_parallel_decl_decode: bool,
+    pub distc_decl_buckets: i64,
+    pub distc_hierarchical_decls: bool,
 }
 
 impl Default for HhConfig {
@@ -93,6 +95,8 @@ impl Default for HhConfig {
             distc_min_worker_memory_gib: 0,
             distc_min_cpu_units: 0,
             distc_parallel_decl_decode: false,
+            distc_decl_buckets: 0,
+            distc_hierarchical_decls: false,
         }
     }
 }
@@ -698,6 +702,12 @@ impl HhConfig {
                 "distc_parallel_decl_decode" => {
                     c.distc_parallel_decl_decode = parse_json(&value)?;
                 }
+                "distc_decl_buckets" => {
+                    c.distc_decl_buckets = parse_json(&value)?;
+                }
+                "distc_hierarchical_decls" => {
+                    c.distc_hierarchical_decls = parse_json(&value)?;
+                }
                 _ => {}
             }
         }
@@ -713,6 +723,7 @@ impl HhConfig {
             "distc_min_worker_memory_gib": self.distc_min_worker_memory_gib,
             "distc_min_cpu_units": self.distc_min_cpu_units,
             "distc_parallel_decl_decode": self.distc_parallel_decl_decode,
+            "distc_hierarchical_decls": self.distc_hierarchical_decls,
         });
         experiments.to_string()
     }

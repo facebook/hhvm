@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashSet;
 use std::sync::Arc;
 
 use decl_parser::DeclParser;
@@ -69,10 +70,22 @@ impl<R: Reason> LazyShallowDeclProvider<R> {
         path: RelativePath,
         decls: impl IntoIterator<Item = NamedDecl<R>>,
     ) -> Result<()> {
-        // dedup, taking the decl which was declared first syntactically
+        let mut seen_classes = HashSet::new();
+        // Dedup same-kind decls, taking the decl which was declared first
+        // syntactically. Also match OCaml's class/type collision behavior:
+        // a class suppresses later typedefs with the same name, but a later
+        // class is still needed so it can be folded.
         let decls = decls
             .into_iter()
-            .unique_by(|decl| (decl.name(), decl.name_kind()));
+            .unique_by(|decl| (decl.name(), decl.name_kind()))
+            .filter(|decl| match decl {
+                NamedDecl::Class(name, _) => {
+                    seen_classes.insert(name.as_symbol());
+                    true
+                }
+                NamedDecl::Typedef(name, _) => !seen_classes.contains(&name.as_symbol()),
+                NamedDecl::Fun(_, _) | NamedDecl::Const(_, _) | NamedDecl::Module(_, _) => true,
+            });
         // dedup with symbols declared in other files
         let decls = self.remove_naming_conflict_losers(path, decls)?;
         self.store.add_decls(decls)?;

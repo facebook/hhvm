@@ -1,0 +1,18 @@
+ERROR: File "duplicate_class_typedef_bad_program.php", line 8, characters 6-15:
+Name already bound: `ClassFirst` (Naming[2012])
+  File "duplicate_class_typedef_bad_program.php", line 7, characters 7-16:
+  Previous definition is here
+ERROR: File "duplicate_class_typedef_bad_program.php", line 11, characters 10-15:
+Typing error (Typing[4429])
+  File "duplicate_class_typedef_bad_program.php", line 11, characters 10-19:
+  Expected `num` because this is used in an arithmetic operation
+  File "duplicate_class_typedef_bad_program.php", line 10, characters 46-55:
+  But got `ClassFirst`
+ERROR: File "duplicate_class_typedef_bad_program.php", line 11, characters 10-19:
+Invalid return type (Typing[4110])
+  File "duplicate_class_typedef_bad_program.php", line 10, characters 66-68:
+  Expected `int`
+  File "duplicate_class_typedef_bad_program.php", line 11, characters 10-19:
+  But got `num` because this is the result of an arithmetic operation with a `num` as the first argument, and no `float`s.
+  File "duplicate_class_typedef_bad_program.php", line 10, characters 46-55:
+  Here is why I think the argument is a `num`: this is a `num`

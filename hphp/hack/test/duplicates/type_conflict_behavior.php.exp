@@ -1,0 +1,32 @@
+name=\class_first, name_type=Class, pos=File "type_conflict_behavior.php", line 3, characters 7-17:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type_conflict_behavior.php", line 3, characters 7-17:)
+   Naming_provider.get_class_canon_name(name): \class_first
+   Decl_provider.get_class(name) |> Option.is_some: true
+   Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "type_conflict_behavior.php", line 3, characters 7-17:
+   Decl_provider.is_this_def_the_winner(name_type,name,pos): winner
+
+name=\class_first, name_type=Typedef, pos=File "type_conflict_behavior.php", line 4, characters 6-16:
+   Naming_provider.typedef_exists(name): false
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type_conflict_behavior.php", line 3, characters 7-17:)
+   Naming_provider.get_typedef_canon_name(name): \class_first
+   Decl_provider.get_typedef(name) |> Option.is_some: false
+   Decl_provider.get_pos_from_decl_of_winner(name_type,name): [none]
+   Decl_provider.is_this_def_the_winner(name_type,name,pos): Loser_to File "type_conflict_behavior.php", line 3, characters 7-17:
+
+name=\type_first, name_type=Class, pos=File "type_conflict_behavior.php", line 7, characters 7-16:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type_conflict_behavior.php", line 7, characters 7-16:)
+   Naming_provider.get_class_canon_name(name): \type_first
+   Decl_provider.get_class(name) |> Option.is_some: true
+   Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "type_conflict_behavior.php", line 7, characters 7-16:
+   Decl_provider.is_this_def_the_winner(name_type,name,pos): winner
+
+name=\type_first, name_type=Typedef, pos=File "type_conflict_behavior.php", line 6, characters 6-15:
+   Naming_provider.typedef_exists(name): false
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type_conflict_behavior.php", line 7, characters 7-16:)
+   Naming_provider.get_typedef_canon_name(name): \type_first
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+   Decl_provider.get_pos_from_decl_of_winner(name_type,name): [none]
+   Decl_provider.is_this_def_the_winner(name_type,name,pos): Loser_to File "type_conflict_behavior.php", line 7, characters 7-16:
+

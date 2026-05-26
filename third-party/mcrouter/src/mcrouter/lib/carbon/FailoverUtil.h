@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <folly/Conv.h>
 #include <folly/Range.h>
 
 #include "mcrouter/lib/mc/protocol.h"

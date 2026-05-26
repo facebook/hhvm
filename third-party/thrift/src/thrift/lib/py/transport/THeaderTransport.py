@@ -39,7 +39,7 @@ except ImportError:
     # If snappy is not available, don't fail immediately.
     # Only raise an error if we actually ever need to perform snappy
     # compression.
-    class DummySnappy(object):
+    class DummySnappy:
         def compress(self, buf):
             raise TTransportException(
                 TTransportException.INVALID_TRANSFORM, "snappy module not available"
@@ -61,7 +61,7 @@ except ImportError:
     # If zstd is not available, don't fail immediately.
     # Only raise an error if we actually ever need to perform zstd
     # compression.
-    class DummyZstd(object):
+    class DummyZstd:
         def ZstdCompressor(self, write_content_size):
             raise TTransportException(
                 TTransportException.INVALID_TRANSFORM, "zstd module not available"
@@ -75,6 +75,29 @@ except ImportError:
     # pyre-fixme[31]: Expression `thrift.transport.THeaderTransport.DummyZstd()` is
     #  not a valid type.
     zstd = DummyZstd()
+
+# Import the lz4 module if it is available
+try:
+    import lz4.block  # @manual
+except ImportError:
+
+    class DummyLz4Block:
+        def compress(self, buf, store_size=True):
+            raise TTransportException(
+                TTransportException.INVALID_TRANSFORM, "lz4 module not available"
+            )
+
+        def decompress(self, buf, uncompressed_size=-1):
+            raise TTransportException(
+                TTransportException.INVALID_TRANSFORM, "lz4 module not available"
+            )
+
+    class _DummyLz4:
+        block = DummyLz4Block()
+
+    # pyre-fixme[31]: Expression `thrift.transport.THeaderTransport._DummyLz4()` is
+    #  not a valid type.
+    lz4 = _DummyLz4()
 
 
 # Definitions from THeader.h
@@ -104,6 +127,7 @@ class TRANSFORM:
     SNAPPY = 0x03
     QLZ = 0x04
     ZSTD = 0x05
+    LZ4 = 0x06
 
 
 class INFO:
@@ -364,7 +388,12 @@ class THeaderTransport(TTransportBase, CReadableTransport):
         # Read the headers.  Data for each header varies.
         for _ in range(0, num_headers):
             trans_id = readVarint(data)
-            if trans_id in (TRANSFORM.ZLIB, TRANSFORM.SNAPPY, TRANSFORM.ZSTD):
+            if trans_id in (
+                TRANSFORM.ZLIB,
+                TRANSFORM.SNAPPY,
+                TRANSFORM.ZSTD,
+                TRANSFORM.LZ4,
+            ):
                 self.__read_transforms.insert(0, trans_id)
             elif trans_id == TRANSFORM.HMAC:
                 raise TApplicationException(
@@ -413,6 +442,10 @@ class THeaderTransport(TTransportBase, CReadableTransport):
                 buf = snappy.compress(buf)
             elif trans_id == TRANSFORM.ZSTD:
                 buf = zstd.ZstdCompressor(write_content_size=True).compress(buf)
+            elif trans_id == TRANSFORM.LZ4:
+                size_prefix = getVarint(len(buf))
+                compressed = lz4.block.compress(buf, store_size=False)
+                buf = size_prefix + compressed
             else:
                 raise TTransportException(
                     TTransportException.INVALID_TRANSFORM,
@@ -428,6 +461,12 @@ class THeaderTransport(TTransportBase, CReadableTransport):
                 buf = snappy.decompress(buf)
             elif trans_id == TRANSFORM.ZSTD:
                 buf = zstd.ZstdDecompressor().decompress(buf)
+            elif trans_id == TRANSFORM.LZ4:
+                bio = StringIO(buf)
+                uncompressed_size = readVarint(bio)
+                buf = lz4.block.decompress(
+                    bio.read(), uncompressed_size=uncompressed_size
+                )
             if trans_id not in self.__write_transforms:
                 self.__write_transforms.append(trans_id)
         return buf

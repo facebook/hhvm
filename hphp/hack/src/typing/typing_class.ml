@@ -1750,7 +1750,7 @@ let check_override_has_parent (c : ('a, 'b) class_) (tc : Cls.t) ~env : unit =
 let check_used_methods_with_override env c (tc : Cls.t) : unit =
   let (class_pos, class_name) = c.c_name in
 
-  let check_override ~is_static (meth_name, ce) =
+  let check_override (meth_name, ce) =
     if
       get_ce_superfluous_override ce
       && not (String.equal ce.ce_origin class_name)
@@ -1771,23 +1771,14 @@ let check_used_methods_with_override env c (tc : Cls.t) : unit =
                    class_name;
                    meth_name;
                    trait_name = ce.ce_origin;
-                   meth_pos =
-                     (let get_meth =
-                        if is_static then
-                          Decl_store.((get ()).get_static_method)
-                        else
-                          Decl_store.((get ()).get_method)
-                      in
-                      match get_meth (ce.ce_origin, meth_name) with
-                      | Some { fe_pos; _ } -> fe_pos
-                      | None -> Pos_or_decl.none);
+                   meth_pos = Lazy.force ce.ce_pos;
                  })
       | _ -> ()
   in
 
   if not Ast_defs.(is_c_trait c.c_kind) then (
-    List.iter (Cls.methods tc) ~f:(check_override ~is_static:false);
-    List.iter (Cls.smethods tc) ~f:(check_override ~is_static:true)
+    List.iter (Cls.methods tc) ~f:check_override;
+    List.iter (Cls.smethods tc) ~f:check_override
   )
 
 (** Check proper usage of the __Override attribute. *)

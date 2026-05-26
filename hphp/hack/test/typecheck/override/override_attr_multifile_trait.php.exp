@@ -1,0 +1,4 @@
+ERROR: File "override_attr_multifile_trait.php--class_file.php", line 3, characters 7-23:
+`OverrideTrait::needsParent` is marked `__Override` but `UsesOverrideTrait` does not define or inherit a `needsParent` method. (Typing[4071])
+  File "override_attr_multifile_trait.php--trait_file.php", line 5, characters 19-29:
+  Declaration of `needsParent` is here

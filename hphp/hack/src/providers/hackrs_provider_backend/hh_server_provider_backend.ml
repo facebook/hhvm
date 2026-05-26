@@ -10,6 +10,8 @@ external register : unit -> unit = "hh_server_provider_backend_register"
 
 let () = register ()
 
+let is_supported = true
+
 external make_ffi :
   root:string ->
   hhi_root:string ->

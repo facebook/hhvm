@@ -6,4 +6,6 @@
  *
  *)
 
+let is_supported = false
+
 let make _ _ = failwith "unimplemented"

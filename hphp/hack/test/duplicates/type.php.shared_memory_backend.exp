@@ -56,7 +56,7 @@ name=\ct, name_type=Typedef, pos=File "type.php--a.php", line 18, characters 6-7
    Naming_provider.typedef_exists(name): false
    Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 17, characters 7-8:)
    Naming_provider.get_typedef_canon_name(name): \ct
-   Decl_provider.get_typedef(name) |> Option.is_some: true
+   Decl_provider.get_typedef(name) |> Option.is_some: false
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): [none]
    Decl_provider.is_this_def_the_winner(name_type,name,pos): Loser_to File "type.php--a.php", line 17, characters 7-8:
 

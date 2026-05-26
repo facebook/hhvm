@@ -270,7 +270,7 @@ let parse_options () =
   let timeout = ref None in
   let set_bool x () = x := Some true in
   let set_bool_ x () = x := true in
-  let rust_provider_backend = ref false in
+  let rust_provider_backend = ref Hh_server_provider_backend.is_supported in
   let skip_hierarchy_checks = ref false in
   let skip_tast_checks = ref false in
   let skip_check_under_dynamic = ref false in
@@ -564,10 +564,6 @@ let parse_options () =
       ( "--batch-files",
         Arg.Set batch_mode,
         " Typecheck each file passed in independently" );
-      ( "--rust-provider-backend",
-        Arg.Set rust_provider_backend,
-        " Use the Rust implementation of Provider_backend (including decl-folding)"
-      );
       ( "--skip-hierarchy-checks",
         Arg.Set skip_hierarchy_checks,
         " Do not apply checks on class hierarchy (override, implements, etc)" );
@@ -768,7 +764,13 @@ let parse_options () =
         let c = Config_file_common.parse_contents setting in
         Config_file_common.apply_overrides ~config ~overrides:c ~log_reason:None)
   in
+  let ( >?? ) x y = Option.value x ~default:y in
   let () = exit_if_invalid_config_keys config in
+  let rust_provider_backend =
+    config
+    |> Config_file.Getters.bool_opt Config_keys.Hhconf.rust_provider_backend
+    >?? !rust_provider_backend
+  in
   let packages_config_path =
     config
     |> Config_file.Getters.string_opt Config_keys.Hhconfig.packages_config_path
@@ -823,7 +825,6 @@ let parse_options () =
         { depth; full_hierarchy = !get_some_file_deps_full_hierarchy }
   | _ -> ());
 
-  let ( >?? ) x y = Option.value x ~default:y in
   let po =
     ParserOptions.
       {
@@ -956,12 +957,12 @@ let parse_options () =
       custom_hhi_path = !custom_hhi_path;
       profile_type_check_multi = !profile_type_check_multi;
       memtrace = !memtrace;
-      rust_provider_backend = !rust_provider_backend;
+      rust_provider_backend;
       naming_table_path = !naming_table;
       packages_config_path;
     },
     root,
-    if !rust_provider_backend then
+    if rust_provider_backend then
       SharedMem.
         {
           !sharedmem_config with
@@ -1554,6 +1555,29 @@ let codemod
     let paths_to_purge =
       Relative_path.Map.keys files_contents |> Relative_path.Set.of_list
     in
+    let names_to_purge =
+      Relative_path.Map.fold
+        files_info
+        ~init:FileInfo.empty_names
+        ~f:(fun path file_info acc ->
+          (* Don't invalidate builtins, otherwise, we can't find them. *)
+          if Relative_path.prefix path |> Relative_path.is_hhi then
+            acc
+          else
+            FileInfo.merge_names
+              acc
+              (FileInfo.ids_to_names file_info.FileInfo.ids))
+    in
+    begin
+      match backend with
+      | Provider_backend.Rust_provider_backend rust_backend ->
+        Rust_provider_backend.Decl.remove_defs rust_backend names_to_purge
+      | Provider_backend.Analysis
+      | Provider_backend.Local_memory _
+      | Provider_backend.Pessimised_shared_memory _
+      | Provider_backend.Shared_memory ->
+        ()
+    end;
     (* Purge the file, then provide its replacement, otherwise the
        replacement is dropped on the floor. *)
     File_provider.remove_batch paths_to_purge;
@@ -1570,6 +1594,8 @@ let codemod
             file_info.FileInfo.ids)
       files_info
   in
+  let final_files_info = ref files_info in
+  let final_files_contents = ref files_contents in
   let rec go files_info files_contents =
     invalidate_heaps_and_update_files files_info files_contents;
     decl_parse_typecheck_and_then files_contents @@ fun files_info ->
@@ -1577,9 +1603,11 @@ let codemod
     let files_contents =
       ServerRenameTypes.apply_patches_to_file_contents files_contents patches
     in
-    if List.is_empty patches then
+    if List.is_empty patches then begin
+      final_files_info := files_info;
+      final_files_contents := files_contents;
       Multifile.print_files_as_multifile files_contents
-    else
+    end else
       go files_info files_contents
   in
   go files_info files_contents;
@@ -1588,8 +1616,8 @@ let codemod
      produce is not garbage. *)
   Printf.printf
     "\nTypechecking after the codemod... (no output after this is good news)\n";
-  invalidate_heaps_and_update_files files_info files_contents;
-  decl_parse_typecheck_and_then files_contents ignore
+  invalidate_heaps_and_update_files !final_files_info !final_files_contents;
+  decl_parse_typecheck_and_then !final_files_contents ignore
 
 (** Enables testing of eager quickfixes (Quickfix.Eager).
   Prefer using `--ide-code-actions` for more realistic tests that don't care about eagerness *)
@@ -2527,8 +2555,6 @@ let decl_and_run_mode
         end
       ~init:files_contents
   in
-  Relative_path.Map.iter files_contents ~f:(fun filename contents ->
-      File_provider.(provide_file_for_tests filename contents));
   (* Don't declare all the filenames in batch_errors mode *)
   let to_decl =
     if batch_mode then
@@ -2585,6 +2611,8 @@ let decl_and_run_mode
         ~tcopt
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
+  Relative_path.Map.iter files_contents ~f:(fun filename contents ->
+      File_provider.(provide_file_for_tests filename contents));
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
      so it will look in the sqlite database for names it doesn't know.
      This function returns the forward naming table. *)

@@ -441,7 +441,7 @@ let () =
 
   let interpret_soft_types_as_like_types = ref false in
   let everything_sdt = ref false in
-  let rust_provider_backend = ref false in
+  let rust_provider_backend = ref Hh_server_provider_backend.is_supported in
   let enable_class_pointer_hint = ref true in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
@@ -480,10 +480,9 @@ let () =
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         "Interpret <<__Soft>> type hints as like types" );
-      ( "--rust-provider-backend",
-        Arg.Set rust_provider_backend,
-        " Use the Rust implementation of Provider_backend (including decl-folding)"
-      );
+      ( "--no-rust-provider-backend",
+        Arg.Clear rust_provider_backend,
+        " Use the shared-memory implementation of Provider_backend" );
       ( "--enable-class-pointer-hint",
         Arg.Bool (fun x -> enable_class_pointer_hint := x),
         " Killswitch to interpret class<T> hint as class<T> type when true, classname<T> when false"

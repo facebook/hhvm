@@ -177,7 +177,6 @@ class ListTests(unittest.TestCase):
 
     def test_list_add(self) -> None:
         other_list = [99, 88, 77, 66, 55]
-        # pyre-fixme[58]: Thrift List supports + but typed as Sequence
         new_list = self.int_list + other_list
         self.assertIsInstance(new_list, list)
         # Insure the items from both lists are in the new_list
@@ -185,7 +184,6 @@ class ListTests(unittest.TestCase):
 
     def test_list_radd(self) -> None:
         other_list = [99, 88, 77, 66, 55]
-        # pyre-fixme[58]: Thrift List supports + but typed as Sequence
         new_list = other_list + self.int_list
         self.assertIsInstance(new_list, list)
         self.assertEqual(new_list, list(itertools.chain(other_list, self.int_list)))

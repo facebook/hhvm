@@ -14,6 +14,7 @@
 
 # pyre-strict
 
+import concurrent.futures
 import copy
 import pickle
 import threading
@@ -22,13 +23,16 @@ from typing import TypeVar
 
 from test_thrift.thrift_mutable_types import (
     easy,
+    EasyList,
     Integers,
     Nested1,
     Nested2,
     Nested3,
     OptionalColorGroups,
+    StrEasyMap,
 )
 from thrift.lib.python.test.testing_utils import run_concurrently
+from thrift.python.mutable_containers import MutableList, MutableMap
 from thrift.python.mutable_serializer import deserialize, serialize
 from thrift.python.mutable_types import (
     MutableStructOrUnion,
@@ -266,6 +270,84 @@ class FreeThreading_MutableStructTests(unittest.TestCase):
             dict(color_groups.color_map) if color_groups.color_map is not None else {},
         )
         self.assertEqual(expected_state, actual_state)
+
+    def test_prebuilt_struct_elements_append_from_multiple_threads_preserves_values(
+        self,
+    ) -> None:
+        # GIVEN
+        prebuilt_items = [
+            easy(val=1, name="primitive-1"),
+            easy(val=2, name="primitive-2"),
+            easy(val=101, name="container-101", val_list=to_thrift_list([101, 201])),
+            easy(val=102, name="container-102", val_list=to_thrift_list([102, 202])),
+        ]
+        expected_values = [
+            (1, "primitive-1", ()),
+            (2, "primitive-2", ()),
+            (101, "container-101", (101, 201)),
+            (102, "container-102", (102, 202)),
+        ]
+        empty_items: list[easy] = []
+        # Prebuilt structs already exist. This test covers only the outer container operation.
+        easy_list: MutableList[easy] = EasyList(to_thrift_list(empty_items))
+        start_barrier: threading.Barrier = threading.Barrier(len(prebuilt_items))
+
+        def worker(item: easy) -> None:
+            start_barrier.wait()
+            easy_list.append(item)
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(prebuilt_items)
+        ) as executor:
+            list(executor.map(worker, prebuilt_items))
+
+        # THEN
+        actual_values = sorted(self._struct_value(item) for item in easy_list)
+        self.assertEqual(expected_values, actual_values)
+
+    def test_prebuilt_struct_elements_map_assign_from_multiple_threads_preserves_values(
+        self,
+    ) -> None:
+        # GIVEN
+        items_by_key = {
+            "key-1": easy(val=1, name="primitive-1"),
+            "key-2": easy(val=2, name="primitive-2"),
+            "key-101": easy(
+                val=101, name="container-101", val_list=to_thrift_list([101, 201])
+            ),
+            "key-102": easy(
+                val=102, name="container-102", val_list=to_thrift_list([102, 202])
+            ),
+        }
+        expected_values = {
+            "key-1": (1, "primitive-1", ()),
+            "key-2": (2, "primitive-2", ()),
+            "key-101": (101, "container-101", (101, 201)),
+            "key-102": (102, "container-102", (102, 202)),
+        }
+        empty_items: dict[str, easy] = {}
+        # Prebuilt structs already exist. This test covers only the outer container operation.
+        easy_map: MutableMap[str, easy] = StrEasyMap(to_thrift_map(empty_items))
+        start_barrier: threading.Barrier = threading.Barrier(len(items_by_key))
+
+        def worker(key_and_item: tuple[str, easy]) -> None:
+            key, item = key_and_item
+            start_barrier.wait()
+            easy_map[key] = item
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(items_by_key)
+        ) as executor:
+            list(executor.map(worker, items_by_key.items()))
+
+        # THEN
+        actual_values = {key: self._struct_value(easy_map[key]) for key in easy_map}
+        self.assertEqual(expected_values, actual_values)
+
+    def _struct_value(self, item: easy) -> tuple[int, str | None, tuple[int, ...]]:
+        return item.val, item.name, tuple(item.val_list)
 
     def test_pickle_same_struct_from_multiple_threads(self) -> None:
         def worker(s1: Nested1) -> None:

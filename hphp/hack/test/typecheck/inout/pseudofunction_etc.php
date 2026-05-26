@@ -1,6 +1,6 @@
 <?hh
 
-function hgoldstein(inout int $x, dynamic $v): void {
+function hgoldstein(inout bool $x, dynamic $v): void {
   invariant(inout $x, 'foo');
   HH\FIXME\UNSAFE_CAST<dynamic, dynamic>(inout $x);
   unset(inout $x);

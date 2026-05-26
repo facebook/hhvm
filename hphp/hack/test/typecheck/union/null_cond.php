@@ -13,7 +13,7 @@ function testit(bool $b):int {
       break;
     }
   }
-  if (!$x) {
+  if ($x === null) {
     return 2;
   }
   return 3;

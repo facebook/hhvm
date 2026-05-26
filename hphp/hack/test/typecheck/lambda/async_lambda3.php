@@ -12,5 +12,5 @@
 function f(): void {
   $x = async $v ==> $v;
   /* HH_IGNORE_ERROR[4273] */
-  if ($x(true)) {}
+  $x(true);
 }

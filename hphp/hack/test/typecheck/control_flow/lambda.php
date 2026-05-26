@@ -76,9 +76,9 @@ function f(bool $b): (F, F) {
 
     expect_B($x);
     expect_B($y);
-    list($a, $b) = $f(new A());
-    expect_H($a);
-    expect_H($b);
+    list($h1, $h2) = $f(new A());
+    expect_H($h1);
+    expect_H($h2);
     expect_B($x);
     expect_B($y);
   }

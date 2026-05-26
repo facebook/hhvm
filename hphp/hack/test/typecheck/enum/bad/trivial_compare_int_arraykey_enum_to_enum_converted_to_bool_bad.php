@@ -5,10 +5,10 @@ enum X: int {
   B = 1;
 }
 
-function f1(X $x): bool {
-  return (!$x === X::A);
+function f1(X $x, bool $b): bool {
+  return ($b === X::A);
 }
 
-function f2(X $x): bool {
-  return ($x === !X::A);
+function f2(X $x, bool $b): bool {
+  return ($x === $b);
 }

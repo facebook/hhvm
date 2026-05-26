@@ -19,7 +19,7 @@
          m_body =
          { fb_ast =
            [([7:5-9:6],
-             (If (((?int), [7:9-19], (Obj_get (((this), [7:9-14], This), ((?int), [7:16-19], (Id ([7:16-19], "foo"))), Regular, Is_prop))),
+             (If (((bool), [7:9-30], (Is (((?int), [7:9-19], (Obj_get (((this), [7:9-14], This), ((?int), [7:16-19], (Id ([7:16-19], "foo"))), Regular, Is_prop))), ([7:23-30], Hnonnull)))),
                 [([8:7-18], (Expr ((int), [8:7-17], (Obj_get (((this), [8:7-12], This), ((int), [8:14-17], (Id ([8:14-17], "foo"))), Regular, Is_prop)))))], 
                 [([Pos.none], Noop)])))
              ]

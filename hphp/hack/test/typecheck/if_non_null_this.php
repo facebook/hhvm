@@ -12,7 +12,7 @@
 
 function initDB(?int $x): int {
   try {
-    while($x) {
+    while($x !== null) {
       $x = '';
     }
     $x = '';

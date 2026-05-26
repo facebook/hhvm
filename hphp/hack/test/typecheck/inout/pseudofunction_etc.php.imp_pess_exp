@@ -1,6 +1,6 @@
 WARN: File "pseudofunction_etc.php", line 9, characters 20-22:
 Property accessed on a value of type `dynamic` (Warn[12042])
-  File "pseudofunction_etc.php", line 3, characters 35-41:
+  File "pseudofunction_etc.php", line 3, characters 36-42:
   This expression has type `dynamic`
 ERROR: File "pseudofunction_etc.php", line 6, characters 9-13:
 You cannot use this syntax in an `unset()` expression. (Parsing[1002])

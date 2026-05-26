@@ -10,6 +10,6 @@
  */
 
 // This should be disallowed -- PHP will parse it wrong.
-function bar<T>(T $x) : T {
+function bar(bool $x) : bool {
   return $x ? $x : $x ? $x : $x;
 }

@@ -1,6 +1,6 @@
 WARN: File "pseudofunction_etc.php", line 9, characters 20-22:
 Property accessed on a value of type `dynamic` (Warn[12042])
-  File "pseudofunction_etc.php", line 3, characters 35-41:
+  File "pseudofunction_etc.php", line 3, characters 36-42:
   This expression has type `dynamic`
 ERROR: File "pseudofunction_etc.php", line 6, characters 9-13:
 You cannot use this syntax in an `unset()` expression. (Parsing[1002])
@@ -28,8 +28,8 @@ Unexpected `inout` annotation for argument (Typing[4183])
   This is a normal parameter (does not have `inout`)
 ERROR: File "pseudofunction_etc.php", line 5, characters 48-49:
 Invalid assignment to an `inout` parameter (Typing[4337])
-  File "pseudofunction_etc.php", line 3, characters 27-29:
-  Expected `int` (`inout` parameter)
+  File "pseudofunction_etc.php", line 3, characters 27-30:
+  Expected `bool` (`inout` parameter)
   File "pseudofunction_etc.php", line 5, characters 24-30:
   But got `dynamic`
   File "soundness.hhi", line 32, characters 3-5:

@@ -50,8 +50,8 @@ function binops(int $a, int $b): void {
 }
 
 // TEST-CHECK-1: define $root.unops
-// CHECK: define $root.unops($this: *void, $a: .notnull *HackInt) : *void {
-function unops(int $a): void {
+// CHECK: define $root.unops($this: *void, $a: .notnull *HackBool) : *void {
+function unops(bool $a): void {
   // TEST-CHECK-1*: $builtins.hhbc_not
   // CHECK:   n1 = $builtins.hhbc_not(n0)
   $c = ! $a;

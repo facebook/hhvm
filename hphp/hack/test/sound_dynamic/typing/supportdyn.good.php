@@ -24,7 +24,7 @@ function expr(supportdyn<mixed> $sd): void {
 }
 
 function stmt(\HH\supportdyn<mixed> $sd): void {
-  if ($sd) {}
+  if ($sd is nonnull) {}
   switch ($sd) {
     case 42:
       break;

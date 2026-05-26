@@ -5,62 +5,62 @@ function make_tvaropt<T>(): ?T {
 }
 
 // This test mimicks something found in www
-function test(bool $b, int $e): void {
+function test(bool $cond, bool $b, int $e): void {
   $a = 0;
   $b = true;
   $c = 1;
   $d = false;
   $e = vec[];
 
-  while ($b) {
+  while ($cond) {
     // a dependency chain to typecheck this loop block multiple times
     $a = $b;
     $b = $c;
     $c = $d;
     $d = $e;
 
-    if ($b) {
+    if ($cond) {
       $x = make_tvaropt();
-    } else if ($b) {
+    } else if ($cond) {
       $x = null;
-    } else if ($b) {
+    } else if ($cond) {
       $x = make_tvaropt();
     } else {
       $x = null;
     }
 
-    if ($b) {
+    if ($cond) {
       return;
     }
 
-    if ($b) {
+    if ($cond) {
       $x = make_tvaropt();
     } else {
       $x = null;
     }
 
-    if ($b) {
+    if ($cond) {
       return;
     }
 
-    if ($b) {
+    if ($cond) {
       $x = make_tvaropt();
-    } else if ($b) {
+    } else if ($cond) {
       $x = null;
-    } else if ($b) {
+    } else if ($cond) {
       $x = make_tvaropt();
-    } else if ($b) {
+    } else if ($cond) {
       $x = null;
-    } else if ($b) {
+    } else if ($cond) {
       $x = make_tvaropt();
-    } else if ($b) {
+    } else if ($cond) {
       $x = null;
-    } else if ($b) {
+    } else if ($cond) {
       $x = make_tvaropt();
     } else {
       $x = null;
     }
-    if ($b) {
+    if ($cond) {
       return;
     }
   }

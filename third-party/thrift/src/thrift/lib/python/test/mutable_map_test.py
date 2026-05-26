@@ -1076,3 +1076,29 @@ class MutableMapTypedefTest(unittest.TestCase):
 
         # THEN
         self.assertIn(dict(assigned), allowed_outcomes)
+
+    def test_shared_python_map_key_addition_during_assignment_produces_valid_values(
+        self,
+    ) -> None:
+        # GIVEN
+        allowed_outcomes = [{"a": 1, "b": 2}, {"a": 1, "b": 2, "c": 99}]
+        shared: dict[str, int] = {"a": 1, "b": 2}
+        start_barrier: threading.Barrier = threading.Barrier(2)
+
+        def assign_shared_map() -> MutableMap[str, int]:
+            start_barrier.wait()
+            return StrIntMap(to_thrift_map(shared))
+
+        def add_key_to_shared_map() -> None:
+            start_barrier.wait()
+            shared["c"] = 99
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            assign_future = executor.submit(assign_shared_map)
+            mutate_future = executor.submit(add_key_to_shared_map)
+            assigned = assign_future.result()
+            mutate_future.result()
+
+        # THEN
+        self.assertIn(dict(assigned), allowed_outcomes)

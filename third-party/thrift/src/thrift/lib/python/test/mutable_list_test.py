@@ -683,6 +683,32 @@ class MutableListTypedefTest(unittest.TestCase):
         # THEN
         self.assertIn(list(assigned), allowed_outcomes)
 
+    def test_shared_python_list_append_during_assignment_produces_valid_values(
+        self,
+    ) -> None:
+        # GIVEN
+        allowed_outcomes = [[1, 2, 3], [1, 2, 3, 99]]
+        shared: list[int] = [1, 2, 3]
+        start_barrier: threading.Barrier = threading.Barrier(2)
+
+        def assign_shared_list() -> MutableList[int]:
+            start_barrier.wait()
+            return I32List(to_thrift_list(shared))
+
+        def append_to_shared_list() -> None:
+            start_barrier.wait()
+            shared.append(99)
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            assign_future = executor.submit(assign_shared_list)
+            mutate_future = executor.submit(append_to_shared_list)
+            assigned = assign_future.result()
+            mutate_future.result()
+
+        # THEN
+        self.assertIn(list(assigned), allowed_outcomes)
+
     def test_str_list_2d(self) -> None:
         """
         typedef list<list<string>> StrList2D

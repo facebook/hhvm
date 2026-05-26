@@ -683,3 +683,35 @@ class MutableSetTypedefTest(unittest.TestCase):
 
         # THEN
         self.assertEqual(expected_exception_types, actual_exception_types)
+
+    def test_shared_python_set_add_during_assignment_allows_exception_or_valid_values(
+        self,
+    ) -> None:
+        # GIVEN
+        allowed_outcomes = [{1, 2, 3}, {1, 2, 3, 99}]
+        allowed_exception_message = "changed size during iteration"
+        shared: set[int] = {1, 2, 3}
+        start_barrier: threading.Barrier = threading.Barrier(2)
+
+        def assign_shared_set() -> MutableSet[int]:
+            start_barrier.wait()
+            return SetI32(to_thrift_set(shared))
+
+        def mutate_shared_set() -> None:
+            start_barrier.wait()
+            shared.add(99)
+
+        # WHEN
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            assign_future = executor.submit(assign_shared_set)
+            mutate_future = executor.submit(mutate_shared_set)
+            try:
+                assigned = assign_future.result()
+            except RuntimeError as error:
+                mutate_future.result()
+                self.assertIn(allowed_exception_message, str(error))
+                return
+            mutate_future.result()
+
+        # THEN
+        self.assertIn(set(assigned), allowed_outcomes)

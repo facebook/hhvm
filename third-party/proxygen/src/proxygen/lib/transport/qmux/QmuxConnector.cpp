@@ -235,12 +235,25 @@ folly::coro::Task<QmuxSession::Ptr> QmuxConnector::connect(
   auto initialIngress = ingressBuf.empty() ? nullptr : ingressBuf.move();
   const uint64_t peerMaxRecordSize = peerParams->maxRecordSize;
 
+  // The minimum of the two advertised values, where 0 means "no advertised
+  // limit".
+  uint64_t effectiveMaxIdleTimeoutMs = 0;
+  if (selfParams.maxIdleTimeout > 0 && peerParams->maxIdleTimeout > 0) {
+    effectiveMaxIdleTimeoutMs =
+        std::min(selfParams.maxIdleTimeout, peerParams->maxIdleTimeout);
+  } else if (selfParams.maxIdleTimeout > 0) {
+    effectiveMaxIdleTimeoutMs = selfParams.maxIdleTimeout;
+  } else {
+    effectiveMaxIdleTimeoutMs = peerParams->maxIdleTimeout;
+  }
+
   co_return std::make_shared<QmuxSession>(evb,
                                           dir,
                                           std::move(selfParams),
                                           std::move(transport),
                                           std::move(wtConfig),
                                           peerMaxRecordSize,
+                                          effectiveMaxIdleTimeoutMs,
                                           std::move(initialIngress),
                                           sessionConfig);
 }

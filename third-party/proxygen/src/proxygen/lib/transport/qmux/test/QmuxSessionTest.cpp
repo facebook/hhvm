@@ -248,6 +248,7 @@ class QmuxSessionTest : public ::testing::Test {
                                              std::move(transport),
                                              std::move(wtConfig),
                                              peerParams.maxRecordSize,
+                                             /*effectiveMaxIdleTimeoutMs=*/0,
                                              /*initialIngress=*/nullptr,
                                              QmuxSession::Config{});
     selfParams_ = selfParams;
@@ -422,6 +423,7 @@ TEST_F(QmuxSessionTest, InitialIngress_IsDrainedOnStartup) {
                                                std::move(transport),
                                                std::move(wtConfig),
                                                kDefaultMaxRecordSize,
+                                               /*effectiveMaxIdleTimeoutMs=*/0,
                                                std::move(preroll),
                                                QmuxSession::Config{});
   auto handler = std::make_unique<TestWtHandler>();
@@ -430,6 +432,48 @@ TEST_F(QmuxSessionTest, InitialIngress_IsDrainedOnStartup) {
   drain();
 
   EXPECT_EQ(handler->newBidiStreamIds, std::vector<uint64_t>{kPeerBidiId});
+
+  // Clean shutdown.
+  rawTransport->addReadEvent(nullptr, /*eof=*/true);
+  drain();
+}
+
+TEST_F(QmuxSessionTest, IdleTimer_NotArmedWhenEffectiveTimeoutZero) {
+  EXPECT_FALSE(session_->isIdleTimeoutScheduled());
+}
+
+TEST_F(QmuxSessionTest, IdleTimer_ArmedWhenEffectiveTimeoutNonzero) {
+  auto state = std::make_unique<TestCoroTransport::State>();
+  auto transport = std::make_unique<TestCoroTransport>(&evb_, state.get());
+  auto* rawTransport = transport.get();
+
+  WtStreamManager::WtConfig wtConfig{.selfMaxStreamsBidi = kSelfMaxStreams,
+                                     .selfMaxStreamsUni = kSelfMaxStreams,
+                                     .selfMaxConnData = 1 << 20,
+                                     .selfMaxStreamDataBidi = 1 << 16,
+                                     .selfMaxStreamDataUni = 1 << 16,
+                                     .peerMaxStreamsBidi = 5,
+                                     .peerMaxStreamsUni = 5,
+                                     .peerMaxConnData = 1 << 20,
+                                     .peerMaxStreamDataBidi = 1 << 16,
+                                     .peerMaxStreamDataUni = 1 << 16};
+
+  auto session = std::make_shared<QmuxSession>(&evb_,
+                                               WtDir::Server,
+                                               selfParams_,
+                                               std::move(transport),
+                                               std::move(wtConfig),
+                                               kDefaultMaxRecordSize,
+                                               /*effectiveMaxIdleTimeoutMs=*/
+                                               30'000,
+                                               /*initialIngress=*/nullptr,
+                                               QmuxSession::Config{});
+  auto handler = std::make_unique<TestWtHandler>();
+  session->setHandler(handler.get());
+  session->start(session);
+  drain();
+
+  EXPECT_TRUE(session->isIdleTimeoutScheduled());
 
   // Clean shutdown.
   rawTransport->addReadEvent(nullptr, /*eof=*/true);

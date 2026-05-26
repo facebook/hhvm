@@ -45,6 +45,7 @@ proxygen_add_library(proxygen_transport_qmux_qmux_session
     proxygen_http_webtransport_wt_stream_manager
     proxygen_http_webtransport_wt_util
     proxygen_transport_qmux_qmux_framer
+    Folly::folly_io_async_async_base
 )
 
 proxygen_add_library(proxygen_transport_qmux_qmux_connector

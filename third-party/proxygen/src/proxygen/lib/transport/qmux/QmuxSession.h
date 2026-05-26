@@ -9,6 +9,7 @@
 #pragma once
 
 #include <deque>
+#include <folly/io/async/HHWheelTimer.h>
 #include <proxygen/lib/http/coro/util/CoroWtSession.h>
 #include <proxygen/lib/http/webtransport/WtStreamManager.h>
 #include <proxygen/lib/http/webtransport/WtUtils.h>
@@ -41,6 +42,7 @@ class QmuxSession
               std::unique_ptr<folly::coro::TransportIf> transport,
               WtStreamManager::WtConfig wtConfig,
               uint64_t peerMaxRecordSize,
+              uint64_t effectiveMaxIdleTimeoutMs,
               std::unique_ptr<folly::IOBuf> initialIngress,
               Config config);
   ~QmuxSession() override;
@@ -67,6 +69,10 @@ class QmuxSession
     return peerAddr_;
   }
 
+  [[nodiscard]] bool isIdleTimeoutScheduled() const noexcept {
+    return idleTimeout_.isScheduled();
+  }
+
  private:
   friend class QmuxCallback;
   folly::coro::Task<void> readLoop(Ptr self);
@@ -74,17 +80,35 @@ class QmuxSession
   void readLoopFinished() noexcept;
   void writeLoopFinished() noexcept;
 
+  void resetIdleTimeout();
+  void onIdleTimeout();
+
+  class IdleTimeoutCallback : public folly::HHWheelTimer::Callback {
+   public:
+    explicit IdleTimeoutCallback(QmuxSession& session) noexcept
+        : session_(session) {
+    }
+    void timeoutExpired() noexcept override {
+      session_.onIdleTimeout();
+    }
+
+   private:
+    QmuxSession& session_;
+  };
+
   WebTransportHandler* wtHandler_{nullptr};
   folly::SocketAddress localAddr_;
   folly::SocketAddress peerAddr_;
   folly::CancellationSource cs_;
   std::unique_ptr<folly::coro::TransportIf> transport_;
   QxTransportParams selfParams_;
+  uint64_t effectiveMaxIdleTimeoutMs_;
   std::unique_ptr<folly::IOBuf> initialIngress_;
   std::deque<std::unique_ptr<folly::IOBuf>> pendingDatagrams_;
   std::vector<QxPing> pendingPongs_;
   uint64_t peerMaxRecordSize_;
   Config config_;
+  IdleTimeoutCallback idleTimeout_{*this};
   bool readLoopDone_ : 1 {false};
   bool writeLoopDone_ : 1 {false};
 };

@@ -111,6 +111,7 @@ QmuxSession::QmuxSession(folly::EventBase* evb,
                          std::unique_ptr<folly::coro::TransportIf> transport,
                          WtStreamManager::WtConfig wtConfig,
                          uint64_t peerMaxRecordSize,
+                         uint64_t effectiveMaxIdleTimeoutMs,
                          std::unique_ptr<folly::IOBuf> initialIngress,
                          Config config)
     : CoroWtSessionBase(dir, wtConfig),
@@ -119,6 +120,7 @@ QmuxSession::QmuxSession(folly::EventBase* evb,
       peerAddr_(transport->getPeerAddress()),
       transport_(std::move(transport)),
       selfParams_(std::move(selfParams)),
+      effectiveMaxIdleTimeoutMs_(effectiveMaxIdleTimeoutMs),
       initialIngress_(std::move(initialIngress)),
       peerMaxRecordSize_(peerMaxRecordSize),
       config_(config) {
@@ -165,6 +167,8 @@ folly::coro::Task<void> QmuxSession::readLoop(Ptr self) {
   codec.setMaxRecordSize(self->selfParams_.maxRecordSize);
   folly::IOBufQueue ingressBuf{folly::IOBufQueue::cacheChainLength()};
 
+  resetIdleTimeout();
+
   while (!sm.isClosed()) {
     bool eom = false;
     if (initialIngress_) {
@@ -173,17 +177,19 @@ folly::coro::Task<void> QmuxSession::readLoop(Ptr self) {
       codec.onIngress(std::move(initialIngress_));
     } else {
       // minReadSize and newAllocationSize copied from CoroWtSession::readLoop.
+      // timeout=0 = wait indefinitely; idleTimeout_ enforces the deadline.
       auto readRes = co_await co_awaitTry(
           transport_->read(ingressBuf,
                            /*minReadSize=*/1460,
                            /*newAllocationSize=*/4000,
-                           /*timeout=*/config_.readTimeout));
+                           /*timeout=*/std::chrono::milliseconds(0)));
       if (readRes.hasException()) {
         XLOG(DBG4) << __func__ << "; ex=" << readRes.exception();
         break;
       }
       eom = (*readRes == 0);
       codec.onIngress(ingressBuf.move());
+      resetIdleTimeout();
     }
 
     if (wtHandler_) {
@@ -194,10 +200,29 @@ folly::coro::Task<void> QmuxSession::readLoop(Ptr self) {
       break;
     }
   }
+  idleTimeout_.cancelTimeout();
   XLOG(DBG4) << "QmuxSession::readLoop exiting";
   sm.shutdown(WtStreamManager::CloseSession{.err = 0x00,
                                             .msg = "stream ingress closed"});
   readLoopFinished();
+}
+
+void QmuxSession::resetIdleTimeout() {
+  if (effectiveMaxIdleTimeoutMs_ == 0) {
+    // Neither endpoint advertised a non-zero max_idle_timeout, so the
+    // connection has no idle deadline. Nothing to do.
+    return;
+  }
+  idleTimeout_.cancelTimeout();
+  evb()->timer().scheduleTimeout(
+      &idleTimeout_, std::chrono::milliseconds(effectiveMaxIdleTimeoutMs_));
+}
+
+void QmuxSession::onIdleTimeout() {
+  XLOG(DBG4) << "QmuxSession::onIdleTimeout sess=" << this
+             << " effectiveMaxIdleTimeoutMs=" << effectiveMaxIdleTimeoutMs_;
+  cs_.requestCancellation();
+  sm.shutdown(WtStreamManager::CloseSession{.err = 0, .msg = "idle timeout"});
 }
 
 folly::coro::Task<void> QmuxSession::writeLoop(Ptr self) {
@@ -278,6 +303,10 @@ folly::coro::Task<void> QmuxSession::writeLoop(Ptr self) {
         XLOG(DBG4) << __func__ << "; ex=" << writeRes.exception();
         break;
       }
+      // QMux draft "Closing the Connection": endpoints reset the idle
+      // timer when sending or receiving QMux frames. The frames just
+      // flushed satisfy the egress half of that rule.
+      self->resetIdleTimeout();
     }
   }
 

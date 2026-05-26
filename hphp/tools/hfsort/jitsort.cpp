@@ -35,7 +35,7 @@ constexpr uint32_t kPageSize = 2 << 20;
 
 using Group2BaseMap = std::map<uint32_t,std::vector<TargetId>>;
 
-void error(const char* msg) {
+[[noreturn]] void error(const char* msg) {
   Logger::Error("JitSort: %s\n", msg);
   throw std::exception();
 }

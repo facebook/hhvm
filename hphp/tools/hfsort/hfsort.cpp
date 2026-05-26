@@ -35,7 +35,7 @@ namespace HPHP::hfsort {
 constexpr uint32_t BUFLEN = 24000;
 constexpr uint32_t kPageSize = 2 << 20;
 
-void error(const char* msg) {
+[[noreturn]] void error(const char* msg) {
   printf("ERROR: %s\n", msg);
   exit(1);
 }

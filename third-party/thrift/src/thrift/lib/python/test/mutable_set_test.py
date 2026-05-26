@@ -603,13 +603,12 @@ class MutableSetTypedefTest(unittest.TestCase):
         # container type, or it should be wrapped with `to_thrift_set()`.
         # Otherwise, it will result in both runtime and Pyre errors.
         with self.assertRaisesRegex(TypeError, self.TYPE_ERROR_MESSAGE):
-            # pyre-fixme[20]: Argument `set_data` expected.
+            # pyre-ignore[6]: Plain Python sets are invalid typedef inputs.
             _ = SetI32({1, 2, 3})
 
         # Initialize with `to_thrift_set()` and verify that the initial
         # Python set `s` and the MutableSet `seti32` are separate sets.
         s = {1, 2, 3}
-        # pyre-fixme[20]: Argument `set_data` expected.
         seti32: MutableSet[int] = SetI32(to_thrift_set(s))
         self.assertEqual({1, 2, 3}, seti32)
 

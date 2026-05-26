@@ -599,13 +599,12 @@ class MutableListTypedefTest(unittest.TestCase):
         # container type, or it should be wrapped with `to_thrift_list()`.
         # Otherwise, it will result in both runtime and Pyre errors.
         with self.assertRaisesRegex(TypeError, self.TYPE_ERROR_MESSAGE):
-            # pyre-fixme[20]: Argument `list_data` expected.
+            # pyre-ignore[6]: Plain Python lists are invalid typedef inputs.
             _ = I32List([1, 2, 3])
 
         # Initialize with `to_thrift_list()` and verify that the initial
         # Python list `lst` and the MutableList `i32list` are separate lists.
         lst = [1, 2, 3]
-        # pyre-fixme[20]: Argument `list_data` expected.
         i32list: MutableList[int] = I32List(to_thrift_list(lst))
         self.assertEqual([1, 2, 3], i32list)
 
@@ -621,13 +620,12 @@ class MutableListTypedefTest(unittest.TestCase):
         # container type, or it should be wrapped with `to_thrift_list()`.
         # Otherwise, it will result in both runtime and Pyre errors.
         with self.assertRaisesRegex(TypeError, self.TYPE_ERROR_MESSAGE):
-            # pyre-fixme[20]: Argument `list_data` expected.
+            # pyre-ignore[6]: Plain Python lists are invalid typedef inputs.
             _ = StrList2D([["a", "b"], ["c", "d"]])
 
         # Initialize with `to_thrift_list()` and verify that the initial
         # Python list `lst` and the MutableList `strlist2d` are separate lists.
         lst = [["a", "b"], ["c", "d"]]
-        # pyre-fixme[20]: Argument `list_data` expected.
         strlist2d: MutableList[MutableList[str]] = StrList2D(to_thrift_list(lst))
         self.assertEqual([["a", "b"], ["c", "d"]], strlist2d)
 
@@ -641,9 +639,7 @@ class MutableListTypedefTest(unittest.TestCase):
         """
         # Initializing the typedef container with the same mutable container
         # carries reference semantics.
-        # pyre-fixme[20]: Argument `list_data` expected.
         strlist2d_1 = StrList2D(to_thrift_list([["a"], ["c"]]))
-        # pyre-fixme[20]: Argument `list_data` expected.
         strlist2d_2 = StrList2D(strlist2d_1)
 
         self.assertEqual(strlist2d_1, strlist2d_2)
@@ -663,11 +659,10 @@ class MutableListTypedefTest(unittest.TestCase):
         # container type, or it should be wrapped with `to_thrift_list()`.
         # Otherwise, it will result in both runtime and Pyre errors.
         with self.assertRaisesRegex(TypeError, self.TYPE_ERROR_MESSAGE):
-            # pyre-fixme[20]: Argument `list_data` expected.
+            # pyre-ignore[6]: Plain Python lists are invalid typedef inputs.
             _ = ListOfStrToI32Map([{"a": 1, "b": 2}])
 
         lst = [{"a": 1, "b": 2}]
-        # pyre-fixme[20]: Argument `list_data` expected.
         strlist2d: MutableList[MutableMap[str, int]] = ListOfStrToI32Map(
             to_thrift_list(lst)
         )
@@ -685,7 +680,6 @@ class MutableListTypedefTest(unittest.TestCase):
         # If the elements are structured types, `to_thrift_list()` does not
         # deep-copy them; they carry reference semantics.
         lst = [easy(val=1), easy(val=2), easy(val=3)]
-        # pyre-fixme[20]: Argument `list_data` expected.
         easylist: MutableList[easy] = EasyList(to_thrift_list(lst))
         self.assertIs(lst[0], easylist[0])
         self.assertIs(lst[1], easylist[1])
@@ -701,7 +695,6 @@ class MutableListTypedefTest(unittest.TestCase):
         """
         typedef list<i32> I32List
         """
-        # pyre-fixme[20]: Argument `list_data` expected.
         i32list: MutableList[int] = I32List(to_thrift_list([]))
         self.assertEqual([], i32list)
         i32list.append(1)

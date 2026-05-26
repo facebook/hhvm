@@ -347,5 +347,15 @@ _fbthrift_union2 = union2
 
 MyStringIdentifier = builtins.str
 MyIntIdentifier = builtins.int
-MyMapIdentifier = _fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.str]
-CompanyLocationsMap = _fbthrift_python_mutable_containers.MutableMap[_fbthrift_Company, _fbthrift_python_mutable_containers.MutableList[_fbthrift_City]]
+class MyMapIdentifier(_fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.str]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftMapWrapper | _fbthrift_python_mutable_containers.MutableMap[builtins.str, builtins.str] | None = ...,
+    ) -> None: ...
+
+class CompanyLocationsMap(_fbthrift_python_mutable_containers.MutableMap[_fbthrift_Company, _fbthrift_python_mutable_containers.MutableList[_fbthrift_City]]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftMapWrapper | _fbthrift_python_mutable_containers.MutableMap[_fbthrift_Company, _fbthrift_python_mutable_containers.MutableList[_fbthrift_City]] | None = ...,
+    ) -> None: ...
+

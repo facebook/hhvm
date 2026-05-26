@@ -1294,11 +1294,36 @@ _fbthrift_Containers = Containers
 
 stringTypedef = builtins.str
 longTypeDef = builtins.int
-mapTypedef = _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]
-listTypedef = _fbthrift_python_mutable_containers.MutableList[builtins.float]
+class mapTypedef(_fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftMapWrapper | _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str] | None = ...,
+    ) -> None: ...
+
+class listTypedef(_fbthrift_python_mutable_containers.MutableList[builtins.float]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftListWrapper | _fbthrift_python_mutable_containers.MutableList[builtins.float] | None = ...,
+    ) -> None: ...
+
 floatTypedef = builtins.float
-FMap = _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]
+class FMap(_fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftMapWrapper | _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int] | None = ...,
+    ) -> None: ...
+
 binary_4918 = builtins.bytes
 i32_1194 = builtins.int
-map_i32_FMap_6797 = _fbthrift_python_mutable_containers.MutableMap[builtins.int, _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]]
-map_i64_string_5732 = _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]
+class map_i32_FMap_6797(_fbthrift_python_mutable_containers.MutableMap[builtins.int, _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftMapWrapper | _fbthrift_python_mutable_containers.MutableMap[builtins.int, _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]] | None = ...,
+    ) -> None: ...
+
+class map_i64_string_5732(_fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftMapWrapper | _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str] | None = ...,
+    ) -> None: ...
+

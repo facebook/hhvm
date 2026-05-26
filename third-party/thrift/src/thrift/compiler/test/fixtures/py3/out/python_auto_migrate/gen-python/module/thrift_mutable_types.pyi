@@ -679,18 +679,48 @@ CustomInteger = builtins.int
 CustomDouble = builtins.float
 CustomString = builtins.str
 CustomBinary = builtins.bytes
-CustomList = _fbthrift_python_mutable_containers.MutableList[builtins.int]
-CustomSet = _fbthrift_python_mutable_containers.MutableSet[builtins.int]
-CustomMap = _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]
+class CustomList(_fbthrift_python_mutable_containers.MutableList[builtins.int]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftListWrapper | _fbthrift_python_mutable_containers.MutableList[builtins.int] | None = ...,
+    ) -> None: ...
+
+class CustomSet(_fbthrift_python_mutable_containers.MutableSet[builtins.int]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftSetWrapper | _fbthrift_python_mutable_containers.MutableSet[builtins.int] | None = ...,
+    ) -> None: ...
+
+class CustomMap(_fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftMapWrapper | _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int] | None = ...,
+    ) -> None: ...
+
 CustomStruct = _fbthrift_SimpleStruct
 AdaptedBool = builtins.bool
 AdaptedInteger = builtins.int
 AdaptedDouble = builtins.float
 AdaptedString = builtins.str
 AdaptedBinary = builtins.bytes
-AdaptedList = _fbthrift_python_mutable_containers.MutableList[builtins.int]
-AdaptedSet = _fbthrift_python_mutable_containers.MutableSet[builtins.int]
-AdaptedMap = _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]
+class AdaptedList(_fbthrift_python_mutable_containers.MutableList[builtins.int]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftListWrapper | _fbthrift_python_mutable_containers.MutableList[builtins.int] | None = ...,
+    ) -> None: ...
+
+class AdaptedSet(_fbthrift_python_mutable_containers.MutableSet[builtins.int]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftSetWrapper | _fbthrift_python_mutable_containers.MutableSet[builtins.int] | None = ...,
+    ) -> None: ...
+
+class AdaptedMap(_fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftMapWrapper | _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int] | None = ...,
+    ) -> None: ...
+
 AdaptedStruct = _fbthrift_SimpleStruct
 
 

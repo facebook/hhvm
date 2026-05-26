@@ -1034,14 +1034,44 @@ _fbthrift_StructWithDoubleUnderscores = StructWithDoubleUnderscores
 TBinary = builtins.bytes
 IntTypedef = builtins.int
 UintTypedef = builtins.int
-SomeListOfTypeMap_2468 = _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]]
+class SomeListOfTypeMap_2468(_fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftListWrapper | _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]] | None = ...,
+    ) -> None: ...
+
 TBinary_8623 = builtins.bytes
 i32_9314 = builtins.int
-list_i32_9187 = _fbthrift_python_mutable_containers.MutableList[builtins.int]
-map_i32_i32_9565 = _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]
-map_i32_string_1261 = _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]
-set_i32_7070 = _fbthrift_python_mutable_containers.MutableSet[builtins.int]
-set_i32_7194 = _fbthrift_python_mutable_containers.MutableSet[builtins.int]
+class list_i32_9187(_fbthrift_python_mutable_containers.MutableList[builtins.int]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftListWrapper | _fbthrift_python_mutable_containers.MutableList[builtins.int] | None = ...,
+    ) -> None: ...
+
+class map_i32_i32_9565(_fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftMapWrapper | _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.int] | None = ...,
+    ) -> None: ...
+
+class map_i32_string_1261(_fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftMapWrapper | _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str] | None = ...,
+    ) -> None: ...
+
+class set_i32_7070(_fbthrift_python_mutable_containers.MutableSet[builtins.int]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftSetWrapper | _fbthrift_python_mutable_containers.MutableSet[builtins.int] | None = ...,
+    ) -> None: ...
+
+class set_i32_7194(_fbthrift_python_mutable_containers.MutableSet[builtins.int]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftSetWrapper | _fbthrift_python_mutable_containers.MutableSet[builtins.int] | None = ...,
+    ) -> None: ...
+
 string_5252 = builtins.str
 
 

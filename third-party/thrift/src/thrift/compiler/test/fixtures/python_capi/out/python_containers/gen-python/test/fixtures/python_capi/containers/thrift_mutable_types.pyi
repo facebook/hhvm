@@ -300,9 +300,39 @@ class IndirectionC(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pytho
 _fbthrift_IndirectionC = IndirectionC
 
 IOBuf = _fbthrift_iobuf.IOBuf
-small_vector_iobuf = _fbthrift_python_mutable_containers.MutableList[_fbthrift_iobuf.IOBuf]
-fbvector_string = _fbthrift_python_mutable_containers.MutableList[builtins.str]
-fbvector_fbvector_string = _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableList[builtins.str]]
-ListOfWrapped = _fbthrift_python_mutable_containers.MutableList[_fbthrift_TWrapped]
-VecOfWrapped = _fbthrift_python_mutable_containers.MutableList[_fbthrift_TWrapped]
-ListOfWrappedAlias = _fbthrift_python_mutable_containers.MutableList[_fbthrift_TWrapped]
+class small_vector_iobuf(_fbthrift_python_mutable_containers.MutableList[_fbthrift_iobuf.IOBuf]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftListWrapper | _fbthrift_python_mutable_containers.MutableList[_fbthrift_iobuf.IOBuf] | None = ...,
+    ) -> None: ...
+
+class fbvector_string(_fbthrift_python_mutable_containers.MutableList[builtins.str]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftListWrapper | _fbthrift_python_mutable_containers.MutableList[builtins.str] | None = ...,
+    ) -> None: ...
+
+class fbvector_fbvector_string(_fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableList[builtins.str]]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftListWrapper | _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableList[builtins.str]] | None = ...,
+    ) -> None: ...
+
+class ListOfWrapped(_fbthrift_python_mutable_containers.MutableList[_fbthrift_TWrapped]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftListWrapper | _fbthrift_python_mutable_containers.MutableList[_fbthrift_TWrapped] | None = ...,
+    ) -> None: ...
+
+class VecOfWrapped(_fbthrift_python_mutable_containers.MutableList[_fbthrift_TWrapped]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftListWrapper | _fbthrift_python_mutable_containers.MutableList[_fbthrift_TWrapped] | None = ...,
+    ) -> None: ...
+
+class ListOfWrappedAlias(_fbthrift_python_mutable_containers.MutableList[_fbthrift_TWrapped]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftListWrapper | _fbthrift_python_mutable_containers.MutableList[_fbthrift_TWrapped] | None = ...,
+    ) -> None: ...
+

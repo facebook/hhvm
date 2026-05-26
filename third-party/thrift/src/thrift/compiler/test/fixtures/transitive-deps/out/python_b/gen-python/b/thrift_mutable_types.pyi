@@ -21,5 +21,10 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import c.thrift_mutable_types as _fbthrift__c__thrift_mutable_types
 
 
-B = _fbthrift_python_mutable_containers.MutableList[_fbthrift__c__thrift_mutable_types.C]
+class B(_fbthrift_python_mutable_containers.MutableList[_fbthrift__c__thrift_mutable_types.C]):
+    def __init__(
+        self,
+        values: _fbthrift_python_mutable_types._ThriftListWrapper | _fbthrift_python_mutable_containers.MutableList[_fbthrift__c__thrift_mutable_types.C] | None = ...,
+    ) -> None: ...
+
 E = _fbthrift__c__thrift_mutable_types.E

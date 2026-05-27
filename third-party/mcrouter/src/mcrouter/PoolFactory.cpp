@@ -7,6 +7,8 @@
 
 #include "PoolFactory.h"
 
+#include <tuple>
+
 #include <folly/json/json.h>
 
 #include "mcrouter/ConfigApiIf.h"
@@ -85,7 +87,11 @@ PoolFactory::PoolJson PoolFactory::parsePool(const folly::dynamic& json) {
   }
   auto jname = json.get_ptr("name");
   checkLogic(jname && jname->isString(), "Pool should have string 'name'");
-  pools_.emplace(jname->stringPiece(), std::make_pair(json, PoolState::NEW));
+  pools_.try_emplace(
+      jname->stringPiece(),
+      std::piecewise_construct,
+      std::forward_as_tuple(json),
+      std::forward_as_tuple(PoolState::NEW));
   return parseNamedPool(jname->stringPiece());
 }
 } // namespace mcrouter

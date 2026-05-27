@@ -64,6 +64,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionContextHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestContextHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/bench/BenchAsyncTransport.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
@@ -415,9 +416,10 @@ struct AppAdapterBenchFixture {
             auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
             thrift::fillSuccessResponseMetadata(*md);
             auto writeResult = self->writeResponse(
-                streamId,
-                folly::IOBuf::copyBuffer("echo response"),
-                std::move(md));
+                thrift::makeResponseMessage(
+                    streamId,
+                    folly::IOBuf::copyBuffer("echo response"),
+                    std::move(md)));
             return writeResult == Result::Error ? Result::Error
                                                 : Result::Success;
           });

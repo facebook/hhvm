@@ -67,6 +67,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionContextHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestContextHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RocketFrameDecoder.h>
 
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -1069,8 +1070,10 @@ TEST_F(
         // back into the read chain. Only Error (connection dead) propagates.
         auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
         fillSuccessResponseMetadata(*md);
-        auto writeResult = self->writeResponse(
-            streamId, folly::IOBuf::copyBuffer("echo response"), std::move(md));
+        auto writeResult = self->writeResponse(makeResponseMessage(
+            streamId,
+            folly::IOBuf::copyBuffer("echo response"),
+            std::move(md)));
         return writeResult == Result::Error ? Result::Error : Result::Success;
       });
 
@@ -1103,8 +1106,8 @@ TEST_F(
           std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
         auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
         fillSuccessResponseMetadata(*md);
-        auto writeResult = self->writeResponse(
-            streamId, folly::IOBuf::copyBuffer("reply"), std::move(md));
+        auto writeResult = self->writeResponse(makeResponseMessage(
+            streamId, folly::IOBuf::copyBuffer("reply"), std::move(md)));
         return writeResult == Result::Error ? Result::Error : Result::Success;
       });
 

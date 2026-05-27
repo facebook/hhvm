@@ -19,7 +19,7 @@
 #include <utility>
 
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 
@@ -61,7 +61,7 @@ channel_pipeline::Result MetadataAppAdapter::writeMetadataResponse(
       const_cast<apache::thrift::metadata::ThriftServiceMetadataResponse*>(
           response_.get());
   presult.setIsSet(0, true);
-  return writeSuccessResponse<Writer>(streamId, presult);
+  return writeResponse(makeSuccessResponseMessage<Writer>(streamId, presult));
 }
 
 channel_pipeline::Result MetadataAppAdapter::handleGetThriftServiceMetadata(
@@ -78,12 +78,11 @@ channel_pipeline::Result MetadataAppAdapter::handleGetThriftServiceMetadata(
     case apache::thrift::ProtocolId::BINARY:
       return impl->writeMetadataResponse<apache::thrift::BinaryProtocolWriter>(
           streamId);
-    default: {
-      auto err = serializeResponseRpcError(
+    default:
+      return impl->writeResponse(makeFrameworkErrorMessage(
+          streamId,
           apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-          "Unsupported protocol id for getThriftServiceMetadata");
-      return impl->writeError(streamId, std::move(err.data), err.errorCode);
-    }
+          "Unsupported protocol id for getThriftServiceMetadata"));
   }
 }
 

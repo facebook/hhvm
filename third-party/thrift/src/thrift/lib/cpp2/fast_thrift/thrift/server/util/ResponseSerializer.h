@@ -25,8 +25,8 @@ inline constexpr size_t kServerDataHeadroomBytes = 128;
 
 // Serialize a presult into a single IOBuf with the standard server data
 // headroom reserved at the front. Codegen calls this with a presult
-// write/size pair; the resulting IOBuf is handed directly to
-// ThriftServerAppAdapter::writeResponse alongside a metadata IOBuf.
+// write/size pair; the resulting IOBuf flows through the response-message
+// helpers in util/ResponsePayloads.h.
 //
 // Mirrors GeneratedAsyncProcessorBase::serializeResponse from legacy
 // (fbcode/thrift/lib/cpp2/async/processor/GeneratedAsyncProcessorBase.h),

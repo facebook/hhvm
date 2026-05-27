@@ -141,7 +141,8 @@ inline apache::thrift::fast_thrift::frame::ErrorCode mapCategoryToErrorCode(
  * server's ERROR frame format so the client's decodeErrorFrame() works.
  *
  * Returns the serialized data and the matching frame error code that the
- * caller hands to ThriftServerAppAdapter::writeError.
+ * caller pairs into a ThriftErrorPayload (typically via the helpers in
+ * util/ResponsePayloads.h).
  */
 inline SerializedResponseError serializeResponseRpcError(
     apache::thrift::ResponseRpcErrorCode code, std::string message) {

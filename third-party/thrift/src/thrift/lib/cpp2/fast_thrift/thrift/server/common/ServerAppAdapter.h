@@ -17,19 +17,13 @@
 #pragma once
 
 #include <concepts>
-#include <memory>
 #include <ranges>
-#include <string>
 #include <utility>
-
-#include <folly/ExceptionWrapper.h>
-#include <folly/io/IOBuf.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/EndpointAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
-#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -43,39 +37,18 @@ concept ServerInboundAppAdapter = channel_pipeline::TailEndpointHandler<T>;
 
 /**
  * ServerOutboundAppAdapter — server-side outbound endpoint concept.
- * Codegen calls these from request handlers to push responses back into
- * the pipeline. Mirrors ClientOutboundAppAdapter on the client side.
- *
- * Templated helpers (writeSuccessResponse, writeDeclaredException) are
- * not part of the concept because concepts can't easily constrain
- * member templates over arbitrary Writer/Presult types; satisfying
- * implementations are expected to provide them as well.
+ * Codegen builds a ThriftServerResponseMessage via the helpers in
+ * util/ResponsePayloads.h and hands it to writeResponse(). Mirrors
+ * ClientOutboundAppAdapter on the client side.
  */
 template <typename T>
-concept ServerOutboundAppAdapter = requires(
-    T& t,
-    uint32_t streamId,
-    std::unique_ptr<folly::IOBuf> data,
-    std::unique_ptr<apache::thrift::ResponseRpcMetadata> metadata,
-    apache::thrift::fast_thrift::frame::ErrorCode errorCode,
-    apache::thrift::ResponseRpcErrorCode rpcErrorCode,
-    std::string message,
-    const folly::exception_wrapper& ew,
-    apache::thrift::ErrorBlame blame) {
-  {
-    t.writeResponse(streamId, std::move(data), std::move(metadata))
-  } noexcept -> std::same_as<channel_pipeline::Result>;
-  {
-    t.writeError(streamId, std::move(data), errorCode)
-  } noexcept -> std::same_as<channel_pipeline::Result>;
-  {
-    t.writeFrameworkError(streamId, rpcErrorCode, std::move(message))
-  } noexcept -> std::same_as<channel_pipeline::Result>;
-  {
-    t.writeUnknownException(streamId, ew, blame)
-  } noexcept -> std::same_as<channel_pipeline::Result>;
-  { t.startDrain() } noexcept;
-};
+concept ServerOutboundAppAdapter =
+    requires(T& t, ThriftServerResponseMessage&& message) {
+      {
+        t.writeResponse(std::move(message))
+      } noexcept -> std::same_as<channel_pipeline::Result>;
+      { t.startDrain() } noexcept;
+    };
 
 /**
  * ServerComposableAppAdapter — wiring + routing-metadata concept.

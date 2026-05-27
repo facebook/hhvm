@@ -25,8 +25,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftRequestPayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftResponsePayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
-#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -145,17 +144,9 @@ ThriftServerCompositeAppAdapter::writeUnknownMethodError(
     XLOG(ERR) << "Pipeline not set, cannot send unknown-method error";
     return channel_pipeline::Result::Error;
   }
-  auto err = serializeResponseRpcError(
-      apache::thrift::ResponseRpcErrorCode::UNKNOWN_METHOD,
-      std::string("Unknown method: ") + std::string(methodName));
-  ThriftServerResponseMessage response{
-      .payload = ThriftErrorPayload{
-          .data = std::move(err.data),
-          .metadata = nullptr,
-          .streamId = streamId,
-          .errorCode = static_cast<uint32_t>(err.errorCode)}};
   return pipeline_->fireWrite(
-      channel_pipeline::erase_and_box(std::move(response)));
+      channel_pipeline::erase_and_box(
+          makeUnknownMethodMessage(streamId, methodName)));
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

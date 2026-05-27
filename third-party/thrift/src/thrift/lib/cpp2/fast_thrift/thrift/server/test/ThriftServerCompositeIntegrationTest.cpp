@@ -66,6 +66,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/test/TestAsyncTransport.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
@@ -159,7 +160,8 @@ class RecordingAppAdapter : public ThriftServerAppAdapter {
           // inspect frame type / streamId / data.
           auto responseData = data ? data->clone() : nullptr;
           return t->writeResponse(
-              streamId, std::move(responseData), std::move(metadata));
+              apache::thrift::fast_thrift::thrift::makeResponseMessage(
+                  streamId, std::move(responseData), std::move(metadata)));
         });
   }
 

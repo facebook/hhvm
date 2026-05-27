@@ -16,7 +16,6 @@
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 
-#include <string>
 #include <utility>
 
 #include <folly/io/async/AsyncSocketException.h>
@@ -24,8 +23,7 @@
 
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ServerAppAdapter.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -68,7 +66,7 @@ void ThriftServerAppAdapter::onPipelineInactive() noexcept {
   // Pipeline disconnect is the canonical "no longer accepting writes" edge.
   // If no requests are in flight, finalize immediately. Otherwise stay in
   // Closing so in-flight handler callbacks can still push final responses,
-  // and let the last fireResponse finalize.
+  // and let the last writeResponse finalize.
   if (inFlight_ == 0) {
     state_ = State::Closed;
     fireCloseCallback();
@@ -86,7 +84,16 @@ void ThriftServerAppAdapter::fireCloseCallback() noexcept {
 }
 
 void ThriftServerAppAdapter::startDrain() noexcept {
-  if (sendConnectionCloseErr() == channel_pipeline::Result::Error) {
+  // Wire-only stream-0 CONNECTION_CLOSE; bypasses writeResponse because no
+  // in-flight slot owns this frame.
+  channel_pipeline::Result wireResult;
+  if (FOLLY_UNLIKELY(!pipeline_)) {
+    wireResult = channel_pipeline::Result::Error;
+  } else {
+    wireResult = pipeline_->fireWrite(
+        channel_pipeline::erase_and_box(makeConnectionCloseMessage()));
+  }
+  if (wireResult == channel_pipeline::Result::Error) {
     // Peer notification failed — pipeline is dead, so waiting on
     // inFlight_ to drain via normal response paths is pointless. Skip
     // the wait and tear down immediately.
@@ -102,23 +109,6 @@ void ThriftServerAppAdapter::startDrain() noexcept {
   } else {
     closeDeferred_ = true;
   }
-}
-
-channel_pipeline::Result
-ThriftServerAppAdapter::sendConnectionCloseErr() noexcept {
-  if (FOLLY_UNLIKELY(!pipeline_)) {
-    return channel_pipeline::Result::Error;
-  }
-  return pipeline_->fireWrite(
-      channel_pipeline::erase_and_box(
-          ThriftServerResponseMessage{
-              .payload = ThriftErrorPayload{
-                  .data = nullptr,
-                  .metadata = nullptr,
-                  .streamId = 0,
-                  .errorCode = static_cast<uint32_t>(
-                      apache::thrift::fast_thrift::frame::ErrorCode::
-                          CONNECTION_CLOSE)}}));
 }
 
 channel_pipeline::Result ThriftServerAppAdapter::onRead(
@@ -162,32 +152,6 @@ void ThriftServerAppAdapter::onException(
   closeDeferred_ = true;
 }
 
-channel_pipeline::Result ThriftServerAppAdapter::writeResponse(
-    uint32_t streamId,
-    std::unique_ptr<folly::IOBuf> data,
-    std::unique_ptr<apache::thrift::ResponseRpcMetadata> metadata) noexcept {
-  return fireResponse(
-      ThriftServerResponseMessage{
-          .payload = ThriftInitialResponsePayload{
-              .data = std::move(data),
-              .metadata = std::move(metadata),
-              .streamId = streamId,
-          }});
-}
-
-channel_pipeline::Result ThriftServerAppAdapter::writeError(
-    uint32_t streamId,
-    std::unique_ptr<folly::IOBuf> errorData,
-    apache::thrift::fast_thrift::frame::ErrorCode errorCode) noexcept {
-  return fireResponse(
-      ThriftServerResponseMessage{
-          .payload = ThriftErrorPayload{
-              .data = std::move(errorData),
-              .metadata = nullptr,
-              .streamId = streamId,
-              .errorCode = static_cast<uint32_t>(errorCode)}});
-}
-
 void ThriftServerAppAdapter::addMethodHandler(
     std::string_view name, RequestResponseProcessFn handler) {
   dispatch_[std::string(name)] = handler;
@@ -205,7 +169,7 @@ std::vector<std::string_view> ThriftServerAppAdapter::methodNames()
 
 channel_pipeline::Result ThriftServerAppAdapter::handleRequestResponse(
     ThriftServerRequestMessage&& request) noexcept {
-  // Paired 1:1 with fireResponse — every dispatch path produces exactly
+  // Paired 1:1 with writeResponse — every dispatch path produces exactly
   // one response (streaming never reaches here).
   ++inFlight_;
 
@@ -244,41 +208,16 @@ channel_pipeline::Result ThriftServerAppAdapter::handleRequestResponse(
 channel_pipeline::Result ThriftServerAppAdapter::handleWrongRpcKind(
     uint32_t streamId, apache::thrift::RpcKind kind) noexcept {
   XLOG(ERR) << "Unsupported RPC kind: " << static_cast<int>(kind);
-  return writeFrameworkError(
-      streamId,
-      apache::thrift::ResponseRpcErrorCode::WRONG_RPC_KIND,
-      std::string("Unsupported RPC kind: ") +
-          std::to_string(static_cast<int>(kind)));
+  return writeResponse(makeWrongRpcKindMessage(streamId, kind));
 }
 
 channel_pipeline::Result ThriftServerAppAdapter::handleUnknownMethod(
     uint32_t streamId, std::string_view methodName) noexcept {
-  return writeFrameworkError(
-      streamId,
-      apache::thrift::ResponseRpcErrorCode::UNKNOWN_METHOD,
-      std::string("Unknown method: ") + std::string(methodName));
+  return writeResponse(makeUnknownMethodMessage(streamId, methodName));
 }
 
-channel_pipeline::Result ThriftServerAppAdapter::writeUnknownException(
-    uint32_t streamId,
-    const folly::exception_wrapper& ew,
-    apache::thrift::ErrorBlame blame) noexcept {
-  auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
-  fillAppErrorResponseMetadata(
-      *md, ew.class_name().toStdString(), ew.what().toStdString(), blame);
-  return writeResponse(streamId, /*data=*/nullptr, std::move(md));
-}
-
-channel_pipeline::Result ThriftServerAppAdapter::writeFrameworkError(
-    uint32_t streamId,
-    apache::thrift::ResponseRpcErrorCode code,
-    std::string message) noexcept {
-  auto err = serializeResponseRpcError(code, std::move(message));
-  return writeError(streamId, std::move(err.data), err.errorCode);
-}
-
-channel_pipeline::Result ThriftServerAppAdapter::fireResponse(
-    ThriftServerResponseMessage&& response) noexcept {
+channel_pipeline::Result ThriftServerAppAdapter::writeResponse(
+    ThriftServerResponseMessage&& message) noexcept {
   // Refuse writes once we're Closed. Open and Closing both still try — in
   // Closing the pipeline may swallow the write if the wire is gone, but
   // an in-flight handler callback completing during graceful drain should
@@ -290,7 +229,7 @@ channel_pipeline::Result ThriftServerAppAdapter::fireResponse(
     result = handleMissingPipeline();
   } else {
     result = pipeline_->fireWrite(
-        channel_pipeline::erase_and_box(std::move(response)));
+        channel_pipeline::erase_and_box(std::move(message)));
   }
 
   DCHECK_GT(inFlight_, 0u);

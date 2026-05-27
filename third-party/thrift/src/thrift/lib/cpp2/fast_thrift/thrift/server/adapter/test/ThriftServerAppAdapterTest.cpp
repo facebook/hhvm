@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -490,10 +491,10 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseFiresWrite) {
       });
 
   bumpInFlight(*adapter, /*streamId=*/42);
-  auto result = adapter->writeResponse(
+  auto result = adapter->writeResponse(makeResponseMessage(
       /*streamId=*/42,
       folly::IOBuf::copyBuffer("response"),
-      /*metadata=*/nullptr);
+      /*metadata=*/nullptr));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled);
@@ -632,10 +633,10 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithClientBlame) {
       apache::thrift::ErrorBlame::CLIENT);
   bumpInFlight(*adapter, /*streamId=*/7);
   EXPECT_EQ(
-      adapter->writeResponse(
+      adapter->writeResponse(makeResponseMessage(
           /*streamId=*/7,
           /*data=*/nullptr,
-          std::move(md)),
+          std::move(md))),
       Result::Success);
 
   EXPECT_TRUE(captured.writeCalled);
@@ -693,10 +694,10 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithServerBlame) {
       apache::thrift::ErrorBlame::SERVER);
   bumpInFlight(*adapter, /*streamId=*/7);
   EXPECT_EQ(
-      adapter->writeResponse(
+      adapter->writeResponse(makeResponseMessage(
           /*streamId=*/7,
           /*data=*/nullptr,
-          std::move(md)),
+          std::move(md))),
       Result::Success);
 
   EXPECT_TRUE(captured.writeCalled);
@@ -722,10 +723,10 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseSurfacesPipelineWriteError) {
       });
 
   bumpInFlight(*adapter, /*streamId=*/42);
-  auto result = adapter->writeResponse(
+  auto result = adapter->writeResponse(makeResponseMessage(
       /*streamId=*/42,
       folly::IOBuf::copyBuffer("response"),
-      /*metadata=*/nullptr);
+      /*metadata=*/nullptr));
 
   EXPECT_EQ(result, Result::Error);
   EXPECT_EQ(built.handler->handlerRemovedCount(), 0);
@@ -831,10 +832,10 @@ TEST_F(
       *md, "my.thrift.MyDeclaredException", "expected failure", classification);
   bumpInFlight(*adapter, /*streamId=*/7);
   EXPECT_EQ(
-      adapter->writeResponse(
+      adapter->writeResponse(makeResponseMessage(
           /*streamId=*/7,
           folly::IOBuf::copyBuffer("serialized exception struct"),
-          std::move(md)),
+          std::move(md))),
       Result::Success);
 
   EXPECT_TRUE(writeCalled);
@@ -849,7 +850,7 @@ TEST_F(
 }
 
 // =============================================================================
-// writeUnknownException / writeFrameworkError member helpers
+// Unknown exception / framework error message paths
 // =============================================================================
 
 // Undeclared exception → PAYLOAD frame (errorCode=0), null data, metadata
@@ -873,7 +874,8 @@ TEST_F(
   auto ew = folly::make_exception_wrapper<std::runtime_error>("boom");
   bumpInFlight(*adapter, /*streamId=*/7);
   EXPECT_EQ(
-      adapter->writeUnknownException(7, ew, apache::thrift::ErrorBlame::CLIENT),
+      adapter->writeResponse(makeUnknownExceptionMessage(
+          7, ew, apache::thrift::ErrorBlame::CLIENT)),
       Result::Success);
 
   ASSERT_TRUE(writeCalled);
@@ -920,10 +922,10 @@ TEST_F(ThriftServerAppAdapterTest, WriteFrameworkErrorEmitsErrorFrame) {
 
   bumpInFlight(*adapter, /*streamId=*/9);
   EXPECT_EQ(
-      adapter->writeFrameworkError(
+      adapter->writeResponse(makeFrameworkErrorMessage(
           9,
           apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-          "bad bytes"),
+          "bad bytes")),
       Result::Success);
 
   ASSERT_TRUE(writeCalled);
@@ -992,7 +994,7 @@ TEST_F(ThriftServerAppAdapterTest, OnReadRejectedOutsideOpen) {
 
   auto built = buildPipeline(adapter.get());
   // Open: onRead is accepted (will hit Unknown method, but that returns
-  // Success because writeFrameworkError fires the error frame inline).
+  // Success because the unknown-method framework error fires inline).
   adapter->registerMethod(
       "x",
       +[](ThriftServerAppAdapter*,
@@ -1057,7 +1059,8 @@ TEST_F(
       adapter->onRead(erase_and_box(makeRequestMessage(1, "defer"))),
       Result::Success);
   EXPECT_EQ(
-      adapter->writeResponse(1, folly::IOBuf::copyBuffer("a"), nullptr),
+      adapter->writeResponse(
+          makeResponseMessage(1, folly::IOBuf::copyBuffer("a"), nullptr)),
       Result::Success);
   EXPECT_EQ(writeCount, 1);
 
@@ -1079,7 +1082,8 @@ TEST_F(
 
   // Closing: write is still allowed so the deferred handler can complete.
   EXPECT_EQ(
-      adapter->writeResponse(2, folly::IOBuf::copyBuffer("b"), nullptr),
+      adapter->writeResponse(
+          makeResponseMessage(2, folly::IOBuf::copyBuffer("b"), nullptr)),
       Result::Success);
   EXPECT_EQ(writeCount, 2);
   // Last in-flight drained with closeDeferred set → immediate Closed.
@@ -1095,10 +1099,11 @@ TEST_F(
 
 // startDrain pushes ERROR(CONNECTION_CLOSE) on stream 0, flips Open → Closing,
 // and defers closeCallback until inFlight_ drains. Verifies the wire frame,
-// the deferred close, AND that both writeResponse and writeFrameworkError
-// each decrement inFlight_ on the way to Closed — the framework-error path
-// is what the FastHandlerCallback destructor takes when a handler is dropped
-// without completing, so its decrement is what unblocks graceful shutdown.
+// the deferred close, AND that both success and framework-error writeResponse
+// paths each decrement inFlight_ on the way to Closed — the framework-error
+// path is what the FastHandlerCallback destructor takes when a handler is
+// dropped without completing, so its decrement is what unblocks graceful
+// shutdown.
 TEST_F(
     ThriftServerAppAdapterTest,
     StartDrainSendsConnectionCloseAndDrainsToClosed) {
@@ -1145,14 +1150,15 @@ TEST_F(
   EXPECT_FALSE(closeCalled);
 
   EXPECT_EQ(
-      adapter->writeResponse(11, folly::IOBuf::copyBuffer("ok"), nullptr),
+      adapter->writeResponse(
+          makeResponseMessage(11, folly::IOBuf::copyBuffer("ok"), nullptr)),
       Result::Success);
   EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closing);
   EXPECT_FALSE(closeCalled);
 
   EXPECT_EQ(
-      adapter->writeFrameworkError(
-          22, apache::thrift::ResponseRpcErrorCode::UNKNOWN, "not completed"),
+      adapter->writeResponse(makeFrameworkErrorMessage(
+          22, apache::thrift::ResponseRpcErrorCode::UNKNOWN, "not completed")),
       Result::Success);
   EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closed);
 

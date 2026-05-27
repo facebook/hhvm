@@ -130,12 +130,12 @@ BasicServiceAppAdapter::process_ping(
           ::apache::thrift::BinaryProtocolReader,
           ::apache::thrift::BinaryProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
-    default: {
-      auto err = ::apache::thrift::fast_thrift::thrift::serializeResponseRpcError(
-          ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-          "Unsupported protocol id for fast_thrift server");
-      return writeError(streamId, std::move(err.data), err.errorCode);
-    }
+    default:
+      return writeResponse(
+          ::apache::thrift::fast_thrift::thrift::makeFrameworkErrorMessage(
+              streamId,
+              ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
+              "Unsupported protocol id for fast_thrift server"));
   }
 }
 
@@ -174,12 +174,12 @@ BasicServiceAppAdapter::process_add(
           ::apache::thrift::BinaryProtocolReader,
           ::apache::thrift::BinaryProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
-    default: {
-      auto err = ::apache::thrift::fast_thrift::thrift::serializeResponseRpcError(
-          ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-          "Unsupported protocol id for fast_thrift server");
-      return writeError(streamId, std::move(err.data), err.errorCode);
-    }
+    default:
+      return writeResponse(
+          ::apache::thrift::fast_thrift::thrift::makeFrameworkErrorMessage(
+              streamId,
+              ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
+              "Unsupported protocol id for fast_thrift server"));
   }
 }
 
@@ -218,12 +218,12 @@ BasicServiceAppAdapter::process_buildItem(
           ::apache::thrift::BinaryProtocolReader,
           ::apache::thrift::BinaryProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
-    default: {
-      auto err = ::apache::thrift::fast_thrift::thrift::serializeResponseRpcError(
-          ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-          "Unsupported protocol id for fast_thrift server");
-      return writeError(streamId, std::move(err.data), err.errorCode);
-    }
+    default:
+      return writeResponse(
+          ::apache::thrift::fast_thrift::thrift::makeFrameworkErrorMessage(
+              streamId,
+              ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
+              "Unsupported protocol id for fast_thrift server"));
   }
 }
 
@@ -262,12 +262,12 @@ BasicServiceAppAdapter::process_lookup(
           ::apache::thrift::BinaryProtocolReader,
           ::apache::thrift::BinaryProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
-    default: {
-      auto err = ::apache::thrift::fast_thrift::thrift::serializeResponseRpcError(
-          ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-          "Unsupported protocol id for fast_thrift server");
-      return writeError(streamId, std::move(err.data), err.errorCode);
-    }
+    default:
+      return writeResponse(
+          ::apache::thrift::fast_thrift::thrift::makeFrameworkErrorMessage(
+              streamId,
+              ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
+              "Unsupported protocol id for fast_thrift server"));
   }
 }
 
@@ -306,12 +306,12 @@ BasicServiceAppAdapter::process_secureLookup(
           ::apache::thrift::BinaryProtocolReader,
           ::apache::thrift::BinaryProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
-    default: {
-      auto err = ::apache::thrift::fast_thrift::thrift::serializeResponseRpcError(
-          ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-          "Unsupported protocol id for fast_thrift server");
-      return writeError(streamId, std::move(err.data), err.errorCode);
-    }
+    default:
+      return writeResponse(
+          ::apache::thrift::fast_thrift::thrift::makeFrameworkErrorMessage(
+              streamId,
+              ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
+              "Unsupported protocol id for fast_thrift server"));
   }
 }
 

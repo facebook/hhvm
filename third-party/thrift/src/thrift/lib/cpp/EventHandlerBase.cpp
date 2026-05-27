@@ -33,8 +33,11 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(void, onEventHandlerCowTriggered) {}
 void EventHandlerBase::addEventHandler(
     const std::shared_ptr<TProcessorEventHandler>& handler) {
   if (!handlers_) {
-    handlers_ = std::make_shared<
-        std::vector<std::shared_ptr<TProcessorEventHandler>>>();
+    handlers_ =
+        std::make_shared<std::vector<std::shared_ptr<TProcessorEventHandler>>>(
+            std::initializer_list<std::shared_ptr<TProcessorEventHandler>>{
+                handler});
+    return;
   } else if (handlersShared_) {
     // Copy-on-write: make a private mutable copy before mutating.
     // This should not happen in steady state — shared handler vectors are

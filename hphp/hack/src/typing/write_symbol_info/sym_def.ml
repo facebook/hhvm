@@ -106,19 +106,21 @@ let resolve ctx SO.{ name; type_; _ } =
   | SO.Property (SO.ClassName c_name, property_name)
   | SO.XhpLiteralAttr (c_name, property_name) ->
     Decl_provider.get_class ctx c_name |> Decl_entry.to_option >>= fun class_ ->
-    let name = IdentifySymbolService.clean_member_name property_name in
-    (match Folded_class.get_prop class_ property_name with
+    let clean_member_name =
+      IdentifySymbolService.clean_member_name property_name
+    in
+    (match Folded_class.get_prop class_ clean_member_name with
     | Some m -> Some m
     | None ->
-      (match Folded_class.get_sprop class_ ("$" ^ property_name) with
+      (match Folded_class.get_sprop class_ ("$" ^ clean_member_name) with
       | Some m -> Some m
       | None ->
         (* Property not found in class - check require constraints for traits *)
         Folded_class.get_sprop_from_req_constraints
           class_
-          ("$" ^ property_name)
+          ("$" ^ clean_member_name)
           ~get_class))
-    >>| fun m -> Property { class_name = m.ce_origin; name }
+    >>| fun m -> Property { class_name = m.ce_origin; name = clean_member_name }
   | SO.Property (SO.UnknownClass, _) -> None
   | SO.ClassConst (SO.ClassName _, "class") -> None
   | SO.ClassConst (SO.ClassName c_name, const_name) ->

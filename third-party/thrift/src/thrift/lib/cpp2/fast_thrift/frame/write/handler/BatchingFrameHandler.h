@@ -36,10 +36,12 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/BatchingHandlerConfig.h>
 
+#include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
 
 #include <functional>
+#include <stdexcept>
 
 namespace apache::thrift::fast_thrift::frame::write::handler {
 
@@ -69,7 +71,7 @@ class BatchingFrameHandler : public folly::EventBase::LoopCallback {
   template <typename Context>
   void handlerAdded(Context& ctx) noexcept {
     eventBase_ = ctx.eventBase();
-    flushFn_ = [this, &ctx]() { (void)doFlush(ctx); };
+    flushFn_ = [this, &ctx]() { flushAndPropagateErrors(ctx); };
   }
 
   template <typename Context>
@@ -128,7 +130,7 @@ class BatchingFrameHandler : public folly::EventBase::LoopCallback {
   void onWriteReady(Context& ctx) noexcept {
     backpressured_ = false;
     ctx.cancelAwaitWriteReady();
-    (void)doFlush(ctx);
+    flushAndPropagateErrors(ctx);
   }
 
   // ===========================================================================
@@ -195,6 +197,16 @@ class BatchingFrameHandler : public folly::EventBase::LoopCallback {
       Context& ctx) noexcept {
     cancelLoopCallbackIfScheduled();
     return doFlush(ctx);
+  }
+
+  template <typename Context>
+  void flushAndPropagateErrors(Context& ctx) noexcept {
+    if (doFlush(ctx) ==
+        apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
+      ctx.fireException(
+          folly::make_exception_wrapper<std::runtime_error>(
+              "BatchingFrameHandler: downstream write failed"));
+    }
   }
 
   template <typename Context>

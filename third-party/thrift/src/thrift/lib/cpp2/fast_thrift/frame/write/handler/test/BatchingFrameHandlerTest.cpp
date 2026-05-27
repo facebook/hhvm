@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
 
 #include <gtest/gtest.h>
+#include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
 
@@ -63,6 +64,9 @@ class MockContext {
     if (batch) {
       writtenBatches_.push_back(std::move(batch));
     }
+    if (forceWriteError_) {
+      return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
+    }
     if (writtenBatches_.size() > backpressureAt_) {
       return apache::thrift::fast_thrift::channel_pipeline::Result::
           Backpressure;
@@ -70,11 +74,17 @@ class MockContext {
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
 
+  void fireException(folly::exception_wrapper&& e) noexcept {
+    ++exceptionCount_;
+    lastException_ = std::move(e);
+  }
+
   void awaitWriteReady() { awaitWriteReadyCalled_ = true; }
   void cancelAwaitWriteReady() { awaitWriteReadyCalled_ = false; }
   void deactivate() {}
 
   void setBackpressureAt(size_t n) { backpressureAt_ = n; }
+  void setForceWriteError(bool b) { forceWriteError_ = b; }
 
   const std::vector<std::unique_ptr<folly::IOBuf>>& writtenBatches() const {
     return writtenBatches_;
@@ -92,11 +102,19 @@ class MockContext {
 
   bool awaitWriteReadyCalled() const { return awaitWriteReadyCalled_; }
 
+  size_t exceptionCount() const { return exceptionCount_; }
+  const folly::exception_wrapper& lastException() const {
+    return lastException_;
+  }
+
  private:
   folly::EventBase* evb_;
   std::vector<std::unique_ptr<folly::IOBuf>> writtenBatches_;
   size_t backpressureAt_{SIZE_MAX}; // Default: never backpressure
   bool awaitWriteReadyCalled_{false};
+  bool forceWriteError_{false};
+  size_t exceptionCount_{0};
+  folly::exception_wrapper lastException_;
 };
 
 // ============================================================================
@@ -435,6 +453,49 @@ TEST_F(BatchingFrameHandlerTest, MultipleBatchesAcrossFlushes) {
   EXPECT_EQ(ctx_->writtenBatches()[1]->computeChainDataLength(), 30);
 }
 
+// ============================================================================
+// Error Propagation Tests
+// ============================================================================
+
+TEST_F(BatchingFrameHandlerTest, LoopTickErrorFiresException) {
+  BatchingHandlerConfig config{
+      .maxPendingBytes = 64 * 1024,
+      .maxPendingFrames = 32,
+  };
+  BatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  // Queue a frame below threshold so flush happens via loop callback
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  EXPECT_EQ(ctx_->exceptionCount(), 0);
+
+  // Transport errors on the next fireWrite
+  ctx_->setForceWriteError(true);
+  runEventBaseLoop();
+
+  EXPECT_EQ(ctx_->exceptionCount(), 1);
+  EXPECT_TRUE(bool(ctx_->lastException()));
+}
+
+TEST_F(BatchingFrameHandlerTest, WriteReadyErrorFiresException) {
+  BatchingHandlerConfig config{
+      .maxPendingBytes = 64 * 1024,
+      .maxPendingFrames = 32,
+  };
+  BatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  // Buffer data without flushing
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+
+  // Transport errors when onWriteReady drives the flush
+  ctx_->setForceWriteError(true);
+  handler.onWriteReady(*ctx_);
+
+  EXPECT_EQ(ctx_->exceptionCount(), 1);
+  EXPECT_TRUE(bool(ctx_->lastException()));
+}
+
 } // namespace
 } // namespace apache::thrift::fast_thrift::frame::write::handler
 
@@ -579,6 +640,26 @@ TEST_F(BatchingFrameHandlerPipelineTest, LoopTickBackpressureRegisters) {
   EXPECT_FALSE(handlerPtr_->hasPendingData());
   EXPECT_FALSE(handlerPtr_->isBackpressured());
   EXPECT_EQ(transport_.writeCount(), 2);
+}
+
+// Verifies that when the transport returns Result::Error, the exception fired
+// by BatchingFrameHandler propagates through the pipeline and reaches the tail.
+TEST_F(BatchingFrameHandlerPipelineTest, TransportErrorPropagatesToTail) {
+  BatchingHandlerConfig config{
+      .maxPendingBytes = 64 * 1024,
+      .maxPendingFrames = 32,
+  };
+  transport_.setWriteResult(cp::Result::Error);
+  auto pipeline = buildPipeline(config);
+
+  // Write below threshold — flush happens on loop tick, where the transport
+  // error is observed and converted to an exception.
+  (void)pipeline->fireWrite(wrapFrame(makePayload(100)));
+  EXPECT_EQ(app_.exceptionCount(), 0);
+
+  evb_.loopOnce(EVLOOP_NONBLOCK);
+
+  EXPECT_EQ(app_.exceptionCount(), 1);
 }
 
 } // namespace apache::thrift::fast_thrift::frame::write::handler

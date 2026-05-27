@@ -30,6 +30,7 @@
  * Output: std::unique_ptr<folly::IOBuf> (coalesced batch)
  */
 
+#include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBase.h>
@@ -38,6 +39,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 
 #include <functional>
+#include <stdexcept>
 
 namespace apache::thrift::fast_thrift::frame::write::handler {
 
@@ -59,7 +61,7 @@ class LoopBatchingFrameHandler : public folly::EventBase::LoopCallback {
   template <typename Context>
   void handlerAdded(Context& ctx) noexcept {
     eventBase_ = ctx.eventBase();
-    flushFn_ = [this, &ctx]() { doFlush(ctx); };
+    flushFn_ = [this, &ctx]() { flushAndPropagateErrors(ctx); };
   }
 
   template <typename Context>
@@ -151,13 +153,22 @@ class LoopBatchingFrameHandler : public folly::EventBase::LoopCallback {
   }
 
   template <typename Context>
-  void doFlush(Context& ctx) noexcept {
+  void flushAndPropagateErrors(Context& ctx) noexcept {
+    if (doFlush(ctx) == channel_pipeline::Result::Error) {
+      ctx.fireException(
+          folly::make_exception_wrapper<std::runtime_error>(
+              "LoopBatchingFrameHandler: downstream write failed"));
+    }
+  }
+
+  template <typename Context>
+  [[nodiscard]] channel_pipeline::Result doFlush(Context& ctx) noexcept {
     auto batchToSend = bufferedWritesQueue_.move();
     if (!batchToSend) {
-      return;
+      return channel_pipeline::Result::Success;
     }
 
-    (void)ctx.fireWrite(
+    return ctx.fireWrite(
         channel_pipeline::TypeErasedBox(std::move(batchToSend)));
   }
 

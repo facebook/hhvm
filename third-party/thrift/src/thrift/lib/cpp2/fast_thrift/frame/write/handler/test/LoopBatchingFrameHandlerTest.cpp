@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/LoopBatchingFrameHandler.h>
 
 #include <gtest/gtest.h>
+#include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
 
@@ -56,7 +57,15 @@ class MockContext {
     if (batch) {
       writtenBatches_.push_back(std::move(batch));
     }
+    if (forceWriteError_) {
+      return channel_pipeline::Result::Error;
+    }
     return channel_pipeline::Result::Success;
+  }
+
+  void fireException(folly::exception_wrapper&& e) noexcept {
+    ++exceptionCount_;
+    lastException_ = std::move(e);
   }
 
   const std::vector<std::unique_ptr<folly::IOBuf>>& writtenBatches() const {
@@ -73,9 +82,18 @@ class MockContext {
     return total;
   }
 
+  void setForceWriteError(bool b) { forceWriteError_ = b; }
+  size_t exceptionCount() const { return exceptionCount_; }
+  const folly::exception_wrapper& lastException() const {
+    return lastException_;
+  }
+
  private:
   folly::EventBase* evb_;
   std::vector<std::unique_ptr<folly::IOBuf>> writtenBatches_;
+  bool forceWriteError_{false};
+  size_t exceptionCount_{0};
+  folly::exception_wrapper lastException_;
 };
 
 // ============================================================================
@@ -284,6 +302,27 @@ TEST_F(LoopBatchingFrameHandlerTest, BatchedDataIntegrity) {
   for (size_t i = 30; i < 60; ++i) {
     EXPECT_EQ(data[i], 'C') << "Byte " << i;
   }
+}
+
+// ============================================================================
+// Error Propagation Tests
+// ============================================================================
+
+TEST_F(LoopBatchingFrameHandlerTest, LoopTickErrorFiresException) {
+  LoopBatchingFrameHandler handler;
+  handler.handlerAdded(*ctx_);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  EXPECT_EQ(ctx_->exceptionCount(), 0);
+
+  // Transport errors when the loop-tick flush fires
+  ctx_->setForceWriteError(true);
+  // Double-loop because this handler reschedules once before flushing
+  runEventBaseLoop();
+  runEventBaseLoop();
+
+  EXPECT_EQ(ctx_->exceptionCount(), 1);
+  EXPECT_TRUE(bool(ctx_->lastException()));
 }
 
 } // namespace

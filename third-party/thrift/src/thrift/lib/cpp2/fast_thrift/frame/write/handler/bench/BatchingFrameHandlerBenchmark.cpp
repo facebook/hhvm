@@ -25,6 +25,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BatchingFrameHandler.h>
 
 #include <folly/Benchmark.h>
+#include <folly/ExceptionWrapper.h>
 #include <folly/init/Init.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
@@ -60,6 +61,7 @@ class BenchContext {
 
   void awaitWriteReady() noexcept {}
   void cancelAwaitWriteReady() noexcept {}
+  void fireException(folly::exception_wrapper&&) noexcept {}
 
   size_t writeCount() const { return writeCount_; }
   size_t bytesWritten() const { return bytesWritten_; }

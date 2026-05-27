@@ -1,6 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $sqrt3 = sqrt(3.0);
+$sqrt6 = sqrt(6.0);
 
 $pixel = new ImagickPixel('red');
 var_dump($pixel->isPixelSimilar($pixel, 0.0));
@@ -12,9 +13,9 @@ var_dump($pixel->isPixelSimilar('#0000FF', 0.02));
 var_dump($pixel->isPixelSimilar('rgb(0, 0, 0)', 0.03));
 
 $pixel = new ImagickPixel('#F02B88');
-var_dump($pixel->isPixelSimilar('#F02B89', 0.9 / $sqrt3 / 255));
+var_dump($pixel->isPixelSimilar('#F02B89', 0.9 / $sqrt6 / 255));
 var_dump($pixel->isPixelSimilar('#F02B89', 1.1 / $sqrt3 / 255));
-var_dump($pixel->isPixelSimilar('#F12A86', 0.9 / 255));
+var_dump($pixel->isPixelSimilar('#F12A86', 0.9 / sqrt(2.0) / 255));
 var_dump($pixel->isPixelSimilar('#F12A88', 1.1 / 255));
 
 echo "==DONE==\n";

@@ -198,6 +198,23 @@ TEST(RocketServerAppAdapterTest, LifecycleAndErrorChannelsAreIndependent) {
   EXPECT_EQ(inactiveCount, 1);
 }
 
+TEST(RocketServerAppAdapterTest, OnWriteReadyInvokesCallback) {
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+  int readyCount = 0;
+  adapter->setOnWriteReady([&]() noexcept { readyCount++; });
+
+  adapter->onWriteReady();
+  adapter->onWriteReady();
+
+  EXPECT_EQ(readyCount, 2);
+}
+
+TEST(RocketServerAppAdapterTest, OnWriteReadyNoOpWhenCallbackUnset) {
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+  // No setOnWriteReady call — must not crash.
+  adapter->onWriteReady();
+}
+
 HANDLER_TAG(mock_head_tag);
 
 TEST(RocketServerAppAdapterTest, WriteWithPipelineCallsFireWrite) {
@@ -235,6 +252,35 @@ TEST(RocketServerAppAdapterTest, WriteWithPipelineCallsFireWrite) {
   pipeline->deactivate();
   pipeline->close();
   adapter->resetPipeline();
+}
+
+TEST(RocketServerAppAdapterTest, NotifyReadReadyFiresPipelineOnReadReady) {
+  folly::EventBase evb;
+  MockHeadHandler head;
+  TestAllocator allocator;
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+
+  auto pipeline =
+      PipelineBuilder<MockHeadHandler, RocketServerAppAdapter, TestAllocator>()
+          .setEventBase(&evb)
+          .setHead(&head)
+          .setTail(adapter.get())
+          .setAllocator(&allocator)
+          .build();
+  adapter->setPipeline(pipeline.get());
+
+  adapter->notifyReadReady();
+
+  EXPECT_EQ(head.onReadReadyCount(), 1);
+
+  pipeline->close();
+  adapter->resetPipeline();
+}
+
+TEST(RocketServerAppAdapterTest, NotifyReadReadyNoOpWhenPipelineUnset) {
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+  // No setPipeline call — must not crash.
+  adapter->notifyReadReady();
 }
 
 } // namespace apache::thrift::fast_thrift::rocket::server::test

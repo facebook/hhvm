@@ -470,4 +470,26 @@ TEST(ThriftClientTransportAdapterTest, RocketActivePropagatesToThriftPipeline) {
   EXPECT_EQ(fixture.thriftTail.pipelineActiveCount(), 1);
 }
 
+TEST(
+    ThriftClientTransportAdapterTest, OnWriteReadyFromRocketReachesThriftTail) {
+  AdapterWithBothPipelines fixture;
+
+  // Simulate rocket-tail onWriteReady (fired when rocket transport's write
+  // buffer drains). The bridge must walk the thrift pipeline and notify
+  // the thrift tail.
+  fixture.rocketAppAdapter->onWriteReady();
+
+  EXPECT_EQ(fixture.thriftTail.onWriteReadyCount(), 1);
+}
+
+TEST(ThriftClientTransportAdapterTest, OnReadReadyFromThriftReachesRocketHead) {
+  AdapterWithBothPipelines fixture;
+
+  // Simulate the thrift pipeline firing onReadReady. The bridge head must
+  // forward it down into the rocket pipeline and reach the rocket head.
+  fixture.thriftPipeline->onReadReady();
+
+  EXPECT_EQ(fixture.rocketHead.onReadReadyCount(), 1);
+}
+
 } // namespace apache::thrift::fast_thrift::thrift::client::test

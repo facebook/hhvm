@@ -82,6 +82,12 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
   using OnDisconnectFn = folly::Function<void() noexcept>;
   using OnCloseFn = folly::Function<void() noexcept>;
 
+  // Cross-pipeline write-ready relay: invoked when the rocket pipeline's
+  // tail receives onWriteReady() from the transport. An upper pipeline
+  // (e.g. thrift) installs this to be told its own pipeline can fire
+  // onWriteReady().
+  using OnWriteReadyFn = folly::Function<void() noexcept>;
+
   RocketClientAppAdapter() = default;
 
   RocketClientAppAdapter(const RocketClientAppAdapter&) = delete;
@@ -122,6 +128,23 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
     onConnect_ = std::move(connectHandler);
     onDisconnect_ = std::move(disconnectHandler);
     onClose_ = std::move(closeHandler);
+  }
+
+  void setOnWriteReady(OnWriteReadyFn fn) noexcept {
+    onWriteReady_ = std::move(fn);
+  }
+
+  /**
+   * Fire onReadReady() on the rocket pipeline. The pipeline walks any
+   * handlers awaiting read-ready notification and then signals the head
+   * (TransportHandler::onReadReady → resumeRead). Used by an upper
+   * pipeline (e.g. thrift) to release inbound backpressure that it had
+   * earlier applied at its own tail.
+   */
+  void notifyReadReady() noexcept {
+    if (pipeline_) {
+      pipeline_->onReadReady();
+    }
   }
 
   // === RocketClientAppOutboundHandler interface ===
@@ -183,6 +206,7 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
     onConnect_ = {};
     onDisconnect_ = {};
     onClose_ = {};
+    onWriteReady_ = {};
   }
 
   void onPipelineActive() noexcept {
@@ -199,7 +223,11 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
     }
   }
 
-  void onWriteReady() noexcept {}
+  void onWriteReady() noexcept {
+    if (onWriteReady_) {
+      onWriteReady_();
+    }
+  }
 
  protected:
   ~RocketClientAppAdapter() override {
@@ -215,6 +243,7 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
   OnConnectFn onConnect_;
   OnDisconnectFn onDisconnect_;
   OnCloseFn onClose_;
+  OnWriteReadyFn onWriteReady_;
   bool disconnected_{true};
 };
 

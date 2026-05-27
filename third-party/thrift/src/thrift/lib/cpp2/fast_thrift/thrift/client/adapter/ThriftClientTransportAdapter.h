@@ -82,6 +82,14 @@ class ThriftClientTransportAdapter {
     connection_->setLifecycleHandlers(
         [this]() noexcept { onConnect(); },
         [this]() noexcept { onDisconnect(); });
+    // Bridge rocket-pipeline egress-drain notifications into the thrift
+    // pipeline. Fired when the rocket transport's write buffer drains;
+    // walks the thrift pipeline's writeReadyList and notifies its tail.
+    connection_->appAdapter->setOnWriteReady([this]() noexcept {
+      if (pipeline_) {
+        pipeline_->onWriteReady();
+      }
+    });
   }
 
   ~ThriftClientTransportAdapter() {
@@ -233,7 +241,14 @@ class ThriftClientTransportAdapter {
     return connection_->appAdapter->write(std::move(rocketMsg));
   }
 
-  void onReadReady() noexcept {}
+  // Thrift pipeline signaled it can accept more inbound reads — relay
+  // down to the rocket pipeline so its head TransportHandler can resume
+  // the socket read callback.
+  void onReadReady() noexcept {
+    if (connection_ && connection_->appAdapter) {
+      connection_->appAdapter->notifyReadReady();
+    }
+  }
 
   void handlerAdded() noexcept {}
 

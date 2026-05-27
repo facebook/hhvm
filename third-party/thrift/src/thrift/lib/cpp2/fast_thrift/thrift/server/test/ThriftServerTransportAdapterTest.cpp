@@ -191,6 +191,60 @@ TEST(ThriftServerTransportAdapterTest, InboundRequestConvertedToThrift) {
   fixture.adapter->resetPipeline();
 }
 
+TEST(
+    ThriftServerTransportAdapterTest, OnWriteReadyFromRocketReachesThriftTail) {
+  AdapterWithRocketPipeline fixture;
+
+  MockTailHandler thriftTail;
+  TestAllocator thriftAllocator;
+
+  auto thriftPipeline = PipelineBuilder<
+                            ThriftServerTransportAdapter,
+                            MockTailHandler,
+                            TestAllocator>()
+                            .setEventBase(&fixture.evb)
+                            .setHead(fixture.adapter.get())
+                            .setTail(&thriftTail)
+                            .setAllocator(&thriftAllocator)
+                            .build();
+  fixture.adapter->setPipeline(thriftPipeline.get());
+
+  // Simulate rocket-tail onWriteReady (which fires when rocket transport's
+  // write buffer drains). The bridge must walk the thrift pipeline and
+  // notify the thrift tail.
+  fixture.appAdapter->onWriteReady();
+
+  EXPECT_EQ(thriftTail.onWriteReadyCount(), 1);
+
+  fixture.adapter->resetPipeline();
+}
+
+TEST(ThriftServerTransportAdapterTest, OnReadReadyFromThriftReachesRocketHead) {
+  AdapterWithRocketPipeline fixture;
+
+  MockTailHandler thriftTail;
+  TestAllocator thriftAllocator;
+
+  auto thriftPipeline = PipelineBuilder<
+                            ThriftServerTransportAdapter,
+                            MockTailHandler,
+                            TestAllocator>()
+                            .setEventBase(&fixture.evb)
+                            .setHead(fixture.adapter.get())
+                            .setTail(&thriftTail)
+                            .setAllocator(&thriftAllocator)
+                            .build();
+  fixture.adapter->setPipeline(thriftPipeline.get());
+
+  // Simulate the thrift pipeline firing onReadReady. The bridge must
+  // walk down into the rocket pipeline and reach the rocket head.
+  thriftPipeline->onReadReady();
+
+  EXPECT_EQ(fixture.rocketHead.onReadReadyCount(), 1);
+
+  fixture.adapter->resetPipeline();
+}
+
 TEST(ThriftServerTransportAdapterTest, OnTransportErrorPropagatesException) {
   AdapterWithRocketPipeline fixture;
 

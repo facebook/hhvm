@@ -175,6 +175,34 @@ TEST(RocketClientAppAdapterTest, LifecycleAndErrorChannelsAreIndependent) {
   EXPECT_EQ(inactiveCount, 1);
 }
 
+TEST(RocketClientAppAdapterTest, OnWriteReadyInvokesCallback) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  int readyCount = 0;
+  adapter->setOnWriteReady([&]() noexcept { readyCount++; });
+
+  adapter->onWriteReady();
+  adapter->onWriteReady();
+
+  EXPECT_EQ(readyCount, 2);
+}
+
+TEST(RocketClientAppAdapterTest, OnWriteReadyNoOpWhenCallbackUnset) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  // No setOnWriteReady call — must not crash.
+  adapter->onWriteReady();
+}
+
+TEST(RocketClientAppAdapterTest, HandlerRemovedClearsOnWriteReadyCallback) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  int readyCount = 0;
+  adapter->setOnWriteReady([&]() noexcept { readyCount++; });
+
+  adapter->handlerRemoved();
+  adapter->onWriteReady();
+
+  EXPECT_EQ(readyCount, 0);
+}
+
 HANDLER_TAG(mock_head_tag);
 
 TEST(RocketClientAppAdapterTest, WriteWithPipelineCallsFireWrite) {
@@ -211,6 +239,35 @@ TEST(RocketClientAppAdapterTest, WriteWithPipelineCallsFireWrite) {
   pipeline->deactivate();
   pipeline->close();
   adapter->resetPipeline();
+}
+
+TEST(RocketClientAppAdapterTest, NotifyReadReadyFiresPipelineOnReadReady) {
+  folly::EventBase evb;
+  MockHeadHandler head;
+  TestAllocator allocator;
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+
+  auto pipeline =
+      PipelineBuilder<MockHeadHandler, RocketClientAppAdapter, TestAllocator>()
+          .setEventBase(&evb)
+          .setHead(&head)
+          .setTail(adapter.get())
+          .setAllocator(&allocator)
+          .build();
+  adapter->setPipeline(pipeline.get());
+
+  adapter->notifyReadReady();
+
+  EXPECT_EQ(head.onReadReadyCount(), 1);
+
+  pipeline->close();
+  adapter->resetPipeline();
+}
+
+TEST(RocketClientAppAdapterTest, NotifyReadReadyNoOpWhenPipelineUnset) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  // No setPipeline call — must not crash.
+  adapter->notifyReadReady();
 }
 
 } // namespace apache::thrift::fast_thrift::rocket::client::test

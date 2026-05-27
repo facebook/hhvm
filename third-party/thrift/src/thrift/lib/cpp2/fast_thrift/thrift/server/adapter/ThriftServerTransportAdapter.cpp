@@ -36,6 +36,14 @@ ThriftServerTransportAdapter::ThriftServerTransportAdapter(
   rocketConn_->setLifecycleHandlers(
       [this]() noexcept { onConnect(); },
       [this]() noexcept { onDisconnect(); });
+  // Bridge rocket-pipeline egress-drain notifications into the thrift
+  // pipeline. Fired when the rocket transport's write buffer drains;
+  // walks the thrift pipeline's writeReadyList and notifies its tail.
+  rocketConn_->appAdapter->setOnWriteReady([this]() noexcept {
+    if (pipeline_) {
+      pipeline_->onWriteReady();
+    }
+  });
 }
 
 ThriftServerTransportAdapter::~ThriftServerTransportAdapter() {

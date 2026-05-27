@@ -195,7 +195,14 @@ class ThriftServerTransportAdapter {
   // flag absorbs the loop.
   FOLLY_NOINLINE void onPipelineInactive() noexcept;
 
-  void onReadReady() noexcept {}
+  // Thrift pipeline signaled it can accept more inbound reads — relay
+  // down to the rocket pipeline so its head TransportHandler can resume
+  // the socket read callback.
+  void onReadReady() noexcept {
+    if (rocketConn_ && rocketConn_->appAdapter) {
+      rocketConn_->appAdapter->notifyReadReady();
+    }
+  }
 
  private:
   // Rocket pipeline became active — activate the thrift pipeline so

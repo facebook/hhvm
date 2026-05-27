@@ -593,8 +593,8 @@ module Decl = struct
       | ([], []) -> false
       | ({ ptyp_desc; _ } :: tys, tv :: tyvars) ->
         (match ptyp_desc with
-        | Ptyp_var nm when not @@ String.equal nm tv -> true
-        | _ -> auxs tys tyvars)
+        | Ptyp_var nm when String.equal nm tv -> auxs tys tyvars
+        | _ -> true)
       | _ ->
         (* This should not happen with valid OCaml types *)
         false
@@ -1411,22 +1411,13 @@ module Gen_fn = struct
     let fn_pat = ppat_var ~loc (Located.mk ~loc fn_name) in
     let (pat, expr) =
       match type_info with
-      | Transform_field.Regular _regular ->
+      | Transform_field.Regular _ ->
         let expr =
           [%expr
             (fun [%p elem_pat] ~ctx ~top_down ~bottom_up -> [%e body_expr])]
         and pat =
-          (* TODO: we currently check if each type declaration is non-regular
-             within its strongly-connected components and mark each component
-             as regular / non-regular individualy in order to generate
-             explicit quantifiers when necessary.
-
-             This seems to be the wrong thing - we actually want explicit
-             quantifiers if _any_ component is non-regular
-
-             For now, we just generate an explicitly quantified signature even
-             when it isn't required. *)
-          (* if regular then fn_pat else *)
+          (* Always generate explicit quantifiers; required for non-regular
+             types and harmless for regular ones *)
           ppat_constraint
             ~loc
             fn_pat
@@ -1447,10 +1438,6 @@ module Gen_fn = struct
             tyvars
             expr
         and pat =
-          (* We always assume that a GADT needs explicit quantifiers
-             TODO: I think this is true since we are generating recursive a
-             recursive function but need to confirm
-          *)
           ppat_constraint
             ~loc
             fn_pat

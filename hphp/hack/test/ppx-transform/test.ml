@@ -92,6 +92,18 @@ end = struct
   and 'a two = MaybeOne of 'a option one [@@deriving transform]
 end
 
+module Nonregular_concrete : sig
+  type 'a t =
+    | Leaf
+    | Node of int t
+  [@@deriving transform]
+end = struct
+  type 'a t =
+    | Leaf
+    | Node of int t
+  [@@deriving transform]
+end
+
 module Composed = struct
   module BinOp : sig
     type t =

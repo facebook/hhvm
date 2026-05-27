@@ -35,7 +35,10 @@ class MockBiDiClientCallback final : public BiDiClientCallback {
   void onFirstResponseError(folly::exception_wrapper) override {}
 
   bool onStreamNext(StreamPayload&&) override { return true; }
-  bool onStreamError(folly::exception_wrapper) override { return true; }
+  bool onStreamError(folly::exception_wrapper) override {
+    streamErrorCount_++;
+    return true;
+  }
   bool onStreamComplete() override {
     streamCompleteCount_++;
     return true;
@@ -47,9 +50,11 @@ class MockBiDiClientCallback final : public BiDiClientCallback {
   void resetServerCallback(BiDiServerCallback&) override {}
 
   int streamCompleteCount() const { return streamCompleteCount_; }
+  int streamErrorCount() const { return streamErrorCount_; }
 
  private:
   int streamCompleteCount_{0};
+  int streamErrorCount_{0};
 };
 
 } // namespace
@@ -84,4 +89,63 @@ TEST(RocketBiDiServerCallbackTest, DuplicateStreamCompleteDoesNotCrash) {
   EXPECT_TRUE(alive); // Sink is still open.
   // clientCallback should NOT have received a second onStreamComplete.
   EXPECT_EQ(clientCallback.streamCompleteCount(), 1);
+}
+
+// Regression test for a crash in dvaar.mysql (SIGSEGV in
+// ClientCallbackStapler::onStreamError). When the client cancels the stream
+// half of a BiDi connection, a late ERROR frame from the server can still reach
+// onStreamError because the stream entry remains in RocketClient::streams_
+// (the sink half is alive). Without the isStreamOpen() guard, the error
+// propagates to ClientCallbackStapler which dereferences null.
+TEST(RocketBiDiServerCallbackTest, StreamErrorAfterStreamCancelDoesNotCrash) {
+  MockBiDiClientCallback clientCallback;
+
+  alignas(RocketClient) char storage[sizeof(RocketClient)];
+  auto& dummyClient = reinterpret_cast<RocketClient&>(storage);
+
+  RocketBiDiServerCallback serverCallback(
+      StreamId{1}, dummyClient, clientCallback, nullptr);
+
+  // Transition to StreamAndSinkOpen.
+  serverCallback.state().onFirstResponseSent();
+  ASSERT_TRUE(serverCallback.state().isBothOpen());
+
+  // Cancel the stream: StreamAndSinkOpen -> OnlySinkOpen.
+  serverCallback.state().onStreamCancel();
+  EXPECT_FALSE(serverCallback.state().isStreamOpen());
+  EXPECT_TRUE(serverCallback.state().isSinkOpen());
+
+  // A late stream error arrives after the stream is already cancelled.
+  // This must be a no-op, not a crash.
+  serverCallback.onStreamError(
+      folly::make_exception_wrapper<std::runtime_error>("late error"));
+
+  // The error should NOT have been forwarded to the client callback.
+  EXPECT_EQ(clientCallback.streamErrorCount(), 0);
+  EXPECT_TRUE(serverCallback.state().isSinkOpen());
+}
+
+TEST(RocketBiDiServerCallbackTest, StreamErrorAfterStreamErrorDoesNotCrash) {
+  MockBiDiClientCallback clientCallback;
+
+  alignas(RocketClient) char storage[sizeof(RocketClient)];
+  auto& dummyClient = reinterpret_cast<RocketClient&>(storage);
+
+  RocketBiDiServerCallback serverCallback(
+      StreamId{1}, dummyClient, clientCallback, nullptr);
+
+  serverCallback.state().onFirstResponseSent();
+  ASSERT_TRUE(serverCallback.state().isBothOpen());
+
+  // First stream error: StreamAndSinkOpen -> OnlySinkOpen.
+  serverCallback.onStreamError(
+      folly::make_exception_wrapper<std::runtime_error>("first error"));
+  EXPECT_EQ(clientCallback.streamErrorCount(), 1);
+  EXPECT_FALSE(serverCallback.state().isStreamOpen());
+  EXPECT_TRUE(serverCallback.state().isSinkOpen());
+
+  // Second stream error: should be a no-op (not crash).
+  serverCallback.onStreamError(
+      folly::make_exception_wrapper<std::runtime_error>("second error"));
+  EXPECT_EQ(clientCallback.streamErrorCount(), 1);
 }

@@ -85,13 +85,17 @@ class ClientCallbackStapler : public BiDiClientCallback,
 
   bool onStreamError(folly::exception_wrapper ew) override {
     DeletionGuard guard(this);
-    std::exchange(stream_, nullptr)->onStreamError(std::move(ew));
+    if (auto* s = std::exchange(stream_, nullptr)) {
+      s->onStreamError(std::move(ew));
+    }
     return stream_ || sink_;
   }
 
   bool onStreamComplete() override {
     DeletionGuard guard(this);
-    std::exchange(stream_, nullptr)->onStreamComplete();
+    if (auto* s = std::exchange(stream_, nullptr)) {
+      s->onStreamComplete();
+    }
     return stream_ || sink_;
   }
 
@@ -105,7 +109,9 @@ class ClientCallbackStapler : public BiDiClientCallback,
 
   bool onSinkCancel() override {
     DeletionGuard guard(this);
-    std::exchange(sink_, nullptr)->onFinalResponse(StreamPayload{nullptr, {}});
+    if (auto* s = std::exchange(sink_, nullptr)) {
+      s->onFinalResponse(StreamPayload{nullptr, {}});
+    }
     return stream_ || sink_;
   }
 

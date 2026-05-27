@@ -138,6 +138,9 @@ bool RocketBiDiServerCallback::onStreamComplete() {
 }
 
 void RocketBiDiServerCallback::onStreamError(folly::exception_wrapper ew) {
+  if (!state_.isStreamOpen()) {
+    return;
+  }
   state_.onStreamError();
   ew.handle(
       [&](RocketException& ex) {

@@ -140,6 +140,7 @@ class t_hack_generator : public t_concat_generator {
     typedef_ = option_is_specified(options, "typedef");
     server_stream_ = option_is_specified(options, "server_stream");
     skip_constants_ = option_is_specified(options, "skip_constants");
+    split_types_ = option_is_specified(options, "split_types");
 
     union_logger_rollout_ =
         option_is_specified(options, "__union_logger_rollout");
@@ -504,6 +505,7 @@ class t_hack_generator : public t_concat_generator {
   bool skip_codegen(const t_field* field);
   bool skip_codegen(const t_function* function);
   bool skip_constants_codegen();
+  void ensure_types_file_open();
 
   bool is_valid_hack_type(const t_type* type, const t_type_ref& top_level_type);
   bool is_valid_hack_type(const t_type_ref& type) {
@@ -1445,6 +1447,8 @@ class t_hack_generator : public t_concat_generator {
    */
   bool skip_constants_;
 
+  bool split_types_;
+
   std::map<std::string, ThriftShapishStructType> struct_async_type_;
   std::unordered_map<const t_paramlist*, const t_program*> paramlist_programs_;
 
@@ -1749,6 +1753,13 @@ bool t_hack_generator::skip_constants_codegen() {
   return skip_constants_ || program_->consts().empty();
 }
 
+void t_hack_generator::ensure_types_file_open() {
+  if (!f_types_.is_open()) {
+    init_codegen_file(
+        f_types_, get_out_dir() + get_program()->name() + "_types.php");
+  }
+}
+
 /**
  * Prepares for file generation by opening up the necessary file output
  * streams.
@@ -1758,8 +1769,10 @@ bool t_hack_generator::skip_constants_codegen() {
 void t_hack_generator::init_generator() {
   // Make output directory.
   std::filesystem::create_directory(get_out_dir());
-  init_codegen_file(
-      f_types_, get_out_dir() + get_program()->name() + "_types.php");
+  if (!split_types_) {
+    init_codegen_file(
+        f_types_, get_out_dir() + get_program()->name() + "_types.php");
+  }
 
   // Print header.
   if (!skip_constants_codegen()) {
@@ -1782,6 +1795,7 @@ void t_hack_generator::init_generator() {
               true);
           codegen_file_open = true;
         }
+        ensure_types_file_open();
         f_types_ << "type " << hack_name(tstruct, true) << " = " << *wrapper
                  << "<" << hack_wrapped_type_name(name, ns) << ">;\n";
       }
@@ -1816,7 +1830,9 @@ void t_hack_generator::init_codegen_file(
  */
 void t_hack_generator::close_generator() {
   // Close types file
-  f_types_.close();
+  if (f_types_.is_open()) {
+    f_types_.close();
+  }
 
   if (!skip_constants_codegen()) {
     // write out the values array
@@ -1893,6 +1909,7 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
     typehint = type_to_typehint(&ttypedef->type().deref());
   }
   if (wrapper && name.has_value()) {
+    ensure_types_file_open();
     f_types_ << (is_mod_int ? "internal " : "") << "type " << typedef_name
              << " = " << *wrapper << "<" << hack_wrapped_type_name(name, ns)
              << ">;\n";
@@ -1915,6 +1932,7 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
     if (typedef_name == typehint) {
       return;
     }
+    ensure_types_file_open();
     f_types_ << (is_mod_int ? "internal " : "") << "type " << typedef_name
              << " = " << typehint << ";\n";
   }
@@ -1929,6 +1947,13 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
  * @param tenum The enumeration
  */
 void t_hack_generator::generate_enum(const t_enum* tenum) {
+  std::ofstream per_type_file;
+  if (split_types_) {
+    init_codegen_file(
+        per_type_file, get_out_dir() + hack_name(tenum, true) + ".php");
+    std::swap(f_types_, per_type_file);
+  }
+
   std::string typehint;
   generate_php_docstring(f_types_, tenum);
   bool hack_enum = false;
@@ -2028,6 +2053,11 @@ void t_hack_generator::generate_enum(const t_enum* tenum) {
   f_types_ << indent() << "}\n";
   indent_down();
   f_types_ << indent() << "}\n\n";
+
+  if (split_types_) {
+    std::swap(f_types_, per_type_file);
+    per_type_file.close();
+  }
 }
 
 /**
@@ -3081,6 +3111,12 @@ void t_hack_generator::generate_struct(const t_structured* tstruct) {
     }
     // reset the flag
     has_nested_ns = false;
+  } else if (split_types_) {
+    std::ofstream per_type_file;
+    init_codegen_file(
+        per_type_file, get_out_dir() + find_hack_type_name(tstruct) + ".php");
+    generate_php_struct_definition(per_type_file, tstruct);
+    per_type_file.close();
   } else {
     generate_php_struct_definition(f_types_, tstruct);
   }
@@ -3157,8 +3193,17 @@ bool t_hack_generator::skip_codegen(const t_function* function) {
  * @param txception The struct definition
  */
 void t_hack_generator::generate_xception(const t_structured* txception) {
-  generate_php_struct_definition(
-      f_types_, txception, ThriftStructType::EXCEPTION);
+  if (split_types_) {
+    std::ofstream per_type_file;
+    init_codegen_file(
+        per_type_file, get_out_dir() + find_hack_type_name(txception) + ".php");
+    generate_php_struct_definition(
+        per_type_file, txception, ThriftStructType::EXCEPTION);
+    per_type_file.close();
+  } else {
+    generate_php_struct_definition(
+        f_types_, txception, ThriftStructType::EXCEPTION);
+  }
 }
 
 void t_hack_generator::generate_php_type_spec(
@@ -8620,7 +8665,9 @@ THRIFT_REGISTER_GENERATOR(
     "    typedef          Generate type aliases for all the types defined\n"
     "    enum_transparenttype Use transparent typing for Hack enums: 'enum "
     "FooBar: int as int'.\n"
-    "    server_stream Generate service code for streaming methods'.\n");
+    "    server_stream Generate service code for streaming methods'.\n"
+    "    split_types   Generate each type in its own file instead of one "
+    "_types.php.\n");
 
 } // namespace
 } // namespace apache::thrift::compiler

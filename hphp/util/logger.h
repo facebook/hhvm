@@ -22,6 +22,8 @@
 #include <filesystem>
 #include <string>
 
+#include <fmt/core.h>
+
 #include "hphp/util/cronolog.h"
 #include "hphp/util/log-file-flusher.h"
 #include "hphp/util/service-data.h"

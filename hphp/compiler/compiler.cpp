@@ -1442,7 +1442,7 @@ bool process(CompilerOptions &po) {
         if (isIncludedReason == FileInBuildReason::notIncluded) {
           Logger::FVerbose("Dropping {} from the repo build because module {} is "
                            "not part of {} deployment",
-                           p.m_filepath,
+                           p.m_filepath->data(),
                            p.m_module_use ? p.m_module_use->data() : "top-level",
                            Cfg::Eval::ActiveDeployment);
           itemsToSkip.insert(i);
@@ -1491,7 +1491,7 @@ bool process(CompilerOptions &po) {
       if (isIncludedReason == FileInBuildReason::notIncluded) {
         Logger::FVerbose("Dropping {} from the repo build because module {} is "
                          "not part of {} deployment",
-                         p.m_filepath,
+                         p.m_filepath->data(),
                          p.m_module_use ? p.m_module_use->data() : "top-level",
                          Cfg::Eval::ActiveDeployment);
         itemsToSkip.insert(i);

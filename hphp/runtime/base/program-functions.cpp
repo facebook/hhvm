@@ -167,6 +167,8 @@
 #include <string>
 #include <vector>
 
+#include <fmt/format.h>
+
 using namespace boost::program_options;
 using std::cout;
 
@@ -887,7 +889,7 @@ hugifyText(char* from, char* to) {
     munlock(from, sz);
     madvise(from, sz, MADV_HUGEPAGE);
     Logger::FInfo("Mapped text section onto THP pagecache from {} to {}.",
-                  (uint64_t*)from, (uint64_t*)to);
+                  fmt::ptr(from), fmt::ptr(to));
     return true;
   }
 #endif
@@ -975,7 +977,8 @@ hugifyText(char* from, char* to) {
       if (offset > size2m) {
         Logger::FWarning("Mapped text section onto hugetlb pages from {} to {},"
                          "which is smaller than the intended size of {} bytes",
-                         (uint64_t*)from, (uint64_t*)(from + offset - size2m),
+                         fmt::ptr(from),
+                         fmt::ptr(from + offset - size2m),
                          sz);
       } else {
         Logger::FWarning("Unable to get any page on hugetlb pages");

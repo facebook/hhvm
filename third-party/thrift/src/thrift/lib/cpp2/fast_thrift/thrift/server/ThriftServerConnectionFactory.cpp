@@ -34,6 +34,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionCloseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionContextHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestContextHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/WriteBufferBackpressureHandler.h>
 
 namespace apache::thrift::fast_thrift::thrift::server {
 
@@ -52,6 +53,7 @@ HANDLER_TAG(server_stream_state_handler);
 HANDLER_TAG(thrift_server_request_context_handler);
 HANDLER_TAG(thrift_server_connection_context_handler);
 HANDLER_TAG(thrift_server_connection_close_handler);
+HANDLER_TAG(write_buffer_backpressure_handler);
 } // namespace
 
 ThriftServerConnectionFactory::ThriftServerConnectionFactory(
@@ -208,6 +210,8 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
       channel_pipeline::detail::ContextImpl>;
   using CloseHandler =
       ThriftServerConnectionCloseHandler<channel_pipeline::detail::ContextImpl>;
+  using WriteBufferHandler =
+      WriteBufferBackpressureHandler<channel_pipeline::detail::ContextImpl>;
   PipelineBuilder<
       ThriftServerTransportAdapter,
       TailAdapter,
@@ -231,6 +235,15 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
   // it up via onEvent and drives the terminal state machine.
   thriftPipelineBuilder.template addNextDuplex<CloseHandler>(
       thrift_server_connection_close_handler_tag);
+  // Write-buffer handler sits between the context handlers and the drain
+  // handler. Placed above drain (closer to head) so its inbound
+  // Backpressure signal propagates upstream toward the transport, and
+  // outbound responses from the tail traverse drain → write-buffer →
+  // head.
+  if (config_.enableWriteBufferBackpressure) {
+    thriftPipelineBuilder.template addNextDuplex<WriteBufferHandler>(
+        write_buffer_backpressure_handler_tag);
+  }
   auto thriftPipeline = thriftPipelineBuilder.build();
   transportAdapterPtr->setPipeline(thriftPipeline.get());
   tailAdapter->setPipeline(thriftPipeline.get());

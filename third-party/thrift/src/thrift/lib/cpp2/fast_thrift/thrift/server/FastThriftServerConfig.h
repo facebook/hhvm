@@ -51,6 +51,13 @@ struct FastThriftServerConfig {
   // The setOnConnectionAccepted callback receives a pointer to the
   // ThriftConnContext (or nullptr when this flag is off).
   bool enableRequestContext{false};
+
+  // When true, insert WriteBufferBackpressureHandler into the thrift
+  // pipeline. The handler buffers outbound responses when the downstream
+  // pipeline returns Result::Backpressure (e.g. transport write buffer
+  // full), drains them in FIFO on onWriteReady, and surfaces inbound
+  // Backpressure while saturated so the transport pauses socket reads.
+  bool enableWriteBufferBackpressure{false};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

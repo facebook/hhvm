@@ -58,6 +58,12 @@ struct ThriftServerConnectionFactoryConfig {
   // ThriftServerConnectionContextHandler into the thrift pipeline so each
   // request's ThriftRequestContext is populated with the ThriftConnContext.
   bool enableRequestContext{false};
+
+  // When true, insert WriteBufferBackpressureHandler into the thrift
+  // pipeline to absorb outbound Backpressure: responses queue in a FIFO
+  // when downstream is saturated and drain on onWriteReady; inbound reads
+  // surface Backpressure while buffered to pause socket reads.
+  bool enableWriteBufferBackpressure{false};
 };
 
 /**

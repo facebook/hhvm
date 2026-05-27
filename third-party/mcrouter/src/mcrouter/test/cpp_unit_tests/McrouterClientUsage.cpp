@@ -99,8 +99,12 @@ TEST(CarbonRouterClient, basicUsageSameThreadClient) {
   bool replyReceived = false;
   folly::fibers::Baton baton;
 
+  folly::RequestContextScopeGuard rcsg;
+  const auto rctx = folly::RequestContext::try_get();
+  ASSERT_NE(rctx, nullptr);
+
   eventBase.runInEventBaseThread(
-      [client = client.get(), &replyReceived, &baton]() {
+      [client = client.get(), &replyReceived, &baton, rctx]() {
         // We must ensure that req will remain alive all the way through the
         // reply callback given to client->send(). This demonstrates one way of
         // ensuring this.
@@ -108,8 +112,10 @@ TEST(CarbonRouterClient, basicUsageSameThreadClient) {
         auto reqRawPtr = req.get();
         client->send(
             *reqRawPtr,
-            [req = std::move(req), &replyReceived, &baton](
+            [req = std::move(req), &replyReceived, &baton, rctx](
                 const McGetRequest&, McGetReply&& reply) {
+              // Callback is executed with the same original request context
+              EXPECT_EQ(rctx, folly::RequestContext::try_get());
               EXPECT_EQ(carbon::Result::NOTFOUND, *reply.result());
               replyReceived = true;
               baton.post();
@@ -141,6 +147,10 @@ TEST(CarbonRouterClient, basicUsageRemoteThreadClient) {
       0 /* max_outstanding_requests */,
       false /* max_outstanding_requests_error */);
 
+  folly::RequestContextScopeGuard rcsg;
+  const auto rctx = folly::RequestContext::try_get();
+  ASSERT_NE(rctx, nullptr);
+
   // Note, as in the previous test, that req is kept alive through the end of
   // the callback provided to client->send() below.
   // Also note that we are careful not to modify req while the proxy (in this
@@ -150,7 +160,10 @@ TEST(CarbonRouterClient, basicUsageRemoteThreadClient) {
   folly::fibers::Baton baton;
 
   client->send(
-      req, [&baton, &replyReceived](const McGetRequest&, McGetReply&& reply) {
+      req,
+      [&baton, &replyReceived, rctx](const McGetRequest&, McGetReply&& reply) {
+        // Callback is executed with the same original request context
+        EXPECT_EQ(rctx, folly::RequestContext::try_get());
         EXPECT_EQ(carbon::Result::NOTFOUND, *reply.result());
         replyReceived = true;
         baton.post();
@@ -182,6 +195,10 @@ TEST(CarbonRouterClient, basicUsageRemoteThreadClientThreadPool) {
       0 /* max_outstanding_requests */,
       false /* max_outstanding_requests_error */);
 
+  folly::RequestContextScopeGuard rcsg;
+  const auto rctx = folly::RequestContext::try_get();
+  ASSERT_NE(rctx, nullptr);
+
   // Note, as in the previous test, that req is kept alive through the end of
   // the callback provided to client->send() below.
   // Also note that we are careful not to modify req while the proxy (in this
@@ -191,7 +208,10 @@ TEST(CarbonRouterClient, basicUsageRemoteThreadClientThreadPool) {
   folly::fibers::Baton baton;
 
   client->send(
-      req, [&baton, &replyReceived](const McGetRequest&, McGetReply&& reply) {
+      req,
+      [&baton, &replyReceived, rctx](const McGetRequest&, McGetReply&& reply) {
+        // Callback is executed with the same original request context
+        EXPECT_EQ(rctx, folly::RequestContext::try_get());
         EXPECT_EQ(carbon::Result::NOTFOUND, *reply.result());
         replyReceived = true;
         baton.post();
@@ -222,6 +242,10 @@ TEST(CarbonRouterClient, basicUsageRemoteThreadClientThreadAffinity) {
       0 /* max_outstanding_requests */,
       false /* max_outstanding_requests_error */);
 
+  folly::RequestContextScopeGuard rcsg;
+  const auto rctx = folly::RequestContext::try_get();
+  ASSERT_NE(rctx, nullptr);
+
   // Note, as in the previous test, that req is kept alive through the end of
   // the callback provided to client->send() below.
   // Also note that we are careful not to modify req while the proxy (in this
@@ -231,7 +255,10 @@ TEST(CarbonRouterClient, basicUsageRemoteThreadClientThreadAffinity) {
   folly::fibers::Baton baton;
 
   client->send(
-      req, [&baton, &replyReceived](const McGetRequest&, McGetReply&& reply) {
+      req,
+      [&baton, &replyReceived, rctx](const McGetRequest&, McGetReply&& reply) {
+        // Callback is executed with the same original request context
+        EXPECT_EQ(rctx, folly::RequestContext::try_get());
         EXPECT_EQ(carbon::Result::NOTFOUND, *reply.result());
         replyReceived = true;
         baton.post();
@@ -276,6 +303,10 @@ TEST(CarbonRouterClient, basicUsageRemoteThreadClientThreadAffinityMulti) {
       0 /* max_outstanding_requests */,
       false /* max_outstanding_requests_error */);
 
+  folly::RequestContextScopeGuard rcsg;
+  const auto rctx = folly::RequestContext::try_get();
+  ASSERT_NE(rctx, nullptr);
+
   std::vector<McGetRequest> requests{
       McGetRequest("key1"),
       McGetRequest("key2"),
@@ -298,8 +329,11 @@ TEST(CarbonRouterClient, basicUsageRemoteThreadClientThreadAffinityMulti) {
   client->send(
       requests.begin(),
       requests.end(),
-      [&baton, &replyCount, &requests](
+      [&baton, &replyCount, &requests, rctx](
           const McGetRequest&, McGetReply&& reply) {
+        // Callback is executed with the same original request context for
+        // fanned out mcrouter requests as well
+        EXPECT_EQ(rctx, folly::RequestContext::try_get());
         EXPECT_TRUE(
             *reply.result() == carbon::Result::CONNECT_ERROR ||
             *reply.result() == carbon::Result::TKO);

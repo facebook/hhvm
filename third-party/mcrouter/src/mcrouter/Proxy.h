@@ -289,6 +289,7 @@ class Proxy : public ProxyBase {
    private:
     const Request& req_;
     std::unique_ptr<ProxyRequestContextTyped<RouterInfo, Request>> ctx_;
+    std::shared_ptr<folly::RequestContext> rctx_;
 
     int64_t timePushedOnQueue_{-1};
   };

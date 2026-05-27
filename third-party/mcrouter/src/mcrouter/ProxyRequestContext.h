@@ -12,6 +12,7 @@
 
 #include <folly/Range.h>
 #include <folly/fibers/FiberManager.h>
+#include <folly/io/async/Request.h>
 
 #include "mcrouter/ProxyRequestPriority.h"
 #include "mcrouter/config-impl.h"
@@ -162,21 +163,6 @@ class ProxyRequestContext {
     }
   }
 
-  /**
-   * Set RequestContextScopeGuard to create folly::RequestContext.
-   */
-  void setRequestContextScopeGuard(
-      std::unique_ptr<folly::ShallowCopyRequestContextScopeGuard> guard) {
-    reqContextScopeGuard_ = std::move(guard);
-  }
-
-  /**
-   * Destroy RequestContextScopeGuard to destroy folly::RequestContext.
-   */
-  void destroyRequestContextScopeGuard() {
-    reqContextScopeGuard_.reset();
-  }
-
   void setThreadAffinity(bool enabled) {
     threadAffinity_ = enabled;
   }
@@ -236,8 +222,6 @@ class ProxyRequestContext {
    * Functions to be executed before actual processing code.
    */
   std::function<void()> mcrouterPreprocess_{nullptr};
-  std::unique_ptr<folly::ShallowCopyRequestContextScopeGuard>
-      reqContextScopeGuard_{nullptr};
 
   ProxyRequestContext(const ProxyRequestContext&) = delete;
   ProxyRequestContext(ProxyRequestContext&&) noexcept = delete;

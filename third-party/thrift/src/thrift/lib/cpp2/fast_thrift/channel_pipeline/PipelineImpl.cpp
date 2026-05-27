@@ -107,7 +107,7 @@ void PipelineImpl::initializeContexts() noexcept {
   for (size_t i = 0; i < N; ++i) {
     auto& ctx = contexts_[i];
 
-    // Read/exception: forward direction (i+1)
+    // Read / exception: forward direction (i+1)
     if (i + 1 < N) {
       ctx.nextReadFn_ = handlers_[i + 1].onReadFn;
       ctx.nextExceptionFn_ = handlers_[i + 1].onExceptionFn;
@@ -132,8 +132,8 @@ void PipelineImpl::initializeContexts() noexcept {
     }
   }
 
-  // Cache entry-point dispatch pointers for fireRead/fireWrite.
-  // Eliminates vector indexing on the hot path entry.
+  // Cache entry-point dispatch pointers for fireRead/fireWrite. Eliminates
+  // vector indexing on the hot path entry.
   if (!handlers_.empty()) {
     firstReadFn_ = handlers_[0].onReadFn;
     firstExceptionFn_ = handlers_[0].onExceptionFn;
@@ -143,6 +143,17 @@ void PipelineImpl::initializeContexts() noexcept {
     lastWriteFn_ = handlers_[N - 1].onWriteFn;
     lastHandler_ = handlers_[N - 1].handlerPtr;
     lastCtx_ = &contexts_[N - 1];
+  }
+
+  // Third pass: link the event hooks for handlers that opted into
+  // onEvent. Walked in tail→head order (descending index) so the
+  // intrusive list iteration matches the broadcast order.
+  for (size_t i = N; i > 0; --i) {
+    const auto idx = i - 1;
+    if (handlers_[idx].onEventFn) {
+      contexts_[idx].eventHook_.handlerIndex = idx;
+      eventList_.push_back(contexts_[idx].eventHook_);
+    }
   }
 }
 
@@ -236,6 +247,26 @@ PIPELINE_HOT_PATH void PipelineImpl::fireException(
   firstExceptionFn_(firstHandler_, *firstCtx_, std::move(e));
 }
 
+void PipelineImpl::fireEvent(TypeErasedBox&& evt) noexcept {
+  RETURN_IF_CLOSED();
+  DestructorGuard dg(this);
+  // Iteration order: tail endpoint → internal handlers that registered
+  // for events (sparse via eventList_, tail→head per push order in
+  // initializeContexts) → head endpoint. Firers receive their own
+  // event back; handlers filter by event-type payload if they handle
+  // events they also emit.
+  if (tailOnEventFn_) {
+    tailOnEventFn_(tailHandler_, evt);
+  }
+  for (auto& hook : eventList_) {
+    auto& h = handlers_[hook.handlerIndex];
+    h.onEventFn(h.handlerPtr, contexts_[hook.handlerIndex], evt);
+  }
+  if (headOnEventFn_) {
+    headOnEventFn_(headHandler_, evt);
+  }
+}
+
 Result PipelineImpl::sendRead(
     HandlerId handlerId, TypeErasedBox&& msg) noexcept {
   DestructorGuard dg(this);
@@ -285,6 +316,9 @@ void PipelineImpl::close() noexcept {
   // Clear ready lists - handlers should not receive callbacks after close
   writeReadyList_.clear();
   readReadyList_.clear();
+  // Unlink event hooks before contexts_ (and the hooks they own) are
+  // destroyed; otherwise auto-unlink would touch a dead list sentinel.
+  eventList_.clear();
 
   callHandlerRemoved();
 }

@@ -105,6 +105,20 @@ class PipelineImpl : public folly::DelayedDestruction {
    */
   void fireException(folly::exception_wrapper&& e) noexcept;
 
+  /**
+   * Broadcast a user event to every registered handler in the pipeline.
+   * Iteration order is tail endpoint → internal handlers (tail→head,
+   * descending index, via the sparse `eventList_`) → head endpoint.
+   * Handlers opt in by implementing `onEvent(ctx, const TypeErasedBox&)`;
+   * non-implementors are not iterated.
+   *
+   * Direction is not part of the event identity — consumers react
+   * based on the event-type payload. Firers receive their own event
+   * back; they're expected to filter by type if they handle events
+   * they also emit.
+   */
+  void fireEvent(TypeErasedBox&& evt) noexcept;
+
   // === Fire to specific handler ===
 
   /**
@@ -308,6 +322,7 @@ class PipelineImpl : public folly::DelayedDestruction {
   void (*tailOnExceptionFn_)(void*, folly::exception_wrapper&&) noexcept {
       nullptr};
   void (*tailOnWriteReadyFn_)(void*) noexcept {nullptr};
+  void (*tailOnEventFn_)(void*, const TypeErasedBox&) noexcept {nullptr};
   // Tail handler lifecycle callbacks
   void (*tailOnPipelineActiveFn_)(void*) noexcept {nullptr};
   void (*tailOnPipelineInactiveFn_)(void*) noexcept {nullptr};
@@ -317,6 +332,7 @@ class PipelineImpl : public folly::DelayedDestruction {
   // Head handler callbacks
   Result (*headOnWriteFn_)(void*, TypeErasedBox&&) noexcept {nullptr};
   void (*headOnReadReadyFn_)(void*) noexcept {nullptr};
+  void (*headOnEventFn_)(void*, const TypeErasedBox&) noexcept {nullptr};
   // Head handler lifecycle callbacks
   void (*headOnPipelineActiveFn_)(void*) noexcept {nullptr};
   void (*headOnPipelineInactiveFn_)(void*) noexcept {nullptr};
@@ -344,6 +360,12 @@ class PipelineImpl : public folly::DelayedDestruction {
   // Handlers self-register via ctx.awaitWriteReady()/ctx.awaitReadReady().
   WriteReadyList writeReadyList_;
   ReadReadyList readReadyList_;
+
+  // Intrusive list of handlers that implement onEvent. Linked once by
+  // initializeContexts based on whether the handler opted in; stays
+  // linked for the pipeline's lifetime. Walked by fireEvent — sparse,
+  // only the registered handlers iterated.
+  EventList eventList_;
 
   // PipelineBuilder needs access to set up the pipeline
   template <typename HeadHandler, typename TailHandler, typename Allocator>

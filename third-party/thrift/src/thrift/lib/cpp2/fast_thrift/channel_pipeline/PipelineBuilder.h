@@ -274,6 +274,18 @@ class PipelineBuilder {
       static_cast<HeadHandler*>(h)->onReadReady();
     };
 
+    // User-event broadcast: head endpoint opts in by implementing
+    // `onEvent(const TypeErasedBox&)`; otherwise it's skipped during
+    // fireEvent iteration.
+    if constexpr (requires(HeadHandler& h, const TypeErasedBox& evt) {
+                    { h.onEvent(evt) } noexcept;
+                  }) {
+      pipeline->headOnEventFn_ = [](void* h,
+                                    const TypeErasedBox& evt) noexcept {
+        static_cast<HeadHandler*>(h)->onEvent(evt);
+      };
+    }
+
     // Lifecycle methods
     pipeline->headOnPipelineActiveFn_ = [](void* h) noexcept {
       static_cast<HeadHandler*>(h)->onPipelineActive();
@@ -301,6 +313,18 @@ class PipelineBuilder {
     pipeline->tailOnWriteReadyFn_ = [](void* t) noexcept {
       static_cast<TailHandler*>(t)->onWriteReady();
     };
+
+    // User-event broadcast: tail endpoint opts in by implementing
+    // `onEvent(const TypeErasedBox&)`; otherwise it's skipped during
+    // fireEvent iteration.
+    if constexpr (requires(TailHandler& t, const TypeErasedBox& evt) {
+                    { t.onEvent(evt) } noexcept;
+                  }) {
+      pipeline->tailOnEventFn_ = [](void* t,
+                                    const TypeErasedBox& evt) noexcept {
+        static_cast<TailHandler*>(t)->onEvent(evt);
+      };
+    }
 
     // Lifecycle methods
     pipeline->tailOnPipelineActiveFn_ = [](void* t) noexcept {

@@ -20,6 +20,7 @@
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Event.h>
 
 namespace apache::thrift::fast_thrift::channel_pipeline {
 
@@ -122,6 +123,18 @@ class ContextImpl {
       folly::exception_wrapper&& e) noexcept {
     nextExceptionFn_(nextHandler_, *nextCtx_, std::move(e));
   }
+
+  /**
+   * Broadcast a user event to every registered handler in the pipeline
+   * (tail → head iteration order). Handlers opt in by implementing
+   * `onEvent(ctx, const TypeErasedBox&)`; non-implementors are not
+   * iterated. The firer receives its own event back — filter by
+   * event-type payload to ignore self-emitted events.
+   *
+   * The event box is consumed; handlers receive it as const ref and
+   * inspect via `get<T>()`. Direction is not part of the event identity.
+   */
+  void fireEvent(TypeErasedBox&& evt) noexcept;
 
   /**
    * Propagate pipeline deactivation to the next outbound handler.
@@ -232,7 +245,8 @@ class ContextImpl {
   // Set once during PipelineImpl::initializeContexts().
   // Eliminates per-hop round-trip through PipelineImpl.
 
-  // Read/exception direction: tail→head (next handler or head terminal)
+  // Read/exception direction: head→tail. Each context's "next" is the
+  // handler closer to the tail.
   Result (*nextReadFn_)(void*, ContextImpl&, TypeErasedBox&&) noexcept {
       nullptr};
   void (*nextExceptionFn_)(
@@ -240,11 +254,16 @@ class ContextImpl {
   void* nextHandler_{nullptr};
   ContextImpl* nextCtx_{nullptr};
 
-  // Write direction: head→tail (prev handler or tail terminal)
+  // Write direction: tail→head (prev handler or head terminal)
   Result (*prevWriteFn_)(void*, ContextImpl&, TypeErasedBox&&) noexcept {
       nullptr};
   void* prevHandler_{nullptr};
   ContextImpl* prevCtx_{nullptr};
+
+  // Event broadcast list membership. Linked by PipelineImpl during
+  // initializeContexts iff the corresponding handler implements
+  // `onEvent`. Stays linked for the pipeline's lifetime.
+  EventHook eventHook_;
 
   friend class ::apache::thrift::fast_thrift::channel_pipeline::PipelineImpl;
 };

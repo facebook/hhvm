@@ -53,6 +53,8 @@ struct HandlerNode {
   using OnWriteFn = Result (*)(void*, ContextImpl&, TypeErasedBox&&) noexcept;
   using OnExceptionFn =
       void (*)(void*, ContextImpl&, folly::exception_wrapper&&) noexcept;
+  using OnEventFn =
+      void (*)(void*, ContextImpl&, const TypeErasedBox&) noexcept;
   using OnWriteReadyFn = void (*)(void*, ContextImpl&) noexcept;
   using OnReadReadyFn = void (*)(void*, ContextImpl&) noexcept;
   using OnPipelineInactiveFn = void (*)(void*, ContextImpl&) noexcept;
@@ -70,6 +72,10 @@ struct HandlerNode {
   OnWriteReadyFn onWriteReadyFn{nullptr};
   OnReadReadyFn onReadReadyFn{nullptr};
   OnPipelineInactiveFn onPipelineInactiveFn{nullptr};
+
+  // User event broadcast — opt-in; nullptr means "not interested".
+  // Pipeline iterates tail→head and calls each non-null fn once.
+  OnEventFn onEventFn{nullptr};
 
   // Lifecycle methods
   HandlerAddedFn handlerAddedFn{nullptr};
@@ -95,6 +101,7 @@ struct HandlerNode {
         onWriteReadyFn(other.onWriteReadyFn),
         onReadReadyFn(other.onReadReadyFn),
         onPipelineInactiveFn(other.onPipelineInactiveFn),
+        onEventFn(other.onEventFn),
         handlerAddedFn(other.handlerAddedFn),
         handlerRemovedFn(other.handlerRemovedFn),
         writeReadyHook_(other.writeReadyHook_),
@@ -108,6 +115,7 @@ struct HandlerNode {
     other.onWriteReadyFn = nullptr;
     other.onReadReadyFn = nullptr;
     other.onPipelineInactiveFn = nullptr;
+    other.onEventFn = nullptr;
     other.handlerAddedFn = nullptr;
     other.handlerRemovedFn = nullptr;
     other.writeReadyHook_ = nullptr;
@@ -126,6 +134,7 @@ struct HandlerNode {
       onWriteReadyFn = other.onWriteReadyFn;
       onReadReadyFn = other.onReadReadyFn;
       onPipelineInactiveFn = other.onPipelineInactiveFn;
+      onEventFn = other.onEventFn;
       handlerAddedFn = other.handlerAddedFn;
       handlerRemovedFn = other.handlerRemovedFn;
       writeReadyHook_ = other.writeReadyHook_;
@@ -140,6 +149,7 @@ struct HandlerNode {
       other.onWriteReadyFn = nullptr;
       other.onReadReadyFn = nullptr;
       other.onPipelineInactiveFn = nullptr;
+      other.onEventFn = nullptr;
       other.handlerAddedFn = nullptr;
       other.handlerRemovedFn = nullptr;
       other.writeReadyHook_ = nullptr;
@@ -263,6 +273,18 @@ HandlerNode makeHandlerNode(HandlerId handlerId, std::unique_ptr<H> handler) {
     node.onPipelineInactiveFn = [](void*, ContextImpl&) noexcept {
       // No-op for non-outbound handlers
     };
+  }
+
+  // User-event broadcast: opt-in. Handlers that don't implement
+  // onEvent leave onEventFn null so the pipeline's
+  // iteration skips them — no per-event forwarding hop.
+  if constexpr (requires(H& h, ContextImpl& ctx, const TypeErasedBox& evt) {
+                  { h.onEvent(ctx, evt) } noexcept;
+                }) {
+    node.onEventFn =
+        [](void* h, ContextImpl& ctx, const TypeErasedBox& evt) noexcept {
+          static_cast<H*>(h)->onEvent(ctx, evt);
+        };
   }
 
   return node;

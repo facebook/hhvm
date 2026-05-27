@@ -50,7 +50,6 @@ function check_params($r)
         }
         check_params_decl_class($p, 'getDeclaringClass');
 //        check_params_decl_func($p, 'getDeclaringFunction');
-        check_params_func($p, 'isArray');
         check_params_func($p, 'allowsNull');
         check_params_func($p, 'isOptional');
         check_params_func($p, 'isDefaultValueAvailable');

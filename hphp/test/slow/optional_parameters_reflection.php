@@ -28,8 +28,6 @@ function main():void {
     var_dump($parameter->hasType() ? $parameter->getType()->allowsNull() : false);
     echo 'type hint: ';
     var_dump($parameter->hasType() ? $parameter->getType()->__toString() : false);
-    echo 'isArray: ';
-    var_dump($parameter->isArray());
     echo 'isCallable: ';
     var_dump($parameter->isCallable());
     echo 'isOptional: ';

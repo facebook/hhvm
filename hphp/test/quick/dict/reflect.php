@@ -22,7 +22,6 @@ function foobar(dict<int, string> $x, dict<arraykey, Foo> $y): dict<int, int> {
 function dump($x) :mixed{
   var_dump((string)$x->getReturnType());
   foreach ($x->getParameters() as $param) {
-    var_dump($param->isArray());
     var_dump((string)$param->getType());
   }
 }

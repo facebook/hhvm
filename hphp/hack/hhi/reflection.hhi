@@ -292,7 +292,7 @@ class ReflectionParameter implements Reflector {
   public function getDeclaringFunction()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getDeclaringClass()[]: ?ReflectionClass;
   public function getClass()[]: ?ReflectionClass;
-  public function isArray()[]: bool;
+
   public function isCallable()[]: bool;
   public function allowsNull()[]: bool;
   public function getPosition()[]: HH\FIXME\MISSING_RETURN_TYPE;

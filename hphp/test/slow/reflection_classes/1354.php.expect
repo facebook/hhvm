@@ -12,14 +12,12 @@ string(4) "cls1"
 bool(false)
 bool(false)
 bool(false)
-bool(false)
 int(0)
 int(1)
 string(2) "p2"
 bool(true)
 NULL
 NULL
-bool(false)
 bool(true)
 bool(false)
 bool(false)
@@ -29,7 +27,6 @@ string(2) "p3"
 bool(false)
 NULL
 NULL
-bool(false)
 bool(true)
 bool(true)
 bool(true)
@@ -53,7 +50,6 @@ string(6) "param1"
 bool(false)
 string(4) "cls1"
 NULL
-bool(false)
 bool(true)
 bool(false)
 bool(false)
@@ -108,7 +104,6 @@ string(6) "param1"
 bool(false)
 string(4) "cls1"
 NULL
-bool(false)
 bool(true)
 bool(false)
 bool(false)
@@ -141,7 +136,6 @@ string(6) "param1"
 bool(false)
 string(4) "cls1"
 NULL
-bool(false)
 bool(true)
 bool(false)
 bool(false)
@@ -196,7 +190,6 @@ string(6) "param1"
 bool(false)
 string(4) "cls1"
 NULL
-bool(false)
 bool(true)
 bool(false)
 bool(false)

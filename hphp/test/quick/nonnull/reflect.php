@@ -14,7 +14,6 @@ function foobar(vec<nonnull> $x): nonnull {
 function dump($x) :mixed{
   var_dump((string)$x->getReturnType());
   foreach ($x->getParameters() as $param) {
-    var_dump($param->isArray());
     var_dump((string)$param->getType());
   }
 }

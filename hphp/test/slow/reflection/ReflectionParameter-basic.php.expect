@@ -18,7 +18,6 @@ getType: object(ReflectionType) (1) {
 type isBuiltin: bool(true)
 type allowsNull: bool(false)
 type hint: string(9) "HH\string"
-isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(false)
 isVariadic: bool(false)
@@ -49,7 +48,6 @@ getType: object(ReflectionType) (1) {
 type isBuiltin: bool(true)
 type allowsNull: bool(false)
 type hint: string(6) "HH\int"
-isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(false)
 isVariadic: bool(false)
@@ -80,7 +78,6 @@ getType: object(ReflectionType) (1) {
 type isBuiltin: bool(true)
 type allowsNull: bool(false)
 type hint: string(8) "HH\float"
-isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(false)
 isVariadic: bool(false)
@@ -111,7 +108,6 @@ getType: object(ReflectionType) (1) {
 type isBuiltin: bool(true)
 type allowsNull: bool(false)
 type hint: string(7) "HH\bool"
-isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(false)
 isVariadic: bool(false)
@@ -142,7 +138,6 @@ getType: object(ReflectionType) (1) {
 type isBuiltin: bool(false)
 type allowsNull: bool(false)
 type hint: string(9) "Exception"
-isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(false)
 isVariadic: bool(false)
@@ -173,7 +168,6 @@ getType: object(ReflectionType) (1) {
 type isBuiltin: bool(true)
 type allowsNull: bool(true)
 type hint: string(9) "?callable"
-isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(true)
 isVariadic: bool(false)
@@ -204,7 +198,6 @@ getType: object(ReflectionType) (1) {
 type isBuiltin: bool(true)
 type allowsNull: bool(true)
 type hint: string(12) "?HH\resource"
-isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(true)
 isVariadic: bool(false)
@@ -225,7 +218,6 @@ getType: NULL
 type isBuiltin: bool(false)
 type allowsNull: bool(false)
 type hint: bool(false)
-isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(true)
 isVariadic: bool(false)

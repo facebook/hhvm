@@ -1,17 +1,12 @@
 ReflectionMethod:
 string(7) "HH\dict"
-bool(false)
 string(26) "HH\dict<HH\string, HH\int>"
-bool(false)
 string(6) "HH\int"
-bool(false)
 string(10) "Foo::Tdict"
 
 ReflectionFunction:
 string(23) "HH\dict<HH\int, HH\int>"
-bool(false)
 string(26) "HH\dict<HH\int, HH\string>"
-bool(false)
 string(25) "HH\dict<HH\arraykey, Foo>"
 
 Foo::TDict type_structure:

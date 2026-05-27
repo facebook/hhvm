@@ -18,7 +18,6 @@ getType: object(ReflectionType) (1) {
 type isBuiltin: bool(true)
 type allowsNull: bool(false)
 type hint: string(6) "HH\int"
-isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(false)
 isVariadic: bool(false)
@@ -49,7 +48,6 @@ getType: object(ReflectionType) (1) {
 type isBuiltin: bool(true)
 type allowsNull: bool(false)
 type hint: string(7) "HH\bool"
-isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(true)
 isVariadic: bool(false)
@@ -80,7 +78,6 @@ getType: object(ReflectionType) (1) {
 type isBuiltin: bool(true)
 type allowsNull: bool(false)
 type hint: string(9) "HH\string"
-isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(true)
 isVariadic: bool(false)

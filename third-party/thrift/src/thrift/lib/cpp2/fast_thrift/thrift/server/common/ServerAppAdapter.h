@@ -38,8 +38,11 @@ concept ServerInboundAppAdapter = channel_pipeline::TailEndpointHandler<T>;
 /**
  * ServerOutboundAppAdapter — server-side outbound endpoint concept.
  * Codegen builds a ThriftServerResponseMessage via the helpers in
- * util/ResponsePayloads.h and hands it to writeResponse(). Mirrors
- * ClientOutboundAppAdapter on the client side.
+ * util/ResponsePayloads.h and hands it to writeResponse(). The adapter
+ * also owns the close-initiation API: close() broadcasts a
+ * ThriftServerEvent::CloseConnection through the pipeline so the
+ * resident ThriftServerConnectionCloseHandler can drive the terminal
+ * state machine. Mirrors ClientOutboundAppAdapter on the client side.
  */
 template <typename T>
 concept ServerOutboundAppAdapter =
@@ -47,7 +50,7 @@ concept ServerOutboundAppAdapter =
       {
         t.writeResponse(std::move(message))
       } noexcept -> std::same_as<channel_pipeline::Result>;
-      { t.startDrain() } noexcept;
+      { t.close() } noexcept;
     };
 
 /**

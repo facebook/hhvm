@@ -24,6 +24,7 @@
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftRequestPayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftResponsePayloads.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 
@@ -100,14 +101,25 @@ void ThriftServerCompositeAppAdapter::onPipelineActive() noexcept {
 }
 
 void ThriftServerCompositeAppAdapter::onPipelineInactive() noexcept {
+  // Fan out to children only. The user closeCallback is NOT fired here
+  // — that fires on the ConnectionClosed broadcast from the
+  // ThriftServerConnectionCloseHandler, which is the edge that guarantees
+  // in-flight handler callbacks have settled (or LOG(FATAL)'d on reap timeout).
   for (auto& child : children_) {
     child.vtable->onPipelineInactive(child.owner);
   }
-  // Canonical "connection is done" edge — fire the close callback so the
-  // owner (ConnectionHandler) can erase its entry. Deferred onto the
-  // EventBase because the callback's typical action is to destroy *us*,
-  // and we're called mid-pipeline-walk. Skip the move-out when pipeline_
-  // is null so the dtor fallback still has the callback to fire.
+}
+
+void ThriftServerCompositeAppAdapter::onEvent(
+    const channel_pipeline::TypeErasedBox& evt) noexcept {
+  const auto& event = evt.get<ThriftServerEvent>();
+  if (event.type != ThriftServerEventType::ConnectionClosed) {
+    return;
+  }
+  // Deferred onto the EventBase because the callback's typical action
+  // is to destroy *us*, and we're called from inside a pipeline
+  // event-dispatch walk. Skip the move-out when pipeline_ is null so
+  // the dtor fallback still has the callback to fire.
   if (!pipeline_) {
     return;
   }
@@ -120,12 +132,6 @@ void ThriftServerCompositeAppAdapter::onPipelineInactive() noexcept {
 void ThriftServerCompositeAppAdapter::onWriteReady() noexcept {
   for (auto& child : children_) {
     child.vtable->onWriteReady(child.owner);
-  }
-}
-
-void ThriftServerCompositeAppAdapter::startDrain() noexcept {
-  for (auto& child : children_) {
-    child.vtable->startDrain(child.owner);
   }
 }
 
@@ -147,6 +153,15 @@ ThriftServerCompositeAppAdapter::writeUnknownMethodError(
   return pipeline_->fireWrite(
       channel_pipeline::erase_and_box(
           makeUnknownMethodMessage(streamId, methodName)));
+}
+
+void ThriftServerCompositeAppAdapter::close() noexcept {
+  if (FOLLY_UNLIKELY(!pipeline_)) {
+    return;
+  }
+  pipeline_->fireEvent(
+      channel_pipeline::erase_and_box(
+          ThriftServerEvent{ThriftServerEventType::CloseConnection}));
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

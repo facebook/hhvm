@@ -63,6 +63,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionContextHandler.h>
@@ -1140,13 +1141,16 @@ TEST_F(
 
 TEST_F(
     ThriftServerAppAdapterIntegrationTest,
-    OnPipelineInactiveInvokesCloseCallback) {
+    OnConnectionClosedEventInvokesCloseCallback) {
   bool closeCalled = false;
   adapter_->setCloseCallback([&] { closeCalled = true; });
 
   setupPipelineWithSetup();
 
-  evb_.runInEventBaseThread([&] { adapter_->onPipelineInactive(); });
+  evb_.runInEventBaseThread([&] {
+    adapter_->onEvent(erase_and_box(
+        ThriftServerEvent{ThriftServerEventType::ConnectionClosed}));
+  });
   evb_.loopOnce();
 
   EXPECT_TRUE(closeCalled);

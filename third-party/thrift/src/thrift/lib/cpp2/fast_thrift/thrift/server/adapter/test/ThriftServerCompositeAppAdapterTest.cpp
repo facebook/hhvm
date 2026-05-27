@@ -105,21 +105,14 @@ class TestChildAdapter : public ThriftServerAppAdapter {
   }
 
   // Lifecycle shadows — bump counters so tests can verify fan-out, then
-  // chain to base for state-bearing methods. The composite's vtable resolves
-  // on T = TestChildAdapter, so without chaining the base's state machine
-  // (Created→Ready→Open and onException close) never runs and downstream
-  // onRead rejects with Result::Error.
-  //
-  // onPipelineActive's base DCHECKs state==Ready, so guard the chain — some
-  // tests exercise fan-out without a real pipeline setup and never reach
-  // Ready. onPipelineInactive / onException have no such precondition.
+  // chain to base. The composite's vtable resolves on T = TestChildAdapter,
+  // so chaining keeps base behavior (e.g. closeCallback firing from
+  // onEvent) intact.
   void handlerAdded() noexcept { ++handlerAddedCount; }
   void handlerRemoved() noexcept { ++handlerRemovedCount; }
   void onPipelineActive() noexcept {
     ++onPipelineActiveCount;
-    if (state() == State::Ready) {
-      ThriftServerAppAdapter::onPipelineActive();
-    }
+    ThriftServerAppAdapter::onPipelineActive();
   }
   void onPipelineInactive() noexcept {
     ++onPipelineInactiveCount;
@@ -131,9 +124,6 @@ class TestChildAdapter : public ThriftServerAppAdapter {
     lastException = e;
     ThriftServerAppAdapter::onException(folly::exception_wrapper{e});
   }
-  // No chain — base startDrain would attempt to write CONNECTION_CLOSE
-  // through the pipeline. Fan-out tests don't always wire one up.
-  void startDrain() noexcept { ++startDrainCount; }
 
   std::string id_;
   std::string dispatchedTo;
@@ -146,7 +136,6 @@ class TestChildAdapter : public ThriftServerAppAdapter {
   int onPipelineInactiveCount{0};
   int onWriteReadyCount{0};
   int onExceptionCount{0};
-  int startDrainCount{0};
   folly::exception_wrapper lastException;
 };
 
@@ -419,13 +408,13 @@ TEST_F(
   composite->addChild(userRaw);
   composite->addChild(monitoringRaw);
 
-  // buildPipeline calls setPipeline (Created -> Ready) then onPipelineActive
-  // (Ready -> Open). After it returns every adapter should be Open.
+  // buildPipeline drives setPipeline then onPipelineActive. The composite
+  // must forward onPipelineActive to every child.
   auto built = buildPipeline(composite.get());
 
-  EXPECT_EQ(userRaw->state(), ThriftServerAppAdapter::State::Open)
+  EXPECT_EQ(userRaw->onPipelineActiveCount, 1)
       << "onPipelineActive must fan out to user child";
-  EXPECT_EQ(monitoringRaw->state(), ThriftServerAppAdapter::State::Open)
+  EXPECT_EQ(monitoringRaw->onPipelineActiveCount, 1)
       << "onPipelineActive must fan out to monitoring child";
 }
 
@@ -446,9 +435,9 @@ TEST_F(
 
   evb_->runInEventBaseThreadAndWait([&] { composite->onPipelineInactive(); });
 
-  EXPECT_EQ(userRaw->state(), ThriftServerAppAdapter::State::Closed)
+  EXPECT_EQ(userRaw->onPipelineInactiveCount, 1)
       << "onPipelineInactive must fan out to user child";
-  EXPECT_EQ(monitoringRaw->state(), ThriftServerAppAdapter::State::Closed)
+  EXPECT_EQ(monitoringRaw->onPipelineInactiveCount, 1)
       << "onPipelineInactive must fan out to monitoring child";
 }
 
@@ -470,9 +459,9 @@ TEST_F(ThriftServerCompositeAppAdapterTest, OnExceptionForwardsToBothChildren) {
         folly::make_exception_wrapper<std::runtime_error>("boom"));
   });
 
-  EXPECT_EQ(userRaw->state(), ThriftServerAppAdapter::State::Closed)
+  EXPECT_EQ(userRaw->onExceptionCount, 1)
       << "onException must fan out to user child";
-  EXPECT_EQ(monitoringRaw->state(), ThriftServerAppAdapter::State::Closed)
+  EXPECT_EQ(monitoringRaw->onExceptionCount, 1)
       << "onException must fan out to monitoring child";
 }
 
@@ -572,25 +561,6 @@ TEST_F(
     EXPECT_EQ(c->onPipelineInactiveCount, 1) << c->id_ << " onPipelineInactive";
     EXPECT_EQ(c->handlerRemovedCount, 1) << c->id_ << " handlerRemoved";
   }
-}
-
-// Composite's startDrain must reach every child via vtable — children are
-// stored as concept-erased entries, so the dispatch goes through the
-// per-T trampoline (`static_cast<T*>(p)->startDrain()`). If the vtable
-// slot were ever misrouted, graceful shutdown silently no-ops.
-TEST_F(ThriftServerCompositeAppAdapterTest, StartDrainFansOutToBothChildren) {
-  TestChildAdapter::Ptr userChild{new TestChildAdapter("user")};
-  TestChildAdapter::Ptr monitoringChild{new TestChildAdapter("monitoring")};
-
-  ThriftServerCompositeAppAdapter::Ptr composite{
-      new ThriftServerCompositeAppAdapter()};
-  composite->addChild(userChild.get());
-  composite->addChild(monitoringChild.get());
-
-  composite->startDrain();
-
-  EXPECT_EQ(userChild->startDrainCount, 1);
-  EXPECT_EQ(monitoringChild->startDrainCount, 1);
 }
 
 // =============================================================================

@@ -104,13 +104,21 @@ class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
   void handlerRemoved() noexcept;
   void onPipelineActive() noexcept;
   void onPipelineInactive() noexcept;
+  // Broadcast pipeline event. Acts on ThriftServerEventType::ConnectionClosed
+  // from the pipeline's ThriftServerConnectionCloseHandler — the edge that
+  // guarantees in-flight handler callbacks have settled. Fires the user
+  // closeCallback. Every other event type (including our own emitted
+  // CloseConnection, delivered back via self-broadcast) is ignored. The
+  // pipeline's onPipelineInactive is no longer the close trigger — see the cpp.
+  void onEvent(const channel_pipeline::TypeErasedBox& evt) noexcept;
   void onWriteReady() noexcept;
 
-  // Server-initiated graceful drain. Fans startDrain() out to every child;
-  // each independently emits its own stream-0 ERROR(CONNECTION_CLOSE) and
-  // transitions to Closing, deferring its closeCallback until its
-  // inFlight_ drains. Must be called on the pipeline's EventBase.
-  void startDrain() noexcept;
+  // Initiate connection close. Internally broadcasts a
+  // ThriftServerEvent::CloseConnection pipeline event; the pipeline-resident
+  // ThriftServerConnectionCloseHandler picks it up and runs the terminal
+  // state machine. The user closeCallback fires when the connection has
+  // fully settled. No-op if the pipeline is not wired.
+  void close() noexcept;
 
  protected:
   ~ThriftServerCompositeAppAdapter() override;
@@ -133,7 +141,6 @@ class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
     void (*onPipelineActive)(void*) noexcept;
     void (*onPipelineInactive)(void*) noexcept;
     void (*onWriteReady)(void*) noexcept;
-    void (*startDrain)(void*) noexcept;
   };
 
   template <typename T>
@@ -149,7 +156,6 @@ class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
       +[](void* p) noexcept { static_cast<T*>(p)->onPipelineActive(); },
       +[](void* p) noexcept { static_cast<T*>(p)->onPipelineInactive(); },
       +[](void* p) noexcept { static_cast<T*>(p)->onWriteReady(); },
-      +[](void* p) noexcept { static_cast<T*>(p)->startDrain(); },
   };
 
   void warnDuplicateMethod(std::string_view name) const;

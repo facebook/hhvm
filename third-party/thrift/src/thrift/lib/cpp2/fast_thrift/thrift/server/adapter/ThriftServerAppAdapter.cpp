@@ -22,6 +22,7 @@
 #include <folly/logging/xlog.h>
 
 #include <thrift/lib/cpp/transport/TTransportException.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
 
@@ -51,29 +52,17 @@ void ThriftServerAppAdapter::setCloseCallback(std::function<void()> cb) {
 void ThriftServerAppAdapter::setPipeline(
     channel_pipeline::PipelineImpl* pipeline) noexcept {
   DCHECK(pipeline);
-  DCHECK(state_ == State::Created);
   pipeline_ = pipeline;
   evb_ = pipeline_->eventBase();
-  state_ = State::Ready;
 }
 
-void ThriftServerAppAdapter::onPipelineActive() noexcept {
-  DCHECK(state_ == State::Ready);
-  state_ = State::Open;
-}
-
-void ThriftServerAppAdapter::onPipelineInactive() noexcept {
-  // Pipeline disconnect is the canonical "no longer accepting writes" edge.
-  // If no requests are in flight, finalize immediately. Otherwise stay in
-  // Closing so in-flight handler callbacks can still push final responses,
-  // and let the last writeResponse finalize.
-  if (inFlight_ == 0) {
-    state_ = State::Closed;
-    fireCloseCallback();
-  } else {
-    state_ = State::Closing;
-    closeDeferred_ = true;
+void ThriftServerAppAdapter::onEvent(
+    const channel_pipeline::TypeErasedBox& evt) noexcept {
+  const auto& event = evt.get<ThriftServerEvent>();
+  if (event.type != ThriftServerEventType::ConnectionClosed) {
+    return;
   }
+  fireCloseCallback();
 }
 
 void ThriftServerAppAdapter::fireCloseCallback() noexcept {
@@ -83,39 +72,8 @@ void ThriftServerAppAdapter::fireCloseCallback() noexcept {
   }
 }
 
-void ThriftServerAppAdapter::startDrain() noexcept {
-  // Wire-only stream-0 CONNECTION_CLOSE; bypasses writeResponse because no
-  // in-flight slot owns this frame.
-  channel_pipeline::Result wireResult;
-  if (FOLLY_UNLIKELY(!pipeline_)) {
-    wireResult = channel_pipeline::Result::Error;
-  } else {
-    wireResult = pipeline_->fireWrite(
-        channel_pipeline::erase_and_box(makeConnectionCloseMessage()));
-  }
-  if (wireResult == channel_pipeline::Result::Error) {
-    // Peer notification failed — pipeline is dead, so waiting on
-    // inFlight_ to drain via normal response paths is pointless. Skip
-    // the wait and tear down immediately.
-    state_ = State::Closed;
-    fireCloseCallback();
-    return;
-  }
-  if (state_ == State::Open) {
-    state_ = State::Closing;
-  }
-  if (inFlight_ == 0) {
-    fireCloseCallback();
-  } else {
-    closeDeferred_ = true;
-  }
-}
-
 channel_pipeline::Result ThriftServerAppAdapter::onRead(
     channel_pipeline::TypeErasedBox&& msg) noexcept {
-  if (FOLLY_UNLIKELY(state_ != State::Open)) {
-    return channel_pipeline::Result::Error;
-  }
   auto request = msg.take<ThriftServerRequestMessage>();
   DCHECK(request.streamId != 0) << "Invalid stream ID";
   return handleRequestResponse(std::move(request));
@@ -123,12 +81,6 @@ channel_pipeline::Result ThriftServerAppAdapter::onRead(
 
 void ThriftServerAppAdapter::onException(
     folly::exception_wrapper&& e) noexcept {
-  // Routine connection close (peer FIN/RST, idle timeout, server-initiated
-  // drop) propagates here as an exception. Match legacy thrift's
-  // RocketServerConnection: TTransportException(END_OF_FILE/NOT_OPEN/...) is
-  // the signal to start a graceful drain — let in-flight handler callbacks
-  // try to write final responses; refuse new requests. Real protocol /
-  // server faults still log and skip the drain (go straight to Closed).
   using TX = apache::thrift::transport::TTransportException;
   bool benign = false;
   e.with_exception([&](const TX& ex) {
@@ -141,15 +93,6 @@ void ThriftServerAppAdapter::onException(
   if (!benign) {
     XLOG(ERR) << "Pipeline exception: " << e.what();
   }
-
-  if (state_ == State::Open) {
-    state_ = benign ? State::Closing : State::Closed;
-  }
-  // Mark close as deferred so the last in-flight writeResponse can finalize
-  // to Closed via handleDeferredClose. Close-notification (firing the close
-  // callback) is left to onPipelineInactive — the canonical "connection is
-  // done" edge that converges on every teardown direction.
-  closeDeferred_ = true;
 }
 
 void ThriftServerAppAdapter::addMethodHandler(
@@ -169,10 +112,6 @@ std::vector<std::string_view> ThriftServerAppAdapter::methodNames()
 
 channel_pipeline::Result ThriftServerAppAdapter::handleRequestResponse(
     ThriftServerRequestMessage&& request) noexcept {
-  // Paired 1:1 with writeResponse — every dispatch path produces exactly
-  // one response (streaming never reaches here).
-  ++inFlight_;
-
   auto& inbound = request.payload;
   DCHECK(inbound.is<ThriftRequestResponsePayload>());
   auto& rr = inbound.get<ThriftRequestResponsePayload>();
@@ -218,28 +157,11 @@ channel_pipeline::Result ThriftServerAppAdapter::handleUnknownMethod(
 
 channel_pipeline::Result ThriftServerAppAdapter::writeResponse(
     ThriftServerResponseMessage&& message) noexcept {
-  // Refuse writes once we're Closed. Open and Closing both still try — in
-  // Closing the pipeline may swallow the write if the wire is gone, but
-  // an in-flight handler callback completing during graceful drain should
-  // be allowed to push a final response toward the wire.
-  channel_pipeline::Result result;
-  if (FOLLY_UNLIKELY(state_ == State::Closed)) {
-    result = handleConnectionClosed();
-  } else if (FOLLY_UNLIKELY(!pipeline_)) {
-    result = handleMissingPipeline();
-  } else {
-    result = pipeline_->fireWrite(
-        channel_pipeline::erase_and_box(std::move(message)));
+  if (FOLLY_UNLIKELY(!pipeline_)) {
+    return handleMissingPipeline();
   }
-
-  DCHECK_GT(inFlight_, 0u);
-  --inFlight_;
-
-  if (FOLLY_UNLIKELY(closeDeferred_)) {
-    handleDeferredClose();
-  }
-
-  return result;
+  return pipeline_->fireWrite(
+      channel_pipeline::erase_and_box(std::move(message)));
 }
 
 channel_pipeline::Result
@@ -248,19 +170,13 @@ ThriftServerAppAdapter::handleMissingPipeline() noexcept {
   return channel_pipeline::Result::Error;
 }
 
-channel_pipeline::Result
-ThriftServerAppAdapter::handleConnectionClosed() noexcept {
-  XLOG(ERR) << "Connection closed, cannot send response";
-  return channel_pipeline::Result::Error;
-}
-
-void ThriftServerAppAdapter::handleDeferredClose() noexcept {
-  DCHECK(closeDeferred_);
-  if (inFlight_ == 0) {
-    closeDeferred_ = false;
-    state_ = State::Closed;
-    fireCloseCallback();
+void ThriftServerAppAdapter::close() noexcept {
+  if (!pipeline_) {
+    return;
   }
+  pipeline_->fireEvent(
+      channel_pipeline::erase_and_box(
+          ThriftServerEvent{ThriftServerEventType::CloseConnection}));
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

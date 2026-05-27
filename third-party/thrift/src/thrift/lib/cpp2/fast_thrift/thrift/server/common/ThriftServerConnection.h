@@ -88,28 +88,31 @@ struct ThriftServerConnection {
   // ThriftServerConnectionContextHandler via refcount.
   boost::intrusive_ptr<ThriftConnContext> connContext;
 
-  // Forceful close: tears the thrift pipeline down; the rocket
-  // connection tears down via the transport adapter's handlerRemoved.
-  // Deactivate before close so the bridge's connected_ guard is satisfied
-  // before handlerRemoved runs (its DCHECK fires otherwise).
+  // Initiate close. From the owner's perspective this is fire-and-wait:
+  // call close(), then wait for the closeCallback to fire before
+  // dropping the ThriftServerConnection. Internally we just trigger
+  // drain — the pipeline-resident ThriftServerConnectionCloseHandler owns the
+  // terminal state machine (drain timeout, reap, LOG(FATAL) on stuck
+  // callbacks) and fires ConnectionClosed inbound when settling is
+  // complete, which the tail adapter turns into the closeCallback.
+  // Must run on the thrift pipeline's EventBase.
   void close() noexcept {
-    if (thriftPipeline) {
-      thriftPipeline->deactivate();
-      thriftPipeline->close();
-      thriftPipeline.reset();
-    }
+    std::visit([](auto& t) { t.adapter->close(); }, tail);
   }
 
-  // Initiate graceful drain on the tail adapter — sends a peer-
-  // disconnect frame and defers the close callback until in-flight
-  // requests complete. Must run on the thrift pipeline's EventBase.
-  void drain() noexcept {
-    std::visit([](auto& t) { t.adapter->startDrain(); }, tail);
-  }
+  // Alias for close(). Pre-existing ConnectionHandler two-phase shutdown
+  // (drain-all then force-close stragglers) still calls drain(); the
+  // distinction is no longer meaningful because the pipeline-resident
+  // ThriftServerConnectionCloseHandler now owns the drain+reap timeouts
+  // internally. ConnectionHandler should collapse to a single close() phase as
+  // follow-up.
+  void drain() noexcept { close(); }
 
-  // Wire a callback fired once when the connection reaches Closed. The cb
-  // lives on the pipeline tail adapter in both cases, so onPipelineInactive
-  // (the canonical "connection done" edge) fires it.
+  // Wire a callback fired once when the connection has fully closed
+  // (all in-flight handler callbacks have settled or LOG(FATAL)'d).
+  // The cb lives on the pipeline tail adapter, which fires it in
+  // response to the ConnectionClosed inbound event from
+  // ThriftServerConnectionCloseHandler.
   void setCloseCallback(std::function<void()> cb) {
     std::visit(
         [&](auto& t) { t.adapter->setCloseCallback(std::move(cb)); }, tail);

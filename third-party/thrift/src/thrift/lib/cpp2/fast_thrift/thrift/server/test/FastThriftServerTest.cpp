@@ -442,15 +442,16 @@ TEST_F(FastThriftServerTest, SecureLookupSecondExceptionPropagates) {
   destroyClientOnEvb(client);
 }
 
-// Regression for the lifetime bug fixed by the inflight-tracking + connection
-// drain change in this commit. Before the fix, stop() synchronously dropped
-// per-connection FastConnection state (including the ThriftServerAppAdapter)
-// while a handler still held a FastHandlerCallbackPtr. The deferred
-// completion then wrote a response through the freed adapter — a UAF caught
-// by ASAN/TSAN. After the fix, stop() drives onException on every adapter,
-// each adapter stays Closing until its inFlight_ counter hits zero, and
-// stop() blocks on connectionsDrainedBaton_ until every adapter has fired
-// its closeCallback. The retained callback can safely complete during stop.
+// Regression for the lifetime bug fixed by graceful drain. Before the fix,
+// stop() synchronously dropped per-connection FastConnection state
+// (including the ThriftServerAppAdapter) while a handler still held a
+// FastHandlerCallbackPtr. The deferred completion then wrote a response
+// through the freed adapter — a UAF caught by ASAN/TSAN. After the fix,
+// stop() drives onException on every adapter;
+// ThriftServerConnectionCloseHandler holds the pipeline open until in-flight
+// responses drain, and stop() blocks on connectionsDrainedBaton_ until every
+// adapter has fired its closeCallback. The retained callback can safely
+// complete during stop.
 TEST(
     FastThriftServerStandaloneTest,
     DeferredPingCallbackAfterStopDoesNotUseFreedAdapter) {

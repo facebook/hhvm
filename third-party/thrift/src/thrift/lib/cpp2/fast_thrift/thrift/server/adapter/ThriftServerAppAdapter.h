@@ -48,30 +48,15 @@ namespace apache::thrift::fast_thrift::thrift {
  * Satisfies TailEndpointHandler concept (onRead / onException) and the
  * ThriftAppAdapter concept consumed by ThriftServerCompositeAppAdapter.
  *
- * State machine (one-directional; adapter is per-connection and never reused):
- *   Created   --setPipeline-->        Ready
- *   Ready     --onPipelineActive-->   Open
- *   Open      --onException(NOT_OPEN
- *               | END_OF_FILE
- *               | INTERRUPTED
- *               | TIMED_OUT)-->       Closing
- *   Open      --onException(other)--> Closed
- *   Closing   --onPipelineInactive--> Closed
- *   Open      --onPipelineInactive--> Closed
+ * The adapter holds no terminal-phase state of its own. Close coordination
+ * (drain, in-flight reap, deferred closeCallback) is owned by the
+ * pipeline-resident ThriftServerConnectionCloseHandler; the adapter just
+ * emits the CloseConnection event from close() and fires the user
+ * closeCallback in response to the inbound ConnectionClosed event.
  *
- *   onRead is accepted only in Open. Closing/Closed reject new requests.
- *   writeResponse is accepted in Open and Closing (in-flight handler
- *   callbacks may still try to send a final response; the pipeline may
- *   swallow it if the wire is gone). Closed refuses all writes.
- *
- *   In-flight requests gate the transition to Closed and the firing of
- *   closeCallback. Every dispatched request increments an in-flight counter
- *   at handleRequestResponse entry; every writeResponse decrements it. When
- *   onPipelineInactive / onException fires with in-flight > 0, the adapter
- *   stays in Closing and defers closeCallback until the last writeResponse
- *   drains the count. Upper-layer owners must hold the adapter Ptr until
- *   closeCallback fires — dropping earlier risks UAF from in-flight handler
- *   callbacks still writing through the adapter.
+ * Lifetime: upper-layer owners must hold the adapter Ptr until
+ * closeCallback fires. Dropping earlier risks UAF from in-flight handler
+ * callbacks still writing through the adapter.
  */
 class ThriftServerAppAdapter : public folly::DelayedDestruction {
  public:
@@ -102,30 +87,11 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
       apache::thrift::ProtocolId protocol,
       std::unique_ptr<ThriftRequestContext> requestContext) noexcept;
 
-  enum class State : uint8_t {
-    Created,
-    Ready,
-    Open,
-    Closing,
-    Closed,
-  };
-
-  State state() const noexcept { return state_; }
-
   ThriftServerAppAdapter() = default;
   ThriftServerAppAdapter(ThriftServerAppAdapter&&) = delete;
   ThriftServerAppAdapter& operator=(ThriftServerAppAdapter&&) = delete;
 
   void setCloseCallback(std::function<void()> cb);
-
-  // Server-initiated graceful drain. Sends a stream-0
-  // ERROR(CONNECTION_CLOSE) so the peer stops issuing new REQUEST_*
-  // frames, then flips Open → Closing and defers closeCallback until
-  // inFlight_ drains. If the wire send fails (pipeline already dead),
-  // skips the drain wait and tears down immediately — there's no path
-  // for in-flight responses to land. Must be called on the pipeline's
-  // EventBase.
-  void startDrain() noexcept;
 
   void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept;
 
@@ -142,13 +108,20 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
 
   void handlerAdded() noexcept {}
   void handlerRemoved() noexcept {}
-  void onPipelineActive() noexcept;
-  void onPipelineInactive() noexcept;
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
+  // Broadcast pipeline event. Acts on ThriftServerEventType::ConnectionClosed
+  // from the pipeline's ThriftServerConnectionCloseHandler — the canonical
+  // "in-flight settled, safe to drop the connection" edge that fires the
+  // user closeCallback. Every other event type (including our own emitted
+  // CloseConnection, delivered back via self-broadcast) is ignored.
+  void onEvent(const channel_pipeline::TypeErasedBox& evt) noexcept;
   void onWriteReady() noexcept {}
 
-  // Single write entry point. Fires the message through the pipeline,
-  // decrements in-flight, and finalizes a deferred close when in-flight
-  // hits zero. Refuses writes in Closed.
+  // Single write entry point. Fires the message through the pipeline.
+  // If the pipeline has been deactivated, fireWrite naturally returns
+  // Error; the close handler upstream still observes the write so its
+  // in-flight counter drains.
   //
   // Build the message via the free functions in
   // thrift/server/util/ResponsePayloads.h (makeResponseMessage,
@@ -156,6 +129,14 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   // makeSuccessResponseMessage<>, makeDeclaredExceptionMessage<>, ...).
   [[nodiscard]] channel_pipeline::Result writeResponse(
       ThriftServerResponseMessage&& message) noexcept;
+
+  // Initiate connection close. Internally broadcasts a
+  // ThriftServerEvent::CloseConnection pipeline event; the pipeline-resident
+  // ThriftServerConnectionCloseHandler picks it up and runs the terminal
+  // state machine (drain timeout → reap → LOG(FATAL) on stuck handler
+  // callbacks). The user closeCallback fires when the connection has fully
+  // settled. No-op if the pipeline is not yet wired.
+  void close() noexcept;
 
   // Methods registered via addMethodHandler — consumed by the composite
   // to build its name -> owner routing map.
@@ -179,15 +160,10 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   FOLLY_NOINLINE channel_pipeline::Result handleUnknownMethod(
       uint32_t streamId, std::string_view methodName) noexcept;
   FOLLY_NOINLINE channel_pipeline::Result handleMissingPipeline() noexcept;
-  FOLLY_NOINLINE channel_pipeline::Result handleConnectionClosed() noexcept;
-  FOLLY_NOINLINE void handleDeferredClose() noexcept;
 
   folly::EventBase* evb_{nullptr};
   folly::F14FastMap<std::string, RequestResponseProcessFn> dispatch_;
   folly::Synchronized<std::function<void()>> closeCallback_;
-  State state_{State::Created};
-  uint32_t inFlight_{0};
-  bool closeDeferred_{false};
 
   void fireCloseCallback() noexcept;
 };

@@ -30,6 +30,7 @@
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
@@ -235,26 +236,6 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
     return {std::move(transportHandler), std::move(pipeline), rawHandler};
   }
 
-  // Bumps inFlight_ on `adapter` by registering a noop dispatch fn and
-  // driving a request through onRead. Used by tests that exercise the
-  // write helpers in isolation — fireResponse DCHECKs inFlight_ > 0,
-  // so the test must pair every write helper call with a prior bump.
-  void bumpInFlight(TestServerAppAdapter& adapter, uint32_t streamId) {
-    adapter.registerMethod(
-        "__test_defer__",
-        +[](ThriftServerAppAdapter*,
-            uint32_t,
-            std::unique_ptr<folly::IOBuf>,
-            apache::thrift::ProtocolId,
-            std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
-          return Result::Success;
-        });
-    ASSERT_EQ(
-        adapter.onRead(
-            erase_and_box(makeRequestMessage(streamId, "__test_defer__"))),
-        Result::Success);
-  }
-
   std::unique_ptr<folly::ScopedEventBaseThread> evbThread_;
   folly::EventBase* evb_{nullptr};
   TestAllocator allocator_;
@@ -417,34 +398,54 @@ TEST_F(ThriftServerAppAdapterTest, OnReadMultipleMethodsDispatched) {
 // onPipelineInactive close-callback tests
 // =============================================================================
 
-TEST_F(ThriftServerAppAdapterTest, OnPipelineInactiveDefersCloseCallback) {
+TEST_F(ThriftServerAppAdapterTest, OnConnectionClosedEventDefersCloseCallback) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
   auto built = buildPipeline(adapter.get());
 
   bool closeCalled = false;
   adapter->setCloseCallback([&] { closeCalled = true; });
 
-  // Close cb fires from onPipelineInactive but is deferred onto the EVB —
-  // calling it synchronously could destroy the pipeline mid-walk.
+  // closeCallback fires in response to a ConnectionClosed inbound event
+  // (the upstream close handler's "in-flight settled" signal) but is
+  // deferred onto the EVB — firing synchronously could destroy the
+  // pipeline mid-walk.
   evb_->runInEventBaseThreadAndWait([&] {
-    adapter->onPipelineInactive();
+    adapter->onEvent(erase_and_box(
+        ThriftServerEvent{ThriftServerEventType::ConnectionClosed}));
     EXPECT_FALSE(closeCalled)
-        << "Close callback must not fire synchronously "
-           "during onPipelineInactive (use-after-free risk)";
+        << "Close callback must not fire synchronously during onEvent "
+           "(use-after-free risk)";
   });
 
-  // After draining, the deferred callback should have fired.
   evb_->runInEventBaseThreadAndWait([&] {});
   EXPECT_TRUE(closeCalled);
 }
 
-TEST_F(
-    ThriftServerAppAdapterTest, OnPipelineInactiveWithNoCallbackDoesNotCrash) {
+TEST_F(ThriftServerAppAdapterTest, OnPipelineInactiveIsNoopWithNoCallbackSet) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
   auto built = buildPipeline(adapter.get());
 
   evb_->runInEventBaseThreadAndWait([&] { adapter->onPipelineInactive(); });
-  // Should not crash
+  // onPipelineInactive no longer carries any adapter-side state work;
+  // the only requirement is that it doesn't crash.
+}
+
+TEST_F(ThriftServerAppAdapterTest, OnPipelineInactiveDoesNotFireCloseCallback) {
+  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+  auto built = buildPipeline(adapter.get());
+
+  bool closeCalled = false;
+  adapter->setCloseCallback([&] { closeCalled = true; });
+
+  // The adapter is intentionally close-coordination-unaware post-refactor;
+  // closeCallback only fires from the upstream ConnectionClosed event.
+  evb_->runInEventBaseThreadAndWait([&] { adapter->onPipelineInactive(); });
+  evb_->runInEventBaseThreadAndWait([&] {});
+  EXPECT_FALSE(closeCalled);
+
+  // Clear so the dtor fallback doesn't fire it after closeCalled goes
+  // out of scope.
+  adapter->setCloseCallback({});
 }
 
 TEST_F(ThriftServerAppAdapterTest, OnExceptionDoesNotFireCloseCallback) {
@@ -454,13 +455,17 @@ TEST_F(ThriftServerAppAdapterTest, OnExceptionDoesNotFireCloseCallback) {
   bool closeCalled = false;
   adapter->setCloseCallback([&] { closeCalled = true; });
 
-  // onException is not the close-callback edge; it sets the soft-drain
-  // state but leaves close-notification to onPipelineInactive (the
-  // canonical "connection is done" signal that converges on every
-  // teardown direction).
+  // closeCallback only fires from onPipelineInactive — the canonical
+  // teardown edge. Pipeline-level exceptions, benign or otherwise, must
+  // not fire it on their own.
   evb_->runInEventBaseThreadAndWait([&] {
     adapter->onException(
-        folly::make_exception_wrapper<std::runtime_error>("connection lost"));
+        folly::make_exception_wrapper<
+            apache::thrift::transport::TTransportException>(
+            apache::thrift::transport::TTransportException::END_OF_FILE,
+            "peer FIN"));
+    adapter->onException(
+        folly::make_exception_wrapper<std::runtime_error>("protocol error"));
   });
   evb_->runInEventBaseThreadAndWait([&] {});
   EXPECT_FALSE(closeCalled);
@@ -490,7 +495,6 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseFiresWrite) {
         return Result::Success;
       });
 
-  bumpInFlight(*adapter, /*streamId=*/42);
   auto result = adapter->writeResponse(makeResponseMessage(
       /*streamId=*/42,
       folly::IOBuf::copyBuffer("response"),
@@ -631,7 +635,6 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithClientBlame) {
       "my.thrift.MyAppError",
       "client did bad",
       apache::thrift::ErrorBlame::CLIENT);
-  bumpInFlight(*adapter, /*streamId=*/7);
   EXPECT_EQ(
       adapter->writeResponse(makeResponseMessage(
           /*streamId=*/7,
@@ -692,7 +695,6 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithServerBlame) {
       "my.thrift.MyAppError",
       "server bug",
       apache::thrift::ErrorBlame::SERVER);
-  bumpInFlight(*adapter, /*streamId=*/7);
   EXPECT_EQ(
       adapter->writeResponse(makeResponseMessage(
           /*streamId=*/7,
@@ -722,7 +724,6 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseSurfacesPipelineWriteError) {
         return Result::Error; // Simulate pipeline write failure
       });
 
-  bumpInFlight(*adapter, /*streamId=*/42);
   auto result = adapter->writeResponse(makeResponseMessage(
       /*streamId=*/42,
       folly::IOBuf::copyBuffer("response"),
@@ -830,7 +831,6 @@ TEST_F(
   auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
   fillDeclaredExceptionMetadata(
       *md, "my.thrift.MyDeclaredException", "expected failure", classification);
-  bumpInFlight(*adapter, /*streamId=*/7);
   EXPECT_EQ(
       adapter->writeResponse(makeResponseMessage(
           /*streamId=*/7,
@@ -872,7 +872,6 @@ TEST_F(
       });
 
   auto ew = folly::make_exception_wrapper<std::runtime_error>("boom");
-  bumpInFlight(*adapter, /*streamId=*/7);
   EXPECT_EQ(
       adapter->writeResponse(makeUnknownExceptionMessage(
           7, ew, apache::thrift::ErrorBlame::CLIENT)),
@@ -920,7 +919,6 @@ TEST_F(ThriftServerAppAdapterTest, WriteFrameworkErrorEmitsErrorFrame) {
         return Result::Success;
       });
 
-  bumpInFlight(*adapter, /*streamId=*/9);
   EXPECT_EQ(
       adapter->writeResponse(makeFrameworkErrorMessage(
           9,
@@ -946,282 +944,10 @@ TEST_F(ThriftServerAppAdapterTest, WriteFrameworkErrorEmitsErrorFrame) {
   EXPECT_EQ(*rpcError.what_utf8(), "bad bytes");
 }
 
-// =============================================================================
-// State Machine Tests
-// =============================================================================
-
-TEST_F(ThriftServerAppAdapterTest, StateTransitionsHappyPath) {
-  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Created);
-
-  auto built = buildPipeline(adapter.get());
-  // buildPipeline calls setPipeline (-> Ready) and onPipelineActive (-> Open).
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Open);
-
-  // Benign exception transitions Open -> Closing.
-  evb_->runInEventBaseThreadAndWait([&] {
-    adapter->onException(
-        folly::make_exception_wrapper<
-            apache::thrift::transport::TTransportException>(
-            apache::thrift::transport::TTransportException::END_OF_FILE,
-            "peer FIN"));
-  });
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closing);
-
-  // onPipelineInactive transitions to Closed.
-  adapter->onPipelineInactive();
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closed);
-}
-
-TEST_F(ThriftServerAppAdapterTest, OnExceptionHardErrorGoesStraightToClosed) {
-  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
-  auto built = buildPipeline(adapter.get());
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Open);
-
-  // Non-benign exception (e.g. protocol parse error) skips Closing.
-  evb_->runInEventBaseThreadAndWait([&] {
-    adapter->onException(
-        folly::make_exception_wrapper<std::runtime_error>("protocol error"));
-  });
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closed);
-}
-
-TEST_F(ThriftServerAppAdapterTest, OnReadRejectedOutsideOpen) {
-  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
-  // Created: no pipeline, no Open.
-  auto rejected = adapter->onRead(erase_and_box(makeRequestMessage(1, "x")));
-  EXPECT_EQ(rejected, Result::Error);
-
-  auto built = buildPipeline(adapter.get());
-  // Open: onRead is accepted (will hit Unknown method, but that returns
-  // Success because the unknown-method framework error fires inline).
-  adapter->registerMethod(
-      "x",
-      +[](ThriftServerAppAdapter*,
-          uint32_t,
-          std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
-        return Result::Success;
-      });
-  EXPECT_EQ(
-      adapter->onRead(erase_and_box(makeRequestMessage(2, "x"))),
-      Result::Success);
-
-  // Closing: onRead rejected.
-  evb_->runInEventBaseThreadAndWait([&] {
-    adapter->onException(
-        folly::make_exception_wrapper<
-            apache::thrift::transport::TTransportException>(
-            apache::thrift::transport::TTransportException::END_OF_FILE,
-            "peer FIN"));
-  });
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closing);
-  EXPECT_EQ(
-      adapter->onRead(erase_and_box(makeRequestMessage(3, "x"))),
-      Result::Error);
-
-  // Closed: onRead rejected.
-  adapter->onPipelineInactive();
-  EXPECT_EQ(
-      adapter->onRead(erase_and_box(makeRequestMessage(4, "x"))),
-      Result::Error);
-}
-
-TEST_F(
-    ThriftServerAppAdapterTest, WriteResponseAllowedInClosingDrainsToClosed) {
-  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
-
-  int writeCount = 0;
-  auto built = buildPipeline(
-      adapter.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&&) {
-        ++writeCount;
-        return Result::Success;
-      });
-
-  // Deferred dispatch fn: onRead bumps inFlight_; the test drives the
-  // matching writeResponse from outside, simulating an async handler that
-  // captures the FastHandlerCallback and completes later.
-  adapter->registerMethod(
-      "defer",
-      +[](ThriftServerAppAdapter*,
-          uint32_t,
-          std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
-        return Result::Success;
-      });
-
-  // Open: dispatch req 1, then write its response.
-  EXPECT_EQ(
-      adapter->onRead(erase_and_box(makeRequestMessage(1, "defer"))),
-      Result::Success);
-  EXPECT_EQ(
-      adapter->writeResponse(
-          makeResponseMessage(1, folly::IOBuf::copyBuffer("a"), nullptr)),
-      Result::Success);
-  EXPECT_EQ(writeCount, 1);
-
-  // Dispatch req 2 — leaves inFlight_ = 1 so the next onException stays in
-  // Closing instead of finalizing.
-  EXPECT_EQ(
-      adapter->onRead(erase_and_box(makeRequestMessage(2, "defer"))),
-      Result::Success);
-
-  // Benign onException with inFlight_ > 0 → Closing, close callback deferred.
-  evb_->runInEventBaseThreadAndWait([&] {
-    adapter->onException(
-        folly::make_exception_wrapper<
-            apache::thrift::transport::TTransportException>(
-            apache::thrift::transport::TTransportException::END_OF_FILE,
-            "peer FIN"));
-  });
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closing);
-
-  // Closing: write is still allowed so the deferred handler can complete.
-  EXPECT_EQ(
-      adapter->writeResponse(
-          makeResponseMessage(2, folly::IOBuf::copyBuffer("b"), nullptr)),
-      Result::Success);
-  EXPECT_EQ(writeCount, 2);
-  // Last in-flight drained with closeDeferred set → immediate Closed.
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closed);
-
-  // Closed: subsequent onRead is rejected, so no further writes can flow
-  // through the dispatch path.
-  EXPECT_EQ(
-      adapter->onRead(erase_and_box(makeRequestMessage(3, "defer"))),
-      Result::Error);
-  EXPECT_EQ(writeCount, 2);
-}
-
-// startDrain pushes ERROR(CONNECTION_CLOSE) on stream 0, flips Open → Closing,
-// and defers closeCallback until inFlight_ drains. Verifies the wire frame,
-// the deferred close, AND that both success and framework-error writeResponse
-// paths each decrement inFlight_ on the way to Closed — the framework-error
-// path is what the FastHandlerCallback destructor takes when a handler is
-// dropped without completing, so its decrement is what unblocks graceful
-// shutdown.
-TEST_F(
-    ThriftServerAppAdapterTest,
-    StartDrainSendsConnectionCloseAndDrainsToClosed) {
-  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
-
-  std::vector<std::pair<uint32_t, uint32_t>> writes;
-  auto built = buildPipeline(
-      adapter.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&& box) {
-        auto& resp = box.get<ThriftServerResponseMessage>();
-        writes.emplace_back(payloadStreamId(resp), payloadErrorCode(resp));
-        return Result::Success;
-      });
-
-  adapter->registerMethod(
-      "defer",
-      +[](ThriftServerAppAdapter*,
-          uint32_t,
-          std::unique_ptr<folly::IOBuf>,
-          apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
-        return Result::Success;
-      });
-  ASSERT_EQ(
-      adapter->onRead(erase_and_box(makeRequestMessage(11, "defer"))),
-      Result::Success);
-  ASSERT_EQ(
-      adapter->onRead(erase_and_box(makeRequestMessage(22, "defer"))),
-      Result::Success);
-
-  bool closeCalled = false;
-  adapter->setCloseCallback([&] { closeCalled = true; });
-
-  evb_->runInEventBaseThreadAndWait([&] { adapter->startDrain(); });
-
-  ASSERT_EQ(writes.size(), 1u);
-  EXPECT_EQ(writes[0].first, 0u);
-  EXPECT_EQ(
-      writes[0].second,
-      static_cast<uint32_t>(
-          apache::thrift::fast_thrift::frame::ErrorCode::CONNECTION_CLOSE));
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closing);
-  EXPECT_FALSE(closeCalled);
-
-  EXPECT_EQ(
-      adapter->writeResponse(
-          makeResponseMessage(11, folly::IOBuf::copyBuffer("ok"), nullptr)),
-      Result::Success);
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closing);
-  EXPECT_FALSE(closeCalled);
-
-  EXPECT_EQ(
-      adapter->writeResponse(makeFrameworkErrorMessage(
-          22, apache::thrift::ResponseRpcErrorCode::UNKNOWN, "not completed")),
-      Result::Success);
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closed);
-
-  evb_->runInEventBaseThreadAndWait([&] {});
-  EXPECT_TRUE(closeCalled);
-}
-
-// startDrain with no in-flight requests fires closeCallback immediately but
-// leaves state at Closing — the wire is still up. The Open → Closed
-// transition is owned by onPipelineInactive (pipeline actually dies) or
-// handleDeferredClose (drain finishes), not by startDrain itself.
-TEST_F(ThriftServerAppAdapterTest, StartDrainWithNoInFlightFiresCallback) {
-  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
-
-  bool writeCalled = false;
-  auto built = buildPipeline(
-      adapter.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&&) {
-        writeCalled = true;
-        return Result::Success;
-      });
-
-  bool closeCalled = false;
-  adapter->setCloseCallback([&] { closeCalled = true; });
-
-  evb_->runInEventBaseThreadAndWait([&] { adapter->startDrain(); });
-
-  EXPECT_TRUE(writeCalled);
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closing);
-
-  evb_->runInEventBaseThreadAndWait([&] {});
-  EXPECT_TRUE(closeCalled);
-
-  // onPipelineInactive completes the lifecycle.
-  adapter->onPipelineInactive();
-  EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closed);
-}
-
-TEST_F(ThriftServerAppAdapterTest, OnPipelineInactiveAlwaysClosesFromAnyState) {
-  // From Open
-  {
-    TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
-    auto built = buildPipeline(adapter.get());
-    EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Open);
-    adapter->onPipelineInactive();
-    EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closed);
-  }
-  // From Closing
-  {
-    TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
-    auto built = buildPipeline(adapter.get());
-    evb_->runInEventBaseThreadAndWait([&] {
-      adapter->onException(
-          folly::make_exception_wrapper<
-              apache::thrift::transport::TTransportException>(
-              apache::thrift::transport::TTransportException::NOT_OPEN,
-              "drain"));
-    });
-    EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closing);
-    adapter->onPipelineInactive();
-    EXPECT_EQ(adapter->state(), ThriftServerAppAdapter::State::Closed);
-  }
-}
+// The adapter no longer carries its own terminal-phase state machine.
+// Close/drain semantics (CloseConnection event emission, in-flight
+// tracking, deferred closeCallback via ConnectionClosed inbound event)
+// live entirely in ThriftServerConnectionCloseHandler and are covered
+// by ThriftServerConnectionCloseHandlerTest.
 
 } // namespace apache::thrift::fast_thrift::thrift

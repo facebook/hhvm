@@ -63,7 +63,7 @@ class MetadataAppAdapter final : public ThriftServerAppAdapter {
   // Static thunk registered via addMethodHandler. Switches on protocol id and
   // dispatches to the templated impl that fills the presult and writes the
   // success response.
-  static channel_pipeline::Result handleGetThriftServiceMetadata(
+  static void handleGetThriftServiceMetadata(
       ThriftServerAppAdapter* self,
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> requestData,
@@ -71,7 +71,7 @@ class MetadataAppAdapter final : public ThriftServerAppAdapter {
       std::unique_ptr<ThriftRequestContext> requestContext) noexcept;
 
   template <typename Writer>
-  channel_pipeline::Result writeMetadataResponse(uint32_t streamId) noexcept;
+  void writeMetadataResponse(uint32_t streamId) noexcept;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

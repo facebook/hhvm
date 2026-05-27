@@ -8,7 +8,7 @@
 
 #include "thrift/compiler/test/fixtures/fast_server/gen-cpp2/BasicService.h"
 
-#include <thrift/lib/cpp2/gen/service_tcc.h>
+#include <thrift/lib/cpp2/gen/fast_service_tcc.h>
 
 namespace cpp2::test {
 typedef apache::thrift::ThriftPresult<false> BasicService_ping_pargs;
@@ -26,8 +26,7 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apac
 // Method 'ping'
 //
 template <typename ProtocolReader, typename ProtocolWriter>
-::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_ping_impl(
+void BasicServiceAppAdapter::process_ping_impl(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
     std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
@@ -44,17 +43,14 @@ BasicServiceAppAdapter::process_ping_impl(
 
   using PresultT = ::cpp2::test::BasicService_ping_presult;
 
-  // Outer cascade: deserialize args, send framework error and return on
-  // failure. parseArgsOrSendError owns the protocol read + the three
-  // catch-arms (TProtocolException → ERROR, std::exception → unknown app
-  // exception, ... → unknown app exception).
-  {
+  try {
     auto pargs = args.pargs();
-    if (auto err = ::apache::thrift::fast_thrift::thrift::parseArgsOrSendError<
-            ProtocolReader>(this, streamId, *data, pargs);
-        err.has_value()) {
-      return *err;
-    }
+    ::apache::thrift::fast_thrift::thrift::deserializeRequest<ProtocolReader>(
+        *data, pargs);
+  } catch (...) {
+    ::apache::thrift::fast_thrift::thrift::sendDeserializationError(
+        this, streamId, ::folly::exception_wrapper(std::current_exception()));
+    return;
   }
 
   // Inner cascade: pre-instantiated FastHandlerCallback static templates
@@ -88,7 +84,6 @@ BasicServiceAppAdapter::process_ping_impl(
       cbRaw->exception(::folly::exception_wrapper(std::current_exception()));
     }
   }
-  return ::apache::thrift::fast_thrift::channel_pipeline::Result::Success;
 }
 
 //
@@ -99,8 +94,7 @@ BasicServiceAppAdapter::process_ping_impl(
 // Method 'add'
 //
 template <typename ProtocolReader, typename ProtocolWriter>
-::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_add_impl(
+void BasicServiceAppAdapter::process_add_impl(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
     std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
@@ -121,17 +115,14 @@ BasicServiceAppAdapter::process_add_impl(
 
   using PresultT = ::cpp2::test::BasicService_add_presult;
 
-  // Outer cascade: deserialize args, send framework error and return on
-  // failure. parseArgsOrSendError owns the protocol read + the three
-  // catch-arms (TProtocolException → ERROR, std::exception → unknown app
-  // exception, ... → unknown app exception).
-  {
+  try {
     auto pargs = args.pargs();
-    if (auto err = ::apache::thrift::fast_thrift::thrift::parseArgsOrSendError<
-            ProtocolReader>(this, streamId, *data, pargs);
-        err.has_value()) {
-      return *err;
-    }
+    ::apache::thrift::fast_thrift::thrift::deserializeRequest<ProtocolReader>(
+        *data, pargs);
+  } catch (...) {
+    ::apache::thrift::fast_thrift::thrift::sendDeserializationError(
+        this, streamId, ::folly::exception_wrapper(std::current_exception()));
+    return;
   }
 
   // Inner cascade: pre-instantiated FastHandlerCallback static templates
@@ -165,7 +156,6 @@ BasicServiceAppAdapter::process_add_impl(
       cbRaw->exception(::folly::exception_wrapper(std::current_exception()));
     }
   }
-  return ::apache::thrift::fast_thrift::channel_pipeline::Result::Success;
 }
 
 //
@@ -176,8 +166,7 @@ BasicServiceAppAdapter::process_add_impl(
 // Method 'buildItem'
 //
 template <typename ProtocolReader, typename ProtocolWriter>
-::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_buildItem_impl(
+void BasicServiceAppAdapter::process_buildItem_impl(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
     std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
@@ -199,17 +188,14 @@ BasicServiceAppAdapter::process_buildItem_impl(
 
   using PresultT = ::cpp2::test::BasicService_buildItem_presult;
 
-  // Outer cascade: deserialize args, send framework error and return on
-  // failure. parseArgsOrSendError owns the protocol read + the three
-  // catch-arms (TProtocolException → ERROR, std::exception → unknown app
-  // exception, ... → unknown app exception).
-  {
+  try {
     auto pargs = args.pargs();
-    if (auto err = ::apache::thrift::fast_thrift::thrift::parseArgsOrSendError<
-            ProtocolReader>(this, streamId, *data, pargs);
-        err.has_value()) {
-      return *err;
-    }
+    ::apache::thrift::fast_thrift::thrift::deserializeRequest<ProtocolReader>(
+        *data, pargs);
+  } catch (...) {
+    ::apache::thrift::fast_thrift::thrift::sendDeserializationError(
+        this, streamId, ::folly::exception_wrapper(std::current_exception()));
+    return;
   }
 
   // Inner cascade: pre-instantiated FastHandlerCallback static templates
@@ -243,7 +229,6 @@ BasicServiceAppAdapter::process_buildItem_impl(
       cbRaw->exception(::folly::exception_wrapper(std::current_exception()));
     }
   }
-  return ::apache::thrift::fast_thrift::channel_pipeline::Result::Success;
 }
 
 //
@@ -254,8 +239,7 @@ BasicServiceAppAdapter::process_buildItem_impl(
 // Method 'lookup'
 //
 template <typename ProtocolReader, typename ProtocolWriter>
-::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_lookup_impl(
+void BasicServiceAppAdapter::process_lookup_impl(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
     std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
@@ -274,17 +258,14 @@ BasicServiceAppAdapter::process_lookup_impl(
 
   using PresultT = ::cpp2::test::BasicService_lookup_presult;
 
-  // Outer cascade: deserialize args, send framework error and return on
-  // failure. parseArgsOrSendError owns the protocol read + the three
-  // catch-arms (TProtocolException → ERROR, std::exception → unknown app
-  // exception, ... → unknown app exception).
-  {
+  try {
     auto pargs = args.pargs();
-    if (auto err = ::apache::thrift::fast_thrift::thrift::parseArgsOrSendError<
-            ProtocolReader>(this, streamId, *data, pargs);
-        err.has_value()) {
-      return *err;
-    }
+    ::apache::thrift::fast_thrift::thrift::deserializeRequest<ProtocolReader>(
+        *data, pargs);
+  } catch (...) {
+    ::apache::thrift::fast_thrift::thrift::sendDeserializationError(
+        this, streamId, ::folly::exception_wrapper(std::current_exception()));
+    return;
   }
 
   // Inner cascade: pre-instantiated FastHandlerCallback static templates
@@ -318,7 +299,6 @@ BasicServiceAppAdapter::process_lookup_impl(
       cbRaw->exception(::folly::exception_wrapper(std::current_exception()));
     }
   }
-  return ::apache::thrift::fast_thrift::channel_pipeline::Result::Success;
 }
 
 //
@@ -329,8 +309,7 @@ BasicServiceAppAdapter::process_lookup_impl(
 // Method 'secureLookup'
 //
 template <typename ProtocolReader, typename ProtocolWriter>
-::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_secureLookup_impl(
+void BasicServiceAppAdapter::process_secureLookup_impl(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
     std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
@@ -352,17 +331,14 @@ BasicServiceAppAdapter::process_secureLookup_impl(
 
   using PresultT = ::cpp2::test::BasicService_secureLookup_presult;
 
-  // Outer cascade: deserialize args, send framework error and return on
-  // failure. parseArgsOrSendError owns the protocol read + the three
-  // catch-arms (TProtocolException → ERROR, std::exception → unknown app
-  // exception, ... → unknown app exception).
-  {
+  try {
     auto pargs = args.pargs();
-    if (auto err = ::apache::thrift::fast_thrift::thrift::parseArgsOrSendError<
-            ProtocolReader>(this, streamId, *data, pargs);
-        err.has_value()) {
-      return *err;
-    }
+    ::apache::thrift::fast_thrift::thrift::deserializeRequest<ProtocolReader>(
+        *data, pargs);
+  } catch (...) {
+    ::apache::thrift::fast_thrift::thrift::sendDeserializationError(
+        this, streamId, ::folly::exception_wrapper(std::current_exception()));
+    return;
   }
 
   // Inner cascade: pre-instantiated FastHandlerCallback static templates
@@ -396,7 +372,6 @@ BasicServiceAppAdapter::process_secureLookup_impl(
       cbRaw->exception(::folly::exception_wrapper(std::current_exception()));
     }
   }
-  return ::apache::thrift::fast_thrift::channel_pipeline::Result::Success;
 }
 
 //

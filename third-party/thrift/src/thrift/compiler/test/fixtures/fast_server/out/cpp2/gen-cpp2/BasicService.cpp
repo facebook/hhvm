@@ -54,7 +54,7 @@ BasicServiceAppAdapter::BasicServiceAppAdapter(
           std::unique_ptr<
               ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
               requestContext) noexcept {
-        return static_cast<BasicServiceAppAdapter*>(a)
+        static_cast<BasicServiceAppAdapter*>(a)
             ->process_ping(
                 streamId, std::move(data), p, std::move(requestContext));
       });
@@ -67,7 +67,7 @@ BasicServiceAppAdapter::BasicServiceAppAdapter(
           std::unique_ptr<
               ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
               requestContext) noexcept {
-        return static_cast<BasicServiceAppAdapter*>(a)
+        static_cast<BasicServiceAppAdapter*>(a)
             ->process_add(
                 streamId, std::move(data), p, std::move(requestContext));
       });
@@ -80,7 +80,7 @@ BasicServiceAppAdapter::BasicServiceAppAdapter(
           std::unique_ptr<
               ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
               requestContext) noexcept {
-        return static_cast<BasicServiceAppAdapter*>(a)
+        static_cast<BasicServiceAppAdapter*>(a)
             ->process_buildItem(
                 streamId, std::move(data), p, std::move(requestContext));
       });
@@ -93,7 +93,7 @@ BasicServiceAppAdapter::BasicServiceAppAdapter(
           std::unique_ptr<
               ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
               requestContext) noexcept {
-        return static_cast<BasicServiceAppAdapter*>(a)
+        static_cast<BasicServiceAppAdapter*>(a)
             ->process_lookup(
                 streamId, std::move(data), p, std::move(requestContext));
       });
@@ -106,14 +106,13 @@ BasicServiceAppAdapter::BasicServiceAppAdapter(
           std::unique_ptr<
               ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
               requestContext) noexcept {
-        return static_cast<BasicServiceAppAdapter*>(a)
+        static_cast<BasicServiceAppAdapter*>(a)
             ->process_secureLookup(
                 streamId, std::move(data), p, std::move(requestContext));
       });
 }
 
-::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_ping(
+void BasicServiceAppAdapter::process_ping(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
     ::apache::thrift::ProtocolId protocolId,
@@ -121,34 +120,35 @@ BasicServiceAppAdapter::process_ping(
         requestContext) noexcept {
   switch (protocolId) {
     case ::apache::thrift::ProtocolId::COMPACT:
-      return process_ping_impl<
+      process_ping_impl<
           ::apache::thrift::CompactProtocolReader,
           ::apache::thrift::CompactProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
+      break;
     case ::apache::thrift::ProtocolId::BINARY:
-      return process_ping_impl<
+      process_ping_impl<
           ::apache::thrift::BinaryProtocolReader,
           ::apache::thrift::BinaryProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
+      break;
     default:
-      return writeResponse(
+      writeResponse(
           ::apache::thrift::fast_thrift::thrift::makeFrameworkErrorMessage(
               streamId,
               ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
               "Unsupported protocol id for fast_thrift server"));
+      break;
   }
 }
 
-template ::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_ping_impl<
+template void BasicServiceAppAdapter::process_ping_impl<
     ::apache::thrift::CompactProtocolReader,
     ::apache::thrift::CompactProtocolWriter>(
     uint32_t,
     std::unique_ptr<folly::IOBuf>,
     std::unique_ptr<
         ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
-template ::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_ping_impl<
+template void BasicServiceAppAdapter::process_ping_impl<
     ::apache::thrift::BinaryProtocolReader,
     ::apache::thrift::BinaryProtocolWriter>(
     uint32_t,
@@ -156,8 +156,7 @@ BasicServiceAppAdapter::process_ping_impl<
     std::unique_ptr<
         ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 
-::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_add(
+void BasicServiceAppAdapter::process_add(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
     ::apache::thrift::ProtocolId protocolId,
@@ -165,34 +164,35 @@ BasicServiceAppAdapter::process_add(
         requestContext) noexcept {
   switch (protocolId) {
     case ::apache::thrift::ProtocolId::COMPACT:
-      return process_add_impl<
+      process_add_impl<
           ::apache::thrift::CompactProtocolReader,
           ::apache::thrift::CompactProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
+      break;
     case ::apache::thrift::ProtocolId::BINARY:
-      return process_add_impl<
+      process_add_impl<
           ::apache::thrift::BinaryProtocolReader,
           ::apache::thrift::BinaryProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
+      break;
     default:
-      return writeResponse(
+      writeResponse(
           ::apache::thrift::fast_thrift::thrift::makeFrameworkErrorMessage(
               streamId,
               ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
               "Unsupported protocol id for fast_thrift server"));
+      break;
   }
 }
 
-template ::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_add_impl<
+template void BasicServiceAppAdapter::process_add_impl<
     ::apache::thrift::CompactProtocolReader,
     ::apache::thrift::CompactProtocolWriter>(
     uint32_t,
     std::unique_ptr<folly::IOBuf>,
     std::unique_ptr<
         ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
-template ::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_add_impl<
+template void BasicServiceAppAdapter::process_add_impl<
     ::apache::thrift::BinaryProtocolReader,
     ::apache::thrift::BinaryProtocolWriter>(
     uint32_t,
@@ -200,8 +200,7 @@ BasicServiceAppAdapter::process_add_impl<
     std::unique_ptr<
         ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 
-::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_buildItem(
+void BasicServiceAppAdapter::process_buildItem(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
     ::apache::thrift::ProtocolId protocolId,
@@ -209,34 +208,35 @@ BasicServiceAppAdapter::process_buildItem(
         requestContext) noexcept {
   switch (protocolId) {
     case ::apache::thrift::ProtocolId::COMPACT:
-      return process_buildItem_impl<
+      process_buildItem_impl<
           ::apache::thrift::CompactProtocolReader,
           ::apache::thrift::CompactProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
+      break;
     case ::apache::thrift::ProtocolId::BINARY:
-      return process_buildItem_impl<
+      process_buildItem_impl<
           ::apache::thrift::BinaryProtocolReader,
           ::apache::thrift::BinaryProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
+      break;
     default:
-      return writeResponse(
+      writeResponse(
           ::apache::thrift::fast_thrift::thrift::makeFrameworkErrorMessage(
               streamId,
               ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
               "Unsupported protocol id for fast_thrift server"));
+      break;
   }
 }
 
-template ::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_buildItem_impl<
+template void BasicServiceAppAdapter::process_buildItem_impl<
     ::apache::thrift::CompactProtocolReader,
     ::apache::thrift::CompactProtocolWriter>(
     uint32_t,
     std::unique_ptr<folly::IOBuf>,
     std::unique_ptr<
         ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
-template ::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_buildItem_impl<
+template void BasicServiceAppAdapter::process_buildItem_impl<
     ::apache::thrift::BinaryProtocolReader,
     ::apache::thrift::BinaryProtocolWriter>(
     uint32_t,
@@ -244,8 +244,7 @@ BasicServiceAppAdapter::process_buildItem_impl<
     std::unique_ptr<
         ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 
-::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_lookup(
+void BasicServiceAppAdapter::process_lookup(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
     ::apache::thrift::ProtocolId protocolId,
@@ -253,34 +252,35 @@ BasicServiceAppAdapter::process_lookup(
         requestContext) noexcept {
   switch (protocolId) {
     case ::apache::thrift::ProtocolId::COMPACT:
-      return process_lookup_impl<
+      process_lookup_impl<
           ::apache::thrift::CompactProtocolReader,
           ::apache::thrift::CompactProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
+      break;
     case ::apache::thrift::ProtocolId::BINARY:
-      return process_lookup_impl<
+      process_lookup_impl<
           ::apache::thrift::BinaryProtocolReader,
           ::apache::thrift::BinaryProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
+      break;
     default:
-      return writeResponse(
+      writeResponse(
           ::apache::thrift::fast_thrift::thrift::makeFrameworkErrorMessage(
               streamId,
               ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
               "Unsupported protocol id for fast_thrift server"));
+      break;
   }
 }
 
-template ::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_lookup_impl<
+template void BasicServiceAppAdapter::process_lookup_impl<
     ::apache::thrift::CompactProtocolReader,
     ::apache::thrift::CompactProtocolWriter>(
     uint32_t,
     std::unique_ptr<folly::IOBuf>,
     std::unique_ptr<
         ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
-template ::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_lookup_impl<
+template void BasicServiceAppAdapter::process_lookup_impl<
     ::apache::thrift::BinaryProtocolReader,
     ::apache::thrift::BinaryProtocolWriter>(
     uint32_t,
@@ -288,8 +288,7 @@ BasicServiceAppAdapter::process_lookup_impl<
     std::unique_ptr<
         ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
 
-::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_secureLookup(
+void BasicServiceAppAdapter::process_secureLookup(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
     ::apache::thrift::ProtocolId protocolId,
@@ -297,34 +296,35 @@ BasicServiceAppAdapter::process_secureLookup(
         requestContext) noexcept {
   switch (protocolId) {
     case ::apache::thrift::ProtocolId::COMPACT:
-      return process_secureLookup_impl<
+      process_secureLookup_impl<
           ::apache::thrift::CompactProtocolReader,
           ::apache::thrift::CompactProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
+      break;
     case ::apache::thrift::ProtocolId::BINARY:
-      return process_secureLookup_impl<
+      process_secureLookup_impl<
           ::apache::thrift::BinaryProtocolReader,
           ::apache::thrift::BinaryProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
+      break;
     default:
-      return writeResponse(
+      writeResponse(
           ::apache::thrift::fast_thrift::thrift::makeFrameworkErrorMessage(
               streamId,
               ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
               "Unsupported protocol id for fast_thrift server"));
+      break;
   }
 }
 
-template ::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_secureLookup_impl<
+template void BasicServiceAppAdapter::process_secureLookup_impl<
     ::apache::thrift::CompactProtocolReader,
     ::apache::thrift::CompactProtocolWriter>(
     uint32_t,
     std::unique_ptr<folly::IOBuf>,
     std::unique_ptr<
         ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
-template ::apache::thrift::fast_thrift::channel_pipeline::Result
-BasicServiceAppAdapter::process_secureLookup_impl<
+template void BasicServiceAppAdapter::process_secureLookup_impl<
     ::apache::thrift::BinaryProtocolReader,
     ::apache::thrift::BinaryProtocolWriter>(
     uint32_t,

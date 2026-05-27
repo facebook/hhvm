@@ -118,7 +118,7 @@ class RecordingAppAdapter : public ThriftServerAppAdapter {
             uint32_t streamId,
             std::unique_ptr<folly::IOBuf> data,
             apache::thrift::ProtocolId protocol,
-            std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+            std::unique_ptr<ThriftRequestContext>) noexcept {
           auto* t = static_cast<RecordingAppAdapter*>(self);
           Recorded r;
           r.streamId = streamId;
@@ -128,7 +128,6 @@ class RecordingAppAdapter : public ThriftServerAppAdapter {
                 data->cloneCoalescedAsValue().moveToFbString().toStdString();
           }
           t->received.push_back(std::move(r));
-          return Result::Success;
         });
   }
 
@@ -141,7 +140,7 @@ class RecordingAppAdapter : public ThriftServerAppAdapter {
             uint32_t streamId,
             std::unique_ptr<folly::IOBuf> data,
             apache::thrift::ProtocolId protocol,
-            std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+            std::unique_ptr<ThriftRequestContext>) noexcept {
           auto* t = static_cast<RecordingAppAdapter*>(self);
           Recorded r;
           r.streamId = streamId;
@@ -159,7 +158,7 @@ class RecordingAppAdapter : public ThriftServerAppAdapter {
           // strictly required for the wire to be parseable; tests only
           // inspect frame type / streamId / data.
           auto responseData = data ? data->clone() : nullptr;
-          return t->writeResponse(
+          t->writeResponse(
               apache::thrift::fast_thrift::thrift::makeResponseMessage(
                   streamId, std::move(responseData), std::move(metadata)));
         });
@@ -218,7 +217,10 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
   }
 
   void TearDown() override {
-    evb_.loopOnce();
+    // Drain pending write callbacks without blocking — once the body's own
+    // loopOnce has consumed the runInLoop wakeup, the EVB has nothing left
+    // to fire and a plain loopOnce would block forever.
+    evb_.loopOnce(EVLOOP_NONBLOCK);
 
     if (transportAdapter_) {
       // Close the transport before tearing down the pipelines, mirroring
@@ -227,6 +229,11 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
       transportHandler_()->resetPipeline();
       transportAdapter_->resetPipeline();
       appAdapter_()->resetPipeline();
+      // composite_ also holds a pipelineGuard on thriftPipeline_; release it
+      // here so thriftPipeline_.reset() below actually destroys the pipeline
+      // while all handlers (head transportAdapter_, tail composite_) are
+      // still alive — otherwise callHandlerRemoved fires on a freed handler.
+      composite_->resetPipeline();
     }
     thriftPipeline_.reset();
     transportAdapter_.reset(); // tears down rocket connection
@@ -526,7 +533,7 @@ TEST_F(
 
   injectFrame(createRequestFrame(
       7, makeRequestMetadata("method.a1"), folly::IOBuf::copyBuffer("echoed")));
-  evb_.loopOnce();
+  evb_.loopOnce(EVLOOP_NONBLOCK);
 
   auto responseFrame = getWrittenFrame();
   ASSERT_NE(responseFrame, nullptr) << "Expected response frame on the wire";
@@ -548,7 +555,7 @@ TEST_F(
       1,
       makeRequestMetadata("method.nobody.owns.this"),
       folly::IOBuf::copyBuffer("p")));
-  evb_.loopOnce();
+  evb_.loopOnce(EVLOOP_NONBLOCK);
 
   // No child should have seen the request.
   EXPECT_EQ(childA_->received.size(), 0u);

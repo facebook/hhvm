@@ -23,6 +23,7 @@
 #include <vector>
 
 #include <boost/intrusive_ptr.hpp>
+#include <glog/logging.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
@@ -68,9 +69,10 @@ struct ThriftServerConnection {
     ThriftServerCompositeAppAdapter::Ptr adapter;
   };
 
-  // Tail declared first so it is destroyed last — must outlive the
-  // pipeline, which holds a raw tail pointer.
-  std::variant<SimpleTail, CompositeTail> tail;
+  // Tail of the thrift pipeline. `std::monostate` is the empty state used
+  // by the dtor to explicitly destroy the active alternative — declaration
+  // order is NOT the source of truth for teardown sequencing; see ~dtor.
+  std::variant<std::monostate, SimpleTail, CompositeTail> tail;
 
   // Buffer allocator used by the thrift pipeline.
   channel_pipeline::SimpleBufferAllocator thriftAllocator;
@@ -97,7 +99,7 @@ struct ThriftServerConnection {
   // complete, which the tail adapter turns into the closeCallback.
   // Must run on the thrift pipeline's EventBase.
   void close() noexcept {
-    std::visit([](auto& t) { t.adapter->close(); }, tail);
+    visitTail([](auto& t) { t.adapter->close(); });
   }
 
   // Alias for close(). Pre-existing ConnectionHandler two-phase shutdown
@@ -114,8 +116,87 @@ struct ThriftServerConnection {
   // response to the ConnectionClosed inbound event from
   // ThriftServerConnectionCloseHandler.
   void setCloseCallback(std::function<void()> cb) {
+    visitTail([&](auto& t) { t.adapter->setCloseCallback(std::move(cb)); });
+  }
+
+  // Move-only. User-defined dtor below would otherwise suppress implicit
+  // moves, breaking factory paths that move-construct (e.g.,
+  // TypeErasedBox::take<T>).
+  ThriftServerConnection() = default;
+  ThriftServerConnection(ThriftServerConnection&&) noexcept = default;
+  ThriftServerConnection& operator=(ThriftServerConnection&&) noexcept =
+      default;
+  ThriftServerConnection(const ThriftServerConnection&) = delete;
+  ThriftServerConnection& operator=(const ThriftServerConnection&) = delete;
+
+  // Explicit ordered teardown. Two correctness constraints:
+  //
+  //   1. Pipeline-dtor walks handler nodes and may fire callbacks on the
+  //      tail adapter (raw pointer). So the tail must still be alive when
+  //      thriftPipeline destroys.
+  //   2. The tail adapter holds a DestructorGuard on thriftPipeline (set
+  //      in setPipeline). If we let the adapter's own dtor release that
+  //      guard, the pipeline's deferred destroy fires synchronously
+  //      inside ~adapter -> UAF on the partially-destroyed tail.
+  //
+  // Every step is explicit — do NOT rely on member declaration order.
+  // Each Ptr/visit is null-tolerant so a moved-from instance's dtor is a
+  // no-op (Ptrs/variant are reset by the move).
+  ~ThriftServerConnection() {
+    // 1. Release every DG on thriftPipeline so the pipeline is fully
+    //    ungated for step 3. Both the head (thriftTransportAdapter) and
+    //    the tail adapter took a DG in setPipeline; if either still holds
+    //    one when its dtor runs, the pipeline's deferred destroy fires
+    //    synchronously inside ~adapter and walks the already-freed peer.
+    //    Monostate is legitimate (moved-from / explicitly cleared); skip
+    //    silently rather than DCHECK like the public-API visitTail.
     std::visit(
-        [&](auto& t) { t.adapter->setCloseCallback(std::move(cb)); }, tail);
+        [](auto& t) {
+          using T = std::decay_t<decltype(t)>;
+          if constexpr (!std::is_same_v<T, std::monostate>) {
+            if (t.adapter) {
+              t.adapter->resetPipeline();
+            }
+          }
+        },
+        tail);
+    if (thriftTransportAdapter) {
+      thriftTransportAdapter->resetPipeline();
+    }
+    // 2. Drop intrusive_ptr early so any pipeline-handler co-owning it
+    //    sees a single ref and releases cleanly during step 3.
+    connContext.reset();
+    // 3. Destroy the thrift pipeline. Both head and tail are still
+    //    alive, so any handler-removed callback into them is safe.
+    thriftPipeline.reset();
+    // 4. Destroy the tail adapter(s). monostate is the empty state;
+    //    assigning it explicitly destroys the active SimpleTail /
+    //    CompositeTail (composite first, then its children).
+    tail = std::monostate{};
+    // 5. Tear down the transport adapter (which owns the rocket
+    //    connection: rocket pipeline, rocket adapter, transport).
+    thriftTransportAdapter.reset();
+    // 6. thriftAllocator is a value member; it has no .reset() to call.
+    //    It destructs at the end of this dtor as part of the implicit
+    //    member-destruction phase.
+  }
+
+ private:
+  // visitTail — std::visit wrapper. monostate is the dtor-only empty
+  // state; no public caller should ever observe it.
+  template <typename F>
+  void visitTail(F&& f) {
+    std::visit(
+        [&](auto& t) {
+          if constexpr (std::is_same_v<
+                            std::decay_t<decltype(t)>,
+                            std::monostate>) {
+            DCHECK(false) << "invalid app adapter";
+          } else {
+            std::forward<F>(f)(t);
+          }
+        },
+        tail);
   }
 };
 

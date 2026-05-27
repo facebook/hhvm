@@ -22,6 +22,10 @@
 
 #include "{{service.program.include_prefix}}{{service.name}}.h"
 
+  {{#if service.is_fast_server?}}
+#include <thrift/lib/cpp2/gen/fast_service_tcc.h>
+  {{#else}}
 #include <thrift/lib/cpp2/gen/service_tcc.h>
+  {{/if service.is_fast_server?}}
 
 {{> service_cpp/service_inl}}

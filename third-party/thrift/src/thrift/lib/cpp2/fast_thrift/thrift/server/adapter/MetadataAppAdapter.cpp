@@ -52,8 +52,7 @@ MetadataAppAdapter::MetadataAppAdapter(
 }
 
 template <typename Writer>
-channel_pipeline::Result MetadataAppAdapter::writeMetadataResponse(
-    uint32_t streamId) noexcept {
+void MetadataAppAdapter::writeMetadataResponse(uint32_t streamId) noexcept {
   GetMetadataPresult presult;
   // Presult holds a pointer to the response; const_cast is safe — write() is
   // logically const, the codegen surface just isn't const-correct.
@@ -61,10 +60,10 @@ channel_pipeline::Result MetadataAppAdapter::writeMetadataResponse(
       const_cast<apache::thrift::metadata::ThriftServiceMetadataResponse*>(
           response_.get());
   presult.setIsSet(0, true);
-  return writeResponse(makeSuccessResponseMessage<Writer>(streamId, presult));
+  writeResponse(makeSuccessResponseMessage<Writer>(streamId, presult));
 }
 
-channel_pipeline::Result MetadataAppAdapter::handleGetThriftServiceMetadata(
+void MetadataAppAdapter::handleGetThriftServiceMetadata(
     ThriftServerAppAdapter* self,
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> /*requestData*/,
@@ -73,16 +72,19 @@ channel_pipeline::Result MetadataAppAdapter::handleGetThriftServiceMetadata(
   auto* impl = static_cast<MetadataAppAdapter*>(self);
   switch (protocol) {
     case apache::thrift::ProtocolId::COMPACT:
-      return impl->writeMetadataResponse<apache::thrift::CompactProtocolWriter>(
+      impl->writeMetadataResponse<apache::thrift::CompactProtocolWriter>(
           streamId);
+      break;
     case apache::thrift::ProtocolId::BINARY:
-      return impl->writeMetadataResponse<apache::thrift::BinaryProtocolWriter>(
+      impl->writeMetadataResponse<apache::thrift::BinaryProtocolWriter>(
           streamId);
+      break;
     default:
-      return impl->writeResponse(makeFrameworkErrorMessage(
+      impl->writeResponse(makeFrameworkErrorMessage(
           streamId,
           apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
           "Unsupported protocol id for getThriftServiceMetadata"));
+      break;
   }
 }
 

@@ -47,9 +47,7 @@ concept ServerInboundAppAdapter = channel_pipeline::TailEndpointHandler<T>;
 template <typename T>
 concept ServerOutboundAppAdapter =
     requires(T& t, ThriftServerResponseMessage&& message) {
-      {
-        t.writeResponse(std::move(message))
-      } noexcept -> std::same_as<channel_pipeline::Result>;
+      { t.writeResponse(std::move(message)) } noexcept -> std::same_as<void>;
       { t.close() } noexcept;
     };
 

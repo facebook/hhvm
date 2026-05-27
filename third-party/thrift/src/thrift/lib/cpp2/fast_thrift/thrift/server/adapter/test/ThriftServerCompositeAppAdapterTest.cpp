@@ -95,12 +95,11 @@ class TestChildAdapter : public ThriftServerAppAdapter {
             uint32_t streamId,
             std::unique_ptr<folly::IOBuf>,
             apache::thrift::ProtocolId protocol,
-            std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+            std::unique_ptr<ThriftRequestContext>) noexcept {
           auto* t = static_cast<TestChildAdapter*>(self);
           t->dispatchedTo = t->id_;
           t->capturedStreamId = streamId;
           t->capturedProtocol = protocol;
-          return Result::Success;
         });
   }
 
@@ -156,11 +155,10 @@ class OtherChildAdapter : public ThriftServerAppAdapter {
             uint32_t streamId,
             std::unique_ptr<folly::IOBuf>,
             apache::thrift::ProtocolId,
-            std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+            std::unique_ptr<ThriftRequestContext>) noexcept {
           auto* t = static_cast<OtherChildAdapter*>(self);
           t->dispatchedTo = t->id_;
           t->capturedStreamId = streamId;
-          return Result::Success;
         });
   }
 
@@ -214,11 +212,20 @@ class ThriftServerCompositeAppAdapterTest : public ::testing::Test {
     apache::thrift::fast_thrift::transport::TransportHandler::Ptr
         transportHandler;
     PipelineImpl::Ptr pipeline;
+    // Raw ptr — owned by the test body's local composite Ptr. Held here so
+    // ~BuiltPipeline can release the composite's pipelineGuard_ before its
+    // own `pipeline` field auto-destroys; otherwise the pipeline's
+    // destroy() is deferred by the guard and fires synchronously inside
+    // ~ThriftServerCompositeAppAdapter -> UAF on a partially-destroyed tail.
+    ThriftServerCompositeAppAdapter* composite{nullptr};
 
     ~BuiltPipeline() {
       if (transportHandler) {
         transportHandler->close(folly::exception_wrapper{});
         transportHandler->resetPipeline();
+      }
+      if (composite) {
+        composite->resetPipeline();
       }
     }
   };
@@ -256,7 +263,7 @@ class ThriftServerCompositeAppAdapterTest : public ::testing::Test {
     // accepted. Real server flow does this via thriftPipeline->activate().
     composite->onPipelineActive();
 
-    return {std::move(transportHandler), std::move(pipeline)};
+    return {std::move(transportHandler), std::move(pipeline), composite};
   }
 
   std::unique_ptr<folly::ScopedEventBaseThread> evbThread_;

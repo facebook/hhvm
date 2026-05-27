@@ -148,7 +148,7 @@ class BasicServiceAppAdapter
   // Per-method dispatcher: switches on protocolId into the templated impl.
   // Wrapped by a captureless-lambda thunk in the ctor when registered with
   // the base's dispatch table.
-  ::apache::thrift::fast_thrift::channel_pipeline::Result process_ping(
+  void process_ping(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
       ::apache::thrift::ProtocolId protocolId,
@@ -157,8 +157,7 @@ class BasicServiceAppAdapter
           requestContext) noexcept;
 
   template <typename ProtocolReader, typename ProtocolWriter>
-  ::apache::thrift::fast_thrift::channel_pipeline::Result
-  process_ping_impl(
+  void process_ping_impl(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
       std::unique_ptr<
@@ -167,7 +166,7 @@ class BasicServiceAppAdapter
   // Per-method dispatcher: switches on protocolId into the templated impl.
   // Wrapped by a captureless-lambda thunk in the ctor when registered with
   // the base's dispatch table.
-  ::apache::thrift::fast_thrift::channel_pipeline::Result process_add(
+  void process_add(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
       ::apache::thrift::ProtocolId protocolId,
@@ -176,8 +175,7 @@ class BasicServiceAppAdapter
           requestContext) noexcept;
 
   template <typename ProtocolReader, typename ProtocolWriter>
-  ::apache::thrift::fast_thrift::channel_pipeline::Result
-  process_add_impl(
+  void process_add_impl(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
       std::unique_ptr<
@@ -186,7 +184,7 @@ class BasicServiceAppAdapter
   // Per-method dispatcher: switches on protocolId into the templated impl.
   // Wrapped by a captureless-lambda thunk in the ctor when registered with
   // the base's dispatch table.
-  ::apache::thrift::fast_thrift::channel_pipeline::Result process_buildItem(
+  void process_buildItem(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
       ::apache::thrift::ProtocolId protocolId,
@@ -195,8 +193,7 @@ class BasicServiceAppAdapter
           requestContext) noexcept;
 
   template <typename ProtocolReader, typename ProtocolWriter>
-  ::apache::thrift::fast_thrift::channel_pipeline::Result
-  process_buildItem_impl(
+  void process_buildItem_impl(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
       std::unique_ptr<
@@ -205,7 +202,7 @@ class BasicServiceAppAdapter
   // Per-method dispatcher: switches on protocolId into the templated impl.
   // Wrapped by a captureless-lambda thunk in the ctor when registered with
   // the base's dispatch table.
-  ::apache::thrift::fast_thrift::channel_pipeline::Result process_lookup(
+  void process_lookup(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
       ::apache::thrift::ProtocolId protocolId,
@@ -214,8 +211,7 @@ class BasicServiceAppAdapter
           requestContext) noexcept;
 
   template <typename ProtocolReader, typename ProtocolWriter>
-  ::apache::thrift::fast_thrift::channel_pipeline::Result
-  process_lookup_impl(
+  void process_lookup_impl(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
       std::unique_ptr<
@@ -224,7 +220,7 @@ class BasicServiceAppAdapter
   // Per-method dispatcher: switches on protocolId into the templated impl.
   // Wrapped by a captureless-lambda thunk in the ctor when registered with
   // the base's dispatch table.
-  ::apache::thrift::fast_thrift::channel_pipeline::Result process_secureLookup(
+  void process_secureLookup(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
       ::apache::thrift::ProtocolId protocolId,
@@ -233,8 +229,7 @@ class BasicServiceAppAdapter
           requestContext) noexcept;
 
   template <typename ProtocolReader, typename ProtocolWriter>
-  ::apache::thrift::fast_thrift::channel_pipeline::Result
-  process_secureLookup_impl(
+  void process_secureLookup_impl(
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
       std::unique_ptr<

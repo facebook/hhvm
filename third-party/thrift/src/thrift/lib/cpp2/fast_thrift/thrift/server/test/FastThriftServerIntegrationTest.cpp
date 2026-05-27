@@ -128,15 +128,6 @@ ThriftServerRequestMessage makeRequest(
   return msg;
 }
 
-apache::thrift::ResponseRpcError deserializeResponseRpcError(
-    const folly::IOBuf& buf) {
-  apache::thrift::ResponseRpcError error;
-  apache::thrift::CompactProtocolReader reader;
-  reader.setInput(&buf);
-  error.read(&reader);
-  return error;
-}
-
 // User-implemented service handler. Each method honors flags set by the
 // test to decide what to return.
 class TestHandler
@@ -239,7 +230,13 @@ class FastThriftServerIntegrationTest : public ::testing::Test {
       transportHandler_->close(folly::exception_wrapper{});
       transportHandler_->resetPipeline();
     }
+    // Adapter must release its pipelineGuard_ BEFORE pipeline_.reset() and
+    // before transportHandler_ is destroyed. Otherwise the pipeline's destroy
+    // is deferred by the guard, then fires inside ~ThriftServerAppAdapter,
+    // running callHandlerRemoved on an already-freed TransportHandler.
+    adapter_.reset();
     pipeline_.reset();
+    transportHandler_.reset();
   }
 
   // Tear down + rebuild pipeline with a different handler. Used by the
@@ -250,7 +247,11 @@ class FastThriftServerIntegrationTest : public ::testing::Test {
       transportHandler_->close(folly::exception_wrapper{});
       transportHandler_->resetPipeline();
     }
+    // See TearDown() — adapter must release pipelineGuard_ before the
+    // pipeline and transport handler are torn down.
+    adapter_.reset();
     pipeline_.reset();
+    transportHandler_.reset();
 
     handler_ = h;
     adapter_.reset(new FastThriftServerAppAdapter(h));
@@ -463,25 +464,28 @@ TEST_F(
 }
 
 // ---------------------------------------------------------------------------
-// Outer cascade: corrupt args buffer trips TProtocolException
+// Outer cascade: corrupt args buffer → TApplicationException reply
 // ---------------------------------------------------------------------------
 
-TEST_F(
-    FastThriftServerIntegrationTest, ParseErrorReturnsRequestParsingFailure) {
-  // Garbage bytes that won't deserialize as the expected pargs.
+TEST_F(FastThriftServerIntegrationTest, ParseErrorReturnsAppException) {
   auto data = folly::IOBuf::copyBuffer("not-valid-thrift-data");
 
   auto response = drive(makeRequest(
       7, "echo", apache::thrift::ProtocolId::BINARY, std::move(data)));
 
-  // Outer cascade routes parse failures through writeError → ERROR frame.
-  EXPECT_NE(payloadErrorCode(response), 0u);
-  ASSERT_NE(payloadData(response), nullptr);
-  auto rpcError = deserializeResponseRpcError(*payloadData(response));
-  ASSERT_TRUE(rpcError.code().has_value());
+  EXPECT_EQ(payloadErrorCode(response), 0u);
+  EXPECT_EQ(payloadData(response), nullptr);
+  const auto* meta = payloadMetadata(response);
+  ASSERT_NE(meta, nullptr);
+  ASSERT_TRUE(meta->payloadMetadata().has_value());
+  ASSERT_EQ(
+      meta->payloadMetadata()->getType(),
+      apache::thrift::PayloadMetadata::Type::exceptionMetadata);
+  auto& exBase = meta->payloadMetadata()->get_exceptionMetadata();
+  ASSERT_TRUE(exBase.metadata().has_value());
   EXPECT_EQ(
-      *rpcError.code(),
-      apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE);
+      exBase.metadata()->getType(),
+      apache::thrift::PayloadExceptionMetadata::Type::appUnknownException);
 }
 
 // ---------------------------------------------------------------------------

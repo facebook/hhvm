@@ -153,6 +153,7 @@ template <typename TailAdapter>
 ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
     folly::AsyncTransport::UniquePtr socket,
     std::variant<
+        std::monostate,
         ThriftServerConnection::SimpleTail,
         ThriftServerConnection::CompositeTail> tail,
     TailAdapter* tailAdapter,

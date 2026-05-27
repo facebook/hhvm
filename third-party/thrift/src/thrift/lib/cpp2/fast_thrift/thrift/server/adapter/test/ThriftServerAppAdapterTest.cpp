@@ -188,11 +188,20 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
         transportHandler;
     PipelineImpl::Ptr pipeline;
     MockHandler* handler{nullptr};
+    // Raw ptr — owned by the test body's local adapter Ptr. Held here so
+    // ~BuiltPipeline can release the adapter's pipelineGuard_ before its
+    // own `pipeline` field auto-destroys; otherwise the pipeline's
+    // destroy() is deferred by the guard and fires synchronously inside
+    // ~ThriftServerAppAdapter -> 4-byte UAF on a partially-destroyed tail.
+    TestServerAppAdapter* adapter{nullptr};
 
     ~BuiltPipeline() {
       if (transportHandler) {
         transportHandler->close(folly::exception_wrapper{});
         transportHandler->resetPipeline();
+      }
+      if (adapter) {
+        adapter->resetPipeline();
       }
     }
   };
@@ -233,7 +242,8 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
     // activate -> handler onPipelineActive.
     adapter->onPipelineActive();
 
-    return {std::move(transportHandler), std::move(pipeline), rawHandler};
+    return {
+        std::move(transportHandler), std::move(pipeline), rawHandler, adapter};
   }
 
   std::unique_ptr<folly::ScopedEventBaseThread> evbThread_;
@@ -254,11 +264,10 @@ TEST_F(ThriftServerAppAdapterTest, OnReadDispatchesToRegisteredHandler) {
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+          std::unique_ptr<ThriftRequestContext>) noexcept {
         auto* t = static_cast<TestServerAppAdapter*>(self);
         t->handlerCalled = true;
         t->capturedStreamId = streamId;
-        return Result::Success;
       });
 
   auto built = buildPipeline(adapter.get());
@@ -312,9 +321,8 @@ TEST_F(ThriftServerAppAdapterTest, OnReadPassesProtocolId) {
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId protocol,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+          std::unique_ptr<ThriftRequestContext>) noexcept {
         static_cast<TestServerAppAdapter*>(self)->capturedProtocol = protocol;
-        return Result::Success;
       });
 
   auto built = buildPipeline(adapter.get());
@@ -335,11 +343,9 @@ TEST_F(ThriftServerAppAdapterTest, OnReadForwardsRequestContextToHandler) {
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext> requestContext) noexcept
-          -> Result {
+          std::unique_ptr<ThriftRequestContext> requestContext) noexcept {
         static_cast<TestServerAppAdapter*>(self)->capturedRequestContext =
             requestContext.get();
-        return Result::Success;
       });
 
   auto built = buildPipeline(adapter.get());
@@ -363,9 +369,8 @@ TEST_F(ThriftServerAppAdapterTest, OnReadMultipleMethodsDispatched) {
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+          std::unique_ptr<ThriftRequestContext>) noexcept {
         static_cast<TestServerAppAdapter*>(self)->method1Count++;
-        return Result::Success;
       });
 
   adapter->registerMethod(
@@ -374,9 +379,8 @@ TEST_F(ThriftServerAppAdapterTest, OnReadMultipleMethodsDispatched) {
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+          std::unique_ptr<ThriftRequestContext>) noexcept {
         static_cast<TestServerAppAdapter*>(self)->method2Count++;
-        return Result::Success;
       });
 
   auto built = buildPipeline(adapter.get());
@@ -495,12 +499,13 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseFiresWrite) {
         return Result::Success;
       });
 
-  auto result = adapter->writeResponse(makeResponseMessage(
-      /*streamId=*/42,
-      folly::IOBuf::copyBuffer("response"),
-      /*metadata=*/nullptr));
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->writeResponse(makeResponseMessage(
+        /*streamId=*/42,
+        folly::IOBuf::copyBuffer("response"),
+        /*metadata=*/nullptr));
+  });
 
-  EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled);
   EXPECT_EQ(capturedStreamId, 42u);
 }
@@ -635,12 +640,12 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithClientBlame) {
       "my.thrift.MyAppError",
       "client did bad",
       apache::thrift::ErrorBlame::CLIENT);
-  EXPECT_EQ(
-      adapter->writeResponse(makeResponseMessage(
-          /*streamId=*/7,
-          /*data=*/nullptr,
-          std::move(md))),
-      Result::Success);
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->writeResponse(makeResponseMessage(
+        /*streamId=*/7,
+        /*data=*/nullptr,
+        std::move(md)));
+  });
 
   EXPECT_TRUE(captured.writeCalled);
   EXPECT_EQ(captured.errorCode, 0u) << "Should be PAYLOAD frame";
@@ -695,12 +700,12 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithServerBlame) {
       "my.thrift.MyAppError",
       "server bug",
       apache::thrift::ErrorBlame::SERVER);
-  EXPECT_EQ(
-      adapter->writeResponse(makeResponseMessage(
-          /*streamId=*/7,
-          /*data=*/nullptr,
-          std::move(md))),
-      Result::Success);
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->writeResponse(makeResponseMessage(
+        /*streamId=*/7,
+        /*data=*/nullptr,
+        std::move(md)));
+  });
 
   EXPECT_TRUE(captured.writeCalled);
   EXPECT_EQ(captured.errorCode, 0u) << "Should be PAYLOAD frame";
@@ -708,29 +713,6 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithServerBlame) {
   EXPECT_EQ(captured.what, "server bug");
   EXPECT_TRUE(captured.hasBlame);
   EXPECT_EQ(captured.blame, apache::thrift::ErrorBlame::SERVER);
-}
-
-// =============================================================================
-// writeResponse Result Check Tests
-// =============================================================================
-
-TEST_F(ThriftServerAppAdapterTest, WriteResponseSurfacesPipelineWriteError) {
-  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
-
-  auto built = buildPipeline(
-      adapter.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&&) {
-        return Result::Error; // Simulate pipeline write failure
-      });
-
-  auto result = adapter->writeResponse(makeResponseMessage(
-      /*streamId=*/42,
-      folly::IOBuf::copyBuffer("response"),
-      /*metadata=*/nullptr));
-
-  EXPECT_EQ(result, Result::Error);
-  EXPECT_EQ(built.handler->handlerRemovedCount(), 0);
 }
 
 // =============================================================================
@@ -831,12 +813,12 @@ TEST_F(
   auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
   fillDeclaredExceptionMetadata(
       *md, "my.thrift.MyDeclaredException", "expected failure", classification);
-  EXPECT_EQ(
-      adapter->writeResponse(makeResponseMessage(
-          /*streamId=*/7,
-          folly::IOBuf::copyBuffer("serialized exception struct"),
-          std::move(md))),
-      Result::Success);
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->writeResponse(makeResponseMessage(
+        /*streamId=*/7,
+        folly::IOBuf::copyBuffer("serialized exception struct"),
+        std::move(md)));
+  });
 
   EXPECT_TRUE(writeCalled);
   EXPECT_EQ(capturedErrorCode, 0u) << "Should be PAYLOAD frame";
@@ -872,10 +854,10 @@ TEST_F(
       });
 
   auto ew = folly::make_exception_wrapper<std::runtime_error>("boom");
-  EXPECT_EQ(
-      adapter->writeResponse(makeUnknownExceptionMessage(
-          7, ew, apache::thrift::ErrorBlame::CLIENT)),
-      Result::Success);
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->writeResponse(
+        makeUnknownExceptionMessage(7, ew, apache::thrift::ErrorBlame::CLIENT));
+  });
 
   ASSERT_TRUE(writeCalled);
   EXPECT_EQ(payloadStreamId(captured), 7u);
@@ -919,12 +901,12 @@ TEST_F(ThriftServerAppAdapterTest, WriteFrameworkErrorEmitsErrorFrame) {
         return Result::Success;
       });
 
-  EXPECT_EQ(
-      adapter->writeResponse(makeFrameworkErrorMessage(
-          9,
-          apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-          "bad bytes")),
-      Result::Success);
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->writeResponse(makeFrameworkErrorMessage(
+        9,
+        apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
+        "bad bytes"));
+  });
 
   ASSERT_TRUE(writeCalled);
   EXPECT_EQ(payloadStreamId(captured), 9u);

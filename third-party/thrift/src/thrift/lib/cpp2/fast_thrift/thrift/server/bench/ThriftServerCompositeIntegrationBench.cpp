@@ -103,9 +103,7 @@ class BenchAppAdapter : public thrift::ThriftServerAppAdapter {
             uint32_t,
             std::unique_ptr<folly::IOBuf>,
             apache::thrift::ProtocolId,
-            std::unique_ptr<thrift::ThriftRequestContext>) noexcept -> Result {
-          return Result::Success;
-        });
+            std::unique_ptr<thrift::ThriftRequestContext>) noexcept {});
   }
 };
 

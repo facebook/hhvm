@@ -39,6 +39,7 @@ static_assert(
     "ThriftServerAppAdapter must satisfy ServerComposableAppAdapter");
 
 ThriftServerAppAdapter::~ThriftServerAppAdapter() {
+  resetPipeline();
   auto cb = closeCallback_.withWLock([](auto& fn) { return std::move(fn); });
   if (cb) {
     cb();
@@ -53,7 +54,16 @@ void ThriftServerAppAdapter::setPipeline(
     channel_pipeline::PipelineImpl* pipeline) noexcept {
   DCHECK(pipeline);
   pipeline_ = pipeline;
-  evb_ = pipeline_->eventBase();
+  pipelineGuard_ =
+      std::make_unique<folly::DelayedDestruction::DestructorGuard>(pipeline_);
+  evb_ = folly::getKeepAliveToken(pipeline_->eventBase());
+}
+
+void ThriftServerAppAdapter::resetPipeline() noexcept {
+  folly::DelayedDestruction::DestructorGuard dg(this);
+  pipeline_ = nullptr;
+  pipelineGuard_.reset();
+  evb_ = {};
 }
 
 void ThriftServerAppAdapter::onEvent(
@@ -76,7 +86,8 @@ channel_pipeline::Result ThriftServerAppAdapter::onRead(
     channel_pipeline::TypeErasedBox&& msg) noexcept {
   auto request = msg.take<ThriftServerRequestMessage>();
   DCHECK(request.streamId != 0) << "Invalid stream ID";
-  return handleRequestResponse(std::move(request));
+  handleRequestResponse(std::move(request));
+  return channel_pipeline::Result::Success;
 }
 
 void ThriftServerAppAdapter::onException(
@@ -110,7 +121,7 @@ std::vector<std::string_view> ThriftServerAppAdapter::methodNames()
   return names;
 }
 
-channel_pipeline::Result ThriftServerAppAdapter::handleRequestResponse(
+void ThriftServerAppAdapter::handleRequestResponse(
     ThriftServerRequestMessage&& request) noexcept {
   auto& inbound = request.payload;
   DCHECK(inbound.is<ThriftRequestResponsePayload>());
@@ -127,47 +138,62 @@ channel_pipeline::Result ThriftServerAppAdapter::handleRequestResponse(
       metadata.kind().value_or(static_cast<apache::thrift::RpcKind>(-1));
   if (FOLLY_UNLIKELY(
           kind != apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    return handleWrongRpcKind(request.streamId, kind);
+    handleWrongRpcKind(request.streamId, kind);
+    return;
   }
 
   auto it = dispatch_.find(methodName);
   if (FOLLY_LIKELY(it != dispatch_.end())) {
     apache::thrift::ProtocolId protocol = metadata.protocol().value_or(0);
-    return it->second(
+    it->second(
         this,
         request.streamId,
         std::move(rr.data),
         protocol,
         std::move(request.requestContext));
+    return;
   }
 
-  return handleUnknownMethod(request.streamId, methodName);
+  handleUnknownMethod(request.streamId, methodName);
 }
 
-channel_pipeline::Result ThriftServerAppAdapter::handleWrongRpcKind(
+void ThriftServerAppAdapter::handleWrongRpcKind(
     uint32_t streamId, apache::thrift::RpcKind kind) noexcept {
   XLOG(ERR) << "Unsupported RPC kind: " << static_cast<int>(kind);
-  return writeResponse(makeWrongRpcKindMessage(streamId, kind));
+  writeResponseOnEventBase(makeWrongRpcKindMessage(streamId, kind));
 }
 
-channel_pipeline::Result ThriftServerAppAdapter::handleUnknownMethod(
+void ThriftServerAppAdapter::handleUnknownMethod(
     uint32_t streamId, std::string_view methodName) noexcept {
-  return writeResponse(makeUnknownMethodMessage(streamId, methodName));
+  writeResponseOnEventBase(makeUnknownMethodMessage(streamId, methodName));
 }
 
-channel_pipeline::Result ThriftServerAppAdapter::writeResponse(
+void ThriftServerAppAdapter::writeResponse(
+    ThriftServerResponseMessage&& message) noexcept {
+  if (evb_->isInEventBaseThread()) {
+    writeResponseOnEventBase(std::move(message));
+  } else {
+    evb_->runInEventBaseThread(
+        [this,
+         dg = folly::DelayedDestruction::DestructorGuard(this),
+         message = std::move(message)]() mutable {
+          writeResponseOnEventBase(std::move(message));
+        });
+  }
+}
+
+void ThriftServerAppAdapter::writeResponseOnEventBase(
     ThriftServerResponseMessage&& message) noexcept {
   if (FOLLY_UNLIKELY(!pipeline_)) {
-    return handleMissingPipeline();
+    handleMissingPipeline();
+    return;
   }
-  return pipeline_->fireWrite(
+  (void)pipeline_->fireWrite(
       channel_pipeline::erase_and_box(std::move(message)));
 }
 
-channel_pipeline::Result
-ThriftServerAppAdapter::handleMissingPipeline() noexcept {
+void ThriftServerAppAdapter::handleMissingPipeline() noexcept {
   XLOG(ERR) << "Pipeline not set, cannot send response";
-  return channel_pipeline::Result::Error;
 }
 
 void ThriftServerAppAdapter::close() noexcept {

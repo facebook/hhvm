@@ -78,8 +78,8 @@ class NoOpAdapter : public ThriftServerAppAdapter {
             uint32_t /*streamId*/,
             std::unique_ptr<folly::IOBuf> /*data*/,
             apache::thrift::ProtocolId /*protocol*/,
-            std::unique_ptr<ThriftRequestContext> /*requestContext*/) noexcept
-            -> Result { return Result::Success; });
+            std::unique_ptr<ThriftRequestContext> /*requestContext*/) noexcept {
+        });
   }
 };
 
@@ -303,8 +303,8 @@ class OtherNoOpAdapter : public ThriftServerAppAdapter {
             uint32_t /*streamId*/,
             std::unique_ptr<folly::IOBuf> /*data*/,
             apache::thrift::ProtocolId /*protocol*/,
-            std::unique_ptr<ThriftRequestContext> /*requestContext*/) noexcept
-            -> Result { return Result::Success; });
+            std::unique_ptr<ThriftRequestContext> /*requestContext*/) noexcept {
+        });
   }
 };
 

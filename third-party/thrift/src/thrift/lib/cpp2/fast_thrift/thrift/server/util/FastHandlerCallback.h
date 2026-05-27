@@ -21,17 +21,11 @@
 #include <type_traits>
 #include <utility>
 
-#include <exception>
-
 #include <folly/ExceptionWrapper.h>
-#include <folly/io/Cursor.h>
-#include <folly/io/IOBuf.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp/TApplicationException.h>
-#include <thrift/lib/cpp/protocol/TProtocolException.h>
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
-#include <thrift/lib/cpp2/SerializationSwitch.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftRequestContext.h>
@@ -66,11 +60,11 @@ inline void writeExceptionCascade(
         classification = getDeclaredExceptionClassification<Ex>(ew);
       });
   if (handled) {
-    (void)a->writeResponse(
+    a->writeResponse(
         makeDeclaredExceptionMessage<ProtocolWriter>(
             sid, presult, ew, classification));
   } else {
-    (void)a->writeResponse(makeUnknownExceptionMessage(
+    a->writeResponse(makeUnknownExceptionMessage(
         sid, ew, apache::thrift::ErrorBlame::SERVER));
   }
 }
@@ -103,6 +97,8 @@ class FastHandlerCallback : public folly::DelayedDestruction {
   FastHandlerCallback(FastHandlerCallback&&) = delete;
   FastHandlerCallback& operator=(FastHandlerCallback&&) = delete;
 
+  // Safe to call from any thread; the adapter's writeResponse handles the
+  // EVB hop.
   void result(T value) {
     completed_ = true;
     resultFn_(handler_, streamId_, std::move(value));
@@ -140,8 +136,7 @@ class FastHandlerCallback : public folly::DelayedDestruction {
       presult.template get<0>().value = &value;
     }
     presult.setIsSet(0, true);
-    (void)a->writeResponse(
-        makeSuccessResponseMessage<ProtocolWriter>(sid, presult));
+    a->writeResponse(makeSuccessResponseMessage<ProtocolWriter>(sid, presult));
   }
 
   template <typename Presult, typename ProtocolWriter>
@@ -155,15 +150,19 @@ class FastHandlerCallback : public folly::DelayedDestruction {
   }
 
  protected:
+  // Synthesize INTERNAL_ERROR if the user handler dropped the callback
+  // without completing. exceptionFn_ → adapter->writeResponse hops to EVB
+  // internally if we're off-thread.
   ~FastHandlerCallback() override {
-    if (!completed_) {
-      exceptionFn_(
-          handler_,
-          streamId_,
-          folly::make_exception_wrapper<TApplicationException>(
-              TApplicationException::INTERNAL_ERROR,
-              "FastHandlerCallback not completed"));
+    if (completed_) {
+      return;
     }
+    exceptionFn_(
+        handler_,
+        streamId_,
+        folly::make_exception_wrapper<TApplicationException>(
+            TApplicationException::INTERNAL_ERROR,
+            "FastHandlerCallback not completed"));
   }
 
  private:
@@ -202,6 +201,8 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
   FastHandlerCallback(FastHandlerCallback&&) = delete;
   FastHandlerCallback& operator=(FastHandlerCallback&&) = delete;
 
+  // Safe to call from any thread; the adapter's writeResponse handles the
+  // EVB hop.
   void done() {
     completed_ = true;
     doneFn_(handler_, streamId_);
@@ -228,8 +229,7 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
   template <typename Presult, typename ProtocolWriter>
   static void writeDone(ThriftServerAppAdapter* a, uint32_t sid) noexcept {
     Presult presult;
-    (void)a->writeResponse(
-        makeSuccessResponseMessage<ProtocolWriter>(sid, presult));
+    a->writeResponse(makeSuccessResponseMessage<ProtocolWriter>(sid, presult));
   }
 
   template <typename Presult, typename ProtocolWriter>
@@ -243,15 +243,17 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
   }
 
  protected:
+  // See FastHandlerCallback<T>::~dtor.
   ~FastHandlerCallback() override {
-    if (!completed_) {
-      exceptionFn_(
-          handler_,
-          streamId_,
-          folly::make_exception_wrapper<TApplicationException>(
-              TApplicationException::INTERNAL_ERROR,
-              "FastHandlerCallback not completed"));
+    if (completed_) {
+      return;
     }
+    exceptionFn_(
+        handler_,
+        streamId_,
+        folly::make_exception_wrapper<TApplicationException>(
+            TApplicationException::INTERNAL_ERROR,
+            "FastHandlerCallback not completed"));
   }
 
  private:
@@ -267,52 +269,5 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
 template <typename T>
 using FastHandlerCallbackPtr =
     folly::DelayedDestructionUniquePtr<FastHandlerCallback<T>>;
-
-// Outer cascade: deserialize a request's args (`pargs`) from `data` using
-// `ProtocolReader`, sending the appropriate error frame if deserialization
-// fails. Returns std::nullopt on success — caller continues dispatch. On
-// failure returns the channel_pipeline::Result of the write, which the
-// caller should propagate.
-//
-// Failure modes:
-//   TProtocolException → ERROR frame, REQUEST_PARSING_FAILURE
-//   std::exception     → PAYLOAD frame, appUnknownException metadata
-//   ...                → PAYLOAD frame, appUnknownException metadata
-//
-// The actual deser delegates to
-// apache::thrift::detail::deserializeRequestBodySimple — same primitive legacy
-// thrift uses — so behavior matches exactly.
-template <typename ProtocolReader, typename Pargs>
-[[nodiscard]] inline std::optional<channel_pipeline::Result>
-parseArgsOrSendError(
-    ThriftServerAppAdapter* adapter,
-    uint32_t streamId,
-    folly::IOBuf& data,
-    Pargs& pargs) noexcept {
-  try {
-    ProtocolReader reader;
-    folly::io::Cursor cursor(&data);
-    reader.setInput(cursor);
-    apache::thrift::detail::deserializeRequestBodySimple(&reader, &pargs);
-    return std::nullopt;
-  } catch (const apache::thrift::protocol::TProtocolException& ex) {
-    return adapter->writeResponse(makeFrameworkErrorMessage(
-        streamId,
-        apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-        ex.what()));
-  } catch (const std::exception& ex) {
-    return adapter->writeResponse(makeAppErrorMessage(
-        streamId,
-        "TApplicationException",
-        ex.what(),
-        apache::thrift::ErrorBlame::SERVER));
-  } catch (...) {
-    return adapter->writeResponse(makeAppErrorMessage(
-        streamId,
-        "TApplicationException",
-        "Unknown exception during args deserialization",
-        apache::thrift::ErrorBlame::SERVER));
-  }
-}
 
 } // namespace apache::thrift::fast_thrift::thrift

@@ -23,11 +23,13 @@
 #include <vector>
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/Executor.h>
 #include <folly/Portability.h>
 #include <folly/Synchronized.h>
 #include <folly/container/F14Map.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/DelayedDestruction.h>
+#include <folly/io/async/EventBase.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
@@ -80,7 +82,7 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   //   requestContext — per-request context stamped by
   //                    ThriftServerRequestContextHandler; ownership moves into
   //                    the FastHandlerCallback so it outlives async handlers.
-  using RequestResponseProcessFn = channel_pipeline::Result (*)(
+  using RequestResponseProcessFn = void (*)(
       ThriftServerAppAdapter*,
       uint32_t streamId,
       std::unique_ptr<folly::IOBuf> data,
@@ -94,6 +96,10 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   void setCloseCallback(std::function<void()> cb);
 
   void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept;
+
+  // Drops the pipeline reference and releases the DestructorGuard taken in
+  // setPipeline. Must be called before the adapter is destroyed.
+  void resetPipeline() noexcept;
 
   channel_pipeline::PipelineImpl* pipeline() const noexcept {
     return pipeline_;
@@ -118,17 +124,14 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   void onEvent(const channel_pipeline::TypeErasedBox& evt) noexcept;
   void onWriteReady() noexcept {}
 
-  // Single write entry point. Fires the message through the pipeline.
-  // If the pipeline has been deactivated, fireWrite naturally returns
-  // Error; the close handler upstream still observes the write so its
-  // in-flight counter drains.
+  // Single write entry point. Thread-safe: hops to the adapter's EVB if
+  // called off-thread, fires inline otherwise.
   //
   // Build the message via the free functions in
   // thrift/server/util/ResponsePayloads.h (makeResponseMessage,
   // makeErrorMessage, makeFrameworkErrorMessage, makeUnknownExceptionMessage,
   // makeSuccessResponseMessage<>, makeDeclaredExceptionMessage<>, ...).
-  [[nodiscard]] channel_pipeline::Result writeResponse(
-      ThriftServerResponseMessage&& message) noexcept;
+  void writeResponse(ThriftServerResponseMessage&& message) noexcept;
 
   // Initiate connection close. Internally broadcasts a
   // ThriftServerEvent::CloseConnection pipeline event; the pipeline-resident
@@ -147,21 +150,27 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
       std::string_view name, RequestResponseProcessFn handler);
 
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
+  // Keeps pipeline_ alive for the adapter's lifetime so in-flight reply
+  // paths (FastHandlerCallback → writeResponse → pipeline_->fireWrite)
+  // cannot dereference a freed pipeline. Released by resetPipeline().
+  std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
 
   ~ThriftServerAppAdapter() override;
 
-  folly::EventBase* getEventBase() const { return evb_; }
+  folly::EventBase* getEventBase() const { return evb_.get(); }
 
  private:
-  channel_pipeline::Result handleRequestResponse(
-      ThriftServerRequestMessage&& request) noexcept;
-  FOLLY_NOINLINE channel_pipeline::Result handleWrongRpcKind(
+  void handleRequestResponse(ThriftServerRequestMessage&& request) noexcept;
+  FOLLY_NOINLINE void handleWrongRpcKind(
       uint32_t streamId, apache::thrift::RpcKind kind) noexcept;
-  FOLLY_NOINLINE channel_pipeline::Result handleUnknownMethod(
+  FOLLY_NOINLINE void handleUnknownMethod(
       uint32_t streamId, std::string_view methodName) noexcept;
-  FOLLY_NOINLINE channel_pipeline::Result handleMissingPipeline() noexcept;
+  FOLLY_NOINLINE void handleMissingPipeline() noexcept;
 
-  folly::EventBase* evb_{nullptr};
+  // Must be called on evb_.
+  void writeResponseOnEventBase(ThriftServerResponseMessage&& message) noexcept;
+
+  folly::Executor::KeepAlive<folly::EventBase> evb_{};
   folly::F14FastMap<std::string, RequestResponseProcessFn> dispatch_;
   folly::Synchronized<std::function<void()>> closeCallback_;
 

@@ -31,6 +31,7 @@
 namespace apache::thrift::fast_thrift::thrift {
 
 ThriftServerCompositeAppAdapter::~ThriftServerCompositeAppAdapter() {
+  resetPipeline();
   // Fallback: if onPipelineInactive never ran (e.g. composite destroyed
   // without prior pipeline tear-down), fire the close callback synchronously.
   auto cb = closeCallback_.withWLock([](auto& fn) { return std::move(fn); });
@@ -77,9 +78,23 @@ void ThriftServerCompositeAppAdapter::onException(
 void ThriftServerCompositeAppAdapter::setPipeline(
     channel_pipeline::PipelineImpl* pipeline) noexcept {
   pipeline_ = pipeline;
+  pipelineGuard_ =
+      std::make_unique<folly::DelayedDestruction::DestructorGuard>(pipeline_);
   for (auto& child : children_) {
     child.vtable->setPipeline(child.owner, pipeline);
   }
+}
+
+void ThriftServerCompositeAppAdapter::resetPipeline() noexcept {
+  folly::DelayedDestruction::DestructorGuard dg(this);
+  // Mirror setPipeline's fan-out: each child holds its own pipelineGuard_
+  // taken when we forwarded setPipeline to them. Release theirs first so
+  // their later dtors don't fire pipeline-dtor cascades.
+  for (auto& child : children_) {
+    child.vtable->resetPipeline(child.owner);
+  }
+  pipeline_ = nullptr;
+  pipelineGuard_.reset();
 }
 
 void ThriftServerCompositeAppAdapter::handlerAdded() noexcept {

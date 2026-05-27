@@ -61,7 +61,7 @@ namespace {{service.cpp_qualified_namespace}} {
           std::unique_ptr<
               ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
               requestContext) noexcept {
-        return static_cast<{{service.cpp_name}}AppAdapter*>(a)
+        static_cast<{{service.cpp_name}}AppAdapter*>(a)
             ->process_{{function.cpp_name}}(
                 streamId, std::move(data), p, std::move(requestContext));
       });
@@ -71,8 +71,7 @@ namespace {{service.cpp_qualified_namespace}} {
 
 {{#each service.functions as |function|}}
 {{#if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
-::apache::thrift::fast_thrift::channel_pipeline::Result
-{{service.cpp_name}}AppAdapter::process_{{function.cpp_name}}(
+void {{service.cpp_name}}AppAdapter::process_{{function.cpp_name}}(
     uint32_t streamId,
     std::unique_ptr<folly::IOBuf> data,
     ::apache::thrift::ProtocolId protocolId,
@@ -80,34 +79,35 @@ namespace {{service.cpp_qualified_namespace}} {
         requestContext) noexcept {
   switch (protocolId) {
     case ::apache::thrift::ProtocolId::COMPACT:
-      return process_{{function.cpp_name}}_impl<
+      process_{{function.cpp_name}}_impl<
           ::apache::thrift::CompactProtocolReader,
           ::apache::thrift::CompactProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
+      break;
     case ::apache::thrift::ProtocolId::BINARY:
-      return process_{{function.cpp_name}}_impl<
+      process_{{function.cpp_name}}_impl<
           ::apache::thrift::BinaryProtocolReader,
           ::apache::thrift::BinaryProtocolWriter>(
           streamId, std::move(data), std::move(requestContext));
+      break;
     default:
-      return writeResponse(
+      writeResponse(
           ::apache::thrift::fast_thrift::thrift::makeFrameworkErrorMessage(
               streamId,
               ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
               "Unsupported protocol id for fast_thrift server"));
+      break;
   }
 }
 
-template ::apache::thrift::fast_thrift::channel_pipeline::Result
-{{service.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl<
+template void {{service.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl<
     ::apache::thrift::CompactProtocolReader,
     ::apache::thrift::CompactProtocolWriter>(
     uint32_t,
     std::unique_ptr<folly::IOBuf>,
     std::unique_ptr<
         ::apache::thrift::fast_thrift::thrift::ThriftRequestContext>) noexcept;
-template ::apache::thrift::fast_thrift::channel_pipeline::Result
-{{service.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl<
+template void {{service.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl<
     ::apache::thrift::BinaryProtocolReader,
     ::apache::thrift::BinaryProtocolWriter>(
     uint32_t,

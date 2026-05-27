@@ -252,8 +252,10 @@ class ThriftServerIntegrationTest : public ::testing::Test {
   }
 
   void TearDown() override {
-    // Drain pending write callbacks before destroying
-    evb_.loopOnce();
+    // Drain pending write callbacks without blocking — once the body's own
+    // loopOnce has consumed the runInLoop wakeup, the EVB has nothing left
+    // to fire and a plain loopOnce would block forever.
+    evb_.loopOnce(EVLOOP_NONBLOCK);
 
     if (transportAdapter_) {
       transportHandler_()->close(folly::exception_wrapper{});
@@ -510,7 +512,7 @@ TEST_F(ThriftServerIntegrationTest, ResponseFlowsFromProcessorToSocket) {
   ASSERT_EQ(processor_->requests().size(), 1u);
 
   processor_->sendReply(0, folly::IOBuf::copyBuffer("response data"));
-  evb_.loopOnce();
+  evb_.loopOnce(EVLOOP_NONBLOCK);
 
   auto responseFrame = getWrittenFrame();
   ASSERT_NE(responseFrame, nullptr) << "Expected response frame";
@@ -532,7 +534,7 @@ TEST_F(ThriftServerIntegrationTest, ThriftErrorProducesErrorFrame) {
 
   // exCode "5" = kQueueOverloadedErrorCode → should produce ERROR frame
   processor_->sendError(0, "server overloaded", "5");
-  evb_.loopOnce();
+  evb_.loopOnce(EVLOOP_NONBLOCK);
 
   auto responseFrame = getWrittenFrame();
   ASSERT_NE(responseFrame, nullptr) << "Expected error response frame";
@@ -571,7 +573,7 @@ TEST_F(ThriftServerIntegrationTest, AppErrorProducesPayloadFrame) {
 
   // exCode "23" = kAppClientErrorCode → no mapping → PAYLOAD frame
   processor_->sendError(0, "application error", "23");
-  evb_.loopOnce();
+  evb_.loopOnce(EVLOOP_NONBLOCK);
 
   auto responseFrame = getWrittenFrame();
   ASSERT_NE(responseFrame, nullptr) << "Expected error response frame";
@@ -599,7 +601,7 @@ TEST_F(ThriftServerIntegrationTest, BadMetadataProducesErrorFrame) {
   // Should not dispatch to processor
   EXPECT_EQ(processor_->requests().size(), 0u);
 
-  evb_.loopOnce();
+  evb_.loopOnce(EVLOOP_NONBLOCK);
 
   auto responseFrame = getWrittenFrame();
   ASSERT_NE(responseFrame, nullptr)
@@ -630,7 +632,7 @@ TEST_F(ThriftServerIntegrationTest, UnsupportedRpcKindProducesErrorFrame) {
   // Should not dispatch to processor
   EXPECT_EQ(processor_->requests().size(), 0u);
 
-  evb_.loopOnce();
+  evb_.loopOnce(EVLOOP_NONBLOCK);
 
   auto responseFrame = getWrittenFrame();
   ASSERT_NE(responseFrame, nullptr)
@@ -661,17 +663,17 @@ TEST_F(ThriftServerIntegrationTest, MultipleResponsesForDifferentStreams) {
 
   // Send first reply, drain write callback, then read the frame
   processor_->sendReply(0, folly::IOBuf::copyBuffer("reply1"));
-  evb_.loopOnce(); // process deferred writeSuccess
+  evb_.loopOnce(EVLOOP_NONBLOCK); // process deferred writeSuccess
   auto frame1 = getWrittenFrame();
   ASSERT_NE(frame1, nullptr) << "Expected first response frame";
   auto parsed1 = parseWrittenFrame(std::move(frame1));
   EXPECT_EQ(parsed1.streamId(), 1u);
 
-  evb_.loopOnce(); // restore write readiness for next write
+  evb_.loopOnce(EVLOOP_NONBLOCK); // restore write readiness for next write
 
   // Send second reply, drain write callback, then read the frame
   processor_->sendReply(1, folly::IOBuf::copyBuffer("reply2"));
-  evb_.loopOnce(); // process deferred writeSuccess
+  evb_.loopOnce(EVLOOP_NONBLOCK); // process deferred writeSuccess
   auto frame2 = getWrittenFrame();
   ASSERT_NE(frame2, nullptr) << "Expected second response frame";
   auto parsed2 = parseWrittenFrame(std::move(frame2));
@@ -825,12 +827,20 @@ class ThriftServerAppAdapterIntegrationTest : public ::testing::Test {
   }
 
   void TearDown() override {
-    evb_.loopOnce();
+    // Drain pending write callbacks without blocking — once the body's own
+    // loopOnce has consumed the runInLoop wakeup, the EVB has nothing left
+    // to fire and a plain loopOnce would block forever.
+    evb_.loopOnce(EVLOOP_NONBLOCK);
 
     if (transportHandler_) {
       transportHandler_->close(folly::exception_wrapper{});
       transportHandler_->resetPipeline();
     }
+    // Adapter must release its pipelineGuard_ BEFORE pipeline_.reset().
+    // Otherwise the pipeline's destroy is deferred by the guard, then
+    // fires synchronously inside ~ThriftServerAppAdapter -> 4-byte UAF
+    // on a partially-destroyed tail.
+    adapter_.reset();
     pipeline_.reset();
     transportHandler_.reset();
     testTransport_ = nullptr;
@@ -958,11 +968,10 @@ TEST_F(
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+          std::unique_ptr<ThriftRequestContext>) noexcept {
         auto* t = static_cast<TestServerAppAdapter*>(self);
         t->handlerCalled = true;
         t->capturedStreamId = streamId;
-        return Result::Success;
       });
 
   setupPipelineWithSetup();
@@ -983,9 +992,8 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, MultipleRequestsDispatched) {
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+          std::unique_ptr<ThriftRequestContext>) noexcept {
         static_cast<TestServerAppAdapter*>(self)->method1Count++;
-        return Result::Success;
       });
 
   adapter_->registerMethod(
@@ -994,9 +1002,8 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, MultipleRequestsDispatched) {
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+          std::unique_ptr<ThriftRequestContext>) noexcept {
         static_cast<TestServerAppAdapter*>(self)->method2Count++;
-        return Result::Success;
       });
 
   setupPipelineWithSetup();
@@ -1023,7 +1030,7 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, UnknownMethodSendsErrorResponse) {
   auto rpcMeta = createMinimalRequestMetadata("unknownMethod");
   injectFrame(createRequestFrame(1, rpcMeta, folly::IOBuf::copyBuffer("req")));
 
-  evb_.loopOnce();
+  evb_.loopOnce(EVLOOP_NONBLOCK);
 
   auto responseFrame = getWrittenFrame();
   ASSERT_NE(responseFrame, nullptr)
@@ -1041,9 +1048,8 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, SetupFrameConsumed) {
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+          std::unique_ptr<ThriftRequestContext>) noexcept {
         static_cast<TestServerAppAdapter*>(self)->handlerCalled = true;
-        return Result::Success;
       });
 
   setupPipeline();
@@ -1065,17 +1071,13 @@ TEST_F(
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
-        // writeResponse returning Backpressure is a write-side flow-control
-        // signal; the request was handled successfully so we report Success
-        // back into the read chain. Only Error (connection dead) propagates.
+          std::unique_ptr<ThriftRequestContext>) noexcept {
         auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
         fillSuccessResponseMetadata(*md);
-        auto writeResult = self->writeResponse(makeResponseMessage(
+        self->writeResponse(makeResponseMessage(
             streamId,
             folly::IOBuf::copyBuffer("echo response"),
             std::move(md)));
-        return writeResult == Result::Error ? Result::Error : Result::Success;
       });
 
   setupPipelineWithSetup();
@@ -1083,7 +1085,7 @@ TEST_F(
   auto rpcMeta = createMinimalRequestMetadata("echo");
   injectFrame(createRequestFrame(1, rpcMeta, folly::IOBuf::copyBuffer("req")));
 
-  evb_.loopOnce();
+  evb_.loopOnce(EVLOOP_NONBLOCK);
 
   auto responseFrame = getWrittenFrame();
   ASSERT_NE(responseFrame, nullptr) << "Expected response frame";
@@ -1104,30 +1106,29 @@ TEST_F(
           uint32_t streamId,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+          std::unique_ptr<ThriftRequestContext>) noexcept {
         auto md = std::make_unique<apache::thrift::ResponseRpcMetadata>();
         fillSuccessResponseMetadata(*md);
-        auto writeResult = self->writeResponse(makeResponseMessage(
+        self->writeResponse(makeResponseMessage(
             streamId, folly::IOBuf::copyBuffer("reply"), std::move(md)));
-        return writeResult == Result::Error ? Result::Error : Result::Success;
       });
 
   setupPipelineWithSetup();
 
   auto rpc1 = createMinimalRequestMetadata("echo");
   injectFrame(createRequestFrame(1, rpc1, folly::IOBuf::copyBuffer("req1")));
-  evb_.loopOnce();
+  evb_.loopOnce(EVLOOP_NONBLOCK);
 
   auto frame1 = getWrittenFrame();
   ASSERT_NE(frame1, nullptr) << "Expected first response frame";
   auto parsed1 = parseWrittenFrame(std::move(frame1));
   EXPECT_EQ(parsed1.streamId(), 1u);
 
-  evb_.loopOnce();
+  evb_.loopOnce(EVLOOP_NONBLOCK);
 
   auto rpc2 = createMinimalRequestMetadata("echo");
   injectFrame(createRequestFrame(3, rpc2, folly::IOBuf::copyBuffer("req2")));
-  evb_.loopOnce();
+  evb_.loopOnce(EVLOOP_NONBLOCK);
 
   auto frame2 = getWrittenFrame();
   ASSERT_NE(frame2, nullptr) << "Expected second response frame";
@@ -1147,10 +1148,15 @@ TEST_F(
 
   setupPipelineWithSetup();
 
-  evb_.runInEventBaseThread([&] {
-    adapter_->onEvent(erase_and_box(
-        ThriftServerEvent{ThriftServerEventType::ConnectionClosed}));
-  });
+  // Call onEvent directly on the test thread. fireCloseCallback defers the
+  // user callback via runInEventBaseThread, which queues onto the EVB's
+  // notification queue. A blocking loopOnce drains it deterministically
+  // — using NONBLOCK here races on mac-arm64, where the eventfd write
+  // from the same thread may not propagate before the non-blocking dispatch
+  // returns, deferring the cb into TearDown after closeCalled has been
+  // destroyed on the stack.
+  adapter_->onEvent(erase_and_box(
+      ThriftServerEvent{ThriftServerEventType::ConnectionClosed}));
   evb_.loopOnce();
 
   EXPECT_TRUE(closeCalled);
@@ -1163,9 +1169,8 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, ProtocolIdPassedToHandler) {
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId protocol,
-          std::unique_ptr<ThriftRequestContext>) noexcept -> Result {
+          std::unique_ptr<ThriftRequestContext>) noexcept {
         static_cast<TestServerAppAdapter*>(self)->capturedProtocol = protocol;
-        return Result::Success;
       });
 
   setupPipelineWithSetup();
@@ -1266,13 +1271,11 @@ TEST_F(
           uint32_t,
           std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId,
-          std::unique_ptr<ThriftRequestContext> requestContext) noexcept
-          -> Result {
+          std::unique_ptr<ThriftRequestContext> requestContext) noexcept {
         auto* t = static_cast<TestServerAppAdapter*>(self);
         t->capturedRequestContextNonNull = requestContext != nullptr;
         t->capturedConnContext =
             requestContext ? requestContext->getConnectionContext() : nullptr;
-        return Result::Success;
       });
 
   setupPipelineWithContextHandlers();

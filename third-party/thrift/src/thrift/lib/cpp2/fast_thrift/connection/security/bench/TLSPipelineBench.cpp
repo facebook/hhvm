@@ -37,6 +37,7 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/net/NetworkSocket.h>
+#include <folly/observer/SimpleObservable.h>
 #include <folly/synchronization/Baton.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
@@ -147,6 +148,8 @@ struct Harness {
     cfg.clientAuth = fizz::server::ClientAuthMode::None;
     tlsParams = std::make_shared<const fts::TLSParams>(
         fts::buildTLSParams(cfg, fts::ThriftTlsConfig{}));
+    tlsParamsObservable = std::make_unique<folly::observer::SimpleObservable<
+        std::shared_ptr<const fts::TLSParams>>>(tlsParams);
 
     head = std::make_unique<NoopHead>();
     tail = std::make_unique<CapturingTail>(
@@ -170,9 +173,7 @@ struct Harness {
               tls_bench_handler_tag,
               *evb,
               policy,
-              tlsParams->fizzContext,
-              tlsParams->thriftParams,
-              tlsParams->handshakeTimeout,
+              tlsParamsObservable->getObserver(),
               &allocator);
       pipeline = builder.build();
       pipeline->activate();
@@ -227,6 +228,9 @@ struct Harness {
   std::unique_ptr<folly::ScopedEventBaseThread> evbThread;
   folly::EventBase* evb{nullptr};
   std::shared_ptr<const fts::TLSParams> tlsParams;
+  std::unique_ptr<
+      folly::observer::SimpleObservable<std::shared_ptr<const fts::TLSParams>>>
+      tlsParamsObservable;
   channel_pipeline::SimpleBufferAllocator allocator;
   std::unique_ptr<NoopHead> head;
   std::unique_ptr<CapturingTail> tail;

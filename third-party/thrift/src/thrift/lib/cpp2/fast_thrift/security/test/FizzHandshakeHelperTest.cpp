@@ -110,7 +110,7 @@ class FizzHandshakeHelperTest : public ::testing::Test {
     // Skip mTLS for handshake-mechanics tests; we cover client auth via the
     // ContextBuilder tests and end-to-end in the integration test.
     cfg.clientAuth = fizz::server::ClientAuthMode::None;
-    serverCtx_ = buildFizzServerContext(cfg, ThriftTlsConfig{}).fizzContext;
+    serverCtx_ = buildTLSParams(cfg, ThriftTlsConfig{}).fizzContext;
   }
 
   void TearDown() override { evbThread_.reset(); }

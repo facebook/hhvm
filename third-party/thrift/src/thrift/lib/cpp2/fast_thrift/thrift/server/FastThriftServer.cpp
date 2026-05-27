@@ -140,6 +140,37 @@ void FastThriftServer::setSocketOptions(connection::SocketOptions opts) {
   socketOptions_ = opts;
 }
 
+void FastThriftServer::reloadTLSConfig(security::FizzServerCertConfig cfg) {
+  // Snapshot thriftConfig_ under the lock: setThriftConfig writes it under
+  // the same mutex, and reloadTLSConfig is documented as safe from any
+  // thread, so an unsynchronized read would be a TSAN data race even though
+  // the lifecycle states normally exclude an overlap.
+  security::ThriftTlsConfig thriftConfigSnapshot;
+  {
+    std::lock_guard<std::mutex> lock(lifecycleMutex_);
+    CHECK(state_ == State::kRunning)
+        << "FastThriftServer::reloadTLSConfig requires a running server "
+           "(call setSSLConfig before start() for the initial config)";
+    thriftConfigSnapshot = thriftConfig_;
+  }
+
+  // Build outside the lock — buildTLSParams may do file IO and may throw
+  // on unreadable cert/CA files or invalid verifier config; holding the
+  // lifecycle mutex across that would block start()/stop()/setters, and a
+  // throw leaves the running server untouched.
+  auto newParams = std::make_shared<const security::TLSParams>(
+      security::buildTLSParams(cfg, thriftConfigSnapshot));
+
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  // Re-check: stop() may have raced in between the two acquisitions. Drop
+  // the reload silently rather than touching a torn-down connectionManager_.
+  if (state_ != State::kRunning) {
+    return;
+  }
+  sslConfig_ = std::move(cfg);
+  connectionManager_->setTLSParams(std::move(newParams));
+}
+
 FastThriftServer::~FastThriftServer() {
   stop();
 
@@ -189,15 +220,13 @@ void FastThriftServer::start() {
     metadataResponse_ = std::move(resp);
   }
 
-  security::BuiltFizzServerContext fizzBuilt;
+  std::shared_ptr<const security::TLSParams> tlsParams;
   security::SSLPolicy sslPolicy = security::SSLPolicy::DISABLED;
-  std::optional<std::chrono::milliseconds> tlsHandshakeTimeout =
-      std::chrono::seconds{30};
   if (sslConfig_) {
     sslPolicy = sslConfig_->sslPolicy;
-    tlsHandshakeTimeout = sslConfig_->handshakeTimeout;
     if (sslPolicy != security::SSLPolicy::DISABLED) {
-      fizzBuilt = security::buildFizzServerContext(*sslConfig_, thriftConfig_);
+      tlsParams = std::make_shared<const security::TLSParams>(
+          security::buildTLSParams(*sslConfig_, thriftConfig_));
     }
   }
 
@@ -225,9 +254,7 @@ void FastThriftServer::start() {
       config_.address,
       folly::getKeepAliveToken(ioThreadPool_.get()),
       sslPolicy,
-      std::move(fizzBuilt.fizzContext),
-      std::move(fizzBuilt.thriftParams),
-      tlsHandshakeTimeout,
+      std::move(tlsParams),
       socketOptions_);
   connectionManager_->setEnableReusePortBpfSpread(enableReusePortBpfSpread_);
 

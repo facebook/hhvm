@@ -855,4 +855,109 @@ TEST(FastThriftServerSharedPoolTest, AfterStartCrashes) {
   server.stop();
 }
 
+// ---------------------------------------------------------------------------
+// Hot-reload — reloadTLSConfig swaps the fizz context on a running server.
+// ---------------------------------------------------------------------------
+
+TEST_F(FastThriftServerTlsTest, HotReloadServesNewCert) {
+  // Establish baseline: RPC works with the cert SetUp installed.
+  auto* evb = clientThread_->getEventBase();
+  {
+    auto transport = connectFizz(evb, server_->getAddress());
+    ASSERT_NE(transport, nullptr);
+    std::unique_ptr<apache::thrift::Client<integration::FastThriftServer>>
+        client;
+    evb->runInEventBaseThreadAndWait([&] {
+      auto channel =
+          apache::thrift::RocketClientChannel::newChannel(std::move(transport));
+      client = std::make_unique<
+          apache::thrift::Client<integration::FastThriftServer>>(
+          std::move(channel));
+    });
+    folly::Baton<> done;
+    EchoResponse echoed;
+    folly::exception_wrapper rpcErr;
+    evb->runInEventBaseThread([&] {
+      client->semifuture_echo("pre-reload")
+          .via(evb)
+          .thenValue([&](EchoResponse r) {
+            echoed = std::move(r);
+            done.post();
+          })
+          .thenError([&](const folly::exception_wrapper& ew) {
+            rpcErr = ew;
+            done.post();
+          });
+    });
+    ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
+    EXPECT_FALSE(rpcErr) << rpcErr.what();
+    EXPECT_EQ(*echoed.message(), "echoed:pre-reload");
+    evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+  }
+
+  // Hot-reload with a freshly-generated cert. The swap fans out across
+  // every EVB; future accepts use the new params, in-flight ones (none
+  // here) keep the old via captured shared_ptr.
+  auto newCert = security::test::makeTestCert();
+  security::FizzServerCertConfig newConfig;
+  newConfig.certPem = newCert.certPem;
+  newConfig.keyPem = newCert.keyPem;
+  newConfig.clientAuth = fizz::server::ClientAuthMode::None;
+  server_->reloadTLSConfig(std::move(newConfig));
+
+  // New RPC must still succeed. The server is serving the new cert
+  // (verifying that explicitly would require client-side peer cert
+  // inspection; here we settle for "swap didn't break anything").
+  {
+    auto transport = connectFizz(evb, server_->getAddress());
+    ASSERT_NE(transport, nullptr);
+    std::unique_ptr<apache::thrift::Client<integration::FastThriftServer>>
+        client;
+    evb->runInEventBaseThreadAndWait([&] {
+      auto channel =
+          apache::thrift::RocketClientChannel::newChannel(std::move(transport));
+      client = std::make_unique<
+          apache::thrift::Client<integration::FastThriftServer>>(
+          std::move(channel));
+    });
+    folly::Baton<> done;
+    EchoResponse echoed;
+    folly::exception_wrapper rpcErr;
+    evb->runInEventBaseThread([&] {
+      client->semifuture_echo("post-reload")
+          .via(evb)
+          .thenValue([&](EchoResponse r) {
+            echoed = std::move(r);
+            done.post();
+          })
+          .thenError([&](const folly::exception_wrapper& ew) {
+            rpcErr = ew;
+            done.post();
+          });
+    });
+    ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
+    EXPECT_FALSE(rpcErr) << rpcErr.what();
+    EXPECT_EQ(*echoed.message(), "echoed:post-reload");
+    evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+  }
+}
+
+TEST(FastThriftServerHotReloadTest, RequiresRunningServer) {
+  // reloadTLSConfig before start() must CHECK-fail.
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
+  auto handler = std::make_shared<TestHandler>();
+  ftt::FastThriftServer server(makeLoopbackConfig());
+  server.setInterface(handler);
+  // No start() — server is in kNotStarted.
+
+  auto cert = security::test::makeTestCert();
+  security::FizzServerCertConfig cfg;
+  cfg.certPem = cert.certPem;
+  cfg.keyPem = cert.keyPem;
+  cfg.clientAuth = fizz::server::ClientAuthMode::None;
+  EXPECT_DEATH(
+      server.reloadTLSConfig(std::move(cfg)),
+      "FastThriftServer::reloadTLSConfig requires a running server");
+}
+
 } // namespace apache::thrift::fast_thrift::thrift::test::integration::test

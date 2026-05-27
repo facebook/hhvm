@@ -23,7 +23,6 @@
 #include <memory>
 #include <optional>
 
-#include <fizz/server/FizzServerContext.h>
 #include <folly/Executor.h>
 #include <folly/SocketAddress.h>
 #include <folly/container/F14Map.h>
@@ -31,6 +30,7 @@
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/logging/xlog.h>
+#include <folly/observer/Observer.h>
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
@@ -43,8 +43,8 @@
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionAcceptCallbackHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionBuilderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionTLSHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/security/SSLPolicy.h>
-#include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 
 namespace apache::thrift::fast_thrift::connection {
 
@@ -83,23 +83,20 @@ HANDLER_TAG(connection_accept_callback_handler);
  * callback to remove each entry), and force-closes any stragglers when
  * the timeout elapses. Must NOT be called from the owning EVB thread —
  * the wait would block the same loop that fires the close callbacks.
+ *
+ * Hot-reload of TLS state is pull-based: ConnectionHandler holds the
+ * Observer and threads it into the TLS pipeline at construction time.
  */
 class ConnectionHandler {
  public:
   using Ptr = std::unique_ptr<ConnectionHandler>;
 
-  // sslPolicy fixes the pipeline shape at construction. fizzContext /
-  // thriftParams are only consulted for PERMITTED / REQUIRED policies and
-  // are ignored under DISABLED. tlsHandshakeTimeout is the per-connection
-  // budget shared between the optional peek phase and the fizz handshake;
-  // std::nullopt = unbounded.
   ConnectionHandler(
       folly::EventBase& evb,
       folly::SocketAddress address,
       fast_security::SSLPolicy sslPolicy,
-      std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
-      std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-      std::optional<std::chrono::milliseconds> tlsHandshakeTimeout,
+      folly::observer::Observer<std::shared_ptr<const fast_security::TLSParams>>
+          tlsParamsObserver,
       SocketOptions socketOptions,
       bool enableReusePortBpfSpread);
 
@@ -187,9 +184,8 @@ class ConnectionHandler {
   SocketOptions socketOptions_;
   bool enableReusePortBpfSpread_;
   fast_security::SSLPolicy sslPolicy_;
-  std::shared_ptr<const fizz::server::FizzServerContext> fizzContext_;
-  std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams_;
-  std::optional<std::chrono::milliseconds> tlsHandshakeTimeout_;
+  folly::observer::Observer<std::shared_ptr<const fast_security::TLSParams>>
+      tlsParamsObserver_;
 
   // Acceptance pipeline pieces. listener_ is constructed in the ctor so
   // getAddress() works before setConnectionFactory(); the rest is built
@@ -260,16 +256,12 @@ void ConnectionHandler::setConnectionFactory(
 
   // The TLS lifecycle (peek classification under PERMITTED, fizz handshake,
   // optional StopTLS V1 downgrade) lives entirely inside ConnectionTLSHandler
-  // as an inner pipeline. The outer pipeline sees one handler.
+  // as an inner pipeline. The outer pipeline sees one handler. The Observer
+  // is forwarded in and snapshotted per accept inside that inner pipeline
+  // (hot-reload safe).
   if (sslPolicy_ != fast_security::SSLPolicy::DISABLED) {
     builder.template addNextDuplex<handler::ConnectionTLSHandler>(
-        connection_tls_tag,
-        *evb_,
-        sslPolicy_,
-        fizzContext_,
-        thriftParams_,
-        tlsHandshakeTimeout_,
-        &allocator_);
+        connection_tls_tag, *evb_, sslPolicy_, tlsParamsObserver_, &allocator_);
   }
 
   builder.template addNextInbound<Builder>(

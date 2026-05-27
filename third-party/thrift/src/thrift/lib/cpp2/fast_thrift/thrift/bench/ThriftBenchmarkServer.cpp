@@ -160,9 +160,7 @@ class FastThriftBenchmarkServer {
         std::move(address),
         folly::getKeepAliveToken(executor_.get()),
         security::SSLPolicy::DISABLED,
-        nullptr,
-        nullptr,
-        std::chrono::seconds{5},
+        /*tlsParams=*/nullptr,
         connection::SocketOptions{});
 
     connectionManager_->setConnectionFactory(ConnectionFactory{this});

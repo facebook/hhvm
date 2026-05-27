@@ -32,11 +32,13 @@
 #include <folly/ExceptionWrapper.h>
 #include <folly/Function.h>
 #include <folly/SocketAddress.h>
+#include <folly/init/Init.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/net/NetworkSocket.h>
+#include <folly/observer/SimpleObservable.h>
 #include <folly/synchronization/Baton.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
@@ -172,6 +174,8 @@ class TLSPipelineIntegrationTest : public ::testing::Test {
 
     tlsParams_ = std::make_shared<const fts::TLSParams>(
         fts::buildTLSParams(cfg, fts::ThriftTlsConfig{}));
+    tlsParamsObservable_ = std::make_unique<folly::observer::SimpleObservable<
+        std::shared_ptr<const fts::TLSParams>>>(tlsParams_);
   }
 
   void TearDown() override {
@@ -203,9 +207,7 @@ class TLSPipelineIntegrationTest : public ::testing::Test {
               tls_test_handler_tag,
               *evb_,
               policy,
-              tlsParams_->fizzContext,
-              tlsParams_->thriftParams,
-              tlsParams_->handshakeTimeout,
+              tlsParamsObservable_->getObserver(),
               &allocator_);
       pipeline_ = builder.build();
       pipeline_->activate();
@@ -228,6 +230,9 @@ class TLSPipelineIntegrationTest : public ::testing::Test {
   std::unique_ptr<folly::ScopedEventBaseThread> evbThread_;
   folly::EventBase* evb_{nullptr};
   std::shared_ptr<const fts::TLSParams> tlsParams_;
+  std::unique_ptr<
+      folly::observer::SimpleObservable<std::shared_ptr<const fts::TLSParams>>>
+      tlsParamsObservable_;
   channel_pipeline::SimpleBufferAllocator allocator_;
   std::unique_ptr<NoopHead> head_;
   std::unique_ptr<CapturingTail> tail_;
@@ -371,3 +376,9 @@ TEST_F(TLSPipelineIntegrationTest, RequiredGarbageInputDropsConnection) {
 }
 
 } // namespace apache::thrift::fast_thrift::connection::security::test
+
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  folly::Init init(&argc, &argv);
+  return RUN_ALL_TESTS();
+}

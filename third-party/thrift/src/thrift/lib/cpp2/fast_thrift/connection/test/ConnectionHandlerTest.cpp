@@ -22,9 +22,11 @@
 #include <vector>
 
 #include <folly/SocketAddress.h>
+#include <folly/init/Init.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
+#include <folly/observer/SimpleObservable.h>
 #include <folly/synchronization/Baton.h>
 
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionHandler.h>
@@ -97,13 +99,16 @@ class ConnectionHandlerTest : public ::testing::Test {
   }
 
   std::unique_ptr<ConnectionHandler> createConnectionHandler() {
+    // DISABLED never reads tlsParams, but the ctor needs a valid Observer.
     return std::make_unique<ConnectionHandler>(
         *evb_,
         folly::SocketAddress("::1", 0),
         fast_security::SSLPolicy::DISABLED,
-        /*fizzContext=*/nullptr,
-        /*thriftParams=*/nullptr,
-        std::chrono::seconds{5},
+        // DISABLED never reads tlsParams, but the ctor needs a valid Observer.
+        folly::observer::SimpleObservable<
+            std::shared_ptr<const fast_security::TLSParams>>(
+            std::shared_ptr<const fast_security::TLSParams>{})
+            .getObserver(),
         SocketOptions{},
         /*enableReusePortBpfSpread=*/false);
   }
@@ -262,3 +267,9 @@ TEST_F(ConnectionHandlerTest, DestroyWithActiveConnections) {
 }
 
 } // namespace apache::thrift::fast_thrift::connection
+
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  folly::Init init(&argc, &argv);
+  return RUN_ALL_TESTS();
+}

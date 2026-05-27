@@ -61,7 +61,7 @@ class StopTLSHelperTest : public ::testing::Test {
     cfg.keyPem = cert.keyPem;
     cfg.clientAuth = fizz::server::ClientAuthMode::None;
     serverCtx_ =
-        apache::thrift::fast_thrift::security::buildFizzServerContext(
+        apache::thrift::fast_thrift::security::buildTLSParams(
             cfg, apache::thrift::fast_thrift::security::ThriftTlsConfig{})
             .fizzContext;
   }

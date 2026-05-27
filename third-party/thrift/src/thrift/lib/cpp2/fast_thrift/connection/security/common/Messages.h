@@ -20,6 +20,7 @@
 
 #include <folly/SocketAddress.h>
 #include <folly/io/async/AsyncTransport.h>
+#include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersServerExtension.h>
 
 namespace apache::thrift::fast_thrift::connection::security {
@@ -32,11 +33,18 @@ namespace apache::thrift::fast_thrift::connection::security {
 // receives the final message and fires it back onto the outer pipeline
 // as a ConnectionMessage.
 //
+// `tlsParams` is stamped by the inner-pipeline head TLSConfigHandler on
+// entry, snapshotted from a folly::Observer so downstream stages see the
+// current params for this accept without each holding the Observer
+// themselves.
+//
 // `extension` is null until the fizz handshake completes; downstream
 // stages (StopTLSV1Handler etc.) query it to decide whether to act.
 struct TLSPipelineMessage {
   folly::AsyncTransport::UniquePtr transport;
   folly::SocketAddress clientAddr;
+  std::shared_ptr<const apache::thrift::fast_thrift::security::TLSParams>
+      tlsParams;
   std::shared_ptr<apache::thrift::ThriftParametersServerExtension> extension;
 };
 

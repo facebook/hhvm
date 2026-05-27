@@ -19,7 +19,7 @@
  *
  * Measures the per-connection cost of a full acceptance pipeline trip:
  *   ConnectionListener → MockTailHandler
- * (fd wrap, fireRead, tail dispatch). Drives connectionAccepted()
+ * (fd wrap, fireRead, take<>, tail dispatch). Drives connectionAccepted()
  * directly so we don't pay bind/listen + kernel-accept costs.
  */
 
@@ -103,6 +103,7 @@ BENCHMARK(Plaintext_AcceptToTail, iters) {
   });
   suspender.rehire();
 
+  doNotOptimizeAway(tail.readCount());
   for (auto fd : clientFds) {
     ::close(fd.toFd());
   }

@@ -25,6 +25,7 @@
 #include <folly/Executor.h>
 #include <folly/SocketAddress.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
+#include <folly/init/Init.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
@@ -93,9 +94,7 @@ class ConnectionManagerTest : public ::testing::Test {
         folly::SocketAddress("::1", 0),
         folly::getKeepAliveToken(executor_),
         fast_security::SSLPolicy::DISABLED,
-        /*fizzContext=*/nullptr,
-        /*thriftParams=*/nullptr,
-        std::chrono::seconds{5},
+        /*tlsParams=*/nullptr,
         SocketOptions{});
     connectionManager_->setConnectionFactory(
         TestConnectionFactory{closeCount_},
@@ -222,3 +221,9 @@ TEST_F(ConnectionManagerTest, DestructorStopsServer) {
 }
 
 } // namespace apache::thrift::fast_thrift::connection
+
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  folly::Init init(&argc, &argv);
+  return RUN_ALL_TESTS();
+}

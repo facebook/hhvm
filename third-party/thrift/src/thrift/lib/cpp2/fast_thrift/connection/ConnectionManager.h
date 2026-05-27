@@ -17,12 +17,9 @@
 #pragma once
 
 #include <atomic>
-#include <chrono>
 #include <functional>
 #include <memory>
-#include <optional>
 
-#include <fizz/server/FizzServerContext.h>
 #include <folly/Executor.h>
 #include <folly/SocketAddress.h>
 #include <folly/Synchronized.h>
@@ -30,11 +27,13 @@
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/observer/Observer.h>
+#include <folly/observer/SimpleObservable.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/SocketOptions.h>
+#include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/security/SSLPolicy.h>
-#include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 
 namespace apache::thrift::fast_thrift::connection {
 
@@ -56,6 +55,10 @@ namespace fast_security = ::apache::thrift::fast_thrift::security;
  * handler, initiates graceful drain on every live connection, waits up
  * to `timeout` for the drain to complete, then force-closes any
  * stragglers. The dtor calls stop() with the default timeout.
+ *
+ * TLS parameters are owned via a SimpleObservable so setTLSParams() can
+ * hot-reload them; every per-EVB ConnectionHandler captures an Observer
+ * off this source.
  */
 class ConnectionManager : public folly::DelayedDestruction {
  public:
@@ -89,9 +92,7 @@ class ConnectionManager : public folly::DelayedDestruction {
       folly::SocketAddress address,
       folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor,
       fast_security::SSLPolicy sslPolicy,
-      std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
-      std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-      std::optional<std::chrono::milliseconds> tlsHandshakeTimeout,
+      std::shared_ptr<const fast_security::TLSParams> tlsParams,
       SocketOptions socketOptions);
 
   /**
@@ -125,6 +126,25 @@ class ConnectionManager : public folly::DelayedDestruction {
     enableReusePortBpfSpread_ = e;
   }
 
+  /**
+   * Replace the TLS parameters used by future accepts. A single setValue
+   * is observed by every accept on every EVB; no fan-out required.
+   * In-flight handshakes keep the previous params alive via the shared_ptr
+   * they captured at start.
+   *
+   * Safe to call from any thread; safe to call before or after start().
+   * No-op for handlers built with SSLPolicy::DISABLED.
+   */
+  void setTLSParams(std::shared_ptr<const fast_security::TLSParams> tlsParams) {
+    tlsParamsObservable_.setValue(std::move(tlsParams));
+  }
+
+  // Observer over the source-of-truth TLSParams.
+  folly::observer::Observer<std::shared_ptr<const fast_security::TLSParams>>
+  getTLSParamsObserver() {
+    return tlsParamsObservable_.getObserver();
+  }
+
   folly::SocketAddress getAddress() const;
 
   size_t numHandlers() const noexcept {
@@ -146,9 +166,7 @@ class ConnectionManager : public folly::DelayedDestruction {
       folly::SocketAddress address,
       folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor,
       fast_security::SSLPolicy sslPolicy,
-      std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
-      std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-      std::optional<std::chrono::milliseconds> tlsHandshakeTimeout,
+      std::shared_ptr<const fast_security::TLSParams> tlsParams,
       SocketOptions socketOptions);
 
   ~ConnectionManager() override;
@@ -165,9 +183,13 @@ class ConnectionManager : public folly::DelayedDestruction {
   folly::SocketAddress address_;
   folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor_;
   fast_security::SSLPolicy sslPolicy_;
-  std::shared_ptr<const fizz::server::FizzServerContext> fizzContext_;
-  std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams_;
-  std::optional<std::chrono::milliseconds> tlsHandshakeTimeout_;
+  // Source-of-truth TLS params. setTLSParams is a single setValue,
+  // observed by every accept on every EVB. Declaration before handlers_
+  // matters: handlers outlive their Observer's source only if this is
+  // destroyed last (member dtor order = reverse decl).
+  folly::observer::SimpleObservable<
+      std::shared_ptr<const fast_security::TLSParams>>
+      tlsParamsObservable_;
   SocketOptions socketOptions_;
   std::shared_ptr<IOObserver> observer_;
 

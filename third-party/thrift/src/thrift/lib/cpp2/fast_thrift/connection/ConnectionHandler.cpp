@@ -25,9 +25,8 @@ ConnectionHandler::ConnectionHandler(
     folly::EventBase& evb,
     folly::SocketAddress address,
     fast_security::SSLPolicy sslPolicy,
-    std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
-    std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-    std::optional<std::chrono::milliseconds> tlsHandshakeTimeout,
+    folly::observer::Observer<std::shared_ptr<const fast_security::TLSParams>>
+        tlsParamsObserver,
     SocketOptions socketOptions,
     bool enableReusePortBpfSpread)
     : evb_(folly::getKeepAliveToken(&evb)),
@@ -35,9 +34,7 @@ ConnectionHandler::ConnectionHandler(
       socketOptions_(socketOptions),
       enableReusePortBpfSpread_(enableReusePortBpfSpread),
       sslPolicy_(sslPolicy),
-      fizzContext_(std::move(fizzContext)),
-      thriftParams_(std::move(thriftParams)),
-      tlsHandshakeTimeout_(tlsHandshakeTimeout),
+      tlsParamsObserver_(std::move(tlsParamsObserver)),
       listener_(
           ConnectionListener::Ptr(new ConnectionListener(
               evb_.get(),

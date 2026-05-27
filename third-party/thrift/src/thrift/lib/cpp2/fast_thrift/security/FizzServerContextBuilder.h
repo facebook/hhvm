@@ -29,46 +29,16 @@
 namespace apache::thrift::fast_thrift::security {
 
 /**
- * Result of building the server-side TLS context from a cert/handshake
- * config and the thrift-extension config.
+ * Server-side TLS parameters: the fizz context, optional thrift TLS
+ * extension params, and the per-connection handshake timeout. Produced by
+ * buildTLSParams() and threaded into ConnectionManager / ConnectionHandler
+ * to drive every accepted connection's TLS handshake.
  *
  * `fizzContext` is always set. `thriftParams` is set iff the config opts
  * into a Thrift-specific TLS extension (e.g. StopTLS V1). When set, the
  * caller is responsible for constructing a fresh
  * `ThriftParametersServerExtension(thriftParams)` per connection and
  * passing it to the `AsyncFizzServer` ctor.
- */
-struct BuiltFizzServerContext {
-  std::shared_ptr<const fizz::server::FizzServerContext> fizzContext;
-  std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams;
-};
-
-/**
- * Build an immutable FizzServerContext (and matching Thrift parameters
- * context, if needed) from a cert/handshake config and the thrift-extension
- * config.
- *
- * The returned objects are safe to share across all connections served by
- * a single server instance. Cert rotation is out of scope for v1 — callers
- * that need rotation should rebuild the context and replace it.
- *
- * Throws std::runtime_error on malformed PEM, missing file, or invalid
- * configuration (e.g. neither path nor buffer set).
- */
-BuiltFizzServerContext buildFizzServerContext(
-    const FizzServerCertConfig& certConfig,
-    const ThriftTlsConfig& thriftConfig);
-
-/**
- * Server-side TLS parameters: the fizz context, optional Thrift TLS
- * extension params, and the per-connection handshake timeout. Plumbed
- * into ConnectionManager / ConnectionHandler via a folly::observer so
- * cert + extension state can be hot-reloaded; the handshake timeout is
- * captured per connection by snapshotting the observer at accept time.
- *
- * Same lifetime contract as BuiltFizzServerContext: fizzContext is
- * always set; thriftParams is set iff a Thrift-specific TLS extension
- * is opted into. handshakeTimeout::nullopt = no server-side cap.
  *
  * SSLPolicy is intentionally NOT included here — the acceptance pipeline
  * shape is fixed at construction time and cannot change at runtime.
@@ -76,6 +46,8 @@ BuiltFizzServerContext buildFizzServerContext(
 struct TLSParams {
   std::shared_ptr<const fizz::server::FizzServerContext> fizzContext;
   std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams;
+  // nullopt = no server-side timeout cap. See FizzServerCertConfig
+  // for the contract; mirrors that field.
   std::optional<std::chrono::milliseconds> handshakeTimeout;
 };
 
@@ -84,7 +56,14 @@ struct TLSParams {
  * context if needed, and the handshake timeout) from a cert/handshake
  * config and the thrift-extension config.
  *
- * Throws on the same conditions as buildFizzServerContext.
+ * The returned objects are safe to share across all connections served by
+ * a single server instance. Hot-reload is supported by calling
+ * buildTLSParams() again with a fresh FizzServerCertConfig and handing the
+ * result to ConnectionManager::setTLSParams; in-flight handshakes keep the
+ * old params alive via their captured shared_ptr.
+ *
+ * Throws std::runtime_error on malformed PEM, missing file, or invalid
+ * configuration (e.g. neither path nor buffer set).
  */
 TLSParams buildTLSParams(
     const FizzServerCertConfig& certConfig,

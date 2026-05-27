@@ -76,9 +76,7 @@ void IntegrationTestFixture::SetUp() {
       folly::SocketAddress("::1", 0),
       folly::getKeepAliveToken(executor_.get()),
       apache::thrift::fast_thrift::security::SSLPolicy::DISABLED,
-      /*fizzContext=*/nullptr,
-      /*thriftParams=*/nullptr,
-      std::chrono::seconds{5},
+      /*tlsParams=*/nullptr,
       apache::thrift::fast_thrift::connection::SocketOptions{});
   connectionManager_->setConnectionFactory(
       TestServerConnectionFactory{&serverAppAdapter_, &serverAllocator_});

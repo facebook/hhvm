@@ -217,6 +217,25 @@ class FastThriftServer {
       std::function<void(ThriftConnContext* connContext)>;
   void setOnConnectionAccepted(OnConnectionAcceptedFn cb);
 
+  /**
+   * Hot-swap the TLS configuration after the server has started. Builds
+   * fresh TLSParams from `cfg` (using the most-recently-set ThriftTlsConfig)
+   * and atomically replaces the per-EventBase parameters used by future
+   * accepts. In-flight handshakes hold the old fizz context via their
+   * captured shared_ptr and continue safely.
+   *
+   * Throws if buildTLSParams throws (e.g. unreadable cert/CA file, missing
+   * verifier with clientAuth=Required) — leaves the server's existing TLS
+   * state untouched in that case.
+   *
+   * Intended for cert / ticket-key rotation. Must be called after start();
+   * before start() the caller should set the initial config via
+   * setSSLConfig instead.
+   *
+   * Safe to call from any thread.
+   */
+  void reloadTLSConfig(security::FizzServerCertConfig cfg);
+
   /// Start accepting connections without blocking.
   void start();
 

@@ -15,6 +15,8 @@
  */
 
 #include <gtest/gtest.h>
+
+#include <folly/init/Init.h>
 #include <thrift/lib/cpp2/fast_thrift/test/IntegrationTestFixture.h>
 
 namespace apache::thrift::fast_thrift::test {
@@ -132,3 +134,9 @@ TEST_F(BasicPipelineIntegrationTest, LargerPayload) {
 }
 
 } // namespace apache::thrift::fast_thrift::test
+
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  folly::Init init(&argc, &argv);
+  return RUN_ALL_TESTS();
+}

@@ -293,9 +293,7 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
         folly::SocketAddress("::1", 0),
         folly::getKeepAliveToken(executor_.get()),
         security::SSLPolicy::DISABLED,
-        /*fizzContext=*/nullptr,
-        /*thriftParams=*/nullptr,
-        /*tlsHandshakeTimeout=*/std::chrono::seconds{5},
+        /*tlsParams=*/nullptr,
         connection::SocketOptions{});
     connectionManager_->setConnectionFactory(
         ServerConnectionFactory{

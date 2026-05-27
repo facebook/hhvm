@@ -25,17 +25,13 @@ ConnectionManager::Ptr ConnectionManager::create(
     folly::SocketAddress address,
     folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor,
     fast_security::SSLPolicy sslPolicy,
-    std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
-    std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-    std::optional<std::chrono::milliseconds> tlsHandshakeTimeout,
+    std::shared_ptr<const fast_security::TLSParams> tlsParams,
     SocketOptions socketOptions) {
   return Ptr(new ConnectionManager(
       std::move(address),
       std::move(executor),
       sslPolicy,
-      std::move(fizzContext),
-      std::move(thriftParams),
-      tlsHandshakeTimeout,
+      std::move(tlsParams),
       socketOptions));
 }
 
@@ -43,16 +39,12 @@ ConnectionManager::ConnectionManager(
     folly::SocketAddress address,
     folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor,
     fast_security::SSLPolicy sslPolicy,
-    std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
-    std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-    std::optional<std::chrono::milliseconds> tlsHandshakeTimeout,
+    std::shared_ptr<const fast_security::TLSParams> tlsParams,
     SocketOptions socketOptions)
     : address_(std::move(address)),
       executor_(std::move(executor)),
       sslPolicy_(sslPolicy),
-      fizzContext_(std::move(fizzContext)),
-      thriftParams_(std::move(thriftParams)),
-      tlsHandshakeTimeout_(tlsHandshakeTimeout),
+      tlsParamsObservable_(std::move(tlsParams)),
       socketOptions_(socketOptions),
       observer_(std::make_shared<IOObserver>(*this)) {}
 
@@ -117,13 +109,9 @@ void ConnectionManager::registerEventBase(folly::EventBase& evb) {
       evb,
       address_,
       sslPolicy_,
-      fizzContext_,
-      thriftParams_,
-      tlsHandshakeTimeout_,
+      tlsParamsObservable_.getObserver(),
       socketOptions_,
       enableReusePortBpfSpread_);
-  // Build the pipeline using the stored factory + onAccept; pulls the
-  // template-instantiated machinery out of ConnectionManager.
   configureHandler_(*handler);
 
   handlers_.withWLock([&](auto& map) {

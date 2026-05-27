@@ -163,6 +163,7 @@ class StopTLSV1Handler {
     TLSPipelineMessage downgraded{
         .transport = std::move(plaintext),
         .clientAddr = clientAddr,
+        .tlsParams = nullptr,
         .extension = std::move(extension),
     };
     auto result =

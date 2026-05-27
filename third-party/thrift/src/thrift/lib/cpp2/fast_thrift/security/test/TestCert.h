@@ -31,6 +31,13 @@ struct TestCert {
   std::string keyPem;
 };
 
+// A CA + leaf pair where leaf is signed by ca.
+struct TestCertChain {
+  std::string caCertPem;
+  std::string leafCertPem;
+  std::string leafKeyPem;
+};
+
 inline std::string toPem(::X509* cert) {
   folly::ssl::BioUniquePtr bio(BIO_new(BIO_s_mem()));
   PEM_write_bio_X509(bio.get(), cert);
@@ -57,6 +64,21 @@ inline TestCert makeTestCert() {
       /*issuer=*/nullptr,
       fizz::KeyType::P256);
   return {toPem(ck.cert.get()), toPem(ck.key.get())};
+}
+
+// Returns a freshly-generated CA + leaf signed by that CA.
+inline TestCertChain makeTestCertChain() {
+  auto ca = fizz::test::createCert(
+      "fast-thrift-test-ca",
+      /*ca=*/true,
+      /*issuer=*/nullptr,
+      fizz::KeyType::P256);
+  auto leaf = fizz::test::createCert(
+      "fast-thrift-test-leaf",
+      /*ca=*/false,
+      /*issuer=*/&ca,
+      fizz::KeyType::P256);
+  return {toPem(ca.cert.get()), toPem(leaf.cert.get()), toPem(leaf.key.get())};
 }
 
 } // namespace apache::thrift::fast_thrift::security::test

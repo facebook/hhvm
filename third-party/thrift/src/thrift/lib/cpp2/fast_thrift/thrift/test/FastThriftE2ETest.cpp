@@ -290,9 +290,7 @@ class FastThriftE2ETest : public ::testing::Test {
             folly::SocketAddress("::1", 0),
             folly::getKeepAliveToken(executor_.get()),
             apache::thrift::fast_thrift::security::SSLPolicy::DISABLED,
-            nullptr,
-            nullptr,
-            std::chrono::seconds{5},
+            /*tlsParams=*/nullptr,
             apache::thrift::fast_thrift::connection::SocketOptions{});
     connectionManager_->setConnectionFactory(ServerConnectionFactory{this});
     connectionManager_->start();
@@ -674,9 +672,7 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
         folly::SocketAddress("::1", 0),
         folly::getKeepAliveToken(executor_.get()),
         security::SSLPolicy::DISABLED,
-        nullptr,
-        nullptr,
-        std::chrono::seconds{5},
+        /*tlsParams=*/nullptr,
         connection::SocketOptions{});
     // Factory wraps a back-pointer to the fixture; defined out-of-line
     // below so it can refer to buildServerConnection.

@@ -16,14 +16,12 @@
 
 #pragma once
 
-#include <chrono>
 #include <memory>
-#include <optional>
 #include <utility>
 
-#include <fizz/server/FizzServerContext.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/observer/Observer.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
@@ -36,8 +34,9 @@
 #include <thrift/lib/cpp2/fast_thrift/connection/security/handler/FizzHandshakeHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/security/handler/StopTLSV1Handler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/security/handler/TLSClassifier.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/security/handler/TLSConfigHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/security/SSLPolicy.h>
-#include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 
 namespace apache::thrift::fast_thrift::connection::handler {
 
@@ -48,6 +47,7 @@ namespace tls_handler =
 
 // Inner-pipeline handler tags. Local to ConnectionTLSHandler; not exposed
 // to the outer pipeline.
+HANDLER_TAG(tls_inner_config);
 HANDLER_TAG(tls_inner_classifier);
 HANDLER_TAG(tls_inner_fizz_handshake);
 HANDLER_TAG(tls_inner_stoptls_v1);
@@ -55,24 +55,31 @@ HANDLER_TAG(tls_inner_stoptls_v1);
 /**
  * Outer-pipeline handler that hides the entire TLS lifecycle behind a
  * single boundary. Owns an inner pipeline whose shape is fixed at
- * construction by sslPolicy + thriftParams:
+ * construction by sslPolicy:
  *
- *   DISABLED:    not installed in the outer pipeline (caller's choice).
- *   REQUIRED:    [FizzHandshakeHandler] (+ [StopTLSV1Handler] if useStopTLS)
- *   PERMITTED:   [TLSClassifier → FizzHandshakeHandler]
- *                              (+ [StopTLSV1Handler] if useStopTLS)
+ *   DISABLED:  not installed in the outer pipeline (caller's choice).
+ *   REQUIRED:  TLSConfigHandler → FizzHandshakeHandler → StopTLSV1Handler
+ *   PERMITTED: TLSConfigHandler → TLSClassifier
+ *                              → FizzHandshakeHandler → StopTLSV1Handler
  *
- * Plays three roles:
+ * StopTLSV1Handler is always present in the inner pipeline. It's a
+ * passthrough for connections that didn't negotiate StopTLS V1, so the
+ * extra stage is cheap; this also keeps the pipeline shape stable across
+ * hot-reload changes to whether StopTLS is enabled.
+ *
+ * Plays three roles on a single class via overloaded methods:
  *   1. Middle handler in the outer (connection acceptance) pipeline. Takes
  *      ConnectionMessage in via onRead(Context&,...) and forwards to the
- *      inner pipeline via TLSPipelineMessage. Forwards writes through.
+ *      inner pipeline as TLSPipelineMessage. Forwards writes through.
  *   2. Head endpoint of the inner pipeline. The TLS pipeline has no
- *      outbound traffic, so the head's onWrite is a sink. (Required by the
- *      pipeline framework's static head/tail contract; the alternative —
- *      a one-off empty TLSPipelineHead class — would be pure boilerplate.)
+ *      outbound traffic, so the head's onWrite is a sink.
  *   3. Tail endpoint of the inner pipeline. Receives the final
  *      TLSPipelineMessage and bridges it back out by firing on the outer
  *      context as a ConnectionMessage.
+ *
+ * Hot-reload of TLS state is pull-based: the Observer passed at
+ * construction is threaded into the inner pipeline and snapshotted there
+ * per accepted connection.
  *
  * Lifecycle:
  *   - Inner pipeline is built once in the constructor; never null after.
@@ -84,21 +91,17 @@ HANDLER_TAG(tls_inner_stoptls_v1);
 class ConnectionTLSHandler {
  public:
   // sslPolicy must not be DISABLED — caller (ConnectionHandler) doesn't
-  // install this handler at all in that case. fizzContext is required for
-  // REQUIRED/PERMITTED; thriftParams is optional (null = no Thrift
-  // extension negotiation, StopTLS V1 stage is omitted from the inner
-  // pipeline). handshakeTimeout is the shared peek+handshake budget;
-  // nullopt = unbounded. allocator is shared with the outer pipeline.
+  // install this handler at all in that case. tlsParamsObserver supplies
+  // fizz context + thrift extension params + handshake timeout per accept.
+  // allocator is shared with the outer pipeline.
   ConnectionTLSHandler(
       folly::EventBase& evb,
       fast_security::SSLPolicy sslPolicy,
-      std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
-      std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-      std::optional<std::chrono::milliseconds> handshakeTimeout,
+      folly::observer::Observer<std::shared_ptr<const fast_security::TLSParams>>
+          tlsParamsObserver,
       channel_pipeline::SimpleBufferAllocator* allocator) {
     DCHECK(sslPolicy != fast_security::SSLPolicy::DISABLED)
         << "ConnectionTLSHandler should not be installed for DISABLED policy";
-    DCHECK(fizzContext != nullptr) << "fizzContext is required when TLS is on";
 
     channel_pipeline::PipelineBuilder<
         ConnectionTLSHandler,
@@ -108,19 +111,19 @@ class ConnectionTLSHandler {
     builder.setEventBase(&evb).setHead(this).setTail(this).setAllocator(
         allocator);
 
+    // TLSConfigHandler stamps the current TLSParams snapshot onto every
+    // accepted message; downstream handlers read it via msg.tlsParams and
+    // don't carry the Observer themselves.
+    builder.template addNextDuplex<tls_handler::TLSConfigHandler>(
+        tls_inner_config_tag, std::move(tlsParamsObserver));
     if (sslPolicy == fast_security::SSLPolicy::PERMITTED) {
       builder.template addNextDuplex<tls_handler::TLSClassifier>(
-          tls_inner_classifier_tag, handshakeTimeout);
+          tls_inner_classifier_tag);
     }
     builder.template addNextDuplex<tls_handler::FizzHandshakeHandler>(
-        tls_inner_fizz_handshake_tag,
-        std::move(fizzContext),
-        thriftParams,
-        handshakeTimeout);
-    if (thriftParams && thriftParams->getUseStopTLS()) {
-      builder.template addNextDuplex<tls_handler::StopTLSV1Handler>(
-          tls_inner_stoptls_v1_tag);
-    }
+        tls_inner_fizz_handshake_tag);
+    builder.template addNextDuplex<tls_handler::StopTLSV1Handler>(
+        tls_inner_stoptls_v1_tag);
 
     innerPipeline_ = builder.build();
   }
@@ -150,6 +153,7 @@ class ConnectionTLSHandler {
     tls_pipeline::TLSPipelineMessage tlsMsg{
         .transport = std::move(incoming.transport),
         .clientAddr = std::move(incoming.clientAddr),
+        .tlsParams = nullptr,
         .extension = nullptr,
     };
     return innerPipeline_->fireRead(
@@ -191,10 +195,6 @@ class ConnectionTLSHandler {
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto m = msg.take<tls_pipeline::TLSPipelineMessage>();
     if (FOLLY_UNLIKELY(!outerCtx_)) {
-      // Outer pipeline tore down. Transport is dropped here; this is the
-      // race window between outer handlerRemoved and inner-helper terminal
-      // callbacks. Inner helpers are cancelled on onPipelineInactive, so
-      // this should be rare.
       return channel_pipeline::Result::Success;
     }
     ConnectionMessage out{

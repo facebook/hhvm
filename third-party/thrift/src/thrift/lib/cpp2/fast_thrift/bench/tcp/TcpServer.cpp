@@ -156,9 +156,7 @@ TcpServer::TcpServer(
       std::move(address),
       folly::getKeepAliveToken(executor_.get()),
       apache::thrift::fast_thrift::security::SSLPolicy::DISABLED,
-      nullptr,
-      nullptr,
-      std::chrono::seconds{5},
+      /*tlsParams=*/nullptr,
       apache::thrift::fast_thrift::connection::SocketOptions{});
 
   connectionManager_->setConnectionFactory(

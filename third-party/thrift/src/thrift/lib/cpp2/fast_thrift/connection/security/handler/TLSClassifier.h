@@ -16,9 +16,7 @@
 
 #pragma once
 
-#include <chrono>
 #include <memory>
-#include <optional>
 #include <utility>
 
 #include <folly/ExceptionWrapper.h>
@@ -40,10 +38,11 @@
 
 namespace apache::thrift::fast_thrift::connection::security::handler {
 
+namespace fast_security = ::apache::thrift::fast_thrift::security;
+
 /**
- * Inner-pipeline middle handler used in SSLPolicy::PERMITTED mode; always
- * the first handler after ConnectionTLSHandler's head role. Peeks the
- * leading bytes of every accepted connection to classify it as TLS or
+ * Inner-pipeline middle handler used in SSLPolicy::PERMITTED mode. Peeks
+ * the first 9 bytes of every accepted connection to classify it as TLS or
  * plaintext, then routes:
  *
  *   TLS-looking → ctx.fireRead(msg)
@@ -58,18 +57,16 @@ namespace apache::thrift::fast_thrift::connection::security::handler {
  * peeked bytes are replayed to whoever reads next (Fizz ClientHello parser
  * for TLS, application protocol for plaintext).
  *
+ * Reads the per-connection handshake-timeout budget off incoming
+ * msg.tlsParams (stamped upstream by TLSConfigHandler). No Observer
+ * dependency lives here.
+ *
  * Peek errors and timeouts are logged at DBG3 and the connection is
  * dropped — matches FizzHandshakeHandler error policy.
  */
 class TLSClassifier {
  public:
-  // handshakeTimeout is the per-connection deadline shared with the
-  // downstream Fizz handler. std::nullopt = unbounded. A fresh
-  // HandshakeTimeout is constructed per connection in onRead so each one
-  // captures its own absolute deadline at peek start.
-  explicit TLSClassifier(
-      std::optional<std::chrono::milliseconds> handshakeTimeout) noexcept
-      : handshakeTimeout_(handshakeTimeout) {}
+  TLSClassifier() = default;
 
   ~TLSClassifier() = default;
   TLSClassifier(const TLSClassifier&) = delete;
@@ -94,8 +91,6 @@ class TLSClassifier {
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto incoming = msg.take<TLSPipelineMessage>();
 
-    // We expect a plain AsyncSocket — anything else (already-negotiated
-    // transport) is forwarded as-is.
     auto* asyncSocket =
         dynamic_cast<folly::AsyncSocket*>(incoming.transport.get());
     if (FOLLY_UNLIKELY(asyncSocket == nullptr)) {
@@ -105,32 +100,34 @@ class TLSClassifier {
     (void)incoming.transport.release();
     folly::AsyncSocket::UniquePtr socket(asyncSocket);
     auto clientAddr = std::move(incoming.clientAddr);
+    auto handshakeTimeout = incoming.tlsParams
+        ? incoming.tlsParams->handshakeTimeout
+        : std::nullopt;
 
-    apache::thrift::fast_thrift::security::TLSPrefixPeeker::UniquePtr peeker(
-        new apache::thrift::fast_thrift::security::TLSPrefixPeeker(
+    fast_security::TLSPrefixPeeker::UniquePtr peeker(
+        new fast_security::TLSPrefixPeeker(
             std::move(socket),
-            apache::thrift::fast_thrift::security::HandshakeTimeout{
-                handshakeTimeout_},
-            [this](
-                apache::thrift::fast_thrift::security::TLSPrefixPeeker*
-                    p) noexcept { inFlight_.erase(p); },
-            [this, clientAddr](
+            fast_security::HandshakeTimeout{handshakeTimeout},
+            [this](fast_security::TLSPrefixPeeker* p) noexcept {
+              inFlight_.erase(p);
+            },
+            [this, clientAddr, params = std::move(incoming.tlsParams)](
                 folly::AsyncSocket::UniquePtr peekedSocket,
                 std::unique_ptr<folly::IOBuf> peekedBytes,
                 bool looksLikeTLS,
-                const folly::exception_wrapper& ex) noexcept {
+                const folly::exception_wrapper& ex) mutable noexcept {
               onPeekComplete(
                   std::move(peekedSocket),
                   std::move(peekedBytes),
                   looksLikeTLS,
                   ex,
-                  clientAddr);
+                  clientAddr,
+                  std::move(params));
             }));
     auto* raw = peeker.get();
     inFlight_.emplace(raw, std::move(peeker));
     raw->start();
 
-    // Message absorbed; downstream handlers see it again only on peek success.
     return channel_pipeline::Result::Success;
   }
 
@@ -155,9 +152,6 @@ class TLSClassifier {
 
   template <typename Context>
   void onPipelineInactive(Context& /*ctx*/) noexcept {
-    // Drain into a local map so each peeker's synchronous self-remove via
-    // onTerminal (inFlight_.erase) doesn't perturb iteration. After the
-    // loop the local map's UniquePtr deleters call each peeker's destroy().
     auto drained = std::move(inFlight_);
     for (auto& [_, peeker] : drained) {
       folly::DelayedDestruction::DestructorGuard guard(peeker.get());
@@ -174,19 +168,17 @@ class TLSClassifier {
       std::unique_ptr<folly::IOBuf> peekedBytes,
       bool looksLikeTLS,
       const folly::exception_wrapper& ex,
-      const folly::SocketAddress& clientAddr) noexcept {
+      const folly::SocketAddress& clientAddr,
+      std::shared_ptr<const fast_security::TLSParams> tlsParams) noexcept {
     if (ex || !socket) {
       XLOG(DBG3) << "TLS peek failed for " << clientAddr.describe() << ": "
                  << (ex ? ex.what().toStdString() : std::string("null"));
       return;
     }
     if (FOLLY_UNLIKELY(!ctx_)) {
-      // handlerRemoved fired before this callback (pipeline tearing down).
       return;
     }
 
-    // Replay the peeked bytes so whoever reads next (Fizz for TLS, app
-    // protocol for plaintext) sees them as if they were freshly received.
     if (peekedBytes && peekedBytes->length() > 0) {
       socket->setPreReceivedData(std::move(peekedBytes));
     }
@@ -194,6 +186,7 @@ class TLSClassifier {
     TLSPipelineMessage forwarded{
         .transport = folly::AsyncTransport::UniquePtr(socket.release()),
         .clientAddr = clientAddr,
+        .tlsParams = std::move(tlsParams),
         .extension = nullptr,
     };
 
@@ -221,10 +214,9 @@ class TLSClassifier {
     }
   }
 
-  std::optional<std::chrono::milliseconds> handshakeTimeout_;
   folly::F14FastMap<
-      apache::thrift::fast_thrift::security::TLSPrefixPeeker*,
-      apache::thrift::fast_thrift::security::TLSPrefixPeeker::UniquePtr>
+      fast_security::TLSPrefixPeeker*,
+      fast_security::TLSPrefixPeeker::UniquePtr>
       inFlight_;
   channel_pipeline::detail::ContextImpl* ctx_{nullptr};
 };

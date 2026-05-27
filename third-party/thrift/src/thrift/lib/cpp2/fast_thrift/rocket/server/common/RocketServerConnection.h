@@ -87,10 +87,6 @@ struct RocketServerConnection {
    * remain owned; call destroy() to release them. If `ew` is non-empty it
    * is fired up the pipeline before deactivation so handlers can resolve
    * in-flight state with the actual reason.
-   *
-   * The pre-existing close callback on the transport is cleared first to
-   * prevent reentry: close() triggers the callback, which would call back
-   * into removeConnection() and close() again.
    */
   void disconnect(folly::exception_wrapper ew = {}) noexcept {
     if (disconnected_) {
@@ -98,7 +94,6 @@ struct RocketServerConnection {
     }
     disconnected_ = true;
     if (transportHandler) {
-      transportHandler->setCloseCallback(nullptr);
       transportHandler->close(std::move(ew));
     }
   }

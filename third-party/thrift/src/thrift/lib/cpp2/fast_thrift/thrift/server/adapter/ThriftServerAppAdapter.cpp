@@ -155,17 +155,11 @@ void ThriftServerAppAdapter::onException(
   if (state_ == State::Open) {
     state_ = benign ? State::Closing : State::Closed;
   }
-
-  // Defer firing closeCallback when in-flight requests still need to write
-  // their final responses through this adapter. The upper layer holds Ptr
-  // until closeCallback fires; deferring keeps the adapter alive for the
-  // in-flight FHCs' marshaled onRequestCompleted calls. The last completion
-  // fires the callback.
-  if (inFlight_ == 0) {
-    fireCloseCallback();
-  } else {
-    closeDeferred_ = true;
-  }
+  // Mark close as deferred so the last in-flight writeResponse can finalize
+  // to Closed via handleDeferredClose. Close-notification (firing the close
+  // callback) is left to onPipelineInactive — the canonical "connection is
+  // done" edge that converges on every teardown direction.
+  closeDeferred_ = true;
 }
 
 channel_pipeline::Result ThriftServerAppAdapter::writeResponse(

@@ -434,29 +434,22 @@ TEST_F(TransportHandlerTest, MultipleReadBufferAvailableCalls) {
 
 // --- Close Behavior Tests ---
 
-// Test: readEOF closes socket, resets pipeline, and invokes close callback
+// Test: readEOF closes socket and reaches Closed.
 TEST_F(TransportHandlerTest, ReadEOFCloseBehavior) {
   auto [handler, pipeline] = createHandlerAndPipeline();
   handler->onConnect();
-
-  bool callbackInvoked = false;
-  handler->setCloseCallback([&callbackInvoked]() { callbackInvoked = true; });
 
   EXPECT_NE(handler->pipeline_, nullptr);
 
   handler->readEOF();
 
   EXPECT_EQ(handler->state(), TransportHandler::State::Closed);
-  EXPECT_TRUE(callbackInvoked);
 }
 
-// Test: readErr closes socket, resets pipeline, and invokes close callback
+// Test: readErr closes socket and reaches Closed.
 TEST_F(TransportHandlerTest, ReadErrCloseBehavior) {
   auto [handler, pipeline] = createHandlerAndPipeline();
   handler->onConnect();
-
-  bool callbackInvoked = false;
-  handler->setCloseCallback([&callbackInvoked]() { callbackInvoked = true; });
 
   EXPECT_NE(handler->pipeline_, nullptr);
 
@@ -465,16 +458,12 @@ TEST_F(TransportHandlerTest, ReadErrCloseBehavior) {
   handler->readErr(ex);
 
   EXPECT_EQ(handler->state(), TransportHandler::State::Closed);
-  EXPECT_TRUE(callbackInvoked);
 }
 
-// Test: writeErr closes socket, resets pipeline, and invokes close callback
+// Test: writeErr closes socket and reaches Closed.
 TEST_F(TransportHandlerTest, WriteErrCloseBehavior) {
   auto [handler, pipeline] = createHandlerAndPipeline();
   handler->onConnect();
-
-  bool callbackInvoked = false;
-  handler->setCloseCallback([&callbackInvoked]() { callbackInvoked = true; });
 
   folly::AsyncTransport::WriteCallback* capturedCallback = nullptr;
 
@@ -492,49 +481,14 @@ TEST_F(TransportHandlerTest, WriteErrCloseBehavior) {
   capturedCallback->writeErr(0, ex);
 
   EXPECT_EQ(handler->state(), TransportHandler::State::Closed);
-  EXPECT_TRUE(callbackInvoked);
 }
 
-// Test: onClose closes socket, resets pipeline, and invokes close callback
+// Test: onClose closes socket and reaches Closed.
 TEST_F(TransportHandlerTest, OnCloseCloseBehavior) {
   auto [handler, pipeline] = createHandlerAndPipeline();
   handler->onConnect();
 
-  bool callbackInvoked = false;
-  handler->setCloseCallback([&callbackInvoked]() { callbackInvoked = true; });
-
   EXPECT_NE(handler->pipeline_, nullptr);
-
-  handler->close(folly::exception_wrapper{});
-
-  EXPECT_EQ(handler->state(), TransportHandler::State::Closed);
-  EXPECT_TRUE(callbackInvoked);
-}
-
-// Test: Close is idempotent - callback only invoked once
-TEST_F(TransportHandlerTest, CloseCallbackInvokedOnlyOnce) {
-  auto [handler, pipeline] = createHandlerAndPipeline();
-  handler->onConnect();
-
-  int callbackCount = 0;
-  handler->setCloseCallback([&callbackCount]() { callbackCount++; });
-
-  // Close multiple times via different paths
-  handler->close(folly::exception_wrapper{});
-  handler->close(
-      folly::exception_wrapper{}); // Second call should be idempotent
-  folly::AsyncSocketException ex(
-      folly::AsyncSocketException::NETWORK_ERROR, "error");
-  handler->readErr(ex);
-
-  // Callback should only be invoked once
-  EXPECT_EQ(callbackCount, 1);
-}
-
-// Test: Close callback can be set to nullptr (no-op)
-TEST_F(TransportHandlerTest, CloseWithNoCallback) {
-  auto [handler, pipeline] = createHandlerAndPipeline();
-  handler->onConnect();
 
   handler->close(folly::exception_wrapper{});
 
@@ -965,14 +919,11 @@ TEST_F(TransportHandlerTest, ResetPipelineDeathFromOpen) {
 
 // --- Drain Tests ---
 
-// THE original bug: multi-WR queued; peer disconnect cascades writeErrs
-// through AsyncSocket's failAllWrites loop. closeCallback_ fires from the
-// FIRST writeErr and synchronously *destroys* the connection wrapper that
-// owns the handler (mimicking ConnectionHandler::removeConnection →
-// connections_.erase). The drain guard inside SocketDrainer defers actual
-// deletion until the cascade finishes — without it, the 2nd/3rd writeErr
-// would dispatch on freed memory.
-TEST_F(TransportHandlerTest, MultiWrErrCascadeDoesNotUAF) {
+// Multi-WR queued; peer disconnect cascades writeErrs through AsyncSocket's
+// failAllWrites loop. The drainGuard inside SocketDrainer keeps the handler
+// alive across the cascade; first writeErr flips Open -> Closing, the last
+// drains writePending_ to 0 and finalizes to Closed.
+TEST_F(TransportHandlerTest, MultiWriteErrCascadeReachesClosed) {
   auto socket = folly::AsyncTransport::UniquePtr(
       new NiceMock<folly::test::MockAsyncTransport>());
   auto* mockSocket =
@@ -980,27 +931,16 @@ TEST_F(TransportHandlerTest, MultiWrErrCascadeDoesNotUAF) {
   ON_CALL(*mockSocket, good()).WillByDefault(Return(true));
   ON_CALL(*mockSocket, getEventBase()).WillByDefault(Return(&evb_));
 
-  // Member declaration: pipeline first, handler second. struct member
-  // destruction is reverse of declaration → handler.Ptr.reset() runs first
-  // (defers via drain guard), then pipeline.Ptr.reset() (defers via TH's
-  // pipelineGuard_). Both defer; actual destruction happens later when
-  // the drain completes (via cascading writeErrs releasing drainGuard).
-  struct ConnectionWrapper {
-    PipelineImpl::Ptr pipeline;
-    TransportHandler::Ptr handler;
-  };
-  auto wrapper = std::make_unique<ConnectionWrapper>();
-  wrapper->handler = TransportHandler::create(std::move(socket), 256, 4096);
-  wrapper->pipeline =
+  auto handler = TransportHandler::create(std::move(socket), 256, 4096);
+  auto pipeline =
       PipelineBuilder<TransportHandler, MockAppHandler, SimpleBufferAllocator>()
           .setEventBase(&evb_)
-          .setHead(wrapper->handler.get())
+          .setHead(handler.get())
           .setTail(&appHandler_)
           .setAllocator(&allocator_)
           .build();
-  wrapper->handler->setPipeline(wrapper->pipeline.get());
-  wrapper->handler->onConnect();
-  auto* rawHandler = wrapper->handler.get();
+  handler->setPipeline(pipeline.get());
+  handler->onConnect();
 
   std::vector<folly::AsyncTransport::WriteCallback*> capturedCallbacks;
   EXPECT_CALL(*mockSocket, writeChain(_, _, _))
@@ -1011,45 +951,28 @@ TEST_F(TransportHandlerTest, MultiWrErrCascadeDoesNotUAF) {
               folly::WriteFlags) { capturedCallbacks.push_back(cb); });
 
   for (int i = 0; i < 3; ++i) {
-    (void)rawHandler->onWrite(TypeErasedBox(folly::IOBuf::copyBuffer("x")));
+    (void)handler->onWrite(TypeErasedBox(folly::IOBuf::copyBuffer("x")));
   }
-  EXPECT_EQ(rawHandler->writePending_, 3u);
-
-  // closeCallback_ destroys the wrapper synchronously — exactly what
-  // removeConnection does in production. Both members defer destruction
-  // (handler via drainGuard, pipeline via pipelineGuard_) until the drain
-  // cascades writeErrs and writePending_ hits 0.
-  bool callbackFired = false;
-  auto wrapperHolder =
-      std::make_shared<std::unique_ptr<ConnectionWrapper>>(std::move(wrapper));
-  rawHandler->setCloseCallback([&callbackFired, wrapperHolder]() {
-    callbackFired = true;
-    wrapperHolder->reset();
-  });
+  EXPECT_EQ(handler->writePending_, 3u);
 
   folly::AsyncSocketException ex(
       folly::AsyncSocketException::NETWORK_ERROR, "broken pipe");
 
-  // First two writeErrs: state goes Open -> Closing on the first; subsequent
-  // ones just decrement pending. closeCallback does NOT fire yet — it only
-  // fires when state reaches Closed (after drain completes).
   capturedCallbacks[0]->writeErr(0, ex);
-  EXPECT_FALSE(callbackFired);
-  EXPECT_EQ(rawHandler->writePending_, 2u);
-  EXPECT_EQ(rawHandler->state(), TransportHandler::State::Closing);
-  EXPECT_TRUE(rawHandler->socketDrainer_.active());
+  EXPECT_EQ(handler->writePending_, 2u);
+  EXPECT_EQ(handler->state(), TransportHandler::State::Closing);
+  EXPECT_TRUE(handler->socketDrainer_.active());
 
   capturedCallbacks[1]->writeErr(0, ex);
-  EXPECT_FALSE(callbackFired);
-  EXPECT_EQ(rawHandler->writePending_, 1u);
+  EXPECT_EQ(handler->writePending_, 1u);
 
-  // Last writeErr drains pending to 0, drainer releases -> closeNow ->
-  // closeCallback fires -> wrapper is torn down -> handler.destroy() is
-  // called. The local DG inside writeErr defers actual delete until the
-  // call returns; ASan would catch any UAF in the cascade.
   capturedCallbacks[2]->writeErr(0, ex);
-  EXPECT_TRUE(callbackFired);
-  // rawHandler is now freed; do not touch it.
+  EXPECT_EQ(handler->writePending_, 0u);
+  EXPECT_EQ(handler->state(), TransportHandler::State::Closed);
+  EXPECT_FALSE(handler->socketDrainer_.active());
+
+  handler->resetPipeline();
+  pipeline.reset();
 }
 
 TEST_F(TransportHandlerTest, DrainGuardReleasedByWriteSuccessAfterClose) {
@@ -1138,50 +1061,6 @@ TEST_F(TransportHandlerTest, DrainTimeoutForcesClose) {
 
   handler->resetPipeline();
   pipeline.reset();
-}
-
-// External close() with no pending writes: closeCallback_ fires, drops the
-// owning wrapper synchronously. close()'s local DG defers actual destroy
-// until close returns. No drain guard taken (writePending_ == 0).
-TEST_F(TransportHandlerTest, CloseCallbackDropsOwnerSynchronously) {
-  auto socket = folly::AsyncTransport::UniquePtr(
-      new NiceMock<folly::test::MockAsyncTransport>());
-  auto* mockSocket =
-      static_cast<folly::test::MockAsyncTransport*>(socket.get());
-  ON_CALL(*mockSocket, good()).WillByDefault(Return(true));
-  ON_CALL(*mockSocket, getEventBase()).WillByDefault(Return(&evb_));
-
-  struct ConnectionWrapper {
-    PipelineImpl::Ptr pipeline;
-    TransportHandler::Ptr handler;
-  };
-  auto wrapper = std::make_unique<ConnectionWrapper>();
-  wrapper->handler = TransportHandler::create(std::move(socket), 256, 4096);
-  wrapper->pipeline =
-      PipelineBuilder<TransportHandler, MockAppHandler, SimpleBufferAllocator>()
-          .setEventBase(&evb_)
-          .setHead(wrapper->handler.get())
-          .setTail(&appHandler_)
-          .setAllocator(&allocator_)
-          .build();
-  wrapper->handler->setPipeline(wrapper->pipeline.get());
-  wrapper->handler->onConnect();
-  auto* rawHandler = wrapper->handler.get();
-
-  bool callbackFired = false;
-  auto* wrapperRaw = wrapper.get();
-  rawHandler->setCloseCallback([&, wrapperRaw]() {
-    callbackFired = true;
-    wrapperRaw->handler->resetPipeline();
-    wrapperRaw->pipeline.reset();
-    wrapperRaw->handler.reset();
-  });
-
-  rawHandler->close(folly::exception_wrapper{});
-  EXPECT_TRUE(callbackFired);
-  // rawHandler is freed at this point; wrapper itself just holds empty
-  // unique_ptrs.
-  wrapper.reset();
 }
 
 } // namespace apache::thrift::fast_thrift::transport

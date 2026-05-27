@@ -413,25 +413,23 @@ TEST_F(ThriftServerAppAdapterTest, OnReadMultipleMethodsDispatched) {
 }
 
 // =============================================================================
-// onException Tests
+// onPipelineInactive close-callback tests
 // =============================================================================
 
-TEST_F(ThriftServerAppAdapterTest, OnExceptionDefersCloseCallback) {
+TEST_F(ThriftServerAppAdapterTest, OnPipelineInactiveDefersCloseCallback) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
   auto built = buildPipeline(adapter.get());
 
   bool closeCalled = false;
   adapter->setCloseCallback([&] { closeCalled = true; });
 
-  // Verify that the close callback is NOT called synchronously during
-  // onException. This is critical: calling the close callback inline
-  // can destroy the pipeline while it's still propagating the exception,
-  // causing use-after-free.
+  // Close cb fires from onPipelineInactive but is deferred onto the EVB —
+  // calling it synchronously could destroy the pipeline mid-walk.
   evb_->runInEventBaseThreadAndWait([&] {
-    adapter->onException(
-        folly::make_exception_wrapper<std::runtime_error>("connection lost"));
-    EXPECT_FALSE(closeCalled) << "Close callback must not fire synchronously "
-                                 "during onException (use-after-free risk)";
+    adapter->onPipelineInactive();
+    EXPECT_FALSE(closeCalled)
+        << "Close callback must not fire synchronously "
+           "during onPipelineInactive (use-after-free risk)";
   });
 
   // After draining, the deferred callback should have fired.
@@ -439,13 +437,36 @@ TEST_F(ThriftServerAppAdapterTest, OnExceptionDefersCloseCallback) {
   EXPECT_TRUE(closeCalled);
 }
 
-TEST_F(ThriftServerAppAdapterTest, OnExceptionWithNoCallbackDoesNotCrash) {
+TEST_F(
+    ThriftServerAppAdapterTest, OnPipelineInactiveWithNoCallbackDoesNotCrash) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
   auto built = buildPipeline(adapter.get());
 
-  adapter->onException(
-      folly::make_exception_wrapper<std::runtime_error>("connection lost"));
+  evb_->runInEventBaseThreadAndWait([&] { adapter->onPipelineInactive(); });
   // Should not crash
+}
+
+TEST_F(ThriftServerAppAdapterTest, OnExceptionDoesNotFireCloseCallback) {
+  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+  auto built = buildPipeline(adapter.get());
+
+  bool closeCalled = false;
+  adapter->setCloseCallback([&] { closeCalled = true; });
+
+  // onException is not the close-callback edge; it sets the soft-drain
+  // state but leaves close-notification to onPipelineInactive (the
+  // canonical "connection is done" signal that converges on every
+  // teardown direction).
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->onException(
+        folly::make_exception_wrapper<std::runtime_error>("connection lost"));
+  });
+  evb_->runInEventBaseThreadAndWait([&] {});
+  EXPECT_FALSE(closeCalled);
+
+  // Clear the callback so the dtor fallback doesn't fire it after
+  // closeCalled goes out of scope.
+  adapter->setCloseCallback({});
 }
 
 // =============================================================================

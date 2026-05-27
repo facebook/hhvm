@@ -1135,16 +1135,15 @@ TEST_F(
 // Error Handling Tests
 // =============================================================================
 
-TEST_F(ThriftServerAppAdapterIntegrationTest, OnExceptionInvokesCloseCallback) {
+TEST_F(
+    ThriftServerAppAdapterIntegrationTest,
+    OnPipelineInactiveInvokesCloseCallback) {
   bool closeCalled = false;
   adapter_->setCloseCallback([&] { closeCalled = true; });
 
   setupPipelineWithSetup();
 
-  evb_.runInEventBaseThread([&] {
-    adapter_->onException(
-        folly::make_exception_wrapper<std::runtime_error>("connection lost"));
-  });
+  evb_.runInEventBaseThread([&] { adapter_->onPipelineInactive(); });
   evb_.loopOnce();
 
   EXPECT_TRUE(closeCalled);

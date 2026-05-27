@@ -30,6 +30,20 @@
 
 namespace apache::thrift::fast_thrift::thrift {
 
+ThriftServerCompositeAppAdapter::~ThriftServerCompositeAppAdapter() {
+  // Fallback: if onPipelineInactive never ran (e.g. composite destroyed
+  // without prior pipeline tear-down), fire the close callback synchronously.
+  auto cb = closeCallback_.withWLock([](auto& fn) { return std::move(fn); });
+  if (cb) {
+    cb();
+  }
+}
+
+void ThriftServerCompositeAppAdapter::setCloseCallback(
+    std::function<void()> cb) {
+  closeCallback_.withWLock([&](auto& fn) { fn = std::move(cb); });
+}
+
 channel_pipeline::Result ThriftServerCompositeAppAdapter::onRead(
     channel_pipeline::TypeErasedBox&& msg) noexcept {
   // Peek (not take) so we can forward the original box to the chosen child
@@ -89,6 +103,18 @@ void ThriftServerCompositeAppAdapter::onPipelineActive() noexcept {
 void ThriftServerCompositeAppAdapter::onPipelineInactive() noexcept {
   for (auto& child : children_) {
     child.vtable->onPipelineInactive(child.owner);
+  }
+  // Canonical "connection is done" edge — fire the close callback so the
+  // owner (ConnectionHandler) can erase its entry. Deferred onto the
+  // EventBase because the callback's typical action is to destroy *us*,
+  // and we're called mid-pipeline-walk. Skip the move-out when pipeline_
+  // is null so the dtor fallback still has the callback to fire.
+  if (!pipeline_) {
+    return;
+  }
+  auto cb = closeCallback_.withWLock([](auto& fn) { return std::move(fn); });
+  if (cb) {
+    pipeline_->eventBase()->runInEventBaseThread(std::move(cb));
   }
 }
 

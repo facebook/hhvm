@@ -115,24 +115,6 @@ TEST(RocketServerConnectionTest, DisconnectIsIdempotent) {
   f.conn.destroy();
 }
 
-TEST(RocketServerConnectionTest, DisconnectClearsCloseCallbackToBreakReentry) {
-  ConnectionFixture f;
-  int closeCallbackInvocations = 0;
-  f.conn.transportHandler->setCloseCallback(
-      [&]() { closeCallbackInvocations++; });
-
-  f.conn.pipeline->activate();
-  f.conn.disconnect();
-
-  // The connection's disconnect() must null out the close callback BEFORE
-  // calling transportHandler->close() — otherwise close would fire the
-  // callback, which on the production path calls back into
-  // RocketServerConnection::close → disconnect → close again, looping.
-  EXPECT_EQ(closeCallbackInvocations, 0);
-
-  f.conn.destroy();
-}
-
 TEST(RocketServerConnectionTest, DestroyAfterDisconnectReleasesEverything) {
   ConnectionFixture f;
   f.conn.pipeline->activate();

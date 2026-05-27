@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -23,6 +24,7 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Portability.h>
+#include <folly/Synchronized.h>
 #include <folly/container/F14Map.h>
 #include <folly/io/async/DelayedDestruction.h>
 
@@ -61,6 +63,20 @@ class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
 
   ThriftServerCompositeAppAdapter() = default;
 
+  ThriftServerCompositeAppAdapter(const ThriftServerCompositeAppAdapter&) =
+      delete;
+  ThriftServerCompositeAppAdapter& operator=(
+      const ThriftServerCompositeAppAdapter&) = delete;
+  ThriftServerCompositeAppAdapter(ThriftServerCompositeAppAdapter&&) = delete;
+  ThriftServerCompositeAppAdapter& operator=(
+      ThriftServerCompositeAppAdapter&&) = delete;
+
+  // Install a callback invoked once when the pipeline goes inactive (or, as
+  // a fallback, when this adapter is destroyed). Used by the owning
+  // ConnectionHandler to learn that the per-connection state is done so it
+  // can erase its map entry.
+  void setCloseCallback(std::function<void()> cb);
+
   // Register a child. Caller retains ownership.
   template <typename T>
     requires ServerInboundAppAdapter<T> && ServerComposableAppAdapter<T>
@@ -97,7 +113,7 @@ class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
   void startDrain() noexcept;
 
  protected:
-  ~ThriftServerCompositeAppAdapter() override = default;
+  ~ThriftServerCompositeAppAdapter() override;
 
  private:
   // Per-child dispatch surfaces. Two thunk groups:
@@ -153,6 +169,7 @@ class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
   std::vector<ChildHook> children_;
   folly::F14FastMap<std::string, Entry> methodMap_;
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
+  folly::Synchronized<std::function<void()>> closeCallback_;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

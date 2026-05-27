@@ -90,10 +90,6 @@ class TransportHandler : public folly::DelayedDestruction,
       apache::thrift::fast_thrift::channel_pipeline::PipelineImpl*
           pipeline) noexcept;
 
-  void setCloseCallback(folly::Function<void()> closeCallback) noexcept {
-    closeCallback_ = std::move(closeCallback);
-  }
-
   bool setZeroCopy(bool enable) noexcept {
     return socket_->setZeroCopy(enable);
   }
@@ -208,7 +204,6 @@ class TransportHandler : public folly::DelayedDestruction,
   bool readPaused_{true};
   uint32_t writePending_{0};
   SocketDrainer socketDrainer_;
-  folly::Function<void()> closeCallback_;
 };
 
 } // namespace apache::thrift::fast_thrift::transport

@@ -107,19 +107,12 @@ struct ThriftServerConnection {
     std::visit([](auto& t) { t.adapter->startDrain(); }, tail);
   }
 
-  // Wire a callback fired once when the connection reaches Closed.
-  // - SimpleTail: hooks the user adapter directly.
-  // - CompositeTail: hooks the first child (the user handler); pipeline
-  //   exceptions fan out via the composite's onException, which always
-  //   reaches every child including the first.
+  // Wire a callback fired once when the connection reaches Closed. The cb
+  // lives on the pipeline tail adapter in both cases, so onPipelineInactive
+  // (the canonical "connection done" edge) fires it.
   void setCloseCallback(std::function<void()> cb) {
-    if (auto* simple = std::get_if<SimpleTail>(&tail)) {
-      simple->adapter->setCloseCallback(std::move(cb));
-    } else {
-      auto& composite = std::get<CompositeTail>(tail);
-      DCHECK(!composite.children.empty());
-      composite.children.front()->setCloseCallback(std::move(cb));
-    }
+    std::visit(
+        [&](auto& t) { t.adapter->setCloseCallback(std::move(cb)); }, tail);
   }
 };
 

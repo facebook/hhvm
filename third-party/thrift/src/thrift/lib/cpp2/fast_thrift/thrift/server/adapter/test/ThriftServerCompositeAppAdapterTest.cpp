@@ -33,6 +33,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ThriftServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -641,6 +642,32 @@ TEST_F(
       folly::make_exception_wrapper<std::runtime_error>("x"));
   composite->onPipelineInactive();
   composite->handlerRemoved();
+}
+
+// Regression guard for the ThriftServerConnection::setCloseCallback wiring on
+// the CompositeTail branch: the cb must land on composite.adapter (whose
+// dtor fallback fires it), not on composite.children.front() — the latter
+// has no dtor fallback, so a misrouted cb would be silently dropped on
+// teardown.
+TEST_F(
+    ThriftServerCompositeAppAdapterTest,
+    ThriftServerConnectionRoutesCloseCallbackToComposite) {
+  server::ThriftServerConnection::CompositeTail tail;
+  tail.children.push_back(
+      ThriftServerAppAdapter::Ptr{new TestChildAdapter("user")});
+  tail.adapter = ThriftServerCompositeAppAdapter::Ptr{
+      new ThriftServerCompositeAppAdapter()};
+  tail.adapter->addChild(tail.children.front().get());
+
+  server::ThriftServerConnection conn;
+  conn.tail = std::move(tail);
+
+  bool cbFired = false;
+  conn.setCloseCallback([&] { cbFired = true; });
+
+  conn = {};
+
+  EXPECT_TRUE(cbFired);
 }
 
 TEST_F(

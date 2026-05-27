@@ -34,10 +34,6 @@ TransportHandler::TransportHandler(
       socketDrainer_(this) {}
 
 TransportHandler::~TransportHandler() {
-  // Defensive: drop closeCallback_ before any teardown can fire it.
-  // Caller-driven destruction without prior close() would otherwise
-  // re-trigger destroy() via removeConnection and double-delete.
-  closeCallback_ = nullptr;
   // Force a non-graceful close from Open so we reach Closed before
   // detaching the pipeline.
   if (state_ == State::Open) {
@@ -254,9 +250,6 @@ void TransportHandler::closeNow() noexcept {
   // see a terminal state and don't re-enter beginClose.
   state_ = State::Closed;
   socket_->closeNow();
-  if (auto closeCallback = std::move(closeCallback_)) {
-    closeCallback();
-  }
 }
 
 // --- SocketDrainer ---

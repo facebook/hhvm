@@ -52,17 +52,17 @@ module Err = struct
   let raise_unsupported_ty loc =
     Location.raise_errorf
       ~loc
-      "The `ppx_traverse` preprocessor does not support this type"
+      "The `ppx_transform` preprocessor does not support this type"
 
   let unsupported_ty loc =
     Location.error_extensionf
       ~loc
-      "The `ppx_traverse` preprocessor does not support this type"
+      "The `ppx_transform` preprocessor does not support this type"
 
   let unsupported_open loc =
     Location.error_extensionf
       ~loc
-      "Unsupported use of trasform (you can only use it on a closed types)"
+      "Unsupported use of transform (you can only use it on closed types)"
 
   let unsupported_abstract loc =
     Location.error_extensionf
@@ -134,19 +134,6 @@ module Annot = struct
     | Opaque
     | Explicit
 
-  let of_attributes attrs =
-    let rec aux = function
-      | [] -> None
-      | { attr_name = { txt; _ }; _ } :: rest ->
-        if String.equal txt Names.explicit_attr then
-          Some Explicit
-        else if String.equal txt Names.opaque_attr then
-          Some Opaque
-        else
-          aux rest
-    in
-    aux attrs
-
   let has_opaque_attr attrs =
     List.exists
       (fun { attr_name = { txt; _ }; _ } -> String.equal Names.opaque_attr txt)
@@ -157,6 +144,26 @@ module Annot = struct
       (fun { attr_name = { txt; _ }; _ } ->
         String.equal Names.explicit_attr txt)
       attrs
+
+  let of_attributes attrs =
+    let has_explicit = has_explicit_attr attrs
+    and has_opaque = has_opaque_attr attrs in
+    match (has_explicit, has_opaque) with
+    | (true, true) ->
+      let loc =
+        (List.find
+           (fun { attr_name = { txt; _ }; _ } ->
+             String.equal txt Names.explicit_attr
+             || String.equal txt Names.opaque_attr)
+           attrs)
+          .attr_loc
+      in
+      Location.raise_errorf
+        ~loc
+        "[@transform.opaque] and [@transform.explicit] are mutually exclusive"
+    | (true, false) -> Some Explicit
+    | (false, true) -> Some Opaque
+    | (false, false) -> None
 end
 
 module Core_ty = struct
@@ -223,7 +230,7 @@ module Core_ty = struct
         method! core_type core_type acc =
           let acc = super#core_type core_type acc in
           match core_type.ptyp_desc with
-          | Ptyp_var v when not @@ List.exists (( = ) v) acc -> v :: acc
+          | Ptyp_var v when not @@ List.exists (String.equal v) acc -> v :: acc
           | _ -> acc
       end
     in
@@ -953,7 +960,7 @@ end = struct
       in
       ty_field :: ctor_fields
 
-  let record_field_field_opt Record_field.{ label; ty; loc } ~type_name =
+  let record_field_field Record_field.{ label; ty; loc } ~type_name =
     let ident = Ident.Field (type_name, label) in
     let tyvars = List.rev @@ Core_ty.tyvars ty in
     Field
@@ -1001,12 +1008,12 @@ end = struct
             Option.bind annot_opt (function
                 | Annot.Opaque -> None
                 | Annot.Explicit ->
-                  Some (record_field_field_opt fld ~type_name:name)))
+                  Some (record_field_field fld ~type_name:name)))
           fields
       in
       ty_field :: field_fields
 
-  (** Try to generate a  [Transform_field.t] for an alias type declaraion.
+  (** Try to generate a  [Transform_field.t] for an alias type declaration.
       This will be [None] if the alias is marked [[@transform.opaque]]  *)
   let alias_transform_field_opt
       Alias.{ name; tyvars; ty; opaque; loc; _ } ~decls =
@@ -1699,7 +1706,7 @@ module Gen_traverse = struct
       | ((["result"] | ["Result"; ("result" | "t")]), [ty_ok; ty_err]) ->
         aux_result ty_ok ty_err binding loc
       | (["ref"], [ty]) -> aux_ref ty binding loc
-      (* -- Commom primitives ----------------------------------------------- *)
+      (* -- Common primitives ----------------------------------------------- *)
       | ([ty], []) when SSet.mem ty Core_ty.builtin_prims ->
         (ppat_var ~loc (Located.mk ~loc binding), None)
       (* -- - *)

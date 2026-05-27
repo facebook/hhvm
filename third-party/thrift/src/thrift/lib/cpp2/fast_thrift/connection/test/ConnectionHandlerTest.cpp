@@ -100,7 +100,7 @@ class ConnectionHandlerTest : public ::testing::Test {
     return std::make_unique<ConnectionHandler>(
         *evb_,
         folly::SocketAddress("::1", 0),
-        security::SSLPolicy::DISABLED,
+        fast_security::SSLPolicy::DISABLED,
         /*fizzContext=*/nullptr,
         /*thriftParams=*/nullptr,
         std::chrono::seconds{5},

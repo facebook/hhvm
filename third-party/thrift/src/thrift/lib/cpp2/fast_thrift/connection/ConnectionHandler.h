@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <optional>
 
 #include <fizz/server/FizzServerContext.h>
 #include <folly/Executor.h>
@@ -41,15 +42,20 @@
 #include <thrift/lib/cpp2/fast_thrift/connection/endpoint/ConnectionListener.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionAcceptCallbackHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionBuilderHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/connection/handler/FizzHandshakeHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/handler/ConnectionTLSHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/security/SSLPolicy.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 
 namespace apache::thrift::fast_thrift::connection {
 
+// Disambiguate from sibling apache::thrift::fast_thrift::connection::security
+// namespace (the inner TLS pipeline). Bare `security::` resolves to the
+// sibling inside this namespace.
+namespace fast_security = ::apache::thrift::fast_thrift::security;
+
 // Pipeline handler tags. Must be at namespace scope (HANDLER_TAG expands to
 // an inline constexpr variable, which can't live in function bodies).
-HANDLER_TAG(connection_fizz_handler);
+HANDLER_TAG(connection_tls);
 HANDLER_TAG(connection_builder_handler);
 HANDLER_TAG(connection_accept_callback_handler);
 
@@ -64,9 +70,12 @@ HANDLER_TAG(connection_accept_callback_handler);
  * Pipeline shape (constructed lazily by setConnectionFactory):
  *
  *   ConnectionListener (head)
- *     → [FizzHandshakeHandler]
+ *     → [ConnectionTLSHandler]                       // PERMITTED + REQUIRED;
+ *                                                    //   owns the inner TLS
+ *                                                    //   pipeline (classifier,
+ *                                                    //   fizz, stoptls)
  *     → ConnectionBuilderHandler<F>
- *     → [ConnectionAcceptCallbackHandler<Conn>]  // only if onAccept is set
+ *     → [ConnectionAcceptCallbackHandler<Conn>]      // only if onAccept is set
  *     → ConnectionInstaller<Conn>  (tail)
  *
  * Shutdown is single-call: stop(timeout) tears the acceptance pipeline
@@ -79,13 +88,18 @@ class ConnectionHandler {
  public:
   using Ptr = std::unique_ptr<ConnectionHandler>;
 
+  // sslPolicy fixes the pipeline shape at construction. fizzContext /
+  // thriftParams are only consulted for PERMITTED / REQUIRED policies and
+  // are ignored under DISABLED. tlsHandshakeTimeout is the per-connection
+  // budget shared between the optional peek phase and the fizz handshake;
+  // std::nullopt = unbounded.
   ConnectionHandler(
       folly::EventBase& evb,
       folly::SocketAddress address,
-      security::SSLPolicy sslPolicy,
+      fast_security::SSLPolicy sslPolicy,
       std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
       std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-      std::chrono::milliseconds tlsHandshakeTimeout,
+      std::optional<std::chrono::milliseconds> tlsHandshakeTimeout,
       SocketOptions socketOptions,
       bool enableReusePortBpfSpread);
 
@@ -172,10 +186,10 @@ class ConnectionHandler {
   folly::SocketAddress address_;
   SocketOptions socketOptions_;
   bool enableReusePortBpfSpread_;
-  security::SSLPolicy sslPolicy_;
+  fast_security::SSLPolicy sslPolicy_;
   std::shared_ptr<const fizz::server::FizzServerContext> fizzContext_;
   std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams_;
-  std::chrono::milliseconds tlsHandshakeTimeout_;
+  std::optional<std::chrono::milliseconds> tlsHandshakeTimeout_;
 
   // Acceptance pipeline pieces. listener_ is constructed in the ctor so
   // getAddress() works before setConnectionFactory(); the rest is built
@@ -244,13 +258,18 @@ void ConnectionHandler::setConnectionFactory(
       .setTail(installerRaw)
       .setAllocator(&allocator_);
 
-  if (sslPolicy_ == security::SSLPolicy::REQUIRED) {
-    DCHECK(fizzContext_ != nullptr);
-    builder.template addNextDuplex<handler::FizzHandshakeHandler>(
-        connection_fizz_handler_tag,
+  // The TLS lifecycle (peek classification under PERMITTED, fizz handshake,
+  // optional StopTLS V1 downgrade) lives entirely inside ConnectionTLSHandler
+  // as an inner pipeline. The outer pipeline sees one handler.
+  if (sslPolicy_ != fast_security::SSLPolicy::DISABLED) {
+    builder.template addNextDuplex<handler::ConnectionTLSHandler>(
+        connection_tls_tag,
+        *evb_,
+        sslPolicy_,
         fizzContext_,
         thriftParams_,
-        tlsHandshakeTimeout_);
+        tlsHandshakeTimeout_,
+        &allocator_);
   }
 
   builder.template addNextInbound<Builder>(

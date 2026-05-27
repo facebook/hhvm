@@ -18,45 +18,57 @@
 
 #include <chrono>
 #include <memory>
+#include <optional>
 #include <utility>
 
+#include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/FizzServerContext.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/SocketAddress.h>
+#include <folly/container/F14Map.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
+#include <folly/io/async/DelayedDestruction.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
-#include <thrift/lib/cpp2/fast_thrift/connection/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/security/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzHandshakeHelper.h>
-#include <thrift/lib/cpp2/fast_thrift/security/PendingHandshakes.h>
+#include <thrift/lib/cpp2/fast_thrift/security/HandshakeTimeout.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
+#include <thrift/lib/cpp2/security/extensions/ThriftParametersServerExtension.h>
 
-namespace apache::thrift::fast_thrift::connection::handler {
+namespace apache::thrift::fast_thrift::connection::security::handler {
 
-// Middle handler that runs the Fizz TLS handshake on each accepted socket.
-// Absorbs the inbound ConnectionMessage, starts an async handshake via
-// PendingHandshakes + FizzHandshakeHelper, and re-fires the upgraded
-// ConnectionMessage (transport = AsyncFizzServer) on success. Handshake
-// failures are logged and the connection is dropped — matches the prior
-// behavior of ConnectionHandler::connectionAccepted.
+/**
+ * Inner-pipeline middle handler that runs the Fizz TLS handshake on each
+ * accepted socket. Wraps FizzHandshakeHelper; tracks in-flight helpers in
+ * inFlight_ and cancels them on onPipelineInactive. Upgrades the
+ * TLSPipelineMessage transport from AsyncSocket → AsyncFizzServer and
+ * populates `extension` so downstream stages (StopTLSV1Handler etc.) can
+ * query the negotiated parameters. Handshake failures are logged at DBG3
+ * and the connection is dropped — message is absorbed.
+ */
 class FizzHandshakeHandler {
  public:
+  // handshakeTimeout is the per-connection deadline shared with any upstream
+  // peek phase. std::nullopt = unbounded. A fresh HandshakeTimeout is
+  // constructed per connection in onRead so each one captures its own
+  // absolute deadline at handshake start.
   FizzHandshakeHandler(
       std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
       std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-      std::chrono::milliseconds handshakeTimeout) noexcept
+      std::optional<std::chrono::milliseconds> handshakeTimeout) noexcept
       : fizzContext_(std::move(fizzContext)),
         thriftParams_(std::move(thriftParams)),
         handshakeTimeout_(handshakeTimeout) {}
 
+  ~FizzHandshakeHandler() = default;
   FizzHandshakeHandler(const FizzHandshakeHandler&) = delete;
   FizzHandshakeHandler& operator=(const FizzHandshakeHandler&) = delete;
   FizzHandshakeHandler(FizzHandshakeHandler&&) = delete;
   FizzHandshakeHandler& operator=(FizzHandshakeHandler&&) = delete;
-  ~FizzHandshakeHandler() = default;
 
   template <typename Context>
   void handlerAdded(Context& ctx) noexcept {
@@ -73,7 +85,7 @@ class FizzHandshakeHandler {
   template <typename Context>
   channel_pipeline::Result onRead(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
-    auto incoming = msg.take<ConnectionMessage>();
+    auto incoming = msg.take<TLSPipelineMessage>();
 
     // We expect a plain AsyncSocket at this point. If the transport is
     // already negotiated (some other handler upstream wrapped it), forward
@@ -84,33 +96,33 @@ class FizzHandshakeHandler {
       return ctx.fireRead(channel_pipeline::erase_and_box(std::move(incoming)));
     }
 
-    // Re-wrap the raw socket pointer in the type FizzHandshakeHelper
-    // expects. Release from the AsyncTransport::UniquePtr and re-own in
-    // an AsyncSocket::UniquePtr; both deleters are DelayedDestruction::
-    // Destructor, so the lifetime contract is preserved.
     (void)incoming.transport.release();
     folly::AsyncSocket::UniquePtr socket(asyncSocket);
-
     auto clientAddr = std::move(incoming.clientAddr);
 
-    security::PendingHandshakes::HelperPtr helper(
-        new security::FizzHandshakeHelper(
+    apache::thrift::fast_thrift::security::FizzHandshakeHelper::UniquePtr
+        helper(new apache::thrift::fast_thrift::security::FizzHandshakeHelper(
             std::move(socket),
             fizzContext_,
             thriftParams_,
-            handshakeTimeout_,
-            pendingHandshakes_,
+            apache::thrift::fast_thrift::security::HandshakeTimeout{
+                handshakeTimeout_},
+            [this](
+                apache::thrift::fast_thrift::security::FizzHandshakeHelper*
+                    h) noexcept { inFlight_.erase(h); },
             [this, clientAddr](
-                folly::AsyncTransport::UniquePtr negotiated,
+                fizz::server::AsyncFizzServer::UniquePtr fizzServer,
+                std::shared_ptr<apache::thrift::ThriftParametersServerExtension>
+                    extension,
                 const folly::exception_wrapper& ex) noexcept {
-              onHandshakeComplete(std::move(negotiated), ex, clientAddr);
+              onHandshakeComplete(
+                  std::move(fizzServer), std::move(extension), ex, clientAddr);
             }));
     auto* raw = helper.get();
-    pendingHandshakes_.add(std::move(helper));
+    inFlight_.emplace(raw, std::move(helper));
     raw->start();
 
-    // Message absorbed; downstream handlers will see it again only if the
-    // handshake succeeds.
+    // Message absorbed; downstream handlers see it again only on success.
     return channel_pipeline::Result::Success;
   }
 
@@ -135,9 +147,13 @@ class FizzHandshakeHandler {
 
   template <typename Context>
   void onPipelineInactive(Context& /*ctx*/) noexcept {
-    // Drop any in-flight handshakes; their callbacks fire with a cancellation
-    // exception and the helpers self-remove from pending_.
-    pendingHandshakes_.cancelAll();
+    // Drain into a local map so each helper's synchronous self-remove via
+    // onTerminal (inFlight_.erase) doesn't perturb iteration.
+    auto drained = std::move(inFlight_);
+    for (auto& [_, helper] : drained) {
+      folly::DelayedDestruction::DestructorGuard guard(helper.get());
+      helper->cancel();
+    }
   }
 
   template <typename Context>
@@ -145,22 +161,24 @@ class FizzHandshakeHandler {
 
  private:
   void onHandshakeComplete(
-      folly::AsyncTransport::UniquePtr negotiated,
+      fizz::server::AsyncFizzServer::UniquePtr fizzServer,
+      std::shared_ptr<apache::thrift::ThriftParametersServerExtension>
+          extension,
       const folly::exception_wrapper& ex,
       const folly::SocketAddress& clientAddr) noexcept {
-    if (ex || !negotiated) {
+    if (ex || !fizzServer) {
       XLOG(DBG3) << "TLS handshake failed for " << clientAddr.describe() << ": "
                  << (ex ? ex.what().toStdString() : std::string("null"));
       return;
     }
     if (FOLLY_UNLIKELY(!ctx_)) {
       // handlerRemoved fired before this callback (pipeline tearing down).
-      // The negotiated transport will be destroyed when this lambda returns.
       return;
     }
-    ConnectionMessage upgraded{
-        .transport = std::move(negotiated),
+    TLSPipelineMessage upgraded{
+        .transport = folly::AsyncTransport::UniquePtr(fizzServer.release()),
         .clientAddr = clientAddr,
+        .extension = std::move(extension),
     };
     auto result =
         ctx_->fireRead(channel_pipeline::erase_and_box(std::move(upgraded)));
@@ -181,9 +199,12 @@ class FizzHandshakeHandler {
 
   std::shared_ptr<const fizz::server::FizzServerContext> fizzContext_;
   std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams_;
-  std::chrono::milliseconds handshakeTimeout_;
-  security::PendingHandshakes pendingHandshakes_;
+  std::optional<std::chrono::milliseconds> handshakeTimeout_;
+  folly::F14FastMap<
+      apache::thrift::fast_thrift::security::FizzHandshakeHelper*,
+      apache::thrift::fast_thrift::security::FizzHandshakeHelper::UniquePtr>
+      inFlight_;
   channel_pipeline::detail::ContextImpl* ctx_{nullptr};
 };
 
-} // namespace apache::thrift::fast_thrift::connection::handler
+} // namespace apache::thrift::fast_thrift::connection::security::handler

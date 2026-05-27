@@ -28,13 +28,13 @@
 #include <fizz/client/FizzClientContext.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncSocketException.h>
+#include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/synchronization/Baton.h>
 
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
-#include <thrift/lib/cpp2/fast_thrift/security/PendingHandshakes.h>
 #include <thrift/lib/cpp2/fast_thrift/security/ThriftTlsConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/test/TestCert.h>
 
@@ -118,7 +118,12 @@ class FizzHandshakeHelperTest : public ::testing::Test {
   std::unique_ptr<folly::ScopedEventBaseThread> evbThread_;
   folly::EventBase* evb_{nullptr};
   std::shared_ptr<const fizz::server::FizzServerContext> serverCtx_;
-  PendingHandshakes pending_;
+  // Direct ownership of the in-flight helper, exercised in lieu of the
+  // production owner (FizzHandshakeHandler::inFlight_). onTerminal closures
+  // reset current_ to mimic the handler unregistering the helper on its
+  // terminal callback.
+  FizzHandshakeHelper::UniquePtr current_;
+  size_t terminalCount_{0};
 };
 
 TEST_F(FizzHandshakeHelperTest, HandshakeSuccess) {
@@ -130,21 +135,23 @@ TEST_F(FizzHandshakeHelperTest, HandshakeSuccess) {
 
   evb_->runInEventBaseThreadAndWait([&] {
     auto serverSock = folly::AsyncSocket::newSocket(evb_, sp.server);
-    PendingHandshakes::HelperPtr helper(new FizzHandshakeHelper(
+    current_.reset(new FizzHandshakeHelper(
         std::move(serverSock),
         serverCtx_,
         /*thriftParams=*/nullptr,
-        std::chrono::seconds{5},
-        pending_,
-        [&](folly::AsyncTransport::UniquePtr t,
+        HandshakeTimeout{std::chrono::seconds{5}},
+        [this](FizzHandshakeHelper*) noexcept {
+          ++terminalCount_;
+          current_.reset();
+        },
+        [&](fizz::server::AsyncFizzServer::UniquePtr fs,
+            std::shared_ptr<apache::thrift::ThriftParametersServerExtension>,
             folly::exception_wrapper ex) noexcept {
-          negotiated = std::move(t);
+          negotiated = folly::AsyncTransport::UniquePtr(fs.release());
           serverEx = std::move(ex);
           serverDone.post();
         }));
-    auto* raw = helper.get();
-    pending_.add(std::move(helper));
-    raw->start();
+    current_->start();
   });
 
   folly::Baton<> clientDone;
@@ -165,13 +172,13 @@ TEST_F(FizzHandshakeHelperTest, HandshakeSuccess) {
   EXPECT_FALSE(clientEx) << clientEx.what();
   EXPECT_NE(negotiated, nullptr);
 
-  // Tear down on the EVB thread that owns these objects. pending_ is
-  // only safe to read from the EVB thread per its thread-affinity contract,
-  // and finish()'s self-removal completes after the user callback posts
-  // serverDone — so the size check must run from the EVB thread to observe
-  // the post-removal state.
+  // Tear down on the EVB thread that owns these objects. terminalCount_
+  // updates from the EVB thread; the user callback posts serverDone before
+  // finish() invokes onTerminal, so we must observe terminalCount_ on the
+  // EVB thread after that has run.
   evb_->runInEventBaseThreadAndWait([&] {
-    EXPECT_EQ(pending_.size(), 0u);
+    EXPECT_EQ(terminalCount_, 1u);
+    EXPECT_EQ(current_, nullptr);
     negotiated.reset();
     client.reset();
   });
@@ -185,28 +192,32 @@ TEST_F(FizzHandshakeHelperTest, HandshakeTimeout) {
 
   evb_->runInEventBaseThreadAndWait([&] {
     auto serverSock = folly::AsyncSocket::newSocket(evb_, sp.server);
-    PendingHandshakes::HelperPtr helper(new FizzHandshakeHelper(
+    current_.reset(new FizzHandshakeHelper(
         std::move(serverSock),
         serverCtx_,
         /*thriftParams=*/nullptr,
         // Short timeout — client never sends ClientHello.
-        std::chrono::milliseconds{50},
-        pending_,
-        [&](folly::AsyncTransport::UniquePtr,
+        HandshakeTimeout{std::chrono::milliseconds{50}},
+        [this](FizzHandshakeHelper*) noexcept {
+          ++terminalCount_;
+          current_.reset();
+        },
+        [&](fizz::server::AsyncFizzServer::UniquePtr,
+            std::shared_ptr<apache::thrift::ThriftParametersServerExtension>,
             folly::exception_wrapper e) noexcept {
           ex = std::move(e);
           done.post();
         }));
-    auto* raw = helper.get();
-    pending_.add(std::move(helper));
-    raw->start();
+    current_->start();
   });
 
   ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{2}));
   ASSERT_TRUE(ex);
-  // pending_ has EVB thread affinity; check size from the EVB thread to
-  // observe the state after finish()'s self-removal.
-  evb_->runInEventBaseThreadAndWait([&] { EXPECT_EQ(pending_.size(), 0u); });
+  // terminalCount_ updates from the EVB thread; check it there.
+  evb_->runInEventBaseThreadAndWait([&] {
+    EXPECT_EQ(terminalCount_, 1u);
+    EXPECT_EQ(current_, nullptr);
+  });
 
   // Close the dangling client fd.
   ::close(sp.client.toFd());
@@ -220,20 +231,22 @@ TEST_F(FizzHandshakeHelperTest, HandshakeErrorOnGarbageInput) {
 
   evb_->runInEventBaseThreadAndWait([&] {
     auto serverSock = folly::AsyncSocket::newSocket(evb_, sp.server);
-    PendingHandshakes::HelperPtr helper(new FizzHandshakeHelper(
+    current_.reset(new FizzHandshakeHelper(
         std::move(serverSock),
         serverCtx_,
         /*thriftParams=*/nullptr,
-        std::chrono::seconds{5},
-        pending_,
-        [&](folly::AsyncTransport::UniquePtr,
+        HandshakeTimeout{std::chrono::seconds{5}},
+        [this](FizzHandshakeHelper*) noexcept {
+          ++terminalCount_;
+          current_.reset();
+        },
+        [&](fizz::server::AsyncFizzServer::UniquePtr,
+            std::shared_ptr<apache::thrift::ThriftParametersServerExtension>,
             folly::exception_wrapper e) noexcept {
           ex = std::move(e);
           done.post();
         }));
-    auto* raw = helper.get();
-    pending_.add(std::move(helper));
-    raw->start();
+    current_->start();
   });
 
   // Write non-TLS garbage to the client end. Fizz should reject it.
@@ -245,7 +258,10 @@ TEST_F(FizzHandshakeHelperTest, HandshakeErrorOnGarbageInput) {
 
   ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{2}));
   ASSERT_TRUE(ex);
-  evb_->runInEventBaseThreadAndWait([&] { EXPECT_EQ(pending_.size(), 0u); });
+  evb_->runInEventBaseThreadAndWait([&] {
+    EXPECT_EQ(terminalCount_, 1u);
+    EXPECT_EQ(current_, nullptr);
+  });
 
   ::close(sp.client.toFd());
 }
@@ -258,34 +274,37 @@ TEST_F(FizzHandshakeHelperTest, ShutdownCancelsPendingHandshake) {
 
   evb_->runInEventBaseThreadAndWait([&] {
     auto serverSock = folly::AsyncSocket::newSocket(evb_, sp.server);
-    PendingHandshakes::HelperPtr helper(new FizzHandshakeHelper(
+    current_.reset(new FizzHandshakeHelper(
         std::move(serverSock),
         serverCtx_,
         /*thriftParams=*/nullptr,
-        std::chrono::seconds{5},
-        pending_,
-        [&](folly::AsyncTransport::UniquePtr,
+        HandshakeTimeout{std::chrono::seconds{5}},
+        [this](FizzHandshakeHelper*) noexcept {
+          ++terminalCount_;
+          current_.reset();
+        },
+        [&](fizz::server::AsyncFizzServer::UniquePtr,
+            std::shared_ptr<apache::thrift::ThriftParametersServerExtension>,
             folly::exception_wrapper ex) noexcept {
           cancelEx = std::move(ex);
           callbackFired.store(true);
         }));
-    auto* raw = helper.get();
-    pending_.add(std::move(helper));
-    raw->start();
+    current_->start();
   });
 
   // No client handshake. Cancel from the EVB thread to mirror real shutdown.
-  // cancelAll() is now synchronous: every helper's terminal callback fires
-  // and removes the entry before cancelAll() returns.
+  // cancel() is synchronous: the terminal callback fires and current_
+  // resets before cancel() returns.
   evb_->runInEventBaseThreadAndWait([&] {
-    pending_.cancelAll();
-    // Synchronous contract: no work left queued, no entries left tracked.
-    EXPECT_EQ(pending_.size(), 0u);
+    folly::DelayedDestruction::DestructorGuard guard(current_.get());
+    current_->cancel();
+    // Synchronous contract: terminal callback fired, ownership cleared.
+    EXPECT_EQ(terminalCount_, 1u);
+    EXPECT_EQ(current_, nullptr);
   });
 
   EXPECT_TRUE(callbackFired.load());
   EXPECT_TRUE(cancelEx);
-  EXPECT_EQ(pending_.size(), 0u);
 
   ::close(sp.client.toFd());
 }

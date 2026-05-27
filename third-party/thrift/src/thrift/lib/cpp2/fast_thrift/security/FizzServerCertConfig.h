@@ -17,10 +17,12 @@
 #pragma once
 
 #include <chrono>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include <fizz/server/FizzServerContext.h>
+#include <thrift/lib/cpp2/fast_thrift/security/SSLPolicy.h>
 
 namespace apache::thrift::fast_thrift::security {
 
@@ -57,8 +59,22 @@ struct FizzServerCertConfig {
   fizz::server::ClientAuthMode clientAuth{
       fizz::server::ClientAuthMode::Required};
 
-  // Maximum time allowed for a single TLS handshake to complete.
-  std::chrono::milliseconds handshakeTimeout{std::chrono::seconds{5}};
+  // Total budget for the accept→handshake-complete journey (covers the
+  // optional peek phase plus the fizz handshake). std::nullopt = unbounded
+  // (no server-side cap; rely on client-side timeouts).
+  //
+  // DO NOT pass std::optional<ms>(0) to mean unbounded — use std::nullopt.
+  // 0 is an immediate deadline and would expire every connection at start;
+  // the HandshakeTimeout constructor CHECKs against this.
+  std::optional<std::chrono::milliseconds> handshakeTimeout{
+      std::chrono::seconds{30}};
+
+  // Per-connection TLS gating. Default REQUIRED matches the classic
+  // ThriftServer default. Use PERMITTED to accept both plaintext and TLS
+  // on the same listening socket; the server peeks the first 9 bytes and
+  // routes accordingly. DISABLED makes setSSLConfig() a no-op for the
+  // accept path.
+  SSLPolicy sslPolicy{SSLPolicy::REQUIRED};
 };
 
 } // namespace apache::thrift::fast_thrift::security

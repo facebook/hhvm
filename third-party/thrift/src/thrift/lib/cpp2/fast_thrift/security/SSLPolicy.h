@@ -18,13 +18,18 @@
 
 namespace apache::thrift::fast_thrift::security {
 
-// Per-server policy for how accepted sockets are treated with respect to TLS.
-// Fixes the shape of the connection acceptance pipeline at server start.
+// Per-connection TLS gating policy. Mirrors apache::thrift::SSLPolicy from
+// the classic ThriftServer. Fixes the shape of the connection acceptance
+// pipeline at server start.
 enum class SSLPolicy {
-  // Plaintext only. No TLS handlers installed; fizzContext is ignored.
+  // Server never performs TLS, even if cert config is supplied.
   DISABLED,
-  // TLS required on every accepted socket. FizzHandshakeHandler runs the
-  // handshake; non-TLS bytes fail the handshake and the connection is dropped.
+  // Server peeks the first 9 bytes of each accepted connection; routes
+  // TLS-looking ones through the fizz handshake and treats the rest as
+  // plaintext on the same listening socket.
+  PERMITTED,
+  // Every accepted connection is forced through the fizz handshake;
+  // non-TLS clients fail.
   REQUIRED,
 };
 

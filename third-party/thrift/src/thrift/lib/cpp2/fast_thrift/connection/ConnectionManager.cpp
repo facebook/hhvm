@@ -24,10 +24,10 @@ namespace apache::thrift::fast_thrift::connection {
 ConnectionManager::Ptr ConnectionManager::create(
     folly::SocketAddress address,
     folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor,
-    security::SSLPolicy sslPolicy,
+    fast_security::SSLPolicy sslPolicy,
     std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
     std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-    std::chrono::milliseconds tlsHandshakeTimeout,
+    std::optional<std::chrono::milliseconds> tlsHandshakeTimeout,
     SocketOptions socketOptions) {
   return Ptr(new ConnectionManager(
       std::move(address),
@@ -42,10 +42,10 @@ ConnectionManager::Ptr ConnectionManager::create(
 ConnectionManager::ConnectionManager(
     folly::SocketAddress address,
     folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor,
-    security::SSLPolicy sslPolicy,
+    fast_security::SSLPolicy sslPolicy,
     std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
     std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-    std::chrono::milliseconds tlsHandshakeTimeout,
+    std::optional<std::chrono::milliseconds> tlsHandshakeTimeout,
     SocketOptions socketOptions)
     : address_(std::move(address)),
       executor_(std::move(executor)),

@@ -20,6 +20,7 @@
 #include <chrono>
 #include <functional>
 #include <memory>
+#include <optional>
 
 #include <fizz/server/FizzServerContext.h>
 #include <folly/Executor.h>
@@ -36,6 +37,10 @@
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 
 namespace apache::thrift::fast_thrift::connection {
+
+// Disambiguate from sibling apache::thrift::fast_thrift::connection::security
+// namespace.
+namespace fast_security = ::apache::thrift::fast_thrift::security;
 
 /**
  * ConnectionManager owns one ConnectionHandler per registered EventBase.
@@ -83,10 +88,10 @@ class ConnectionManager : public folly::DelayedDestruction {
   static Ptr create(
       folly::SocketAddress address,
       folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor,
-      security::SSLPolicy sslPolicy,
+      fast_security::SSLPolicy sslPolicy,
       std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
       std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-      std::chrono::milliseconds tlsHandshakeTimeout,
+      std::optional<std::chrono::milliseconds> tlsHandshakeTimeout,
       SocketOptions socketOptions);
 
   /**
@@ -140,10 +145,10 @@ class ConnectionManager : public folly::DelayedDestruction {
   ConnectionManager(
       folly::SocketAddress address,
       folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor,
-      security::SSLPolicy sslPolicy,
+      fast_security::SSLPolicy sslPolicy,
       std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
       std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-      std::chrono::milliseconds tlsHandshakeTimeout,
+      std::optional<std::chrono::milliseconds> tlsHandshakeTimeout,
       SocketOptions socketOptions);
 
   ~ConnectionManager() override;
@@ -159,10 +164,10 @@ class ConnectionManager : public folly::DelayedDestruction {
   std::atomic<State> state_{State::NONE};
   folly::SocketAddress address_;
   folly::Executor::KeepAlive<folly::IOThreadPoolExecutorBase> executor_;
-  security::SSLPolicy sslPolicy_;
+  fast_security::SSLPolicy sslPolicy_;
   std::shared_ptr<const fizz::server::FizzServerContext> fizzContext_;
   std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams_;
-  std::chrono::milliseconds tlsHandshakeTimeout_;
+  std::optional<std::chrono::milliseconds> tlsHandshakeTimeout_;
   SocketOptions socketOptions_;
   std::shared_ptr<IOObserver> observer_;
 

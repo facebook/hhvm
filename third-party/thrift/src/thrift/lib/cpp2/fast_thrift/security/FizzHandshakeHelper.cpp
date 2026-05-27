@@ -18,9 +18,6 @@
 
 #include <folly/io/async/AsyncSocketException.h>
 #include <folly/logging/xlog.h>
-#include <thrift/lib/cpp2/security/SSLUtil.h>
-
-#include <thrift/lib/cpp2/fast_thrift/security/PendingHandshakes.h>
 
 namespace apache::thrift::fast_thrift::security {
 
@@ -28,8 +25,8 @@ FizzHandshakeHelper::FizzHandshakeHelper(
     folly::AsyncSocket::UniquePtr socket,
     std::shared_ptr<const fizz::server::FizzServerContext> context,
     std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-    std::chrono::milliseconds timeout,
-    PendingHandshakes& pending,
+    HandshakeTimeout timeout,
+    OnTerminal onTerminal,
     Callback callback)
     : folly::AsyncTimeout(socket->getEventBase()),
       fizzServer_(),
@@ -39,7 +36,7 @@ FizzHandshakeHelper::FizzHandshakeHelper(
                              thriftParams)
                        : nullptr),
       evb_(socket->getEventBase()),
-      pending_(pending),
+      onTerminal_(std::move(onTerminal)),
       callback_(std::move(callback)),
       timeout_(timeout) {
   fizzServer_.reset(new fizz::server::AsyncFizzServer(
@@ -57,35 +54,35 @@ FizzHandshakeHelper::~FizzHandshakeHelper() {
 }
 
 void FizzHandshakeHelper::start() {
-  scheduleTimeout(timeout_);
+  // Same fail-fast pattern as TLSPrefixPeeker::start. Guard against
+  // synchronous self-destruction via finish() → onTerminal_(this) →
+  // destroy(); without a guard, `this` could be deleted while we are
+  // still on the stack of start().
+  DestructorGuard guard(this);
+
+  if (timeout_.hasExpired()) {
+    XLOG(DBG3) << "Fizz handshake: budget already exhausted at start";
+    finish(
+        nullptr,
+        folly::make_exception_wrapper<folly::AsyncSocketException>(
+            folly::AsyncSocketException::TIMED_OUT,
+            "handshake budget already exhausted before fizz handshake"));
+    return;
+  }
+  // No-op when timeout_ is unbounded or just-barely past the deadline.
+  // The hasExpired() check above is the primary fail-fast mechanism.
+  timeout_.schedule(*this);
   fizzServer_->accept(this);
 }
 
 void FizzHandshakeHelper::fizzHandshakeSuccess(
-    fizz::server::AsyncFizzServer* transport) noexcept {
+    fizz::server::AsyncFizzServer* /*transport*/) noexcept {
   DestructorGuard guard(this);
   cancelTimeout();
-
-  // If both sides agreed to StopTLS V1, run the TLS shutdown now and
-  // surface the resulting plaintext socket. Otherwise hand the encrypted
-  // fizz transport to the caller.
-  if (extension_ && extension_->getNegotiatedStopTLS()) {
-    XLOG(DBG3) << "Beginning StopTLS V1 negotiation";
-    stopTlsFrame_.reset(new apache::thrift::AsyncStopTLS(*this));
-    // 0ms = no internal timeout. Matches legacy ThriftFizzAcceptorHandshake-
-    // Helper convention (see FizzPeeker.cpp); shutdown lifetime is managed by
-    // the outer connection owner, which calls closeNow() on shutdown and
-    // surfaces a readErr → stopTLSError() into this helper.
-    stopTlsFrame_->start(
-        transport,
-        apache::thrift::AsyncStopTLS::Role::Server,
-        std::chrono::milliseconds{0});
-    return;
-  }
-
-  finish(
-      folly::AsyncTransport::UniquePtr(fizzServer_.release()),
-      folly::exception_wrapper());
+  // StopTLS V1/V2 are now separate pipeline stages
+  // (connection::security::handler::StopTLSV1Handler etc.) that inspect
+  // extension_ and chain StopTLSHelper. This helper is pure handshake.
+  finish(std::move(fizzServer_), folly::exception_wrapper());
 }
 
 void FizzHandshakeHelper::fizzHandshakeError(
@@ -95,32 +92,6 @@ void FizzHandshakeHelper::fizzHandshakeError(
   cancelTimeout();
   XLOG(DBG3) << "Fizz handshake failed: " << ex.what();
   finish(nullptr, std::move(ex));
-}
-
-void FizzHandshakeHelper::stopTLSSuccess(
-    std::unique_ptr<folly::IOBuf> postTLSData) {
-  // finish() removes us from PendingHandshakes, dropping the HelperPtr and
-  // calling destroy(); without a guard, that delete fires while we are still
-  // on this stack. See header comment on finish().
-  DestructorGuard guard(this);
-  // Re-wrap the same FD as a plaintext socket and push back any residual
-  // bytes the peer sent immediately after their close_notify.
-  auto plaintext = apache::thrift::toFDSocket(
-      fizzServer_.get(), apache::thrift::kSecurityProtocolStopTLS);
-  if (postTLSData) {
-    plaintext->setPreReceivedData(std::move(postTLSData));
-  }
-  plaintext->cacheAddresses();
-  fizzServer_.reset();
-  finish(
-      folly::AsyncTransport::UniquePtr(plaintext.release()),
-      folly::exception_wrapper());
-}
-
-void FizzHandshakeHelper::stopTLSError(const folly::exception_wrapper& ex) {
-  DestructorGuard guard(this);
-  XLOG(DBG3) << "StopTLS failed: " << ex.what();
-  finish(nullptr, ex);
 }
 
 void FizzHandshakeHelper::fizzHandshakeAttemptFallback(
@@ -155,7 +126,7 @@ void FizzHandshakeHelper::cancel() {
   // Synchronous-terminal-callback contract (mirrors wangle's
   // AcceptorHandshakeHelper::dropConnection): closeNow drives fizz to fire
   // fizzHandshakeError on this same stack, which routes through finish() and
-  // synchronously removes us from PendingHandshakes.
+  // synchronously fires onTerminal_(this).
   if (fizzServer_) {
     fizzServer_->closeNow();
   }
@@ -172,19 +143,22 @@ void FizzHandshakeHelper::cancel() {
 }
 
 void FizzHandshakeHelper::finish(
-    folly::AsyncTransport::UniquePtr transport,
+    fizz::server::AsyncFizzServer::UniquePtr transport,
     folly::exception_wrapper ex) noexcept {
   if (done_) {
     return;
   }
   done_ = true;
   if (callback_) {
-    callback_(std::move(transport), std::move(ex));
+    callback_(std::move(transport), extension_, std::move(ex));
   }
-  // Inline self-removal. Every entry point that lands here first takes a
-  // DestructorGuard on `this`, so DelayedDestruction defers the actual
-  // delete (triggered by HelperPtr's deleter) until that guard pops.
-  pending_.remove(this);
+  // User callback first, then signal the owner. Every entry point that
+  // lands here first takes a DestructorGuard on `this`, so DelayedDestruction
+  // defers the actual delete (triggered by the owner's unique_ptr deleter)
+  // until that guard pops.
+  if (onTerminal_) {
+    onTerminal_(this);
+  }
 }
 
 } // namespace apache::thrift::fast_thrift::security

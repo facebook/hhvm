@@ -190,10 +190,15 @@ void FastThriftServer::start() {
   }
 
   security::BuiltFizzServerContext fizzBuilt;
-  std::chrono::milliseconds tlsHandshakeTimeout{std::chrono::seconds{5}};
+  security::SSLPolicy sslPolicy = security::SSLPolicy::DISABLED;
+  std::optional<std::chrono::milliseconds> tlsHandshakeTimeout =
+      std::chrono::seconds{30};
   if (sslConfig_) {
-    fizzBuilt = security::buildFizzServerContext(*sslConfig_, thriftConfig_);
+    sslPolicy = sslConfig_->sslPolicy;
     tlsHandshakeTimeout = sslConfig_->handshakeTimeout;
+    if (sslPolicy != security::SSLPolicy::DISABLED) {
+      fizzBuilt = security::buildFizzServerContext(*sslConfig_, thriftConfig_);
+    }
   }
 
   // Materialize the default IO pool only when the embedder didn't supply
@@ -219,8 +224,7 @@ void FastThriftServer::start() {
   connectionManager_ = connection::ConnectionManager::create(
       config_.address,
       folly::getKeepAliveToken(ioThreadPool_.get()),
-      sslConfig_ ? security::SSLPolicy::REQUIRED
-                 : security::SSLPolicy::DISABLED,
+      sslPolicy,
       std::move(fizzBuilt.fizzContext),
       std::move(fizzBuilt.thriftParams),
       tlsHandshakeTimeout,

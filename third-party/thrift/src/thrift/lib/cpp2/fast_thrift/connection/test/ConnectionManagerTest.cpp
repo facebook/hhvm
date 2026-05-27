@@ -92,7 +92,7 @@ class ConnectionManagerTest : public ::testing::Test {
     connectionManager_ = ConnectionManager::create(
         folly::SocketAddress("::1", 0),
         folly::getKeepAliveToken(executor_),
-        security::SSLPolicy::DISABLED,
+        fast_security::SSLPolicy::DISABLED,
         /*fizzContext=*/nullptr,
         /*thriftParams=*/nullptr,
         std::chrono::seconds{5},

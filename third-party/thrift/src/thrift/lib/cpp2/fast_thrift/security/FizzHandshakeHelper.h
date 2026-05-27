@@ -25,57 +25,64 @@
 #include <folly/Function.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTimeout.h>
-#include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
-#include <thrift/lib/cpp2/security/AsyncStopTLS.h>
+#include <thrift/lib/cpp2/fast_thrift/security/HandshakeTimeout.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersServerExtension.h>
 
 namespace apache::thrift::fast_thrift::security {
 
-class PendingHandshakes;
-
 /**
- * Drives a single TLS handshake on an accepted socket using fizz.
+ * Drives a single TLS handshake on an accepted socket using fizz. Pure
+ * handshake only — post-handshake StopTLS is a separate concern handled by
+ * `connection::security::util::StopTLSHelper`. Callers that want StopTLS
+ * inspect the surfaced `ThriftParametersServerExtension` for
+ * `getNegotiatedStopTLS*()` and chain `StopTLSHelper` themselves.
  *
  * Lifetime:
- *   - Constructed on the EventBase thread that owns the socket. Held by
- *     PendingHandshakes via PendingHandshakes::HelperPtr (a unique_ptr with
- *     a folly::DelayedDestruction::Destructor deleter). Use that alias to
- *     construct, e.g. `PendingHandshakes::HelperPtr p(new
- * FizzHandshakeHelper(...));`.
- *   - start() kicks off the handshake; the helper lives in PendingHandshakes
- *     until completion.
+ *   - Constructed on the EventBase thread that owns the socket. Held by the
+ *     owner (typically the FizzHandshakeHandler) via a unique_ptr with a
+ *     folly::DelayedDestruction::Destructor deleter.
+ *   - start() kicks off the handshake.
  *   - On success/error/timeout, invokes the user callback exactly once and
- *     synchronously removes itself from PendingHandshakes. Removal triggers
- *     destroy() through the unique_ptr deleter; DelayedDestruction defers
+ *     then synchronously invokes onTerminal(this) so the owner can drop its
+ *     unique_ptr. The deleter triggers destroy(); DelayedDestruction defers
  *     the actual delete until the surrounding DestructorGuard pops.
- *   - PendingHandshakes::cancelAll() drives the same path during shutdown
- *     by calling cancel() on each helper, which closes the AsyncFizzServer
- *     and routes through fizzHandshakeError → finish() synchronously. The
- *     user callback receives a cancellation exception_wrapper.
+ *   - cancel() drives the same path synchronously during shutdown by closing
+ *     the AsyncFizzServer; fizz routes through fizzHandshakeError → finish().
+ *     The user callback receives a cancellation exception_wrapper.
  */
 class FizzHandshakeHelper
     : private fizz::server::AsyncFizzServer::HandshakeCallback,
-      private apache::thrift::AsyncStopTLS::Callback,
       private folly::AsyncTimeout,
       public folly::DelayedDestruction {
  public:
-  // Invoked with the negotiated transport on success, or `nullptr` plus the
-  // failure reason on error. The transport may be a
-  // fizz::server::AsyncFizzServer (encrypted), or — when StopTLS V1 was
-  // negotiated — a plaintext folly::AsyncSocketTransport with peer cert info
-  // preserved.
+  // Owning pointer with the DelayedDestruction-aware deleter. Matches the
+  // folly convention (e.g. AsyncSocket::UniquePtr).
+  using UniquePtr = std::
+      unique_ptr<FizzHandshakeHelper, folly::DelayedDestruction::Destructor>;
+
+  // Invoked on terminal handshake state.
+  // On success: `transport` is the negotiated AsyncFizzServer; `extension`
+  // is non-null iff the helper was constructed with thriftParams and carries
+  // the negotiation results (StopTLS V1/V2, TTLSTunnel, compression, PSP).
+  // On error: `transport` is null and `ex` carries the reason.
   using Callback = folly::Function<void(
-      folly::AsyncTransport::UniquePtr, folly::exception_wrapper) noexcept>;
+      fizz::server::AsyncFizzServer::UniquePtr,
+      std::shared_ptr<apache::thrift::ThriftParametersServerExtension>,
+      folly::exception_wrapper) noexcept>;
+
+  // Fires exactly once after the user Callback, on the EventBase thread.
+  // Receives `this`; owner uses it to drop its owning UniquePtr.
+  using OnTerminal = folly::Function<void(FizzHandshakeHelper*) noexcept>;
 
   FizzHandshakeHelper(
       folly::AsyncSocket::UniquePtr socket,
       std::shared_ptr<const fizz::server::FizzServerContext> context,
       std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-      std::chrono::milliseconds timeout,
-      PendingHandshakes& pending,
+      HandshakeTimeout timeout,
+      OnTerminal onTerminal,
       Callback callback);
 
   FizzHandshakeHelper(const FizzHandshakeHelper&) = delete;
@@ -89,9 +96,8 @@ class FizzHandshakeHelper
   // Synchronously aborts the handshake. Closes the underlying AsyncFizzServer,
   // which causes fizz to fire fizzHandshakeError on this same stack, routing
   // through finish() to invoke the user callback with a cancellation error
-  // and remove the helper from PendingHandshakes. Mirrors wangle's
-  // AcceptorHandshakeHelper::dropConnection contract: a terminal callback
-  // must fire synchronously with respect to the cancel() call.
+  // and fire onTerminal(this). Mirrors wangle's AcceptorHandshakeHelper::
+  // dropConnection contract.
   void cancel();
 
  protected:
@@ -109,27 +115,23 @@ class FizzHandshakeHelper
   void fizzHandshakeAttemptFallback(
       fizz::server::AttemptVersionFallback fallback) override;
 
-  // apache::thrift::AsyncStopTLS::Callback
-  void stopTLSSuccess(std::unique_ptr<folly::IOBuf> postTLSData) override;
-  void stopTLSError(const folly::exception_wrapper& ex) override;
-
   // folly::AsyncTimeout
   void timeoutExpired() noexcept override;
 
-  // Invokes the user callback (once) and synchronously removes self from
-  // PendingHandshakes. All callers must hold a DestructorGuard on `this`
-  // because remove() drops the helper's HelperPtr, which calls destroy().
+  // Invokes the user callback (once), then synchronously invokes
+  // onTerminal(this) so the owner can drop its unique_ptr. All callers must
+  // hold a DestructorGuard on `this` because onTerminal typically destroys
+  // `this` via the unique_ptr deleter.
   void finish(
-      folly::AsyncTransport::UniquePtr transport,
+      fizz::server::AsyncFizzServer::UniquePtr transport,
       folly::exception_wrapper ex) noexcept;
 
   fizz::server::AsyncFizzServer::UniquePtr fizzServer_;
   std::shared_ptr<apache::thrift::ThriftParametersServerExtension> extension_;
-  apache::thrift::AsyncStopTLS::UniquePtr stopTlsFrame_;
   folly::EventBase* evb_;
-  PendingHandshakes& pending_;
+  OnTerminal onTerminal_;
   Callback callback_;
-  std::chrono::milliseconds timeout_;
+  HandshakeTimeout timeout_;
   bool done_{false};
 };
 

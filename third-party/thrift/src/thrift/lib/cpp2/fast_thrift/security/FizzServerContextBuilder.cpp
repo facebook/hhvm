@@ -100,4 +100,15 @@ BuiltFizzServerContext buildFizzServerContext(
   return BuiltFizzServerContext{std::move(ctx), std::move(thriftParams)};
 }
 
+TLSParams buildTLSParams(
+    const FizzServerCertConfig& certConfig,
+    const ThriftTlsConfig& thriftConfig) {
+  auto built = buildFizzServerContext(certConfig, thriftConfig);
+  return TLSParams{
+      std::move(built.fizzContext),
+      std::move(built.thriftParams),
+      certConfig.handshakeTimeout,
+  };
+}
+
 } // namespace apache::thrift::fast_thrift::security

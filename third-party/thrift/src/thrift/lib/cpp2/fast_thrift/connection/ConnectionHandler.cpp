@@ -24,10 +24,10 @@ namespace apache::thrift::fast_thrift::connection {
 ConnectionHandler::ConnectionHandler(
     folly::EventBase& evb,
     folly::SocketAddress address,
-    security::SSLPolicy sslPolicy,
+    fast_security::SSLPolicy sslPolicy,
     std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
     std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
-    std::chrono::milliseconds tlsHandshakeTimeout,
+    std::optional<std::chrono::milliseconds> tlsHandshakeTimeout,
     SocketOptions socketOptions,
     bool enableReusePortBpfSpread)
     : evb_(folly::getKeepAliveToken(&evb)),

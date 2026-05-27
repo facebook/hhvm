@@ -1281,6 +1281,30 @@ TEST(HTTPErrorTests, ErrorStrings) {
   EXPECT_EQ(getErrorString(HTTPErrorCode(100000)), "UNKNOWN_ERROR");
 }
 
+TEST(HTTPErrorTests, InternalErrorCodesFromSourceMapToInternalError) {
+  EXPECT_EQ(HTTPErrorCode2ErrorCode(HTTPErrorCode::MESSAGE_ERROR,
+                                    /*fromSource=*/true),
+            ErrorCode::INTERNAL_ERROR);
+  EXPECT_EQ(HTTPErrorCode2ErrorCode(HTTPErrorCode::FLOW_CONTROL_ERROR,
+                                    /*fromSource=*/true),
+            ErrorCode::INTERNAL_ERROR);
+  EXPECT_EQ(HTTPErrorCode2HTTP3ErrorCode(HTTPErrorCode::MESSAGE_ERROR,
+                                         /*fromSource=*/true),
+            HTTP3::ErrorCode::HTTP_INTERNAL_ERROR);
+  EXPECT_EQ(HTTPErrorCode2HTTP3ErrorCode(HTTPErrorCode::FLOW_CONTROL_ERROR,
+                                         /*fromSource=*/true),
+            HTTP3::ErrorCode::HTTP_INTERNAL_ERROR);
+}
+
+TEST(HTTPErrorTests, InternalErrorCodesNotFromSourcePreserveWireCode) {
+  EXPECT_EQ(HTTPErrorCode2ErrorCode(HTTPErrorCode::MESSAGE_ERROR,
+                                    /*fromSource=*/false),
+            ErrorCode::PROTOCOL_ERROR);
+  EXPECT_EQ(HTTPErrorCode2ErrorCode(HTTPErrorCode::FLOW_CONTROL_ERROR,
+                                    /*fromSource=*/false),
+            ErrorCode::FLOW_CONTROL_ERROR);
+}
+
 TEST(HTTPEventTest, DefaultTrailers) {
   HTTPBodyEvent trailerEvent1(std::make_unique<HTTPHeaders>());
   HTTPBodyEvent bodyEvent(nullptr, true);

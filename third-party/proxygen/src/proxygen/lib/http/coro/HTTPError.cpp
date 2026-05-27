@@ -20,6 +20,7 @@ bool checkInvalidAppErrorCode(HTTPErrorCode ec) {
   switch (ec) {
     // Internal H2 errors
     case HTTPErrorCode::PROTOCOL_ERROR:
+    case HTTPErrorCode::FLOW_CONTROL_ERROR:
     case HTTPErrorCode::SETTINGS_TIMEOUT:
     case HTTPErrorCode::STREAM_CLOSED:
     case HTTPErrorCode::FRAME_SIZE_ERROR:
@@ -27,6 +28,7 @@ bool checkInvalidAppErrorCode(HTTPErrorCode ec) {
 
     // Internal lib errors
     case HTTPErrorCode::INVALID_STATE_TRANSITION:
+    case HTTPErrorCode::MESSAGE_ERROR:
     case HTTPErrorCode::WRITE_TIMEOUT:
     case HTTPErrorCode::TRANSPORT_EOF:
     case HTTPErrorCode::TRANSPORT_READ_ERROR:

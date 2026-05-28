@@ -22,11 +22,14 @@
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/IntervalBatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/MetadataAppAdapter.h>
@@ -46,7 +49,10 @@ using channel_pipeline::SimpleBufferAllocator;
 HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(batching_frame_handler);
 HANDLER_TAG(frame_length_encoder_handler);
-HANDLER_TAG(rocket_server_frame_codec_handler);
+HANDLER_TAG(frame_codec_handler);
+HANDLER_TAG(frame_defragmentation_handler);
+HANDLER_TAG(frame_fragmentation_handler);
+HANDLER_TAG(rocket_server_message_marshal_handler);
 HANDLER_TAG(server_setup_frame_handler);
 HANDLER_TAG(server_request_response_frame_handler);
 HANDLER_TAG(server_stream_state_handler);
@@ -273,8 +279,14 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
           batching_frame_handler_tag, config_.batchingConfig)
       .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
           frame_length_encoder_handler_tag)
-      .addNextDuplex<rocket::server::handler::RocketServerFrameCodecHandler>(
-          rocket_server_frame_codec_handler_tag)
+      .addNextDuplex<frame::handler::FrameCodecHandler>(frame_codec_handler_tag)
+      .addNextInbound<frame::read::handler::FrameDefragmentationHandler>(
+          frame_defragmentation_handler_tag)
+      .addNextOutbound<frame::write::handler::FrameFragmentationHandler>(
+          frame_fragmentation_handler_tag, config_.fragmentationConfig)
+      .addNextDuplex<
+          rocket::server::handler::RocketServerMessageMarshalHandler>(
+          rocket_server_message_marshal_handler_tag)
       .addNextDuplex<rocket::server::handler::RocketServerSetupFrameHandler>(
           server_setup_frame_handler_tag, std::move(onSetupComplete))
       .addNextDuplex<

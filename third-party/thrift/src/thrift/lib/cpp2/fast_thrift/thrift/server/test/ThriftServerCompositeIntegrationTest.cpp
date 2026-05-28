@@ -50,16 +50,20 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
@@ -84,7 +88,10 @@ using apache::thrift::fast_thrift::transport::test::TestAsyncTransport;
 
 HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
-HANDLER_TAG(rocket_server_frame_codec_handler);
+HANDLER_TAG(frame_codec_handler);
+HANDLER_TAG(frame_defragmentation_handler);
+HANDLER_TAG(frame_fragmentation_handler);
+HANDLER_TAG(rocket_server_message_marshal_handler);
 HANDLER_TAG(server_setup_frame_handler);
 HANDLER_TAG(server_request_response_frame_handler);
 HANDLER_TAG(server_stream_state_handler);
@@ -275,9 +282,20 @@ class ThriftServerCompositeIntegrationTest : public ::testing::Test {
             .addNextOutbound<apache::thrift::fast_thrift::frame::write::
                                  handler::FrameLengthEncoderHandler>(
                 frame_length_encoder_handler_tag)
+            .addNextDuplex<
+                apache::thrift::fast_thrift::frame::handler::FrameCodecHandler>(
+                frame_codec_handler_tag)
+            .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
+                                FrameDefragmentationHandler>(
+                frame_defragmentation_handler_tag)
+            .addNextOutbound<apache::thrift::fast_thrift::frame::write::
+                                 handler::FrameFragmentationHandler>(
+                frame_fragmentation_handler_tag,
+                apache::thrift::fast_thrift::frame::write::
+                    FragmentationHandlerConfig{})
             .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
-                               handler::RocketServerFrameCodecHandler>(
-                rocket_server_frame_codec_handler_tag)
+                               handler::RocketServerMessageMarshalHandler>(
+                rocket_server_message_marshal_handler_tag)
             .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
                                handler::RocketServerSetupFrameHandler>(
                 server_setup_frame_handler_tag)

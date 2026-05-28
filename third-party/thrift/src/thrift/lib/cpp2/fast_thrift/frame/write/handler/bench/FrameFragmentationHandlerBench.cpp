@@ -49,7 +49,7 @@ class BenchContext {
  public:
   explicit BenchContext(folly::EventBase* evb) : evb_(evb) {}
 
-  folly::EventBase* getEventBase() const { return evb_; }
+  folly::EventBase* eventBase() const { return evb_; }
 
   Result fireWrite(TypeErasedBox&&) {
     ++writeCount_;

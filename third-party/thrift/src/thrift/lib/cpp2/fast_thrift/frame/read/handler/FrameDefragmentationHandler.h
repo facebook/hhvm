@@ -72,6 +72,9 @@ class FrameDefragmentationHandler {
   // === InboundHandler ===
 
   template <typename Context>
+  void onPipelineActive(Context& /*ctx*/) noexcept {}
+
+  template <typename Context>
   void onReadReady(Context& /*ctx*/) noexcept {}
 
   template <typename Context>
@@ -268,7 +271,8 @@ class FrameDefragmentationHandler {
     result.metadata.descriptor = &getDescriptor(state.originalType);
     result.metadata.streamId = state.streamId;
     // Clear follows bit since frame is now complete
-    result.metadata.flags_ = state.originalFlags & ~detail::kFollowsBit;
+    result.metadata.flags_ = state.originalFlags &
+        ~::apache::thrift::fast_thrift::frame::detail::kFollowsBit;
     result.metadata.payloadSize = payloadSize;
     result.metadata.payloadOffset = 0;
     result.metadata.metadataSize = state.metadataSize;

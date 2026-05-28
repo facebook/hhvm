@@ -48,20 +48,6 @@ namespace apache::thrift::fast_thrift::thrift {
  * This is the "fast handler" variant. For the legacy AsyncProcessorFactory
  * path see FastThriftChannelServer in this directory.
  *
- * Architecture per accepted connection:
- *
- *   Rocket pipeline (owned by RocketServerConnection):
- *     TransportHandler
- *       -> FrameLengthParserHandler
- *       -> FrameLengthEncoderHandler
- *       -> RocketServerFrameCodecHandler
- *       -> RocketServerSetupFrameHandler
- *       -> RocketServerRequestResponseFrameHandler
- *       -> RocketServerStreamStateHandler
- *       -> RocketServerAppAdapter
- *
- *   Thrift pipeline (owned by FastConnection):
- *     ThriftServerTransportAdapter -> <Service>FastSvAppAdapter
  *
  * The user supplies a generated ServiceFastHandler<Service> via setInterface;
  * the server asks the factory for a fresh app adapter per connection

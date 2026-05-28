@@ -39,18 +39,19 @@ struct FragmentationHandlerConfig {
    * Maximum fragment size in bytes.
    *
    * Payloads larger than this are fragmented into chunks of this size.
-   * Also used as the bypass threshold: frames <= this size go directly
-   * to the immediate queue without fragmentation.
+   * Frames <= this size go through unfragmented.
    *
-   * Default: 16KB - reflects average payload size at Meta, providing good
-   * interleaving granularity for HOL blocking mitigation.
+   * Default: `0xffffff - 512` (~16 MiB minus 512 bytes) — matches legacy
+   * `apache::thrift::rocket::kMaxFragmentedPayloadSize`
+   * (`fbcode/thrift/lib/cpp2/transport/rocket/framing/Frames.h`). The
+   * 3-byte RSocket frame-length field caps at `0xffffff`; the 512-byte
+   * margin leaves room for the per-frame header.
    *
-   * Tuning:
-   *   - High-latency networks: Increase to 64KB+ to reduce header overhead
-   *   - Low-latency requirements: Keep at 16KB or decrease for finer
-   * interleaving
+   * At this default, fragmentation only kicks in for very large payloads
+   * (multi-megabyte). Override to a smaller value (e.g., 64KB) to enable
+   * SRPT-style HOL-blocking mitigation on smaller frames.
    */
-  size_t maxFragmentSize{16 * 1024};
+  size_t maxFragmentSize{0xffffff - 512};
 
   /**
    * Maximum pending bytes before forcing a flush.

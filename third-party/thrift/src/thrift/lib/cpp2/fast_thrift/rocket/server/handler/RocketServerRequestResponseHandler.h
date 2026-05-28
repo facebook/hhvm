@@ -38,7 +38,7 @@ namespace apache::thrift::fast_thrift::rocket::server::handler {
  * REQUEST_RESPONSE RPC pattern on the server side.
  *
  * Frame-level concerns (parsing/serializing wire bytes) live in
- * RocketServerFrameCodecHandler; per-stream lifecycle (registration,
+ * RocketServerMessageMarshalHandler; per-stream lifecycle (registration,
  * streamType stamping, terminal-frame cleanup, duplicate-response
  * rejection) lives in RocketServerStreamStateHandler. This handler owns
  * RPC-pattern semantics specific to RR:

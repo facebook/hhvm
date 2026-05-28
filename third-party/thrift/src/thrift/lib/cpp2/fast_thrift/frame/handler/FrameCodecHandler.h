@@ -22,37 +22,39 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 
-namespace apache::thrift::fast_thrift::rocket::server::handler {
+namespace apache::thrift::fast_thrift::frame::handler {
 
 /**
- * RocketServerFrameCodecHandler - Bidirectional codec for Rocket frames.
- *
- * The single point in the server pipeline that converts between typed
- * payloads and wire bytes:
+ * FrameCodecHandler - The wire codec for RSocket frames.
  *
  * Inbound (read path):
- *   std::unique_ptr<folly::IOBuf> -> ParsedFrame
- *   Parses the raw IOBuf and validates it.
+ *   `BytesPtr` (single raw frame, length-prefix already stripped) →
+ * `ParsedFrame` Parses the 6-byte base header + per-frame extra-header bytes
+ * lazily via `frame::read::tryParseFrame`. Fires an exception on malformed
+ * frames.
  *
  * Outbound (write path):
- *   RocketResponseMessage{frame = Composed*Frame variant alternative}
- *     -> std::unique_ptr<folly::IOBuf>
- *   Visits the variant and dispatches to the matching
- *   `frame::write::serialize(Composed*Frame&&)` overload.
+ *   `ComposedFrame` (logical frame) → `BytesPtr` (wire bytes)
+ *   Forwards to `ComposedFrame::serialize()`, which switches on `frameType`
+ *   and writes the matching wire format via `write::serialize`.
  *
  * Pipeline position:
- *   Transport -> FrameLengthParserHandler -> RocketServerFrameCodecHandler ->
- *   RocketServerSetupFrameHandler -> ...
+ *   Transport → FrameLengthParserHandler → FrameCodecHandler →
+ *     [defrag] → ... rocket marshal → ...
+ *   ... → [frag] → FrameCodecHandler → FrameLengthEncoderHandler →
+ *     batching → Transport
+ *
+ * Shared between client and server: the wire shape is identical regardless
+ * of which side codes / decodes it.
  */
-class RocketServerFrameCodecHandler {
+class FrameCodecHandler {
  public:
-  RocketServerFrameCodecHandler() = default;
+  FrameCodecHandler() = default;
 
   // === HandlerLifecycle ===
 
@@ -88,14 +90,9 @@ class RocketServerFrameCodecHandler {
       return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
     }
 
-    // Wrap in RocketRequestMessage so the inbound chain has a uniform
-    // message type. StreamStateHandler stamps streamId/streamType later.
-    RocketRequestMessage request;
-    request.frame = std::move(frame);
-
     return ctx.fireRead(
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
-            std::move(request)));
+            std::move(frame)));
   }
 
   template <typename Context>
@@ -110,11 +107,11 @@ class RocketServerFrameCodecHandler {
       Context& ctx,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
-    auto response = msg.take<RocketResponseMessage>();
-    auto serializedFrame = std::move(response.frame).serialize();
+    auto frame = msg.take<apache::thrift::fast_thrift::frame::ComposedFrame>();
+    auto bytes = std::move(frame).serialize();
     return ctx.fireWrite(
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
-            std::move(serializedFrame)));
+            std::move(bytes)));
   }
 
   template <typename Context>
@@ -126,8 +123,8 @@ class RocketServerFrameCodecHandler {
 
 static_assert(
     apache::thrift::fast_thrift::channel_pipeline::DuplexHandler<
-        RocketServerFrameCodecHandler,
+        FrameCodecHandler,
         apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl>,
-    "RocketServerFrameCodecHandler must satisfy DuplexHandler concept");
+    "FrameCodecHandler must satisfy DuplexHandler concept");
 
-} // namespace apache::thrift::fast_thrift::rocket::server::handler
+} // namespace apache::thrift::fast_thrift::frame::handler

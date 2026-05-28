@@ -19,7 +19,7 @@
  *
  * Measures the end-to-end benefit of headroom pre-allocation in
  * ThriftServerChannel through to frame serialization in
- * RocketServerFrameCodecHandler.
+ * FrameCodecHandler.
  *
  * Compares two paths:
  * - NoHeadroom: metadata serialized without headroom -> FrameWriter slow path
@@ -37,11 +37,11 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -51,8 +51,8 @@ using namespace apache::thrift::fast_thrift;
 using namespace apache::thrift::fast_thrift::frame;
 using namespace apache::thrift::fast_thrift::frame::read;
 using namespace apache::thrift::fast_thrift::frame::write;
+using namespace apache::thrift::fast_thrift::frame::handler;
 using namespace apache::thrift::fast_thrift::rocket::server;
-using namespace apache::thrift::fast_thrift::rocket::server::handler;
 
 namespace {
 
@@ -129,8 +129,7 @@ apache::thrift::ResponseRpcMetadata createLargeResponseMetadata() {
 // Contexts
 // =============================================================================
 
-// Captures the final serialized frame IOBuf from
-// RocketServerFrameCodecHandler.
+// Captures the final serialized frame IOBuf from FrameCodecHandler.
 class FrameSinkContext {
  public:
   // NOLINTNEXTLINE(clang-diagnostic-unused-member-function)
@@ -178,7 +177,7 @@ struct PreparedResponse {
 void benchNoHeadroom(
     size_t iters, const apache::thrift::ResponseRpcMetadata& metadataTemplate) {
   BenchmarkSuspender suspender;
-  RocketServerFrameCodecHandler codec;
+  FrameCodecHandler codec;
   FrameSinkContext codecCtx;
 
   // Pre-build payloads and metadata copies, but do NOT serialize metadata yet.
@@ -198,19 +197,15 @@ void benchNoHeadroom(
   for (size_t i = 0; i < iters; ++i) {
     // Serialize metadata without headroom (in timed section)
     auto serializedMeta = serializeMetadataNoHeadroom(responses[i].metadata);
-    auto streamResp = RocketResponseMessage{
-        .frame =
-            apache::thrift::fast_thrift::frame::ComposedFrame{
-                .frameType =
-                    apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
-                .streamId = responses[i].streamId,
-                .metadata = std::move(serializedMeta),
-                .data = std::move(responses[i].payload),
-                .complete = true,
-                .next = true,
-            },
+    apache::thrift::fast_thrift::frame::ComposedFrame frame{
+        .frameType = apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+        .streamId = responses[i].streamId,
+        .metadata = std::move(serializedMeta),
+        .data = std::move(responses[i].payload),
+        .complete = true,
+        .next = true,
     };
-    auto result = codec.onWrite(codecCtx, erase_and_box(std::move(streamResp)));
+    auto result = codec.onWrite(codecCtx, erase_and_box(std::move(frame)));
     doNotOptimizeAway(result);
   }
 }
@@ -218,7 +213,7 @@ void benchNoHeadroom(
 void benchWithHeadroom(
     size_t iters, const apache::thrift::ResponseRpcMetadata& metadataTemplate) {
   BenchmarkSuspender suspender;
-  RocketServerFrameCodecHandler codec;
+  FrameCodecHandler codec;
   FrameSinkContext codecCtx;
 
   // Pre-build payloads and metadata copies, but do NOT serialize metadata yet.
@@ -240,21 +235,17 @@ void benchWithHeadroom(
     // Serialize metadata with headroom (in timed section)
     auto serializedMeta = serializeMetadataWithHeadroom(responses[i].metadata);
 
-    auto streamResp = RocketResponseMessage{
-        .frame =
-            apache::thrift::fast_thrift::frame::ComposedFrame{
-                .frameType =
-                    apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
-                .streamId = responses[i].streamId,
-                .metadata = std::move(serializedMeta),
-                .data = std::move(responses[i].payload),
-                .complete = true,
-                .next = true,
-            },
+    apache::thrift::fast_thrift::frame::ComposedFrame frame{
+        .frameType = apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+        .streamId = responses[i].streamId,
+        .metadata = std::move(serializedMeta),
+        .data = std::move(responses[i].payload),
+        .complete = true,
+        .next = true,
     };
 
-    // RocketServerFrameCodecHandler serializes the frame
-    auto result = codec.onWrite(codecCtx, erase_and_box(std::move(streamResp)));
+    // FrameCodecHandler serializes the frame
+    auto result = codec.onWrite(codecCtx, erase_and_box(std::move(frame)));
     doNotOptimizeAway(result);
   }
 }

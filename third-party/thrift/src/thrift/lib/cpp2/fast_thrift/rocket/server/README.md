@@ -13,7 +13,7 @@ stream state for inbound requests and outbound responses.
 
 | Handler | Purpose |
 |---------|---------|
-| `RocketServerFrameCodecHandler` | Parses raw IOBuf frames into ParsedFrame on the read path; passthrough on the write path |
+| `RocketServerMessageMarshalHandler` | Wraps inbound `ParsedFrame` into `RocketRequestMessage`; unwraps outbound `RocketResponseMessage` into `ComposedFrame`. Wire bytes are handled by the shared `frame::handler::FrameCodecHandler` upstream. |
 | `RocketServerSetupFrameHandler` | Validates and consumes the RSocket SETUP frame on connection establishment |
 | `RocketServerStreamStateHandler` | Manages stream IDs and request/response routing for client-initiated streams; consumes connection-level frames |
 | `RocketServerRequestResponseFrameHandler` | Duplex handler for REQUEST_RESPONSE interactions (inbound request tracking + outbound response serialization) |
@@ -23,12 +23,14 @@ stream state for inbound requests and outbound responses.
 ## Pipeline Architecture
 
 ```
-Inbound:  Transport -> FrameHandler -> RocketServerFrameCodecHandler -> RocketServerSetupFrameHandler -> RocketServerRequestResponseFrameHandler -> RocketServerStreamStateHandler -> App
-Outbound: Transport <- FrameHandler <- RocketServerFrameCodecHandler <- RocketServerSetupFrameHandler <- RocketServerRequestResponseFrameHandler <- RocketServerStreamStateHandler <- App
+Inbound:  Transport -> FrameHandler -> FrameCodecHandler -> FrameDefragmentationHandler -> RocketServerMessageMarshalHandler -> RocketServerSetupFrameHandler -> RocketServerRequestResponseFrameHandler -> RocketServerStreamStateHandler -> App
+Outbound: Transport <- FrameHandler <- FrameCodecHandler <- FrameFragmentationHandler <- RocketServerMessageMarshalHandler <- RocketServerSetupFrameHandler <- RocketServerRequestResponseFrameHandler <- RocketServerStreamStateHandler <- App
 ```
 
-Note: `RocketServerFrameCodecHandler` parses raw IOBuf into ParsedFrame and
-validates frames. `RocketServerSetupFrameHandler` validates the first frame is a valid
+Note: `frame::handler::FrameCodecHandler` parses raw IOBuf into ParsedFrame and
+serializes ComposedFrame back to IOBuf. `RocketServerMessageMarshalHandler` is
+the rocket↔frame boundary that wraps/unwraps `RocketRequestMessage` /
+`RocketResponseMessage`. `RocketServerSetupFrameHandler` validates the first frame is a valid
 SETUP and consumes it (does not forward downstream), then becomes a near-zero-cost
 passthrough. `RocketServerRequestResponseFrameHandler` tracks REQUEST_RESPONSE streams
 and serializes their response frames. `RocketServerStreamStateHandler` manages active

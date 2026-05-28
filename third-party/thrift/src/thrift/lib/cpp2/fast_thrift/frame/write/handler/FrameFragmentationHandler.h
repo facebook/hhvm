@@ -82,7 +82,7 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
 
   template <typename Context>
   void handlerAdded(Context& ctx) noexcept {
-    eventBase_ = ctx.getEventBase();
+    eventBase_ = ctx.eventBase();
     ctxPtr_ = &ctx;
     // Type-erase the templated doFlush via a context-typed trampoline.
     // No std::function allocation; pure function pointer indirection.
@@ -155,12 +155,11 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
   }
 
   template <typename Context>
-  void onPipelineInactive(Context& ctx) noexcept {
+  void onPipelineInactive(Context& /*ctx*/) noexcept {
     cancelLoopCallbackIfScheduled();
     immediateQueue_.clear();
     streams_.clear();
     resetPending();
-    ctx.deactivate();
   }
 
   template <typename Context>

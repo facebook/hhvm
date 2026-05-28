@@ -130,7 +130,8 @@ ParsedFrame makeSetupFrame() {
 }
 
 // Wrap a ParsedFrame in a RocketRequestMessage (matches how
-// RocketServerFrameCodecHandler delivers inbound frames to StreamStateHandler).
+// RocketServerMessageMarshalHandler delivers inbound frames to
+// StreamStateHandler).
 RocketRequestMessage wrapRequest(ParsedFrame frame) {
   RocketRequestMessage msg;
   msg.frame = std::move(frame);

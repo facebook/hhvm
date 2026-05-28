@@ -45,7 +45,7 @@ class MockContext {
  public:
   explicit MockContext(folly::EventBase* evb) : evb_(evb) {}
 
-  folly::EventBase* getEventBase() const { return evb_; }
+  folly::EventBase* eventBase() const { return evb_; }
 
   apache::thrift::fast_thrift::channel_pipeline::Result fireWrite(
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&

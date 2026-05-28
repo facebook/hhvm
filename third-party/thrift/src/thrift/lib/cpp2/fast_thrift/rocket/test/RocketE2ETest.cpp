@@ -39,8 +39,12 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameDefragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BatchingFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
@@ -51,7 +55,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
@@ -79,6 +83,9 @@ HANDLER_TAG(s_frame_length_parser);
 HANDLER_TAG(s_batching);
 HANDLER_TAG(s_frame_length_encoder);
 HANDLER_TAG(s_frame_codec);
+HANDLER_TAG(s_frame_defragmentation);
+HANDLER_TAG(s_frame_fragmentation);
+HANDLER_TAG(s_marshal);
 HANDLER_TAG(s_setup);
 HANDLER_TAG(s_request_response);
 HANDLER_TAG(s_stream_state);
@@ -245,8 +252,18 @@ class RocketE2ETest : public ::testing::Test {
               .addNextOutbound<
                   frame::write::handler::FrameLengthEncoderHandler>(
                   s_frame_length_encoder_tag)
-              .addNextDuplex<server::handler::RocketServerFrameCodecHandler>(
+              .addNextDuplex<frame::handler::FrameCodecHandler>(
                   s_frame_codec_tag)
+              .addNextInbound<
+                  frame::read::handler::FrameDefragmentationHandler>(
+                  s_frame_defragmentation_tag)
+              .addNextOutbound<
+                  frame::write::handler::FrameFragmentationHandler>(
+                  s_frame_fragmentation_tag,
+                  frame::write::FragmentationHandlerConfig{})
+              .addNextDuplex<
+                  server::handler::RocketServerMessageMarshalHandler>(
+                  s_marshal_tag)
               .addNextDuplex<server::handler::RocketServerSetupFrameHandler>(
                   s_setup_tag)
               .addNextDuplex<server::handler::RocketServerStreamStateHandler>(

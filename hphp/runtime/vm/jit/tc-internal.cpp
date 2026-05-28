@@ -264,6 +264,26 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
       tl_liveStreak.begin(), tl_liveStreak.end(), funcId
   ) != tl_liveStreak.end();
 
+  auto const softMaxTransTime = Cfg::Jit::SoftMaxRequestTranslationTime;
+  if (softMaxTransTime >= 0 &&
+      !inStreak &&
+      Cfg::Server::Mode &&
+      !mcgen::isAsyncJitEnabled(kind)) {
+    auto const transCounter = Timer::CounterValue(Timer::mcg_translate);
+    if (transCounter.wall_time_elapsed >= softMaxTransTime) {
+      if (Trace::moduleEnabledRelease(Trace::mcg, 1)) {
+        Trace::traceRelease("Skipping first-time translation. "
+                            "Soft time budget of %" PRId64 " exceeded. "
+                            "%" PRId64 "us elapsed. "
+                            "%" PRId64 " translations completed\n",
+                            softMaxTransTime,
+                            transCounter.wall_time_elapsed,
+                            transCounter.count);
+      }
+      return TranslationResult::Scope::Request;
+    }
+  }
+
   if (!noTheshold && (isLive || isProf)) {
     auto const baseThreshold = isLive ? adjustedLiveThreshold()
                                       : Cfg::Jit::ProfileThreshold;

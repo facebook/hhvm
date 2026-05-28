@@ -2039,6 +2039,20 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t Jit.TraceletGuardsLimit = 5, UNKNOWN
 - uint64_t Jit.GlobalTranslationLimit = -1, UNKNOWN
 - int64_t Jit.MaxRequestTranslationTime = -1, UNKNOWN
+
+  Hard limit in microseconds on cumulative wall-clock JIT translation
+  time per request. When exceeded, all further JIT translation is
+  skipped for the remainder of the request. -1 disables the limit.
+
+- int64_t Jit.SoftMaxRequestTranslationTime = -1, UNKNOWN
+
+  Soft limit in microseconds on cumulative wall-clock JIT translation
+  time per request. When exceeded, only retranslations of recently
+  translated functions are allowed; first-time translations of new
+  functions are skipped and fall back to the interpreter. This reduces
+  JIT overhead on long requests without giving up on keeping translations
+  of the same function close to each other. -1 disables the limit.
+
 - uint32_t Jit.MaxRegionInstrs = 3000, UNKNOWN
 - uint32_t Jit.MaxLiveRegionInstrs = 50, UNKNOWN
 - uint32_t Jit.MaxAwaitAllUnroll = 8, UNKNOWN

@@ -861,6 +861,24 @@ final class ThriftContextPropState {
     $this->setBaggageFlags1($flags1);
   }
 
+  public function isIGAgentAsUserSandboxRequest(): bool {
+    return $this->isBaggageFlags1Set(
+      ContextProp\BaggageFlags1::IG_AGENT_AS_USER_SANDBOX_REQUEST,
+    );
+  }
+
+  public function setIGAgentAsUserSandboxRequest(): void {
+    $this->setBaggageFlags1ByName(
+      ContextProp\BaggageFlags1::IG_AGENT_AS_USER_SANDBOX_REQUEST,
+    );
+  }
+
+  public function clearIGAgentAsUserSandboxRequest(): void {
+    $this->clearBaggageFlags1ByName(
+      ContextProp\BaggageFlags1::IG_AGENT_AS_USER_SANDBOX_REQUEST,
+    );
+  }
+
   public readonly function getAgentId_DIRECTLY_WITHOUT_LOOKASIDE_DO_NOT_CALL_THIS_UNLESS_YOU_ARE_AGENT_DOT_PHP(
   )[leak_safe]: ?string {
     if ($this->storage->baggage?->agent_id is null) {

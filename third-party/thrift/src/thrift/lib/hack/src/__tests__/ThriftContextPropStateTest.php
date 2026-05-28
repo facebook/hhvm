@@ -734,6 +734,34 @@ final class ThriftContextPropStateTest extends WWWTest {
       ->toBeFalse();
   }
 
+  public function testIGAgentAsUserSandboxRequestFlag(): void {
+    $tcps = ThriftContextPropState::get();
+    $tcps->clear();
+
+    expect($tcps->isIGAgentAsUserSandboxRequest())->toBeFalse();
+    expect(
+      $tcps->isBaggageFlags1Set(
+        ContextProp\BaggageFlags1::IG_AGENT_AS_USER_SANDBOX_REQUEST,
+      ),
+    )->toBeFalse();
+
+    $tcps->setIGAgentAsUserSandboxRequest();
+    expect($tcps->isIGAgentAsUserSandboxRequest())->toBeTrue();
+    expect(
+      $tcps->isBaggageFlags1Set(
+        ContextProp\BaggageFlags1::IG_AGENT_AS_USER_SANDBOX_REQUEST,
+      ),
+    )->toBeTrue();
+
+    $tcps->clearIGAgentAsUserSandboxRequest();
+    expect($tcps->isIGAgentAsUserSandboxRequest())->toBeFalse();
+    expect(
+      $tcps->isBaggageFlags1Set(
+        ContextProp\BaggageFlags1::IG_AGENT_AS_USER_SANDBOX_REQUEST,
+      ),
+    )->toBeFalse();
+  }
+
   public function testBaggageRootProductId(): void {
     $tcps_with_empty_baggage = ThriftContextPropState::get();
     $tcps_with_empty_baggage->clear();

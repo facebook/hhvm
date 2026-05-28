@@ -629,6 +629,110 @@ void swap([[maybe_unused]] Float32Struct& a, [[maybe_unused]] Float32Struct& b) 
 
 namespace py3::simple {
 
+std::string_view IssetInspectionStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<IssetInspectionStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view IssetInspectionStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<IssetInspectionStruct>::name;
+}
+
+IssetInspectionStruct::IssetInspectionStruct(const IssetInspectionStruct&) = default;
+IssetInspectionStruct& IssetInspectionStruct::operator=(const IssetInspectionStruct&) = default;
+IssetInspectionStruct::IssetInspectionStruct() :
+    __fbthrift_field_int_field(),
+    __fbthrift_field_bool_field() {
+}
+
+
+IssetInspectionStruct::~IssetInspectionStruct() {}
+
+IssetInspectionStruct::IssetInspectionStruct([[maybe_unused]] IssetInspectionStruct&& other) noexcept :
+    __fbthrift_field_int_field(std::move(other.__fbthrift_field_int_field)),
+    __fbthrift_field_opt_str_field(std::move(other.__fbthrift_field_opt_str_field)),
+    __fbthrift_field_bool_field(std::move(other.__fbthrift_field_bool_field)),
+    __isset(other.__isset) {
+}
+
+IssetInspectionStruct& IssetInspectionStruct::operator=([[maybe_unused]] IssetInspectionStruct&& other) noexcept {
+    this->__fbthrift_field_int_field = std::move(other.__fbthrift_field_int_field);
+    this->__fbthrift_field_opt_str_field = std::move(other.__fbthrift_field_opt_str_field);
+    this->__fbthrift_field_bool_field = std::move(other.__fbthrift_field_bool_field);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+IssetInspectionStruct::IssetInspectionStruct(apache::thrift::FragileConstructor, ::std::int32_t int_field__arg, ::std::string opt_str_field__arg, bool bool_field__arg) :
+    __fbthrift_field_int_field(std::move(int_field__arg)),
+    __fbthrift_field_opt_str_field(std::move(opt_str_field__arg)),
+    __fbthrift_field_bool_field(std::move(bool_field__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+}
+
+void IssetInspectionStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_int_field = ::std::int32_t();
+  this->__fbthrift_field_opt_str_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  this->__fbthrift_field_bool_field = bool();
+  __isset = {};
+}
+
+bool IssetInspectionStruct::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool IssetInspectionStruct::operator==([[maybe_unused]] const IssetInspectionStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool IssetInspectionStruct::operator<([[maybe_unused]] const IssetInspectionStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+::std::int32_t IssetInspectionStruct::get_int_field() const {
+  return __fbthrift_field_int_field;
+}
+
+::std::int32_t& IssetInspectionStruct::set_int_field(::std::int32_t int_field_) {
+  int_field_ref() = int_field_;
+  return __fbthrift_field_int_field;
+}
+
+const ::std::string* IssetInspectionStruct::get_opt_str_field() const& {
+  return opt_str_field_ref().has_value() ? std::addressof(__fbthrift_field_opt_str_field) : nullptr;
+}
+
+::std::string* IssetInspectionStruct::get_opt_str_field() & {
+  return opt_str_field_ref().has_value() ? std::addressof(__fbthrift_field_opt_str_field) : nullptr;
+}
+
+bool IssetInspectionStruct::get_bool_field() const {
+  return __fbthrift_field_bool_field;
+}
+
+bool& IssetInspectionStruct::set_bool_field(bool bool_field_) {
+  bool_field_ref() = bool_field_;
+  return __fbthrift_field_bool_field;
+}
+
+void swap([[maybe_unused]] IssetInspectionStruct& a, [[maybe_unused]] IssetInspectionStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_int_field, b.__fbthrift_field_int_field);
+  swap(a.__fbthrift_field_opt_str_field, b.__fbthrift_field_opt_str_field);
+  swap(a.__fbthrift_field_bool_field, b.__fbthrift_field_bool_field);
+  swap(a.__isset, b.__isset);
+}
+
+
+} // namespace py3::simple
+
+
+namespace py3::simple {
+
 std::string_view HiddenTypeFieldsStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<HiddenTypeFieldsStruct>::fields_names[folly::to_underlying(ord) - 1];

@@ -33,6 +33,11 @@ cdef api int can_extract__module__Float32Struct(object) except -1
 
 cdef api object init__module__Float32Struct(object data)
 
+cdef api int can_extract__module__IssetInspectionStruct(object) except -1
+
+
+cdef api object init__module__IssetInspectionStruct(object data)
+
 cdef api int can_extract__module__HiddenTypeFieldsStruct(object) except -1
 
 cdef api __cIOBuf* extract__module__HiddenTypeFieldsStruct(object) except NULL

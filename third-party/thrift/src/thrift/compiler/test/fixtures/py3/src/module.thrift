@@ -98,6 +98,13 @@ struct Float32Struct {
   4: map<string, list<DeferredTruncationFloat>> float_map;
 }
 
+@python.EnableUnsafeIssetInspection
+struct IssetInspectionStruct {
+  1: i32 int_field;
+  2: optional string opt_str_field;
+  3: bool bool_field;
+}
+
 @cpp.Adapter{name = "Adapter"}
 typedef SimpleStruct AdaptedTypeDef
 @python.Py3Hidden

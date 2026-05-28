@@ -60,6 +60,7 @@ SimpleException = _fbthrift_types_inplace.SimpleException
 OptionalRefStruct = _fbthrift_types_inplace.OptionalRefStruct
 SimpleStruct = _fbthrift_types_inplace.SimpleStruct
 Float32Struct = _fbthrift_types_inplace.Float32Struct
+IssetInspectionStruct = _fbthrift_types_inplace.IssetInspectionStruct
 HiddenTypeFieldsStruct = _fbthrift_types_inplace.HiddenTypeFieldsStruct
 ComplexStruct = _fbthrift_types_inplace.ComplexStruct
 BinaryUnion = _fbthrift_types_inplace.BinaryUnion

@@ -110,6 +110,18 @@ cdef class Float32Struct(thrift.py3.types.Struct):
 
 
 
+cdef class IssetInspectionStruct(thrift.py3.types.Struct):
+    cdef shared_ptr[_module_cbindings.cIssetInspectionStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef _fbthrift_types_fields.__IssetInspectionStruct_FieldsSetter _fields_setter
+    cdef inline object int_field_impl(self)
+    cdef inline object opt_str_field_impl(self)
+    cdef inline object bool_field_impl(self)
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cIssetInspectionStruct])
+
+
+
 cdef class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
     cdef shared_ptr[_module_cbindings.cHiddenTypeFieldsStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__HiddenTypeFieldsStruct_FieldsSetter _fields_setter

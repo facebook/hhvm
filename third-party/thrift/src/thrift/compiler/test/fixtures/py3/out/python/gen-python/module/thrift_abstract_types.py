@@ -145,6 +145,30 @@ class Float32Struct(_abc.ABC):
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.Float32Struct": ...  # type: ignore
 _fbthrift_Float32Struct = Float32Struct
+class IssetInspectionStruct(_abc.ABC):
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def int_field(self) -> builtins.int: ...
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def opt_str_field(self) -> _typing.Optional[builtins.str]: ...
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def bool_field(self) -> builtins.bool: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int, builtins.str, builtins.bool]]]: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.IssetInspectionStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.IssetInspectionStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.IssetInspectionStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.IssetInspectionStruct": ...  # type: ignore
+_fbthrift_IssetInspectionStruct = IssetInspectionStruct
 class HiddenTypeFieldsStruct(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property

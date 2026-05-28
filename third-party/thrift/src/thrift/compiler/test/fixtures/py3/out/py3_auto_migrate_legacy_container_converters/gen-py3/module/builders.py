@@ -79,6 +79,20 @@ class Float32Struct_Builder(thrift.py3.builder.StructBuilder):
         yield "float_list", self.float_list
         yield "float_map", self.float_map
 
+_fbthrift_struct_type__IssetInspectionStruct = _module_types.IssetInspectionStruct
+class IssetInspectionStruct_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__IssetInspectionStruct
+
+    def __init__(self):
+        self.int_field: _typing.Optional[int] = None
+        self.opt_str_field: _typing.Optional[str] = None
+        self.bool_field: _typing.Optional[bool] = None
+
+    def __iter__(self):
+        yield "int_field", self.int_field
+        yield "opt_str_field", self.opt_str_field
+        yield "bool_field", self.bool_field
+
 _fbthrift_struct_type__HiddenTypeFieldsStruct = _module_types.HiddenTypeFieldsStruct
 class HiddenTypeFieldsStruct_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__HiddenTypeFieldsStruct

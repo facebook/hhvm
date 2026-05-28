@@ -2417,6 +2417,120 @@ class Float32Struct(thrift.py3.types.Struct):
 
 __all__.append("Float32Struct")
 
+class IssetInspectionStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.IssetInspectionStruct
+    _FBTHRIFT__FIELD_NAMES = (
+        "int_field",
+        "opt_str_field",
+        "bool_field",
+    )
+    _fbthrift__inner : _fbthrift_python_types.IssetInspectionStruct
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        _fbthrift__maybe_str_enum = kwargs.get("opt_str_field", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["opt_str_field"] = _fbthrift__maybe_str_enum.value
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.IssetInspectionStruct(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.IssetInspectionStruct(*args, **kwargs)
+
+
+    def __new__(_fbthrift__cls, *args, **kwargs) -> IssetInspectionStruct:
+        instance = super().__new__(_fbthrift__cls)
+        return instance
+
+    def __call__(self, **kwargs) -> IssetInspectionStruct:
+        return IssetInspectionStruct.from_python(self._fbthrift__inner(**kwargs))
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.IssetInspectionStruct) -> IssetInspectionStruct:
+        inst = IssetInspectionStruct.__new__(IssetInspectionStruct)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> IssetInspectionStruct:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.IssetInspectionStruct:
+        return self._fbthrift__inner
+
+    def _to_py_deprecated(self):
+        py_deprecated_types = _get_py_deprecated_module()
+        return thrift.util.converter.to_py_struct(py_deprecated_types.IssetInspectionStruct, self)
+
+    def _fbthrift__isset(self) -> dict[str, bool]:
+        return thrift.python.types.isset(self._fbthrift__inner)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__IssetInspectionStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        return IssetInspectionStruct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.IssetInspectionStruct"
+
+    @_python__property
+    def int_field(self) -> int:
+        return self._fbthrift__inner.int_field
+
+    @_python__property
+    def opt_str_field(self) -> _typing.Optional[str]:
+        return self._fbthrift__inner.opt_str_field
+
+    @_python__property
+    def bool_field(self) -> bool:
+        return self._fbthrift__inner.bool_field
+
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 3
+
+    def __eq__(self, other):
+        if type(self) == type(other):
+            return self._fbthrift__inner == other._fbthrift__inner
+
+        if type(other) is self._FBTHRIFT__PYTHON_CLASS:
+            return self._fbthrift__inner == other
+
+        return False
+
+
+    def __lt__(self, other):
+        if not isinstance(other, IssetInspectionStruct):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, IssetInspectionStruct):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
+
+    def __copy__(self):
+        return self
+
+
+__all__.append("IssetInspectionStruct")
+
 class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
     __slots__ = (

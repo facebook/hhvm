@@ -28,6 +28,11 @@ template uint32_t Float32Struct::write<>(apache::thrift::BinaryProtocolWriter*) 
 template uint32_t Float32Struct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t Float32Struct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 
+template void IssetInspectionStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t IssetInspectionStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t IssetInspectionStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t IssetInspectionStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+
 template void HiddenTypeFieldsStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t HiddenTypeFieldsStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t HiddenTypeFieldsStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;

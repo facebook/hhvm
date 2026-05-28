@@ -10,6 +10,7 @@ from module.thrift_types import (
     OptionalRefStruct,
     SimpleStruct,
     Float32Struct,
+    IssetInspectionStruct,
     HiddenTypeFieldsStruct,
     AdaptedUnion,
     HiddenException,

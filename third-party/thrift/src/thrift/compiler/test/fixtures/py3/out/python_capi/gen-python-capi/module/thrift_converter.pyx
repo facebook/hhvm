@@ -36,6 +36,12 @@ cdef cFloat32Struct Float32Struct_convert_to_cpp(object inst) except *:
 cdef object Float32Struct_from_cpp(const cFloat32Struct& c_struct):
     return cpp_to_python[cFloat32Struct, _fbthrift__NamespaceTag](c_struct)
 
+cdef cIssetInspectionStruct IssetInspectionStruct_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cIssetInspectionStruct, _fbthrift__NamespaceTag](inst))
+
+cdef object IssetInspectionStruct_from_cpp(const cIssetInspectionStruct& c_struct):
+    return cpp_to_python[cIssetInspectionStruct, _fbthrift__NamespaceTag](c_struct)
+
 cdef cHiddenTypeFieldsStruct HiddenTypeFieldsStruct_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cHiddenTypeFieldsStruct, _fbthrift__NamespaceTag](inst))
 

@@ -16,6 +16,8 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-cpp2/module_types.h":
         cSimpleStruct()
     cdef cppclass cFloat32Struct "::py3::simple::Float32Struct":
         cFloat32Struct()
+    cdef cppclass cIssetInspectionStruct "::py3::simple::IssetInspectionStruct":
+        cIssetInspectionStruct()
     cdef cppclass cHiddenTypeFieldsStruct "::py3::simple::HiddenTypeFieldsStruct":
         cHiddenTypeFieldsStruct()
     cdef cppclass cAdaptedUnion "::py3::simple::detail::AdaptedUnion":
@@ -53,6 +55,9 @@ cdef object SimpleStruct_from_cpp(const cSimpleStruct& c_struct)
 
 cdef cFloat32Struct Float32Struct_convert_to_cpp(object inst) except*
 cdef object Float32Struct_from_cpp(const cFloat32Struct& c_struct)
+
+cdef cIssetInspectionStruct IssetInspectionStruct_convert_to_cpp(object inst) except*
+cdef object IssetInspectionStruct_from_cpp(const cIssetInspectionStruct& c_struct)
 
 cdef cHiddenTypeFieldsStruct HiddenTypeFieldsStruct_convert_to_cpp(object inst) except*
 cdef object HiddenTypeFieldsStruct_from_cpp(const cHiddenTypeFieldsStruct& c_struct)

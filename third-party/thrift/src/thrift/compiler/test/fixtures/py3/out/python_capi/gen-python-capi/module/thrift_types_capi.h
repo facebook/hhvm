@@ -146,6 +146,37 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>> {
+  static const bool kUsingMarshal = true;
+  ExtractorResult<::py3::simple::IssetInspectionStruct> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::IssetInspectionStruct, ::module::NamespaceTag >>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>> {
+  ExtractorResult<::py3::simple::IssetInspectionStruct> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>> {
+  static const bool kUsingMarshal = true;
+  PyObject* operator()(const ::py3::simple::IssetInspectionStruct& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>> {
+  PyObject* operator()(const ::py3::simple::IssetInspectionStruct& val);
+};
+
+template <>
 struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::HiddenTypeFieldsStruct, ::module::NamespaceTag>>
     : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::HiddenTypeFieldsStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = false;

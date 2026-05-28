@@ -217,6 +217,43 @@ class Float32Struct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pyth
 _fbthrift_Float32Struct = Float32Struct
 
 @_typing.final
+class IssetInspectionStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.IssetInspectionStruct):
+    @property
+    def int_field(self) -> builtins.int: ...
+    @int_field.setter
+    def int_field(self, value: builtins.int) -> None: ...
+
+    @property
+    def opt_str_field(self) -> _typing.Optional[builtins.str]: ...
+    @opt_str_field.setter
+    def opt_str_field(self, value: _typing.Optional[builtins.str]) -> None: ...
+
+    @property
+    def bool_field(self) -> builtins.bool: ...
+    @bool_field.setter
+    def bool_field(self, value: builtins.bool) -> None: ...
+
+    def __init__(
+        self, *,
+        int_field: _typing.Optional[builtins.int]=...,
+        opt_str_field: _typing.Optional[builtins.str]=...,
+        bool_field: _typing.Optional[builtins.bool]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        int_field: _typing.Optional[builtins.int]=...,
+        opt_str_field: _typing.Optional[builtins.str]=...,
+        bool_field: _typing.Optional[builtins.bool]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int, builtins.str, builtins.bool]]]: ...
+    def _to_python(self) -> "module.thrift_types.IssetInspectionStruct": ...  # type: ignore
+    def _to_mutable_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "module.types.IssetInspectionStruct": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.IssetInspectionStruct": ...  # type: ignore
+_fbthrift_IssetInspectionStruct = IssetInspectionStruct
+
+@_typing.final
 class HiddenTypeFieldsStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.HiddenTypeFieldsStruct):
     @property
     def field1(self) -> _fbthrift_SimpleStruct: ...

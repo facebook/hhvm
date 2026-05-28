@@ -683,6 +683,137 @@ cdef class Float32Struct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 @__cython.final
+cdef class IssetInspectionStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
+    def __init__(IssetInspectionStruct self, **kwargs):
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cIssetInspectionStruct]()
+        self._fields_setter = _fbthrift_types_fields.__IssetInspectionStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        super().__init__(**kwargs)
+
+    def __call__(IssetInspectionStruct self, **kwargs):
+        if not kwargs:
+            return self
+        cdef IssetInspectionStruct __fbthrift_inst = IssetInspectionStruct.__new__(IssetInspectionStruct)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cIssetInspectionStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__IssetInspectionStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return _fbthrift_IsSet("IssetInspectionStruct", {
+          "int_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).int_field_ref().has_value(),
+          "opt_str_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_str_field_ref().has_value(),
+          "bool_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bool_field_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cIssetInspectionStruct] cpp_obj):
+        __fbthrift_inst = <IssetInspectionStruct>IssetInspectionStruct.__new__(IssetInspectionStruct)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline int_field_impl(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).int_field_ref().value()
+
+    @property
+    def int_field(self):
+        return self.int_field_impl()
+
+    cdef inline opt_str_field_impl(self):
+        if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_str_field_ref().has_value():
+            return None
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_str_field_ref().value_unchecked()).decode('UTF-8')
+
+    @property
+    def opt_str_field(self):
+        return self.opt_str_field_impl()
+
+    cdef inline bool_field_impl(self):
+        return <pbool> deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bool_field_ref().value()
+
+    @property
+    def bool_field(self):
+        return self.bool_field_impl()
+
+
+    def __hash__(IssetInspectionStruct self):
+        return super().__hash__()
+
+    def __repr__(IssetInspectionStruct self):
+        return super().__repr__()
+
+    def __str__(IssetInspectionStruct self):
+        return super().__str__()
+
+
+    def __copy__(IssetInspectionStruct self):
+        return self
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[_module_cbindings.cIssetInspectionStruct](
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<IssetInspectionStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__IssetInspectionStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        _module_cbindings.StructMetadata[_module_cbindings.cIssetInspectionStruct].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.IssetInspectionStruct"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cIssetInspectionStruct](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 3
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(IssetInspectionStruct self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[_module_cbindings.cIssetInspectionStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(IssetInspectionStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cIssetInspectionStruct]()
+        with nogil:
+            needed = serializer.cdeserialize[_module_cbindings.cIssetInspectionStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+        return needed
+
+
+    def _to_python(self):
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.IssetInspectionStruct,
+            self,
+        )
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.IssetInspectionStruct, self)
+
+@__cython.auto_pickle(False)
+@__cython.final
 cdef class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 

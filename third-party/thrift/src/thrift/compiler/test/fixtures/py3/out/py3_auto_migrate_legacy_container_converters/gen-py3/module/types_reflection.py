@@ -281,6 +281,53 @@ def get_reflection__Float32Struct() -> __StructSpec:
         ),
     )
     return spec
+def get_reflection__IssetInspectionStruct() -> __StructSpec:
+    spec: __StructSpec = __StructSpec._fbthrift_create(
+        name="IssetInspectionStruct",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="int_field",
+            py_name="int_field",
+            type=int,
+            kind=__NumberType.I32,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="opt_str_field",
+            py_name="opt_str_field",
+            type=str,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.OPTIONAL,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=3,
+            name="bool_field",
+            py_name="bool_field",
+            type=bool,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
 def get_reflection__HiddenTypeFieldsStruct() -> __StructSpec:
     spec: __StructSpec = __StructSpec._fbthrift_create(
         name="HiddenTypeFieldsStruct",

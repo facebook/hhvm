@@ -51,6 +51,14 @@ cdef object Float32Struct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFloat32
     _py_struct = _module_thrift_converter.Float32Struct_from_cpp(deref(const_pointer_cast(c_struct)))
     return _py_struct
 
+cdef shared_ptr[_fbthrift_cbindings.cIssetInspectionStruct] IssetInspectionStruct_convert_to_cpp(object inst) except*:
+    return make_shared[_fbthrift_cbindings.cIssetInspectionStruct](
+        _module_thrift_converter.IssetInspectionStruct_convert_to_cpp(inst)
+    )
+cdef object IssetInspectionStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cIssetInspectionStruct]& c_struct):
+    _py_struct = _module_thrift_converter.IssetInspectionStruct_from_cpp(deref(const_pointer_cast(c_struct)))
+    return _py_struct
+
 cdef shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct] HiddenTypeFieldsStruct_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cHiddenTypeFieldsStruct](
         _module_thrift_converter.HiddenTypeFieldsStruct_convert_to_cpp(inst)

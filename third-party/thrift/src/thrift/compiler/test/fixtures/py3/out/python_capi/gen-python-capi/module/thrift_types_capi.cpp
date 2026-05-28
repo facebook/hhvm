@@ -34,6 +34,9 @@ bool ensure_module_imported() {
   static constexpr std::int16_t _fbthrift__Float32Struct__tuple_pos[4] = {
     1, 2, 3, 4
   };
+  static constexpr std::int16_t _fbthrift__IssetInspectionStruct__tuple_pos[3] = {
+    1, 2, 3
+  };
   static constexpr std::int16_t _fbthrift__HiddenException__tuple_pos[1] = {
     1
   };
@@ -576,6 +579,120 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
           *fbthrift_data,
           _fbthrift__Float32Struct__tuple_pos[3],
           *_fbthrift__float_map) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
+}
+
+
+ExtractorResult<::py3::simple::IssetInspectionStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a IssetInspectionStruct");
+      }
+      return extractorError<::py3::simple::IssetInspectionStruct>(
+          "Marshal error: IssetInspectionStruct");
+  }
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>>{}(*fbThriftData);
+}
+
+ExtractorResult<::py3::simple::IssetInspectionStruct>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::py3::simple::IssetInspectionStruct cpp;
+  std::optional<std::string_view> error;
+  Extractor<int32_t>{}.extractInto(
+      cpp.int_field_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__IssetInspectionStruct__tuple_pos[0]),
+      error);
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
+      cpp.opt_str_field_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__IssetInspectionStruct__tuple_pos[1]),
+      error);
+  Extractor<bool>{}.extractInto(
+      cpp.bool_field_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__IssetInspectionStruct__tuple_pos[2]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module module import error");
+  }
+  int result =
+      can_extract__module__IssetInspectionStruct(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: IssetInspectionStruct");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>>::operator()(
+    const ::py3::simple::IssetInspectionStruct& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
+  return init__module__IssetInspectionStruct(*fbthrift_data);
+}
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::py3::simple::IssetInspectionStruct& val) {
+  StrongRef fbthrift_data(createStructTuple(3));
+  StrongRef _fbthrift__int_field(
+    Constructor<int32_t>{}
+    .constructFrom(val.int_field_ref()));
+  if (!_fbthrift__int_field ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__IssetInspectionStruct__tuple_pos[0],
+          *_fbthrift__int_field) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__opt_str_field(
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
+    .constructFrom(val.opt_str_field_ref()));
+  if (_fbthrift__opt_str_field.isNone()) {
+    Py_INCREF(Py_None);
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__IssetInspectionStruct__tuple_pos[1],
+      Py_None);
+  } else
+  if (!_fbthrift__opt_str_field ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__IssetInspectionStruct__tuple_pos[1],
+          *_fbthrift__opt_str_field) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__bool_field(
+    Constructor<bool>{}
+    .constructFrom(val.bool_field_ref()));
+  if (!_fbthrift__bool_field ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__IssetInspectionStruct__tuple_pos[2],
+          *_fbthrift__bool_field) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();

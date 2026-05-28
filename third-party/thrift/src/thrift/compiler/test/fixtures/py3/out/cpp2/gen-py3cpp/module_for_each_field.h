@@ -60,6 +60,16 @@ struct ForEachField<::py3::simple::Float32Struct> {
 };
 
 template <>
+struct ForEachField<::py3::simple::IssetInspectionStruct> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).int_field_ref()...);
+    f(1, static_cast<T&&>(t).opt_str_field_ref()...);
+    f(2, static_cast<T&&>(t).bool_field_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::py3::simple::HiddenTypeFieldsStruct> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {

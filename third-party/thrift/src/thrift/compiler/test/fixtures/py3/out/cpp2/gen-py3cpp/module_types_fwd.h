@@ -14,6 +14,7 @@ class SimpleException;
 class OptionalRefStruct;
 class SimpleStruct;
 class Float32Struct;
+class IssetInspectionStruct;
 class HiddenTypeFieldsStruct;
 namespace detail {
 class AdaptedUnion;

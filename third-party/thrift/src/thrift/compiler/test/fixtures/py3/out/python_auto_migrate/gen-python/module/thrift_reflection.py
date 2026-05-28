@@ -351,6 +351,59 @@ def get_reflection__Float32Struct():
     return spec
 
 
+def get_reflection__IssetInspectionStruct():
+    if not _HAS_REFLECTION:
+        return None
+    import facebook.thrift.annotation.python.thrift_types as _fbthrift__facebook__thrift__annotation__python__thrift_types  # noqa: F811
+    spec = _StructSpec(
+        name="IssetInspectionStruct",
+        kind=_StructType.STRUCT,
+        structured_annotations={
+            "python.EnableUnsafeIssetInspection": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__python__thrift_types.EnableUnsafeIssetInspection, fields={}), thrift_type=_ThriftType.STRUCT),
+        },
+    )
+    spec.add_field(
+        _FieldSpec(
+            id=1,
+            name="int_field",
+            py_name="int_field",
+            type=int,
+            thrift_type=_ThriftType.I32,
+            qualifier=_Qualifier.UNQUALIFIED,
+            default=0,
+            structured_annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        _FieldSpec(
+            id=2,
+            name="opt_str_field",
+            py_name="opt_str_field",
+            type=str,
+            thrift_type=_ThriftType.STRING,
+            qualifier=_Qualifier.OPTIONAL,
+            default=None,
+            structured_annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        _FieldSpec(
+            id=3,
+            name="bool_field",
+            py_name="bool_field",
+            type=bool,
+            thrift_type=_ThriftType.BOOL,
+            qualifier=_Qualifier.UNQUALIFIED,
+            default=False,
+            structured_annotations={
+            },
+        ),
+    )
+    return spec
+
+
 def get_reflection__HiddenTypeFieldsStruct():
     if not _HAS_REFLECTION:
         return None

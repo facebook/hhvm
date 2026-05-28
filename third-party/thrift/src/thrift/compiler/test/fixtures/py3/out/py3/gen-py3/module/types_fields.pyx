@@ -305,6 +305,54 @@ cdef class __Float32Struct_FieldsSetter(__StructFieldsSetter):
 
 
 @__cython.auto_pickle(False)
+cdef class __IssetInspectionStruct_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __IssetInspectionStruct_FieldsSetter _fbthrift_create(_module_cbindings.cIssetInspectionStruct* struct_cpp_obj):
+        cdef __IssetInspectionStruct_FieldsSetter __fbthrift_inst = __IssetInspectionStruct_FieldsSetter.__new__(__IssetInspectionStruct_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"int_field")] = __IssetInspectionStruct_FieldsSetter._set_field_0
+        __fbthrift_inst._setters[__cstring_view(<const char*>"opt_str_field")] = __IssetInspectionStruct_FieldsSetter._set_field_1
+        __fbthrift_inst._setters[__cstring_view(<const char*>"bool_field")] = __IssetInspectionStruct_FieldsSetter._set_field_2
+        return __fbthrift_inst
+
+    cdef void set_field(__IssetInspectionStruct_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __IssetInspectionStruct_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field int_field
+        if _fbthrift_value is None:
+            __reset_field[_module_cbindings.cIssetInspectionStruct](deref(self._struct_cpp_obj), 0)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'int_field is not a { int !r}.')
+        _fbthrift_value = <cint32_t> _fbthrift_value
+        deref(self._struct_cpp_obj).int_field_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_1(self, _fbthrift_value) except *:
+        # for field opt_str_field
+        if _fbthrift_value is None:
+            __reset_field[_module_cbindings.cIssetInspectionStruct](deref(self._struct_cpp_obj), 1)
+            return
+        if not isinstance(_fbthrift_value, str):
+            raise TypeError(f'opt_str_field is not a { str !r}.')
+        deref(self._struct_cpp_obj).opt_str_field_ref().assign(cmove(bytes_to_string(_fbthrift_value.encode('utf-8'))))
+
+    cdef void _set_field_2(self, _fbthrift_value) except *:
+        # for field bool_field
+        if _fbthrift_value is None:
+            __reset_field[_module_cbindings.cIssetInspectionStruct](deref(self._struct_cpp_obj), 2)
+            return
+        if not isinstance(_fbthrift_value, bool):
+            raise TypeError(f'bool_field is not a { bool !r}.')
+        deref(self._struct_cpp_obj).bool_field_ref().assign(_fbthrift_value)
+
+
+@__cython.auto_pickle(False)
 cdef class __HiddenTypeFieldsStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod

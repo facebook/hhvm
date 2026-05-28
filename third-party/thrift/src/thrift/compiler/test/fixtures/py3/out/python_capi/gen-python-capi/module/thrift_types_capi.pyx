@@ -47,6 +47,13 @@ cdef api int can_extract__module__Float32Struct(object __obj) except -1:
 cdef api object init__module__Float32Struct(object data):
     return __thrift_types.Float32Struct._fbthrift_from_internal_data(data)
 
+cdef api int can_extract__module__IssetInspectionStruct(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.IssetInspectionStruct) else 0
+
+
+cdef api object init__module__IssetInspectionStruct(object data):
+    return __thrift_types.IssetInspectionStruct._fbthrift_from_internal_data(data)
+
 cdef api int can_extract__module__HiddenTypeFieldsStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.HiddenTypeFieldsStruct) else 0
 

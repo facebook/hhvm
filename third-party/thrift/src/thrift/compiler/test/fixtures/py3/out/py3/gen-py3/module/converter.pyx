@@ -50,6 +50,14 @@ cdef shared_ptr[_fbthrift_cbindings.cFloat32Struct] Float32Struct_convert_to_cpp
 cdef object Float32Struct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFloat32Struct]& c_struct):
     return _fbthrift_ctypes.Float32Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+cdef shared_ptr[_fbthrift_cbindings.cIssetInspectionStruct] IssetInspectionStruct_convert_to_cpp(object inst) except*:
+    return make_shared[_fbthrift_cbindings.cIssetInspectionStruct](deref(
+        (<_fbthrift_ctypes.IssetInspectionStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
+
+cdef object IssetInspectionStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cIssetInspectionStruct]& c_struct):
+    return _fbthrift_ctypes.IssetInspectionStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct] HiddenTypeFieldsStruct_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cHiddenTypeFieldsStruct](deref(
         (<_fbthrift_ctypes.HiddenTypeFieldsStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE

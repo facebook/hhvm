@@ -402,6 +402,20 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-cpp2/module_types_custom
         __field_ref[cmap[string,vector[float]]] float_map_ref "float_map_ref" ()
 
 
+    cdef cppclass cIssetInspectionStruct "::py3::simple::IssetInspectionStruct":
+        cIssetInspectionStruct() except +
+        cIssetInspectionStruct(const cIssetInspectionStruct&) except +
+        bint operator==(cIssetInspectionStruct&)
+        bint operator!=(cIssetInspectionStruct&)
+        bint operator<(cIssetInspectionStruct&)
+        bint operator>(cIssetInspectionStruct&)
+        bint operator<=(cIssetInspectionStruct&)
+        bint operator>=(cIssetInspectionStruct&)
+        __field_ref[cint32_t] int_field_ref "int_field_ref" ()
+        __optional_field_ref[string] opt_str_field_ref "opt_str_field_ref" ()
+        __field_ref[cbool] bool_field_ref "bool_field_ref" ()
+
+
     cdef cppclass cHiddenTypeFieldsStruct "::py3::simple::HiddenTypeFieldsStruct":
         cHiddenTypeFieldsStruct() except +
         cHiddenTypeFieldsStruct(const cHiddenTypeFieldsStruct&) except +

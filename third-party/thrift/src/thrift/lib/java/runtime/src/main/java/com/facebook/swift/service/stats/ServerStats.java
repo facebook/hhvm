@@ -19,8 +19,8 @@ package com.facebook.swift.service.stats;
 import com.facebook.nifty.core.NiftyMetrics;
 import com.facebook.thrift.metrics.distribution.MultiWindowDistribution;
 import com.facebook.thrift.metrics.distribution.Quantile;
+import com.facebook.thrift.metrics.rate.CompositeMovingCounter;
 import com.facebook.thrift.metrics.rate.ExpMovingAverageRate;
-import com.facebook.thrift.metrics.rate.SlidingTimeWindowMovingCounter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.LongAdder;
 public class ServerStats {
   private final ConcurrentHashMap<String, ExpMovingAverageRate> movingAverages =
       new ConcurrentHashMap<>();
-  private final ConcurrentHashMap<String, SlidingTimeWindowMovingCounter> counters =
+  private final ConcurrentHashMap<String, CompositeMovingCounter> counters =
       new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, MultiWindowDistribution> distributions =
       new ConcurrentHashMap<>();
@@ -203,9 +203,9 @@ public class ServerStats {
     }
     adder.add(value);
 
-    SlidingTimeWindowMovingCounter counter = counters.get(key);
+    CompositeMovingCounter counter = counters.get(key);
     if (counter == null) {
-      counter = counters.computeIfAbsent(key, k -> new SlidingTimeWindowMovingCounter());
+      counter = counters.computeIfAbsent(key, k -> new CompositeMovingCounter());
     }
     counter.add(value);
   }

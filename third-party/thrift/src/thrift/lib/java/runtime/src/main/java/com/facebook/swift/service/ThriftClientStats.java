@@ -20,7 +20,7 @@ import static java.util.Arrays.asList;
 
 import com.facebook.thrift.metrics.distribution.MultiWindowDistribution;
 import com.facebook.thrift.metrics.distribution.Quantile;
-import com.facebook.thrift.metrics.rate.SlidingTimeWindowMovingCounter;
+import com.facebook.thrift.metrics.rate.CompositeMovingCounter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,7 +49,7 @@ public class ThriftClientStats {
 
   private static final String DISPOSED = ".diposed";
 
-  private final ConcurrentHashMap<String, SlidingTimeWindowMovingCounter> counters =
+  private final ConcurrentHashMap<String, CompositeMovingCounter> counters =
       new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, MultiWindowDistribution> distributions =
       new ConcurrentHashMap<>();
@@ -129,9 +129,9 @@ public class ThriftClientStats {
     }
     adder.increment();
 
-    SlidingTimeWindowMovingCounter counter = counters.get(key);
+    CompositeMovingCounter counter = counters.get(key);
     if (counter == null) {
-      counter = counters.computeIfAbsent(key, k -> new SlidingTimeWindowMovingCounter());
+      counter = counters.computeIfAbsent(key, k -> new CompositeMovingCounter());
     }
     counter.add(1);
   }

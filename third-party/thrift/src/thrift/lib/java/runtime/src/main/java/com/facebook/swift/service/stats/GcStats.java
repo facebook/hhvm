@@ -18,7 +18,7 @@ package com.facebook.swift.service.stats;
 
 import com.facebook.thrift.metrics.distribution.Quantile;
 import com.facebook.thrift.metrics.distribution.SingleWindowDistribution;
-import com.facebook.thrift.metrics.rate.SlidingTimeWindowMovingCounter;
+import com.facebook.thrift.metrics.rate.CompositeMovingCounter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.AtomicDouble;
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 public class GcStats {
   private static final Logger logger = LoggerFactory.getLogger(GcStats.class);
 
-  private final Map<String, SlidingTimeWindowMovingCounter> counters = new ConcurrentHashMap<>();
+  private final Map<String, CompositeMovingCounter> counters = new ConcurrentHashMap<>();
   private final Map<String, SingleWindowDistribution> distributions = new ConcurrentHashMap<>();
 
   public static enum Collector {
@@ -502,7 +502,7 @@ public class GcStats {
   }
 
   private void incrementCounter(String key, long value) {
-    counters.computeIfAbsent(key, (k) -> new SlidingTimeWindowMovingCounter()).add(value);
+    counters.computeIfAbsent(key, (k) -> new CompositeMovingCounter()).add(value);
   }
 
   private void incrementDistribution(String key, long value) {

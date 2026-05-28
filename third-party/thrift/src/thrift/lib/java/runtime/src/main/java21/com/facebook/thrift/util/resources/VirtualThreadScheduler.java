@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.util.resources;
 
-import com.facebook.thrift.metrics.rate.SlidingTimeWindowMovingCounter;
+import com.facebook.thrift.metrics.rate.CompositeMovingCounter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -107,8 +107,7 @@ public final class VirtualThreadScheduler implements ThriftScheduler {
   private static final MeterRegistry registry = new SimpleMeterRegistry();
   private final DistributionSummary dist =
       DistributionSummary.builder("execution_time").publishPercentiles(0.95).register(registry);
-  private final SlidingTimeWindowMovingCounter createdTasksSum =
-      new SlidingTimeWindowMovingCounter();
+  private final CompositeMovingCounter createdTasksSum = new CompositeMovingCounter();
   private final Semaphore semaphore;
   private final ExecutorService executor;
   private final Scheduler periodicScheduler;

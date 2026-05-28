@@ -5403,9 +5403,9 @@ dependencies = [
 
 [[package]]
 name = "vergen"
-version = "7.3.1"
+version = "7.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f10de320f0fe3f21913dabbfcbced6867bbe47a6b1a5db830e37df3a50279bd0"
+checksum = "f21b881cd6636ece9735721cf03c1fe1e774fe258683d084bb2812ab67435749"
 dependencies = [
  "anyhow",
  "cfg-if 1.0.4",

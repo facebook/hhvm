@@ -58,7 +58,7 @@ void ConnectionManager::start() {
   executor_->addObserver(observer_);
 }
 
-void ConnectionManager::stop(std::chrono::milliseconds drainTimeout) {
+void ConnectionManager::stop() {
   State expected = State::STARTED;
   if (!state_.compare_exchange_strong(expected, State::STOPPED)) {
     return;
@@ -74,8 +74,9 @@ void ConnectionManager::stop(std::chrono::milliseconds drainTimeout) {
   });
   for (auto& [_, handler] : snapshot) {
     // handler->stop() bounces to its EVB for the synchronous phases and
-    // waits off-EVB for the drain — safe to call from this thread.
-    handler->stop(drainTimeout);
+    // waits off-EVB for the per-connection teardown — safe to call from
+    // this thread.
+    handler->stop();
   }
   // Drop the IOObserver last: unregisterEventBase only erases the map
   // entry (the handler is already torn down) so it's cheap.

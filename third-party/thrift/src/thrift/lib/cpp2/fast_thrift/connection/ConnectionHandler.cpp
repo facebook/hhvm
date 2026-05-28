@@ -57,30 +57,26 @@ ConnectionHandler::~ConnectionHandler() {
   }
 }
 
-void ConnectionHandler::stop(std::chrono::milliseconds drainTimeout) {
+void ConnectionHandler::stop() {
   DCHECK(!evb_->inRunningEventBaseThread())
       << "ConnectionHandler::stop must not be called from the owning EVB; "
-      << "the drain wait would block the loop that fires close callbacks";
+      << "the wait would block the loop that fires close callbacks";
 
   // Phase 1: stop accepting new connections.
   evb_->runImmediatelyOrRunInEventBaseThreadAndWait(
       [this] { stopAcceptingOnEvb(); });
 
-  // Phase 2: initiate graceful drain on every live connection.
+  // Phase 2: trigger close on every live connection.
   evb_->runImmediatelyOrRunInEventBaseThreadAndWait(
-      [this] { drainAllOnEvb(); });
+      [this] { closeAllOnEvb(); });
 
-  // Phase 3: wait for the drain to complete (close callbacks decrement
-  // connections_ and post drainedBaton_ when the last one drops). Off-EVB
-  // so the loop is free to fire those callbacks.
-  if (!drainedBaton_.try_wait_for(drainTimeout)) {
-    XLOG(WARN) << "ConnectionHandler::stop drain timed out after "
-               << drainTimeout.count() << "ms; force-closing remaining";
-  }
-
-  // Phase 4: force-close any stragglers.
-  evb_->runImmediatelyOrRunInEventBaseThreadAndWait(
-      [this] { closeAllConnectionsOnEvb(); });
+  // Phase 3: wait for every connection to fully tear down. Close callbacks
+  // decrement connections_ and post drainedBaton_ when the last one drops.
+  // Each connection is responsible for bounding its own termination (the
+  // thrift connection's close handler owns drain + reap deadlines and
+  // LOG(FATAL)s on stuck callbacks), so no outer timeout is needed here.
+  // Off-EVB so the loop is free to fire those callbacks.
+  drainedBaton_.wait();
 }
 
 void ConnectionHandler::stopAcceptingOnEvb() {
@@ -94,15 +90,15 @@ void ConnectionHandler::stopAcceptingOnEvb() {
   listener_.reset();
 }
 
-void ConnectionHandler::drainAllOnEvb() {
+void ConnectionHandler::closeAllOnEvb() {
   draining_.store(true, std::memory_order_release);
   if (connections_.empty()) {
     postDrainedOnce();
     return;
   }
-  // Snapshot keys so iteration is safe across re-entrant erases (drain()
+  // Snapshot keys so iteration is safe across re-entrant erases (close()
   // may fire the close callback synchronously for connection types
-  // without async drain work).
+  // without async teardown work).
   std::vector<uint64_t> ids;
   ids.reserve(connections_.size());
   for (const auto& [id, _] : connections_) {
@@ -111,7 +107,7 @@ void ConnectionHandler::drainAllOnEvb() {
   for (auto id : ids) {
     auto it = connections_.find(id);
     if (it != connections_.end()) {
-      it->second.drain();
+      it->second.close();
     }
   }
 }

@@ -51,10 +51,10 @@ namespace fast_security = ::apache::thrift::fast_thrift::security;
  * templated setConnectionFactory<F>(); the manager type-erases them so
  * the class itself stays non-templated.
  *
- * Shutdown is a single call: stop(timeout) stops accept across every
- * handler, initiates graceful drain on every live connection, waits up
- * to `timeout` for the drain to complete, then force-closes any
- * stragglers. The dtor calls stop() with the default timeout.
+ * Shutdown is a single call: stop() stops accept across every handler,
+ * triggers close on every live connection, and waits for them all to
+ * fully tear down. Each connection bounds its own termination — there
+ * is no outer deadline. The dtor calls stop().
  *
  * TLS parameters are owned via a SimpleObservable so setTLSParams() can
  * hot-reload them; every per-EVB ConnectionHandler captures an Observer
@@ -115,12 +115,12 @@ class ConnectionManager : public folly::DelayedDestruction {
   void start();
 
   /**
-   * Single-call shutdown: stop accept on every handler, initiate
-   * graceful drain on every live connection, wait up to `drainTimeout`
-   * for the drain to complete, then force-close any stragglers and tear
-   * the IOObserver down. Idempotent.
+   * Single-call shutdown: stop accept on every handler, trigger close on
+   * every live connection, wait for them all to fully tear down, then
+   * drop the IOObserver. Each connection bounds its own termination —
+   * there is no outer deadline. Idempotent.
    */
-  void stop(std::chrono::milliseconds drainTimeout = std::chrono::seconds{30});
+  void stop();
 
   void setEnableReusePortBpfSpread(bool e) noexcept {
     enableReusePortBpfSpread_ = e;

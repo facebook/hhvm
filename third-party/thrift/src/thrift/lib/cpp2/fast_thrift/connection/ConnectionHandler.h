@@ -78,11 +78,12 @@ HANDLER_TAG(connection_accept_callback_handler);
  *     → [ConnectionAcceptCallbackHandler<Conn>]      // only if onAccept is set
  *     → ConnectionInstaller<Conn>  (tail)
  *
- * Shutdown is single-call: stop(timeout) tears the acceptance pipeline
- * down, drains every live connection (drain() then waits on the close
- * callback to remove each entry), and force-closes any stragglers when
- * the timeout elapses. Must NOT be called from the owning EVB thread —
- * the wait would block the same loop that fires the close callbacks.
+ * Shutdown is single-call: stop() tears the acceptance pipeline down,
+ * triggers close on every live connection, and waits for each one's
+ * close callback to remove its entry. Each connection is responsible for
+ * bounding its own termination — ConnectionHandler does not impose an
+ * outer deadline. Must NOT be called from the owning EVB thread; the
+ * wait would block the same loop that fires the close callbacks.
  *
  * Hot-reload of TLS state is pull-based: ConnectionHandler holds the
  * Observer and threads it into the TLS pipeline at construction time.
@@ -124,11 +125,13 @@ class ConnectionHandler {
       F& factory, std::function<void(FactoryConnectionType<F>&)> onAccept = {});
 
   /**
-   * Graceful shutdown. Stops accept, drains every live connection, waits
-   * up to `drainTimeout` for the drain to complete, then force-closes any
-   * stragglers. Must be called off-EVB.
+   * Graceful shutdown. Stops accept, triggers close on every live
+   * connection, and waits for them all to fully tear down (their close
+   * callbacks remove each entry). Each connection bounds its own
+   * termination — there is no outer deadline here. Must be called
+   * off-EVB.
    */
-  void stop(std::chrono::milliseconds drainTimeout = std::chrono::seconds{30});
+  void stop();
 
   folly::SocketAddress getAddress() const;
 
@@ -146,11 +149,9 @@ class ConnectionHandler {
     std::unique_ptr<void, void (*)(void*) noexcept> conn;
     void (*startFn)(void*) noexcept;
     void (*closeFn)(void*) noexcept;
-    void (*drainFn)(void*) noexcept;
 
     void start() noexcept { startFn(conn.get()); }
     void close() noexcept { closeFn(conn.get()); }
-    void drain() noexcept { drainFn(conn.get()); }
   };
 
   template <typename C>
@@ -161,15 +162,15 @@ class ConnectionHandler {
             [](void* p) noexcept { delete static_cast<C*>(p); }),
         .startFn = [](void* p) noexcept { static_cast<C*>(p)->start(); },
         .closeFn = [](void* p) noexcept { static_cast<C*>(p)->close(); },
-        .drainFn = [](void* p) noexcept { static_cast<C*>(p)->drain(); },
     };
   }
 
   // Acceptance pipeline teardown — invoked from stop().
   void stopAcceptingOnEvb();
-  // Initiate drain on every live connection — invoked from stop() on EVB.
-  void drainAllOnEvb();
-  // Force-close any remaining connections — invoked from stop() on EVB.
+  // Trigger close on every live connection — invoked from stop() on EVB.
+  void closeAllOnEvb();
+  // Synchronous force-destroy escape hatch — invoked only from the dtor's
+  // on-EVB branch where we cannot wait for graceful teardown.
   void closeAllConnectionsOnEvb();
 
   // Close-callback installed on every accepted connection. Erases the

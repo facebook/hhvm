@@ -113,14 +113,6 @@ struct ThriftServerConnection {
     visitTail([](auto& t) { t.adapter->close(); });
   }
 
-  // Alias for close(). Pre-existing ConnectionHandler two-phase shutdown
-  // (drain-all then force-close stragglers) still calls drain(); the
-  // distinction is no longer meaningful because the pipeline-resident
-  // ThriftServerConnectionCloseHandler now owns the drain+reap timeouts
-  // internally. ConnectionHandler should collapse to a single close() phase as
-  // follow-up.
-  void drain() noexcept { close(); }
-
   // Wire a callback fired once when the connection has fully closed
   // (all in-flight handler callbacks have settled or LOG(FATAL)'d).
   // The cb lives on the pipeline tail adapter, which fires it in

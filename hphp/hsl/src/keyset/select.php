@@ -171,8 +171,7 @@ function intersect<Tv as arraykey>(
   Traversable<Tv> $second,
   Container<Tv> ...$rest
 )[]: keyset<Tv> {
-  /* HH_IGNORE[12006] suppress sketchy null check */
-  if (!$first || !$second) {
+  if (!\HH\legacy_is_truthy($first) || !\HH\legacy_is_truthy($second)) {
     return keyset[];
   }
   $intersection = keyset($first);
@@ -185,7 +184,7 @@ function intersect<Tv as arraykey>(
         $next_intersection[] = $value;
       }
     }
-    if (!$next_intersection) {
+    if (C\is_empty($next_intersection)) {
       return keyset[];
     }
     $intersection = $next_intersection;

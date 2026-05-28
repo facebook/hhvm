@@ -53,7 +53,7 @@ function open(string $path, int $flags, ?int $mode = null): FileDescriptor {
       'mode should only be specified in combination with O_CREAT',
     );
   }
-  if (($flags & O_CREAT) && $mode === null) {
+  if (($flags & O_CREAT) !== 0 && $mode === null) {
     _OS\throw_errno(
       Errno::EINVAL,
       'mode must be specified when O_CREAT is specified',

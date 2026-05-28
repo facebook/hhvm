@@ -24,7 +24,7 @@ function open_write_only(
   return OS\open(
     $path,
     OS\O_WRONLY | $mode as int,
-    ($mode & OS\O_CREAT) ? $create_file_permissions : null,
+    ($mode & OS\O_CREAT) !== 0 ? $create_file_permissions : null,
   )
     |> new _File\CloseableWriteHandle($$, $path);
 }
@@ -37,7 +37,7 @@ function open_read_write(
   return OS\open(
     $path,
     OS\O_RDWR | $mode as int,
-    ($mode & OS\O_CREAT) ? $create_file_permissions : null,
+    ($mode & OS\O_CREAT) !== 0 ? $create_file_permissions : null,
   )
     |> new _File\CloseableReadWriteHandle($$, $path);
 }

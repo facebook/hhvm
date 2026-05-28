@@ -199,7 +199,7 @@ function split(
   $match_end = 0;
   $count = 1;
   $match = _Private\regex_match($haystack, $delimiter, inout $offset);
-  while ($match && $count < $limit) {
+  while ($match is nonnull && $count < $limit) {
     // Copy anything between the previous match and this one
     $result[] = Str\slice($haystack, $match_end, $offset - $match_end);
     $match_length = Str\length(Shapes::at($match, 0) as string);

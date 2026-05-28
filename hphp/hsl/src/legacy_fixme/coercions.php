@@ -517,7 +517,7 @@ function string_cast_for_basic_switch(
   if ($value is string) return $value;
   if ($value is null) return '';
   // check for 0ish or true
-  if (($value is num && !$value) || ($value is bool && $value)) {
+  if ($value === 0 || $value === 0. || ($value is bool && $value)) {
     return ($first_case as ?string) ?? SWITCH_STRING_SENTINEL;
   }
   if ($value is \StringishObject && !($value is \ConstCollection<_>)) {

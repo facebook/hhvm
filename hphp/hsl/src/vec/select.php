@@ -29,15 +29,14 @@ function diff<Tv1 as arraykey, Tv2 as arraykey>(
   Traversable<Tv2> $second,
   Container<Tv2> ...$rest
 )[]: vec<Tv1> {
-  /* HH_IGNORE[12006] suppress sketchy null check */
-  if (!$first) {
+  if (!\HH\legacy_is_truthy($first)) {
     return vec[];
   }
-  /* HH_IGNORE[12006] suppress sketchy null check */
-  if (!$second && !$rest) {
+  if (!\HH\legacy_is_truthy($second) && C\is_empty($rest)) {
     return cast_clear_legacy_array_mark($first);
   }
-  $union = !$rest ? keyset($second) : Keyset\union($second, ...$rest);
+  $union =
+    C\is_empty($rest) ? keyset($second) : Keyset\union($second, ...$rest);
   return filter($first, ($value) ==> !C\contains_key($union, $value));
 }
 
@@ -58,12 +57,10 @@ function diff_by<Tv, Ts as arraykey>(
   Traversable<Tv> $second,
   (function(Tv)[_]: Ts) $scalar_func,
 )[ctx $scalar_func]: vec<Tv> {
-  /* HH_IGNORE[12006] suppress sketchy null check */
-  if (!$first) {
+  if (!\HH\legacy_is_truthy($first)) {
     return vec[];
   }
-  /* HH_IGNORE[12006] suppress sketchy null check */
-  if (!$second) {
+  if (!\HH\legacy_is_truthy($second)) {
     return cast_clear_legacy_array_mark($first);
   }
   $set = Keyset\map($second, $scalar_func);
@@ -175,7 +172,7 @@ function intersect<Tv as arraykey>(
     $first = vec($first);
   }
   $intersection = Keyset\intersect($first, $second, ...$rest);
-  if (!$intersection) {
+  if (C\is_empty($intersection)) {
     return vec[];
   }
   return filter($first, ($value) ==> C\contains_key($intersection, $value));

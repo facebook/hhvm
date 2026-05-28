@@ -29,7 +29,7 @@ function sort<Tv as arraykey>(
   ?(function(Tv, Tv)[_]: num) $comparator = null,
 )[ctx $comparator]: keyset<Tv> {
   $keyset = keyset($traversable);
-  if ($comparator) {
+  if ($comparator is nonnull) {
     \uksort(inout $keyset, $comparator);
   } else {
     \ksort(inout $keyset);

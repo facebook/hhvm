@@ -117,5 +117,5 @@ function is_empty<T>(readonly Container<T> $container)[]: bool {
   if ($container is \ConstCollection<_>) {
     return $container->isEmpty();
   }
-  return !$container;
+  return !\HH\legacy_is_truthy($container);
 }

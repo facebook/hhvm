@@ -60,7 +60,7 @@ function get_throw_errno_impl(): (function(OS\Errno, string): noreturn) {
 
   return ($code, $message) ==> {
     $override = $throws[$code] ?? null;
-    if ($override) {
+    if ($override is nonnull) {
       $override($message);
     }
     throw new OS\ErrnoException($code, $message);

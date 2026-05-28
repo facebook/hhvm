@@ -27,12 +27,10 @@ function diff_by_key<Tk1 as arraykey, Tk2 as arraykey, Tv>(
   KeyedTraversable<Tk2, mixed> $second,
   KeyedContainer<Tk2, mixed> ...$rest
 )[]: dict<Tk1, Tv> {
-  /* HH_IGNORE[12006] suppress sketchy null check */
-  if (!$first) {
+  if (!\HH\legacy_is_truthy($first)) {
     return dict[];
   }
-  /* HH_IGNORE[12006] suppress sketchy null check */
-  if (!$second && !$rest) {
+  if (!\HH\legacy_is_truthy($second) && C\is_empty($rest)) {
     return cast_clear_legacy_array_mark($first);
   }
   $union = merge($second, ...$rest);

@@ -69,7 +69,7 @@ function sort<Tk as arraykey, Tv>(
   ?(function(Tv, Tv)[_]: num) $value_comparator = null,
 )[ctx $value_comparator]: dict<Tk, Tv> {
   $result = cast_clear_legacy_array_mark($traversable);
-  if ($value_comparator) {
+  if ($value_comparator is nonnull) {
     \uasort(inout $result, $value_comparator);
   } else {
     \asort(inout $result);
@@ -101,7 +101,7 @@ function sort_by<Tk as arraykey, Tv, Ts>(
   (function(Tv)[_]: Ts) $scalar_func,
   ?(function(Ts, Ts)[_]: num) $scalar_comparator = null,
 )[ctx $scalar_func, ctx $scalar_comparator]: dict<Tk, Tv> {
-  $tuple_comparator = $scalar_comparator
+  $tuple_comparator = $scalar_comparator is nonnull
     ? ((Ts, Tv) $a, (Ts, Tv) $b) ==> $scalar_comparator($a[0], $b[0])
     /* HH_FIXME[4240] need Scalar type */
     : ((Ts, Tv) $a, (Ts, Tv) $b) ==> $a[0] <=> $b[0];
@@ -133,7 +133,7 @@ function sort_by_key<Tk as arraykey, Tv>(
   ?(function(Tk, Tk)[_]: num) $key_comparator = null,
 )[ctx $key_comparator]: dict<Tk, Tv> {
   $result = cast_clear_legacy_array_mark($traversable);
-  if ($key_comparator) {
+  if ($key_comparator is nonnull) {
     \uksort(inout $result, $key_comparator);
   } else {
     \ksort(inout $result);

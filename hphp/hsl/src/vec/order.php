@@ -85,7 +85,7 @@ function sort<Tv>(
   ?(function(Tv, Tv)[_]: num) $comparator = null,
 )[ctx $comparator]: vec<Tv> {
   $vec = cast_clear_legacy_array_mark($traversable);
-  if ($comparator) {
+  if ($comparator is nonnull) {
     \usort(inout $vec, $comparator);
   } else {
     \sort(inout $vec);
@@ -118,7 +118,7 @@ function sort_by<Tv, Ts>(
 )[ctx $scalar_func, ctx $comparator]: vec<Tv> {
   $vec = cast_clear_legacy_array_mark($traversable);
   $order_by = Dict\map($vec, $scalar_func);
-  if ($comparator) {
+  if ($comparator is nonnull) {
     \uasort(inout $order_by, $comparator);
   } else {
     \asort(inout $order_by);

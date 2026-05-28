@@ -79,7 +79,7 @@ function flatten<Tk as arraykey, Tv>(
 )[]: dict<Tk, Tv> {
   $result = dict[];
   foreach ($keyed_containers as $keyed_container) {
-    if (!$result) {
+    if (\HH\Lib\C\is_empty($result)) {
       $result = dict($keyed_container);
     } else {
       foreach ($keyed_container as $key => $value) {

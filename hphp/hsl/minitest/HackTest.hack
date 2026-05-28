@@ -25,7 +25,7 @@ abstract class HackTest {
       }
       \printf("-----   %s::%s()\n", static::class, $name);
       $dp = $method->getAttributeClass(DataProvider::class);
-      if (!$dp) {
+      if ($dp is null) {
         try {
           /* HH_FIXME[4128] Minitest intentionally uses reflection to invoke test methods */
           $ret = $method->invoke($this);

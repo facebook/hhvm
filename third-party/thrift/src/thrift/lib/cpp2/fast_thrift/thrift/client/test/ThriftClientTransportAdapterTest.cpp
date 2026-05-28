@@ -425,7 +425,10 @@ TEST(
 
   // Thrift side initiates: deactivate the thrift pipeline. Bridge head's
   // onPipelineInactive must call connection_->disconnect(), which in turn
-  // deactivates the rocket pipeline.
+  // deactivates the rocket pipeline. deactivate() is a no-op unless the
+  // pipeline is Active, so activate first.
+  fixture.rocketPipelineRaw->activate();
+  fixture.thriftPipeline->activate();
   EXPECT_EQ(fixture.thriftTail.pipelineInactiveCount(), 0);
 
   fixture.thriftPipeline->deactivate();

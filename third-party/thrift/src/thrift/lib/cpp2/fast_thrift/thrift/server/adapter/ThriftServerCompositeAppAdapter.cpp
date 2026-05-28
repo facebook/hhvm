@@ -69,9 +69,17 @@ channel_pipeline::Result ThriftServerCompositeAppAdapter::onRead(
 
 void ThriftServerCompositeAppAdapter::onException(
     folly::exception_wrapper&& e) noexcept {
-  XLOG(ERR) << "Pipeline exception: " << e.what();
+  // Tail-of-pipeline contract: any exception reaching here is unhandled.
+  // Tear down the pipeline immediately (no graceful drain). Children
+  // also get the notification for any per-child cleanup, but the
+  // pipeline teardown is owned here; their own onException → deactivate
+  // calls are absorbed by PipelineImpl::deactivate's idempotency.
+  XLOG_EVERY_MS(ERR, 60'000) << "Pipeline exception: " << e.what();
   for (auto& child : children_) {
     child.vtable->onException(child.owner, folly::exception_wrapper{e});
+  }
+  if (pipeline_) {
+    pipeline_->deactivate();
   }
 }
 
@@ -165,9 +173,15 @@ ThriftServerCompositeAppAdapter::writeUnknownMethodError(
     XLOG(ERR) << "Pipeline not set, cannot send unknown-method error";
     return channel_pipeline::Result::Error;
   }
-  return pipeline_->fireWrite(
+  auto result = pipeline_->fireWrite(
       channel_pipeline::erase_and_box(
           makeUnknownMethodMessage(streamId, methodName)));
+  // Failed write means pipeline is broken — tear down immediately.
+  // Idempotent at the pipeline level.
+  if (FOLLY_UNLIKELY(result == channel_pipeline::Result::Error)) {
+    pipeline_->deactivate();
+  }
+  return result;
 }
 
 void ThriftServerCompositeAppAdapter::close() noexcept {

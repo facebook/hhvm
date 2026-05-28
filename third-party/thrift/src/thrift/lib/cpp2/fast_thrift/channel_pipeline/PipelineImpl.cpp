@@ -27,11 +27,11 @@
 // After close(), handlers have been removed and the head/tail raw pointers
 // may dangle (their owning structs can be destroyed without nulling our
 // raw pointers). Refuse all dispatches.
-#define RETURN_IF_CLOSED(...)      \
-  do {                             \
-    if (FOLLY_UNLIKELY(closed_)) { \
-      return __VA_ARGS__;          \
-    }                              \
+#define RETURN_IF_CLOSED(...)                      \
+  do {                                             \
+    if (FOLLY_UNLIKELY(state_ == State::Closed)) { \
+      return __VA_ARGS__;                          \
+    }                                              \
   } while (0)
 
 namespace {
@@ -185,9 +185,10 @@ void PipelineImpl::callHandlerRemoved() noexcept {
 
 void PipelineImpl::activate() noexcept {
   DestructorGuard dg(this);
-  if (closed_) {
+  if (state_ != State::Inactive) {
     return;
   }
+  state_ = State::Active;
 
   headOnPipelineActiveFn_(headHandler_);
   for (size_t i = 0; i < handlers_.size(); ++i) {
@@ -200,9 +201,10 @@ void PipelineImpl::activate() noexcept {
 
 void PipelineImpl::deactivate() noexcept {
   DestructorGuard dg(this);
-  if (closed_) {
+  if (state_ != State::Active) {
     return;
   }
+  state_ = State::Inactive;
 
   // Call in reverse order (LIFO)
   tailOnPipelineInactiveFn_(tailHandler_);
@@ -308,10 +310,10 @@ PipelineImpl::context(HandlerId handlerId) noexcept {
 
 void PipelineImpl::close() noexcept {
   DestructorGuard dg(this);
-  if (closed_) {
+  if (state_ == State::Closed) {
     return;
   }
-  closed_ = true;
+  state_ = State::Closed;
 
   // Clear ready lists - handlers should not receive callbacks after close
   writeReadyList_.clear();
@@ -389,7 +391,7 @@ size_t PipelineImpl::lookupHandler(HandlerId handlerId) const noexcept {
 
 PIPELINE_HOT_PATH void PipelineImpl::onWriteReady() noexcept {
   DestructorGuard dg(this);
-  if (closed_) {
+  if (state_ == State::Closed) {
     return;
   }
 
@@ -414,7 +416,7 @@ PIPELINE_HOT_PATH void PipelineImpl::onWriteReady() noexcept {
 
 void PipelineImpl::onReadReady() noexcept {
   DestructorGuard dg(this);
-  if (closed_) {
+  if (state_ == State::Closed) {
     return;
   }
 

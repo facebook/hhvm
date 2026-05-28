@@ -18,10 +18,8 @@
 
 #include <utility>
 
-#include <folly/io/async/AsyncSocketException.h>
 #include <folly/logging/xlog.h>
 
-#include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponsePayloads.h>
@@ -92,17 +90,15 @@ channel_pipeline::Result ThriftServerAppAdapter::onRead(
 
 void ThriftServerAppAdapter::onException(
     folly::exception_wrapper&& e) noexcept {
-  using TX = apache::thrift::transport::TTransportException;
-  bool benign = false;
-  e.with_exception([&](const TX& ex) {
-    benign = ex.getType() == TX::END_OF_FILE || ex.getType() == TX::NOT_OPEN ||
-        ex.getType() == TX::INTERRUPTED || ex.getType() == TX::TIMED_OUT;
-  });
-  e.with_exception([&](const folly::AsyncSocketException& ex) {
-    benign = benign || ex.getType() == folly::AsyncSocketException::END_OF_FILE;
-  });
-  if (!benign) {
-    XLOG(ERR) << "Pipeline exception: " << e.what();
+  // Tail-of-pipeline contract: any exception reaching here is unhandled.
+  // The pipeline is in a broken state — no point waiting for a graceful
+  // drain (close() would). Tear it down immediately. PipelineImpl's
+  // deactivate() is idempotent (state-gated), so racing with a
+  // transport-initiated deactivate is safe — only the first call
+  // cascades; the close handler's onPipelineInactive does the rest.
+  XLOG_EVERY_MS(ERR, 60'000) << "Pipeline exception: " << e.what();
+  if (pipeline_) {
+    pipeline_->deactivate();
   }
 }
 
@@ -188,8 +184,14 @@ void ThriftServerAppAdapter::writeResponseOnEventBase(
     handleMissingPipeline();
     return;
   }
-  (void)pipeline_->fireWrite(
-      channel_pipeline::erase_and_box(std::move(message)));
+  auto result =
+      pipeline_->fireWrite(channel_pipeline::erase_and_box(std::move(message)));
+  // A failed write means the response can't reach the wire — pipeline
+  // is in a broken or torn-down state. Tear down immediately rather
+  // than wait for a graceful drain. Idempotent at the pipeline level.
+  if (FOLLY_UNLIKELY(result == channel_pipeline::Result::Error)) {
+    pipeline_->deactivate();
+  }
 }
 
 void ThriftServerAppAdapter::handleMissingPipeline() noexcept {

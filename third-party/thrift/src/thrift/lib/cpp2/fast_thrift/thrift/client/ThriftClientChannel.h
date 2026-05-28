@@ -137,10 +137,7 @@ class ThriftClientChannel : public apache::thrift::RequestChannel {
 
   // === TailEndpointHandler lifecycle ===
   void handlerAdded() noexcept {}
-  void handlerRemoved() noexcept {
-    DCHECK(state_ == State::Closed);
-    state_ = State::Closed;
-  }
+  void handlerRemoved() noexcept { state_ = State::Closed; }
   void onPipelineActive() noexcept;
   void onPipelineInactive() noexcept;
   void onWriteReady() noexcept {}

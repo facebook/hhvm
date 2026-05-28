@@ -431,15 +431,15 @@ TEST_F(PipelineImplTest, FireConnectIsIdempotent) {
   createHandlers();
   auto pipeline = buildPipeline();
 
-  // Fire connect multiple times
+  // Repeated activate() calls on an already-active pipeline are a no-op —
+  // only the first Inactive→Active transition cascades onPipelineActive.
   pipeline->activate();
   pipeline->activate();
   pipeline->activate();
 
-  // Each handler should receive onPipelineActive each time
-  EXPECT_EQ(head_ptr_->pipelineActivatedCount(), 3);
-  EXPECT_EQ(middle_ptr_->pipelineActivatedCount(), 3);
-  EXPECT_EQ(tail_ptr_->pipelineActivatedCount(), 3);
+  EXPECT_EQ(head_ptr_->pipelineActivatedCount(), 1);
+  EXPECT_EQ(middle_ptr_->pipelineActivatedCount(), 1);
+  EXPECT_EQ(tail_ptr_->pipelineActivatedCount(), 1);
 }
 
 TEST_F(PipelineImplTest, FireConnectAfterCloseIsNoop) {
@@ -512,6 +512,7 @@ TEST_F(PipelineImplTest, FireDisconnectCallsAllHandlers) {
   createHandlers();
   auto pipeline = buildPipeline();
 
+  pipeline->activate();
   pipeline->deactivate();
 
   EXPECT_EQ(head_ptr_->pipelineDeactivatedCount(), 1);
@@ -533,6 +534,7 @@ TEST_F(PipelineImplTest, FireDisconnectCallsHandlersInTailToHeadOrder) {
       [&](detail::ContextImpl&) { tailOrder = callOrder++; });
 
   auto pipeline = buildPipeline();
+  pipeline->activate();
   pipeline->deactivate();
 
   // Should be called tail → head (reverse of connect order)
@@ -544,6 +546,7 @@ TEST_F(PipelineImplTest, FireDisconnectAfterCloseIsNoop) {
   createHandlers();
   auto pipeline = buildPipeline();
 
+  pipeline->activate();
   pipeline->close();
   pipeline->deactivate();
 
@@ -556,13 +559,17 @@ TEST_F(PipelineImplTest, FireDisconnectIsIdempotent) {
   createHandlers();
   auto pipeline = buildPipeline();
 
+  // Repeated deactivate() calls on an already-inactive pipeline are a
+  // no-op — only the first Active→Inactive transition cascades
+  // onPipelineInactive.
+  pipeline->activate();
   pipeline->deactivate();
   pipeline->deactivate();
   pipeline->deactivate();
 
-  EXPECT_EQ(head_ptr_->pipelineDeactivatedCount(), 3);
-  EXPECT_EQ(middle_ptr_->pipelineDeactivatedCount(), 3);
-  EXPECT_EQ(tail_ptr_->pipelineDeactivatedCount(), 3);
+  EXPECT_EQ(head_ptr_->pipelineDeactivatedCount(), 1);
+  EXPECT_EQ(middle_ptr_->pipelineDeactivatedCount(), 1);
+  EXPECT_EQ(tail_ptr_->pipelineDeactivatedCount(), 1);
 }
 
 // ==================== Context Tests ====================

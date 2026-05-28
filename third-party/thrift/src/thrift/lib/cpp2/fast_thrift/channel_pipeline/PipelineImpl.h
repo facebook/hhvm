@@ -54,6 +54,28 @@ class PipelineImpl : public folly::DelayedDestruction {
   using Ptr = folly::DelayedDestructionUniquePtr<PipelineImpl>;
 
   /**
+   * Pipeline lifecycle state.
+   *
+   *   Inactive  initial state; also re-entered after deactivate()
+   *   Active    after activate() ran the onPipelineActive cascade
+   *   Closed    handlers removed; head/tail pointers may dangle; terminal
+   *
+   * Transitions:
+   *   Inactive  --activate()-->   Active
+   *   Active    --deactivate()--> Inactive
+   *   any       --close()-->      Closed
+   *
+   * activate()/deactivate() are idempotent: a second activate() in Active
+   * or deactivate() in Inactive is a no-op (no re-cascade). close() is
+   * also idempotent and is terminal — no transitions out.
+   */
+  enum class State : uint8_t {
+    Inactive,
+    Active,
+    Closed,
+  };
+
+  /**
    * Creates a new PipelineImpl.
    * Use PipelineBuilder for construction.
    *
@@ -284,8 +306,8 @@ class PipelineImpl : public folly::DelayedDestruction {
       return;
     }
     // Call handlerRemoved directly without DestructorGuard to avoid recursion
-    if (!closed_) {
-      closed_ = true;
+    if (state_ != State::Closed) {
+      state_ = State::Closed;
       callHandlerRemovedImpl();
     }
     delete this;
@@ -354,7 +376,7 @@ class PipelineImpl : public folly::DelayedDestruction {
   void* lastHandler_{nullptr};
   detail::ContextImpl* lastCtx_{nullptr};
 
-  bool closed_{false};
+  State state_{State::Inactive};
 
   // Intrusive lists tracking handlers awaiting write/read ready notifications.
   // Handlers self-register via ctx.awaitWriteReady()/ctx.awaitReadReady().

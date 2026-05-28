@@ -734,6 +734,93 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
 };
 
 /*
+ * Common helper that iterates over a set-like container in the order required
+ * by `Protocol`, invoking `writeElem(elem)` for each element. Used by both
+ * `protocol_methods<type_class::set<...>, ...>::write` and
+ * `op::detail::SetEncode<Tag>`.
+ */
+template <typename Tag, typename Protocol, typename Container, typename WriteFn>
+void encodeSetElements(
+    Protocol& /*protocol*/, const Container& set, WriteFn writeElem) {
+  constexpr bool kContainerIsOrdered =
+      folly::is_detected_v<detect_key_compare, Container>;
+  constexpr KeyOrder kKeyOrder = Protocol::keyOrder();
+  constexpr bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
+      (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
+
+  if constexpr (kShouldSort) {
+    std::vector<typename Container::const_iterator> iters;
+    iters.reserve(set.size());
+    for (auto it = set.begin(); it != set.end(); ++it) {
+      iters.push_back(it);
+    }
+    auto compare = [](auto a, auto b) {
+      if constexpr (kKeyOrder == KeyOrder::StableAscending) {
+        return ::apache::thrift::op::detail::StableLessThan<Tag>{}(*a, *b);
+      } else {
+        return *a < *b;
+      }
+    };
+    std::sort(iters.begin(), iters.end(), compare);
+    for (auto it : iters) {
+      writeElem(*it);
+    }
+  } else {
+    // Support containers with defined but non-FIFO iteration order.
+    for (const auto& elem :
+         folly::order_preserving_reinsertion_view_or_default(set)) {
+      writeElem(elem);
+    }
+  }
+}
+
+/*
+ * Common helper that iterates over a map-like container in the order required
+ * by `Protocol`, invoking `writeEntry(key, value)` for each entry. Used by
+ * both `protocol_methods<type_class::map<...>, ...>::write` and
+ * `op::detail::MapEncode<Key, Value>`.
+ */
+template <
+    typename KeyTag,
+    typename Protocol,
+    typename Container,
+    typename WriteFn>
+void encodeMapElements(
+    Protocol& /*protocol*/, const Container& map, WriteFn writeEntry) {
+  constexpr bool kContainerIsOrdered =
+      folly::is_detected_v<detect_key_compare, Container>;
+  constexpr KeyOrder kKeyOrder = Protocol::keyOrder();
+  constexpr bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
+      (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
+
+  if constexpr (kShouldSort) {
+    std::vector<typename Container::const_iterator> iters;
+    iters.reserve(map.size());
+    for (auto it = map.begin(); it != map.end(); ++it) {
+      iters.push_back(it);
+    }
+    auto compare = [](auto a, auto b) {
+      if constexpr (kKeyOrder == KeyOrder::StableAscending) {
+        return ::apache::thrift::op::detail::StableLessThan<KeyTag>{}(
+            (*a).first, (*b).first);
+      } else {
+        return (*a).first < (*b).first;
+      }
+    };
+    std::sort(iters.begin(), iters.end(), compare);
+    for (auto it : iters) {
+      writeEntry((*it).first, (*it).second);
+    }
+  } else {
+    // Support containers with defined but non-FIFO iteration order.
+    for (const auto& elem_pair :
+         folly::order_preserving_reinsertion_view_or_default(map)) {
+      writeEntry(elem_pair.first, elem_pair.second);
+    }
+  }
+}
+
+/*
  * Set Specialization
  */
 template <typename ElemClass, typename Type>
@@ -797,37 +884,10 @@ struct protocol_methods<type_class::set<ElemClass>, Type> {
     xfer += protocol.writeSetBegin(
         elem_ttype::value, checked_container_size(out.size()));
 
-    constexpr bool kContainerIsOrdered =
-        folly::is_detected_v<detect_key_compare, Type>;
-    constexpr KeyOrder kKeyOrder = Protocol::keyOrder();
-    constexpr bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
-        (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
-
-    if constexpr (kShouldSort) {
-      using Tag = type_class::to_type_tag_t<ElemClass, elem_type>;
-      std::vector<typename Type::const_iterator> iters;
-      iters.reserve(out.size());
-      for (auto it = out.begin(); it != out.end(); ++it) {
-        iters.push_back(it);
-      }
-      auto compare = [](auto a, auto b) {
-        if constexpr (kKeyOrder == KeyOrder::StableAscending) {
-          return ::apache::thrift::op::detail::StableLessThan<Tag>{}(*a, *b);
-        } else {
-          return *a < *b;
-        }
-      };
-      std::sort(iters.begin(), iters.end(), compare);
-      for (auto it : iters) {
-        xfer += elem_methods::write(protocol, *it);
-      }
-    } else {
-      // Support containers with defined but non-FIFO iteration order.
-      auto get_view = folly::order_preserving_reinsertion_view_or_default;
-      for (const auto& elem : get_view(out)) {
-        xfer += elem_methods::write(protocol, elem);
-      }
-    }
+    using Tag = type_class::to_type_tag_t<ElemClass, elem_type>;
+    encodeSetElements<Tag>(protocol, out, [&](const auto& elem) {
+      xfer += elem_methods::write(protocol, elem);
+    });
     xfer += protocol.writeSetEnd();
     return xfer;
   }
@@ -929,44 +989,14 @@ struct protocol_methods<type_class::map<KeyClass, MappedClass>, Type> {
         std::is_same_v<KeyClass, type_class::string> ||
             std::is_same_v<KeyClass, type_class::enumeration>);
 
-    constexpr bool kContainerIsOrdered =
-        folly::is_detected_v<detect_key_compare, Type>;
-    constexpr KeyOrder kKeyOrder = Protocol::keyOrder();
-    constexpr bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
-        (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
-
-    if constexpr (kShouldSort) {
-      using Tag = type_class::to_type_tag_t<KeyClass, key_type>;
-      std::vector<typename U::const_iterator> iters;
-      iters.reserve(out.size());
-      for (auto it = out.begin(); it != out.end(); ++it) {
-        iters.push_back(it);
-      }
-      auto compare = [](auto a, auto b) {
-        if constexpr (kKeyOrder == KeyOrder::StableAscending) {
-          return ::apache::thrift::op::detail::StableLessThan<Tag>{}(
-              a->first, b->first);
-        } else {
-          return a->first < b->first;
-        }
-      };
-      std::sort(iters.begin(), iters.end(), compare);
-      for (auto it : iters) {
-        xfer += writeMapValueBegin(protocol);
-        xfer += key_methods::write(protocol, it->first);
-        xfer += mapped_methods::write(protocol, it->second);
-        xfer += writeMapValueEnd(protocol);
-      }
-    } else {
-      // Support containers with defined but non-FIFO iteration order.
-      auto get_view = folly::order_preserving_reinsertion_view_or_default;
-      for (const auto& elem_pair : get_view(out)) {
-        xfer += writeMapValueBegin(protocol);
-        xfer += key_methods::write(protocol, elem_pair.first);
-        xfer += mapped_methods::write(protocol, elem_pair.second);
-        xfer += writeMapValueEnd(protocol);
-      }
-    }
+    using KeyTag = type_class::to_type_tag_t<KeyClass, key_type>;
+    encodeMapElements<KeyTag>(
+        protocol, out, [&](const auto& key, const auto& value) {
+          xfer += writeMapValueBegin(protocol);
+          xfer += key_methods::write(protocol, key);
+          xfer += mapped_methods::write(protocol, value);
+          xfer += writeMapValueEnd(protocol);
+        });
     xfer += protocol.writeMapEnd();
     return xfer;
   }

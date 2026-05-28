@@ -677,38 +677,10 @@ struct SetEncode {
     uint32_t xfer = 0;
     xfer += prot.writeSetBegin(
         typeTagToTType<Tag>, checked_container_size(set.size()));
-
-    constexpr bool kContainerIsOrdered = folly::
-        is_detected_v<::apache::thrift::detail::pm::detect_key_compare, T>;
-    constexpr KeyOrder kKeyOrder = Protocol::keyOrder();
-    constexpr bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
-        (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
-
-    if constexpr (kShouldSort) {
-      std::vector<typename T::const_iterator> iters;
-      iters.reserve(set.size());
-      for (auto it = set.begin(); it != set.end(); ++it) {
-        iters.push_back(it);
-      }
-      auto compare = [=](auto a, auto b) {
-        if constexpr (kKeyOrder == KeyOrder::StableAscending) {
-          return StableLessThan<Tag>{}(*a, *b);
-        } else {
-          return *a < *b;
-        }
-      };
-      std::sort(iters.begin(), iters.end(), compare);
-      for (auto it : iters) {
-        xfer += Encode<Tag>{}(prot, *it);
-      }
-    } else {
-      // Support containers with defined but non-FIFO iteration order.
-      for (const auto& elem :
-           folly::order_preserving_reinsertion_view_or_default(set)) {
-        xfer += Encode<Tag>{}(prot, elem);
-      }
-    }
-
+    apache::thrift::detail::pm::encodeSetElements<Tag>(
+        prot, set, [&](const auto& elem) {
+          xfer += Encode<Tag>{}(prot, elem);
+        });
     xfer += prot.writeSetEnd();
     return xfer;
   }
@@ -731,42 +703,13 @@ struct MapEncode {
         checked_container_size(map.size()),
         alternativeKeyForm);
 
-    constexpr bool kContainerIsOrdered = folly::
-        is_detected_v<::apache::thrift::detail::pm::detect_key_compare, T>;
-    constexpr KeyOrder kKeyOrder = Protocol::keyOrder();
-    constexpr bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
-        (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
-
-    if constexpr (kShouldSort) {
-      std::vector<typename T::const_iterator> iters;
-      iters.reserve(map.size());
-      for (auto it = map.begin(); it != map.end(); ++it) {
-        iters.push_back(it);
-      }
-      auto compare = [=](auto a, auto b) {
-        if constexpr (kKeyOrder == KeyOrder::StableAscending) {
-          return StableLessThan<Key>{}((*a).first, (*b).first);
-        } else {
-          return (*a).first < (*b).first;
-        }
-      };
-      std::sort(iters.begin(), iters.end(), compare);
-      for (auto it : iters) {
-        xfer += apache::thrift::detail::pm::writeMapValueBegin(prot);
-        xfer += Encode<Key>{}(prot, (*it).first);
-        xfer += Encode<Value>{}(prot, (*it).second);
-        xfer += apache::thrift::detail::pm::writeMapValueEnd(prot);
-      }
-    } else {
-      // Support containers with defined but non-FIFO iteration order.
-      for (const auto& elem_pair :
-           folly::order_preserving_reinsertion_view_or_default(map)) {
-        xfer += apache::thrift::detail::pm::writeMapValueBegin(prot);
-        xfer += Encode<Key>{}(prot, elem_pair.first);
-        xfer += Encode<Value>{}(prot, elem_pair.second);
-        xfer += apache::thrift::detail::pm::writeMapValueEnd(prot);
-      }
-    }
+    apache::thrift::detail::pm::encodeMapElements<Key>(
+        prot, map, [&](const auto& key, const auto& value) {
+          xfer += apache::thrift::detail::pm::writeMapValueBegin(prot);
+          xfer += Encode<Key>{}(prot, key);
+          xfer += Encode<Value>{}(prot, value);
+          xfer += apache::thrift::detail::pm::writeMapValueEnd(prot);
+        });
 
     xfer += prot.writeMapEnd();
     return xfer;

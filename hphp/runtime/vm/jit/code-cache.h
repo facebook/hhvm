@@ -255,8 +255,8 @@ private:
     void ensure(CodeCache& cc, size_t size);
   };
 
-  template<const char* name, bool forwardAllocation, size_t pageSize>
-  using CodeSection = SectionImpl<name, true, true, forwardAllocation, pageSize>;
+  template<const char* name, bool overAllocate, bool forwardAllocation, size_t pageSize>
+  using CodeSection = SectionImpl<name, true, overAllocate, forwardAllocation, pageSize>;
   using DataSection = SectionImpl<kData, false, false, false, DataBlock::kPageSize>;
 
   Address m_threadLocalStart{nullptr};
@@ -265,9 +265,9 @@ private:
   size_t m_codeSize; // all code (jit+bytecode)
   size_t m_threadLocalSize;
 
-  CodeSection<kMain, true, DataBlock::kPageSize> m_main;
-  CodeSection<kCold, false, DataBlock::kPageSize> m_cold;
-  CodeSection<kFrozen, false, DataBlock::kPageSize> m_frozen;
+  CodeSection<kMain, true, true, DataBlock::kPageSize> m_main;
+  CodeSection<kCold, false, false, DataBlock::kPageSize> m_cold;
+  CodeSection<kFrozen, false, false, DataBlock::kPageSize> m_frozen;
   DataSection m_data;
 
   DataBlock m_bytecode;

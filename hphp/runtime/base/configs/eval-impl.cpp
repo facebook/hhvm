@@ -150,7 +150,7 @@ std::string EvalLoader::PackagesTomlFileNameDefault() {
 
 int EvalLoader::AsyncJitWorkerThreadsDefault() {
   // So that each thread can have their own view to emit code.
-  return std::max(4, Process::GetCPUCount() / 2);
+  return MaxConcurrentCodeViewsDefault();
 }
 
 bool EvalLoader::EnableAsyncJITProfileDefault() {
@@ -160,11 +160,6 @@ bool EvalLoader::EnableAsyncJITProfileDefault() {
 }
 
 int EvalLoader::MaxConcurrentCodeViewsDefault() {
-  // Sandbox mode uses Async JIT with at least 4 threads (see above).
-  // So setting this to be 2 max views here because we use this to determine
-  // when TC is full and it's good to make sure that at least 2 threads
-  // claim TC is full just for safety.
-  return Cfg::Repo::Authoritative ? std::max(4, Process::GetCPUCount() / 2)
-                                  : 2;
+  return 12;
 }
 }

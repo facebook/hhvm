@@ -18,8 +18,6 @@
 
 #include <gtest/gtest.h>
 
-#include <boost/intrusive_ptr.hpp>
-
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
 
 namespace apache::thrift::fast_thrift::thrift {

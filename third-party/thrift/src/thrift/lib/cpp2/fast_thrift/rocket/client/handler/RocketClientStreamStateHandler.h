@@ -267,11 +267,26 @@ class RocketClientStreamStateHandler {
   /**
    * Generate the next stream ID.
    *
-   * Client generates odd IDs: 1, 3, 5, ...
+   * Client generates odd IDs: 1, 3, 5, ... Caps at the RSocket 31-bit
+   * limit; wraps back to 1 and latches `hitMaxStreamId_` so subsequent
+   * allocations skip IDs still live in `activeStreams_`. The collision
+   * loop is bounded by `activeStreams_.size() + 1` — a contiguous run
+   * of collisions cannot exceed the number of live streams.
    */
   uint32_t generateStreamId() noexcept {
-    uint32_t id = nextStreamId_;
-    nextStreamId_ += 2;
+    uint32_t id;
+    size_t iter = 0;
+    const size_t maxIter = activeStreams_.size() + 1;
+    do {
+      id = nextStreamId_;
+      nextStreamId_ += 2;
+      XCHECK_LE(++iter, maxIter)
+          << "generateStreamId collision loop exceeded live-stream bound";
+    } while (hitMaxStreamId_ && activeStreams_.contains(id));
+    if (FOLLY_UNLIKELY(id == kMaxStreamId)) {
+      nextStreamId_ = 1;
+      hitMaxStreamId_ = true;
+    }
     return id;
   }
 
@@ -391,7 +406,10 @@ class RocketClientStreamStateHandler {
     apache::thrift::fast_thrift::frame::FrameType streamType;
   };
 
+  static constexpr uint32_t kMaxStreamId = (1u << 31) - 1;
+
   uint32_t nextStreamId_{1};
+  bool hitMaxStreamId_{false};
   apache::thrift::fast_thrift::frame::read::DirectStreamMap<ClientStreamContext>
       activeStreams_;
 };

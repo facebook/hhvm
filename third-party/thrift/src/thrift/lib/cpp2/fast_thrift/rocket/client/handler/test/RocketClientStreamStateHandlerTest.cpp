@@ -215,6 +215,39 @@ TEST_F(ClientStreamStateHandlerTest, GeneratesOddStreamIds) {
   EXPECT_EQ(handler_.nextStreamId(), 7);
 }
 
+TEST_F(ClientStreamStateHandlerTest, WrapsAtMaxStreamId) {
+  // RSocket 31-bit client stream ID cap. Allocating the cap value must
+  // return it once, then wrap the counter back to 1.
+  constexpr uint32_t kMax = (1u << 31) - 1;
+  handler_.setNextStreamIdForTest(kMax);
+  EXPECT_EQ(handler_.generateStreamId(), kMax);
+  EXPECT_EQ(handler_.generateStreamId(), 1);
+  EXPECT_EQ(handler_.generateStreamId(), 3);
+}
+
+TEST_F(ClientStreamStateHandlerTest, SkipsActiveStreamsAfterWrap) {
+  // Make IDs 1, 3, 5 live via real writes, then force a wrap. The
+  // post-wrap allocator must skip the live IDs and hand out the next
+  // free odd ID (7).
+  for (int i = 0; i < 3; ++i) {
+    auto request = makeClientRequest(
+        folly::IOBuf::copyBuffer("request"),
+        folly::IOBuf::copyBuffer("metadata"));
+    EXPECT_EQ(
+        handler_.onWrite(ctx_, erase_and_box(std::move(request))),
+        Result::Success);
+  }
+  ASSERT_EQ(handler_.activeStreamCount(), 3);
+  ASSERT_TRUE(handler_.hasActiveStream(1));
+  ASSERT_TRUE(handler_.hasActiveStream(3));
+  ASSERT_TRUE(handler_.hasActiveStream(5));
+
+  constexpr uint32_t kMax = (1u << 31) - 1;
+  handler_.setNextStreamIdForTest(kMax);
+  EXPECT_EQ(handler_.generateStreamId(), kMax);
+  EXPECT_EQ(handler_.generateStreamId(), 7);
+}
+
 // =============================================================================
 // Outbound Write
 // =============================================================================

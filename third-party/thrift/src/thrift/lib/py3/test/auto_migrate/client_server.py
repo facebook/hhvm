@@ -21,7 +21,14 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
-from typing import cast as typing_cast, Iterable, Optional, Sequence
+from typing import (
+    AbstractSet,
+    cast as typing_cast,
+    Iterable,
+    Mapping,
+    Optional,
+    Sequence,
+)
 
 from derived.clients import DerivedTestingService
 from derived.services import DerivedTestingServiceInterface
@@ -96,6 +103,24 @@ class Handler(TestingServiceInterface):
 
     async def renamed_func(self, ret: bool) -> bool:
         return ret
+
+    async def echoStruct(self, what: easy) -> easy:
+        return what
+
+    async def echoColor(self, color: Color) -> Color:
+        return color
+
+    async def echoList(self, ints: Sequence[int]) -> Sequence[int]:
+        return ints
+
+    async def echoMap(self, m: Mapping[Color, easy]) -> Mapping[Color, easy]:
+        return m
+
+    async def echoSet(self, s: AbstractSet[int]) -> AbstractSet[int]:
+        return s
+
+    async def echoSetNoTypedef(self, s: AbstractSet[str]) -> AbstractSet[str]:
+        return s
 
 
 class DerivedHandler(Handler, DerivedTestingServiceInterface):

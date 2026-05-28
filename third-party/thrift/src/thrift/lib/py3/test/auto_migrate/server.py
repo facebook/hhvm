@@ -18,7 +18,7 @@
 import asyncio
 import types
 import unittest
-from typing import Sequence
+from typing import AbstractSet, Mapping, Sequence
 
 from test_thrift.services import TestingServiceInterface
 from test_thrift.types import Color, easy
@@ -85,6 +85,24 @@ class Handler(TestingServiceInterface):
 
     async def getRequestId(self) -> str:
         return "Testing"
+
+    async def echoStruct(self, what: easy) -> easy:
+        return what
+
+    async def echoColor(self, color: Color) -> Color:
+        return color
+
+    async def echoList(self, ints: Sequence[int]) -> Sequence[int]:
+        return ints
+
+    async def echoMap(self, m: Mapping[Color, easy]) -> Mapping[Color, easy]:
+        return m
+
+    async def echoSet(self, s: AbstractSet[int]) -> AbstractSet[int]:
+        return s
+
+    async def echoSetNoTypedef(self, s: AbstractSet[str]) -> AbstractSet[str]:
+        return s
 
 
 class ServicesTests(unittest.IsolatedAsyncioTestCase):

@@ -26,24 +26,24 @@ namespace apache::thrift::fast_thrift::thrift {
 namespace {
 
 // Records the invocations made by the FastHandlerCallback's static
-// function-pointer dispatch. The opaque ThriftServerAppAdapter* slot is
-// reinterpreted to point at this struct so the callbacks can record into it
-// without depending on the real adapter type.
-struct CallRecorder {
+// function-pointer dispatch. Subclasses ThriftServerAppAdapter so the
+// callback's adapterGuard_ (a DestructorGuard) operates on a real
+// DelayedDestruction; the static dispatch fns downcast to read counters.
+class RecordingAdapter : public ThriftServerAppAdapter {
+ public:
   int resultCount{0};
   int doneCount{0};
   int exceptionCount{0};
   uint32_t lastStreamId{0};
   int lastValue{0};
   std::string lastExceptionMessage;
+
+ protected:
+  ~RecordingAdapter() override = default;
 };
 
-CallRecorder& asRecorder(ThriftServerAppAdapter* p) {
-  return *reinterpret_cast<CallRecorder*>(p);
-}
-
-ThriftServerAppAdapter* asAdapter(CallRecorder* r) {
-  return reinterpret_cast<ThriftServerAppAdapter*>(r);
+RecordingAdapter& asRecorder(ThriftServerAppAdapter* p) {
+  return *static_cast<RecordingAdapter*>(p);
 }
 
 void onResult(ThriftServerAppAdapter* a, uint32_t streamId, int value) {
@@ -68,106 +68,170 @@ void onDone(ThriftServerAppAdapter* a, uint32_t streamId) {
   r.lastStreamId = streamId;
 }
 
+using RecordingAdapterPtr =
+    folly::DelayedDestructionUniquePtr<RecordingAdapter>;
+
+RecordingAdapterPtr makeRecorder() {
+  return folly::makeDelayedDestructionUniquePtr<RecordingAdapter>();
+}
+
 constexpr uint32_t kStreamId = 42;
 
 } // namespace
 
 TEST(FastHandlerCallbackTest, ResultInvokesResultFnAndSuppressesDestructor) {
-  CallRecorder rec;
+  auto rec = makeRecorder();
   folly::EventBase evb;
   {
     auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
-        &onResult, &onException, asAdapter(&rec), kStreamId, &evb, nullptr);
+        &onResult, &onException, rec.get(), kStreamId, &evb, nullptr);
     cb->result(123);
   }
   // Single success invocation, no synthetic destructor exception.
-  EXPECT_EQ(rec.resultCount, 1);
-  EXPECT_EQ(rec.exceptionCount, 0);
-  EXPECT_EQ(rec.lastStreamId, kStreamId);
-  EXPECT_EQ(rec.lastValue, 123);
+  EXPECT_EQ(rec->resultCount, 1);
+  EXPECT_EQ(rec->exceptionCount, 0);
+  EXPECT_EQ(rec->lastStreamId, kStreamId);
+  EXPECT_EQ(rec->lastValue, 123);
 }
 
 TEST(
     FastHandlerCallbackTest,
     ExceptionInvokesExceptionFnAndSuppressesDestructor) {
-  CallRecorder rec;
+  auto rec = makeRecorder();
   folly::EventBase evb;
   {
     auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
-        &onResult, &onException, asAdapter(&rec), kStreamId, &evb, nullptr);
+        &onResult, &onException, rec.get(), kStreamId, &evb, nullptr);
     cb->exception(
         folly::make_exception_wrapper<TApplicationException>(
             TApplicationException::UNKNOWN_METHOD, "boom"));
   }
-  EXPECT_EQ(rec.resultCount, 0);
-  EXPECT_EQ(rec.exceptionCount, 1);
-  EXPECT_EQ(rec.lastStreamId, kStreamId);
-  EXPECT_NE(rec.lastExceptionMessage.find("boom"), std::string::npos);
+  EXPECT_EQ(rec->resultCount, 0);
+  EXPECT_EQ(rec->exceptionCount, 1);
+  EXPECT_EQ(rec->lastStreamId, kStreamId);
+  EXPECT_NE(rec->lastExceptionMessage.find("boom"), std::string::npos);
 }
 
 TEST(FastHandlerCallbackTest, DestructorFiresExceptionWhenNotCompleted) {
-  CallRecorder rec;
+  auto rec = makeRecorder();
   folly::EventBase evb;
   {
     auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
-        &onResult, &onException, asAdapter(&rec), kStreamId, &evb, nullptr);
+        &onResult, &onException, rec.get(), kStreamId, &evb, nullptr);
     // Drop without completing — destructor must synthesize an error so the
     // peer never hangs.
   }
-  EXPECT_EQ(rec.resultCount, 0);
-  EXPECT_EQ(rec.exceptionCount, 1);
-  EXPECT_EQ(rec.lastStreamId, kStreamId);
-  EXPECT_NE(rec.lastExceptionMessage.find("not completed"), std::string::npos);
+  EXPECT_EQ(rec->resultCount, 0);
+  EXPECT_EQ(rec->exceptionCount, 1);
+  EXPECT_EQ(rec->lastStreamId, kStreamId);
+  EXPECT_NE(rec->lastExceptionMessage.find("not completed"), std::string::npos);
 }
 
 TEST(FastHandlerCallbackTest, VoidDoneInvokesDoneFnAndSuppressesDestructor) {
-  CallRecorder rec;
+  auto rec = makeRecorder();
   folly::EventBase evb;
   {
     auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<void>>(
-        &onDone, &onException, asAdapter(&rec), kStreamId, &evb, nullptr);
+        &onDone, &onException, rec.get(), kStreamId, &evb, nullptr);
     cb->done();
   }
-  EXPECT_EQ(rec.doneCount, 1);
-  EXPECT_EQ(rec.exceptionCount, 0);
-  EXPECT_EQ(rec.lastStreamId, kStreamId);
+  EXPECT_EQ(rec->doneCount, 1);
+  EXPECT_EQ(rec->exceptionCount, 0);
+  EXPECT_EQ(rec->lastStreamId, kStreamId);
 }
 
 TEST(FastHandlerCallbackTest, VoidDestructorFiresExceptionWhenNotCompleted) {
-  CallRecorder rec;
+  auto rec = makeRecorder();
   folly::EventBase evb;
   {
     auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<void>>(
-        &onDone, &onException, asAdapter(&rec), kStreamId, &evb, nullptr);
+        &onDone, &onException, rec.get(), kStreamId, &evb, nullptr);
   }
-  EXPECT_EQ(rec.doneCount, 0);
-  EXPECT_EQ(rec.exceptionCount, 1);
-  EXPECT_NE(rec.lastExceptionMessage.find("not completed"), std::string::npos);
+  EXPECT_EQ(rec->doneCount, 0);
+  EXPECT_EQ(rec->exceptionCount, 1);
+  EXPECT_NE(rec->lastExceptionMessage.find("not completed"), std::string::npos);
 }
 
 TEST(FastHandlerCallbackTest, GetEventBaseReturnsConfiguredEventBase) {
-  CallRecorder rec;
+  auto rec = makeRecorder();
   folly::EventBase evb;
   auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
-      &onResult, &onException, asAdapter(&rec), kStreamId, &evb, nullptr);
+      &onResult, &onException, rec.get(), kStreamId, &evb, nullptr);
   EXPECT_EQ(cb->getEventBase(), &evb);
   cb->result(0); // suppress destructor exception
 }
 
 TEST(FastHandlerCallbackTest, RequestContextAccessorReturnsStoredPointer) {
-  CallRecorder rec;
+  auto rec = makeRecorder();
   folly::EventBase evb;
   auto requestContext = std::make_unique<ThriftRequestContext>();
   auto* requestContextPtr = requestContext.get();
   auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
       &onResult,
       &onException,
-      asAdapter(&rec),
+      rec.get(),
       kStreamId,
       &evb,
       std::move(requestContext));
   EXPECT_EQ(cb->requestContext(), requestContextPtr);
   cb->result(0); // suppress destructor exception
+}
+
+// =============================================================================
+// Force-close behavior: FHC keeps adapter alive across straggler completions
+// =============================================================================
+
+TEST(FastHandlerCallbackTest, OutlivingFHCKeepsAdapterAlive) {
+  // Simulates the force-close scenario: the upper layer drops its
+  // adapter Ptr while an FHC is still alive. The FHC's DG must hold
+  // the adapter object alive so the straggler completion is safe.
+  folly::EventBase evb;
+  auto rec = makeRecorder();
+  RecordingAdapter* recPtr = rec.get();
+
+  auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
+      &onResult, &onException, recPtr, kStreamId, &evb, nullptr);
+
+  // Owner drops its Ptr while the FHC is still alive — the FHC's
+  // adapterGuard_ must hold the adapter live.
+  rec.reset();
+
+  // Recorder is still alive: the static dispatch fn writes into it
+  // successfully (would UAF if adapter had been freed).
+  cb->result(99);
+  EXPECT_EQ(recPtr->resultCount, 1);
+  EXPECT_EQ(recPtr->lastValue, 99);
+
+  // Releasing the FHC drops the last DG; adapter dies cleanly now.
+  cb.reset();
+}
+
+TEST(FastHandlerCallbackTest, UncompletedFHCDestructorIsSafeAfterOwnerDrop) {
+  // FHC dtor synthesizes an INTERNAL_ERROR and dispatches it through
+  // the adapter. After the upper-layer Ptr is dropped, the FHC's
+  // adapterGuard_ must keep the adapter alive across this dispatch.
+  // ASAN would catch a UAF here; passing means the lifetime chain is
+  // correct.
+  //
+  // We hold a separate DG so the adapter survives past the FHC's
+  // destruction, letting us inspect the recorded exception state.
+  folly::EventBase evb;
+  auto rec = makeRecorder();
+  RecordingAdapter* recPtr = rec.get();
+
+  auto cb = folly::makeDelayedDestructionUniquePtr<FastHandlerCallback<int>>(
+      &onResult, &onException, recPtr, kStreamId, &evb, nullptr);
+
+  // Test-only: keep the adapter alive past cb.reset() so we can
+  // observe state. In production, dropping the owner Ptr leaves only
+  // the FHC's DG; the adapter destructs the moment the FHC does.
+  folly::DelayedDestruction::DestructorGuard keepAlive(recPtr);
+  rec.reset();
+  cb.reset();
+
+  EXPECT_EQ(recPtr->exceptionCount, 1);
+  EXPECT_NE(
+      recPtr->lastExceptionMessage.find("not completed"), std::string::npos);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

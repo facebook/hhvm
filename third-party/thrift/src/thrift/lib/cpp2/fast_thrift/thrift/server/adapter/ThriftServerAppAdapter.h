@@ -57,8 +57,12 @@ namespace apache::thrift::fast_thrift::thrift {
  * closeCallback in response to the inbound ConnectionClosed event.
  *
  * Lifetime: upper-layer owners must hold the adapter Ptr until
- * closeCallback fires. Dropping earlier risks UAF from in-flight handler
- * callbacks still writing through the adapter.
+ * closeCallback fires. After that, the adapter may persist independently
+ * of the pipeline until in-flight FastHandlerCallbacks drain — each one
+ * holds a DestructorGuard on the adapter, so the underlying object stays
+ * valid even if the upper-layer Ptr is dropped. Once the pipeline is
+ * gone (signaled to the adapter via ConnectionClosed), pipelineActive_
+ * is false and straggler writeResponse calls are silently dropped.
  */
 class ThriftServerAppAdapter : public folly::DelayedDestruction {
  public:
@@ -118,9 +122,12 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   void onPipelineInactive() noexcept {}
   // Broadcast pipeline event. Acts on ThriftServerEventType::ConnectionClosed
   // from the pipeline's ThriftServerConnectionCloseHandler — the canonical
-  // "in-flight settled, safe to drop the connection" edge that fires the
-  // user closeCallback. Every other event type (including our own emitted
-  // CloseConnection, delivered back via self-broadcast) is ignored.
+  // "pipeline is done" edge. Clears pipelineActive_, releases
+  // pipelineGuard_ (so the pipeline can die independently of any
+  // straggler FastHandlerCallbacks still holding a DG on the adapter),
+  // and fires the user closeCallback. Every other event type (including
+  // our own emitted CloseConnection, delivered back via self-broadcast)
+  // is ignored.
   void onEvent(const channel_pipeline::TypeErasedBox& evt) noexcept;
   void onWriteReady() noexcept {}
 
@@ -136,7 +143,7 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   // Initiate connection close. Internally broadcasts a
   // ThriftServerEvent::CloseConnection pipeline event; the pipeline-resident
   // ThriftServerConnectionCloseHandler picks it up and runs the terminal
-  // state machine (drain timeout → reap → LOG(FATAL) on stuck handler
+  // state machine (drain timeout → reap → force-close on stuck handler
   // callbacks). The user closeCallback fires when the connection has fully
   // settled. No-op if the pipeline is not yet wired.
   void close() noexcept;
@@ -150,10 +157,16 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
       std::string_view name, RequestResponseProcessFn handler);
 
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
-  // Keeps pipeline_ alive for the adapter's lifetime so in-flight reply
-  // paths (FastHandlerCallback → writeResponse → pipeline_->fireWrite)
-  // cannot dereference a freed pipeline. Released by resetPipeline().
+  // Keeps pipeline_ alive while pipelineActive_ is true. Released on
+  // ConnectionClosed (or in resetPipeline) so the pipeline can die
+  // independently of any straggler FastHandlerCallbacks. Straggler
+  // writes are gated by pipelineActive_ and never touch pipeline_
+  // after release.
   std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
+  // EVB-only. Set true in setPipeline(), cleared on ConnectionClosed
+  // (and on adapter destruction via resetPipeline). When false,
+  // writeResponseOnEventBase drops without touching pipeline_.
+  bool pipelineActive_{false};
 
   ~ThriftServerAppAdapter() override;
 

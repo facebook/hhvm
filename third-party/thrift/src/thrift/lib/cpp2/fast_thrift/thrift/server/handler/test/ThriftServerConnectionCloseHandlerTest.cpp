@@ -304,6 +304,47 @@ TEST(
 }
 
 // =============================================================================
+// Reap timeout — force-close path (replaces previous LOG(FATAL))
+// =============================================================================
+
+TEST(
+    ThriftServerConnectionCloseHandlerTest,
+    ReapTimeoutForcesGracefulCloseWithInFlightOutstanding) {
+  // Reap fires while in-flight is still nonzero. The new behavior is
+  // a graceful force-close: warn log + transitionToClosed (fires
+  // ConnectionClosed inbound) instead of LOG(FATAL). The adapter's
+  // pipelineActive_ flag will pick up the event and cause straggler
+  // writes to be dropped at that layer; here we just verify the
+  // close handler's state and event emission.
+  Fixture f{/*drainTimeout=*/std::chrono::milliseconds{5},
+            /*reapTimeout=*/std::chrono::milliseconds{10}};
+  f.ctx.pipeline_.onDeactivate = [&] { f.handler.onPipelineInactive(f.ctx); };
+
+  ASSERT_EQ(
+      f.handler.onRead(f.ctx, erase_and_box(makeRequest(1))), Result::Success);
+  f.handler.onEvent(f.ctx, closeConnectionEvent());
+  ASSERT_TRUE(f.handler.isDraining());
+
+  // Drive past both drain and reap deadlines. Drain → reap → force-close.
+  f.ctx.evb_.runAfterDelay(
+      [&] { f.ctx.evb_.terminateLoopSoon(); }, /*milliseconds=*/100);
+  f.ctx.evb_.loopForever();
+
+  EXPECT_TRUE(f.handler.isClosed());
+  EXPECT_FALSE(f.handler.isReaping());
+  // Pipeline deactivated exactly once (by the drain-timer escalation).
+  // The reap-timeout force-close path does NOT re-deactivate.
+  EXPECT_EQ(f.ctx.pipeline_.deactivateCount, 1);
+  // ConnectionClosed event was fired despite in-flight > 0 — the
+  // adapter receives this and tears down its pipeline binding.
+  ASSERT_EQ(f.ctx.events.size(), 1u);
+  expectConnectionClosedEvent(f.ctx.events.front());
+  // In-flight is intentionally NOT decremented — the straggler is
+  // still alive in the application. The close handler is done with it.
+  EXPECT_EQ(f.handler.inFlight(), 1u);
+}
+
+// =============================================================================
 // Exception path
 // =============================================================================
 

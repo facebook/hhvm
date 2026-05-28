@@ -88,6 +88,7 @@ class FastHandlerCallback : public folly::DelayedDestruction {
       : resultFn_(resultFn),
         exceptionFn_(exceptionFn),
         handler_(handler),
+        adapterGuard_(handler),
         streamId_(streamId),
         evb_(evb),
         requestContext_(std::move(requestContext)) {}
@@ -98,7 +99,8 @@ class FastHandlerCallback : public folly::DelayedDestruction {
   FastHandlerCallback& operator=(FastHandlerCallback&&) = delete;
 
   // Safe to call from any thread; the adapter's writeResponse handles the
-  // EVB hop.
+  // EVB hop. Safe even after the connection has been force-closed: the
+  // DG keeps the adapter alive, writeResponse drops on pipelineActive_.
   void result(T value) {
     completed_ = true;
     resultFn_(handler_, streamId_, std::move(value));
@@ -169,6 +171,11 @@ class FastHandlerCallback : public folly::DelayedDestruction {
   ResultFn resultFn_;
   ExceptionFn exceptionFn_;
   ThriftServerAppAdapter* handler_;
+  // Keeps the adapter alive as long as this callback exists, so a
+  // straggler completing after force-close still has a valid adapter
+  // to dispatch through. The adapter drops the write internally
+  // because pipelineActive_ is false.
+  folly::DelayedDestruction::DestructorGuard adapterGuard_;
   uint32_t streamId_;
   folly::EventBase* evb_;
   std::unique_ptr<ThriftRequestContext> requestContext_;
@@ -192,6 +199,7 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
       : doneFn_(doneFn),
         exceptionFn_(exceptionFn),
         handler_(handler),
+        adapterGuard_(handler),
         streamId_(streamId),
         evb_(evb),
         requestContext_(std::move(requestContext)) {}
@@ -260,6 +268,8 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
   DoneFn doneFn_;
   ExceptionFn exceptionFn_;
   ThriftServerAppAdapter* handler_;
+  // See FastHandlerCallback<T>::adapterGuard_.
+  folly::DelayedDestruction::DestructorGuard adapterGuard_;
   uint32_t streamId_;
   folly::EventBase* evb_;
   std::unique_ptr<ThriftRequestContext> requestContext_;

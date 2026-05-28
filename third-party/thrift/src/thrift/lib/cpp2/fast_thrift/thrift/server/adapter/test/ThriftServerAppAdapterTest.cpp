@@ -932,4 +932,53 @@ TEST_F(ThriftServerAppAdapterTest, WriteFrameworkErrorEmitsErrorFrame) {
 // live entirely in ThriftServerConnectionCloseHandler and are covered
 // by ThriftServerConnectionCloseHandlerTest.
 
+// =============================================================================
+// Force-close: writeResponse is dropped after ConnectionClosed
+// =============================================================================
+
+TEST_F(
+    ThriftServerAppAdapterTest, WriteResponseAfterConnectionClosedIsDropped) {
+  // Stragglers (in-flight FastHandlerCallbacks completing after the
+  // reap timer's force-close) still call writeResponse. The adapter
+  // must drop the write silently — pipelineGuard_ has been released
+  // and pipeline_ may be dangling, so dereferencing it would UAF.
+  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+
+  int writeCount = 0;
+  auto built = buildPipeline(
+      adapter.get(),
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&&) {
+        ++writeCount;
+        return Result::Success;
+      });
+
+  // Sanity: writes work before close.
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->writeResponse(makeResponseMessage(
+        /*streamId=*/1,
+        folly::IOBuf::copyBuffer("ok"),
+        /*metadata=*/nullptr));
+  });
+  ASSERT_EQ(writeCount, 1);
+
+  // Simulate the reap-timeout force-close — close handler fires
+  // ConnectionClosed inbound.
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->onEvent(erase_and_box(
+        ThriftServerEvent{ThriftServerEventType::ConnectionClosed}));
+  });
+
+  // Straggler write — must NOT dispatch through the pipeline.
+  evb_->runInEventBaseThreadAndWait([&] {
+    adapter->writeResponse(makeResponseMessage(
+        /*streamId=*/2,
+        folly::IOBuf::copyBuffer("late"),
+        /*metadata=*/nullptr));
+  });
+
+  EXPECT_EQ(writeCount, 1)
+      << "Straggler write after ConnectionClosed must be dropped silently";
+}
+
 } // namespace apache::thrift::fast_thrift::thrift

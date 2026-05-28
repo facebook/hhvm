@@ -54,10 +54,12 @@ namespace apache::thrift::fast_thrift::thrift {
  *     deactivation (the socket goes away regardless of stragglers).
  *
  *   reapTimeout — how long to wait for in-flight handler callbacks to
- *     return after the pipeline has been deactivated. Expiry is a
- *     LOG(FATAL) — a handler that hasn't completed within this window
- *     after the socket is gone is stuck and would otherwise leak the
- *     adapter memory silently.
+ *     return after the pipeline has been deactivated. Expiry forces a
+ *     graceful close: a warning is logged, the connection settles via
+ *     ConnectionClosed, and the adapter outlives the pipeline until
+ *     stragglers drain (each FastHandlerCallback holds a DestructorGuard
+ *     on the adapter). Straggler writes are silently dropped by the
+ *     adapter because pipelineActive_ is cleared on ConnectionClosed.
  *
  * State machine:
  *
@@ -83,7 +85,9 @@ namespace apache::thrift::fast_thrift::thrift {
  *                                                          Closed   fires
  *                                                                    │
  *                                                                    ▼
- *                                                              LOG(FATAL)
+ *                                                                  Closed
+ *                                                              (forced;
+ * stragglers drop writes via the adapter's pipelineActive_ flag)
  *
  * Closed transitions broadcast a ConnectionClosed pipeline event; the
  * tail adapter handles it by firing the user closeCallback. From the
@@ -120,17 +124,24 @@ class ThriftServerConnectionCloseHandler {
       // un-armed is correct.
       ctx.deactivate();
     });
-    reapTimer_ = folly::AsyncTimeout::make(*evb, [this]() noexcept {
+    reapTimer_ = folly::AsyncTimeout::make(*evb, [this, &ctx]() noexcept {
       if (state_ != State::ClosedReaping) {
         return;
       }
+      // Force-close. ConnectionClosed clears the adapter's
+      // pipelineActive_ flag and drops its pipelineGuard_, so the
+      // pipeline is free to die. Each in-flight FastHandlerCallback
+      // holds a DestructorGuard on the adapter, so the adapter
+      // outlives the pipeline until the last straggler is destroyed;
+      // their writes hit pipelineActive_==false and are dropped.
       XLOGF(
-          FATAL,
-          "ThriftServerConnectionCloseHandler reap timed out after {}ms with {} in-flight "
-          "callback(s) outstanding; a thrift handler completion is stuck. "
-          "Stack should point at the offending site.",
+          WARN,
+          "ThriftServerConnectionCloseHandler reap timed out after {}ms "
+          "with {} in-flight callback(s) outstanding; forcing close. "
+          "Adapter will persist until stragglers drain.",
           reapTimeout_.count(),
           inFlight_);
+      transitionToClosed(ctx);
     });
   }
 

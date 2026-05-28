@@ -54,11 +54,13 @@ void ThriftServerAppAdapter::setPipeline(
   pipeline_ = pipeline;
   pipelineGuard_ =
       std::make_unique<folly::DelayedDestruction::DestructorGuard>(pipeline_);
+  pipelineActive_ = true;
   evb_ = folly::getKeepAliveToken(pipeline_->eventBase());
 }
 
 void ThriftServerAppAdapter::resetPipeline() noexcept {
   folly::DelayedDestruction::DestructorGuard dg(this);
+  pipelineActive_ = false;
   pipeline_ = nullptr;
   pipelineGuard_.reset();
   evb_ = {};
@@ -70,6 +72,13 @@ void ThriftServerAppAdapter::onEvent(
   if (event.type != ThriftServerEventType::ConnectionClosed) {
     return;
   }
+  // Detach from pipeline. Stragglers (FastHandlerCallbacks still
+  // alive, each holding a DG on us) call writeResponse, hit
+  // pipelineActive_==false in writeResponseOnEventBase, and drop
+  // silently. The pipeline is free to die — its DG count from us
+  // just dropped.
+  pipelineActive_ = false;
+  pipelineGuard_.reset();
   fireCloseCallback();
 }
 
@@ -180,6 +189,12 @@ void ThriftServerAppAdapter::writeResponse(
 
 void ThriftServerAppAdapter::writeResponseOnEventBase(
     ThriftServerResponseMessage&& message) noexcept {
+  // Straggler after force-close (or any post-ConnectionClosed write):
+  // the pipeline may already be gone. Drop silently — pipeline_ may
+  // be dangling, do NOT dereference.
+  if (FOLLY_UNLIKELY(!pipelineActive_)) {
+    return;
+  }
   if (FOLLY_UNLIKELY(!pipeline_)) {
     handleMissingPipeline();
     return;

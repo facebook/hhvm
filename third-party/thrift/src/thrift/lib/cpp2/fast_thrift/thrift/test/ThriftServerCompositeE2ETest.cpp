@@ -253,6 +253,10 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
     ServerConnectionContext(const ServerConnectionContext&) = delete;
     ServerConnectionContext& operator=(const ServerConnectionContext&) = delete;
 
+    void start() noexcept {
+      transportAdapter->rocketConnection().transportHandler->onConnect();
+    }
+
     void close() noexcept {
       if (closed) {
         return;
@@ -395,10 +399,8 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
     // (Ready -> Open). Without this, child onRead rejects with
     // Result::Error because base state-checks state == Open.
     ctx.thriftPipeline->activate();
-    // Activate the rocket pipeline so it can begin reading. Mirrors
-    // ThriftServerConnectionFactory::getConnection's onConnect call.
-    ctx.transportAdapter->rocketConnection().transportHandler->onConnect();
-
+    // Connection is inert; ConnectionHandler's installer lambda calls
+    // start() after registering the entry, which fires onConnect().
     return ctx;
   }
 

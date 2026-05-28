@@ -65,7 +65,8 @@ TestServerConnection TestServerConnectionFactory::getConnection(
   TestServerConnection conn;
   conn.transportHandler = std::move(transportHandler);
   conn.pipeline = std::move(pipeline);
-  conn.transportHandler->onConnect();
+  // Connection is inert; ConnectionHandler's installer lambda calls
+  // start() after registering the entry, which fires onConnect().
   return conn;
 }
 

@@ -90,6 +90,17 @@ struct ThriftServerConnection {
   // ThriftServerConnectionContextHandler via refcount.
   boost::intrusive_ptr<ThriftConnContext> connContext;
 
+  // Begin reading. May synchronously drain pre-received bytes (e.g. the
+  // post-StopTLS handoff buffer) and dispatch the first request inline, so
+  // callers must complete every piece of accept-time setup
+  // (onConnectionAccepted hook, registration in the owning
+  // connection-manager map) before calling this.
+  void start() noexcept {
+    DCHECK(!started_) << "ThriftServerConnection::start called twice";
+    started_ = true;
+    thriftTransportAdapter->rocketConnection().transportHandler->onConnect();
+  }
+
   // Initiate close. From the owner's perspective this is fire-and-wait:
   // call close(), then wait for the closeCallback to fire before
   // dropping the ThriftServerConnection. Internally we just trigger
@@ -198,6 +209,8 @@ struct ThriftServerConnection {
         },
         tail);
   }
+
+  bool started_{false};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift::server

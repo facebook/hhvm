@@ -26,8 +26,14 @@ namespace apache::thrift::fast_thrift::connection {
 
 /**
  * Connection — anything the connection layer is willing to store and tear
- * down. The connection layer drives shutdown in two phases:
+ * down. The connection layer drives lifecycle in three phases:
  *
+ *   start() — begin reading. May synchronously dispatch the first request
+ *             inline (e.g. when bytes were already buffered at the
+ *             transport, as with a post-StopTLS handoff). The connection
+ *             layer calls this only after the accept hook has fired AND
+ *             the connection has been registered in its bookkeeping, so
+ *             any synchronous close fired from start() finds the entry.
  *   drain() — initiate graceful shutdown; returns immediately. The
  *             connection sends any peer-disconnect signal, lets in-flight
  *             work complete, and fires its close callback when done.
@@ -40,6 +46,7 @@ namespace apache::thrift::fast_thrift::connection {
  */
 template <typename C>
 concept Connection = requires(C& c, std::function<void()> cb) {
+  c.start();
   c.close();
   c.drain();
   c.setCloseCallback(std::move(cb));

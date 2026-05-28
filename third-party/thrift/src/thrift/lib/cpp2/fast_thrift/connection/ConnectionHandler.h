@@ -144,9 +144,11 @@ class ConnectionHandler {
   // pattern keeps the connection layer free of vtables on our types.
   struct AnyConnection {
     std::unique_ptr<void, void (*)(void*) noexcept> conn;
+    void (*startFn)(void*) noexcept;
     void (*closeFn)(void*) noexcept;
     void (*drainFn)(void*) noexcept;
 
+    void start() noexcept { startFn(conn.get()); }
     void close() noexcept { closeFn(conn.get()); }
     void drain() noexcept { drainFn(conn.get()); }
   };
@@ -157,6 +159,7 @@ class ConnectionHandler {
         .conn = std::unique_ptr<void, void (*)(void*) noexcept>(
             new C(std::move(c)),
             [](void* p) noexcept { delete static_cast<C*>(p); }),
+        .startFn = [](void* p) noexcept { static_cast<C*>(p)->start(); },
         .closeFn = [](void* p) noexcept { static_cast<C*>(p)->close(); },
         .drainFn = [](void* p) noexcept { static_cast<C*>(p)->drain(); },
     };
@@ -229,13 +232,22 @@ void ConnectionHandler::setConnectionFactory(
   // appears outside the pipeline. It wraps each connection into an
   // AnyConnection and installs a close callback so the connection self-
   // removes from connections_ when it tears down.
+  //
+  // Ordering note: start() must run AFTER the connection is registered in
+  // connections_, because start() can synchronously dispatch the first
+  // request (e.g. when the post-StopTLS handoff has bytes already buffered
+  // at the transport), and any synchronous close fired off that dispatch
+  // would invoke onConnectionClosed against an entry that doesn't yet
+  // exist. The local `c` is moved into the map, so start() is invoked via
+  // the stored AnyConnection.
   auto installer =
       typename Installer::Ptr(new Installer([this](Conn c) noexcept {
         auto connId = nextConnId_++;
         c.setCloseCallback(
             [this, connId]() noexcept { onConnectionClosed(connId); });
-        connections_.emplace(connId, wrap<Conn>(std::move(c)));
+        auto it = connections_.emplace(connId, wrap<Conn>(std::move(c))).first;
         connectionCount_.fetch_add(1, std::memory_order_relaxed);
+        it->second.start();
       }));
   auto* installerRaw = installer.get();
   installer_ = std::unique_ptr<

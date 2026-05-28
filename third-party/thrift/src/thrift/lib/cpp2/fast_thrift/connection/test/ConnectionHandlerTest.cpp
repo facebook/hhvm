@@ -38,13 +38,25 @@ namespace {
 // shared atomic so tests can verify teardown, and treats drain() as an
 // immediate close (firing the close callback so the handler can erase
 // the entry).
+//
+// `closeOnStart` exists to exercise the synchronous-close-during-start
+// invariant: when set, start() immediately invokes close(), which fires
+// the close callback under the same installer-lambda frame that just
+// registered this connection.
 struct TestConnection {
   folly::AsyncTransport::UniquePtr transport;
   std::shared_ptr<std::atomic<size_t>> closeCount;
   std::function<void()> closeCb;
   bool closed{false};
+  bool closeOnStart{false};
 
   void setCloseCallback(std::function<void()> cb) { closeCb = std::move(cb); }
+
+  void start() noexcept {
+    if (closeOnStart) {
+      close();
+    }
+  }
 
   void drain() noexcept { close(); }
 
@@ -70,18 +82,21 @@ struct TestConnection {
 class TestConnectionFactory {
  public:
   explicit TestConnectionFactory(
-      std::shared_ptr<std::atomic<size_t>> closeCount = nullptr) noexcept
-      : closeCount_(std::move(closeCount)) {}
+      std::shared_ptr<std::atomic<size_t>> closeCount = nullptr,
+      bool closeOnStart = false) noexcept
+      : closeCount_(std::move(closeCount)), closeOnStart_(closeOnStart) {}
 
   TestConnection getConnection(folly::AsyncTransport::UniquePtr socket) {
     return TestConnection{
         .transport = std::move(socket),
         .closeCount = closeCount_,
-        .closeCb = {}};
+        .closeCb = {},
+        .closeOnStart = closeOnStart_};
   }
 
  private:
   std::shared_ptr<std::atomic<size_t>> closeCount_;
+  bool closeOnStart_;
 };
 
 } // namespace
@@ -264,6 +279,59 @@ TEST_F(ConnectionHandlerTest, DestroyWithActiveConnections) {
   // Destructor drives stop() — should release live connections cleanly.
   handler.reset();
   EXPECT_EQ(closeCount_->load(), 1);
+}
+
+// Regression: the installer lambda must register the connection in
+// connections_ BEFORE calling start(). A factory-built connection whose
+// start() synchronously closes (modelling a post-StopTLS handoff that
+// dispatches and tears down inline) would otherwise fire its close callback
+// against a not-yet-registered entry, missing the erase + count decrement.
+TEST_F(ConnectionHandlerTest, SynchronousCloseDuringStartIsSafe) {
+  auto handler = createConnectionHandler();
+  factory_ = std::make_unique<TestConnectionFactory>(
+      closeCount_, /*closeOnStart=*/true);
+  evb_->runInEventBaseThreadAndWait(
+      [&] { handler->setConnectionFactory(*factory_); });
+
+  // Open a client socket — the server-side install will run start(), which
+  // synchronously closes, firing the close callback under the install
+  // lambda. We wait on closeCount_ rather than connectionCount() because
+  // the count briefly hits 1 and returns to 0 in the same EVB iteration;
+  // a spin-wait on connectionCount() would race the synchronous close.
+  folly::Baton<> connected;
+  struct ConnectCb : folly::AsyncSocket::ConnectCallback {
+    folly::Baton<>& baton;
+    explicit ConnectCb(folly::Baton<>& b) : baton(b) {}
+    void connectSuccess() noexcept override { baton.post(); }
+    void connectErr(const folly::AsyncSocketException&) noexcept override {}
+  };
+  ConnectCb cb(connected);
+  auto clientThread = std::make_unique<folly::ScopedEventBaseThread>();
+  auto* clientEvb = clientThread->getEventBase();
+  std::shared_ptr<folly::AsyncSocket> clientSocket;
+  clientEvb->runInEventBaseThreadAndWait([&] {
+    clientSocket = folly::AsyncSocket::newSocket(clientEvb);
+    clientSocket->connect(&cb, handler->getAddress(), 1000);
+  });
+  connected.wait();
+
+  const auto deadline =
+      std::chrono::steady_clock::now() + std::chrono::seconds{5};
+  while (closeCount_->load() == 0) {
+    ASSERT_LT(std::chrono::steady_clock::now(), deadline)
+        << "timed out waiting for server-side install + synchronous close";
+    // NOLINTNEXTLINE(facebook-hte-BadCall-sleep_for)
+    std::this_thread::sleep_for(std::chrono::milliseconds{5});
+  }
+  EXPECT_EQ(handler->connectionCount(), 0)
+      << "synchronous close during start() must remove the registered entry";
+  EXPECT_EQ(closeCount_->load(), 1);
+
+  // Hand off the client socket so its dtor runs on its EVB.
+  ClientConnection cc;
+  cc.socket = std::move(clientSocket);
+  cc.thread = std::move(clientThread);
+  clientConnections_.push_back(std::move(cc));
 }
 
 } // namespace apache::thrift::fast_thrift::connection

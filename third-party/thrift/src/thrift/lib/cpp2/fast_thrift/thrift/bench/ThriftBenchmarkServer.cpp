@@ -133,6 +133,8 @@ struct BenchmarkConnection {
   BenchmarkConnection& operator=(const BenchmarkConnection&) = delete;
   ~BenchmarkConnection() = default;
 
+  void start() noexcept { transportHandler->onConnect(); }
+
   void close() noexcept {
     if (closed) {
       return;

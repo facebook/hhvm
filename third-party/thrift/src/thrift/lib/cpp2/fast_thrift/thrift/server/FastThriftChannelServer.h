@@ -160,6 +160,7 @@ struct ThriftServerChannelConnection {
   std::shared_ptr<std::function<void()>> closeCbHolder{
       std::make_shared<std::function<void()>>()};
   bool closed{false};
+  bool started{false};
 
   ThriftServerChannelConnection() = default;
   ThriftServerChannelConnection(ThriftServerChannelConnection&&) noexcept =
@@ -170,6 +171,17 @@ struct ThriftServerChannelConnection {
   ThriftServerChannelConnection& operator=(
       const ThriftServerChannelConnection&) = delete;
   ~ThriftServerChannelConnection() = default;
+
+  // Connection concept: begin reading. May synchronously drain pre-received
+  // bytes (e.g. the post-StopTLS handoff buffer) and dispatch the first
+  // request inline, so callers must complete every piece of accept-time
+  // setup (onConnectionAccepted hook, registration in the owning
+  // connection-manager map) before calling this.
+  void start() noexcept {
+    DCHECK(!started) << "ThriftServerChannelConnection::start called twice";
+    started = true;
+    transportAdapter->rocketConnection().transportHandler->onConnect();
+  }
 
   // Connection concept: forceful synchronous teardown. Closes the thrift
   // pipeline (which propagates handlerRemoved into the transport adapter,
@@ -512,9 +524,13 @@ ThriftServerChannelConnection FastThriftServerT<Stats>::buildConnection(
     }
   });
 
-  // Activate the rocket pipeline so it can begin reading. Mirrors
-  // ThriftServerConnectionFactory::getConnection's onConnect call.
-  conn.transportAdapter->rocketConnection().transportHandler->onConnect();
+  // Note: the connection is fully wired but inert. Reading is started
+  // separately via ThriftServerChannelConnection::start() once the
+  // connection layer has registered this connection in the manager's
+  // bookkeeping. Starting here would race the registration, since
+  // setReadCB can synchronously drain pre-received bytes (post-StopTLS
+  // handoff) and tear the connection down before the install lambda has
+  // recorded its entry.
   return conn;
 }
 

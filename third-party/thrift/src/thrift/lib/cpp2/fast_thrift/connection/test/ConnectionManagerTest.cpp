@@ -46,6 +46,8 @@ struct TestConnection {
 
   void setCloseCallback(std::function<void()> cb) { closeCb = std::move(cb); }
 
+  void start() noexcept {}
+
   void drain() noexcept { close(); }
 
   void close() noexcept {

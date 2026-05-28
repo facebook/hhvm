@@ -55,6 +55,10 @@ struct TestServerConnection {
   TestServerConnection(const TestServerConnection&) = delete;
   TestServerConnection& operator=(const TestServerConnection&) = delete;
 
+  void start() noexcept {
+    transportAdapter->rocketConnection().transportHandler->onConnect();
+  }
+
   void close() noexcept {
     if (closed) {
       return;

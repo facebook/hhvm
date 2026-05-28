@@ -102,9 +102,13 @@ ThriftServerConnection ThriftServerConnectionFactory::getConnection(
   // callback can reach it post-construction.
   conn.connContext = std::move(connContext);
 
-  // Activate the rocket pipeline so it can begin reading.
-  conn.thriftTransportAdapter->rocketConnection().transportHandler->onConnect();
-
+  // Note: the connection is fully wired but inert. Reading is started
+  // separately via ThriftServerConnection::start() once the connection
+  // layer has run its accept-time setup (e.g. onConnectionAccepted hook,
+  // registration in the connection-manager map). Starting here would race
+  // those steps: setReadCB can synchronously drain pre-received bytes
+  // (post-StopTLS handoff) and dispatch the first request before the
+  // accept hook has populated per-connection state.
   return conn;
 }
 
@@ -253,7 +257,6 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
   auto thriftPipeline = thriftPipelineBuilder.build();
   transportAdapterPtr->setPipeline(thriftPipeline.get());
   tailAdapter->setPipeline(thriftPipeline.get());
-  thriftPipeline->activate();
   conn.thriftPipeline = std::move(thriftPipeline);
 
   return conn;

@@ -103,6 +103,8 @@ struct TcpConnection {
   TcpConnection& operator=(const TcpConnection&) = delete;
   ~TcpConnection() = default;
 
+  void start() noexcept { transportHandler->onConnect(); }
+
   void close() noexcept {
     if (closed) {
       return;

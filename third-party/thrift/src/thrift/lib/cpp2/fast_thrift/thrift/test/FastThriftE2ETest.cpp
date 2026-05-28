@@ -183,6 +183,9 @@ class FastThriftE2ETest : public ::testing::Test {
     ServerConnection(const ServerConnection&) = delete;
     ServerConnection& operator=(const ServerConnection&) = delete;
 
+    void start() noexcept {
+      transportAdapter->rocketConnection().transportHandler->onConnect();
+    }
     void close() noexcept {
       if (closed) {
         return;
@@ -291,9 +294,8 @@ class FastThriftE2ETest : public ::testing::Test {
     serverChannel->setPipelineRef(*conn.thriftPipeline);
     serverChannel->setWorker(apache::thrift::Cpp2Worker::createDummy(evb));
     conn.transportAdapter = std::move(transportAdapter);
-    // Activate the rocket pipeline so it can begin reading. Mirrors
-    // ThriftServerConnectionFactory::getConnection's onConnect call.
-    conn.transportAdapter->rocketConnection().transportHandler->onConnect();
+    // Connection is inert; ConnectionHandler's installer lambda calls
+    // start() after registering the entry, which fires onConnect().
     return conn;
   }
 
@@ -593,6 +595,9 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
     ServerConnection(const ServerConnection&) = delete;
     ServerConnection& operator=(const ServerConnection&) = delete;
 
+    void start() noexcept {
+      transportAdapter->rocketConnection().transportHandler->onConnect();
+    }
     void close() noexcept {
       if (closed) {
         return;
@@ -681,9 +686,8 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
     serverChannel->setPipelineRef(*conn.thriftPipeline);
     serverChannel->setWorker(apache::thrift::Cpp2Worker::createDummy(evb));
     conn.transportAdapter = std::move(transportAdapter);
-    // Activate the rocket pipeline so it can begin reading. Mirrors
-    // ThriftServerConnectionFactory::getConnection's onConnect call.
-    conn.transportAdapter->rocketConnection().transportHandler->onConnect();
+    // Connection is inert; ConnectionHandler's installer lambda calls
+    // start() after registering the entry, which fires onConnect().
     return conn;
   }
 

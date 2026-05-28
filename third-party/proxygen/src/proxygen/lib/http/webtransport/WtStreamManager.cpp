@@ -48,9 +48,8 @@
  *   WebTransport::WriteHandle::resetStream).
  *
  * – An ingress handle transitions from [HandleState::Open] ->
- *   [HandleState::Closed] in three cases: fin is read via ::readStreamData(),
- *   the application is no longer interested in ingress (i.e.
- *   WebTransport::ReadHandle::stopSending), or the transport receives a
+ *   [HandleState::Closed] in two cases cases: fin is read via
+ *   ::readStreamData() or the transport receives a
  *   reset_stream and WtStreamManager::onResetStream is invoked.
  *
  * – An invalid handle (e.g. client egress handle for a
@@ -121,6 +120,7 @@ struct WtStreamManager::Accessor {
 namespace {
 
 constexpr uint8_t kStreamIdInc = 0x04;
+constexpr uint32_t kInternalWtErr = proxygen::WebTransport::kInternalError;
 
 struct BufferedData {
   folly::IOBuf chain; // head is always empty
@@ -132,6 +132,11 @@ size_t computeChainLength(std::unique_ptr<folly::IOBuf>& buf) {
 }
 
 using namespace proxygen::detail;
+using WtException = WtStreamManager::WtException;
+folly::exception_wrapper makeWtException(uint32_t err, std::string_view msg) {
+  return folly::make_exception_wrapper<WtException>(err, std::string{msg});
+}
+
 using ReadPromise = WtStreamManager::ReadPromise;
 ReadPromise emptyReadPromise() {
   return ReadPromise::makeEmpty();
@@ -142,12 +147,20 @@ WritePromise emptyWritePromise() {
   return WritePromise::makeEmpty();
 }
 
-using WtException = WtStreamManager::WtException;
 using Result = WtStreamManager::Result;
 using StreamData = WtStreamManager::StreamData;
 using WebTransport = proxygen::WebTransport;
 using Accessor = WtStreamManager::Accessor;
-enum HandleState : uint8_t { Closed = 0, Open = 1 };
+
+enum class ReadHandleState : uint8_t {
+  Open = 0,   /* open */
+  HalfClosed, /* tx stop_sending */
+  Closed      /* invalid, rx rst_stream or eom read */
+};
+enum class WriteHandleState : uint8_t {
+  Open = 0, /* open */
+  Closed    /* invalid, tx rst_stream or eom sent */
+};
 
 struct ReadHandle : public WebTransport::StreamReadHandle {
   // why doesn't using StreamReadHandle::StreamReadHandle work here?
@@ -168,7 +181,7 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
   WtStreamManager::ReadCallback* rcb_{nullptr};
   uint64_t bytesRead_{0};
   ReadPromise promise_{emptyReadPromise()};
-  HandleState state_;
+  ReadHandleState state_;
   WriteHandle* wh_{nullptr}; // ptr to the symmetric wh
 };
 struct WriteHandle : public WebTransport::StreamWriteHandle {
@@ -197,7 +210,7 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
   WtBufferedStreamData bufferedSendData_;
   uint64_t err{kInvalidVarint};
   WritePromise promise_{emptyWritePromise()};
-  HandleState state_;
+  WriteHandleState state_;
   ReadHandle* rh_{nullptr}; // ptr to the symmetric rh
 };
 
@@ -259,15 +272,15 @@ void Accessor::onStreamWritable(WriteHandle& wh) noexcept {
 }
 
 void Accessor::done(WriteHandle& wh) noexcept {
-  XCHECK_EQ(wh.state_, Closed);
-  if (wh.rh_->state_ == Closed) { // bidi done
+  XCHECK_EQ(wh.state_, WriteHandleState::Closed);
+  if (wh.rh_->state_ == ReadHandleState::Closed) { // bidi done
     sm_.erase(wh.getID());
   }
 }
 
 void Accessor::done(ReadHandle& rh) noexcept {
-  XCHECK_EQ(rh.state_, Closed);
-  if (rh.wh_->state_ == Closed) { // bidi done
+  XCHECK_EQ(rh.state_, ReadHandleState::Closed);
+  if (rh.wh_->state_ == WriteHandleState::Closed) { // bidi done
     sm_.erase(rh.getID());
   }
 }
@@ -578,8 +591,7 @@ WtStreamManager::Result WtStreamManager::onResetStream(
     ResetStream data) noexcept {
   XLOG(DBG9) << __func__ << "; id=" << data.streamId << "; err=" << data.err;
   if (auto* rh = readhandle_ptr_cast(getIngressHandle(data.streamId))) {
-    auto ex = folly::make_exception_wrapper<WtException>(uint32_t(data.err),
-                                                         "rx reset_stream");
+    auto ex = makeWtException(uint32_t(data.err), "rx reset_stream");
     rh->cancel(std::move(ex), data.reliableSize);
     return Ok;
   }
@@ -652,7 +664,7 @@ void WtStreamManager::shutdown(CloseSession cs) noexcept {
   }
   shutdown_ = true;
   XLOG(DBG4) << __func__ << "; ec=" << cs.err << "; err=" << cs.msg;
-  auto ex = folly::make_exception_wrapper<WtException>(cs.err, cs.msg);
+  auto ex = makeWtException(cs.err, cs.msg);
   auto streams = std::move(streams_);
   for (auto& [_, handle] : streams) {
     handle->rh.cancel(ex);
@@ -830,17 +842,15 @@ void WtStreamManager::onClosed(uint64_t streamId) const noexcept {
 /**
  * ReadHandle & WriteHandle implementations here
  */
-
 ReadHandle::ReadHandle(uint64_t id, uint64_t initRecvWnd, Accessor acc) noexcept
     : StreamReadHandle(id),
       smAccessor_(acc),
       streamRecvFc_(initRecvWnd),
-      state_(static_cast<HandleState>(acc.isIngress(id))) {
+      state_(acc.isIngress(id) ? ReadHandleState::Open
+                               : ReadHandleState::Closed) {
 }
 
 folly::SemiFuture<StreamData> ReadHandle::readStreamData() {
-  // TODO(@damlaj): hook into interrupt handler, but somehow ensure no UB from
-  // concurrent access
   XLOG_IF(FATAL, promise_.valid()) << "one pending read at a time";
   if (!ingress_.chain.empty() || ingress_.fin) {
     auto len = ingress_.chain.computeChainDataLength();
@@ -866,31 +876,43 @@ folly::SemiFuture<StreamData> ReadHandle::readStreamData() {
 }
 
 folly::Expected<folly::Unit, ReadHandle::ErrCode> ReadHandle::stopSending(
-    uint32_t error) {
-  smAccessor_.stopSending(*this, error);
-  // **beware cancel must be last** (`this` can be deleted immediately after)
-  cancel(folly::make_exception_wrapper<WtException>(error, "tx stop_sending"));
+    uint32_t error) { // wait for peer eom or rst_stream
+  XCHECK_NE(state_, ReadHandleState::Closed);
+  const auto prevState = std::exchange(state_, ReadHandleState::HalfClosed);
+  if (prevState == ReadHandleState::Open) { // egress at most one ss
+    smAccessor_.stopSending(*this, error);
+  }
+  if (auto p = resetPromise(); p.valid()) { // resolve pending read with ex
+    p.setException(makeWtException(kInternalWtErr, "tx stop_sending"));
+  }
   return folly::unit;
 }
 
 Result ReadHandle::enqueue(StreamData&& data) noexcept {
   auto len = computeChainLength(data.data);
-  if (!streamRecvFc_.reserve(len) || ingress_.fin) { // error
+  const bool ingressDone = state_ == ReadHandleState::Closed || ingress_.fin;
+  if (ingressDone || !streamRecvFc_.reserve(len)) { // error
     return Result::Fail;
   }
   if (len > 0) {
+    // TODO(@damlaj): can improve here and elide buffering when half-closed
     ingress_.chain.appendToChain(std::move(data.data));
   }
   ingress_.fin = data.fin;
   XLOG(DBG6) << __func__ << "; len=" << len << "; fin=" << data.fin
              << "; p.valid()=" << promise_.valid();
   if (auto p = resetPromise(); p.valid()) {
-    // only issue conn-level fc if we've rx'd fin
+    // issue only conn-level fc if we've rx'd fin
     smAccessor_.maybeGrantFc(ingress_.fin ? nullptr : this, len);
     p.setValue(StreamData{ingress_.chain.pop(), ingress_.fin});
     if (rcb_) {
       rcb_->readReady(*this);
     }
+    finish(ingress_.fin);
+  } else if (state_ == ReadHandleState::HalfClosed && ingress_.fin) {
+    // HalfClosed => app will not read anymore; issue conn-fc & dealloc on fin
+    smAccessor_.maybeGrantFc(/*rh=*/nullptr,
+                             ingress_.chain.computeChainDataLength());
     finish(ingress_.fin);
   }
   return Result::Ok;
@@ -929,7 +951,7 @@ ReadPromise ReadHandle::resetPromise() noexcept {
 
 void ReadHandle::finish(bool done) noexcept {
   if (done) {
-    state_ = Closed;
+    state_ = ReadHandleState::Closed;
     smAccessor_.done(*this);
   }
 }
@@ -940,7 +962,8 @@ WriteHandle::WriteHandle(uint64_t id,
     : StreamWriteHandle(id),
       smAccessor_(acc),
       bufferedSendData_(initSendWnd),
-      state_(static_cast<HandleState>(acc.isEgress(id))) {
+      state_(acc.isEgress(id) ? WriteHandleState::Open
+                              : WriteHandleState::Closed) {
 }
 
 folly::Expected<WriteHandle::FcState, WriteHandle::ErrCode>
@@ -973,7 +996,7 @@ folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::resetStream(
 
 folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::setPriority(
     quic::PriorityQueue::Priority priority) {
-  XCHECK_NE(state_, Closed) << "setPriority after close";
+  XCHECK_NE(state_, WriteHandleState::Closed) << "setPriority after close";
 
   StreamWriteHandle::setPriority(priority);
   smAccessor_.writableStreams().update(getID(), getPriority());
@@ -1010,7 +1033,7 @@ WritePromise WriteHandle::resetPromise() noexcept {
 // TODO(@damlaj): StreamData and DequeueResult should be the same struct
 WtBufferedStreamData::DequeueResult WriteHandle::dequeue(
     uint64_t atMost) noexcept {
-  XCHECK_NE(state_, Closed) << "dequeue after close";
+  XCHECK_NE(state_, WriteHandleState::Closed) << "dequeue after close";
 
   auto res = bufferedSendData_.dequeue(atMost);
   const auto bufferAvailable = bufferedSendData_.window().getBufferAvailable();
@@ -1053,13 +1076,13 @@ void WriteHandle::cancel(folly::exception_wrapper ex) noexcept {
 }
 
 void WriteHandle::onStopSending(uint32_t errCode) noexcept {
-  ex_ = folly::make_exception_wrapper<WtException>(errCode, "rx stop_sending");
+  ex_ = makeWtException(errCode, "rx stop_sending");
   cs_.requestCancellation(); // notify applicaiton of stop sending
 }
 
 void WriteHandle::finish(bool done) noexcept {
   if (done) {
-    state_ = Closed;
+    state_ = WriteHandleState::Closed;
     smAccessor_.done(*this);
   }
 }

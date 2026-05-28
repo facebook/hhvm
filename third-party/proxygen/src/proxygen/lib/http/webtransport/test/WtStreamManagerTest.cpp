@@ -654,7 +654,7 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   CHECK(one.readHandle && one.writeHandle);
   auto id = one.readHandle->getID();
 
-  // stop sending should invoke callback and resolve pending promise
+  // ReadHandle::stopSending invokes ::eventsAvailable & resolve pending promise
   auto rp = one.readHandle->readStreamData();
   one.readHandle->stopSending(0);
   EXPECT_TRUE(rp.isReady() && rp.hasException()); // exception via stopSending
@@ -680,7 +680,11 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   EXPECT_EQ(resetStream.streamId, id);
   EXPECT_EQ(resetStream.err, 1);
 
+  // stream considered bidirectionally complete when peer sends rst_stream
+  EXPECT_TRUE(streamManager.hasStreams());
+
   // bidirectionally reset => stream deleted
+  streamManager.onResetStream({.streamId = id, .err = 0x00});
   EXPECT_FALSE(streamManager.hasStreams());
 
   // ::resetStream on a unidirectional egress stream should erase the stream
@@ -690,6 +694,75 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
                                     // handle; bidirectionally complete after
                                     // ::resetStream
   EXPECT_FALSE(streamManager.hasStreams());
+}
+
+TEST(WtStreamManager, StopSendingTest) {
+  WtConfig config{};
+  WtSmEgressCb egressCb;
+  WtSmIngressCb ingressCb;
+  config.selfMaxStreamsUni = 5;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
+  WtStreamManager streamManager{
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
+  constexpr auto kBufLen = 65'535;
+
+  {
+    // StopSending on an ingress stream marks it as half closed; stream is only
+    // closed when we rx a reset_stream or eom from peer (to account for flow
+    // control)
+    auto* uni = CHECK_NOTNULL(streamManager.getOrCreateIngressHandle(0x03));
+    uni->stopSending(0x00);
+
+    // validate StopSending event is enqueued
+    EXPECT_TRUE(std::exchange(egressCb.evAvail_, false));
+    auto events = streamManager.moveEvents();
+    EXPECT_EQ(events.size(), 1);
+    EXPECT_TRUE(std::holds_alternative<StopSending>(events[0]));
+
+    // continue to rx data from peer; no fc credit is released since we're no
+    // longer reading
+    streamManager.enqueue(*uni, {.data = makeBuf(kBufLen), .fin = false});
+    events = streamManager.moveEvents();
+    EXPECT_EQ(events.size(), 0);
+
+    // rxing eom from peer triggers conn-fc even if application does not read
+    streamManager.enqueue(*uni, {.data = nullptr, .fin = true});
+    events = streamManager.moveEvents();
+    EXPECT_EQ(events.size(), 1);
+    EXPECT_TRUE(std::holds_alternative<MaxConnData>(events[0]));
+    // stream now deallocated
+    EXPECT_FALSE(streamManager.hasStreams());
+  }
+
+  // identical to above, but tests ingress reset_stream instead of eof
+  {
+    // StopSending on an ingress stream marks it as half closed; stream is only
+    // closed when we rx a reset_stream or eom from peer (to account for flow
+    // control)
+    auto* uni = CHECK_NOTNULL(streamManager.getOrCreateIngressHandle(0x07));
+    uni->stopSending(0x00);
+
+    // validate StopSending event is enqueued
+    EXPECT_TRUE(std::exchange(egressCb.evAvail_, false));
+    auto events = streamManager.moveEvents();
+    EXPECT_EQ(events.size(), 1);
+    EXPECT_TRUE(std::holds_alternative<StopSending>(events[0]));
+
+    // continue to rx data from peer; no fc credit is released since we're no
+    // longer reading
+    streamManager.enqueue(*uni, {.data = makeBuf(kBufLen), .fin = false});
+    events = streamManager.moveEvents();
+    EXPECT_EQ(events.size(), 0);
+
+    // rxing rst_stream from peer triggers conn-fc even if application does not
+    // read
+    streamManager.onResetStream({.streamId = 0x07});
+    events = streamManager.moveEvents();
+    EXPECT_EQ(events.size(), 1);
+    EXPECT_TRUE(std::holds_alternative<MaxConnData>(events[0]));
+    // stream now deallocated
+    EXPECT_FALSE(streamManager.hasStreams());
+  }
 }
 
 TEST(WtStreamManager, AwaitWritableTest) {
@@ -936,10 +1009,11 @@ TEST(WtStreamManager, IssueMaxStreamsBidiUni) {
   CHECK(peerBidi.readHandle && peerBidi.writeHandle);
   auto peerUni = CHECK_NOTNULL(streamManager.getOrCreateIngressHandle(0x03));
 
-  // rst_stream & stop_sending on peerBidi will close stream => issue
+  // tx & rx rst_stream on peerBidi will close stream => issue
   // MaxStreamsBidi
   peerBidi.readHandle->stopSending(0);
   peerBidi.writeHandle->resetStream(0);
+  streamManager.onResetStream({peerBidi.writeHandle->getID()});
 
   // reading fin on peerUni will close stream => issue MaxStreamsUni
   streamManager.enqueue(*peerUni, {makeBuf(0), true});

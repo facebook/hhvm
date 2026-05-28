@@ -742,7 +742,10 @@ CO_TEST_P_X(WtTest, MaxStreamsBidiUni) {
     writeWTStream(wtBuf,
                   WTStreamCapsule{.streamId = nextServerUni,
                                   .streamData = makeBuf(1),
-                                  .fin = false});
+                                  .fin = true});
+    // reset the ingress direction for bidi streams
+    writeWTResetStream(
+        wtBuf, {.streamId = nextServerBidi, .appProtocolErrorCode = 0x00});
     nextServerBidi += 4;
     nextServerUni += 4;
   }
@@ -753,10 +756,12 @@ CO_TEST_P_X(WtTest, MaxStreamsBidiUni) {
     co_await rescheduleN(1);
   }
 
-  // bidirectionally terminate each stream
+  // terminate egress for each stream (via above, ingress closed either by
+  // rst_stream for bidi or eom for uni)
   for (auto& handle : wtHandlerCtx->peerStreams) {
     // read handle is unconditional for peer-initiated streams
-    CHECK_NOTNULL(handle.readHandle)->stopSending(0);
+    auto res = co_await co_awaitTry(handle.readHandle->readStreamData());
+    EXPECT_FALSE(res.hasException());
     if (handle.writeHandle) {
       handle.writeHandle->resetStream(0);
     }

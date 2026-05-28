@@ -18,8 +18,6 @@
 
 #include <gtest/gtest.h>
 
-#include <boost/intrusive_ptr.hpp>
-
 #include <folly/SocketAddress.h>
 
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/TypeErasedPtr.h>

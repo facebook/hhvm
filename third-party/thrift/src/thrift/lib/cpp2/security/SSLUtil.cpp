@@ -151,6 +151,9 @@ folly::AsyncSocketTransport::UniquePtr toFDSocket(
   }
 
   auto sock = fizzSock->template getUnderlyingTransport<folly::AsyncSocket>();
+  // Query the underlying AsyncSocket directly — AsyncFizzBase doesn't
+  // override getZeroCopy(), so fizzSock->getZeroCopy() always returns false.
+  const bool hadZeroCopy = sock && sock->getZeroCopy();
   folly::AsyncSocketTransport::UniquePtr ret;
 #if defined(__linux__) && __has_include(<liburing.h>)
   if (!sock &&
@@ -229,6 +232,10 @@ folly::AsyncSocketTransport::UniquePtr toFDSocket(
       ret.reset(populate(new FDTransport<folly::AsyncSocket>(
           eb, fd, zcId, selfCert, peerCert)));
     }
+  }
+
+  if (ret && hadZeroCopy) {
+    ret->setZeroCopy(true);
   }
   return ret;
 }

@@ -16,11 +16,15 @@
 
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
+
 #include <gtest/gtest.h>
+#include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
 
 #include <map>
+#include <stdexcept>
 #include <vector>
 
 namespace apache::thrift::fast_thrift::frame::write::handler {
@@ -33,13 +37,8 @@ namespace {
 struct CapturedFrame {
   uint32_t streamId;
   FrameType frameType;
-  uint16_t flags;
-  size_t payloadSize;
-
-  bool hasFollows() const {
-    return (flags &
-            ::apache::thrift::fast_thrift::frame::detail::kFollowsBit) != 0;
-  }
+  size_t dataSize;
+  bool follows;
 };
 
 class MockContext {
@@ -49,21 +48,29 @@ class MockContext {
   folly::EventBase* getEventBase() const { return evb_; }
 
   apache::thrift::fast_thrift::channel_pipeline::Result fireWrite(
-      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&& msg) {
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
+          msg) noexcept {
+    if (errorEnabled_ && written_.size() >= errorAt_) {
+      return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
+    }
     if (backpressureAt_ > 0 && written_.size() >= backpressureAt_) {
       return apache::thrift::fast_thrift::channel_pipeline::Result::
           Backpressure;
     }
 
-    auto& frame = msg.get<OutboundFrame>();
-    written_.push_back(
-        CapturedFrame{
-            .streamId = frame.streamId,
-            .frameType = frame.frameType,
-            .flags = frame.flags,
-            .payloadSize = frame.payloadSize(),
-        });
+    auto& f = msg.get<ComposedFrame>();
+    CapturedFrame cap{};
+    cap.streamId = f.streamId;
+    cap.frameType = f.frameType;
+    cap.dataSize = f.data ? f.data->computeChainDataLength() : 0;
+    cap.follows = f.follows;
+    written_.push_back(cap);
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+  }
+
+  void fireException(folly::exception_wrapper&& e) noexcept {
+    ++fireExceptionCount_;
+    lastException_ = std::move(e);
   }
 
   void awaitWriteReady() { awaitWriteReadyCalled_ = true; }
@@ -71,14 +78,26 @@ class MockContext {
   void deactivate() {}
 
   void setBackpressureAt(size_t n) { backpressureAt_ = n; }
+  void setErrorAt(size_t n) {
+    errorEnabled_ = true;
+    errorAt_ = n;
+  }
   const std::vector<CapturedFrame>& written() const { return written_; }
   bool awaitWriteReadyCalled() const { return awaitWriteReadyCalled_; }
+  size_t fireExceptionCount() const { return fireExceptionCount_; }
+  const folly::exception_wrapper& lastException() const {
+    return lastException_;
+  }
 
  private:
   folly::EventBase* evb_;
   std::vector<CapturedFrame> written_;
   size_t backpressureAt_{0};
+  size_t errorAt_{0};
+  bool errorEnabled_{false};
   bool awaitWriteReadyCalled_{false};
+  size_t fireExceptionCount_{0};
+  folly::exception_wrapper lastException_;
 };
 
 // ============================================================================
@@ -92,17 +111,34 @@ std::unique_ptr<folly::IOBuf> makePayload(size_t size) {
   return buf;
 }
 
-apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox makeFrame(
-    uint32_t streamId,
-    size_t payloadSize,
-    FrameType type = FrameType::PAYLOAD) {
-  OutboundFrame frame;
-  frame.streamId = streamId;
-  frame.frameType = type;
-  frame.flags = 0;
-  frame.payload = makePayload(payloadSize);
+apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox makePayloadFrame(
+    uint32_t streamId, size_t dataSize) {
+  ComposedFrame f;
+  f.frameType = FrameType::PAYLOAD;
+  f.streamId = streamId;
+  f.data = makePayload(dataSize);
+  f.next = true;
   return apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
-      std::move(frame));
+      std::move(f));
+}
+
+apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox makeCancelFrame(
+    uint32_t streamId) {
+  ComposedFrame f;
+  f.frameType = FrameType::CANCEL;
+  f.streamId = streamId;
+  return apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
+      std::move(f));
+}
+
+apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox makeErrorFrame(
+    uint32_t streamId) {
+  ComposedFrame f;
+  f.frameType = FrameType::ERROR;
+  f.streamId = streamId;
+  f.errorCode = 0x00000201;
+  return apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
+      std::move(f));
 }
 
 // ============================================================================
@@ -136,19 +172,17 @@ TEST_F(FrameFragmentationHandlerTest, SmallFrameBypassesFragmentation) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  // Frame fits in one fragment AND heap is empty → fast-path direct fireWrite.
-  auto result = handler.onWrite(*ctx_, makeFrame(1, 32 * 1024));
+  auto result = handler.onWrite(*ctx_, makePayloadFrame(1, 32 * 1024));
   EXPECT_EQ(
       result, apache::thrift::fast_thrift::channel_pipeline::Result::Success);
 
-  // Fast-path: sent immediately, nothing queued.
   EXPECT_EQ(handler.immediateQueueSize(), 0);
   EXPECT_EQ(handler.pendingStreamCount(), 0);
 
   ASSERT_EQ(ctx_->written().size(), 1);
   EXPECT_EQ(ctx_->written()[0].streamId, 1);
-  EXPECT_EQ(ctx_->written()[0].payloadSize, 32 * 1024);
-  EXPECT_FALSE(ctx_->written()[0].hasFollows());
+  EXPECT_EQ(ctx_->written()[0].dataSize, 32 * 1024);
+  EXPECT_FALSE(ctx_->written()[0].follows);
 }
 
 TEST_F(FrameFragmentationHandlerTest, LargeFrameFragmented) {
@@ -156,7 +190,7 @@ TEST_F(FrameFragmentationHandlerTest, LargeFrameFragmented) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  auto result = handler.onWrite(*ctx_, makeFrame(1, 192 * 1024));
+  auto result = handler.onWrite(*ctx_, makePayloadFrame(1, 192 * 1024));
   EXPECT_EQ(
       result, apache::thrift::fast_thrift::channel_pipeline::Result::Success);
 
@@ -166,10 +200,29 @@ TEST_F(FrameFragmentationHandlerTest, LargeFrameFragmented) {
   runEventBaseLoop();
 
   ASSERT_EQ(ctx_->written().size(), 3);
+  EXPECT_TRUE(ctx_->written()[0].follows);
+  EXPECT_TRUE(ctx_->written()[1].follows);
+  EXPECT_FALSE(ctx_->written()[2].follows);
+  // First fragment keeps original PAYLOAD type; continuations are PAYLOAD too.
+  EXPECT_EQ(ctx_->written()[0].frameType, FrameType::PAYLOAD);
+  EXPECT_EQ(ctx_->written()[1].frameType, FrameType::PAYLOAD);
+  EXPECT_EQ(ctx_->written()[2].frameType, FrameType::PAYLOAD);
+}
 
-  EXPECT_TRUE(ctx_->written()[0].hasFollows());
-  EXPECT_TRUE(ctx_->written()[1].hasFollows());
-  EXPECT_FALSE(ctx_->written()[2].hasFollows());
+// ============================================================================
+// Non-fragmentable bypass
+// ============================================================================
+
+TEST_F(FrameFragmentationHandlerTest, ErrorFrameBypasses) {
+  FragmentationHandlerConfig config{.maxFragmentSize = 64 * 1024};
+  FrameFragmentationHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  (void)handler.onWrite(*ctx_, makeErrorFrame(1));
+  ASSERT_EQ(ctx_->written().size(), 1);
+  EXPECT_EQ(ctx_->written()[0].frameType, FrameType::ERROR);
+  EXPECT_EQ(handler.pendingStreamCount(), 0);
+  EXPECT_EQ(handler.immediateQueueSize(), 0);
 }
 
 // ============================================================================
@@ -181,9 +234,9 @@ TEST_F(FrameFragmentationHandlerTest, MultiStreamRoundRobinInterleaving) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  (void)handler.onWrite(*ctx_, makeFrame(1, 192 * 1024)); // 3 fragments
-  (void)handler.onWrite(*ctx_, makeFrame(2, 128 * 1024)); // 2 fragments
-  (void)handler.onWrite(*ctx_, makeFrame(3, 65 * 1024)); // 2 fragments
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 192 * 1024)); // 3 fragments
+  (void)handler.onWrite(*ctx_, makePayloadFrame(2, 128 * 1024)); // 2 fragments
+  (void)handler.onWrite(*ctx_, makePayloadFrame(3, 65 * 1024)); // 2 fragments
 
   EXPECT_EQ(handler.pendingStreamCount(), 3);
 
@@ -200,7 +253,6 @@ TEST_F(FrameFragmentationHandlerTest, MultiStreamRoundRobinInterleaving) {
   EXPECT_EQ(fragmentsByStream[2].size(), 2);
   EXPECT_EQ(fragmentsByStream[3].size(), 2);
 
-  // Per-stream ordering preserved
   for (const auto& [streamId, indices] : fragmentsByStream) {
     for (size_t i = 1; i < indices.size(); ++i) {
       EXPECT_GT(indices[i], indices[i - 1])
@@ -214,10 +266,10 @@ TEST_F(FrameFragmentationHandlerTest, SmallFramesSentBeforeLargeFragments) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  (void)handler.onWrite(*ctx_, makeFrame(1, 192 * 1024));
-  (void)handler.onWrite(*ctx_, makeFrame(2, 32 * 1024));
-  (void)handler.onWrite(*ctx_, makeFrame(3, 128 * 1024));
-  (void)handler.onWrite(*ctx_, makeFrame(4, 16 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 192 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(2, 32 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(3, 128 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(4, 16 * 1024));
 
   EXPECT_EQ(handler.immediateQueueSize(), 2);
   EXPECT_EQ(handler.pendingStreamCount(), 2);
@@ -226,7 +278,6 @@ TEST_F(FrameFragmentationHandlerTest, SmallFramesSentBeforeLargeFragments) {
 
   ASSERT_EQ(ctx_->written().size(), 7);
 
-  // Small frames first
   EXPECT_EQ(ctx_->written()[0].streamId, 2);
   EXPECT_EQ(ctx_->written()[1].streamId, 4);
 }
@@ -240,8 +291,8 @@ TEST_F(FrameFragmentationHandlerTest, BackpressurePausesFlush) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  (void)handler.onWrite(*ctx_, makeFrame(1, 128 * 1024));
-  (void)handler.onWrite(*ctx_, makeFrame(2, 128 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 128 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(2, 128 * 1024));
 
   ctx_->setBackpressureAt(2);
 
@@ -256,23 +307,18 @@ TEST_F(FrameFragmentationHandlerTest, BackpressureResumeCompletes) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  // Use 3 fragments so we can verify resume works
-  (void)handler.onWrite(*ctx_, makeFrame(1, 192 * 1024)); // 3 fragments
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 192 * 1024)); // 3 fragments
 
-  ctx_->setBackpressureAt(2); // Allow 2 fragments, backpressure on 3rd
+  ctx_->setBackpressureAt(2);
 
   runEventBaseLoop();
   EXPECT_EQ(ctx_->written().size(), 2);
   EXPECT_TRUE(ctx_->awaitWriteReadyCalled());
 
-  // Clear backpressure and resume
   ctx_->setBackpressureAt(0);
   handler.onWriteReady(*ctx_);
 
-  // After resume, stream should be fully drained
   EXPECT_EQ(handler.pendingStreamCount(), 0);
-  // At least 2 fragments were written before backpressure,
-  // and the stream is now complete (drained)
   EXPECT_GE(ctx_->written().size(), 2);
 }
 
@@ -288,10 +334,10 @@ TEST_F(FrameFragmentationHandlerTest, MaxPendingBytesForceFlush) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  (void)handler.onWrite(*ctx_, makeFrame(1, 128 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 128 * 1024));
   EXPECT_EQ(ctx_->written().size(), 0);
 
-  (void)handler.onWrite(*ctx_, makeFrame(2, 192 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(2, 192 * 1024));
   EXPECT_GT(ctx_->written().size(), 0);
 }
 
@@ -304,22 +350,18 @@ TEST_F(FrameFragmentationHandlerTest, MaxPendingFramesForceFlush) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  // First: add a large frame that needs fragmentation to fill the heap.
-  (void)handler.onWrite(*ctx_, makeFrame(1, 192 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 192 * 1024));
   EXPECT_EQ(ctx_->written().size(), 0);
   EXPECT_EQ(handler.pendingStreamCount(), 1);
 
-  // Second large frame.
-  (void)handler.onWrite(*ctx_, makeFrame(2, 192 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(2, 192 * 1024));
   EXPECT_EQ(ctx_->written().size(), 0);
   EXPECT_EQ(handler.pendingStreamCount(), 2);
 
-  // Third large frame — at limit, not exceeded.
-  (void)handler.onWrite(*ctx_, makeFrame(3, 192 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(3, 192 * 1024));
   EXPECT_EQ(ctx_->written().size(), 0);
 
-  // Fourth large frame exceeds limit — should force flush.
-  (void)handler.onWrite(*ctx_, makeFrame(4, 192 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(4, 192 * 1024));
   EXPECT_GT(ctx_->written().size(), 0);
 }
 
@@ -331,13 +373,11 @@ TEST_F(FrameFragmentationHandlerTest, BackpressureAtExactByteLimit) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  // Large frame goes to SrptHeap — at limit but not exceeded.
-  (void)handler.onWrite(*ctx_, makeFrame(1, 128 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 128 * 1024));
   EXPECT_EQ(ctx_->written().size(), 0);
   EXPECT_EQ(handler.pendingBytes(), 128 * 1024);
 
-  // Another large frame exceeds limit — should force flush.
-  (void)handler.onWrite(*ctx_, makeFrame(2, 128 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(2, 128 * 1024));
   EXPECT_GT(ctx_->written().size(), 0);
 }
 
@@ -350,16 +390,13 @@ TEST_F(FrameFragmentationHandlerTest, BackpressureAtExactFrameLimit) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  // Large frames go to SrptHeap.
-  (void)handler.onWrite(*ctx_, makeFrame(1, 128 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 128 * 1024));
   EXPECT_EQ(ctx_->written().size(), 0);
 
-  // Second large frame — at exact frame limit, not exceeded.
-  (void)handler.onWrite(*ctx_, makeFrame(2, 128 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(2, 128 * 1024));
   EXPECT_EQ(ctx_->written().size(), 0);
 
-  // Third large frame exceeds limit — should force flush.
-  (void)handler.onWrite(*ctx_, makeFrame(3, 128 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(3, 128 * 1024));
   EXPECT_GT(ctx_->written().size(), 0);
 }
 
@@ -368,24 +405,19 @@ TEST_F(FrameFragmentationHandlerTest, BackpressureOnImmediateQueueDrain) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  // First: add a large frame to populate the heap.
-  (void)handler.onWrite(*ctx_, makeFrame(10, 192 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(10, 192 * 1024));
   EXPECT_EQ(handler.pendingStreamCount(), 1);
 
-  // Now add medium frames (above minSizeToFragment but below maxFragmentSize).
-  // Heap is non-empty, so they go to immediateQueue instead of fast-path.
-  (void)handler.onWrite(*ctx_, makeFrame(1, 2 * 1024));
-  (void)handler.onWrite(*ctx_, makeFrame(2, 2 * 1024));
-  (void)handler.onWrite(*ctx_, makeFrame(3, 2 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 2 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(2, 2 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(3, 2 * 1024));
 
   EXPECT_EQ(handler.immediateQueueSize(), 3);
 
-  // Set backpressure to trigger on second frame.
   ctx_->setBackpressureAt(1);
 
   runEventBaseLoop();
 
-  // Only first frame should be written before backpressure.
   EXPECT_EQ(ctx_->written().size(), 1);
   EXPECT_TRUE(ctx_->awaitWriteReadyCalled());
 }
@@ -395,20 +427,16 @@ TEST_F(FrameFragmentationHandlerTest, BackpressureOnFirstFragment) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  // Add a large frame that will be fragmented
-  (void)handler.onWrite(*ctx_, makeFrame(1, 192 * 1024)); // 3 fragments
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 192 * 1024));
 
   EXPECT_EQ(handler.pendingStreamCount(), 1);
 
-  // Set backpressure to trigger on first fragment
-  // backpressureAt(1) means backpressure after 1 frame written
   ctx_->setBackpressureAt(1);
 
   runEventBaseLoop();
 
-  // First fragment should be written, then backpressure
   EXPECT_EQ(ctx_->written().size(), 1);
-  EXPECT_TRUE(ctx_->written()[0].hasFollows());
+  EXPECT_TRUE(ctx_->written()[0].follows);
   EXPECT_TRUE(ctx_->awaitWriteReadyCalled());
 }
 
@@ -417,26 +445,21 @@ TEST_F(FrameFragmentationHandlerTest, BackpressureOnContinuationFragment) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  // Add a large frame that will be fragmented into 3 fragments
-  (void)handler.onWrite(*ctx_, makeFrame(1, 192 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 192 * 1024));
 
   EXPECT_EQ(handler.pendingStreamCount(), 1);
 
-  // Set backpressure to trigger on second fragment (continuation)
   ctx_->setBackpressureAt(1);
 
   runEventBaseLoop();
 
-  // First fragment written, backpressure on second
   EXPECT_EQ(ctx_->written().size(), 1);
-  EXPECT_TRUE(ctx_->written()[0].hasFollows());
+  EXPECT_TRUE(ctx_->written()[0].follows);
   EXPECT_TRUE(ctx_->awaitWriteReadyCalled());
 
-  // Clear backpressure and resume
   ctx_->setBackpressureAt(0);
   handler.onWriteReady(*ctx_);
 
-  // Remaining fragments should now be written
   EXPECT_GE(ctx_->written().size(), 2);
 }
 
@@ -449,14 +472,13 @@ TEST_F(FrameFragmentationHandlerTest, ExactFragmentSizeNotFragmented) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  // Exactly maxFragmentSize AND heap empty → fast-path direct fireWrite.
-  (void)handler.onWrite(*ctx_, makeFrame(1, 64 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 64 * 1024));
 
   EXPECT_EQ(handler.immediateQueueSize(), 0);
   EXPECT_EQ(handler.pendingStreamCount(), 0);
 
   ASSERT_EQ(ctx_->written().size(), 1);
-  EXPECT_FALSE(ctx_->written()[0].hasFollows());
+  EXPECT_FALSE(ctx_->written()[0].follows);
 }
 
 TEST_F(FrameFragmentationHandlerTest, StreamCompletionRemovesFromMap) {
@@ -464,7 +486,7 @@ TEST_F(FrameFragmentationHandlerTest, StreamCompletionRemovesFromMap) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  (void)handler.onWrite(*ctx_, makeFrame(1, 65 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 65 * 1024));
 
   EXPECT_EQ(handler.pendingStreamCount(), 1);
 
@@ -478,17 +500,17 @@ TEST_F(FrameFragmentationHandlerTest, UnevenFragmentSizes) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  (void)handler.onWrite(*ctx_, makeFrame(1, 100 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 100 * 1024));
 
   runEventBaseLoop();
 
   ASSERT_EQ(ctx_->written().size(), 2);
 
-  EXPECT_EQ(ctx_->written()[0].payloadSize, 64 * 1024);
-  EXPECT_TRUE(ctx_->written()[0].hasFollows());
+  EXPECT_EQ(ctx_->written()[0].dataSize, 64 * 1024);
+  EXPECT_TRUE(ctx_->written()[0].follows);
 
-  EXPECT_EQ(ctx_->written()[1].payloadSize, 36 * 1024);
-  EXPECT_FALSE(ctx_->written()[1].hasFollows());
+  EXPECT_EQ(ctx_->written()[1].dataSize, 36 * 1024);
+  EXPECT_FALSE(ctx_->written()[1].follows);
 }
 
 TEST_F(FrameFragmentationHandlerTest, CancelClearsStreamFragments) {
@@ -496,32 +518,18 @@ TEST_F(FrameFragmentationHandlerTest, CancelClearsStreamFragments) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  // Add a large frame that will require fragmentation
-  (void)handler.onWrite(*ctx_, makeFrame(1, 128 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 128 * 1024));
 
-  // Verify stream is pending
   EXPECT_EQ(handler.pendingStreamCount(), 1);
   EXPECT_TRUE(handler.hasPendingStream(1));
 
-  // Send CANCEL for this stream
-  OutboundFrame cancelFrame;
-  cancelFrame.streamId = 1;
-  cancelFrame.frameType = FrameType::CANCEL;
-  cancelFrame.flags = 0;
-  cancelFrame.payload = nullptr;
-  (void)handler.onWrite(
-      *ctx_,
-      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
-          std::move(cancelFrame)));
+  (void)handler.onWrite(*ctx_, makeCancelFrame(1));
 
-  // Stream should be removed from pending
   EXPECT_EQ(handler.pendingStreamCount(), 0);
   EXPECT_FALSE(handler.hasPendingStream(1));
 
-  // Run event loop - should only get the CANCEL frame, not fragments
   runEventBaseLoop();
 
-  // Verify CANCEL was forwarded (it's in immediate queue)
   bool cancelSent = false;
   for (const auto& f : ctx_->written()) {
     if (f.frameType == FrameType::CANCEL && f.streamId == 1) {
@@ -536,31 +544,18 @@ TEST_F(FrameFragmentationHandlerTest, ErrorClearsStreamFragments) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  // Add a large frame that will require fragmentation
-  (void)handler.onWrite(*ctx_, makeFrame(1, 128 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 128 * 1024));
 
-  // Verify stream is pending
   EXPECT_EQ(handler.pendingStreamCount(), 1);
   EXPECT_TRUE(handler.hasPendingStream(1));
 
-  // Send ERROR for this stream
-  OutboundFrame errorFrame;
-  errorFrame.streamId = 1;
-  errorFrame.frameType = FrameType::ERROR;
-  errorFrame.flags = 0;
-  errorFrame.payload = nullptr;
-  (void)handler.onWrite(
-      *ctx_,
-      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
-          std::move(errorFrame)));
+  (void)handler.onWrite(*ctx_, makeErrorFrame(1));
 
-  // Stream should be removed from pending
   EXPECT_EQ(handler.pendingStreamCount(), 0);
   EXPECT_FALSE(handler.hasPendingStream(1));
 
   runEventBaseLoop();
 
-  // Verify ERROR was forwarded
   bool errorSent = false;
   for (const auto& f : ctx_->written()) {
     if (f.frameType == FrameType::ERROR && f.streamId == 1) {
@@ -575,41 +570,155 @@ TEST_F(FrameFragmentationHandlerTest, CancelOnlyAffectsTargetStream) {
   FrameFragmentationHandler handler(config);
   handler.handlerAdded(*ctx_);
 
-  // Add large frames for two different streams
-  (void)handler.onWrite(*ctx_, makeFrame(1, 128 * 1024));
-  (void)handler.onWrite(*ctx_, makeFrame(2, 128 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 128 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(2, 128 * 1024));
 
-  // Verify both streams are pending
   EXPECT_EQ(handler.pendingStreamCount(), 2);
-  EXPECT_TRUE(handler.hasPendingStream(1));
-  EXPECT_TRUE(handler.hasPendingStream(2));
 
-  // Send CANCEL only for stream 1
-  OutboundFrame cancelFrame;
-  cancelFrame.streamId = 1;
-  cancelFrame.frameType = FrameType::CANCEL;
-  cancelFrame.flags = 0;
-  cancelFrame.payload = nullptr;
-  (void)handler.onWrite(
-      *ctx_,
-      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
-          std::move(cancelFrame)));
+  (void)handler.onWrite(*ctx_, makeCancelFrame(1));
 
-  // Only stream 1 should be removed
   EXPECT_EQ(handler.pendingStreamCount(), 1);
   EXPECT_FALSE(handler.hasPendingStream(1));
   EXPECT_TRUE(handler.hasPendingStream(2));
 
   runEventBaseLoop();
 
-  // Verify stream 2 fragments were still sent
   size_t stream2Fragments = 0;
   for (const auto& f : ctx_->written()) {
     if (f.streamId == 2 && f.frameType == FrameType::PAYLOAD) {
       stream2Fragments++;
     }
   }
-  EXPECT_EQ(stream2Fragments, 2); // 128KB = 2 fragments of 64KB each
+  EXPECT_EQ(stream2Fragments, 2);
+}
+
+// ============================================================================
+// Multi-frame-per-stream regression — exercises the per-stream FIFO.
+// ============================================================================
+
+TEST_F(FrameFragmentationHandlerTest, MultiFramesPerStreamAllSent) {
+  FragmentationHandlerConfig config{.maxFragmentSize = 64 * 1024};
+  FrameFragmentationHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  // Two large PAYLOAD frames for the same stream. With the pre-rework
+  // single-payload state the second would have clobbered the first's
+  // remaining bytes; both must come out intact and in order.
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 100 * 1024)); // 2 fragments
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 100 * 1024)); // 2 fragments
+
+  runEventBaseLoop();
+
+  ASSERT_EQ(ctx_->written().size(), 4);
+  size_t totalBytes = 0;
+  for (const auto& f : ctx_->written()) {
+    EXPECT_EQ(f.streamId, 1);
+    EXPECT_EQ(f.frameType, FrameType::PAYLOAD);
+    totalBytes += f.dataSize;
+  }
+  EXPECT_EQ(totalBytes, 200 * 1024);
+}
+
+// ============================================================================
+// Error Propagation Tests (downstream Result::Error)
+// ============================================================================
+
+TEST_F(FrameFragmentationHandlerTest, AsyncFlushStopsImmediateQueueOnError) {
+  // Forces several small frames into immediateQueue_ behind a fragmented
+  // stream, then errors downstream after the first write. The Step 1 loop
+  // must stop after the failed write, and the async-discard path must
+  // surface a single inbound fireException.
+  FragmentationHandlerConfig config{.maxFragmentSize = 64 * 1024};
+  FrameFragmentationHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  (void)handler.onWrite(*ctx_, makePayloadFrame(10, 192 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 2 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(2, 2 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(3, 2 * 1024));
+  ASSERT_EQ(handler.immediateQueueSize(), 3);
+
+  ctx_->setErrorAt(1);
+  runEventBaseLoop();
+
+  EXPECT_EQ(ctx_->written().size(), 1);
+  EXPECT_EQ(ctx_->fireExceptionCount(), 1);
+  EXPECT_NE(
+      std::string(ctx_->lastException().what())
+          .find("FrameFragmentationHandler: downstream write failed"),
+      std::string::npos);
+}
+
+TEST_F(FrameFragmentationHandlerTest, AsyncFlushStopsSrptLoopOnError) {
+  // Two streams in the SRPT heap; downstream errors after two writes. The
+  // Step 2 SRPT loop must stop and the async-discard path must fire one
+  // inbound exception.
+  FragmentationHandlerConfig config{.maxFragmentSize = 64 * 1024};
+  FrameFragmentationHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 192 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(2, 192 * 1024));
+
+  ctx_->setErrorAt(2);
+  runEventBaseLoop();
+
+  EXPECT_EQ(ctx_->written().size(), 2);
+  EXPECT_EQ(ctx_->fireExceptionCount(), 1);
+  EXPECT_NE(
+      std::string(ctx_->lastException().what())
+          .find("FrameFragmentationHandler: downstream write failed"),
+      std::string::npos);
+}
+
+TEST_F(
+    FrameFragmentationHandlerTest,
+    OnWriteReadyFiresExceptionOnDownstreamError) {
+  // Backpressure, then resume via onWriteReady with downstream returning
+  // Error. The onWriteReady async-discard path must fire inbound.
+  FragmentationHandlerConfig config{.maxFragmentSize = 64 * 1024};
+  FrameFragmentationHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 192 * 1024));
+
+  ctx_->setBackpressureAt(1);
+  runEventBaseLoop();
+  ASSERT_TRUE(ctx_->awaitWriteReadyCalled());
+  ASSERT_EQ(ctx_->fireExceptionCount(), 0);
+
+  ctx_->setBackpressureAt(0);
+  ctx_->setErrorAt(ctx_->written().size());
+  handler.onWriteReady(*ctx_);
+
+  EXPECT_EQ(ctx_->fireExceptionCount(), 1);
+  EXPECT_NE(
+      std::string(ctx_->lastException().what())
+          .find("FrameFragmentationHandler: downstream write failed"),
+      std::string::npos);
+}
+
+TEST_F(FrameFragmentationHandlerTest, SyncThresholdFlushDoesNotFireException) {
+  // onWrite triggers a sync flushNow via the maxPendingBytes threshold.
+  // The caller (channel boundary) owns escalation on the sync path, so
+  // onWrite must return Result::Error WITHOUT firing fireException — firing
+  // both would double-fire at the channel.
+  FragmentationHandlerConfig config{
+      .maxFragmentSize = 64 * 1024,
+      .maxPendingBytes = 128 * 1024,
+  };
+  FrameFragmentationHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 128 * 1024));
+  ASSERT_EQ(ctx_->written().size(), 0);
+
+  ctx_->setErrorAt(0);
+
+  auto result = handler.onWrite(*ctx_, makePayloadFrame(2, 192 * 1024));
+  EXPECT_EQ(
+      result, apache::thrift::fast_thrift::channel_pipeline::Result::Error);
+  EXPECT_EQ(ctx_->fireExceptionCount(), 0);
 }
 
 } // namespace

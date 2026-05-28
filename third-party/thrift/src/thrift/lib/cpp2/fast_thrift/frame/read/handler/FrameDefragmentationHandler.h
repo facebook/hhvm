@@ -144,18 +144,21 @@ class FrameDefragmentationHandler {
     if (it == pending_.end()) {
       auto payloadSize = frame.payloadSize();
       if (totalPendingBytes_ + payloadSize > maxPendingBytes_) {
-        return apache::thrift::fast_thrift::channel_pipeline::Result::
-            Backpressure;
+        return failOversizedReassembly(ctx);
       }
       initPendingFragment(ctx, streamId, frame);
       return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
     }
 
-    // Continuation/final fragment: check backpressure before appending
+    // Continuation/final fragment: enforce reassembly budget. Returning
+    // Backpressure here would silently drop the fragment (msg was already
+    // moved in), permanently wedging the stream. Fail the connection
+    // instead so the caller observes the limit.
     auto dataSize = frame.dataSize();
     if (totalPendingBytes_ + dataSize > maxPendingBytes_) {
-      return apache::thrift::fast_thrift::channel_pipeline::Result::
-          Backpressure;
+      totalPendingBytes_ -= it->second.accumulatedBytes;
+      pending_.erase(it);
+      return failOversizedReassembly(ctx);
     }
 
     // Append fragment data (applies to both continuation and final)
@@ -175,6 +178,21 @@ class FrameDefragmentationHandler {
 
     // Continuation fragment: buffered, waiting for more
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+  }
+
+  /**
+   * Signal a reassembly-budget overrun to the pipeline. The connection
+   * cannot continue safely once we have dropped a fragment of an in-flight
+   * frame, so propagate as an exception rather than silently corrupting
+   * the stream.
+   */
+  template <typename Context>
+  apache::thrift::fast_thrift::channel_pipeline::Result failOversizedReassembly(
+      Context& ctx) noexcept {
+    ctx.fireException(
+        folly::make_exception_wrapper<std::runtime_error>(
+            "FrameDefragmentationHandler: pending reassembly bytes exceeded limit"));
+    return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
   }
 
   /**

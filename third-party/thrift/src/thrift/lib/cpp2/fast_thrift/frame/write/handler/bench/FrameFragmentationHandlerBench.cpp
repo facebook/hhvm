@@ -21,6 +21,8 @@
  * All message allocation happens outside the timing loop.
  */
 
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/PerStreamState.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 
 #include <folly/Benchmark.h>
@@ -57,6 +59,7 @@ class BenchContext {
   void awaitWriteReady() {}
   void cancelAwaitWriteReady() {}
   void deactivate() {}
+  void fireException(folly::exception_wrapper&&) noexcept {}
 
   size_t writeCount() const { return writeCount_; }
   void resetWriteCount() { writeCount_ = 0; }
@@ -77,11 +80,11 @@ std::unique_ptr<folly::IOBuf> makePayload(size_t size) {
 }
 
 TypeErasedBox makeFrame(uint32_t streamId, size_t payloadSize) {
-  OutboundFrame frame;
-  frame.streamId = streamId;
+  ComposedFrame frame;
   frame.frameType = FrameType::PAYLOAD;
-  frame.flags = 0;
-  frame.payload = makePayload(payloadSize);
+  frame.streamId = streamId;
+  frame.data = makePayload(payloadSize);
+  frame.next = true;
   return TypeErasedBox(std::move(frame));
 }
 
@@ -418,9 +421,11 @@ void BM_FragmentExtraction(uint32_t iters, size_t fragmentSize) {
 
   PerStreamState state;
   state.streamId = 1;
-  state.frameType = FrameType::PAYLOAD;
-  state.originalFlags = 0;
-  state.init(std::move(payload));
+  ComposedFrame seedFrame;
+  seedFrame.frameType = FrameType::PAYLOAD;
+  seedFrame.streamId = 1;
+  state.enqueue(
+      std::move(seedFrame), std::move(payload), /*originalComplete=*/false);
 
   braces.dismiss();
 
@@ -428,11 +433,17 @@ void BM_FragmentExtraction(uint32_t iters, size_t fragmentSize) {
   for (uint32_t i = 0; i < iters; ++i) {
     if (!state.hasMore()) {
       braces.rehire();
-      state.init(makePayload(kPayloadSize));
+      ComposedFrame nextSeed;
+      nextSeed.frameType = FrameType::PAYLOAD;
+      nextSeed.streamId = 1;
+      state.enqueue(
+          std::move(nextSeed),
+          makePayload(kPayloadSize),
+          /*originalComplete=*/false);
       braces.dismiss();
     }
-    auto [frag, follows] = state.nextFragment(fragmentSize);
-    totalExtracted += frag ? frag->computeChainDataLength() : 0;
+    auto frag = state.nextFragment(fragmentSize);
+    totalExtracted += frag.payloadBytes;
   }
 
   folly::doNotOptimizeAway(totalExtracted);

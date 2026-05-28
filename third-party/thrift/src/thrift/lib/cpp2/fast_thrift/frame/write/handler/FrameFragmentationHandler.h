@@ -19,11 +19,16 @@
 /**
  * FrameFragmentationHandler - Outbound handler for HOL blocking mitigation.
  *
- * Uses SRPT (Shortest Remaining Processing Time) scheduling to minimize mean
- * stream completion latency. Streams with the fewest remaining bytes are
- * flushed first, so small responses (the common case — single-fragment
+ * Uses SRPT (Shortest Remaining Processing Time) scheduling to minimize
+ * mean stream completion latency. Streams with the fewest remaining bytes
+ * are flushed first, so small responses (the common case — single-fragment
  * request-response) complete immediately rather than being blocked behind
  * bulk transfers.
+ *
+ * Operates on the flat `ComposedFrame`. Non-fragmentable frame types
+ * (ERROR, CANCEL, REQUEST_N, KEEPALIVE, SETUP, METADATA_PUSH, EXT) bypass
+ * the handler. Fragmentable types (PAYLOAD + REQUEST_*) are split
+ * data-tail-only — all metadata stays with the first fragment.
  *
  * See: FrameFragmentationHandler.md for design documentation.
  */
@@ -32,31 +37,21 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/PerStreamState.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/SrptHeap.h>
 
+#include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
 
+#include <glog/logging.h>
+
 #include <deque>
-#include <functional>
+#include <stdexcept>
 
 namespace apache::thrift::fast_thrift::frame::write::handler {
-
-/**
- * Outbound frame structure for fragmentation.
- */
-struct OutboundFrame {
-  uint32_t streamId{0};
-  FrameType frameType{FrameType::RESERVED};
-  uint16_t flags{0};
-  std::unique_ptr<folly::IOBuf> payload;
-
-  size_t payloadSize() const noexcept {
-    return payload ? payload->computeChainDataLength() : 0;
-  }
-};
 
 /// KeyFn for SrptHeap: extracts remaining bytes from PerStreamState.
 struct RemainingBytesFn {
@@ -66,7 +61,8 @@ struct RemainingBytesFn {
 };
 
 /**
- * FrameFragmentationHandler - Composable outbound handler for HOL mitigation.
+ * Composable outbound handler for HOL mitigation. Consumes and emits
+ * `ComposedFrame`.
  */
 class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
  public:
@@ -87,7 +83,12 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
   template <typename Context>
   void handlerAdded(Context& ctx) noexcept {
     eventBase_ = ctx.getEventBase();
-    flushFn_ = [this, &ctx]() { (void)doFlush(ctx); };
+    ctxPtr_ = &ctx;
+    // Type-erase the templated doFlush via a context-typed trampoline.
+    // No std::function allocation; pure function pointer indirection.
+    flushTrampoline_ = +[](FrameFragmentationHandler* self, void* c) noexcept {
+      self->flushAndPropagateErrors(*static_cast<Context*>(c));
+    };
   }
 
   template <typename Context>
@@ -95,10 +96,10 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
     cancelLoopCallbackIfScheduled();
     immediateQueue_.clear();
     streams_.clear();
-    pendingBytes_ = 0;
-    pendingFrames_ = 0;
+    resetPending();
     eventBase_ = nullptr;
-    flushFn_ = nullptr;
+    ctxPtr_ = nullptr;
+    flushTrampoline_ = nullptr;
   }
 
   template <typename Context>
@@ -106,35 +107,43 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
       Context& ctx,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
-    auto& frame = msg.get<OutboundFrame>();
-    size_t frameSize = frame.payloadSize();
-    uint32_t streamId = frame.streamId;
+    auto& frame = msg.get<ComposedFrame>();
+    const FrameType frameType = frame.frameType;
+    const uint32_t streamId = frame.streamId;
 
-    // Terminal frames: cancel pending fragments, forward immediately.
-    if (isTerminalFrameType(frame.frameType)) {
+    // Terminal frames: drop any queued fragments / immediate-queue entries
+    // for this stream, then forward immediately.
+    if (isTerminalFrameType(frameType)) {
       cancelStream(streamId);
       return ctx.fireWrite(std::move(msg));
     }
 
-    // Fast path: frame doesn't need fragmentation AND no pending fragments
-    // from other streams → pass straight through, zero overhead.
-    // Covers ~99% of traffic (small request-response at 200+ QPS).
-    if (frameSize <= config_.minSizeToFragment ||
-        (frameSize <= config_.maxFragmentSize && streams_.empty())) {
+    // Non-fragmentable types (KEEPALIVE, SETUP, ...) bypass the handler.
+    if (!frame.canFragment()) {
       return ctx.fireWrite(std::move(msg));
     }
 
-    // Medium path: fits in one fragment but there ARE pending fragments
-    // from other streams → queue behind them to preserve ordering.
-    if (frameSize <= config_.maxFragmentSize) {
-      immediateQueue_.push_back(std::move(msg));
-    } else {
-      // Slow path: needs fragmentation → SrptHeap
+    const size_t dataSize =
+        frame.data ? frame.data->computeChainDataLength() : 0;
+
+    const bool streamHasPending = streams_.contains(streamId);
+    const bool needsFragmentation = dataSize > config_.maxFragmentSize;
+
+    // Slow path: needs fragmentation, OR same-stream frames are already
+    // pending (ordering must be preserved on the wire for that stream).
+    if (needsFragmentation || streamHasPending) {
       addToStreamQueue(streamId, std::move(msg));
+    } else if (streams_.empty() || dataSize <= config_.minSizeToFragment) {
+      // Fast path: no per-stream ordering risk and either nothing else is
+      // pending or this frame is tiny enough to bypass.
+      return ctx.fireWrite(std::move(msg));
+    } else {
+      // Other streams have pending fragments; preserve cross-stream batching
+      // semantics by queueing behind them.
+      immediateQueue_.push_back(std::move(msg));
     }
 
-    pendingBytes_ += frameSize;
-    pendingFrames_++;
+    incrPending(dataSize, 1);
 
     if (pendingBytes_ > config_.maxPendingBytes ||
         pendingFrames_ > config_.maxPendingFrames) {
@@ -150,6 +159,7 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
     cancelLoopCallbackIfScheduled();
     immediateQueue_.clear();
     streams_.clear();
+    resetPending();
     ctx.deactivate();
   }
 
@@ -157,19 +167,20 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
   void onWriteReady(Context& ctx) noexcept {
     ctx.cancelAwaitWriteReady();
     backpressured_ = false;
-    (void)doFlush(ctx);
+    flushAndPropagateErrors(ctx);
   }
 
   void runLoopCallback() noexcept override {
     isScheduled_ = false;
-    if (flushFn_) {
-      flushFn_();
+    if (flushTrampoline_) {
+      flushTrampoline_(this, ctxPtr_);
     }
   }
 
   size_t pendingStreamCount() const noexcept { return streams_.size(); }
   size_t immediateQueueSize() const noexcept { return immediateQueue_.size(); }
   size_t pendingBytes() const noexcept { return pendingBytes_; }
+  size_t pendingFrames() const noexcept { return pendingFrames_; }
   bool isScheduled() const noexcept { return isScheduled_; }
 
   bool hasPendingStream(uint32_t streamId) const noexcept {
@@ -181,20 +192,17 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
       uint32_t streamId,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
-    auto& frame = msg.get<OutboundFrame>();
+    auto frame = msg.take<ComposedFrame>();
+    auto data = std::move(frame.data);
+    const bool originalComplete = frame.isComplete();
 
-    auto* existing = streams_.find(streamId);
-    if (existing) {
-      existing->frameType = frame.frameType;
-      existing->originalFlags = frame.flags;
-      existing->init(std::move(frame.payload));
+    if (auto* existing = streams_.find(streamId)) {
+      existing->enqueue(std::move(frame), std::move(data), originalComplete);
       streams_.update(streamId);
     } else {
       PerStreamState state;
       state.streamId = streamId;
-      state.frameType = frame.frameType;
-      state.originalFlags = frame.flags;
-      state.init(std::move(frame.payload));
+      state.enqueue(std::move(frame), std::move(data), originalComplete);
       streams_.insert(streamId, std::move(state));
     }
   }
@@ -214,16 +222,49 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
   }
 
   /**
-   * Cancel a stream and clean up its pending fragments.
-   * Called when CANCEL or ERROR frame is sent for a stream.
+   * Cancel a stream: drop all queued fragments AND any immediate-queue
+   * entries for that stream, so a CANCEL/ERROR going out is not followed
+   * by stale data frames for the same stream.
    */
   void cancelStream(uint32_t streamId) noexcept {
-    auto* state = streams_.find(streamId);
-    if (state) {
-      pendingBytes_ -= state->remaining();
-      pendingFrames_--;
+    if (auto* state = streams_.find(streamId)) {
+      decrPending(state->totalRemaining, state->frames.size());
       streams_.erase(streamId);
     }
+    for (auto it = immediateQueue_.begin(); it != immediateQueue_.end();) {
+      auto& f = it->get<ComposedFrame>();
+      if (f.streamId == streamId) {
+        const size_t sz = f.data ? f.data->computeChainDataLength() : 0;
+        decrPending(sz, 1);
+        it = immediateQueue_.erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
+
+  // Pending-counter mutators. All updates to pendingBytes_ / pendingFrames_
+  // funnel through these so the bookkeeping has a single audit point.
+  // DCHECKs trip on underflow / lost-tracking bugs in debug builds.
+  void incrPending(size_t bytes, size_t frames) noexcept {
+    pendingBytes_ += bytes;
+    pendingFrames_ += frames;
+  }
+
+  void decrPending(size_t bytes, size_t frames) noexcept {
+    DCHECK_GE(pendingBytes_, bytes);
+    DCHECK_GE(pendingFrames_, frames);
+    pendingBytes_ -= bytes;
+    pendingFrames_ -= frames;
+  }
+
+  void resetPending() noexcept {
+    // Reset is only valid once the in-flight queues have been emptied;
+    // otherwise we'd be silently discarding tracked work.
+    DCHECK(immediateQueue_.empty());
+    DCHECK(streams_.empty());
+    pendingBytes_ = 0;
+    pendingFrames_ = 0;
   }
 
   template <typename Context>
@@ -234,51 +275,63 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
   }
 
   template <typename Context>
+  void flushAndPropagateErrors(Context& ctx) noexcept {
+    if (doFlush(ctx) ==
+        apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
+      ctx.fireException(
+          folly::make_exception_wrapper<std::runtime_error>(
+              "FrameFragmentationHandler: downstream write failed"));
+    }
+  }
+
+  template <typename Context>
   [[nodiscard]] apache::thrift::fast_thrift::channel_pipeline::Result doFlush(
       Context& ctx) noexcept {
-    // Step 1: Drain immediate queue
+    // Step 1: Drain immediate queue.
     while (!immediateQueue_.empty()) {
-      auto result = ctx.fireWrite(std::move(immediateQueue_.front()));
+      auto box = std::move(immediateQueue_.front());
       immediateQueue_.pop_front();
+      auto& f = box.get<ComposedFrame>();
+      const size_t sz = f.data ? f.data->computeChainDataLength() : 0;
+      // Settle the pending accounting before handing the frame off — once
+      // fireWrite() runs the frame is no longer ours to track, and a
+      // re-entrant flush must see counters that already exclude it.
+      decrPending(sz, 1);
+      auto result = ctx.fireWrite(std::move(box));
       if (result ==
           apache::thrift::fast_thrift::channel_pipeline::Result::Backpressure) {
         backpressured_ = true;
         ctx.awaitWriteReady();
         return result;
       }
+      if (result ==
+          apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
+        return result;
+      }
     }
 
-    // Step 2: SRPT — always flush the stream with least remaining bytes.
-    // This minimizes mean flow completion time: small streams finish
-    // immediately rather than being interleaved with bulk transfers.
+    // Step 2: SRPT — always flush the stream with least remaining bytes
+    // first. Minimizes mean flow completion time.
     while (!streams_.empty()) {
       auto& state = streams_.peekMin();
-
       if (!state.hasMore()) {
         streams_.extractMin();
         continue;
       }
 
-      auto [fragment, follows] = state.nextFragment(config_.maxFragmentSize);
+      const uint32_t curStreamId = state.streamId;
+      auto frag = state.nextFragment(config_.maxFragmentSize);
 
-      OutboundFrame fragmentFrame;
-      fragmentFrame.streamId = state.streamId;
-      fragmentFrame.frameType = state.frameType;
-      fragmentFrame.flags = state.originalFlags;
-      if (follows) {
-        fragmentFrame.flags |= detail::kFollowsBit;
-      } else {
-        fragmentFrame.flags &= ~detail::kFollowsBit;
-      }
-      fragmentFrame.payload = std::move(fragment);
+      // Refresh heap priority after mutating remaining bytes.
+      streams_.update(curStreamId);
 
-      // Update heap priority after removing bytes.
-      uint32_t minStreamId = streams_.peekMinStreamId();
-      streams_.update(minStreamId);
+      // Settle pending accounting before fireWrite() so a re-entrant flush
+      // observes counters that already exclude this fragment.
+      decrPending(frag.payloadBytes, frag.currentFrameDone ? 1 : 0);
 
       auto result = ctx.fireWrite(
-          apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
-              std::move(fragmentFrame)));
+          apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+              std::move(frag.outFrame)));
 
       if (result ==
           apache::thrift::fast_thrift::channel_pipeline::Result::Backpressure) {
@@ -286,20 +339,27 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
         ctx.awaitWriteReady();
         return result;
       }
+      if (result ==
+          apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
+        return result;
+      }
 
-      // If the stream is done after this fragment, remove it.
-      if (!follows) {
-        streams_.erase(minStreamId);
+      if (!state.hasMore()) {
+        streams_.erase(curStreamId);
       }
     }
 
-    pendingBytes_ = 0;
-    pendingFrames_ = 0;
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
 
   FragmentationHandlerConfig config_;
   folly::EventBase* eventBase_{nullptr};
+
+  // Type-erased context dispatch for runLoopCallback. The trampoline
+  // restores the original Context type captured in handlerAdded.
+  void* ctxPtr_{nullptr};
+  void (*flushTrampoline_)(FrameFragmentationHandler*, void*) noexcept {
+      nullptr};
 
   bool isScheduled_{false};
   bool backpressured_{false};
@@ -310,10 +370,7 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
   std::deque<apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>
       immediateQueue_;
   // SRPT min-heap: always flush the stream with least remaining bytes first.
-  // Eliminates round-robin's HOL blocking — small responses complete
-  // immediately rather than being interleaved with bulk transfers.
   SrptHeap<PerStreamState, RemainingBytesFn> streams_;
-  std::function<void()> flushFn_;
 };
 
 } // namespace apache::thrift::fast_thrift::frame::write::handler

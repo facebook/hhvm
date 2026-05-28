@@ -17,120 +17,141 @@
 #pragma once
 
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <deque>
 #include <memory>
 #include <utility>
 
 namespace apache::thrift::fast_thrift::frame::write {
 
 /**
- * Per-stream fragment state for lazy fragmentation.
+ * One logical frame awaiting fragmentation. `originalFrame` is the
+ * `ComposedFrame` the caller handed us, with its `data` buffer detached
+ * into `dataQueue`. The first fragment goes out as `originalFrame` (with
+ * the first chunk reattached and `follows` stamped); subsequent fragments
+ * are minted as fresh `ComposedFrame{.frameType = PAYLOAD, ...}`
+ * continuations from `dataQueue`.
  *
- * Tracks the state needed to fragment a large payload across multiple
- * round-robin flush cycles.
+ * `originalComplete` is the originating frame's `isComplete()` value at
+ * enqueue time — propagated to the final PAYLOAD continuation so
+ * REQUEST_CHANNEL streams close properly on the receiver.
+ */
+struct PendingFrame {
+  ComposedFrame originalFrame{};
+  folly::IOBufQueue dataQueue{folly::IOBufQueue::cacheChainLength()};
+  bool firstEmitted{false};
+  bool originalComplete{false};
+
+  PendingFrame() = default;
+  ~PendingFrame() = default;
+  PendingFrame(PendingFrame&&) noexcept = default;
+  PendingFrame& operator=(PendingFrame&&) noexcept = default;
+  PendingFrame(const PendingFrame&) = delete;
+  PendingFrame& operator=(const PendingFrame&) = delete;
+
+  [[nodiscard]] size_t remaining() const noexcept {
+    return dataQueue.chainLength();
+  }
+};
+
+/**
+ * Per-stream fragmentation state. Owns a FIFO of `PendingFrame`s;
+ * SRPT scheduling reads `remaining()` (sum across the FIFO, cached).
  *
- * Design: Zero-copy fragmentation using IOBufQueue::split().
- * Instead of cloning chunks from a static payload, we directly split
- * off fragments from the queue. This avoids any data copying.
- *
- * See: FrameFragmentationHandler.md for design documentation.
+ * `nextFragment()` extracts and materializes the next on-wire frame for
+ * this stream, dispatching first-vs-continuation typing in one place so
+ * the handler stays focused on scheduling.
  */
 struct PerStreamState {
-  // Stream identifier
   uint32_t streamId{0};
-
-  // Payload queue - we split fragments directly from this (zero-copy)
-  folly::IOBufQueue payloadQueue{folly::IOBufQueue::cacheChainLength()};
-
-  // Original frame type (REQUEST_*, PAYLOAD, etc.)
-  FrameType frameType{FrameType::RESERVED};
-
-  // Original flags from the frame (metadata bit, etc.)
-  uint16_t originalFlags{0};
-
-  // ============================================================================
-  // Construction
-  // ============================================================================
+  std::deque<PendingFrame> frames;
+  size_t totalRemaining{0};
 
   PerStreamState() = default;
   ~PerStreamState() = default;
-
-  // Move-only
-  PerStreamState(PerStreamState&&) = default;
-  PerStreamState& operator=(PerStreamState&&) = default;
+  PerStreamState(PerStreamState&&) noexcept = default;
+  PerStreamState& operator=(PerStreamState&&) noexcept = default;
   PerStreamState(const PerStreamState&) = delete;
   PerStreamState& operator=(const PerStreamState&) = delete;
 
-  /**
-   * Initialize state with a new payload.
-   * Takes ownership of the IOBuf and appends it to the queue.
-   */
-  void init(std::unique_ptr<folly::IOBuf> payload) noexcept {
-    payloadQueue.reset();
-    if (payload) {
-      payloadQueue.append(std::move(payload));
+  void enqueue(
+      ComposedFrame&& originalFrame,
+      std::unique_ptr<folly::IOBuf> data,
+      bool originalComplete) noexcept {
+    const size_t size = data ? data->computeChainDataLength() : 0;
+    PendingFrame pf;
+    pf.originalFrame = std::move(originalFrame);
+    pf.originalComplete = originalComplete;
+    if (data) {
+      pf.dataQueue.append(std::move(data));
     }
+    totalRemaining += size;
+    frames.push_back(std::move(pf));
   }
 
-  // ============================================================================
-  // Fragment Iteration
-  // ============================================================================
+  [[nodiscard]] bool hasMore() const noexcept { return !frames.empty(); }
+  [[nodiscard]] size_t remaining() const noexcept { return totalRemaining; }
 
   /**
-   * Returns true if more data remains to be sent.
+   * Materialized fragment ready to emit. The handler fires `outFrame`,
+   * decrements `payloadBytes` from its pending counter, and decrements
+   * the frame counter iff `currentFrameDone`.
    */
-  [[nodiscard]] bool hasMore() const noexcept { return !payloadQueue.empty(); }
+  struct Fragment {
+    ComposedFrame outFrame{};
+    size_t payloadBytes{0};
+    bool currentFrameDone{false};
+  };
 
   /**
-   * Returns the number of bytes remaining to be sent.
+   * Pull the next fragment from the head pending frame. Mutates state:
+   * splits `maxSize` bytes off the head's data queue, restores the
+   * original `ComposedFrame` for first fragments or mints a PAYLOAD
+   * continuation for subsequent ones, and pops the head frame if its
+   * data is exhausted. Precondition: `hasMore()`.
    */
-  [[nodiscard]] size_t remaining() const noexcept {
-    return payloadQueue.chainLength();
-  }
+  Fragment nextFragment(size_t maxSize) noexcept {
+    auto& head = frames.front();
+    const size_t chunkSize = std::min(maxSize, head.dataQueue.chainLength());
+    auto chunk = head.dataQueue.split(chunkSize);
+    const bool follows = !head.dataQueue.empty();
 
-  /**
-   * Extract the next fragment up to maxSize bytes.
-   *
-   * Zero-copy: Uses IOBufQueue::split() which either:
-   * - Returns existing IOBuf directly if it's exactly the right size
-   * - Splits an IOBuf in the chain (pointer manipulation, no memcpy)
-   *
-   * Returns a pair of:
-   *   - fragment: IOBuf containing the next chunk (ownership transferred)
-   *   - follows: true if more fragments remain after this one
-   */
-  [[nodiscard]] std::pair<std::unique_ptr<folly::IOBuf>, bool> nextFragment(
-      size_t maxSize) noexcept {
-    if (payloadQueue.empty()) {
-      return {nullptr, false};
+    totalRemaining -= chunkSize;
+
+    Fragment frag;
+    frag.payloadBytes = chunkSize;
+    frag.currentFrameDone = !follows;
+
+    // `complete` only fires on the final emitted fragment. For unfragmented
+    // first-emit (follows=false) this preserves the caller's bit; for any
+    // fragmented case it clears it on intermediate frames and re-asserts
+    // it on the last one.
+    if (!head.firstEmitted) {
+      head.firstEmitted = true;
+      frag.outFrame = std::move(head.originalFrame);
+      frag.outFrame.data = std::move(chunk);
+      frag.outFrame.follows = follows;
+      frag.outFrame.complete = !follows && head.originalComplete;
+    } else {
+      frag.outFrame.frameType = FrameType::PAYLOAD;
+      frag.outFrame.streamId = streamId;
+      frag.outFrame.data = std::move(chunk);
+      frag.outFrame.follows = follows;
+      frag.outFrame.complete = !follows && head.originalComplete;
+      frag.outFrame.next = true;
     }
 
-    size_t chunkSize = std::min(maxSize, remaining());
-
-    // Split off the front of the queue (zero-copy)
-    auto fragment = payloadQueue.split(chunkSize);
-
-    // Determine if more fragments follow
-    bool follows = hasMore();
-
-    return {std::move(fragment), follows};
-  }
-
-  /**
-   * Reset state for reuse with a new payload.
-   */
-  void reset(
-      std::unique_ptr<folly::IOBuf> newPayload,
-      FrameType newFrameType,
-      uint16_t newFlags) noexcept {
-    frameType = newFrameType;
-    originalFlags = newFlags;
-    init(std::move(newPayload));
+    if (frag.currentFrameDone) {
+      frames.pop_front();
+    }
+    return frag;
   }
 };
 

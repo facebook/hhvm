@@ -604,7 +604,7 @@ function canonical_path_from_base(string $test, string $base): mixed {
   }
   $dirstat = stat($base);
   if (!is_dict($dirstat)) return false;
-  for ($p = dirname($full); $p && $p !== "/"; $p = dirname($p)) {
+  for ($p = dirname($full); $p !== "" && $p !== "0" && $p !== "/"; $p = dirname($p)) {
     $s = stat($p);
     if (!is_dict($s)) continue;
     if ($s['ino'] === $dirstat['ino'] && $s['dev'] === $dirstat['dev']) {
@@ -737,7 +737,7 @@ function find_tests(
   vec<string> $files,
   Options $options,
 ): vec<string> {
-  if (!$files) {
+  if ($files === vec[]) {
     $files = vec['quick'];
   }
   if ($files == vec['all']) {
@@ -775,7 +775,7 @@ function find_tests(
     "-not -path '*.sbcc_build_root*' " .
     "-not -path '*.sbcc_run_root*'"
   );
-  if (!$tests) {
+  if ($tests === vec[]) {
     error("Could not find any tests associated with your options.\n" .
           "Make sure your test path is correct and that you have " .
           "the right expect files for the tests you are trying to run.\n" .
@@ -792,7 +792,7 @@ function find_tests(
   if ($options->exclude_pattern is nonnull) {
     $exclude = $options->exclude_pattern;
     $tests = vec(array_filter($tests, function($test) use ($exclude) {
-      return !preg_match($exclude, $test);
+      return preg_match($exclude, $test) !== 1;
     }));
   }
   if ($options->exclude_recorded_failures is nonnull) {
@@ -862,7 +862,7 @@ function find_file_for_dir(string $dir, string $name): ?string {
   // /home/you/code/tests/mytest.php. Don't use realpath() to get that because
   // it will mess up relative paths.
   $depth = count(explode('/', realpath($dir))) - 1;
-  for (; $dir !== '/' && is_dir($dir) && $depth; $depth--) {
+  for (; $dir !== '/' && is_dir($dir) && $depth !== 0; $depth--) {
     $file = "$dir/$name";
     if (is_file($file)) {
       return $file;
@@ -1034,7 +1034,7 @@ function sbcc_mode_setup_impl(Options $options, string $test): (string, bool) {
         if ($line === '') continue;
         // Convert -vName=Value to -v Name=Value
         $m = vec[];
-        if (preg_match_with_matches('/^-v\s*(.+)$/', $line, inout $m)) {
+        if (preg_match_with_matches('/^-v\s*(.+)$/', $line, inout $m) === 1) {
           $config_v_flags[] = '-v';
           $config_v_flags[] = $m[1];
         }
@@ -1569,7 +1569,7 @@ function exec_with_timeout(string $cmd,
     $read = vec[];
     if (!feof($pipes[1])) $read[] = $pipes[1];
     if (!feof($pipes[2])) $read[] = $pipes[2];
-    if (!count($read)) break;
+    if (count($read) === 0) break;
 
     $write = null;
     $except = null;
@@ -1657,7 +1657,7 @@ function exec_with_timeout(string $cmd,
   $stack = null;
   if (file_exists($stack_file)) $stack = file_get_contents($stack_file);
 
-  if ($stack) {
+  if ($stack is nonnull && HH\legacy_is_truthy($stack)) {
     $error .= "\nstdout:\n$before_dump\nstderr:\n$stderr";
     $error .= "\nContents of $stack_file:\n$stack";
   } else if (!Str\is_empty($dump)) {
@@ -2450,7 +2450,7 @@ final class Status {
   }
 
   public static function getQueue(): Queue {
-    if (!self::$queue) {
+    if (self::$queue is null) {
       if (self::$killed) error("Killed!");
       self::$queue = new Queue(self::$workdir);
     }
@@ -2712,7 +2712,7 @@ function runif_locale_matches(
     return shape('valid' => false, 'error' => "malformed 'locale' match");
   }
   $category = array_shift(inout $words);
-  if (!preg_match('/^LC_[A-Z]+$/', $category)) {
+  if (preg_match('/^LC_[A-Z]+$/', $category) !== 1) {
     return shape('valid' => false, 'error' => "bad locale category '$category'");
   }
   $locale_args = implode(', ', array_map($word ==> "'$word'", $words));
@@ -2751,7 +2751,7 @@ function runif_should_skip_test(
       return shape('valid' => false, 'error' => "malformed line '$line'");
     }
     foreach ($words as $word) {
-      if (!preg_match('|^[\w/.-]+$|', $word)) {
+      if (preg_match('|^[\w/.-]+$|', $word) !== 1) {
         return shape(
           'valid' => false,
           'error' => "bad word '$word' in line '$line'",
@@ -2925,7 +2925,7 @@ function skipif_should_skip_test(
   if ($output === '') {
     return shape('valid' => true, 'match' => true);
   }
-  if (preg_match('/^skip.*$/', $output)) {
+  if (preg_match('/^skip.*$/', $output) === 1) {
     return shape(
       'valid' => true,
       'match' => false,
@@ -2968,7 +2968,7 @@ class ExpectfParser {
   private function literal(string $s): void {
     $next = count($this->pattern) + 1;
     $this->pattern[] = (int $sindex) ==> {
-      if (!strlen($s)) return vec[tuple($sindex, $next)];
+      if (strlen($s) === 0) return vec[tuple($sindex, $next)];
       if ($sindex + strlen($s) > strlen($this->str)) return vec[];
       if (substr_compare($this->str, $s, $sindex, strlen($s)) !== 0) {
         return vec[];
@@ -3117,11 +3117,11 @@ class ExpectfParser {
       if ($token !== '%') {
         if ($sub is nonnull) {
           if ($token === '}') {
-            if (strlen($current_literal)) $this->literal($current_literal);
+            if (strlen($current_literal) !== 0) $this->literal($current_literal);
             return true;
           }
           if ($token === '|' && $sub === '|') {
-            if (strlen($current_literal)) $this->literal($current_literal);
+            if (strlen($current_literal) !== 0) $this->literal($current_literal);
             return false;
           }
         }
@@ -3139,7 +3139,7 @@ class ExpectfParser {
 
       if ($token !== '%' && $token !== 't' && $token !== 'h') {
         $this->found_wildcard = true;
-        if (strlen($current_literal)) {
+        if (strlen($current_literal) !== 0) {
           $this->literal($current_literal);
           $current_literal = '';
         }
@@ -3322,7 +3322,7 @@ class ExpectfParser {
         $this->pstr, $this->pindex
       );
     }
-    if (strlen($current_literal)) $this->literal($current_literal);
+    if (strlen($current_literal) !== 0) $this->literal($current_literal);
     return false;
   }
 
@@ -3346,7 +3346,7 @@ class ExpectfParser {
         }
       }
       $states = $newStates;
-    } while ($states);
+    } while (count($states) !== 0);
     return false;
   }
 }
@@ -3686,7 +3686,7 @@ function run_config_post(
     }
     return $output;
   };
-  if (!$repeats) {
+  if ($repeats === 0) {
     $split = vec[$prep($output)];
   } else {
     $split = array_map($prep, explode(MULTI_REQUEST_SEP, $output));
@@ -3798,7 +3798,7 @@ function run_and_log_test(Options $options, string $test): void {
     clean_test_files($test, $options);
   } else if ($status is string) {
     invariant(
-      preg_match('/^skip-[\w-]+$/', $status),
+      preg_match('/^skip-[\w-]+$/', $status) === 1,
       "invalid skip status %s",
       $status
     );
@@ -3849,14 +3849,14 @@ function run_test(Options $options, string $test): mixed {
 
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
 
-  if (preg_grep('/ --count[ =][0-9]+ .* --count[ =][0-9]+( |$)/', $hhvm)) {
+  if (HH\legacy_is_truthy(preg_grep('/ --count[ =][0-9]+ .* --count[ =][0-9]+( |$)/', $hhvm))) {
     // we got --count from 2 sources (e.g. .opts file and multi_request_mode)
     // this can't work so skip the test
     return 'skip-count';
   } else if ($options->jit_serialize is nonnull) {
     // jit-serialize adds the --count option later, so even 1 --count in the
     // command means we have to skip
-    if (preg_grep('/ --count[ =][0-9]+( |$)/', $hhvm)) {
+    if (HH\legacy_is_truthy(preg_grep('/ --count[ =][0-9]+( |$)/', $hhvm))) {
       return 'skip-count';
     }
   }
@@ -3973,7 +3973,7 @@ function num_cpus(): int {
       $data = file('/proc/stat');
       $cores = 0;
       foreach($data as $line) {
-        if (preg_match('/^cpu[0-9]/', $line)) {
+        if (preg_match('/^cpu[0-9]/', $line) === 1) {
           $cores++;
         }
       }
@@ -4080,9 +4080,9 @@ function msg_loop(int $num_tests, Queue $queue): void {
   if ($do_progress) {
     $stty = strtolower(Status::getSTTY());
     $matches = vec[];
-    if (preg_match_with_matches("/columns ([0-9]+);/", $stty, inout $matches) ||
+    if (preg_match_with_matches("/columns ([0-9]+);/", $stty, inout $matches) === 1||
         // because BSD has to be different
-        preg_match_with_matches("/([0-9]+) columns;/", $stty, inout $matches)) {
+        preg_match_with_matches("/([0-9]+) columns;/", $stty, inout $matches) === 1) {
       $cols = (int)$matches[1];
     }
   }
@@ -4137,7 +4137,7 @@ function print_success(
   Options $options,
 ): void {
   // We didn't run any tests, not even skipped. Clowntown!
-  if (!$tests) {
+  if (count($tests) === 0) {
     print "\nCLOWNTOWN: No tests!\n";
     if (!$options->no_fun) {
       print_clown();
@@ -4192,7 +4192,7 @@ function print_failure(
   $failing_tests_file = $options->failure_file ??
     Status::getWorkingDir() . '/test-failures';
   file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
-  if ($passed) {
+  if (count($passed) !== 0) {
     $passing_tests_file = Status::getWorkingDir() . '/tests-passed';
     file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
   } else {
@@ -4231,7 +4231,7 @@ function print_failure(
     }
   }
 
-  if ($passed) {
+  if (count($passed) !== 0) {
     print make_header(
       'For xargs, lists of failed and passed tests are available using:'
     );
@@ -4467,7 +4467,7 @@ function error_handler(int $type,
                        mixed $_1,
                        mixed $_2,
                        mixed $_3): bool {
-  if (!($type & error_reporting())) return true;
+  if (($type & error_reporting()) !== 0) return true;
   throw new ErrorException($message, 0, $type, $file, $line);
 }
 
@@ -4579,7 +4579,7 @@ function main(vec<string> $argv): int {
   }
   Status::setUseColor($options->color || posix_isatty(HH\stdout()));
 
-  Status::$nofork = count($tests) === 1 && !$servers;
+  Status::$nofork = count($tests) === 1 && $servers is nonnull;
 
   if (!Status::$nofork) {
     // Create the Queue before any children are forked.
@@ -4613,7 +4613,7 @@ function main(vec<string> $argv): int {
       $pid = pcntl_fork();
       if ($pid === -1) {
         error('could not fork');
-      } else if ($pid) {
+      } else if ($pid !== 0) {
         Status::$children[] = $pid;
       } else {
         $serial = ($i === 0) ? $serial_tests : vec[];
@@ -4627,7 +4627,7 @@ function main(vec<string> $argv): int {
 
     // Have the parent wait for all forked children to exit.
     $return_value = 0;
-    while (count(Status::$children) && Status::$printer_pid !== 0) {
+    while (count(Status::$children) !== 0 && Status::$printer_pid !== 0) {
       $status = null;
       $pid = pcntl_wait(inout $status);
       if (pcntl_wifexited($status as nonnull)) {
@@ -4645,7 +4645,7 @@ function main(vec<string> $argv): int {
           // Don't consider the run successful if the printer worker died
           $return_value = 1;
         }
-      } else if ($servers && isset($servers->pids[$pid])) {
+      } else if ($servers is nonnull && isset($servers->pids[$pid])) {
         // A server crashed. Restart it.
         // We intentionally ignore $bad_end here because we expect this to
         // show up as a test failure in whatever test was running on the server
@@ -4703,7 +4703,7 @@ function main(vec<string> $argv): int {
   }
 
   // Kill the servers.
-  if ($servers) {
+  if ($servers is nonnull) {
     foreach ($servers->pids as $server) {
       proc_terminate($server->proc);
       proc_close($server->proc);
@@ -4758,7 +4758,7 @@ function main(vec<string> $argv): int {
   } else if ($options->testpilot) {
     Status::say(dict['op' => 'all_done', 'results' => $results]);
     return $return_value;
-  } else if (!$return_value) {
+  } else if ($return_value === 0) {
     print_success($tests, $results, $options);
   } else {
     print_failure($argv, $results, $options);

@@ -34,11 +34,13 @@
  * Output: std::unique_ptr<folly::IOBuf> (coalesced batch)
  */
 
+#include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/HHWheelTimer.h>
 
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Backpressure.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Handler.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
@@ -46,12 +48,16 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/IntervalBatchingHandlerConfig.h>
 
 #include <functional>
+#include <stdexcept>
 
 namespace apache::thrift::fast_thrift::frame::write::handler {
 
 class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
                                      private folly::HHWheelTimer::Callback {
  public:
+  // Detected by makeHandlerNode; pipeline drives onWriteReady through this.
+  channel_pipeline::WriteReadyHook writeReadyHook_;
+
   explicit IntervalBatchingFrameHandler(
       IntervalBatchingHandlerConfig config = {}) noexcept
       : config_(std::move(config)) {}
@@ -75,7 +81,7 @@ class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
   template <typename Context>
   void handlerAdded(Context& ctx) noexcept {
     eventBase_ = ctx.eventBase();
-    flushFn_ = [this, &ctx]() { doFlush(ctx); };
+    flushFn_ = [this, &ctx]() { flushAndPropagateErrors(ctx); };
   }
 
   template <typename Context>
@@ -106,6 +112,12 @@ class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
     totalBytesBuffered_ += frameSize;
     ++bufferedWritesCount_;
 
+    // While downstream is backpressured we still buffer, but don't schedule
+    // any flush — onWriteReady will drain when downstream is ready.
+    if (backpressured_) {
+      return channel_pipeline::Result::Backpressure;
+    }
+
     if (wasEmpty) {
       scheduleFlush();
     }
@@ -123,7 +135,11 @@ class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
   }
 
   template <typename Context>
-  void onWriteReady(Context& /*ctx*/) noexcept {}
+  void onWriteReady(Context& ctx) noexcept {
+    backpressured_ = false;
+    ctx.cancelAwaitWriteReady();
+    flushAndPropagateErrors(ctx);
+  }
 
   /**
    * Synchronously flush all pending writes.
@@ -145,6 +161,7 @@ class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
   size_t pendingBytes() const noexcept { return totalBytesBuffered_; }
   size_t pendingFrames() const noexcept { return bufferedWritesCount_; }
   bool empty() const noexcept { return bufferedWritesQueue_.empty(); }
+  bool isBackpressured() const noexcept { return backpressured_; }
 
  private:
   // ===========================================================================
@@ -196,18 +213,34 @@ class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
   }
 
   template <typename Context>
-  void doFlush(Context& ctx) noexcept {
+  void flushAndPropagateErrors(Context& ctx) noexcept {
+    if (doFlush(ctx) == channel_pipeline::Result::Error) {
+      ctx.fireException(
+          folly::make_exception_wrapper<std::runtime_error>(
+              "IntervalBatchingFrameHandler: downstream write failed"));
+    }
+  }
+
+  template <typename Context>
+  [[nodiscard]] channel_pipeline::Result doFlush(Context& ctx) noexcept {
     auto batchToSend = bufferedWritesQueue_.move();
     if (!batchToSend) {
-      return;
+      return channel_pipeline::Result::Success;
     }
 
     bufferedWritesCount_ = 0;
     totalBytesBuffered_ = 0;
     earlyFlushRequested_ = false;
 
-    (void)ctx.fireWrite(
-        channel_pipeline::TypeErasedBox(std::move(batchToSend)));
+    auto result =
+        ctx.fireWrite(channel_pipeline::TypeErasedBox(std::move(batchToSend)));
+
+    if (result == channel_pipeline::Result::Backpressure) {
+      backpressured_ = true;
+      ctx.awaitWriteReady();
+    }
+
+    return result;
   }
 
   void cancelLoopCallbackIfScheduled() noexcept {
@@ -223,6 +256,7 @@ class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
     bufferedWritesCount_ = 0;
     totalBytesBuffered_ = 0;
     earlyFlushRequested_ = false;
+    backpressured_ = false;
   }
 
   IntervalBatchingHandlerConfig config_;
@@ -232,6 +266,7 @@ class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
   size_t bufferedWritesCount_{0};
   size_t totalBytesBuffered_{0};
   bool earlyFlushRequested_{false};
+  bool backpressured_{false};
 
   std::function<void()> flushFn_;
 };

@@ -17,10 +17,12 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/IntervalBatchingFrameHandler.h>
 
 #include <gtest/gtest.h>
+#include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
 
 #include <cstring>
+#include <optional>
 #include <vector>
 
 namespace apache::thrift::fast_thrift::frame::write::handler {
@@ -56,8 +58,24 @@ class MockContext {
     if (batch) {
       writtenBatches_.push_back(std::move(batch));
     }
+    if (writtenBatches_.size() > errorAt_) {
+      return channel_pipeline::Result::Error;
+    }
+    if (writtenBatches_.size() > backpressureAt_) {
+      return channel_pipeline::Result::Backpressure;
+    }
     return channel_pipeline::Result::Success;
   }
+
+  void awaitWriteReady() { awaitWriteReadyCalled_ = true; }
+  void cancelAwaitWriteReady() { awaitWriteReadyCalled_ = false; }
+
+  void fireException(folly::exception_wrapper&& e) {
+    firedException_ = std::move(e);
+  }
+
+  void setBackpressureAt(size_t n) { backpressureAt_ = n; }
+  void setErrorAt(size_t n) { errorAt_ = n; }
 
   const std::vector<std::unique_ptr<folly::IOBuf>>& writtenBatches() const {
     return writtenBatches_;
@@ -73,9 +91,19 @@ class MockContext {
     return total;
   }
 
+  bool awaitWriteReadyCalled() const { return awaitWriteReadyCalled_; }
+
+  const std::optional<folly::exception_wrapper>& firedException() const {
+    return firedException_;
+  }
+
  private:
   folly::EventBase* evb_;
   std::vector<std::unique_ptr<folly::IOBuf>> writtenBatches_;
+  size_t backpressureAt_{SIZE_MAX}; // Default: never backpressure
+  size_t errorAt_{SIZE_MAX}; // Default: never error
+  bool awaitWriteReadyCalled_{false};
+  std::optional<folly::exception_wrapper> firedException_;
 };
 
 // ============================================================================
@@ -339,6 +367,213 @@ TEST_F(IntervalBatchingFrameHandlerTest, BatchedDataIntegrity) {
   for (size_t i = 30; i < 60; ++i) {
     EXPECT_EQ(data[i], 'C') << "Byte " << i;
   }
+}
+
+// ============================================================================
+// Backpressure
+// ============================================================================
+
+TEST_F(
+    IntervalBatchingFrameHandlerTest,
+    Backpressure_FlushSetsFlagAndRegistersAwait) {
+  IntervalBatchingHandlerConfig config{};
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  ctx_->setBackpressureAt(0); // Fail the very first flush
+
+  EXPECT_EQ(
+      handler.onWrite(*ctx_, wrapFrame(makePayload(100))),
+      channel_pipeline::Result::Success);
+
+  runEventBaseLoop();
+
+  EXPECT_TRUE(handler.isBackpressured());
+  EXPECT_TRUE(ctx_->awaitWriteReadyCalled());
+}
+
+TEST_F(
+    IntervalBatchingFrameHandlerTest,
+    Backpressure_BufferedWritesReturnBackpressureAndDoNotSchedule) {
+  IntervalBatchingHandlerConfig config{};
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  ctx_->setBackpressureAt(0);
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  runEventBaseLoop();
+  ASSERT_TRUE(handler.isBackpressured());
+
+  // Further writes buffer (no flush attempt), and surface Backpressure
+  // upstream.
+  EXPECT_EQ(
+      handler.onWrite(*ctx_, wrapFrame(makePayload(50, 'B'))),
+      channel_pipeline::Result::Backpressure);
+  EXPECT_EQ(
+      handler.onWrite(*ctx_, wrapFrame(makePayload(75, 'C'))),
+      channel_pipeline::Result::Backpressure);
+
+  EXPECT_EQ(handler.pendingFrames(), 2);
+  EXPECT_EQ(handler.pendingBytes(), 125);
+
+  // No new flush attempts while backpressured.
+  runEventBaseLoop();
+  EXPECT_EQ(ctx_->writtenBatches().size(), 1);
+}
+
+TEST_F(
+    IntervalBatchingFrameHandlerTest,
+    Backpressure_OnWriteReadyClearsFlagAndDrains) {
+  IntervalBatchingHandlerConfig config{};
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  ctx_->setBackpressureAt(0);
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100, 'A')));
+  runEventBaseLoop();
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(50, 'B')));
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(75, 'C')));
+  ASSERT_TRUE(handler.isBackpressured());
+
+  // Downstream signals it can accept more.
+  ctx_->setBackpressureAt(SIZE_MAX);
+  handler.onWriteReady(*ctx_);
+
+  EXPECT_FALSE(handler.isBackpressured());
+  EXPECT_FALSE(ctx_->awaitWriteReadyCalled());
+  EXPECT_TRUE(handler.empty());
+  ASSERT_EQ(ctx_->writtenBatches().size(), 2);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 225);
+}
+
+TEST_F(
+    IntervalBatchingFrameHandlerTest,
+    Backpressure_ReEntersIfDownstreamStillBackpressured) {
+  IntervalBatchingHandlerConfig config{};
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  // Allow first flush, backpressure after one batch.
+  ctx_->setBackpressureAt(1);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  runEventBaseLoop();
+  EXPECT_FALSE(handler.isBackpressured());
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  runEventBaseLoop();
+  EXPECT_TRUE(handler.isBackpressured());
+
+  // onWriteReady fires but downstream still rejects → re-arms backpressure.
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(50)));
+  handler.onWriteReady(*ctx_);
+  EXPECT_TRUE(handler.isBackpressured());
+  EXPECT_TRUE(ctx_->awaitWriteReadyCalled());
+}
+
+// ============================================================================
+// Error propagation
+// ============================================================================
+
+TEST_F(
+    IntervalBatchingFrameHandlerTest,
+    Error_DownstreamWriteFailureFiresException) {
+  IntervalBatchingHandlerConfig config{};
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  ctx_->setErrorAt(0); // Fail the very first flush
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  runEventBaseLoop();
+
+  ASSERT_TRUE(ctx_->firedException().has_value());
+  EXPECT_TRUE(ctx_->firedException()->is_compatible_with<std::runtime_error>());
+}
+
+TEST_F(
+    IntervalBatchingFrameHandlerTest,
+    Error_OnWriteReadyPropagatesDownstreamFailure) {
+  IntervalBatchingHandlerConfig config{};
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  ctx_->setBackpressureAt(0);
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  runEventBaseLoop();
+  ASSERT_TRUE(handler.isBackpressured());
+  ASSERT_FALSE(ctx_->firedException().has_value());
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(50)));
+
+  // Downstream now errors out on the drain triggered by onWriteReady.
+  ctx_->setBackpressureAt(SIZE_MAX);
+  ctx_->setErrorAt(1);
+  handler.onWriteReady(*ctx_);
+
+  ASSERT_TRUE(ctx_->firedException().has_value());
+  EXPECT_TRUE(ctx_->firedException()->is_compatible_with<std::runtime_error>());
+}
+
+TEST_F(IntervalBatchingFrameHandlerTest, Error_TimeoutExpiredFiresException) {
+  // Interval mode: the timer-driven flush path goes through the same
+  // flushAndPropagateErrors helper. Verifies the timeoutExpired wiring.
+  IntervalBatchingHandlerConfig config{
+      .batchingInterval = std::chrono::milliseconds(10),
+      .batchingSize = 1000,
+      .batchingByteSize = 1024 * 1024,
+  };
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  ctx_->setErrorAt(0);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  evb_->loop();
+
+  ASSERT_TRUE(ctx_->firedException().has_value());
+  EXPECT_TRUE(ctx_->firedException()->is_compatible_with<std::runtime_error>());
+}
+
+TEST_F(IntervalBatchingFrameHandlerTest, Error_DrainFiresException) {
+  // drain() — also exercised by onPipelineInactive — must surface
+  // downstream failures rather than silently dropping them on shutdown.
+  IntervalBatchingHandlerConfig config{
+      .batchingInterval = std::chrono::milliseconds(100),
+      .batchingSize = 1000,
+      .batchingByteSize = 1024 * 1024,
+  };
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  ctx_->setErrorAt(0);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  ASSERT_FALSE(ctx_->firedException().has_value());
+
+  handler.drain();
+
+  ASSERT_TRUE(ctx_->firedException().has_value());
+  EXPECT_TRUE(ctx_->firedException()->is_compatible_with<std::runtime_error>());
+}
+
+TEST_F(IntervalBatchingFrameHandlerTest, Error_MessageIdentifiesHandler) {
+  // Guards against message drift — debuggers rely on the handler name
+  // prefix to localize the failure to this layer.
+  IntervalBatchingHandlerConfig config{};
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  ctx_->setErrorAt(0);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  runEventBaseLoop();
+
+  ASSERT_TRUE(ctx_->firedException().has_value());
+  EXPECT_NE(
+      std::string(ctx_->firedException()->what())
+          .find("IntervalBatchingFrameHandler: downstream write failed"),
+      std::string::npos);
 }
 
 } // namespace

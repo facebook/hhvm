@@ -741,21 +741,21 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
  */
 template <typename Tag, typename Protocol, typename Container, typename WriteFn>
 void encodeSetElements(
-    Protocol& /*protocol*/, const Container& set, WriteFn writeElem) {
+    Protocol& protocol, const Container& set, WriteFn writeElem) {
   constexpr bool kContainerIsOrdered =
       folly::is_detected_v<detect_key_compare, Container>;
-  constexpr KeyOrder kKeyOrder = Protocol::keyOrder();
-  constexpr bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
+  const KeyOrder kKeyOrder = protocol.keyOrder();
+  const bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
       (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
 
-  if constexpr (kShouldSort) {
+  if (kShouldSort) {
     std::vector<typename Container::const_iterator> iters;
     iters.reserve(set.size());
     for (auto it = set.begin(); it != set.end(); ++it) {
       iters.push_back(it);
     }
-    auto compare = [](auto a, auto b) {
-      if constexpr (kKeyOrder == KeyOrder::StableAscending) {
+    auto compare = [&](auto a, auto b) {
+      if (protocol.keyOrder() == KeyOrder::StableAscending) {
         return ::apache::thrift::op::detail::StableLessThan<Tag>{}(*a, *b);
       } else {
         return *a < *b;
@@ -786,21 +786,21 @@ template <
     typename Container,
     typename WriteFn>
 void encodeMapElements(
-    Protocol& /*protocol*/, const Container& map, WriteFn writeEntry) {
+    Protocol& protocol, const Container& map, WriteFn writeEntry) {
   constexpr bool kContainerIsOrdered =
       folly::is_detected_v<detect_key_compare, Container>;
-  constexpr KeyOrder kKeyOrder = Protocol::keyOrder();
-  constexpr bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
+  const KeyOrder kKeyOrder = protocol.keyOrder();
+  const bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
       (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
 
-  if constexpr (kShouldSort) {
+  if (kShouldSort) {
     std::vector<typename Container::const_iterator> iters;
     iters.reserve(map.size());
     for (auto it = map.begin(); it != map.end(); ++it) {
       iters.push_back(it);
     }
-    auto compare = [](auto a, auto b) {
-      if constexpr (kKeyOrder == KeyOrder::StableAscending) {
+    auto compare = [&](auto a, auto b) {
+      if (protocol.keyOrder() == KeyOrder::StableAscending) {
         return ::apache::thrift::op::detail::StableLessThan<KeyTag>{}(
             (*a).first, (*b).first);
       } else {

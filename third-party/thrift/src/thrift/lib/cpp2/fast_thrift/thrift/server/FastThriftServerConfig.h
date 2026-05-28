@@ -21,6 +21,8 @@
 
 #include <folly/SocketAddress.h>
 
+#include <thrift/lib/cpp2/fast_thrift/frame/write/IntervalBatchingHandlerConfig.h>
+
 namespace apache::thrift::fast_thrift::thrift {
 
 /**
@@ -58,6 +60,11 @@ struct FastThriftServerConfig {
   // full), drains them in FIFO on onWriteReady, and surfaces inbound
   // Backpressure while saturated so the transport pauses socket reads.
   bool enableWriteBufferBackpressure{false};
+
+  // Outbound write batching. Default zero-interval flushes via LoopCallback
+  // at end of each event loop iteration. Set batchingInterval > 0 to use
+  // an HHWheelTimer-driven flush instead.
+  frame::write::IntervalBatchingHandlerConfig batchingConfig{};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

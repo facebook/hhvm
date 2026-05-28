@@ -26,6 +26,7 @@
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/IntervalBatchingHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/debug/DebugServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/monitor/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/fast_thrift/interface/status/StatusServerInterface.h>
@@ -64,6 +65,10 @@ struct ThriftServerConnectionFactoryConfig {
   // when downstream is saturated and drain on onWriteReady; inbound reads
   // surface Backpressure while buffered to pause socket reads.
   bool enableWriteBufferBackpressure{false};
+  // Outbound write batching. Default zero-interval flushes via LoopCallback
+  // at end of each event loop iteration. Set batchingInterval > 0 to use
+  // an HHWheelTimer-driven flush instead.
+  frame::write::IntervalBatchingHandlerConfig batchingConfig{};
 };
 
 /**

@@ -272,6 +272,7 @@ void FastThriftServer::start() {
       .zeroCopyThreshold = config_.zeroCopyThreshold,
       .enableRequestContext = config_.enableRequestContext,
       .enableWriteBufferBackpressure = config_.enableWriteBufferBackpressure,
+      .batchingConfig = config_.batchingConfig,
   };
   std::function<void(server::ThriftServerConnection&)> onAccept;
   if (onConnectionAccepted_) {

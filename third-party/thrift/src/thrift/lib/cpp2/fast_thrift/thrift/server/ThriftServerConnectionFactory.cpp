@@ -23,8 +23,8 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/IntervalBatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
@@ -269,8 +269,8 @@ PipelineImpl::Ptr ThriftServerConnectionFactory::buildRocketPipeline(
       .setAllocator(&rocketAllocator_)
       .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
           frame_length_parser_handler_tag)
-      .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
-          batching_frame_handler_tag)
+      .addNextOutbound<frame::write::handler::IntervalBatchingFrameHandler>(
+          batching_frame_handler_tag, config_.batchingConfig)
       .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
           frame_length_encoder_handler_tag)
       .addNextDuplex<rocket::server::handler::RocketServerFrameCodecHandler>(

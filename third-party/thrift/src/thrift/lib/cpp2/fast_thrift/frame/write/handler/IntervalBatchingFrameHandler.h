@@ -131,7 +131,7 @@ class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
 
   template <typename Context>
   void onPipelineInactive(Context& /*ctx*/) noexcept {
-    drain();
+    clearPendingState();
   }
 
   template <typename Context>

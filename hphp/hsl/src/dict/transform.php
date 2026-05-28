@@ -202,18 +202,18 @@ function from_values<Tk as arraykey, Tv>(
   return $result;
 }
 
- /**
-  * Return a dict keyed by the result of calling the giving function, preserving
-  * duplicate values.
-  *
-  *  - keys are the results of the given function called on the given values.
-  *  - values are vecs of original values that all produced the same key.
-  *
-  * If a value produces a null key, it's omitted from the result.
-  *
-  * Time complexity: O(n * f), where f is the complexity of `$key_func`
-  * Space complexity: O(n)
-  */
+/**
+ * Return a dict keyed by the result of calling the giving function, preserving
+ * duplicate values.
+ *
+ *  - keys are the results of the given function called on the given values.
+ *  - values are vecs of original values that all produced the same key.
+ *
+ * If a value produces a null key, it's omitted from the result.
+ *
+ * Time complexity: O(n * f), where f is the complexity of `$key_func`
+ * Space complexity: O(n)
+ */
 function group_by<Tk as arraykey, Tv>(
   Traversable<Tv> $values,
   (function(Tv)[_]: ?Tk) $key_func,

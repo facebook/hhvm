@@ -7,7 +7,7 @@
  *  LICENSE file in the hphp/hsl/ subdirectory of this source tree.
  *
  */
-<<file:__EnableUnstableFeatures('readonly')>>
+<<file: __EnableUnstableFeatures('readonly')>>
 
 /**
  * C is for Containers. This file contains functions that ask
@@ -45,10 +45,7 @@ function any<T>(
  * Time complexity: O(n) (O(1) for keysets and ConstSets)
  * Space complexity: O(1)
  */
-function contains<
-  <<__NonDisjoint>> T1,
-  <<__NonDisjoint>> T2
->(
+function contains<<<__NonDisjoint>> T1, <<__NonDisjoint>> T2>(
   readonly Traversable<T1> $traversable,
   readonly T2 $value,
 )[]: bool {
@@ -72,11 +69,8 @@ function contains<
 function contains_key<
   <<__NonDisjoint>> Tk1 as arraykey,
   <<__NonDisjoint>> Tk2 as arraykey,
-  Tv
->(
-  readonly KeyedContainer<Tk1, Tv> $container,
-  readonly Tk2 $key,
-)[]: bool {
+  Tv,
+>(readonly KeyedContainer<Tk1, Tv> $container, readonly Tk2 $key)[]: bool {
   return \array_key_exists($key, $container);
 }
 
@@ -86,9 +80,7 @@ function contains_key<
  * Time complexity: O(1)
  * Space complexity: O(1)
  */
-function count(
-  readonly Container<mixed> $container,
-)[]: int {
+function count(readonly Container<mixed> $container)[]: int {
   return \count($container);
 }
 
@@ -121,9 +113,7 @@ function every<T>(
  * Time complexity: O(1)
  * Space complexity: O(1)
  */
-function is_empty<T>(
-  readonly Container<T> $container,
-)[]: bool {
+function is_empty<T>(readonly Container<T> $container)[]: bool {
   if ($container is \ConstCollection<_>) {
     return $container->isEmpty();
   }

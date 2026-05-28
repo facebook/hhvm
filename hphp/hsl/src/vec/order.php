@@ -23,11 +23,7 @@ use namespace HH\Lib\{C, Dict, Math, Str};
  * Time complexity: O(n), where `n` is the size of the resulting vec
  * Space complexity: O(n), where `n` is the size of the resulting vec
  */
-function range<Tv as num>(
-  Tv $start,
-  Tv $end,
-  ?Tv $step = null,
-)[]: vec<Tv> {
+function range<Tv as num>(Tv $start, Tv $end, ?Tv $step = null)[]: vec<Tv> {
   $step ??= 1;
   invariant($step > 0, 'Expected positive step.');
   if ($step > Math\abs($end - $start)) {
@@ -43,9 +39,7 @@ function range<Tv as num>(
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
-function reverse<Tv>(
-  Traversable<Tv> $traversable,
-)[]: vec<Tv> {
+function reverse<Tv>(Traversable<Tv> $traversable)[]: vec<Tv> {
   $vec = cast_clear_legacy_array_mark($traversable);
   for ($lo = 0, $hi = C\count($vec) - 1; $lo < $hi; $lo++, $hi--) {
     $temp = $vec[$lo];
@@ -64,9 +58,7 @@ function reverse<Tv>(
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
-function shuffle<Tv>(
-  Traversable<Tv> $traversable,
-)[leak_safe]: vec<Tv> {
+function shuffle<Tv>(Traversable<Tv> $traversable)[leak_safe]: vec<Tv> {
   $vec = cast_clear_legacy_array_mark($traversable);
   \shuffle(inout $vec);
   return $vec;

@@ -320,6 +320,35 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
       OverloadResult&& overloadResult);
   void disconnect(const char* comment) noexcept;
 
+  struct RequestDispatchContext {
+    std::unique_ptr<HeaderServerChannel::HeaderRequest> hreq;
+    std::string methodName;
+    const apache::thrift::detail::ap::MessageBegin::Metadata* meta;
+    apache::thrift::protocol::PROTOCOL_TYPES protoId;
+    const Cpp2Worker::PerServiceMetadata::FindMethodResult*
+        methodMetadataResult;
+    std::shared_ptr<folly::RequestContext> reqCtx;
+    ThriftServer* server;
+    std::chrono::steady_clock::time_point readEnd;
+    const SamplingStatus* samplingStatus;
+    server::TServerObserver* observer;
+  };
+
+  bool handleUnsupportedClientType(HeaderServerChannel::HeaderRequest& hreq);
+  bool handleUpgradeToRocket(
+      std::unique_ptr<HeaderServerChannel::HeaderRequest>& hreq,
+      const std::string& methodName,
+      apache::thrift::protocol::PROTOCOL_TYPES protoId,
+      const apache::thrift::detail::ap::MessageBegin::Metadata& meta);
+  bool handleInjectedFailure(
+      std::unique_ptr<HeaderServerChannel::HeaderRequest>& hreq,
+      ThriftServer* server);
+  bool handleOverloadAndPreprocessResult(
+      std::unique_ptr<HeaderServerChannel::HeaderRequest>& hreq,
+      ThriftServer* server,
+      const std::string& methodName);
+  void buildAndDispatchRequest(RequestDispatchContext ctx);
+
   void setServerHeaders(transport::THeader::StringToStringMap& writeHeaders);
   void setServerHeaders(HeaderServerChannel::HeaderRequest& request);
 

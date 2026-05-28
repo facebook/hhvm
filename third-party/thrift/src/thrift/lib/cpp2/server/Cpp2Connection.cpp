@@ -378,9 +378,270 @@ void Cpp2Connection::killRequestServerOverloaded(
       std::move(overloadResult.errorCode));
 }
 
+bool Cpp2Connection::handleUnsupportedClientType(
+    HeaderServerChannel::HeaderRequest& hreq) {
+  auto clientType = hreq.getHeader()->getClientType();
+  if (clientType == THRIFT_HTTP_SERVER_TYPE ||
+      clientType == THRIFT_HTTP_CLIENT_TYPE ||
+      clientType == THRIFT_HTTP_GET_CLIENT_TYPE) {
+    disconnect("Rejecting HTTP connection over Header");
+    return true;
+  }
+  if (THRIFT_FLAG(server_header_reject_framed) &&
+      (clientType == THRIFT_FRAMED_DEPRECATED ||
+       clientType == THRIFT_FRAMED_COMPACT)) {
+    disconnect("Rejecting framed connection over Header");
+    return true;
+  }
+  if (THRIFT_FLAG(server_header_reject_unframed) &&
+      (clientType == THRIFT_UNFRAMED_DEPRECATED ||
+       clientType == THRIFT_UNFRAMED_COMPACT_DEPRECATED)) {
+    disconnect("Rejecting unframed connection over Header");
+    return true;
+  }
+  return false;
+}
+
+bool Cpp2Connection::handleUpgradeToRocket(
+    std::unique_ptr<HeaderServerChannel::HeaderRequest>& hreq,
+    const std::string& methodName,
+    apache::thrift::protocol::PROTOCOL_TYPES protoId,
+    const apache::thrift::detail::ap::MessageBegin::Metadata& meta) {
+  if (upgradeToRocketCallback_ != nullptr) {
+    disconnect("Unexpected Header message after Rocket upgrade");
+    return true;
+  }
+  if (methodName != "upgradeToRocket") {
+    return false;
+  }
+
+  auto handlers = worker_->getServer()->getRoutingHandlers();
+  auto rocketHandlerIterator =
+      std::find_if(handlers->begin(), handlers->end(), [](auto& handler) {
+        return dynamic_cast<RocketRoutingHandler*>(handler.get()) != nullptr;
+      });
+  if (rocketHandlerIterator == handlers->end()) {
+    killRequest(
+        std::move(hreq),
+        TApplicationException::TApplicationExceptionType::UNKNOWN_METHOD,
+        kMethodUnknownErrorCode,
+        "Rocket upgrade attempted but RocketRoutingHandler not found");
+    return true;
+  }
+
+  // Lifetime not guaranteed — we assume the handler outlives the upgrade.
+  auto* rocketHandler =
+      dynamic_cast<RocketRoutingHandler*>(rocketHandlerIterator->get());
+  ResponsePayload response;
+  switch (protoId) {
+    case apache::thrift::protocol::T_BINARY_PROTOCOL:
+      response = upgradeToRocketReply<apache::thrift::BinaryProtocolWriter>(
+          meta.seqId);
+      break;
+    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
+      response = upgradeToRocketReply<apache::thrift::CompactProtocolWriter>(
+          meta.seqId);
+      break;
+    default:
+      LOG(DFATAL) << "Unsupported protocol found";
+      disconnect("Unsupported protocol found during Rocket upgrade");
+      return true;
+  }
+
+  upgradeToRocketCallback_ = std::make_unique<TransportUpgradeSendCallback>(
+      rocketHandler,
+      transport_,
+      context_.getPeerAddress(),
+      getWorker(),
+      this,
+      channel_.get());
+  hreq->sendReply(std::move(response), upgradeToRocketCallback_.get());
+  return true;
+}
+
+bool Cpp2Connection::handleInjectedFailure(
+    std::unique_ptr<HeaderServerChannel::HeaderRequest>& hreq,
+    ThriftServer* server) {
+  auto injectedFailure = server->maybeInjectFailure();
+  switch (injectedFailure) {
+    case ThriftServer::InjectedFailure::NONE:
+      return false;
+    case ThriftServer::InjectedFailure::ERROR:
+      killRequest(
+          std::move(hreq),
+          TApplicationException::TApplicationExceptionType::INJECTED_FAILURE,
+          kInjectedFailureErrorCode,
+          "injected failure");
+      return true;
+    case ThriftServer::InjectedFailure::DROP:
+      VLOG(1) << "ERROR: injected drop: "
+              << context_.getPeerAddress()->getAddressStr();
+      return true;
+    case ThriftServer::InjectedFailure::DISCONNECT:
+      disconnect("injected failure");
+      return true;
+  }
+  folly::assume_unreachable();
+}
+
+bool Cpp2Connection::handleOverloadAndPreprocessResult(
+    std::unique_ptr<HeaderServerChannel::HeaderRequest>& hreq,
+    ThriftServer* server,
+    const std::string& methodName) {
+  if (auto overloadResult =
+          server->checkOverload(hreq->getHeader()->getHeaders(), methodName)) {
+    killRequestServerOverloaded(std::move(hreq), std::move(*overloadResult));
+    return true;
+  }
+
+  auto preprocessResult = server->preprocess(
+      {hreq->getHeader()->getHeaders(), methodName, context_});
+  if (std::holds_alternative<std::monostate>(preprocessResult)) {
+    return false;
+  }
+
+  folly::variant_match(
+      preprocessResult,
+      [&](AppClientException& ace) {
+        handleAppError(std::move(hreq), ace.name(), ace.getMessage(), true);
+      },
+      [&](AppOverloadedException& aoe) {
+        killRequestServerOverloaded(
+            std::move(hreq),
+            OverloadResult{
+                kAppOverloadedErrorCode,
+                aoe.getMessage(),
+                LoadShedder::CUSTOM,
+            });
+      },
+      [&](AppQuotaExceededException& aqe) {
+        killRequest(
+            std::move(hreq),
+            TApplicationException::TENANT_QUOTA_EXCEEDED,
+            kTenantQuotaExceededErrorCode,
+            aqe.getMessage().c_str());
+      },
+      [&](AppServerException& ase) {
+        handleAppError(std::move(hreq), ase.name(), ase.getMessage(), false);
+      },
+      [](std::monostate&) { folly::assume_unreachable(); });
+  return true;
+}
+
+void Cpp2Connection::buildAndDispatchRequest(RequestDispatchContext ctx) {
+  // After this point, the request buffer is no longer owned by hreq.
+  auto serializedRequest = [&] {
+    folly::IOBufQueue bufQueue;
+    bufQueue.append(ctx.hreq->extractBuf());
+    bufQueue.trimStart(ctx.meta->size);
+    if (bufQueue.empty()) {
+      // trimStart can clear the entire queue if the request contained only
+      // metadata; move() would return nullptr, so return an empty IOBuf.
+      return SerializedRequest(folly::IOBuf::create(0));
+    }
+    return SerializedRequest(bufQueue.move());
+  }();
+
+  auto debugPayload =
+      rocket::Payload::makeCombined(serializedRequest.buffer->clone(), 0);
+
+  std::chrono::milliseconds queueTimeout;
+  std::chrono::milliseconds taskTimeout;
+  std::chrono::milliseconds clientQueueTimeout =
+      ctx.hreq->getHeader()->getClientQueueTimeout();
+  std::chrono::milliseconds clientTimeout =
+      ctx.hreq->getHeader()->getClientTimeout();
+  auto differentTimeouts = ctx.server->getTaskExpireTimeForRequest(
+      clientQueueTimeout, clientTimeout, queueTimeout, taskTimeout);
+
+  context_.setClientType(ctx.hreq->getHeader()->getClientType());
+
+  auto t2r = RequestsRegistry::makeRequest<Cpp2Request>(
+      *ctx.server,
+      std::move(ctx.hreq),
+      std::move(ctx.reqCtx),
+      this_,
+      std::move(debugPayload),
+      std::move(ctx.methodName));
+
+  ctx.server->incActiveRequests();
+
+  auto& timestamps = t2r->getTimestamps();
+  timestamps.setStatus(*ctx.samplingStatus);
+  timestamps.readEnd = ctx.readEnd;
+  timestamps.processBegin = std::chrono::steady_clock::now();
+  if (ctx.samplingStatus->isServerSamplingEnabled() && ctx.observer) {
+    if (threadManager_) {
+      ctx.observer->queuedRequests(threadManager_->pendingUpstreamTaskCount());
+    } else if (!ctx.server->resourcePoolSet().empty()) {
+      ctx.observer->queuedRequests(
+          static_cast<int32_t>(ctx.server->resourcePoolSet().numQueued()));
+    }
+    ctx.observer->activeRequests(ctx.server->getActiveRequests());
+  }
+
+  activeRequests_.insert(t2r.get());
+
+  auto reqContext = t2r->getContext();
+  if (ctx.observer) {
+    ctx.observer->admittedRequest(&reqContext->getMethodName());
+  }
+
+  if (differentTimeouts) {
+    if (queueTimeout > std::chrono::milliseconds(0)) {
+      scheduleTimeout(&t2r->queueTimeout_, queueTimeout);
+    }
+  }
+  if (taskTimeout > std::chrono::milliseconds(0)) {
+    scheduleTimeout(&t2r->taskTimeout_, taskTimeout);
+  }
+
+  if (clientTimeout > std::chrono::milliseconds::zero()) {
+    reqContext->setRequestTimeout(clientTimeout);
+  } else {
+    reqContext->setRequestTimeout(taskTimeout);
+  }
+
+  LoggingSampler monitoringLogSampler{
+      THRIFT_FLAG(monitoring_over_header_logging_sample_rate)};
+  if (monitoringLogSampler.isSampled()) {
+    if (isMonitoringMethodName(reqContext->getMethodName())) {
+      THRIFT_CONNECTION_EVENT(monitoring_over_header)
+          .logSampled(context_, monitoringLogSampler, [&] {
+            return folly::dynamic::object(
+                "method_name", reqContext->getMethodName());
+          });
+    }
+  }
+
+  ResponseChannelRequest::UniquePtr req = std::move(t2r);
+  if (!apache::thrift::detail::ap::setupRequestContextWithMessageBegin(
+          *ctx.meta, ctx.protoId, req, reqContext, worker_->getEventBase())) {
+    return;
+  }
+
+  if (!std::get_if<Cpp2Worker::PerServiceMetadata::MetadataNotFound>(
+          ctx.methodMetadataResult)) {
+    logSetupConnectionEventsOnce(setupLoggingFlag_, context_);
+  }
+
+  Cpp2Worker::dispatchRequest(
+      processorFactory_,
+      processor_.get(),
+      std::move(req),
+      SerializedCompressedRequest(std::move(serializedRequest)),
+      *ctx.methodMetadataResult,
+      ctx.protoId,
+      reqContext,
+      threadManager_.get(),
+      worker_->getServer());
+}
+
 // Response Channel callbacks
 void Cpp2Connection::requestReceived(
     unique_ptr<HeaderServerChannel::HeaderRequest>&& hreq) {
+  // samplingStatus references a member of *hreq; the std::move below
+  // transfers unique_ptr ownership without invalidating the pointee.
   auto& samplingStatus = hreq->getSamplingStatus();
   std::chrono::steady_clock::time_point readEnd{
       std::chrono::steady_clock::now()};
@@ -391,23 +652,7 @@ void Cpp2Connection::requestReceived(
     }
   });
 
-  if (hreq->getHeader()->getClientType() == THRIFT_HTTP_SERVER_TYPE ||
-      hreq->getHeader()->getClientType() == THRIFT_HTTP_CLIENT_TYPE ||
-      hreq->getHeader()->getClientType() == THRIFT_HTTP_GET_CLIENT_TYPE) {
-    disconnect("Rejecting HTTP connection over Header");
-    return;
-  }
-  if (THRIFT_FLAG(server_header_reject_framed) &&
-      (hreq->getHeader()->getClientType() == THRIFT_FRAMED_DEPRECATED ||
-       hreq->getHeader()->getClientType() == THRIFT_FRAMED_COMPACT)) {
-    disconnect("Rejecting framed connection over Header");
-    return;
-  }
-  if (THRIFT_FLAG(server_header_reject_unframed) &&
-      (hreq->getHeader()->getClientType() == THRIFT_UNFRAMED_DEPRECATED ||
-       hreq->getHeader()->getClientType() ==
-           THRIFT_UNFRAMED_COMPACT_DEPRECATED)) {
-    disconnect("Rejecting unframed connection over Header");
+  if (handleUnsupportedClientType(*hreq)) {
     return;
   }
 
@@ -424,64 +669,7 @@ void Cpp2Connection::requestReceived(
   std::string& methodName = msgBegin.methodName;
   const auto& meta = msgBegin.metadata;
 
-  // If the transport upgrade has begun, we should reject any requests made
-  // before it's completed.
-  if (upgradeToRocketCallback_ != nullptr) {
-    // In essence, we've already swapped to Rocket even if the current message
-    // was still in the buffer. Handle this as a protocol error, as a
-    // misbehaving client.
-    disconnect("Unexpected Header message after Rocket upgrade");
-    return;
-  }
-  // Transport upgrade: check if client requested transport upgrade from header
-  // to rocket. If yes, check if we support Rocket, then reply immediately and
-  // upgrade the transport after sending the reply.
-  if (methodName == "upgradeToRocket") {
-    auto handlers = worker_->getServer()->getRoutingHandlers();
-    auto rocketHandlerIterator =
-        std::find_if(handlers->begin(), handlers->end(), [](auto& handler) {
-          return dynamic_cast<RocketRoutingHandler*>(handler.get()) != nullptr;
-        });
-    if (rocketHandlerIterator == handlers->end()) {
-      killRequest(
-          std::move(hreq),
-          TApplicationException::TApplicationExceptionType::UNKNOWN_METHOD,
-          kMethodUnknownErrorCode,
-          "Rocket upgrade attempted but RocketRoutingHandler not found");
-      return;
-    }
-    // We assume the referenced RocketRoutingHandler object will remain alive
-    // while we need it, but there's nothing guaranteeing that.
-    apache::thrift::RocketRoutingHandler* rocketHandler =
-        dynamic_cast<RocketRoutingHandler*>(rocketHandlerIterator->get());
-    ResponsePayload response;
-    switch (protoId) {
-      case apache::thrift::protocol::T_BINARY_PROTOCOL:
-        response = upgradeToRocketReply<apache::thrift::BinaryProtocolWriter>(
-            meta.seqId);
-        break;
-      case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-        response = upgradeToRocketReply<apache::thrift::CompactProtocolWriter>(
-            meta.seqId);
-        break;
-      default:
-        LOG(DFATAL) << "Unsupported protocol found";
-        // This should never occur. Unsupported protocols should be caught and
-        // handled higher up in the stack. If we somehow still reach this, and
-        // the protocol is neither binary nor compact, disconnect the client and
-        // abort the upgrade.
-        disconnect("Unsupported protocol found during Rocket upgrade");
-        return;
-    }
-
-    upgradeToRocketCallback_ = std::make_unique<TransportUpgradeSendCallback>(
-        rocketHandler,
-        transport_,
-        context_.getPeerAddress(),
-        getWorker(),
-        this,
-        channel_.get());
-    hreq->sendReply(std::move(response), upgradeToRocketCallback_.get());
+  if (handleUpgradeToRocket(hreq, methodName, protoId, meta)) {
     return;
   }
 
@@ -491,7 +679,6 @@ void Cpp2Connection::requestReceived(
       worker_->getServer()->getLegacyTransport() ==
           ThriftServer::LegacyTransport::DISABLED) {
     THRIFT_CONNECTION_EVENT(connection_rejected.header).log(context_);
-
     disconnect("Rejecting Header connection");
     return;
   }
@@ -517,64 +704,15 @@ void Cpp2Connection::requestReceived(
     observer->receivedRequest(&methodName);
   }
 
-  auto injectedFailure = server->maybeInjectFailure();
-  switch (injectedFailure) {
-    case ThriftServer::InjectedFailure::NONE:
-      break;
-    case ThriftServer::InjectedFailure::ERROR:
-      killRequest(
-          std::move(hreq),
-          TApplicationException::TApplicationExceptionType::INJECTED_FAILURE,
-          kInjectedFailureErrorCode,
-          "injected failure");
-      return;
-    case ThriftServer::InjectedFailure::DROP:
-      VLOG(1) << "ERROR: injected drop: "
-              << context_.getPeerAddress()->getAddressStr();
-      return;
-    case ThriftServer::InjectedFailure::DISCONNECT:
-      disconnect("injected failure");
-      return;
+  if (handleInjectedFailure(hreq, server)) {
+    return;
   }
 
   if (server->getGetHeaderHandler()) {
     server->getGetHeaderHandler()(hreq->getHeader(), context_.getPeerAddress());
   }
 
-  if (auto overloadResult =
-          server->checkOverload(hreq->getHeader()->getHeaders(), methodName)) {
-    killRequestServerOverloaded(std::move(hreq), std::move(*overloadResult));
-    return;
-  }
-
-  if (auto preprocessResult = server->preprocess(
-          {hreq->getHeader()->getHeaders(), methodName, context_});
-      !std::holds_alternative<std::monostate>(preprocessResult)) {
-    folly::variant_match(
-        preprocessResult,
-        [&](AppClientException& ace) {
-          handleAppError(std::move(hreq), ace.name(), ace.getMessage(), true);
-        },
-        [&](AppOverloadedException& aoe) {
-          killRequestServerOverloaded(
-              std::move(hreq),
-              OverloadResult{
-                  kAppOverloadedErrorCode,
-                  aoe.getMessage(),
-                  LoadShedder::CUSTOM,
-              });
-        },
-        [&](AppQuotaExceededException& aqe) {
-          killRequest(
-              std::move(hreq),
-              TApplicationException::TENANT_QUOTA_EXCEEDED,
-              kTenantQuotaExceededErrorCode,
-              aqe.getMessage().c_str());
-        },
-        [&](AppServerException& ase) {
-          handleAppError(std::move(hreq), ase.name(), ase.getMessage(), false);
-        },
-        [](std::monostate&) { folly::assume_unreachable(); });
+  if (handleOverloadAndPreprocessResult(hreq, server, methodName)) {
     return;
   }
 
@@ -596,118 +734,18 @@ void Cpp2Connection::requestReceived(
     return;
   }
 
-  // After this, the request buffer is no longer owned by the request
-  // and will be released after deserializeRequest.
-  auto serializedRequest = [&] {
-    folly::IOBufQueue bufQueue;
-    bufQueue.append(hreq->extractBuf());
-    bufQueue.trimStart(meta.size);
-    if (bufQueue.empty()) {
-      // If the request only contained metadata, trimStart could clear the
-      // entire queue. Return an empty IOBuf if that happens (move() otherwise
-      // returns nullptr).
-      return SerializedRequest(folly::IOBuf::create(0));
-    }
-    return SerializedRequest(bufQueue.move());
-  }();
-
-  // We keep a clone of the request payload buffer for debugging purposes, but
-  // the lifetime of payload should not necessarily be the same as its request
-  // object's.
-  auto debugPayload =
-      rocket::Payload::makeCombined(serializedRequest.buffer->clone(), 0);
-
-  std::chrono::milliseconds queueTimeout;
-  std::chrono::milliseconds taskTimeout;
-  std::chrono::milliseconds clientQueueTimeout =
-      hreq->getHeader()->getClientQueueTimeout();
-  std::chrono::milliseconds clientTimeout =
-      hreq->getHeader()->getClientTimeout();
-  auto differentTimeouts = server->getTaskExpireTimeForRequest(
-      clientQueueTimeout, clientTimeout, queueTimeout, taskTimeout);
-
-  context_.setClientType(hreq->getHeader()->getClientType());
-
-  auto t2r = RequestsRegistry::makeRequest<Cpp2Request>(
-      *server,
-      std::move(hreq),
-      std::move(reqCtx),
-      this_,
-      std::move(debugPayload),
-      std::move(methodName));
-
-  server->incActiveRequests();
-  // Expensive operations; happens only when sampling is enabled
-  auto& timestamps = t2r->getTimestamps();
-  timestamps.setStatus(samplingStatus);
-  timestamps.readEnd = readEnd;
-  timestamps.processBegin = std::chrono::steady_clock::now();
-  if (samplingStatus.isServerSamplingEnabled() && observer) {
-    if (threadManager_) {
-      observer->queuedRequests(threadManager_->pendingUpstreamTaskCount());
-    } else if (!server->resourcePoolSet().empty()) {
-      observer->queuedRequests(server->resourcePoolSet().numQueued());
-    }
-    observer->activeRequests(server->getActiveRequests());
-  }
-
-  activeRequests_.insert(t2r.get());
-
-  auto reqContext = t2r->getContext();
-  if (observer) {
-    observer->admittedRequest(&reqContext->getMethodName());
-  }
-
-  if (differentTimeouts) {
-    if (queueTimeout > std::chrono::milliseconds(0)) {
-      scheduleTimeout(&t2r->queueTimeout_, queueTimeout);
-    }
-  }
-  if (taskTimeout > std::chrono::milliseconds(0)) {
-    scheduleTimeout(&t2r->taskTimeout_, taskTimeout);
-  }
-
-  if (clientTimeout > std::chrono::milliseconds::zero()) {
-    reqContext->setRequestTimeout(clientTimeout);
-  } else {
-    reqContext->setRequestTimeout(taskTimeout);
-  }
-
-  // Log monitoring methods that are called over header interface so that they
-  // can be migrated to rocket monitoring interface.
-  LoggingSampler monitoringLogSampler{
-      THRIFT_FLAG(monitoring_over_header_logging_sample_rate)};
-  if (monitoringLogSampler.isSampled()) {
-    if (isMonitoringMethodName(reqContext->getMethodName())) {
-      THRIFT_CONNECTION_EVENT(monitoring_over_header)
-          .logSampled(context_, monitoringLogSampler, [&] {
-            return folly::dynamic::object(
-                "method_name", reqContext->getMethodName());
-          });
-    }
-  }
-
-  ResponseChannelRequest::UniquePtr req = std::move(t2r);
-  if (!apache::thrift::detail::ap::setupRequestContextWithMessageBegin(
-          meta, protoId, req, reqContext, worker_->getEventBase())) {
-    return;
-  }
-
-  if (!std::get_if<PerServiceMetadata::MetadataNotFound>(
-          &methodMetadataResult)) {
-    logSetupConnectionEventsOnce(setupLoggingFlag_, context_);
-  }
-
-  Cpp2Worker::dispatchRequest(
-      processorFactory_,
-      processor_.get(),
-      std::move(req),
-      SerializedCompressedRequest(std::move(serializedRequest)),
-      methodMetadataResult,
-      protoId,
-      reqContext,
-      threadManager_.get(),
-      worker_->getServer());
+  buildAndDispatchRequest({
+      .hreq = std::move(hreq),
+      .methodName = std::move(methodName),
+      .meta = &meta,
+      .protoId = protoId,
+      .methodMetadataResult = &methodMetadataResult,
+      .reqCtx = std::move(reqCtx),
+      .server = server,
+      .readEnd = readEnd,
+      .samplingStatus = &samplingStatus,
+      .observer = observer,
+  });
 }
 
 void Cpp2Connection::channelClosed(folly::exception_wrapper&& ex) {

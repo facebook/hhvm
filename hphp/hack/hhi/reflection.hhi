@@ -113,6 +113,7 @@ class ReflectionClass implements Reflector {
   public function isSubclassOf(mixed $class)[]: bool;
   public function isTrait()[]: bool;
   public function isUserDefined()[]: bool;
+  <<__Deprecated("Use HH_FIXME::reflectionClassNewInstanceForCallsite instead")>>
   public function newInstance(
     HH\FIXME\MISSING_PARAM_TYPE ...$args
   ): HH\FIXME\MISSING_RETURN_TYPE;

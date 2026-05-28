@@ -214,7 +214,7 @@ class ThriftClientTransportAdapter {
     // serializer/allocator failure. Catch and deliver inbound as a
     // per-request ThriftClientResponseError so the AppAdapter fails just this
     // request without tearing the channel down.
-    frame::ComposedRequestResponseFrame frame;
+    frame::ComposedFrame frame;
     try {
       // Client outbound: request metadata is currently always Binary on the
       // wire — SETUP-time negotiation is not yet plumbed through the client

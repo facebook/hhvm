@@ -136,14 +136,16 @@ class RocketClientSetupFrameHandler {
     // SETUP is a connection-level frame — no stream, no streamType.
     return RocketRequestMessage{
         .frame =
-            apache::thrift::fast_thrift::frame::ComposedSetupFrame{
-                .data = std::move(data),
+            apache::thrift::fast_thrift::frame::ComposedFrame{
+                .frameType =
+                    apache::thrift::fast_thrift::frame::FrameType::SETUP,
+                .streamId = 0,
                 .metadata = std::move(metadata),
-                .header =
-                    {.majorVersion = kRSocketMajorVersion,
-                     .minorVersion = kRSocketMinorVersion,
-                     .keepaliveTime = kMaxKeepaliveTime,
-                     .maxLifetime = kMaxLifetime},
+                .data = std::move(data),
+                .majorVersion = kRSocketMajorVersion,
+                .minorVersion = kRSocketMinorVersion,
+                .keepaliveTime = kMaxKeepaliveTime,
+                .maxLifetime = kMaxLifetime,
             },
         .requestContext = {},
     };

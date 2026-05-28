@@ -238,9 +238,12 @@ TEST(RocketServerAppAdapterTest, WriteWithPipelineCallsFireWrite) {
 
   RocketResponseMessage msg{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
+              .metadata = nullptr,
               .data = folly::IOBuf::copyBuffer("response"),
-              .header = {.streamId = 1},
           },
   };
 

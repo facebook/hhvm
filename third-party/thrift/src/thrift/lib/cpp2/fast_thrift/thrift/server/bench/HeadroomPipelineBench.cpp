@@ -200,13 +200,14 @@ void benchNoHeadroom(
     auto serializedMeta = serializeMetadataNoHeadroom(responses[i].metadata);
     auto streamResp = RocketResponseMessage{
         .frame =
-            apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
-                .data = std::move(responses[i].payload),
+            apache::thrift::fast_thrift::frame::ComposedFrame{
+                .frameType =
+                    apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+                .streamId = responses[i].streamId,
                 .metadata = std::move(serializedMeta),
-                .header =
-                    {.streamId = responses[i].streamId,
-                     .complete = true,
-                     .next = true},
+                .data = std::move(responses[i].payload),
+                .complete = true,
+                .next = true,
             },
     };
     auto result = codec.onWrite(codecCtx, erase_and_box(std::move(streamResp)));
@@ -241,13 +242,14 @@ void benchWithHeadroom(
 
     auto streamResp = RocketResponseMessage{
         .frame =
-            apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
-                .data = std::move(responses[i].payload),
+            apache::thrift::fast_thrift::frame::ComposedFrame{
+                .frameType =
+                    apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+                .streamId = responses[i].streamId,
                 .metadata = std::move(serializedMeta),
-                .header =
-                    {.streamId = responses[i].streamId,
-                     .complete = true,
-                     .next = true},
+                .data = std::move(responses[i].payload),
+                .complete = true,
+                .next = true,
             },
     };
 

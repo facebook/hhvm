@@ -34,8 +34,8 @@ namespace apache::thrift::fast_thrift::thrift {
  * implementations are `noexcept` — no serialization, just header
  * construction.
  *
- * Each struct provides `toRocketFrame() &&` returning the matching
- * `frame::Composed*Frame`. The `RocketFrame` typedef on each struct names
+ * Each struct provides `toRocketFrame() &&` returning a flat
+ * `frame::ComposedFrame`. The `RocketFrame` typedef on each struct names
  * the return type for variant-level dispatch (see ThriftPayloadVariant).
  */
 
@@ -46,13 +46,18 @@ namespace apache::thrift::fast_thrift::thrift {
  * comes from the enclosing message wrapper.
  */
 struct ThriftCancelPayload {
-  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedCancelFrame;
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedFrame;
 
   uint32_t streamId{apache::thrift::fast_thrift::rocket::kInvalidStreamId};
 
   RocketFrame toRocketFrame(
       rocket::server::MetadataProtocol /*metadataProtocol*/) && noexcept {
-    return {.header = {.streamId = streamId}};
+    return {
+        .frameType = apache::thrift::fast_thrift::frame::FrameType::CANCEL,
+        .streamId = streamId,
+        .metadata = nullptr,
+        .data = nullptr,
+    };
   }
 };
 
@@ -62,14 +67,20 @@ struct ThriftCancelPayload {
  * Tells the peer to send N more payloads on this stream.
  */
 struct ThriftRequestNPayload {
-  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedRequestNFrame;
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedFrame;
 
   uint32_t streamId{apache::thrift::fast_thrift::rocket::kInvalidStreamId};
   uint32_t requestN{0};
 
   RocketFrame toRocketFrame(
       rocket::server::MetadataProtocol /*metadataProtocol*/) && noexcept {
-    return {.header = {.streamId = streamId, .requestN = requestN}};
+    return {
+        .frameType = apache::thrift::fast_thrift::frame::FrameType::REQUEST_N,
+        .streamId = streamId,
+        .metadata = nullptr,
+        .data = nullptr,
+        .requestN = requestN,
+    };
   }
 };
 
@@ -85,14 +96,19 @@ struct ThriftRequestNPayload {
  * client may send to push runtime metadata.
  */
 struct ThriftMetadataPushPayload {
-  using RocketFrame =
-      apache::thrift::fast_thrift::frame::ComposedMetadataPushFrame;
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedFrame;
 
   std::unique_ptr<folly::IOBuf> metadata{nullptr};
 
   RocketFrame toRocketFrame(
       rocket::server::MetadataProtocol /*metadataProtocol*/) && noexcept {
-    return {.metadata = std::move(metadata), .header = {}};
+    return {
+        .frameType =
+            apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH,
+        .streamId = 0,
+        .metadata = std::move(metadata),
+        .data = nullptr,
+    };
   }
 };
 

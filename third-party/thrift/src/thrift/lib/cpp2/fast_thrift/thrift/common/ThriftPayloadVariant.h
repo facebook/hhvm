@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrameVariant.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftControlPayloads.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadConcept.h>
@@ -50,8 +50,8 @@ inline constexpr size_t maxAlignof = std::max({alignof(Ts)...});
 
 /**
  * ThriftPayloadVariant - A discriminated union of `ThriftPayloadConcept`
- * types that exposes a single `toRocketFrame()` accessor returning the
- * matching `ComposedFrameVariant<typename Ts::RocketFrame...>`.
+ * types that exposes a single `toRocketFrame()` accessor returning a flat
+ * `frame::ComposedFrame`.
  *
  * Why specialized vs a general variant:
  *   `toRocketFrame()` is the one operation every Thrift→Rocket dispatch
@@ -68,7 +68,7 @@ inline constexpr size_t maxAlignof = std::max({alignof(Ts)...});
  *   ThriftPayloadVariant<ThriftRequestResponsePayload, ...> v
  *       = ThriftRequestResponsePayload{...};
  *   auto rocketFrame = std::move(v).toRocketFrame();
- *     // → ComposedFrameVariant<ComposedRequestResponseFrame, ...>
+ *     // → frame::ComposedFrame (discriminated by .frameType)
  */
 #pragma pack(push, 1)
 template <ThriftPayloadConcept... Ts>
@@ -107,15 +107,13 @@ class ThriftPayloadVariant {
            ...);
   }
 
-  using RocketFrameVariant =
-      apache::thrift::fast_thrift::frame::ComposedFrameVariant<
-          typename Ts::RocketFrame...>;
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedFrame;
 
   template <size_t... Is>
-  RocketFrameVariant toRocketFrameImpl(
+  RocketFrame toRocketFrameImpl(
       rocket::server::MetadataProtocol metadataProtocol,
       std::index_sequence<Is...>) && {
-    RocketFrameVariant result;
+    RocketFrame result;
     (void)((index_ == Is &&
             (result = std::move(
                           *std::launder(reinterpret_cast<AltAt<Is>*>(storage_)))
@@ -282,11 +280,11 @@ class ThriftPayloadVariant {
   // === Rocket frame conversion ===
   //
   // Single fold-expression dispatch over alternatives. Each alternative's
-  // `toRocketFrame()` returns its specific `Composed*Frame`, which is
-  // assigned into the uniform `ComposedFrameVariant` return type.
-  // Eliminates the runtime switch in the transport adapter.
+  // `toRocketFrame()` returns a flat `frame::ComposedFrame` (discriminated
+  // by `.frameType`). Eliminates the runtime switch in the transport
+  // adapter.
 
-  RocketFrameVariant toRocketFrame(
+  RocketFrame toRocketFrame(
       rocket::server::MetadataProtocol metadataProtocol) && {
     return std::move(*this).toRocketFrameImpl(
         metadataProtocol, std::index_sequence_for<Ts...>{});

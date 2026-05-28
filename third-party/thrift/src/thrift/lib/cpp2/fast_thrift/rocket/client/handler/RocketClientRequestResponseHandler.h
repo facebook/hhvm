@@ -175,12 +175,12 @@ class RocketClientRequestResponseHandler {
             .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>()
             .streamId();
     auto buf =
-        apache::thrift::fast_thrift::frame::ComposedErrorFrame{
+        apache::thrift::fast_thrift::frame::ComposedFrame{
+            .frameType = apache::thrift::fast_thrift::frame::FrameType::ERROR,
+            .streamId = streamId,
             .data = folly::IOBuf::fromString(std::move(description)),
-            .header =
-                {.streamId = streamId,
-                 .errorCode = static_cast<uint32_t>(
-                     apache::thrift::fast_thrift::frame::ErrorCode::INVALID)},
+            .errorCode = static_cast<uint32_t>(
+                apache::thrift::fast_thrift::frame::ErrorCode::INVALID),
         }
             .serialize();
     response.payload =

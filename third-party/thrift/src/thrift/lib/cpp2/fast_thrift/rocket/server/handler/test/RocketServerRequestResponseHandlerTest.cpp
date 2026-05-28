@@ -111,10 +111,11 @@ RocketResponseMessage makePayloadResponse(
     std::unique_ptr<folly::IOBuf> data = nullptr) {
   return RocketResponseMessage{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = streamId,
               .data = std::move(data),
-              .metadata = nullptr,
-              .header = {.streamId = streamId},
           },
       .streamType = streamType,
   };
@@ -126,10 +127,11 @@ RocketResponseMessage makeErrorResponse(
     FrameType streamType = FrameType::REQUEST_RESPONSE) {
   return RocketResponseMessage{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedErrorFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType = apache::thrift::fast_thrift::frame::FrameType::ERROR,
+              .streamId = streamId,
               .data = folly::IOBuf::copyBuffer("err"),
-              .metadata = nullptr,
-              .header = {.streamId = streamId, .errorCode = errorCode},
+              .errorCode = errorCode,
           },
       .streamType = streamType,
   };
@@ -256,16 +258,10 @@ TEST_F(
   EXPECT_TRUE(ctx_.readMessages().empty());
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& errorMsg = ctx_.writeMessages()[0].get<RocketResponseMessage>();
-  ASSERT_TRUE(
-      errorMsg.frame
-          .is<apache::thrift::fast_thrift::frame::ComposedErrorFrame>());
-  auto& errorPayload =
-      errorMsg.frame
-          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
-  EXPECT_EQ(errorPayload.header.streamId, 1u);
+  ASSERT_EQ(errorMsg.frame.frameType, FrameType::ERROR);
+  EXPECT_EQ(errorMsg.frame.streamId, 1u);
   EXPECT_EQ(
-      static_cast<ErrorCode>(errorPayload.header.errorCode),
-      ErrorCode::INVALID);
+      static_cast<ErrorCode>(errorMsg.frame.errorCode), ErrorCode::INVALID);
 }
 
 // =============================================================================
@@ -284,22 +280,16 @@ TEST_F(
   EXPECT_TRUE(ctx_.readMessages().empty());
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& errorMsg = ctx_.writeMessages()[0].get<RocketResponseMessage>();
-  ASSERT_TRUE(
-      errorMsg.frame
-          .is<apache::thrift::fast_thrift::frame::ComposedErrorFrame>());
-  auto& errorPayload =
-      errorMsg.frame
-          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
-  EXPECT_EQ(errorPayload.header.streamId, 1u);
+  ASSERT_EQ(errorMsg.frame.frameType, FrameType::ERROR);
+  EXPECT_EQ(errorMsg.frame.streamId, 1u);
   EXPECT_EQ(
-      static_cast<ErrorCode>(errorPayload.header.errorCode),
-      ErrorCode::INVALID);
+      static_cast<ErrorCode>(errorMsg.frame.errorCode), ErrorCode::INVALID);
   EXPECT_EQ(errorMsg.streamType, FrameType::REQUEST_RESPONSE);
 }
 
 // =============================================================================
-// Outbound: stamps complete=true, next=true on ComposedPayloadFrame for RR
-// streams; ComposedErrorFrame pass through; non-RR pass through.
+// Outbound: stamps complete=true, next=true on PAYLOAD for RR streams; ERROR
+// passes through; non-RR passes through.
 // =============================================================================
 
 TEST_F(
@@ -313,12 +303,10 @@ TEST_F(
       Result::Success);
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& forwarded = ctx_.writeMessages()[0].get<RocketResponseMessage>();
-  auto& payload =
-      forwarded.frame
-          .get<apache::thrift::fast_thrift::frame::ComposedPayloadFrame>();
-  EXPECT_TRUE(payload.header.complete);
-  EXPECT_TRUE(payload.header.next);
-  EXPECT_EQ(payload.streamId(), 42u);
+  EXPECT_EQ(forwarded.frame.frameType, FrameType::PAYLOAD);
+  EXPECT_TRUE(forwarded.frame.complete);
+  EXPECT_TRUE(forwarded.frame.next);
+  EXPECT_EQ(forwarded.frame.streamId, 42u);
 }
 
 TEST_F(
@@ -332,12 +320,10 @@ TEST_F(
       Result::Success);
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& forwarded = ctx_.writeMessages()[0].get<RocketResponseMessage>();
-  auto& errorPayload =
-      forwarded.frame
-          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
-  EXPECT_EQ(errorPayload.header.streamId, 1u);
+  EXPECT_EQ(forwarded.frame.frameType, FrameType::ERROR);
+  EXPECT_EQ(forwarded.frame.streamId, 1u);
   EXPECT_EQ(
-      static_cast<ErrorCode>(errorPayload.header.errorCode),
+      static_cast<ErrorCode>(forwarded.frame.errorCode),
       ErrorCode::APPLICATION_ERROR);
 }
 
@@ -352,12 +338,10 @@ TEST_F(
       Result::Success);
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& forwarded = ctx_.writeMessages()[0].get<RocketResponseMessage>();
-  auto& payload =
-      forwarded.frame
-          .get<apache::thrift::fast_thrift::frame::ComposedPayloadFrame>();
-  // No stamping for non-RR — header.complete defaults to false.
-  EXPECT_FALSE(payload.header.complete);
-  EXPECT_FALSE(payload.header.next);
+  EXPECT_EQ(forwarded.frame.frameType, FrameType::PAYLOAD);
+  // No stamping for non-RR — complete defaults to false.
+  EXPECT_FALSE(forwarded.frame.complete);
+  EXPECT_FALSE(forwarded.frame.next);
 }
 
 // =============================================================================

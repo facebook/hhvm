@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrameVariant.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -29,7 +29,8 @@ namespace apache::thrift::fast_thrift::thrift {
  * Base concept for Thrift payload types that can be held in
  * `ThriftPayloadVariant`. Each payload provides:
  *
- *   - `T::RocketFrame` typedef naming the matching `frame::Composed*Frame`.
+ *   - `T::RocketFrame` typedef naming the rocket frame type (always
+ *     `frame::ComposedFrame` post-flat-migration).
  *   - `std::move(t).toRocketFrame()` produces the rocket frame.
  *
  * `toRocketFrame()` may be either noexcept or throwing — the
@@ -38,16 +39,8 @@ namespace apache::thrift::fast_thrift::thrift {
  * failure. The transport adapter catches and surfaces such failures
  * inbound as per-request errors.
  *
- * The rocket frame returned by `toRocketFrame()` must satisfy the
- * `frame::ComposedFrameConcept` (i.e., it can be held in a
- * `ComposedFrameVariant`). Together this lets the variant expose a single
- * `toRocketFrame()` accessor that returns a `ComposedFrameVariant<...>` of
- * all the alternatives' rocket frames — eliminating the runtime switch in
- * the transport adapter.
- *
- * Lives in its own header to break the dependency cycle between the
- * variant template (which constrains its alternatives via this base
- * concept) and the payload headers. Refined concepts (request /
+ * Lives in its own header to keep the payload headers free of dependencies
+ * on consumers of this concept. Refined concepts (request /
  * initial-response) live alongside it so all payload-variant constraints
  * are in one place.
  */
@@ -58,8 +51,9 @@ concept ThriftPayloadConcept =
         std::move(t).toRocketFrame(p)
       } -> std::same_as<typename T::RocketFrame>;
     } &&
-    apache::thrift::fast_thrift::frame::ComposedFrameConcept<
-        typename T::RocketFrame>;
+    std::same_as<
+        typename T::RocketFrame,
+        apache::thrift::fast_thrift::frame::ComposedFrame>;
 
 /**
  * Refines `ThriftPayloadConcept` for the 5 initial-request payload types

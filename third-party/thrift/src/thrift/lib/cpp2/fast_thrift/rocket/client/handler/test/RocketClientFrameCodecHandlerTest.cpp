@@ -347,9 +347,12 @@ TEST_F(RocketClientFrameCodecHandlerTest, SerializesRequestResponsePayload) {
 
   RocketRequestMessage request{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType = apache::thrift::fast_thrift::frame::FrameType::
+                  REQUEST_RESPONSE,
+              .streamId = 1,
+              .metadata = nullptr,
               .data = std::move(data),
-              .header = {.streamId = 1},
           },
       .requestContext = {},
       .streamType =
@@ -371,9 +374,12 @@ TEST_F(RocketClientFrameCodecHandlerTest, PropagatesWriteError) {
 
   RocketRequestMessage request{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType = apache::thrift::fast_thrift::frame::FrameType::
+                  REQUEST_RESPONSE,
+              .streamId = 1,
+              .metadata = nullptr,
               .data = folly::IOBuf::copyBuffer("test"),
-              .header = {.streamId = 1},
           },
       .requestContext = {},
       .streamType =
@@ -390,9 +396,12 @@ TEST_F(RocketClientFrameCodecHandlerTest, PropagatesWriteBackpressure) {
 
   RocketRequestMessage request{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType = apache::thrift::fast_thrift::frame::FrameType::
+                  REQUEST_RESPONSE,
+              .streamId = 1,
+              .metadata = nullptr,
               .data = folly::IOBuf::copyBuffer("test"),
-              .header = {.streamId = 1},
           },
       .requestContext = {},
       .streamType =

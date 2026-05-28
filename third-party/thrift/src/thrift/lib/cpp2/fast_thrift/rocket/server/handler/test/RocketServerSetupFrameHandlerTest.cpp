@@ -398,11 +398,12 @@ TEST_F(
   auto& errResp = ctx_.writeMessages()[0]
                       .get<apache::thrift::fast_thrift::rocket::server::
                                RocketResponseMessage>();
-  const auto& errPayload =
-      errResp.frame
-          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
+  const auto& errPayload = errResp.frame;
   EXPECT_EQ(
-      errPayload.header.errorCode,
+      errPayload.frameType,
+      apache::thrift::fast_thrift::frame::FrameType::ERROR);
+  EXPECT_EQ(
+      errPayload.errorCode,
       static_cast<uint32_t>(
           apache::thrift::fast_thrift::frame::ErrorCode::UNSUPPORTED_SETUP));
 }
@@ -420,11 +421,12 @@ TEST_F(
   auto& errResp = ctx_.writeMessages()[0]
                       .get<apache::thrift::fast_thrift::rocket::server::
                                RocketResponseMessage>();
-  const auto& errPayload =
-      errResp.frame
-          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
+  const auto& errPayload = errResp.frame;
   EXPECT_EQ(
-      errPayload.header.errorCode,
+      errPayload.frameType,
+      apache::thrift::fast_thrift::frame::FrameType::ERROR);
+  EXPECT_EQ(
+      errPayload.errorCode,
       static_cast<uint32_t>(
           apache::thrift::fast_thrift::frame::ErrorCode::UNSUPPORTED_SETUP));
 }
@@ -446,11 +448,12 @@ TEST_F(
   auto& errResp = ctx_.writeMessages()[0]
                       .get<apache::thrift::fast_thrift::rocket::server::
                                RocketResponseMessage>();
-  const auto& errPayload =
-      errResp.frame
-          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
+  const auto& errPayload = errResp.frame;
   EXPECT_EQ(
-      errPayload.header.errorCode,
+      errPayload.frameType,
+      apache::thrift::fast_thrift::frame::FrameType::ERROR);
+  EXPECT_EQ(
+      errPayload.errorCode,
       static_cast<uint32_t>(
           apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP));
 }
@@ -467,11 +470,12 @@ TEST_F(
   auto& errResp = ctx_.writeMessages()[0]
                       .get<apache::thrift::fast_thrift::rocket::server::
                                RocketResponseMessage>();
-  const auto& errPayload =
-      errResp.frame
-          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
+  const auto& errPayload = errResp.frame;
   EXPECT_EQ(
-      errPayload.header.errorCode,
+      errPayload.frameType,
+      apache::thrift::fast_thrift::frame::FrameType::ERROR);
+  EXPECT_EQ(
+      errPayload.errorCode,
       static_cast<uint32_t>(
           apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP));
 }
@@ -492,12 +496,13 @@ TEST_F(ServerSetupFrameHandlerTest, NonSetupFirstFrameReturnsInvalidSetup) {
   auto& errResp = ctx_.writeMessages()[0]
                       .get<apache::thrift::fast_thrift::rocket::server::
                                RocketResponseMessage>();
-  const auto& errPayload =
-      errResp.frame
-          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
-  EXPECT_EQ(errPayload.header.streamId, 0u);
+  const auto& errPayload = errResp.frame;
   EXPECT_EQ(
-      errPayload.header.errorCode,
+      errPayload.frameType,
+      apache::thrift::fast_thrift::frame::FrameType::ERROR);
+  EXPECT_EQ(errPayload.streamId, 0u);
+  EXPECT_EQ(
+      errPayload.errorCode,
       static_cast<uint32_t>(
           apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP));
 }
@@ -520,11 +525,12 @@ TEST_F(ServerSetupFrameHandlerTest, DuplicateSetupFrameReturnsInvalidSetup) {
   auto& errResp = ctx_.writeMessages()[0]
                       .get<apache::thrift::fast_thrift::rocket::server::
                                RocketResponseMessage>();
-  const auto& errPayload =
-      errResp.frame
-          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
+  const auto& errPayload = errResp.frame;
   EXPECT_EQ(
-      errPayload.header.errorCode,
+      errPayload.frameType,
+      apache::thrift::fast_thrift::frame::FrameType::ERROR);
+  EXPECT_EQ(
+      errPayload.errorCode,
       static_cast<uint32_t>(
           apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP));
 }

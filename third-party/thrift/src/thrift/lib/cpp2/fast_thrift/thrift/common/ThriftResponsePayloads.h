@@ -56,7 +56,7 @@ namespace apache::thrift::fast_thrift::thrift {
  * adapter catches and surfaces such failures.
  */
 struct ThriftInitialResponsePayload {
-  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedPayloadFrame;
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
   std::unique_ptr<apache::thrift::ResponseRpcMetadata> metadata{nullptr};
@@ -66,10 +66,13 @@ struct ThriftInitialResponsePayload {
       rocket::server::MetadataProtocol metadataProtocol) && {
     DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
-        .data = std::move(data),
+        .frameType = apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+        .streamId = streamId,
         .metadata = serializeResponseMetadata(*metadata, metadataProtocol),
+        .data = std::move(data),
         // RR / Sink invariants: terminal + carries data.
-        .header = {.streamId = streamId, .complete = true, .next = true},
+        .complete = true,
+        .next = true,
     };
   }
 
@@ -92,7 +95,7 @@ struct ThriftInitialResponsePayload {
  * adapter catches and surfaces such failures.
  */
 struct ThriftStreamInitialResponsePayload {
-  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedPayloadFrame;
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
   std::unique_ptr<apache::thrift::ResponseRpcMetadata> metadata{nullptr};
@@ -104,9 +107,12 @@ struct ThriftStreamInitialResponsePayload {
       rocket::server::MetadataProtocol metadataProtocol) && {
     DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
-        .data = std::move(data),
+        .frameType = apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+        .streamId = streamId,
         .metadata = serializeResponseMetadata(*metadata, metadataProtocol),
-        .header = {.streamId = streamId, .complete = complete, .next = next},
+        .data = std::move(data),
+        .complete = complete,
+        .next = next,
     };
   }
 
@@ -134,7 +140,7 @@ struct ThriftStreamInitialResponsePayload {
  * failures.
  */
 struct ThriftStreamPayload {
-  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedPayloadFrame;
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
   std::unique_ptr<apache::thrift::StreamPayloadMetadata> metadata{nullptr};
@@ -145,11 +151,14 @@ struct ThriftStreamPayload {
   RocketFrame toRocketFrame(
       rocket::server::MetadataProtocol metadataProtocol) && {
     return {
-        .data = std::move(data),
+        .frameType = apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+        .streamId = streamId,
         .metadata = metadata
             ? serializeStreamPayloadMetadata(*metadata, metadataProtocol)
             : nullptr,
-        .header = {.streamId = streamId, .complete = complete, .next = next},
+        .data = std::move(data),
+        .complete = complete,
+        .next = next,
     };
   }
 };
@@ -161,7 +170,7 @@ struct ThriftStreamPayload {
  * Applies to any RpcKind.
  */
 struct ThriftErrorPayload {
-  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedErrorFrame;
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
   std::unique_ptr<folly::IOBuf> metadata{nullptr};
@@ -171,9 +180,11 @@ struct ThriftErrorPayload {
   RocketFrame toRocketFrame(
       rocket::server::MetadataProtocol /*metadataProtocol*/) && noexcept {
     return {
-        .data = std::move(data),
+        .frameType = apache::thrift::fast_thrift::frame::FrameType::ERROR,
+        .streamId = streamId,
         .metadata = std::move(metadata),
-        .header = {.streamId = streamId, .errorCode = errorCode},
+        .data = std::move(data),
+        .errorCode = errorCode,
     };
   }
 };

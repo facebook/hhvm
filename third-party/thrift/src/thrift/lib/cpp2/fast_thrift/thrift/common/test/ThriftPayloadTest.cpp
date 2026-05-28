@@ -121,9 +121,9 @@ TEST(
   };
   auto frame = std::move(payload).toRocketFrame(
       rocket::server::MetadataProtocol::COMPACT);
-  EXPECT_EQ(frame.header.streamId, 42u);
-  EXPECT_TRUE(frame.header.complete);
-  EXPECT_TRUE(frame.header.next);
+  EXPECT_EQ(frame.streamId, 42u);
+  EXPECT_TRUE(frame.complete);
+  EXPECT_TRUE(frame.next);
   EXPECT_NE(frame.data, nullptr);
   EXPECT_NE(frame.metadata, nullptr);
 }
@@ -142,9 +142,9 @@ TEST(ThriftStreamInitialResponsePayloadTest, ToRocketFramePropagatesFlags) {
   };
   auto frame = std::move(payload).toRocketFrame(
       rocket::server::MetadataProtocol::BINARY);
-  EXPECT_EQ(frame.header.streamId, 7u);
-  EXPECT_FALSE(frame.header.complete);
-  EXPECT_TRUE(frame.header.next);
+  EXPECT_EQ(frame.streamId, 7u);
+  EXPECT_FALSE(frame.complete);
+  EXPECT_TRUE(frame.next);
   EXPECT_NE(frame.data, nullptr);
   EXPECT_NE(frame.metadata, nullptr);
 }
@@ -159,9 +159,9 @@ TEST(ThriftStreamInitialResponsePayloadTest, ToRocketFrameTerminalChunk) {
   };
   auto frame = std::move(payload).toRocketFrame(
       rocket::server::MetadataProtocol::COMPACT);
-  EXPECT_EQ(frame.header.streamId, 9u);
-  EXPECT_TRUE(frame.header.complete);
-  EXPECT_FALSE(frame.header.next);
+  EXPECT_EQ(frame.streamId, 9u);
+  EXPECT_TRUE(frame.complete);
+  EXPECT_FALSE(frame.next);
   EXPECT_EQ(frame.data, nullptr);
   EXPECT_NE(frame.metadata, nullptr);
 }
@@ -180,9 +180,9 @@ TEST(ThriftStreamPayloadTest, ToRocketFrameWithMetadata) {
   };
   auto frame = std::move(payload).toRocketFrame(
       rocket::server::MetadataProtocol::BINARY);
-  EXPECT_EQ(frame.header.streamId, 13u);
-  EXPECT_FALSE(frame.header.complete);
-  EXPECT_TRUE(frame.header.next);
+  EXPECT_EQ(frame.streamId, 13u);
+  EXPECT_FALSE(frame.complete);
+  EXPECT_TRUE(frame.next);
   EXPECT_NE(frame.data, nullptr);
   EXPECT_NE(frame.metadata, nullptr);
 }
@@ -197,9 +197,9 @@ TEST(ThriftStreamPayloadTest, ToRocketFrameWithoutMetadata) {
   };
   auto frame = std::move(payload).toRocketFrame(
       rocket::server::MetadataProtocol::BINARY);
-  EXPECT_EQ(frame.header.streamId, 13u);
-  EXPECT_FALSE(frame.header.complete);
-  EXPECT_TRUE(frame.header.next);
+  EXPECT_EQ(frame.streamId, 13u);
+  EXPECT_FALSE(frame.complete);
+  EXPECT_TRUE(frame.next);
   EXPECT_NE(frame.data, nullptr);
   EXPECT_EQ(frame.metadata, nullptr);
 }
@@ -214,9 +214,9 @@ TEST(ThriftStreamPayloadTest, ToRocketFrameTerminalChunk) {
   };
   auto frame = std::move(payload).toRocketFrame(
       rocket::server::MetadataProtocol::BINARY);
-  EXPECT_EQ(frame.header.streamId, 21u);
-  EXPECT_TRUE(frame.header.complete);
-  EXPECT_FALSE(frame.header.next);
+  EXPECT_EQ(frame.streamId, 21u);
+  EXPECT_TRUE(frame.complete);
+  EXPECT_FALSE(frame.next);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

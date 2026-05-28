@@ -55,34 +55,40 @@ apache::thrift::fast_thrift::frame::read::ParsedFrame makePayloadFrame(
 
 apache::thrift::fast_thrift::frame::read::ParsedFrame makeErrorFrame(
     uint32_t streamId, uint32_t errorCode) {
-  apache::thrift::fast_thrift::frame::ComposedErrorFrame frame{
-      .data = folly::IOBuf::copyBuffer("err-payload"),
+  apache::thrift::fast_thrift::frame::ComposedFrame frame{
+      .frameType = apache::thrift::fast_thrift::frame::FrameType::ERROR,
+      .streamId = streamId,
       .metadata = nullptr,
-      .header = {.streamId = streamId, .errorCode = errorCode}};
+      .data = folly::IOBuf::copyBuffer("err-payload"),
+      .errorCode = errorCode};
   auto wire = std::move(frame).serialize();
   return apache::thrift::fast_thrift::frame::read::parseFrame(std::move(wire));
 }
 
 apache::thrift::fast_thrift::frame::read::ParsedFrame makeCancelFrame(
     uint32_t streamId) {
-  apache::thrift::fast_thrift::frame::ComposedCancelFrame frame{
-      .header = {.streamId = streamId}};
+  apache::thrift::fast_thrift::frame::ComposedFrame frame{
+      .frameType = apache::thrift::fast_thrift::frame::FrameType::CANCEL,
+      .streamId = streamId};
   auto wire = std::move(frame).serialize();
   return apache::thrift::fast_thrift::frame::read::parseFrame(std::move(wire));
 }
 
 apache::thrift::fast_thrift::frame::read::ParsedFrame makeRequestNFrame(
     uint32_t streamId, uint32_t requestN) {
-  apache::thrift::fast_thrift::frame::ComposedRequestNFrame frame{
-      .header = {.streamId = streamId, .requestN = requestN}};
+  apache::thrift::fast_thrift::frame::ComposedFrame frame{
+      .frameType = apache::thrift::fast_thrift::frame::FrameType::REQUEST_N,
+      .streamId = streamId,
+      .requestN = requestN};
   auto wire = std::move(frame).serialize();
   return apache::thrift::fast_thrift::frame::read::parseFrame(std::move(wire));
 }
 
 apache::thrift::fast_thrift::frame::read::ParsedFrame makeMetadataPushFrame(
     folly::StringPiece bytes) {
-  apache::thrift::fast_thrift::frame::ComposedMetadataPushFrame frame{
-      .metadata = folly::IOBuf::copyBuffer(bytes), .header = {}};
+  apache::thrift::fast_thrift::frame::ComposedFrame frame{
+      .frameType = apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH,
+      .metadata = folly::IOBuf::copyBuffer(bytes)};
   auto wire = std::move(frame).serialize();
   return apache::thrift::fast_thrift::frame::read::parseFrame(std::move(wire));
 }
@@ -177,10 +183,13 @@ TEST(FromRocketFrameTest, PayloadOnNonRRRpcKindReturnsError) {
 TEST(FromRocketFrameTest, MalformedMetadataReturnsError) {
   // Build a PAYLOAD frame with metadata bytes that aren't valid binary
   // protocol — fromRocketFrame should surface deserialization failure.
-  apache::thrift::fast_thrift::frame::ComposedPayloadFrame frame{
-      .data = folly::IOBuf::copyBuffer("data"),
+  apache::thrift::fast_thrift::frame::ComposedFrame frame{
+      .frameType = apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+      .streamId = 5,
       .metadata = folly::IOBuf::copyBuffer("\xFF\xFF\xFF\xFF garbage"),
-      .header = {.streamId = 5, .complete = true, .next = true}};
+      .data = folly::IOBuf::copyBuffer("data"),
+      .complete = true,
+      .next = true};
   auto wire = std::move(frame).serialize();
   auto parsed =
       apache::thrift::fast_thrift::frame::read::parseFrame(std::move(wire));

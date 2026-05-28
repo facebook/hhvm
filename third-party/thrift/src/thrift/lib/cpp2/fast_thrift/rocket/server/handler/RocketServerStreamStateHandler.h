@@ -133,12 +133,12 @@ class RocketServerStreamStateHandler {
           msg) noexcept {
     auto& response = msg.get<RocketResponseMessage>();
 
-    // streamId() and complete() are free, inlined reads on
-    // ComposedFrameVariant — each frame alternative answers complete()
-    // for itself (ERROR/CANCEL terminal by frame type, PAYLOAD forwards
-    // header.complete). The handler only owns the erase policy.
-    uint32_t streamId = response.frame.streamId();
-    bool complete = response.frame.complete();
+    // streamId is a direct field read; isComplete() encapsulates the
+    // per-frame-type terminal check (ERROR/CANCEL terminal by frame type,
+    // PAYLOAD/CHANNEL forward the `complete` flag). The handler only owns
+    // the erase policy.
+    uint32_t streamId = response.frame.streamId;
+    bool complete = response.frame.isComplete();
 
     auto it = activeStreams_.find(streamId);
     if (it == activeStreams_.end()) {

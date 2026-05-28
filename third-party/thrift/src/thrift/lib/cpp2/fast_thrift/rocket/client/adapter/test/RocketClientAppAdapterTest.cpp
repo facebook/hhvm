@@ -225,7 +225,9 @@ TEST(RocketClientAppAdapterTest, WriteWithPipelineCallsFireWrite) {
 
   RocketRequestMessage msg{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType = frame::FrameType::REQUEST_RESPONSE,
+              .metadata = nullptr,
               .data = folly::IOBuf::copyBuffer("test"),
           },
       .requestContext = {},

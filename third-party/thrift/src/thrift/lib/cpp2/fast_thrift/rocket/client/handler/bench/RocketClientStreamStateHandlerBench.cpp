@@ -61,9 +61,11 @@ using rocket::bench::BenchContext;
 RocketRequestMessage createRocketRequest() {
   return RocketRequestMessage{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType = FrameType::REQUEST_RESPONSE,
+              .streamId = kInvalidStreamId,
+              .metadata = nullptr,
               .data = folly::IOBuf::copyBuffer("data"),
-              .header = {.streamId = kInvalidStreamId},
           },
       .requestContext = borrow(reinterpret_cast<void*>(0x1)),
       .streamType = FrameType::REQUEST_RESPONSE,

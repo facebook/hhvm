@@ -197,24 +197,22 @@ class RocketClientStreamStateHandler {
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
     auto& request = msg.get<RocketRequestMessage>();
-    // Today only ComposedRequestResponseFrame is stamped here. SETUP frames
-    // are injected downstream of this handler by RocketClientSetupFrameHandler
+    // Today only REQUEST_RESPONSE is stamped here. SETUP frames are
+    // injected downstream of this handler by RocketClientSetupFrameHandler
     // and never reach this onWrite. When more RPC patterns are added, this
-    // becomes a `request.frame.visit(...)` that stamps
-    // `payload.header.streamId` uniformly across pattern arms.
-    DCHECK(request.frame.is<
-           apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame>())
-        << "StreamStateHandler::onWrite saw an unexpected payload arm";
-    auto& payload = request.frame.get<
-        apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame>();
+    // becomes a frameType-dispatched stamp of `request.frame.streamId`.
+    DCHECK(
+        request.frame.frameType ==
+        apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE)
+        << "StreamStateHandler::onWrite saw an unexpected frame type";
 
-    DCHECK(payload.streamId() == kInvalidStreamId);
-    if (payload.streamId() != kInvalidStreamId) {
+    DCHECK(request.frame.streamId == kInvalidStreamId);
+    if (request.frame.streamId != kInvalidStreamId) {
       return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
     }
 
-    payload.header.streamId = generateStreamId();
-    const uint32_t sid = payload.streamId();
+    request.frame.streamId = generateStreamId();
+    const uint32_t sid = request.frame.streamId;
     DCHECK(!activeStreams_.contains(sid))
         << "Stream ID " << sid << " already exists in active streams";
 

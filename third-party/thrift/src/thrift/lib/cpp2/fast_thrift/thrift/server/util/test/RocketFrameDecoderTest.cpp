@@ -61,16 +61,17 @@ frame::read::ParsedFrame makeRequestResponseFrame(
 }
 
 frame::read::ParsedFrame makeFnfFrame(uint32_t streamId) {
-  frame::ComposedRequestFnfFrame frame{
-      .data = folly::IOBuf::copyBuffer("fnf"),
+  frame::ComposedFrame frame{
+      .frameType = frame::FrameType::REQUEST_FNF,
+      .streamId = streamId,
       .metadata = nullptr,
-      .header = {.streamId = streamId}};
+      .data = folly::IOBuf::copyBuffer("fnf")};
   auto wire = std::move(frame).serialize();
   return frame::read::parseFrame(std::move(wire));
 }
 
 frame::read::ParsedFrame makeKeepAliveFrame() {
-  frame::ComposedKeepAliveFrame frame{.header = {}};
+  frame::ComposedFrame frame{.frameType = frame::FrameType::KEEPALIVE};
   auto wire = std::move(frame).serialize();
   return frame::read::parseFrame(std::move(wire));
 }
@@ -120,10 +121,11 @@ TEST(FromRocketFrameTest, RequestResponseWithNoMetadataYieldsEmptyMetadata) {
 TEST(FromRocketFrameTest, MalformedMetadataReturnsError) {
   // Replace the metadata bytes with garbage that won't parse as Binary
   // protocol RequestRpcMetadata.
-  frame::ComposedRequestResponseFrame frame{
-      .data = folly::IOBuf::copyBuffer("data"),
+  frame::ComposedFrame frame{
+      .frameType = frame::FrameType::REQUEST_RESPONSE,
+      .streamId = 5,
       .metadata = folly::IOBuf::copyBuffer("\xFF\xFF\xFF\xFF garbage"),
-      .header = {.streamId = 5}};
+      .data = folly::IOBuf::copyBuffer("data")};
   auto wire = std::move(frame).serialize();
   auto parsed = frame::read::parseFrame(std::move(wire));
 

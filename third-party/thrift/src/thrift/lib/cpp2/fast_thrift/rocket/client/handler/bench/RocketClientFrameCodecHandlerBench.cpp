@@ -82,9 +82,11 @@ std::unique_ptr<folly::IOBuf> createErrorFrame(uint32_t streamId) {
 RocketRequestMessage createRocketRequestResponseRequest(uint32_t streamId) {
   return RocketRequestMessage{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType = FrameType::REQUEST_RESPONSE,
+              .streamId = streamId,
+              .metadata = nullptr,
               .data = folly::IOBuf::copyBuffer("data"),
-              .header = {.streamId = streamId},
           },
       .requestContext = {},
       .streamType = FrameType::REQUEST_RESPONSE,

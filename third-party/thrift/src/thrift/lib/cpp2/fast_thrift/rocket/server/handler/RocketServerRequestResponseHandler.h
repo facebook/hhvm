@@ -145,14 +145,14 @@ class RocketServerRequestResponseHandler {
         request.frame.typeName());
     RocketResponseMessage errorResponse{
         .frame =
-            apache::thrift::fast_thrift::frame::ComposedErrorFrame{
-                .data = folly::IOBuf::fromString(std::move(description)),
+            apache::thrift::fast_thrift::frame::ComposedFrame{
+                .frameType =
+                    apache::thrift::fast_thrift::frame::FrameType::ERROR,
+                .streamId = request.streamId,
                 .metadata = nullptr,
-                .header =
-                    {.streamId = request.streamId,
-                     .errorCode =
-                         static_cast<uint32_t>(apache::thrift::fast_thrift::
-                                                   frame::ErrorCode::INVALID)},
+                .data = folly::IOBuf::fromString(std::move(description)),
+                .errorCode = static_cast<uint32_t>(
+                    apache::thrift::fast_thrift::frame::ErrorCode::INVALID),
             },
         .streamType =
             apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
@@ -183,15 +183,12 @@ class RocketServerRequestResponseHandler {
       return ctx.fireWrite(std::move(msg));
     }
 
-    // Stamp RR terminal flags on ComposedPayloadFrame — RR is single-shot.
-    // ComposedErrorFrame is implicitly terminal; no stamping needed.
-    if (response.frame
-            .is<apache::thrift::fast_thrift::frame::ComposedPayloadFrame>()) {
-      auto& payload =
-          response.frame
-              .get<apache::thrift::fast_thrift::frame::ComposedPayloadFrame>();
-      payload.header.complete = true;
-      payload.header.next = true;
+    // Stamp RR terminal flags on PAYLOAD frame — RR is single-shot.
+    // ERROR frame is implicitly terminal; no stamping needed.
+    if (response.frame.frameType ==
+        apache::thrift::fast_thrift::frame::FrameType::PAYLOAD) {
+      response.frame.complete = true;
+      response.frame.next = true;
     }
 
     return ctx.fireWrite(std::move(msg));

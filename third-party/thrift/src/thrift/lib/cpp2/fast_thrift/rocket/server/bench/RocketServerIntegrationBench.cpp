@@ -252,12 +252,14 @@ BENCHMARK(Rocket_Server_Response_Payload, iters) {
   for (size_t i = 0; i < iters; ++i) {
     server::RocketResponseMessage resp{
         .frame =
-            apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+            apache::thrift::fast_thrift::frame::ComposedFrame{
+                .frameType =
+                    apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+                .streamId = static_cast<uint32_t>(i * 2 + 1),
+                .metadata = nullptr,
                 .data = makePayloadData(kPayloadSize),
-                .header =
-                    {.streamId = static_cast<uint32_t>(i * 2 + 1),
-                     .complete = true,
-                     .next = true},
+                .complete = true,
+                .next = true,
             },
     };
     responses.push_back(std::move(resp));
@@ -290,11 +292,13 @@ BENCHMARK(Rocket_Server_Response_Error, iters) {
   for (size_t i = 0; i < iters; ++i) {
     server::RocketResponseMessage resp{
         .frame =
-            apache::thrift::fast_thrift::frame::ComposedErrorFrame{
+            apache::thrift::fast_thrift::frame::ComposedFrame{
+                .frameType =
+                    apache::thrift::fast_thrift::frame::FrameType::ERROR,
+                .streamId = static_cast<uint32_t>(i * 2 + 1),
+                .metadata = nullptr,
                 .data = folly::IOBuf::copyBuffer("error"),
-                .header =
-                    {.streamId = static_cast<uint32_t>(i * 2 + 1),
-                     .errorCode = kErrorCodeApplicationError},
+                .errorCode = kErrorCodeApplicationError,
             },
     };
     responses.push_back(std::move(resp));
@@ -403,12 +407,14 @@ BENCHMARK(Rocket_Server_RequestResponse_RoundTrip, iters) {
     // Outbound: send response
     server::RocketResponseMessage resp{
         .frame =
-            apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+            apache::thrift::fast_thrift::frame::ComposedFrame{
+                .frameType =
+                    apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+                .streamId = static_cast<uint32_t>(i * 2 + 1),
+                .metadata = nullptr,
                 .data = makePayloadData(kPayloadSize),
-                .header =
-                    {.streamId = static_cast<uint32_t>(i * 2 + 1),
-                     .complete = true,
-                     .next = true},
+                .complete = true,
+                .next = true,
             },
     };
     (void)fixture.appAdapter->write(std::move(resp));

@@ -45,10 +45,12 @@ RocketRequestMessage makeClientRequest(
     void* requestContext = nullptr) {
   return RocketRequestMessage{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
-              .data = std::move(data),
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType = apache::thrift::fast_thrift::frame::FrameType::
+                  REQUEST_RESPONSE,
+              .streamId = kInvalidStreamId,
               .metadata = std::move(metadata),
-              .header = {.streamId = kInvalidStreamId},
+              .data = std::move(data),
           },
       .requestContext = borrow(requestContext),
       .streamType =
@@ -60,9 +62,7 @@ RocketRequestMessage makeClientRequest(
  * Helper to get the streamId from a RocketRequestMessage.
  */
 uint32_t getStreamId(const RocketRequestMessage& msg) {
-  return msg.frame
-      .get<apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame>()
-      .header.streamId;
+  return msg.frame.streamId;
 }
 
 /**

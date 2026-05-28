@@ -329,9 +329,14 @@ TEST_F(RocketServerIntegrationTest, ResponseFlowsFromAppToSocket) {
 
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
+              .metadata = nullptr,
               .data = folly::IOBuf::copyBuffer("response data"),
-              .header = {.streamId = 1, .complete = true, .next = true},
+              .complete = true,
+              .next = true,
           },
       .streamType =
           apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
@@ -365,9 +370,12 @@ TEST_F(RocketServerIntegrationTest, ErrorResponseFlowsFromAppToSocket) {
 
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedErrorFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType = apache::thrift::fast_thrift::frame::FrameType::ERROR,
+              .streamId = 1,
+              .metadata = nullptr,
               .data = folly::IOBuf::copyBuffer("error message"),
-              .header = {.streamId = 1, .errorCode = 0x00000201},
+              .errorCode = 0x00000201,
           },
       .streamType =
           apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
@@ -395,10 +403,14 @@ TEST_F(RocketServerIntegrationTest, ResponseWithMetadata) {
 
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
-              .data = folly::IOBuf::copyBuffer("response data"),
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
               .metadata = folly::IOBuf::copyBuffer("response metadata"),
-              .header = {.streamId = 1, .complete = true, .next = true},
+              .data = folly::IOBuf::copyBuffer("response data"),
+              .complete = true,
+              .next = true,
           },
       .streamType =
           apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
@@ -453,9 +465,14 @@ TEST_F(RocketServerIntegrationTest, ResponseForCompletedStreamFails) {
 
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
+              .metadata = nullptr,
               .data = folly::IOBuf::copyBuffer("response"),
-              .header = {.streamId = 1, .complete = true, .next = true},
+              .complete = true,
+              .next = true,
           },
       .streamType =
           apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
@@ -467,9 +484,14 @@ TEST_F(RocketServerIntegrationTest, ResponseForCompletedStreamFails) {
 
   RocketResponseMessage duplicate{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
+              .metadata = nullptr,
               .data = folly::IOBuf::copyBuffer("duplicate"),
-              .header = {.streamId = 1, .complete = true, .next = true},
+              .complete = true,
+              .next = true,
           },
       .streamType =
           apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
@@ -510,8 +532,14 @@ TEST_F(RocketServerIntegrationTest, EmptyPayloadResponse) {
 
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
-              .header = {.streamId = 1, .complete = true, .next = true},
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
+              .metadata = nullptr,
+              .data = nullptr,
+              .complete = true,
+              .next = true,
           },
       .streamType =
           apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,

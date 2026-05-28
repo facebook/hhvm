@@ -242,11 +242,12 @@ class RocketServerSetupFrameHandler {
       auto errorData = ctx.copyBuffer(message, std::strlen(message));
       RocketResponseMessage response{
           .frame =
-              apache::thrift::fast_thrift::frame::ComposedErrorFrame{
+              apache::thrift::fast_thrift::frame::ComposedFrame{
+                  .frameType =
+                      apache::thrift::fast_thrift::frame::FrameType::ERROR,
+                  .streamId = 0,
                   .data = std::move(errorData),
-                  .header =
-                      {.streamId = 0,
-                       .errorCode = static_cast<uint32_t>(errorCode)},
+                  .errorCode = static_cast<uint32_t>(errorCode),
               },
       };
       auto writeResult = ctx.fireWrite(

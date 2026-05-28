@@ -18,7 +18,6 @@
 
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrameVariant.h>
 
 #include <cstdint>
 
@@ -49,25 +48,18 @@ struct RocketRequestMessage {
 /**
  * RocketResponseMessage - Outbound response from App to StreamHandler.
  *
- * The `frame` field is a typed variant of per-frame payload structs from
- * `frame::ComposedFrame.h`. Handlers carry the typed payload all the way
- * down to the codec; the codec is the single point that serializes the
- * held payload into wire bytes via `frame.serialize()`.
- *
+ * The `frame` field is a flat `ComposedFrame` that spans every RSocket
+ * frame type via its `frameType` discriminator. Handlers carry it all
+ * the way down to the codec; the codec is the single point that
+ * serializes it into wire bytes via `frame.serialize()`.
  *
  * `streamType` is the originating REQUEST_* frame type for the stream
  * this response belongs to. App must copy it from the inbound
  * `RocketRequestMessage` so per-pattern handlers (RR/Stream/Channel/FNF)
  * can dispatch statelessly on the outbound path.
- *
- * As STREAM/CHANNEL/FNF response frame types get wired up, their
- * corresponding `Composed*Frame` types will join the variant.
  */
 struct RocketResponseMessage {
-  apache::thrift::fast_thrift::frame::ComposedFrameVariant<
-      apache::thrift::fast_thrift::frame::ComposedPayloadFrame,
-      apache::thrift::fast_thrift::frame::ComposedErrorFrame>
-      frame;
+  apache::thrift::fast_thrift::frame::ComposedFrame frame;
   apache::thrift::fast_thrift::frame::FrameType streamType{
       apache::thrift::fast_thrift::frame::FrameType::RESERVED};
 };

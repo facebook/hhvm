@@ -123,7 +123,7 @@ class RocketClientFrameCodecHandler {
       // inbound as a per-request error: a frame-codec failure is not
       // recoverable on the same connection.
       XLOG(ERR) << "Frame serialization failed on streamId="
-                << request.frame.streamId() << ": "
+                << request.frame.streamId << ": "
                 << folly::exceptionStr(std::current_exception());
       return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
     }

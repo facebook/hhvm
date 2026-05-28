@@ -51,8 +51,7 @@ namespace apache::thrift::fast_thrift::thrift {
 struct ThriftRequestResponsePayload {
   static constexpr apache::thrift::RpcKind kRpcKind =
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
-  using RocketFrame =
-      apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame;
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
   std::unique_ptr<apache::thrift::RequestRpcMetadata> metadata{nullptr};
@@ -67,10 +66,11 @@ struct ThriftRequestResponsePayload {
       rocket::server::MetadataProtocol /*metadataProtocol*/) && {
     DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
-        .data = std::move(data),
+        .frameType =
+            apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
+        .streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId,
         .metadata = serializeRequestMetadata(*metadata),
-        .header =
-            {.streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId},
+        .data = std::move(data),
     };
   }
 
@@ -83,8 +83,7 @@ struct ThriftRequestResponsePayload {
 struct ThriftRequestFnfPayload {
   static constexpr apache::thrift::RpcKind kRpcKind =
       apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE;
-  using RocketFrame =
-      apache::thrift::fast_thrift::frame::ComposedRequestFnfFrame;
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
   std::unique_ptr<apache::thrift::RequestRpcMetadata> metadata{nullptr};
@@ -93,10 +92,10 @@ struct ThriftRequestFnfPayload {
       rocket::server::MetadataProtocol /*metadataProtocol*/) && {
     DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
-        .data = std::move(data),
+        .frameType = apache::thrift::fast_thrift::frame::FrameType::REQUEST_FNF,
+        .streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId,
         .metadata = serializeRequestMetadata(*metadata),
-        .header =
-            {.streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId},
+        .data = std::move(data),
     };
   }
 
@@ -109,8 +108,7 @@ struct ThriftRequestFnfPayload {
 struct ThriftRequestStreamPayload {
   static constexpr apache::thrift::RpcKind kRpcKind =
       apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE;
-  using RocketFrame =
-      apache::thrift::fast_thrift::frame::ComposedRequestStreamFrame;
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
   std::unique_ptr<apache::thrift::RequestRpcMetadata> metadata{nullptr};
@@ -120,11 +118,12 @@ struct ThriftRequestStreamPayload {
       rocket::server::MetadataProtocol /*metadataProtocol*/) && {
     DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
-        .data = std::move(data),
+        .frameType =
+            apache::thrift::fast_thrift::frame::FrameType::REQUEST_STREAM,
+        .streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId,
         .metadata = serializeRequestMetadata(*metadata),
-        .header =
-            {.streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId,
-             .initialRequestN = initialRequestN},
+        .data = std::move(data),
+        .initialRequestN = initialRequestN,
     };
   }
 
@@ -140,8 +139,7 @@ struct ThriftRequestSinkPayload {
   // SINK and BIDI both map to REQUEST_CHANNEL on the wire. The Thrift layer
   // distinguishes them via metadata (RequestRpcMetadata.kind) on the initial
   // request; the rocket layer sees them as identical channel openings.
-  using RocketFrame =
-      apache::thrift::fast_thrift::frame::ComposedRequestChannelFrame;
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
   std::unique_ptr<apache::thrift::RequestRpcMetadata> metadata{nullptr};
@@ -151,11 +149,12 @@ struct ThriftRequestSinkPayload {
       rocket::server::MetadataProtocol /*metadataProtocol*/) && {
     DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
-        .data = std::move(data),
+        .frameType =
+            apache::thrift::fast_thrift::frame::FrameType::REQUEST_CHANNEL,
+        .streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId,
         .metadata = serializeRequestMetadata(*metadata),
-        .header =
-            {.streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId,
-             .initialRequestN = initialRequestN},
+        .data = std::move(data),
+        .initialRequestN = initialRequestN,
     };
   }
 
@@ -169,8 +168,7 @@ struct ThriftRequestBidiPayload {
   static constexpr apache::thrift::RpcKind kRpcKind =
       apache::thrift::RpcKind::BIDIRECTIONAL_STREAM;
   // See ThriftRequestSinkPayload for the SINK/BIDI → REQUEST_CHANNEL note.
-  using RocketFrame =
-      apache::thrift::fast_thrift::frame::ComposedRequestChannelFrame;
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
   std::unique_ptr<apache::thrift::RequestRpcMetadata> metadata{nullptr};
@@ -180,11 +178,12 @@ struct ThriftRequestBidiPayload {
       rocket::server::MetadataProtocol /*metadataProtocol*/) && {
     DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
-        .data = std::move(data),
+        .frameType =
+            apache::thrift::fast_thrift::frame::FrameType::REQUEST_CHANNEL,
+        .streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId,
         .metadata = serializeRequestMetadata(*metadata),
-        .header =
-            {.streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId,
-             .initialRequestN = initialRequestN},
+        .data = std::move(data),
+        .initialRequestN = initialRequestN,
     };
   }
 

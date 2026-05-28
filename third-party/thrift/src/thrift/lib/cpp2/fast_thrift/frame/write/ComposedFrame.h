@@ -17,9 +17,12 @@
 #pragma once
 
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 
 #include <folly/io/IOBuf.h>
+
+#include <glog/logging.h>
 
 #include <cstdint>
 #include <memory>
@@ -27,210 +30,211 @@
 namespace apache::thrift::fast_thrift::frame {
 
 /**
- * Per-frame "composed frame" structs — one per RSocket frame type. Each
- * composes the matching `write::*Header` (which owns all wire fields,
- * including streamId) with the optional metadata/data buffers, plus:
+ * `ComposedFrame` is the outbound counterpart to `read::ParsedFrame`: one
+ * flat struct that spans every RSocket frame type, discriminated by
+ * `frameType`. Fields beyond `{frameType, streamId, metadata, data}` are
+ * sparse — only specific frame types read them (`errorCode` for ERROR,
+ * `requestN` for REQUEST_N, `setupKeepaliveTime` for SETUP, etc.).
  *
- *   - `kFrameType` — compile-time `FrameType` tag identifying this frame.
- *   - `streamId()` — the stream this frame belongs to (0 for
- *     connection-level frames per RSocket spec).
- *   - `complete()` — does this frame terminate the sender's half of the
- *     stream? `true` for ERROR / CANCEL / REQUEST_FNF (terminal by frame
- *     type), forwards `header.complete` for PAYLOAD / REQUEST_CHANNEL,
- *     `false` for everything else.
- *   - `serialize() &&` — produce wire bytes by consuming the frame.
- *     Forwards directly to the matching `write::serialize(header, ...)`
- *     worker; with inlining + LTO this collapses to a single call.
+ * Why flat over the previous typed `Composed*Frame` + `ComposedFrameVariant`:
+ *   - Direct field access on accessors (`streamId`, `frameType`, flag
+ *     bits) instead of tag-dispatch fold expressions — matters on the
+ *     fragmentation / serializer hot path.
+ *   - No template instantiation per pipeline (frag/serializer take
+ *     `ComposedFrame`, not `ComposedFrameVariant<...>`).
+ *   - Mirrors `ParsedFrame`'s design on the inbound side.
+ *   - Continuation fragments (PAYLOAD with new chunk) are minted by
+ *     field assignment, not typed-struct placement-new.
  *
- * Together these satisfy `ComposedFrameConcept` (see
- * ComposedFrameVariant.h), which lets composed frames be held in a typed
- * `ComposedFrameVariant<...>` whose 4-API surface (streamId / complete /
- * frameType / serialize) is dispatched inline with no `std::visit` at the
- * call site.
+ * `serialize()` reconstructs the per-type `write::*Header` struct on the
+ * stack and forwards to the matching `write::serialize` overload — the
+ * temporary header gets elided by the inliner.
  *
- * Shared across client and server because the wire shape is identical
- * regardless of which side serializes it.
+ * Shared across client and server: the wire shape is identical regardless
+ * of which side serializes.
  */
+struct ComposedFrame {
+  FrameType frameType{FrameType::RESERVED};
+  uint32_t streamId{0};
 
-// ============================================================================
-// Request Frames
-// ============================================================================
-
-struct ComposedRequestResponseFrame {
-  static constexpr FrameType kFrameType = FrameType::REQUEST_RESPONSE;
-
-  std::unique_ptr<folly::IOBuf> data{nullptr};
+  // Payload buffers — present on PAYLOAD, REQUEST_*, ERROR, SETUP,
+  // METADATA_PUSH (metadata only), KEEPALIVE (data only), EXT.
   std::unique_ptr<folly::IOBuf> metadata{nullptr};
-  write::RequestResponseHeader header{};
-
-  uint32_t streamId() const noexcept { return header.streamId; }
-  bool complete() const noexcept { return false; }
-  std::unique_ptr<folly::IOBuf> serialize() && {
-    return write::serialize(header, std::move(metadata), std::move(data));
-  }
-};
-
-struct ComposedRequestFnfFrame {
-  static constexpr FrameType kFrameType = FrameType::REQUEST_FNF;
-
   std::unique_ptr<folly::IOBuf> data{nullptr};
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
-  write::RequestFnfHeader header{};
 
-  uint32_t streamId() const noexcept { return header.streamId; }
-  bool complete() const noexcept { return true; }
-  std::unique_ptr<folly::IOBuf> serialize() && {
-    return write::serialize(header, std::move(metadata), std::move(data));
+  // Common flag bits. Each is meaningful only for specific frame types
+  // per the RSocket spec; ignored by `serialize()` for types that don't
+  // carry that flag.
+  bool follows{false}; // PAYLOAD, REQUEST_*
+  bool complete{false}; // PAYLOAD, REQUEST_CHANNEL
+  bool next{false}; // PAYLOAD
+  bool ignore{false}; // EXT
+  bool lease{false}; // SETUP
+  bool respond{false}; // KEEPALIVE
+
+  // Per-type extra header fields (sparse). Naming kept aligned with the
+  // `write::*Header` field names for clarity.
+  uint32_t errorCode{0}; // ERROR
+  uint32_t requestN{0}; // REQUEST_N
+  uint32_t initialRequestN{0}; // REQUEST_STREAM, REQUEST_CHANNEL
+  uint32_t extendedType{0}; // EXT
+  uint64_t lastReceivedPosition{0}; // KEEPALIVE
+  uint16_t majorVersion{1}; // SETUP
+  uint16_t minorVersion{0}; // SETUP
+  uint32_t keepaliveTime{0}; // SETUP
+  uint32_t maxLifetime{0}; // SETUP
+
+  /// True for the five fragmentable frame types (PAYLOAD + REQUEST_*).
+  /// Matches legacy `serializeInFragmentsSlow` overload set.
+  [[nodiscard]] bool canFragment() const noexcept {
+    switch (frameType) {
+      case FrameType::PAYLOAD:
+      case FrameType::REQUEST_RESPONSE:
+      case FrameType::REQUEST_FNF:
+      case FrameType::REQUEST_STREAM:
+      case FrameType::REQUEST_CHANNEL:
+        return true;
+      case FrameType::RESERVED:
+      case FrameType::SETUP:
+      case FrameType::LEASE:
+      case FrameType::KEEPALIVE:
+      case FrameType::REQUEST_N:
+      case FrameType::CANCEL:
+      case FrameType::ERROR:
+      case FrameType::METADATA_PUSH:
+      case FrameType::RESUME:
+      case FrameType::RESUME_OK:
+      case FrameType::EXT:
+        return false;
+      default:
+        DCHECK(false) << "Unknown FrameType: "
+                      << static_cast<uint8_t>(frameType);
+        break;
+    }
+    return false;
   }
-};
 
-struct ComposedRequestStreamFrame {
-  static constexpr FrameType kFrameType = FrameType::REQUEST_STREAM;
-
-  std::unique_ptr<folly::IOBuf> data{nullptr};
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
-  write::RequestStreamHeader header{};
-
-  uint32_t streamId() const noexcept { return header.streamId; }
-  bool complete() const noexcept { return false; }
-  std::unique_ptr<folly::IOBuf> serialize() && {
-    return write::serialize(header, std::move(metadata), std::move(data));
+  /// True if this frame terminates the sender's half of the stream
+  /// (CANCEL, ERROR, REQUEST_FNF, or PAYLOAD/REQUEST_CHANNEL with
+  /// `complete = true`).
+  [[nodiscard]] bool isComplete() const noexcept {
+    switch (frameType) {
+      case FrameType::CANCEL:
+      case FrameType::ERROR:
+      case FrameType::REQUEST_FNF:
+        return true;
+      case FrameType::PAYLOAD:
+      case FrameType::REQUEST_CHANNEL:
+        return complete;
+      case FrameType::RESERVED:
+      case FrameType::SETUP:
+      case FrameType::LEASE:
+      case FrameType::KEEPALIVE:
+      case FrameType::REQUEST_RESPONSE:
+      case FrameType::REQUEST_STREAM:
+      case FrameType::REQUEST_N:
+      case FrameType::METADATA_PUSH:
+      case FrameType::RESUME:
+      case FrameType::RESUME_OK:
+      case FrameType::EXT:
+        return false;
+      default:
+        DCHECK(false) << "Unknown FrameType: "
+                      << static_cast<uint8_t>(frameType);
+        break;
+    }
+    return false;
   }
-};
 
-struct ComposedRequestChannelFrame {
-  static constexpr FrameType kFrameType = FrameType::REQUEST_CHANNEL;
-
-  std::unique_ptr<folly::IOBuf> data{nullptr};
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
-  write::RequestChannelHeader header{};
-
-  uint32_t streamId() const noexcept { return header.streamId; }
-  bool complete() const noexcept { return header.complete; }
+  /// Produce wire bytes. Consumes the frame. Returns nullptr for
+  /// unsupported frame types (LEASE, RESUME, RESUME_OK, RESERVED).
   std::unique_ptr<folly::IOBuf> serialize() && {
-    return write::serialize(header, std::move(metadata), std::move(data));
-  }
-};
-
-// ============================================================================
-// Flow Control Frames (header only — no metadata / data)
-// ============================================================================
-
-struct ComposedRequestNFrame {
-  static constexpr FrameType kFrameType = FrameType::REQUEST_N;
-
-  write::RequestNHeader header{};
-
-  uint32_t streamId() const noexcept { return header.streamId; }
-  bool complete() const noexcept { return false; }
-  std::unique_ptr<folly::IOBuf> serialize() && {
-    return write::serialize(header);
-  }
-};
-
-struct ComposedCancelFrame {
-  static constexpr FrameType kFrameType = FrameType::CANCEL;
-
-  write::CancelHeader header{};
-
-  uint32_t streamId() const noexcept { return header.streamId; }
-  bool complete() const noexcept { return true; }
-  std::unique_ptr<folly::IOBuf> serialize() && {
-    return write::serialize(header);
-  }
-};
-
-// ============================================================================
-// Payload & Error Frames
-// ============================================================================
-
-struct ComposedPayloadFrame {
-  static constexpr FrameType kFrameType = FrameType::PAYLOAD;
-
-  std::unique_ptr<folly::IOBuf> data{nullptr};
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
-  write::PayloadHeader header{};
-
-  uint32_t streamId() const noexcept { return header.streamId; }
-  bool complete() const noexcept { return header.complete; }
-  std::unique_ptr<folly::IOBuf> serialize() && {
-    return write::serialize(header, std::move(metadata), std::move(data));
-  }
-};
-
-struct ComposedErrorFrame {
-  static constexpr FrameType kFrameType = FrameType::ERROR;
-
-  std::unique_ptr<folly::IOBuf> data{nullptr};
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
-  write::ErrorHeader header{};
-
-  uint32_t streamId() const noexcept { return header.streamId; }
-  bool complete() const noexcept { return true; }
-  std::unique_ptr<folly::IOBuf> serialize() && {
-    return write::serialize(header, std::move(metadata), std::move(data));
-  }
-};
-
-// ============================================================================
-// Connection-Level Frames (streamId is always 0 per RSocket spec)
-// ============================================================================
-
-struct ComposedKeepAliveFrame {
-  static constexpr FrameType kFrameType = FrameType::KEEPALIVE;
-
-  std::unique_ptr<folly::IOBuf> data{nullptr};
-  write::KeepAliveHeader header{};
-
-  uint32_t streamId() const noexcept { return 0; }
-  bool complete() const noexcept { return false; }
-  std::unique_ptr<folly::IOBuf> serialize() && {
-    return write::serialize(header, std::move(data));
-  }
-};
-
-struct ComposedSetupFrame {
-  static constexpr FrameType kFrameType = FrameType::SETUP;
-
-  std::unique_ptr<folly::IOBuf> data{nullptr};
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
-  write::SetupHeader header{};
-
-  uint32_t streamId() const noexcept { return 0; }
-  bool complete() const noexcept { return false; }
-  std::unique_ptr<folly::IOBuf> serialize() && {
-    return write::serialize(header, std::move(metadata), std::move(data));
-  }
-};
-
-struct ComposedMetadataPushFrame {
-  static constexpr FrameType kFrameType = FrameType::METADATA_PUSH;
-
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
-  write::MetadataPushHeader header{};
-
-  uint32_t streamId() const noexcept { return 0; }
-  bool complete() const noexcept { return false; }
-  std::unique_ptr<folly::IOBuf> serialize() && {
-    return write::serialize(header, std::move(metadata));
-  }
-};
-
-// ============================================================================
-// Extension Frame
-// ============================================================================
-
-struct ComposedExtFrame {
-  static constexpr FrameType kFrameType = FrameType::EXT;
-
-  std::unique_ptr<folly::IOBuf> data{nullptr};
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
-  write::ExtHeader header{};
-
-  uint32_t streamId() const noexcept { return header.streamId; }
-  bool complete() const noexcept { return false; }
-  std::unique_ptr<folly::IOBuf> serialize() && {
-    return write::serialize(header, std::move(metadata), std::move(data));
+    switch (frameType) {
+      case FrameType::REQUEST_RESPONSE:
+        return write::serialize(
+            write::RequestResponseHeader{
+                .streamId = streamId, .follows = follows},
+            std::move(metadata),
+            std::move(data));
+      case FrameType::REQUEST_FNF:
+        return write::serialize(
+            write::RequestFnfHeader{.streamId = streamId, .follows = follows},
+            std::move(metadata),
+            std::move(data));
+      case FrameType::REQUEST_STREAM:
+        return write::serialize(
+            write::RequestStreamHeader{
+                .streamId = streamId,
+                .initialRequestN = initialRequestN,
+                .follows = follows},
+            std::move(metadata),
+            std::move(data));
+      case FrameType::REQUEST_CHANNEL:
+        return write::serialize(
+            write::RequestChannelHeader{
+                .streamId = streamId,
+                .initialRequestN = initialRequestN,
+                .follows = follows,
+                .complete = complete},
+            std::move(metadata),
+            std::move(data));
+      case FrameType::REQUEST_N:
+        return write::serialize(
+            write::RequestNHeader{.streamId = streamId, .requestN = requestN});
+      case FrameType::CANCEL:
+        return write::serialize(write::CancelHeader{.streamId = streamId});
+      case FrameType::PAYLOAD:
+        return write::serialize(
+            write::PayloadHeader{
+                .streamId = streamId,
+                .follows = follows,
+                .complete = complete,
+                .next = next},
+            std::move(metadata),
+            std::move(data));
+      case FrameType::ERROR:
+        return write::serialize(
+            write::ErrorHeader{.streamId = streamId, .errorCode = errorCode},
+            std::move(metadata),
+            std::move(data));
+      case FrameType::KEEPALIVE:
+        return write::serialize(
+            write::KeepAliveHeader{
+                .lastReceivedPosition = lastReceivedPosition,
+                .respond = respond},
+            std::move(data));
+      case FrameType::SETUP:
+        return write::serialize(
+            write::SetupHeader{
+                .majorVersion = majorVersion,
+                .minorVersion = minorVersion,
+                .keepaliveTime = keepaliveTime,
+                .maxLifetime = maxLifetime,
+                .lease = lease},
+            std::move(metadata),
+            std::move(data));
+      case FrameType::METADATA_PUSH:
+        return write::serialize(
+            write::MetadataPushHeader{}, std::move(metadata));
+      case FrameType::EXT:
+        return write::serialize(
+            write::ExtHeader{
+                .streamId = streamId,
+                .extendedType = extendedType,
+                .ignore = ignore},
+            std::move(metadata),
+            std::move(data));
+      case FrameType::RESERVED:
+      case FrameType::LEASE:
+      case FrameType::RESUME:
+      case FrameType::RESUME_OK:
+        return nullptr;
+      default:
+        DCHECK(false) << "Unknown FrameType: "
+                      << static_cast<uint8_t>(frameType);
+        break;
+    }
+    return nullptr;
   }
 };
 

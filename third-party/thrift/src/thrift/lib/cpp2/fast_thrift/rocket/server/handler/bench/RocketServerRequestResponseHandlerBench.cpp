@@ -156,10 +156,11 @@ BENCHMARK(Write_PayloadOnRRStream_StampComplete, iters) {
     responses.push_back(
         RocketResponseMessage{
             .frame =
-                apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
-                    .data = copyBuffer("response"),
+                apache::thrift::fast_thrift::frame::ComposedFrame{
+                    .frameType = FrameType::PAYLOAD,
+                    .streamId = static_cast<uint32_t>(2 * i + 1),
                     .metadata = nullptr,
-                    .header = {.streamId = static_cast<uint32_t>(2 * i + 1)},
+                    .data = copyBuffer("response"),
                 },
             .streamType = FrameType::REQUEST_RESPONSE,
         });

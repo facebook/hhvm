@@ -117,13 +117,10 @@ auto makeDefaultFactory() {
   };
 }
 
-// Helper to serialize the SETUP payload held in the variant for wire-byte
-// inspection. After this call the held payload's data/metadata are moved out.
+// Helper to serialize the SETUP frame for wire-byte inspection. After this
+// call the frame's data/metadata are moved out.
 std::unique_ptr<folly::IOBuf> serializeSetupFrame(RocketRequestMessage& msg) {
-  return std::move(
-             msg.frame
-                 .get<apache::thrift::fast_thrift::frame::ComposedSetupFrame>())
-      .serialize();
+  return std::move(msg.frame).serialize();
 }
 
 } // namespace
@@ -147,8 +144,9 @@ TEST_F(ClientSetupFrameHandlerTest, OnConnectWritesSetupFrame) {
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
   EXPECT_NE(serializeSetupFrame(msg), nullptr);
-  EXPECT_TRUE(
-      msg.frame.is<apache::thrift::fast_thrift::frame::ComposedSetupFrame>());
+  EXPECT_EQ(
+      msg.frame.frameType,
+      apache::thrift::fast_thrift::frame::FrameType::SETUP);
 }
 
 TEST_F(ClientSetupFrameHandlerTest, OnConnectClosesOnWriteFailure) {
@@ -421,9 +419,9 @@ TEST_F(ClientSetupFrameHandlerTest, OnDisconnectAllowsMultipleReconnections) {
   // Verify all are SETUP frames
   for (auto& msg : ctx_.writeMessages()) {
     auto& rocketMsg = msg.get<RocketRequestMessage>();
-    EXPECT_TRUE(
-        rocketMsg.frame
-            .is<apache::thrift::fast_thrift::frame::ComposedSetupFrame>());
+    EXPECT_EQ(
+        rocketMsg.frame.frameType,
+        apache::thrift::fast_thrift::frame::FrameType::SETUP);
   }
 }
 
@@ -448,7 +446,10 @@ TEST_F(ClientSetupFrameHandlerTest, OnWritePassesThrough) {
   auto data = folly::IOBuf::copyBuffer("test data");
   RocketRequestMessage msg{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType = apache::thrift::fast_thrift::frame::FrameType::
+                  REQUEST_RESPONSE,
+              .metadata = nullptr,
               .data = std::move(data),
           },
       .requestContext = {},

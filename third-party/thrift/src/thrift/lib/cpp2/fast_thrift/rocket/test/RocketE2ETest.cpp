@@ -171,12 +171,13 @@ class RocketE2ETest : public ::testing::Test {
                               .get<rocket::server::RocketRequestMessage>();
               server::RocketResponseMessage response{
                   .frame =
-                      apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+                      apache::thrift::fast_thrift::frame::ComposedFrame{
+                          .frameType = frame::FrameType::PAYLOAD,
+                          .streamId = req.streamId,
+                          .metadata = nullptr,
                           .data = folly::IOBuf::copyBuffer("e2e-response"),
-                          .header =
-                              {.streamId = req.streamId,
-                               .complete = true,
-                               .next = true},
+                          .complete = true,
+                          .next = true,
                       },
               };
               (void)serverAppAdapter_->write(std::move(response));
@@ -267,9 +268,11 @@ class RocketE2ETest : public ::testing::Test {
   RocketRequestMessage createRequest(std::unique_ptr<folly::IOBuf> data) {
     return RocketRequestMessage{
         .frame =
-            apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+            apache::thrift::fast_thrift::frame::ComposedFrame{
+                .frameType = frame::FrameType::REQUEST_RESPONSE,
+                .streamId = kInvalidStreamId,
+                .metadata = nullptr,
                 .data = std::move(data),
-                .header = {.streamId = kInvalidStreamId},
             },
         .requestContext = {},
         .streamType = frame::FrameType::REQUEST_RESPONSE,

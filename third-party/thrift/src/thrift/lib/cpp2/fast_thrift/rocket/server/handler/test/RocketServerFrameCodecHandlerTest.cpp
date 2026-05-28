@@ -272,9 +272,13 @@ TEST_F(RocketServerFrameCodecHandlerTest, WriteSerializesPayload) {
 
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
               .data = folly::IOBuf::copyBuffer(dataStr),
-              .header = {.streamId = 1, .complete = true, .next = true},
+              .complete = true,
+              .next = true,
           },
   };
 
@@ -293,9 +297,13 @@ TEST_F(RocketServerFrameCodecHandlerTest, PropagatesWriteError) {
 
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
               .data = folly::IOBuf::copyBuffer("test"),
-              .header = {.streamId = 1, .complete = true, .next = true},
+              .complete = true,
+              .next = true,
           },
   };
 
@@ -309,9 +317,13 @@ TEST_F(RocketServerFrameCodecHandlerTest, PropagatesWriteBackpressure) {
 
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
               .data = folly::IOBuf::copyBuffer("test"),
-              .header = {.streamId = 1, .complete = true, .next = true},
+              .complete = true,
+              .next = true,
           },
   };
 

@@ -347,9 +347,13 @@ TEST_F(
 
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
               .data = copyBuffer("response data"),
-              .header = {.streamId = 1, .complete = true, .next = true},
+              .complete = true,
+              .next = true,
           },
   };
 
@@ -359,11 +363,11 @@ TEST_F(
   EXPECT_EQ(ctx_.writeMessages().size(), 1);
 
   auto& wireMsg = ctx_.writeMessages()[0].get<RocketResponseMessage>();
-  const auto& payload =
-      wireMsg.frame
-          .get<apache::thrift::fast_thrift::frame::ComposedPayloadFrame>();
-  EXPECT_EQ(payload.streamId(), 1u);
-  EXPECT_NE(payload.data, nullptr);
+  EXPECT_EQ(
+      wireMsg.frame.frameType,
+      apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
+  EXPECT_EQ(wireMsg.frame.streamId, 1u);
+  EXPECT_NE(wireMsg.frame.data, nullptr);
 
   EXPECT_FALSE(handler_.hasActiveStream(1));
   EXPECT_EQ(handler_.activeStreamCount(), 0);
@@ -378,9 +382,13 @@ TEST_F(ServerStreamStateHandlerTest, IncompleteResponseKeepsStreamActive) {
 
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
               .data = copyBuffer("partial data"),
-              .header = {.streamId = 1, .complete = false, .next = true},
+              .complete = false,
+              .next = true,
           },
   };
 
@@ -390,10 +398,10 @@ TEST_F(ServerStreamStateHandlerTest, IncompleteResponseKeepsStreamActive) {
   EXPECT_EQ(ctx_.writeMessages().size(), 1);
 
   auto& wireMsg = ctx_.writeMessages()[0].get<RocketResponseMessage>();
-  const auto& payload =
-      wireMsg.frame
-          .get<apache::thrift::fast_thrift::frame::ComposedPayloadFrame>();
-  EXPECT_EQ(payload.streamId(), 1u);
+  EXPECT_EQ(
+      wireMsg.frame.frameType,
+      apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
+  EXPECT_EQ(wireMsg.frame.streamId, 1u);
 
   EXPECT_TRUE(handler_.hasActiveStream(1));
 }
@@ -401,9 +409,13 @@ TEST_F(ServerStreamStateHandlerTest, IncompleteResponseKeepsStreamActive) {
 TEST_F(ServerStreamStateHandlerTest, ResponseForUnknownStreamReturnsError) {
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 999,
               .data = copyBuffer("data"),
-              .header = {.streamId = 999, .complete = true, .next = true},
+              .complete = true,
+              .next = true,
           },
   };
 
@@ -526,9 +538,13 @@ TEST_F(ServerStreamStateHandlerTest, ErrorFromDownstreamOnWrite) {
 
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
               .data = copyBuffer("data"),
-              .header = {.streamId = 1, .complete = true, .next = true},
+              .complete = true,
+              .next = true,
           },
   };
 
@@ -548,9 +564,13 @@ TEST_F(ServerStreamStateHandlerTest, BackpressureFromDownstreamOnWrite) {
 
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
               .data = copyBuffer("data"),
-              .header = {.streamId = 1, .complete = true, .next = true},
+              .complete = true,
+              .next = true,
           },
   };
 
@@ -572,9 +592,13 @@ TEST_F(
 
   RocketResponseMessage response{
       .frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+          apache::thrift::fast_thrift::frame::ComposedFrame{
+              .frameType =
+                  apache::thrift::fast_thrift::frame::FrameType::PAYLOAD,
+              .streamId = 1,
               .data = copyBuffer("data"),
-              .header = {.streamId = 1, .complete = false, .next = true},
+              .complete = false,
+              .next = true,
           },
   };
 

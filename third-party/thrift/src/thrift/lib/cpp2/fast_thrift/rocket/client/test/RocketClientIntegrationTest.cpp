@@ -422,10 +422,12 @@ class RocketClientIntegrationTest : public ::testing::Test {
       std::unique_ptr<folly::IOBuf> metadata = nullptr) {
     return RocketRequestMessage{
         .frame =
-            apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
-                .data = std::move(data),
+            apache::thrift::fast_thrift::frame::ComposedFrame{
+                .frameType = apache::thrift::fast_thrift::frame::FrameType::
+                    REQUEST_RESPONSE,
+                .streamId = rocket::kInvalidStreamId,
                 .metadata = std::move(metadata),
-                .header = {.streamId = rocket::kInvalidStreamId},
+                .data = std::move(data),
             },
         .requestContext = {},
         .streamType =

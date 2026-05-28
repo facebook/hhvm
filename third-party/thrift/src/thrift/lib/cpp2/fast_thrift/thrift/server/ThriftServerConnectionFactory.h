@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <cstddef>
 #include <memory>
 #include <variant>
@@ -74,6 +75,13 @@ struct ThriftServerConnectionFactoryConfig {
   // Outbound frame fragmentation. Splits oversized PAYLOAD / REQUEST_*
   // frames into spec-compliant fragment chains; small frames bypass.
   frame::write::FragmentationHandlerConfig fragmentationConfig{};
+
+  // Per-connection terminal-phase deadlines passed to
+  // ThriftServerConnectionCloseHandler. Defaults mirror that handler's
+  // kDefaultDrainTimeout / kDefaultReapTimeout. See FastThriftServerConfig
+  // for semantics.
+  std::chrono::milliseconds drainTimeout{std::chrono::seconds{30}};
+  std::chrono::milliseconds reapTimeout{std::chrono::seconds{60}};
 };
 
 /**

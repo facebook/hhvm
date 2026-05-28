@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 
@@ -65,6 +66,19 @@ struct FastThriftServerConfig {
   // at end of each event loop iteration. Set batchingInterval > 0 to use
   // an HHWheelTimer-driven flush instead.
   frame::write::IntervalBatchingHandlerConfig batchingConfig{};
+
+  // Per-connection terminal-phase deadlines. Consumed by
+  // ThriftServerConnectionCloseHandler; defaults mirror its
+  // kDefaultDrainTimeout / kDefaultReapTimeout.
+  //
+  //   drainTimeout — after a CloseConnection event, how long to wait for
+  //     in-flight responses to flush before forcing the socket down.
+  //   reapTimeout — after the socket is gone, how long to wait for
+  //     in-flight handler callbacks to return before LOG(FATAL)ing.
+  //     A handler that hasn't completed within this window is stuck and
+  //     would otherwise silently leak the per-connection adapter.
+  std::chrono::milliseconds drainTimeout{std::chrono::seconds{30}};
+  std::chrono::milliseconds reapTimeout{std::chrono::seconds{60}};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

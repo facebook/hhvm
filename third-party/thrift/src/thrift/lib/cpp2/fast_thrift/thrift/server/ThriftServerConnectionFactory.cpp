@@ -244,7 +244,9 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
   // ThriftServerEvent::CloseConnection through the pipeline; the handler picks
   // it up via onEvent and drives the terminal state machine.
   thriftPipelineBuilder.template addNextDuplex<CloseHandler>(
-      thrift_server_connection_close_handler_tag);
+      thrift_server_connection_close_handler_tag,
+      config_.drainTimeout,
+      config_.reapTimeout);
   // Write-buffer handler sits between the context handlers and the drain
   // handler. Placed above drain (closer to head) so its inbound
   // Backpressure signal propagates upstream toward the transport, and

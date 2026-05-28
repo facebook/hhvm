@@ -20,6 +20,7 @@
 #include <folly/io/async/test/AsyncSSLSocketTest.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <folly/portability/OpenSSL.h>
 #include <wangle/ssl/SSLStats.h>
 #include <wangle/ssl/TLSTicketKeyManager.h>
 #include <wangle/ssl/test/MockSSLStats.h>
@@ -232,4 +233,85 @@ TEST(
   evb.loop();
 
   EXPECT_FALSE(client->getSSLSessionReused());
+}
+
+TEST(TLSTicketKeyManager, RenewTicketsOnResumeDefaultOff) {
+  wangle::TLSTicketKeyManager manager;
+  manager.setTLSTicketKeySeeds({"67"}, {"68"}, {"69"});
+
+  unsigned char keyName[16] = {};
+  unsigned char iv[EVP_MAX_IV_LENGTH] = {};
+  EVP_CIPHER_CTX* cipherCtx = EVP_CIPHER_CTX_new();
+  HMAC_CTX* hmacCtx = HMAC_CTX_new();
+
+  // Encrypt a ticket
+  int encResult = manager.ticketCallback(
+      nullptr, keyName, iv, cipherCtx, hmacCtx, 1 /* encrypt */);
+  EXPECT_EQ(encResult, 1);
+
+  // Decrypt should return 1 (do not renew) by default
+  int decResult = manager.ticketCallback(
+      nullptr, keyName, iv, cipherCtx, hmacCtx, 0 /* decrypt */);
+  EXPECT_EQ(decResult, 1);
+
+  EVP_CIPHER_CTX_free(cipherCtx);
+  HMAC_CTX_free(hmacCtx);
+}
+
+TEST(TLSTicketKeyManager, RenewTicketsOnResumeWithNullSsl) {
+  wangle::TLSTicketKeyManager manager;
+  manager.setTLSTicketKeySeeds({"67"}, {"68"}, {"69"});
+  manager.setRenewTicketsOnResume(true);
+
+  unsigned char keyName[16] = {};
+  unsigned char iv[EVP_MAX_IV_LENGTH] = {};
+  EVP_CIPHER_CTX* cipherCtx = EVP_CIPHER_CTX_new();
+  HMAC_CTX* hmacCtx = HMAC_CTX_new();
+
+  // Encrypt a ticket
+  int encResult = manager.ticketCallback(
+      nullptr, keyName, iv, cipherCtx, hmacCtx, 1 /* encrypt */);
+  EXPECT_EQ(encResult, 1);
+
+  // With null SSL, renewal should not trigger even when enabled
+  int decResult = manager.ticketCallback(
+      nullptr, keyName, iv, cipherCtx, hmacCtx, 0 /* decrypt */);
+  EXPECT_EQ(decResult, 1);
+
+  EVP_CIPHER_CTX_free(cipherCtx);
+  HMAC_CTX_free(hmacCtx);
+}
+
+TEST(TLSTicketKeyManager, RenewTicketsOnResumeTLS13Returns2) {
+  wangle::TLSTicketKeyManager manager;
+  manager.setTLSTicketKeySeeds({"67"}, {"68"}, {"69"});
+  manager.setRenewTicketsOnResume(true);
+
+  // Create a minimal SSL object configured for TLS 1.3
+  SSL_CTX* sslCtx = SSL_CTX_new(TLS_method());
+  ASSERT_NE(sslCtx, nullptr);
+  SSL_CTX_set_min_proto_version(sslCtx, TLS1_3_VERSION);
+  SSL_CTX_set_max_proto_version(sslCtx, TLS1_3_VERSION);
+  SSL* ssl = SSL_new(sslCtx);
+  ASSERT_NE(ssl, nullptr);
+
+  unsigned char keyName[16] = {};
+  unsigned char iv[EVP_MAX_IV_LENGTH] = {};
+  EVP_CIPHER_CTX* cipherCtx = EVP_CIPHER_CTX_new();
+  HMAC_CTX* hmacCtx = HMAC_CTX_new();
+
+  // Encrypt a ticket to populate keyName with the current encryption key
+  int encResult = manager.ticketCallback(
+      ssl, keyName, iv, cipherCtx, hmacCtx, 1 /* encrypt */);
+  EXPECT_EQ(encResult, 1);
+
+  // Decrypt with TLS 1.3 SSL and renewal enabled should return 2
+  int decResult = manager.ticketCallback(
+      ssl, keyName, iv, cipherCtx, hmacCtx, 0 /* decrypt */);
+  EXPECT_EQ(decResult, 2);
+
+  EVP_CIPHER_CTX_free(cipherCtx);
+  HMAC_CTX_free(hmacCtx);
+  SSL_free(ssl);
+  SSL_CTX_free(sslCtx);
 }

@@ -107,7 +107,7 @@ TLSTicketKeyManager::TLSTicketKeyManager()
 TLSTicketKeyManager::~TLSTicketKeyManager() = default;
 
 int TLSTicketKeyManager::ticketCallback(
-    SSL*,
+    SSL* ssl,
     unsigned char* keyName,
     unsigned char* iv,
     EVP_CIPHER_CTX* cipherCtx,
@@ -124,6 +124,12 @@ int TLSTicketKeyManager::ticketCallback(
     }
   } else {
     result = decryptCallback(keyName, iv, cipherCtx, hmacCtx);
+    if (result == 1 && renewTicketsOnResume_ && ssl &&
+        SSL_version(ssl) == TLS1_3_VERSION &&
+        encryptionKeyName_.size() >= kTLSTicketKeyNameLen &&
+        memcmp(keyName, encryptionKeyName_.data(), kTLSTicketKeyNameLen) == 0) {
+      result = 2;
+    }
   }
 
   // Result records whether a ticket key was found to encrypt or decrypt this

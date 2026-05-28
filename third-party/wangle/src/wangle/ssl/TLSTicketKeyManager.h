@@ -110,6 +110,20 @@ class TLSTicketKeyManager : public folly::OpenSSLTicketHandler {
     stats_ = stats;
   }
 
+  /**
+   * When enabled, ticketCallback returns 2 (renew) instead of 1 (success)
+   * for TLS 1.3 connections where the ticket was encrypted with the current
+   * key. This causes OpenSSL to issue new NewSessionTicket messages after
+   * resumed connections, which is necessary because TLS 1.3 tickets are
+   * single-use. Tickets encrypted with older rotated keys are not renewed,
+   * bounding session lifetime to the key rotation period.
+   *
+   * Default is false for backward compatibility.
+   */
+  void setRenewTicketsOnResume(bool enable) {
+    renewTicketsOnResume_ = enable;
+  }
+
  private:
   TLSTicketKeyManager(const TLSTicketKeyManager&) = delete;
   TLSTicketKeyManager& operator=(const TLSTicketKeyManager&) = delete;
@@ -193,6 +207,7 @@ class TLSTicketKeyManager : public folly::OpenSSLTicketHandler {
   std::string encryptionKeyName_;
   std::unordered_map<std::string, std::unique_ptr<TLSTicketKey>> ticketKeyMap_;
   SSLStats* stats_{nullptr};
+  bool renewTicketsOnResume_{false};
   // A ticket key to use to generate new session tickets when no seeds have been
   // configured.
   TLSTicketKey fallbackTicketKey_;

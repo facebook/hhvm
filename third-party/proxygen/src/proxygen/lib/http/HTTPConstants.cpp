@@ -8,11 +8,13 @@
 
 #include <proxygen/lib/http/HTTPConstants.h>
 
+#include <array>
+
 namespace proxygen {
 
 #define CONNECTION_CLOSE_REASON_STRING(e, r) r,
-const char* connectionCloseStrings[] = {
-    CONNECTION_CLOSE_REASON_GEN(CONNECTION_CLOSE_REASON_STRING)};
+constexpr auto connectionCloseStrings = std::to_array<const char*>(
+    {CONNECTION_CLOSE_REASON_GEN(CONNECTION_CLOSE_REASON_STRING)});
 #undef CONNECTION_CLOSE_REASON_STRING
 
 const char* getConnectionCloseReasonStringByIndex(unsigned int index) {

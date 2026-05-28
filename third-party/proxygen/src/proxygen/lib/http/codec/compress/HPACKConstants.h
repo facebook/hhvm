@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <array>
 #include <iosfwd>
 #include <stdint.h>
 
@@ -58,7 +59,7 @@ const uint32_t kDefaultBlocking = 100;
 
 const uint32_t kTableSize = 4096;
 
-const uint8_t NBIT_MASKS[9] = {
+constexpr std::array<uint8_t, 9> NBIT_MASKS = {
     0x00, // 00000000, unused
     0x01, // 00000001
     0x03, // 00000011

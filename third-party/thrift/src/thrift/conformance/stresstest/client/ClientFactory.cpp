@@ -104,6 +104,10 @@ std::shared_ptr<fizz::client::FizzClientContext> getFizzContext(
     }
     auto ctx = std::make_shared<fizz::client::FizzClientContext>();
     ctx->setSupportedAlpns({"rs"});
+    if (cfg.stopTLSv2) {
+      ctx->setFactory(
+          std::make_shared<facebook::services::FizzThriftFactory>());
+    }
     if (!cfg.certPath.empty() && !cfg.keyPath.empty()) {
       std::string cert, key;
       folly::readFile(cfg.certPath.c_str(), cert);
@@ -295,8 +299,8 @@ folly::AsyncTransport::UniquePtr createFizzSocket(
     thriftExtension =
         std::make_shared<apache::thrift::ThriftParametersClientExtension>(
             thriftParametersContext);
-    fizzContext->setFactory(
-        std::make_shared<facebook::services::FizzThriftFactory>());
+    // Factory is installed once during getFizzContext singleton init
+    // to avoid a data race on the shared FizzClientContext.
   }
 
   std::vector<std::shared_ptr<fizz::ClientExtensions>> extensions;
@@ -384,8 +388,8 @@ folly::AsyncTransport::UniquePtr createIOUringFizz(
     thriftExtension =
         std::make_shared<apache::thrift::ThriftParametersClientExtension>(
             thriftParametersContext);
-    fizzContext->setFactory(
-        std::make_shared<facebook::services::FizzThriftFactory>());
+    // Factory is installed once during getFizzContext singleton init
+    // to avoid a data race on the shared FizzClientContext.
   }
   std::vector<std::shared_ptr<fizz::ClientExtensions>> extensions;
   if (thriftExtension != nullptr) {

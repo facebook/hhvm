@@ -333,6 +333,18 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   }
 
   /**
+   * Increase the size of read buffer allocations to the length of the current
+   * in-progress TLS record. This reduces the number of allocations needed and
+   * reduces the length of the final IOBuf chain for large records.
+   *
+   * This is independent of setHandshakeRecordAlignedReads which is only used
+   * for handshakes and disabled after.
+   */
+  void setPreallocFromRecordHint(bool flag) {
+    preallocFromRecordHint_ = flag;
+  }
+
+  /**
    * If set, after AsyncFizzBase has been used to write `bytes` worth of data,
    * AsyncFizzBase will automatically initiate a key_update
    */
@@ -599,6 +611,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
 
   size_t readSizeHint_{0};
   bool handshakeAligned_{false};
+  bool preallocFromRecordHint_{false};
 
   QueuedWriteRequest* tailWriteRequest_{nullptr};
   QueuedWriteRequest* immediatelyPendingWriteRequest_{nullptr};

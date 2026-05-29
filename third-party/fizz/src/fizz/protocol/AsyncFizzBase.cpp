@@ -358,9 +358,11 @@ void AsyncFizzBase::getReadBuffer(
     folly::IOBufQueue& buf,
     void** bufReturn,
     size_t* lenReturn) {
-  std::pair<void*, uint32_t> readSpace = buf.preallocate(
-      transportOptions_.readBufferMinReadSize,
-      transportOptions_.readBufferAllocationSize);
+  const size_t allocSize = preallocFromRecordHint_
+      ? std::max(transportOptions_.readBufferAllocationSize, readSizeHint_)
+      : transportOptions_.readBufferAllocationSize;
+  auto readSpace =
+      buf.preallocate(transportOptions_.readBufferMinReadSize, allocSize);
   *bufReturn = readSpace.first;
 
   // `readSizeHint_`, if zero, indicates that we do not care about how much

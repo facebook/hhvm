@@ -17,6 +17,7 @@
 #include <thrift/conformance/stresstest/client/ClientFactory.h>
 #include <thrift/conformance/stresstest/client/FizzStopTLSConnector.h>
 #include "common/services/cpp/security/FizzThriftFactory.h"
+#include "common/services/cpp/security/SecureThriftUtil.h"
 
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/client/AsyncFizzClient.h>
@@ -317,6 +318,30 @@ folly::AsyncTransport::UniquePtr createFizzSocket(
               : std::make_shared<fizz::client::MultiClientExtensions>(
                     std::move(extensions))));
 
+  if (cfg.stopTLSv2) {
+    [](auto* t) {
+      if constexpr (requires { t->setAlignedRecordReads(true); }) {
+        t->setAlignedRecordReads(true);
+      }
+    }(fizzClient.get());
+    [](auto* t) {
+      if constexpr (requires { t->setPreallocFromRecordHint(true); }) {
+        t->setPreallocFromRecordHint(true);
+      }
+    }(fizzClient.get());
+    [](auto* t) {
+      if constexpr (requires {
+                      t->setShouldSlicePredicate(
+                          typename std::remove_pointer_t<
+                              decltype(t)>::ShouldSliceFn{});
+                    }) {
+        t->setShouldSlicePredicate([](const folly::IOBuf& buf) {
+          return !facebook::services::SecureThriftUtil::isUnencrypted(buf);
+        });
+      }
+    }(fizzClient.get());
+  }
+
   fizzClient->connect(
       cfg.serverHost,
       cfg.connectCb,
@@ -403,6 +428,29 @@ folly::AsyncTransport::UniquePtr createIOUringFizz(
               ? nullptr
               : std::make_shared<fizz::client::MultiClientExtensions>(
                     std::move(extensions))));
+  if (cfg.stopTLSv2) {
+    [](auto* t) {
+      if constexpr (requires { t->setAlignedRecordReads(true); }) {
+        t->setAlignedRecordReads(true);
+      }
+    }(fizzClient.get());
+    [](auto* t) {
+      if constexpr (requires { t->setPreallocFromRecordHint(true); }) {
+        t->setPreallocFromRecordHint(true);
+      }
+    }(fizzClient.get());
+    [](auto* t) {
+      if constexpr (requires {
+                      t->setShouldSlicePredicate(
+                          typename std::remove_pointer_t<
+                              decltype(t)>::ShouldSliceFn{});
+                    }) {
+        t->setShouldSlicePredicate([](const folly::IOBuf& buf) {
+          return !facebook::services::SecureThriftUtil::isUnencrypted(buf);
+        });
+      }
+    }(fizzClient.get());
+  }
   fizzClient->connect(
       cfg.serverHost,
       cfg.connectCb,

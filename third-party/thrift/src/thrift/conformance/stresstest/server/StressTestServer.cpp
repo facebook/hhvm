@@ -97,6 +97,9 @@ DEFINE_bool(enable_overload_checker, false, "Enable overload checker");
 DEFINE_bool(enable_resource_pools, false, "Enable resource pools");
 DEFINE_bool(stopTLSv1, false, "Enable stopTLS v1");
 DEFINE_bool(stopTLSv2, false, "Enable stopTLS v2");
+THRIFT_FLAG_DECLARE_bool(server_fizz_prealloc_from_record_hint);
+THRIFT_FLAG_DECLARE_bool(server_fizz_aligned_record_reads);
+THRIFT_FLAG_DECLARE_bool(server_fizz_skip_slice_partial_writes);
 DEFINE_bool(
     disable_active_request_tracking, false, "Disabled Active Request Tracking");
 DEFINE_bool(enable_checksum, false, "Enable Server Side Checksum support");
@@ -275,6 +278,9 @@ std::shared_ptr<ThriftServer> createStressTestServer(
         thriftConfig.enableStopTLS = true;
       } else {
         thriftConfig.enableStopTLSV2 = true;
+        THRIFT_FLAG_SET_MOCK(server_fizz_aligned_record_reads, true);
+        THRIFT_FLAG_SET_MOCK(server_fizz_prealloc_from_record_hint, true);
+        THRIFT_FLAG_SET_MOCK(server_fizz_skip_slice_partial_writes, true);
       }
       server->setThriftConfig(thriftConfig);
     }

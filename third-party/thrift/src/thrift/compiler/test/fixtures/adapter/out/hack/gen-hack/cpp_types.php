@@ -1690,7 +1690,17 @@ class EnumType implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 }
 
 /**
- * Indicates that frozen types should not be generated for a given struct.
+ * When applied to a struct or union, indicates that frozen types should not be
+ * generated for that type.
+ * 
+ * When applied to a field, indicates that the field should be omitted from the
+ * frozen layout. The field's value is not laid out, not frozen, and not
+ * carried in the frozen blob; a populated excluded field will throw
+ * `LayoutExcludedException` on freeze, exactly as struct-level
+ * `@cpp.Frozen2Exclude` does when its type is used as a populated non-nullable
+ * field. Field-level `@cpp.Frozen2Exclude` is supported only on `optional`
+ * non-ref, non-adapted, non-boxed value fields; other shapes are rejected at
+ * compile time.
  *
  * Original thrift struct:-
  * Frozen2Exclude
@@ -1740,6 +1750,7 @@ class Frozen2Exclude implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     return shape(
       'struct' => dict[
         '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::withDefaultValues(),
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::withDefaultValues(),
       ],
       'fields' => dict[
       ],

@@ -22,24 +22,28 @@ from thrift.perf.py.asyncio_load_handler import LoadHandler
 from thrift.server.TAsyncioServer import ThriftAsyncServerFactory
 
 
+async def _run_server(port: int) -> None:
+    loop = asyncio.get_running_loop()
+    handler = LoadHandler()
+    server = await ThriftAsyncServerFactory(handler, port=port, loop=loop)
+    print("Running Asyncio server on port {}".format(port))
+
+    try:
+        await loop.create_future()  # run forever
+    except asyncio.CancelledError:
+        pass
+    finally:
+        server.close()
+
+
 def main():
     parser = ArgumentParser()
     parser.add_argument("--port", default=1234, type=int, help="Port to run on")
     options = parser.parse_args()
-    loop = asyncio.get_event_loop()
-    handler = LoadHandler()
-    server = loop.run_until_complete(
-        ThriftAsyncServerFactory(handler, port=options.port, loop=loop)
-    )
-    print("Running Asyncio server on port {}".format(options.port))
-
     try:
-        loop.run_forever()
+        asyncio.run(_run_server(options.port))
     except KeyboardInterrupt:
         print("Caught SIGINT, exiting")
-    finally:
-        server.close()
-        loop.close()
 
 
 def invoke_main() -> None:

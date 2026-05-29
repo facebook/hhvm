@@ -24,18 +24,22 @@ from thrift.perf.py3.load_handler import LoadTestHandler
 from thrift.py3 import ThriftServer
 
 
-def main():
+async def _run_server() -> None:
     parser = ArgumentParser()
     parser.add_argument("--port", default=1234, type=int, help="Port to run on")
     options = parser.parse_args()
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     # pyrefly: ignore [bad-instantiation]
     handler = LoadTestHandler(loop)
     server = ThriftServer(handler, options.port)
     loop.add_signal_handler(signal.SIGINT, server.stop)
     loop.add_signal_handler(signal.SIGTERM, server.stop)
     print("Running Py3 server on port {}".format(options.port))
-    loop.run_until_complete(server.serve())
+    await server.serve()
+
+
+def main():
+    asyncio.run(_run_server())
 
 
 def invoke_main() -> None:

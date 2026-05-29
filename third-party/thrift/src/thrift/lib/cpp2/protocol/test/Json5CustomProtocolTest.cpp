@@ -16,11 +16,18 @@
 
 #include <thrift/lib/cpp2/protocol/Json5Protocol.h>
 
+#include <algorithm>
 #include <cmath>
+#include <cstdint>
+#include <unordered_map>
+#include <vector>
 #include <gtest/gtest.h>
+#include <folly/json/dynamic.h>
+#include <folly/json/json.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/json5_test_constants.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/json5_test_types.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/json5_test_types_custom_protocol.h>
+#include <thrift/lib/cpp2/type/Tag.h>
 
 namespace apache::thrift {
 
@@ -233,6 +240,66 @@ TEST(Json5WriterOptionsTest, BinaryAsBase64String) {
   auto result =
       writeExample(example, {.writer = {}, .binaryAsBase64String = true});
   EXPECT_EQ(result, R"RAW({"binaryValue":"AAEC"})RAW");
+}
+
+// ── Tests for keyOrder option ──────────────────────────────────────────────
+
+TEST(Json5WriterOptionsTest, KeyOrder) {
+  Json5ProtocolWriter defaultWriter;
+  EXPECT_EQ(defaultWriter.keyOrder(), KeyOrder::StableAscending);
+
+  Json5ProtocolWriter ascendingWriter(
+      COPY_EXTERNAL_BUFFER,
+      {.writer = {}, .keyOrder = KeyOrder::StableAscending});
+  EXPECT_EQ(ascendingWriter.keyOrder(), KeyOrder::StableAscending);
+
+  Json5ProtocolWriter unspecifiedWriter(
+      COPY_EXTERNAL_BUFFER, {.writer = {}, .keyOrder = KeyOrder::Unspecified});
+  EXPECT_EQ(unspecifiedWriter.keyOrder(), KeyOrder::Unspecified);
+}
+
+namespace {
+
+std::vector<int64_t> extractEmittedKeys(const std::string& json) {
+  std::vector<int64_t> keys;
+  for (const auto& entry : folly::parseJson(json)) {
+    keys.push_back(entry["key"].asInt());
+  }
+  return keys;
+}
+
+} // namespace
+
+TEST(Json5WriterOptionsTest, KeyOrderControlsMapKeyOutputOrder) {
+  using Tag = type::cpp_type<
+      std::unordered_map<int64_t, int64_t>,
+      type::map<type::i64_t, type::i64_t>>;
+
+  std::unordered_map<int64_t, int64_t> m;
+  for (int64_t i = 0; i < 100; ++i) {
+    m[i] = i;
+  }
+
+  std::vector<int64_t> iterationOrder;
+  iterationOrder.reserve(m.size());
+  for (const auto& [k, _] : m) {
+    iterationOrder.push_back(k);
+  }
+
+  // Unspecified: output order == unordered_map iteration order.
+  {
+    auto json = json5::detail::toJsonImpl<Tag>(
+        m, {.writer = {}, .keyOrder = KeyOrder::Unspecified});
+    EXPECT_EQ(extractEmittedKeys(json), iterationOrder);
+  }
+
+  // Default (StableAscending): output keys are sorted.
+  {
+    auto json = json5::detail::toJsonImpl<Tag>(m, {});
+    auto emittedKeys = extractEmittedKeys(json);
+    EXPECT_EQ(emittedKeys.size(), m.size());
+    EXPECT_TRUE(std::is_sorted(emittedKeys.begin(), emittedKeys.end()));
+  }
 }
 
 } // namespace apache::thrift

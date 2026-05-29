@@ -117,13 +117,14 @@ class Json5ProtocolWriter final {
     bool enumAsInteger = false;
     bool binaryAsBase64String = false;
     bool mapPrimitiveKeysAsMemberNames = false;
+    KeyOrder keyOrder = KeyOrder::StableAscending;
   };
   explicit Json5ProtocolWriter(
       ExternalBufferSharing /*sharing*/ = COPY_EXTERNAL_BUFFER /* ignored */,
       Options options = defaultOptions())
       : options_(options), writer_(options_.writer) {}
 
-  static constexpr KeyOrder keyOrder() { return KeyOrder::StableAscending; }
+  KeyOrder keyOrder() const { return options_.keyOrder; }
   FieldOrder fieldOrder() const { return FieldOrder::IdAscending; }
 
   static constexpr ProtocolType protocolType() {

@@ -1502,8 +1502,7 @@ void testArmLoadPairNoClobberBase() {
 
     simplify(unit);
 
-    auto result = stripWhitespace(show(unit));
-    // Should NOT be fused — both loads write to the same destination.
+    auto const result = stripWhitespace(show(unit));
     EXPECT_EQ(result.find("loadpair"), std::string::npos)
       << "Should not fuse loads with same destination, got:\n" << result;
   }
@@ -1545,4 +1544,150 @@ TEST(Vasm, ArmShiftedBitTestZeroExtendsBit31Mask) {
 TEST(Vasm, ArmShiftedBitTestRejectsNonZFlagUse) {
   testArmShiftedBitTestRejectsNonZFlagUse();
 }
+
+void testArmWritebackBaseOverlap() {
+#ifndef __aarch64__
+  GTEST_SKIP() << "ARM-specific writeback folding test";
+#else
+  // Post-index load: load{base[0], base}; addqi{8, base, base}
+  // Must NOT fold — the addqi operates on the loaded value, not the address.
+  {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const base = Vreg{Reg64{0}};
+    auto const sf = v.makeReg();
+    v << ldimmq{uintptr_t(0x1000), base};
+    v << load{base[0], base};
+    v << addqi{8, base, base, sf};
+    v << ret{RegSet{base}};
+
+    postRASimplify(unit, abi(CodeKind::Trace));
+
+    auto const result = stripWhitespace(show(unit));
+    EXPECT_EQ(result.find("loadpi"), std::string::npos)
+      << "Should not fold post-index load when dest == base, got:\n" << result;
+    EXPECT_EQ(result.find("loadpri"), std::string::npos)
+      << "Should not fold pre-index load when dest == base, got:\n" << result;
+  }
+
+  // Pre-index load: addqi{8, base, base}; load{base[0], base}
+  // Must NOT fold.
+  {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const base = Vreg{Reg64{0}};
+    auto const sf = v.makeReg();
+    v << ldimmq{uintptr_t(0x1000), base};
+    v << addqi{8, base, base, sf};
+    v << load{base[0], base};
+    v << ret{RegSet{base}};
+
+    postRASimplify(unit, abi(CodeKind::Trace));
+
+    auto const result = stripWhitespace(show(unit));
+    EXPECT_EQ(result.find("loadpri"), std::string::npos)
+      << "Should not fold pre-index load when dest == base, got:\n" << result;
+    EXPECT_EQ(result.find("loadpi"), std::string::npos)
+      << "Should not fold post-index load when dest == base, got:\n" << result;
+  }
+
+  // Post-index store: store{base, base[0]}; addqi{8, base, base}
+  // Must NOT fold — value register aliases the base.
+  {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const base = Vreg{Reg64{0}};
+    auto const sf = v.makeReg();
+    v << ldimmq{uintptr_t(0x1000), base};
+    v << store{base, base[0]};
+    v << addqi{8, base, base, sf};
+    v << ret{RegSet{base}};
+
+    postRASimplify(unit, abi(CodeKind::Trace));
+
+    auto const result = stripWhitespace(show(unit));
+    EXPECT_EQ(result.find("storepi"), std::string::npos)
+      << "Should not fold post-index store when value == base, got:\n" << result;
+    EXPECT_EQ(result.find("storepri"), std::string::npos)
+      << "Should not fold pre-index store when value == base, got:\n" << result;
+  }
+
+  // Positive case: load where dest != base should still fold.
+  {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const base = Vreg{Reg64{0}};
+    auto const dst = Vreg{Reg64{1}};
+    auto const sf = v.makeReg();
+    v << ldimmq{uintptr_t(0x1000), base};
+    v << load{base[0], dst};
+    v << addqi{8, base, base, sf};
+    v << ret{RegSet{base} | RegSet{dst}};
+
+    postRASimplify(unit, abi(CodeKind::Trace));
+
+    auto const result = stripWhitespace(show(unit));
+    EXPECT_NE(result.find("loadpi"), std::string::npos)
+      << "Should fold post-index load when dest != base, got:\n" << result;
+  }
+
+  // Positive case: store where value != base should still fold.
+  {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const base = Vreg{Reg64{0}};
+    auto const val = Vreg{Reg64{1}};
+    auto const sf = v.makeReg();
+    v << ldimmq{uintptr_t(0x1000), base};
+    v << ldimmq{uintptr_t(42), val};
+    v << store{val, base[0]};
+    v << addqi{8, base, base, sf};
+    v << ret{RegSet{base}};
+
+    postRASimplify(unit, abi(CodeKind::Trace));
+
+    auto const result = stripWhitespace(show(unit));
+    EXPECT_NE(result.find("storepi"), std::string::npos)
+      << "Should fold post-index store when value != base, got:\n" << result;
+  }
+
+  // Loadpair: load{base[0], base}; load{base[8], dst2}
+  // The loadpair fusion should already be blocked by dependent-base logic,
+  // but verify the writeback path is also guarded.
+  {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const base = Vreg{Reg64{0}};
+    auto const dst2 = Vreg{Reg64{1}};
+    auto const sf = v.makeReg();
+    v << ldimmq{uintptr_t(0x1000), base};
+    v << loadpair{Vptr128{base, 0}, base, dst2};
+    v << addqi{16, base, base, sf};
+    v << ret{RegSet{base} | RegSet{dst2}};
+
+    postRASimplify(unit, abi(CodeKind::Trace));
+
+    auto const result = stripWhitespace(show(unit));
+    EXPECT_EQ(result.find("loadpairpi"), std::string::npos)
+      << "Should not fold post-index loadpair when d0 == base, got:\n" << result;
+  }
+#endif
+}
+
+TEST(Vasm, ArmWritebackBaseOverlap) {
+  testArmWritebackBaseOverlap();
+}
+
 }

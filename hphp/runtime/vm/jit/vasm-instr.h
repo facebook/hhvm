@@ -56,6 +56,53 @@ struct Vunit;
  *    DH(d,h)   define d, try assigning same register as h
  *    Un,Dn     no uses, defs
  */
+
+#define VASM_STORE_UPDATE_SINGLE_LIST(X) \
+  X(store, storepri, storepi, Vreg, 8, d) \
+  X(storeb, storebpri, storebpi, Vreg8, 1, m) \
+  X(storew, storewpri, storewpi, Vreg16, 2, m) \
+  X(storel, storelpri, storelpi, Vreg32, 4, m) \
+  X(storesd, storesdpri, storesdpi, VregDbl, 8, m)
+
+#define VASM_STORE_UPDATE_PAIR_LIST(X) \
+  X(storepair, storepairpri, storepairpi, Vreg64, 8, 2, d) \
+  X(storepairl, storepairlpri, storepairlpi, Vreg32, 4, 2, d)
+
+#define VASM_LOAD_UPDATE_SINGLE_LIST(X) \
+  X(load, loadpri, loadpi, Vreg, 8, s) \
+  X(loadb, loadbpri, loadbpi, Vreg8, 1, s) \
+  X(loadw, loadwpri, loadwpi, Vreg16, 2, s) \
+  X(loadl, loadlpri, loadlpi, Vreg32, 4, s) \
+  X(loadsd, loadsdpri, loadsdpi, VregDbl, 8, s) \
+  X(loadzbl, loadzblpri, loadzblpi, Vreg32, 1, s) \
+  X(loadzbq, loadzbqpri, loadzbqpi, Vreg64, 1, s) \
+  X(loadzwq, loadzwqpri, loadzwqpi, Vreg64, 2, s) \
+  X(loadzlq, loadzlqpri, loadzlqpi, Vreg64, 4, s) \
+  X(loadsbl, loadsblpri, loadsblpi, Vreg32, 1, s) \
+  X(loadsbq, loadsbqpri, loadsbqpi, Vreg64, 1, s) \
+  X(loadtqb, loadtqbpri, loadtqbpi, Vreg8, 1, s) \
+  X(loadtql, loadtqlpri, loadtqlpi, Vreg32, 4, s)
+
+#define VASM_LOAD_UPDATE_PAIR_LIST(X) \
+  X(loadpair, loadpairpri, loadpairpi, Vreg64, 8, 2, s) \
+  X(loadpairl, loadpairlpri, loadpairlpi, Vreg32, 4, 2, s)
+
+#define VASM_LOAD_UPDATE_SINGLE_OP_ENTRY(name, pre, post, reg, size, ptr) \
+  O(pre, I(s0), U(s), DH(base,s) D(d))\
+  O(post, I(s0), U(s), DH(base,s) D(d))
+
+#define VASM_LOAD_UPDATE_PAIR_OP_ENTRY(name, pre, post, reg, size, lanes, ptr) \
+  O(pre, I(s0), U(s), DH(base,s) D(d0) D(d1))\
+  O(post, I(s0), U(s), DH(base,s) D(d0) D(d1))
+
+#define VASM_STORE_UPDATE_SINGLE_OP_ENTRY(name, pre, post, reg, size, ptr) \
+  O(pre, I(s0), U(s) U(v), DH(base,s))\
+  O(post, I(s0), U(s) U(v), DH(base,s))
+
+#define VASM_STORE_UPDATE_PAIR_OP_ENTRY(name, pre, post, reg, size, lanes, ptr) \
+  O(pre, I(s0), U(s) U(v0) U(v1), DH(base,s))\
+  O(post, I(s0), U(s) U(v0) U(v1), DH(base,s))
+
 #define VASM_OPCODES\
   /* service requests */\
   O(bindjmp, I(target) I(spOff), U(args), Dn)\
@@ -78,7 +125,11 @@ struct Vunit;
   O(ldimmq, I(s), Un, D(d))\
   O(ldundefq, Inone, Un, D(d))\
   O(load, Inone, U(s), D(d))\
+  VASM_LOAD_UPDATE_SINGLE_LIST(VASM_LOAD_UPDATE_SINGLE_OP_ENTRY)\
+  VASM_LOAD_UPDATE_PAIR_LIST(VASM_LOAD_UPDATE_PAIR_OP_ENTRY)\
   O(store, Inone, U(s) UW(d), Dn)\
+  VASM_STORE_UPDATE_SINGLE_LIST(VASM_STORE_UPDATE_SINGLE_OP_ENTRY)\
+  VASM_STORE_UPDATE_PAIR_LIST(VASM_STORE_UPDATE_PAIR_OP_ENTRY)\
   O(mcprep, Inone, Un, D(d))\
   O(phidef, Inone, Un, D(defs))\
   O(phijmp, Inone, U(uses), Dn)\
@@ -547,7 +598,27 @@ struct ldundefq { Vreg d; };
  * Memory operand load and store.
  */
 struct load { Vptr64 s; Vreg d; };
+#define VASM_LOAD_UPDATE_SINGLE_STRUCT(name, pre, post, reg, size, ptr) \
+struct pre { Immed s0; Vreg64 s, base; reg d; }; \
+struct post { Immed s0; Vreg64 s, base; reg d; };
+VASM_LOAD_UPDATE_SINGLE_LIST(VASM_LOAD_UPDATE_SINGLE_STRUCT)
+#undef VASM_LOAD_UPDATE_SINGLE_STRUCT
+#define VASM_LOAD_UPDATE_PAIR_STRUCT(name, pre, post, reg, size, lanes, ptr) \
+struct pre { Immed s0; Vreg64 s, base; reg d0, d1; }; \
+struct post { Immed s0; Vreg64 s, base; reg d0, d1; };
+VASM_LOAD_UPDATE_PAIR_LIST(VASM_LOAD_UPDATE_PAIR_STRUCT)
+#undef VASM_LOAD_UPDATE_PAIR_STRUCT
 struct store { Vreg s; Vptr64 d; };
+#define VASM_STORE_UPDATE_SINGLE_STRUCT(name, pre, post, reg, size, ptr) \
+struct pre { Immed s0; Vreg64 s, base; reg v; }; \
+struct post { Immed s0; Vreg64 s, base; reg v; };
+VASM_STORE_UPDATE_SINGLE_LIST(VASM_STORE_UPDATE_SINGLE_STRUCT)
+#undef VASM_STORE_UPDATE_SINGLE_STRUCT
+#define VASM_STORE_UPDATE_PAIR_STRUCT(name, pre, post, reg, size, lanes, ptr) \
+struct pre { Immed s0; Vreg64 s, base; reg v0, v1; }; \
+struct post { Immed s0; Vreg64 s, base; reg v0, v1; };
+VASM_STORE_UPDATE_PAIR_LIST(VASM_STORE_UPDATE_PAIR_STRUCT)
+#undef VASM_STORE_UPDATE_PAIR_STRUCT
 
 /*
  * Method cache smashable prime data.

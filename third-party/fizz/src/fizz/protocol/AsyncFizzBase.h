@@ -361,6 +361,16 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   }
 
   /**
+   * Always allocate a separate, aligned buffer to read a single TLS record
+   * into. This is always done even for small (e.g. 32 byte) TLS records, so
+   * only enable this for workloads where it's known to send large records >= 4
+   * KB.
+   */
+  void setAlignedRecordReads(bool enabled) {
+    alignedRecordReads_ = enabled;
+  }
+
+  /**
    * If set, after AsyncFizzBase has been used to write `bytes` worth of data,
    * AsyncFizzBase will automatically initiate a key_update
    */
@@ -630,6 +640,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   size_t readSizeHint_{0};
   bool handshakeAligned_{false};
   bool preallocFromRecordHint_{false};
+  bool alignedRecordReads_{false};
 
   ShouldSliceFn shouldSliceFn_;
 

@@ -362,6 +362,18 @@ void AsyncFizzBase::getReadBuffer(
     folly::IOBufQueue& buf,
     void** bufReturn,
     size_t* lenReturn) {
+  if (alignedRecordReads_) {
+    auto readRemaining =
+        std::max(readSizeHint_, buf.chainLength()) - buf.chainLength();
+    size_t readLimit = readRemaining > 0 ? readRemaining : readSizeHint_;
+    if (readLimit > 0) {
+      auto readSpace = buf.preallocate(readLimit, readLimit);
+      *bufReturn = readSpace.first;
+      *lenReturn = std::min<size_t>(readSpace.second, readLimit);
+      return;
+    }
+  }
+
   const size_t allocSize = preallocFromRecordHint_
       ? std::max(transportOptions_.readBufferAllocationSize, readSizeHint_)
       : transportOptions_.readBufferAllocationSize;

@@ -162,6 +162,8 @@ type check_info = {
   per_file_profiling: HackEventLogger.PerFileProfilingConfig.t;
   memtrace_dir: string option;
   heartbeat_interval: int option;
+  prefetch_decls_enabled: bool;
+  prefetch_decls_threshold: int;
 }
 
 type workitems_to_process = workitem BigList.t

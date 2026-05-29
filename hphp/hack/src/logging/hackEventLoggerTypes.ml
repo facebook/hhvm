@@ -126,4 +126,6 @@ type rollout_flags = {
       (** POC: @frankemrich - Whether to use Eden's state tracking API *)
   edenfs_informant_enabled: bool;
       (** POC: @frankemrich - If true, use Eden backend for InformantNotifier (= file watching in monitor process) *)
+  prefetch_decls_enabled: bool;
+      (** POC: @izorin - If true, prefetch class declarations in parallel before type-checking files with many class references *)
 }

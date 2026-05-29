@@ -536,6 +536,10 @@ module Hhconf = struct
 
   let heartbeat_interval = hhconf_key "heartbeat_interval"
 
+  let prefetch_decls_enabled = hhconf_key "prefetch_decls_enabled"
+
+  let prefetch_decls_threshold = hhconf_key "prefetch_decls_threshold"
+
   let hg_aware = hhconf_key "hg_aware"
 
   let hg_aware_parsing_restart_threshold =

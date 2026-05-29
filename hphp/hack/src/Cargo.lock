@@ -2043,6 +2043,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "hack_thread_pool"
+version = "0.0.0"
+dependencies = [
+ "oxidized",
+ "rayon",
+]
+
+[[package]]
 name = "hackc"
 version = "0.0.0"
 dependencies = [
@@ -4219,13 +4227,13 @@ version = "0.0.0"
 dependencies = [
  "crossbeam",
  "direct_decl_parser",
+ "hack_thread_pool",
  "hh_hash",
  "ocamlrep",
  "ocamlrep_caml_builtins",
  "ocamlrep_custom",
  "ocamlrep_ocamlpool",
  "oxidized",
- "rayon",
  "relative_path",
 ]
 

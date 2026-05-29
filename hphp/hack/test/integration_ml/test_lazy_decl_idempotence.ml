@@ -68,6 +68,8 @@ let test () =
       per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
       memtrace_dir = None;
       heartbeat_interval = None;
+      prefetch_decls_enabled = false;
+      prefetch_decls_threshold = 0;
     }
   in
   let { Typing_check_service.diagnostics; telemetry; _ } =

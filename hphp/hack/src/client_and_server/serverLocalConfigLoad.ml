@@ -76,6 +76,8 @@ let default =
     num_local_workers = None;
     defer_class_declaration_threshold = None;
     heartbeat_interval = None;
+    prefetch_decls_enabled = false;
+    prefetch_decls_threshold = 0;
     produce_streaming_errors = true;
     consume_streaming_errors = false;
     rust_provider_backend = true;
@@ -628,6 +630,18 @@ let load_
   let heartbeat_interval =
     int_opt Config_keys.Hhconf.heartbeat_interval config
   in
+  let prefetch_decls_enabled =
+    bool_
+      Config_keys.Hhconf.prefetch_decls_enabled
+      ~default:default.prefetch_decls_enabled
+      config
+  in
+  let prefetch_decls_threshold =
+    int_
+      Config_keys.Hhconf.prefetch_decls_threshold
+      ~default:default.prefetch_decls_threshold
+      config
+  in
   let produce_streaming_errors =
     bool_
       Config_keys.Hhconf.produce_streaming_errors
@@ -1096,6 +1110,8 @@ let load_
     num_local_workers;
     defer_class_declaration_threshold;
     heartbeat_interval;
+    prefetch_decls_enabled;
+    prefetch_decls_threshold;
     produce_streaming_errors;
     consume_streaming_errors;
     rust_provider_backend;
@@ -1219,4 +1235,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       edenfs_file_watcher_state_tracking =
         options.edenfs_file_watcher.state_tracking;
       edenfs_informant_enabled = options.edenfs_informant_enabled;
+      prefetch_decls_enabled = options.prefetch_decls_enabled;
     }

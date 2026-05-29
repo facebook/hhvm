@@ -315,7 +315,9 @@ let scrape_class_names (ast : Nast.program) : SSet.t =
 let process_file
     (ctx : Provider_context.t)
     (file : check_file_workitem)
-    ~(decl_cap_mb : int option) : process_file_results =
+    ~(decl_cap_mb : int option)
+    ~(prefetch_decls_enabled : bool)
+    ~(prefetch_decls_threshold : int) : process_file_results =
   let fn = file.path in
   let (file_errors, ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
   if Diagnostics.has_errors file_errors then
@@ -324,7 +326,16 @@ let process_file
       deferred_decls = [];
       file_map_reduce_data = Map_reduce.empty;
     }
-  else
+  else begin
+    (* Decl prefetching: implemented for Rust provider backend only *)
+    (if prefetch_decls_enabled then
+      match Provider_context.get_backend ctx with
+      | Provider_backend.Rust_provider_backend _ ->
+        let nast = Diagnostics.ignore_ (fun () -> Naming.program ctx ast) in
+        let class_names = scrape_class_names nast in
+        if SSet.cardinal class_names > prefetch_decls_threshold then
+          Decl_provider.prefetch_decls ctx (SSet.elements class_names)
+      | _ -> ());
     let opts = Provider_context.get_tcopt ctx in
     let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
     try
@@ -371,6 +382,7 @@ let process_file
       let e = Exception.wrap exn in
       prerr_endline ("Exception on file " ^ Relative_path.S.to_string fn);
       Exception.reraise e
+  end
 
 module ProcessFilesTally = struct
   (** Counters for the [check_file_workitem] of each sort being processed *)
@@ -471,7 +483,12 @@ let process_one_workitem
     match fn with
     | Check file ->
       let { file_diagnostics; file_map_reduce_data; deferred_decls } =
-        process_file ctx file ~decl_cap_mb
+        process_file
+          ctx
+          file
+          ~decl_cap_mb
+          ~prefetch_decls_enabled:check_info.prefetch_decls_enabled
+          ~prefetch_decls_threshold:check_info.prefetch_decls_threshold
       in
       let map_reduce_data =
         Map_reduce.reduce map_reduce_data file_map_reduce_data
@@ -485,7 +502,12 @@ let process_one_workitem
       begin
         if type_check_twice then
           let (_ignored : process_file_results) =
-            process_file ctx file ~decl_cap_mb
+            process_file
+              ctx
+              file
+              ~decl_cap_mb
+              ~prefetch_decls_enabled:false
+              ~prefetch_decls_threshold:0
           in
           ()
       end;

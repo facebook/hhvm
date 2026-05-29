@@ -144,6 +144,9 @@ ocaml_ffi! {
     fn hh_rust_provider_backend_declare_folded_class(backend: Backend, name: pos::TypeName) {
         backend.declare_folded_class(name)
     }
+    fn hh_rust_provider_backend_prefetch_folded_classes(backend: Backend, names: Vec<pos::TypeName>, opts: oxidized::decl_parser_options::DeclParserOptions) {
+        backend.prefetch_folded_classes(names, opts)
+    }
     fn hh_rust_provider_backend_oldify_defs(backend: Backend, names: file_info::Names) {
         backend.oldify_defs(&names)
     }

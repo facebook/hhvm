@@ -485,6 +485,10 @@ module Hhconf : sig
 
   val heartbeat_interval : string
 
+  val prefetch_decls_enabled : string
+
+  val prefetch_decls_threshold : string
+
   val hg_aware : string
 
   val hg_aware_parsing_restart_threshold : string

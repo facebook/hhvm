@@ -396,6 +396,15 @@ module Decl = struct
   let declare_folded_class t ctx name =
     set_decl_store t;
     with_ctx_proxy_opt t ctx @@ fun () -> declare_folded_class t name
+
+  external prefetch_folded_classes_ffi :
+    t -> string list -> Decl_parser_options.t -> unit
+    = "hh_rust_provider_backend_prefetch_folded_classes"
+
+  let prefetch_folded_classes t ctx ~opts names =
+    set_decl_store t;
+    with_ctx_proxy_opt t ctx @@ fun () ->
+    prefetch_folded_classes_ffi t names opts
 end
 
 let set backend = Decl.set_decl_store backend

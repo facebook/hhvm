@@ -46,6 +46,8 @@ module Decl = struct
 
   let declare_folded_class _ _ _ = failwith "unimplemented"
 
+  let prefetch_folded_classes _ _ ~opts:_ _ : unit = failwith "unimplemented"
+
   let get_old_shallow_classes_batch _ _ = failwith "unimplemented"
 
   let get_old_defs _ _ = failwith "unimplemented"

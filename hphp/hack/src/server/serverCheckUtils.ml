@@ -122,6 +122,10 @@ let get_check_info ~check_reason ~log_errors ~discard_warnings (genv : genv) env
     per_file_profiling = genv.local_config.ServerLocalConfig.per_file_profiling;
     memtrace_dir = genv.local_config.ServerLocalConfig.memtrace_dir;
     heartbeat_interval = genv.local_config.ServerLocalConfig.heartbeat_interval;
+    prefetch_decls_enabled =
+      genv.local_config.ServerLocalConfig.prefetch_decls_enabled;
+    prefetch_decls_threshold =
+      genv.local_config.ServerLocalConfig.prefetch_decls_threshold;
   }
 
 type user_filter =

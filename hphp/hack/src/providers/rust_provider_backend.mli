@@ -57,6 +57,9 @@ module Decl : sig
 
   val declare_folded_class : t -> ctx_proxy option -> string -> unit
 
+  val prefetch_folded_classes :
+    t -> ctx_proxy option -> opts:Decl_parser_options.t -> string list -> unit
+
   val get_old_defs :
     t ->
     FileInfo.names ->

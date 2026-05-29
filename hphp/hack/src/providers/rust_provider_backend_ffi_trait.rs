@@ -53,6 +53,20 @@ pub trait ProviderBackendFfi {
     /// Fold the given class (writing to folded decl stores).
     fn declare_folded_class(&self, name: pos::TypeName);
 
+    /// Fold multiple classes in parallel, warming the decl caches.
+    /// `opts` supplies the worker thread stack size. The default
+    /// implementation is sequential; the blanket impl for
+    /// RustProviderBackend overrides this with a rayon-parallel version.
+    fn prefetch_folded_classes(
+        &self,
+        names: Vec<pos::TypeName>,
+        _opts: oxidized::decl_parser_options::DeclParserOptions,
+    ) {
+        for name in names {
+            self.declare_folded_class(name);
+        }
+    }
+
     /// Optional fast path for `NamingProvider::get_type_path_and_kind`.
     ///
     /// If `Some` is returned, the `UnsafeOcamlPtr` is expected to have OCaml
@@ -340,6 +354,21 @@ where
     fn declare_folded_class(&self, name: pos::TypeName) {
         let _: Option<Arc<decl::FoldedClass<R>>> =
             self.folded_decl_provider().get_class(name).unwrap();
+    }
+
+    fn prefetch_folded_classes(
+        &self,
+        names: Vec<pos::TypeName>,
+        opts: oxidized::decl_parser_options::DeclParserOptions,
+    ) {
+        use rayon::prelude::*;
+        let pool = hack_thread_pool::get_thread_pool(&opts);
+        let fdp = self.folded_decl_provider();
+        pool.install(|| {
+            names.par_iter().for_each(|&name| {
+                let _ = fdp.get_class(name);
+            });
+        });
     }
 
     fn as_any(&self) -> &dyn std::any::Any {

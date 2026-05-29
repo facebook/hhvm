@@ -303,6 +303,11 @@ type t = {
       always lazily declares classes not already in cache. *)
   heartbeat_interval: int option;
       (** If set, periodically log which file is being type-checked, every this many seconds *)
+  prefetch_decls_enabled: bool;
+      (** If true, prefetch class declarations in parallel before type-checking files
+          with many class references. *)
+  prefetch_decls_threshold: int;
+      (** Minimum number of class name references in a file to trigger parallel decl prefetching. *)
   produce_streaming_errors: bool;
       (** whether hh_server should write errors to errors.bin file *)
   consume_streaming_errors: bool;

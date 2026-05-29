@@ -41,6 +41,8 @@ val process_file :
   Provider_context.t ->
   Typing_service_types.check_file_workitem ->
   decl_cap_mb:int option ->
+  prefetch_decls_enabled:bool ->
+  prefetch_decls_threshold:int ->
   process_file_results
 
 type result = {

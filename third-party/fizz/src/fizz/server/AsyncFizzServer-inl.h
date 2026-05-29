@@ -349,7 +349,7 @@ void AsyncFizzServerT<SM>::ActionMoveVisitor::operator()(
 
   // Disable record aligned reads. At this point, we are aligned on a record
   // boundary (if handshakeRecordAlignedReads = true).
-  server_.updateReadHint(0);
+  server_.setHandshakeRecordAlignedReads(false);
   if (fizz_hook_on_handshake_success) {
     fizz_hook_on_handshake_success(&server_, server_.getState());
   }

@@ -326,6 +326,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
    */
   void setHandshakeRecordAlignedReads(bool flag) {
     constexpr size_t kRecordHeaderSize = 5;
+    handshakeAligned_ = flag;
     if (flag) {
       readSizeHint_ = kRecordHeaderSize;
     }
@@ -483,14 +484,9 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
    *
    * Record aligned reads are not the default; it must be explicitly enabled
    * through AsyncFizzBase::setHandshakeRecordAlignedReads()
-   *
-   * setting hint=0 disables this functionality. All subsequent updateReadHint()
-   * values will be ignored.
    */
   void updateReadHint(size_t hint) {
-    if (readSizeHint_ > 0) {
-      readSizeHint_ = hint;
-    }
+    readSizeHint_ = hint;
   }
 
   /**
@@ -602,6 +598,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   size_t appBytesReceived_{0};
 
   size_t readSizeHint_{0};
+  bool handshakeAligned_{false};
 
   QueuedWriteRequest* tailWriteRequest_{nullptr};
   QueuedWriteRequest* immediatelyPendingWriteRequest_{nullptr};

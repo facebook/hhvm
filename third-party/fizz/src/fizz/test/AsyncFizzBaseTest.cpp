@@ -1062,11 +1062,10 @@ TEST_F(AsyncFizzBaseTest, TestAlignedRecordReads) {
     auto _ = this->transportReadBuf_.move();
   }
 
-  // When the handshake completes, read hint will be 0, subsequent allocations
-  // should be equal to the default kMaxReadSize allocation.
-  this->updateReadHint(0);
-
-  // This should be ignored, since updateReadHint(0) was already called.
+  // When the handshake completes, explicitly disable record aligned reads.
+  // subsequent allocations should be equal to the default kMaxReadSize
+  // allocation.
+  this->setHandshakeRecordAlignedReads(false);
   this->updateReadHint(5);
 
   this->transportReadCallback_->getReadBuffer(&buf, &len);

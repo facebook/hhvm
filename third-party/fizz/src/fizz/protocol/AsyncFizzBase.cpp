@@ -376,7 +376,7 @@ void AsyncFizzBase::getReadBuffer(
   // equal to the size of the TLS record header. Subsequently, the state machine
   // will tell us exactly how much data is required to complete the record
   // in WaitForData actions.
-  if (readSizeHint_ > 0) {
+  if (handshakeAligned_) {
     *lenReturn = std::min(
         static_cast<decltype(readSizeHint_)>(
             transportOptions_.readBufferMinReadSize),

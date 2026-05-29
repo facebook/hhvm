@@ -8,9 +8,9 @@
 #include "watchman/portability/Backtrace.h"
 #include <stdint.h>
 #include <mutex>
-#include <vector>
 
 #ifdef _WIN32
+#include <vector>
 
 #define PRIsize_t "Iu"
 

@@ -22,6 +22,10 @@
 #include <wangle/acceptor/FizzAcceptorHandshakeHelper.h>
 #include <wangle/acceptor/SSLAcceptorHandshakeHelper.h>
 
+THRIFT_FLAG_DEFINE_bool(server_fizz_prealloc_from_record_hint, false);
+THRIFT_FLAG_DEFINE_bool(server_fizz_aligned_record_reads, false);
+THRIFT_FLAG_DEFINE_bool(server_fizz_skip_slice_partial_writes, false);
+
 namespace apache::thrift {
 
 namespace detail {
@@ -32,6 +36,11 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     void, setSockOptTLSInfo, fizz::server::AsyncFizzServer*) {
+  return;
+}
+
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    void, setFizzShouldSlicePredicate, fizz::server::AsyncFizzServer*) {
   return;
 }
 } // namespace detail
@@ -115,6 +124,23 @@ void ThriftFizzAcceptorHandshakeHelper::fizzHandshakeSuccess(
           t->setSecurityProtocolOverride(p);
         }
       }(transport, kSecurityProtocolStopTLSV2);
+      if (**THRIFT_FLAG_OBSERVE(server_fizz_aligned_record_reads)) {
+        [](auto* t) {
+          if constexpr (requires { t->setAlignedRecordReads(true); }) {
+            t->setAlignedRecordReads(true);
+          }
+        }(transport);
+      }
+      if (**THRIFT_FLAG_OBSERVE(server_fizz_prealloc_from_record_hint)) {
+        [](auto* t) {
+          if constexpr (requires { t->setPreallocFromRecordHint(true); }) {
+            t->setPreallocFromRecordHint(true);
+          }
+        }(transport);
+      }
+      if (**THRIFT_FLAG_OBSERVE(server_fizz_skip_slice_partial_writes)) {
+        detail::setFizzShouldSlicePredicate(transport);
+      }
     }
 
     if (thriftExtension_->getNegotiatedStopTLS()) {

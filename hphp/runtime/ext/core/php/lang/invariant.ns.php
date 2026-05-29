@@ -83,7 +83,7 @@ function invariant(
   mixed... $args
 )[]: void {
   /* HH_IGNORE[12003] sketchy null check on $test */
-  if (!\HH\legacy_is_truthy($test)) {
+  if (!$test) {
     \HH\invariant_violation(
       HH\FIXME\UNSAFE_CAST<mixed, string>($format_str),
       ...$args,

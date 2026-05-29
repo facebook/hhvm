@@ -178,7 +178,7 @@ function hash_update_file(mixed $context, string $filename,
   }
   for (
     $data = HH\FIXME\UNSAFE_CAST<mixed, string>(fread($fp, 1024));
-    strlen($data) !== 0;
+    strlen($data);
     $data = HH\FIXME\UNSAFE_CAST<mixed, string>(fread($fp, 1024))
   ) {
     if (!hash_update(HH\FIXME\UNSAFE_CAST<mixed, resource>($context), $data)) {
@@ -206,12 +206,12 @@ function hash_update_stream(mixed $context, mixed $handle,
   $didread = 0;
   $context = HH\FIXME\UNSAFE_CAST<mixed, resource>($context);
   $handle = HH\FIXME\UNSAFE_CAST<mixed, resource>($handle);
-  while ($maxlen !== 0) {
+  while ($maxlen) {
     $chunk = HH\FIXME\UNSAFE_CAST<mixed, string>(
       fread($handle, ($maxlen > 0) ? $maxlen : 1024)
     );
     $len = strlen($chunk);
-    if ($len === 0) {
+    if (!$len) {
       return $didread;
     }
     if (!hash_update($context, $chunk)) {
@@ -286,7 +286,7 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
   $hash_length = strlen(
     HH\FIXME\UNSAFE_CAST<mixed, string>(hash($algo, "", true))
   );
-  if ($length === 0) {
+  if (!$length) {
     $length = $hash_length;
     if (!$raw_output) {
       // It's a bit weird

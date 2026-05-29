@@ -5,7 +5,6 @@ HHVM_DEFINE_EXTENSION("hh" REQUIRED
     ext_hh.h
   SYSTEMLIB
     ext_hh.php
-    ext_hh_functions.php
 )
 
 HHVM_DEFINE_EXTENSION("implicit_context" REQUIRED

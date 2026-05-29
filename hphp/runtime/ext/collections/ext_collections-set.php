@@ -55,7 +55,7 @@ final class Set<T as arraykey> implements \MutableSet<T> {
   /** Returns true if the Set is empty, false otherwise.
    * @return bool
    */
-  public readonly function isEmpty()[]: bool { return $this->count() === 0; }
+  public readonly function isEmpty()[]: bool { return !$this->count(); }
 
   /** Returns the number of values in the Set.
    * @return int
@@ -526,7 +526,7 @@ final class ImmSet<T as arraykey> implements \ConstSet<T> {
   /** Returns true if the ImmSet is empty, false otherwise.
    * @return bool
    */
-  public readonly function isEmpty()[]: bool { return $this->count() === 0; }
+  public readonly function isEmpty()[]: bool { return !$this->count(); }
 
   /** Returns the number of values in the ImmSet.
    * @return int

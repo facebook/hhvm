@@ -58,7 +58,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return bool
    */
   public readonly function isEmpty()[]: bool {
-    return $this->count() === 0;
+    return !$this->count();
   }
 
   /** Returns the number of key/value pairs in the Map.
@@ -641,7 +641,7 @@ final class ImmMap<Tk as arraykey, Tv> implements \ConstMap<Tk, Tv> {
    * @return bool
    */
   public readonly function isEmpty()[]: bool {
-    return $this->count() === 0;
+    return !$this->count();
   }
 
   /** Returns the number of key/value pairs in the ImmMap.

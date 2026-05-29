@@ -25,6 +25,10 @@
 
 namespace HPHP::jit {
 
+#ifdef __aarch64__
+namespace arm { struct ImmFolder; }
+#endif
+
 #ifdef __x86_64__
 namespace x64 { struct ImmFolder; }
 
@@ -254,5 +258,100 @@ TEST(Vasm, FoldImms) {
   );
 #endif
 }
+
+#ifdef __aarch64__
+TEST(Vasm, FoldImmsArmLimitsSignedZeroToCmpsd) {
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  Vout v(unit, unit.entry);
+
+  auto const base = v.makeReg();
+  auto const positiveZero = unit.makeConst(0.0);
+  auto const negativeZero = unit.makeConst(-0.0);
+  auto const nonZero = unit.makeConst(1.0);
+  auto const positiveCmp = VregDbl{v.makeReg()};
+  auto const negativeCmp = VregDbl{v.makeReg()};
+  auto const neqCmp = VregDbl{v.makeReg()};
+
+  v << ldimmq{0x1000, base};
+  v << store{positiveZero, base[0]};
+  v << store{negativeZero, base[8]};
+  v << cmpsd{
+    ComparisonPred::eq_ord,
+    VregDbl{nonZero},
+    VregDbl{positiveZero},
+    positiveCmp
+  };
+  v << cmpsd{
+    ComparisonPred::eq_ord,
+    VregDbl{negativeZero},
+    VregDbl{nonZero},
+    negativeCmp
+  };
+  v << cmpsd{
+    ComparisonPred::ne_unord,
+    VregDbl{nonZero},
+    VregDbl{positiveZero},
+    neqCmp
+  };
+  v << ret{};
+
+  foldImms<arm::ImmFolder>(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 7);
+  ASSERT_EQ(code[1].op, Vinstr::store);
+  ASSERT_EQ(code[2].op, Vinstr::store);
+  ASSERT_EQ(code[3].op, Vinstr::cmpsdz);
+  ASSERT_EQ(code[4].op, Vinstr::cmpsdz);
+  ASSERT_EQ(code[5].op, Vinstr::cmpsdz);
+  EXPECT_EQ(code[1].store_.s, Vreg64{PhysReg(vixl::xzr)}) << show(unit);
+  EXPECT_EQ(code[2].store_.s, negativeZero) << show(unit);
+  EXPECT_EQ(code[3].cmpsdz_.pred, ComparisonPred::eq_ord) << show(unit);
+  EXPECT_EQ(code[3].cmpsdz_.s, VregDbl{nonZero}) << show(unit);
+  EXPECT_EQ(code[4].cmpsdz_.pred, ComparisonPred::eq_ord) << show(unit);
+  EXPECT_EQ(code[4].cmpsdz_.s, VregDbl{nonZero}) << show(unit);
+  EXPECT_EQ(code[5].cmpsdz_.pred, ComparisonPred::ne_unord) << show(unit);
+  EXPECT_EQ(code[5].cmpsdz_.s, VregDbl{nonZero}) << show(unit);
+}
+
+TEST(Vasm, FoldImmsArmLimitsSignedZeroToUcomisd) {
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  Vout v(unit, unit.entry);
+
+  auto const base = v.makeReg();
+  auto const positiveZero = unit.makeConst(0.0);
+  auto const negativeZero = unit.makeConst(-0.0);
+  auto const nonZero = unit.makeConst(1.0);
+  auto const positiveSf = VregSF{v.makeReg()};
+  auto const negativeSf = VregSF{v.makeReg()};
+  auto const reverseSf = VregSF{v.makeReg()};
+
+  v << ldimmq{0x1000, base};
+  v << store{positiveZero, base[0]};
+  v << store{negativeZero, base[8]};
+  v << ucomisd{VregDbl{nonZero}, VregDbl{positiveZero}, positiveSf};
+  v << ucomisd{VregDbl{nonZero}, VregDbl{negativeZero}, negativeSf};
+  v << ucomisd{VregDbl{positiveZero}, VregDbl{nonZero}, reverseSf};
+  v << ret{};
+
+  foldImms<arm::ImmFolder>(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 7);
+  ASSERT_EQ(code[1].op, Vinstr::store);
+  ASSERT_EQ(code[2].op, Vinstr::store);
+  ASSERT_EQ(code[3].op, Vinstr::ucomisdz);
+  ASSERT_EQ(code[4].op, Vinstr::ucomisdz);
+  ASSERT_EQ(code[5].op, Vinstr::ucomisd);
+  EXPECT_EQ(code[1].store_.s, Vreg64{PhysReg(vixl::xzr)}) << show(unit);
+  EXPECT_EQ(code[2].store_.s, negativeZero) << show(unit);
+  EXPECT_EQ(code[3].ucomisdz_.s, VregDbl{nonZero}) << show(unit);
+  EXPECT_EQ(code[4].ucomisdz_.s, VregDbl{nonZero}) << show(unit);
+  EXPECT_EQ(code[5].ucomisd_.s0, VregDbl{positiveZero}) << show(unit);
+  EXPECT_EQ(code[5].ucomisd_.s1, VregDbl{nonZero}) << show(unit);
+}
+#endif
 
 }

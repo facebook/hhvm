@@ -28,7 +28,7 @@ struct ImmFolder {
   jit::vector<uint64_t> vals;
   boost::dynamic_bitset<> valid;
 
-  explicit ImmFolder(Vunit& /*unit*/, jit::vector<uint8_t>&& uses_in)
+  explicit ImmFolder(Vunit&, jit::vector<uint8_t>&& uses_in)
       : uses(std::move(uses_in)) {}
 
   bool arith_imm(Vreg r, int32_t& out) {
@@ -59,6 +59,22 @@ struct ImmFolder {
   bool zero_imm(Vreg r) {
     if (!valid.test(r)) return false;
     return vals[r] == 0;
+  }
+
+  bool double_zero_imm(Vreg r) {
+    return valid.test(r) &&
+      (vals[r] == 0 || vals[r] == (uint64_t{1} << 63));
+  }
+
+  static bool can_fold_cmpsd_zero(ComparisonPred pred) {
+    switch (pred) {
+    case ComparisonPred::eq_ord:
+    case ComparisonPred::ne_unord:
+      return true;
+    default:
+      // Keep future predicates on cmpsd until cmpsdz handles them explicitly.
+      return false;
+    }
   }
 
   template<typename arithi, typename arith>
@@ -126,6 +142,24 @@ struct ImmFolder {
   void fold(cmpw& in, Vinstr& out) { return fold_cmp<cmpwi>(in, out); }
   void fold(cmpl& in, Vinstr& out) { return fold_cmp<cmpli>(in, out); }
   void fold(cmpq& in, Vinstr& out) { return fold_cmp<cmpqi>(in, out); }
+  void fold(cmpsd& in, Vinstr& out) {
+    auto const in_copy = in;
+    if (!can_fold_cmpsd_zero(in_copy.pred)) return;
+
+    // ARM fcmeq treats +0.0 and -0.0 equally.
+    if (double_zero_imm(in_copy.s1)) {
+      out = cmpsdz{in_copy.pred, in_copy.s0, in_copy.d};
+    } else if (double_zero_imm(in_copy.s0)) {
+      out = cmpsdz{in_copy.pred, in_copy.s1, in_copy.d};
+    }
+  }
+  void fold(ucomisd& in, Vinstr& out) {
+    auto const in_copy = in;
+    // Arm64 only supports the second operand being 0.0.
+    if (double_zero_imm(in_copy.s1)) {
+      out = ucomisdz{in_copy.s0, in_copy.sf, in_copy.fl};
+    }
+  }
 
   void fold(andq& in, Vinstr& out) {
     // Copy `in` because it aliases `out` through the Vinstr union, and

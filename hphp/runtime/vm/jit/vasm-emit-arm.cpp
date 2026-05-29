@@ -356,6 +356,7 @@ struct Vgen {
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
   void emit(const cmpqi& i) { a->Cmp(X(i.s1), i.s0.q()); }
   void emit(const cmpsd& i);
+  void emit(const cmpsdz& i);
   // TODO(CDE): csinc[bw]{} Should a) sign extend and b) set SF for overflow
   void emit(const csincb& i) { a->Csinc(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const csincw& i) { a->Csinc(W(i.d), W(i.t), W(i.f), C(i.cc)); }
@@ -454,6 +455,7 @@ struct Vgen {
   void emit(const testqi64& i) { a->Tst(X(i.s1), i.s0.q()); }
   void emit(const trap& /*i*/);
   void emit(const ucomisd& i) { a->Fcmp(D(i.s0), D(i.s1)); }
+  void emit(const ucomisdz& i) { a->Fcmp(D(i.s), 0.0); }
   void emit(const unpcklpd&);
   void emit(const pack2q&);
   void emit(const xorb& i);
@@ -1326,6 +1328,19 @@ void Vgen::emit(const cmpsd& i) {
   switch (i.pred) {
   case ComparisonPred::eq_ord:
     // Do nothing
+    break;
+  case ComparisonPred::ne_unord:
+    a->mvn(D(i.d), D(i.d));
+    break;
+  default:
+    always_assert(false);
+  }
+}
+
+void Vgen::emit(const cmpsdz& i) {
+  a->fcmeq(D(i.d), D(i.s), 0.0);
+  switch (i.pred) {
+  case ComparisonPred::eq_ord:
     break;
   case ComparisonPred::ne_unord:
     a->mvn(D(i.d), D(i.d));

@@ -168,12 +168,12 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
     [&](Vout& v) {
       // result > max signed int or unordered
       auto const sf = v.makeReg();
-      v << ucomisd{v.cns(0.0), src, sf};
+      v << ucomisd{src, v.cns(0.0), sf};
 
       return cond(
-        v, CC_NB, sf, v.makeReg(), [&](Vout& /*v*/) { return d; },
+        v, CC_BE, sf, v.makeReg(), [&](Vout& /*v*/) { return d; },
         [&](Vout& v) {
-          // src > 0 (CF = 1 -> less than 0 or unordered)
+          // src > 0.
           return cond(v, CC_P, sf, v.makeReg(),
             [&] (Vout& v) {
               // PF = 1 -> unordered, i.e., we are doing an int cast of NaN.

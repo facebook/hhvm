@@ -90,6 +90,7 @@ proxygen_add_library(proxygen_hq_samples
     proxygen_http_http_utils
     proxygen_http_message
     proxygen_http_codec_codec
+    proxygen_http_codec_h3_early_data_handler
     proxygen_http_session_hq_upstream_session
     proxygen_http_session_http_transaction
     proxygen_http_session_client

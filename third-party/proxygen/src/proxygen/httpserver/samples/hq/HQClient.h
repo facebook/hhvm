@@ -15,6 +15,7 @@
 #include <proxygen/httpserver/samples/hq/H1QUpstreamSession.h>
 #include <proxygen/httpserver/samples/hq/HQCommandLine.h>
 #include <proxygen/lib/http/HTTPMessage.h>
+#include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
 #include <proxygen/lib/http/session/HQUpstreamSession.h>
 #include <quic/common/events/HighResQuicTimer.h>
 
@@ -116,6 +117,8 @@ class HQClient
   folly::Optional<std::function<void(const proxygen::HTTPMessage& request,
                                      const folly::IOBuf* chainBuf)>>
       onBodyFunc_;
+
+  std::unique_ptr<proxygen::H3EarlyDataHandler> earlyDataHandler_;
 
   bool failed_{false};
 

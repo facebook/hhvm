@@ -71,6 +71,9 @@ void HQClient::onTransportReady() noexcept {
     hqSession_->setConnectCallback(&connCb_);
     quicClient_->setConnectionCallback(hqSession_);
     quicClient_->setConnectionSetupCallback(hqSession_);
+    if (earlyDataHandler_) {
+      hqSession_->setEarlyDataHandler(std::move(earlyDataHandler_));
+    }
     hqSession_->setSocket(quicClient_);
     hqSession_->startNow();
     // TODO: get rid HQUpstreamSession::ConnectCallback
@@ -320,6 +323,10 @@ void HQClient::initializeQuicClient(const folly::SocketAddress& remoteAddress,
   }
   client->setTransportSettings(params_.transportSettings);
   client->setSupportedVersions(params_.quicVersions);
+  if (params_.transportSettings.attemptEarlyData) {
+    earlyDataHandler_ = std::make_unique<proxygen::H3EarlyDataHandler>();
+    client->setEarlyDataAppParamsHandler(earlyDataHandler_.get());
+  }
 
   quicClient_ = std::move(client);
 }

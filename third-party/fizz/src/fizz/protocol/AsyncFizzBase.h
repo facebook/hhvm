@@ -12,6 +12,7 @@
 #include <fizz/protocol/KeyScheduler.h>
 #include <fizz/record/Types.h>
 #include <fizz/util/Logging.h>
+#include <folly/Function.h>
 #include <folly/io/IOBufIovecBuilder.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncSocket.h>
@@ -345,6 +346,21 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   }
 
   /**
+   * Predicate consulted on every writeChain to decide whether large/shared
+   * writes should be sliced into kPartialWriteThreshold-sized chunks before
+   * being handed to the record layer.
+   *
+   * Callers that need different policy can install a custom predicate; for
+   * example, a buffer that should be passed through to the record layer in a
+   * single piece can be exempted by returning false here.
+   */
+  using ShouldSliceFn = folly::Function<bool(const folly::IOBuf& buf) const>;
+
+  void setShouldSlicePredicate(ShouldSliceFn fn) {
+    shouldSliceFn_ = std::move(fn);
+  }
+
+  /**
    * If set, after AsyncFizzBase has been used to write `bytes` worth of data,
    * AsyncFizzBase will automatically initiate a key_update
    */
@@ -602,6 +618,8 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   void
   getReadBuffer(folly::IOBufQueue& buf, void** bufReturn, size_t* lenReturn);
 
+  bool shouldSlice(const folly::IOBuf& buf);
+
   ReadCallback* readCallback_{nullptr};
   std::unique_ptr<folly::IOBuf> appDataBuf_;
   folly::Optional<folly::AsyncSocketException> pendingReadEx_;
@@ -612,6 +630,8 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   size_t readSizeHint_{0};
   bool handshakeAligned_{false};
   bool preallocFromRecordHint_{false};
+
+  ShouldSliceFn shouldSliceFn_;
 
   QueuedWriteRequest* tailWriteRequest_{nullptr};
   QueuedWriteRequest* immediatelyPendingWriteRequest_{nullptr};

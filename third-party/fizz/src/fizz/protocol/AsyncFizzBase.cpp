@@ -93,7 +93,10 @@ AsyncFizzBase::QueuedWriteRequest::QueuedWriteRequest(
 }
 
 void AsyncFizzBase::QueuedWriteRequest::startWriting() {
-  auto buf = data_.splitAtMost(kPartialWriteThreshold);
+  auto* head = data_.front();
+  auto buf = asyncFizzBase_->shouldSlice(*head)
+      ? data_.splitAtMost(kPartialWriteThreshold)
+      : data_.move();
 
   auto flags = flags_;
   if (!data_.empty()) {
@@ -196,8 +199,9 @@ void AsyncFizzBase::writeChain(
   // when sending early data to avoid the possibility of splitting writes
   // between early data and normal data.
   bool largeWrite = writeSize > kPartialWriteThreshold;
+  bool slice = largeWrite && shouldSlice(*buf);
   bool transportBuffering = transport_->getRawBytesBuffered() > 0;
-  bool needsToQueue = (largeWrite || transportBuffering) && buf->isShared() &&
+  bool needsToQueue = (slice || transportBuffering) && buf->isShared() &&
       !connecting() && isReplaySafe();
   if (tailWriteRequest_ || needsToQueue) {
     auto newWriteRequest =
@@ -386,6 +390,13 @@ void AsyncFizzBase::getReadBuffer(
   } else {
     *lenReturn = readSpace.second;
   }
+}
+
+bool AsyncFizzBase::shouldSlice(const folly::IOBuf& buf) {
+  if (shouldSliceFn_) {
+    return shouldSliceFn_(buf);
+  }
+  return true;
 }
 
 void AsyncFizzBase::getReadBuffer(void** bufReturn, size_t* lenReturn) {

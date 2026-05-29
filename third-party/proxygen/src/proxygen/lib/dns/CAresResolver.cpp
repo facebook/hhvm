@@ -106,6 +106,7 @@ void CAresResolver::Query::cancelResolutionImpl() {
   callback_ = nullptr;
   cancelTimeout();
   resolver_->queryFinished();
+  resolver_->sampleActiveQueries();
 }
 
 void CAresResolver::Query::fail(ResolutionStatus status,
@@ -226,6 +227,7 @@ void CAresResolver::Query::checkForCName(Query* self, hostent* host) {
 void CAresResolver::Query::queryCallback(
     void* data, int status, int /*timeouts*/, unsigned char* abuf, int alen) {
   auto* self = static_cast<Query*>(data);
+  self->resolver_->noteCAresQueryCompleted();
 
   // Record the RCODE value for this query. Note that we ignore the
   // recordStats_ stat, as that's only for aggregated end-of-resolution
@@ -435,14 +437,15 @@ void CAresResolver::Query::queryCallback(
 // leave it around for the query callback to complete
 void CAresResolver::Query::timeoutExpired() noexcept {
   ResolutionCallback* cb = callback_;
+  CAresResolver* resolver = resolver_;
 
   callback_ = nullptr;
-  resolver_->queryFinished();
+  resolver->queryFinished();
+  resolver->sampleActiveQueries();
   if (!cb) {
     return;
   }
 
-  CAresResolver* resolver = resolver_;
   auto ew =
       folly::make_exception_wrapper<Exception>(TIMEOUT, "Query timed out");
   std::chrono::milliseconds resolutionTime = millisecondsSince(startTime_);
@@ -596,9 +599,13 @@ class CAresResolver::SocketHandler : public folly::EventHandler {
         (events & EventHandler::READ) ? sock_.data : ARES_SOCKET_BAD;
     ares_socket_t wsock =
         (events & EventHandler::WRITE) ? sock_.data : ARES_SOCKET_BAD;
+    auto* resolver = resolver_;
 
-    DelayedDestruction::DestructorGuard dg(resolver_);
+    DelayedDestruction::DestructorGuard dg(resolver);
     ares_process_fd(channel_, rsock, wsock);
+    // `ares_process_fd()` can close the current socket and destroy `this`.
+    // Use the guarded resolver pointer captured above after it returns.
+    resolver->sampleActiveQueries();
   }
 
  private:
@@ -661,6 +668,33 @@ void CAresResolver::setStatsCollector(DNSResolver::StatsCollector* sc) {
 
 DNSResolver::StatsCollector* CAresResolver::getStatsCollector() const {
   return statsCollector_;
+}
+
+void CAresResolver::noteCAresQueryStarted() {
+  ++caresActiveQueries_;
+}
+
+void CAresResolver::noteCAresQueryCompleted() {
+  if (caresActiveQueries_ == 0) {
+    LOG(ERROR) << "Invalid c-ares active query count in "
+                  "`CAresResolver::queryCallback()`";
+    return;
+  }
+  --caresActiveQueries_;
+}
+
+void CAresResolver::sampleActiveQueries() {
+  if (!caresStateSamplingEnabled_) {
+    return;
+  }
+  getStatsCollector()->recordCAresActiveQueries(caresActiveQueries_);
+}
+
+void CAresResolver::sampleOpenSockets() {
+  if (!caresStateSamplingEnabled_) {
+    return;
+  }
+  getStatsCollector()->recordCAresOpenSockets(socketHandlers_.size());
 }
 
 void CAresResolver::init() {
@@ -781,6 +815,7 @@ void CAresResolver::resolveAddress(DNSResolver::ResolutionCallback* cb,
                      &timeUtil_,
                      std::move(teContext));
   q->resolve(cb, timeout);
+  sampleActiveQueries();
 }
 
 bool CAresResolver::resolveLocalhost(ResolutionCallback* cb,
@@ -855,6 +890,7 @@ void CAresResolver::resolveHostname(DNSResolver::ResolutionCallback* cb,
   dnsEvent.addMeta(TraceFieldType::NumberResolvers, servers_.size());
   dnsEvent.addMeta(TraceFieldType::ResolversSerialized, serializedResolvers_);
   dnsEvent.addMeta(TraceFieldType::RequestFamily, family);
+  bool issuedQuery = false;
 
   if (resolveSRVRecord_) {
     auto q = new Query(this,
@@ -866,6 +902,7 @@ void CAresResolver::resolveHostname(DNSResolver::ResolutionCallback* cb,
                        std::move(teContext));
     cb->insertQuery(q);
     q->resolve(cb, std::chrono::milliseconds(timeout));
+    issuedQuery = true;
   }
 
   if (family == AF_INET) {
@@ -878,6 +915,7 @@ void CAresResolver::resolveHostname(DNSResolver::ResolutionCallback* cb,
                        std::move(teContext));
     cb->insertQuery(q);
     q->resolve(cb, std::chrono::milliseconds(timeout));
+    issuedQuery = true;
   } else if (family == AF_INET6) {
     auto q = new Query(this,
                        RecordType::kAAAA,
@@ -888,6 +926,7 @@ void CAresResolver::resolveHostname(DNSResolver::ResolutionCallback* cb,
                        std::move(teContext));
     cb->insertQuery(q);
     q->resolve(cb, std::chrono::milliseconds(timeout));
+    issuedQuery = true;
   } else if (family == AF_UNSPEC) {
     auto mq = new MultiQuery(this, host);
     cb->insertQuery(mq);
@@ -907,12 +946,17 @@ void CAresResolver::resolveHostname(DNSResolver::ResolutionCallback* cb,
                            &timeUtil_,
                            teContext)},
                 std::chrono::milliseconds(timeout));
+    issuedQuery = true;
   } else {
     LOG(DFATAL) << "Unsupported family specified: " << family;
     auto ew = folly::make_exception_wrapper<Exception>(
         INVALID,
         folly::to<std::string>("Unsupported address family: ", family));
     cb->resolutionError(ew);
+  }
+
+  if (issuedQuery) {
+    sampleActiveQueries();
   }
 }
 
@@ -940,6 +984,7 @@ void CAresResolver::resolveMailExchange(DNSResolver::ResolutionCallback* cb,
                      &timeUtil_,
                      std::move(teContext));
   q->resolve(cb, timeout);
+  sampleActiveQueries();
 }
 
 bool CAresResolver::resolveLiterals(DNSResolver::ResolutionCallback* cb,
@@ -971,6 +1016,8 @@ void CAresResolver::query(const std::string& name,
                           RecordType type,
                           ares_callback cb,
                           void* cb_data) {
+  noteCAresQueryStarted();
+
   if (++channelRefcnt_ == 1) {
     for (auto& shp : socketHandlers_) {
       shp.second->registerHandler(shp.second->getRegisteredEvents());
@@ -1010,6 +1057,7 @@ void CAresResolver::dnsSocketReady(void* data,
         << "dnsSocketReady() asked to close a socket that we don't kow about";
     if (it != self->socketHandlers_.end()) {
       self->socketHandlers_.erase(it);
+      self->sampleOpenSockets();
     }
 
     return;
@@ -1032,6 +1080,9 @@ void CAresResolver::dnsSocketReady(void* data,
   events |= (write) ? EventHandler::WRITE : 0;
   if (!shp->registerHandler(events)) {
     LOG(DFATAL) << "Failed to register SocketHandler";
+  }
+  if (it == self->socketHandlers_.end()) {
+    self->sampleOpenSockets();
   }
 }
 

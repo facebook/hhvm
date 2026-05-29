@@ -347,10 +347,20 @@ class DNSResolver : public folly::DelayedDestruction {
       */
      virtual void recordCachePartialMiss() noexcept {}
 
-    /**
+     /**
       * Optional: record cache hit a stale entry in CachingDNSResolver
       */
      virtual void recordStaleCacheHit() noexcept {}
+
+     /**
+      * Optional: record the current number of active c-ares queries.
+      */
+     virtual void recordCAresActiveQueries(size_t /*count*/) noexcept {}
+
+     /**
+      * Optional: record the current number of open c-ares sockets.
+      */
+     virtual void recordCAresOpenSockets(size_t /*count*/) noexcept {}
 };
 
 

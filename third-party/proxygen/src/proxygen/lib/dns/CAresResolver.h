@@ -182,6 +182,16 @@ class CAresResolver : public DNSResolver {
   }
 
   /**
+   * Enable sampling of c-ares internal state for observability metrics.
+   *
+   * Sampling is disabled by default to avoid extra work on hot query and
+   * socket lifecycle paths when these metrics are not needed.
+   */
+  void enableCAresStateSampling() {
+    caresStateSamplingEnabled_ = true;
+  }
+
+  /**
    * Initialize the resolver.
    */
   virtual void init();
@@ -218,6 +228,7 @@ class CAresResolver : public DNSResolver {
   folly::EventBase* base_;
   ares_channel channel_;
   uint16_t channelRefcnt_;
+  size_t caresActiveQueries_{0};
   std::map<int, std::unique_ptr<SocketHandler>> socketHandlers_;
   std::list<folly::SocketAddress> servers_;
   std::string serializedResolvers_;
@@ -225,6 +236,18 @@ class CAresResolver : public DNSResolver {
   StatsCollector* statsCollector_;
   TimeUtil timeUtil_;
   bool resolveSRVRecord_{false};
+  bool caresStateSamplingEnabled_{false};
+
+  // Tracks the number of queries still owned by c-ares. This intentionally
+  // outlives app-level timeouts so we can see work that c-ares is still
+  // driving after the caller has already given up.
+  void noteCAresQueryStarted();
+  void noteCAresQueryCompleted();
+
+  // Samples c-ares state via resolver-owned query accounting and the socket
+  // state callback.
+  void sampleActiveQueries();
+  void sampleOpenSockets();
 
   // Attempt to resolve literal IPs, invoking the callback and returning
   // true if we succeeded.

@@ -43,11 +43,11 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Val other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -62,14 +62,14 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
 
         public String getStrVal() { return strVal; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="intVal", requiredness=Requiredness.NONE)    public Builder setIntVal(int intVal) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="intVal", requiredness=Requiredness.NONE)    public Builder setIntVal(int intVal) {
             this.intVal = intVal;
             return this;
         }
 
         public int getIntVal() { return intVal; }
 
-            @com.facebook.swift.codec.ThriftField(value=9, name="typedefValue", requiredness=Requiredness.NONE)    public Builder setTypedefValue(Map<Short, String> typedefValue) {
+        @com.facebook.swift.codec.ThriftField(value=9, name="typedefValue", requiredness=Requiredness.NONE)    public Builder setTypedefValue(Map<Short, String> typedefValue) {
             this.typedefValue = typedefValue;
             return this;
         }
@@ -93,6 +93,7 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -101,34 +102,29 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
     private final String strVal;
     public static final int _STRVAL = 1;
     private static final TField STR_VAL_FIELD_DESC = new TField("strVal", TType.STRING, (short)1);
-        private final int intVal;
+    private final int intVal;
     public static final int _INTVAL = 2;
     private static final TField INT_VAL_FIELD_DESC = new TField("intVal", TType.I32, (short)2);
-        private final Map<Short, String> typedefValue;
+    private final Map<Short, String> typedefValue;
     public static final int _TYPEDEFVALUE = 9;
     private static final TField TYPEDEF_VALUE_FIELD_DESC = new TField("typedefValue", TType.MAP, (short)9);
     static {
-      NAMES_TO_IDS.put("strVal", 1);
-      THRIFT_NAMES_TO_IDS.put("strVal", 1);
-      FIELD_METADATA.put(1, STR_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("intVal", 2);
-      THRIFT_NAMES_TO_IDS.put("intVal", 2);
-      FIELD_METADATA.put(2, INT_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("typedefValue", 9);
-      THRIFT_NAMES_TO_IDS.put("typedefValue", 9);
-      FIELD_METADATA.put(9, TYPEDEF_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("strVal", 1);
+        THRIFT_NAMES_TO_IDS.put("strVal", 1);
+        FIELD_METADATA.put(1, STR_VAL_FIELD_DESC);
+        NAMES_TO_IDS.put("intVal", 2);
+        THRIFT_NAMES_TO_IDS.put("intVal", 2);
+        FIELD_METADATA.put(2, INT_VAL_FIELD_DESC);
+        NAMES_TO_IDS.put("typedefValue", 9);
+        THRIFT_NAMES_TO_IDS.put("typedefValue", 9);
+        FIELD_METADATA.put(9, TYPEDEF_VALUE_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="strVal", requiredness=Requiredness.NONE)
     public String getStrVal() { return strVal; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=2, name="intVal", requiredness=Requiredness.NONE)
     public int getIntVal() { return intVal; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="typedefValue", requiredness=Requiredness.NONE)
     public Map<Short, String> getTypedefValue() { return typedefValue; }
@@ -164,106 +160,117 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(strVal);
-            _hashCode = 31 * _hashCode + Integer.hashCode(intVal);
-            _hashCode = 31 * _hashCode + Objects.hashCode(typedefValue);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Integer.hashCode(intVal);
+        _hashCode = 31 * _hashCode + Objects.hashCode(typedefValue);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Val> asReader() {
       return Val::read0;
     }
 
     public static Val read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Val.NAMES_TO_IDS, Val.THRIFT_NAMES_TO_IDS, Val.FIELD_METADATA);
-      Val.Builder builder = new Val.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _STRVAL:
-          if (__field.type == TType.STRING) {
-            String strVal = oprot.readString();
-            builder.setStrVal(strVal);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _INTVAL:
-          if (__field.type == TType.I32) {
-            int intVal = oprot.readI32();
-            builder.setIntVal(intVal);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _TYPEDEFVALUE:
-          if (__field.type == TType.MAP) {
-            Map<Short, String> typedefValue;
-                {
-                TMap _map = oprot.readMapBegin();
-                typedefValue = new HashMap<Short, String>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    short _key1 = oprot.readI16();
-                    String _value1 = oprot.readString();
-                    typedefValue.put(_key1, _value1);
+        TField __field;
+        oprot.readStructBegin(Val.NAMES_TO_IDS, Val.THRIFT_NAMES_TO_IDS, Val.FIELD_METADATA);
+        Val.Builder builder = new Val.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _STRVAL:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setStrVal(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
+                break;
+            case _INTVAL:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setIntVal(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readMapEnd();
-            builder.setTypedefValue(typedefValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            case _TYPEDEFVALUE:
+                if (__field.type == TType.MAP) {
+                    Map<Short, String> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<Short, String>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            short _fbthriftKey1;
+                            String _fbthriftValue1;
+
+                            {
+                                short _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI16();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setTypedefValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      String _iter0 = this.strVal;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(STR_VAL_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      int _iter0 = this.intVal;
-      oprot.writeFieldBegin(INT_VAL_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      Map<Short, String> _iter0 = this.typedefValue;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(TYPEDEF_VALUE_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I16, TType.STRING, _iter0.size()));
-            for (Map.Entry<Short, String> _iter1 : _iter0.entrySet()) {
-              {
-                Short _iter2 = _iter1.getKey();
-                oprot.writeI16(_iter2);
-              }
-              {
-                String _iter2 = _iter1.getValue();
-                oprot.writeString(_iter2);
-              }
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            String _fbthriftVar0 = this.strVal;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(STR_VAL_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        {
+            int _fbthriftVar0 = this.intVal;
+            oprot.writeFieldBegin(INT_VAL_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            Map<Short, String> _fbthriftVar0 = this.typedefValue;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(TYPEDEF_VALUE_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I16, TType.STRING, _fbthriftVar0.size()));
+                for (Map.Entry<Short, String> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Short _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI16(_fbthriftVar2);
+                    }
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _ValLazy {

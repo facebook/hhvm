@@ -1,0 +1,7 @@
+<?hh
+
+<<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+
+// Self-recursive case type with random base type
+// Tests that the type checker terminates and correctly rejects cycles
+case type RecCT = TYPE#1 | vec<RecCT>;

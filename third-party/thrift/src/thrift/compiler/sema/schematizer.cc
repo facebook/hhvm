@@ -1005,7 +1005,7 @@ int64_t schematizer::identify_program(const t_program& node) {
   return ret;
 }
 
-std::string schematizer::name_schema(
+std::string schematizer::schema_const_name(
     source_manager& sm, const t_program& node) {
   schematizer s(*node.global_scope(), sm, {});
   return fmt::format(

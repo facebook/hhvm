@@ -6,13 +6,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <boost/algorithm/string.hpp>
 #include <folly/String.h>
 #include <algorithm>
 #include <type_traits>
 #include <vector>
 
 #include "squangle/mysql_client/Query.h"
+#include "squangle/mysql_client/QueryRenderer.h"
 
 namespace facebook::common::mysql_client {
 
@@ -288,209 +288,10 @@ Query& Query::operator=(const Query&) = default;
 
 namespace {
 
-// Some helper functions for encoding/escaping.
-void appendComment(folly::fbstring* s, const QueryArgument& d) {
-  auto str = d.asString();
-  boost::replace_all(str, "/*", " / * ");
-  boost::replace_all(str, "*/", " * / ");
-  s->append(str);
-}
-
-std::string_view resolveAggregateFunctionName(
-    const AggregateFunction& aggFunc) {
-  switch (aggFunc) {
-    case AggregateFunction::AVG:
-      return "AVG(";
-    case AggregateFunction::AVG_DISTINCT:
-      return "AVG(DISTINCT ";
-    case AggregateFunction::BIT_AND:
-      return "BIT_AND(";
-    case AggregateFunction::BIT_OR:
-      return "BIT_OR(";
-    case AggregateFunction::BIT_XOR:
-      return "BIT_XOR(";
-    case AggregateFunction::COUNT:
-      return "COUNT(";
-    case AggregateFunction::COUNT_DISTINCT:
-      return "COUNT(DISTINCT ";
-    case AggregateFunction::GROUP_CONCAT:
-      return "GROUP_CONCAT(";
-    case AggregateFunction::GROUP_CONCAT_DISTINCT:
-      return "GROUP_CONCAT(DISTINCT ";
-    case AggregateFunction::JSON_ARRAYAGG:
-      return "JSON_ARRAYAGG(";
-    case AggregateFunction::MAX:
-      return "MAX(";
-    case AggregateFunction::MAX_DISTINCT:
-      return "MAX(DISTINCT ";
-    case AggregateFunction::MIN:
-      return "MIN(";
-    case AggregateFunction::MIN_DISTINCT:
-      return "MIN(DISTINCT ";
-    case AggregateFunction::STD:
-      return "STD(";
-    case AggregateFunction::STDDEV:
-      return "STDDEV(";
-    case AggregateFunction::STDDEV_POP:
-      return "STDDEV_POP(";
-    case AggregateFunction::STDDEV_SAMP:
-      return "STDDEV_SAMP(";
-    case AggregateFunction::SUM:
-      return "SUM(";
-    case AggregateFunction::SUM_DISTINCT:
-      return "SUM(DISTINCT ";
-    case AggregateFunction::VAR_POP:
-      return "VAR_POP(";
-    case AggregateFunction::VAR_SAMP:
-      return "VAR_SAMP(";
-    case AggregateFunction::VARIANCE:
-      return "VARIANCE(";
-  }
-}
-
-void appendColumnTableName(folly::fbstring* s, const QueryArgument& d) {
-  if (d.isString()) {
-    folly::grow_capacity_by(*s, d.getString().size() + 4);
-    s->push_back('`');
-    for (char c : d.getString()) {
-      // Toss in an extra ` if we see one.
-      if (c == '`') {
-        s->push_back('`');
-      }
-      s->push_back(c);
-    }
-    s->push_back('`');
-  } else if (d.isTwoTuple()) {
-    // If a two-tuple is provided we have a qualified column name
-    auto t = d.getTwoTuple();
-    appendColumnTableName(s, std::get<0>(t));
-    s->push_back('.');
-    appendColumnTableName(s, std::get<1>(t));
-  } else if (d.isThreeTuple()) {
-    // If a three-tuple is provided we have a qualified column name
-    // with an alias. This is helpful for constructing JOIN queries.
-    auto t = d.getThreeTuple();
-    appendColumnTableName(s, std::get<0>(t));
-    s->push_back('.');
-    appendColumnTableName(s, std::get<1>(t));
-    s->append(" AS ");
-    appendColumnTableName(s, std::get<2>(t));
-  } else if (d.isAggregateColumn()) {
-    auto t = d.getAggregateColumn();
-    s->append(resolveAggregateFunctionName(std::get<0>(t)));
-    appendColumnTableName(s, std::get<1>(t));
-    s->push_back(')');
-  } else if (d.isAliasedAggregateColumn()) {
-    auto t = d.getAliasedAggregateColumn();
-    s->append(resolveAggregateFunctionName(std::get<0>(t)));
-    auto& [tableName, columnName, AliasName] = std::get<1>(t);
-    appendColumnTableName(s, tableName);
-    s->push_back('.');
-    appendColumnTableName(s, columnName);
-    s->append(") AS ");
-    appendColumnTableName(s, AliasName);
-  } else {
-    s->append(d.asString());
-  }
-}
-
-// Raise an exception with, hopefully, a helpful error message.
-[[noreturn]] void parseError(
-    const folly::StringPiece s,
-    size_t offset,
-    const folly::StringPiece message) {
-  const std::string msg = fmt::format(
-      "Parse error at offset {}: {}, query: {}", offset, message, s);
-  throw std::invalid_argument(msg);
-}
-
-// Raise an exception for format string/value mismatches
-[[noreturn]] void formatStringParseError(
-    folly::StringPiece query_text,
-    size_t offset,
-    char format_specifier,
-    folly::StringPiece value_type) {
-  parseError(
-      query_text,
-      offset,
-      fmt::format(
-          "invalid value type {} for format string %{}",
-          value_type,
-          format_specifier));
-}
-
-// Consume the next x bytes from s, updating offset, and raising an
-// exception if there aren't sufficient bytes left.
-folly::StringPiece
-advance(const folly::StringPiece s, size_t* offset, size_t num) {
-  if (s.size() <= *offset + num) {
-    parseError(s, *offset, "unexpected end of string");
-  }
-  *offset += num;
-  return folly::StringPiece(
-      s.data() + *offset - num + 1, s.data() + *offset + 1);
-}
-
-// No escaping (useful for logging/testing only)
-void noEscapeString(folly::fbstring* dest, const folly::fbstring& value) {
-  VLOG(3) << "connectionless escape performed; this should only occur in "
-          << "testing.";
-  *dest += value;
-}
-
-// Simple escaping of default characters
-void simpleEscapeString(folly::fbstring* dest, const folly::fbstring& value) {
-  folly::grow_capacity_by(*dest, value.size());
-  for (const char ch : value) {
-    switch (ch) {
-      case '\\':
-        dest->append("\\\\");
-        break;
-      case '\'':
-        dest->append("\\'");
-        break;
-      case '\"':
-        dest->append("\\\"");
-        break;
-      case '\0':
-        dest->append("\\0");
-        break;
-      case '\b':
-        dest->append("\\b");
-        break;
-      case '\n':
-        dest->append("\\n");
-        break;
-      case '\r':
-        dest->append("\\r");
-        break;
-      case '\t':
-        dest->append("\\t");
-        break;
-      default:
-        dest->push_back(ch);
-        break;
-    }
-  }
-}
-
-// Escape a string using the connection.  The connection allows for special
-// handling of byte sequences that look like multi-byte characters but are not
-// based on the connection's character set
-void fullEscapeString(
-    folly::fbstring* dest,
-    const folly::fbstring& value,
-    const InternalConnection* conn) {
-  if (!conn) {
-    return noEscapeString(dest, value);
-  }
-
-  auto old_size = dest->size();
-  dest->resize(old_size + 2 * value.size() + 1);
-  auto* start = &(*dest)[old_size];
-  auto actual = conn->escapeString(start, value.data(), value.size());
-  dest->resize(old_size + actual);
-}
+using FbRenderer = QueryRenderer<folly::fbstring>;
+using StdRenderer = QueryRenderer<std::string>;
+using FbEscapeMode = FbRenderer::EscapeMode;
+using StdEscapeMode = StdRenderer::EscapeMode;
 
 } // namespace
 
@@ -508,304 +309,169 @@ void Query::append(Query&& query2) {
   }
 }
 
-// Append a dynamic to the query string we're building.  We ensure the
-// type matches the dynamic's type (or allow a magic 'v' type to be
-// any value, but this isn't exposed to the users of the library).
-void Query::appendValue(
-    folly::fbstring* s,
-    size_t offset,
-    char type,
-    const QueryArgument& d,
-    const EscapeFunc& escapeFunc) const {
-  auto querySp = query_text_.getQuery();
+namespace {
 
-  if (d.isString()) {
-    if (type != 's' && type != 'v' && type != 'm') {
-      formatStringParseError(querySp, offset, type, "string");
-    }
-    const auto& value = d.getString();
-    folly::grow_capacity_by(*s, value.size() + 4);
-    s->push_back('"');
-    escapeFunc(s, value);
-    s->push_back('"');
-  } else if (d.isBool()) {
-    if (type != 'v' && type != 'm') {
-      formatStringParseError(querySp, offset, type, "bool");
-    }
-    s->append(d.asString());
-  } else if (d.isInt()) {
-    if (type != 'd' && type != 'v' && type != 'm' && type != 'u') {
-      formatStringParseError(querySp, offset, type, "int");
-    }
-    if (type == 'u') {
-      s->append(folly::to<folly::fbstring>(static_cast<uint64_t>(d.getInt())));
-    } else {
-      s->append(d.asString());
-    }
-  } else if (d.isDouble()) {
-    if (type != 'f' && type != 'v' && type != 'm') {
-      formatStringParseError(querySp, offset, type, "double");
-    }
-    s->append(d.asString());
-  } else if (d.isQuery()) {
-    s->append(d.getQuery().renderInternal(escapeFunc));
-  } else if (d.isNull()) {
-    s->append("NULL");
-  } else {
-    formatStringParseError(querySp, offset, type, d.typeName());
-  }
-}
-
-void Query::appendValueClauses(
-    folly::fbstring* ret,
-    size_t* idx,
-    const char* sep,
-    const QueryArgument& param,
-    const EscapeFunc& escapeFunc) const {
-  auto querySp = query_text_.getQuery();
-
-  if (!param.isPairList()) {
-    parseError(
-        querySp,
-        *idx,
-        fmt::format(
-            "object expected for %Lx but received {}", param.typeName()));
-  }
-  // Sort these to get consistent query ordering (mainly for
-  // testing, but also aesthetics of the final query).
-  bool first_param = true;
-  for (const auto& key_value : param.getPairs()) {
-    if (!first_param) {
-      ret->append(sep);
-    }
-    first_param = false;
-    appendColumnTableName(ret, key_value.first);
-    if (key_value.second.isNull() && sep[0] != ',') {
-      ret->append(" IS NULL");
-    } else {
-      ret->append(" = ");
-      appendValue(ret, *idx, 'v', key_value.second, escapeFunc);
-    }
-  }
-}
-
-folly::fbstring Query::renderMultiQuery(
-    const InternalConnection* conn,
+template <typename StringType, typename RenderFunc>
+StringType renderMultiQueryImpl(
     const std::vector<Query>& queries,
-    std::string_view query_prefix) {
-  auto reserve_size = 0;
+    std::string_view query_prefix,
+    RenderFunc&& renderOne) {
+  size_t reserve_size = 0;
   for (const Query& query : queries) {
-    reserve_size += query.query_text_.getQuery().size() +
-        8 * query.params_.size() + query_prefix.size();
+    reserve_size += query.getQueryFormat().size() +
+        8 * query.getParams().size() + query_prefix.size();
   }
   if (queries.size() > 0) {
     reserve_size += queries.size() - 1;
   }
 
-  folly::fbstring ret;
+  StringType ret;
   ret.reserve(reserve_size);
 
-  // Not adding `;` in the end
   for (const Query& query : queries) {
     if (!ret.empty()) {
       ret.append(";");
     }
     if (!query_prefix.empty()) {
-      ret.append(query_prefix);
+      ret.append(query_prefix.data(), query_prefix.size());
     }
-    ret.append(query.render(conn));
+    auto rendered = renderOne(query);
+    ret.append(rendered.data(), rendered.size());
   }
 
   return ret;
 }
 
-folly::fbstring Query::render(const InternalConnection* conn) const {
-  return render(conn, params_);
+} // namespace
+
+folly::fbstring Query::renderMultiQueryFb(
+    const InternalConnection* conn,
+    const std::vector<Query>& queries,
+    std::string_view query_prefix) {
+  return renderMultiQueryImpl<folly::fbstring>(
+      queries, query_prefix, [conn](const Query& q) {
+        return q.renderFb(conn);
+      });
 }
 
-folly::fbstring Query::render(
+std::string Query::renderMultiQueryStr(
+    const InternalConnection* conn,
+    const std::vector<Query>& queries,
+    std::string_view query_prefix) {
+  return renderMultiQueryImpl<std::string>(
+      queries, query_prefix, [conn](const Query& q) {
+        return q.renderStr(conn);
+      });
+}
+
+// -- Fb variants --
+
+folly::fbstring Query::renderFb(const InternalConnection* conn) const {
+  return renderFb(conn, params_);
+}
+
+folly::fbstring Query::renderFb(
     const InternalConnection* conn,
     const std::vector<QueryArgument>& params) const {
-  return renderInternal(
-      [&](auto* dest, const auto& value) {
-        return fullEscapeString(dest, value, conn);
-      },
-      params);
+  return FbRenderer::render(
+      query_text_.getQuery(), unsafe_query_, params, FbEscapeMode::Full, conn);
 }
 
-folly::fbstring Query::renderInsecure() const {
-  return renderInternal(noEscapeString);
+folly::fbstring Query::renderInsecureFb() const {
+  return FbRenderer::render(
+      query_text_.getQuery(), unsafe_query_, params_, FbEscapeMode::None);
 }
 
-folly::fbstring Query::renderInsecure(
+folly::fbstring Query::renderInsecureFb(
     const std::vector<QueryArgument>& params) const {
-  return renderInternal(noEscapeString, params);
+  return FbRenderer::render(
+      query_text_.getQuery(), unsafe_query_, params, FbEscapeMode::None);
 }
 
-folly::fbstring Query::renderPartiallyEscaped() const {
-  return renderInternal(simpleEscapeString);
+folly::fbstring Query::renderInsecureFb(
+    size_t maxSize,
+    std::string_view truncationIndicator) const {
+  return FbRenderer::render(
+      query_text_.getQuery(),
+      unsafe_query_,
+      params_,
+      FbEscapeMode::None,
+      nullptr,
+      maxSize,
+      truncationIndicator);
 }
 
-folly::fbstring Query::renderInternal(const EscapeFunc& escapeFunc) const {
-  return renderInternal(escapeFunc, params_);
+folly::fbstring Query::renderPartiallyEscapedFb() const {
+  return FbRenderer::render(
+      query_text_.getQuery(), unsafe_query_, params_, FbEscapeMode::Simple);
 }
 
-folly::fbstring Query::renderInternal(
-    const EscapeFunc& escapeFunc,
+folly::fbstring Query::renderPartiallyEscapedFb(
+    size_t maxSize,
+    std::string_view truncationIndicator) const {
+  return FbRenderer::render(
+      query_text_.getQuery(),
+      unsafe_query_,
+      params_,
+      FbEscapeMode::Simple,
+      nullptr,
+      maxSize,
+      truncationIndicator);
+}
+
+// -- Str variants --
+
+std::string Query::renderStr(const InternalConnection* conn) const {
+  return renderStr(conn, params_);
+}
+
+std::string Query::renderStr(
+    const InternalConnection* conn,
     const std::vector<QueryArgument>& params) const {
-  auto querySp = query_text_.getQuery();
+  return StdRenderer::render(
+      query_text_.getQuery(), unsafe_query_, params, StdEscapeMode::Full, conn);
+}
 
-  if (unsafe_query_) {
-    return querySp.to<folly::fbstring>();
-  }
+std::string Query::renderInsecureStr() const {
+  return StdRenderer::render(
+      query_text_.getQuery(), unsafe_query_, params_, StdEscapeMode::None);
+}
 
-  auto offset = querySp.find_first_of(";'\"`");
-  if (offset != folly::StringPiece::npos) {
-    parseError(querySp, offset, "Saw dangerous characters in SQL query");
-  }
+std::string Query::renderInsecureStr(
+    const std::vector<QueryArgument>& params) const {
+  return StdRenderer::render(
+      query_text_.getQuery(), unsafe_query_, params, StdEscapeMode::None);
+}
 
-  folly::fbstring ret;
-  ret.reserve(querySp.size() + 8 * params.size());
+std::string Query::renderInsecureStr(
+    size_t maxSize,
+    std::string_view truncationIndicator) const {
+  return StdRenderer::render(
+      query_text_.getQuery(),
+      unsafe_query_,
+      params_,
+      StdEscapeMode::None,
+      nullptr,
+      maxSize,
+      truncationIndicator);
+}
 
-  auto current_param = params.begin();
-  bool after_percent = false;
-  size_t idx;
-  // Walk our string, watching for % values.
-  for (idx = 0; idx < querySp.size(); ++idx) {
-    char c = querySp[idx];
-    if (!after_percent) {
-      if (c != '%') {
-        ret.push_back(c);
-      } else {
-        after_percent = true;
-      }
-      continue;
-    }
+std::string Query::renderPartiallyEscapedStr() const {
+  return StdRenderer::render(
+      query_text_.getQuery(), unsafe_query_, params_, StdEscapeMode::Simple);
+}
 
-    after_percent = false;
-    if (c == '%') {
-      ret.push_back('%');
-      continue;
-    }
-
-    if (current_param == params.end()) {
-      parseError(querySp, idx, "too few parameters for query");
-    }
-
-    const auto& param = *current_param++;
-    if (c == 'd' || c == 's' || c == 'f' || c == 'u') {
-      appendValue(&ret, idx, c, param, escapeFunc);
-    } else if (c == 'm') {
-      if (!(param.isString() || param.isInt() || param.isDouble() ||
-            param.isBool() || param.isNull() || param.isQuery())) {
-        parseError(querySp, idx, "%m expects int/float/string/bool");
-      }
-      appendValue(&ret, idx, c, param, escapeFunc);
-    } else if (c == 'K') {
-      ret.append("/*");
-      appendComment(&ret, param);
-      ret.append("*/");
-    } else if (c == 'T' || c == 'C') {
-      appendColumnTableName(&ret, param);
-    } else if (c == '=') {
-      folly::StringPiece type = advance(querySp, &idx, 1);
-      if (type != "d" && type != "s" && type != "f" && type != "u" &&
-          type != "m") {
-        parseError(querySp, idx, "expected %=d, %=f, %=s, %=u, or %=m");
-      }
-
-      if (param.isNull()) {
-        ret.append(" IS NULL");
-      } else {
-        ret.append(" = ");
-        appendValue(&ret, idx, type[0], param, escapeFunc);
-      }
-    } else if (c == 'V') {
-      if (param.isQuery()) {
-        parseError(querySp, idx, "%V doesn't allow subquery");
-      }
-      size_t col_idx;
-      size_t row_len = 0;
-      bool first_row = true;
-      for (const auto& row : param.getList()) {
-        bool first_in_row = true;
-        col_idx = 0;
-        if (!first_row) {
-          ret.append(", ");
-        }
-        ret.append("(");
-        for (const auto& col : row.getList()) {
-          if (!first_in_row) {
-            ret.append(", ");
-          }
-          appendValue(&ret, idx, 'v', col, escapeFunc);
-          col_idx++;
-          first_in_row = false;
-          if (first_row) {
-            row_len++;
-          }
-        }
-        ret.append(")");
-        if (first_row) {
-          first_row = false;
-        } else if (col_idx != row_len) {
-          parseError(
-              querySp,
-              idx,
-              "not all rows provided for %V formatter are the same size");
-        }
-      }
-    } else if (c == 'L') {
-      folly::StringPiece type = advance(querySp, &idx, 1);
-      if (type == "O" || type == "A") {
-        ret.append("(");
-        const char* sep = (type == "O") ? " OR " : " AND ";
-        appendValueClauses(&ret, &idx, sep, param, escapeFunc);
-        ret.append(")");
-      } else {
-        if (!param.isList()) {
-          parseError(querySp, idx, "expected array for %L formatter");
-        }
-
-        bool first_param = true;
-        for (const auto& val : param.getList()) {
-          if (!first_param) {
-            ret.append(", ");
-          }
-          first_param = false;
-          if (type == "C") {
-            appendColumnTableName(&ret, val);
-          } else {
-            appendValue(&ret, idx, type[0], val, escapeFunc);
-          }
-        }
-      }
-    } else if (c == 'U' || c == 'W') {
-      if (c == 'W') {
-        appendValueClauses(&ret, &idx, " AND ", param, escapeFunc);
-      } else {
-        appendValueClauses(&ret, &idx, ", ", param, escapeFunc);
-      }
-    } else if (c == 'Q') {
-      if (param.isQuery()) {
-        ret.append(param.getQuery().renderInternal(escapeFunc));
-      } else {
-        ret.append((param).asString());
-      }
-    } else {
-      parseError(querySp, idx, "unknown % code");
-    }
-  }
-
-  if (after_percent) {
-    parseError(querySp, idx, "string ended with unfinished % code");
-  }
-
-  if (current_param != params.end()) {
-    parseError(querySp, 0, "too many parameters specified for query");
-  }
-
-  return ret;
+std::string Query::renderPartiallyEscapedStr(
+    size_t maxSize,
+    std::string_view truncationIndicator) const {
+  return StdRenderer::render(
+      query_text_.getQuery(),
+      unsafe_query_,
+      params_,
+      StdEscapeMode::Simple,
+      nullptr,
+      maxSize,
+      truncationIndicator);
 }
 
 std::shared_ptr<folly::fbstring> MultiQuery::renderQuery(

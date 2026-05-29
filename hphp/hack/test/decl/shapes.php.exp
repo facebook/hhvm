@@ -59,7 +59,7 @@
               ft_instantiated = true }));
         fe_pos = [5:10-21]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\returns_shape",
    (Shallow_decl_defs.Fun
@@ -103,7 +103,7 @@
               ft_instantiated = true }));
         fe_pos = [9:10-23]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\generic_shape",
    (Shallow_decl_defs.Fun
@@ -153,7 +153,7 @@
               ft_instantiated = true }));
         fe_pos = [15:10-23]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\TaggedCoordinate",
    (Shallow_decl_defs.Typedef

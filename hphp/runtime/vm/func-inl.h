@@ -375,11 +375,18 @@ inline bool Func::hasUntrustedReturnType() const {
 }
 
 inline const TypeIntersectionConstraint& Func::returnTypeConstraints() const {
-  return shared()->m_retTypeConstraints;
+  if (!hasInheritedReturnTypes()) {
+    return shared()->m_retTypeConstraints;
+  }
+  return lookupInheritedReturnTypes();
 }
 
 inline const StringData* Func::returnUserType() const {
   return shared()->m_retUserType.get(m_unit);
+}
+
+inline bool Func::hasInheritedReturnTypes() const {
+  return m_attrs & AttrHasInheritedReturnTypes;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -403,6 +410,10 @@ inline uint32_t Func::numNamedParams() const {
 
 inline uint32_t Func::numPositionalParams() const {
   return numNonVariadicParams() - numNamedParams();
+}
+
+inline uint32_t Func::numPositionalParamsVariadic() const {
+  return numParams() - numNamedParams();
 }
 
 inline uint32_t Func::numNonVariadicParams() const {
@@ -527,11 +538,11 @@ inline int Func::numSlotsInFrame() const {
 }
 
 inline bool Func::hasForeignThis() const {
-  return m_hasForeignThis;
+  return m_allFlags.m_hasForeignThis;
 }
 
 inline void Func::setHasForeignThis(bool hasForeignThis) {
-  m_hasForeignThis = hasForeignThis;
+  m_allFlags.m_hasForeignThis = hasForeignThis;
 }
 
 inline void Func::setGenerated(bool isGenerated) {
@@ -583,7 +594,7 @@ inline bool Func::isAbstract() const {
 }
 
 inline bool Func::isPreFunc() const {
-  return m_isPreFunc;
+  return m_allFlags.m_isPreFunc;
 }
 
 inline bool Func::isMemoizeWrapper() const {
@@ -728,7 +739,7 @@ inline Slot Func::methodSlot() const {
 }
 
 inline bool Func::hasPrivateAncestor() const {
-  return m_hasPrivateAncestor;
+  return m_allFlags.m_hasPrivateAncestor;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -806,6 +817,10 @@ inline bool Func::isPhpLeafFn() const {
 
 inline bool Func::hasReifiedGenerics() const {
   return shared()->m_allFlags.m_hasReifiedGenerics;
+}
+
+inline bool Func::hasNamedParams() const {
+  return m_allFlags.m_hasNamedParams;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -897,7 +912,7 @@ inline void Func::setBaseCls(Class* baseCls) {
 }
 
 inline void Func::setHasPrivateAncestor(bool b) {
-  m_hasPrivateAncestor = b;
+  m_allFlags.m_hasPrivateAncestor = b;
 }
 
 inline void Func::setMethodSlot(Slot s) {

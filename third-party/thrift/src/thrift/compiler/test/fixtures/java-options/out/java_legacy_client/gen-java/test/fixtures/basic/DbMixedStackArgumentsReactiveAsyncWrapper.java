@@ -14,17 +14,17 @@ public class DbMixedStackArgumentsReactiveAsyncWrapper
   private DbMixedStackArguments.Reactive _delegate;
 
   public DbMixedStackArgumentsReactiveAsyncWrapper(DbMixedStackArguments.Reactive _delegate) {
-    
-    this._delegate = _delegate;
+      
+      this._delegate = _delegate;
   }
 
   public DbMixedStackArgumentsReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new DbMixedStackArgumentsReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new DbMixedStackArgumentsReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
   @java.lang.Override
@@ -43,7 +43,7 @@ public class DbMixedStackArgumentsReactiveAsyncWrapper
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<byte[]>> getDataByKey0Wrapper(
     final String key,
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.getDataByKey0Wrapper(key, rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.getDataByKey0Wrapper(key, rpcOptions));
   }
 
   @java.lang.Override
@@ -62,7 +62,7 @@ public class DbMixedStackArgumentsReactiveAsyncWrapper
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<byte[]>> getDataByKey1Wrapper(
     final String key,
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.getDataByKey1Wrapper(key, rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.getDataByKey1Wrapper(key, rpcOptions));
   }
 
 }

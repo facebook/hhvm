@@ -46,23 +46,6 @@ let shape_idx_access_required_field field_pos name =
     ^ " is required to exist in the shape. Consider using a subscript-expression instead, such as "
     ^ Markdown_lite.md_codify ("$myshape['" ^ name ^ "']"))
 
-let sealed_not_subtype verb parent_pos parent_name child_name child_kind =
-  let parent_name = Utils.strip_ns parent_name in
-  let child_name = Utils.strip_ns child_name in
-  add
-    (Codes.to_enum Codes.SealedNotSubtype)
-    Lint_error
-    parent_pos
-    (child_kind
-    ^ " "
-    ^ Markdown_lite.md_codify child_name
-    ^ " in sealed allowlist for "
-    ^ Markdown_lite.md_codify parent_name
-    ^ ", but does not "
-    ^ verb
-    ^ " "
-    ^ Markdown_lite.md_codify parent_name)
-
 let option_mixed pos =
   add
     (Codes.to_enum Codes.OptionMixed)

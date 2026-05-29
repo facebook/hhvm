@@ -169,7 +169,6 @@
     ide_search
     startup_initializer_stubs
     state_loader
-    watchman_client
     write_symbol_info
   (select
    serverInitMessages.ml

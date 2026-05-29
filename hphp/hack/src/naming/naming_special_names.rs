@@ -21,6 +21,8 @@ pub mod classes {
 
     pub const AWAITABLE: &str = "\\HH\\Awaitable";
 
+    pub const REPRESENTABLE_AS: &str = "\\HH\\Runtime\\RepresentableAs";
+
     pub const GENERATOR: &str = "\\Generator";
 
     pub const ASYNC_GENERATOR: &str = "\\HH\\AsyncGenerator";

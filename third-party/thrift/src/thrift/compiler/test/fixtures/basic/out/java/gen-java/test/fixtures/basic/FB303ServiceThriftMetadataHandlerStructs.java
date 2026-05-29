@@ -21,26 +21,26 @@ import com.facebook.thrift.metadata.ThriftStructType;
 import com.facebook.thrift.metadata.ThriftType;
 
 class FB303ServiceThriftMetadataHandlerStructs_0 {
-  static void addStructs(Map<String, ThriftStruct> structs) {
-    structs.put("test.fixtures.basic.ReservedKeyword", new ThriftStruct.Builder()
-        .setName("test.fixtures.basic.ReservedKeyword")
-        .setFields(Arrays.asList(
-            new ThriftField.Builder()
-                .setId(1)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE))
-                .setName("reserved_field")
-                .setIsOptional(false)
-                .build()
-        ))
-        .setIsUnion(false)
-        .build());
-  }
+    static void addStructs(Map<String, ThriftStruct> structs) {
+        structs.put("test.fixtures.basic.ReservedKeyword", new ThriftStruct.Builder()
+            .setName("test.fixtures.basic.ReservedKeyword")
+            .setFields(Arrays.asList(
+                new ThriftField.Builder()
+                    .setId(1)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE))
+                    .setName("reserved_field")
+                    .setIsOptional(false)
+                    .build()
+            ))
+            .setIsUnion(false)
+            .build());
+    }
 }
 
 class FB303ServiceThriftMetadataHandlerStructs {
-  static Map<String, ThriftStruct> getStructs() {
-    Map<String, ThriftStruct> structs = new HashMap<>();
-    FB303ServiceThriftMetadataHandlerStructs_0.addStructs(structs);
-    return structs;
-  }
+    static Map<String, ThriftStruct> getStructs() {
+        Map<String, ThriftStruct> structs = new HashMap<>();
+        FB303ServiceThriftMetadataHandlerStructs_0.addStructs(structs);
+        return structs;
+    }
 }

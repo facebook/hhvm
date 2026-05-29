@@ -19,6 +19,9 @@
 #pragma once
 
 #include <thrift/lib/cpp2/gen/client_h.h>
+  {{#if program.any_fast_client?}}
+#include <thrift/lib/cpp2/gen/fast_client_h.h>
+  {{/if program.any_fast_client?}}
 
 #include "{{program.include_prefix}}{{program.name}}_types.h"
   {{#each program.includes_for_codegen as |include|}}
@@ -51,7 +54,11 @@ namespace apache { namespace thrift {
 }}
 
   {{#each program.services as |service|}}
+  {{#if service.is_fast_client?}}
+{{> service_h/fast_client}}
+  {{#else}}
 {{> service_h/async_client}}
+  {{/if service.is_fast_client?}}
 
 
   {{/each}}

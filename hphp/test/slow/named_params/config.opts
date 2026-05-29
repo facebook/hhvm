@@ -1,1 +1,2 @@
 -vHack.Lang.AllowUnstableFeatures=1
+-vEval.WarnOnTooManyArguments=2

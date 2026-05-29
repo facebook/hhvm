@@ -29,7 +29,6 @@ service TestGracefulShutdownService {
   // Sink: accepts items slowly so we can trigger shutdown mid-sink
   sink<i32, string> consume(1: i32 count);
 
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   // BiDi: echoes input to output so we can trigger shutdown mid-bidi
   sink<string>, stream<string> bidiEcho();
 }

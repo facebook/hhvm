@@ -425,12 +425,13 @@ void PageletServer::Restart() {
     s_dispatcher->start();
     BootStats::mark("pagelet server started");
     s_counters = new ServiceData::CounterCallback(
-        [](std::map<std::string, int64_t>& counters) {
+        [](ServiceData::CounterMap& counters) {
           counters["pagelet_inflight_requests"] =
             PageletServer::GetActiveWorker();
           counters["pagelet_queued_requests"] =
             PageletServer::GetQueuedJobs();
-        }
+        },
+        "pagelet_"
     );
   }
 }

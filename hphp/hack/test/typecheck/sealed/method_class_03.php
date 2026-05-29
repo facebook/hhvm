@@ -7,7 +7,9 @@ class C {
   public function foo(): void {}
 }
 
-class D extends C {}
+class D extends C {
+  // warning here, as D is expected to override foo
+}
 
 class E extends D {
   // this should be rejected

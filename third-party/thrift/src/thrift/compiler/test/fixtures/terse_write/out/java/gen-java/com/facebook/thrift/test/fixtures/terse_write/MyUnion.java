@@ -60,72 +60,72 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     private static final TField STRUCT_FIELD_FIELD_DESC = new TField("structField", TType.STRUCT, (short)14);
 
     static {
-      NAMES_TO_IDS.put("boolField", 1);
-      THRIFT_NAMES_TO_IDS.put("bool_field", 1);
-      FIELD_METADATA.put(1, BOOL_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("byteField", 2);
-      THRIFT_NAMES_TO_IDS.put("byte_field", 2);
-      FIELD_METADATA.put(2, BYTE_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("shortField", 3);
-      THRIFT_NAMES_TO_IDS.put("short_field", 3);
-      FIELD_METADATA.put(3, SHORT_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("intField", 4);
-      THRIFT_NAMES_TO_IDS.put("int_field", 4);
-      FIELD_METADATA.put(4, INT_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("longField", 5);
-      THRIFT_NAMES_TO_IDS.put("long_field", 5);
-      FIELD_METADATA.put(5, LONG_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("floatField", 6);
-      THRIFT_NAMES_TO_IDS.put("float_field", 6);
-      FIELD_METADATA.put(6, FLOAT_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("doubleField", 7);
-      THRIFT_NAMES_TO_IDS.put("double_field", 7);
-      FIELD_METADATA.put(7, DOUBLE_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("stringField", 8);
-      THRIFT_NAMES_TO_IDS.put("string_field", 8);
-      FIELD_METADATA.put(8, STRING_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("binaryField", 9);
-      THRIFT_NAMES_TO_IDS.put("binary_field", 9);
-      FIELD_METADATA.put(9, BINARY_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("enumField", 10);
-      THRIFT_NAMES_TO_IDS.put("enum_field", 10);
-      FIELD_METADATA.put(10, ENUM_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("listField", 11);
-      THRIFT_NAMES_TO_IDS.put("list_field", 11);
-      FIELD_METADATA.put(11, LIST_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("setField", 12);
-      THRIFT_NAMES_TO_IDS.put("set_field", 12);
-      FIELD_METADATA.put(12, SET_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("mapField", 13);
-      THRIFT_NAMES_TO_IDS.put("map_field", 13);
-      FIELD_METADATA.put(13, MAP_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("structField", 14);
-      THRIFT_NAMES_TO_IDS.put("struct_field", 14);
-      FIELD_METADATA.put(14, STRUCT_FIELD_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/terse_write/MyUnion"),
-        MyUnion.class, MyUnion::read0));
+        NAMES_TO_IDS.put("boolField", 1);
+        THRIFT_NAMES_TO_IDS.put("bool_field", 1);
+        FIELD_METADATA.put(1, BOOL_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("byteField", 2);
+        THRIFT_NAMES_TO_IDS.put("byte_field", 2);
+        FIELD_METADATA.put(2, BYTE_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("shortField", 3);
+        THRIFT_NAMES_TO_IDS.put("short_field", 3);
+        FIELD_METADATA.put(3, SHORT_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("intField", 4);
+        THRIFT_NAMES_TO_IDS.put("int_field", 4);
+        FIELD_METADATA.put(4, INT_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("longField", 5);
+        THRIFT_NAMES_TO_IDS.put("long_field", 5);
+        FIELD_METADATA.put(5, LONG_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("floatField", 6);
+        THRIFT_NAMES_TO_IDS.put("float_field", 6);
+        FIELD_METADATA.put(6, FLOAT_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("doubleField", 7);
+        THRIFT_NAMES_TO_IDS.put("double_field", 7);
+        FIELD_METADATA.put(7, DOUBLE_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("stringField", 8);
+        THRIFT_NAMES_TO_IDS.put("string_field", 8);
+        FIELD_METADATA.put(8, STRING_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("binaryField", 9);
+        THRIFT_NAMES_TO_IDS.put("binary_field", 9);
+        FIELD_METADATA.put(9, BINARY_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("enumField", 10);
+        THRIFT_NAMES_TO_IDS.put("enum_field", 10);
+        FIELD_METADATA.put(10, ENUM_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("listField", 11);
+        THRIFT_NAMES_TO_IDS.put("list_field", 11);
+        FIELD_METADATA.put(11, LIST_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("setField", 12);
+        THRIFT_NAMES_TO_IDS.put("set_field", 12);
+        FIELD_METADATA.put(12, SET_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("mapField", 13);
+        THRIFT_NAMES_TO_IDS.put("map_field", 13);
+        FIELD_METADATA.put(13, MAP_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("structField", 14);
+        THRIFT_NAMES_TO_IDS.put("struct_field", 14);
+        FIELD_METADATA.put(14, STRUCT_FIELD_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/terse_write/MyUnion"),
+            MyUnion.class, MyUnion::read0));
     }
 
     private java.lang.Object value;
     private short id;
 
     public enum TypeEnum {
-      __FBTHRIFT_EMPTY_UNION__,
-      BOOL_FIELD,
-      BYTE_FIELD,
-      SHORT_FIELD,
-      INT_FIELD,
-      LONG_FIELD,
-      FLOAT_FIELD,
-      DOUBLE_FIELD,
-      STRING_FIELD,
-      BINARY_FIELD,
-      ENUM_FIELD,
-      LIST_FIELD,
-      SET_FIELD,
-      MAP_FIELD,
-      STRUCT_FIELD,
+        __FBTHRIFT_EMPTY_UNION__,
+        BOOL_FIELD,
+        BYTE_FIELD,
+        SHORT_FIELD,
+        INT_FIELD,
+        LONG_FIELD,
+        FLOAT_FIELD,
+        DOUBLE_FIELD,
+        STRING_FIELD,
+        BINARY_FIELD,
+        ENUM_FIELD,
+        LIST_FIELD,
+        SET_FIELD,
+        MAP_FIELD,
+        STRUCT_FIELD,
     }
 
     public static MyUnion from(int _id, java.lang.Object _field) {
@@ -138,7 +138,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
             throw new java.lang.IllegalArgumentException("unknown field " + _id);
         }
 
-        MyUnion _u = new  MyUnion();
+        MyUnion _u = new MyUnion();
 
         try {
             switch(_id) {
@@ -199,7 +199,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
                     _u.value = (com.facebook.thrift.test.fixtures.terse_write.MyStruct) _field;
                     return _u;
                 default:
-                throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
+                    throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
             }
         } catch (java.lang.Exception t) {
             throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
@@ -448,7 +448,6 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         return res;
     }
 
-    
 
     @com.facebook.swift.codec.ThriftField(value=1, name="bool_field", requiredness=Requiredness.NONE)
     public boolean isBoolField() {
@@ -624,40 +623,40 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     }
 
     public TypeEnum getThriftUnionType() {
-      switch(this.id) {
-        case 0:
-          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
-        case 1:
-          return TypeEnum.BOOL_FIELD;
-        case 2:
-          return TypeEnum.BYTE_FIELD;
-        case 3:
-          return TypeEnum.SHORT_FIELD;
-        case 4:
-          return TypeEnum.INT_FIELD;
-        case 5:
-          return TypeEnum.LONG_FIELD;
-        case 6:
-          return TypeEnum.FLOAT_FIELD;
-        case 7:
-          return TypeEnum.DOUBLE_FIELD;
-        case 8:
-          return TypeEnum.STRING_FIELD;
-        case 9:
-          return TypeEnum.BINARY_FIELD;
-        case 10:
-          return TypeEnum.ENUM_FIELD;
-        case 11:
-          return TypeEnum.LIST_FIELD;
-        case 12:
-          return TypeEnum.SET_FIELD;
-        case 13:
-          return TypeEnum.MAP_FIELD;
-        case 14:
-          return TypeEnum.STRUCT_FIELD;
-        default:
-          throw new IllegalStateException("unreachable");
-      }
+        switch(this.id) {
+            case 0:
+                return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
+            case 1:
+                return TypeEnum.BOOL_FIELD;
+            case 2:
+                return TypeEnum.BYTE_FIELD;
+            case 3:
+                return TypeEnum.SHORT_FIELD;
+            case 4:
+                return TypeEnum.INT_FIELD;
+            case 5:
+                return TypeEnum.LONG_FIELD;
+            case 6:
+                return TypeEnum.FLOAT_FIELD;
+            case 7:
+                return TypeEnum.DOUBLE_FIELD;
+            case 8:
+                return TypeEnum.STRING_FIELD;
+            case 9:
+                return TypeEnum.BINARY_FIELD;
+            case 10:
+                return TypeEnum.ENUM_FIELD;
+            case 11:
+                return TypeEnum.LIST_FIELD;
+            case 12:
+                return TypeEnum.SET_FIELD;
+            case 13:
+                return TypeEnum.MAP_FIELD;
+            case 14:
+                return TypeEnum.STRUCT_FIELD;
+            default:
+                throw new IllegalStateException("unreachable");
+        }
     }
 
     public String getThriftName() {
@@ -751,7 +750,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
 
     public interface Visitor<T> {
         default T visit(MyUnion acceptor) {
-        return acceptor.accept(this);
+            return acceptor.accept(this);
         }
 
         T visitBoolField(boolean boolField);
@@ -771,299 +770,319 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     }
 
     public void write0(TProtocol oprot) throws TException {
-      if (this.id != 0 && this.value == null ){
-        if(allowNullFieldValues) {
-          // Warning: this path will generate corrupt serialized data!
-          return;
-        } else {
-          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        if (this.id != 0 && this.value == null ){
+            if(allowNullFieldValues) {
+                // Warning: this path will generate corrupt serialized data!
+                return;
+            } else {
+                throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+            }
         }
-      }
-      oprot.writeStructBegin(STRUCT_DESC);
-      switch (this.id) {
-      case _BOOL_FIELD: {
-        oprot.writeFieldBegin(BOOL_FIELD_FIELD_DESC);
-        boolean _iter0 = (boolean)this.value;
+        oprot.writeStructBegin(STRUCT_DESC);
+        switch (this.id) {
+        case _BOOL_FIELD: {
+            oprot.writeFieldBegin(BOOL_FIELD_FIELD_DESC);
+            boolean _fbthriftVar0 = (boolean)this.value;
 
-        oprot.writeBool(_iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _BYTE_FIELD: {
-        oprot.writeFieldBegin(BYTE_FIELD_FIELD_DESC);
-        byte _iter0 = (byte)this.value;
+            oprot.writeBool(_fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _BYTE_FIELD: {
+            oprot.writeFieldBegin(BYTE_FIELD_FIELD_DESC);
+            byte _fbthriftVar0 = (byte)this.value;
 
-        oprot.writeByte(_iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _SHORT_FIELD: {
-        oprot.writeFieldBegin(SHORT_FIELD_FIELD_DESC);
-        short _iter0 = (short)this.value;
+            oprot.writeByte(_fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _SHORT_FIELD: {
+            oprot.writeFieldBegin(SHORT_FIELD_FIELD_DESC);
+            short _fbthriftVar0 = (short)this.value;
 
-        oprot.writeI16(_iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _INT_FIELD: {
-        oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
-        int _iter0 = (int)this.value;
+            oprot.writeI16(_fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _INT_FIELD: {
+            oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
+            int _fbthriftVar0 = (int)this.value;
 
-        oprot.writeI32(_iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _LONG_FIELD: {
-        oprot.writeFieldBegin(LONG_FIELD_FIELD_DESC);
-        long _iter0 = (long)this.value;
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _LONG_FIELD: {
+            oprot.writeFieldBegin(LONG_FIELD_FIELD_DESC);
+            long _fbthriftVar0 = (long)this.value;
 
-        oprot.writeI64(_iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _FLOAT_FIELD: {
-        oprot.writeFieldBegin(FLOAT_FIELD_FIELD_DESC);
-        float _iter0 = (float)this.value;
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _FLOAT_FIELD: {
+            oprot.writeFieldBegin(FLOAT_FIELD_FIELD_DESC);
+            float _fbthriftVar0 = (float)this.value;
 
-        oprot.writeFloat(_iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _DOUBLE_FIELD: {
-        oprot.writeFieldBegin(DOUBLE_FIELD_FIELD_DESC);
-        double _iter0 = (double)this.value;
+            oprot.writeFloat(_fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _DOUBLE_FIELD: {
+            oprot.writeFieldBegin(DOUBLE_FIELD_FIELD_DESC);
+            double _fbthriftVar0 = (double)this.value;
 
-        oprot.writeDouble(_iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _STRING_FIELD: {
-        oprot.writeFieldBegin(STRING_FIELD_FIELD_DESC);
-        String _iter0 = (String)this.value;
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _STRING_FIELD: {
+            oprot.writeFieldBegin(STRING_FIELD_FIELD_DESC);
+            String _fbthriftVar0 = (String)this.value;
 
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _BINARY_FIELD: {
-        oprot.writeFieldBegin(BINARY_FIELD_FIELD_DESC);
-        byte[] _iter0 = (byte[])this.value;
+            oprot.writeString(_fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _BINARY_FIELD: {
+            oprot.writeFieldBegin(BINARY_FIELD_FIELD_DESC);
+            byte[] _fbthriftVar0 = (byte[])this.value;
 
-        org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _ENUM_FIELD: {
-        oprot.writeFieldBegin(ENUM_FIELD_FIELD_DESC);
-        com.facebook.thrift.test.fixtures.terse_write.MyEnum _iter0 = (com.facebook.thrift.test.fixtures.terse_write.MyEnum)this.value;
+            org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _ENUM_FIELD: {
+            oprot.writeFieldBegin(ENUM_FIELD_FIELD_DESC);
+            com.facebook.thrift.test.fixtures.terse_write.MyEnum _fbthriftVar0 = (com.facebook.thrift.test.fixtures.terse_write.MyEnum)this.value;
 
-        oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _LIST_FIELD: {
-        oprot.writeFieldBegin(LIST_FIELD_FIELD_DESC);
-        List<Short> _iter0 = (List<Short>)this.value;
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _LIST_FIELD: {
+            oprot.writeFieldBegin(LIST_FIELD_FIELD_DESC);
+            List<Short> _fbthriftVar0 = (List<Short>)this.value;
 
-        oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
-            for (short _iter1 : _iter0) {
-              oprot.writeI16(_iter1);
+            oprot.writeListBegin(new TList(TType.I16, _fbthriftVar0.size()));
+            for (short _fbthriftVar1 : _fbthriftVar0) {
+                oprot.writeI16(_fbthriftVar1);
             }
             oprot.writeListEnd();
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _SET_FIELD: {
-        oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
-        Set<Short> _iter0 = (Set<Short>)this.value;
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _SET_FIELD: {
+            oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
+            Set<Short> _fbthriftVar0 = (Set<Short>)this.value;
 
-        oprot.writeSetBegin(new TSet(TType.I16, _iter0.size()));
-            for (short _iter1 : _iter0) {
-              oprot.writeI16(_iter1);
+            oprot.writeSetBegin(new TSet(TType.I16, _fbthriftVar0.size()));
+            for (short _fbthriftVar1 : _fbthriftVar0) {
+                oprot.writeI16(_fbthriftVar1);
             }
             oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _MAP_FIELD: {
-        oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
-        Map<Short, Short> _iter0 = (Map<Short, Short>)this.value;
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _MAP_FIELD: {
+            oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
+            Map<Short, Short> _fbthriftVar0 = (Map<Short, Short>)this.value;
 
-        oprot.writeMapBegin(new TMap(TType.I16, TType.I16, _iter0.size()));
-            for (Map.Entry<Short, Short> _iter1 : _iter0.entrySet()) {
-              {
-                Short _iter2 = _iter1.getKey();
-                oprot.writeI16(_iter2);
-              }
-              {
-                Short _iter2 = _iter1.getValue();
-                oprot.writeI16(_iter2);
-              }
+            oprot.writeMapBegin(new TMap(TType.I16, TType.I16, _fbthriftVar0.size()));
+            for (Map.Entry<Short, Short> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                {
+                    Short _fbthriftVar2 = _fbthriftVar1.getKey();
+                    oprot.writeI16(_fbthriftVar2);
+                }
+                {
+                    Short _fbthriftVar2 = _fbthriftVar1.getValue();
+                    oprot.writeI16(_fbthriftVar2);
+                }
             }
             oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _STRUCT_FIELD: {
-        oprot.writeFieldBegin(STRUCT_FIELD_FIELD_DESC);
-        com.facebook.thrift.test.fixtures.terse_write.MyStruct _iter0 = (com.facebook.thrift.test.fixtures.terse_write.MyStruct)this.value;
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _STRUCT_FIELD: {
+            oprot.writeFieldBegin(STRUCT_FIELD_FIELD_DESC);
+            com.facebook.thrift.test.fixtures.terse_write.MyStruct _fbthriftVar0 = (com.facebook.thrift.test.fixtures.terse_write.MyStruct)this.value;
 
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-        break;
-      }
-      default:
-          // ignore unknown field
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+            _fbthriftVar0.write0(oprot);
+            oprot.writeFieldEnd();
+            break;
+        }
+        default:
+            // ignore unknown field
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyUnion> asReader() {
-      return MyUnion::read0;
+        return MyUnion::read0;
     }
 
     public static MyUnion read0(TProtocol oprot) throws TException {
-      MyUnion res = new MyUnion();
-      res.value = null;
-      res.id = (short) 0;
-      oprot.readStructBegin(MyUnion.NAMES_TO_IDS, MyUnion.THRIFT_NAMES_TO_IDS, MyUnion.FIELD_METADATA);
-      TField __field = oprot.readFieldBegin();
-      if (__field.type != TType.STOP) {
-          switch (__field.id) {
-          case _BOOL_FIELD:
-            if (__field.type == BOOL_FIELD_FIELD_DESC.type) {
-              boolean boolField = oprot.readBool();
-              res.value = boolField;
-            }
-            break;
-          case _BYTE_FIELD:
-            if (__field.type == BYTE_FIELD_FIELD_DESC.type) {
-              byte byteField = oprot.readByte();
-              res.value = byteField;
-            }
-            break;
-          case _SHORT_FIELD:
-            if (__field.type == SHORT_FIELD_FIELD_DESC.type) {
-              short shortField = oprot.readI16();
-              res.value = shortField;
-            }
-            break;
-          case _INT_FIELD:
-            if (__field.type == INT_FIELD_FIELD_DESC.type) {
-              int intField = oprot.readI32();
-              res.value = intField;
-            }
-            break;
-          case _LONG_FIELD:
-            if (__field.type == LONG_FIELD_FIELD_DESC.type) {
-              long longField = oprot.readI64();
-              res.value = longField;
-            }
-            break;
-          case _FLOAT_FIELD:
-            if (__field.type == FLOAT_FIELD_FIELD_DESC.type) {
-              float floatField = oprot.readFloat();
-              res.value = floatField;
-            }
-            break;
-          case _DOUBLE_FIELD:
-            if (__field.type == DOUBLE_FIELD_FIELD_DESC.type) {
-              double doubleField = oprot.readDouble();
-              res.value = doubleField;
-            }
-            break;
-          case _STRING_FIELD:
-            if (__field.type == STRING_FIELD_FIELD_DESC.type) {
-              String stringField = oprot.readString();
-              res.value = stringField;
-            }
-            break;
-          case _BINARY_FIELD:
-            if (__field.type == BINARY_FIELD_FIELD_DESC.type) {
-              byte[] binaryField = oprot.readBinary().array();
-              res.value = binaryField;
-            }
-            break;
-          case _ENUM_FIELD:
-            if (__field.type == ENUM_FIELD_FIELD_DESC.type) {
-              com.facebook.thrift.test.fixtures.terse_write.MyEnum enumField = com.facebook.thrift.test.fixtures.terse_write.MyEnum.fromInteger(oprot.readI32());
-              res.value = enumField;
-            }
-            break;
-          case _LIST_FIELD:
-            if (__field.type == LIST_FIELD_FIELD_DESC.type) {
-              List<Short> listField;
-                {
-                TList _list = oprot.readListBegin();
-                listField = new ArrayList<Short>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    short _value1 = oprot.readI16();
-                    listField.add(_value1);
+        MyUnion res = new MyUnion();
+        res.value = null;
+        res.id = (short) 0;
+        oprot.readStructBegin(MyUnion.NAMES_TO_IDS, MyUnion.THRIFT_NAMES_TO_IDS, MyUnion.FIELD_METADATA);
+        TField __field = oprot.readFieldBegin();
+        if (__field.type != TType.STOP) {
+            switch (__field.id) {
+            case _BOOL_FIELD:
+                if (__field.type == BOOL_FIELD_FIELD_DESC.type) {
+                    boolean _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBool();
+                    res.value = _fbthriftVar0;
                 }
-                oprot.readListEnd();
+                break;
+            case _BYTE_FIELD:
+                if (__field.type == BYTE_FIELD_FIELD_DESC.type) {
+                    byte _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readByte();
+                    res.value = _fbthriftVar0;
                 }
-              res.value = listField;
+                break;
+            case _SHORT_FIELD:
+                if (__field.type == SHORT_FIELD_FIELD_DESC.type) {
+                    short _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI16();
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _INT_FIELD:
+                if (__field.type == INT_FIELD_FIELD_DESC.type) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _LONG_FIELD:
+                if (__field.type == LONG_FIELD_FIELD_DESC.type) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _FLOAT_FIELD:
+                if (__field.type == FLOAT_FIELD_FIELD_DESC.type) {
+                    float _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readFloat();
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _DOUBLE_FIELD:
+                if (__field.type == DOUBLE_FIELD_FIELD_DESC.type) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _STRING_FIELD:
+                if (__field.type == STRING_FIELD_FIELD_DESC.type) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _BINARY_FIELD:
+                if (__field.type == BINARY_FIELD_FIELD_DESC.type) {
+                    byte[] _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBinary().array();
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _ENUM_FIELD:
+                if (__field.type == ENUM_FIELD_FIELD_DESC.type) {
+                    com.facebook.thrift.test.fixtures.terse_write.MyEnum _fbthriftVar0;
+                    _fbthriftVar0 = com.facebook.thrift.test.fixtures.terse_write.MyEnum.fromInteger(oprot.readI32());
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _LIST_FIELD:
+                if (__field.type == LIST_FIELD_FIELD_DESC.type) {
+                    List<Short> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Short>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            short _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI16();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _SET_FIELD:
+                if (__field.type == SET_FIELD_FIELD_DESC.type) {
+                    Set<Short> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Short>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            short _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI16();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _MAP_FIELD:
+                if (__field.type == MAP_FIELD_FIELD_DESC.type) {
+                    Map<Short, Short> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<Short, Short>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            short _fbthriftKey1;
+                            short _fbthriftValue1;
+
+                            {
+                                short _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI16();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                short _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI16();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _STRUCT_FIELD:
+                if (__field.type == STRUCT_FIELD_FIELD_DESC.type) {
+                    com.facebook.thrift.test.fixtures.terse_write.MyStruct _fbthriftVar0;
+                    _fbthriftVar0 = com.facebook.thrift.test.fixtures.terse_write.MyStruct.read0(oprot);
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
             }
-            break;
-          case _SET_FIELD:
-            if (__field.type == SET_FIELD_FIELD_DESC.type) {
-              Set<Short> setField;
-                {
-                TSet _set = oprot.readSetBegin();
-                setField = new HashSet<Short>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    short _value1 = oprot.readI16();
-                    setField.add(_value1);
-                }
-                oprot.readSetEnd();
-                }
-              res.value = setField;
+            if (res.value != null) {
+                res.id = __field.id;
             }
-            break;
-          case _MAP_FIELD:
-            if (__field.type == MAP_FIELD_FIELD_DESC.type) {
-              Map<Short, Short> mapField;
-                {
-                TMap _map = oprot.readMapBegin();
-                mapField = new HashMap<Short, Short>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    short _key1 = oprot.readI16();
-                    short _value1 = oprot.readI16();
-                    mapField.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-              res.value = mapField;
+            oprot.readFieldEnd();
+            TField __stopField = oprot.readFieldBegin(); // Consume the STOP byte
+            if (__stopField.type != TType.STOP) {
+                throw new TProtocolException(TProtocolException.INVALID_DATA, "Union 'MyUnion' is missing a STOP byte");
             }
-            break;
-          case _STRUCT_FIELD:
-            if (__field.type == STRUCT_FIELD_FIELD_DESC.type) {
-              com.facebook.thrift.test.fixtures.terse_write.MyStruct structField = com.facebook.thrift.test.fixtures.terse_write.MyStruct.read0(oprot);
-              res.value = structField;
-            }
-            break;
-          default:
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-        if (res.value != null) {
-          res.id = __field.id;
         }
-        oprot.readFieldEnd();
-        TField __stopField = oprot.readFieldBegin(); // Consume the STOP byte
-        if (__stopField.type != TType.STOP) {
-          throw new TProtocolException(TProtocolException.INVALID_DATA, "Union 'MyUnion' is missing a STOP byte");
-        }
-      }
-      oprot.readStructEnd();
-      return res;
+        oprot.readStructEnd();
+        return res;
     }
+
     public static MyUnion defaultInstance() {
         return _DEFAULT;
     }
-
 }

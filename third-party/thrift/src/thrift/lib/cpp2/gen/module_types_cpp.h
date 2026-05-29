@@ -18,10 +18,12 @@
 
 #include <memory>
 #include <string_view>
+#include <utility>
 
 #include <folly/Memory.h>
 #include <folly/Portability.h>
 #include <folly/Traits.h>
+#include <folly/container/F14Map.h>
 #include <folly/container/Reserve.h>
 #include <folly/detail/StaticSingletonManager.h>
 
@@ -121,11 +123,27 @@ struct translate_field_name_table {
   const protocol::TType* types;
 };
 
+struct translate_field_name_hash_table {
+  translate_field_name_hash_table(
+      size_t size,
+      const std::string_view* names,
+      const int16_t* ids,
+      const protocol::TType* types);
+
+  folly::F14FastMap<std::string_view, std::pair<int16_t, protocol::TType>> map;
+};
+
 void translate_field_name(
     std::string_view fname,
     int16_t& fid,
     protocol::TType& ftype,
     const translate_field_name_table& table) noexcept;
+
+void translate_field_name(
+    std::string_view fname,
+    int16_t& fid,
+    protocol::TType& ftype,
+    const translate_field_name_hash_table& table) noexcept;
 
 namespace {
 

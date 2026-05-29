@@ -228,7 +228,7 @@ const TypeInfo TypeToInfo<
     /* .type */ protocol::TType::T_I32,
     /* .get */ get<int32_t, ::{{program.cpp_qualified_namespace}}::{{enum.cpp_name}}>,
     /* .set */ eraseFuncPtr(set<::{{program.cpp_qualified_namespace}}::{{enum.cpp_name}}, int32_t>),
-    /* .typeExt */ nullptr,
+    /* .typeExt */ &getEnumFieldExt<::{{program.cpp_qualified_namespace}}::{{enum.cpp_name}}>(),
 };
     {{/each}}
     {{#each program.current_split_structured_definitions as |struct|}}

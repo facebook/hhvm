@@ -52,8 +52,11 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#ifdef __aarch64__
 #include "hphp/runtime/vm/jit/unique-stubs-arm.h"
+#else
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
+#endif
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -232,27 +235,65 @@ Result withVMRegsForCall(PrologueFlags prologueFlags, const Func* func,
 }
 
 uint32_t fcallRepackHelper(PrologueFlags prologueFlags, const Func* func,
-                           uint32_t numArgsInclUnpack, TCA savedRip) {
+                           uint32_t numPositionalsInclUnpack, TCA savedRip,
+                           uintptr_t namedArgNamesPtr) {
   assert_native_stack_aligned();
+  const ArrayData* namedArgNames =
+    prologueFlags.hasNamedArgs()
+      ? reinterpret_cast<const ArrayData*>(namedArgNamesPtr)
+      : nullptr;
+  auto numArgs = numPositionalsInclUnpack - 1;
+  if (namedArgNames) numArgs += namedArgNames->size();
   return withVMRegsForCall<uint32_t>(
-      prologueFlags, func, numArgsInclUnpack - 1, true, savedRip,
+      prologueFlags, func, numArgs, true, savedRip,
       [&] (Stack& stack, TypedValue* calleeFP) {
     // Check for stack overflow as we may unpack arbitrary number of arguments.
     if (checkCalleeStackOverflow(calleeFP, func)) {
       throw_stack_overflow();
     }
-
     // Repack arguments while saving generics.
     GenericsSaver gs{prologueFlags.hasGenerics()};
-    // TODO(named_params) fix JIT side once we thread calls with named args to fcallRepack
-    return prepareUnpackArgs(func, numArgsInclUnpack - 1, 0, true);
+    return prepareUnpackArgs(func, numPositionalsInclUnpack - 1, true);
+  });
+}
+
+uint32_t fcallPackExtraHelper(PrologueFlags prologueFlags, const Func* func,
+                              uint32_t posArgc, TCA savedRip,
+                              uintptr_t namedArgNamesPtr) {
+  assert_native_stack_aligned();
+  // namedArgNames arg register contains garbage unless hasNamedArgs is set.
+  const ArrayData* namedArgNames =
+    prologueFlags.hasNamedArgs()
+      ? reinterpret_cast<const ArrayData*>(namedArgNamesPtr)
+      : nullptr;
+  auto numArgs = posArgc;
+  if (namedArgNames) numArgs += namedArgNames->size();
+  return withVMRegsForCall<uint32_t>(
+    prologueFlags, func, numArgs, false, savedRip,
+    [&] (Stack& stack, TypedValue* calleeFP) {
+      GenericsSaver gs{prologueFlags.hasGenerics()};
+      auto const numPositionalParams = func->numPositionalParams();
+      // If extra named args are passed, there's nothing to pack.
+      if (posArgc <= numPositionalParams) return posArgc;
+      auto const numToPack = posArgc - numPositionalParams;
+      auto const ad = VanillaVec::MakeVec(numToPack, vmStack().topC());
+      vmStack().ndiscard(numToPack);
+      vmStack().pushVecNoRc(ad);
+      return static_cast<uint32_t>(numPositionalParams) + 1;
   });
 }
 
 void fcallHelper(PrologueFlags prologueFlags, Func* func,
-                 uint32_t numArgsInclUnpack, void* ctx, TCA savedRip) {
+                 uint32_t posArgc, void* ctx, TCA savedRip,
+                 const uintptr_t namedArgNamesPtr) {
   assert_native_stack_aligned();
-  assertx(numArgsInclUnpack <= func->numNonVariadicParams() + 1);
+  assertx(posArgc <= func->numPositionalParams() + 1);
+  const ArrayData* namedArgNames =
+    prologueFlags.hasNamedArgs()
+      ? reinterpret_cast<const ArrayData*>(namedArgNamesPtr)
+      : nullptr;
+  auto namedArgNamesSize = namedArgNames ? namedArgNames->size() : 0;
+  auto numArgsInclUnpack = posArgc + namedArgNamesSize;
   auto const hasUnpack = numArgsInclUnpack == func->numNonVariadicParams() + 1;
   auto const numArgs = numArgsInclUnpack - (hasUnpack ? 1 : 0);
   withVMRegsForCall<void>(
@@ -264,8 +305,7 @@ void fcallHelper(PrologueFlags prologueFlags, Func* func,
       throw_stack_overflow();
     }
 
-    // TODO(named_params) thread named arg names here
-    doFCall(prologueFlags, func, nullptr /* namedArgNames */, numArgsInclUnpack, ctx, savedRip);
+    doFCall(prologueFlags, func, namedArgNames, numArgsInclUnpack, ctx, savedRip);
   });
 }
 
@@ -280,92 +320,78 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data, const char* name)
 
   return vwrap(cb, data, [] (Vout& v) {
     auto const callee = v.makeReg();
-    auto const numArgs = v.makeReg();
+    auto const posArgc = v.makeReg();
     v << copy{r_func_prologue_callee(), callee};
-    v << copy{r_func_prologue_num_args(), numArgs};
-
-    auto const paramCounts = v.makeReg();
-    auto const paramCountsMinusOne = v.makeReg();
-    auto const numNonVariadicParams = v.makeReg();
-    v << loadl{callee[Func::paramCountsOff()], paramCounts};
-    v << decl{paramCounts, paramCountsMinusOne, v.makeReg()};
-    v << shrli{1, paramCountsMinusOne, numNonVariadicParams, v.makeReg()};
-
-    auto const sf = v.makeReg();
-    v << cmpl{numNonVariadicParams, numArgs, sf};
+    v << copy{r_func_prologue_num_args(), posArgc};
 
     auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
     auto const ptrSize = safe_cast<int32_t>(sizeof(LowTCA));
 
-    ifThen(v, CC_LE, sf, [&] (Vout& v) {
-      // Fast path (numArgs <= numNonVariadicParams). Call the numArgs prologue.
-      auto const dest = v.makeReg();
-      v << loadzlq{callee[numArgs * ptrSize + pTabOff], dest};
-      v << jmpr{dest, func_prologue_regs(true)};
+    auto const hasNamedParams = v.makeReg();
+
+    auto const paramCounts = v.makeReg();
+    auto const paramCountsMinusOne = v.makeReg();
+    auto const numNonVariadicParams = v.makeReg();
+
+    v << loadl{callee[Func::paramCountsOff()], paramCounts};
+    v << decl{paramCounts, paramCountsMinusOne, v.makeReg()};
+    v << shrli{1, paramCountsMinusOne, numNonVariadicParams, v.makeReg()};
+    v << testbim{(int32_t)Func::hasNamedParamsMask(), callee[Func::allFlagsOff()], hasNamedParams};
+    ifThen(v, CC_Z, hasNamedParams, [&] (Vout& v) {
+      auto const sf = v.makeReg();
+      // This stub will only get called if named args are absent, so this check is
+      // OK.
+      v << cmpl{numNonVariadicParams, posArgc, sf};
+
+      auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
+      auto const ptrSize = safe_cast<int32_t>(sizeof(LowTCA));
+
+      ifThen(v, CC_LE, sf, [&] (Vout& v) {
+          // Fast path (posArgc <= numPositionalParams). Call the posArgc prologue.
+          auto const dest = v.makeReg();
+          v << loadzlq{callee[posArgc * ptrSize + pTabOff], dest};
+          v << jmpr{dest, func_prologue_regs(true, false)};
+      });
     });
+    // Slow path: either we passed more positional arguments than declared, or
+    // the callee has named params. The C++ helper will read the named args,
+    // understand how many positionals were passed, pack any extra positional
+    // args and dispatch to the appropriate prologue.
 
-    // Slow path: we passed more arguments than declared. Need to pack the extra
-    // args and dispatch to the "too many arguments" prologue. We should likely
-    // move all of this logic to a helper - JIT-ing it doesn't help much.
-
-    // We are going to do a C++ call, need to ensure native stack is aligned.
+    // Need to ensure native stack is aligned for the C++ call.
     v << stublogue{false};
 
-    // Figure out the range of stack values to pack.
-    auto const stackTopOff = v.makeReg();
-    auto const stackTopPtr = v.makeReg();
-    auto const numToPack = v.makeReg();
-    assertx(sizeof(TypedValue) == (1 << 4));
-    v << shlqi{4, numArgs, stackTopOff, v.makeReg()};
-    v << subq{stackTopOff, rvmsp(), stackTopPtr, v.makeReg()};
-    v << subl{numNonVariadicParams, numArgs, numToPack, v.makeReg()};
-
-    // Pack the extra args into a vec/varray.
-    auto const packedArr = v.makeReg();
+    auto const flags = v.makeReg();
+    auto const savedRip = v.makeReg();
+    v << copy{r_func_prologue_flags(), flags};
+    v << loadstubret{savedRip};
+    // Call C++ helper which will pack extra arguments into
+    // a vec in-place. The total number of args afterwards
+    // will not necessarily be numNonVariadicParams() + 1
+    // due to the presence of optional named params.
+    auto const newPosArgc = v.makeReg();
+    storeVMRegs(v);
     {
-      auto const save =
-        r_func_prologue_flags() |
-        r_func_prologue_callee() |
-        r_func_prologue_ctx();
-      PhysRegSaver prs{v, save};
+      // We don't have named args if we're calling this redispatch stub.
+      PhysRegSaver prs{v, RegSet{r_func_prologue_ctx()}};
+      auto const namedArgs = v.cns(nullptr); 
       v << vcall{
-        CallSpec::direct(VanillaVec::MakeVec),
-        v.makeVcallArgs({{numToPack, stackTopPtr}}),
-        v.makeTuple({packedArr}),
+        CallSpec::direct(fcallPackExtraHelper),
+        v.makeVcallArgs({{flags, callee, posArgc, savedRip, namedArgs}}),
+        v.makeTuple({newPosArgc}),
         Fixup::none(),
         DestType::SSA
       };
     }
-
-    // Calculate the new number of arguments.
-    auto const numNewArgs32 = v.makeReg();
-    auto const numNewArgs = v.makeReg();
-    v << incl{numNonVariadicParams, numNewArgs32, v.makeReg()};
-    v << movzlq{numNewArgs32, numNewArgs};
-
-    // Figure out where to store the packed array.
-    auto const unpackCellOff = v.makeReg();
-    auto const unpackCellPtr = v.makeReg();
-    assertx(sizeof(TypedValue) == (1 << 4));
-    v << shlqi{4, numNewArgs, unpackCellOff, v.makeReg()};
-    v << subq{unpackCellOff, rvmsp(), unpackCellPtr, v.makeReg()};
-
-    // Store it.
-    v << store{packedArr, unpackCellPtr + TVOFF(m_data)};
-    v << storeb{v.cns(KindOfVec), unpackCellPtr + TVOFF(m_type)};
-
-    // Move generics to the correct place.
-    auto const generics = v.makeReg();
-    v << loadups{stackTopPtr[-int32_t(sizeof(TypedValue))], generics};
-    v << storeups{generics, unpackCellPtr[-int32_t(sizeof(TypedValue))]};
-
     // Restore all inputs.
-    v << copy{numNewArgs, r_func_prologue_num_args()};
+    v << copy{flags, r_func_prologue_flags()};
+    v << copy{callee, r_func_prologue_callee()};
+    v << copy{newPosArgc, r_func_prologue_num_args()};
 
-    // Call the numNonVariadicParams + 1 prologue.
+    // Call the newPosArgc prologue.
     auto const dest = v.makeReg();
-    v << loadzlq{Vreg(r_func_prologue_callee())[numNewArgs * ptrSize + pTabOff], dest};
-    v << tailcallstubr{dest, func_prologue_regs(true)};
+    v << loadzlq{Vreg(r_func_prologue_callee())[newPosArgc * ptrSize + pTabOff], dest};
+    v << tailcallstubr{dest, func_prologue_regs(true, false)};
   }, name);
 }
 
@@ -381,24 +407,26 @@ TCA emitFuncPrologueRedispatchUnpack(CodeBlock& main, CodeBlock& cold,
     // Save all inputs.
     auto const flags = v.makeReg();
     auto const callee = v.makeReg();
-    auto const numArgs = v.makeReg();
+    auto const numPositionals = v.makeReg();
     auto const savedRip = v.makeReg();
     v << copy{r_func_prologue_flags(), flags};
     v << copy{r_func_prologue_callee(), callee};
-    v << copy{r_func_prologue_num_args(), numArgs};
+    v << copy{r_func_prologue_num_args(), numPositionals};
     v << loadstubret{savedRip};
 
     // Call C++ helper to repack arguments.
-    auto const numNewArgs = v.makeReg();
+    auto const newPosArgc = v.makeReg();
     storeVMRegs(v);
     {
-      PhysRegSaver prs{v, RegSet{r_func_prologue_ctx()}};
+      PhysRegSaver prs{v, RegSet{r_func_prologue_ctx() | r_func_prologue_named_args()}};
+      auto const namedArgs = v.makeReg();
+      v << copy{r_func_prologue_named_args(), namedArgs};
       auto const done = v.makeBlock();
       auto const ctch = vc.makeBlock();
       v << vinvoke{
         CallSpec::direct(fcallRepackHelper),
-        v.makeVcallArgs({{flags, callee, numArgs, savedRip}}),
-        v.makeTuple({numNewArgs}),
+        v.makeVcallArgs({{flags, callee, numPositionals, savedRip, namedArgs}}),
+        v.makeTuple({newPosArgc}),
         {done, ctch},
         Fixup::indirect(prs.qwordsPushed(), SBInvOffset{0}),
         DestType::SSA
@@ -416,14 +444,83 @@ TCA emitFuncPrologueRedispatchUnpack(CodeBlock& main, CodeBlock& cold,
     // Restore all inputs.
     v << copy{flags, r_func_prologue_flags()};
     v << copy{callee, r_func_prologue_callee()};
-    v << copy{numNewArgs, r_func_prologue_num_args()};
+    v << copy{newPosArgc, r_func_prologue_num_args()};
 
-    // Call the numNewArgs prologue.
+    // Call the newPosArgc prologue.
     auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
     auto const ptrSize = safe_cast<int32_t>(sizeof(LowTCA));
     auto const dest = v.makeReg();
-    v << loadzlq{callee[numNewArgs * ptrSize + pTabOff], dest};
-    v << tailcallstubr{dest, func_prologue_regs(true)};
+    v << loadzlq{callee[newPosArgc * ptrSize + pTabOff], dest};
+    v << tailcallstubr{dest, func_prologue_regs(true, true)};
+  }, name);
+
+  meta.process(nullptr);
+  return start;
+}
+
+
+TCA emitFuncPrologueRedispatchNamedArgs(CodeBlock& main, CodeBlock& cold,
+                                        DataBlock& data, UniqueStubs& us,
+                                        const char* name) {
+  alignCacheLine(main);
+  CGMeta meta;
+
+  auto const start = vwrap2(main, cold, data, meta, [&] (Vout& v, Vout& vc) {
+    v << stublogue{false};
+
+    // Save all inputs.
+    auto const flags = v.makeReg();
+    auto const callee = v.makeReg();
+    auto const posArgc = v.makeReg();
+    auto const savedRip = v.makeReg();
+
+    v << copy{r_func_prologue_flags(), flags};
+    v << copy{r_func_prologue_callee(), callee};
+    v << copy{r_func_prologue_num_args(), posArgc};
+
+    v << loadstubret{savedRip};
+    // Call C++ helper to repack arguments.
+    auto const newPosArgc = v.makeReg();
+    storeVMRegs(v);
+    {
+      // This is written unidiomatically, using a PhysRegSaver rather than
+      // moving namedArgs back to r_func_prologue_named_args to avoid
+      // spilling issues. A more straightforward attempt tripped the "spilling
+      // before RSP is set" asserts.
+      PhysRegSaver prs{v, RegSet{r_func_prologue_ctx() | r_func_prologue_named_args()}};
+      auto const namedArgs = v.makeReg();
+      v << copy{r_func_prologue_named_args(), namedArgs};
+      auto const done = v.makeBlock();
+      auto const ctch = vc.makeBlock();
+      v << vinvoke{
+        CallSpec::direct(fcallPackExtraHelper),
+        v.makeVcallArgs({{flags, callee, posArgc, savedRip, namedArgs}}),
+        v.makeTuple({newPosArgc}),
+        {done, ctch},
+        Fixup::indirect(prs.qwordsPushed(), SBInvOffset{0}),
+        DestType::SSA
+      };
+
+      vc = ctch;
+      emitStubCatch(vc, us, [&] (Vout& v) {
+        v << lea{rsp()[prs.qwordsPushed() * sizeof(uintptr_t)], rsp()};
+        loadVmfp(v);
+      });
+
+      v = done;
+    }
+
+    // Restore all inputs.
+    v << copy{flags, r_func_prologue_flags()};
+    v << copy{callee, r_func_prologue_callee()};
+    v << copy{newPosArgc, r_func_prologue_num_args()};
+
+    // Call the newPosArgc prologue.
+    auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
+    auto const ptrSize = safe_cast<int32_t>(sizeof(LowTCA));
+    auto const dest = v.makeReg();
+    v << loadzlq{callee[newPosArgc * ptrSize + pTabOff], dest};
+    v << tailcallstubr{dest, func_prologue_regs(true, true)};
   }, name);
 
   meta.process(nullptr);
@@ -441,18 +538,20 @@ TCA emitFCallHelperThunkImpl(CodeBlock& main, CodeBlock& cold,
 
     // Save all inputs.
     auto const callee = v.makeReg();
-    auto const numArgs = v.makeReg();
+    auto const numPositionals = v.makeReg();
     v << copy{r_func_prologue_callee(), callee};
-    v << copy{r_func_prologue_num_args(), numArgs};
+    v << copy{r_func_prologue_num_args(), numPositionals};
 
     if (translate) {
       // Try to JIT the prologue first.
       auto const target = v.makeReg();
       {
-        PhysRegSaver prs{v, r_func_prologue_flags() | r_func_prologue_ctx()};
+        PhysRegSaver prs{v, r_func_prologue_flags() |
+                             r_func_prologue_ctx() |
+                             r_func_prologue_named_args()};
         v << vcall{
           CallSpec::direct(getFuncPrologueHelper),
-          v.makeVcallArgs({{callee, numArgs}}),
+          v.makeVcallArgs({{callee, numPositionals}}),
           v.makeTuple({target}),
           Fixup::none(),
           DestType::SSA
@@ -464,25 +563,27 @@ TCA emitFCallHelperThunkImpl(CodeBlock& main, CodeBlock& cold,
       ifThen(v, CC_NZ, targetSF, [&] (Vout& v) {
           // Restore all inputs and call the resolved prologue.
           v << copy{callee, r_func_prologue_callee()};
-          v << copy{numArgs, r_func_prologue_num_args()};
-          v << tailcallstubr{target, func_prologue_regs(true)};
+          v << copy{numPositionals, r_func_prologue_num_args()};
+          v << tailcallstubr{target, func_prologue_regs(true, true)};
         });
     }
 
     auto const flags = v.makeReg();
     auto const ctx = v.makeReg();
     auto const savedRip = v.makeReg();
+    auto const namedArgs = v.makeReg();
+
     v << copy{r_func_prologue_flags(), flags};
     v << copy{r_func_prologue_ctx(), ctx};
     v << loadstubret{savedRip};
-
+    v << copy{r_func_prologue_named_args(), namedArgs};
     // Call C++ helper to perform the equivalent of the func prologue logic.
     auto const done = v.makeBlock();
     auto const ctch = vc.makeBlock();
     storeVMRegs(v);
     v << vinvoke{
       CallSpec::direct(fcallHelper),
-      v.makeVcallArgs({{flags, callee, numArgs, ctx, savedRip}}),
+      v.makeVcallArgs({{flags, callee, numPositionals, ctx, savedRip, namedArgs}}),
       v.makeTuple({}),
       {done, ctch},
       Fixup::none()
@@ -841,7 +942,9 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data, const char* name) {
     // Call C++ helper to bind the call.
     auto const target = v.makeReg();
     {
-      PhysRegSaver prs{v, r_func_prologue_flags() | r_func_prologue_ctx()};
+      PhysRegSaver prs{v, r_func_prologue_flags()
+                          | r_func_prologue_ctx()
+                          | r_func_prologue_named_args()};
       v << vcall{
         CallSpec::direct(svcreq::handleBindCall),
         v.makeVcallArgs({{toSmash, callee, numArgs}}),
@@ -854,7 +957,7 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data, const char* name) {
     // Restore all inputs and call the resolved prologue.
     v << copy{callee, r_func_prologue_callee()};
     v << copy{numArgs, r_func_prologue_num_args()};
-    v << tailcallstubr{target, func_prologue_regs(true)};
+    v << tailcallstubr{target, func_prologue_regs(true, true)};
   }, name);
 }
 
@@ -1013,15 +1116,10 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data, const char* /*name*/) {
 
   auto const start = vwrap(cb, data, meta, [] (Vout& v) {
     v << vregrestrict{};
-    auto const fullFrame = [&] {
-      switch (arch::get()) {
-        case Arch::ARM:
-          return true;
-        case Arch::X64:
-          return false;
-      }
-      not_reached();
-    }();
+    auto const fullFrame = ARCH_MATCH(
+      [](arch::X64) { return false; },
+      [](arch::ARM) { return true; }
+    );
     v << stublogue{fullFrame};
     if (fullFrame) {
       v << copy{rsp(), rvmfp()};
@@ -1070,13 +1168,12 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data, const char* /*name*/) {
 namespace {
 
 void alignNativeStack(Vout& v, bool exit) {
-  switch (arch::get()) {
-    case Arch::X64:
+  ARCH_MATCH(
+    ([&](arch::X64) {
       v << lea{rsp()[exit ? 8 : -8], rsp()};
-      break;
-    case Arch::ARM:
-      break;
-  }
+    }),
+    [](arch::ARM) {}
+  );
 }
 
 }
@@ -1427,6 +1524,9 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(funcPrologueRedispatchUnpack,
       hotView(),
       emitFuncPrologueRedispatchUnpack, hot(), cold, data, *this);
+  ADD(funcPrologueRedispatchNamedArgs,
+      hotView(),
+      emitFuncPrologueRedispatchNamedArgs, hot(), cold, data, *this);
   ADD(functionSurprised,
       hotView(),
       emitFunctionSurprised, hot(), cold, data, *this);

@@ -17,7 +17,7 @@
              ft_instantiated = true }));
        fe_pos = [3:10-23]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-       fe_no_auto_likes = false;
+       fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\async_function",
    (Shallow_decl_defs.Fun
@@ -43,7 +43,7 @@
               ft_instantiated = true }));
         fe_pos = [5:16-30]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\generator_function",
    (Shallow_decl_defs.Fun
@@ -71,7 +71,7 @@
               ft_instantiated = true }));
         fe_pos = [10:10-28]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\generator_function_implicit_key",
    (Shallow_decl_defs.Fun
@@ -99,7 +99,7 @@
               ft_instantiated = true }));
         fe_pos = [14:10-41]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\async_generator",
    (Shallow_decl_defs.Fun
@@ -127,6 +127,6 @@
               ft_instantiated = true }));
         fe_pos = [18:16-31]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }))
   ]

@@ -46,11 +46,11 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(StructWithFieldAdapter other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -66,21 +66,21 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
 
         public com.facebook.thrift.my.AdaptedI32_1 getField() { return field; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="shared_field", requiredness=Requiredness.NONE)    public Builder setSharedField(int sharedField) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="shared_field", requiredness=Requiredness.NONE)    public Builder setSharedField(int sharedField) {
             this.sharedField = sharedField;
             return this;
         }
 
         public int getSharedField() { return sharedField; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="opt_shared_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptSharedField(com.facebook.thrift.my.AdaptedI32_1 optSharedField) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="opt_shared_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptSharedField(com.facebook.thrift.my.AdaptedI32_1 optSharedField) {
             this.optSharedField = optSharedField;
             return this;
         }
 
         public com.facebook.thrift.my.AdaptedI32_1 getOptSharedField() { return optSharedField; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="opt_boxed_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptBoxedField(Integer optBoxedField) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="opt_boxed_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptBoxedField(Integer optBoxedField) {
             this.optBoxedField = optBoxedField;
             return this;
         }
@@ -106,8 +106,9 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
             return result;
         }
     }
-            private static final com.facebook.thrift.adapter.TypeAdapter<Integer, com.facebook.thrift.my.AdaptedI32_1> _field_Adapter = new com.facebook.thrift.my.Adapter1();
-            private static final com.facebook.thrift.adapter.TypeAdapter<Integer, com.facebook.thrift.my.AdaptedI32_1> _optSharedField_Adapter = new com.facebook.thrift.my.Adapter1();
+
+    private static final com.facebook.thrift.adapter.TypeAdapter<Integer, com.facebook.thrift.my.AdaptedI32_1> _field_Adapter = new com.facebook.thrift.my.Adapter1();
+    private static final com.facebook.thrift.adapter.TypeAdapter<Integer, com.facebook.thrift.my.AdaptedI32_1> _optSharedField_Adapter = new com.facebook.thrift.my.Adapter1();
 
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -116,48 +117,41 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
     private final com.facebook.thrift.my.AdaptedI32_1 field;
     public static final int _FIELD = 1;
     private static final TField FIELD_FIELD_DESC = new TField("field", TType.I32, (short)1);
-        private final int sharedField;
+    private final int sharedField;
     public static final int _SHARED_FIELD = 2;
     private static final TField SHARED_FIELD_FIELD_DESC = new TField("shared_field", TType.I32, (short)2);
-        private final com.facebook.thrift.my.AdaptedI32_1 optSharedField;
+    private final com.facebook.thrift.my.AdaptedI32_1 optSharedField;
     public static final int _OPT_SHARED_FIELD = 3;
     private static final TField OPT_SHARED_FIELD_FIELD_DESC = new TField("opt_shared_field", TType.I32, (short)3);
-        private final Integer optBoxedField;
+    private final Integer optBoxedField;
     public static final int _OPT_BOXED_FIELD = 4;
     private static final TField OPT_BOXED_FIELD_FIELD_DESC = new TField("opt_boxed_field", TType.I32, (short)4);
     static {
-      NAMES_TO_IDS.put("field", 1);
-      THRIFT_NAMES_TO_IDS.put("field", 1);
-      FIELD_METADATA.put(1, FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("sharedField", 2);
-      THRIFT_NAMES_TO_IDS.put("shared_field", 2);
-      FIELD_METADATA.put(2, SHARED_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("optSharedField", 3);
-      THRIFT_NAMES_TO_IDS.put("opt_shared_field", 3);
-      FIELD_METADATA.put(3, OPT_SHARED_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("optBoxedField", 4);
-      THRIFT_NAMES_TO_IDS.put("opt_boxed_field", 4);
-      FIELD_METADATA.put(4, OPT_BOXED_FIELD_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/StructWithFieldAdapter"),
-        StructWithFieldAdapter.class, StructWithFieldAdapter::read0));
+        NAMES_TO_IDS.put("field", 1);
+        THRIFT_NAMES_TO_IDS.put("field", 1);
+        FIELD_METADATA.put(1, FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("sharedField", 2);
+        THRIFT_NAMES_TO_IDS.put("shared_field", 2);
+        FIELD_METADATA.put(2, SHARED_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("optSharedField", 3);
+        THRIFT_NAMES_TO_IDS.put("opt_shared_field", 3);
+        FIELD_METADATA.put(3, OPT_SHARED_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("optBoxedField", 4);
+        THRIFT_NAMES_TO_IDS.put("opt_boxed_field", 4);
+        FIELD_METADATA.put(4, OPT_BOXED_FIELD_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/StructWithFieldAdapter"),
+            StructWithFieldAdapter.class, StructWithFieldAdapter::read0));
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)
     public com.facebook.thrift.my.AdaptedI32_1 getField() { return field; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=2, name="shared_field", requiredness=Requiredness.NONE)
     public int getSharedField() { return sharedField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="opt_shared_field", requiredness=Requiredness.OPTIONAL)
     public com.facebook.thrift.my.AdaptedI32_1 getOptSharedField() { return optSharedField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="opt_boxed_field", requiredness=Requiredness.OPTIONAL)
     public Integer getOptBoxedField() { return optBoxedField; }
@@ -195,101 +189,104 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(field);
-            _hashCode = 31 * _hashCode + Integer.hashCode(sharedField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optSharedField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optBoxedField);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Integer.hashCode(sharedField);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optSharedField);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optBoxedField);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<StructWithFieldAdapter> asReader() {
       return StructWithFieldAdapter::read0;
     }
 
     public static StructWithFieldAdapter read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(StructWithFieldAdapter.NAMES_TO_IDS, StructWithFieldAdapter.THRIFT_NAMES_TO_IDS, StructWithFieldAdapter.FIELD_METADATA);
-      StructWithFieldAdapter.Builder builder = new StructWithFieldAdapter.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _FIELD:
-          if (__field.type == TType.I32) {
-            int field = oprot.readI32();
-            builder.setField(_field_Adapter.fromThrift(field));
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SHARED_FIELD:
-          if (__field.type == TType.I32) {
-            int sharedField = oprot.readI32();
-            builder.setSharedField(sharedField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPT_SHARED_FIELD:
-          if (__field.type == TType.I32) {
-            Integer optSharedField = oprot.readI32();
-            builder.setOptSharedField(_optSharedField_Adapter.fromThrift(optSharedField));
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPT_BOXED_FIELD:
-          if (__field.type == TType.I32) {
-            Integer optBoxedField = oprot.readI32();
-            builder.setOptBoxedField(optBoxedField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(StructWithFieldAdapter.NAMES_TO_IDS, StructWithFieldAdapter.THRIFT_NAMES_TO_IDS, StructWithFieldAdapter.FIELD_METADATA);
+        StructWithFieldAdapter.Builder builder = new StructWithFieldAdapter.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _FIELD:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setField(_field_Adapter.fromThrift(_fbthriftVar0));
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _SHARED_FIELD:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setSharedField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _OPT_SHARED_FIELD:
+                if (__field.type == TType.I32) {
+                    Integer _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setOptSharedField(_optSharedField_Adapter.fromThrift(_fbthriftVar0));
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _OPT_BOXED_FIELD:
+                if (__field.type == TType.I32) {
+                    Integer _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setOptBoxedField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      Integer _iter0 = _field_Adapter.toThrift(this.field);
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(FIELD_FIELD_DESC);
-        oprot.writeI32(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      int _iter0 = this.sharedField;
-      oprot.writeFieldBegin(SHARED_FIELD_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      Integer _iter0 = _optSharedField_Adapter.toThrift(this.optSharedField);
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPT_SHARED_FIELD_FIELD_DESC);
-        oprot.writeI32(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Integer _iter0 = this.optBoxedField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPT_BOXED_FIELD_FIELD_DESC);
-        oprot.writeI32(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            Integer _fbthriftVar0 = _field_Adapter.toThrift(this.field);
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(FIELD_FIELD_DESC);
+                oprot.writeI32(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            int _fbthriftVar0 = this.sharedField;
+            oprot.writeFieldBegin(SHARED_FIELD_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            Integer _fbthriftVar0 = _optSharedField_Adapter.toThrift(this.optSharedField);
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPT_SHARED_FIELD_FIELD_DESC);
+                oprot.writeI32(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            Integer _fbthriftVar0 = this.optBoxedField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPT_BOXED_FIELD_FIELD_DESC);
+                oprot.writeI32(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _StructWithFieldAdapterLazy {

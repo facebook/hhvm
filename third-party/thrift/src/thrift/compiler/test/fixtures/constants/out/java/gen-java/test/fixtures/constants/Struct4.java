@@ -43,11 +43,11 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Struct4 other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -62,14 +62,14 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
 
         public int getA() { return a; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.OPTIONAL)    public Builder setB(Double b) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.OPTIONAL)    public Builder setB(Double b) {
             this.b = b;
             return this;
         }
 
         public Double getB() { return b; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.OPTIONAL)    public Builder setC(Byte c) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.OPTIONAL)    public Builder setC(Byte c) {
             this.c = c;
             return this;
         }
@@ -93,6 +93,7 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -101,34 +102,29 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
     private final int a;
     public static final int _A = 1;
     private static final TField A_FIELD_DESC = new TField("a", TType.I32, (short)1);
-        private final Double b;
+    private final Double b;
     public static final int _B = 2;
     private static final TField B_FIELD_DESC = new TField("b", TType.DOUBLE, (short)2);
-        private final Byte c;
+    private final Byte c;
     public static final int _C = 3;
     private static final TField C_FIELD_DESC = new TField("c", TType.BYTE, (short)3);
     static {
-      NAMES_TO_IDS.put("a", 1);
-      THRIFT_NAMES_TO_IDS.put("a", 1);
-      FIELD_METADATA.put(1, A_FIELD_DESC);
-      NAMES_TO_IDS.put("b", 2);
-      THRIFT_NAMES_TO_IDS.put("b", 2);
-      FIELD_METADATA.put(2, B_FIELD_DESC);
-      NAMES_TO_IDS.put("c", 3);
-      THRIFT_NAMES_TO_IDS.put("c", 3);
-      FIELD_METADATA.put(3, C_FIELD_DESC);
+        NAMES_TO_IDS.put("a", 1);
+        THRIFT_NAMES_TO_IDS.put("a", 1);
+        FIELD_METADATA.put(1, A_FIELD_DESC);
+        NAMES_TO_IDS.put("b", 2);
+        THRIFT_NAMES_TO_IDS.put("b", 2);
+        FIELD_METADATA.put(2, B_FIELD_DESC);
+        NAMES_TO_IDS.put("c", 3);
+        THRIFT_NAMES_TO_IDS.put("c", 3);
+        FIELD_METADATA.put(3, C_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)
     public int getA() { return a; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.OPTIONAL)
     public Double getB() { return b; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.OPTIONAL)
     public Byte getC() { return c; }
@@ -164,84 +160,86 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Integer.hashCode(a);
-            _hashCode = 31 * _hashCode + Objects.hashCode(b);
-            _hashCode = 31 * _hashCode + Objects.hashCode(c);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(b);
+        _hashCode = 31 * _hashCode + Objects.hashCode(c);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Struct4> asReader() {
       return Struct4::read0;
     }
 
     public static Struct4 read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Struct4.NAMES_TO_IDS, Struct4.THRIFT_NAMES_TO_IDS, Struct4.FIELD_METADATA);
-      Struct4.Builder builder = new Struct4.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _A:
-          if (__field.type == TType.I32) {
-            int a = oprot.readI32();
-            builder.setA(a);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _B:
-          if (__field.type == TType.DOUBLE) {
-            Double b = oprot.readDouble();
-            builder.setB(b);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _C:
-          if (__field.type == TType.BYTE) {
-            Byte c = oprot.readByte();
-            builder.setC(c);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(Struct4.NAMES_TO_IDS, Struct4.THRIFT_NAMES_TO_IDS, Struct4.FIELD_METADATA);
+        Struct4.Builder builder = new Struct4.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _A:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setA(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _B:
+                if (__field.type == TType.DOUBLE) {
+                    Double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setB(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _C:
+                if (__field.type == TType.BYTE) {
+                    Byte _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readByte();
+                    builder.setC(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      int _iter0 = this.a;
-      oprot.writeFieldBegin(A_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      Double _iter0 = this.b;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(B_FIELD_DESC);
-        oprot.writeDouble(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Byte _iter0 = this.c;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(C_FIELD_DESC);
-        oprot.writeByte(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            int _fbthriftVar0 = this.a;
+            oprot.writeFieldBegin(A_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            Double _fbthriftVar0 = this.b;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(B_FIELD_DESC);
+                oprot.writeDouble(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            Byte _fbthriftVar0 = this.c;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(C_FIELD_DESC);
+                oprot.writeByte(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _Struct4Lazy {

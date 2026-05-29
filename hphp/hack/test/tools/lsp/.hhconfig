@@ -6,5 +6,3 @@ unsafe_xhp = false
 user_attributes = DataProvider ExpectedException ExpectedExceptionCode ExpectedExceptionMessage TestsBypassVisibility FBMock_DoNotMock UIComponentID Task FBTEnum ApiEnum HiddenNames XMLImpl XMLName XMLElement XMLTransient XMLTypeahead XMLKey XMLChildren XMLUseLenientParsing XMLJSModule TestPlatformVersions MinPlatformVersion MaxPlatformVersion Relative Iters MinMsec WarmUp DynamicallyCalledFrom AsyncPHPSerialization AsyncJobType AsyncFastFail Serialize SerializeAs GraphQLDeprecatedEnumValues GraphQLEnumValueDescriptions JsonField GraphQLObject GraphQLField GraphQLInterface Owner SelfDescriptive
 
 auto_namespace_map = {"Dict": "HH\\Lib\\Dict", "Vec": "HH\\Lib\\Vec", "Keyset": "HH\\Lib\\Keyset", "C": "HH\\Lib\\C", "Str": "HH\\Lib\\Str"}
-
-enable_experimental_tc_features = instanceof

@@ -158,7 +158,6 @@ namespace Trace {
       TM(hhir_store)    \
       TM(hhir_unreachable) \
       TM(hhir_vanilla)  \
-      TM(hhprof)        \
       TM(inline_stitching) \
       TM(inlining)      \
       TM(instancebits)  \

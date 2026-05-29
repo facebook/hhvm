@@ -49,11 +49,11 @@ public final class User implements com.facebook.thrift.payload.ThriftSerializabl
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(User other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -70,28 +70,28 @@ public final class User implements com.facebook.thrift.payload.ThriftSerializabl
 
         public long getId() { return id; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)    public Builder setName(String name) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)    public Builder setName(String name) {
             this.name = name;
             return this;
         }
 
         public String getName() { return name; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="full_name", requiredness=Requiredness.NONE)    public Builder setFullName(String fullName) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="full_name", requiredness=Requiredness.NONE)    public Builder setFullName(String fullName) {
             this.fullName = fullName;
             return this;
         }
 
         public String getFullName() { return fullName; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="email", requiredness=Requiredness.OPTIONAL)    public Builder setEmail(String email) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="email", requiredness=Requiredness.OPTIONAL)    public Builder setEmail(String email) {
             this.email = email;
             return this;
         }
 
         public String getEmail() { return email; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="email_address", requiredness=Requiredness.OPTIONAL)    public Builder setEmailAddress(String emailAddress) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="email_address", requiredness=Requiredness.OPTIONAL)    public Builder setEmailAddress(String emailAddress) {
             this.emailAddress = emailAddress;
             return this;
         }
@@ -119,6 +119,7 @@ public final class User implements com.facebook.thrift.payload.ThriftSerializabl
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -127,61 +128,52 @@ public final class User implements com.facebook.thrift.payload.ThriftSerializabl
     private final long id;
     public static final int _ID = 1;
     private static final TField ID_FIELD_DESC = new TField("id", TType.I64, (short)1);
-        private final String name;
+    private final String name;
     public static final int _NAME = 2;
     private static final TField NAME_FIELD_DESC = new TField("name", TType.STRING, (short)2);
-        private final String fullName;
+    private final String fullName;
     public static final int _FULL_NAME = 3;
     private static final TField FULL_NAME_FIELD_DESC = new TField("full_name", TType.STRING, (short)3);
-        private final String email;
+    private final String email;
     public static final int _EMAIL = 4;
     private static final TField EMAIL_FIELD_DESC = new TField("email", TType.STRING, (short)4);
-        private final String emailAddress;
+    private final String emailAddress;
     public static final int _EMAIL_ADDRESS = 5;
     private static final TField EMAIL_ADDRESS_FIELD_DESC = new TField("email_address", TType.STRING, (short)5);
     static {
-      NAMES_TO_IDS.put("id", 1);
-      THRIFT_NAMES_TO_IDS.put("id", 1);
-      FIELD_METADATA.put(1, ID_FIELD_DESC);
-      NAMES_TO_IDS.put("name", 2);
-      THRIFT_NAMES_TO_IDS.put("name", 2);
-      FIELD_METADATA.put(2, NAME_FIELD_DESC);
-      NAMES_TO_IDS.put("fullName", 3);
-      THRIFT_NAMES_TO_IDS.put("full_name", 3);
-      FIELD_METADATA.put(3, FULL_NAME_FIELD_DESC);
-      NAMES_TO_IDS.put("email", 4);
-      THRIFT_NAMES_TO_IDS.put("email", 4);
-      FIELD_METADATA.put(4, EMAIL_FIELD_DESC);
-      NAMES_TO_IDS.put("emailAddress", 5);
-      THRIFT_NAMES_TO_IDS.put("email_address", 5);
-      FIELD_METADATA.put(5, EMAIL_ADDRESS_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/User"),
-        User.class, User::read0));
+        NAMES_TO_IDS.put("id", 1);
+        THRIFT_NAMES_TO_IDS.put("id", 1);
+        FIELD_METADATA.put(1, ID_FIELD_DESC);
+        NAMES_TO_IDS.put("name", 2);
+        THRIFT_NAMES_TO_IDS.put("name", 2);
+        FIELD_METADATA.put(2, NAME_FIELD_DESC);
+        NAMES_TO_IDS.put("fullName", 3);
+        THRIFT_NAMES_TO_IDS.put("full_name", 3);
+        FIELD_METADATA.put(3, FULL_NAME_FIELD_DESC);
+        NAMES_TO_IDS.put("email", 4);
+        THRIFT_NAMES_TO_IDS.put("email", 4);
+        FIELD_METADATA.put(4, EMAIL_FIELD_DESC);
+        NAMES_TO_IDS.put("emailAddress", 5);
+        THRIFT_NAMES_TO_IDS.put("email_address", 5);
+        FIELD_METADATA.put(5, EMAIL_ADDRESS_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/User"),
+            User.class, User::read0));
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE)
     public long getId() { return id; }
-
-    
     @Deprecated
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)
     public String getName() { return name; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="full_name", requiredness=Requiredness.NONE)
     public String getFullName() { return fullName; }
-
-    
     @Deprecated
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="email", requiredness=Requiredness.OPTIONAL)
     public String getEmail() { return email; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="email_address", requiredness=Requiredness.OPTIONAL)
     public String getEmailAddress() { return emailAddress; }
@@ -221,118 +213,122 @@ public final class User implements com.facebook.thrift.payload.ThriftSerializabl
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(id);
-            _hashCode = 31 * _hashCode + Objects.hashCode(name);
-            _hashCode = 31 * _hashCode + Objects.hashCode(fullName);
-            _hashCode = 31 * _hashCode + Objects.hashCode(email);
-            _hashCode = 31 * _hashCode + Objects.hashCode(emailAddress);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(name);
+        _hashCode = 31 * _hashCode + Objects.hashCode(fullName);
+        _hashCode = 31 * _hashCode + Objects.hashCode(email);
+        _hashCode = 31 * _hashCode + Objects.hashCode(emailAddress);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<User> asReader() {
       return User::read0;
     }
 
     public static User read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(User.NAMES_TO_IDS, User.THRIFT_NAMES_TO_IDS, User.FIELD_METADATA);
-      User.Builder builder = new User.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _ID:
-          if (__field.type == TType.I64) {
-            long id = oprot.readI64();
-            builder.setId(id);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _NAME:
-          if (__field.type == TType.STRING) {
-            String name = oprot.readString();
-            builder.setName(name);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _FULL_NAME:
-          if (__field.type == TType.STRING) {
-            String fullName = oprot.readString();
-            builder.setFullName(fullName);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _EMAIL:
-          if (__field.type == TType.STRING) {
-            String email = oprot.readString();
-            builder.setEmail(email);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _EMAIL_ADDRESS:
-          if (__field.type == TType.STRING) {
-            String emailAddress = oprot.readString();
-            builder.setEmailAddress(emailAddress);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(User.NAMES_TO_IDS, User.THRIFT_NAMES_TO_IDS, User.FIELD_METADATA);
+        User.Builder builder = new User.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _ID:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setId(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _NAME:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setName(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _FULL_NAME:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setFullName(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _EMAIL:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setEmail(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _EMAIL_ADDRESS:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setEmailAddress(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.id;
-      oprot.writeFieldBegin(ID_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.name;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(NAME_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.fullName;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(FULL_NAME_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.email;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(EMAIL_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.emailAddress;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(EMAIL_ADDRESS_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.id;
+            oprot.writeFieldBegin(ID_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.name;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(NAME_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.fullName;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(FULL_NAME_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.email;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(EMAIL_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.emailAddress;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(EMAIL_ADDRESS_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _UserLazy {

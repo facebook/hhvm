@@ -51,3 +51,21 @@ cdef class PythonAsyncProcessorFactoryCTest:
         actual = cAsyncProcessorFactory.describe(create_method_metadata_result)
         self.ut.maxDiff = None
         self.ut.assertEqual(expected, actual)
+
+    def test_make_handler_func_full_name(
+        self,
+        bytes service_name,
+        bytes function_name,
+        RpcKind rpc_kind,
+        string expected,
+    ) -> None:
+        cdef string service_name_string = service_name
+        cdef string_view function_name_view = bytes_to_string_view(function_name)
+
+        handler_func = makeHandlerFunc(
+            rpc_kind,
+            <PyObject*>None,
+            service_name_string,
+            function_name_view,
+        )
+        self.ut.assertEqual(expected, handler_func.fullName)

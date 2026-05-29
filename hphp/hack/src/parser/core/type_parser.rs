@@ -217,7 +217,6 @@ where
             | TokenKind::Shape => self.parse_shape_specifier(),
             | TokenKind::Question => self.parse_nullable_type_specifier(),
             | TokenKind::Tilde => self.parse_like_type_specifier(),
-            | TokenKind::At => self.parse_soft_type_specifier(),
             | TokenKind::LessThanLessThan if allow_attr => self.parse_attributized_specifier(),
             | TokenKind::Enum
             | TokenKind::Class => self.parse_class_ptr_type_specifier(),
@@ -1082,21 +1081,6 @@ where
         let tilde = self.assert_token(TokenKind::Tilde);
         let like_type = self.parse_type_specifier(false, true);
         self.sc_mut().make_like_type_specifier(tilde, like_type)
-    }
-
-    fn parse_soft_type_specifier(&mut self) -> S::Output {
-        // SPEC (Draft)
-        // soft-type-specifier:
-        //   @ type-specifier
-        //
-        // TODO: The spec does not mention this type grammar.  Work out where and
-        // when it is legal, and what the exact semantics are, and put it in the spec.
-        // Add an error pass if necessary to identify illegal usages of this type.
-        //
-        // Note that it is legal for trivia to come between the @ and the type.
-        let soft_at = self.assert_token(TokenKind::At);
-        let soft_type = self.parse_type_specifier(false, true);
-        self.sc_mut().make_soft_type_specifier(soft_at, soft_type)
     }
 
     fn parse_attributized_specifier(&mut self) -> S::Output {

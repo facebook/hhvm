@@ -63,19 +63,19 @@ public class LegacyServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        Map<String, List<Integer>> _iter0 = (Map<String, List<Integer>>)_r;
+        Map<String, List<Integer>> _fbthriftVar0 = (Map<String, List<Integer>>)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.MAP_FIELD);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-        for (Map.Entry<String, List<Integer>> _iter1 : _iter0.entrySet()) {
+        oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _fbthriftVar0.size()));
+        for (Map.Entry<String, List<Integer>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
           {
-            String _iter2 = _iter1.getKey();
-            oprot.writeString(_iter2);
+            String _fbthriftVar2 = _fbthriftVar1.getKey();
+            oprot.writeString(_fbthriftVar2);
           }
           {
-            List<Integer> _iter2 = _iter1.getValue();
-            oprot.writeListBegin(new TList(TType.I32, _iter2.size()));
-            for (int _iter3 : _iter2) {
-              oprot.writeI32(_iter3);
+            List<Integer> _fbthriftVar2 = _fbthriftVar1.getValue();
+            oprot.writeListBegin(new TList(TType.I32, _fbthriftVar2.size()));
+            for (int _fbthriftVar3 : _fbthriftVar2) {
+              oprot.writeI32(_fbthriftVar3);
             }
             oprot.writeListEnd();
           }

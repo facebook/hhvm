@@ -654,6 +654,8 @@ void load_standard_library(map::raw& module) {
   module.emplace(create_string_functions());
   module.emplace(create_int_functions());
   module.emplace(create_object_functions());
+
+  module.emplace("newline", w::string("\n"));
 }
 
 } // namespace whisker

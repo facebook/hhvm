@@ -101,8 +101,6 @@ module Hhconfig = struct
 
   let call_coeffects = key "call_coeffects"
 
-  let check_attribute_locations = key "check_attribute_locations"
-
   let check_bool_for_condition = key "check_bool_for_condition"
 
   let check_redundant_generics = key "check_redundant_generics"
@@ -147,20 +145,11 @@ module Hhconfig = struct
 
   let dump_tast_hashes = key "dump_tast_hashes"
 
-  let enable_abstract_method_optional_parameters =
-    key "enable_abstract_method_optional_parameters"
-
   let enable_experimental_tc_features = key "enable_experimental_tc_features"
-
-  let enable_function_references = key "enable_function_references"
 
   let enable_no_auto_dynamic = key "enable_no_auto_dynamic"
 
   let enable_tc_migration_flags = key "enable_tc_migration_flags"
-
-  let enforce_sealed_subclasses = key "enforce_sealed_subclasses"
-
-  let error_php_lambdas = key "error_php_lambdas"
 
   let explicit_consistent_constructors = key "explicit_consistent_constructors"
 
@@ -244,8 +233,6 @@ module Hhconfig = struct
 
   let strict_consistent_construct = key "strict_consistent_construct"
 
-  let strict_value_equality = key "strict_value_equality"
-
   let symbol_write_exclude_out = key "symbol_write_exclude_out"
 
   let symbol_write_hhi_path = key "symbol_write_hhi_path"
@@ -317,8 +304,6 @@ module Hhconfig = struct
   let naming_table_compression_level = key "naming_table_compression_level"
 
   let naming_table_compression_threads = key "naming_table_compression_threads"
-
-  let override_hhconfig_hash = key "override_hhconfig_hash"
 
   let packages_config_path = key "packages_config_path"
 
@@ -427,7 +412,6 @@ module Hhconf = struct
   let use_justknobs = hhconf_key "use_justknobs"
 
   (* IDE *)
-  let hack_warnings = key "hack_warnings"
 
   let autocomplete_sort_text = hhconf_key "autocomplete_sort_text"
 
@@ -455,14 +439,10 @@ module Hhconf = struct
 
   let eden_fetch_parallelism = hhconf_key "eden_fetch_parallelism"
 
-  let hackfmt_version = hhconf_key "hackfmt.version"
-
   let package_config_strict_validation =
     hhconf_key "package_config_strict_validation"
 
   let rollout_group = hhconf_key "rollout_group"
-
-  let sharedmem_dep_table_pow = hhconf_key "sharedmem_dep_table_pow"
 
   let workload_quantile = hhconf_key "workload_quantile"
 

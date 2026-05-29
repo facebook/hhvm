@@ -734,8 +734,29 @@
         }
       }
     },
+    "FastClient" : {
+      "lineno" : 440,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Service" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 440,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 441,
+          "column" : 21
+        }
+      }
+    },
     "NonOrderable" : {
-      "lineno" : 441,
+      "lineno" : 452,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -746,17 +767,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 441,
+          "line" : 452,
           "column" : 1
         },
         "end" : {
-          "line" : 442,
+          "line" : 453,
           "column" : 23
         }
       }
     },
     "DeclareHashSpecialization" : {
-      "lineno" : 449,
+      "lineno" : 460,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -768,17 +789,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 449,
+          "line" : 460,
           "column" : 1
         },
         "end" : {
-          "line" : 451,
+          "line" : 462,
           "column" : 36
         }
       }
     },
     "DeclareEqualToSpecialization" : {
-      "lineno" : 458,
+      "lineno" : 469,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -790,11 +811,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 458,
+          "line" : 469,
           "column" : 1
         },
         "end" : {
-          "line" : 460,
+          "line" : 471,
           "column" : 39
         }
       }

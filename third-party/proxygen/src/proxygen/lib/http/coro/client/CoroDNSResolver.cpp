@@ -55,42 +55,40 @@ DNSResolver::UniquePtr* getDNSResolverInstance(folly::EventBase* evb) {
   return resolver_.get(*evb);
 }
 
-class CoroResolutionCallback : public DNSResolver::ResolutionCallback {
- public:
-  explicit CoroResolutionCallback(folly::coro::Baton& baton) : baton_(baton) {
-  }
-
-  void resolutionSuccess(
-      std::vector<DNSResolver::Answer> ans) noexcept override {
-    for (const auto& answer : ans) {
-      if (answer.type == DNSResolver::Answer::AT_ADDRESS) {
-        addrs.push_back(answer.address);
-      }
-    }
-    if (addrs.empty()) {
-      exception = DNSResolver::makeNoNameException();
-    } else {
-      // fallback to unsorted addresses if rfc6724_sort throws an exception
-      folly::makeTryWith([&]() { rfc6724_sort(addrs); });
-    }
-
-    baton_.post();
-  }
-  void resolutionError(const folly::exception_wrapper& exp) noexcept override {
-    exception = exp;
-    baton_.post();
-  }
-
-  std::vector<folly::SocketAddress> addrs;
-  folly::exception_wrapper exception;
-
- private:
-  folly::coro::Baton& baton_;
-};
-
 } // namespace
 
 namespace proxygen::coro {
+
+BatonResolutionCallback::BatonResolutionCallback(folly::coro::Baton& baton)
+    : baton_(baton) {
+}
+
+void BatonResolutionCallback::resolutionSuccess(
+    std::vector<DNSResolver::Answer> ans) noexcept {
+  answers = std::move(ans);
+  baton_.post();
+}
+
+void BatonResolutionCallback::resolutionError(
+    const folly::exception_wrapper& exp) noexcept {
+  exception = exp;
+  baton_.post();
+}
+
+std::vector<folly::SocketAddress> BatonResolutionCallback::extractAddresses()
+    const {
+  std::vector<folly::SocketAddress> addrs;
+  for (const auto& answer : answers) {
+    if (answer.type == DNSResolver::Answer::AT_ADDRESS) {
+      addrs.push_back(answer.address);
+    }
+  }
+  // fallback to unsorted addresses if rfc6724_sort throws an exception
+  if (!addrs.empty()) {
+    folly::makeTryWith([&]() { rfc6724_sort(addrs); });
+  }
+  return addrs;
+}
 
 void CoroDNSResolver::emplaceStatsCollector(
     folly::EventBase* evb, std::unique_ptr<StatsCollector> statsCollector) {
@@ -112,7 +110,7 @@ CoroDNSResolver::resolveHostAll(folly::EventBase* evb,
                                 DNSResolver* resolver) {
 
   folly::coro::Baton baton;
-  CoroResolutionCallback cb(baton);
+  BatonResolutionCallback cb(baton);
 
   if (resolver) {
     resolver->resolveHostname(&cb, hostname, timeout, AF_UNSPEC);
@@ -130,8 +128,11 @@ CoroDNSResolver::resolveHostAll(folly::EventBase* evb,
   if (cb.exception) {
     co_yield co_error(cb.exception);
   }
-  XCHECK(!cb.addrs.empty());
-  co_return cb.addrs;
+  auto addrs = cb.extractAddresses();
+  if (addrs.empty()) {
+    co_yield co_error(DNSResolver::makeNoNameException());
+  }
+  co_return addrs;
 }
 
 folly::coro::Task<CoroDNSResolver::Result> CoroDNSResolver::resolveHost(

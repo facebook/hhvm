@@ -372,7 +372,7 @@ let list_files_with_errors env =
             match severity with
             | User_diagnostic.Err ->
               SSet.add (Relative_path.to_absolute (Pos.filename pos)) acc
-            | User_diagnostic.Warning -> acc
+            | User_diagnostic.Warning _ -> acc
         end
       ~init:SSet.empty
       (Diagnostics.get_diagnostic_list env.diagnostics)

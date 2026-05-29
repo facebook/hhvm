@@ -102,24 +102,12 @@ std::string_view cpp_type_override(const t_node& node) {
   if (auto typedef_override = structured_type_override(node)) {
     return typedef_override->get_string();
   }
-  if (auto type = type_of_node(node)) {
-    // finds unstructured annotation type, if present
-    return cpp2::get_type(type->get_true_type());
-  }
   return "";
 }
 
 std::string_view get_cpp_template(const t_node& node) {
   if (auto template_override = structured_type_override(node, "template")) {
     return template_override->get_string();
-  }
-  if (auto type = type_of_node(node)) {
-    // finds unstructured annotation template, if present
-    if (const auto* _template =
-            type->get_true_type()->find_unstructured_annotation_or_null(
-                {"cpp.template", "cpp2.template"})) {
-      return *_template;
-    }
   }
   return "";
 }
@@ -321,29 +309,10 @@ bool is_capi_eligible_type(const t_type* type) {
   if (type->has_structured_annotation(kCppAdapterUri)) {
     return false;
   }
-
   if (const auto* cpp_type_anno =
-          type->find_structured_annotation_or_null(kCppTypeUri)) {
-    if (!is_capi_eligible_type_annotation(cpp_type_anno)) {
-      return false;
-    }
-  }
-  // Unstructured annotation fallback for legacy cpp.type/cpp.template on
-  // non-typedef types. User-defined typedefs must use structured @cpp.Type.
-  if (auto* td = type->try_as<t_typedef>();
-      !td || td->typedef_kind() != t_typedef::kind::defined) {
-    if (const std::string* template_anno =
-            type->find_unstructured_annotation_or_null(
-                {"cpp.template", "cpp2.template"})) {
-      if (!is_supported_template(*template_anno)) {
-        return false;
-      }
-    }
-    if (const std::string* type_anno =
-            type->find_unstructured_annotation_or_null(
-                {"cpp.type", "cpp2.type"})) {
-      return is_type_iobuf(*type_anno);
-    }
+          type->find_structured_annotation_or_null(kCppTypeUri);
+      cpp_type_anno && !is_capi_eligible_type_annotation(cpp_type_anno)) {
+    return false;
   }
   if (const t_list* list = type->try_as<t_list>();
       list != nullptr && !is_capi_eligible_type(list->elem_type().get_type())) {

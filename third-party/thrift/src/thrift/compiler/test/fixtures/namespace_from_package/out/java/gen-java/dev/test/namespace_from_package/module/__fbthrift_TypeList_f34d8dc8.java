@@ -13,22 +13,22 @@ import java.util.List;
 
 public class __fbthrift_TypeList_f34d8dc8 implements TypeList {
 
-  private static List<TypeMapping> list = new ArrayList<>();
+    private static List<TypeMapping> list = new ArrayList<>();
 
-  private static void add(String uri, String className) {
-    list.add(new TypeList.TypeMapping(uri, className));
-  }
+    private static void add(String uri, String className) {
+        list.add(new TypeList.TypeMapping(uri, className));
+    }
 
-  private static void addToList0() {
-    add("test.dev/namespace_from_package/module/Foo", "dev.test.namespace_from_package.module.Foo");
-  }
+    private static void addToList0() {
+        add("test.dev/namespace_from_package/module/Foo", "dev.test.namespace_from_package.module.Foo");
+    }
 
-  static {
-    addToList0();
-  }
+    static {
+        addToList0();
+    }
 
-  @java.lang.Override
-  public List<TypeList.TypeMapping> getTypes() {
-    return list;
-  }
+    @java.lang.Override
+    public List<TypeList.TypeMapping> getTypes() {
+        return list;
+    }
 }

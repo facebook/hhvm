@@ -238,6 +238,54 @@ TEST_F(ThriftStreamLogTest, CompleteSummaryAccumulation) {
   EXPECT_EQ(logging_.lastSummary.endReason, detail::StreamEndReason::COMPLETE);
 }
 
+TEST_F(ThriftStreamLogTest, PayloadBytesAccumulation) {
+  ThriftStreamLog log("myMethod", &counters_, &logging_);
+  log.log(detail::StreamSubscribeEvent{});
+  log.log(detail::StreamCreditEvent{10});
+
+  log.log(detail::StreamNextEvent{100});
+  log.log(detail::StreamNextEvent{500});
+  log.log(detail::StreamNextEvent{200});
+
+  log.log(detail::StreamCompleteEvent{detail::StreamEndReason::COMPLETE});
+
+  EXPECT_EQ(logging_.lastSummary.totalBytes, 800);
+  EXPECT_EQ(logging_.lastSummary.minChunkSize, 100);
+  EXPECT_EQ(logging_.lastSummary.maxChunkSize, 500);
+}
+
+TEST_F(ThriftStreamLogTest, PayloadBytesZeroDoesNotAffectMinMax) {
+  ThriftStreamLog log("myMethod", &counters_, &logging_);
+  log.log(detail::StreamSubscribeEvent{});
+  log.log(detail::StreamCreditEvent{10});
+
+  // Zero-byte events (e.g., ordered headers) should not affect min/max
+  log.log(detail::StreamNextEvent{0});
+  log.log(detail::StreamNextEvent{300});
+  log.log(detail::StreamNextEvent{0});
+
+  log.log(detail::StreamCompleteEvent{detail::StreamEndReason::COMPLETE});
+
+  EXPECT_EQ(logging_.lastSummary.totalBytes, 300);
+  EXPECT_EQ(logging_.lastSummary.minChunkSize, 300);
+  EXPECT_EQ(logging_.lastSummary.maxChunkSize, 300);
+}
+
+TEST_F(ThriftStreamLogTest, PayloadBytesAllZero) {
+  ThriftStreamLog log("myMethod", &counters_, &logging_);
+  log.log(detail::StreamSubscribeEvent{});
+  log.log(detail::StreamCreditEvent{10});
+
+  log.log(detail::StreamNextEvent{0});
+  log.log(detail::StreamNextEvent{0});
+
+  log.log(detail::StreamCompleteEvent{detail::StreamEndReason::COMPLETE});
+
+  EXPECT_EQ(logging_.lastSummary.totalBytes, 0);
+  EXPECT_EQ(logging_.lastSummary.minChunkSize, 0);
+  EXPECT_EQ(logging_.lastSummary.maxChunkSize, 0);
+}
+
 TEST_F(ThriftStreamLogTest, PauseResumeOnComplete) {
   ThriftStreamLog log("myMethod", &counters_, &logging_);
   log.log(detail::StreamSubscribeEvent{});

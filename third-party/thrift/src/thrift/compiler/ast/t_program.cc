@@ -61,10 +61,6 @@ void t_program::add_definition(std::unique_ptr<t_named> definition) {
     if (auto* cnst = definition->find_structured_annotation_or_null(kUriUri)) {
       auto* val = cnst->get_value_from_structured_annotation_or_null("value");
       definition->set_uri(val ? val->get_string() : "", /*is_explicit=*/true);
-    } else if (
-        auto* uri =
-            definition->find_unstructured_annotation_or_null("thrift.uri")) {
-      definition->set_uri(*uri, /*is_explicit=*/true);
     } else { // Inherit from package.
       definition->set_uri(
           package_.get_uri(definition->name()), /*is_explicit=*/false);

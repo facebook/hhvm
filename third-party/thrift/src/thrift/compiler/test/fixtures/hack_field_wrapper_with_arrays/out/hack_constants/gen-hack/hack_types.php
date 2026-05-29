@@ -126,7 +126,7 @@ class FieldWrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -322,7 +322,7 @@ class Wrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -485,7 +485,7 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -608,7 +608,7 @@ class SkipCodegen implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -762,7 +762,7 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -901,7 +901,7 @@ class UnionEnumAttributes implements \IThriftSyncStruct, \IThriftStructMetadata,
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1033,7 +1033,7 @@ class StructTrait implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1215,7 +1215,7 @@ class Attributes implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1315,7 +1315,7 @@ class StructAsTrait implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1411,7 +1411,7 @@ class ModuleInternal implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1515,7 +1515,7 @@ class GenerateClientMethodsWithHeaders implements \IThriftSyncStruct, \IThriftSt
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1608,7 +1608,7 @@ class MigrationBlockingAllowInheritance implements \IThriftSyncStruct, \IThriftS
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1701,7 +1701,7 @@ class MigrationBlockingLegacyJSONSerialization implements \IThriftSyncStruct, \I
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1805,7 +1805,7 @@ class FixmeWrongType implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1905,7 +1905,7 @@ class UnsafeArray implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");

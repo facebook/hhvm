@@ -1,2 +1,6 @@
+WARN: File "fc_enum_17.php", line 9, characters 3-15:
+Value of type `dynamic` called as a function (Warn[12039])
+  File "fc_enum_17.php", line 3, characters 11-13:
+  This expression has type `dynamic`
 ERROR: File "fc_enum_17.php", line 9, characters 3-4:
 Was expecting a class, but got a value of type Foo (Typing[4026])

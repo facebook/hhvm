@@ -15,127 +15,136 @@
   limitations under the License.
 
 }}
-{{#if service:docs?}}
-#[doc = {{service:docs}}]
-{{/if service:docs?}}
+{{#import "lib/rpc" as rpc}}
+{{#import "lib/types" as types}}
+
+{{#let export partial server_trait |interface| captures |rpc types|}}
+  {{#let has_request_context = (and (not interface.interaction?) interface.requestContext?)}}
+  {{#if interface.docs?}}
+#[doc = {{interface.docs}}]
+  {{/if interface.docs?}}
 #[::async_trait::async_trait]
-pub trait {{service:rust_name}}: ::std::marker::Send + ::std::marker::Sync + 'static {
-  {{#if service:requestContext?}}
+pub trait {{interface.rust_name}}: ::std::marker::Send + ::std::marker::Sync + 'static {
+  {{#if has_request_context}}
     type RequestContext: ::std::marker::Sync;
-  {{/if service:requestContext?}}
-{{#service:functions}}{{#if (not function:starts_interaction?)}}
-    {{#if function:docs?}}
-    #[doc = {{function:docs}}]
-    {{/if function:docs?}}
-    async fn {{function:rust_name}}(
-        &self,{{!
-        }}{{#if service:requestContext?}}
-        _request_context: &Self::RequestContext,{{!
-        }}{{/if service:requestContext?}}{{!
-        }}{{#function:args}}
-        _{{field:name}}: {{#partial types.type_name type=field:self.type}},{{!
-        }}{{/function:args}}
-    ) -> {{#partial rpc.server_return_type function=function:self service=service:self}} {
-        ::std::result::Result::Err({{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::ApplicationException(
+  {{/if has_request_context}}
+  {{#each interface.functions as |function|}}
+    {{#if function.docs?}}
+    #[doc = {{function.docs}}]
+    {{/if function.docs?}}
+    {{#if function.starts_interaction?}}
+    fn {{function.rust_name}}(
+        &self,
+    ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function.interaction_name}}>> {
+        ::anyhow::bail!("{{interface.name}}.{{function.name}} not implemented");
+    }
+    {{#else}}
+    async fn {{function.rust_name}}(
+        &self,
+      {{#if has_request_context}}
+        _request_context: &Self::RequestContext,
+      {{/if has_request_context}}
+      {{#each function.params.fields as |param|}}
+        _{{param.name}}: {{#partial types.type_name type=param.type}},
+      {{/each}}
+    ) -> {{#partial rpc.server_return_type function=function service=interface}} {
+        ::std::result::Result::Err({{interface.program.crate}}::services::{{interface.snake}}::{{function.upcamel}}Exn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
-                "{{service:name}}",
-                "{{function:name}}",
+                "{{interface.name}}",
+                "{{function.name}}",
             ),
         ))
     }
-{{/if (not function:starts_interaction?)}}{{#if function:starts_interaction?}}
-    {{#if function:docs?}}
-    #[doc = {{function:docs}}]
-    {{/if function:docs?}}
-    fn {{function:rust_name}}(
-        &self,
-    ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function:interaction_name}}>> {
-        ::anyhow::bail!("{{service:name}}.{{function:name}} not implemented");
-    }
-{{/if function:starts_interaction?}}{{/service:functions}}
-{{#if service:interaction?}}
+    {{/if function.starts_interaction?}}
+  {{/each}}
+  {{#if interface.interaction?}}
     async fn on_termination(&self) {}
-{{/if service:interaction?}}
+  {{/if interface.interaction?}}
 }
 
 #[::async_trait::async_trait]
-impl<T> {{service:rust_name}} for ::std::boxed::Box<T>
+impl<T> {{interface.rust_name}} for ::std::boxed::Box<T>
 where
-    T: {{service:rust_name}} + Send + Sync + ?Sized,
+    T: {{interface.rust_name}} + Send + Sync + ?Sized,
 {
-  {{#if service:requestContext?}}
+  {{#if has_request_context}}
     type RequestContext = T::RequestContext;
-  {{/if service:requestContext?}}
-{{#service:functions}}{{#if (not function:starts_interaction?)}}
-    async fn {{function:rust_name}}(
-        &self,{{!
-        }}{{#if service:requestContext?}}
-        request_context: &Self::RequestContext,{{!
-        }}{{/if service:requestContext?}}{{!
-        }}{{#function:args}}
-        {{field:rust_name}}: {{#partial types.type_name type=field:self.type}},{{!
-        }}{{/function:args}}
-    ) -> {{#partial rpc.server_return_type function=function:self service=service:self}} {
-        (**self).{{function:rust_name}}({{!
-            }}{{#if service:requestContext?}}
-            request_context,{{!
-            }}{{/if service:requestContext?}}{{!
-            }}{{#function:args}}
-            {{field:rust_name}},{{!
-            }}{{/function:args}}
+  {{/if has_request_context}}
+  {{#each interface.functions as |function|}}
+    {{#if function.starts_interaction?}}
+    fn {{function.rust_name}}(
+        &self,
+    ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function.interaction_name}}>> {
+        (**self).{{function.rust_name}}()
+    }
+    {{#else}}
+    async fn {{function.rust_name}}(
+        &self,
+      {{#if has_request_context}}
+        request_context: &Self::RequestContext,
+      {{/if has_request_context}}
+      {{#each function.params.fields as |param|}}
+        {{param.rust_name}}: {{#partial types.type_name type=param.type}},
+      {{/each}}
+    ) -> {{#partial rpc.server_return_type function=function service=interface}} {
+        (**self).{{function.rust_name}}(
+      {{#if has_request_context}}
+            request_context,
+      {{/if has_request_context}}
+      {{#each function.params.fields as |param|}}
+            {{param.rust_name}},
+      {{/each}}
         ).await
     }
-{{/if (not function:starts_interaction?)}}{{#if function:starts_interaction?}}
-    fn {{function:rust_name}}(
-        &self,
-    ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function:interaction_name}}>> {
-        (**self).{{function:rust_name}}()
-    }
-{{/if function:starts_interaction?}}{{/service:functions}}
-{{#if service:interaction?}}
+    {{/if function.starts_interaction?}}
+  {{/each}}
+  {{#if interface.interaction?}}
     async fn on_termination(&self) {
         (**self).on_termination().await;
     }
-{{/if service:interaction?}}
+  {{/if interface.interaction?}}
 }
 
 #[::async_trait::async_trait]
-impl<T> {{service:rust_name}} for ::std::sync::Arc<T>
+impl<T> {{interface.rust_name}} for ::std::sync::Arc<T>
 where
-    T: {{service:rust_name}} + Send + Sync + ?Sized,
+    T: {{interface.rust_name}} + Send + Sync + ?Sized,
 {
-  {{#if service:requestContext?}}
+  {{#if has_request_context}}
     type RequestContext = T::RequestContext;
-  {{/if service:requestContext?}}
-{{#service:functions}}{{#if (not function:starts_interaction?)}}
-    async fn {{function:rust_name}}(
-        &self,{{!
-        }}{{#if service:requestContext?}}
-        request_context: &Self::RequestContext,{{!
-        }}{{/if service:requestContext?}}{{!
-        }}{{#function:args}}
-        {{field:rust_name}}: {{#partial types.type_name type=field:self.type}},{{!
-        }}{{/function:args}}
-    ) -> {{#partial rpc.server_return_type function=function:self service=service:self}} {
-        (**self).{{function:rust_name}}({{!
-            }}{{#if service:requestContext?}}
-            request_context,{{!
-            }}{{/if service:requestContext?}}{{!
-            }}{{#function:args}}
-            {{field:rust_name}},{{!
-            }}{{/function:args}}
+  {{/if has_request_context}}
+  {{#each interface.functions as |function|}}
+    {{#if function.starts_interaction?}}
+    fn {{function.rust_name}}(
+        &self,
+    ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function.interaction_name}}>> {
+        (**self).{{function.rust_name}}()
+    }
+    {{#else}}
+    async fn {{function.rust_name}}(
+        &self,
+      {{#if has_request_context}}
+        request_context: &Self::RequestContext,
+      {{/if has_request_context}}
+      {{#each function.params.fields as |param|}}
+        {{param.rust_name}}: {{#partial types.type_name type=param.type}},
+      {{/each}}
+    ) -> {{#partial rpc.server_return_type function=function service=interface}} {
+        (**self).{{function.rust_name}}(
+        {{#if has_request_context}}
+            request_context,
+        {{/if has_request_context}}
+        {{#each function.params.fields as |param|}}
+            {{param.rust_name}},
+        {{/each}}
         ).await
     }
-{{/if (not function:starts_interaction?)}}{{#if function:starts_interaction?}}
-    fn {{function:rust_name}}(
-        &self,
-    ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function:interaction_name}}>> {
-        (**self).{{function:rust_name}}()
-    }
-{{/if function:starts_interaction?}}{{/service:functions}}
-{{#if service:interaction?}}
+    {{/if function.starts_interaction?}}
+  {{/each}}
+  {{#if interface.interaction?}}
     async fn on_termination(&self) {
         (**self).on_termination().await;
     }
-{{/if service:interaction?}}
-}
+  {{/if interface.interaction?}}
+}{{!
+}}{{/let partial}}

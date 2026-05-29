@@ -12,6 +12,13 @@
 
 namespace proxygen {
 
+//////// Protocol Selection ////////
+
+enum class FrameProtocol : uint8_t {
+  WT_CAPSULE, // WebTransport over HTTP capsules (draft-ietf-webtrans-http)
+  QMUX,       // QMUX framing (draft-ietf-quic-qmux)
+};
+
 //////// Types ////////
 
 enum class CapsuleType : uint32_t {
@@ -31,6 +38,24 @@ enum class CapsuleType : uint32_t {
   DATAGRAM = 0x00,
   CLOSE_WEBTRANSPORT_SESSION = 0x190B4D45,
   DRAIN_WEBTRANSPORT_SESSION = 0x190B4D46
+};
+
+// QMUX frame types from draft-ietf-quic-qmux, matching QUIC frame type values.
+// Names match CapsuleType (minus WT_ prefix) for use with the WT_QMUX macro.
+enum class QmuxFrameType : uint64_t {
+  RESET_STREAM = 0x04,
+  STOP_SENDING = 0x05,
+  STREAM = 0x0a,          // QUIC STREAM | LEN
+  STREAM_WITH_FIN = 0x0b, // QUIC STREAM | LEN | FIN
+  MAX_DATA = 0x10,
+  MAX_STREAM_DATA = 0x11,
+  MAX_STREAMS_BIDI = 0x12,
+  MAX_STREAMS_UNI = 0x13,
+  DATA_BLOCKED = 0x14,
+  STREAM_DATA_BLOCKED = 0x15,
+  STREAMS_BLOCKED_BIDI = 0x16,
+  STREAMS_BLOCKED_UNI = 0x17,
+  DATAGRAM = 0x31, // QUIC DATAGRAM with length
 };
 
 struct PaddingCapsule {
@@ -136,31 +161,52 @@ parseDrainWebTransportSession(size_t length);
 // change from std::optional<size_t> -> size_t (0 can signal error)?
 using WriteResult = std::optional<size_t>;
 
-// Function declarations for serializing each capsule type
+// Function declarations for serializing each capsule type.
+// Shared frame types accept a FrameProtocol parameter to select the wire
+// format.  WT_CAPSULE (default) writes capsule TLV headers; QMUX writes the
+// QUIC-style frame type with no outer length prefix.
 WriteResult writePadding(folly::IOBufQueue& queue,
                          const PaddingCapsule& capsule);
-WriteResult writeWTResetStream(folly::IOBufQueue& queue,
-                               const WTResetStreamCapsule& capsule);
-WriteResult writeWTStopSending(folly::IOBufQueue& queue,
-                               const WTStopSendingCapsule& capsule);
+WriteResult writeWTResetStream(
+    folly::IOBufQueue& queue,
+    const WTResetStreamCapsule& capsule,
+    FrameProtocol protocol = FrameProtocol::WT_CAPSULE);
+WriteResult writeWTStopSending(
+    folly::IOBufQueue& queue,
+    const WTStopSendingCapsule& capsule,
+    FrameProtocol protocol = FrameProtocol::WT_CAPSULE);
 WriteResult writeWTStream(folly::IOBufQueue& queue,
-                          const WTStreamCapsule& capsule);
+                          const WTStreamCapsule& capsule,
+                          FrameProtocol protocol = FrameProtocol::WT_CAPSULE);
 WriteResult writeWTMaxData(folly::IOBufQueue& queue,
-                           const WTMaxDataCapsule& capsule);
-WriteResult writeWTMaxStreamData(folly::IOBufQueue& queue,
-                                 const WTMaxStreamDataCapsule& capsule);
-WriteResult writeWTMaxStreams(folly::IOBufQueue& queue,
-                              const WTMaxStreamsCapsule& capsule,
-                              bool isBidi);
-WriteResult writeWTDataBlocked(folly::IOBufQueue& queue,
-                               const WTDataBlockedCapsule& capsule);
-WriteResult writeWTStreamDataBlocked(folly::IOBufQueue& queue,
-                                     const WTStreamDataBlockedCapsule& capsule);
-WriteResult writeWTStreamsBlocked(folly::IOBufQueue& queue,
-                                  const WTStreamsBlockedCapsule& capsule,
-                                  bool isBidi);
+                           const WTMaxDataCapsule& capsule,
+                           FrameProtocol protocol = FrameProtocol::WT_CAPSULE);
+WriteResult writeWTMaxStreamData(
+    folly::IOBufQueue& queue,
+    const WTMaxStreamDataCapsule& capsule,
+    FrameProtocol protocol = FrameProtocol::WT_CAPSULE);
+WriteResult writeWTMaxStreams(
+    folly::IOBufQueue& queue,
+    const WTMaxStreamsCapsule& capsule,
+    bool isBidi,
+    FrameProtocol protocol = FrameProtocol::WT_CAPSULE);
+WriteResult writeWTDataBlocked(
+    folly::IOBufQueue& queue,
+    const WTDataBlockedCapsule& capsule,
+    FrameProtocol protocol = FrameProtocol::WT_CAPSULE);
+WriteResult writeWTStreamDataBlocked(
+    folly::IOBufQueue& queue,
+    const WTStreamDataBlockedCapsule& capsule,
+    FrameProtocol protocol = FrameProtocol::WT_CAPSULE);
+WriteResult writeWTStreamsBlocked(
+    folly::IOBufQueue& queue,
+    const WTStreamsBlockedCapsule& capsule,
+    bool isBidi,
+    FrameProtocol protocol = FrameProtocol::WT_CAPSULE);
 WriteResult writeDatagram(folly::IOBufQueue& queue,
-                          const DatagramCapsule& capsule);
+                          const DatagramCapsule& capsule,
+                          FrameProtocol protocol = FrameProtocol::WT_CAPSULE);
+// WT-only capsule types (no QMUX equivalent)
 WriteResult writeCloseWebTransportSession(
     folly::IOBufQueue& queue, const CloseWebTransportSessionCapsule& capsule);
 WriteResult writeDrainWebTransportSession(folly::IOBufQueue& queue);

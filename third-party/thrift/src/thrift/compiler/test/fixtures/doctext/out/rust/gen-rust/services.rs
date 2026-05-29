@@ -10,7 +10,6 @@ pub mod c {
 
     #[derive(Clone, Debug)]
     pub enum FExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -90,7 +89,6 @@ pub mod c {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -100,7 +98,6 @@ pub mod c {
 
     #[derive(Clone, Debug)]
     pub enum NumbersStreamExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -164,7 +161,6 @@ pub mod c {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -174,7 +170,6 @@ pub mod c {
 
     #[derive(Clone, Debug)]
     pub enum NumbersExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -253,7 +248,6 @@ pub mod c {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();

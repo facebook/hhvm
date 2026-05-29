@@ -48,6 +48,9 @@ class ResourcePoolsTest : public Test {
         std::make_shared<BlockingCallTestService>());
 
     auto& thriftServer = runner_->getThriftServer();
+    // Disable queue timeout so requests stay queued during the test instead of
+    // being load-shed with TApplicationException::TIMEOUT.
+    thriftServer.setQueueTimeout(std::chrono::milliseconds(0));
     pools_ = &thriftServer.resourcePoolSet();
     auto& asyncRP = pools_->resourcePool(ResourcePoolHandle::defaultAsync());
     cc_ = &asyncRP.concurrencyController()->get();

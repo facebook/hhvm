@@ -39,7 +39,6 @@ class t_typedef : public t_type {
  public:
   enum class kind {
     defined,
-    unnamed,
     placeholder,
   };
 
@@ -96,17 +95,11 @@ class t_typedef : public t_type {
 
   bool is_sealed() const override;
 
-  static std::unique_ptr<t_typedef> make_unnamed(
-      const t_program* program, std::string name, t_type_ref type);
-
  protected:
   /**
    * Reference to the IDL type being transparently aliased by this typedef.
    */
   t_type_ref aliased_type_ref_;
-
- private:
-  bool unnamed_{false};
 };
 
 // A placeholder for a type that can't be resolved at parse time.

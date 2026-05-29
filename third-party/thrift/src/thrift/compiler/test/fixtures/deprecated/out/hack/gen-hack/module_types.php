@@ -214,7 +214,7 @@ class User implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -496,7 +496,7 @@ class ExampleUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
 
   public function readFromJson(string $jsonText): void {
     $this->_type = \test\fixtures\deprecated\ExampleUnionEnum::_EMPTY_;
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");

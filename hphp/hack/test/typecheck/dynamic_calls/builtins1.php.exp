@@ -4,4 +4,7 @@ File "builtins1.php", line 26, characters 3-27:
   dynamic
 File "builtins1.php", line 28, characters 3-22:
   dynamic
-No errors
+WARN: File "builtins1.php", line 27, characters 17-28:
+Value of type `dynamic` called as a function (Warn[12039])
+  File "dyn_func_pointers.hhi", line 12, characters 46-52:
+  This expression has type `dynamic`

@@ -90,3 +90,11 @@ class PythonAsyncProcessorFactoryTest(unittest.TestCase):
             rpc_kind,
             expected,
         )
+
+    def test_make_handler_func_full_name(self) -> None:
+        CTests(self).test_make_handler_func_full_name(
+            b"PythonService",
+            b"createResponsesStream",
+            RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE,
+            b"PythonService.createResponsesStream",
+        )

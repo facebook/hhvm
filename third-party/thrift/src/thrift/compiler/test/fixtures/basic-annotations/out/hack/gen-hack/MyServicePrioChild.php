@@ -191,7 +191,7 @@ class MyServicePrioChild_pang_args implements \IThriftSyncStruct, \IThriftStruct
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -252,7 +252,7 @@ class MyServicePrioChild_pang_result extends \ThriftSyncStructWithoutResult impl
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");

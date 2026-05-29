@@ -61,11 +61,11 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(MyStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -86,56 +86,56 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
 
         public long getMyIntField() { return myIntField; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
             this.myStringField = myStringField;
             return this;
         }
 
         public String getMyStringField() { return myStringField; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)    public Builder setMyDataField(test.fixtures.basic.MyDataItem myDataField) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)    public Builder setMyDataField(test.fixtures.basic.MyDataItem myDataField) {
             this.myDataField = myDataField;
             return this;
         }
 
         public test.fixtures.basic.MyDataItem getMyDataField() { return myDataField; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="myEnum", requiredness=Requiredness.NONE)    public Builder setMyEnum(test.fixtures.basic.MyEnum myEnum) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="myEnum", requiredness=Requiredness.NONE)    public Builder setMyEnum(test.fixtures.basic.MyEnum myEnum) {
             this.myEnum = myEnum;
             return this;
         }
 
         public test.fixtures.basic.MyEnum getMyEnum() { return myEnum; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="oneway", requiredness=Requiredness.NONE)    public Builder setOneway(boolean oneway) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="oneway", requiredness=Requiredness.NONE)    public Builder setOneway(boolean oneway) {
             this.oneway = oneway;
             return this;
         }
 
         public boolean isOneway() { return oneway; }
 
-            @com.facebook.swift.codec.ThriftField(value=6, name="readonly", requiredness=Requiredness.NONE)    public Builder setReadonly(boolean readonly) {
+        @com.facebook.swift.codec.ThriftField(value=6, name="readonly", requiredness=Requiredness.NONE)    public Builder setReadonly(boolean readonly) {
             this.readonly = readonly;
             return this;
         }
 
         public boolean isReadonly() { return readonly; }
 
-            @com.facebook.swift.codec.ThriftField(value=7, name="idempotent", requiredness=Requiredness.NONE)    public Builder setIdempotent(boolean idempotent) {
+        @com.facebook.swift.codec.ThriftField(value=7, name="idempotent", requiredness=Requiredness.NONE)    public Builder setIdempotent(boolean idempotent) {
             this.idempotent = idempotent;
             return this;
         }
 
         public boolean isIdempotent() { return idempotent; }
 
-            @com.facebook.swift.codec.ThriftField(value=8, name="floatSet", requiredness=Requiredness.NONE)    public Builder setFloatSet(Set<Float> floatSet) {
+        @com.facebook.swift.codec.ThriftField(value=8, name="floatSet", requiredness=Requiredness.NONE)    public Builder setFloatSet(Set<Float> floatSet) {
             this.floatSet = floatSet;
             return this;
         }
 
         public Set<Float> getFloatSet() { return floatSet; }
 
-            @com.facebook.swift.codec.ThriftField(value=9, name="no_hack_codegen_field", requiredness=Requiredness.NONE)    public Builder setNoHackCodegenField(String noHackCodegenField) {
+        @com.facebook.swift.codec.ThriftField(value=9, name="no_hack_codegen_field", requiredness=Requiredness.NONE)    public Builder setNoHackCodegenField(String noHackCodegenField) {
             this.noHackCodegenField = noHackCodegenField;
             return this;
         }
@@ -171,6 +171,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -179,103 +180,86 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     private final long myIntField;
     public static final int _MYINTFIELD = 1;
     private static final TField MY_INT_FIELD_FIELD_DESC = new TField("MyIntField", TType.I64, (short)1);
-        private final String myStringField;
+    private final String myStringField;
     public static final int _MYSTRINGFIELD = 2;
     private static final TField MY_STRING_FIELD_FIELD_DESC = new TField("MyStringField", TType.STRING, (short)2);
-        private final test.fixtures.basic.MyDataItem myDataField;
+    private final test.fixtures.basic.MyDataItem myDataField;
     public static final int _MYDATAFIELD = 3;
     private static final TField MY_DATA_FIELD_FIELD_DESC = new TField("MyDataField", TType.STRUCT, (short)3);
-        private final test.fixtures.basic.MyEnum myEnum;
+    private final test.fixtures.basic.MyEnum myEnum;
     public static final int _MYENUM = 4;
     private static final TField MY_ENUM_FIELD_DESC = new TField("myEnum", TType.I32, (short)4);
-        private final boolean oneway;
+    private final boolean oneway;
     public static final int _ONEWAY = 5;
     private static final TField ONEWAY_FIELD_DESC = new TField("oneway", TType.BOOL, (short)5);
-        private final boolean readonly;
+    private final boolean readonly;
     public static final int _READONLY = 6;
     private static final TField READONLY_FIELD_DESC = new TField("readonly", TType.BOOL, (short)6);
-        private final boolean idempotent;
+    private final boolean idempotent;
     public static final int _IDEMPOTENT = 7;
     private static final TField IDEMPOTENT_FIELD_DESC = new TField("idempotent", TType.BOOL, (short)7);
-        private final Set<Float> floatSet;
+    private final Set<Float> floatSet;
     public static final int _FLOATSET = 8;
     private static final TField FLOAT_SET_FIELD_DESC = new TField("floatSet", TType.SET, (short)8);
-        private final String noHackCodegenField;
+    private final String noHackCodegenField;
     public static final int _NO_HACK_CODEGEN_FIELD = 9;
     private static final TField NO_HACK_CODEGEN_FIELD_FIELD_DESC = new TField("no_hack_codegen_field", TType.STRING, (short)9);
     static {
-      NAMES_TO_IDS.put("myIntField", 1);
-      THRIFT_NAMES_TO_IDS.put("MyIntField", 1);
-      FIELD_METADATA.put(1, MY_INT_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myStringField", 2);
-      THRIFT_NAMES_TO_IDS.put("MyStringField", 2);
-      FIELD_METADATA.put(2, MY_STRING_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myDataField", 3);
-      THRIFT_NAMES_TO_IDS.put("MyDataField", 3);
-      FIELD_METADATA.put(3, MY_DATA_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myEnum", 4);
-      THRIFT_NAMES_TO_IDS.put("myEnum", 4);
-      FIELD_METADATA.put(4, MY_ENUM_FIELD_DESC);
-      NAMES_TO_IDS.put("oneway", 5);
-      THRIFT_NAMES_TO_IDS.put("oneway", 5);
-      FIELD_METADATA.put(5, ONEWAY_FIELD_DESC);
-      NAMES_TO_IDS.put("readonly", 6);
-      THRIFT_NAMES_TO_IDS.put("readonly", 6);
-      FIELD_METADATA.put(6, READONLY_FIELD_DESC);
-      NAMES_TO_IDS.put("idempotent", 7);
-      THRIFT_NAMES_TO_IDS.put("idempotent", 7);
-      FIELD_METADATA.put(7, IDEMPOTENT_FIELD_DESC);
-      NAMES_TO_IDS.put("floatSet", 8);
-      THRIFT_NAMES_TO_IDS.put("floatSet", 8);
-      FIELD_METADATA.put(8, FLOAT_SET_FIELD_DESC);
-      NAMES_TO_IDS.put("noHackCodegenField", 9);
-      THRIFT_NAMES_TO_IDS.put("no_hack_codegen_field", 9);
-      FIELD_METADATA.put(9, NO_HACK_CODEGEN_FIELD_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/basic/MyStruct"),
-        MyStruct.class, MyStruct::read0));
+        NAMES_TO_IDS.put("myIntField", 1);
+        THRIFT_NAMES_TO_IDS.put("MyIntField", 1);
+        FIELD_METADATA.put(1, MY_INT_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myStringField", 2);
+        THRIFT_NAMES_TO_IDS.put("MyStringField", 2);
+        FIELD_METADATA.put(2, MY_STRING_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myDataField", 3);
+        THRIFT_NAMES_TO_IDS.put("MyDataField", 3);
+        FIELD_METADATA.put(3, MY_DATA_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myEnum", 4);
+        THRIFT_NAMES_TO_IDS.put("myEnum", 4);
+        FIELD_METADATA.put(4, MY_ENUM_FIELD_DESC);
+        NAMES_TO_IDS.put("oneway", 5);
+        THRIFT_NAMES_TO_IDS.put("oneway", 5);
+        FIELD_METADATA.put(5, ONEWAY_FIELD_DESC);
+        NAMES_TO_IDS.put("readonly", 6);
+        THRIFT_NAMES_TO_IDS.put("readonly", 6);
+        FIELD_METADATA.put(6, READONLY_FIELD_DESC);
+        NAMES_TO_IDS.put("idempotent", 7);
+        THRIFT_NAMES_TO_IDS.put("idempotent", 7);
+        FIELD_METADATA.put(7, IDEMPOTENT_FIELD_DESC);
+        NAMES_TO_IDS.put("floatSet", 8);
+        THRIFT_NAMES_TO_IDS.put("floatSet", 8);
+        FIELD_METADATA.put(8, FLOAT_SET_FIELD_DESC);
+        NAMES_TO_IDS.put("noHackCodegenField", 9);
+        THRIFT_NAMES_TO_IDS.put("no_hack_codegen_field", 9);
+        FIELD_METADATA.put(9, NO_HACK_CODEGEN_FIELD_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("test.dev/fixtures/basic/MyStruct"),
+            MyStruct.class, MyStruct::read0));
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
     public long getMyIntField() { return myIntField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)
     public String getMyStringField() { return myStringField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)
     public test.fixtures.basic.MyDataItem getMyDataField() { return myDataField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="myEnum", requiredness=Requiredness.NONE)
     public test.fixtures.basic.MyEnum getMyEnum() { return myEnum; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=5, name="oneway", requiredness=Requiredness.NONE)
     public boolean isOneway() { return oneway; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=6, name="readonly", requiredness=Requiredness.NONE)
     public boolean isReadonly() { return readonly; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=7, name="idempotent", requiredness=Requiredness.NONE)
     public boolean isIdempotent() { return idempotent; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="floatSet", requiredness=Requiredness.NONE)
     public Set<Float> getFloatSet() { return floatSet; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="no_hack_codegen_field", requiredness=Requiredness.NONE)
     public String getNoHackCodegenField() { return noHackCodegenField; }
@@ -323,192 +307,199 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(myIntField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myStringField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myDataField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myEnum);
-            _hashCode = 31 * _hashCode + Boolean.hashCode(oneway);
-            _hashCode = 31 * _hashCode + Boolean.hashCode(readonly);
-            _hashCode = 31 * _hashCode + Boolean.hashCode(idempotent);
-            _hashCode = 31 * _hashCode + Objects.hashCode(floatSet);
-            _hashCode = 31 * _hashCode + Objects.hashCode(noHackCodegenField);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(myStringField);
+        _hashCode = 31 * _hashCode + Objects.hashCode(myDataField);
+        _hashCode = 31 * _hashCode + Objects.hashCode(myEnum);
+        _hashCode = 31 * _hashCode + Boolean.hashCode(oneway);
+        _hashCode = 31 * _hashCode + Boolean.hashCode(readonly);
+        _hashCode = 31 * _hashCode + Boolean.hashCode(idempotent);
+        _hashCode = 31 * _hashCode + Objects.hashCode(floatSet);
+        _hashCode = 31 * _hashCode + Objects.hashCode(noHackCodegenField);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyStruct> asReader() {
       return MyStruct::read0;
     }
 
     public static MyStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
-      MyStruct.Builder builder = new MyStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MYINTFIELD:
-          if (__field.type == TType.I64) {
-            long myIntField = oprot.readI64();
-            builder.setMyIntField(myIntField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYSTRINGFIELD:
-          if (__field.type == TType.STRING) {
-            String myStringField = oprot.readString();
-            builder.setMyStringField(myStringField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDATAFIELD:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.basic.MyDataItem myDataField = test.fixtures.basic.MyDataItem.read0(oprot);
-            builder.setMyDataField(myDataField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYENUM:
-          if (__field.type == TType.I32) {
-            test.fixtures.basic.MyEnum myEnum = test.fixtures.basic.MyEnum.fromInteger(oprot.readI32());
-            builder.setMyEnum(myEnum);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ONEWAY:
-          if (__field.type == TType.BOOL) {
-            boolean oneway = oprot.readBool();
-            builder.setOneway(oneway);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _READONLY:
-          if (__field.type == TType.BOOL) {
-            boolean readonly = oprot.readBool();
-            builder.setReadonly(readonly);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _IDEMPOTENT:
-          if (__field.type == TType.BOOL) {
-            boolean idempotent = oprot.readBool();
-            builder.setIdempotent(idempotent);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _FLOATSET:
-          if (__field.type == TType.SET) {
-            Set<Float> floatSet;
-                {
-                TSet _set = oprot.readSetBegin();
-                floatSet = new HashSet<Float>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    float _value1 = oprot.readFloat();
-                    floatSet.add(_value1);
+        TField __field;
+        oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
+        MyStruct.Builder builder = new MyStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MYINTFIELD:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMyIntField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readSetEnd();
+                break;
+            case _MYSTRINGFIELD:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMyStringField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setFloatSet(floatSet);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _NO_HACK_CODEGEN_FIELD:
-          if (__field.type == TType.STRING) {
-            String noHackCodegenField = oprot.readString();
-            builder.setNoHackCodegenField(noHackCodegenField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            case _MYDATAFIELD:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.basic.MyDataItem _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.basic.MyDataItem.read0(oprot);
+                    builder.setMyDataField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYENUM:
+                if (__field.type == TType.I32) {
+                    test.fixtures.basic.MyEnum _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.basic.MyEnum.fromInteger(oprot.readI32());
+                    builder.setMyEnum(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ONEWAY:
+                if (__field.type == TType.BOOL) {
+                    boolean _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBool();
+                    builder.setOneway(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _READONLY:
+                if (__field.type == TType.BOOL) {
+                    boolean _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBool();
+                    builder.setReadonly(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _IDEMPOTENT:
+                if (__field.type == TType.BOOL) {
+                    boolean _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBool();
+                    builder.setIdempotent(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _FLOATSET:
+                if (__field.type == TType.SET) {
+                    Set<Float> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Float>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            float _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readFloat();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setFloatSet(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _NO_HACK_CODEGEN_FIELD:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setNoHackCodegenField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.myIntField;
-      oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.myStringField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_STRING_FIELD_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.basic.MyDataItem _iter0 = this.myDataField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_DATA_FIELD_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.basic.MyEnum _iter0 = this.myEnum;
-      oprot.writeFieldBegin(MY_ENUM_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      boolean _iter0 = this.oneway;
-      oprot.writeFieldBegin(ONEWAY_FIELD_DESC);
-      oprot.writeBool(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      boolean _iter0 = this.readonly;
-      oprot.writeFieldBegin(READONLY_FIELD_DESC);
-      oprot.writeBool(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      boolean _iter0 = this.idempotent;
-      oprot.writeFieldBegin(IDEMPOTENT_FIELD_DESC);
-      oprot.writeBool(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      Set<Float> _iter0 = this.floatSet;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(FLOAT_SET_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.FLOAT, _iter0.size()));
-            for (float _iter1 : _iter0) {
-              oprot.writeFloat(_iter1);
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.myIntField;
+            oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.myStringField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_STRING_FIELD_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.noHackCodegenField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(NO_HACK_CODEGEN_FIELD_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        {
+            test.fixtures.basic.MyDataItem _fbthriftVar0 = this.myDataField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_DATA_FIELD_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.basic.MyEnum _fbthriftVar0 = this.myEnum;
+            oprot.writeFieldBegin(MY_ENUM_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            boolean _fbthriftVar0 = this.oneway;
+            oprot.writeFieldBegin(ONEWAY_FIELD_DESC);
+            oprot.writeBool(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            boolean _fbthriftVar0 = this.readonly;
+            oprot.writeFieldBegin(READONLY_FIELD_DESC);
+            oprot.writeBool(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            boolean _fbthriftVar0 = this.idempotent;
+            oprot.writeFieldBegin(IDEMPOTENT_FIELD_DESC);
+            oprot.writeBool(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            Set<Float> _fbthriftVar0 = this.floatSet;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(FLOAT_SET_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.FLOAT, _fbthriftVar0.size()));
+                for (float _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeFloat(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.noHackCodegenField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(NO_HACK_CODEGEN_FIELD_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _MyStructLazy {

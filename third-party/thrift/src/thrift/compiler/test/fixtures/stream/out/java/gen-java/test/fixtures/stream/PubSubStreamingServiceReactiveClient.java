@@ -84,7 +84,6 @@ public class PubSubStreamingServiceReactiveClient
   }
 
   public PubSubStreamingServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = reactor.core.publisher.Mono.empty();
@@ -105,7 +104,6 @@ public class PubSubStreamingServiceReactiveClient
   }
 
   public PubSubStreamingServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = _headersMono;
@@ -122,18 +120,18 @@ public class PubSubStreamingServiceReactiveClient
         {
           oprot.writeFieldBegin(_returnstream_I32_FROM_FIELD_DESC);
 
-          int _iter0 = i32From;
+          int _fbthriftVar0 = i32From;
 
-          oprot.writeI32(_iter0);
+          oprot.writeI32(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
         {
           oprot.writeFieldBegin(_returnstream_I32_TO_FIELD_DESC);
 
-          int _iter0 = i32To;
+          int _fbthriftVar0 = i32To;
 
-          oprot.writeI32(_iter0);
+          oprot.writeI32(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -193,9 +191,9 @@ public class PubSubStreamingServiceReactiveClient
         {
           oprot.writeFieldBegin(_streamthrows_FOO_FIELD_DESC);
 
-          int _iter0 = foo;
+          int _fbthriftVar0 = foo;
 
-          oprot.writeI32(_iter0);
+          oprot.writeI32(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -255,9 +253,9 @@ public class PubSubStreamingServiceReactiveClient
         {
           oprot.writeFieldBegin(_servicethrows_FOO_FIELD_DESC);
 
-          int _iter0 = foo;
+          int _fbthriftVar0 = foo;
 
-          oprot.writeI32(_iter0);
+          oprot.writeI32(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -317,9 +315,9 @@ public class PubSubStreamingServiceReactiveClient
         {
           oprot.writeFieldBegin(_servicethrows2_FOO_FIELD_DESC);
 
-          int _iter0 = foo;
+          int _fbthriftVar0 = foo;
 
-          oprot.writeI32(_iter0);
+          oprot.writeI32(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -379,9 +377,9 @@ public class PubSubStreamingServiceReactiveClient
         {
           oprot.writeFieldBegin(_boththrows_FOO_FIELD_DESC);
 
-          int _iter0 = foo;
+          int _fbthriftVar0 = foo;
 
-          oprot.writeI32(_iter0);
+          oprot.writeI32(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -441,9 +439,9 @@ public class PubSubStreamingServiceReactiveClient
         {
           oprot.writeFieldBegin(_responseandstreamstreamthrows_FOO_FIELD_DESC);
 
-          int _iter0 = foo;
+          int _fbthriftVar0 = foo;
 
-          oprot.writeI32(_iter0);
+          oprot.writeI32(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -484,7 +482,7 @@ public class PubSubStreamingServiceReactiveClient
             return _rpc
                 .singleRequestStreamingResponse(_crp, rpcOptions)
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());})
-                .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Integer,Integer>)_p.getData()), _p.getHeaders(), _p.getBinaryHeaders()));
+                .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Integer, Integer>)_p.getData()), _p.getHeaders(), _p.getBinaryHeaders()));
       }));
   }
 
@@ -504,9 +502,9 @@ public class PubSubStreamingServiceReactiveClient
         {
           oprot.writeFieldBegin(_responseandstreamservicethrows_FOO_FIELD_DESC);
 
-          int _iter0 = foo;
+          int _fbthriftVar0 = foo;
 
-          oprot.writeI32(_iter0);
+          oprot.writeI32(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -547,7 +545,7 @@ public class PubSubStreamingServiceReactiveClient
             return _rpc
                 .singleRequestStreamingResponse(_crp, rpcOptions)
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());})
-                .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Integer,Integer>)_p.getData()), _p.getHeaders(), _p.getBinaryHeaders()));
+                .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Integer, Integer>)_p.getData()), _p.getHeaders(), _p.getBinaryHeaders()));
       }));
   }
 
@@ -567,9 +565,9 @@ public class PubSubStreamingServiceReactiveClient
         {
           oprot.writeFieldBegin(_responseandstreamboththrows_FOO_FIELD_DESC);
 
-          int _iter0 = foo;
+          int _fbthriftVar0 = foo;
 
-          oprot.writeI32(_iter0);
+          oprot.writeI32(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -610,7 +608,7 @@ public class PubSubStreamingServiceReactiveClient
             return _rpc
                 .singleRequestStreamingResponse(_crp, rpcOptions)
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());})
-                .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Integer,Integer>)_p.getData()), _p.getHeaders(), _p.getBinaryHeaders()));
+                .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Integer, Integer>)_p.getData()), _p.getHeaders(), _p.getBinaryHeaders()));
       }));
   }
 
@@ -630,18 +628,18 @@ public class PubSubStreamingServiceReactiveClient
         {
           oprot.writeFieldBegin(_returnstreamFast_I32_FROM_FIELD_DESC);
 
-          int _iter0 = i32From;
+          int _fbthriftVar0 = i32From;
 
-          oprot.writeI32(_iter0);
+          oprot.writeI32(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
         {
           oprot.writeFieldBegin(_returnstreamFast_I32_TO_FIELD_DESC);
 
-          int _iter0 = i32To;
+          int _fbthriftVar0 = i32To;
 
-          oprot.writeI32(_iter0);
+          oprot.writeI32(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 

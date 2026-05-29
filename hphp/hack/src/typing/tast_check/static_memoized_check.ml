@@ -11,15 +11,6 @@ open Hh_prelude
 open Aast
 module SN = Naming_special_names
 
-let attribute_exists x1 attrs =
-  List.exists attrs ~f:(fun { ua_name; _ } -> String.equal x1 (snd ua_name))
-
-let static_memoized_check m =
-  if attribute_exists SN.UserAttributes.uaMemoize m.m_user_attributes then
-    Diagnostics.add_diagnostic
-      Nast_check_error.(
-        to_user_diagnostic @@ Static_memoized_function (fst m.m_name))
-
 let unnecessary_memoize_lsb c m custom_err_config =
   let attr = SN.UserAttributes.uaMemoizeLSB in
   match Naming_attributes.mem_pos attr m.m_user_attributes with
@@ -47,16 +38,7 @@ let handler =
         let tcopt = Tast_env.get_tcopt env in
         TypecheckerOptions.custom_error_config tcopt
       in
-      let disallow_static_memoized =
-        TypecheckerOptions.experimental_feature_enabled
-          (Tast_env.get_tcopt env)
-          TypecheckerOptions.experimental_disallow_static_memoized
-      in
-      let (constructor, static_methods, _) = split_methods c.c_methods in
-      if disallow_static_memoized && not c.c_final then (
-        List.iter static_methods ~f:static_memoized_check;
-        Option.iter constructor ~f:static_memoized_check
-      );
+      let (_, static_methods, _) = split_methods c.c_methods in
       if c.c_final then
         List.iter static_methods ~f:(fun m ->
             unnecessary_memoize_lsb c m custom_err_config)

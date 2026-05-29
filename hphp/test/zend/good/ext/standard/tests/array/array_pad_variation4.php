@@ -17,7 +17,7 @@ $input = vec[1, 2, 3];
 $pad_size = 6;
 
 // initialize $pad_value with reference variable
-$binary = b"hello";
+$binary = "hello";
 
 var_dump( array_pad($input, $pad_size, $binary) );  // positive 'pad_size'
 var_dump( array_pad($input, -$pad_size, $binary) );  // negative 'pad_size'

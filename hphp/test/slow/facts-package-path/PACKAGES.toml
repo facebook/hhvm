@@ -1,0 +1,23 @@
+[packages]
+
+# Short name, long include path — regression test for the name-vs-path-length
+# comparison bug.
+[packages.a]
+include_paths=["//subdir/"]
+
+# Nested prefixes to test longest-prefix-wins.
+[packages.flib]
+include_paths=["//flib/"]
+
+[packages.prod]
+include_paths=["//flib/prod/"]
+
+# Package with multiple include paths.
+[packages.multi]
+include_paths=["//multi_a/", "//multi_b/"]
+
+# Catch-all.
+[packages.fallthrough]
+include_paths=["//"]
+
+[deployments]

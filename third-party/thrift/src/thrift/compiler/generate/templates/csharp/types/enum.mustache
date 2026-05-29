@@ -21,8 +21,8 @@
 /// </summary>
 public enum {{enum.csharp_name}} : int
 {
-{{#each (array.enumerate enum.values with_last=true) as |index ev last?|}}
-    {{ev.csharp_name}} = {{ev.value}}{{#if (not last?)}},{{/if (not last?)}}
-{{/each}}
+{{#each enum.values as |ev| separator=(string.concat "," newline)}}
+    {{ev.csharp_name}} = {{ev.value ~}}
+{{~ /each}}
 }
 {{/let partial}}

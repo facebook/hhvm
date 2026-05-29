@@ -31,14 +31,18 @@ using namespace testing;
 
 class MockKeyScheduler : public KeyScheduler {
  public:
-  MockKeyScheduler() : KeyScheduler(std::make_unique<MockKeyDerivation>()) {}
+  MockKeyScheduler() : KeyScheduler(std::make_unique<MockKeyDerivation>()) {
+    ON_CALL(*this, deriveEarlySecret(_, _))
+        .WillByDefault(Return(Status::Success));
+    ON_CALL(*this, clearMasterSecret(_)).WillByDefault(Return(Status::Success));
+  }
 
-  MOCK_METHOD(void, deriveEarlySecret, (folly::ByteRange psk));
+  MOCK_METHOD(Status, deriveEarlySecret, (Error & err, folly::ByteRange psk));
   MOCK_METHOD(void, deriveHandshakeSecret, ());
   MOCK_METHOD(void, deriveHandshakeSecret, (folly::ByteRange ecdhe));
   MOCK_METHOD(void, deriveMasterSecret, ());
   MOCK_METHOD(void, deriveAppTrafficSecrets, (folly::ByteRange transcript));
-  MOCK_METHOD(void, clearMasterSecret, ());
+  MOCK_METHOD(Status, clearMasterSecret, (Error & err));
   MOCK_METHOD(uint32_t, clientKeyUpdate, ());
   MOCK_METHOD(uint32_t, serverKeyUpdate, ());
   MOCK_METHOD(
@@ -78,6 +82,8 @@ class MockKeyScheduler : public KeyScheduler {
       (const));
 
   void setDefaults() {
+    ON_CALL(*this, deriveEarlySecret(_, _))
+        .WillByDefault(Return(Status::Success));
     ON_CALL(*this, getTrafficKey(_, _, _))
         .WillByDefault(InvokeWithoutArgs([]() {
           return TrafficKey{
@@ -205,15 +211,26 @@ class MockCertificateVerifier : public CertificateVerifier {
  public:
   MOCK_METHOD(
       std::shared_ptr<const Cert>,
-      verify,
+      _verify,
       (const std::vector<std::shared_ptr<const PeerCert>>&),
       (const));
-
+  Status verify(
+      std::shared_ptr<const Cert>& ret,
+      Error& err,
+      const std::vector<std::shared_ptr<const PeerCert>>& certs)
+      const override {
+    FIZZ_THROW_TO_ERROR(ret, _verify(certs));
+  }
   MOCK_METHOD(
       std::vector<Extension>,
-      getCertificateRequestExtensions,
+      _getCertificateRequestExtensions,
       (),
       (const));
+  Status getCertificateRequestExtensions(
+      std::vector<Extension>& ret,
+      Error& err) const override {
+    FIZZ_THROW_TO_ERROR(ret, _getCertificateRequestExtensions());
+  }
 };
 
 class MockCertificateSerialization : public CertificateSerialization {
@@ -264,15 +281,32 @@ class MockFactory : public ::fizz::DefaultFactory {
       (const));
   MOCK_METHOD(
       std::unique_ptr<KeyExchange>,
-      makeKeyExchange,
+      _makeKeyExchange,
       (NamedGroup group, KeyExchangeRole role),
       (const));
+  Status makeKeyExchange(
+      std::unique_ptr<KeyExchange>& ret,
+      Error& err,
+      NamedGroup group,
+      KeyExchangeRole role) const override {
+    FIZZ_THROW_TO_ERROR(ret, _makeKeyExchange(group, role));
+  }
   MOCK_METHOD(
       const HasherFactoryWithMetadata*,
-      makeHasherFactory,
+      _makeHasherFactory,
       (HashFunction),
       (const));
-  MOCK_METHOD(std::unique_ptr<Aead>, makeAead, (CipherSuite cipher), (const));
+  Status makeHasherFactory(
+      const HasherFactoryWithMetadata*& ret,
+      Error& err,
+      HashFunction digest) const override {
+    FIZZ_THROW_TO_ERROR(ret, _makeHasherFactory(digest));
+  }
+  MOCK_METHOD(std::unique_ptr<Aead>, _makeAead, (CipherSuite cipher), (const));
+  Status makeAead(std::unique_ptr<Aead>& ret, Error& err, CipherSuite cipher)
+      const override {
+    FIZZ_THROW_TO_ERROR(ret, _makeAead(cipher));
+  }
 
   MOCK_METHOD(
       std::unique_ptr<PeerCert>,
@@ -328,12 +362,13 @@ class MockFactory : public ::fizz::DefaultFactory {
           ret->setDefaults();
           return ret;
         }));
-    ON_CALL(*this, makeKeyExchange(_, _)).WillByDefault(InvokeWithoutArgs([]() {
-      auto ret = std::make_unique<NiceMock<MockKeyExchange>>();
-      ret->setDefaults();
-      return ret;
-    }));
-    ON_CALL(*this, makeHasherFactory(_))
+    ON_CALL(*this, _makeKeyExchange(_, _))
+        .WillByDefault(InvokeWithoutArgs([]() {
+          auto ret = std::make_unique<NiceMock<MockKeyExchange>>();
+          ret->setDefaults();
+          return ret;
+        }));
+    ON_CALL(*this, _makeHasherFactory(_))
         .WillByDefault(
             InvokeWithoutArgs([]() -> const fizz::HasherFactoryWithMetadata* {
               const static HasherFactoryWithMetadata instance =
@@ -343,7 +378,7 @@ class MockFactory : public ::fizz::DefaultFactory {
                       });
               return &instance;
             }));
-    ON_CALL(*this, makeAead(_)).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, _makeAead(_)).WillByDefault(InvokeWithoutArgs([]() {
       auto ret = std::make_unique<NiceMock<MockAead>>();
       ret->setDefaults();
       return ret;
@@ -368,9 +403,16 @@ class MockAsyncKexFactory : public ::fizz::DefaultFactory {
  public:
   MOCK_METHOD(
       std::unique_ptr<KeyExchange>,
-      makeKeyExchange,
+      _makeKeyExchange,
       (NamedGroup group, KeyExchangeRole role),
       (const));
+  Status makeKeyExchange(
+      std::unique_ptr<KeyExchange>& ret,
+      Error& err,
+      NamedGroup group,
+      KeyExchangeRole role) const override {
+    FIZZ_THROW_TO_ERROR(ret, _makeKeyExchange(group, role));
+  }
 };
 
 class MockAsyncFizzBase : public AsyncFizzBase {
@@ -454,18 +496,27 @@ class MockECHDecrypter : public ech::Decrypter {
  public:
   MOCK_METHOD(
       folly::Optional<ech::DecrypterResult>,
-      decryptClientHello,
+      _decryptClientHello,
       (const ClientHello& chlo));
+
+  Status decryptClientHello(
+      folly::Optional<ech::DecrypterResult>& ret,
+      Error& err,
+      const ClientHello& chlo) override {
+    FIZZ_THROW_TO_ERROR(ret, _decryptClientHello(chlo));
+  }
 
   MOCK_METHOD(
       ClientHello,
       _decryptClientHelloHRR_Stateful,
       (const ClientHello& chlo, std::unique_ptr<hpke::HpkeContext>& context));
 
-  ClientHello decryptClientHelloHRR(
+  Status decryptClientHelloHRR(
+      ClientHello& ret,
+      Error& err,
       const ClientHello& chlo,
       std::unique_ptr<hpke::HpkeContext>& context) override {
-    return _decryptClientHelloHRR_Stateful(chlo, context);
+    FIZZ_THROW_TO_ERROR(ret, _decryptClientHelloHRR_Stateful(chlo, context));
   }
 
   MOCK_METHOD(
@@ -474,10 +525,13 @@ class MockECHDecrypter : public ech::Decrypter {
       (const ClientHello& chlo,
        const std::unique_ptr<folly::IOBuf>& encapsulatedKey));
 
-  ClientHello decryptClientHelloHRR(
+  Status decryptClientHelloHRR(
+      ClientHello& ret,
+      Error& err,
       const ClientHello& chlo,
       const std::unique_ptr<folly::IOBuf>& encapsulatedKey) override {
-    return _decryptClientHelloHRR_Stateless(chlo, encapsulatedKey);
+    FIZZ_THROW_TO_ERROR(
+        ret, _decryptClientHelloHRR_Stateless(chlo, encapsulatedKey));
   }
 
   MOCK_METHOD(

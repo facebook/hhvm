@@ -1,12 +1,12 @@
 <?hh
 
 <<__EntryPoint>> function main(): void {
-print b<<<ENDOFHEREDOC
+print <<<ENDOFHEREDOC
 This is a heredoc test.
 
 ENDOFHEREDOC;
 
-$x = b<<<ENDOFHEREDOC
+$x = <<<ENDOFHEREDOC
 This is another heredoc test.
 
 ENDOFHEREDOC;

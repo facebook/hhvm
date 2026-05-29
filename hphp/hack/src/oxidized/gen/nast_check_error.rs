@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<670b988d2c4b1105058910be383abb1e>>
+// @generated SignedSource<<89e5a1154c54eb94c3ce0ee9686be6b5>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -132,8 +132,6 @@ pub enum NastCheckError {
     },
     #[rust_to_ocaml(name = "Interface_uses_trait")]
     InterfaceUsesTrait(pos::Pos),
-    #[rust_to_ocaml(name = "Static_memoized_function")]
-    StaticMemoizedFunction(pos::Pos),
     Magic {
         pos: pos::Pos,
         meth_name: String,

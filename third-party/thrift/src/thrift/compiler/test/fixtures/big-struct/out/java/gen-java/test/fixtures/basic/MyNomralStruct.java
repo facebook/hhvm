@@ -124,11 +124,11 @@ public final class MyNomralStruct implements com.facebook.thrift.payload.ThriftS
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(MyNomralStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -170,203 +170,203 @@ public final class MyNomralStruct implements com.facebook.thrift.payload.ThriftS
 
         public String getMsg1() { return msg1; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="msg2", requiredness=Requiredness.NONE)    public Builder setMsg2(String msg2) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="msg2", requiredness=Requiredness.NONE)    public Builder setMsg2(String msg2) {
             this.msg2 = msg2;
             return this;
         }
 
         public String getMsg2() { return msg2; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="msg3", requiredness=Requiredness.NONE)    public Builder setMsg3(String msg3) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="msg3", requiredness=Requiredness.NONE)    public Builder setMsg3(String msg3) {
             this.msg3 = msg3;
             return this;
         }
 
         public String getMsg3() { return msg3; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="msg4", requiredness=Requiredness.NONE)    public Builder setMsg4(String msg4) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="msg4", requiredness=Requiredness.NONE)    public Builder setMsg4(String msg4) {
             this.msg4 = msg4;
             return this;
         }
 
         public String getMsg4() { return msg4; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="msg5", requiredness=Requiredness.NONE)    public Builder setMsg5(String msg5) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="msg5", requiredness=Requiredness.NONE)    public Builder setMsg5(String msg5) {
             this.msg5 = msg5;
             return this;
         }
 
         public String getMsg5() { return msg5; }
 
-            @com.facebook.swift.codec.ThriftField(value=6, name="msg6", requiredness=Requiredness.NONE)    public Builder setMsg6(String msg6) {
+        @com.facebook.swift.codec.ThriftField(value=6, name="msg6", requiredness=Requiredness.NONE)    public Builder setMsg6(String msg6) {
             this.msg6 = msg6;
             return this;
         }
 
         public String getMsg6() { return msg6; }
 
-            @com.facebook.swift.codec.ThriftField(value=7, name="msg7", requiredness=Requiredness.NONE)    public Builder setMsg7(String msg7) {
+        @com.facebook.swift.codec.ThriftField(value=7, name="msg7", requiredness=Requiredness.NONE)    public Builder setMsg7(String msg7) {
             this.msg7 = msg7;
             return this;
         }
 
         public String getMsg7() { return msg7; }
 
-            @com.facebook.swift.codec.ThriftField(value=8, name="msg8", requiredness=Requiredness.NONE)    public Builder setMsg8(String msg8) {
+        @com.facebook.swift.codec.ThriftField(value=8, name="msg8", requiredness=Requiredness.NONE)    public Builder setMsg8(String msg8) {
             this.msg8 = msg8;
             return this;
         }
 
         public String getMsg8() { return msg8; }
 
-            @com.facebook.swift.codec.ThriftField(value=9, name="msg9", requiredness=Requiredness.NONE)    public Builder setMsg9(String msg9) {
+        @com.facebook.swift.codec.ThriftField(value=9, name="msg9", requiredness=Requiredness.NONE)    public Builder setMsg9(String msg9) {
             this.msg9 = msg9;
             return this;
         }
 
         public String getMsg9() { return msg9; }
 
-            @com.facebook.swift.codec.ThriftField(value=10, name="myIntField10", requiredness=Requiredness.NONE)    public Builder setMyIntField10(int myIntField10) {
+        @com.facebook.swift.codec.ThriftField(value=10, name="myIntField10", requiredness=Requiredness.NONE)    public Builder setMyIntField10(int myIntField10) {
             this.myIntField10 = myIntField10;
             return this;
         }
 
         public int getMyIntField10() { return myIntField10; }
 
-            @com.facebook.swift.codec.ThriftField(value=11, name="myIntField11", requiredness=Requiredness.NONE)    public Builder setMyIntField11(int myIntField11) {
+        @com.facebook.swift.codec.ThriftField(value=11, name="myIntField11", requiredness=Requiredness.NONE)    public Builder setMyIntField11(int myIntField11) {
             this.myIntField11 = myIntField11;
             return this;
         }
 
         public int getMyIntField11() { return myIntField11; }
 
-            @com.facebook.swift.codec.ThriftField(value=12, name="myIntField12", requiredness=Requiredness.NONE)    public Builder setMyIntField12(int myIntField12) {
+        @com.facebook.swift.codec.ThriftField(value=12, name="myIntField12", requiredness=Requiredness.NONE)    public Builder setMyIntField12(int myIntField12) {
             this.myIntField12 = myIntField12;
             return this;
         }
 
         public int getMyIntField12() { return myIntField12; }
 
-            @com.facebook.swift.codec.ThriftField(value=13, name="myIntField13", requiredness=Requiredness.NONE)    public Builder setMyIntField13(int myIntField13) {
+        @com.facebook.swift.codec.ThriftField(value=13, name="myIntField13", requiredness=Requiredness.NONE)    public Builder setMyIntField13(int myIntField13) {
             this.myIntField13 = myIntField13;
             return this;
         }
 
         public int getMyIntField13() { return myIntField13; }
 
-            @com.facebook.swift.codec.ThriftField(value=14, name="myIntField14", requiredness=Requiredness.NONE)    public Builder setMyIntField14(int myIntField14) {
+        @com.facebook.swift.codec.ThriftField(value=14, name="myIntField14", requiredness=Requiredness.NONE)    public Builder setMyIntField14(int myIntField14) {
             this.myIntField14 = myIntField14;
             return this;
         }
 
         public int getMyIntField14() { return myIntField14; }
 
-            @com.facebook.swift.codec.ThriftField(value=15, name="myIntField15", requiredness=Requiredness.NONE)    public Builder setMyIntField15(int myIntField15) {
+        @com.facebook.swift.codec.ThriftField(value=15, name="myIntField15", requiredness=Requiredness.NONE)    public Builder setMyIntField15(int myIntField15) {
             this.myIntField15 = myIntField15;
             return this;
         }
 
         public int getMyIntField15() { return myIntField15; }
 
-            @com.facebook.swift.codec.ThriftField(value=16, name="myIntField16", requiredness=Requiredness.NONE)    public Builder setMyIntField16(int myIntField16) {
+        @com.facebook.swift.codec.ThriftField(value=16, name="myIntField16", requiredness=Requiredness.NONE)    public Builder setMyIntField16(int myIntField16) {
             this.myIntField16 = myIntField16;
             return this;
         }
 
         public int getMyIntField16() { return myIntField16; }
 
-            @com.facebook.swift.codec.ThriftField(value=17, name="myIntField17", requiredness=Requiredness.NONE)    public Builder setMyIntField17(int myIntField17) {
+        @com.facebook.swift.codec.ThriftField(value=17, name="myIntField17", requiredness=Requiredness.NONE)    public Builder setMyIntField17(int myIntField17) {
             this.myIntField17 = myIntField17;
             return this;
         }
 
         public int getMyIntField17() { return myIntField17; }
 
-            @com.facebook.swift.codec.ThriftField(value=18, name="myIntField18", requiredness=Requiredness.NONE)    public Builder setMyIntField18(int myIntField18) {
+        @com.facebook.swift.codec.ThriftField(value=18, name="myIntField18", requiredness=Requiredness.NONE)    public Builder setMyIntField18(int myIntField18) {
             this.myIntField18 = myIntField18;
             return this;
         }
 
         public int getMyIntField18() { return myIntField18; }
 
-            @com.facebook.swift.codec.ThriftField(value=19, name="myIntField19", requiredness=Requiredness.NONE)    public Builder setMyIntField19(int myIntField19) {
+        @com.facebook.swift.codec.ThriftField(value=19, name="myIntField19", requiredness=Requiredness.NONE)    public Builder setMyIntField19(int myIntField19) {
             this.myIntField19 = myIntField19;
             return this;
         }
 
         public int getMyIntField19() { return myIntField19; }
 
-            @com.facebook.swift.codec.ThriftField(value=20, name="myIntField20", requiredness=Requiredness.NONE)    public Builder setMyIntField20(int myIntField20) {
+        @com.facebook.swift.codec.ThriftField(value=20, name="myIntField20", requiredness=Requiredness.NONE)    public Builder setMyIntField20(int myIntField20) {
             this.myIntField20 = myIntField20;
             return this;
         }
 
         public int getMyIntField20() { return myIntField20; }
 
-            @com.facebook.swift.codec.ThriftField(value=21, name="myDoubleField21", requiredness=Requiredness.NONE)    public Builder setMyDoubleField21(double myDoubleField21) {
+        @com.facebook.swift.codec.ThriftField(value=21, name="myDoubleField21", requiredness=Requiredness.NONE)    public Builder setMyDoubleField21(double myDoubleField21) {
             this.myDoubleField21 = myDoubleField21;
             return this;
         }
 
         public double getMyDoubleField21() { return myDoubleField21; }
 
-            @com.facebook.swift.codec.ThriftField(value=22, name="myDoubleField22", requiredness=Requiredness.NONE)    public Builder setMyDoubleField22(double myDoubleField22) {
+        @com.facebook.swift.codec.ThriftField(value=22, name="myDoubleField22", requiredness=Requiredness.NONE)    public Builder setMyDoubleField22(double myDoubleField22) {
             this.myDoubleField22 = myDoubleField22;
             return this;
         }
 
         public double getMyDoubleField22() { return myDoubleField22; }
 
-            @com.facebook.swift.codec.ThriftField(value=23, name="myDoubleField23", requiredness=Requiredness.NONE)    public Builder setMyDoubleField23(double myDoubleField23) {
+        @com.facebook.swift.codec.ThriftField(value=23, name="myDoubleField23", requiredness=Requiredness.NONE)    public Builder setMyDoubleField23(double myDoubleField23) {
             this.myDoubleField23 = myDoubleField23;
             return this;
         }
 
         public double getMyDoubleField23() { return myDoubleField23; }
 
-            @com.facebook.swift.codec.ThriftField(value=24, name="myDoubleField24", requiredness=Requiredness.NONE)    public Builder setMyDoubleField24(double myDoubleField24) {
+        @com.facebook.swift.codec.ThriftField(value=24, name="myDoubleField24", requiredness=Requiredness.NONE)    public Builder setMyDoubleField24(double myDoubleField24) {
             this.myDoubleField24 = myDoubleField24;
             return this;
         }
 
         public double getMyDoubleField24() { return myDoubleField24; }
 
-            @com.facebook.swift.codec.ThriftField(value=25, name="myDoubleField25", requiredness=Requiredness.NONE)    public Builder setMyDoubleField25(double myDoubleField25) {
+        @com.facebook.swift.codec.ThriftField(value=25, name="myDoubleField25", requiredness=Requiredness.NONE)    public Builder setMyDoubleField25(double myDoubleField25) {
             this.myDoubleField25 = myDoubleField25;
             return this;
         }
 
         public double getMyDoubleField25() { return myDoubleField25; }
 
-            @com.facebook.swift.codec.ThriftField(value=26, name="myDoubleField26", requiredness=Requiredness.NONE)    public Builder setMyDoubleField26(double myDoubleField26) {
+        @com.facebook.swift.codec.ThriftField(value=26, name="myDoubleField26", requiredness=Requiredness.NONE)    public Builder setMyDoubleField26(double myDoubleField26) {
             this.myDoubleField26 = myDoubleField26;
             return this;
         }
 
         public double getMyDoubleField26() { return myDoubleField26; }
 
-            @com.facebook.swift.codec.ThriftField(value=27, name="myDoubleField27", requiredness=Requiredness.NONE)    public Builder setMyDoubleField27(double myDoubleField27) {
+        @com.facebook.swift.codec.ThriftField(value=27, name="myDoubleField27", requiredness=Requiredness.NONE)    public Builder setMyDoubleField27(double myDoubleField27) {
             this.myDoubleField27 = myDoubleField27;
             return this;
         }
 
         public double getMyDoubleField27() { return myDoubleField27; }
 
-            @com.facebook.swift.codec.ThriftField(value=28, name="myDoubleField28", requiredness=Requiredness.NONE)    public Builder setMyDoubleField28(double myDoubleField28) {
+        @com.facebook.swift.codec.ThriftField(value=28, name="myDoubleField28", requiredness=Requiredness.NONE)    public Builder setMyDoubleField28(double myDoubleField28) {
             this.myDoubleField28 = myDoubleField28;
             return this;
         }
 
         public double getMyDoubleField28() { return myDoubleField28; }
 
-            @com.facebook.swift.codec.ThriftField(value=29, name="myDoubleField29", requiredness=Requiredness.NONE)    public Builder setMyDoubleField29(double myDoubleField29) {
+        @com.facebook.swift.codec.ThriftField(value=29, name="myDoubleField29", requiredness=Requiredness.NONE)    public Builder setMyDoubleField29(double myDoubleField29) {
             this.myDoubleField29 = myDoubleField29;
             return this;
         }
 
         public double getMyDoubleField29() { return myDoubleField29; }
 
-            @com.facebook.swift.codec.ThriftField(value=30, name="myDoubleField30", requiredness=Requiredness.NONE)    public Builder setMyDoubleField30(double myDoubleField30) {
+        @com.facebook.swift.codec.ThriftField(value=30, name="myDoubleField30", requiredness=Requiredness.NONE)    public Builder setMyDoubleField30(double myDoubleField30) {
             this.myDoubleField30 = myDoubleField30;
             return this;
         }
@@ -444,6 +444,7 @@ public final class MyNomralStruct implements com.facebook.thrift.payload.ThriftS
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -452,332 +453,273 @@ public final class MyNomralStruct implements com.facebook.thrift.payload.ThriftS
     private final String msg1;
     public static final int _MSG1 = 1;
     private static final TField MSG1_FIELD_DESC = new TField("msg1", TType.STRING, (short)1);
-        private final String msg2;
+    private final String msg2;
     public static final int _MSG2 = 2;
     private static final TField MSG2_FIELD_DESC = new TField("msg2", TType.STRING, (short)2);
-        private final String msg3;
+    private final String msg3;
     public static final int _MSG3 = 3;
     private static final TField MSG3_FIELD_DESC = new TField("msg3", TType.STRING, (short)3);
-        private final String msg4;
+    private final String msg4;
     public static final int _MSG4 = 4;
     private static final TField MSG4_FIELD_DESC = new TField("msg4", TType.STRING, (short)4);
-        private final String msg5;
+    private final String msg5;
     public static final int _MSG5 = 5;
     private static final TField MSG5_FIELD_DESC = new TField("msg5", TType.STRING, (short)5);
-        private final String msg6;
+    private final String msg6;
     public static final int _MSG6 = 6;
     private static final TField MSG6_FIELD_DESC = new TField("msg6", TType.STRING, (short)6);
-        private final String msg7;
+    private final String msg7;
     public static final int _MSG7 = 7;
     private static final TField MSG7_FIELD_DESC = new TField("msg7", TType.STRING, (short)7);
-        private final String msg8;
+    private final String msg8;
     public static final int _MSG8 = 8;
     private static final TField MSG8_FIELD_DESC = new TField("msg8", TType.STRING, (short)8);
-        private final String msg9;
+    private final String msg9;
     public static final int _MSG9 = 9;
     private static final TField MSG9_FIELD_DESC = new TField("msg9", TType.STRING, (short)9);
-        private final int myIntField10;
+    private final int myIntField10;
     public static final int _MYINTFIELD10 = 10;
     private static final TField MY_INT_FIELD10_FIELD_DESC = new TField("myIntField10", TType.I32, (short)10);
-        private final int myIntField11;
+    private final int myIntField11;
     public static final int _MYINTFIELD11 = 11;
     private static final TField MY_INT_FIELD11_FIELD_DESC = new TField("myIntField11", TType.I32, (short)11);
-        private final int myIntField12;
+    private final int myIntField12;
     public static final int _MYINTFIELD12 = 12;
     private static final TField MY_INT_FIELD12_FIELD_DESC = new TField("myIntField12", TType.I32, (short)12);
-        private final int myIntField13;
+    private final int myIntField13;
     public static final int _MYINTFIELD13 = 13;
     private static final TField MY_INT_FIELD13_FIELD_DESC = new TField("myIntField13", TType.I32, (short)13);
-        private final int myIntField14;
+    private final int myIntField14;
     public static final int _MYINTFIELD14 = 14;
     private static final TField MY_INT_FIELD14_FIELD_DESC = new TField("myIntField14", TType.I32, (short)14);
-        private final int myIntField15;
+    private final int myIntField15;
     public static final int _MYINTFIELD15 = 15;
     private static final TField MY_INT_FIELD15_FIELD_DESC = new TField("myIntField15", TType.I32, (short)15);
-        private final int myIntField16;
+    private final int myIntField16;
     public static final int _MYINTFIELD16 = 16;
     private static final TField MY_INT_FIELD16_FIELD_DESC = new TField("myIntField16", TType.I32, (short)16);
-        private final int myIntField17;
+    private final int myIntField17;
     public static final int _MYINTFIELD17 = 17;
     private static final TField MY_INT_FIELD17_FIELD_DESC = new TField("myIntField17", TType.I32, (short)17);
-        private final int myIntField18;
+    private final int myIntField18;
     public static final int _MYINTFIELD18 = 18;
     private static final TField MY_INT_FIELD18_FIELD_DESC = new TField("myIntField18", TType.I32, (short)18);
-        private final int myIntField19;
+    private final int myIntField19;
     public static final int _MYINTFIELD19 = 19;
     private static final TField MY_INT_FIELD19_FIELD_DESC = new TField("myIntField19", TType.I32, (short)19);
-        private final int myIntField20;
+    private final int myIntField20;
     public static final int _MYINTFIELD20 = 20;
     private static final TField MY_INT_FIELD20_FIELD_DESC = new TField("myIntField20", TType.I32, (short)20);
-        private final double myDoubleField21;
+    private final double myDoubleField21;
     public static final int _MYDOUBLEFIELD21 = 21;
     private static final TField MY_DOUBLE_FIELD21_FIELD_DESC = new TField("myDoubleField21", TType.DOUBLE, (short)21);
-        private final double myDoubleField22;
+    private final double myDoubleField22;
     public static final int _MYDOUBLEFIELD22 = 22;
     private static final TField MY_DOUBLE_FIELD22_FIELD_DESC = new TField("myDoubleField22", TType.DOUBLE, (short)22);
-        private final double myDoubleField23;
+    private final double myDoubleField23;
     public static final int _MYDOUBLEFIELD23 = 23;
     private static final TField MY_DOUBLE_FIELD23_FIELD_DESC = new TField("myDoubleField23", TType.DOUBLE, (short)23);
-        private final double myDoubleField24;
+    private final double myDoubleField24;
     public static final int _MYDOUBLEFIELD24 = 24;
     private static final TField MY_DOUBLE_FIELD24_FIELD_DESC = new TField("myDoubleField24", TType.DOUBLE, (short)24);
-        private final double myDoubleField25;
+    private final double myDoubleField25;
     public static final int _MYDOUBLEFIELD25 = 25;
     private static final TField MY_DOUBLE_FIELD25_FIELD_DESC = new TField("myDoubleField25", TType.DOUBLE, (short)25);
-        private final double myDoubleField26;
+    private final double myDoubleField26;
     public static final int _MYDOUBLEFIELD26 = 26;
     private static final TField MY_DOUBLE_FIELD26_FIELD_DESC = new TField("myDoubleField26", TType.DOUBLE, (short)26);
-        private final double myDoubleField27;
+    private final double myDoubleField27;
     public static final int _MYDOUBLEFIELD27 = 27;
     private static final TField MY_DOUBLE_FIELD27_FIELD_DESC = new TField("myDoubleField27", TType.DOUBLE, (short)27);
-        private final double myDoubleField28;
+    private final double myDoubleField28;
     public static final int _MYDOUBLEFIELD28 = 28;
     private static final TField MY_DOUBLE_FIELD28_FIELD_DESC = new TField("myDoubleField28", TType.DOUBLE, (short)28);
-        private final double myDoubleField29;
+    private final double myDoubleField29;
     public static final int _MYDOUBLEFIELD29 = 29;
     private static final TField MY_DOUBLE_FIELD29_FIELD_DESC = new TField("myDoubleField29", TType.DOUBLE, (short)29);
-        private final double myDoubleField30;
+    private final double myDoubleField30;
     public static final int _MYDOUBLEFIELD30 = 30;
     private static final TField MY_DOUBLE_FIELD30_FIELD_DESC = new TField("myDoubleField30", TType.DOUBLE, (short)30);
     static {
-      NAMES_TO_IDS.put("msg1", 1);
-      THRIFT_NAMES_TO_IDS.put("msg1", 1);
-      FIELD_METADATA.put(1, MSG1_FIELD_DESC);
-      NAMES_TO_IDS.put("msg2", 2);
-      THRIFT_NAMES_TO_IDS.put("msg2", 2);
-      FIELD_METADATA.put(2, MSG2_FIELD_DESC);
-      NAMES_TO_IDS.put("msg3", 3);
-      THRIFT_NAMES_TO_IDS.put("msg3", 3);
-      FIELD_METADATA.put(3, MSG3_FIELD_DESC);
-      NAMES_TO_IDS.put("msg4", 4);
-      THRIFT_NAMES_TO_IDS.put("msg4", 4);
-      FIELD_METADATA.put(4, MSG4_FIELD_DESC);
-      NAMES_TO_IDS.put("msg5", 5);
-      THRIFT_NAMES_TO_IDS.put("msg5", 5);
-      FIELD_METADATA.put(5, MSG5_FIELD_DESC);
-      NAMES_TO_IDS.put("msg6", 6);
-      THRIFT_NAMES_TO_IDS.put("msg6", 6);
-      FIELD_METADATA.put(6, MSG6_FIELD_DESC);
-      NAMES_TO_IDS.put("msg7", 7);
-      THRIFT_NAMES_TO_IDS.put("msg7", 7);
-      FIELD_METADATA.put(7, MSG7_FIELD_DESC);
-      NAMES_TO_IDS.put("msg8", 8);
-      THRIFT_NAMES_TO_IDS.put("msg8", 8);
-      FIELD_METADATA.put(8, MSG8_FIELD_DESC);
-      NAMES_TO_IDS.put("msg9", 9);
-      THRIFT_NAMES_TO_IDS.put("msg9", 9);
-      FIELD_METADATA.put(9, MSG9_FIELD_DESC);
-      NAMES_TO_IDS.put("myIntField10", 10);
-      THRIFT_NAMES_TO_IDS.put("myIntField10", 10);
-      FIELD_METADATA.put(10, MY_INT_FIELD10_FIELD_DESC);
-      NAMES_TO_IDS.put("myIntField11", 11);
-      THRIFT_NAMES_TO_IDS.put("myIntField11", 11);
-      FIELD_METADATA.put(11, MY_INT_FIELD11_FIELD_DESC);
-      NAMES_TO_IDS.put("myIntField12", 12);
-      THRIFT_NAMES_TO_IDS.put("myIntField12", 12);
-      FIELD_METADATA.put(12, MY_INT_FIELD12_FIELD_DESC);
-      NAMES_TO_IDS.put("myIntField13", 13);
-      THRIFT_NAMES_TO_IDS.put("myIntField13", 13);
-      FIELD_METADATA.put(13, MY_INT_FIELD13_FIELD_DESC);
-      NAMES_TO_IDS.put("myIntField14", 14);
-      THRIFT_NAMES_TO_IDS.put("myIntField14", 14);
-      FIELD_METADATA.put(14, MY_INT_FIELD14_FIELD_DESC);
-      NAMES_TO_IDS.put("myIntField15", 15);
-      THRIFT_NAMES_TO_IDS.put("myIntField15", 15);
-      FIELD_METADATA.put(15, MY_INT_FIELD15_FIELD_DESC);
-      NAMES_TO_IDS.put("myIntField16", 16);
-      THRIFT_NAMES_TO_IDS.put("myIntField16", 16);
-      FIELD_METADATA.put(16, MY_INT_FIELD16_FIELD_DESC);
-      NAMES_TO_IDS.put("myIntField17", 17);
-      THRIFT_NAMES_TO_IDS.put("myIntField17", 17);
-      FIELD_METADATA.put(17, MY_INT_FIELD17_FIELD_DESC);
-      NAMES_TO_IDS.put("myIntField18", 18);
-      THRIFT_NAMES_TO_IDS.put("myIntField18", 18);
-      FIELD_METADATA.put(18, MY_INT_FIELD18_FIELD_DESC);
-      NAMES_TO_IDS.put("myIntField19", 19);
-      THRIFT_NAMES_TO_IDS.put("myIntField19", 19);
-      FIELD_METADATA.put(19, MY_INT_FIELD19_FIELD_DESC);
-      NAMES_TO_IDS.put("myIntField20", 20);
-      THRIFT_NAMES_TO_IDS.put("myIntField20", 20);
-      FIELD_METADATA.put(20, MY_INT_FIELD20_FIELD_DESC);
-      NAMES_TO_IDS.put("myDoubleField21", 21);
-      THRIFT_NAMES_TO_IDS.put("myDoubleField21", 21);
-      FIELD_METADATA.put(21, MY_DOUBLE_FIELD21_FIELD_DESC);
-      NAMES_TO_IDS.put("myDoubleField22", 22);
-      THRIFT_NAMES_TO_IDS.put("myDoubleField22", 22);
-      FIELD_METADATA.put(22, MY_DOUBLE_FIELD22_FIELD_DESC);
-      NAMES_TO_IDS.put("myDoubleField23", 23);
-      THRIFT_NAMES_TO_IDS.put("myDoubleField23", 23);
-      FIELD_METADATA.put(23, MY_DOUBLE_FIELD23_FIELD_DESC);
-      NAMES_TO_IDS.put("myDoubleField24", 24);
-      THRIFT_NAMES_TO_IDS.put("myDoubleField24", 24);
-      FIELD_METADATA.put(24, MY_DOUBLE_FIELD24_FIELD_DESC);
-      NAMES_TO_IDS.put("myDoubleField25", 25);
-      THRIFT_NAMES_TO_IDS.put("myDoubleField25", 25);
-      FIELD_METADATA.put(25, MY_DOUBLE_FIELD25_FIELD_DESC);
-      NAMES_TO_IDS.put("myDoubleField26", 26);
-      THRIFT_NAMES_TO_IDS.put("myDoubleField26", 26);
-      FIELD_METADATA.put(26, MY_DOUBLE_FIELD26_FIELD_DESC);
-      NAMES_TO_IDS.put("myDoubleField27", 27);
-      THRIFT_NAMES_TO_IDS.put("myDoubleField27", 27);
-      FIELD_METADATA.put(27, MY_DOUBLE_FIELD27_FIELD_DESC);
-      NAMES_TO_IDS.put("myDoubleField28", 28);
-      THRIFT_NAMES_TO_IDS.put("myDoubleField28", 28);
-      FIELD_METADATA.put(28, MY_DOUBLE_FIELD28_FIELD_DESC);
-      NAMES_TO_IDS.put("myDoubleField29", 29);
-      THRIFT_NAMES_TO_IDS.put("myDoubleField29", 29);
-      FIELD_METADATA.put(29, MY_DOUBLE_FIELD29_FIELD_DESC);
-      NAMES_TO_IDS.put("myDoubleField30", 30);
-      THRIFT_NAMES_TO_IDS.put("myDoubleField30", 30);
-      FIELD_METADATA.put(30, MY_DOUBLE_FIELD30_FIELD_DESC);
+        NAMES_TO_IDS.put("msg1", 1);
+        THRIFT_NAMES_TO_IDS.put("msg1", 1);
+        FIELD_METADATA.put(1, MSG1_FIELD_DESC);
+        NAMES_TO_IDS.put("msg2", 2);
+        THRIFT_NAMES_TO_IDS.put("msg2", 2);
+        FIELD_METADATA.put(2, MSG2_FIELD_DESC);
+        NAMES_TO_IDS.put("msg3", 3);
+        THRIFT_NAMES_TO_IDS.put("msg3", 3);
+        FIELD_METADATA.put(3, MSG3_FIELD_DESC);
+        NAMES_TO_IDS.put("msg4", 4);
+        THRIFT_NAMES_TO_IDS.put("msg4", 4);
+        FIELD_METADATA.put(4, MSG4_FIELD_DESC);
+        NAMES_TO_IDS.put("msg5", 5);
+        THRIFT_NAMES_TO_IDS.put("msg5", 5);
+        FIELD_METADATA.put(5, MSG5_FIELD_DESC);
+        NAMES_TO_IDS.put("msg6", 6);
+        THRIFT_NAMES_TO_IDS.put("msg6", 6);
+        FIELD_METADATA.put(6, MSG6_FIELD_DESC);
+        NAMES_TO_IDS.put("msg7", 7);
+        THRIFT_NAMES_TO_IDS.put("msg7", 7);
+        FIELD_METADATA.put(7, MSG7_FIELD_DESC);
+        NAMES_TO_IDS.put("msg8", 8);
+        THRIFT_NAMES_TO_IDS.put("msg8", 8);
+        FIELD_METADATA.put(8, MSG8_FIELD_DESC);
+        NAMES_TO_IDS.put("msg9", 9);
+        THRIFT_NAMES_TO_IDS.put("msg9", 9);
+        FIELD_METADATA.put(9, MSG9_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField10", 10);
+        THRIFT_NAMES_TO_IDS.put("myIntField10", 10);
+        FIELD_METADATA.put(10, MY_INT_FIELD10_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField11", 11);
+        THRIFT_NAMES_TO_IDS.put("myIntField11", 11);
+        FIELD_METADATA.put(11, MY_INT_FIELD11_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField12", 12);
+        THRIFT_NAMES_TO_IDS.put("myIntField12", 12);
+        FIELD_METADATA.put(12, MY_INT_FIELD12_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField13", 13);
+        THRIFT_NAMES_TO_IDS.put("myIntField13", 13);
+        FIELD_METADATA.put(13, MY_INT_FIELD13_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField14", 14);
+        THRIFT_NAMES_TO_IDS.put("myIntField14", 14);
+        FIELD_METADATA.put(14, MY_INT_FIELD14_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField15", 15);
+        THRIFT_NAMES_TO_IDS.put("myIntField15", 15);
+        FIELD_METADATA.put(15, MY_INT_FIELD15_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField16", 16);
+        THRIFT_NAMES_TO_IDS.put("myIntField16", 16);
+        FIELD_METADATA.put(16, MY_INT_FIELD16_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField17", 17);
+        THRIFT_NAMES_TO_IDS.put("myIntField17", 17);
+        FIELD_METADATA.put(17, MY_INT_FIELD17_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField18", 18);
+        THRIFT_NAMES_TO_IDS.put("myIntField18", 18);
+        FIELD_METADATA.put(18, MY_INT_FIELD18_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField19", 19);
+        THRIFT_NAMES_TO_IDS.put("myIntField19", 19);
+        FIELD_METADATA.put(19, MY_INT_FIELD19_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField20", 20);
+        THRIFT_NAMES_TO_IDS.put("myIntField20", 20);
+        FIELD_METADATA.put(20, MY_INT_FIELD20_FIELD_DESC);
+        NAMES_TO_IDS.put("myDoubleField21", 21);
+        THRIFT_NAMES_TO_IDS.put("myDoubleField21", 21);
+        FIELD_METADATA.put(21, MY_DOUBLE_FIELD21_FIELD_DESC);
+        NAMES_TO_IDS.put("myDoubleField22", 22);
+        THRIFT_NAMES_TO_IDS.put("myDoubleField22", 22);
+        FIELD_METADATA.put(22, MY_DOUBLE_FIELD22_FIELD_DESC);
+        NAMES_TO_IDS.put("myDoubleField23", 23);
+        THRIFT_NAMES_TO_IDS.put("myDoubleField23", 23);
+        FIELD_METADATA.put(23, MY_DOUBLE_FIELD23_FIELD_DESC);
+        NAMES_TO_IDS.put("myDoubleField24", 24);
+        THRIFT_NAMES_TO_IDS.put("myDoubleField24", 24);
+        FIELD_METADATA.put(24, MY_DOUBLE_FIELD24_FIELD_DESC);
+        NAMES_TO_IDS.put("myDoubleField25", 25);
+        THRIFT_NAMES_TO_IDS.put("myDoubleField25", 25);
+        FIELD_METADATA.put(25, MY_DOUBLE_FIELD25_FIELD_DESC);
+        NAMES_TO_IDS.put("myDoubleField26", 26);
+        THRIFT_NAMES_TO_IDS.put("myDoubleField26", 26);
+        FIELD_METADATA.put(26, MY_DOUBLE_FIELD26_FIELD_DESC);
+        NAMES_TO_IDS.put("myDoubleField27", 27);
+        THRIFT_NAMES_TO_IDS.put("myDoubleField27", 27);
+        FIELD_METADATA.put(27, MY_DOUBLE_FIELD27_FIELD_DESC);
+        NAMES_TO_IDS.put("myDoubleField28", 28);
+        THRIFT_NAMES_TO_IDS.put("myDoubleField28", 28);
+        FIELD_METADATA.put(28, MY_DOUBLE_FIELD28_FIELD_DESC);
+        NAMES_TO_IDS.put("myDoubleField29", 29);
+        THRIFT_NAMES_TO_IDS.put("myDoubleField29", 29);
+        FIELD_METADATA.put(29, MY_DOUBLE_FIELD29_FIELD_DESC);
+        NAMES_TO_IDS.put("myDoubleField30", 30);
+        THRIFT_NAMES_TO_IDS.put("myDoubleField30", 30);
+        FIELD_METADATA.put(30, MY_DOUBLE_FIELD30_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="msg1", requiredness=Requiredness.NONE)
     public String getMsg1() { return msg1; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="msg2", requiredness=Requiredness.NONE)
     public String getMsg2() { return msg2; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="msg3", requiredness=Requiredness.NONE)
     public String getMsg3() { return msg3; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="msg4", requiredness=Requiredness.NONE)
     public String getMsg4() { return msg4; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="msg5", requiredness=Requiredness.NONE)
     public String getMsg5() { return msg5; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="msg6", requiredness=Requiredness.NONE)
     public String getMsg6() { return msg6; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="msg7", requiredness=Requiredness.NONE)
     public String getMsg7() { return msg7; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="msg8", requiredness=Requiredness.NONE)
     public String getMsg8() { return msg8; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="msg9", requiredness=Requiredness.NONE)
     public String getMsg9() { return msg9; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=10, name="myIntField10", requiredness=Requiredness.NONE)
     public int getMyIntField10() { return myIntField10; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=11, name="myIntField11", requiredness=Requiredness.NONE)
     public int getMyIntField11() { return myIntField11; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=12, name="myIntField12", requiredness=Requiredness.NONE)
     public int getMyIntField12() { return myIntField12; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=13, name="myIntField13", requiredness=Requiredness.NONE)
     public int getMyIntField13() { return myIntField13; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=14, name="myIntField14", requiredness=Requiredness.NONE)
     public int getMyIntField14() { return myIntField14; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=15, name="myIntField15", requiredness=Requiredness.NONE)
     public int getMyIntField15() { return myIntField15; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=16, name="myIntField16", requiredness=Requiredness.NONE)
     public int getMyIntField16() { return myIntField16; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=17, name="myIntField17", requiredness=Requiredness.NONE)
     public int getMyIntField17() { return myIntField17; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=18, name="myIntField18", requiredness=Requiredness.NONE)
     public int getMyIntField18() { return myIntField18; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=19, name="myIntField19", requiredness=Requiredness.NONE)
     public int getMyIntField19() { return myIntField19; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=20, name="myIntField20", requiredness=Requiredness.NONE)
     public int getMyIntField20() { return myIntField20; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=21, name="myDoubleField21", requiredness=Requiredness.NONE)
     public double getMyDoubleField21() { return myDoubleField21; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=22, name="myDoubleField22", requiredness=Requiredness.NONE)
     public double getMyDoubleField22() { return myDoubleField22; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=23, name="myDoubleField23", requiredness=Requiredness.NONE)
     public double getMyDoubleField23() { return myDoubleField23; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=24, name="myDoubleField24", requiredness=Requiredness.NONE)
     public double getMyDoubleField24() { return myDoubleField24; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=25, name="myDoubleField25", requiredness=Requiredness.NONE)
     public double getMyDoubleField25() { return myDoubleField25; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=26, name="myDoubleField26", requiredness=Requiredness.NONE)
     public double getMyDoubleField26() { return myDoubleField26; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=27, name="myDoubleField27", requiredness=Requiredness.NONE)
     public double getMyDoubleField27() { return myDoubleField27; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=28, name="myDoubleField28", requiredness=Requiredness.NONE)
     public double getMyDoubleField28() { return myDoubleField28; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=29, name="myDoubleField29", requiredness=Requiredness.NONE)
     public double getMyDoubleField29() { return myDoubleField29; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=30, name="myDoubleField30", requiredness=Requiredness.NONE)
     public double getMyDoubleField30() { return myDoubleField30; }
 
@@ -866,503 +808,532 @@ public final class MyNomralStruct implements com.facebook.thrift.payload.ThriftS
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(msg1);
-            _hashCode = 31 * _hashCode + Objects.hashCode(msg2);
-            _hashCode = 31 * _hashCode + Objects.hashCode(msg3);
-            _hashCode = 31 * _hashCode + Objects.hashCode(msg4);
-            _hashCode = 31 * _hashCode + Objects.hashCode(msg5);
-            _hashCode = 31 * _hashCode + Objects.hashCode(msg6);
-            _hashCode = 31 * _hashCode + Objects.hashCode(msg7);
-            _hashCode = 31 * _hashCode + Objects.hashCode(msg8);
-            _hashCode = 31 * _hashCode + Objects.hashCode(msg9);
-            _hashCode = 31 * _hashCode + Integer.hashCode(myIntField10);
-            _hashCode = 31 * _hashCode + Integer.hashCode(myIntField11);
-            _hashCode = 31 * _hashCode + Integer.hashCode(myIntField12);
-            _hashCode = 31 * _hashCode + Integer.hashCode(myIntField13);
-            _hashCode = 31 * _hashCode + Integer.hashCode(myIntField14);
-            _hashCode = 31 * _hashCode + Integer.hashCode(myIntField15);
-            _hashCode = 31 * _hashCode + Integer.hashCode(myIntField16);
-            _hashCode = 31 * _hashCode + Integer.hashCode(myIntField17);
-            _hashCode = 31 * _hashCode + Integer.hashCode(myIntField18);
-            _hashCode = 31 * _hashCode + Integer.hashCode(myIntField19);
-            _hashCode = 31 * _hashCode + Integer.hashCode(myIntField20);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField21);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField22);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField23);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField24);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField25);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField26);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField27);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField28);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField29);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField30);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(msg2);
+        _hashCode = 31 * _hashCode + Objects.hashCode(msg3);
+        _hashCode = 31 * _hashCode + Objects.hashCode(msg4);
+        _hashCode = 31 * _hashCode + Objects.hashCode(msg5);
+        _hashCode = 31 * _hashCode + Objects.hashCode(msg6);
+        _hashCode = 31 * _hashCode + Objects.hashCode(msg7);
+        _hashCode = 31 * _hashCode + Objects.hashCode(msg8);
+        _hashCode = 31 * _hashCode + Objects.hashCode(msg9);
+        _hashCode = 31 * _hashCode + Integer.hashCode(myIntField10);
+        _hashCode = 31 * _hashCode + Integer.hashCode(myIntField11);
+        _hashCode = 31 * _hashCode + Integer.hashCode(myIntField12);
+        _hashCode = 31 * _hashCode + Integer.hashCode(myIntField13);
+        _hashCode = 31 * _hashCode + Integer.hashCode(myIntField14);
+        _hashCode = 31 * _hashCode + Integer.hashCode(myIntField15);
+        _hashCode = 31 * _hashCode + Integer.hashCode(myIntField16);
+        _hashCode = 31 * _hashCode + Integer.hashCode(myIntField17);
+        _hashCode = 31 * _hashCode + Integer.hashCode(myIntField18);
+        _hashCode = 31 * _hashCode + Integer.hashCode(myIntField19);
+        _hashCode = 31 * _hashCode + Integer.hashCode(myIntField20);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField21);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField22);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField23);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField24);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField25);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField26);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField27);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField28);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField29);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField30);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyNomralStruct> asReader() {
       return MyNomralStruct::read0;
     }
 
     public static MyNomralStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(MyNomralStruct.NAMES_TO_IDS, MyNomralStruct.THRIFT_NAMES_TO_IDS, MyNomralStruct.FIELD_METADATA);
-      MyNomralStruct.Builder builder = new MyNomralStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MSG1:
-          if (__field.type == TType.STRING) {
-            String msg1 = oprot.readString();
-            builder.setMsg1(msg1);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MSG2:
-          if (__field.type == TType.STRING) {
-            String msg2 = oprot.readString();
-            builder.setMsg2(msg2);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MSG3:
-          if (__field.type == TType.STRING) {
-            String msg3 = oprot.readString();
-            builder.setMsg3(msg3);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MSG4:
-          if (__field.type == TType.STRING) {
-            String msg4 = oprot.readString();
-            builder.setMsg4(msg4);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MSG5:
-          if (__field.type == TType.STRING) {
-            String msg5 = oprot.readString();
-            builder.setMsg5(msg5);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MSG6:
-          if (__field.type == TType.STRING) {
-            String msg6 = oprot.readString();
-            builder.setMsg6(msg6);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MSG7:
-          if (__field.type == TType.STRING) {
-            String msg7 = oprot.readString();
-            builder.setMsg7(msg7);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MSG8:
-          if (__field.type == TType.STRING) {
-            String msg8 = oprot.readString();
-            builder.setMsg8(msg8);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MSG9:
-          if (__field.type == TType.STRING) {
-            String msg9 = oprot.readString();
-            builder.setMsg9(msg9);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYINTFIELD10:
-          if (__field.type == TType.I32) {
-            int myIntField10 = oprot.readI32();
-            builder.setMyIntField10(myIntField10);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYINTFIELD11:
-          if (__field.type == TType.I32) {
-            int myIntField11 = oprot.readI32();
-            builder.setMyIntField11(myIntField11);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYINTFIELD12:
-          if (__field.type == TType.I32) {
-            int myIntField12 = oprot.readI32();
-            builder.setMyIntField12(myIntField12);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYINTFIELD13:
-          if (__field.type == TType.I32) {
-            int myIntField13 = oprot.readI32();
-            builder.setMyIntField13(myIntField13);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYINTFIELD14:
-          if (__field.type == TType.I32) {
-            int myIntField14 = oprot.readI32();
-            builder.setMyIntField14(myIntField14);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYINTFIELD15:
-          if (__field.type == TType.I32) {
-            int myIntField15 = oprot.readI32();
-            builder.setMyIntField15(myIntField15);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYINTFIELD16:
-          if (__field.type == TType.I32) {
-            int myIntField16 = oprot.readI32();
-            builder.setMyIntField16(myIntField16);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYINTFIELD17:
-          if (__field.type == TType.I32) {
-            int myIntField17 = oprot.readI32();
-            builder.setMyIntField17(myIntField17);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYINTFIELD18:
-          if (__field.type == TType.I32) {
-            int myIntField18 = oprot.readI32();
-            builder.setMyIntField18(myIntField18);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYINTFIELD19:
-          if (__field.type == TType.I32) {
-            int myIntField19 = oprot.readI32();
-            builder.setMyIntField19(myIntField19);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYINTFIELD20:
-          if (__field.type == TType.I32) {
-            int myIntField20 = oprot.readI32();
-            builder.setMyIntField20(myIntField20);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLEFIELD21:
-          if (__field.type == TType.DOUBLE) {
-            double myDoubleField21 = oprot.readDouble();
-            builder.setMyDoubleField21(myDoubleField21);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLEFIELD22:
-          if (__field.type == TType.DOUBLE) {
-            double myDoubleField22 = oprot.readDouble();
-            builder.setMyDoubleField22(myDoubleField22);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLEFIELD23:
-          if (__field.type == TType.DOUBLE) {
-            double myDoubleField23 = oprot.readDouble();
-            builder.setMyDoubleField23(myDoubleField23);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLEFIELD24:
-          if (__field.type == TType.DOUBLE) {
-            double myDoubleField24 = oprot.readDouble();
-            builder.setMyDoubleField24(myDoubleField24);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLEFIELD25:
-          if (__field.type == TType.DOUBLE) {
-            double myDoubleField25 = oprot.readDouble();
-            builder.setMyDoubleField25(myDoubleField25);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLEFIELD26:
-          if (__field.type == TType.DOUBLE) {
-            double myDoubleField26 = oprot.readDouble();
-            builder.setMyDoubleField26(myDoubleField26);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLEFIELD27:
-          if (__field.type == TType.DOUBLE) {
-            double myDoubleField27 = oprot.readDouble();
-            builder.setMyDoubleField27(myDoubleField27);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLEFIELD28:
-          if (__field.type == TType.DOUBLE) {
-            double myDoubleField28 = oprot.readDouble();
-            builder.setMyDoubleField28(myDoubleField28);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLEFIELD29:
-          if (__field.type == TType.DOUBLE) {
-            double myDoubleField29 = oprot.readDouble();
-            builder.setMyDoubleField29(myDoubleField29);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLEFIELD30:
-          if (__field.type == TType.DOUBLE) {
-            double myDoubleField30 = oprot.readDouble();
-            builder.setMyDoubleField30(myDoubleField30);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(MyNomralStruct.NAMES_TO_IDS, MyNomralStruct.THRIFT_NAMES_TO_IDS, MyNomralStruct.FIELD_METADATA);
+        MyNomralStruct.Builder builder = new MyNomralStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MSG1:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMsg1(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MSG2:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMsg2(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MSG3:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMsg3(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MSG4:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMsg4(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MSG5:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMsg5(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MSG6:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMsg6(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MSG7:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMsg7(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MSG8:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMsg8(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MSG9:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMsg9(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYINTFIELD10:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMyIntField10(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYINTFIELD11:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMyIntField11(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYINTFIELD12:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMyIntField12(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYINTFIELD13:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMyIntField13(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYINTFIELD14:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMyIntField14(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYINTFIELD15:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMyIntField15(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYINTFIELD16:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMyIntField16(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYINTFIELD17:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMyIntField17(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYINTFIELD18:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMyIntField18(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYINTFIELD19:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMyIntField19(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYINTFIELD20:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMyIntField20(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYDOUBLEFIELD21:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDoubleField21(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYDOUBLEFIELD22:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDoubleField22(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYDOUBLEFIELD23:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDoubleField23(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYDOUBLEFIELD24:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDoubleField24(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYDOUBLEFIELD25:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDoubleField25(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYDOUBLEFIELD26:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDoubleField26(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYDOUBLEFIELD27:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDoubleField27(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYDOUBLEFIELD28:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDoubleField28(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYDOUBLEFIELD29:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDoubleField29(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYDOUBLEFIELD30:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDoubleField30(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      String _iter0 = this.msg1;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MSG1_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.msg2;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MSG2_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.msg3;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MSG3_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.msg4;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MSG4_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.msg5;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MSG5_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.msg6;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MSG6_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.msg7;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MSG7_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.msg8;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MSG8_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.msg9;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MSG9_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      int _iter0 = this.myIntField10;
-      oprot.writeFieldBegin(MY_INT_FIELD10_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.myIntField11;
-      oprot.writeFieldBegin(MY_INT_FIELD11_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.myIntField12;
-      oprot.writeFieldBegin(MY_INT_FIELD12_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.myIntField13;
-      oprot.writeFieldBegin(MY_INT_FIELD13_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.myIntField14;
-      oprot.writeFieldBegin(MY_INT_FIELD14_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.myIntField15;
-      oprot.writeFieldBegin(MY_INT_FIELD15_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.myIntField16;
-      oprot.writeFieldBegin(MY_INT_FIELD16_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.myIntField17;
-      oprot.writeFieldBegin(MY_INT_FIELD17_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.myIntField18;
-      oprot.writeFieldBegin(MY_INT_FIELD18_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.myIntField19;
-      oprot.writeFieldBegin(MY_INT_FIELD19_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.myIntField20;
-      oprot.writeFieldBegin(MY_INT_FIELD20_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDoubleField21;
-      oprot.writeFieldBegin(MY_DOUBLE_FIELD21_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDoubleField22;
-      oprot.writeFieldBegin(MY_DOUBLE_FIELD22_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDoubleField23;
-      oprot.writeFieldBegin(MY_DOUBLE_FIELD23_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDoubleField24;
-      oprot.writeFieldBegin(MY_DOUBLE_FIELD24_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDoubleField25;
-      oprot.writeFieldBegin(MY_DOUBLE_FIELD25_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDoubleField26;
-      oprot.writeFieldBegin(MY_DOUBLE_FIELD26_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDoubleField27;
-      oprot.writeFieldBegin(MY_DOUBLE_FIELD27_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDoubleField28;
-      oprot.writeFieldBegin(MY_DOUBLE_FIELD28_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDoubleField29;
-      oprot.writeFieldBegin(MY_DOUBLE_FIELD29_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDoubleField30;
-      oprot.writeFieldBegin(MY_DOUBLE_FIELD30_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            String _fbthriftVar0 = this.msg1;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MSG1_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.msg2;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MSG2_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.msg3;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MSG3_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.msg4;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MSG4_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.msg5;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MSG5_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.msg6;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MSG6_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.msg7;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MSG7_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.msg8;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MSG8_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.msg9;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MSG9_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            int _fbthriftVar0 = this.myIntField10;
+            oprot.writeFieldBegin(MY_INT_FIELD10_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.myIntField11;
+            oprot.writeFieldBegin(MY_INT_FIELD11_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.myIntField12;
+            oprot.writeFieldBegin(MY_INT_FIELD12_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.myIntField13;
+            oprot.writeFieldBegin(MY_INT_FIELD13_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.myIntField14;
+            oprot.writeFieldBegin(MY_INT_FIELD14_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.myIntField15;
+            oprot.writeFieldBegin(MY_INT_FIELD15_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.myIntField16;
+            oprot.writeFieldBegin(MY_INT_FIELD16_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.myIntField17;
+            oprot.writeFieldBegin(MY_INT_FIELD17_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.myIntField18;
+            oprot.writeFieldBegin(MY_INT_FIELD18_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.myIntField19;
+            oprot.writeFieldBegin(MY_INT_FIELD19_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.myIntField20;
+            oprot.writeFieldBegin(MY_INT_FIELD20_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDoubleField21;
+            oprot.writeFieldBegin(MY_DOUBLE_FIELD21_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDoubleField22;
+            oprot.writeFieldBegin(MY_DOUBLE_FIELD22_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDoubleField23;
+            oprot.writeFieldBegin(MY_DOUBLE_FIELD23_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDoubleField24;
+            oprot.writeFieldBegin(MY_DOUBLE_FIELD24_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDoubleField25;
+            oprot.writeFieldBegin(MY_DOUBLE_FIELD25_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDoubleField26;
+            oprot.writeFieldBegin(MY_DOUBLE_FIELD26_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDoubleField27;
+            oprot.writeFieldBegin(MY_DOUBLE_FIELD27_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDoubleField28;
+            oprot.writeFieldBegin(MY_DOUBLE_FIELD28_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDoubleField29;
+            oprot.writeFieldBegin(MY_DOUBLE_FIELD29_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDoubleField30;
+            oprot.writeFieldBegin(MY_DOUBLE_FIELD30_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _MyNomralStructLazy {

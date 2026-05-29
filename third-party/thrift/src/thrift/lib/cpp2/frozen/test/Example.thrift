@@ -165,9 +165,8 @@ struct Big {
   5: string aString;
 }
 
-@thrift.DeprecatedUnvalidatedAnnotations{
-  items = {"cpp.declare_equal_to": "1", "cpp.declare_hash": "1"},
-}
+@cpp.DeclareEqualToSpecialization
+@cpp.DeclareHashSpecialization
 struct User {
   1: i64 uid;
   2: string name;

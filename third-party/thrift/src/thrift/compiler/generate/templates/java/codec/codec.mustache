@@ -37,47 +37,47 @@
 {{/let partial}}
 
 {{! Writes a Thrift value to the protocol for response/sink types.
-    Takes a type object and a depth integer (suffix for _iter variables).
-    The top-level call site passes depth=0, meaning the value is in _iter0.
+    Takes a type object and a depth integer (suffix for _fbthriftVar variables).
+    The top-level call site passes depth=0, meaning the value is in _fbthriftVar0.
     Recurses into containers, incrementing depth for each nesting level. }}
 {{#let export partial write_response_type |type depth| captures |types|}}
 {{#if type.typedef?}}{{!
 }}{{#partial write_response_type type=type.resolved depth=depth}}{{!
-}}{{#else if type.set?}}oprot.writeSetBegin(new TSet(TType.{{#partial types.ttype type=type.elem_type}}, _iter{{depth}}.size()));
-for ({{#partial types.java_type type=type.elem_type}} _iter{{(int.add depth 1)}} : _iter{{depth}}) {
+}}{{#else if type.set?}}oprot.writeSetBegin(new TSet(TType.{{#partial types.ttype type=type.elem_type}}, _fbthriftVar{{depth}}.size()));
+for ({{#partial types.java_type type=type.elem_type has_adapter_override=false}} _fbthriftVar{{(int.add depth 1)}} : _fbthriftVar{{depth}}) {
   {{#partial write_response_type type=type.elem_type depth=(int.add depth 1)}}
 }
 oprot.writeSetEnd();
-{{#else if type.list?}}oprot.writeListBegin(new TList(TType.{{#partial types.ttype type=type.elem_type}}, _iter{{depth}}.size()));
-for ({{#partial types.java_type type=type.elem_type}} _iter{{(int.add depth 1)}} : _iter{{depth}}) {
+{{#else if type.list?}}oprot.writeListBegin(new TList(TType.{{#partial types.ttype type=type.elem_type}}, _fbthriftVar{{depth}}.size()));
+for ({{#partial types.java_type type=type.elem_type has_adapter_override=false}} _fbthriftVar{{(int.add depth 1)}} : _fbthriftVar{{depth}}) {
   {{#partial write_response_type type=type.elem_type depth=(int.add depth 1)}}
 }
 oprot.writeListEnd();
-{{#else if type.map?}}oprot.writeMapBegin(new TMap(TType.{{#partial types.ttype type=type.key_type}}, TType.{{#partial types.ttype type=type.val_type}}, _iter{{depth}}.size()));
-for (Map.Entry<{{#partial types.boxed_type type=type.key_type type_isAdapterSet=false field_hasAdapter=false}}, {{#partial types.boxed_type type=type.val_type type_isAdapterSet=false field_hasAdapter=false}}> _iter{{(int.add depth 1)}} : _iter{{depth}}.entrySet()) {
+{{#else if type.map?}}oprot.writeMapBegin(new TMap(TType.{{#partial types.ttype type=type.key_type}}, TType.{{#partial types.ttype type=type.val_type}}, _fbthriftVar{{depth}}.size()));
+for (Map.Entry<{{#partial types.boxed_type type=type.key_type field_hasAdapter=false}}, {{#partial types.boxed_type type=type.val_type field_hasAdapter=false}}> _fbthriftVar{{(int.add depth 1)}} : _fbthriftVar{{depth}}.entrySet()) {
   {
-    {{#partial types.boxed_type type=type.key_type type_isAdapterSet=false field_hasAdapter=false}} _iter{{(int.add depth 2)}} = _iter{{(int.add depth 1)}}.getKey();
+    {{#partial types.boxed_type type=type.key_type field_hasAdapter=false}} _fbthriftVar{{(int.add depth 2)}} = _fbthriftVar{{(int.add depth 1)}}.getKey();
     {{#partial write_response_type type=type.key_type depth=(int.add depth 2)}}
   }
   {
-    {{#partial types.boxed_type type=type.val_type type_isAdapterSet=false field_hasAdapter=false}} _iter{{(int.add depth 2)}} = _iter{{(int.add depth 1)}}.getValue();
+    {{#partial types.boxed_type type=type.val_type field_hasAdapter=false}} _fbthriftVar{{(int.add depth 2)}} = _fbthriftVar{{(int.add depth 1)}}.getValue();
     {{#partial write_response_type type=type.val_type depth=(int.add depth 2)}}
   }
 }
 oprot.writeMapEnd();
-{{#else if type.structured?}}_iter{{depth}}.write0(oprot);
-{{#else if type.enum?}}oprot.writeI32(_iter{{depth}} == null ? 0 : _iter{{depth}}.getValue());
+{{#else if type.structured?}}_fbthriftVar{{depth}}.write0(oprot);
+{{#else if type.enum?}}oprot.writeI32(_fbthriftVar{{depth}} == null ? 0 : _fbthriftVar{{depth}}.getValue());
 {{#else if type.binary?}}{{!
-}}{{#if (string.empty? type.javaType)}}oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter{{depth}}));
-{{#else}}oprot.writeBinary(_iter{{depth}});
-{{/if (string.empty? type.javaType)}}{{!
-}}{{#else if type.string?}}oprot.writeString(_iter{{depth}});
-{{#else if type.bool?}}oprot.writeBool(_iter{{depth}});
-{{#else if type.byte?}}oprot.writeByte(_iter{{depth}});
-{{#else if type.i16?}}oprot.writeI16(_iter{{depth}});
-{{#else if type.i32?}}oprot.writeI32(_iter{{depth}});
-{{#else if type.i64?}}oprot.writeI64(_iter{{depth}});
-{{#else if type.float?}}oprot.writeFloat(_iter{{depth}});
-{{#else if type.double?}}oprot.writeDouble(_iter{{depth}});
+}}{{#if (not type.java_type?)}}oprot.writeBinary(java.nio.ByteBuffer.wrap(_fbthriftVar{{depth}}));
+{{#else}}oprot.writeBinary(_fbthriftVar{{depth}});
+{{/if (not type.java_type?)}}{{!
+}}{{#else if type.string?}}oprot.writeString(_fbthriftVar{{depth}});
+{{#else if type.bool?}}oprot.writeBool(_fbthriftVar{{depth}});
+{{#else if type.byte?}}oprot.writeByte(_fbthriftVar{{depth}});
+{{#else if type.i16?}}oprot.writeI16(_fbthriftVar{{depth}});
+{{#else if type.i32?}}oprot.writeI32(_fbthriftVar{{depth}});
+{{#else if type.i64?}}oprot.writeI64(_fbthriftVar{{depth}});
+{{#else if type.float?}}oprot.writeFloat(_fbthriftVar{{depth}});
+{{#else if type.double?}}oprot.writeDouble(_fbthriftVar{{depth}});
 {{/if type.typedef?}}{{!
 }}{{/let partial}}

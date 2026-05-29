@@ -22,8 +22,8 @@ import com.facebook.thrift.metadata.ThriftType;
 
 
 class FB303ServiceThriftMetadataHandlerExceptions {
-  static Map<String, ThriftException> getExceptions() {
-    Map<String, ThriftException> exceptions = new HashMap<>();
-    return exceptions;
-  }
+    static Map<String, ThriftException> getExceptions() {
+        Map<String, ThriftException> exceptions = new HashMap<>();
+        return exceptions;
+    }
 }

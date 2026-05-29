@@ -60,18 +60,18 @@ public class ExtendedServiceReactiveClient extends com.facebook.thrift.test.fixt
         {
           oprot.writeFieldBegin(_init_PARAM0_FIELD_DESC);
 
-          long _iter0 = param0;
+          long _fbthriftVar0 = param0;
 
-          oprot.writeI64(_iter0);
+          oprot.writeI64(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
         {
           oprot.writeFieldBegin(_init_PARAM1_FIELD_DESC);
 
-          long _iter0 = param1;
+          long _fbthriftVar0 = param1;
 
-          oprot.writeI64(_iter0);
+          oprot.writeI64(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 

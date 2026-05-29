@@ -210,13 +210,17 @@ struct BlobEncoder {
     writeRaw(reinterpret_cast<const char*>(&d), sizeof(double));
   }
 
-  void encode(const std::string& s) {
+  void encode(const std::string_view& s) {
     uint32_t sz = s.size();
     encode(sz);
     if (!sz) return;
     const size_t start = m_blob.size();
     m_blob.resize(start + sz);
     std::copy(s.data(), s.data() + sz, &m_blob[start]);
+  }
+
+  void encode(const std::string& s) {
+    encode(std::string_view(s));
   }
 
   void encode(const std::filesystem::path& p) {
@@ -666,12 +670,18 @@ struct BlobDecoder {
     advance(sizeof(double));
   }
 
-  void decode(std::string& s) {
+  void decode(std::string_view& s) {
     uint32_t sz;
     decode(sz);
     assertx(m_last - m_p >= sz);
-    s = std::string{m_p, m_p + sz};
+    s = std::string_view{(const char *)m_p, sz};
     m_p += sz;
+  }
+
+  void decode(std::string& s) {
+    std::string_view sv;
+    decode(sv);
+    s = std::string{sv};
   }
 
   void decode(std::filesystem::path& p) {
@@ -993,6 +1003,17 @@ struct BlobDecoder {
     advance(sizeof(uint32_t));
     for (size_t i = 0; i < count; ++i) f();
     return *this;
+  }
+
+  template <typename V, typename F>
+  V readArrayInitWithLazyCount(const F& f) {
+    assertx(remaining() >= sizeof(uint32_t));
+    uint32_t count;
+    std::copy(m_p, m_p + sizeof(uint32_t), (unsigned char*)&count);
+    advance(sizeof(uint32_t));
+    V ret(count);
+    for (size_t i = 0; i < count; ++i) f(ret);
+    return std::move(ret);
   }
 
   // Decode data encoded by BlobEncoder::alternate. First the data

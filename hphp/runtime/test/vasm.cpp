@@ -60,11 +60,7 @@ void test_function(Lcodegen lcodegen, Ltest ltest) {
   lcodegen(v);
 
   CGMeta meta;
-  if (arch::get() == Arch::ARM) {
-    emitARM(unit, text, meta, nullptr);
-  } else if (arch::get() == Arch::X64) {
-    emitX64(unit, text, meta, nullptr);
-  }
+  emit(unit, text, meta, nullptr);
 
   ltest((T)code);
 }

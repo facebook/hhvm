@@ -310,17 +310,11 @@ impl<'b> InstrEmitter<'b> {
         };
         let hint = BytesId::EMPTY;
         let instr = match &call.detail {
-            ir::instr::CallDetail::FCallClsMethod { log } => {
-                Opcode::FCallClsMethod(fcall_args, hint, *log)
-            }
             ir::instr::CallDetail::FCallClsMethodD { clsid, method } => {
                 Opcode::FCallClsMethodD(fcall_args, *clsid, *method)
             }
-            ir::instr::CallDetail::FCallClsMethodM { method, log } => {
-                Opcode::FCallClsMethodM(fcall_args, hint, *log, *method)
-            }
-            ir::instr::CallDetail::FCallClsMethodS { clsref } => {
-                Opcode::FCallClsMethodS(fcall_args, hint, *clsref)
+            ir::instr::CallDetail::FCallClsMethodM { method } => {
+                Opcode::FCallClsMethodM(fcall_args, hint, *method)
             }
             ir::instr::CallDetail::FCallClsMethodSD { method, clsref } => {
                 Opcode::FCallClsMethodSD(fcall_args, hint, *clsref, *method)

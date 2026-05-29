@@ -1,1 +1,4 @@
-No errors
+WARN: File "foreach_anyarray_and_dynamic.php", line 7, characters 12-13:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "foreach_anyarray_and_dynamic.php", line 4, characters 23-29:
+  This expression has type `dynamic`

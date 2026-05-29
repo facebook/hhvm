@@ -25,6 +25,7 @@
 #include <vector>
 
 #include <folly/CPortability.h>
+#include <folly/Indestructible.h>
 #include <folly/Optional.h>
 #include <folly/Range.h>
 #include <folly/Traits.h>
@@ -34,6 +35,7 @@
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/TypeClass.h>
+#include <thrift/lib/cpp2/detail/Enum.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/protocol/TableBasedForwardTypes.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
@@ -374,6 +376,29 @@ struct MapFieldExt final {
       size_t (*writer)(
           const void* context, const void* keyElem, const void* valueElem));
 };
+
+struct EnumFieldExt final {
+  st::enum_find<std::int32_t>& map;
+};
+
+template <typename EnumType>
+FOLLY_EXPORT const EnumFieldExt& getEnumFieldExt() {
+  using traits = TEnumTraits<EnumType>;
+  using metadata = typename st::enum_find<std::int32_t>::metadata;
+  static const folly::Indestructible<std::vector<std::int32_t>> values = [] {
+    std::vector<std::int32_t> v;
+    v.reserve(TEnumTraits<EnumType>::values.size());
+    for (EnumType e : TEnumTraits<EnumType>::values) {
+      v.push_back(static_cast<std::int32_t>(e));
+    }
+    return v;
+  }();
+  static const metadata meta{
+      traits::size, values->data(), TEnumTraits<EnumType>::names.data()};
+  static st::enum_find<std::int32_t> map{meta};
+  static const EnumFieldExt instance{map};
+  return instance;
+}
 
 template <typename ThriftUnion>
 void clearUnion(void* object) {

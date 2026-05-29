@@ -74,7 +74,7 @@ class KeyScheduler {
   /**
    * Derives the early secret. Must be in uninitialized state.
    */
-  virtual void deriveEarlySecret(folly::ByteRange psk);
+  virtual Status deriveEarlySecret(Error& err, folly::ByteRange psk);
 
   /**
    * Derives the master secert. Must be in early secret state.
@@ -101,7 +101,7 @@ class KeyScheduler {
   /**
    * Clears the master secret. Must be in master secret state.
    */
-  virtual void clearMasterSecret();
+  virtual Status clearMasterSecret(Error& err);
 
   /**
    * Performs a key update on the client traffic key. Traffic secrets must be

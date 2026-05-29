@@ -27,8 +27,6 @@
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/srckey.h"
 
-#include "hphp/vixl/aarch64/constants-aarch64.h"
-
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/immed.h"

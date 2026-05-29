@@ -1145,14 +1145,13 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
     }
 
     let mut output = match *detail {
-        CallDetail::FCallClsMethod { .. } => write_todo(state.fb, "FCallClsMethod")?,
         CallDetail::FCallClsMethodD { clsid, method } => {
             // C::foo()
             let target = mangle::FunctionName::method(clsid, IsStatic::Static, method);
             let this = state.load_static_class(clsid)?;
             state.fb.call_static(&target, this.into(), args)?
         }
-        CallDetail::FCallClsMethodM { method, log: _ } => {
+        CallDetail::FCallClsMethodM { method } => {
             // $c::foo()
 
             // TODO: figure out better typing. If this is coming from a
@@ -1161,7 +1160,6 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
             let obj = state.lookup_vid(detail.class(operands));
             state.fb.call_virtual(&target, obj, args)?
         }
-        CallDetail::FCallClsMethodS { .. } => state.write_todo("TODO_FCallClsMethodS")?,
         CallDetail::FCallClsMethodSD { clsref, method } => match clsref {
             SpecialClsRef::SelfCls => {
                 // self::foo() - Static call to the method in the current class.
@@ -1601,14 +1599,6 @@ fn cmp_lid(x: &LocalId, y: &LocalId) -> std::cmp::Ordering {
         (LocalId::Named(_), LocalId::Unnamed(_)) => std::cmp::Ordering::Less,
         (LocalId::Unnamed(_), LocalId::Named(_)) => std::cmp::Ordering::Greater,
         (LocalId::Unnamed(x_id), LocalId::Unnamed(y_id)) => x_id.cmp(y_id),
-    }
-}
-
-pub(crate) fn write_todo(fb: &mut textual::FuncBuilder<'_, '_>, msg: &str) -> Result<Sid> {
-    trace!("TODO: {}", msg);
-    textual_todo! {
-        let target = mangle::FunctionName::Unmangled(format!("$todo.{msg}"));
-        fb.call(&target, ())
     }
 }
 

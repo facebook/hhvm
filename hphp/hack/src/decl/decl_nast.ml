@@ -116,6 +116,7 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
       Typing_defs_flags.Fun.support_dynamic_type ft_flags;
     fe_no_auto_dynamic = false;
     fe_no_auto_likes = false;
+    fe_gated_by_feature_flag = None;
     (* Lambdas cannot be require package *)
     fe_package_requirement = RPNormal;
   }

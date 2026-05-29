@@ -105,20 +105,6 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext, func: &Func, call: &Call) ->
     let verbose = ctx.verbose;
     use instr::CallDetail;
     match &call.detail {
-        CallDetail::FCallClsMethod { log } => {
-            let dc = match *log {
-                IsLogAsDynamicCallOp::LogAsDynamicCall => " log_as_dc",
-                IsLogAsDynamicCallOp::DontLogAsDynamicCall => "",
-                _ => panic!("bad IsLogAsDynamicCallOp value"),
-            };
-            write!(
-                w,
-                "call cls_method {}::{}{}",
-                FmtVid(func, call.detail.class(&call.operands), verbose),
-                FmtVid(func, call.detail.method(&call.operands), verbose),
-                dc
-            )?;
-        }
         CallDetail::FCallClsMethodD { clsid, method } => {
             write!(
                 w,
@@ -127,26 +113,12 @@ fn print_call(w: &mut dyn Write, ctx: &FuncContext, func: &Func, call: &Call) ->
                 FmtIdentifierId(method.as_bytes_id()),
             )?;
         }
-        CallDetail::FCallClsMethodM { method, log } => {
-            let dc = match *log {
-                IsLogAsDynamicCallOp::LogAsDynamicCall => " log_as_dc",
-                IsLogAsDynamicCallOp::DontLogAsDynamicCall => "",
-                _ => panic!("bad IsLogAsDynamicCallOp value"),
-            };
-            write!(
-                w,
-                "call cls_method {}::{}{}",
-                FmtVid(func, call.detail.class(&call.operands), verbose),
-                FmtIdentifierId(method.as_bytes_id()),
-                dc
-            )?;
-        }
-        CallDetail::FCallClsMethodS { clsref } => {
+        CallDetail::FCallClsMethodM { method } => {
             write!(
                 w,
                 "call cls_method {}::{}",
-                FmtSpecialClsRef(*clsref),
-                FmtVid(func, call.detail.method(&call.operands), verbose),
+                FmtVid(func, call.detail.class(&call.operands), verbose),
+                FmtIdentifierId(method.as_bytes_id()),
             )?;
         }
         CallDetail::FCallClsMethodSD { clsref, method } => {

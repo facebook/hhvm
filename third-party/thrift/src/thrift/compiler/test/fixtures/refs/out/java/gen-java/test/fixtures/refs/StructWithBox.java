@@ -43,11 +43,11 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(StructWithBox other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -62,14 +62,14 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
 
         public String getA() { return a; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.OPTIONAL)    public Builder setB(List<Long> b) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.OPTIONAL)    public Builder setB(List<Long> b) {
             this.b = b;
             return this;
         }
 
         public List<Long> getB() { return b; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.OPTIONAL)    public Builder setC(test.fixtures.refs.StructWithRef c) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.OPTIONAL)    public Builder setC(test.fixtures.refs.StructWithRef c) {
             this.c = c;
             return this;
         }
@@ -93,6 +93,7 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -101,34 +102,29 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
     private final String a;
     public static final int _A = 1;
     private static final TField A_FIELD_DESC = new TField("a", TType.STRING, (short)1);
-        private final List<Long> b;
+    private final List<Long> b;
     public static final int _B = 2;
     private static final TField B_FIELD_DESC = new TField("b", TType.LIST, (short)2);
-        private final test.fixtures.refs.StructWithRef c;
+    private final test.fixtures.refs.StructWithRef c;
     public static final int _C = 3;
     private static final TField C_FIELD_DESC = new TField("c", TType.STRUCT, (short)3);
     static {
-      NAMES_TO_IDS.put("a", 1);
-      THRIFT_NAMES_TO_IDS.put("a", 1);
-      FIELD_METADATA.put(1, A_FIELD_DESC);
-      NAMES_TO_IDS.put("b", 2);
-      THRIFT_NAMES_TO_IDS.put("b", 2);
-      FIELD_METADATA.put(2, B_FIELD_DESC);
-      NAMES_TO_IDS.put("c", 3);
-      THRIFT_NAMES_TO_IDS.put("c", 3);
-      FIELD_METADATA.put(3, C_FIELD_DESC);
+        NAMES_TO_IDS.put("a", 1);
+        THRIFT_NAMES_TO_IDS.put("a", 1);
+        FIELD_METADATA.put(1, A_FIELD_DESC);
+        NAMES_TO_IDS.put("b", 2);
+        THRIFT_NAMES_TO_IDS.put("b", 2);
+        FIELD_METADATA.put(2, B_FIELD_DESC);
+        NAMES_TO_IDS.put("c", 3);
+        THRIFT_NAMES_TO_IDS.put("c", 3);
+        FIELD_METADATA.put(3, C_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.OPTIONAL)
     public String getA() { return a; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.OPTIONAL)
     public List<Long> getB() { return b; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.refs.StructWithRef getC() { return c; }
@@ -164,100 +160,101 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(a);
-            _hashCode = 31 * _hashCode + Objects.hashCode(b);
-            _hashCode = 31 * _hashCode + Objects.hashCode(c);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(b);
+        _hashCode = 31 * _hashCode + Objects.hashCode(c);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<StructWithBox> asReader() {
       return StructWithBox::read0;
     }
 
     public static StructWithBox read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(StructWithBox.NAMES_TO_IDS, StructWithBox.THRIFT_NAMES_TO_IDS, StructWithBox.FIELD_METADATA);
-      StructWithBox.Builder builder = new StructWithBox.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _A:
-          if (__field.type == TType.STRING) {
-            String a = oprot.readString();
-            builder.setA(a);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _B:
-          if (__field.type == TType.LIST) {
-            List<Long> b;
-                {
-                TList _list = oprot.readListBegin();
-                b = new ArrayList<Long>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    long _value1 = oprot.readI64();
-                    b.add(_value1);
+        TField __field;
+        oprot.readStructBegin(StructWithBox.NAMES_TO_IDS, StructWithBox.THRIFT_NAMES_TO_IDS, StructWithBox.FIELD_METADATA);
+        StructWithBox.Builder builder = new StructWithBox.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _A:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setA(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _B:
+                if (__field.type == TType.LIST) {
+                    List<Long> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Long>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            long _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI64();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setB(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setB(b);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _C:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.refs.StructWithRef c = test.fixtures.refs.StructWithRef.read0(oprot);
-            builder.setC(c);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            case _C:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.refs.StructWithRef _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.refs.StructWithRef.read0(oprot);
+                    builder.setC(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      String _iter0 = this.a;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(A_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Long> _iter0 = this.b;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(B_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.I64, _iter0.size()));
-            for (long _iter1 : _iter0) {
-              oprot.writeI64(_iter1);
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            String _fbthriftVar0 = this.a;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(A_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.refs.StructWithRef _iter0 = this.c;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(C_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        {
+            List<Long> _fbthriftVar0 = this.b;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(B_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.I64, _fbthriftVar0.size()));
+                for (long _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI64(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.refs.StructWithRef _fbthriftVar0 = this.c;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(C_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _StructWithBoxLazy {

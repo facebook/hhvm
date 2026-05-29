@@ -38,8 +38,8 @@ $wouldblocks = vec[
   "string",
   "",
   /* binary input */
-  b"string",
-  b"",
+  "string",
+  "",
   "\0"
 ];
 

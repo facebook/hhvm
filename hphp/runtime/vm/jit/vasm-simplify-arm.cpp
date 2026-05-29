@@ -339,6 +339,13 @@ bool simplify(Env& env, const load& inst, Vlabel b, size_t i) {
     if (inst.d == ld.d) return false;
     if (!inst.d.isGP()) return false;
     if (!ld.d.isGP()) return false;
+
+    bool hasDependentUse = false;
+    visitUses(env.unit, ld, [&](Vreg r) {
+      if (inst.d == r) hasDependentUse = true;
+    });
+    if (hasDependentUse) return false;
+
     const auto rv = is_adjacent_vptr64(inst.s, ld.s, 8, -512, 504);
     if (rv != 0) {
       return simplify_impl(env, b, i, [&] (Vout& v) {
@@ -362,6 +369,12 @@ bool simplify(Env& env, const loadl& inst, Vlabel b, size_t i) {
     if (inst.d == ld.d) return false;
     if (!inst.d.isGP()) return false;
     if (!ld.d.isGP()) return false;
+
+    bool hasDependentUse = false;
+    visitUses(env.unit, ld, [&](Vreg r) {
+      if (inst.d == r) hasDependentUse = true;
+    });
+    if (hasDependentUse) return false;
     const auto rv = is_adjacent_vptr64(inst.s, ld.s, 4, -256, 252);
     if (rv != 0) {
       return simplify_impl(env, b, i, [&] (Vout& v) {
@@ -447,7 +460,7 @@ bool simplify(Env& env, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool psimplify(Env& env, Vlabel b, size_t i) {
+bool psimplify(Env& env, const Abi& /*abi*/, Vlabel b, size_t i) {
   assertx(i <= env.unit.blocks[b].code.size());
   auto const& inst = env.unit.blocks[b].code[i];
 

@@ -540,23 +540,14 @@ fn cmp_instr_call(a: &Call, b: &Call) -> Result {
         (CallDetail::FCallCtor, CallDetail::FCallCtor)
         | (CallDetail::FCallFunc, CallDetail::FCallFunc) => {}
 
-        (CallDetail::FCallClsMethod { log: a_log },
-         CallDetail::FCallClsMethod { log: b_log }) => {
-            cmp_eq(a_log, b_log).qualified("log")?;
-        }
         (CallDetail::FCallClsMethodD { clsid: a_clsid, method: a_method },
          CallDetail::FCallClsMethodD { clsid: b_clsid, method: b_method }) => {
             cmp_eq(a_clsid, b_clsid).qualified("clsid")?;
             cmp_eq(a_method, b_method).qualified("method")?;
         }
-        (CallDetail::FCallClsMethodM { method: a_method, log: a_log },
-         CallDetail::FCallClsMethodM { method: b_method, log: b_log }) => {
+        (CallDetail::FCallClsMethodM { method: a_method },
+         CallDetail::FCallClsMethodM { method: b_method }) => {
             cmp_eq(a_method, b_method).qualified("method")?;
-            cmp_eq(a_log, b_log).qualified("log")?;
-        }
-        (CallDetail::FCallClsMethodS { clsref: a_clsref },
-         CallDetail::FCallClsMethodS { clsref: b_clsref }) => {
-            cmp_eq(a_clsref, b_clsref).qualified("clsref")?;
         }
         (CallDetail::FCallClsMethodSD { clsref: a_clsref, method: a_method },
          CallDetail::FCallClsMethodSD { clsref: b_clsref, method: b_method }) => {
@@ -581,10 +572,8 @@ fn cmp_instr_call(a: &Call, b: &Call) -> Result {
         (
             CallDetail::FCallCtor
             | CallDetail::FCallFunc
-            | CallDetail::FCallClsMethod {..}
             | CallDetail::FCallClsMethodD {..}
             | CallDetail::FCallClsMethodM {..}
-            | CallDetail::FCallClsMethodS {..}
             | CallDetail::FCallClsMethodSD {..}
             | CallDetail::FCallFuncD {..}
             | CallDetail::FCallObjMethod {..}

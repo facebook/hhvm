@@ -59,47 +59,7 @@ set(
 
 set(
   MVFST_LIBRARIES
-  mvfst_constants
-  mvfst_exception
-  mvfst_transport
-  mvfst_batch_writer
-  mvfst_client
-  mvfst_codec_types
-  mvfst_codec_decode
-  mvfst_codec_pktbuilder
-  mvfst_codec_pktrebuilder
-  mvfst_codec_packet_number_cipher
-  mvfst_codec
-  mvfst_contiguous_cursor
-  mvfst_looper
-  mvfst_buf_accessor
-  mvfst_bufutil
-  mvfst_transport_knobs
-  mvfst_events
-  mvfst_async_udp_socket
-  mvfst_cc_algo
-  mvfst_fizz_client
-  mvfst_fizz_handshake
-  mvfst_flowcontrol
-  mvfst_folly_utils
-  mvfst_handshake
-  mvfst_happyeyeballs
-  mvfst_qlogger
-  mvfst_loss
-  mvfst_observer
-  mvfst_server
-  mvfst_server_state
-  mvfst_server_async_tran
-  mvfst_state_machine
-  mvfst_state_ack_handler
-  mvfst_state_datagram_handler
-  mvfst_state_stream_functions
-  mvfst_state_pacing_functions
-  mvfst_state_functions
-  mvfst_state_simple_frame_functions
-  mvfst_state_stream
-  mvfst_transport_settings_functions
-  mvfst_xsk
+  mvfst
 )
 
 add_dependencies(bundled_mvfst ${MVFST_DEPS})

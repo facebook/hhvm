@@ -67,8 +67,7 @@ class t_exception final : public t_structured {
         return &field;
       }
     }
-    const auto* value = find_unstructured_annotation_or_null("message");
-    return value ? get_field_by_name(*value) : nullptr;
+    return nullptr;
   }
 
   ~t_exception() override;

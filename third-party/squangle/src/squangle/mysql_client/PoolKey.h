@@ -21,9 +21,11 @@ class PoolKey {
       std::shared_ptr<const ConnectionKey> conn_key,
       ConnectionOptions conn_opts)
       : connKey_(std::move(conn_key)), connOptions_(std::move(conn_opts)) {
-    options_hash_ = folly::hash::hash_range(
-        connOptions_.getAttributes().begin(),
-        connOptions_.getAttributes().end());
+    options_hash_ = folly::hash::hash_combine(
+        folly::hash::hash_range(
+            connOptions_.getAttributes().begin(),
+            connOptions_.getAttributes().end()),
+        connOptions_.isEnableTLS13());
     partial_hash_ =
         folly::hash::hash_combine(connKey_->partial_hash(), options_hash_);
     full_hash_ = folly::hash::hash_combine(connKey_->hash(), options_hash_);

@@ -46,6 +46,8 @@ THRIFT_FLAG_DEFINE_bool(enable_server_async_fd_socket, /* default = */ true);
 
 THRIFT_FLAG_DEFINE_int64(thrift_key_update_threshold, 0);
 
+THRIFT_FLAG_DEFINE_bool(thrift_release_handshake_logging, false);
+
 namespace apache::thrift {
 
 namespace detail {
@@ -187,6 +189,9 @@ void Cpp2Worker::onNewConnectionThatMayThrow(
       if (auto fizz =
               sock->getUnderlyingTransport<fizz::server::AsyncFizzServer>()) {
         fizz->setDecryptInplace(true);
+        if (THRIFT_FLAG(thrift_release_handshake_logging)) {
+          fizz->releaseHandshakeLogging();
+        }
       }
       // Use the announced protocol to determine the correct handler
       if (!nextProtocolName.empty()) {

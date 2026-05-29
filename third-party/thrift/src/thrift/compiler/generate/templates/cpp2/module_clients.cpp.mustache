@@ -22,7 +22,11 @@
 #include <thrift/lib/cpp2/gen/client_cpp.h>
 
   {{#each program.services as |service|}}
+  {{#if service.is_fast_client?}}
+{{> service_cpp/fast_client_cpp}}
+  {{#else}}
 {{> service_cpp/async_client_cpp}}
+  {{/if service.is_fast_client?}}
 
 
   {{/each}}

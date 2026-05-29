@@ -1,3 +1,11 @@
+WARN: File "private_dynamic.bad.php", line 62, characters 7-10:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "private_dynamic.bad.php", line 61, characters 25-31:
+  This expression has type `dynamic`
+WARN: File "private_dynamic.bad.php", line 63, characters 12-14:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "private_dynamic.bad.php", line 61, characters 25-31:
+  This expression has type `dynamic`
 ERROR: File "private_dynamic.bad.php", line 13, characters 12-16:
 Method  `setItems` in class `C` is not dynamically callable. (Typing[4426])
   File "private_dynamic.bad.php", line 13, characters 12-16:

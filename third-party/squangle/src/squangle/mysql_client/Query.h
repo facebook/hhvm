@@ -260,31 +260,94 @@ class Query {
     return conn.escapeString(unescaped);
   }
 
-  static folly::fbstring renderMultiQuery(
+  static folly::fbstring renderMultiQueryFb(
       const InternalConnection* conn,
       const std::vector<Query>& queries,
       std::string_view prefix = "");
 
-  // render either with the parameters to the constructor or specified
-  // ones.
-  folly::fbstring render(const InternalConnection* conn) const;
-  folly::fbstring render(
+  static std::string renderMultiQueryStr(
+      const InternalConnection* conn,
+      const std::vector<Query>& queries,
+      std::string_view prefix = "");
+
+  // Backwards-compatible alias
+  static folly::fbstring renderMultiQuery(
+      const InternalConnection* conn,
+      const std::vector<Query>& queries,
+      std::string_view prefix = "") {
+    return renderMultiQueryFb(conn, queries, prefix);
+  }
+
+  // -- Fb variants (return folly::fbstring) --
+
+  // Render with connection-based escaping, suitable for sending to MySQL.
+  folly::fbstring renderFb(const InternalConnection* conn) const;
+  folly::fbstring renderFb(
       const InternalConnection* conn,
       const std::vector<QueryArgument>& params) const;
 
-  // render either with the parameters to the constructor or specified
-  // ones.  This is mainly for testing as it does not properly escape
-  // the MySQL strings.
-  folly::fbstring renderInsecure() const;
-  folly::fbstring renderInsecure(
+  // Render without escaping. Mainly for testing.
+  folly::fbstring renderInsecureFb() const;
+  folly::fbstring renderInsecureFb(
+      const std::vector<QueryArgument>& params) const;
+  // Render without escaping, truncated to at most maxSize characters.
+  // When truncation occurs, truncationIndicator is appended (its length is
+  // accounted for within maxSize). Pass "" to suppress the indicator.
+  folly::fbstring renderInsecureFb(
+      size_t maxSize,
+      std::string_view truncationIndicator = "...") const;
+
+  // Render with basic escaping. Not suitable for MySQL, but good for logging.
+  folly::fbstring renderPartiallyEscapedFb() const;
+  folly::fbstring renderPartiallyEscapedFb(
+      size_t maxSize,
+      std::string_view truncationIndicator = "...") const;
+
+  // -- Str variants (return std::string) --
+
+  std::string renderStr(const InternalConnection* conn) const;
+  std::string renderStr(
+      const InternalConnection* conn,
       const std::vector<QueryArgument>& params) const;
 
-  // Render with basic query escaping. Not suitable for generating a query to
-  // be sent to MySQL, but it should be good enough for logging.
-  folly::fbstring renderPartiallyEscaped() const;
+  std::string renderInsecureStr() const;
+  std::string renderInsecureStr(const std::vector<QueryArgument>& params) const;
+  std::string renderInsecureStr(
+      size_t maxSize,
+      std::string_view truncationIndicator = "...") const;
+
+  std::string renderPartiallyEscapedStr() const;
+  std::string renderPartiallyEscapedStr(
+      size_t maxSize,
+      std::string_view truncationIndicator = "...") const;
+
+  // -- Backwards-compatible aliases (delegate to Fb variants) --
+
+  folly::fbstring render(const InternalConnection* conn) const {
+    return renderFb(conn);
+  }
+  folly::fbstring render(
+      const InternalConnection* conn,
+      const std::vector<QueryArgument>& params) const {
+    return renderFb(conn, params);
+  }
+  folly::fbstring renderInsecure() const {
+    return renderInsecureFb();
+  }
+  folly::fbstring renderInsecure(
+      const std::vector<QueryArgument>& params) const {
+    return renderInsecureFb(params);
+  }
+  folly::fbstring renderPartiallyEscaped() const {
+    return renderPartiallyEscapedFb();
+  }
 
   folly::StringPiece getQueryFormat() const {
     return query_text_.getQuery();
+  }
+
+  const std::vector<QueryArgument>& getParams() const {
+    return params_;
   }
 
  private:
@@ -342,7 +405,7 @@ class Query {
     QueryText(QueryText&& other) noexcept {
       *this = std::move(other);
     }
-    QueryText& operator=(QueryText&& other) {
+    QueryText& operator=(QueryText&& other) noexcept {
       if (this == &other) {
         return *this;
       }
@@ -399,31 +462,6 @@ class Query {
   void allowUnsafeEvilQueries() {
     unsafe_query_ = true;
   }
-
-  using EscapeFunc =
-      std::function<void(folly::fbstring*, const folly::fbstring&)>;
-
-  folly::fbstring renderInternal(const EscapeFunc& escapeFunc) const;
-  folly::fbstring renderInternal(
-      const EscapeFunc& escapeFunc,
-      const std::vector<QueryArgument>& params) const;
-
-  // append an int, float, or string to the specified buffer
-  void appendValue(
-      folly::fbstring* s,
-      size_t offset,
-      char type,
-      const QueryArgument& d,
-      const EscapeFunc& escapeFunc) const;
-
-  // append a dynamic::object param as key=value joined with sep;
-  // values are passed to appendValue
-  void appendValueClauses(
-      folly::fbstring* ret,
-      size_t* idx,
-      const char* sep,
-      const QueryArgument& param,
-      const EscapeFunc& escapeFunc) const;
 
   template <typename Arg, typename... Args>
   void unpack(Arg&& arg, Args&&... args);

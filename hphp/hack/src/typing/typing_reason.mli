@@ -431,8 +431,6 @@ val flow_param_hint : hint:locl_phase t_ -> param:locl_phase t_ -> locl_phase t_
 
 val flow_elab : from:locl_phase t_ -> into:locl_phase t_ -> locl_phase t_
 
-val flow_unsafe_cast : from:locl_phase t_ -> into:locl_phase t_ -> locl_phase t_
-
 val solved :
   Tvid.t -> solution:locl_phase t_ -> in_:locl_phase t_ -> locl_phase t_
 
@@ -662,8 +660,6 @@ module Predicates : sig
   val is_hint : t -> bool
 
   val is_captured_like : t -> bool
-
-  val went_through_unsafe_cast : t -> bool
 
   val unpack_expr_dep_type_opt :
     t -> (t * Pos_or_decl.t * expr_dep_type_reason) option

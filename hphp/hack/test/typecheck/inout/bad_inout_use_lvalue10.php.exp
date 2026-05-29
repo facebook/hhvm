@@ -1,3 +1,11 @@
+WARN: File "bad_inout_use_lvalue10.php", line 4, characters 16-17:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "bad_inout_use_lvalue10.php", line 3, characters 23-29:
+  This expression has type `dynamic`
+WARN: File "bad_inout_use_lvalue10.php", line 4, characters 16-20:
+Appending to a value of type `dynamic` (Warn[12040])
+  File "bad_inout_use_lvalue10.php", line 4, characters 16-20:
+  This expression has type `dynamic`
 ERROR: File "bad_inout_use_lvalue10.php", line 4, characters 16-22:
 You cannot decorate this argument as `inout` (Parsing[1002])
 ERROR: File "bad_inout_use_lvalue10.php", line 4, characters 16-20:

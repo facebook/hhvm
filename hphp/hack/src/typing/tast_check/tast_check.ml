@@ -36,7 +36,6 @@ let select_logger_handlers ctx =
 let warning_checks =
   [
     (module Is_check : Handler.Warning.S);
-    (module Sketchy_null_check);
     (module Disjoint_types);
     (module Cast_non_primitive);
     (module Truthiness_test);
@@ -45,6 +44,7 @@ let warning_checks =
     (module Redundant_nullsafe);
     (module Set_or_keyset_array_get);
     (module Tany_check);
+    (module Dynamic_call_check);
   ]
 
 let visitor ctx =
@@ -133,3 +133,28 @@ let visitor ctx =
 let program ctx = (visitor ctx)#go ctx
 
 let def ctx = (visitor ctx)#go_def ctx
+
+(** A visitor that only runs warning checks (no error-producing checks).
+    Used to run warning checks on the dynamic TAST for trusted/untrusted
+    intersection. *)
+let warning_visitor ctx =
+  let tcopt = Provider_context.get_tcopt ctx in
+  let handlers =
+    if TypecheckerOptions.skip_tast_checks tcopt then
+      []
+    else
+      List.filter_map warning_checks ~f:(fun (module M) ->
+          if
+            List.exists
+              M.error_codes
+              ~f:(Typing_warning_utils.code_is_enabled tcopt)
+          then
+            Some (M.handler ~as_lint:false)
+          else
+            None)
+  in
+  Tast_visitor.iter_with ~catch_handler_exceptions:true handlers
+
+let warning_def ctx = (warning_visitor ctx)#go_def ctx
+
+let warning_program ctx = (warning_visitor ctx)#go ctx

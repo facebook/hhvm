@@ -15,7 +15,9 @@ namespace fizz {
 
 class Exporter {
  public:
-  static Buf getExportedKeyingMaterial(
+  static Status getExportedKeyingMaterial(
+      Buf& ret,
+      Error& err,
       const Factory& factory,
       CipherSuite cipher,
       folly::ByteRange exporterMaster,

@@ -37,9 +37,7 @@ class RendezvousHashFunc {
       const std::vector<folly::StringPiece>& endpoints,
       const folly::dynamic& json);
 
-  size_t operator()(folly::StringPiece key) const {
-    return *begin(key);
-  }
+  size_t operator()(folly::StringPiece key) const;
 
   RendezvousIterator begin(folly::StringPiece key) const;
 

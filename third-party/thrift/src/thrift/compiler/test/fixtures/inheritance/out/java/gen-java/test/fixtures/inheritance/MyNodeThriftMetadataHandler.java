@@ -26,74 +26,74 @@ import com.facebook.thrift.metadata.ThriftType;
 
 public class MyNodeThriftMetadataHandler implements com.facebook.thrift.server.ThriftMetadataHandler {
 
-  private static void addFunctions_0(List<ThriftFunction> functions) {
-        {
-          List<ThriftField> args = new ArrayList<>();
+    private static void addFunctions_0(List<ThriftFunction> functions) {
+            {
+              List<ThriftField> args = new ArrayList<>();
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("do_mid")
-              .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-  }
+              functions.add(new ThriftFunction.Builder()
+                  .setName("do_mid")
+                  .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+    }
 
-  private static final ThriftService THRIFT_SERVICE;
+    private static final ThriftService THRIFT_SERVICE;
 
-  private static final com.facebook.thrift.server.ThriftMetadataHandler PARENT_HANDLER =
-      new test.fixtures.inheritance.MyRootThriftMetadataHandler();
+    private static final com.facebook.thrift.server.ThriftMetadataHandler PARENT_HANDLER =
+        new test.fixtures.inheritance.MyRootThriftMetadataHandler();
 
-  static {
-    List<ThriftFunction> functions = new ArrayList<>();
-    addFunctions_0(functions);
-    THRIFT_SERVICE = new ThriftService.Builder()
-        .setName("test.fixtures.inheritance.MyNode")
-        .setParent("test.fixtures.inheritance.MyRoot")
-        .setFunctions(functions)
-        .build();
-  }
+    static {
+        List<ThriftFunction> functions = new ArrayList<>();
+        addFunctions_0(functions);
+        THRIFT_SERVICE = new ThriftService.Builder()
+            .setName("test.fixtures.inheritance.MyNode")
+            .setParent("test.fixtures.inheritance.MyRoot")
+            .setFunctions(functions)
+            .build();
+    }
 
-  @Override
-  public String getName() {
-    return "MyNode";
-  }
+    @Override
+    public String getName() {
+        return "MyNode";
+    }
 
-  @Override
-  public String getFullyQualifiedName() {
-    return "test.fixtures.inheritance.MyNode";
-  }
+    @Override
+    public String getFullyQualifiedName() {
+        return "test.fixtures.inheritance.MyNode";
+    }
 
-  @Override
-  public ThriftService getThriftService() {
-    return THRIFT_SERVICE;
-  }
+    @Override
+    public ThriftService getThriftService() {
+        return THRIFT_SERVICE;
+    }
 
-  @Override
-  public String getParentServiceName() {
-    return "test.fixtures.inheritance.MyRoot";
-  }
+    @Override
+    public String getParentServiceName() {
+        return "test.fixtures.inheritance.MyRoot";
+    }
 
-  @Override
-  public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
-    return PARENT_HANDLER;
-  }
+    @Override
+    public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
+        return PARENT_HANDLER;
+    }
 
-  @Override
-  public Map<String, ThriftEnum> getEnums() {
-    return MyNodeThriftMetadataHandlerEnums.getEnums();
-  }
+    @Override
+    public Map<String, ThriftEnum> getEnums() {
+        return MyNodeThriftMetadataHandlerEnums.getEnums();
+    }
 
-  @Override
-  public Map<String, ThriftStruct> getStructs() {
-    return MyNodeThriftMetadataHandlerStructs.getStructs();
-  }
+    @Override
+    public Map<String, ThriftStruct> getStructs() {
+        return MyNodeThriftMetadataHandlerStructs.getStructs();
+    }
 
-  @Override
-  public Map<String, ThriftException> getExceptions() {
-    return MyNodeThriftMetadataHandlerExceptions.getExceptions();
-  }
+    @Override
+    public Map<String, ThriftException> getExceptions() {
+        return MyNodeThriftMetadataHandlerExceptions.getExceptions();
+    }
 }

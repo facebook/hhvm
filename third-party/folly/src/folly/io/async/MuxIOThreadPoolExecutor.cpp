@@ -103,6 +103,7 @@ MuxIOThreadPoolExecutor::MuxIOThreadPoolExecutor(
 MuxIOThreadPoolExecutor::~MuxIOThreadPoolExecutor() {
   deregisterThreadPoolExecutor(this);
   stop();
+  destroyTaskObservers();
 }
 
 void MuxIOThreadPoolExecutor::add(Func func) {
@@ -112,7 +113,11 @@ void MuxIOThreadPoolExecutor::add(Func func) {
 void MuxIOThreadPoolExecutor::add(
     Func func, std::chrono::milliseconds expiration, Func expireCallback) {
   auto& evbState = pickEvbState();
-  auto task = Task(std::move(func), expiration, std::move(expireCallback));
+  auto task = Task(
+      std::move(func),
+      folly::RequestContext::saveContext(),
+      expiration,
+      std::move(expireCallback));
   registerTaskEnqueue(task);
   auto wrappedFunc = [this, &evbState, task = std::move(task)]() mutable {
     const auto& ioThread = *thisThread_;

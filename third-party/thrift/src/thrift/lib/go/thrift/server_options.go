@@ -42,35 +42,40 @@ type ConnContextFunc func(context.Context, net.Conn) context.Context
 
 // serverConfig is config needed to run a thrift server
 type serverConfig struct {
-	numWorkers     int
-	log            func(format string, args ...any)
-	connContext    ConnContextFunc
-	serverStats    *stats.ServerStats
-	processorStats map[string]*stats.TimingSeries
-	serverObserver ServerObserver
-	maxRequests    int64
-	loadFn         func() uint32
+	numWorkers      int
+	log             func(format string, args ...any)
+	userConnContext ConnContextFunc
+	serverStats     *stats.ServerStats
+	processorStats  map[string]*stats.TimingSeries
+	serverObserver  ServerObserver
+	maxRequests     int64
+	loadFn          func() uint32
 }
 
-func defaultServerConfig() *serverConfig {
+func newServerConfig(options ...ServerOption) *serverConfig {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
-	return &serverConfig{
+	config := &serverConfig{
 		numWorkers:     GoroutinePerRequest,
 		log:            logger.Printf,
-		connContext:    withConnInfo,
 		processorStats: make(map[string]*stats.TimingSeries),
 		serverStats:    stats.NewServerStats(stats.NewTimingConfig(defaultStatsPeriod), defaultStatsPeriod),
 		serverObserver: newNoopServerObserver(),
 		maxRequests:    0, // disable
 	}
-}
 
-func newServerConfig(options ...ServerOption) *serverConfig {
-	config := defaultServerConfig()
 	for _, option := range options {
 		option(config)
 	}
 	return config
+}
+
+// connContext returns a context enriched with connection info and any user-provided context modifications.
+func (c *serverConfig) connContext(ctx context.Context, conn net.Conn) context.Context {
+	ctx = withConnInfo(ctx, conn)
+	if c.userConnContext != nil {
+		ctx = c.userConnContext(ctx, conn)
+	}
+	return ctx
 }
 
 // WithNumWorkers sets the number of concurrent workers for the thrift server.
@@ -88,13 +93,7 @@ func WithNumWorkers(num int) ServerOption {
 // that specifies a function that modifies the context passed to procedures per connection.
 func WithConnContext(connContext ConnContextFunc) ServerOption {
 	return func(config *serverConfig) {
-		if connContext == nil {
-			return
-		}
-		config.connContext = func(ctx context.Context, conn net.Conn) context.Context {
-			ctx = withConnInfo(ctx, conn)
-			return connContext(ctx, conn)
-		}
+		config.userConnContext = connContext
 	}
 }
 

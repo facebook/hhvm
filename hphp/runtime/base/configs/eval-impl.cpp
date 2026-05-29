@@ -36,7 +36,7 @@ void EvalLoader::CheckSymLinkPostProcess(bool& val) {
 }
 
 bool EvalLoader::KeepProfDataDefault() {
-  return arch::any(Arch::ARM);
+  return arch::any<arch::ARM>();
 }
 
 bool EvalLoader::DisableSmallAllocatorDefault() {
@@ -79,7 +79,7 @@ bool EvalLoader::DumpTCAnnotationsForAllTransDefault() {
 
 uint32_t EvalLoader::MaxHotTextHugePagesDefault() {
   if (!Cfg::Server::Mode) return 0;
-  return arch::get() == Arch::ARM ? 12 : 8;
+  return arch::any<arch::ARM>() ? 12 : 8;
 }
 
 bool EvalLoader::FileBackedColdArenaDefault() {
@@ -136,7 +136,7 @@ void EvalLoader::EmbeddedDataFallbackPathPostProcess(std::string& path) {
 
 void EvalLoader::FastMethodInterceptPostProcess(bool& val) {
   // Fast method intercept is currently unsupported on ARM.
-  if (arch::get() == Arch::ARM) val = false;
+  if (arch::any<arch::ARM>()) val = false;
 }
 
 void EvalLoader::FastMethodInterceptNoAsyncOptPostProcess(bool& val) {

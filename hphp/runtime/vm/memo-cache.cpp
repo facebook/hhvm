@@ -158,6 +158,29 @@ struct GenericHeader {
 
 ////////////////////////////////////////////////////////////
 
+template <typename S>
+size_t hashStorage(const S& s) {
+  // If the key has no elements (which can happen in generic caches), just use
+  // the hash for the header.
+  if (s.size() <= 0) return s.header().startHash();
+  // Otherwise, combine the hash for the first element and the header.
+  auto hash = s.header().startHash(s.elem(0).hash(s.isString(0)));
+  if (s.size() > 1) {
+    // And then combine it with the rest of the hashes for the other key
+    // elements.
+    for (size_t i = 1; i < s.size(); ++i) {
+      hash = combineHashes(hash, s.elem(i).hash(s.isString(i)));
+    }
+    // Need to do the bit mix explicitly.
+    hash = hash_int64(hash);
+  } else if (s.header().needsMixing() || !s.isString(0)) {
+    // Single element, and the element itself is combined with another key,
+    // or the element is an int, so needs a final mix.
+    hash = hash_int64(hash);
+  }
+  return std::uint32_t(hash) | (std::size_t(hash) << 32);
+}
+
 // Fixed-size storage specialization. N is the number of keys, and H is the
 // header to use. We derive from H to make use of the empty-base class
 // optimization.
@@ -171,6 +194,7 @@ template <int N, typename H> struct FixedStorage : private H {
   FixedStorage(FixedStorage&& o) noexcept
     : Header{std::move(o)}
     , stringTags{std::move(o.stringTags)}
+    , cachedHash_{o.cachedHash_}
   {
     o.moved();
     o.stringTags.reset();
@@ -224,6 +248,7 @@ template <int N, typename H> struct FixedStorage : private H {
   // are strings.
   std::array<KeyElem, N> elems;
   std::bitset<N> stringTags;
+  size_t cachedHash_ = 0;
 };
 
 // Header specialization for a non-fixed number of keys. Used for generic memo
@@ -244,6 +269,7 @@ struct UnboundStorage {
   UnboundStorage(UnboundStorage&& o) noexcept
     : header_{std::move(o.header_)}
     , data{o.data}
+    , cachedHash_{o.cachedHash_}
   {
     o.header_.moved();
     o.data = nullptr;
@@ -299,6 +325,7 @@ struct UnboundStorage {
     }
   };
   Pair* data;
+  size_t cachedHash_ = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -351,32 +378,7 @@ template <typename S> struct Key {
     return proxy.equals(storage);
   }
 
-  size_t hash() const {
-    // If the key has no elements (which can happen in generic caches), just use
-    // the hash for the header.
-    if (storage.size() <= 0) return storage.header().startHash();
-    // Otherwise, combine the hash for the first element and the header.
-    auto hash = storage.header().startHash(
-      storage.elem(0).hash(storage.isString(0))
-    );
-    if (storage.size() > 1) {
-      // And then combine it with the rest of the hashes for the other key
-      // elements.
-      for (size_t i = 1; i < storage.size(); ++i) {
-        hash = combineHashes(
-          hash,
-          storage.elem(i).hash(storage.isString(i))
-        );
-      }
-      // Need to do the bit mix explicitly.
-      hash = hash_int64(hash);
-    } else if (storage.header().needsMixing() || !storage.isString(0)) {
-      // Single element, and the element itself is combined with another key,
-      // or the element is an int, so needs a final mix.
-      hash = hash_int64(hash);
-    }
-    return std::uint32_t(hash) | (std::size_t(hash) << 32);
-  }
+  size_t hash() const { return storage.cachedHash_; }
 
   FuncId getFuncId() const {
     // storage contains header, which contains funcId in all shared caches
@@ -463,6 +465,7 @@ struct KeyProxy {
       }
       storage.elem(i).i = keys[i].m_data.num;
     }
+    storage.cachedHash_ = hashStorage(storage);
   }
 };
 
@@ -501,6 +504,7 @@ struct KeyProxyWithTypes {
     assertx(storage.size() == Size);
     if (S::HasStringTags) storage.setStringTags(makeBitset());
     initStorageRec<0>(storage);
+    storage.cachedHash_ = hashStorage(storage);
   }
 
   template <int N> size_t hashRec(size_t hash) const {
@@ -590,6 +594,7 @@ template <bool IsStr> struct KeyProxyWithTypes<IsStr> {
     assertx(storage.size() == 1);
     if (S::HasStringTags) storage.setStringTags(makeBitset());
     initStorageRec<0>(storage);
+    storage.cachedHash_ = hashStorage(storage);
   }
 
   template <int N> size_t hashRec(size_t hash) const {

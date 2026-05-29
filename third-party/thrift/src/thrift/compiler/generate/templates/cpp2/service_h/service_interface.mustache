@@ -47,10 +47,10 @@ class ServiceHandler<{{service.qualified_name}}> : {{#if (object.notnull? servic
   typedef {{service.qualified_name}}AsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
-  {{#if service.program.has_schema?}}
+  {{#if service.program.has_schema_const?}}
   std::optional<schema::DefinitionsSchema> getServiceSchema() override;
   std::vector<folly::not_null<const syntax_graph::ServiceNode*>> getServiceSchemaNodes() override;
-  {{/if service.program.has_schema?}}
+  {{/if service.program.has_schema_const?}}
   {{#if (object.eq? null service.extends)}}
   bool isThriftGenerated() const override final { return true; }
   {{/if (object.eq? null service.extends)}}

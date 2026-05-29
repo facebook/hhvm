@@ -6,7 +6,7 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_deprecated_terse_writes_metadata.h"
+#include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_deprecated_terse_writes_types.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
 
 namespace apache {

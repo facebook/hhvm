@@ -6,9 +6,9 @@
 
 /// Service definitions for `BiDiService`.
 pub mod bi_di_service {
+
     #[derive(Clone, Debug)]
     pub enum SimpleStreamExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -72,7 +72,6 @@ pub mod bi_di_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -82,7 +81,6 @@ pub mod bi_di_service {
 
     #[derive(Clone, Debug)]
     pub enum SimpleSinkExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -146,7 +144,6 @@ pub mod bi_di_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -209,7 +206,6 @@ pub mod bi_di_service {
 
     #[derive(Clone, Debug)]
     pub enum SimpleExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -288,7 +284,6 @@ pub mod bi_di_service {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -298,7 +293,6 @@ pub mod bi_di_service {
 
     #[derive(Clone, Debug)]
     pub enum ResponseStreamExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -362,7 +356,6 @@ pub mod bi_di_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -372,7 +365,6 @@ pub mod bi_di_service {
 
     #[derive(Clone, Debug)]
     pub enum ResponseSinkExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -436,7 +428,6 @@ pub mod bi_di_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -499,7 +490,6 @@ pub mod bi_di_service {
 
     #[derive(Clone, Debug)]
     pub enum ResponseExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -579,7 +569,6 @@ pub mod bi_di_service {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();

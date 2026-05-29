@@ -389,6 +389,7 @@
  (libraries
   typing_modules
   typing_packages
+  typing_error_utils
   typing_utils)
  (preprocess
   (pps ppx_deriving.std)))

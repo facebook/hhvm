@@ -16,8 +16,11 @@
 
 #include "hphp/runtime/vm/jit/align.h"
 
+#ifdef __aarch64__
 #include "hphp/runtime/vm/jit/align-arm.h"
+#else
 #include "hphp/runtime/vm/jit/align-x64.h"
+#endif
 
 #include "hphp/util/arch.h"
 

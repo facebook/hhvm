@@ -37,7 +37,6 @@
 #include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
-#include <thrift/lib/cpp2/type/TypeRegistry.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 #include <thrift/lib/thrift/gen-cpp2/standard_types.h>
 #include <thrift/test/gen-cpp2/adapter_types.h>
@@ -1536,8 +1535,7 @@ TEST(ToAnyTest, simple) {
   bar.field_4()->field_1() = 42;
   bar.field_4()->field_2() = "Everything";
 
-  auto any = type::TypeRegistry::generated().store(
-      bar, type::StandardProtocol::Compact);
+  auto any = type::AnyData::toAny<type::struct_t<Bar>>(bar);
   auto serialized = CompactSerializer::serialize<folly::IOBufQueue>(bar).move();
   Value value;
   value.ensure_object() =

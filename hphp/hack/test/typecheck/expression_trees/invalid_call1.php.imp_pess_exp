@@ -1,0 +1,8 @@
+WARN: File "invalid_call1.php", line 15, characters 5-18:
+Value of type `dynamic` called as a function (Warn[12039])
+  File "invalid_call1.php", line 15, characters 5-18:
+  This expression has type `dynamic`, the result of calling a `dynamic` type as a function
+ERROR: File "invalid_call1.php", line 15, characters 5-18:
+Expression trees only support static method calls on `static` and named classes. (Parsing[1002])
+ERROR: File "invalid_call1.php", line 15, characters 5-6:
+Variable `$y` is undefined, or not always defined. (Naming[2050])

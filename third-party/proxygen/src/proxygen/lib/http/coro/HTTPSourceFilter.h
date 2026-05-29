@@ -59,15 +59,16 @@ class HTTPSourceFilter : public HTTPSource {
     return readBodyEventImpl(max, /*deleteOnDone=*/true);
   }
 
-  void stopReading(
-      folly::Optional<const HTTPErrorCode> error = folly::none) override;
+  void stopReading(folly::Optional<const HTTPErrorCode> error =
+                       folly::none) noexcept override;
 
-  [[nodiscard]] folly::Optional<uint64_t> getStreamID() const override {
+  [[nodiscard]] folly::Optional<uint64_t> getStreamID()
+      const noexcept override {
     XCHECK(source_);
     return source_->getStreamID();
   }
 
-  void setReadTimeout(std::chrono::milliseconds timeout) override {
+  void setReadTimeout(std::chrono::milliseconds timeout) noexcept override {
     XCHECK(source_);
     source_->setReadTimeout(timeout);
   }

@@ -9,7 +9,6 @@ pub(crate) use crate as types;
 
 pub mod services;
 
-
 pub(crate) mod r#impl {
     use ::ref_cast::RefCast;
 

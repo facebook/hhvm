@@ -31,7 +31,7 @@ interface IPureMemoizeParam extends IMemoizeParam {
  * TODO: enforce SingletonMemoizeParam in some way in runtime/typechecker
 */
 interface UNSAFESingletonMemoizeParam extends IMemoizeParam {
-  public function getInstanceKey(): string;
+  public function getInstanceKey()[]: string;
 }
 
 /**

@@ -30,7 +30,7 @@ namespace wangle {
  * Callbacks related to SSL session cache
  *
  * This class contains three methods, setSSLSession() to store existing SSL
- * session data to cache, getSSLSession() to retreive cached session
+ * session data to cache, getSSLSession() to retrieve cached session
  * data in cache, and removeSSLSession() to remove session data from cache.
  */
 class SSLSessionCallbacks {

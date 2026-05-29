@@ -37,6 +37,8 @@ THRIFT_FLAG_DEFINE_bool(allow_set_thread_manager_resource_pools, true);
 THRIFT_FLAG_DEFINE_bool(
     allow_resource_pools_set_thread_manager_from_executor, true);
 
+THRIFT_FLAG_DEFINE_bool(thrift_server_compress_response_on_cpu, false);
+
 FOLLY_GFLAGS_DEFINE_bool(
     thrift_use_token_bucket_concurrency_controller,
     false,

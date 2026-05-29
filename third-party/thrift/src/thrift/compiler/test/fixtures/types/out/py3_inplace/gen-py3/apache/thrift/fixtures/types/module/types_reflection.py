@@ -1236,11 +1236,3 @@ def get_reflection__Map__i32_i32() -> __MapSpec:
         value_kind=__NumberType.I32,
     )
 
-def get_reflection__Map__i32_string() -> __MapSpec:
-    return __MapSpec._fbthrift_create(
-        key=int,
-        key_kind=__NumberType.I32,
-        value=str,
-        value_kind=__NumberType.NOT_A_NUMBER,
-    )
-

@@ -62,9 +62,9 @@ public class BoxServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        test.fixtures.interactions.ShouldBeBoxed _iter0 = (test.fixtures.interactions.ShouldBeBoxed)_r;
+        test.fixtures.interactions.ShouldBeBoxed _fbthriftVar0 = (test.fixtures.interactions.ShouldBeBoxed)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.STRUCT_FIELD);
-        _iter0.write0(oprot);
+        _fbthriftVar0.write0(oprot);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();

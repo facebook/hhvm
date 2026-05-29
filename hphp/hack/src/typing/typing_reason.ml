@@ -270,7 +270,6 @@ type flow_kind =
   | Flow_return_expr
   | Flow_instantiate of string
   | Flow_elab
-  | Flow_unsafe_cast
 [@@deriving hash]
 
 let flow_kind_to_json = function
@@ -285,7 +284,6 @@ let flow_kind_to_json = function
   | Flow_return_expr -> `String "Flow_return_expr"
   | Flow_instantiate str -> `Assoc [("Flow_instantiate", `String str)]
   | Flow_elab -> `String "Flow_elab"
-  | Flow_unsafe_cast -> `String "Flow_unsafe_cast"
 (* ~~ Witnesses ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
 (** Witness the reason for a type during typing using the position of a hint or
@@ -1492,12 +1490,6 @@ type _ t_ =
   (* -- Used when applying substitutions { var -> type_ } -- *)
   | No_reason : 'phase t_
   (* -- Core flow constructors -- *)
-  | Wrapped : {
-      flags: int;
-      origin: locl_phase t_;
-      reason: locl_phase t_;
-    }
-      -> locl_phase t_
   | From_witness_locl : witness_locl -> locl_phase t_
       (** Lift a typing-time witness into a reason   *)
   | Lower_bound : {
@@ -1596,7 +1588,6 @@ type _ t_ =
 let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
   match r with
-  | Wrapped { reason; _ } -> to_raw_pos reason
   | No_reason
   | Invalid
   | Missing_field ->
@@ -1636,8 +1627,7 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Expr_dep_type (t, _, _) -> to_raw_pos t
   | Typeconst (t, _, _, _) -> to_raw_pos t
 
-let rec get_pri : type ph. ph t_ -> int = function
-  | Wrapped { reason; _ } -> get_pri reason
+let get_pri : type ph. ph t_ -> int = function
   | No_reason -> 0
   | From_witness_locl witness -> get_pri_witness_locl witness
   | From_witness_decl _ -> 2
@@ -1656,13 +1646,6 @@ let rec map_pos :
     type ph.
     (Pos.t -> Pos.t) -> (Pos_or_decl.t -> Pos_or_decl.t) -> ph t_ -> ph t_ =
  fun pos pos_or_decl -> function
-  | Wrapped { flags; origin; reason } ->
-    Wrapped
-      {
-        flags;
-        origin = map_pos pos pos_or_decl origin;
-        reason = map_pos pos pos_or_decl reason;
-      }
   | No_reason -> No_reason
   | Missing_field -> Missing_field
   | From_witness_locl witness ->
@@ -1751,8 +1734,7 @@ let rec map_pos :
         in_ = map_pos pos pos_or_decl in_;
       }
 
-let rec to_constructor_string : type ph. ph t_ -> string = function
-  | Wrapped { reason; _ } -> to_constructor_string reason
+let to_constructor_string : type ph. ph t_ -> string = function
   | No_reason -> "Rnone"
   | Invalid -> "Rinvalid"
   | Missing_field -> "Rmissing_field"
@@ -1797,7 +1779,6 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
     Format.pp_print_string fmt @@ to_constructor_string r
   | From_witness_locl witness -> pp_witness_locl fmt witness
   | From_witness_decl witness -> pp_witness_decl fmt witness
-  | Wrapped { reason; _ } -> pp_t_ fmt reason
   | _ ->
     Format.pp_print_string fmt @@ to_constructor_string r;
     Format.fprintf fmt "@ (@[";
@@ -1806,8 +1787,7 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
     | Invalid
     | Missing_field
     | From_witness_locl _
-    | From_witness_decl _
-    | Wrapped _ ->
+    | From_witness_decl _ ->
       failwith "already matched"
     | Typeconst (r1, (p, s1), (lazy s2), r2) ->
       pp_t_ fmt r1;
@@ -1945,7 +1925,6 @@ let rec to_json_help : type a. a t_ -> int option -> Yojson.Safe.t * int option
   else begin
     let fuel_opt = Option.map fuel_opt ~f:(fun fuel -> fuel - 1) in
     match t with
-    | Wrapped { reason; _ } -> to_json_help reason fuel_opt
     | No_reason -> (`Assoc [("No_reason", `List [])], fuel_opt)
     | Missing_field -> (`Assoc [("Missing_field", `List [])], fuel_opt)
     | Invalid -> (`Assoc [("Invalid", `List [])], fuel_opt)
@@ -2154,149 +2133,7 @@ let to_json_full : type a. a t_ -> Yojson.Safe.t =
 
 let to_pos : type ph. ph t_ -> Pos_or_decl.t = (fun r -> to_raw_pos r)
 
-(* ~~ Wrapped helpers ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-let flag_origin_is_none = 0x1
-
-let flag_origin_is_hint = 0x2
-
-let flag_origin_is_instantiate = 0x4
-
-let flag_origin_is_opaque_type_from_module = 0x8
-
-let flag_origin_is_captured_like = 0x10
-
-let flag_contains_tyvar = 0x20
-
-let flag_went_through_unsafe_cast = 0x40
-
-let flag_is_missing_type_in_hierarchy = 0x80
-
-let has_mth_in_into into =
-  match into with
-  | From_witness_decl (Missing_type_in_hierarchy _) -> true
-  | Flow { from = From_witness_decl (Missing_type_in_hierarchy _); _ } -> true
-  | _ -> false
-
-let rec extract_origin = function
-  | Wrapped { origin; _ } -> origin
-  | Def (pos, t) -> Def (pos, extract_origin t)
-  | r -> r
-
-let rec extract_flags = function
-  | Wrapped { flags; _ } -> flags
-  | Type_access (Typeconst (r, _, _, _), _) -> extract_flags r
-  | _ -> 0
-
-let unwrap = function
-  | Wrapped { reason; _ } -> reason
-  | r -> r
-
-let is_tyvar_witness = function
-  | From_witness_locl (Type_variable _ | Type_variable_generics _) -> true
-  | _ -> false
-
-let rec compute_origin_flags origin =
-  match origin with
-  | Def (_, t) -> compute_origin_flags t
-  | No_reason -> flag_origin_is_none
-  | From_witness_decl (Hint _) -> flag_origin_is_hint
-  | From_witness_decl (Missing_type_in_hierarchy _) ->
-    flag_is_missing_type_in_hierarchy
-  | Instantiate _ -> flag_origin_is_instantiate
-  | Opaque_type_from_module _ -> flag_origin_is_opaque_type_from_module
-  | From_witness_locl (Captured_like _) -> flag_origin_is_captured_like
-  | _ -> 0
-
-(* Bounded traversal of the raw reason chain to detect whether it contains
-   a [Missing_type_in_hierarchy] witness. Returns [flag_is_missing_type_in_hierarchy]
-   if found, 0 otherwise. When encountering a [Wrapped] node inside the chain,
-   we check its flag directly (O(1)) rather than re-traversing. *)
-let compute_mth_flag reason =
-  let rec aux depth r =
-    if depth > 10 then
-      0
-    else
-      match r with
-      | Wrapped { flags; _ } -> flags land flag_is_missing_type_in_hierarchy
-      | Flow { kind = Flow_elab; into; _ } when has_mth_in_into into ->
-        flag_is_missing_type_in_hierarchy
-      | Type_access (Typeconst (Flow { kind = Flow_elab; into; _ }, _, _, _), _)
-        when has_mth_in_into into ->
-        flag_is_missing_type_in_hierarchy
-      | Type_access
-          ( Typeconst
-              ( Wrapped { reason = Flow { kind = Flow_elab; into; _ }; _ },
-                _,
-                _,
-                _ ),
-            _ )
-        when has_mth_in_into into ->
-        flag_is_missing_type_in_hierarchy
-      | From_witness_decl (Missing_type_in_hierarchy _) ->
-        flag_is_missing_type_in_hierarchy
-      | Type_access (Typeconst (r, _, _, _), _) -> aux (depth + 1) r
-      | Instantiate { type_ = t; _ }
-      | Flow { from = t; _ }
-      | Lower_bound { bound = t; _ }
-      | Axiom { next = t; _ }
-      | Prj_both { sub_prj = t; _ }
-      | Prj_one { part = t; _ }
-      | Def (_, t) ->
-        aux (depth + 1) t
-      | Solved { solution; in_; _ } ->
-        aux (depth + 1) solution lor aux (depth + 1) in_
-      | _ -> 0
-  in
-  aux 0 reason
-
-let make_wrapped ~origin ~reason ~from_flags ~into_flags =
-  let inherited_flags =
-    from_flags
-    lor into_flags
-    land (flag_contains_tyvar
-         lor flag_went_through_unsafe_cast
-         lor flag_is_missing_type_in_hierarchy)
-  in
-  let tyvar_flag =
-    (* Note: OCaml, weirdly, lets you use `lor` and `land` as though they were
-       infix operators. However, they seem to behave like functions so they have
-       equal precedenc. The code below should be read as
-
-       (from_flags lor into_flags) land (flag_contains_tyvar <> 0)
-
-       Unfortunately, the formatter removes unused parens. For the benefit of
-       readers, human and AI, here is an example of this behavior
-
-       let x = 1 lor 1 land 0    (* evaluates to 0 *)
-       let y = (1 lor 1) land 0  (* evaluates to 1 *)
-       let z = 1 lor (1 land 0)  (* evaluates to 1 *)
-       let u = 0 land (1 lor 1)  (* evaluates to 0 *)
-       let v = 0 land 1 lor 1    (* evaluates to 1 *)
-    *)
-    if
-      is_tyvar_witness origin
-      || from_flags lor into_flags land flag_contains_tyvar <> 0
-    then
-      flag_contains_tyvar
-    else
-      0
-  in
-
-  let origin_flags = compute_origin_flags origin in
-  let mth_flag =
-    if
-      inherited_flags lor origin_flags land flag_is_missing_type_in_hierarchy
-      <> 0
-    then
-      0
-    else
-      compute_mth_flag reason
-  in
-  let flags = origin_flags lor tyvar_flag lor inherited_flags lor mth_flag in
-  Wrapped { flags; origin; reason }
-
 let rec flow_contains_tyvar = function
-  | Wrapped { flags; _ } -> flags land flag_contains_tyvar <> 0
   | Flow
       {
         from = From_witness_locl (Type_variable_generics _ | Type_variable _);
@@ -2313,23 +2150,7 @@ let reverse_flow t =
       aux into ~k:(fun into -> k @@ Flow { from = into; into = from; kind })
     | t -> k t
   in
-  match t with
-  | Wrapped { reason; _ } ->
-    let reversed = aux ~k:(fun r -> r) reason in
-    (* Recompute origin from reversed chain — extract_origin on raw reason
-       follows from/bound/next/sub_prj/part path *)
-    let rec extract_origin_from_raw = function
-      | Flow { from; _ } -> extract_origin_from_raw from
-      | Lower_bound { bound; _ } -> extract_origin_from_raw bound
-      | Axiom { next; _ } -> extract_origin_from_raw next
-      | Prj_both { sub_prj; _ } -> extract_origin_from_raw sub_prj
-      | Prj_one { part; _ } -> extract_origin_from_raw part
-      | Def (pos, t) -> Def (pos, extract_origin_from_raw t)
-      | r -> r
-    in
-    let origin = extract_origin_from_raw reversed in
-    make_wrapped ~origin ~reason:reversed ~from_flags:0 ~into_flags:0
-  | _ -> aux ~k:(fun r -> r) t
+  aux ~k:(fun r -> r) t
 
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
@@ -2341,7 +2162,6 @@ let rec to_string_help :
  fun prefix solutions r ->
   let p = to_pos r in
   match r with
-  | Wrapped { reason; _ } -> to_string_help prefix solutions reason
   | No_reason -> [(p, prefix)]
   | Missing_field -> [(p, prefix)]
   | Invalid -> [(p, prefix)]
@@ -2366,7 +2186,6 @@ let rec to_string_help :
     | Flow_array_get ->
       to_string_help prefix solutions into
       @ to_string_help "  from this definition" solutions from
-    | Flow_unsafe_cast -> to_string_help prefix solutions into
     | _ -> to_string_help prefix solutions from)
   (* otherwise, follow the flow until we reach the type variable *)
   | Flow { from; into; kind } ->
@@ -2439,7 +2258,6 @@ let rec to_string_help :
   | Arith_ret_float (_, r, s) ->
     let rec find_last reason =
       match reason with
-      | Wrapped { reason; _ } -> find_last reason
       | Flow { from = r; _ }
       | Arith_ret_float (_, r, _) ->
         find_last r
@@ -2460,7 +2278,6 @@ let rec to_string_help :
   | Arith_ret_num (_, r, s) ->
     let rec find_last reason =
       match reason with
-      | Wrapped { reason; _ } -> find_last reason
       | Flow { from = r; _ }
       | Arith_ret_num (_, r, _) ->
         find_last r
@@ -2865,31 +2682,11 @@ module Constructors = struct
 
   let join_point p = from_witness_locl @@ Join_point p
 
-  let rec flow_raw ~from ~into ~kind =
+  let rec flow ~from ~into ~kind =
     match (from, into) with
     | (Flow { from; into = into_l; kind = kind_l }, _) ->
-      Flow { from; into = flow_raw ~from:into_l ~into ~kind; kind = kind_l }
+      Flow { from; into = flow ~from:into_l ~into ~kind; kind = kind_l }
     | _ -> Flow { from; kind; into }
-
-  let flow ~from ~into ~kind =
-    let origin = extract_origin from in
-    let from_flags =
-      let f = extract_flags from in
-      match kind with
-      | Flow_unsafe_cast -> f lor flag_went_through_unsafe_cast
-      | _ -> f
-    in
-    let into_flags =
-      let f = extract_flags into in
-      match kind with
-      | Flow_elab when has_mth_in_into (unwrap into) ->
-        f lor flag_is_missing_type_in_hierarchy
-      | _ -> f
-    in
-    let from_raw = unwrap from in
-    let into_raw = unwrap into in
-    let reason = flow_raw ~from:from_raw ~into:into_raw ~kind in
-    make_wrapped ~origin ~reason ~from_flags ~into_flags
 
   let flow_array_get ~def ~access =
     flow ~from:def ~into:access ~kind:Flow_array_get
@@ -2915,113 +2712,27 @@ module Constructors = struct
   let flow_param_hint ~hint ~param =
     flow ~from:hint ~into:param ~kind:Flow_param_hint
 
-  let solved of_ ~solution ~in_ =
-    let in_ =
-      match in_ with
-      | Wrapped { flags; origin; reason } ->
-        let is_solved_tyvar =
-          match origin with
-          | From_witness_locl
-              ( Type_variable (_, id)
-              | Type_variable_generics (_, _, _, id)
-              | Type_variable_error (_, id) ) ->
-            Tvid.equal id of_
-          | _ -> false
-        in
-        if is_solved_tyvar then
-          let origin = extract_origin solution in
-          let flags =
-            compute_origin_flags origin
-            lor (flags
-                land (flag_contains_tyvar
-                     lor flag_went_through_unsafe_cast
-                     lor flag_is_missing_type_in_hierarchy))
-          in
-          Wrapped { flags; origin; reason }
-        else
-          in_
-      | _ -> in_
-    in
-    Solved { solution; of_; in_ }
+  let solved of_ ~solution ~in_ = Solved { solution; of_; in_ }
 
   let axiom_extends ~child ~ancestor =
-    let origin = extract_origin ancestor in
-    let reason =
-      Axiom { axiom = Extends; prev = unwrap child; next = unwrap ancestor }
-    in
-    make_wrapped
-      ~origin
-      ~reason
-      ~from_flags:(extract_flags ancestor)
-      ~into_flags:(extract_flags child)
+    Axiom { axiom = Extends; prev = child; next = ancestor }
 
   let axiom_upper_bound ~bound ~of_ ~name =
-    let origin = extract_origin bound in
-    let reason =
-      Axiom { axiom = Upper_bound name; prev = unwrap of_; next = unwrap bound }
-    in
-    make_wrapped
-      ~origin
-      ~reason
-      ~from_flags:(extract_flags bound)
-      ~into_flags:(extract_flags of_)
+    Axiom { axiom = Upper_bound name; prev = of_; next = bound }
 
   let axiom_lower_bound ~bound ~of_ =
-    let origin = extract_origin bound in
-    let reason =
-      Axiom { axiom = Lower_bound; prev = unwrap of_; next = unwrap bound }
-    in
-    make_wrapped
-      ~origin
-      ~reason
-      ~from_flags:(extract_flags bound)
-      ~into_flags:(extract_flags of_)
+    Axiom { axiom = Lower_bound; prev = of_; next = bound }
 
-  let trans_lower_bound ~bound ~of_ =
-    let origin = extract_origin bound in
-    let reason = Lower_bound { bound = unwrap bound; of_ = unwrap of_ } in
-    make_wrapped
-      ~origin
-      ~reason
-      ~from_flags:(extract_flags bound)
-      ~into_flags:(extract_flags of_)
+  let trans_lower_bound ~bound ~of_ = Lower_bound { bound; of_ }
 
   let definition def of_ = Def (def, of_)
 
   (* -- Symmetric projections -- *)
   let prj_symm_co ~sub ~sub_prj ~super prj =
-    let origin = extract_origin sub_prj in
-    let reason =
-      Prj_both
-        {
-          sub_prj = unwrap sub_prj;
-          prj;
-          sub = unwrap sub;
-          super = unwrap super;
-        }
-    in
-    make_wrapped
-      ~origin
-      ~reason
-      ~from_flags:(extract_flags sub_prj lor extract_flags sub)
-      ~into_flags:(extract_flags super)
+    Prj_both { sub_prj; prj; sub; super }
 
   let prj_symm_contra ~sub ~super ~super_prj prj =
-    let origin = extract_origin super_prj in
-    let reason =
-      Prj_both
-        {
-          sub_prj = unwrap super_prj;
-          prj;
-          sub = unwrap sub;
-          super = unwrap super;
-        }
-    in
-    make_wrapped
-      ~origin
-      ~reason
-      ~from_flags:(extract_flags super_prj lor extract_flags sub)
-      ~into_flags:(extract_flags super)
+    Prj_both { sub_prj = super_prj; prj; sub; super }
 
   let prj_ctor_co ~sub ~sub_prj ~super ctor_kind nm idx is_invariant =
     let var =
@@ -3079,24 +2790,10 @@ module Constructors = struct
   (* -- Asymmetric projections -- *)
 
   let prj_asymm_sub ~sub ~sub_prj prj =
-    let origin = extract_origin sub_prj in
-    let reason = Prj_one { part = unwrap sub_prj; prj; whole = unwrap sub } in
-    make_wrapped
-      ~origin
-      ~reason
-      ~from_flags:(extract_flags sub_prj)
-      ~into_flags:(extract_flags sub)
+    Prj_one { part = sub_prj; prj; whole = sub }
 
   let prj_asymm_super ~super ~super_prj prj =
-    let origin = extract_origin super_prj in
-    let reason =
-      Prj_one { part = unwrap super_prj; prj; whole = unwrap super }
-    in
-    make_wrapped
-      ~origin
-      ~reason
-      ~from_flags:(extract_flags super_prj)
-      ~into_flags:(extract_flags super)
+    Prj_one { part = super_prj; prj; whole = super }
 
   let prj_contains_sub ~sub ~sub_prj =
     prj_asymm_sub ~sub ~sub_prj Prj_asymm_contains
@@ -3145,8 +2842,6 @@ module Constructors = struct
 
   let flow_elab ~from ~into = flow ~from ~into ~kind:Flow_elab
 
-  let flow_unsafe_cast ~from ~into = flow ~from ~into ~kind:Flow_unsafe_cast
-
   let missing_type_in_hierarchy pos =
     from_witness_decl @@ Missing_type_in_hierarchy pos
 
@@ -3161,13 +2856,6 @@ module Visitor = struct
     object (this)
       method on_reason r =
         match r with
-        | Wrapped { flags; origin; reason } ->
-          Wrapped
-            {
-              flags;
-              origin = this#on_reason origin;
-              reason = this#on_reason reason;
-            }
         | Type_access (r, l) ->
           Type_access
             ( this#on_reason r,
@@ -3245,7 +2933,6 @@ module Predicates = struct
   let on_outermost t f =
     let rec aux t ~solutions =
       match t with
-      | Wrapped { origin; _ } -> aux origin ~solutions
       | Solved { solution; of_; in_ = t } ->
         let solutions = Tvid.Map.add of_ solution solutions in
         aux t ~solutions
@@ -3267,38 +2954,28 @@ module Predicates = struct
     aux t ~solutions:Tvid.Map.empty
 
   let is_opaque_type_from_module r =
-    match r with
-    | Wrapped { flags; _ } ->
-      flags land flag_origin_is_opaque_type_from_module <> 0
-    | _ ->
-      let p r =
-        match r with
-        | Opaque_type_from_module _ -> true
-        | _ -> false
-      in
-      on_outermost r p
+    let p r =
+      match r with
+      | Opaque_type_from_module _ -> true
+      | _ -> false
+    in
+    on_outermost r p
 
   let is_none r =
-    match r with
-    | Wrapped { flags; _ } -> flags land flag_origin_is_none <> 0
-    | _ ->
-      let p r =
-        match r with
-        | No_reason -> true
-        | _ -> false
-      in
-      on_outermost r p
+    let p r =
+      match r with
+      | No_reason -> true
+      | _ -> false
+    in
+    on_outermost r p
 
   let is_instantiate r =
-    match r with
-    | Wrapped { flags; _ } -> flags land flag_origin_is_instantiate <> 0
-    | _ ->
-      let p r =
-        match r with
-        | Instantiate _ -> true
-        | _ -> false
-      in
-      on_outermost r p
+    let p r =
+      match r with
+      | Instantiate _ -> true
+      | _ -> false
+    in
+    on_outermost r p
 
   let is_enforced_type r =
     let p r =
@@ -3309,34 +2986,23 @@ module Predicates = struct
     on_outermost r p
 
   let is_captured_like r =
-    match r with
-    | Wrapped { flags; _ } -> flags land flag_origin_is_captured_like <> 0
-    | _ ->
-      let p r =
-        match r with
-        | From_witness_locl (Captured_like _) -> true
-        | _ -> false
-      in
-      on_outermost r p
-
-  let went_through_unsafe_cast r =
-    match r with
-    | Wrapped { flags; _ } -> flags land flag_went_through_unsafe_cast <> 0
-    | _ -> false
+    let p r =
+      match r with
+      | From_witness_locl (Captured_like _) -> true
+      | _ -> false
+    in
+    on_outermost r p
 
   (* Should be used only for diagnostics *)
   let outer_constructor_string r = on_outermost r to_constructor_string
 
   let is_hint r =
-    match r with
-    | Wrapped { flags; _ } -> flags land flag_origin_is_hint <> 0
-    | _ ->
-      let p r =
-        match r with
-        | From_witness_decl (Hint _) -> true
-        | _ -> false
-      in
-      on_outermost r p
+    let p r =
+      match r with
+      | From_witness_decl (Hint _) -> true
+      | _ -> false
+    in
+    on_outermost r p
 
   let unpack_expr_dep_type_opt r =
     let f r =
@@ -3370,45 +3036,50 @@ module Predicates = struct
     in
     on_outermost r f
 
+  (* This predicate needs to go under [Instantiate] so we can't use
+     [on_outermost].
+
+     Due to [flow] restructuring, [Flow_elab] is always the outermost [Flow]
+     (since it is applied first at localization). [Missing_type_in_hierarchy]
+     appears as either [into] directly (before any subsequent flows) or as
+     the first [from] in the [into] chain (after subsequent flows have been
+     appended by [flow] restructuring).
+
+     The [Flow_elab] may be wrapped in a small number of [Instantiate],
+     [Solved], etc. nodes, so we search with a depth limit to avoid
+     traversing arbitrarily large reason trees. *)
   let is_missing_type_in_hierarchy t =
-    match t with
-    | Wrapped { flags; _ } -> flags land flag_is_missing_type_in_hierarchy <> 0
-    | _ ->
-      let rec aux depth t =
-        if depth > 10 then
-          false
-        else
-          match t with
-          | Wrapped { flags; _ } ->
-            flags land flag_is_missing_type_in_hierarchy <> 0
-          | Type_access
-              (Typeconst (Flow { kind = Flow_elab; into; _ }, _, _, _), _)
-            when has_mth_in_into into ->
-            true
-          | Type_access
-              ( Typeconst
-                  ( Wrapped { reason = Flow { kind = Flow_elab; into; _ }; _ },
-                    _,
-                    _,
-                    _ ),
-                _ )
-            when has_mth_in_into into ->
-            true
-          | Flow { kind = Flow_elab; into; _ } when has_mth_in_into into -> true
-          | From_witness_decl (Missing_type_in_hierarchy _) -> true
-          | Instantiate { type_ = t; _ } -> aux (depth + 1) t
-          | Flow { from = t; _ }
-          | Lower_bound { bound = t; _ }
-          | Axiom { next = t; _ }
-          | Prj_both { sub_prj = t; _ }
-          | Prj_one { part = t; _ }
-          | Def (_, t) ->
-            aux (depth + 1) t
-          | Solved { in_; solution; _ } ->
-            aux (depth + 1) solution || aux (depth + 1) in_
-          | _ -> false
-      in
-      aux 0 t
+    let has_mth_in_into into =
+      match into with
+      | From_witness_decl (Missing_type_in_hierarchy _) -> true
+      | Flow { from = From_witness_decl (Missing_type_in_hierarchy _); _ } ->
+        true
+      | _ -> false
+    in
+    let rec aux depth t =
+      if depth > 10 then
+        false
+      else
+        match t with
+        | Type_access
+            (Typeconst (Flow { kind = Flow_elab; into; _ }, _, _, _), _)
+          when has_mth_in_into into ->
+          true
+        | Flow { kind = Flow_elab; into; _ } when has_mth_in_into into -> true
+        | From_witness_decl (Missing_type_in_hierarchy _) -> true
+        | Instantiate { type_ = t; _ } -> aux (depth + 1) t
+        | Flow { from = t; _ }
+        | Lower_bound { bound = t; _ }
+        | Axiom { next = t; _ }
+        | Prj_both { sub_prj = t; _ }
+        | Prj_one { part = t; _ }
+        | Def (_, t) ->
+          aux (depth + 1) t
+        | Solved { in_; solution; _ } ->
+          aux (depth + 1) solution || aux (depth + 1) in_
+        | _ -> false
+    in
+    aux 0 t
 end
 
 (* ~~ Aliases ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
@@ -3899,13 +3570,6 @@ module Derivation = struct
   (* ~~ Construct a derviation from a reason ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
   let rec push_solutions t ~solutions =
     match t with
-    | Wrapped { flags; origin; reason } ->
-      Wrapped
-        {
-          flags;
-          origin = push_solutions origin ~solutions;
-          reason = push_solutions reason ~solutions;
-        }
     | From_witness_locl (Type_variable (_, id))
     | From_witness_locl (Type_variable_generics (_, _, _, id))
     | From_witness_locl (Type_variable_error (_, id)) ->
@@ -3937,7 +3601,6 @@ module Derivation = struct
 
   let rec extract_last t =
     match t with
-    | Wrapped { reason; _ } -> extract_last reason
     | Prj_both { sub; _ } -> extract_last sub
     | Prj_one { whole; _ } -> extract_last whole
     | Axiom { prev; _ } -> extract_last prev
@@ -3970,7 +3633,6 @@ module Derivation = struct
 
   let rec extract_first t =
     match t with
-    | Wrapped { origin; _ } -> origin
     | Prj_both { sub_prj; _ } -> extract_first sub_prj
     | Prj_one { part; _ } -> extract_first part
     | Axiom { next; _ } -> extract_first next
@@ -4008,13 +3670,6 @@ module Derivation = struct
       t
     else begin
       match t with
-      | Wrapped { flags; origin; reason } ->
-        Wrapped
-          {
-            flags;
-            origin = resolve origin ~solutions ~depth;
-            reason = resolve reason ~solutions ~depth;
-          }
       (* Substitute a tvar for its solution *)
       | From_witness_locl (Type_variable (_, id))
       | From_witness_locl (Type_variable_generics (_, _, _, id))
@@ -4118,9 +3773,6 @@ module Derivation = struct
   let of_reason ~sub ~super =
     let rec aux (sub, super) ~deriv ~solutions =
       match (sub, super) with
-      (* -- Unwrap Wrapped -- *)
-      | (Wrapped { reason; _ }, _) -> aux (reason, super) ~deriv ~solutions
-      | (_, Wrapped { reason; _ }) -> aux (sub, reason) ~deriv ~solutions
       (* -- Accumulate solutions -- *)
       | (Solved { solution; of_; in_ }, _) ->
         let solution = extract_first @@ resolve solution ~solutions ~depth:20 in
@@ -4407,7 +4059,6 @@ module Derivation = struct
       | Flow_instantiate nm ->
         Format.sprintf "as the instantiation of the generic `%s`" nm
       | Flow_elab -> "as the elaboration of"
-      | Flow_unsafe_cast -> "through an `UNSAFE_CAST`"
 
     let rec explain t ~st ~cfg ~ctxt =
       match t with
@@ -4586,7 +4237,6 @@ module Derivation = struct
 
     and explain_reason reason ~st ~cfg ~ctxt =
       match reason with
-      | Wrapped { reason; _ } -> explain_reason reason ~st ~cfg ~ctxt
       (* -- Expected 'atoms' in a derivation step -- *)
       | From_witness_locl witness -> ([explain_witness_locl witness], st)
       | From_witness_decl witness -> ([explain_witness_decl witness], st)
@@ -4863,7 +4513,6 @@ let debug_derivation ~sub ~super =
 
 let rec get_top_fun_param_prj_idx r =
   match r with
-  | Wrapped { reason; _ } -> get_top_fun_param_prj_idx reason
   | Prj_both { prj = Prj_symm_fn_param (i, _); sub; _ } ->
     (match get_top_fun_param_prj_idx sub with
     | None -> Some i

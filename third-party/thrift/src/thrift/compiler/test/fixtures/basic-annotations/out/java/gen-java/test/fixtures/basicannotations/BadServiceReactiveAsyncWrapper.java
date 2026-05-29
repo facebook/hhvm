@@ -14,17 +14,17 @@ public class BadServiceReactiveAsyncWrapper
   private BadService.Reactive _delegate;
 
   public BadServiceReactiveAsyncWrapper(BadService.Reactive _delegate) {
-    
-    this._delegate = _delegate;
+      
+      this._delegate = _delegate;
   }
 
   public BadServiceReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new BadServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new BadServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
   @java.lang.Override
@@ -41,7 +41,7 @@ public class BadServiceReactiveAsyncWrapper
   @java.lang.Override
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Integer>> barWrapper(
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.barWrapper( rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.barWrapper( rpcOptions));
   }
 
   public class BadInteractionImpl implements BadInteraction {
@@ -59,7 +59,7 @@ public class BadServiceReactiveAsyncWrapper
     @java.lang.Override
     public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> fooWrapper(
       com.facebook.thrift.client.RpcOptions rpcOptions) {
-      throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
+        throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
     }
 
     @java.lang.Override
@@ -69,4 +69,5 @@ public class BadServiceReactiveAsyncWrapper
   public BadInteraction createBadInteraction() {
       return new BadInteractionImpl();
   }
+
 }

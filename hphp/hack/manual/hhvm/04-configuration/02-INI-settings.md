@@ -954,7 +954,7 @@ These settings are for toggling various code checks (e.g., typehints).
 
 ### Profiling
 
-These are additional settings for the HHVM profiler. HHProf uses jemalloc per heap profiling.
+These are additional settings for the HHVM profiler.
 
 | Setting | Type | Default
 |---------|------|--------
@@ -962,10 +962,6 @@ These are additional settings for the HHVM profiler. HHProf uses jemalloc per he
 | `hhvm.profile_heap_across_requests` | `bool` | `false`
 | `hhvm.profile_hw_enable` | `bool` | `true`
 | `hhvm.profile_hw_events` | `string` | `''`
-| `hhvm.hh_prof.enabled` | `bool` | `false`
-| `hhvm.hh_prof.active` | `bool` | `false`
-| `hhvm.hh_prof.accum` | `bool` | `false`
-| `hhvm.hh_prof.request` | `bool` | `false`
 | `hhvm.record_code_coverage` | `bool`| `false` |
 | `hhvm.code_coverage_output_file` | `bool` | `false`
 | `hhvm.hot_func_count` | `int` | `4100`

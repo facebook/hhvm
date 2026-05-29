@@ -21,25 +21,25 @@ import com.facebook.thrift.metadata.ThriftStructType;
 import com.facebook.thrift.metadata.ThriftType;
 
 class SinkServiceThriftMetadataHandlerExceptions_0 {
-  static void addExceptions(Map<String, ThriftException> exceptions) {
-    exceptions.put("test.fixtures.sink.InitialException", new ThriftException.Builder()
-        .setName("test.fixtures.sink.InitialException")
-        .setFields(Arrays.asList(
-            new ThriftField.Builder()
-                .setId(1)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
-                .setName("reason")
-                .setIsOptional(false)
-                .build()
-        ))
-        .build());
-  }
+    static void addExceptions(Map<String, ThriftException> exceptions) {
+        exceptions.put("test.fixtures.sink.InitialException", new ThriftException.Builder()
+            .setName("test.fixtures.sink.InitialException")
+            .setFields(Arrays.asList(
+                new ThriftField.Builder()
+                    .setId(1)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
+                    .setName("reason")
+                    .setIsOptional(false)
+                    .build()
+            ))
+            .build());
+    }
 }
 
 class SinkServiceThriftMetadataHandlerExceptions {
-  static Map<String, ThriftException> getExceptions() {
-    Map<String, ThriftException> exceptions = new HashMap<>();
-    SinkServiceThriftMetadataHandlerExceptions_0.addExceptions(exceptions);
-    return exceptions;
-  }
+    static Map<String, ThriftException> getExceptions() {
+        Map<String, ThriftException> exceptions = new HashMap<>();
+        SinkServiceThriftMetadataHandlerExceptions_0.addExceptions(exceptions);
+        return exceptions;
+    }
 }

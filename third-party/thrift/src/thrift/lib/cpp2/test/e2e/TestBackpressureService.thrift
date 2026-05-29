@@ -21,6 +21,5 @@ package "facebook.com/thrift/test/e2e/backpressure"
 service TestBackpressureService {
   stream<string> generateItems(1: i32 count);
   sink<string, string> consumeItems();
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<string>, stream<string> bidiEcho();
 }

@@ -49,11 +49,11 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Internship other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -70,28 +70,28 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
 
         public int getWeeks() { return weeks; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="title", requiredness=Requiredness.NONE)    public Builder setTitle(String title) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="title", requiredness=Requiredness.NONE)    public Builder setTitle(String title) {
             this.title = title;
             return this;
         }
 
         public String getTitle() { return title; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="employer", requiredness=Requiredness.OPTIONAL)    public Builder setEmployer(test.fixtures.constants.Company employer) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="employer", requiredness=Requiredness.OPTIONAL)    public Builder setEmployer(test.fixtures.constants.Company employer) {
             this.employer = employer;
             return this;
         }
 
         public test.fixtures.constants.Company getEmployer() { return employer; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="compensation", requiredness=Requiredness.OPTIONAL)    public Builder setCompensation(Double compensation) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="compensation", requiredness=Requiredness.OPTIONAL)    public Builder setCompensation(Double compensation) {
             this.compensation = compensation;
             return this;
         }
 
         public Double getCompensation() { return compensation; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="school", requiredness=Requiredness.OPTIONAL)    public Builder setSchool(String school) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="school", requiredness=Requiredness.OPTIONAL)    public Builder setSchool(String school) {
             this.school = school;
             return this;
         }
@@ -119,6 +119,7 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -127,56 +128,47 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
     private final int weeks;
     public static final int _WEEKS = 1;
     private static final TField WEEKS_FIELD_DESC = new TField("weeks", TType.I32, (short)1);
-        private final String title;
+    private final String title;
     public static final int _TITLE = 2;
     private static final TField TITLE_FIELD_DESC = new TField("title", TType.STRING, (short)2);
-        private final test.fixtures.constants.Company employer;
+    private final test.fixtures.constants.Company employer;
     public static final int _EMPLOYER = 3;
     private static final TField EMPLOYER_FIELD_DESC = new TField("employer", TType.I32, (short)3);
-        private final Double compensation;
+    private final Double compensation;
     public static final int _COMPENSATION = 4;
     private static final TField COMPENSATION_FIELD_DESC = new TField("compensation", TType.DOUBLE, (short)4);
-        private final String school;
+    private final String school;
     public static final int _SCHOOL = 5;
     private static final TField SCHOOL_FIELD_DESC = new TField("school", TType.STRING, (short)5);
     static {
-      NAMES_TO_IDS.put("weeks", 1);
-      THRIFT_NAMES_TO_IDS.put("weeks", 1);
-      FIELD_METADATA.put(1, WEEKS_FIELD_DESC);
-      NAMES_TO_IDS.put("title", 2);
-      THRIFT_NAMES_TO_IDS.put("title", 2);
-      FIELD_METADATA.put(2, TITLE_FIELD_DESC);
-      NAMES_TO_IDS.put("employer", 3);
-      THRIFT_NAMES_TO_IDS.put("employer", 3);
-      FIELD_METADATA.put(3, EMPLOYER_FIELD_DESC);
-      NAMES_TO_IDS.put("compensation", 4);
-      THRIFT_NAMES_TO_IDS.put("compensation", 4);
-      FIELD_METADATA.put(4, COMPENSATION_FIELD_DESC);
-      NAMES_TO_IDS.put("school", 5);
-      THRIFT_NAMES_TO_IDS.put("school", 5);
-      FIELD_METADATA.put(5, SCHOOL_FIELD_DESC);
+        NAMES_TO_IDS.put("weeks", 1);
+        THRIFT_NAMES_TO_IDS.put("weeks", 1);
+        FIELD_METADATA.put(1, WEEKS_FIELD_DESC);
+        NAMES_TO_IDS.put("title", 2);
+        THRIFT_NAMES_TO_IDS.put("title", 2);
+        FIELD_METADATA.put(2, TITLE_FIELD_DESC);
+        NAMES_TO_IDS.put("employer", 3);
+        THRIFT_NAMES_TO_IDS.put("employer", 3);
+        FIELD_METADATA.put(3, EMPLOYER_FIELD_DESC);
+        NAMES_TO_IDS.put("compensation", 4);
+        THRIFT_NAMES_TO_IDS.put("compensation", 4);
+        FIELD_METADATA.put(4, COMPENSATION_FIELD_DESC);
+        NAMES_TO_IDS.put("school", 5);
+        THRIFT_NAMES_TO_IDS.put("school", 5);
+        FIELD_METADATA.put(5, SCHOOL_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="weeks", requiredness=Requiredness.REQUIRED)
     public int getWeeks() { return weeks; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="title", requiredness=Requiredness.NONE)
     public String getTitle() { return title; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="employer", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.constants.Company getEmployer() { return employer; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="compensation", requiredness=Requiredness.OPTIONAL)
     public Double getCompensation() { return compensation; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="school", requiredness=Requiredness.OPTIONAL)
     public String getSchool() { return school; }
@@ -216,118 +208,122 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Integer.hashCode(weeks);
-            _hashCode = 31 * _hashCode + Objects.hashCode(title);
-            _hashCode = 31 * _hashCode + Objects.hashCode(employer);
-            _hashCode = 31 * _hashCode + Objects.hashCode(compensation);
-            _hashCode = 31 * _hashCode + Objects.hashCode(school);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(title);
+        _hashCode = 31 * _hashCode + Objects.hashCode(employer);
+        _hashCode = 31 * _hashCode + Objects.hashCode(compensation);
+        _hashCode = 31 * _hashCode + Objects.hashCode(school);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Internship> asReader() {
       return Internship::read0;
     }
 
     public static Internship read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Internship.NAMES_TO_IDS, Internship.THRIFT_NAMES_TO_IDS, Internship.FIELD_METADATA);
-      Internship.Builder builder = new Internship.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _WEEKS:
-          if (__field.type == TType.I32) {
-            int weeks = oprot.readI32();
-            builder.setWeeks(weeks);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _TITLE:
-          if (__field.type == TType.STRING) {
-            String title = oprot.readString();
-            builder.setTitle(title);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _EMPLOYER:
-          if (__field.type == TType.I32) {
-            test.fixtures.constants.Company employer = test.fixtures.constants.Company.fromInteger(oprot.readI32());
-            builder.setEmployer(employer);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _COMPENSATION:
-          if (__field.type == TType.DOUBLE) {
-            Double compensation = oprot.readDouble();
-            builder.setCompensation(compensation);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SCHOOL:
-          if (__field.type == TType.STRING) {
-            String school = oprot.readString();
-            builder.setSchool(school);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(Internship.NAMES_TO_IDS, Internship.THRIFT_NAMES_TO_IDS, Internship.FIELD_METADATA);
+        Internship.Builder builder = new Internship.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _WEEKS:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setWeeks(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _TITLE:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setTitle(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _EMPLOYER:
+                if (__field.type == TType.I32) {
+                    test.fixtures.constants.Company _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.constants.Company.fromInteger(oprot.readI32());
+                    builder.setEmployer(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _COMPENSATION:
+                if (__field.type == TType.DOUBLE) {
+                    Double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setCompensation(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _SCHOOL:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setSchool(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      int _iter0 = this.weeks;
-      oprot.writeFieldBegin(WEEKS_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.title;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(TITLE_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.constants.Company _iter0 = this.employer;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(EMPLOYER_FIELD_DESC);
-        oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Double _iter0 = this.compensation;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(COMPENSATION_FIELD_DESC);
-        oprot.writeDouble(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.school;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(SCHOOL_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            int _fbthriftVar0 = this.weeks;
+            oprot.writeFieldBegin(WEEKS_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.title;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(TITLE_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.constants.Company _fbthriftVar0 = this.employer;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(EMPLOYER_FIELD_DESC);
+                oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            Double _fbthriftVar0 = this.compensation;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(COMPENSATION_FIELD_DESC);
+                oprot.writeDouble(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.school;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(SCHOOL_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _InternshipLazy {

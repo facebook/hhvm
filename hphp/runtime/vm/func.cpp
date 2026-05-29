@@ -68,6 +68,8 @@ const StaticString s_TrivialHHVMBuiltinWrapper("TrivialHHVMBuiltinWrapper");
 
 std::atomic<bool> Func::s_treadmill;
 
+InheritedRetTypesMap s_inheritedRetTypes;
+
 Mutex g_funcsMutex;
 
 /*
@@ -94,12 +96,12 @@ static InitFiniNode s_funcidCounterInit([]{
 }, InitFiniNode::When::PostRuntimeOptions, "func_id counter init");
 
 namespace {
-inline int numProloguesForNumParams(int numParams) {
-  // The number of prologues is numParams + 2. The extra 2 are needed for
+inline int numProloguesForNumPositionals(int numPositionalParams) {
+  // The number of prologues is numPositionalParams + 2. The extra 2 are needed for
   // the following cases:
-  //   - arguments passed > numParams
+  //   - arguments passed > numPositionalParams
   //   - no arguments passed
-  return numParams + 2;
+  return numPositionalParams + 2;
 }
 }
 
@@ -108,30 +110,24 @@ inline int numProloguesForNumParams(int numParams) {
 
 Func::Func(Unit& unit, const StringData* name, Attr attrs)
   : m_name(name)
-  , m_isPreFunc(false)
-  , m_hasPrivateAncestor(false)
-  , m_shouldSampleJit(StructuredLog::coinflip(Cfg::Jit::SampleRate))
-  , m_hasForeignThis(false)
-  , m_registeredInDataMap(false)
   , m_unit(&unit)
   , m_shared(nullptr)
   , m_attrs(attrs)
 {
+  m_allFlags.m_allFlags = 0;
+  m_allFlags.m_shouldSampleJit = StructuredLog::coinflip(Cfg::Jit::SampleRate);
 }
 
 Func::Func(
   Unit& unit, const StringData* name, Attr attrs,
   const StringData *methCallerCls, const StringData *methCallerMeth)
   : m_name(name)
-  , m_isPreFunc(false)
-  , m_hasPrivateAncestor(false)
-  , m_shouldSampleJit(StructuredLog::coinflip(Cfg::Jit::SampleRate))
-  , m_hasForeignThis(false)
-  , m_registeredInDataMap(false)
   , m_unit(&unit)
   , m_shared(nullptr)
   , m_attrs(attrs)
 {
+  m_allFlags.m_allFlags = 0;
+  m_allFlags.m_shouldSampleJit = StructuredLog::coinflip(Cfg::Jit::SampleRate);
   assertx(methCallerCls != nullptr);
   assertx(methCallerMeth != nullptr);
   methCallerData().m_methName = methCallerMeth;
@@ -140,15 +136,15 @@ Func::Func(
 
 Func::~Func() {
   // Should've deregistered in Func::destroy() or Func::freeClone()
-  assertx(!m_registeredInDataMap);
+  assertx(!m_allFlags.m_registeredInDataMap);
 #ifndef NDEBUG
   validate();
   m_magic = ~m_magic;
 #endif
 }
 
-void* Func::allocFuncMem(int numParams) {
-  int numPrologues = numProloguesForNumParams(numParams);
+void* Func::allocFuncMem(int numPositionalParams) {
+  int numPrologues = numProloguesForNumPositionals(numPositionalParams);
 
   auto const funcSize =
     sizeof(Func) + numPrologues * sizeof(m_prologueTable[0])
@@ -165,7 +161,11 @@ void Func::destroy(Func* func) {
     jit::tc::reclaimFunction(func);
   }
 
-  if (func->m_registeredInDataMap) {
+  if (func->hasInheritedReturnTypes()) {
+    s_inheritedRetTypes.erase(func->getFuncId().toStableInt());
+  }
+
+  if (func->m_allFlags.m_registeredInDataMap) {
     func->deregisterInDataMap();
   }
 
@@ -198,8 +198,13 @@ void Func::freeClone() {
     jit::tc::reclaimFunction(this);
   }
 
-  if (m_registeredInDataMap) {
+  if (m_allFlags.m_registeredInDataMap) {
     deregisterInDataMap();
+  }
+
+  if (hasInheritedReturnTypes()) {
+    s_inheritedRetTypes.erase(getFuncId().toStableInt());
+    m_attrs = static_cast<Attr>(m_attrs & ~AttrHasInheritedReturnTypes);
   }
 
 #ifndef USE_LOWPTR
@@ -211,32 +216,36 @@ void Func::freeClone() {
 #endif
 
   m_cloned.flag.clear();
+  assertx(!hasInheritedReturnTypes());
 }
 
 Func* Func::clone(Class* cls, const StringData* name) const {
-  auto numParams = this->numParams();
+  auto numPositionalParams = this->numPositionalParamsVariadic();
 
   // If this is a PreFunc (i.e., a Func on a PreClass) that is not already
   // being used as a regular Func by a Class, and we aren't trying to change
   // its name (since the name is part of the template for later clones), we can
   // reuse this same Func as the clone.
   bool const can_reuse =
-    m_isPreFunc && !name && !m_cloned.flag.test_and_set();
+    m_allFlags.m_isPreFunc && !name && !m_cloned.flag.test_and_set();
 
   Func* f = !can_reuse
-    ? new (allocFuncMem(numParams)) Func(*this)
+    ? new (allocFuncMem(numPositionalParams)) Func(*this)
     : const_cast<Func*>(this);
 
   f->m_cloned.flag.test_and_set();
-  f->initProloguesAndFuncEntry(numParams);
+  f->initProloguesAndFuncEntry(numPositionalParams);
   if (name) f->m_name = name;
   f->clsData().m_impl = cls;
-  f->setFullName(numParams);
+  f->setFullName();
 
   if (f != this) {
-    f->m_isPreFunc = false;
-    f->m_registeredInDataMap = false;
+    f->m_allFlags.m_isPreFunc = false;
+    f->m_allFlags.m_registeredInDataMap = false;
   }
+  // We may be cloning from a prefunc which has this attribute set in the
+  // context of the class it was cloned into, so unset it for the new clone.
+  f->m_attrs = Attr(f->m_attrs & ~AttrHasInheritedReturnTypes);
 
 #ifndef USE_LOWPTR
   f->m_funcId = {FuncId::Invalid};
@@ -248,20 +257,20 @@ Func* Func::clone(Class* cls, const StringData* name) const {
 
 void Func::rescope(Class* ctx) {
   clsData().m_impl = ctx;
-  setFullName(numParams());
+  setFullName();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Initialization.
 
-void Func::init(int numParams) {
+void Func::init(int numPositionalParams) {
 #ifndef NDEBUG
   m_magic = kMagic;
 #endif
   setNewFuncId();
   // For methods, we defer setting the full name until m_cls is initialized
   if (!preClass()) {
-    setFullName(numParams);
+    setFullName();
   } else {
     m_fullName = nullptr;
   }
@@ -273,11 +282,11 @@ void Func::init(int numParams) {
     m_attrs = m_attrs | AttrNoInjection;
   }
   assertx(m_name);
-  initProloguesAndFuncEntry(numParams);
+  initProloguesAndFuncEntry(numPositionalParams);
 }
 
-void Func::initProloguesAndFuncEntry(int numParams) {
-  int numPrologues = numProloguesForNumParams(numParams);
+void Func::initProloguesAndFuncEntry(int numPositionalParams) {
+  int numPrologues = numProloguesForNumPositionals(numPositionalParams);
 
   if (!jit::mcgen::initialized()) {
     for (int i = 0; i < numPrologues; i++) {
@@ -295,7 +304,7 @@ void Func::initProloguesAndFuncEntry(int numParams) {
   m_funcEntry = stubs.handleTranslateMainFuncEntry;
 }
 
-void Func::setFullName(int /*numParams*/) {
+void Func::setFullName() {
   assertx(m_name->isStatic());
   Class *clazz = cls();
   if (clazz) {
@@ -341,21 +350,21 @@ void Func::registerInDataMap() {
 #ifndef USE_LOWPTR
   assertx(!m_funcId.isInvalid());
 #endif
-  assertx((!m_isPreFunc || m_cloned.flag.test_and_set()));
-  assertx(!m_registeredInDataMap);
+  assertx((!m_allFlags.m_isPreFunc || m_cloned.flag.test_and_set()));
+  assertx(!m_allFlags.m_registeredInDataMap);
   assertx(mallocEnd());
   data_map::register_start(this);
-  m_registeredInDataMap = true;
+  m_allFlags.m_registeredInDataMap = true;
 }
 
 void Func::deregisterInDataMap() {
-  assertx(m_registeredInDataMap);
-  assertx((!m_isPreFunc || m_cloned.flag.test_and_set()));
+  assertx(m_allFlags.m_registeredInDataMap);
+  assertx((!m_allFlags.m_isPreFunc || m_cloned.flag.test_and_set()));
 #ifndef USE_LOWPTR
   assertx(!m_funcId.isInvalid());
 #endif
   data_map::deregister(this);
-  m_registeredInDataMap = false;
+  m_allFlags.m_registeredInDataMap = false;
 }
 
 bool Func::isMemoizeImplName(const StringData* name) {
@@ -465,7 +474,20 @@ bool Func::hasNonTrivialDVFuncEntry() const {
   return false;
 }
 
-Offset Func::getEntryForNumArgs(int numArgsPassed) const {
+
+Offset Func::getPrologueEntryForNumPositionals(int numPositionalsPassed) const {
+  assertx(numPositionalsPassed >= 0);
+  auto const nparams = numNonVariadicParams();
+  for (unsigned i = numPositionalsPassed + numNamedParams(); i < nparams; i++) {
+    const Func::ParamInfo& pi = params()[i];
+    if (pi.hasDefaultValue()) {
+      return pi.funcletOff;
+    }
+  }
+  return 0;
+}
+
+Offset Func::getFuncEntryForNumArgs(int numArgsPassed) const {
   assertx(numArgsPassed >= 0);
   auto const nparams = numNonVariadicParams();
   for (unsigned i = numArgsPassed; i < nparams; i++) {
@@ -558,7 +580,7 @@ bool Func::isImmutableFrom(const Class* cls) const {
 // JIT data.
 
 int Func::numPrologues() const {
-  return numProloguesForNumParams(numParams());
+  return numProloguesForNumPositionals(numPositionalParamsVariadic());
 }
 
 void Func::resetPrologue(int numParams) {
@@ -1404,6 +1426,25 @@ void Func::recordCallNoCheck() const {
     : StrNR{unit()->filepath()}.asString();
 
   tl_called_functions->set(fullNameStr().asString(), std::move(path), true);
+}
+
+const TypeIntersectionConstraint& Func::lookupInheritedReturnTypes() const {
+  assertx(hasInheritedReturnTypes());
+  auto it = s_inheritedRetTypes.find(getFuncId().toStableInt());
+  always_assert(it != s_inheritedRetTypes.end());
+  return it->second;
+}
+
+void Func::storeInheritedReturnTypes(TypeIntersectionConstraint&& tcs) {
+  always_assert(s_inheritedRetTypes.insert(getFuncId().toStableInt(), std::move(tcs)).second);
+  m_attrs = m_attrs | AttrHasInheritedReturnTypes;
+}
+
+bool Func::trustReturnType() const {
+  return isCPPBuiltin()
+    || isMemoizeWrapper()
+    || isMemoizeWrapperLSB()
+    || isGenerator();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

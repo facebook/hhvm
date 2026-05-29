@@ -23,13 +23,19 @@ StringPiece basic_expected_ekm = {
 
 TEST(ExporterTest, TestExporterBasic) {
   fizz::DefaultFactory factory;
-  auto ekm = Exporter::getExportedKeyingMaterial(
-      factory,
-      CipherSuite::TLS_AES_128_GCM_SHA256,
-      folly::Range<const char*>(exporter_master),
-      label,
-      nullptr,
-      32);
+  Buf ekm;
+  Error err;
+  EXPECT_EQ(
+      Exporter::getExportedKeyingMaterial(
+          ekm,
+          err,
+          factory,
+          CipherSuite::TLS_AES_128_GCM_SHA256,
+          folly::Range<const char*>(exporter_master),
+          label,
+          nullptr,
+          32),
+      Status::Success);
 
   EXPECT_EQ(StringPiece(ekm->coalesce()), unhexlify(basic_expected_ekm));
 }

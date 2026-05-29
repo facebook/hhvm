@@ -29,7 +29,7 @@ $paths = vec[
   "$file_path/foo".chr(47)."symlink.link",
   "$file_path".chr(47)."foo/symlink.link",
   "$file_path".chr(47)."foo".chr(47)."symlink.link",
-  b"$file_path/foo/symlink.link",
+  "$file_path/foo/symlink.link",
 
   /* Testing directories */
   ".",  // current directory

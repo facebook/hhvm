@@ -12,20 +12,20 @@
 class classA
 {
   public function __toString() :mixed{
-    return b"hello, world";
+    return "hello, world";
   }
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strrpos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$needle = b'world';
+$needle = 'world';
 $offset = 0;
 $encoding = 'utf-8';
 
 
 // heredoc string
-$heredoc = b<<<EOT
+$heredoc = <<<EOT
 hello, world
 EOT;
 
@@ -36,8 +36,8 @@ $inputs = vec[
        '',
 
        // string data
-/*18*/ b"hello, world",
-       b'hello, world',
+/*18*/ "hello, world",
+       'hello, world',
        $heredoc,
 ];
 

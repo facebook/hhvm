@@ -20,6 +20,6 @@ public final class Constants {
     public static final test.fixtures.complex_struct.MyUnion CONST_ENUM_UNION = construct_CONST_ENUM_UNION();
 
     private static test.fixtures.complex_struct.MyUnion construct_CONST_ENUM_UNION() {
-      return test.fixtures.complex_struct.MyUnion.fromMyEnum(test.fixtures.complex_struct.MyEnum.MY_VALUE2);
+        return test.fixtures.complex_struct.MyUnion.fromMyEnum(test.fixtures.complex_struct.MyEnum.MY_VALUE2);
     }
 }

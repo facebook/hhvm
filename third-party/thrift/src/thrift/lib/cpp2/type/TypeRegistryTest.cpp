@@ -30,7 +30,7 @@ namespace {
 TEST(TypeRegistry, Void) {
   TypeRegistry treg;
   // We can store void.
-  AnyData data = treg.store<StandardProtocol::Compact>(Ref{});
+  AnyData data = treg.store<StandardProtocol::Compact>(AnyValue{});
   EXPECT_EQ(data.type(), Type::get<void_t>());
   EXPECT_TRUE(data.protocol().empty()); // void has no protocol
 
@@ -40,22 +40,18 @@ TEST(TypeRegistry, Void) {
   EXPECT_EQ(val.type(), Type::get<void_t>());
 
   // Happy with an empty AnyRef.
-  Ref rval;
-  treg.load(data, rval);
-  EXPECT_TRUE(rval.empty());
-  EXPECT_EQ(rval.type(), Type::create<void_t>());
-
-  // Cannot load void into a real reference.
-  int32_t uval;
-  rval = Ref::to<i32_t>(uval);
-  EXPECT_THROW(treg.load(data, rval), std::bad_any_cast);
+  treg.load(data, val);
+  EXPECT_TRUE(val.empty());
+  EXPECT_EQ(val.type(), Type::create<void_t>());
 }
 
 TEST(TypeRegistry, OutOfRange) {
   TypeRegistry treg;
   // Try to store a non-void value.
   EXPECT_THROW(
-      (treg.store<i16_t, StandardProtocol::Compact>(7)), std::out_of_range);
+      (treg.store<StandardProtocol::Compact>(
+          AnyValue::create<i16_t>(int16_t{7}))),
+      std::out_of_range);
 
   // Try to load a non-void value.
   SemiAny builder;
@@ -72,7 +68,8 @@ TEST(TypeRegistry, Register) {
   treg.registerSerializer(serializer, double_t{});
 
   // Store the value using registered protocol.
-  AnyData any = treg.store<double_t>(2.5, test::kFollyToStringProtocol);
+  AnyData any =
+      treg.store(AnyValue::create<double_t>(2.5), test::kFollyToStringProtocol);
   EXPECT_EQ(any.type(), Type::get<double_t>());
   EXPECT_EQ(any.protocol().name(), "facebook.com/thrift/FollyToString");
   EXPECT_EQ(any.data().to<std::string>(), "2.5");

@@ -40,7 +40,7 @@ void TccStructTraits<::apache::thrift::test::EmptiableStruct>::translateFieldNam
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::apache::thrift::test::EmptiableStruct>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
@@ -61,7 +61,7 @@ void TccStructTraits<::apache::thrift::test::NotEmptiableStruct>::translateField
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),

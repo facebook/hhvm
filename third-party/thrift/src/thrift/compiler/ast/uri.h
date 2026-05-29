@@ -140,6 +140,8 @@ inline constexpr auto kCppDeclareHashSpecialization =
     "facebook.com/thrift/annotation/cpp/DeclareHashSpecialization";
 inline constexpr auto kCppDeclareEqualToSpecialization =
     "facebook.com/thrift/annotation/cpp/DeclareEqualToSpecialization";
+inline constexpr auto kCppFastClientUri =
+    "facebook.com/thrift/annotation/cpp/FastClient";
 
 // Java:
 inline constexpr auto kJavaMutableUri =

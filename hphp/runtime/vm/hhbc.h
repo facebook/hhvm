@@ -478,7 +478,6 @@ const char* subopToName(AsTypeStructExceptionKind);
 const char* subopToName(ContCheckOp);
 const char* subopToName(SpecialClsRef);
 const char* subopToName(ClassGetCMode);
-const char* subopToName(IsLogAsDynamicCallOp);
 const char* subopToName(ReadonlyOp);
 
 /*
@@ -608,10 +607,8 @@ constexpr bool isComparisonOp(Op opcode) {
 
 constexpr bool isFCallClsMethod(Op opcode) {
   return
-    opcode == OpFCallClsMethod ||
     opcode == OpFCallClsMethodM ||
     opcode == OpFCallClsMethodD ||
-    opcode == OpFCallClsMethodS ||
     opcode == OpFCallClsMethodSD;
 }
 

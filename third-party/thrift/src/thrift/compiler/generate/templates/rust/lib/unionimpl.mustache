@@ -52,11 +52,11 @@ where
   {{#each structured.fields as |field|}}
             Self::{{field.rust_name}}(inner) => {
                 p.write_field_begin("{{field.name}}", {{#partial types.protocol_ttype type=field.type}}, {{field.id}});
-                {{#partial fields.write field=field}}({{!
-                }}{{#if field.has_adapter?}}&{{field.adapter_qualified}}::to_thrift_field::<{{structured.rust_name}}>({{/if}}{{!
-                }}inner{{!
-                }}{{#if field.has_adapter?}}, {{field.id}}){{/if}}{{!
-                }}, p);
+                {{#partial fields.write field=field}}({{!}}
+                    {{~ #if field.has_adapter?}}&{{field.adapter_qualified}}::to_thrift_field::<{{structured.rust_name}}>({{/if ~}}
+                    inner
+                    {{~ #if field.has_adapter?}}, {{field.id}}){{/if ~}}
+                    , p);
                 p.write_field_end();
             }
   {{/each}}
@@ -88,11 +88,11 @@ where
   {{#each structured.fields as |field|}}
                 ({{#partial types.protocol_ttype type=field.type}}, {{field.id}}, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::{{field.rust_name}}({{!
-                    }}{{#if field.has_adapter?}}{{field.adapter_qualified}}::from_thrift_field::<{{structured.rust_name}}>({{/if}}{{!
-                    }}::anyhow::Context::context({{#partial fields.read field=field}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field.name}}", strct: "{{structured.name}}"})?{{!
-                    }}{{#if field.has_adapter?}}, {{field.id}})?{{/if}}{{!
-                    }}));
+                    alt = ::std::option::Option::Some(Self::{{field.rust_name}}({{!}}
+                        {{~ #if field.has_adapter?}}{{field.adapter_qualified}}::from_thrift_field::<{{structured.rust_name}}>({{/if ~}}
+                        ::anyhow::Context::context({{#partial fields.read field=field}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field.name}}", strct: "{{structured.name}}"})?
+                        {{~ #if field.has_adapter?}}, {{field.id}})?{{/if ~}}
+                    ));
                 }
   {{/each}}
                 (fty, _, false) => p.skip(fty)?,
@@ -130,6 +130,7 @@ impl {{structured.rust_name}} {
     }
 }
   {{#if root_program.rust_gen_native_metadata?}}
+
 {{> lib/metadata/struct}}
   {{/if root_program.rust_gen_native_metadata?}}
 {{/if structured.union?}}

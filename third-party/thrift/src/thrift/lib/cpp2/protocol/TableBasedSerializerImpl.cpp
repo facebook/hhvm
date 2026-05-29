@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-#include <memory>
 #include <thrift/lib/cpp2/protocol/TableBasedSerializerImpl.h>
+
+#include <memory>
+
+#include <folly/lang/Assume.h>
 
 namespace apache::thrift::detail {
 
@@ -172,7 +175,7 @@ void setToIntrinsicDefault(void* value, const FieldInfo& info) {
     case protocol::TType::T_UTF8:
     case protocol::TType::T_U64:
     case protocol::TType::T_UTF16:
-      CHECK(false);
+      folly::assume_unreachable();
   }
 }
 
@@ -298,7 +301,7 @@ bool isTerseFieldSet(const ThriftValue& value, const FieldInfo& fieldInfo) {
     case protocol::TType::T_UTF8:
     case protocol::TType::T_U64:
     case protocol::TType::T_UTF16:
-      CHECK(false);
+      folly::assume_unreachable();
   }
   return false;
 }
@@ -329,6 +332,17 @@ void markFieldAsSet(
   }
   *reinterpret_cast<bool*>(static_cast<char*>(object) + fieldInfo.issetOffset) =
       true;
+}
+
+const FieldInfo* findFieldInfoById(
+    const StructInfo& structInfo, FieldID fieldId) {
+  const FieldInfo* const end = structInfo.fieldInfos + structInfo.numFields;
+  const FieldInfo* found = std::lower_bound(
+      structInfo.fieldInfos,
+      end,
+      fieldId,
+      [](const FieldInfo& lhs, FieldID rhs) { return lhs.id < rhs; });
+  return (found != end && found->id == fieldId) ? found : nullptr;
 }
 
 } // namespace apache::thrift::detail

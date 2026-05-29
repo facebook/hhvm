@@ -103,53 +103,98 @@ let abstract_or_exact env id ({ name; _ } as abstr) =
   else
     Abstract abstr
 
-(** In the case of an abstract type constant with a bound which refines the
-    constant to be equal to a constant in the class from which we are projecting,
-    localization will proceed and determine that we have a cycle:
+(** Recursive class refinements (the "fluent builder" pattern) introduce
+    self-referential bounds on abstract type constants:
 
-    interface I {
-      abstract const type T as I with { type T = I::T; };
-                                                 ^^^^
-      public function next(): this::T;
-    }
+      interface I {
+        abstract const type T as I with { type T = this::T; };
+        public function next(): this::T;
+      }
 
-    In this example if we were to recursively localize `I::T` we would encounter
-    a cycle. To avoid this, we have to make a substitution for the result of
-    localization.
+    When we expand T from I, the upper bound contains `this::T`. Naively
+    localizing that bound would expand T from I again, producing a cycle.
+    This function breaks the cycle by replacing `this::T` in the decl-phase
+    bound with a mangled Tgeneric whose name matches the generic that
+    [type_of_result] will create for this access, establishing a fixpoint.
 
-    Since any type constant triggering this case is abstract, we know that the
-    receiver (`this`) will be an 'expression dependent' type and we only need
-    to rewrite in this case.
+    We need to determine a [this_name] prefix so that the replacement
+    generic `this_name::T` matches what [type_of_result] / [tp_name]
+    produces. There are two cases, distinguished by what [this_ty] is
+    when we reach this function:
 
-    We therefore know that resulting type is the mangled generic we use to
-    represent accesses on expression dependent types.
+    {v
+      Example            | Receiver type        | make_with_dep_kind    | this_ty                      | this_name
+      -------------------|----------------------|-----------------------|------------------------------|---------------------
+      I $i; $i->next()   | Tclass(I, nonexact)  | wraps in Tdependent   | Tdependent(DTexpr e1, ...)   | Expression_id e1
+      this::TB $b;       | Tgeneric("C::TB")    | no-op (has "::")      | Tgeneric("C::TB")            | "C::TB"
+        $b->next()       |                      |                       |                              |
+    v}
 
-    This function transforms a decl_ty looking for occurrences of an access
-    of the [type_const_name] on [TThis] and replaces them with a mangled generic
-    obtained by appending the [type_const_name] to the string representation of
-    the expression dependent type we are accessing through. *)
+    Case 1 — [this_ty] is [Tdependent (DTexpr expr_id, _)]:
+      The receiver is a concrete class type. [ExprDepTy.make_with_dep_kind]
+      wraps it in [Tdependent], and the [Tdependent] case in [expand] uses
+      [DependentKind.to_string] (= [Expression_id.display]) as the
+      outermost name in the abstract result chain. So we use
+      [Expression_id.display expr_id] as [this_name].
+
+    Case 2 — [this_ty] is [Tgeneric s] where [s] is an expression-dependent
+    generic (its name contains "::"):
+      The receiver is itself the result of a type constant access (e.g.
+      [this::TBuilder] localizes to [Tgeneric("C::TBuilder")]). When
+      [$b->next()] is called, [ExprDepTy.make_with_dep_kind] sees that the
+      receiver type is a generic whose name already contains "::" and
+      returns it without [Tdependent] wrapping (see
+      [typing_dependent_type.ml], the [is_generic_dep_ty] guard). The
+      [Tgeneric] case in [expand] uses the generic name directly via
+      [update_class_name], so [type_of_result] / [tp_name] will produce
+      ["C::TBuilder::T"]. We therefore use the generic name [s] as
+      [this_name].
+
+    In both cases the replacement generic name is [this_name :: T], which
+    is exactly the name that [type_of_result] will register in the typing
+    environment with the refined upper bound, establishing the fixpoint. *)
 let eliminate_recursive_access ty type_const_name this_ty =
-  match get_node this_ty with
-  | Tdependent (DTexpr expr_id, _) ->
-    let this_name = Expression_id.display expr_id in
-    let on_ty ty ~ctx =
-      match deref ty with
-      | (reason, Taccess (root_ty, (_, name)))
-        when String.equal name type_const_name -> begin
-        match get_node root_ty with
-        | Tthis ->
-          let ty =
-            mk
-              ( reason,
-                Tgeneric (Format.sprintf "%s::%s" this_name type_const_name) )
-          in
-          (ctx, `Stop ty)
+  let this_name_opt =
+    match get_node this_ty with
+    | Tdependent (DTexpr expr_id, _) -> Some (Expression_id.display expr_id)
+    | Tgeneric s when String.equal s Naming_special_names.Typehints.this ->
+      (* [is_generic_dep_ty] matches "this", so without this guard we'd
+         fall into the case below and replace Taccess(Tthis, T) with
+         Tgeneric "this::T". That substitution is a valid fixpoint, but it
+         prevents cycle detection from firing during localization in
+         [to_tys] below. We rely on cycle detection there to add back
+         supportdyn<mixed> as an upper bound under everything_sdt (see
+         the comment in [to_tys]). Skipping the substitution here keeps
+         the bound as Taccess(Tthis, T), which triggers the cycle and the
+         supportdyn<mixed> fallback.
+
+         A cleaner fix would be to add supportdyn<mixed> at the decl
+         level in [maybe_add_supportdyn_bound] (decl_folded_class.ml) by
+         intersecting it with any existing explicit bound, making this
+         special case unnecessary. *)
+      None
+    | Tgeneric s when DependentKind.is_generic_dep_ty s -> Some s
+    | _ -> None
+  in
+  Option.value_map this_name_opt ~default:ty ~f:(fun this_name ->
+      let on_ty ty ~ctx =
+        match deref ty with
+        | (reason, Taccess (root_ty, (_, name)))
+          when String.equal name type_const_name -> begin
+          match get_node root_ty with
+          | Tthis ->
+            let ty =
+              mk
+                ( reason,
+                  Tgeneric (Format.sprintf "%s::%s" this_name type_const_name)
+                )
+            in
+            (ctx, `Stop ty)
+          | _ -> (ctx, `Continue ty)
+        end
         | _ -> (ctx, `Continue ty)
-      end
-      | _ -> (ctx, `Continue ty)
-    and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in
-    Typing_defs_core.transform_top_down_decl_ty ty ~on_ty ~on_rc_bound ~ctx:()
-  | _ -> ty
+      and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in
+      Typing_defs_core.transform_top_down_decl_ty ty ~on_ty ~on_rc_bound ~ctx:())
 
 (** [create_root_from_type_constant ctx env root class_name class_]
   looks up a type constant in a class and returns a `result`. More precisely, it looks up
@@ -279,6 +324,23 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
         in
         let ((env, e1, cycles_lower), lower_bounds) = to_tys env lower in
         let ((env, e2, cycles_upper), upper_bounds) = to_tys env upper in
+        (* Under everything_sdt, abstract type constants without an
+           explicit bound get supportdyn<mixed> as their upper bound
+           (see maybe_add_supportdyn_bound in decl_folded_class.ml).
+           When the only upper bound is self-referential and gets dropped
+           by cycle detection above, we must add back supportdyn<mixed>
+           so that the type constant remains compatible with SDT
+           requirements. *)
+        let upper_bounds =
+          if
+            TySet.is_empty upper_bounds
+            && Option.is_some upper
+            && TypecheckerOptions.everything_sdt (Env.get_tcopt env)
+          then
+            TySet.singleton (MakeType.supportdyn_mixed Reason.none)
+          else
+            upper_bounds
+        in
         let (res, e3) = abstract_or_exact env ~lower_bounds ~upper_bounds in
         let ty_err_opt =
           Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3]

@@ -189,7 +189,7 @@ end = struct
       match diagnostic.User_diagnostic.severity with
       | User_diagnostic.Err ->
         { state with extra_error_count = state.extra_error_count + 1 }
-      | User_diagnostic.Warning ->
+      | User_diagnostic.Warning _ ->
         { state with extra_warning_count = state.extra_warning_count + 1 }
 
   let print_extra_diagnostics_if_any

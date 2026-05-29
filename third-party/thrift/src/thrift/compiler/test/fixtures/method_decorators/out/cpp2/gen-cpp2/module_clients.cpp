@@ -273,32 +273,15 @@ void apache::thrift::Client<::cpp2::DecoratedService>::noop(folly::Function<void
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::DecoratedService>::recv_wrapped_noop(::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::DecoratedService_noop_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state);
+  });
 }
 
 void apache::thrift::Client<::cpp2::DecoratedService>::recv_noop(::apache::thrift::ClientReceiveState& state) {
@@ -479,32 +462,15 @@ void apache::thrift::Client<::cpp2::DecoratedService>::echo(folly::Function<void
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::DecoratedService>::recv_wrapped_echo(::std::string& _return, ::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::DecoratedService_echo_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state, _return);
+  });
 }
 
 void apache::thrift::Client<::cpp2::DecoratedService>::recv_echo(::std::string& _return, ::apache::thrift::ClientReceiveState& state) {
@@ -687,32 +653,15 @@ void apache::thrift::Client<::cpp2::DecoratedService>::increment(folly::Function
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::DecoratedService>::recv_wrapped_increment(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::DecoratedService_increment_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state, _return);
+  });
 }
 
 ::std::int64_t apache::thrift::Client<::cpp2::DecoratedService>::recv_increment(::apache::thrift::ClientReceiveState& state) {
@@ -897,32 +846,15 @@ void apache::thrift::Client<::cpp2::DecoratedService>::sum(folly::Function<void 
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::DecoratedService>::recv_wrapped_sum(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::DecoratedService_sum_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state, _return);
+  });
 }
 
 ::std::int64_t apache::thrift::Client<::cpp2::DecoratedService>::recv_sum(::apache::thrift::ClientReceiveState& state) {
@@ -1105,32 +1037,15 @@ void apache::thrift::Client<::cpp2::DecoratedService>::withStruct(folly::Functio
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::DecoratedService>::recv_wrapped_withStruct(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::DecoratedService_withStruct_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state, _return);
+  });
 }
 
 void apache::thrift::Client<::cpp2::DecoratedService>::recv_withStruct(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state) {
@@ -1313,32 +1228,15 @@ void apache::thrift::Client<::cpp2::DecoratedService>::multiParam(folly::Functio
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::DecoratedService>::recv_wrapped_multiParam(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::DecoratedService_multiParam_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state, _return);
+  });
 }
 
 void apache::thrift::Client<::cpp2::DecoratedService>::recv_multiParam(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state) {
@@ -1521,32 +1419,15 @@ std::pair<
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::DecoratedService>::recv_wrapped_echoInteraction(::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::DecoratedService_echoInteraction_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state);
+  });
 }
 
 void apache::thrift::Client<::cpp2::DecoratedService>::recv_echoInteraction(::apache::thrift::ClientReceiveState& state) {
@@ -1722,32 +1603,15 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::DecoratedService>:
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::DecoratedService>::LegacyPerforms::recv_wrapped_perform(::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::DecoratedService_LegacyPerforms_perform_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state);
+  });
 }
 void apache::thrift::Client<::cpp2::DecoratedService>::LegacyPerforms::recv_perform(::apache::thrift::ClientReceiveState& state) {
   auto ew = recv_wrapped_perform(state);
@@ -1921,32 +1785,15 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DecoratedService
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::DecoratedService>::EchoInteraction::recv_wrapped_interactionEcho(::std::string& _return, ::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::DecoratedService_EchoInteraction_interactionEcho_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state, _return);
+  });
 }
 void apache::thrift::Client<::cpp2::DecoratedService>::EchoInteraction::recv_interactionEcho(::std::string& _return, ::apache::thrift::ClientReceiveState& state) {
   auto ew = recv_wrapped_interactionEcho(_return, state);
@@ -2214,32 +2061,15 @@ void apache::thrift::Client<::cpp2::UndecoratedService>::noop(folly::Function<vo
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::UndecoratedService>::recv_wrapped_noop(::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::UndecoratedService_noop_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state);
+  });
 }
 
 void apache::thrift::Client<::cpp2::UndecoratedService>::recv_noop(::apache::thrift::ClientReceiveState& state) {
@@ -2420,32 +2250,15 @@ void apache::thrift::Client<::cpp2::UndecoratedService>::echo(folly::Function<vo
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::UndecoratedService>::recv_wrapped_echo(::std::string& _return, ::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::UndecoratedService_echo_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state, _return);
+  });
 }
 
 void apache::thrift::Client<::cpp2::UndecoratedService>::recv_echo(::std::string& _return, ::apache::thrift::ClientReceiveState& state) {
@@ -2628,32 +2441,15 @@ void apache::thrift::Client<::cpp2::UndecoratedService>::increment(folly::Functi
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::UndecoratedService>::recv_wrapped_increment(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::UndecoratedService_increment_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state, _return);
+  });
 }
 
 ::std::int64_t apache::thrift::Client<::cpp2::UndecoratedService>::recv_increment(::apache::thrift::ClientReceiveState& state) {
@@ -2838,32 +2634,15 @@ void apache::thrift::Client<::cpp2::UndecoratedService>::sum(folly::Function<voi
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::UndecoratedService>::recv_wrapped_sum(::std::int64_t& _return, ::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::UndecoratedService_sum_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state, _return);
+  });
 }
 
 ::std::int64_t apache::thrift::Client<::cpp2::UndecoratedService>::recv_sum(::apache::thrift::ClientReceiveState& state) {
@@ -3046,32 +2825,15 @@ void apache::thrift::Client<::cpp2::UndecoratedService>::withStruct(folly::Funct
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::UndecoratedService>::recv_wrapped_withStruct(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::UndecoratedService_withStruct_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state, _return);
+  });
 }
 
 void apache::thrift::Client<::cpp2::UndecoratedService>::recv_withStruct(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state) {
@@ -3254,32 +3016,15 @@ void apache::thrift::Client<::cpp2::UndecoratedService>::multiParam(folly::Funct
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::UndecoratedService>::recv_wrapped_multiParam(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::UndecoratedService_multiParam_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state, _return);
+  });
 }
 
 void apache::thrift::Client<::cpp2::UndecoratedService>::recv_multiParam(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state) {
@@ -3460,32 +3205,15 @@ void apache::thrift::Client<::cpp2::UndecoratedService>::adaptedRequest(folly::F
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::UndecoratedService>::recv_wrapped_adaptedRequest(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::UndecoratedService_adaptedRequest_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state, _return);
+  });
 }
 
 void apache::thrift::Client<::cpp2::UndecoratedService>::recv_adaptedRequest(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state) {
@@ -3685,32 +3413,15 @@ void apache::thrift::Client<::cpp2::DecoratedService_ExtendsUndecoratedService>:
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::DecoratedService_ExtendsUndecoratedService>::recv_wrapped_extension(::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::DecoratedService_ExtendsUndecoratedService_extension_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state);
+  });
 }
 
 void apache::thrift::Client<::cpp2::DecoratedService_ExtendsUndecoratedService>::recv_extension(::apache::thrift::ClientReceiveState& state) {
@@ -3910,32 +3621,15 @@ void apache::thrift::Client<::cpp2::DecoratedService_ExtendsDecoratedService>::e
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::DecoratedService_ExtendsDecoratedService>::recv_wrapped_extension(::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::DecoratedService_ExtendsDecoratedService_extension_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state);
+  });
 }
 
 void apache::thrift::Client<::cpp2::DecoratedService_ExtendsDecoratedService>::recv_extension(::apache::thrift::ClientReceiveState& state) {
@@ -4135,32 +3829,15 @@ void apache::thrift::Client<::cpp2::UndecoratedService_ExtendsDecoratedService>:
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::UndecoratedService_ExtendsDecoratedService>::recv_wrapped_extension(::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::UndecoratedService_ExtendsDecoratedService_extension_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state);
+  });
 }
 
 void apache::thrift::Client<::cpp2::UndecoratedService_ExtendsDecoratedService>::recv_extension(::apache::thrift::ClientReceiveState& state) {
@@ -4361,32 +4038,15 @@ void apache::thrift::Client<::cpp2::DecoratedService_ExtendsUndecoratedService_E
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper apache::thrift::Client<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::recv_wrapped_secondExtension(::std::string& _return, ::apache::thrift::ClientReceiveState& state) {
-  if (state.isException()) {
-    return std::move(state.exception());
-  }
-  if (!state.hasResponseBuffer()) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+    if (auto ew = apache::thrift::detail::ac::check_recv_state(state)) {
+    return ew;
   }
 
   using result = ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService_secondExtension_presult;
-  switch (state.protocolId()) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL:
-    {
-      apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
-    {
-      apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result>(
-          &reader, state, _return);
-    }
-    default:
-    {
-    }
-  }
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+  return apache::thrift::detail::ac::withProtocolReader(state.protocolId(), [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(
+        &reader, state, _return);
+  });
 }
 
 void apache::thrift::Client<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::recv_secondExtension(::std::string& _return, ::apache::thrift::ClientReceiveState& state) {

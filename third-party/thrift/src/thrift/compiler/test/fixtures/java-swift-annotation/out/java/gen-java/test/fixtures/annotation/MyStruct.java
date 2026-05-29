@@ -52,11 +52,11 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(MyStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -74,35 +74,35 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
 
         public long getIntField() { return intField; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="stringField", requiredness=Requiredness.NONE)    public Builder setStringField(String stringField) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="stringField", requiredness=Requiredness.NONE)    public Builder setStringField(String stringField) {
             this.stringField = stringField;
             return this;
         }
 
         public String getStringField() { return stringField; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="detailField", requiredness=Requiredness.NONE)    public Builder setDetailField(String detailField) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="detailField", requiredness=Requiredness.NONE)    public Builder setDetailField(String detailField) {
             this.detailField = detailField;
             return this;
         }
 
         public String getDetailField() { return detailField; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="detailMap", requiredness=Requiredness.NONE)    public Builder setDetailMap(com.foo.FastIntLongMap detailMap) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="detailMap", requiredness=Requiredness.NONE)    public Builder setDetailMap(com.foo.FastIntLongMap detailMap) {
             this.detailMap = detailMap;
             return this;
         }
 
         public com.foo.FastIntLongMap getDetailMap() { return detailMap; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="titi", requiredness=Requiredness.NONE)    public Builder setToto(String toto) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="titi", requiredness=Requiredness.NONE)    public Builder setToto(String toto) {
             this.toto = toto;
             return this;
         }
 
         public String getToto() { return toto; }
 
-            @org.apache.thrift.annotations.Sensitive
+        @org.apache.thrift.annotations.Sensitive
         @com.facebook.swift.codec.ThriftField(value=6, name="password", requiredness=Requiredness.NONE)    public Builder setPassword(String password) {
             this.password = password;
             return this;
@@ -133,6 +133,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -141,68 +142,57 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     private final long intField;
     public static final int _INTFIELD = 1;
     private static final TField INT_FIELD_FIELD_DESC = new TField("intField", TType.I64, (short)1);
-        @com.foo.Bar("BAZ") private final String stringField;
+    @com.foo.Bar("BAZ") private final String stringField;
     public static final int _STRINGFIELD = 2;
     private static final TField STRING_FIELD_FIELD_DESC = new TField("stringField", TType.STRING, (short)2);
-        @com.foo.Ignored private final String detailField;
+    @com.foo.Ignored private final String detailField;
     public static final int _DETAILFIELD = 3;
     private static final TField DETAIL_FIELD_FIELD_DESC = new TField("detailField", TType.STRING, (short)3);
-        @com.foo.Ignored private final com.foo.FastIntLongMap detailMap;
+    @com.foo.Ignored private final com.foo.FastIntLongMap detailMap;
     public static final int _DETAILMAP = 4;
     private static final TField DETAIL_MAP_FIELD_DESC = new TField("detailMap", TType.MAP, (short)4);
-        private final String toto;
+    private final String toto;
     public static final int _TITI = 5;
     private static final TField TOTO_FIELD_DESC = new TField("titi", TType.STRING, (short)5);
-        @org.apache.thrift.annotations.Sensitive
+    @org.apache.thrift.annotations.Sensitive
     private final String password;
     public static final int _PASSWORD = 6;
     private static final TField PASSWORD_FIELD_DESC = new TField("password", TType.STRING, (short)6);
     static {
-      NAMES_TO_IDS.put("intField", 1);
-      THRIFT_NAMES_TO_IDS.put("intField", 1);
-      FIELD_METADATA.put(1, INT_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("stringField", 2);
-      THRIFT_NAMES_TO_IDS.put("stringField", 2);
-      FIELD_METADATA.put(2, STRING_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("detailField", 3);
-      THRIFT_NAMES_TO_IDS.put("detailField", 3);
-      FIELD_METADATA.put(3, DETAIL_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("detailMap", 4);
-      THRIFT_NAMES_TO_IDS.put("detailMap", 4);
-      FIELD_METADATA.put(4, DETAIL_MAP_FIELD_DESC);
-      NAMES_TO_IDS.put("toto", 5);
-      THRIFT_NAMES_TO_IDS.put("titi", 5);
-      FIELD_METADATA.put(5, TOTO_FIELD_DESC);
-      NAMES_TO_IDS.put("password", 6);
-      THRIFT_NAMES_TO_IDS.put("password", 6);
-      FIELD_METADATA.put(6, PASSWORD_FIELD_DESC);
+        NAMES_TO_IDS.put("intField", 1);
+        THRIFT_NAMES_TO_IDS.put("intField", 1);
+        FIELD_METADATA.put(1, INT_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("stringField", 2);
+        THRIFT_NAMES_TO_IDS.put("stringField", 2);
+        FIELD_METADATA.put(2, STRING_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("detailField", 3);
+        THRIFT_NAMES_TO_IDS.put("detailField", 3);
+        FIELD_METADATA.put(3, DETAIL_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("detailMap", 4);
+        THRIFT_NAMES_TO_IDS.put("detailMap", 4);
+        FIELD_METADATA.put(4, DETAIL_MAP_FIELD_DESC);
+        NAMES_TO_IDS.put("toto", 5);
+        THRIFT_NAMES_TO_IDS.put("titi", 5);
+        FIELD_METADATA.put(5, TOTO_FIELD_DESC);
+        NAMES_TO_IDS.put("password", 6);
+        THRIFT_NAMES_TO_IDS.put("password", 6);
+        FIELD_METADATA.put(6, PASSWORD_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE)
     public long getIntField() { return intField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="stringField", requiredness=Requiredness.NONE)
     public String getStringField() { return stringField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="detailField", requiredness=Requiredness.NONE)
     public String getDetailField() { return detailField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="detailMap", requiredness=Requiredness.NONE)
     public com.foo.FastIntLongMap getDetailMap() { return detailMap; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="titi", requiredness=Requiredness.NONE)
     public String getToto() { return toto; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="password", requiredness=Requiredness.NONE)
     public String getPassword() { return password; }
@@ -244,157 +234,171 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(intField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(stringField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(detailField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(detailMap);
-            _hashCode = 31 * _hashCode + Objects.hashCode(toto);
-            _hashCode = 31 * _hashCode + Objects.hashCode(password);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(stringField);
+        _hashCode = 31 * _hashCode + Objects.hashCode(detailField);
+        _hashCode = 31 * _hashCode + Objects.hashCode(detailMap);
+        _hashCode = 31 * _hashCode + Objects.hashCode(toto);
+        _hashCode = 31 * _hashCode + Objects.hashCode(password);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyStruct> asReader() {
       return MyStruct::read0;
     }
 
     public static MyStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
-      MyStruct.Builder builder = new MyStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _INTFIELD:
-          if (__field.type == TType.I64) {
-            long intField = oprot.readI64();
-            builder.setIntField(intField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _STRINGFIELD:
-          if (__field.type == TType.STRING) {
-            String stringField = oprot.readString();
-            builder.setStringField(stringField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _DETAILFIELD:
-          if (__field.type == TType.STRING) {
-            String detailField = oprot.readString();
-            builder.setDetailField(detailField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _DETAILMAP:
-          if (__field.type == TType.MAP) {
-            com.foo.FastIntLongMap detailMap;
-                {
-                TMap _map = oprot.readMapBegin();
-                detailMap = new com.foo.FastIntLongMap();
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    int _key1 = oprot.readI32();
-                    long _value1 = oprot.readI64();
-                    detailMap.put(_key1, _value1);
+        TField __field;
+        oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
+        MyStruct.Builder builder = new MyStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _INTFIELD:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setIntField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
+                break;
+            case _STRINGFIELD:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setStringField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readMapEnd();
-            builder.setDetailMap(detailMap);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _TITI:
-          if (__field.type == TType.STRING) {
-            String toto = oprot.readString();
-            builder.setToto(toto);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _PASSWORD:
-          if (__field.type == TType.STRING) {
-            String password = oprot.readString();
-            builder.setPassword(password);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            case _DETAILFIELD:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setDetailField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _DETAILMAP:
+                if (__field.type == TType.MAP) {
+                    com.foo.FastIntLongMap _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new com.foo.FastIntLongMap();
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            int _fbthriftKey1;
+                            long _fbthriftValue1;
+
+                            {
+                                int _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI32();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                long _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI64();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setDetailMap(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _TITI:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setToto(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _PASSWORD:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setPassword(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.intField;
-      oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.stringField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(STRING_FIELD_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.detailField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(DETAIL_FIELD_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      com.foo.FastIntLongMap _iter0 = this.detailMap;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(DETAIL_MAP_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I32, TType.I64, _iter0.size()));
-            for (Map.Entry<Integer, Long> _iter1 : _iter0.entrySet()) {
-              {
-                Integer _iter2 = _iter1.getKey();
-                oprot.writeI32(_iter2);
-              }
-              {
-                Long _iter2 = _iter1.getValue();
-                oprot.writeI64(_iter2);
-              }
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.intField;
+            oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.stringField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(STRING_FIELD_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.toto;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(TOTO_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.password;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(PASSWORD_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        {
+            String _fbthriftVar0 = this.detailField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(DETAIL_FIELD_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            com.foo.FastIntLongMap _fbthriftVar0 = this.detailMap;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(DETAIL_MAP_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I32, TType.I64, _fbthriftVar0.size()));
+                for (Map.Entry<Integer, Long> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Integer _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI32(_fbthriftVar2);
+                    }
+                    {
+                        Long _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeI64(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.toto;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(TOTO_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.password;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(PASSWORD_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _MyStructLazy {

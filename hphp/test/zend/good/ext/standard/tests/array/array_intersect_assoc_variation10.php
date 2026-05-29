@@ -13,7 +13,7 @@
 echo "*** Testing array_intersect_assoc() : binary safe checking ***\n";
 
 // array with binary values
-$arr_binary = vec[b"hello", b"world"];
+$arr_binary = vec["hello", "world"];
 // simple array
 $arr_normal = vec["hello", "world"];
 

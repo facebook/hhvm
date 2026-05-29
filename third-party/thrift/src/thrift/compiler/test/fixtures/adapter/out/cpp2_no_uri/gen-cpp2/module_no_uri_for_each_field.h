@@ -6,7 +6,7 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_metadata.h"
+#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_types.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
 
 namespace apache {

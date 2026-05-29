@@ -123,7 +123,10 @@ string(5) "?Test"
 
 *** return types
 ** Function/method return type 0
+bool(true)
 bool(false)
+bool(false)
+string(7) "HH\void"
 ** Function/method return type 1
 bool(true)
 bool(false)

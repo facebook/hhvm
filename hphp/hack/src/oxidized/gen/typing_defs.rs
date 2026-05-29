@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e269113b4bb46a8bb1439e75a1b4a68b>>
+// @generated SignedSource<<ef2f3312e2371c9943eab5efbe93cf07>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -200,6 +200,7 @@ pub struct FunElt {
     pub support_dynamic_type: bool,
     pub no_auto_dynamic: bool,
     pub no_auto_likes: bool,
+    pub gated_by_feature_flag: Option<String>,
     pub package_requirement: PackageRequirement,
 }
 

@@ -233,7 +233,7 @@ class FB303Service_renamed_rpc implements \IThriftSyncStruct, \IThriftStructMeta
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -341,14 +341,14 @@ class FB303Service_renamed_rpc_result extends \ThriftSyncStructWithResult implem
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'success') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyRenamedStruct>($parsed['success']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyRenamedStruct>($parsed['success']));
       $_tmp1 = \test\fixtures\basic\MyRenamedStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->success = $_tmp1;

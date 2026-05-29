@@ -117,8 +117,7 @@ class t_program : public t_named {
    * 2. else, if it does not already have an explicit URI, attempts to determine
    *    the URI using the first of the following:
    *    a. `@thrift.Uri` (structured annotation)
-   *    b. `thrift.uri` (deprecated, unstructured annotation)
-   *    c. Implicitly, using the `package` name (if any).
+   *    b. Implicitly, using the `package` name (if any).
    *
    * Finally, the given definition is indexed in the appropriate collection
    * depending on its actual type:
@@ -159,18 +158,10 @@ class t_program : public t_named {
     return *type_insts_.emplace_back(std::move(type_inst));
   }
 
-  void add_unnamed_typedef(std::unique_ptr<t_typedef> td) {
-    assert(td != nullptr);
-    nodes_.push_back(std::move(td));
-  }
-
   void add_unnamed_type(std::unique_ptr<t_type> ut) {
     assert(ut != nullptr);
     // Should use add_type_instantiation.
     assert(dynamic_cast<t_container*>(ut.get()) == nullptr);
-    // Should use add_placeholder_typedef.
-    assert(dynamic_cast<t_placeholder_typedef*>(ut.get()) == nullptr);
-    // Should use add_unnamed_typedef.
     assert(dynamic_cast<t_typedef*>(ut.get()) == nullptr);
     nodes_.push_back(std::move(ut));
   }

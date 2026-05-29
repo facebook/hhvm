@@ -47,9 +47,6 @@ let build_ocaml_hh_config contents =
     opts;
     gc_minor_heap_size = local_config.ServerLocalConfig.gc_minor_heap_size;
     gc_space_overhead = local_config.ServerLocalConfig.gc_space_overhead;
-    hackfmt_version = local_config.ServerLocalConfig.hackfmt_version;
-    sharedmem_dep_table_pow =
-      local_config.ServerLocalConfig.sharedmem_dep_table_pow;
     sharedmem_global_size = local_config.ServerLocalConfig.sharedmem_global_size;
     sharedmem_hash_table_pow =
       local_config.ServerLocalConfig.sharedmem_hash_table_pow;

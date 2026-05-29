@@ -940,6 +940,152 @@ TEST_F(ParserTest, each_else_missing_close) {
           2)));
 }
 
+TEST_F(ParserTest, each_block_with_separator_string_literal) {
+  auto ast = parse_ast(
+      R"({{#each items as |item| separator=", "}})"
+      "\n"
+      "{{/each}}"
+      "\n");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ each-block <line:1:1, line:2:10>\n"
+      "   ├─ expression <line:1:9, col:14> 'items'\n"
+      "   ├─ element-capture 'item'\n"
+      "   ╰─ separator '\", \"'\n");
+}
+
+TEST_F(ParserTest, each_block_with_separator_variable) {
+  auto ast = parse_ast(
+      "{{#each items as |item| separator=sep}}"
+      "\n"
+      "{{/each}}"
+      "\n");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ each-block <line:1:1, line:2:10>\n"
+      "   ├─ expression <line:1:9, col:14> 'items'\n"
+      "   ├─ element-capture 'item'\n"
+      "   ╰─ separator 'sep'\n");
+}
+
+TEST_F(ParserTest, each_block_with_separator_function_call) {
+  auto ast = parse_ast(
+      "{{#each items as |item| separator=(not true)}}"
+      "\n"
+      "{{/each}}"
+      "\n");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ each-block <line:1:1, line:2:10>\n"
+      "   ├─ expression <line:1:9, col:14> 'items'\n"
+      "   ├─ element-capture 'item'\n"
+      "   ╰─ separator '(not true)'\n");
+}
+
+TEST_F(ParserTest, each_block_with_separator_no_captures) {
+  auto ast = parse_ast(
+      R"({{#each items separator=", "}})"
+      "\n"
+      "{{/each}}"
+      "\n");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ each-block <line:1:1, line:2:10>\n"
+      "   ├─ expression <line:1:9, col:14> 'items'\n"
+      "   ╰─ separator '\", \"'\n");
+}
+
+TEST_F(ParserTest, each_block_with_separator_and_tilde) {
+  auto ast = parse_ast(
+      R"({{~ #each items as |item| separator=", " ~}})"
+      "\n"
+      "{{~ item ~}}"
+      "\n"
+      "{{~ /each ~}}");
+  auto result = to_string(ast);
+  EXPECT_THAT(
+      result, testing::HasSubstr("each-block [strip-left, strip-right]"));
+  EXPECT_THAT(result, testing::HasSubstr("element-capture 'item'"));
+  EXPECT_THAT(result, testing::HasSubstr("separator '\", \"'"));
+  EXPECT_THAT(result, testing::HasSubstr("close [strip-left, strip-right]"));
+}
+
+TEST_F(ParserTest, each_block_unknown_identifier_error) {
+  parse_ast_should_fail(
+      R"({{#each items as |item| unknown="x"}})"
+      "\n"
+      "{{/each}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "unexpected identifier 'unknown' in each-block opening tag. "
+          "Did you mean 'separator=<expression>'?",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_block_duplicate_separator_error) {
+  parse_ast_should_fail(
+      R"({{#each items separator=", " separator="; "}})"
+      "\n"
+      "{{/each}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "duplicate 'separator' clause in each-block",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_block_capture_named_separator_with_separator_clause) {
+  auto ast = parse_ast(
+      R"({{#each items as |separator| separator=", "}})"
+      "\n"
+      "{{/each}}"
+      "\n");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ each-block <line:1:1, line:2:10>\n"
+      "   ├─ expression <line:1:9, col:14> 'items'\n"
+      "   ├─ element-capture 'separator'\n"
+      "   ╰─ separator '\", \"'\n");
+}
+
+TEST_F(ParserTest, each_block_separator_missing_value_error) {
+  parse_ast_should_fail(
+      "{{#each items separator=}}"
+      "\n"
+      "{{/each}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected expression for separator value in each-block but found `}}`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_block_separator_missing_equals_error) {
+  parse_ast_should_fail(
+      "{{#each items separator}}"
+      "\n"
+      "{{/each}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `=` after 'separator' in each-block but found `}}`",
+          path_to_file(1),
+          1)));
+}
+
 TEST_F(ParserTest, literals) {
   auto ast = parse_ast(
       "{{null}}\n"
@@ -2122,6 +2268,370 @@ TEST_F(
       "│  ╰─ newline <line:4:2, line:5:1> '\\n'\n"
       "├─ text <line:6:1, col:9> '| A Line'\n"
       "╰─ newline <line:6:9, line:7:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, tilde_interpolation_left) {
+  auto ast = parse_ast("{{~ foo }}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ interpolation [strip-left] <line:1:1, col:11> 'foo'\n");
+}
+
+TEST_F(ParserTest, tilde_interpolation_right) {
+  auto ast = parse_ast("{{ foo ~}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ interpolation [strip-right] <line:1:1, col:11> 'foo'\n");
+}
+
+TEST_F(ParserTest, tilde_interpolation_both) {
+  auto ast = parse_ast("{{~ foo ~}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ interpolation [strip-left, strip-right] <line:1:1, col:12> 'foo'\n");
+}
+
+TEST_F(ParserTest, tilde_no_tilde_preserves_default) {
+  // Verify that without tildes, no strip annotations appear in the AST dump.
+  auto ast = parse_ast("{{ foo }}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ interpolation <line:1:1, col:10> 'foo'\n");
+}
+
+TEST_F(ParserTest, tilde_comment_error) {
+  // {{~! is rejected by the lexer — whitespace is required between ~ and
+  // tag content. {{~ ! (with whitespace) is valid.
+  auto ast = try_parse_ast("text{{~! comment }}more");
+  EXPECT_THAT(
+      diagnostics,
+      testing::Contains(diagnostic(
+          diagnostic_level::error,
+          "whitespace is required between '~' and tag content in '{{~'",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, tilde_comment_left) {
+  auto ast = parse_ast("text{{~ ! comment }}more");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "├─ text <line:1:1, col:5> 'text'\n"
+      "├─ comment [strip-left] <line:1:5, col:21> ' comment '\n"
+      "╰─ text <line:1:21, col:25> 'more'\n");
+}
+
+TEST_F(ParserTest, tilde_comment_right) {
+  auto ast = parse_ast("text{{! comment ~}}more");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "├─ text <line:1:1, col:5> 'text'\n"
+      "├─ comment [strip-right] <line:1:5, col:20> ' comment '\n"
+      "╰─ text <line:1:20, col:24> 'more'\n");
+}
+
+TEST_F(ParserTest, tilde_comment_both) {
+  auto ast = parse_ast("text{{~ ! comment ~}}more");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "├─ text <line:1:1, col:5> 'text'\n"
+      "├─ comment [strip-left, strip-right] <line:1:5, col:22> ' comment '\n"
+      "╰─ text <line:1:22, col:26> 'more'\n");
+}
+
+TEST_F(ParserTest, tilde_escaped_comment_left) {
+  auto ast = parse_ast("text{{~ !-- comment --}}more");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "├─ text <line:1:1, col:5> 'text'\n"
+      "├─ comment [strip-left] <line:1:5, col:25> ' comment '\n"
+      "╰─ text <line:1:25, col:29> 'more'\n");
+}
+
+TEST_F(ParserTest, tilde_escaped_comment_right) {
+  auto ast = parse_ast("text{{!-- comment -- ~}}more");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "├─ text <line:1:1, col:5> 'text'\n"
+      "├─ comment [strip-right] <line:1:5, col:25> ' comment '\n"
+      "╰─ text <line:1:25, col:29> 'more'\n");
+}
+
+TEST_F(ParserTest, tilde_escaped_comment_both) {
+  auto ast = parse_ast("text{{~ !-- comment -- ~}}more");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "├─ text <line:1:1, col:5> 'text'\n"
+      "├─ comment [strip-left, strip-right] <line:1:5, col:27> ' comment '\n"
+      "╰─ text <line:1:27, col:31> 'more'\n");
+}
+
+TEST_F(ParserTest, tilde_section_block) {
+  auto ast = parse_ast(
+      "{{~ #news ~}}\n"
+      "  body\n"
+      "{{~ /news ~}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ section-block [strip-left, strip-right] <line:1:1, line:3:14>\n"
+      "   ├─ variable-lookup <line:1:6, col:10> 'news'\n"
+      "   ├─ text <line:2:1, col:7> 'body'\n"
+      "   ╰─ close [strip-left, strip-right]\n");
+}
+
+TEST_F(ParserTest, tilde_section_block_left_only) {
+  auto ast = parse_ast("{{~ #x }}body{{/x}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ section-block [strip-left] <line:1:1, col:20>\n"
+      "   ├─ variable-lookup <line:1:6, col:7> 'x'\n"
+      "   ╰─ text <line:1:10, col:14> 'body'\n");
+}
+
+TEST_F(ParserTest, tilde_if_block) {
+  auto ast = parse_ast("{{~ #if cond ~}}body{{~ /if cond ~}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ if-block [strip-left, strip-right] <line:1:1, col:37>\n"
+      "   ├─ expression <line:1:9, col:13> 'cond'\n"
+      "   ├─ text <line:1:17, col:21> 'body'\n"
+      "   ╰─ close [strip-left, strip-right]\n");
+}
+
+TEST_F(ParserTest, tilde_if_block_left_only) {
+  auto ast = parse_ast("{{~ #if cond }}body{{/if cond}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ if-block [strip-left] <line:1:1, col:32>\n"
+      "   ├─ expression <line:1:9, col:13> 'cond'\n"
+      "   ╰─ text <line:1:16, col:20> 'body'\n");
+}
+
+TEST_F(ParserTest, tilde_else_clause) {
+  auto ast = parse_ast("{{#if x}}yes{{~ #else ~}}no{{/if x}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ if-block <line:1:1, col:37>\n"
+      "   ├─ expression <line:1:7, col:8> 'x'\n"
+      "   ├─ text <line:1:10, col:13> 'yes'\n"
+      "   ╰─ else-block [strip-left, strip-right] <line:1:13, col:28>\n"
+      "      ╰─ text <line:1:26, col:28> 'no'\n");
+}
+
+TEST_F(ParserTest, tilde_else_if_clause) {
+  auto ast = parse_ast("{{#if a}}1{{~ #else if b ~}}2{{/if a}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ if-block <line:1:1, col:39>\n"
+      "   ├─ expression <line:1:7, col:8> 'a'\n"
+      "   ├─ text <line:1:10, col:11> '1'\n"
+      "   ╰─ else-if-block [strip-left, strip-right] <line:1:11, col:30>\n"
+      "      ╰─ text <line:1:29, col:30> '2'\n");
+}
+
+TEST_F(ParserTest, tilde_each_block) {
+  auto ast = parse_ast("{{~ #each items as |item| ~}}{{item}}{{~ /each ~}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ each-block [strip-left, strip-right] <line:1:1, col:51>\n"
+      "   ├─ expression <line:1:11, col:16> 'items'\n"
+      "   ├─ element-capture 'item'\n"
+      "   ├─ interpolation <line:1:30, col:38> 'item'\n"
+      "   ╰─ close [strip-left, strip-right]\n");
+}
+
+TEST_F(ParserTest, tilde_with_block) {
+  auto ast = parse_ast("{{~ #with obj ~}}{{name}}{{~ /with ~}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ with-block [strip-left, strip-right] <line:1:1, col:39>\n"
+      "   ├─ expression <line:1:11, col:14> 'obj'\n"
+      "   ├─ interpolation <line:1:18, col:26> 'name'\n"
+      "   ╰─ close [strip-left, strip-right]\n");
+}
+
+TEST_F(ParserTest, tilde_let_statement) {
+  auto ast = parse_ast("text{{~ #let x = 42 ~}}more");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "├─ text <line:1:1, col:5> 'text'\n"
+      "├─ let-statement [strip-left, strip-right] <line:1:5, col:24>\n"
+      "│  ├─ identifier 'x'\n"
+      "│  ╰─ expression <line:1:18, col:20> '42'\n"
+      "╰─ text <line:1:24, col:28> 'more'\n");
+}
+
+TEST_F(ParserTest, tilde_standalone_with_tilde) {
+  // Verify that standalone stripping still works with tildes.
+  // Standalone lines have their whitespace + newline stripped regardless.
+  // The left tilde on the close tag also strips the newline after "body".
+  auto ast = parse_ast(
+      "  {{~ #if cond ~}}\n"
+      "body\n"
+      "  {{~ /if cond ~}}\n");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ if-block [strip-left, strip-right] <line:1:3, line:3:19>\n"
+      "   ├─ expression <line:1:11, col:15> 'cond'\n"
+      "   ├─ text <line:2:1, col:5> 'body'\n"
+      "   ╰─ close [strip-left, strip-right]\n");
+}
+
+TEST_F(ParserTest, tilde_pragma_statement) {
+  auto ast = parse_ast(
+      "{{~ #pragma ignore-newlines ~}}\n"
+      "body\n");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "├─ header\n"
+      "│  ╰─ pragma-statement [strip-left, strip-right] 'ignore-newlines' <line:1:1, col:32>\n"
+      "├─ text <line:2:1, col:5> 'body'\n"
+      "╰─ newline <line:2:5, line:3:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, tilde_partial_statement) {
+  auto ast = parse_ast("text{{~ #partial foo ~}}more");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "├─ text <line:1:1, col:5> 'text'\n"
+      "├─ partial-statement [strip-left, strip-right] <line:1:5, col:25> 'foo'\n"
+      "╰─ text <line:1:25, col:29> 'more'\n");
+}
+
+TEST_F(ParserTest, tilde_macro) {
+  auto ast = parse_ast("text{{~ > path/to/tmpl ~}}more");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "├─ text <line:1:1, col:5> 'text'\n"
+      "├─ macro [strip-left, strip-right] <line:1:5, col:27> 'path/to/tmpl'\n"
+      "╰─ text <line:1:27, col:31> 'more'\n");
+}
+
+TEST_F(ParserTest, tilde_nested_blocks) {
+  auto ast = parse_ast(
+      "{{~ #if a ~}}\n"
+      "  {{~ #each items as |x| ~}}\n"
+      "    {{~ x ~}}\n"
+      "  {{~ /each ~}}\n"
+      "{{~ /if a ~}}\n");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ if-block [strip-left, strip-right] <line:1:1, line:5:14>\n"
+      "   ├─ expression <line:1:9, col:10> 'a'\n"
+      "   ├─ each-block [strip-left, strip-right] <line:2:3, line:4:16>\n"
+      "   │  ├─ expression <line:2:13, col:18> 'items'\n"
+      "   │  ├─ element-capture 'x'\n"
+      "   │  ├─ interpolation [strip-left, strip-right] <line:3:5, col:14> 'x'\n"
+      "   │  ╰─ close [strip-left, strip-right]\n"
+      "   ╰─ close [strip-left, strip-right]\n");
+}
+
+TEST_F(ParserTest, tilde_close_only) {
+  // Open tag has no tildes, but close tag has tildes.
+  // Verifies close_strip_whitespace is independent of strip_whitespace.
+  auto ast = parse_ast("{{#x}}body{{~ /x ~}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ section-block <line:1:1, col:21>\n"
+      "   ├─ variable-lookup <line:1:4, col:5> 'x'\n"
+      "   ├─ text <line:1:7, col:11> 'body'\n"
+      "   ╰─ close [strip-left, strip-right]\n");
+}
+
+TEST_F(ParserTest, tilde_open_and_close_differ) {
+  // Open has left tilde only, close has right tilde only.
+  auto ast = parse_ast("{{~ #x }}body{{/x ~}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ section-block [strip-left] <line:1:1, col:22>\n"
+      "   ├─ variable-lookup <line:1:6, col:7> 'x'\n"
+      "   ├─ text <line:1:10, col:14> 'body'\n"
+      "   ╰─ close [strip-right]\n");
+}
+
+TEST_F(ParserTest, tilde_if_block_close_strip_whitespace) {
+  // If-block with no open tilde but close tag has tildes.
+  auto ast = parse_ast("{{#if x}}body{{~ /if x ~}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ if-block <line:1:1, col:27>\n"
+      "   ├─ expression <line:1:7, col:8> 'x'\n"
+      "   ├─ text <line:1:10, col:14> 'body'\n"
+      "   ╰─ close [strip-left, strip-right]\n");
+}
+
+TEST_F(ParserTest, tilde_each_block_with_else_and_close) {
+  auto ast = parse_ast(
+      "{{~ #each items as |item| ~}}"
+      "{{item}}"
+      "{{~ #else ~}}"
+      "none"
+      "{{~ /each ~}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ each-block [strip-left, strip-right] <line:1:1, col:68>\n"
+      "   ├─ expression <line:1:11, col:16> 'items'\n"
+      "   ├─ element-capture 'item'\n"
+      "   ├─ interpolation <line:1:30, col:38> 'item'\n"
+      "   ├─ else-block [strip-left, strip-right] <line:1:38, col:55>\n"
+      "   │  ╰─ text <line:1:51, col:55> 'none'\n"
+      "   ╰─ close [strip-left, strip-right]\n");
+}
+
+TEST_F(ParserTest, tilde_import_statement_left_error) {
+  // Import statements do not support tilde stripping (left side).
+  parse_ast_should_fail(
+      "{{~ #import \"foo.whisker\" as foo}}\n"
+      "body\n");
+  EXPECT_THAT(
+      diagnostics,
+      testing::Contains(diagnostic(
+          diagnostic_level::error,
+          "tilde whitespace stripping is not supported on import statements",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, tilde_import_statement_right_error) {
+  // Import statements do not support tilde stripping (right side).
+  parse_ast_should_fail(
+      "{{#import \"foo.whisker\" as foo ~}}\n"
+      "body\n");
+  EXPECT_THAT(
+      diagnostics,
+      testing::Contains(diagnostic(
+          diagnostic_level::error,
+          "tilde whitespace stripping is not supported on import statements",
+          path_to_file(1),
+          1)));
 }
 
 } // namespace whisker

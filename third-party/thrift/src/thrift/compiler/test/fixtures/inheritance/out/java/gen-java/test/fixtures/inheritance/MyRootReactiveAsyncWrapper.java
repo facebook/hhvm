@@ -14,17 +14,17 @@ public class MyRootReactiveAsyncWrapper
   private MyRoot.Reactive _delegate;
 
   public MyRootReactiveAsyncWrapper(MyRoot.Reactive _delegate) {
-    
-    this._delegate = _delegate;
+      
+      this._delegate = _delegate;
   }
 
   public MyRootReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new MyRootReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new MyRootReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
   @java.lang.Override
@@ -41,7 +41,7 @@ public class MyRootReactiveAsyncWrapper
   @java.lang.Override
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> doRootWrapper(
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.doRootWrapper( rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.doRootWrapper( rpcOptions));
   }
 
 }

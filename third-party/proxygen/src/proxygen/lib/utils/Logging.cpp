@@ -11,7 +11,7 @@
 #include <folly/Format.h>
 #include <folly/Singleton.h>
 #include <folly/String.h>
-#include <folly/experimental/symbolizer/Symbolizer.h>
+#include <folly/debugging/symbolizer/Symbolizer.h>
 #include <fstream>
 #include <memory>
 #include <ostream>

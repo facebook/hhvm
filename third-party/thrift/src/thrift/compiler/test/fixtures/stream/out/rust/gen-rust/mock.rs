@@ -13,7 +13,7 @@
 //! service MyService {
 //!     FunctionResponse myFunction(
 //!         1: FunctionRequest request,
-//!     ) throws {
+//!     ) throws (
 //!         1: StorageException s,
 //!         2: NotFoundException n,
 //!     ),

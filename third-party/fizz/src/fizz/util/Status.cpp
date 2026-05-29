@@ -32,6 +32,10 @@ void Error::throwException() const {
       throw std::logic_error(msg);
     case Error::Category::StdOutOfRange:
       throw std::out_of_range(msg);
+    case Error::Category::StdBadAlloc:
+      throw std::bad_alloc();
+    case Error::Category::Unknown:
+      throw std::exception();
   }
 }
 folly::exception_wrapper Error::toException() const {
@@ -51,6 +55,10 @@ folly::exception_wrapper Error::toException() const {
       return folly::make_exception_wrapper<std::logic_error>(msg());
     case Error::Category::StdOutOfRange:
       return folly::make_exception_wrapper<std::out_of_range>(msg());
+    case Error::Category::StdBadAlloc:
+      return folly::make_exception_wrapper<std::bad_alloc>();
+    case Error::Category::Unknown:
+      return folly::make_exception_wrapper<std::exception>();
   }
   return {};
 }

@@ -64,9 +64,9 @@ public class AdapterServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        test.fixtures.adapter.CountingStruct _iter0 = (test.fixtures.adapter.CountingStruct)_r;
+        test.fixtures.adapter.CountingStruct _fbthriftVar0 = (test.fixtures.adapter.CountingStruct)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.STRUCT_FIELD);
-        _iter0.write0(oprot);
+        _fbthriftVar0.write0(oprot);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -151,9 +151,9 @@ public class AdapterServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        test.fixtures.adapter.HeapAllocated _iter0 = (test.fixtures.adapter.HeapAllocated)_r;
+        test.fixtures.adapter.HeapAllocated _fbthriftVar0 = (test.fixtures.adapter.HeapAllocated)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.STRUCT_FIELD);
-        _iter0.write0(oprot);
+        _fbthriftVar0.write0(oprot);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();

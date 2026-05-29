@@ -57,4 +57,5 @@ public class BoxServiceAsyncReactiveWrapper
     public BoxedInteraction createBoxedInteraction() {
         return new BoxedInteractionImpl(_delegate.createBoxedInteraction());
     }
+
 }

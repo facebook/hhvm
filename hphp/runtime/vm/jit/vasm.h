@@ -139,7 +139,7 @@ void removeTrivialNops(Vunit&);
 void reuseImmq(Vunit&);
 template<typename Folder> void foldImms(Vunit&);
 void simplify(Vunit&);
-void postRASimplify(Vunit&);
+void postRASimplify(Vunit&, const Abi&);
 void sfPeepholes(Vunit&, const Abi&);
 void fixupVmfpUses(Vunit& unit);
 

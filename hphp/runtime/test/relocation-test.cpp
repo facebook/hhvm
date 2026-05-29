@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __aarch64__
+
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/util/arch.h"
@@ -22,11 +24,11 @@
 
 #include <gtest/gtest.h>
 
-using namespace vixl;
-
 namespace HPHP::jit {
 
 namespace arm {
+
+using namespace vixl;
 
 uint8_t* code_;
 size_t blockSize_ = 4096;
@@ -62,11 +64,6 @@ void freeBlocks() {
  *     br $tmp
  */
 TEST(Relocation, RelocateBccImm2MovzMovkBccReg) {
-  if (arch::get() != Arch::ARM) {
-    SUCCEED();
-    return;
-  }
-
   // 1. Init
   CodeBlock main;
   DataBlock data;
@@ -127,11 +124,6 @@ TEST(Relocation, RelocateBccImm2MovzMovkBccReg) {
  *     br $tmp
  */
 TEST(Relocation, RelocateCbz2MovzMovkCbnzReg) {
-  if (arch::get() != Arch::ARM) {
-    SUCCEED();
-    return;
-  }
-
   // 1. Init
   CodeBlock main;
   DataBlock data;
@@ -192,11 +184,6 @@ TEST(Relocation, RelocateCbz2MovzMovkCbnzReg) {
  *     br $tmp
  */
 TEST(Relocation, RelocateTbz2MovzMovkTbnzReg) {
-  if (arch::get() != Arch::ARM) {
-    SUCCEED();
-    return;
-  }
-
   // 1. Init
   CodeBlock main;
   DataBlock data;
@@ -251,12 +238,6 @@ TEST(Relocation, RelocateTbz2MovzMovkTbnzReg) {
  * See arm::relocateImmediateHelper().
  */
 TEST(Relocation, RelocateMovzMovkLdr2LdrLiteral) {
-
-  if (arch::get() != Arch::ARM) {
-    SUCCEED();
-    return;
-  }
-
   // 1. Init
   CodeBlock main;
   DataBlock data;
@@ -298,11 +279,6 @@ TEST(Relocation, RelocateMovzMovkLdr2LdrLiteral) {
  * movz/movk is relocated. See arm::relocateImmediateHelper().
  */
 TEST(Relocation, RelocateAdjustedMovzMovk) {
-  if (arch::get() != Arch::ARM) {
-    SUCCEED();
-    return;
-  }
-
   // 1. Init
   CodeBlock main;
   DataBlock data;
@@ -349,11 +325,6 @@ TEST(Relocation, RelocateAdjustedMovzMovk) {
  * relocateImpl().
  */
 TEST(Relocation, RelocateInternalAdjustedMovzMovk) {
-  if (arch::get() != Arch::ARM) {
-    SUCCEED();
-    return;
-  }
-
   // 1. Init
   CodeBlock main;
   DataBlock data;
@@ -397,11 +368,6 @@ TEST(Relocation, RelocateInternalAdjustedMovzMovk) {
  * is relocated. See arm::adjustInstruction().
  */
 TEST(Relocation, AdjustMovzMovk) {
-  if (arch::get() != Arch::ARM) {
-    SUCCEED();
-    return;
-  }
-
   // 1. Init
   CodeBlock main;
   DataBlock data;
@@ -444,3 +410,5 @@ TEST(Relocation, AdjustMovzMovk) {
 }
 
 }}
+
+#endif

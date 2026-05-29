@@ -283,3 +283,16 @@ val filter_out_mergebase_warnings : Warnings_saved_state.t option -> t -> t
 val filter_out_warnings : t -> t
 
 val make_warning_saved_state : t -> Warnings_saved_state.t
+
+(** Run [f] in an isolated error context and return the set of
+    [(code, pos)] pairs for any warnings produced. The warnings
+    are not added to the current accumulator. *)
+val collect_warning_keys : (unit -> unit) -> (int * Pos.t) list
+
+(** For each accumulated warning with [is_trusted = false] whose
+    [(code, pos)] appears in [keys], set [is_trusted = true]. *)
+val mark_warnings_trusted : (int * Pos.t) list -> unit
+
+(** Mark all accumulated warnings as [is_trusted = true]. Used when
+    no dynamic TAST exists (all params are enforceable). *)
+val mark_all_warnings_trusted : unit -> unit

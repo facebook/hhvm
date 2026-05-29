@@ -7,7 +7,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/visitation/visit_by_thrift_field_metadata.h>
-#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_metadata.h"
+#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_types.h"
 
 namespace apache {
 namespace thrift {

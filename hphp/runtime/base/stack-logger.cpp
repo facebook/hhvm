@@ -28,8 +28,8 @@ void log_native_stack(const char* msg) {}
 
 #else // FACEBOOK
 
-#include <folly/experimental/symbolizer/StackTrace.h>
-#include <folly/experimental/symbolizer/Symbolizer.h>
+#include <folly/debugging/symbolizer/StackTrace.h>
+#include <folly/debugging/symbolizer/Symbolizer.h>
 
 #include "hphp/util/logger.h"
 

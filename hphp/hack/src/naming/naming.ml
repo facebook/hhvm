@@ -59,7 +59,7 @@ let mk_env filename tcopt =
       (TypecheckerOptions.allowed_files_for_ignore_readonly tcopt)
   and everything_sdt = TypecheckerOptions.everything_sdt tcopt
   and supportdynamic_type_hint_enabled =
-    TypecheckerOptions.experimental_feature_enabled
+    TypecheckerOptions.legacy_experimental_feature_enabled
       tcopt
       TypecheckerOptions.experimental_supportdynamic_type_hint
   and soft_as_like = TypecheckerOptions.interpret_soft_types_as_like_types tcopt

@@ -117,6 +117,7 @@ type fun_elt = {
   fe_support_dynamic_type: bool;
   fe_no_auto_dynamic: bool;
   fe_no_auto_likes: bool;
+  fe_gated_by_feature_flag: string option;
   fe_package_requirement: package_requirement;
 }
 [@@deriving show, eq]

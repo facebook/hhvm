@@ -60,7 +60,6 @@ type t =
       keyword: string;
     }
   | Interface_uses_trait of Pos.t
-  | Static_memoized_function of Pos.t
   | Magic of {
       pos: Pos.t;
       meth_name: string;

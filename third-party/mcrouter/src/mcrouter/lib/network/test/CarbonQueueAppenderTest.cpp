@@ -29,7 +29,7 @@ TEST(CarbonQueueAppenderTest, longString) {
   // Require more space than CarbonQueueAppenderStorage's internal 512B buffer.
   // This will append() a copy of the string allocated on the heap.
   const std::string message(1024, 'a');
-  reply.message_ref() = message;
+  reply.message() = message;
 
   carbon::CarbonProtocolWriter writer(storage);
   writer.writeRaw(reply);
@@ -66,8 +66,8 @@ TEST(CarbonQueueAppenderTest, longString) {
   carbon::CarbonProtocolReader reader(folly::io::Cursor(inputBody.get()));
   reader.readRawInto(inputReply);
 
-  EXPECT_EQ(carbon::Result::REMOTE_ERROR, *inputReply.result_ref());
-  EXPECT_EQ(message, *inputReply.message_ref());
+  EXPECT_EQ(carbon::Result::REMOTE_ERROR, *inputReply.result());
+  EXPECT_EQ(message, *inputReply.message());
 }
 
 namespace {
@@ -89,46 +89,46 @@ TEST(CarbonQueueAppender, manyFields) {
   const char str1[] = "abcde";
   const char str2[] = "xyzzyx";
   // Write null-terminating character too so we can use EXPECT_STREQ
-  writeToBuf(manyFields.buf1_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf2_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf3_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf4_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf5_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf6_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf7_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf8_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf9_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf10_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf11_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf12_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf13_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf14_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf15_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf16_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf17_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf18_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf19_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf20_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf21_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf22_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf23_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf24_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf25_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf26_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf27_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf28_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf29_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf30_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf31_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf32_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf33_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf34_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf35_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf36_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf37_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf38_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf39_ref(), str1, std::strlen(str1) + 1);
-  writeToBuf(manyFields.buf40_ref(), str2, std::strlen(str2) + 1);
+  writeToBuf(manyFields.buf1(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf2(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf3(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf4(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf5(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf6(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf7(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf8(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf9(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf10(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf11(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf12(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf13(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf14(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf15(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf16(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf17(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf18(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf19(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf20(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf21(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf22(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf23(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf24(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf25(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf26(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf27(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf28(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf29(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf30(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf31(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf32(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf33(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf34(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf35(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf36(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf37(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf38(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf39(), str1, std::strlen(str1) + 1);
+  writeToBuf(manyFields.buf40(), str2, std::strlen(str2) + 1);
 
   carbon::CarbonProtocolWriter writer(storage);
 
@@ -167,84 +167,75 @@ TEST(CarbonQueueAppender, manyFields) {
   carbon::CarbonProtocolReader reader(folly::io::Cursor(inputBody.get()));
   reader.readRawInto(manyFields2);
 
+  EXPECT_STREQ(str1, reinterpret_cast<const char*>(manyFields2.buf1()->data()));
+  EXPECT_STREQ(str1, reinterpret_cast<const char*>(manyFields2.buf2()->data()));
+  EXPECT_STREQ(str1, reinterpret_cast<const char*>(manyFields2.buf3()->data()));
+  EXPECT_STREQ(str1, reinterpret_cast<const char*>(manyFields2.buf4()->data()));
+  EXPECT_STREQ(str1, reinterpret_cast<const char*>(manyFields2.buf5()->data()));
+  EXPECT_STREQ(str1, reinterpret_cast<const char*>(manyFields2.buf6()->data()));
+  EXPECT_STREQ(str1, reinterpret_cast<const char*>(manyFields2.buf7()->data()));
+  EXPECT_STREQ(str1, reinterpret_cast<const char*>(manyFields2.buf8()->data()));
+  EXPECT_STREQ(str1, reinterpret_cast<const char*>(manyFields2.buf9()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf1_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf10()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf2_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf11()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf3_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf12()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf4_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf13()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf5_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf14()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf6_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf15()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf7_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf16()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf8_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf17()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf9_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf18()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf10_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf19()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf11_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf20()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf12_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf21()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf13_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf22()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf14_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf23()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf15_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf24()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf16_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf25()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf17_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf26()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf18_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf27()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf19_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf28()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf20_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf29()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf21_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf30()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf22_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf31()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf23_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf32()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf24_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf33()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf25_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf34()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf26_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf35()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf27_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf36()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf28_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf37()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf29_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf38()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf30_ref()->data()));
+      str1, reinterpret_cast<const char*>(manyFields2.buf39()->data()));
   EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf31_ref()->data()));
-  EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf32_ref()->data()));
-  EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf33_ref()->data()));
-  EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf34_ref()->data()));
-  EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf35_ref()->data()));
-  EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf36_ref()->data()));
-  EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf37_ref()->data()));
-  EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf38_ref()->data()));
-  EXPECT_STREQ(
-      str1, reinterpret_cast<const char*>(manyFields2.buf39_ref()->data()));
-  EXPECT_STREQ(
-      str2, reinterpret_cast<const char*>(manyFields2.buf40_ref()->data()));
+      str2, reinterpret_cast<const char*>(manyFields2.buf40()->data()));
 }

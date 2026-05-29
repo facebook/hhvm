@@ -189,6 +189,7 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       apache::thrift::ResponseChannelRequest::UniquePtr req,
       apache::thrift::ContextStack::UniquePtr ctxStack,
       const char* serviceName,
+      const char* qualifiedMethodName,
       apache::thrift::SerializedRequest serializedRequest,
       apache::thrift::RpcKind kind);
 

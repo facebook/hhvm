@@ -78,10 +78,6 @@ public:
   explicit constexpr PhysReg(Reg16 r) : n(int(r)) {}
   explicit constexpr PhysReg(Reg8 r) : n(int(r)) {}
 
-  constexpr /* implicit */ PhysReg(vixl::Register r) : n(r.code()) {}
-  constexpr /* implicit */ PhysReg(vixl::VRegister r)
-    : n(r.code() + kSIMDOffset) {}
-
   /* implicit */ operator Reg64() const {
     assertx(isGP() || n == 0xff);
     return Reg64(n);
@@ -94,6 +90,11 @@ public:
     assertx(isSF() || n == 0xff);
     return RegSF(n - kSFOffset);
   }
+
+  #if defined(__aarch64__)
+  constexpr /* implicit */ PhysReg(vixl::Register r) : n(r.code()) {}
+  constexpr /* implicit */ PhysReg(vixl::VRegister r)
+    : n(r.code() + kSIMDOffset) {}
 
   /* implicit */ operator vixl::CPURegister() const {
     if (n == 0xff) {
@@ -111,6 +112,7 @@ public:
       }
     }
   }
+  #endif
 
   Type type() const {
     assertx(n < kMaxRegs);

@@ -13,7 +13,7 @@ function main(): void {
 
   mb_internal_encoding('UTF-8');
 
-  $string_ascii = b'+Is an English string'; //21 chars
+  $string_ascii = '+Is an English string'; //21 chars
 
   $string_mb = base64_decode(
     '5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=',

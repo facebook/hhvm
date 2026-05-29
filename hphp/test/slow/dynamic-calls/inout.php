@@ -28,17 +28,9 @@ function positive_tests() :mixed{
   $x = vec[new A, 'func2']; $x(inout $v);
   $x = vec[new A, 'func3']; $x(inout $v);
 
-
-
-  $x = 'A'; $x::func3(inout $v);
-
-
-
   $x = 'func3'; HH\dynamic_class_meth(A::class, $x)(inout $v);
 
   $obj = new A; $x = 'func2'; $obj->$x(inout $v);
-
-
 }
 
 function negative_tests() :mixed{
@@ -59,7 +51,7 @@ function negative_tests() :mixed{
 
   $obj = new B; $x = 'func5'; $obj->$x(inout $v);
 
-
+  $x = 'A'; $x::func3(inout $v);
 }
 <<__EntryPoint>> function main(): void {
 positive_tests();

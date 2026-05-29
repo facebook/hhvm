@@ -134,7 +134,6 @@ class HQStreamCodec
 
   uint32_t getDefaultWindowSize() const override {
     CHECK(false) << __func__ << " not supported";
-    return 0;
   }
 
   bool peerHasWebsockets() const {
@@ -143,7 +142,6 @@ class HQStreamCodec
 
   bool isRequest(StreamID /*id*/) const {
     CHECK(false) << __func__ << " not implemented yet";
-    return false;
   }
 
   CompressionInfo getCompressionInfo() const override;

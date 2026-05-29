@@ -21,20 +21,20 @@ import com.facebook.thrift.metadata.ThriftStructType;
 import com.facebook.thrift.metadata.ThriftType;
 
 class PrimitivesServiceThriftMetadataHandlerStructs_0 {
-  static void addStructs(Map<String, ThriftStruct> structs) {
-    structs.put("test.fixtures.service_schema.I", new ThriftStruct.Builder()
-        .setName("test.fixtures.service_schema.I")
-        .setFields(Arrays.asList(
-        ))
-        .setIsUnion(false)
-        .build());
-  }
+    static void addStructs(Map<String, ThriftStruct> structs) {
+        structs.put("test.fixtures.service_schema.I", new ThriftStruct.Builder()
+            .setName("test.fixtures.service_schema.I")
+            .setFields(Arrays.asList(
+            ))
+            .setIsUnion(false)
+            .build());
+    }
 }
 
 class PrimitivesServiceThriftMetadataHandlerStructs {
-  static Map<String, ThriftStruct> getStructs() {
-    Map<String, ThriftStruct> structs = new HashMap<>();
-    PrimitivesServiceThriftMetadataHandlerStructs_0.addStructs(structs);
-    return structs;
-  }
+    static Map<String, ThriftStruct> getStructs() {
+        Map<String, ThriftStruct> structs = new HashMap<>();
+        PrimitivesServiceThriftMetadataHandlerStructs_0.addStructs(structs);
+        return structs;
+    }
 }

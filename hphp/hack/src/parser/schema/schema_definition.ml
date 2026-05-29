@@ -2412,15 +2412,6 @@ let schema : schema_node list =
       fields = [("tilde", Token); ("type", Aggregate Specifier)];
     };
     {
-      kind_name = "SoftTypeSpecifier";
-      type_name = "soft_type_specifier";
-      func_name = "soft_type_specifier";
-      description = "soft_type_specifier";
-      prefix = "soft";
-      aggregates = [Specifier];
-      fields = [("at", Token); ("type", Aggregate Specifier)];
-    };
-    {
       kind_name = "AttributizedSpecifier";
       type_name = "attributized_specifier";
       func_name = "attributized_specifier";

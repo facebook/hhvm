@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 
 #include "hphp/util/configs/hhir.h"
@@ -80,12 +81,12 @@ void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
 
   auto const tp = [&] {
     auto const mask = [&] {
-      if (!aux.u_raw) return uint64_t{};
-      if (aux.u_raw == static_cast<uint32_t>(-1)) {
-        return static_cast<uint64_t>(-1) <<
-          std::numeric_limits<u_data_type>::digits;
+      if (arch::any<arch::ARM>()) {
+        // ARM return registers keep the aux payload in bits [63:32] and reserve
+        // bits [31:8] for narrow type operations.
+        return uint64_t{aux.u_raw} << 32;
       }
-      return uint64_t{aux.u_raw} << 32;
+      return auxToMask(aux);
     }();
 
     if (!retLoc.hasReg(1)) {
@@ -101,6 +102,8 @@ void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
     // DataType is signed. We're using movzbq here to clear out the upper 7
     // bytes of the register, not to actually extend the type value.
     v << movzbq{type, extended};
+    if (!mask) return extended;
+
     v << orq{extended, v.cns(mask), result, v.makeReg()};
     return result;
   }();

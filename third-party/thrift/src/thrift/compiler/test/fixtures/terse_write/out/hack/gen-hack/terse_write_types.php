@@ -108,7 +108,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1095,7 +1095,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
   public function readFromJson(string $jsonText): void {
     $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::_EMPTY_;
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1205,7 +1205,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       $this->_type = \facebook\thrift\test\fixtures\terse_write\MyUnionEnum::map_field;
     }
     if (idx($parsed, 'struct_field') !== null) {
-      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyStruct>($parsed['struct_field']));
+      $_tmp24 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyStruct>($parsed['struct_field']));
       $_tmp25 = \facebook\thrift\test\fixtures\terse_write\MyStruct::withDefaultValues();
       $_tmp25->readFromJson($_tmp24);
       $this->struct_field = $_tmp25;
@@ -1312,7 +1312,7 @@ class MyStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMet
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1899,7 +1899,7 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1996,13 +1996,13 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
       $this->map_field = $_container21;
     }
     if (idx($parsed, 'struct_field') !== null) {
-      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyStruct>($parsed['struct_field']));
+      $_tmp24 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyStruct>($parsed['struct_field']));
       $_tmp25 = \facebook\thrift\test\fixtures\terse_write\MyStruct::withDefaultValues();
       $_tmp25->readFromJson($_tmp24);
       $this->struct_field = $_tmp25;
     }
     if (idx($parsed, 'union_field') !== null) {
-      $_tmp26 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyUnion>($parsed['union_field']));
+      $_tmp26 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyUnion>($parsed['union_field']));
       $_tmp27 = \facebook\thrift\test\fixtures\terse_write\MyUnion::withDefaultValues();
       $_tmp27->readFromJson($_tmp26);
       $this->union_field = $_tmp27;
@@ -3142,7 +3142,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -3239,13 +3239,13 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       $this->terse_map_field = $_container21;
     }
     if (idx($parsed, 'terse_struct_field') !== null) {
-      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyStruct>($parsed['terse_struct_field']));
+      $_tmp24 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyStruct>($parsed['terse_struct_field']));
       $_tmp25 = \facebook\thrift\test\fixtures\terse_write\MyStruct::withDefaultValues();
       $_tmp25->readFromJson($_tmp24);
       $this->terse_struct_field = $_tmp25;
     }
     if (idx($parsed, 'terse_union_field') !== null) {
-      $_tmp26 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyUnion>($parsed['terse_union_field']));
+      $_tmp26 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyUnion>($parsed['terse_union_field']));
       $_tmp27 = \facebook\thrift\test\fixtures\terse_write\MyUnion::withDefaultValues();
       $_tmp27->readFromJson($_tmp26);
       $this->terse_union_field = $_tmp27;
@@ -3341,13 +3341,13 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       $this->map_field = $_container49;
     }
     if (idx($parsed, 'struct_field') !== null) {
-      $_tmp52 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyStruct>($parsed['struct_field']));
+      $_tmp52 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyStruct>($parsed['struct_field']));
       $_tmp53 = \facebook\thrift\test\fixtures\terse_write\MyStruct::withDefaultValues();
       $_tmp53->readFromJson($_tmp52);
       $this->struct_field = $_tmp53;
     }
     if (idx($parsed, 'union_field') !== null) {
-      $_tmp54 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyUnion>($parsed['union_field']));
+      $_tmp54 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\terse_write\MyUnion>($parsed['union_field']));
       $_tmp55 = \facebook\thrift\test\fixtures\terse_write\MyUnion::withDefaultValues();
       $_tmp55->readFromJson($_tmp54);
       $this->union_field = $_tmp55;
@@ -3592,7 +3592,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -3730,7 +3730,7 @@ class TerseException extends \TException implements \IThriftSyncStruct, \IThrift
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");

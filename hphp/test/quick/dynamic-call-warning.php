@@ -23,11 +23,10 @@ function main() :mixed{
   $x::bar(); // no warning
   $x::rbar<int>(10); // no warning
   $x = 'Foo';
-  $x::bar(); // warning
-  $x::rbar<int>(10); // warning
+  $x::bar();
+  $x::rbar<int>(10);
   $s = 'bar';
   HH\dynamic_class_meth(Foo::class, $s)(); // warning
   $s = 'baz';
   HH\dynamic_class_meth(Foo::class, $s)(); // no warning
-
 }

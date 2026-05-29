@@ -673,7 +673,7 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
       appendToTranscript(BufMatches("clienthelloencoding")))
       .InSequence(contextSeq);
   EXPECT_CALL(
-      *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
+      *factory_, _makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
       .WillOnce(InvokeWithoutArgs([]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, generateKeyPair());
@@ -964,7 +964,7 @@ TEST_F(ServerProtocolTest, TestClientHelloAsyncCertFullHandshakeFlow) {
       appendToTranscript(BufMatches("clienthelloencoding")))
       .InSequence(contextSeq);
   EXPECT_CALL(
-      *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
+      *factory_, _makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
       .WillOnce(InvokeWithoutArgs([]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, generateKeyPair());
@@ -1272,7 +1272,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
       appendToTranscript(BufMatches("clienthelloencoding")))
       .InSequence(contextSeq);
   EXPECT_CALL(
-      *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
+      *factory_, _makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
       .WillOnce(InvokeWithoutArgs([]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, generateKeyPair());
@@ -1554,7 +1554,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
 
   size_t innerChloSize = 0;
   auto decrypter = std::make_shared<MockECHDecrypter>();
-  EXPECT_CALL(*decrypter, decryptClientHello(_))
+  EXPECT_CALL(*decrypter, _decryptClientHello(_))
       .WillOnce(InvokeWithoutArgs(
           [&innerChloSize]() mutable -> folly::Optional<ech::DecrypterResult> {
             auto chlo = TestMessages::clientHello();
@@ -1604,8 +1604,9 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
   r.fill(0xEC);
   EXPECT_CALL(
       *mockEchKeyScheduler,
-      deriveEarlySecret(RangeMatches(std::string(r.begin(), r.end()))))
-      .InSequence(contextSeq);
+      deriveEarlySecret(_, RangeMatches(std::string(r.begin(), r.end()))))
+      .InSequence(contextSeq)
+      .WillOnce(Return(Status::Success));
   EXPECT_CALL(*mockHandshakeContext_, clone())
       .InSequence(contextSeq)
       .WillOnce(Invoke(
@@ -1705,7 +1706,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
       {"serverkey", &waead},
       {"serverappkey", &appwaead}};
 
-  EXPECT_CALL(*factory_, makeAead(_)).WillRepeatedly(InvokeWithoutArgs([=]() {
+  EXPECT_CALL(*factory_, _makeAead(_)).WillRepeatedly(InvokeWithoutArgs([=]() {
     auto ret = std::make_unique<MockAead>();
     EXPECT_CALL(*ret, _setKey(_))
         .WillOnce(Invoke([keys, ptr = ret.get()](TrafficKey& key) {
@@ -1834,7 +1835,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
             folly::IOBuf::copyBuffer("serverappiv")};
       }));
 
-  EXPECT_CALL(*factory_, makeKeyExchange(_, _))
+  EXPECT_CALL(*factory_, _makeKeyExchange(_, _))
       .WillRepeatedly(InvokeWithoutArgs([]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, generateKeyPair());
@@ -1919,7 +1920,7 @@ TEST_F(ServerProtocolTest, TestECHMissingInnerExtension) {
   Sequence contextSeq;
 
   auto decrypter = std::make_shared<MockECHDecrypter>();
-  EXPECT_CALL(*decrypter, decryptClientHello(_))
+  EXPECT_CALL(*decrypter, _decryptClientHello(_))
       .WillOnce(
           InvokeWithoutArgs([=]() -> folly::Optional<ech::DecrypterResult> {
             return ech::DecrypterResult{
@@ -1942,7 +1943,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
   context_->setClientAuthMode(ClientAuthMode::Required);
 
   auto decrypter = std::make_shared<MockECHDecrypter>();
-  EXPECT_CALL(*decrypter, decryptClientHello(_))
+  EXPECT_CALL(*decrypter, _decryptClientHello(_))
       .WillOnce(InvokeWithoutArgs([=]() { return folly::none; }));
   EXPECT_CALL(*decrypter, getRetryConfigs(_))
       .WillOnce(InvokeWithoutArgs([]() -> std::vector<ech::ECHConfig> {
@@ -2050,7 +2051,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
       {"serverkey", &waead},
       {"serverappkey", &appwaead}};
 
-  EXPECT_CALL(*factory_, makeAead(_)).WillRepeatedly(InvokeWithoutArgs([=]() {
+  EXPECT_CALL(*factory_, _makeAead(_)).WillRepeatedly(InvokeWithoutArgs([=]() {
     auto ret = std::make_unique<MockAead>();
     EXPECT_CALL(*ret, _setKey(_))
         .WillOnce(Invoke([keys, ptr = ret.get()](TrafficKey& key) {
@@ -2192,7 +2193,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
             folly::IOBuf::copyBuffer("serverappiv")};
       }));
 
-  EXPECT_CALL(*factory_, makeKeyExchange(_, _))
+  EXPECT_CALL(*factory_, _makeKeyExchange(_, _))
       .WillRepeatedly(InvokeWithoutArgs([]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, generateKeyPair());
@@ -2279,7 +2280,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
       appendToTranscript(BufMatches("clienthelloencoding")))
       .InSequence(contextSeq);
   EXPECT_CALL(
-      *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
+      *factory_, _makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
       .WillOnce(InvokeWithoutArgs([]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, generateKeyPair());
@@ -2567,7 +2568,8 @@ TEST_F(ServerProtocolTest, TestClientHelloPskFlow) {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
   EXPECT_CALL(
-      *mockKeyScheduler_, deriveEarlySecret(RangeMatches("resumesecret")));
+      *mockKeyScheduler_, deriveEarlySecret(_, RangeMatches("resumesecret")))
+      .WillOnce(Return(Status::Success));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(BufMatches("client")))
       .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext_, getFinishedData(RangeMatches("bdr")))
@@ -2806,7 +2808,8 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheFlow) {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
   EXPECT_CALL(
-      *mockKeyScheduler_, deriveEarlySecret(RangeMatches("resumesecret")));
+      *mockKeyScheduler_, deriveEarlySecret(_, RangeMatches("resumesecret")))
+      .WillOnce(Return(Status::Success));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(BufMatches("client")))
       .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext_, getFinishedData(RangeMatches("bdr")))
@@ -2825,7 +2828,7 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheFlow) {
             EarlySecrets::ResumptionPskBinder);
       }));
   EXPECT_CALL(
-      *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
+      *factory_, _makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
       .WillOnce(InvokeWithoutArgs([]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, generateKeyPair());
@@ -3127,7 +3130,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
       appendToTranscript(BufMatches("clienthelloencoding")))
       .InSequence(contextSeq);
   EXPECT_CALL(
-      *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
+      *factory_, _makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
       .WillOnce(InvokeWithoutArgs([]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, generateKeyPair());
@@ -3398,7 +3401,8 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloPskDheFlow) {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
   EXPECT_CALL(
-      *mockKeyScheduler_, deriveEarlySecret(RangeMatches("resumesecret")));
+      *mockKeyScheduler_, deriveEarlySecret(_, RangeMatches("resumesecret")))
+      .WillOnce(Return(Status::Success));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(BufMatches("client")))
       .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext_, getFinishedData(RangeMatches("bdr")))
@@ -3417,7 +3421,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloPskDheFlow) {
             EarlySecrets::ResumptionPskBinder);
       }));
   EXPECT_CALL(
-      *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
+      *factory_, _makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
       .WillOnce(InvokeWithoutArgs([]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, generateKeyPair());
@@ -3648,7 +3652,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
       appendToTranscript(BufMatches("clienthelloencoding")))
       .InSequence(contextSeq);
   EXPECT_CALL(
-      *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
+      *factory_, _makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
       .WillOnce(InvokeWithoutArgs([]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, generateKeyPair());
@@ -3670,8 +3674,9 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
   r.fill(0xEC);
   EXPECT_CALL(
       *mockEchKeyScheduler,
-      deriveEarlySecret(RangeMatches(std::string(r.begin(), r.end()))))
-      .InSequence(contextSeq);
+      deriveEarlySecret(_, RangeMatches(std::string(r.begin(), r.end()))))
+      .InSequence(contextSeq)
+      .WillOnce(Return(Status::Success));
   auto mockEchContext = new MockHandshakeContext();
   EXPECT_CALL(*mockHandshakeContext_, clone())
       .InSequence(contextSeq)
@@ -3985,7 +3990,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
       appendToTranscript(BufMatches("clienthelloencoding")))
       .InSequence(contextSeq);
   EXPECT_CALL(
-      *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
+      *factory_, _makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
       .WillOnce(InvokeWithoutArgs([]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, generateKeyPair());
@@ -4282,7 +4287,8 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheEarlyFlow) {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
   EXPECT_CALL(
-      *mockKeyScheduler_, deriveEarlySecret(RangeMatches("resumesecret")));
+      *mockKeyScheduler_, deriveEarlySecret(_, RangeMatches("resumesecret")))
+      .WillOnce(Return(Status::Success));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(BufMatches("client")))
       .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext_, getFinishedData(RangeMatches("bdr")))
@@ -4320,7 +4326,7 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheEarlyFlow) {
             std::vector<uint8_t>({'e', 'e', 'm'}), EarlySecrets::EarlyExporter);
       }));
   EXPECT_CALL(
-      *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
+      *factory_, _makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Server))
       .WillOnce(InvokeWithoutArgs([]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, generateKeyPair());
@@ -4589,7 +4595,8 @@ TEST_F(ServerProtocolTest, TestClientHelloPskEarlyFlow) {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
   EXPECT_CALL(
-      *mockKeyScheduler_, deriveEarlySecret(RangeMatches("resumesecret")));
+      *mockKeyScheduler_, deriveEarlySecret(_, RangeMatches("resumesecret")))
+      .WillOnce(Return(Status::Success));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(BufMatches("client")))
       .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext_, getFinishedData(RangeMatches("bdr")))
@@ -6603,7 +6610,7 @@ TEST_F(ServerProtocolTest, TestFullHandshakeFinished) {
         content.data = folly::IOBuf::copyBuffer("handshake");
         return content;
       }));
-  EXPECT_CALL(*mockKeyScheduler_, clearMasterSecret());
+  EXPECT_CALL(*mockKeyScheduler_, clearMasterSecret(_));
 
   fizz::Param param = TestMessages::finished();
   auto actions = getActions(detail::processEvent(state_, param));
@@ -6698,7 +6705,7 @@ TEST_F(ServerProtocolTest, TestFinishedNoAutomaticNewSessionTicket) {
   setUpExpectingFinished();
   context_->setSendNewSessionTicket(false);
 
-  EXPECT_CALL(*mockKeyScheduler_, clearMasterSecret());
+  EXPECT_CALL(*mockKeyScheduler_, clearMasterSecret(_));
   fizz::Param param = TestMessages::finished();
   auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, ReportHandshakeSuccess, SecretAvailable>(actions);
@@ -7304,7 +7311,7 @@ TEST_F(ServerProtocolTest, TestCertificateVerifyWithVerifier) {
           RangeMatches("signature")))
       .InSequence(contextSeq);
 
-  EXPECT_CALL(*certVerifier_, verify(_))
+  EXPECT_CALL(*certVerifier_, _verify(_))
       .InSequence(contextSeq)
       .WillOnce(Invoke(
           [this](const std::vector<std::shared_ptr<const PeerCert>>& certs) {
@@ -7386,7 +7393,7 @@ TEST_F(ServerProtocolTest, TestCertificateVerifyVerifierFailure) {
           RangeMatches("signature")))
       .InSequence(contextSeq);
 
-  EXPECT_CALL(*certVerifier_, verify(_))
+  EXPECT_CALL(*certVerifier_, _verify(_))
       .InSequence(contextSeq)
       .WillOnce(Throw(FizzVerificationException(
           "verifier failed", AlertDescription::bad_certificate)));
@@ -7443,7 +7450,7 @@ TEST_F(ServerProtocolTest, TestOptionalCertificateVerifyVerifierFailure) {
           RangeMatches("signature")))
       .InSequence(contextSeq);
 
-  EXPECT_CALL(*certVerifier_, verify(_))
+  EXPECT_CALL(*certVerifier_, _verify(_))
       .InSequence(contextSeq)
       .WillOnce(Throw(
           FizzException("verifier failed", AlertDescription::bad_certificate)));
@@ -7472,7 +7479,7 @@ TEST_F(ServerProtocolTest, TestCertificateVerifyVerifierGenericFailure) {
           RangeMatches("signature")))
       .InSequence(contextSeq);
 
-  EXPECT_CALL(*certVerifier_, verify(_))
+  EXPECT_CALL(*certVerifier_, _verify(_))
       .InSequence(contextSeq)
       .WillOnce(Throw(std::runtime_error("oops")));
 
@@ -7567,7 +7574,7 @@ TEST_F(ServerProtocolTest, TestWaitForDataSizeHint) {
 TEST_F(ServerProtocolTest, AsyncKeyExchangeTest) {
   folly::Promise<AsyncKeyExchange::DoKexResult> p;
   setUpExpectingClientHello();
-  EXPECT_CALL(*factory_, makeKeyExchange(_, _))
+  EXPECT_CALL(*factory_, _makeKeyExchange(_, _))
       .WillOnce(InvokeWithoutArgs([&]() {
         auto asyncKex = std::make_unique<MockAsyncKeyExchange>();
         EXPECT_CALL(*asyncKex, doAsyncKexFuture(_))

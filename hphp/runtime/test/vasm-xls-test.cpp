@@ -16,8 +16,11 @@
 
 #include "hphp/runtime/base/datatype-macros.h"
 #include "hphp/runtime/vm/jit/abi.h"
+#ifdef __aarch64__
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#else
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#endif
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
@@ -33,22 +36,6 @@ using namespace reg;
 
 template<class T> uint64_t test_const(T val) {
   using testfunc = double (*)();
-  static const Abi test_abi_arm = {
-    .gpUnreserved = RegSet{},
-    .gpReserved = arm::abi().gp(),
-    .simdUnreserved = RegSet{vixl::d0},
-    .simdReserved = arm::abi().simd() - RegSet{vixl::d0},
-    .calleeSaved = arm::abi().calleeSaved,
-    .sf = arm::abi().sf
-  };
-  static const Abi test_abi_x64 = {
-    .gpUnreserved = RegSet{},
-    .gpReserved = x64::abi().gp(),
-    .simdUnreserved = RegSet{xmm0},
-    .simdReserved = x64::abi().simd() - RegSet{xmm0},
-    .calleeSaved = x64::abi().calleeSaved,
-    .sf = x64::abi().sf
-  };
 
   auto blockSize = 4096;
   auto code = static_cast<uint8_t*>(mmap(nullptr, blockSize,
@@ -77,13 +64,32 @@ template<class T> uint64_t test_const(T val) {
   v << ret{RegSet{xmm0}};
 
   CGMeta meta;
-  if (arch::get() == Arch::ARM) {
-    optimizeARM(vasm.unit(), test_abi_arm, true /* regalloc */);
-    emitARM(unit, text, meta, nullptr);
-  } else if (arch::get() == Arch::X64) {
-    optimizeX64(vasm.unit(), test_abi_x64, true /* regalloc */);
-    emitX64(unit, text, meta, nullptr);
-  }
+  Abi abi = ARCH_MATCH(
+    ([](arch::X64) {
+      return Abi {
+        .gpUnreserved = RegSet{},
+        .gpReserved = x64::abi().gp(),
+        .simdUnreserved = RegSet{xmm0},
+        .simdReserved = x64::abi().simd() - RegSet{xmm0},
+        .calleeSaved = x64::abi().calleeSaved,
+        .sf = x64::abi().sf
+      };
+    }),
+    ([](arch::ARM) {
+      return Abi {
+        .gpUnreserved = RegSet{},
+        .gpReserved = arm::abi().gp(),
+        .simdUnreserved = RegSet{vixl::d0},
+        .simdReserved = arm::abi().simd() - RegSet{vixl::d0},
+        .calleeSaved = arm::abi().calleeSaved,
+        .sf = arm::abi().sf
+      };
+    })
+  );
+
+  optimize(vasm.unit(), abi, true /* regalloc */);
+  emit(unit, text, meta, nullptr);
+
   // The above code might use meta.literalAddrs but shouldn't use anything else.
   meta.literalAddrs.clear();
   EXPECT_TRUE(meta.empty());

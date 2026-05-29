@@ -14,11 +14,17 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#pragma ignore-newlines}}
+}}
+{{#pragma ignore-newlines}}
+{{#import "common/common" as common}}
 {{#import "common/const_value" as const_value}}
 {{#import "common/types" as types}}
 {{#import "codec/codec" as codec}}
-{{#if struct:union?}}{{> Union}}
-{{#else if struct:exception?}}{{> Exception}}
-{{#else}}{{> Struct}}
-{{/if struct:union?}}
+{{#import "types/field" as field}}
+{{#import "types/struct" as struct}}
+{{#import "types/union" as union}}
+{{#import "types/exception" as exception}}
+{{#if self.union?}}{{#partial union.union_class struct=self}}
+{{#else if self.exception?}}{{#partial exception.exception_class struct=self}}
+{{#else}}{{#partial struct.struct_class struct=self}}
+{{/if self.union?}}

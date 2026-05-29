@@ -893,19 +893,21 @@ struct FactsStoreImpl final
     auto path_string = relativePath.value().slice();
 
     Optional<String> package;
+    size_t best_match_length = 0;
     // Facts expects that, within a given package, paths are sorted in reverse
     // lex ordering such that the longest possible match will always appear
     // first in the sorted result.
     for (const auto& [package_name, package_data] : packageInfo.packages()) {
       for (const auto& include_path : package_data.m_include_paths) {
         if ((!package.has_value() ||
-             include_path.length() > package->length()) &&
+             include_path.length() > best_match_length) &&
             path_string.length() >= include_path.length() &&
             std::equal(
                 include_path.begin(),
                 include_path.end(),
                 path_string.begin())) {
           package = StrNR{package_name};
+          best_match_length = include_path.length();
 
           // We can stop searching this package if we found a match, but another
           // package might have a better/longer match so we can't return early.

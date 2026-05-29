@@ -24,35 +24,41 @@ class Protocol {
       folly::ByteRange secret,
       const Factory& factory,
       const KeyScheduler& scheduler) {
-    auto aead = deriveRecordAead(factory, scheduler, cipher, secret);
+    std::unique_ptr<Aead> aead;
+    FIZZ_RETURN_ON_ERROR(
+        deriveRecordAead(aead, err, factory, scheduler, cipher, secret));
     FIZZ_RETURN_ON_ERROR(recordLayer.setAead(err, secret, std::move(aead)));
     return Status::Success;
   }
 
-  static std::unique_ptr<Aead> deriveRecordAead(
+  static Status deriveRecordAead(
+      std::unique_ptr<Aead>& ret,
+      Error& err,
       const Factory& factory,
       const KeyScheduler& scheduler,
       CipherSuite cipher,
       folly::ByteRange secret) {
-    auto aead = factory.makeAead(cipher);
+    FIZZ_RETURN_ON_ERROR(factory.makeAead(ret, err, cipher));
     auto trafficKey =
-        scheduler.getTrafficKey(secret, aead->keyLength(), aead->ivLength());
-    aead->setKey(std::move(trafficKey));
-    return aead;
+        scheduler.getTrafficKey(secret, ret->keyLength(), ret->ivLength());
+    ret->setKey(std::move(trafficKey));
+    return Status::Success;
   }
 
-  static std::unique_ptr<Aead> deriveRecordAeadWithLabel(
+  static Status deriveRecordAeadWithLabel(
+      std::unique_ptr<Aead>& ret,
+      Error& err,
       const Factory& factory,
       const KeyScheduler& scheduler,
       CipherSuite cipher,
       folly::ByteRange secret,
       folly::StringPiece keyLabel,
       folly::StringPiece ivLabel) {
-    auto aead = factory.makeAead(cipher);
+    FIZZ_RETURN_ON_ERROR(factory.makeAead(ret, err, cipher));
     auto trafficKey = scheduler.getTrafficKeyWithLabel(
-        secret, keyLabel, ivLabel, aead->keyLength(), aead->ivLength());
-    aead->setKey(std::move(trafficKey));
-    return aead;
+        secret, keyLabel, ivLabel, ret->keyLength(), ret->ivLength());
+    ret->setKey(std::move(trafficKey));
+    return Status::Success;
   }
 
   static Buf getFinished(
@@ -79,7 +85,8 @@ class Protocol {
     return encodedKeyUpdated;
   }
 
-  static void checkAllowedExtensions(
+  static Status checkAllowedExtensions(
+      Error& err,
       const EncryptedExtensions& ee,
       const std::vector<ExtensionType>& requestedExtensions) {
     for (const auto& ext : ee.extensions) {
@@ -91,7 +98,7 @@ class Protocol {
         case ExtensionType::psk_key_exchange_modes:
         case ExtensionType::cookie:
         case ExtensionType::supported_versions:
-          throw FizzException(
+          return err.error(
               "unexpected extension in ee: " + toString(ext.extension_type),
               AlertDescription::illegal_parameter);
         default:
@@ -99,17 +106,18 @@ class Protocol {
                   requestedExtensions.begin(),
                   requestedExtensions.end(),
                   ext.extension_type) == requestedExtensions.end()) {
-            throw FizzException(
+            return err.error(
                 "unexpected extension in ee: " + toString(ext.extension_type),
                 AlertDescription::illegal_parameter);
           }
           break;
       }
     }
-    checkDuplicateExtensions(ee.extensions);
+    return checkDuplicateExtensions(err, ee.extensions);
   }
 
-  static void checkAllowedExtensions(
+  static Status checkAllowedExtensions(
+      Error& err,
       const ServerHello& shlo,
       const std::vector<ExtensionType>& requestedExtensions) {
     for (const auto& ext : shlo.extensions) {
@@ -120,15 +128,16 @@ class Protocol {
           (ext.extension_type != ExtensionType::key_share &&
            ext.extension_type != ExtensionType::pre_shared_key &&
            ext.extension_type != ExtensionType::supported_versions)) {
-        throw FizzException(
+        return err.error(
             "unexpected extension in shlo: " + toString(ext.extension_type),
             AlertDescription::illegal_parameter);
       }
     }
-    checkDuplicateExtensions(shlo.extensions);
+    return checkDuplicateExtensions(err, shlo.extensions);
   }
 
-  static void checkAllowedExtensions(
+  static Status checkAllowedExtensions(
+      Error& err,
       const HelloRetryRequest& hrr,
       const std::vector<ExtensionType>& requestedExtensions) {
     // HRR is allowed to send 'cookie' unprompted, and we always send key_share
@@ -143,19 +152,20 @@ class Protocol {
                requestedExtensions.begin(),
                requestedExtensions.end(),
                ext.extension_type) == requestedExtensions.end())) {
-        throw FizzException(
+        return err.error(
             "unexpected extension in hrr: " + toString(ext.extension_type),
             AlertDescription::illegal_parameter);
       }
     }
-    checkDuplicateExtensions(hrr.extensions);
+    return checkDuplicateExtensions(err, hrr.extensions);
   }
 
   /*
    * Checks that the presented extensions in the cert are a subset of the
    * requested. Used for the response to the servers cert req msg
    */
-  static void checkAllowedExtensions(
+  static Status checkAllowedExtensions(
+      Error& err,
       const CertificateEntry& certEntry,
       const std::vector<ExtensionType>& requestedExtensions) {
     // Extensions in cert must be a subset of extensions sent in the cert
@@ -169,13 +179,15 @@ class Protocol {
                          requestedExtensions.end(),
                          ext.extension_type) != requestedExtensions.end();
             })) {
-      throw FizzException(
+      return err.error(
           "Unexpected extension in cert", AlertDescription::illegal_parameter);
     }
-    checkDuplicateExtensions(certEntry.extensions);
+    return checkDuplicateExtensions(err, certEntry.extensions);
   }
 
-  static void checkDuplicateExtensions(const std::vector<Extension>& exts) {
+  static Status checkDuplicateExtensions(
+      Error& err,
+      const std::vector<Extension>& exts) {
     std::vector<ExtensionType> extensionList;
     extensionList.reserve(exts.size());
     for (const auto& extension : exts) {
@@ -184,9 +196,10 @@ class Protocol {
     std::sort(extensionList.begin(), extensionList.end());
     if (std::unique(extensionList.begin(), extensionList.end()) !=
         extensionList.end()) {
-      throw FizzException(
+      return err.error(
           "duplicate extension", AlertDescription::illegal_parameter);
     }
+    return Status::Success;
   }
 };
 } // namespace fizz

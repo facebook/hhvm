@@ -62,6 +62,22 @@ class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
       HandlerCallbackPtr<std::unique_ptr<AlignedResponse>> callback,
       std::unique_ptr<AlignedRequest> request) override;
 
+  void async_tm_storageReadTm(
+      HandlerCallbackPtr<std::unique_ptr<StorageReadResponse>> callback,
+      std::unique_ptr<StorageReadRequest> request) override;
+
+  void async_eb_storageReadEb(
+      HandlerCallbackPtr<std::unique_ptr<StorageReadResponse>> callback,
+      std::unique_ptr<StorageReadRequest> request) override;
+
+  void async_tm_storageWriteTm(
+      HandlerCallbackPtr<std::unique_ptr<StorageWriteResponse>> callback,
+      std::unique_ptr<StorageWriteRequest> request) override;
+
+  void async_eb_storageWriteEb(
+      HandlerCallbackPtr<std::unique_ptr<StorageWriteResponse>> callback,
+      std::unique_ptr<StorageWriteRequest> request) override;
+
  private:
   void requestResponseImpl(
       HandlerCallbackPtr<std::unique_ptr<BasicResponse>> callback,

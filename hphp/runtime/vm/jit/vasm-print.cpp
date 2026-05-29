@@ -45,10 +45,12 @@ const char* area_names[] = { "main", "cold", "frozen" };
 
 namespace {
 
+#ifdef __aarch64__
 const char* vixl_ccs[] = {
   "eq", "ne", "hs", "lo", "mi", "pl", "vs", "vc",
   "hi", "ls", "ge", "lt", "gt", "le", "al", "nv"
 };
+#endif
 
 // Visitor class to format the operands of a Vinstr.  There are imm()
 // overloaded methods for each type of operand used by any Vinstr.  If you add
@@ -86,7 +88,9 @@ struct FormatVisitor {
 
   void imm(SBInvOffset off) { str << sep() << off.offset; }
   void imm(ConditionCode cc) { str << sep() << cc_names[cc]; }
+#ifdef __aarch64__
   void imm(vixl::Condition cc) { str << sep() << vixl_ccs[cc]; }
+#endif
   void imm(TCA addr) {
     str << sep() << getNativeFunctionName(addr);
   }
@@ -264,20 +268,18 @@ std::string show(const VregList& l) {
 
 std::string show(Vptr p) {
   std::string str;
-  switch(arch::get()) {
-    case Arch::X64:
-    case Arch::ARM: {
-      // [%fs + %base + disp + %index * scale]
-      str = "[";
-      auto prefix = false;
-      if (p.seg == Segment::FS) {
-        str += "%fs";
-        prefix = true;
-      }
-      if (p.seg == Segment::GS) {
-        str += "%gs";
-        prefix = true;
-      }
+  {
+    // [%fs + %base + disp + %index * scale]
+    str = "[";
+    auto prefix = false;
+    if (p.seg == Segment::FS) {
+      str += "%fs";
+      prefix = true;
+    }
+    if (p.seg == Segment::GS) {
+      str += "%gs";
+      prefix = true;
+    }
       if (p.base.isValid()) {
         folly::toAppend(prefix ? " + " : "", show(p.base), &str);
         prefix = true;
@@ -292,11 +294,9 @@ std::string show(Vptr p) {
         folly::toAppend(prefix ? " + " : "", show(p.index), &str);
         if (p.scale != 1) folly::toAppend(" * ", p.scale, &str);
       }
-      str += ']';
-      return str;
-    }
+    str += ']';
+    return str;
   }
-  not_reached();
 }
 
 std::string show(Vconst c) {

@@ -10,9 +10,9 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_substr() : basic functionality ***\n";
 
-$string_ascii = b'ABCDEF';
+$string_ascii = 'ABCDEF';
 //Japanese string in UTF-8
-$string_mb = base64_decode(b'5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
+$string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 
 echo "\n-- ASCII string 1 --\n";
 var_dump(bin2hex(iconv_substr($string_ascii, 3)));

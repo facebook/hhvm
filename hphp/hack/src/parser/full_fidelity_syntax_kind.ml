@@ -188,7 +188,6 @@ type t =
   | GenericTypeSpecifier
   | NullableTypeSpecifier
   | LikeTypeSpecifier
-  | SoftTypeSpecifier
   | AttributizedSpecifier
   | ReifiedTypeArgument
   | TypeArguments
@@ -377,7 +376,6 @@ let to_string kind =
   | GenericTypeSpecifier -> "generic_type_specifier"
   | NullableTypeSpecifier -> "nullable_type_specifier"
   | LikeTypeSpecifier -> "like_type_specifier"
-  | SoftTypeSpecifier -> "soft_type_specifier"
   | AttributizedSpecifier -> "attributized_specifier"
   | ReifiedTypeArgument -> "reified_type_argument"
   | TypeArguments -> "type_arguments"

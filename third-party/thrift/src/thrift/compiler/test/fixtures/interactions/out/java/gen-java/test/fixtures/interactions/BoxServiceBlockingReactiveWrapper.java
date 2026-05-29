@@ -90,4 +90,5 @@ public class BoxServiceBlockingReactiveWrapper
     public BoxedInteraction createBoxedInteraction() {
         return new BoxedInteractionImpl(_delegate.createBoxedInteraction());
     }
+
 }

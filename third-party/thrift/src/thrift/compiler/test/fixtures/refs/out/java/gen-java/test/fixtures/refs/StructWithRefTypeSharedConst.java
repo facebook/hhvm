@@ -43,11 +43,11 @@ public final class StructWithRefTypeSharedConst implements com.facebook.thrift.p
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(StructWithRefTypeSharedConst other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -62,14 +62,14 @@ public final class StructWithRefTypeSharedConst implements com.facebook.thrift.p
 
         public test.fixtures.refs.Empty getDefField() { return defField; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="opt_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptField(test.fixtures.refs.Empty optField) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="opt_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptField(test.fixtures.refs.Empty optField) {
             this.optField = optField;
             return this;
         }
 
         public test.fixtures.refs.Empty getOptField() { return optField; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="req_field", requiredness=Requiredness.REQUIRED)    public Builder setReqField(test.fixtures.refs.Empty reqField) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="req_field", requiredness=Requiredness.REQUIRED)    public Builder setReqField(test.fixtures.refs.Empty reqField) {
             this.reqField = reqField;
             return this;
         }
@@ -93,6 +93,7 @@ public final class StructWithRefTypeSharedConst implements com.facebook.thrift.p
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -101,35 +102,30 @@ public final class StructWithRefTypeSharedConst implements com.facebook.thrift.p
     private final test.fixtures.refs.Empty defField;
     public static final int _DEF_FIELD = 1;
     private static final TField DEF_FIELD_FIELD_DESC = new TField("def_field", TType.STRUCT, (short)1);
-        private final test.fixtures.refs.Empty optField;
+    private final test.fixtures.refs.Empty optField;
     public static final int _OPT_FIELD = 2;
     private static final TField OPT_FIELD_FIELD_DESC = new TField("opt_field", TType.STRUCT, (short)2);
-        private final test.fixtures.refs.Empty reqField;
+    private final test.fixtures.refs.Empty reqField;
     public static final int _REQ_FIELD = 3;
     private static final TField REQ_FIELD_FIELD_DESC = new TField("req_field", TType.STRUCT, (short)3);
     static {
-      NAMES_TO_IDS.put("defField", 1);
-      THRIFT_NAMES_TO_IDS.put("def_field", 1);
-      FIELD_METADATA.put(1, DEF_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("optField", 2);
-      THRIFT_NAMES_TO_IDS.put("opt_field", 2);
-      FIELD_METADATA.put(2, OPT_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("reqField", 3);
-      THRIFT_NAMES_TO_IDS.put("req_field", 3);
-      FIELD_METADATA.put(3, REQ_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("defField", 1);
+        THRIFT_NAMES_TO_IDS.put("def_field", 1);
+        FIELD_METADATA.put(1, DEF_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("optField", 2);
+        THRIFT_NAMES_TO_IDS.put("opt_field", 2);
+        FIELD_METADATA.put(2, OPT_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("reqField", 3);
+        THRIFT_NAMES_TO_IDS.put("req_field", 3);
+        FIELD_METADATA.put(3, REQ_FIELD_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="def_field", requiredness=Requiredness.NONE)
     public test.fixtures.refs.Empty getDefField() { return defField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="opt_field", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.refs.Empty getOptField() { return optField; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=3, name="req_field", requiredness=Requiredness.REQUIRED)
     public test.fixtures.refs.Empty getReqField() { return reqField; }
 
@@ -164,86 +160,88 @@ public final class StructWithRefTypeSharedConst implements com.facebook.thrift.p
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(defField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(reqField);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(optField);
+        _hashCode = 31 * _hashCode + Objects.hashCode(reqField);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<StructWithRefTypeSharedConst> asReader() {
       return StructWithRefTypeSharedConst::read0;
     }
 
     public static StructWithRefTypeSharedConst read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(StructWithRefTypeSharedConst.NAMES_TO_IDS, StructWithRefTypeSharedConst.THRIFT_NAMES_TO_IDS, StructWithRefTypeSharedConst.FIELD_METADATA);
-      StructWithRefTypeSharedConst.Builder builder = new StructWithRefTypeSharedConst.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _DEF_FIELD:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.refs.Empty defField = test.fixtures.refs.Empty.read0(oprot);
-            builder.setDefField(defField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPT_FIELD:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.refs.Empty optField = test.fixtures.refs.Empty.read0(oprot);
-            builder.setOptField(optField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _REQ_FIELD:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.refs.Empty reqField = test.fixtures.refs.Empty.read0(oprot);
-            builder.setReqField(reqField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(StructWithRefTypeSharedConst.NAMES_TO_IDS, StructWithRefTypeSharedConst.THRIFT_NAMES_TO_IDS, StructWithRefTypeSharedConst.FIELD_METADATA);
+        StructWithRefTypeSharedConst.Builder builder = new StructWithRefTypeSharedConst.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _DEF_FIELD:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.refs.Empty _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.refs.Empty.read0(oprot);
+                    builder.setDefField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _OPT_FIELD:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.refs.Empty _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.refs.Empty.read0(oprot);
+                    builder.setOptField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _REQ_FIELD:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.refs.Empty _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.refs.Empty.read0(oprot);
+                    builder.setReqField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      test.fixtures.refs.Empty _iter0 = this.defField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(DEF_FIELD_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.refs.Empty _iter0 = this.optField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPT_FIELD_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.refs.Empty _iter0 = this.reqField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(REQ_FIELD_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            test.fixtures.refs.Empty _fbthriftVar0 = this.defField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(DEF_FIELD_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.refs.Empty _fbthriftVar0 = this.optField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPT_FIELD_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.refs.Empty _fbthriftVar0 = this.reqField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(REQ_FIELD_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _StructWithRefTypeSharedConstLazy {

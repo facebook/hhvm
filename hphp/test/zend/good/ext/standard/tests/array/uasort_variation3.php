@@ -77,7 +77,7 @@ $array_arg = dict[
 
   // binary key
   "a".chr(0)."b" => 45,
-  b"binary" => 30,
+  "binary" => 30,
 
   //heredoc keys
   $empty_heredoc => 90,

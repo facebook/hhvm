@@ -398,22 +398,24 @@ void ProxyDestination<Transport>::initializeTransport() {
               return;
             }
 
-            pdstn->proxy().stats().increment(num_connections_closed_stat);
-            if (pdstn->accessPoint()->useSsl()) {
-              auto mech = pdstn->accessPoint()->getSecurityMech();
-              if (mech == SecurityMech::TLS_TO_PLAINTEXT) {
-                pdstn->proxy().stats().increment(
-                    num_tls_to_plain_connections_closed_stat);
-              } else if (mech == SecurityMech::KTLS12) {
-                pdstn->proxy().stats().increment(
-                    num_ktls_connections_closed_stat);
-              } else {
-                pdstn->proxy().stats().increment(
-                    num_ssl_connections_closed_stat);
+            if (!isConnectionDownReasonConnectFailure(reason)) {
+              pdstn->proxy().stats().increment(num_connections_closed_stat);
+              if (pdstn->accessPoint()->useSsl()) {
+                auto mech = pdstn->accessPoint()->getSecurityMech();
+                if (mech == SecurityMech::TLS_TO_PLAINTEXT) {
+                  pdstn->proxy().stats().increment(
+                      num_tls_to_plain_connections_closed_stat);
+                } else if (mech == SecurityMech::KTLS12) {
+                  pdstn->proxy().stats().increment(
+                      num_ktls_connections_closed_stat);
+                } else {
+                  pdstn->proxy().stats().increment(
+                      num_ssl_connections_closed_stat);
+                }
               }
-            }
 
-            pdstn->updatePoolStatConnections(false);
+              pdstn->updatePoolStatConnections(false);
+            }
 
             if (reason == ConnectionDownReason::ABORTED) {
               pdstn->setState(State::Closed);

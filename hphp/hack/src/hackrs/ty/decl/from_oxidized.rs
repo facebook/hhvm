@@ -504,6 +504,7 @@ impl<R: Reason> From<o::shallow_decl_defs::FunDecl> for shallow::FunDecl<R> {
             support_dynamic_type: sf.support_dynamic_type,
             no_auto_dynamic: sf.no_auto_dynamic,
             no_auto_likes: sf.no_auto_likes,
+            gated_by_feature_flag: sf.gated_by_feature_flag,
             package: sf.package,
             package_requirement: sf.package_requirement,
         }

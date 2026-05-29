@@ -88,6 +88,7 @@ class ExtractCommand(utils.Command):
                 f.write(memory)
                 result.write(f"Wrote to {options.outfile}\n")
         else:
+            # pyre-fixme[16]: ReadMemory returns bytes at runtime
             result.write(memory.decode("utf-8"))
 
 

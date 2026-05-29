@@ -236,16 +236,12 @@ IRSPRelOffset offsetToReturnSlot(IRGS& env) {
 }
 
 void emitVerifyReturn(IRGS& env, HPHP::VerifyRetKind kind, int32_t ind) {
-  switch(kind) {
-    case HPHP::VerifyRetKind::All:
-      verifyRetType(env, TypeConstraint::ReturnId, ind, false);
-      break;
-    case HPHP::VerifyRetKind::NonNull:
-      verifyRetType(env, TypeConstraint::ReturnId, ind, true);
-      break;
-    case HPHP::VerifyRetKind::None:
-      return;
+  auto const func = curFunc(env);
+  if (func->trustReturnType()) {
+    assertx(kind == VerifyRetKind::None);
+    return;
   }
+  verifyRetType(env, TypeConstraint::ReturnId, BCSPRelOffset{ind}, kind);
 }
 
 void emitRetC(IRGS& env, HPHP::VerifyRetKind kind) {

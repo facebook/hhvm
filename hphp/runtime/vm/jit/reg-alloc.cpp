@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -42,13 +41,10 @@ namespace {
  * into a SIMD register.
  */
 bool loadsCell(const IRInstruction& inst) {
-  auto const arch_allows = [] {
-    switch (arch::get()) {
-    case Arch::X64: return true;
-    case Arch::ARM: return true;
-    }
-    not_reached();
-  }();
+  auto const arch_allows = ARCH_MATCH(
+    [](arch::X64) { return true; },
+    [](arch::ARM) { return true; }
+  );
 
   switch (inst.op()) {
   case LdMem:

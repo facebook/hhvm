@@ -244,41 +244,49 @@ let check_package_access
     | `PackageSoftIncludes _ -> Package_access_ok
   end
   | `ClassPtrLinterOnly ->
-    let current_package =
-      Option.map ~f:(fun p -> p.Package.name) (Env.get_current_package env)
-    in
-    let current_package_membership = Env.get_current_package_membership env in
-    let check_classptr_access () =
-      let (_, target_package, _) =
-        Typing_packages.get_package_profile env target_package_membership
+    let current_file = Env.get_file env in
+    let target_file = Pos_or_decl.filename def_pos in
+    if
+      Typing_packages.is_excluded env current_file
+      || Typing_packages.is_excluded env target_file
+    then
+      Package_access_ok
+    else
+      let current_package =
+        Option.map ~f:(fun p -> p.Package.name) (Env.get_current_package env)
       in
-      match
-        Typing_packages.can_access_ignoring_package_override
-          ~env
-          ~current_package
-          ~target_package
-          ~target_file:(Pos_or_decl.filename def_pos)
-          ~classptr_reference_warning:true
-      with
-      | `Yes -> Package_access_ok
-      | `YesWarning w -> Package_access_linter_error (use_pos, w)
-    in
-    (match current_package_membership with
-    | Some (Aast_defs.PackageConfigAssignment _) -> check_classptr_access ()
-    | Some (Aast_defs.PackageOverride (_, current_override_pkg)) ->
-      (* When source has PackageOverride, only warn if target does NOT have
-         PackageOverride to the same package. If target also overrides to the
-         same package, both are effectively in the same package. *)
-      (match target_package_membership with
-      | Some (Aast_defs.PackageOverride (_, target_override_pkg))
-        when String.equal current_override_pkg target_override_pkg ->
-        (* Both override to the same package, no lint needed *)
-        Package_access_ok
-      | _ ->
-        (* Target has no override, or overrides to a different package.
-           Check if source's override package includes target's original package. *)
-        check_classptr_access ())
-    | None -> Package_access_ok)
+      let current_package_membership = Env.get_current_package_membership env in
+      let check_classptr_access () =
+        let (_, target_package, _) =
+          Typing_packages.get_package_profile env target_package_membership
+        in
+        match
+          Typing_packages.can_access_ignoring_package_override
+            ~env
+            ~current_package
+            ~target_package
+            ~target_file:(Pos_or_decl.filename def_pos)
+            ~classptr_reference_warning:true
+        with
+        | `Yes -> Package_access_ok
+        | `YesWarning w -> Package_access_linter_error (use_pos, w)
+      in
+      (match current_package_membership with
+      | Some (Aast_defs.PackageConfigAssignment _) -> check_classptr_access ()
+      | Some (Aast_defs.PackageOverride (_, current_override_pkg)) ->
+        (* When source has PackageOverride, only warn if target does NOT have
+           PackageOverride to the same package. If target also overrides to the
+           same package, both are effectively in the same package. *)
+        (match target_package_membership with
+        | Some (Aast_defs.PackageOverride (_, target_override_pkg))
+          when String.equal current_override_pkg target_override_pkg ->
+          (* Both override to the same package, no lint needed *)
+          Package_access_ok
+        | _ ->
+          (* Target has no override, or overrides to a different package.
+             Check if source's override package includes target's original package. *)
+          check_classptr_access ())
+      | None -> Package_access_ok)
 
 let is_visible_for_obj ~is_method ~is_receiver_interface env vis =
   let member_ty =
@@ -573,3 +581,36 @@ let check_deprecated ~use_pos ~def_pos env deprecated =
           primary
           @@ Primary.Deprecated_use
                { pos = use_pos; decl_pos_opt = Some def_pos; msg = s }))
+
+(** Check if a declaration is gated behind a feature flag via
+    [__GatedByFeatureFlag('feature')].  Emits error 4509 if the feature
+    is not enabled.  [attrs] are the user attributes from the already-loaded
+    decl so no additional decl fetch is needed. *)
+let check_gated_by_feature_flag env pos name attrs =
+  let feature_opt =
+    List.find_map attrs ~f:(fun ua ->
+        if
+          String.equal
+            (snd ua.Typing_defs_core.ua_name)
+            Naming_special_names.UserAttributes.uaGatedByFeatureFlag
+        then
+          List.find_map ua.Typing_defs_core.ua_params ~f:(function
+              | Typing_defs_core.String s -> Some s
+              | _ -> None)
+        else
+          None)
+  in
+  Option.iter feature_opt ~f:(fun feature_name ->
+      let tcopt = Env.get_tcopt env in
+      if not (TypecheckerOptions.is_unstable_feature_enabled tcopt feature_name)
+      then
+        Typing_error_utils.add_typing_error
+          ~env
+          Typing_error.(
+            primary
+            @@ Primary.Gated_by_feature_flag
+                 {
+                   pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                   name;
+                   feature = feature_name;
+                 }))

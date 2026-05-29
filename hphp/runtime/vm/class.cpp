@@ -73,6 +73,7 @@ const StaticString s_86reifiedinit("86reifiedinit");
 const StaticString s___MockClass("__MockClass");
 const StaticString s___Reified("__Reified");
 const StaticString s___ModuleLevelTrait("__ModuleLevelTrait");
+const StaticString s_Awaitable("HH\\Awaitable");
 
 int64_t constexpr kInvalidIdx = std::numeric_limits<int64_t>::max();
 
@@ -2149,6 +2150,7 @@ Class::Class(PreClass* preClass, Class* parent,
   setSpecial();       // must run before setRTAttributes
   setRTAttributes();
   setInterfaces();
+  propagateReturnTypes(); // must be run after setting base class and interfaces.
   setEnumType();
   setIncludedEnums();
   setConstants();
@@ -2176,6 +2178,178 @@ Class::Class(PreClass* preClass, Class* parent,
   auto handler = Native::getClassExtraDataHandler(name());
   if (handler) {
     handler(this);
+  }
+}
+
+namespace {
+  bool shouldInheritReturnTypes(const StringData* name) {
+    return !(Func::isSpecial(name) ||
+      s_toString.get()->same(name) ||
+      s_construct.get()->same(name) ||
+      s_invoke.get()->same(name) ||
+      s_sleep.get()->same(name) ||
+      s_debugInfo.get()->same(name) ||
+      s_clone.get()->same(name));
+  }
+
+  bool shouldInheritTc(
+    const Func* current,
+    const Func* parent,
+    const TypeConstraint& parentTc
+  ) {
+    if (!parentTc.isCheckable()) return false;
+
+    // Don't pass down the Awaitable<x> type constraint from interfaces
+    // and abstract classes to their async overrides.
+    return !(current->isAsync()
+      && !parent->isAsync()
+      && parentTc.typeName()
+      && parentTc.typeName()->tsame(s_Awaitable.get()));
+  }
+
+  hphp_fast_map<const StringData*, std::vector<const Func*>>
+  collectReturnTypes(const Class* cls) {
+    hphp_fast_map<const StringData*, std::vector<const Func*>> overrides;
+
+    auto accumulate = [&](const Class* c) {
+      for (Slot i = 0; i < c->numMethods(); ++i) {
+        auto f = c->getMethod(i);
+        if (f->attrs() & AttrPrivate) continue;
+        overrides[f->name()].emplace_back(f);
+      }
+    };
+
+    if (cls->parent() != nullptr) {
+      accumulate(cls->parent());
+    }
+    for (auto const interface : cls->allInterfaces().range()) {
+      accumulate(interface);
+    }
+    return overrides;
+  }
+
+  void inheritReturnTypesForMethod(
+    Func* f,
+    const std::vector<const Func*>& parents
+  ) {
+    constexpr auto kNormalizeFlags = TypeConstraintFlags::Inherited
+      | TypeConstraintFlags::SingleTypeConstraint
+      | TypeConstraintFlags::Soft
+      | TypeConstraintFlags::Nullable
+      | TypeConstraintFlags::DisplayNullable;
+
+    // Flags to merge
+    constexpr auto kFlagBitMask = TypeConstraintFlags::Soft
+      | TypeConstraintFlags::Nullable;
+
+    // Map from normalized TC to tracked flags.
+    hphp_fast_map<TypeConstraint, TypeConstraintFlags, TypeConstraintHasher> seen;
+    auto tcs = f->returnTypeConstraints().range();
+    for (auto const& tc : tcs) {
+      auto normTc = tc;
+      normTc.removeFlags(kNormalizeFlags);
+      auto flagBits = tc.flags() & kFlagBitMask;
+      auto it = seen.find(normTc);
+      if (it != seen.end()) {
+        it->second = it->second & flagBits;
+      } else {
+        seen.emplace(std::move(normTc), flagBits);
+      }
+    }
+
+    // Only collect inherited constraints that aren't already present or that
+    // provide stricter types.
+    std::vector<TypeConstraint> inherited;
+    for (auto const& parent : parents) {
+      for (auto const& tc : parent->returnTypeConstraints().range()) {
+        if (!shouldInheritTc(f, parent, tc)) continue;
+
+        auto normTc = tc;
+        normTc.removeFlags(kNormalizeFlags);
+        auto parentFlags = tc.flags() & kFlagBitMask;
+        if (Cfg::Eval::EnforceOverriddenReturnTypes == 1) {
+          parentFlags = parentFlags | TypeConstraintFlags::Soft;
+        }
+
+        bool shouldAdd = false;
+        auto it = seen.find(normTc);
+        if (it == seen.end()) {
+          shouldAdd = true;
+          seen.emplace(normTc, parentFlags);
+        } else {
+          // Inherit the parent TC only if it provides a stricter type,
+          // i.e. the child has Soft or Nullable set but the parent does not.
+          auto hasStricterFlags = it->second & ~parentFlags;
+          if (hasStricterFlags != TypeConstraintFlags::NoFlags) {
+            shouldAdd = true;
+            it->second = it->second & parentFlags;
+          }
+        }
+
+        if (shouldAdd) {
+          auto copy = tc;
+          copy.addFlags(TypeConstraintFlags::Inherited);
+          if (Cfg::Eval::EnforceOverriddenReturnTypes == 1) {
+            copy.addFlags(TypeConstraintFlags::Soft);
+          }
+          inherited.push_back(std::move(copy));
+        }
+      }
+    }
+
+    if (!inherited.empty()) {
+      // Current return types first, then inherited types.
+      std::vector<TypeConstraint> result;
+      result.reserve(tcs.size() + inherited.size());
+      for (auto const& tc : tcs) {
+        result.push_back(tc);
+      }
+      for (auto& tc : inherited) {
+        result.push_back(std::move(tc));
+      }
+      f->storeInheritedReturnTypes(
+        TypeIntersectionConstraint(std::move(result))
+      );
+      assertx(f->hasInheritedReturnTypes());
+    } else {
+      assertx(!f->hasInheritedReturnTypes());
+    }
+  }
+}
+
+void Class::propagateReturnTypes() const {
+  if (!Cfg::Eval::EnforceOverriddenReturnTypes) return;
+  auto overrides = collectReturnTypes(this);
+  if (overrides.empty()) return;
+
+  // TODO: Recompute return types for methods present in the parent class
+  // but don't have an override in the current class. Such methods may
+  // provide an implementation for an interface method which could differ in
+  // its return type.
+  for (Slot i = 0; i < m_preClass->numMethods(); ++i) {
+    auto name = m_preClass->methods()[i]->name();
+    auto const it = overrides.find(name);
+    if ((it == overrides.end()) || !shouldInheritReturnTypes(name)) continue;
+
+    auto f = lookupMethod(name);
+    assertx(f);
+
+    // Generators produce values via yield and not RetC. RetC only fires when
+    // the generator body finishes, and the value on the stack at that point
+    // is always null which indicates the end of the stream.
+    if (f->isGenerator()) continue;
+
+    inheritReturnTypesForMethod(f, it->second);
+
+    // If this is a memoize wrapper, propagate the inherited constraints
+    // to the impl method which shares the same return type.
+    if (f->hasInheritedReturnTypes() && f->isMemoizeWrapper()) {
+      auto impl = lookupMethod(f->memoizeImplName());
+      assertx(impl);
+      impl->storeInheritedReturnTypes(
+        TypeIntersectionConstraint(f->returnTypeConstraints().asVec())
+      );
+    }
   }
 }
 

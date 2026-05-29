@@ -94,6 +94,8 @@ struct ResponsePayload {
 
   void transform(
       std::vector<uint16_t>& writeTrans, size_t minCompressBytes = 0);
+  void transform(
+      std::vector<TTransform>& writeTrans, size_t minCompressBytes = 0);
 
   explicit operator bool() const { return static_cast<bool>(buffer_); }
 

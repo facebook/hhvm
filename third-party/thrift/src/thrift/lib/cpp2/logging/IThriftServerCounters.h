@@ -99,6 +99,36 @@ class IThriftServerCounters {
   virtual void onSinkApproxPausedDuration(
       std::string_view /*methodName*/, std::chrono::milliseconds /*duration*/) {
   }
+
+  // ---------------------------------------------------------------------------
+  // BiDi counters
+  // ---------------------------------------------------------------------------
+
+  virtual void onBiDiSubscribe(std::string_view /*methodName*/) {}
+
+  virtual void onBiDiSinkNext(std::string_view /*methodName*/) {}
+
+  virtual void onBiDiSinkCredit(
+      std::string_view /*methodName*/, uint32_t /*credits*/) {}
+
+  virtual void onBiDiStreamNext(std::string_view /*methodName*/) {}
+
+  virtual void onBiDiSinkFirstChunkLatency(
+      std::string_view /*methodName*/, std::chrono::milliseconds /*latency*/) {}
+
+  virtual void onBiDiStreamFirstChunkLatency(
+      std::string_view /*methodName*/, std::chrono::milliseconds /*latency*/) {}
+
+  virtual void onBiDiStreamGenerationInterval(
+      std::string_view /*methodName*/, std::chrono::milliseconds /*interval*/) {
+  }
+
+  virtual void onBiDiComplete(
+      std::string_view /*methodName*/,
+      detail::BiDiEndReason /*reason*/,
+      uint32_t /*sinkTotalChunks*/,
+      uint32_t /*streamTotalChunks*/,
+      std::chrono::milliseconds /*duration*/) {}
 };
 
 } // namespace apache::thrift

@@ -181,6 +181,7 @@ public interface MyService extends java.io.Closeable, com.facebook.thrift.util.B
         }
 
         public SerialInteraction createSerialInteraction();
+
     }
     @java.lang.Override void close();
 
@@ -372,6 +373,7 @@ public interface MyService extends java.io.Closeable, com.facebook.thrift.util.B
         }
 
         public SerialInteraction createSerialInteraction();
+
     }
     @com.facebook.swift.service.ThriftInteraction("MyInteraction")
     public interface MyInteraction extends java.io.Closeable {
@@ -441,4 +443,5 @@ public interface MyService extends java.io.Closeable, com.facebook.thrift.util.B
     }
 
     SerialInteraction createSerialInteraction();
+
 }

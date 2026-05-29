@@ -106,4 +106,6 @@ void enqueueAsyncTranslateOptRequest(const Func* func);
  */
 void joinAsyncTranslationWorkerThreads();
 
+void waitForAsyncTranslationWorkerThreadsToEmpty();
+
 }

@@ -19,12 +19,9 @@
 #include <folly/Range.h>
 #include <folly/SocketAddress.h>
 #include <glog/logging.h>
-#include <chrono>
-#include <list>
-#include <set>
-#include <string>
-
 #include <wangle/acceptor/NetworkAddress.h>
+#include <chrono>
+#include <set>
 
 namespace wangle {
 
@@ -315,10 +312,10 @@ class LoadShedConfiguration {
   /**
    * Performs a series of CHECKs to ensure the underlying configuration is
    * sane.
-   * For example the following must be true: (1.0 - minCpuIdle_) >= maxCpuUsage_
-   * Note: totalMemBytes represents the total system memory to be used when
-   * normalizing minFreeMem_ and killMinFreeMemBytes_ in order for the
-   * associated comparisons.
+   * For example the following must be true: (1.0 - minCpuIdle_) >=
+   * maxCpuUsage_ Note: totalMemBytes represents the total system memory to be
+   * used when normalizing minFreeMem_ and killMinFreeMemBytes_ in order for
+   * the associated comparisons.
    */
   struct SysParams {
     uint64_t numLogicalCpuCores{0};

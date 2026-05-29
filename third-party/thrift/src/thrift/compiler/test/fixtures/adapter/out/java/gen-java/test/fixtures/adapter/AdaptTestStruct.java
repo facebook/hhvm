@@ -64,11 +64,11 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(AdaptTestStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -90,63 +90,63 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
 
         public long getDelay() { return delay; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="custom", requiredness=Requiredness.NONE)    public Builder setCustom(byte[] custom) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="custom", requiredness=Requiredness.NONE)    public Builder setCustom(byte[] custom) {
             this.custom = custom;
             return this;
         }
 
         public byte[] getCustom() { return custom; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="timeout", requiredness=Requiredness.NONE)    public Builder setTimeout(long timeout) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="timeout", requiredness=Requiredness.NONE)    public Builder setTimeout(long timeout) {
             this.timeout = timeout;
             return this;
         }
 
         public long getTimeout() { return timeout; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="data", requiredness=Requiredness.NONE)    public Builder setData(long data) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="data", requiredness=Requiredness.NONE)    public Builder setData(long data) {
             this.data = data;
             return this;
         }
 
         public long getData() { return data; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="meta", requiredness=Requiredness.NONE)    public Builder setMeta(String meta) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="meta", requiredness=Requiredness.NONE)    public Builder setMeta(String meta) {
             this.meta = meta;
             return this;
         }
 
         public String getMeta() { return meta; }
 
-            @com.facebook.swift.codec.ThriftField(value=6, name="indirectionString", requiredness=Requiredness.NONE)    public Builder setIndirectionString(String indirectionString) {
+        @com.facebook.swift.codec.ThriftField(value=6, name="indirectionString", requiredness=Requiredness.NONE)    public Builder setIndirectionString(String indirectionString) {
             this.indirectionString = indirectionString;
             return this;
         }
 
         public String getIndirectionString() { return indirectionString; }
 
-            @com.facebook.swift.codec.ThriftField(value=7, name="string_data", requiredness=Requiredness.NONE)    public Builder setStringData(String stringData) {
+        @com.facebook.swift.codec.ThriftField(value=7, name="string_data", requiredness=Requiredness.NONE)    public Builder setStringData(String stringData) {
             this.stringData = stringData;
             return this;
         }
 
         public String getStringData() { return stringData; }
 
-            @com.facebook.swift.codec.ThriftField(value=8, name="double_wrapped_bool", requiredness=Requiredness.NONE)    public Builder setDoubleWrappedBool(boolean doubleWrappedBool) {
+        @com.facebook.swift.codec.ThriftField(value=8, name="double_wrapped_bool", requiredness=Requiredness.NONE)    public Builder setDoubleWrappedBool(boolean doubleWrappedBool) {
             this.doubleWrappedBool = doubleWrappedBool;
             return this;
         }
 
         public boolean isDoubleWrappedBool() { return doubleWrappedBool; }
 
-            @com.facebook.swift.codec.ThriftField(value=9, name="double_wrapped_integer", requiredness=Requiredness.NONE)    public Builder setDoubleWrappedInteger(int doubleWrappedInteger) {
+        @com.facebook.swift.codec.ThriftField(value=9, name="double_wrapped_integer", requiredness=Requiredness.NONE)    public Builder setDoubleWrappedInteger(int doubleWrappedInteger) {
             this.doubleWrappedInteger = doubleWrappedInteger;
             return this;
         }
 
         public int getDoubleWrappedInteger() { return doubleWrappedInteger; }
 
-            @com.facebook.swift.codec.ThriftField(value=10, name="binary_data", requiredness=Requiredness.NONE)    public Builder setBinaryData(byte[] binaryData) {
+        @com.facebook.swift.codec.ThriftField(value=10, name="binary_data", requiredness=Requiredness.NONE)    public Builder setBinaryData(byte[] binaryData) {
             this.binaryData = binaryData;
             return this;
         }
@@ -184,6 +184,7 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -192,114 +193,95 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
     private final long delay;
     public static final int _DELAY = 1;
     private static final TField DELAY_FIELD_DESC = new TField("delay", TType.I64, (short)1);
-        private final byte[] custom;
+    private final byte[] custom;
     public static final int _CUSTOM = 2;
     private static final TField CUSTOM_FIELD_DESC = new TField("custom", TType.STRING, (short)2);
-        private final long timeout;
+    private final long timeout;
     public static final int _TIMEOUT = 3;
     private static final TField TIMEOUT_FIELD_DESC = new TField("timeout", TType.I64, (short)3);
-        private final long data;
+    private final long data;
     public static final int _DATA = 4;
     private static final TField DATA_FIELD_DESC = new TField("data", TType.I64, (short)4);
-        private final String meta;
+    private final String meta;
     public static final int _META = 5;
     private static final TField META_FIELD_DESC = new TField("meta", TType.STRING, (short)5);
-        private final String indirectionString;
+    private final String indirectionString;
     public static final int _INDIRECTIONSTRING = 6;
     private static final TField INDIRECTION_STRING_FIELD_DESC = new TField("indirectionString", TType.STRING, (short)6);
-        private final String stringData;
+    private final String stringData;
     public static final int _STRING_DATA = 7;
     private static final TField STRING_DATA_FIELD_DESC = new TField("string_data", TType.STRING, (short)7);
-        private final boolean doubleWrappedBool;
+    private final boolean doubleWrappedBool;
     public static final int _DOUBLE_WRAPPED_BOOL = 8;
     private static final TField DOUBLE_WRAPPED_BOOL_FIELD_DESC = new TField("double_wrapped_bool", TType.BOOL, (short)8);
-        private final int doubleWrappedInteger;
+    private final int doubleWrappedInteger;
     public static final int _DOUBLE_WRAPPED_INTEGER = 9;
     private static final TField DOUBLE_WRAPPED_INTEGER_FIELD_DESC = new TField("double_wrapped_integer", TType.I32, (short)9);
-        private final byte[] binaryData;
+    private final byte[] binaryData;
     public static final int _BINARY_DATA = 10;
     private static final TField BINARY_DATA_FIELD_DESC = new TField("binary_data", TType.STRING, (short)10);
     static {
-      NAMES_TO_IDS.put("delay", 1);
-      THRIFT_NAMES_TO_IDS.put("delay", 1);
-      FIELD_METADATA.put(1, DELAY_FIELD_DESC);
-      NAMES_TO_IDS.put("custom", 2);
-      THRIFT_NAMES_TO_IDS.put("custom", 2);
-      FIELD_METADATA.put(2, CUSTOM_FIELD_DESC);
-      NAMES_TO_IDS.put("timeout", 3);
-      THRIFT_NAMES_TO_IDS.put("timeout", 3);
-      FIELD_METADATA.put(3, TIMEOUT_FIELD_DESC);
-      NAMES_TO_IDS.put("data", 4);
-      THRIFT_NAMES_TO_IDS.put("data", 4);
-      FIELD_METADATA.put(4, DATA_FIELD_DESC);
-      NAMES_TO_IDS.put("meta", 5);
-      THRIFT_NAMES_TO_IDS.put("meta", 5);
-      FIELD_METADATA.put(5, META_FIELD_DESC);
-      NAMES_TO_IDS.put("indirectionString", 6);
-      THRIFT_NAMES_TO_IDS.put("indirectionString", 6);
-      FIELD_METADATA.put(6, INDIRECTION_STRING_FIELD_DESC);
-      NAMES_TO_IDS.put("stringData", 7);
-      THRIFT_NAMES_TO_IDS.put("string_data", 7);
-      FIELD_METADATA.put(7, STRING_DATA_FIELD_DESC);
-      NAMES_TO_IDS.put("doubleWrappedBool", 8);
-      THRIFT_NAMES_TO_IDS.put("double_wrapped_bool", 8);
-      FIELD_METADATA.put(8, DOUBLE_WRAPPED_BOOL_FIELD_DESC);
-      NAMES_TO_IDS.put("doubleWrappedInteger", 9);
-      THRIFT_NAMES_TO_IDS.put("double_wrapped_integer", 9);
-      FIELD_METADATA.put(9, DOUBLE_WRAPPED_INTEGER_FIELD_DESC);
-      NAMES_TO_IDS.put("binaryData", 10);
-      THRIFT_NAMES_TO_IDS.put("binary_data", 10);
-      FIELD_METADATA.put(10, BINARY_DATA_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/AdaptTestStruct"),
-        AdaptTestStruct.class, AdaptTestStruct::read0));
+        NAMES_TO_IDS.put("delay", 1);
+        THRIFT_NAMES_TO_IDS.put("delay", 1);
+        FIELD_METADATA.put(1, DELAY_FIELD_DESC);
+        NAMES_TO_IDS.put("custom", 2);
+        THRIFT_NAMES_TO_IDS.put("custom", 2);
+        FIELD_METADATA.put(2, CUSTOM_FIELD_DESC);
+        NAMES_TO_IDS.put("timeout", 3);
+        THRIFT_NAMES_TO_IDS.put("timeout", 3);
+        FIELD_METADATA.put(3, TIMEOUT_FIELD_DESC);
+        NAMES_TO_IDS.put("data", 4);
+        THRIFT_NAMES_TO_IDS.put("data", 4);
+        FIELD_METADATA.put(4, DATA_FIELD_DESC);
+        NAMES_TO_IDS.put("meta", 5);
+        THRIFT_NAMES_TO_IDS.put("meta", 5);
+        FIELD_METADATA.put(5, META_FIELD_DESC);
+        NAMES_TO_IDS.put("indirectionString", 6);
+        THRIFT_NAMES_TO_IDS.put("indirectionString", 6);
+        FIELD_METADATA.put(6, INDIRECTION_STRING_FIELD_DESC);
+        NAMES_TO_IDS.put("stringData", 7);
+        THRIFT_NAMES_TO_IDS.put("string_data", 7);
+        FIELD_METADATA.put(7, STRING_DATA_FIELD_DESC);
+        NAMES_TO_IDS.put("doubleWrappedBool", 8);
+        THRIFT_NAMES_TO_IDS.put("double_wrapped_bool", 8);
+        FIELD_METADATA.put(8, DOUBLE_WRAPPED_BOOL_FIELD_DESC);
+        NAMES_TO_IDS.put("doubleWrappedInteger", 9);
+        THRIFT_NAMES_TO_IDS.put("double_wrapped_integer", 9);
+        FIELD_METADATA.put(9, DOUBLE_WRAPPED_INTEGER_FIELD_DESC);
+        NAMES_TO_IDS.put("binaryData", 10);
+        THRIFT_NAMES_TO_IDS.put("binary_data", 10);
+        FIELD_METADATA.put(10, BINARY_DATA_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/AdaptTestStruct"),
+            AdaptTestStruct.class, AdaptTestStruct::read0));
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="delay", requiredness=Requiredness.NONE)
     public long getDelay() { return delay; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="custom", requiredness=Requiredness.NONE)
     public byte[] getCustom() { return custom; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=3, name="timeout", requiredness=Requiredness.NONE)
     public long getTimeout() { return timeout; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=4, name="data", requiredness=Requiredness.NONE)
     public long getData() { return data; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="meta", requiredness=Requiredness.NONE)
     public String getMeta() { return meta; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="indirectionString", requiredness=Requiredness.NONE)
     public String getIndirectionString() { return indirectionString; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="string_data", requiredness=Requiredness.NONE)
     public String getStringData() { return stringData; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=8, name="double_wrapped_bool", requiredness=Requiredness.NONE)
     public boolean isDoubleWrappedBool() { return doubleWrappedBool; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=9, name="double_wrapped_integer", requiredness=Requiredness.NONE)
     public int getDoubleWrappedInteger() { return doubleWrappedInteger; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=10, name="binary_data", requiredness=Requiredness.NONE)
     public byte[] getBinaryData() { return binaryData; }
@@ -349,195 +331,204 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(delay);
-            _hashCode = 31 * _hashCode + Arrays.hashCode(custom);
-            _hashCode = 31 * _hashCode + Long.hashCode(timeout);
-            _hashCode = 31 * _hashCode + Long.hashCode(data);
-            _hashCode = 31 * _hashCode + Objects.hashCode(meta);
-            _hashCode = 31 * _hashCode + Objects.hashCode(indirectionString);
-            _hashCode = 31 * _hashCode + Objects.hashCode(stringData);
-            _hashCode = 31 * _hashCode + Boolean.hashCode(doubleWrappedBool);
-            _hashCode = 31 * _hashCode + Integer.hashCode(doubleWrappedInteger);
-            _hashCode = 31 * _hashCode + Arrays.hashCode(binaryData);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Arrays.hashCode(custom);
+        _hashCode = 31 * _hashCode + Long.hashCode(timeout);
+        _hashCode = 31 * _hashCode + Long.hashCode(data);
+        _hashCode = 31 * _hashCode + Objects.hashCode(meta);
+        _hashCode = 31 * _hashCode + Objects.hashCode(indirectionString);
+        _hashCode = 31 * _hashCode + Objects.hashCode(stringData);
+        _hashCode = 31 * _hashCode + Boolean.hashCode(doubleWrappedBool);
+        _hashCode = 31 * _hashCode + Integer.hashCode(doubleWrappedInteger);
+        _hashCode = 31 * _hashCode + Arrays.hashCode(binaryData);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<AdaptTestStruct> asReader() {
       return AdaptTestStruct::read0;
     }
 
     public static AdaptTestStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(AdaptTestStruct.NAMES_TO_IDS, AdaptTestStruct.THRIFT_NAMES_TO_IDS, AdaptTestStruct.FIELD_METADATA);
-      AdaptTestStruct.Builder builder = new AdaptTestStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _DELAY:
-          if (__field.type == TType.I64) {
-            long delay = oprot.readI64();
-            builder.setDelay(delay);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _CUSTOM:
-          if (__field.type == TType.STRING) {
-            byte[] custom = oprot.readBinary().array();
-            builder.setCustom(custom);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _TIMEOUT:
-          if (__field.type == TType.I64) {
-            long timeout = oprot.readI64();
-            builder.setTimeout(timeout);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _DATA:
-          if (__field.type == TType.I64) {
-            long data = oprot.readI64();
-            builder.setData(data);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _META:
-          if (__field.type == TType.STRING) {
-            String meta = oprot.readString();
-            builder.setMeta(meta);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _INDIRECTIONSTRING:
-          if (__field.type == TType.STRING) {
-            String indirectionString = oprot.readString();
-            builder.setIndirectionString(indirectionString);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _STRING_DATA:
-          if (__field.type == TType.STRING) {
-            String stringData = oprot.readString();
-            builder.setStringData(stringData);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _DOUBLE_WRAPPED_BOOL:
-          if (__field.type == TType.BOOL) {
-            boolean doubleWrappedBool = oprot.readBool();
-            builder.setDoubleWrappedBool(doubleWrappedBool);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _DOUBLE_WRAPPED_INTEGER:
-          if (__field.type == TType.I32) {
-            int doubleWrappedInteger = oprot.readI32();
-            builder.setDoubleWrappedInteger(doubleWrappedInteger);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _BINARY_DATA:
-          if (__field.type == TType.STRING) {
-            byte[] binaryData = oprot.readBinary().array();
-            builder.setBinaryData(binaryData);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(AdaptTestStruct.NAMES_TO_IDS, AdaptTestStruct.THRIFT_NAMES_TO_IDS, AdaptTestStruct.FIELD_METADATA);
+        AdaptTestStruct.Builder builder = new AdaptTestStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _DELAY:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setDelay(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _CUSTOM:
+                if (__field.type == TType.STRING) {
+                    byte[] _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBinary().array();
+                    builder.setCustom(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _TIMEOUT:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setTimeout(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _DATA:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setData(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _META:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMeta(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _INDIRECTIONSTRING:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setIndirectionString(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _STRING_DATA:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setStringData(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _DOUBLE_WRAPPED_BOOL:
+                if (__field.type == TType.BOOL) {
+                    boolean _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBool();
+                    builder.setDoubleWrappedBool(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _DOUBLE_WRAPPED_INTEGER:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setDoubleWrappedInteger(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _BINARY_DATA:
+                if (__field.type == TType.STRING) {
+                    byte[] _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBinary().array();
+                    builder.setBinaryData(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.delay;
-      oprot.writeFieldBegin(DELAY_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      byte[] _iter0 = this.custom;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(CUSTOM_FIELD_DESC);
-        org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      long _iter0 = this.timeout;
-      oprot.writeFieldBegin(TIMEOUT_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      long _iter0 = this.data;
-      oprot.writeFieldBegin(DATA_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.meta;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(META_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.indirectionString;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(INDIRECTION_STRING_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.stringData;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(STRING_DATA_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      boolean _iter0 = this.doubleWrappedBool;
-      oprot.writeFieldBegin(DOUBLE_WRAPPED_BOOL_FIELD_DESC);
-      oprot.writeBool(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.doubleWrappedInteger;
-      oprot.writeFieldBegin(DOUBLE_WRAPPED_INTEGER_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      byte[] _iter0 = this.binaryData;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(BINARY_DATA_FIELD_DESC);
-        org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.delay;
+            oprot.writeFieldBegin(DELAY_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            byte[] _fbthriftVar0 = this.custom;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(CUSTOM_FIELD_DESC);
+                org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            long _fbthriftVar0 = this.timeout;
+            oprot.writeFieldBegin(TIMEOUT_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            long _fbthriftVar0 = this.data;
+            oprot.writeFieldBegin(DATA_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.meta;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(META_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.indirectionString;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(INDIRECTION_STRING_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.stringData;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(STRING_DATA_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            boolean _fbthriftVar0 = this.doubleWrappedBool;
+            oprot.writeFieldBegin(DOUBLE_WRAPPED_BOOL_FIELD_DESC);
+            oprot.writeBool(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.doubleWrappedInteger;
+            oprot.writeFieldBegin(DOUBLE_WRAPPED_INTEGER_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            byte[] _fbthriftVar0 = this.binaryData;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(BINARY_DATA_FIELD_DESC);
+                org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _AdaptTestStructLazy {

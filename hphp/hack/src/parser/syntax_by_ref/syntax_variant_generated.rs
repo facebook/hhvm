@@ -193,7 +193,6 @@ pub enum SyntaxVariant<'a, T, V> {
     GenericTypeSpecifier(&'a GenericTypeSpecifierChildren<'a, T, V>),
     NullableTypeSpecifier(&'a NullableTypeSpecifierChildren<'a, T, V>),
     LikeTypeSpecifier(&'a LikeTypeSpecifierChildren<'a, T, V>),
-    SoftTypeSpecifier(&'a SoftTypeSpecifierChildren<'a, T, V>),
     AttributizedSpecifier(&'a AttributizedSpecifierChildren<'a, T, V>),
     ReifiedTypeArgument(&'a ReifiedTypeArgumentChildren<'a, T, V>),
     TypeArguments(&'a TypeArgumentsChildren<'a, T, V>),
@@ -1558,12 +1557,6 @@ pub struct NullableTypeSpecifierChildren<'a, T, V> {
 #[derive(Debug, Clone)]
 pub struct LikeTypeSpecifierChildren<'a, T, V> {
     pub tilde: Syntax<'a, T, V>,
-    pub type_: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct SoftTypeSpecifierChildren<'a, T, V> {
-    pub at: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
 }
 

@@ -6,9 +6,9 @@
 
 /// Service definitions for `Service`.
 pub mod service {
+
     #[derive(Clone, Debug)]
     pub enum FuncExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -88,7 +88,6 @@ pub mod service {
                     ::fbthrift::Serialize::rs_thrift_write(&<crate::types::adapters::MyI32 as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<::fbthrift::metadata::NoThriftAnnotations>(_success, 0), p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -98,9 +97,9 @@ pub mod service {
 }
 /// Service definitions for `AdapterService`.
 pub mod adapter_service {
+
     #[derive(Clone, Debug)]
     pub enum CountExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -180,7 +179,6 @@ pub mod adapter_service {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -190,7 +188,6 @@ pub mod adapter_service {
 
     #[derive(Clone, Debug)]
     pub enum AdaptedTypesExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -270,7 +267,6 @@ pub mod adapter_service {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();

@@ -145,7 +145,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::structC>::translateFieldName(
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::test_cpp2::cpp_reflection::structC>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
@@ -208,7 +208,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::struct3>::translateFieldName(
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::test_cpp2::cpp_reflection::struct3>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
@@ -355,7 +355,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::union_with_special_names>::tra
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
@@ -376,7 +376,7 @@ void TccStructTraits<::test_cpp2::cpp_reflection::struct_with_special_names>::tr
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),

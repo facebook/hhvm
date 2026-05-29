@@ -289,6 +289,12 @@ HQServer::HQServer(
   server_->setSupportedVersion(params_.quicVersions);
   server_->setFizzContext(std::move(fizzCtx));
 
+  server_->setQuicExperimentHandlerFn(
+      [](quic::QuicConnectionStateBase& /* conn */, uint16_t experimentId) {
+        VLOG(2) << "quic_experiment handler fired: experimentId="
+                << experimentId;
+      });
+
   // Apply UDP socket buffer size options if specified
   folly::SocketOptionMap socketOptions;
   if (params_.udpRecvBufferSize > 0) {

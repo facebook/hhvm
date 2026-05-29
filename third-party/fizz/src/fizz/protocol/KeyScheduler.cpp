@@ -34,13 +34,14 @@ static constexpr StringPiece kHRRECHAcceptConfirmation{
 
 namespace fizz {
 
-void KeyScheduler::deriveEarlySecret(folly::ByteRange psk) {
+Status KeyScheduler::deriveEarlySecret(Error& err, folly::ByteRange psk) {
   if (secret_) {
-    throw std::runtime_error("secret already set");
+    return err.error("secret already set", folly::none);
   }
 
   auto zeros = std::vector<uint8_t>(deriver_->hashLength(), 0);
   secret_.emplace(EarlySecret{deriver_->hkdfExtract(folly::range(zeros), psk)});
+  return Status::Success;
 }
 
 void KeyScheduler::deriveHandshakeSecret() {
@@ -103,11 +104,12 @@ void KeyScheduler::deriveAppTrafficSecrets(folly::ByteRange transcript) {
   appTrafficSecret_ = std::move(trafficSecret);
 }
 
-void KeyScheduler::clearMasterSecret() {
+Status KeyScheduler::clearMasterSecret(Error& err) {
   if (secret_->type() != KeySchedulerSecret::Type::MasterSecret_E) {
-    throw std::runtime_error("Secret isn't MasterSecret");
+    return err.error("Secret isn't MasterSecret", folly::none);
   }
   secret_ = folly::none;
+  return Status::Success;
 }
 
 uint32_t KeyScheduler::clientKeyUpdate() {

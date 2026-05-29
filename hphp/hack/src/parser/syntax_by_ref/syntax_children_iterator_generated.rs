@@ -1730,14 +1730,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
-            SoftTypeSpecifier(x) => {
-                get_index(2).and_then(|index| { match index {
-                        0 => Some(&x.at),
-                    1 => Some(&x.type_),
-                        _ => None,
-                    }
-                })
-            },
             AttributizedSpecifier(x) => {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),

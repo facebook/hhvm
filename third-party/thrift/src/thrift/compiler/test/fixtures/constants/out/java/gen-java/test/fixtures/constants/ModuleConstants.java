@@ -26,7 +26,7 @@ public final class ModuleConstants {
     public static final List<Map<String, Integer>> STATES = construct_STATES();
 
     private static List<Map<String, Integer>> construct_STATES() {
-      return ImmutableList.<Map<String, Integer>>builder()
+        return ImmutableList.<Map<String, Integer>>builder()
         .add(ImmutableMap.<String, Integer>builder()
         .put("San Diego", 3211000)
         .put("Sacramento", 479600)
@@ -54,7 +54,7 @@ public final class ModuleConstants {
     public static final test.fixtures.constants.Company MY_COMPANY = construct_MY_COMPANY();
 
     private static test.fixtures.constants.Company construct_MY_COMPANY() {
-      return test.fixtures.constants.Company.FACEBOOK;
+        return test.fixtures.constants.Company.FACEBOOK;
     }
 
     public static final String FOO = "foo";
@@ -64,7 +64,7 @@ public final class ModuleConstants {
     public static final Map<String, String> MYMAP = construct_MYMAP();
 
     private static Map<String, String> construct_MYMAP() {
-      return ImmutableMap.<String, String>builder()
+        return ImmutableMap.<String, String>builder()
         .put("keys", "values")
         .build();
     }
@@ -72,7 +72,7 @@ public final class ModuleConstants {
     public static final List<test.fixtures.constants.Company> MY_APPS = construct_MY_APPS();
 
     private static List<test.fixtures.constants.Company> construct_MY_APPS() {
-      return ImmutableList.<test.fixtures.constants.Company>builder()
+        return ImmutableList.<test.fixtures.constants.Company>builder()
         .add(test.fixtures.constants.Company.FACEBOOK)
         .add(test.fixtures.constants.Company.__FRIEND__FEED)
         .build();
@@ -81,19 +81,19 @@ public final class ModuleConstants {
     public static final test.fixtures.constants.Internship INSTAGRAM = construct_INSTAGRAM();
 
     private static test.fixtures.constants.Internship construct_INSTAGRAM() {
-      return new test.fixtures.constants.Internship.Builder().setWeeks(12).setTitle("Software Engineer").setEmployer(test.fixtures.constants.Company.INSTAGRAM).setCompensation((double)1200).setSchool("Monters University").build();
+        return new test.fixtures.constants.Internship.Builder().setWeeks(12).setTitle("Software Engineer").setEmployer(test.fixtures.constants.Company.INSTAGRAM).setCompensation((double)1200).setSchool("Monters University").build();
     }
 
     public static final test.fixtures.constants.Internship PARTIAL_CONST = construct_PARTIAL_CONST();
 
     private static test.fixtures.constants.Internship construct_PARTIAL_CONST() {
-      return new test.fixtures.constants.Internship.Builder().setWeeks(8).setTitle("Some Job").build();
+        return new test.fixtures.constants.Internship.Builder().setWeeks(8).setTitle("Some Job").build();
     }
 
     public static final List<test.fixtures.constants.City> CITIES = construct_CITIES();
 
     private static List<test.fixtures.constants.City> construct_CITIES() {
-      return ImmutableList.<test.fixtures.constants.City>builder()
+        return ImmutableList.<test.fixtures.constants.City>builder()
         .add(test.fixtures.constants.City.NYC)
         .add(test.fixtures.constants.City.MPK)
         .add(test.fixtures.constants.City.SEA)
@@ -104,7 +104,7 @@ public final class ModuleConstants {
     public static final Map<test.fixtures.constants.Company, List<test.fixtures.constants.City>> COMPANY_LOCATIONS = construct_COMPANY_LOCATIONS();
 
     private static Map<test.fixtures.constants.Company, List<test.fixtures.constants.City>> construct_COMPANY_LOCATIONS() {
-      return ImmutableMap.<test.fixtures.constants.Company, List<test.fixtures.constants.City>>builder()
+        return ImmutableMap.<test.fixtures.constants.Company, List<test.fixtures.constants.City>>builder()
         .put(test.fixtures.constants.Company.FACEBOOK, ImmutableList.<test.fixtures.constants.City>builder()
         .add(test.fixtures.constants.City.NYC)
         .add(test.fixtures.constants.City.MPK)
@@ -117,7 +117,7 @@ public final class ModuleConstants {
     public static final List<test.fixtures.constants.Range> K_RANGES = construct_K_RANGES();
 
     private static List<test.fixtures.constants.Range> construct_K_RANGES() {
-      return ImmutableList.<test.fixtures.constants.Range>builder()
+        return ImmutableList.<test.fixtures.constants.Range>builder()
         .add(new test.fixtures.constants.Range.Builder().setMin(1).setMax(2).build())
         .add(new test.fixtures.constants.Range.Builder().setMin(5).setMax(6).build())
         .build();
@@ -126,7 +126,7 @@ public final class ModuleConstants {
     public static final List<test.fixtures.constants.Internship> INTERN_LIST = construct_INTERN_LIST();
 
     private static List<test.fixtures.constants.Internship> construct_INTERN_LIST() {
-      return ImmutableList.<test.fixtures.constants.Internship>builder()
+        return ImmutableList.<test.fixtures.constants.Internship>builder()
         .add(test.fixtures.constants.Constants.INSTAGRAM)
         .add(new test.fixtures.constants.Internship.Builder().setWeeks(10).setTitle("Sales Intern").setEmployer(test.fixtures.constants.Company.FACEBOOK).setCompensation((double)1000).build())
         .build();
@@ -135,31 +135,31 @@ public final class ModuleConstants {
     public static final test.fixtures.constants.Struct1 POD_0 = construct_POD_0();
 
     private static test.fixtures.constants.Struct1 construct_POD_0() {
-      return new test.fixtures.constants.Struct1.Builder().build();
+        return new test.fixtures.constants.Struct1.Builder().build();
     }
 
     public static final test.fixtures.constants.Struct1 POD_S_0 = construct_POD_S_0();
 
     private static test.fixtures.constants.Struct1 construct_POD_S_0() {
-      return new test.fixtures.constants.Struct1.Builder().build();
+        return new test.fixtures.constants.Struct1.Builder().build();
     }
 
     public static final test.fixtures.constants.Struct1 POD_1 = construct_POD_1();
 
     private static test.fixtures.constants.Struct1 construct_POD_1() {
-      return new test.fixtures.constants.Struct1.Builder().setA(10).setB("foo").build();
+        return new test.fixtures.constants.Struct1.Builder().setA(10).setB("foo").build();
     }
 
     public static final test.fixtures.constants.Struct1 POD_S_1 = construct_POD_S_1();
 
     private static test.fixtures.constants.Struct1 construct_POD_S_1() {
-      return new test.fixtures.constants.Struct1.Builder().setA(10).setB("foo").build();
+        return new test.fixtures.constants.Struct1.Builder().setA(10).setB("foo").build();
     }
 
     public static final test.fixtures.constants.Struct2 POD_2 = construct_POD_2();
 
     private static test.fixtures.constants.Struct2 construct_POD_2() {
-      return new test.fixtures.constants.Struct2.Builder().setA(98).setB("gaz").setC(new test.fixtures.constants.Struct1.Builder().setA(12).setB("bar").build()).setD(ImmutableList.<Integer>builder()
+        return new test.fixtures.constants.Struct2.Builder().setA(98).setB("gaz").setC(new test.fixtures.constants.Struct1.Builder().setA(12).setB("bar").build()).setD(ImmutableList.<Integer>builder()
         .add(11)
         .add(22)
         .add(33)
@@ -169,7 +169,7 @@ public final class ModuleConstants {
     public static final test.fixtures.constants.Struct2 POD_TRAILING_COMMAS = construct_POD_TRAILING_COMMAS();
 
     private static test.fixtures.constants.Struct2 construct_POD_TRAILING_COMMAS() {
-      return new test.fixtures.constants.Struct2.Builder().setA(98).setB("gaz").setC(new test.fixtures.constants.Struct1.Builder().setA(12).setB("bar").build()).setD(ImmutableList.<Integer>builder()
+        return new test.fixtures.constants.Struct2.Builder().setA(98).setB("gaz").setC(new test.fixtures.constants.Struct1.Builder().setA(12).setB("bar").build()).setD(ImmutableList.<Integer>builder()
         .add(11)
         .add(22)
         .add(33)
@@ -179,7 +179,7 @@ public final class ModuleConstants {
     public static final test.fixtures.constants.Struct2 POD_S_2 = construct_POD_S_2();
 
     private static test.fixtures.constants.Struct2 construct_POD_S_2() {
-      return new test.fixtures.constants.Struct2.Builder().setA(98).setB("gaz").setC(new test.fixtures.constants.Struct1.Builder().setA(12).setB("bar").build()).setD(ImmutableList.<Integer>builder()
+        return new test.fixtures.constants.Struct2.Builder().setA(98).setB("gaz").setC(new test.fixtures.constants.Struct1.Builder().setA(12).setB("bar").build()).setD(ImmutableList.<Integer>builder()
         .add(11)
         .add(22)
         .add(33)
@@ -189,7 +189,7 @@ public final class ModuleConstants {
     public static final test.fixtures.constants.Struct3 POD_3 = construct_POD_3();
 
     private static test.fixtures.constants.Struct3 construct_POD_3() {
-      return new test.fixtures.constants.Struct3.Builder().setA("abc").setB(456).setC(new test.fixtures.constants.Struct2.Builder().setA(888).setC(new test.fixtures.constants.Struct1.Builder().setB("gaz").build()).setD(ImmutableList.<Integer>builder()
+        return new test.fixtures.constants.Struct3.Builder().setA("abc").setB(456).setC(new test.fixtures.constants.Struct2.Builder().setA(888).setC(new test.fixtures.constants.Struct1.Builder().setB("gaz").build()).setD(ImmutableList.<Integer>builder()
         .add(1)
         .add(2)
         .add(3)
@@ -199,7 +199,7 @@ public final class ModuleConstants {
     public static final test.fixtures.constants.Struct3 POD_S_3 = construct_POD_S_3();
 
     private static test.fixtures.constants.Struct3 construct_POD_S_3() {
-      return new test.fixtures.constants.Struct3.Builder().setA("abc").setB(456).setC(new test.fixtures.constants.Struct2.Builder().setA(888).setC(new test.fixtures.constants.Struct1.Builder().setB("gaz").build()).setD(ImmutableList.<Integer>builder()
+        return new test.fixtures.constants.Struct3.Builder().setA("abc").setB(456).setC(new test.fixtures.constants.Struct2.Builder().setA(888).setC(new test.fixtures.constants.Struct1.Builder().setB("gaz").build()).setD(ImmutableList.<Integer>builder()
         .add(1)
         .add(2)
         .add(3)
@@ -209,61 +209,61 @@ public final class ModuleConstants {
     public static final test.fixtures.constants.Struct4 POD_4 = construct_POD_4();
 
     private static test.fixtures.constants.Struct4 construct_POD_4() {
-      return new test.fixtures.constants.Struct4.Builder().setA(1234).setB((double)0.333).setC((byte)25).build();
+        return new test.fixtures.constants.Struct4.Builder().setA(1234).setB((double)0.333).setC((byte)25).build();
     }
 
     public static final test.fixtures.constants.Union1 U_1_1 = construct_U_1_1();
 
     private static test.fixtures.constants.Union1 construct_U_1_1() {
-      return test.fixtures.constants.Union1.fromI(97);
+        return test.fixtures.constants.Union1.fromI(97);
     }
 
     public static final test.fixtures.constants.Union1 U_1_2 = construct_U_1_2();
 
     private static test.fixtures.constants.Union1 construct_U_1_2() {
-      return test.fixtures.constants.Union1.fromD((double)5.6);
+        return test.fixtures.constants.Union1.fromD((double)5.6);
     }
 
     public static final test.fixtures.constants.Union1 U_1_3 = construct_U_1_3();
 
     private static test.fixtures.constants.Union1 construct_U_1_3() {
-      return new test.fixtures.constants.Union1();
+        return new test.fixtures.constants.Union1();
     }
 
     public static final test.fixtures.constants.Union2 U_2_1 = construct_U_2_1();
 
     private static test.fixtures.constants.Union2 construct_U_2_1() {
-      return test.fixtures.constants.Union2.fromI(51);
+        return test.fixtures.constants.Union2.fromI(51);
     }
 
     public static final test.fixtures.constants.Union2 U_2_2 = construct_U_2_2();
 
     private static test.fixtures.constants.Union2 construct_U_2_2() {
-      return test.fixtures.constants.Union2.fromD((double)6.7);
+        return test.fixtures.constants.Union2.fromD((double)6.7);
     }
 
     public static final test.fixtures.constants.Union2 U_2_3 = construct_U_2_3();
 
     private static test.fixtures.constants.Union2 construct_U_2_3() {
-      return test.fixtures.constants.Union2.fromS(new test.fixtures.constants.Struct1.Builder().setA(8).setB("abacabb").build());
+        return test.fixtures.constants.Union2.fromS(new test.fixtures.constants.Struct1.Builder().setA(8).setB("abacabb").build());
     }
 
     public static final test.fixtures.constants.Union2 U_2_4 = construct_U_2_4();
 
     private static test.fixtures.constants.Union2 construct_U_2_4() {
-      return test.fixtures.constants.Union2.fromU(test.fixtures.constants.Union1.fromI(43));
+        return test.fixtures.constants.Union2.fromU(test.fixtures.constants.Union1.fromI(43));
     }
 
     public static final test.fixtures.constants.Union2 U_2_5 = construct_U_2_5();
 
     private static test.fixtures.constants.Union2 construct_U_2_5() {
-      return test.fixtures.constants.Union2.fromU(test.fixtures.constants.Union1.fromD((double)9.8));
+        return test.fixtures.constants.Union2.fromU(test.fixtures.constants.Union1.fromD((double)9.8));
     }
 
     public static final test.fixtures.constants.Union2 U_2_6 = construct_U_2_6();
 
     private static test.fixtures.constants.Union2 construct_U_2_6() {
-      return test.fixtures.constants.Union2.fromU(new test.fixtures.constants.Union1());
+        return test.fixtures.constants.Union2.fromU(new test.fixtures.constants.Union1());
     }
 
     public static final String APOSTROPHE = "'";
@@ -279,7 +279,7 @@ public final class ModuleConstants {
     public static final Map<String, Integer> CHAR2ASCII = construct_CHAR2ASCII();
 
     private static Map<String, Integer> construct_CHAR2ASCII() {
-      return ImmutableMap.<String, Integer>builder()
+        return ImmutableMap.<String, Integer>builder()
         .put("'", 39)
         .put("\"", 34)
         .put("\\", 92)
@@ -290,7 +290,7 @@ public final class ModuleConstants {
     public static final List<String> ESCAPED_STRINGS = construct_ESCAPED_STRINGS();
 
     private static List<String> construct_ESCAPED_STRINGS() {
-      return ImmutableList.<String>builder()
+        return ImmutableList.<String>builder()
         .add("\001")
         .add("\037")
         .add(" ")
@@ -321,7 +321,7 @@ public final class ModuleConstants {
     public static final List<String> UNICODE_LIST = construct_UNICODE_LIST();
 
     private static List<String> construct_UNICODE_LIST() {
-      return ImmutableList.<String>builder()
+        return ImmutableList.<String>builder()
         .add("Bulgaria")
         .add("Benin")
         .add("Saint Barthélemy")
@@ -347,63 +347,63 @@ public final class ModuleConstants {
     public static final List<Integer> EMPTY_INT_LIST = construct_EMPTY_INT_LIST();
 
     private static List<Integer> construct_EMPTY_INT_LIST() {
-      return ImmutableList.<Integer>builder()
+        return ImmutableList.<Integer>builder()
         .build();
     }
 
     public static final List<String> EMPTY_STRING_LIST = construct_EMPTY_STRING_LIST();
 
     private static List<String> construct_EMPTY_STRING_LIST() {
-      return ImmutableList.<String>builder()
+        return ImmutableList.<String>builder()
         .build();
     }
 
     public static final Set<Integer> EMPTY_INT_SET = construct_EMPTY_INT_SET();
 
     private static Set<Integer> construct_EMPTY_INT_SET() {
-      return ImmutableSet.<Integer>builder()
+        return ImmutableSet.<Integer>builder()
         .build();
     }
 
     public static final Set<String> EMPTY_STRING_SET = construct_EMPTY_STRING_SET();
 
     private static Set<String> construct_EMPTY_STRING_SET() {
-      return ImmutableSet.<String>builder()
+        return ImmutableSet.<String>builder()
         .build();
     }
 
     public static final Map<Integer, Integer> EMPTY_INT_INT_MAP = construct_EMPTY_INT_INT_MAP();
 
     private static Map<Integer, Integer> construct_EMPTY_INT_INT_MAP() {
-      return ImmutableMap.<Integer, Integer>builder()
+        return ImmutableMap.<Integer, Integer>builder()
         .build();
     }
 
     public static final Map<Integer, String> EMPTY_INT_STRING_MAP = construct_EMPTY_INT_STRING_MAP();
 
     private static Map<Integer, String> construct_EMPTY_INT_STRING_MAP() {
-      return ImmutableMap.<Integer, String>builder()
+        return ImmutableMap.<Integer, String>builder()
         .build();
     }
 
     public static final Map<String, Integer> EMPTY_STRING_INT_MAP = construct_EMPTY_STRING_INT_MAP();
 
     private static Map<String, Integer> construct_EMPTY_STRING_INT_MAP() {
-      return ImmutableMap.<String, Integer>builder()
+        return ImmutableMap.<String, Integer>builder()
         .build();
     }
 
     public static final Map<String, String> EMPTY_STRING_STRING_MAP = construct_EMPTY_STRING_STRING_MAP();
 
     private static Map<String, String> construct_EMPTY_STRING_STRING_MAP() {
-      return ImmutableMap.<String, String>builder()
+        return ImmutableMap.<String, String>builder()
         .build();
     }
 
     public static final Map<String, String> UNICODE_MAP = construct_UNICODE_MAP();
 
     private static Map<String, String> construct_UNICODE_MAP() {
-      return ImmutableMap.<String, String>builder()
+        return ImmutableMap.<String, String>builder()
         .put("BG", "Bulgaria")
         .put("BH", "Bahrain")
         .put("BÉ", "Saint Barthélemy")
@@ -455,7 +455,7 @@ public final class ModuleConstants {
     public static final Map<Integer, Boolean> I2B = construct_I2B();
 
     private static Map<Integer, Boolean> construct_I2B() {
-      return ImmutableMap.<Integer, Boolean>builder()
+        return ImmutableMap.<Integer, Boolean>builder()
         .put(0, false)
         .put(1, true)
         .put(2, true)
@@ -466,7 +466,7 @@ public final class ModuleConstants {
     public static final Map<Integer, Boolean> I2B_REF = construct_I2B_REF();
 
     private static Map<Integer, Boolean> construct_I2B_REF() {
-      return ImmutableMap.<Integer, Boolean>builder()
+        return ImmutableMap.<Integer, Boolean>builder()
         .put(0, false)
         .put(1, true)
         .put(2, true)
@@ -477,21 +477,21 @@ public final class ModuleConstants {
     public static final Map<Integer, Integer> MAP_LIST_INITIALIZER = construct_MAP_LIST_INITIALIZER();
 
     private static Map<Integer, Integer> construct_MAP_LIST_INITIALIZER() {
-      return ImmutableMap.<Integer, Integer>builder()
+        return ImmutableMap.<Integer, Integer>builder()
         .build();
     }
 
     public static final List<Integer> LIST_MAP_INITIALIZER = construct_LIST_MAP_INITIALIZER();
 
     private static List<Integer> construct_LIST_MAP_INITIALIZER() {
-      return ImmutableList.<Integer>builder()
+        return ImmutableList.<Integer>builder()
         .build();
     }
 
     public static final Set<Integer> SET_MAP_INITIALIZER = construct_SET_MAP_INITIALIZER();
 
     private static Set<Integer> construct_SET_MAP_INITIALIZER() {
-      return ImmutableSet.<Integer>builder()
+        return ImmutableSet.<Integer>builder()
         .build();
     }
 }

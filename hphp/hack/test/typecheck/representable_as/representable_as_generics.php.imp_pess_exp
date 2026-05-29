@@ -1,0 +1,14 @@
+ERROR: File "representable_as_generics.php", line 11, characters 10-11:
+Invalid return type (Typing[4110])
+  File "representable_as_generics.php", line 9, characters 77-77:
+  Expected `T`
+  File "representable_as_generics.php", line 9, characters 41-70:
+  But got `HH\Runtime\RepresentableAs<T>`
+ERROR: File "representable_as_generics.php", line 11, characters 10-11:
+Invalid return type (Typing[4110])
+  File "representable_as_generics.php", line 9, characters 77-77:
+  Expected `T`
+  File "representable_as_generics.php", line 9, characters 41-70:
+  But got `mixed`
+  File "representable_as.hhi", line 7, characters 11-25:
+    by the definition of `HH\Runtime\RepresentableAs`

@@ -163,7 +163,7 @@ void annotateSFUses(Vunit& unit) {
 // is dead.
 void sfPeepholes(Vunit& unit, const Abi& abi) {
   // Currently, all our optimizations are only relevant on x64.
-  assertx(arch::get() == Arch::X64);
+  assertx(arch::any<arch::X64>());
 
   Timer timer(Timer::vasm_sf_peepholes, unit.log_entry);
 

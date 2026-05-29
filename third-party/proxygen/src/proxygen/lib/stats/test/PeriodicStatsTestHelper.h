@@ -20,8 +20,7 @@ class PeriodicStatsTestHelper {
   PeriodicStatsTestHelper(proxygen::PeriodicStats<T>* psUT) {
     psUT_ = psUT;
 
-    std::function<void()> refreshCb(
-        std::bind(&PeriodicStatsTestHelper::refreshCb, this));
+    std::function<void()> refreshCb([this] { this->refreshCb(); });
     psUT_->setRefreshCB(refreshCb);
   }
 

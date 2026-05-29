@@ -184,13 +184,9 @@ namespace HPHP {
   O(NewObjS,         ONE(OA(SpecialClsRef)),                            \
                                        NOV,             ONE(CV),    NF) \
   O(LockObj,         NA,               ONE(CV),         ONE(CV),    NF) \
-  O(FCallClsMethod,  THREE(FCA,SA,OA(IsLogAsDynamicCallOp)),            \
-                                       FCALL(2, 0),     FCALL,      CF) \
-  O(FCallClsMethodM, FOUR(FCA,SA,OA(IsLogAsDynamicCallOp),SA),          \
+  O(FCallClsMethodM, THREE(FCA,SA,SA),                                   \
                                        FCALL(1, 0),     FCALL,      CF) \
   O(FCallClsMethodD, THREE(FCA,SA,SA), FCALL(0, 0),     FCALL,      CF) \
-  O(FCallClsMethodS, THREE(FCA,SA,OA(SpecialClsRef)),                   \
-                                       FCALL(1, 0),     FCALL,      CF) \
   O(FCallClsMethodSD,FOUR(FCA,SA,OA(SpecialClsRef),SA),                 \
                                        FCALL(0, 0),     FCALL,      CF) \
   O(FCallCtor,       TWO(FCA,SA),      FCALL(0, 1),     FCALL,      CF) \

@@ -37,11 +37,11 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Foo other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -67,6 +67,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -76,12 +77,11 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     public static final int _A = 1;
     private static final TField A_FIELD_DESC = new TField("a", TType.I64, (short)1);
     static {
-      NAMES_TO_IDS.put("a", 1);
-      THRIFT_NAMES_TO_IDS.put("a", 1);
-      FIELD_METADATA.put(1, A_FIELD_DESC);
+        NAMES_TO_IDS.put("a", 1);
+        THRIFT_NAMES_TO_IDS.put("a", 1);
+        FIELD_METADATA.put(1, A_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)
     public long getA() { return a; }
 
@@ -112,50 +112,50 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(a);
-            return _hashCode;
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Foo> asReader() {
       return Foo::read0;
     }
 
     public static Foo read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Foo.NAMES_TO_IDS, Foo.THRIFT_NAMES_TO_IDS, Foo.FIELD_METADATA);
-      Foo.Builder builder = new Foo.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _A:
-          if (__field.type == TType.I64) {
-            long a = oprot.readI64();
-            builder.setA(a);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(Foo.NAMES_TO_IDS, Foo.THRIFT_NAMES_TO_IDS, Foo.FIELD_METADATA);
+        Foo.Builder builder = new Foo.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _A:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setA(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.a;
-      oprot.writeFieldBegin(A_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.a;
+            oprot.writeFieldBegin(A_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _FooLazy {

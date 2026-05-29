@@ -61,7 +61,7 @@ void TccStructTraits<::cpp2::MyStruct>::translateFieldName(
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::MyStruct>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
@@ -103,7 +103,7 @@ void TccStructTraits<::cpp2::defaultStruct>::translateFieldName(
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::defaultStruct>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
@@ -208,7 +208,7 @@ void TccStructTraits<::cpp2::ComplexNestedStruct>::translateFieldName(
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::ComplexNestedStruct>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
@@ -334,7 +334,7 @@ void TccStructTraits<::cpp2::Containers>::translateFieldName(
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::cpp2::Containers>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),

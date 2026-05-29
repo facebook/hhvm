@@ -40,11 +40,11 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(MyStructMapFloatThrowExp other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -58,7 +58,7 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
 
         public long getMyLongField() { return myLongField; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="mapListOfFloats", requiredness=Requiredness.NONE)    public Builder setMapListOfFloats(Map<Integer, List<List<Float>>> mapListOfFloats) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="mapListOfFloats", requiredness=Requiredness.NONE)    public Builder setMapListOfFloats(Map<Integer, List<List<Float>>> mapListOfFloats) {
             this.mapListOfFloats = mapListOfFloats;
             return this;
         }
@@ -80,6 +80,7 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -88,23 +89,20 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
     private final long myLongField;
     public static final int _MYLONGFIELD = 1;
     private static final TField MY_LONG_FIELD_FIELD_DESC = new TField("myLongField", TType.I64, (short)1);
-        private final Map<Integer, List<List<Float>>> mapListOfFloats;
+    private final Map<Integer, List<List<Float>>> mapListOfFloats;
     public static final int _MAPLISTOFFLOATS = 2;
     private static final TField MAP_LIST_OF_FLOATS_FIELD_DESC = new TField("mapListOfFloats", TType.MAP, (short)2);
     static {
-      NAMES_TO_IDS.put("myLongField", 1);
-      THRIFT_NAMES_TO_IDS.put("myLongField", 1);
-      FIELD_METADATA.put(1, MY_LONG_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("mapListOfFloats", 2);
-      THRIFT_NAMES_TO_IDS.put("mapListOfFloats", 2);
-      FIELD_METADATA.put(2, MAP_LIST_OF_FLOATS_FIELD_DESC);
+        NAMES_TO_IDS.put("myLongField", 1);
+        THRIFT_NAMES_TO_IDS.put("myLongField", 1);
+        FIELD_METADATA.put(1, MY_LONG_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("mapListOfFloats", 2);
+        THRIFT_NAMES_TO_IDS.put("mapListOfFloats", 2);
+        FIELD_METADATA.put(2, MAP_LIST_OF_FLOATS_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="myLongField", requiredness=Requiredness.NONE)
     public long getMyLongField() { return myLongField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="mapListOfFloats", requiredness=Requiredness.NONE)
     public Map<Integer, List<List<Float>>> getMapListOfFloats() { return mapListOfFloats; }
@@ -138,125 +136,125 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(myLongField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mapListOfFloats);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(mapListOfFloats);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyStructMapFloatThrowExp> asReader() {
       return MyStructMapFloatThrowExp::read0;
     }
 
     public static MyStructMapFloatThrowExp read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(MyStructMapFloatThrowExp.NAMES_TO_IDS, MyStructMapFloatThrowExp.THRIFT_NAMES_TO_IDS, MyStructMapFloatThrowExp.FIELD_METADATA);
-      MyStructMapFloatThrowExp.Builder builder = new MyStructMapFloatThrowExp.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MYLONGFIELD:
-          if (__field.type == TType.I64) {
-            long myLongField = oprot.readI64();
-            builder.setMyLongField(myLongField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAPLISTOFFLOATS:
-          if (__field.type == TType.MAP) {
-            Map<Integer, List<List<Float>>> mapListOfFloats;
-                {
-                TMap _map = oprot.readMapBegin();
-                mapListOfFloats = new HashMap<Integer, List<List<Float>>>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    int _key1 = oprot.readI32();
-                    List<List<Float>> _value1;
+        TField __field;
+        oprot.readStructBegin(MyStructMapFloatThrowExp.NAMES_TO_IDS, MyStructMapFloatThrowExp.THRIFT_NAMES_TO_IDS, MyStructMapFloatThrowExp.FIELD_METADATA);
+        MyStructMapFloatThrowExp.Builder builder = new MyStructMapFloatThrowExp.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MYLONGFIELD:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMyLongField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAPLISTOFFLOATS:
+                if (__field.type == TType.MAP) {
+                    Map<Integer, List<List<Float>>> _fbthriftVar0;
                     {
-                                TList _list1 = oprot.readListBegin();
-                                _value1 = new ArrayList<List<Float>>(Math.max(0, _list1.size));
-                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                    
-                                    
-                                    List<Float> _value2;
-                                    {
-                                                TList _list2 = oprot.readListBegin();
-                                                _value2 = new ArrayList<Float>(Math.max(0, _list2.size));
-                                                for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
-                                                    
-                                                    
-                                                    float _value3 = oprot.readFloat();
-                                                    
-                                                    
-                                                    _value2.add(_value3);
-                                                    
-                                                }
-                                                oprot.readListEnd();
-                                                }
-                                    
-                                    
-                                    _value1.add(_value2);
-                                    
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<Integer, List<List<Float>>>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            int _fbthriftKey1;
+                            List<List<Float>> _fbthriftValue1;
+
+                            {
+                                int _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI32();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                List<List<Float>> _fbthriftVar1;
+                                {
+                                    TList _list1 = oprot.readListBegin();
+                                    _fbthriftVar1 = new ArrayList<List<Float>>(Math.max(0, _list1.size));
+                                    for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                        List<Float> _fbthriftVar2;
+                                        {
+                                            TList _list2 = oprot.readListBegin();
+                                            _fbthriftVar2 = new ArrayList<Float>(Math.max(0, _list2.size));
+                                            for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
+                                                float _fbthriftVar3;
+                                                _fbthriftVar3 = oprot.readFloat();
+                                                _fbthriftVar2.add(_fbthriftVar3);
+                                            }
+                                            oprot.readListEnd();
+                                        }
+                                        _fbthriftVar1.add(_fbthriftVar2);
+                                    }
+                                    oprot.readListEnd();
                                 }
-                                oprot.readListEnd();
-                                }
-                    mapListOfFloats.put(_key1, _value1);
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMapListOfFloats(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                }
-                oprot.readMapEnd();
-            builder.setMapListOfFloats(mapListOfFloats);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.myLongField;
-      oprot.writeFieldBegin(MY_LONG_FIELD_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      Map<Integer, List<List<Float>>> _iter0 = this.mapListOfFloats;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MAP_LIST_OF_FLOATS_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
-            for (Map.Entry<Integer, List<List<Float>>> _iter1 : _iter0.entrySet()) {
-              {
-                Integer _iter2 = _iter1.getKey();
-                oprot.writeI32(_iter2);
-              }
-              {
-                List<List<Float>> _iter2 = _iter1.getValue();
-                oprot.writeListBegin(new TList(TType.LIST, _iter2.size()));
-            for (List<Float> _iter3 : _iter2) {
-              oprot.writeListBegin(new TList(TType.FLOAT, _iter3.size()));
-            for (float _iter4 : _iter3) {
-              oprot.writeFloat(_iter4);
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.myLongField;
+            oprot.writeFieldBegin(MY_LONG_FIELD_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            Map<Integer, List<List<Float>>> _fbthriftVar0 = this.mapListOfFloats;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MAP_LIST_OF_FLOATS_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _fbthriftVar0.size()));
+                for (Map.Entry<Integer, List<List<Float>>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Integer _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI32(_fbthriftVar2);
+                    }
+                    {
+                        List<List<Float>> _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeListBegin(new TList(TType.LIST, _fbthriftVar2.size()));
+                        for (List<Float> _fbthriftVar3 : _fbthriftVar2) {
+                            oprot.writeListBegin(new TList(TType.FLOAT, _fbthriftVar3.size()));
+                            for (float _fbthriftVar4 : _fbthriftVar3) {
+                                oprot.writeFloat(_fbthriftVar4);
+                            }
+                            oprot.writeListEnd();
+                        }
+                        oprot.writeListEnd();
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-            }
-            oprot.writeListEnd();
-              }
-            }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _MyStructMapFloatThrowExpLazy {

@@ -110,14 +110,7 @@ void genBlock(IRLS& env, Vout& v, Vout& vc, Block& block) {
 
 void optimize(Vunit& unit, CodeKind kind, bool regAlloc) {
   auto const abi = jit::abi(kind);
-  switch (arch::get()) {
-    case Arch::X64:
-      optimizeX64(unit, abi, regAlloc);
-      break;
-    case Arch::ARM:
-      optimizeARM(unit, abi, regAlloc);
-      break;
-  }
+  optimize(unit, abi, regAlloc);
 }
 
 std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,

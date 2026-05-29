@@ -106,14 +106,14 @@ let to_contextual_string lint =
       Tty.Default
   in
   User_diagnostic.make_absolute
-    User_diagnostic.Warning
+    (User_diagnostic.Warning { is_trusted = true })
     lint.code
     [(lint.pos, lint.message)]
   |> Contextual_diagnostic_formatter.to_string ~claim_color
 
 let to_highlighted_string (lint : string Pos.pos t) =
   User_diagnostic.make_absolute
-    User_diagnostic.Warning
+    (User_diagnostic.Warning { is_trusted = true })
     lint.code
     [(lint.pos, lint.message)]
   |> Highlighted_diagnostic_formatter.to_string

@@ -6,9 +6,9 @@
 
 /// Service definitions for `PubSubStreamingService`.
 pub mod pub_sub_streaming_service {
+
     #[derive(Clone, Debug)]
     pub enum ReturnstreamStreamExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -72,7 +72,6 @@ pub mod pub_sub_streaming_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -82,7 +81,6 @@ pub mod pub_sub_streaming_service {
 
     #[derive(Clone, Debug)]
     pub enum ReturnstreamExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -161,7 +159,6 @@ pub mod pub_sub_streaming_service {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -263,7 +260,6 @@ pub mod pub_sub_streaming_service {
 
     #[derive(Clone, Debug)]
     pub enum StreamthrowsExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -342,7 +338,6 @@ pub mod pub_sub_streaming_service {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -352,7 +347,6 @@ pub mod pub_sub_streaming_service {
 
     #[derive(Clone, Debug)]
     pub enum ServicethrowsStreamExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -416,7 +410,6 @@ pub mod pub_sub_streaming_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -514,7 +507,6 @@ pub mod pub_sub_streaming_service {
 
     #[derive(Clone, Debug)]
     pub enum Servicethrows2StreamExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -578,7 +570,6 @@ pub mod pub_sub_streaming_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -588,7 +579,8 @@ pub mod pub_sub_streaming_service {
 
     #[derive(Clone, Debug)]
     pub enum Servicethrows2Exn {
-        e1(crate::types::FooEx),        e2(crate::types::FooEx2),
+        e1(crate::types::FooEx),
+        e2(crate::types::FooEx2),
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -676,7 +668,8 @@ pub mod pub_sub_streaming_service {
                     );
                     ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
-                }                ::std::result::Result::Err(Self::e2(inner)) => {
+                }
+                ::std::result::Result::Err(Self::e2(inner)) => {
                     p.write_field_begin(
                         "e2",
                         ::fbthrift::TType::Struct,
@@ -966,7 +959,6 @@ pub mod pub_sub_streaming_service {
 
     #[derive(Clone, Debug)]
     pub enum ResponseandstreamstreamthrowsExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1046,7 +1038,6 @@ pub mod pub_sub_streaming_service {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1056,7 +1047,6 @@ pub mod pub_sub_streaming_service {
 
     #[derive(Clone, Debug)]
     pub enum ResponseandstreamservicethrowsStreamExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1120,7 +1110,6 @@ pub mod pub_sub_streaming_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1400,7 +1389,6 @@ pub mod pub_sub_streaming_service {
 
     #[derive(Clone, Debug)]
     pub enum ReturnstreamFastStreamExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1464,7 +1452,6 @@ pub mod pub_sub_streaming_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1474,7 +1461,6 @@ pub mod pub_sub_streaming_service {
 
     #[derive(Clone, Debug)]
     pub enum ReturnstreamFastExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1553,7 +1539,6 @@ pub mod pub_sub_streaming_service {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();

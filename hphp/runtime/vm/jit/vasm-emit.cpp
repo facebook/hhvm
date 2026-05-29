@@ -24,6 +24,11 @@
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#ifdef __aarch64__
+#include "hphp/runtime/vm/jit/vasm-emit-arm.h"
+#else
+#include "hphp/runtime/vm/jit/vasm-emit-x64.h"
+#endif
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
@@ -107,19 +112,16 @@ void bindDataPtrs(Vunit& vunit, DataBlock& data) {
   });
 }
 
-void emit(Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
-  switch (arch::get()) {
-    case Arch::X64:
-      emitX64(vunit, vtext, meta, ai);
-      break;
-    case Arch::ARM:
-      emitARM(vunit, vtext, meta, ai);
-      break;
-  }
-}
-
 std::atomic<size_t> s_uploadId;
 
+}
+
+void optimize(Vunit& vunit, const Abi& abi, bool regalloc) {
+  ARCH_SWITCH_CALL(optimize, vunit, abi, regalloc);
+}
+
+void emit(Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
+  ARCH_SWITCH_CALL(emit, vunit, vtext, meta, ai);
 }
 
 void emitVunit(Vunit& vunit, const IRUnit* unit,
@@ -154,13 +156,10 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
     // emitted cold code.
     static unsigned seed = 42;
     auto code_alignment = [](void) -> uint8_t {
-      switch (arch::get()) {
-        case Arch::X64:
-          return 1;
-        case Arch::ARM:
-          return 4;
-      }
-      not_reached();
+      return ARCH_MATCH(
+        [](arch::X64) { return 1; },
+        [](arch::ARM) { return 4; }
+      );
     }();
     auto off = rand_r(&seed) & (cache_line_size() - code_alignment);
 

@@ -52,15 +52,14 @@ struct Env {
 };
 
 bool isMultiword(int64_t imm) {
-  switch (arch::get()) {
-  case Arch::X64:
-    break;
-  case Arch::ARM:
-    uint64_t val = std::abs(imm);
-    if (val > (1 << 16)) return true;
-    break;
-  }
-  return false;
+  return ARCH_MATCH(
+    [](arch::X64) { return false; },
+    [&](arch::ARM) {
+      uint64_t val = std::abs(imm);
+      if (val > (1 << 16)) return true;
+      return false;
+    }
+  );
 }
 
 // candidate around +/- uimm12

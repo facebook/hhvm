@@ -8,12 +8,66 @@
 
 #include <proxygen/lib/http/codec/webtransport/WebTransportFramer.h>
 
+#include <array>
+
+#include <folly/Utility.h>
+#include <folly/io/Cursor.h>
+#include <folly/io/IOBufQueue.h>
+
 #include <quic/codec/QuicInteger.h>
 #include <quic/folly_utils/Utils.h>
 
 namespace {
 const size_t kDefaultBufferGrowth = 32;
+
+// Logical frame type index into kFrameTypeMap.
+enum class FrameType : uint8_t {
+  RESET_STREAM,
+  STOP_SENDING,
+  STREAM,
+  STREAM_WITH_FIN,
+  MAX_DATA,
+  MAX_STREAM_DATA,
+  MAX_STREAMS_BIDI,
+  MAX_STREAMS_UNI,
+  DATA_BLOCKED,
+  STREAM_DATA_BLOCKED,
+  STREAMS_BLOCKED_BIDI,
+  STREAMS_BLOCKED_UNI,
+  DATAGRAM,
+  NUM_TYPES,
+};
+
+// Each entry is {WT capsule type, QMUX frame type}.
+#define WT_QMUX(name)                                      \
+  {folly::to_underlying(proxygen::CapsuleType::WT_##name), \
+   folly::to_underlying(proxygen::QmuxFrameType::name)}
+
+constexpr std::array<std::pair<uint64_t, uint64_t>,
+                     static_cast<size_t>(FrameType::NUM_TYPES)>
+    kFrameTypeMap = {{
+        WT_QMUX(RESET_STREAM),
+        WT_QMUX(STOP_SENDING),
+        WT_QMUX(STREAM),
+        WT_QMUX(STREAM_WITH_FIN),
+        WT_QMUX(MAX_DATA),
+        WT_QMUX(MAX_STREAM_DATA),
+        WT_QMUX(MAX_STREAMS_BIDI),
+        WT_QMUX(MAX_STREAMS_UNI),
+        WT_QMUX(DATA_BLOCKED),
+        WT_QMUX(STREAM_DATA_BLOCKED),
+        WT_QMUX(STREAMS_BLOCKED_BIDI),
+        WT_QMUX(STREAMS_BLOCKED_UNI),
+        {folly::to_underlying(proxygen::CapsuleType::DATAGRAM),
+         folly::to_underlying(proxygen::QmuxFrameType::DATAGRAM)},
+    }};
+#undef WT_QMUX
+
+uint64_t getWireType(FrameType type, proxygen::FrameProtocol protocol) {
+  const auto& [wt, qmux] = kFrameTypeMap[static_cast<size_t>(type)];
+  return protocol == proxygen::FrameProtocol::QMUX ? qmux : wt;
 }
+} // namespace
 
 namespace proxygen {
 
@@ -46,9 +100,6 @@ parseWTResetStream(folly::io::Cursor& cursor, size_t length) {
   }
   length -= reliableSizeOpt->second;
   wtResetStreamCapsule.reliableSize = reliableSizeOpt->first;
-  if (length > 0) {
-    return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_ERROR);
-  }
   return wtResetStreamCapsule;
 }
 
@@ -69,9 +120,6 @@ parseWTStopSending(folly::io::Cursor& cursor, size_t length) {
   length -= appProtocolErrorCodeOpt->second;
   wtStopSendingCapsule.appProtocolErrorCode =
       static_cast<uint32_t>(appProtocolErrorCodeOpt->first);
-  if (length > 0) {
-    return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_ERROR);
-  }
   return wtStopSendingCapsule;
 }
 
@@ -101,9 +149,6 @@ folly::Expected<WTMaxDataCapsule, CapsuleCodec::ErrorCode> parseWTMaxData(
   }
   length -= maximumDataOpt->second;
   wtMaxDataCapsule.maximumData = maximumDataOpt->first;
-  if (length > 0) {
-    return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_ERROR);
-  }
   return wtMaxDataCapsule;
 }
 
@@ -123,9 +168,6 @@ parseWTMaxStreamData(folly::io::Cursor& cursor, size_t length) {
   }
   length -= maximumStreamDataOpt->second;
   wtMaxStreamDataCapsule.maximumStreamData = maximumStreamDataOpt->first;
-  if (length > 0) {
-    return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_ERROR);
-  }
   return wtMaxStreamDataCapsule;
 }
 
@@ -138,9 +180,6 @@ folly::Expected<WTMaxStreamsCapsule, CapsuleCodec::ErrorCode> parseWTMaxStreams(
   }
   length -= maximumStreamsOpt->second;
   wtMaxStreamsCapsule.maximumStreams = maximumStreamsOpt->first;
-  if (length > 0) {
-    return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_ERROR);
-  }
   return wtMaxStreamsCapsule;
 }
 
@@ -153,9 +192,6 @@ parseWTDataBlocked(folly::io::Cursor& cursor, size_t length) {
   }
   length -= maximumDataOpt->second;
   wtDataBlockedCapsule.maximumData = maximumDataOpt->first;
-  if (length > 0) {
-    return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_ERROR);
-  }
   return wtDataBlockedCapsule;
 }
 
@@ -175,9 +211,6 @@ parseWTStreamDataBlocked(folly::io::Cursor& cursor, size_t length) {
   }
   length -= maximumStreamDataOpt->second;
   wtStreamDataBlockedCapsule.maximumStreamData = maximumStreamDataOpt->first;
-  if (length > 0) {
-    return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_ERROR);
-  }
   return wtStreamDataBlockedCapsule;
 }
 
@@ -190,9 +223,6 @@ parseWTStreamsBlocked(folly::io::Cursor& cursor, size_t length) {
   }
   length -= maximumStreamsOpt->second;
   wtStreamsBlockedCapsule.maximumStreams = maximumStreamsOpt->first;
-  if (length > 0) {
-    return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_ERROR);
-  }
   return wtStreamsBlockedCapsule;
 }
 
@@ -231,9 +261,6 @@ parseCloseWebTransportSession(folly::io::Cursor& cursor, size_t length) {
 folly::Expected<DrainWebTransportSessionCapsule, CapsuleCodec::ErrorCode>
 parseDrainWebTransportSession(size_t length) {
   DrainWebTransportSessionCapsule drainWebTransportSessionCapsule{};
-  if (length != 0) {
-    return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_ERROR);
-  }
   return drainWebTransportSessionCapsule;
 }
 
@@ -266,6 +293,24 @@ void writeCapsuleHeader(folly::IOBufQueue& queue,
                         uint64_t length) {
   writeVarint(queue, folly::to_underlying(capsuleType), size, error);
   writeVarint(queue, length, size, error);
+}
+
+// Writes the appropriate frame header based on protocol.
+// WT_CAPSULE: writes capsule type + payload length (TLV).
+// QMUX: writes just the frame type (no length prefix).
+void writeFrameHeader(folly::IOBufQueue& queue,
+                      proxygen::FrameProtocol protocol,
+                      FrameType type,
+                      size_t& size,
+                      bool& error,
+                      uint64_t payloadLength) {
+  auto wireType = getWireType(type, protocol);
+  if (protocol == proxygen::FrameProtocol::QMUX) {
+    writeVarint(queue, wireType, size, error);
+  } else {
+    writeVarint(queue, wireType, size, error);
+    writeVarint(queue, payloadLength, size, error);
+  }
 }
 
 // Helper to calculate the capsule size based on varint encoding + actual
@@ -301,7 +346,8 @@ WriteResult writePadding(folly::IOBufQueue& queue,
 }
 
 WriteResult writeWTResetStream(folly::IOBufQueue& queue,
-                               const WTResetStreamCapsule& capsule) {
+                               const WTResetStreamCapsule& capsule,
+                               FrameProtocol protocol) {
   size_t size = 0;
   bool error = false;
   auto capsuleLen = getCapsuleSize<3, 0>(
@@ -310,8 +356,12 @@ WriteResult writeWTResetStream(folly::IOBufQueue& queue,
   if (capsuleLen.hasError()) {
     return std::nullopt;
   }
-  writeCapsuleHeader(
-      queue, CapsuleType::WT_RESET_STREAM, size, error, capsuleLen.value());
+  writeFrameHeader(queue,
+                   protocol,
+                   FrameType::RESET_STREAM,
+                   size,
+                   error,
+                   capsuleLen.value());
   writeVarint(queue, capsule.streamId, size, error);
   writeVarint(queue, capsule.appProtocolErrorCode, size, error);
   writeVarint(queue, capsule.reliableSize, size, error);
@@ -319,7 +369,8 @@ WriteResult writeWTResetStream(folly::IOBufQueue& queue,
 }
 
 WriteResult writeWTStopSending(folly::IOBufQueue& queue,
-                               const WTStopSendingCapsule& capsule) {
+                               const WTStopSendingCapsule& capsule,
+                               FrameProtocol protocol) {
   size_t size = 0;
   bool error = false;
   auto capsuleLen = getCapsuleSize<2, 0>(
@@ -327,51 +378,65 @@ WriteResult writeWTStopSending(folly::IOBufQueue& queue,
   if (capsuleLen.hasError()) {
     return std::nullopt;
   }
-  writeCapsuleHeader(
-      queue, CapsuleType::WT_STOP_SENDING, size, error, capsuleLen.value());
+  writeFrameHeader(queue,
+                   protocol,
+                   FrameType::STOP_SENDING,
+                   size,
+                   error,
+                   capsuleLen.value());
   writeVarint(queue, capsule.streamId, size, error);
   writeVarint(queue, capsule.appProtocolErrorCode, size, error);
   return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeWTStream(folly::IOBufQueue& queue,
-                          const WTStreamCapsule& capsule) {
+                          const WTStreamCapsule& capsule,
+                          FrameProtocol protocol) {
   size_t size = 0;
   bool error = false;
-  auto capsuleType =
-      capsule.fin ? CapsuleType::WT_STREAM_WITH_FIN : CapsuleType::WT_STREAM;
+  auto frameType = capsule.fin ? FrameType::STREAM_WITH_FIN : FrameType::STREAM;
   const auto dataLen =
       capsule.streamData ? capsule.streamData->computeChainDataLength() : 0;
-  auto capsuleLen = getCapsuleSize<1, 1>({capsule.streamId}, {dataLen});
-  if (capsuleLen.hasError()) {
-    return std::nullopt;
+  if (protocol == FrameProtocol::QMUX) {
+    // QMUX STREAM: type (includes LEN flag) + streamId + dataLen + data
+    writeVarint(queue, getWireType(frameType, protocol), size, error);
+    writeVarint(queue, capsule.streamId, size, error);
+    writeVarint(queue, dataLen, size, error);
+  } else {
+    // WT capsule: type + capsuleLen + streamId + data
+    auto capsuleLen = getCapsuleSize<1, 1>({capsule.streamId}, {dataLen});
+    if (capsuleLen.hasError()) {
+      return std::nullopt;
+    }
+    writeFrameHeader(
+        queue, protocol, frameType, size, error, capsuleLen.value());
+    writeVarint(queue, capsule.streamId, size, error);
   }
-  writeCapsuleHeader(queue, capsuleType, size, error, capsuleLen.value());
-  writeVarint(queue, capsule.streamId, size, error);
-  if (dataLen) {
-    // TODO(@damlaj): replace const WtStreamCapsule& w/ WtStreamCapsule&&
+  if (dataLen > 0) {
     queue.append(capsule.streamData->clone());
+    size += dataLen;
   }
-  size += dataLen;
   return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeWTMaxData(folly::IOBufQueue& queue,
-                           const WTMaxDataCapsule& capsule) {
+                           const WTMaxDataCapsule& capsule,
+                           FrameProtocol protocol) {
   size_t size = 0;
   bool error = false;
   auto capsuleLen = getCapsuleSize<1, 0>({capsule.maximumData}, {});
   if (capsuleLen.hasError()) {
     return std::nullopt;
   }
-  writeCapsuleHeader(
-      queue, CapsuleType::WT_MAX_DATA, size, error, capsuleLen.value());
+  writeFrameHeader(
+      queue, protocol, FrameType::MAX_DATA, size, error, capsuleLen.value());
   writeVarint(queue, capsule.maximumData, size, error);
   return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeWTMaxStreamData(folly::IOBufQueue& queue,
-                                 const WTMaxStreamDataCapsule& capsule) {
+                                 const WTMaxStreamDataCapsule& capsule,
+                                 FrameProtocol protocol) {
   size_t size = 0;
   bool error = false;
   auto capsuleLen =
@@ -379,8 +444,12 @@ WriteResult writeWTMaxStreamData(folly::IOBufQueue& queue,
   if (capsuleLen.hasError()) {
     return std::nullopt;
   }
-  writeCapsuleHeader(
-      queue, CapsuleType::WT_MAX_STREAM_DATA, size, error, capsuleLen.value());
+  writeFrameHeader(queue,
+                   protocol,
+                   FrameType::MAX_STREAM_DATA,
+                   size,
+                   error,
+                   capsuleLen.value());
   writeVarint(queue, capsule.streamId, size, error);
   writeVarint(queue, capsule.maximumStreamData, size, error);
   return error ? std::nullopt : std::make_optional(size);
@@ -388,36 +457,42 @@ WriteResult writeWTMaxStreamData(folly::IOBufQueue& queue,
 
 WriteResult writeWTMaxStreams(folly::IOBufQueue& queue,
                               const WTMaxStreamsCapsule& capsule,
-                              bool isBidi) {
+                              bool isBidi,
+                              FrameProtocol protocol) {
   size_t size = 0;
   bool error = false;
   auto capsuleLen = getCapsuleSize<1, 0>({capsule.maximumStreams}, {});
   if (capsuleLen.hasError()) {
     return std::nullopt;
   }
-  auto type = isBidi ? CapsuleType::WT_MAX_STREAMS_BIDI
-                     : CapsuleType::WT_MAX_STREAMS_UNI;
-  writeCapsuleHeader(queue, type, size, error, capsuleLen.value());
+  auto type = isBidi ? FrameType::MAX_STREAMS_BIDI : FrameType::MAX_STREAMS_UNI;
+  writeFrameHeader(queue, protocol, type, size, error, capsuleLen.value());
   writeVarint(queue, capsule.maximumStreams, size, error);
   return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeWTDataBlocked(folly::IOBufQueue& queue,
-                               const WTDataBlockedCapsule& capsule) {
+                               const WTDataBlockedCapsule& capsule,
+                               FrameProtocol protocol) {
   size_t size = 0;
   bool error = false;
   auto capsuleLen = getCapsuleSize<1, 0>({capsule.maximumData}, {});
   if (capsuleLen.hasError()) {
     return std::nullopt;
   }
-  writeCapsuleHeader(
-      queue, CapsuleType::WT_DATA_BLOCKED, size, error, capsuleLen.value());
+  writeFrameHeader(queue,
+                   protocol,
+                   FrameType::DATA_BLOCKED,
+                   size,
+                   error,
+                   capsuleLen.value());
   writeVarint(queue, capsule.maximumData, size, error);
   return error ? std::nullopt : std::make_optional(size);
 }
 
-WriteResult writeWTStreamDataBlocked(
-    folly::IOBufQueue& queue, const WTStreamDataBlockedCapsule& capsule) {
+WriteResult writeWTStreamDataBlocked(folly::IOBufQueue& queue,
+                                     const WTStreamDataBlockedCapsule& capsule,
+                                     FrameProtocol protocol) {
   size_t size = 0;
   bool error = false;
   auto capsuleLen =
@@ -425,11 +500,12 @@ WriteResult writeWTStreamDataBlocked(
   if (capsuleLen.hasError()) {
     return std::nullopt;
   }
-  writeCapsuleHeader(queue,
-                     CapsuleType::WT_STREAM_DATA_BLOCKED,
-                     size,
-                     error,
-                     capsuleLen.value());
+  writeFrameHeader(queue,
+                   protocol,
+                   FrameType::STREAM_DATA_BLOCKED,
+                   size,
+                   error,
+                   capsuleLen.value());
   writeVarint(queue, capsule.streamId, size, error);
   writeVarint(queue, capsule.maximumStreamData, size, error);
   return error ? std::nullopt : std::make_optional(size);
@@ -437,34 +513,46 @@ WriteResult writeWTStreamDataBlocked(
 
 WriteResult writeWTStreamsBlocked(folly::IOBufQueue& queue,
                                   const WTStreamsBlockedCapsule& capsule,
-                                  bool isBidi) {
+                                  bool isBidi,
+                                  FrameProtocol protocol) {
   size_t size = 0;
   bool error = false;
   auto capsuleLen = getCapsuleSize<1, 0>({capsule.maximumStreams}, {});
   if (capsuleLen.hasError()) {
     return std::nullopt;
   }
-  auto type = isBidi ? CapsuleType::WT_STREAMS_BLOCKED_BIDI
-                     : CapsuleType::WT_STREAMS_BLOCKED_UNI;
-  writeCapsuleHeader(queue, type, size, error, capsuleLen.value());
+  auto type =
+      isBidi ? FrameType::STREAMS_BLOCKED_BIDI : FrameType::STREAMS_BLOCKED_UNI;
+  writeFrameHeader(queue, protocol, type, size, error, capsuleLen.value());
   writeVarint(queue, capsule.maximumStreams, size, error);
-
   return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeDatagram(folly::IOBufQueue& queue,
-                          const DatagramCapsule& capsule) {
+                          const DatagramCapsule& capsule,
+                          FrameProtocol protocol) {
   size_t size = 0;
   bool error = false;
-  auto capsuleLen = getCapsuleSize<0, 1>(
-      {}, {capsule.httpDatagramPayload->computeChainDataLength()});
-  if (capsuleLen.hasError()) {
-    return std::nullopt;
+  auto dataLen = capsule.httpDatagramPayload
+                     ? capsule.httpDatagramPayload->computeChainDataLength()
+                     : 0;
+  if (protocol == FrameProtocol::QMUX) {
+    // QMUX DATAGRAM_WITH_LEN: type + varint(dataLen) + data
+    writeVarint(queue, getWireType(FrameType::DATAGRAM, protocol), size, error);
+    writeVarint(queue, dataLen, size, error);
+  } else {
+    // WT capsule: type + capsuleLen + data
+    auto capsuleLen = getCapsuleSize<0, 1>({}, {dataLen});
+    if (capsuleLen.hasError()) {
+      return std::nullopt;
+    }
+    writeFrameHeader(
+        queue, protocol, FrameType::DATAGRAM, size, error, capsuleLen.value());
   }
-  writeCapsuleHeader(
-      queue, CapsuleType::DATAGRAM, size, error, capsuleLen.value());
-  queue.append(capsule.httpDatagramPayload->clone());
-  size += capsule.httpDatagramPayload->computeChainDataLength();
+  if (dataLen > 0) {
+    queue.append(capsule.httpDatagramPayload->clone());
+    size += dataLen;
+  }
   return error ? std::nullopt : std::make_optional(size);
 }
 

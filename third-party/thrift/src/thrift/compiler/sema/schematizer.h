@@ -90,7 +90,8 @@ class schematizer {
   static size_t definition_identifier_length();
 
   // Get the name of the program's schema const.
-  static std::string name_schema(source_manager& sm, const t_program& node);
+  static std::string schema_const_name(
+      source_manager& sm, const t_program& node);
 
  private:
   const t_global_scope& global_scope_;

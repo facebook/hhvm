@@ -27,10 +27,10 @@ std::unique_ptr<apache::thrift::AsyncProcessor> {{#partial server.service_class_
   return ::apache::thrift::detail::ap::createMethodMetadataMap<{{service.qualified_name}}AsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
-  {{#if service.program.has_schema?}}
+  {{#if service.program.has_schema_const?}}
 std::optional<apache::thrift::schema::DefinitionsSchema> {{#partial server.service_class_name service=service parent_service=null}}::getServiceSchema() {
   std::optional<apache::thrift::schema::DefinitionsSchema> ret = schema::DefinitionsSchema{};
-  ret->schema = ::apache::thrift::schema::detail::loadBundledSchema(::{{service.cpp_qualified_namespace}}::{{service.program.name}}_constants::{{service.program.schema_name}}_includes());
+  ret->schema = ::apache::thrift::schema::detail::loadBundledSchema(::{{service.cpp_qualified_namespace}}::{{service.program.name}}_constants::{{service.program.schema_const_name}}_includes());
   ret->definitions = { {"{{service.definition_key.buffer}}", {{service.definition_key.length}}} };
   return ret;
 }
@@ -38,7 +38,7 @@ std::optional<apache::thrift::schema::DefinitionsSchema> {{#partial server.servi
 std::vector<folly::not_null<const apache::thrift::syntax_graph::ServiceNode*>> {{#partial server.service_class_name service=service parent_service=null}}::getServiceSchemaNodes() {
   return {&apache::thrift::SchemaRegistry::get().getNode<{{service.qualified_name}}>()};
 }
-  {{/if service.program.has_schema?}}
+  {{/if service.program.has_schema_const?}}
 {{#partial decorator_cpp.decorator_definitions service=service}}
 
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> {{#partial server.service_class_name service=service parent_service=null}}::getServiceRequestInfoMap() const {

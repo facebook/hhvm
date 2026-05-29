@@ -145,6 +145,10 @@ size_t usedBytes();
 size_t usedLocalBytes();
 size_t usedPersistentBytes();
 
+size_t capacityBytes();
+size_t capacityLocalBytes();
+size_t capacityPersistentBytes();
+
 folly::Range<const char*> normalSection();
 folly::Range<const char*> localSection();
 

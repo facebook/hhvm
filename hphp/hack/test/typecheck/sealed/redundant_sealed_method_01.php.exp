@@ -1,0 +1,4 @@
+WARN: File "redundant_sealed_method_01.php", line 6, characters 14-21:
+Class `D` in sealed allowlist for method `foo` in `C`, but does not extend `C` (Warn[12035])
+WARN: File "redundant_sealed_method_01.php", line 6, characters 24-31:
+Class `E` in sealed allowlist for method `foo` in `C`, but does not override method `foo` (Warn[12041])

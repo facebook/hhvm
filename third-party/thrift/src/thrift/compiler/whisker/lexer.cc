@@ -20,8 +20,8 @@
 #include <thrift/compiler/whisker/expected.h>
 #include <thrift/compiler/whisker/lexer.h>
 
+#include <array>
 #include <cstdlib>
-#include <functional>
 #include <iterator>
 #include <optional>
 #include <unordered_map>
@@ -133,18 +133,40 @@ struct lexed_token {
 struct no_lex_result {};
 
 /**
- * Result of a scan which resulted in a token.
+ * Result of a scan which resulted in one or more tokens.
+ */
+template <std::size_t N>
+  requires(N > 0)
+struct [[nodiscard]] lex_result_n
+    : private expected<std::array<lexed_token, N>, no_lex_result> {
+ private:
+  using base = expected<std::array<lexed_token, N>, no_lex_result>;
+
+ public:
+  /* implicit */ lex_result_n(std::array<lexed_token, N> tokens)
+      : base(std::in_place, std::move(tokens)) {}
+  /* implicit */ lex_result_n(no_lex_result) noexcept : base(unexpect) {}
+
+  using base::operator bool;
+  using base::has_value;
+  using base::operator*;
+  using base::operator->;
+};
+
+/**
+ * Result of a scan which resulted in a single token.
+ *
  * The (now advanced) scan_window is packaged with the token so the lexer can
  * move up its cursor.
  */
-struct [[nodiscard]] lex_result : private expected<lexed_token, no_lex_result> {
+struct [[nodiscard]] lex_result : private lex_result_n<1> {
  private:
-  using base = expected<lexed_token, no_lex_result>;
+  using base = lex_result_n<1>;
 
  public:
   lex_result(token t, const detail::lexer_scan_window& advanced)
-      : base(std::in_place, std::move(t), advanced) {}
-  /* implicit */ lex_result(no_lex_result) : base(unexpect) {}
+      : base({lexed_token(std::move(t), advanced)}) {}
+  /* implicit */ lex_result(no_lex_result) noexcept : base(no_lex_result()) {}
 
   [[nodiscard]] token advance_to_token(detail::lexer_scan_window* scan) && {
     assert(has_value());
@@ -153,8 +175,19 @@ struct [[nodiscard]] lex_result : private expected<lexed_token, no_lex_result> {
 
   using base::operator bool;
   using base::has_value;
-  using base::operator*;
-  using base::operator->;
+
+  lexed_token& operator*() & noexcept { return base::operator*()[0]; }
+  lexed_token&& operator*() && noexcept {
+    return std::move(base::operator*()[0]);
+  }
+  const lexed_token& operator*() const& noexcept {
+    return base::operator*()[0];
+  }
+
+  lexed_token* operator->() noexcept { return &base::operator*()[0]; }
+  const lexed_token* operator->() const noexcept {
+    return &base::operator*()[0];
+  }
 };
 
 // Returns the skipped scan_window if the comment is escaped "{{--"
@@ -368,6 +401,71 @@ lex_result lex_close(detail::lexer_scan_window scan) {
   return lex_result(token(tok::close, scan.range()), scan);
 }
 
+/**
+ * Looks for a right tilde: "~" immediately followed by "}}" (the close
+ * delimiter). No whitespace is allowed between "~" and "}}".
+ *
+ * If found, produces a tok::tilde token. Importantly, the "}}" is NOT
+ * consumed — it is left for the caller's next iteration to handle via
+ * lex_close(). This design avoids the need to return multiple tokens from a
+ * single lex function and keeps the state_template / state_macro loops simple:
+ *
+ *   Iteration N:   lex_right_tilde  → emits tok::tilde, advances past "~"
+ *   Iteration N+1: lex_close        → emits tok::close, transitions to text
+ *
+ * A standalone "~" that is NOT followed by "}}" is not a right tilde. In that
+ * case, no_lex_result is returned and the caller falls through to normal
+ * template token parsing (which will report an error since "~" is not a valid
+ * identifier or punctuation token).
+ */
+lex_result lex_right_tilde(detail::lexer_scan_window scan) {
+  assert(scan.empty());
+  if (scan.advance() != '~') {
+    return no_lex_result();
+  }
+  auto tilde_token = token(tok::tilde, scan.range());
+  // "~" must be immediately followed by "}}" — no whitespace allowed.
+  auto lookahead = scan.make_fresh();
+  if (!lex_close(lookahead)) {
+    return no_lex_result();
+  }
+  return lex_result(std::move(tilde_token), scan);
+}
+
+/**
+ * Looks for a right tilde on an escaped comment close: "-- ~}}".
+ * The "--" and whitespace are consumed as escape syntax (not included in token
+ * ranges). Whitespace is required between "--" and "~}}".
+ *
+ * On success, produces the tilde and close tokens (with scan positions).
+ */
+lex_result_n<2> lex_escaped_comment_right_tilde(
+    detail::lexer_scan_window scan) {
+  auto s = scan.make_fresh();
+  if (s.advance() != '-' || s.advance() != '-') {
+    return no_lex_result();
+  }
+  s = s.make_fresh(); // ignore "--"
+  if (!detail::is_whitespace(s.peek())) {
+    return no_lex_result();
+  }
+  skip_whitespace(&s);
+  s = s.make_fresh(); // ignore whitespace
+  if (s.advance() != '~') {
+    return no_lex_result();
+  }
+  auto tilde = lexed_token(token(tok::tilde, s.range()), s);
+  s = s.make_fresh();
+  if (s.advance() != '}' || s.advance() != '}') {
+    return no_lex_result();
+  }
+  auto close = lexed_token(token(tok::close, s.range()), s);
+  return std::array<lexed_token, 2>{
+      std::move(tilde),
+      std::move(close),
+  };
+}
+
 // Lexes common template parts (to be shared between different lexer states)
 lex_result lex_template_part(
     detail::lexer_scan_window scan, lexer::diagnoser diagnoser) {
@@ -401,6 +499,14 @@ class lexer::state_text : public lexer::state_base {
  * "--}}" respectively.
  *
  * This implementation assumes that we transition after "{{" but before "!".
+ *
+ * Right-tilde detection is handled within the text scanning loop.
+ * The "~" must be immediately followed by "}}" (no whitespace):
+ *   - Basic comments: "~}}" emits tok::tilde; "}}" is consumed next.
+ *   - Escaped comments: "-- ~}}" emits tok::tilde and tok::close together.
+ *
+ * Left-tilde detection ("{{~") is handled in state_text before transitioning
+ * to this state, so state_comment never sees the left tilde.
  */
 class lexer::state_comment : public lexer::state_base {
   result next(lexer& lex) override {
@@ -431,6 +537,37 @@ class lexer::state_comment : public lexer::state_base {
         tokens.push_back(std::move(close).advance_to_token(&scan));
         return {std::move(tokens), std::make_unique<lexer::state_text>()};
       }
+      // Check for right tilde on basic comments: "~}}" with no
+      // whitespace between "~" and "}}".
+      if (!init_->is_escaped && scan.peek() == '~') {
+        auto tilde_scan = scan.make_fresh();
+        tilde_scan.advance(); // consume '~'
+        auto lookahead = tilde_scan.make_fresh();
+        if (lex_comment_close(lookahead, false)) {
+          // Right tilde found: ~}}
+          std::vector<token> tokens;
+          if (!text.empty()) {
+            tokens.push_back(token::make_text(text, scan.range()));
+          }
+          scan = scan.make_fresh(); // start at '~'
+          scan.advance(); // consume '~'
+          tokens.push_back(token(tok::tilde, scan.range()));
+          return {std::move(tokens)};
+        }
+      }
+      // Check for right tilde on escaped comments: "-- ~}}".
+      if (init_->is_escaped && scan.peek() == '-') {
+        if (auto result = lex_escaped_comment_right_tilde(scan)) {
+          auto& [tilde_lexed, close_lexed] = *result;
+          std::vector<token> tokens;
+          if (!text.empty()) {
+            tokens.push_back(token::make_text(text, scan.range()));
+          }
+          tokens.push_back(std::move(tilde_lexed).advance_to_token(&scan));
+          tokens.push_back(std::move(close_lexed).advance_to_token(&scan));
+          return {std::move(tokens), std::make_unique<lexer::state_text>()};
+        }
+      }
       text += scan.advance();
     }
     return text.empty() ? token(tok::eof, scan.range())
@@ -446,13 +583,20 @@ class lexer::state_comment : public lexer::state_base {
 /**
  * Reads the templating language constructs in between "{{" and "}}" (except
  * macros and comments).
+ *
+ * Right-tilde detection ("~}}") is handled by lex_right_tilde(), which emits
+ * tok::tilde on one iteration. The following "}}" is then picked up by
+ * lex_close() on the next iteration, which transitions back to state_text.
+ *
+ * Left-tilde detection ("{{~") is handled in state_text before transitioning
+ * to this state, so state_template never sees the left tilde.
  */
 class lexer::state_template : public lexer::state_base {
   result next(lexer& lex) override {
     auto& scan = lex.scan_window_;
     assert(scan.empty());
 
-    // in template bodies, whitespace is ignored (unlike in raw text)
+    // In template bodies, whitespace is ignored (unlike in raw text).
     skip_whitespace(&scan);
     scan = scan.make_fresh();
 
@@ -460,11 +604,17 @@ class lexer::state_template : public lexer::state_base {
       return token(tok::eof, scan.range());
     }
 
+    // "}}" — end of template, transition back to raw text.
     if (lex_result close = lex_close(scan)) {
       return {
           std::move(close).advance_to_token(&scan),
           std::make_unique<lexer::state_text>()};
     }
+    // "~" followed by "}}" — right tilde. The "}}" is consumed next iteration.
+    if (lex_result tilde = lex_right_tilde(scan)) {
+      return std::move(tilde).advance_to_token(&scan);
+    }
+    // Punctuation, identifiers, keywords, literals, etc.
     if (lex_result any = lex_template_part(scan, lex.diagnose())) {
       return std::move(any).advance_to_token(&scan);
     }
@@ -482,13 +632,16 @@ class lexer::state_template : public lexer::state_base {
  * macro application contexts.
  *
  * This implementation assumes we transition after "{{" but before ">".
+ *
+ * Right-tilde ("~}}") and left-tilde ("{{~") handling follows the same
+ * strategy as state_template — see its class comment for details.
  */
 class lexer::state_macro : public lexer::state_base {
   result next(lexer& lex) override {
     auto& scan = lex.scan_window_;
     assert(scan.empty());
 
-    // in template bodies, whitespace is ignored (unlike in raw text)
+    // In template bodies, whitespace is ignored (unlike in raw text).
     skip_whitespace(&scan);
     if (!init_) {
       init_ = true;
@@ -503,10 +656,15 @@ class lexer::state_macro : public lexer::state_base {
       return token(tok::eof, scan.range());
     }
 
+    // "}}" — end of macro, transition back to raw text.
     if (lex_result close = lex_close(scan)) {
       return {
           std::move(close).advance_to_token(&scan),
           std::make_unique<lexer::state_text>()};
+    }
+    // "~" followed by "}}" — right tilde. The "}}" is consumed next iteration.
+    if (lex_result tilde = lex_right_tilde(scan)) {
+      return std::move(tilde).advance_to_token(&scan);
     }
     if (lex_result path_separator = lex_path_separator(scan)) {
       return std::move(path_separator).advance_to_token(&scan);
@@ -542,6 +700,59 @@ class lexer::state_terminal : public lexer::state_base {
 
  private:
   const token terminal_token_;
+};
+
+/**
+ * Entered immediately after "{{" (tok::open already emitted). Inspects the
+ * next character(s) to decide which lexer state to transition to.
+ *
+ * This state also handles error reporting for malformed tilde syntax:
+ *   "{{~" without whitespace or "}}" → error
+ */
+class lexer::state_template_choice : public lexer::state_base {
+  // Selects the lexer state to transition to based on the character
+  // following the opening delimiter (after any tilde and whitespace).
+  static std::unique_ptr<state_base> select_transition(char c) {
+    using ptr = std::unique_ptr<state_base>;
+    if (c == '!') {
+      return ptr(std::make_unique<state_comment>());
+    }
+    return c == '>' ? ptr(std::make_unique<state_macro>())
+                    : ptr(std::make_unique<state_template>());
+  }
+
+  result next(lexer& lex) override {
+    auto& scan = lex.scan_window_;
+    assert(scan.empty());
+
+    if (scan.peek() != '~') {
+      // "{{" — no tilde, transition based on the next character.
+      return select_transition(scan.peek());
+    }
+
+    // "{{~" — left tilde modifier.
+    auto tilde_scan = scan.make_fresh();
+    tilde_scan.advance(); // consume '~'
+
+    // Whitespace is required between "~" and tag content:
+    //   {{~ #if condition ~}}     ✓  whitespace after ~
+    //   {{~ > path }}             ✓  whitespace after ~
+    //   {{~#if condition}}        ✗  error — no whitespace
+    //   {{~! comment }}           ✗  error — no whitespace
+    //   {{~> path }}              ✗  error — no whitespace
+    if (!detail::is_whitespace(tilde_scan.peek())) {
+      scan = scan.make_fresh();
+      scan.advance();
+      return lex.diagnose().report_error(
+          scan,
+          "whitespace is required between '~' and tag content in '{{{{~'");
+    }
+    auto tilde_token = token(tok::tilde, tilde_scan.range());
+    skip_whitespace(&tilde_scan);
+    auto transition = select_transition(tilde_scan.peek());
+    scan = tilde_scan;
+    return {std::move(tilde_token), std::move(transition)};
+  }
 };
 
 lexer::state_text::result lexer::state_text::next(lexer& lex) {
@@ -627,20 +838,11 @@ lexer::state_text::result lexer::state_text::next(lexer& lex) {
     if (c == '{' && scan.next().peek() == '{') {
       auto scan_within = scan.make_fresh().next(2);
       auto open_token = token(tok::open, scan_within.range());
-      using ptr = std::unique_ptr<lexer::state_base>;
-      auto transition = std::invoke([&] {
-        if (scan_within.peek() == '!') {
-          return ptr(std::make_unique<lexer::state_comment>());
-        }
-        return scan_within.peek() == '>'
-            ? ptr(std::make_unique<lexer::state_macro>())
-            : ptr(std::make_unique<lexer::state_template>());
-      });
       std::vector<token> tokens = std::move(buffer).to_tokens(scan);
       tokens.emplace_back(std::move(open_token));
-      // Move up the scan_window to the '!'
       scan = scan_within;
-      return {std::move(tokens), std::move(transition)};
+      return {
+          std::move(tokens), std::make_unique<lexer::state_template_choice>()};
     }
     buffer.consume_one(&scan);
   }

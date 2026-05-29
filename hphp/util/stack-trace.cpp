@@ -330,7 +330,7 @@ bool StackTrace::PerfMap::translate(StackFrameExtra* frame) const {
   if (it == m_map.end()) {
     // Not found.
     frame->filename = "?";
-    frame->funcname = "TC?"; // Note HHProf::HandlePProfSymbol() dependency.
+    frame->funcname = "TC?";
     return true;
   }
 

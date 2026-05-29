@@ -43,11 +43,11 @@ public final class CountingStruct implements com.facebook.thrift.payload.ThriftS
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(CountingStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -62,14 +62,14 @@ public final class CountingStruct implements com.facebook.thrift.payload.ThriftS
 
         public Long getRegularInt() { return regularInt; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="countingInt", requiredness=Requiredness.OPTIONAL)    public Builder setCountingInt(Long countingInt) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="countingInt", requiredness=Requiredness.OPTIONAL)    public Builder setCountingInt(Long countingInt) {
             this.countingInt = countingInt;
             return this;
         }
 
         public Long getCountingInt() { return countingInt; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="regularString", requiredness=Requiredness.OPTIONAL)    public Builder setRegularString(String regularString) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="regularString", requiredness=Requiredness.OPTIONAL)    public Builder setRegularString(String regularString) {
             this.regularString = regularString;
             return this;
         }
@@ -93,6 +93,7 @@ public final class CountingStruct implements com.facebook.thrift.payload.ThriftS
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -101,37 +102,32 @@ public final class CountingStruct implements com.facebook.thrift.payload.ThriftS
     private final Long regularInt;
     public static final int _REGULARINT = 1;
     private static final TField REGULAR_INT_FIELD_DESC = new TField("regularInt", TType.I64, (short)1);
-        private final Long countingInt;
+    private final Long countingInt;
     public static final int _COUNTINGINT = 2;
     private static final TField COUNTING_INT_FIELD_DESC = new TField("countingInt", TType.I64, (short)2);
-        private final String regularString;
+    private final String regularString;
     public static final int _REGULARSTRING = 3;
     private static final TField REGULAR_STRING_FIELD_DESC = new TField("regularString", TType.STRING, (short)3);
     static {
-      NAMES_TO_IDS.put("regularInt", 1);
-      THRIFT_NAMES_TO_IDS.put("regularInt", 1);
-      FIELD_METADATA.put(1, REGULAR_INT_FIELD_DESC);
-      NAMES_TO_IDS.put("countingInt", 2);
-      THRIFT_NAMES_TO_IDS.put("countingInt", 2);
-      FIELD_METADATA.put(2, COUNTING_INT_FIELD_DESC);
-      NAMES_TO_IDS.put("regularString", 3);
-      THRIFT_NAMES_TO_IDS.put("regularString", 3);
-      FIELD_METADATA.put(3, REGULAR_STRING_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/CountingStruct"),
-        CountingStruct.class, CountingStruct::read0));
+        NAMES_TO_IDS.put("regularInt", 1);
+        THRIFT_NAMES_TO_IDS.put("regularInt", 1);
+        FIELD_METADATA.put(1, REGULAR_INT_FIELD_DESC);
+        NAMES_TO_IDS.put("countingInt", 2);
+        THRIFT_NAMES_TO_IDS.put("countingInt", 2);
+        FIELD_METADATA.put(2, COUNTING_INT_FIELD_DESC);
+        NAMES_TO_IDS.put("regularString", 3);
+        THRIFT_NAMES_TO_IDS.put("regularString", 3);
+        FIELD_METADATA.put(3, REGULAR_STRING_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/CountingStruct"),
+            CountingStruct.class, CountingStruct::read0));
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="regularInt", requiredness=Requiredness.OPTIONAL)
     public Long getRegularInt() { return regularInt; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="countingInt", requiredness=Requiredness.OPTIONAL)
     public Long getCountingInt() { return countingInt; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="regularString", requiredness=Requiredness.OPTIONAL)
     public String getRegularString() { return regularString; }
@@ -167,86 +163,88 @@ public final class CountingStruct implements com.facebook.thrift.payload.ThriftS
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(regularInt);
-            _hashCode = 31 * _hashCode + Objects.hashCode(countingInt);
-            _hashCode = 31 * _hashCode + Objects.hashCode(regularString);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(countingInt);
+        _hashCode = 31 * _hashCode + Objects.hashCode(regularString);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<CountingStruct> asReader() {
       return CountingStruct::read0;
     }
 
     public static CountingStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(CountingStruct.NAMES_TO_IDS, CountingStruct.THRIFT_NAMES_TO_IDS, CountingStruct.FIELD_METADATA);
-      CountingStruct.Builder builder = new CountingStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _REGULARINT:
-          if (__field.type == TType.I64) {
-            Long regularInt = oprot.readI64();
-            builder.setRegularInt(regularInt);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _COUNTINGINT:
-          if (__field.type == TType.I64) {
-            Long countingInt = oprot.readI64();
-            builder.setCountingInt(countingInt);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _REGULARSTRING:
-          if (__field.type == TType.STRING) {
-            String regularString = oprot.readString();
-            builder.setRegularString(regularString);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(CountingStruct.NAMES_TO_IDS, CountingStruct.THRIFT_NAMES_TO_IDS, CountingStruct.FIELD_METADATA);
+        CountingStruct.Builder builder = new CountingStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _REGULARINT:
+                if (__field.type == TType.I64) {
+                    Long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setRegularInt(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _COUNTINGINT:
+                if (__field.type == TType.I64) {
+                    Long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setCountingInt(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _REGULARSTRING:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setRegularString(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      Long _iter0 = this.regularInt;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(REGULAR_INT_FIELD_DESC);
-        oprot.writeI64(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Long _iter0 = this.countingInt;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(COUNTING_INT_FIELD_DESC);
-        oprot.writeI64(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.regularString;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(REGULAR_STRING_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            Long _fbthriftVar0 = this.regularInt;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(REGULAR_INT_FIELD_DESC);
+                oprot.writeI64(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            Long _fbthriftVar0 = this.countingInt;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(COUNTING_INT_FIELD_DESC);
+                oprot.writeI64(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.regularString;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(REGULAR_STRING_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _CountingStructLazy {

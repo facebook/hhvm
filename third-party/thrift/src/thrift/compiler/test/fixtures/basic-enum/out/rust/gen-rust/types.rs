@@ -49,6 +49,13 @@ impl ::fbthrift::ThriftEnum for EmptyEnum {
     fn inner_value(&self) -> i32 {
         self.0 as i32
     }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for EmptyEnum: {e}")
+        })
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -172,6 +179,13 @@ impl ::fbthrift::ThriftEnum for MyEnum {
     #[allow(clippy::unnecessary_cast)]
     fn inner_value(&self) -> i32 {
         self.0 as i32
+    }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for MyEnum: {e}")
+        })
     }
 }
 
@@ -304,6 +318,13 @@ impl ::fbthrift::ThriftEnum for MyUseIntrinsicDefaultEnum {
     #[allow(clippy::unnecessary_cast)]
     fn inner_value(&self) -> i32 {
         self.0 as i32
+    }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for MyUseIntrinsicDefaultEnum: {e}")
+        })
     }
 }
 
@@ -506,6 +527,13 @@ impl ::fbthrift::ThriftEnum for MyBigEnum {
     #[allow(clippy::unnecessary_cast)]
     fn inner_value(&self) -> i32 {
         self.0 as i32
+    }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for MyBigEnum: {e}")
+        })
     }
 }
 

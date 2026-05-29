@@ -171,9 +171,9 @@ public class MyServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        String _iter0 = (String)_r;
+        String _fbthriftVar0 = (String)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.STRING_FIELD);
-        oprot.writeString(_iter0);
+        oprot.writeString(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -430,9 +430,9 @@ public class MyServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        boolean _iter0 = (boolean)_r;
+        boolean _fbthriftVar0 = (boolean)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.BOOL_FIELD);
-        oprot.writeBool(_iter0);
+        oprot.writeBool(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -518,9 +518,9 @@ public class MyServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        String _iter0 = (String)_r;
+        String _fbthriftVar0 = (String)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.STRING_FIELD);
-        oprot.writeString(_iter0);
+        oprot.writeString(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -690,11 +690,11 @@ public class MyServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        Set<Float> _iter0 = (Set<Float>)_r;
+        Set<Float> _fbthriftVar0 = (Set<Float>)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.SET_FIELD);
-        oprot.writeSetBegin(new TSet(TType.FLOAT, _iter0.size()));
-        for (float _iter1 : _iter0) {
-          oprot.writeFloat(_iter1);
+        oprot.writeSetBegin(new TSet(TType.FLOAT, _fbthriftVar0.size()));
+        for (float _fbthriftVar1 : _fbthriftVar0) {
+          oprot.writeFloat(_fbthriftVar1);
         }
         oprot.writeSetEnd();
         oprot.writeFieldEnd();

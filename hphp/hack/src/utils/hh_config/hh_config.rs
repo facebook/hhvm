@@ -52,8 +52,6 @@ pub struct HhConfig {
 
     pub gc_minor_heap_size: usize,
     pub gc_space_overhead: usize,
-    pub hackfmt_version: usize,
-    pub sharedmem_dep_table_pow: usize,
     pub sharedmem_global_size: usize,
     pub sharedmem_hash_table_pow: usize,
     pub sharedmem_heap_size: usize,
@@ -76,8 +74,6 @@ impl Default for HhConfig {
             opts: GlobalOptions::default(),
             gc_minor_heap_size: 0,
             gc_space_overhead: 0,
-            hackfmt_version: 0,
-            sharedmem_dep_table_pow: 0,
             sharedmem_global_size: 0,
             sharedmem_hash_table_pow: 0,
             sharedmem_heap_size: 0,
@@ -355,9 +351,9 @@ impl HhConfig {
                     .get_bool("project_metadata_w_flags")
                     .unwrap_or(Ok(default.tco_saved_state.project_metadata_w_flags))?,
             },
-            tco_experimental_features: hhconfig.get_string_set_or(
+            tco_legacy_experimental_features: hhconfig.get_string_set_or(
                 "enable_experimental_tc_features",
-                default.tco_experimental_features,
+                default.tco_legacy_experimental_features,
             ),
             tco_migration_flags: default.tco_migration_flags,
             tco_num_local_workers: default.tco_num_local_workers,
@@ -593,6 +589,7 @@ impl HhConfig {
             )?,
             recursive_case_types: hhconfig
                 .get_bool_or("recursive_case_types", default.recursive_case_types)?,
+            tco_enabled_unstable_features: Default::default(),
             class_sub_classname: hhconfig
                 .get_bool_or("class_sub_classname", default.class_sub_classname)?,
             class_class_type: hhconfig.get_bool_or("class_class_type", default.class_class_type)?,
@@ -650,12 +647,6 @@ impl HhConfig {
                 }
                 "gc_space_overhead" => {
                     c.gc_space_overhead = parse_json(&value)?;
-                }
-                "hackfmt.version" => {
-                    c.hackfmt_version = parse_json(&value)?;
-                }
-                "sharedmem_dep_table_pow" => {
-                    c.sharedmem_dep_table_pow = parse_json(&value)?;
                 }
                 "sharedmem_global_size" => {
                     value.retain(|c| c != '_');

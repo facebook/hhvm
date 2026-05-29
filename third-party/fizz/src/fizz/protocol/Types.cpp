@@ -10,31 +10,37 @@
 
 namespace fizz {
 
-HashFunction getHashFunction(CipherSuite cipher) {
+Status getHashFunction(HashFunction& ret, Error& err, CipherSuite cipher) {
   switch (cipher) {
     case CipherSuite::TLS_AES_128_GCM_SHA256:
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
     case CipherSuite::TLS_AEGIS_128L_SHA256:
-      return HashFunction::Sha256;
+      ret = HashFunction::Sha256;
+      return Status::Success;
     case CipherSuite::TLS_AES_256_GCM_SHA384:
-      return HashFunction::Sha384;
+      ret = HashFunction::Sha384;
+      return Status::Success;
     case CipherSuite::TLS_AEGIS_256_SHA512:
-      return HashFunction::Sha512;
+      ret = HashFunction::Sha512;
+      return Status::Success;
   }
-  throw std::runtime_error("unknown cipher suite");
+  return err.error("unknown cipher suite");
 }
 
-size_t getHashSize(HashFunction hash) {
+Status getHashSize(size_t& ret, Error& err, HashFunction hash) {
   switch (hash) {
     case HashFunction::Sha256:
-      return 32;
+      ret = 32;
+      return Status::Success;
     case HashFunction::Sha384:
-      return 48;
+      ret = 48;
+      return Status::Success;
     case HashFunction::Sha512:
-      return 64;
+      ret = 64;
+      return Status::Success;
   }
-  throw std::runtime_error("unknown hash function");
+  return err.error("unknown hash function");
 }
 
 folly::StringPiece toString(PskType pskType) {

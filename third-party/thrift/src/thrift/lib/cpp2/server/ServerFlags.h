@@ -30,6 +30,8 @@ THRIFT_FLAG_DECLARE_bool(allow_set_thread_manager_resource_pools);
 
 THRIFT_FLAG_DECLARE_bool(allow_resource_pools_set_thread_manager_from_executor);
 
+THRIFT_FLAG_DECLARE_bool(thrift_server_compress_response_on_cpu);
+
 // Use TokenBucketConcurrencyController as a standard concurrency controller in
 // ThriftServer
 FOLLY_GFLAGS_DECLARE_bool(thrift_use_token_bucket_concurrency_controller);

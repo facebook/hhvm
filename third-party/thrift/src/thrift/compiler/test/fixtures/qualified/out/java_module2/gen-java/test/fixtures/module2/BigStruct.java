@@ -40,11 +40,11 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(BigStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -58,7 +58,7 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
 
         public test.fixtures.module2.Struct getS() { return s; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="id", requiredness=Requiredness.NONE)    public Builder setId(int id) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="id", requiredness=Requiredness.NONE)    public Builder setId(int id) {
             this.id = id;
             return this;
         }
@@ -80,6 +80,7 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -88,24 +89,21 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
     private final test.fixtures.module2.Struct s;
     public static final int _S = 1;
     private static final TField S_FIELD_DESC = new TField("s", TType.STRUCT, (short)1);
-        private final int id;
+    private final int id;
     public static final int _ID = 2;
     private static final TField ID_FIELD_DESC = new TField("id", TType.I32, (short)2);
     static {
-      NAMES_TO_IDS.put("s", 1);
-      THRIFT_NAMES_TO_IDS.put("s", 1);
-      FIELD_METADATA.put(1, S_FIELD_DESC);
-      NAMES_TO_IDS.put("id", 2);
-      THRIFT_NAMES_TO_IDS.put("id", 2);
-      FIELD_METADATA.put(2, ID_FIELD_DESC);
+        NAMES_TO_IDS.put("s", 1);
+        THRIFT_NAMES_TO_IDS.put("s", 1);
+        FIELD_METADATA.put(1, S_FIELD_DESC);
+        NAMES_TO_IDS.put("id", 2);
+        THRIFT_NAMES_TO_IDS.put("id", 2);
+        FIELD_METADATA.put(2, ID_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="s", requiredness=Requiredness.NONE)
     public test.fixtures.module2.Struct getS() { return s; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=2, name="id", requiredness=Requiredness.NONE)
     public int getId() { return id; }
 
@@ -138,67 +136,68 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(s);
-            _hashCode = 31 * _hashCode + Integer.hashCode(id);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Integer.hashCode(id);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<BigStruct> asReader() {
       return BigStruct::read0;
     }
 
     public static BigStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(BigStruct.NAMES_TO_IDS, BigStruct.THRIFT_NAMES_TO_IDS, BigStruct.FIELD_METADATA);
-      BigStruct.Builder builder = new BigStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _S:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.module2.Struct s = test.fixtures.module2.Struct.read0(oprot);
-            builder.setS(s);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ID:
-          if (__field.type == TType.I32) {
-            int id = oprot.readI32();
-            builder.setId(id);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(BigStruct.NAMES_TO_IDS, BigStruct.THRIFT_NAMES_TO_IDS, BigStruct.FIELD_METADATA);
+        BigStruct.Builder builder = new BigStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _S:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.module2.Struct _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.module2.Struct.read0(oprot);
+                    builder.setS(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ID:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setId(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      test.fixtures.module2.Struct _iter0 = this.s;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(S_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      int _iter0 = this.id;
-      oprot.writeFieldBegin(ID_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            test.fixtures.module2.Struct _fbthriftVar0 = this.s;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(S_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            int _fbthriftVar0 = this.id;
+            oprot.writeFieldBegin(ID_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _BigStructLazy {

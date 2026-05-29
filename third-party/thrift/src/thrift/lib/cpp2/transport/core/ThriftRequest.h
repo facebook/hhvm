@@ -68,6 +68,19 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     apache::thrift::transport::THeader::StringToStringMap&);
 } // namespace detail
 
+// Carries pre-compressed response state from CPU thread to IO thread.
+// Set by ThriftRequestCore::compressResponse(), checked by
+// sendThriftResponse().
+struct CpuProcessedResponseInfo {
+  CompressionAlgorithm compressionAlgorithm{CompressionAlgorithm::NONE};
+  PayloadMetadata payloadMetadata;
+  std::optional<Checksum> checksum;
+
+  bool isCompressed() const {
+    return compressionAlgorithm != CompressionAlgorithm::NONE;
+  }
+};
+
 /**
  * Manages per-RPC state.  There is one of these objects for each RPC.
  *
@@ -372,6 +385,47 @@ class ThriftRequestCore : public ResponseChannelRequest {
   }
 
   bool isReplyChecksumNeeded() const override { return checksumRequested_; }
+
+  // Returns true if the CPU compression flag is enabled.
+  bool isCpuCompressionEnabled() const override;
+
+  // Compress response on CPU thread. Returns true if compression was performed.
+  bool compressResponse(
+      SerializedResponse& response,
+      Cpp2RequestContext* ctx,
+      size_t payloadSize) override;
+
+  // Returns true if CPU compression dispatch is worthwhile (flag enabled +
+  // compression configured). Used by sendReply to decide whether to dispatch
+  // to a CPU executor when called on the IO thread.
+  bool shouldDispatchCompressionToCpu(size_t payloadSize) const override;
+
+  // Returns the compression algorithm to use if CPU compression is eligible,
+  // or std::nullopt if not. Shared by shouldDispatchCompressionToCpu and
+  // compressResponse to avoid duplicating guard logic.
+  std::optional<CompressionAlgorithm> getEligibleCompressionAlgorithm(
+      size_t payloadSize) const;
+
+  // Check whether response was pre-compressed on the CPU thread.
+  bool isResponsePreCompressed() const {
+    return cpuProcessedResponseInfo_.isCompressed();
+  }
+
+  // Get pre-compressed response info (valid only if isResponsePreCompressed()).
+  const CpuProcessedResponseInfo& getCpuProcessedResponseInfo() const {
+    return cpuProcessedResponseInfo_;
+  }
+
+  // Apply pre-compressed metadata to response metadata. Call this instead of
+  // processFirstResponse() when isResponsePreCompressed() is true.
+  void applyPreCompressedMetadata(ResponseRpcMetadata& metadata) const {
+    const auto& cpuInfo = cpuProcessedResponseInfo_;
+    metadata.payloadMetadata() = cpuInfo.payloadMetadata;
+    metadata.compression() = cpuInfo.compressionAlgorithm;
+    if (cpuInfo.checksum) {
+      metadata.checksum() = *cpuInfo.checksum;
+    }
+  }
 
   virtual void closeConnection(folly::exception_wrapper) noexcept {
     LOG(FATAL) << "closeConnection not implemented";
@@ -712,6 +766,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   std::chrono::milliseconds clientTimeout_{0};
 
  protected:
+  CpuProcessedResponseInfo cpuProcessedResponseInfo_;
   RequestStateMachine stateMachine_;
 };
 

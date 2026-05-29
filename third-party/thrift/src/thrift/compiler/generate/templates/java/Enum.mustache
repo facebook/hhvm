@@ -14,8 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#if (and enum:java_enums_compat? enum:java_enum_type_open?)}}{{!
-  }}{{> enum/OpenEnum}}{{!
-}}{{#else}}{{!
-  }}{{> enum/ClosedEnum}}{{!
-}}{{/if (and enum:java_enums_compat? enum:java_enum_type_open?)}}
+}}
+{{#import "types/closed_enum" as closed_enum}}
+{{#import "types/open_enum" as open_enum}}
+{{#if (and self.java_enums_compat? self.java_enum_type_open?)}}
+{{#partial open_enum.open_enum enum=self}}
+{{#else}}
+{{#partial closed_enum.closed_enum enum=self}}
+{{/if (and self.java_enums_compat? self.java_enum_type_open?)}}

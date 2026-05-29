@@ -40,7 +40,7 @@ folly::coro::Task<HTTPBodyEvent> ExecutorSourceFilter::readBodyEvent(
 }
 
 void ExecutorSourceFilter::stopReading(
-    folly::Optional<const HTTPErrorCode> error) {
+    folly::Optional<const HTTPErrorCode> error) noexcept {
   evb_.runImmediatelyOrRunInEventBaseThread(
       [this, error]() { HTTPSourceFilter::stopReading(error); });
 }

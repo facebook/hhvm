@@ -30,27 +30,22 @@
   {{/if val_type.string?}}
 {{/let partial}}
 
-{{!
-  We can't use ignore-newlines in the const_value partial because lists/maps
-  need to emit newlines. So we must comment all the line breaks we don't want to emit.
-}}
 {{#let export partial const_value |value| captures |primitive_value|}}
   {{#let val_type = value.type}}
-{{#if val_type.primitive?}}{{#partial primitive_value value=value}}{{!
-}}{{#else if (and val_type.enum? value.enum_value?)}}{{val_type.true_type.name}}.{{value.enum_value.name}}{{!
-}}{{#else if val_type.list?}}{{!
-  List
-}}[
+{{#if val_type.primitive?}}{{#partial primitive_value value=value}}
+{{~ #else if (and val_type.enum? value.enum_value?) ~}}
+{{val_type.true_type.name}}.{{value.enum_value.name}}
+{{~ #else if val_type.list? ~}}
+[
     {{#each value.list_elements as |elem|}}
   {{#partial const_value value=elem }},
     {{/each}}
-]{{!
-}}{{#else if val_type.map?}}{{!
-  Map
-}}{
+]
+{{~ #else if val_type.map? ~}}
+{
     {{#each value.map_elements as |elem|}}
   {{#partial const_value value=elem.key}}: {{#partial const_value value=elem.value}},
     {{/each}}
-}{{!
-}}{{/if val_type.primitive?}}{{!
-}}{{/let partial}}
+}
+{{~ /if val_type.primitive? ~}}
+{{~ /let partial}}

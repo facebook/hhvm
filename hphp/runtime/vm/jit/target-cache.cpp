@@ -533,7 +533,7 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
     // same class and the same method name, will never return MethodNotFound.
     // It will always return the same f and if we do give it a this it will
     // return MethodFoundWithThis iff (this->instanceof(cls) && !f->isStatic()).
-    // this->instanceof(cls) is always true for FCallClsMethodS because it is
+    // this->instanceof(cls) is always true for FCallClsMethodSD because it is
     // only used for self:: and parent:: calls. So, if we store f and its
     // staticness we can handle calls with and without this completely in
     // assembly.

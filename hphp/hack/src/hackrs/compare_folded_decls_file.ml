@@ -164,7 +164,7 @@ let () =
   let enable_xhp_class_modifier = ref false in
   let disable_xhp_element_mangling = ref false in
   let keep_user_attributes = ref false in
-  let disallow_static_memoized = ref false in
+
   let interpret_soft_types_as_like_types = ref false in
   let everything_sdt = ref false in
   let print_ocaml = ref false in
@@ -192,9 +192,6 @@ let () =
         Arg.Set disable_xhp_element_mangling,
         "." );
       ("--keep-user-attributes", Arg.Set keep_user_attributes, ".");
-      ( "--disallow-static-memoized",
-        Arg.Set disallow_static_memoized,
-        " Disallow static memoized methods on non-final methods" );
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         "Interpret <<__Soft>> type hints as like types" );
@@ -272,13 +269,7 @@ let () =
         ~everything_sdt
         ~enable_class_pointer_hint
     in
-    let tco_experimental_features =
-      TypecheckerOptions.experimental_from_flags
-        ~disallow_static_memoized:!disallow_static_memoized
-    in
-    let tcopt =
-      GlobalOptions.{ default with po = popt; tco_experimental_features }
-    in
+    let tcopt = GlobalOptions.{ default with po = popt } in
     let tcopt =
       let config =
         List.fold

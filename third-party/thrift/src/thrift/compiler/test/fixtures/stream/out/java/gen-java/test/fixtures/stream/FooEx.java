@@ -38,10 +38,9 @@ public final class FooEx extends org.apache.thrift.TBaseException implements com
     }
 
 
-
     public static class Builder {
 
-    public Builder() { }
+        public Builder() { }
         public Builder(FooEx other) {
         }
 
@@ -54,33 +53,32 @@ public final class FooEx extends org.apache.thrift.TBaseException implements com
     }
 
 
-    
     public static com.facebook.thrift.payload.Reader<FooEx> asReader() {
       return FooEx::read0;
     }
 
     public static FooEx read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(FooEx.NAMES_TO_IDS, FooEx.THRIFT_NAMES_TO_IDS, FooEx.FIELD_METADATA);
-      FooEx.Builder builder = new FooEx.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(FooEx.NAMES_TO_IDS, FooEx.THRIFT_NAMES_TO_IDS, FooEx.FIELD_METADATA);
+        FooEx.Builder builder = new FooEx.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _FooExLazy {
@@ -89,4 +87,5 @@ public final class FooEx extends org.apache.thrift.TBaseException implements com
 
     public static FooEx defaultInstance() {
         return  _FooExLazy._DEFAULT;
-    }}
+    }
+}

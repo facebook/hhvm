@@ -36,21 +36,21 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
     private static final TField STRING_DATA_FIELD_DESC = new TField("stringData", TType.STRING, (short)2);
 
     static {
-      NAMES_TO_IDS.put("binaryData", 1);
-      THRIFT_NAMES_TO_IDS.put("binaryData", 1);
-      FIELD_METADATA.put(1, BINARY_DATA_FIELD_DESC);
-      NAMES_TO_IDS.put("stringData", 2);
-      THRIFT_NAMES_TO_IDS.put("stringData", 2);
-      FIELD_METADATA.put(2, STRING_DATA_FIELD_DESC);
+        NAMES_TO_IDS.put("binaryData", 1);
+        THRIFT_NAMES_TO_IDS.put("binaryData", 1);
+        FIELD_METADATA.put(1, BINARY_DATA_FIELD_DESC);
+        NAMES_TO_IDS.put("stringData", 2);
+        THRIFT_NAMES_TO_IDS.put("stringData", 2);
+        FIELD_METADATA.put(2, STRING_DATA_FIELD_DESC);
     }
 
     private java.lang.Object value;
     private short id;
 
     public enum TypeEnum {
-      __FBTHRIFT_EMPTY_UNION__,
-      BINARY_DATA,
-      STRING_DATA,
+        __FBTHRIFT_EMPTY_UNION__,
+        BINARY_DATA,
+        STRING_DATA,
     }
 
     public static DataUnion from(int _id, java.lang.Object _field) {
@@ -63,7 +63,7 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
             throw new java.lang.IllegalArgumentException("unknown field " + _id);
         }
 
-        DataUnion _u = new  DataUnion();
+        DataUnion _u = new DataUnion();
 
         try {
             switch(_id) {
@@ -76,7 +76,7 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
                     _u.value = (String) _field;
                     return _u;
                 default:
-                throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
+                    throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
             }
         } catch (java.lang.Exception t) {
             throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
@@ -127,7 +127,6 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
         return res;
     }
 
-    
 
     @com.facebook.swift.codec.ThriftField(value=1, name="binaryData", requiredness=Requiredness.NONE)
     public byte[] getBinaryData() {
@@ -159,16 +158,16 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
     }
 
     public TypeEnum getThriftUnionType() {
-      switch(this.id) {
-        case 0:
-          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
-        case 1:
-          return TypeEnum.BINARY_DATA;
-        case 2:
-          return TypeEnum.STRING_DATA;
-        default:
-          throw new IllegalStateException("unreachable");
-      }
+        switch(this.id) {
+            case 0:
+                return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
+            case 1:
+                return TypeEnum.BINARY_DATA;
+            case 2:
+                return TypeEnum.STRING_DATA;
+            default:
+                throw new IllegalStateException("unreachable");
+        }
     }
 
     public String getThriftName() {
@@ -226,7 +225,7 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
 
     public interface Visitor<T> {
         default T visit(DataUnion acceptor) {
-        return acceptor.accept(this);
+            return acceptor.accept(this);
         }
 
         T visitBinaryData(byte[] binaryData);
@@ -234,81 +233,82 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
     }
 
     public void write0(TProtocol oprot) throws TException {
-      if (this.id != 0 && this.value == null ){
-        if(allowNullFieldValues) {
-          // Warning: this path will generate corrupt serialized data!
-          return;
-        } else {
-          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        if (this.id != 0 && this.value == null ){
+            if(allowNullFieldValues) {
+                // Warning: this path will generate corrupt serialized data!
+                return;
+            } else {
+                throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+            }
         }
-      }
-      oprot.writeStructBegin(STRUCT_DESC);
-      switch (this.id) {
-      case _BINARYDATA: {
-        oprot.writeFieldBegin(BINARY_DATA_FIELD_DESC);
-        byte[] _iter0 = (byte[])this.value;
+        oprot.writeStructBegin(STRUCT_DESC);
+        switch (this.id) {
+        case _BINARYDATA: {
+            oprot.writeFieldBegin(BINARY_DATA_FIELD_DESC);
+            byte[] _fbthriftVar0 = (byte[])this.value;
 
-        org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _STRINGDATA: {
-        oprot.writeFieldBegin(STRING_DATA_FIELD_DESC);
-        String _iter0 = (String)this.value;
+            org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _STRINGDATA: {
+            oprot.writeFieldBegin(STRING_DATA_FIELD_DESC);
+            String _fbthriftVar0 = (String)this.value;
 
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      default:
-          // ignore unknown field
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+            oprot.writeString(_fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        default:
+            // ignore unknown field
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
-    
     public static com.facebook.thrift.payload.Reader<DataUnion> asReader() {
-      return DataUnion::read0;
+        return DataUnion::read0;
     }
 
     public static DataUnion read0(TProtocol oprot) throws TException {
-      DataUnion res = new DataUnion();
-      res.value = null;
-      res.id = (short) 0;
-      oprot.readStructBegin(DataUnion.NAMES_TO_IDS, DataUnion.THRIFT_NAMES_TO_IDS, DataUnion.FIELD_METADATA);
-      TField __field = oprot.readFieldBegin();
-      if (__field.type != TType.STOP) {
-          switch (__field.id) {
-          case _BINARYDATA:
-            if (__field.type == BINARY_DATA_FIELD_DESC.type) {
-              byte[] binaryData = oprot.readBinary().array();
-              res.value = binaryData;
+        DataUnion res = new DataUnion();
+        res.value = null;
+        res.id = (short) 0;
+        oprot.readStructBegin(DataUnion.NAMES_TO_IDS, DataUnion.THRIFT_NAMES_TO_IDS, DataUnion.FIELD_METADATA);
+        TField __field = oprot.readFieldBegin();
+        if (__field.type != TType.STOP) {
+            switch (__field.id) {
+            case _BINARYDATA:
+                if (__field.type == BINARY_DATA_FIELD_DESC.type) {
+                    byte[] _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBinary().array();
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _STRINGDATA:
+                if (__field.type == STRING_DATA_FIELD_DESC.type) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
             }
-            break;
-          case _STRINGDATA:
-            if (__field.type == STRING_DATA_FIELD_DESC.type) {
-              String stringData = oprot.readString();
-              res.value = stringData;
+            if (res.value != null) {
+                res.id = __field.id;
             }
-            break;
-          default:
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-        if (res.value != null) {
-          res.id = __field.id;
+            oprot.readFieldEnd();
+            TField __stopField = oprot.readFieldBegin(); // Consume the STOP byte
+            if (__stopField.type != TType.STOP) {
+                throw new TProtocolException(TProtocolException.INVALID_DATA, "Union 'DataUnion' is missing a STOP byte");
+            }
         }
-        oprot.readFieldEnd();
-        TField __stopField = oprot.readFieldBegin(); // Consume the STOP byte
-        if (__stopField.type != TType.STOP) {
-          throw new TProtocolException(TProtocolException.INVALID_DATA, "Union 'DataUnion' is missing a STOP byte");
-        }
-      }
-      oprot.readStructEnd();
-      return res;
+        oprot.readStructEnd();
+        return res;
     }
+
     public static DataUnion defaultInstance() {
         return _DEFAULT;
     }
-
 }

@@ -39,6 +39,33 @@ if TYPE_CHECKING:
     from .manifest import ManifestContext, ManifestParser
 
 
+def _validate_archive_members(names: list[str], dest_dir: str) -> None:
+    """Validate archive member paths to prevent path traversal (Zip Slip) attacks."""
+    dest_dir = os.path.realpath(dest_dir)
+    for name in names:
+        if os.path.isabs(name):
+            raise ValueError(f"Blocked absolute path in archive: {name!r}")
+        member_path = os.path.realpath(os.path.join(dest_dir, name))
+        if not member_path.startswith(dest_dir + os.sep) and member_path != dest_dir:
+            raise ValueError(f"Blocked path traversal in archive: {name!r}")
+
+
+def safe_extractall(archive: tarfile.TarFile | zipfile.ZipFile, dest: str) -> None:
+    """Safely extract a tar or zip archive with path traversal protection."""
+    if isinstance(archive, tarfile.TarFile):
+        _validate_archive_members(archive.getnames(), dest)
+        try:
+            archive.extractall(dest, filter="data")
+        except TypeError:
+            # Python < 3.12 without filter support
+            archive.extractall(dest)
+    elif isinstance(archive, zipfile.ZipFile):
+        _validate_archive_members(archive.namelist(), dest)
+        archive.extractall(dest)
+    else:
+        raise TypeError(f"Unsupported archive type: {type(archive)}")
+
+
 def file_name_is_cmake_file(file_name: str) -> bool:
     file_name = file_name.lower()
     base = os.path.basename(file_name)
@@ -227,6 +254,7 @@ class SystemPackageFetcher:
 
     def hash(self) -> str:
         if self.packages_are_installed():
+            # pyrefly: ignore [bad-argument-type]
             return hashlib.sha256(self.installed).hexdigest()
         else:
             return "0" * 40
@@ -913,6 +941,7 @@ def download_url_to_file_with_progress(url: str, file_name: str) -> None:
 
         def write_update(self, total: int, amount: int) -> None:
             if total == -1:
+                # pyrefly: ignore [bad-assignment]
                 total = "(Unknown)"
 
             if sys.stdout.isatty():
@@ -929,6 +958,7 @@ def download_url_to_file_with_progress(url: str, file_name: str) -> None:
         def progress_pycurl(
             self, total: float, amount: float, _uploadtotal: float, _uploadamount: float
         ) -> None:
+            # pyrefly: ignore [bad-argument-type]
             self.write_update(total, amount)
 
     progress = Progress()
@@ -1129,7 +1159,7 @@ class ArchiveFetcher(Fetcher):
             # the boost tarball it makes some assumptions and tries to convert
             # a non-ascii path to ascii and throws.
             src = str(src)
-            t.extractall(src)
+            safe_extractall(t, src)
 
         if is_windows():
             subdir = self.manifest.get("build", "subdir")

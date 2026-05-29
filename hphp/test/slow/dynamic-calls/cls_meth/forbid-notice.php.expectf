@@ -12,10 +12,6 @@ Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in 
 
 Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/cls_meth/forbid-notice.php on line 136
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/cls_meth/forbid-notice.php on line 138
-
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/cls_meth/forbid-notice.php on line 140
-
 Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/cls_meth/forbid-notice.php on line 143
 
 Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/cls_meth/forbid-notice.php on line 145
@@ -63,8 +59,6 @@ Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %
 Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/cls_meth/forbid-notice.php on line 203
 =============== negative tests =====================
 =============== positive tests (exceptions) ========
-Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable

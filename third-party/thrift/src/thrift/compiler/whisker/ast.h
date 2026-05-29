@@ -70,6 +70,28 @@ using header = std::variant<comment, pragma_statement, import_statement>;
 using headers = std::vector<header>;
 
 /**
+ * Describes whitespace stripping behavior for a template tag due to tilde
+ * (`~`) annotations in the source. Tilde whitespace trimming allows template
+ * authors to explicitly control whitespace around tags, complementing the
+ * automatic standalone line stripping mechanism.
+ *
+ * When `left` is true, whitespace (including newlines) immediately preceding
+ * the tag in the rendered output is stripped.
+ * When `right` is true, whitespace (including newlines) immediately following
+ * the tag in the rendered output is stripped.
+ *
+ * Example:
+ *   `{{~ expr ~}}` — both left and right are true
+ *   `{{~ expr }}`  — only left is true
+ *   `{{ expr ~}}`  — only right is true
+ *   `{{ expr }}`   — both are false (default, no stripping)
+ */
+struct strip_whitespace_rule {
+  bool left = false;
+  bool right = false;
+};
+
+/**
  * The root node of a Whisker AST representing a source file.
  */
 struct root {
@@ -130,6 +152,7 @@ struct newline {
  */
 struct comment {
   source_range loc;
+  strip_whitespace_rule strip_whitespace;
   std::string text;
 };
 
@@ -414,6 +437,7 @@ struct expression {
  */
 struct interpolation {
   source_range loc;
+  strip_whitespace_rule strip_whitespace;
   expression content;
 
   std::string to_string() const { return content.to_string(); }
@@ -425,6 +449,7 @@ struct interpolation {
  */
 struct let_statement {
   source_range loc;
+  strip_whitespace_rule strip_whitespace;
 
   bool exported;
   identifier id;
@@ -439,6 +464,7 @@ struct pragma_statement {
     ignore_newlines,
   };
   source_range loc;
+  strip_whitespace_rule strip_whitespace;
 
   pragmas pragma;
 
@@ -463,6 +489,8 @@ struct import_statement {
  */
 struct section_block {
   source_range loc;
+  strip_whitespace_rule open_strip_whitespace;
+  strip_whitespace_rule close_strip_whitespace;
   /**
    * {{# ⇒ inverted == false
    * {{^ ⇒ inverted == true
@@ -477,6 +505,7 @@ struct section_block {
  */
 struct else_block {
   source_range loc;
+  strip_whitespace_rule strip_whitespace;
   bodies body_elements;
 };
 
@@ -487,6 +516,8 @@ struct else_block {
  */
 struct conditional_block {
   source_range loc;
+  strip_whitespace_rule open_strip_whitespace;
+  strip_whitespace_rule close_strip_whitespace;
 
   expression condition;
   bodies body_elements;
@@ -494,6 +525,7 @@ struct conditional_block {
   // Any {{#else if}} clauses, if present.
   struct else_if_block {
     source_range loc;
+    strip_whitespace_rule strip_whitespace;
     expression condition;
     bodies body_elements;
   };
@@ -509,6 +541,8 @@ struct conditional_block {
  */
 struct with_block {
   source_range loc;
+  strip_whitespace_rule open_strip_whitespace;
+  strip_whitespace_rule close_strip_whitespace;
 
   expression value;
   bodies body_elements;
@@ -521,6 +555,8 @@ struct with_block {
  */
 struct each_block {
   source_range loc;
+  strip_whitespace_rule open_strip_whitespace;
+  strip_whitespace_rule close_strip_whitespace;
 
   expression iterable;
   /**
@@ -529,6 +565,13 @@ struct each_block {
    * an array with the same number of elements as the number of captures.
    */
   std::vector<identifier> captured;
+
+  /**
+   * Optional separator expression. When present, the rendered separator
+   * string is written between iterations. Evaluated lazily on the first
+   * iteration (not evaluated when the array is empty).
+   */
+  std::optional<expression> separator;
 
   bodies body_elements;
   std::optional<else_block> else_clause;
@@ -542,6 +585,8 @@ struct each_block {
  */
 struct partial_block {
   source_range loc;
+  strip_whitespace_rule open_strip_whitespace;
+  strip_whitespace_rule close_strip_whitespace;
 
   bool exported;
   identifier name;
@@ -559,6 +604,7 @@ struct partial_block {
  */
 struct partial_statement {
   source_range loc;
+  strip_whitespace_rule strip_whitespace;
   /**
    * An expression that evaluates to an (implementation-defined) partial block
    * instance.
@@ -606,6 +652,7 @@ struct macro_lookup {
  */
 struct macro {
   source_range loc;
+  strip_whitespace_rule strip_whitespace;
   macro_lookup path;
   /**
    * Standalone macros exhibit different indentation behavior:

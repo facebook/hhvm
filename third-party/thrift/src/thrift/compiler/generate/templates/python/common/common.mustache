@@ -150,7 +150,8 @@ from {{program.module_path}}.thrift_enums import (
     {{/if typedef.enum?}}
 {{/each}}
 )
-{{/if (or program.enums? program.has_enum_typedefs?)}}{{!
+{{/if (or program.enums? program.has_enum_typedefs?)}}
+{{!
     with
 
     from module.path.thrift_enums import EnumName

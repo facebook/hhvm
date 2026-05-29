@@ -574,9 +574,6 @@ where S: SmartConstructors<State = St>,
     fn make_like_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
         compose(SyntaxKind::LikeTypeSpecifier, self.s.make_like_type_specifier(arg0.1, arg1.1))
     }
-    fn make_soft_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
-        compose(SyntaxKind::SoftTypeSpecifier, self.s.make_soft_type_specifier(arg0.1, arg1.1))
-    }
     fn make_attributized_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
         compose(SyntaxKind::AttributizedSpecifier, self.s.make_attributized_specifier(arg0.1, arg1.1))
     }

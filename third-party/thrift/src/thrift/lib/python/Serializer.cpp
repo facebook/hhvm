@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/JSONProtocol.h>
+#include <thrift/lib/cpp2/protocol/Json5Protocol.h>
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 #include <thrift/lib/python/types.h>
 
@@ -43,6 +44,11 @@ std::unique_ptr<folly::IOBuf> serialize(
     // Deprecated, remove as soon as thrift-python migration complete
     case PROTOCOL_TYPES::T_JSON_PROTOCOL:
       return serializeWithWriter<JSONProtocolWriter>(dynamicStructInfo, object);
+#ifdef THRIFT_HAS_JSON5_PROTOCOL
+    case PROTOCOL_TYPES::T_JSON5_PROTOCOL:
+      return serializeWithWriter<json5::detail::Json5ProtocolWriter>(
+          dynamicStructInfo, object);
+#endif
     default:
       throw TProtocolException(
           TProtocolException::NOT_IMPLEMENTED, "protocol not supported yet");
@@ -74,6 +80,11 @@ size_t deserialize(
     case PROTOCOL_TYPES::T_JSON_PROTOCOL:
       return deserializeWithReader<JSONProtocolReader>(
           dynamicStructInfo, buf, object);
+#ifdef THRIFT_HAS_JSON5_PROTOCOL
+    case PROTOCOL_TYPES::T_JSON5_PROTOCOL:
+      return deserializeWithReader<json5::detail::Json5ProtocolReader>(
+          dynamicStructInfo, buf, object);
+#endif
     default:
       throw TProtocolException(
           TProtocolException::NOT_IMPLEMENTED, "protocol not supported yet");

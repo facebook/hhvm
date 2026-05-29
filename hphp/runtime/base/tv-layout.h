@@ -33,7 +33,7 @@ void tvDecRefCountable(TypedValue);
 
 namespace tv_layout {
 
-constexpr bool stores_unaligned_typed_values = arch::any(Arch::X64, Arch::ARM);
+constexpr bool stores_unaligned_typed_values = arch::any<arch::X64, arch::ARM>();
 
 /* A TV layout represents a integer-indexed aggregate of TypedValues.
  *

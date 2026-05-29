@@ -26,12 +26,16 @@ class RecordingCounters : public IThriftServerCounters {
  public:
   int streamSubscribes = 0;
   int sinkSubscribes = 0;
+  int biDiSubscribes = 0;
 
   void onStreamSubscribe(std::string_view /*methodName*/) override {
     ++streamSubscribes;
   }
   void onSinkSubscribe(std::string_view /*methodName*/) override {
     ++sinkSubscribes;
+  }
+  void onBiDiSubscribe(std::string_view /*methodName*/) override {
+    ++biDiSubscribes;
   }
 };
 
@@ -70,10 +74,20 @@ TEST_F(ThriftConnectionLogTest, MultipleLogsShareBackend) {
   EXPECT_EQ(counters_.streamSubscribes, 2);
 }
 
+TEST_F(ThriftConnectionLogTest, CreateBiDiLog) {
+  ThriftConnectionLog connLog(&counters_, nullptr);
+  auto biDiLog = connLog.createBiDiLog("myBiDi");
+  ASSERT_NE(biDiLog, nullptr);
+
+  biDiLog->log(detail::BiDiSubscribeEvent{});
+  EXPECT_EQ(counters_.biDiSubscribes, 1);
+}
+
 TEST_F(ThriftConnectionLogTest, NullBackendsReturnsNullptr) {
   ThriftConnectionLog connLog(nullptr, nullptr);
   EXPECT_EQ(connLog.createStreamLog("method"), nullptr);
   EXPECT_EQ(connLog.createSinkLog("method"), nullptr);
+  EXPECT_EQ(connLog.createBiDiLog("method"), nullptr);
 }
 
 } // namespace apache::thrift

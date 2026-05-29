@@ -148,13 +148,6 @@ pub mod ffi {
 
     #[repr(u8)]
     #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
-    enum IsLogAsDynamicCallOp {
-        LogAsDynamicCall,
-        DontLogAsDynamicCall,
-    }
-
-    #[repr(u8)]
-    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum ReadonlyOp {
         Any,
         Readonly,
@@ -255,7 +248,6 @@ pub mod ffi {
         type FCallArgsFlags;
         type IncDecOp;
         type InitPropOp;
-        type IsLogAsDynamicCallOp;
         type IsTypeOp;
         type IterArgsFlags;
         type MOpMode;

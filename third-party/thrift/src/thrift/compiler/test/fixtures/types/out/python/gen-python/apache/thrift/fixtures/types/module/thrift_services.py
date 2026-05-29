@@ -56,7 +56,7 @@ class SomeServiceInterface(
     async def bounce_map(
             self,
             m: _typing.Mapping[builtins.int, builtins.str]
-        ) -> _typing.Mapping[builtins.int, builtins.str]:
+        ) -> _fbthrift_python_types.ImmutableMap[builtins.int, builtins.str]:
         raise NotImplementedError("async def bounce_map is not implemented")
 
     async def _fbthrift__handler_bounce_map(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -69,7 +69,7 @@ class SomeServiceInterface(
     async def binary_keyed_map(
             self,
             r: _typing.Sequence[builtins.int]
-        ) -> _typing.Mapping[builtins.bytes, builtins.int]:
+        ) -> _fbthrift_python_types.ImmutableMap[builtins.bytes, builtins.int]:
         raise NotImplementedError("async def binary_keyed_map is not implemented")
 
     async def _fbthrift__handler_binary_keyed_map(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:

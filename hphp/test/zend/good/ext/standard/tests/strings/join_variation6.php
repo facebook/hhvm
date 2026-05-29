@@ -13,7 +13,7 @@ echo "*** Testing join() : usage variationsi - binary safe ***\n";
 
 $glues = vec[
   ",".chr(0)." ",
-  b", "
+  ", "
 ];
 
 $pieces = vec["Red", "Green", "White", 1];

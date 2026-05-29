@@ -12,11 +12,11 @@ proxygen_add_library(proxygen_http_coro_client_dns_resolver
   DEPS
     proxygen_dns_dns_module
     proxygen_dns_rfc6724
-    Folly::folly_coro_baton
     Folly::folly_io_async_async_base
     Folly::folly_logging_logging
   EXPORTED_DEPS
     proxygen_dns_dns_base
+    Folly::folly_coro_baton
     Folly::folly_coro_task
     Folly::folly_network_address
 )
@@ -35,7 +35,7 @@ proxygen_add_library(proxygen_http_coro_client_http_connector
     mvfst::mvfst_common_udpsocket_folly_async_udp_socket
     mvfst::mvfst_exception
     mvfst::mvfst_fizz_client_handshake
-    wangle::wangle_ssl_ssl_stats
+    wangle::wangle_ssl_ssl_config
     wangle::wangle_ssl_ssl_util
     fizz::fizz
     Folly::folly_coro_collect

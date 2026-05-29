@@ -34,7 +34,7 @@
 #include "hphp/util/hash-map.h"
 
 #ifdef HHVM_FACEBOOK
-#include <folly/experimental/symbolizer/Symbolizer.h>
+#include <folly/debugging/symbolizer/Symbolizer.h>
 #endif
 
 namespace HPHP {

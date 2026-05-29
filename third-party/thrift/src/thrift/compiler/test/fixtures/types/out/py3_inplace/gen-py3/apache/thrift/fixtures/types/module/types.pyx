@@ -116,7 +116,6 @@ List__AdaptedListDep = _fbthrift_types_inplace.List__AdaptedListDep
 List__DependentAdaptedListDep = _fbthrift_types_inplace.List__DependentAdaptedListDep
 Set__i32 = _fbthrift_types_inplace.Set__i32
 Map__i32_i32 = _fbthrift_types_inplace.Map__i32_i32
-Map__i32_string = _fbthrift_types_inplace.Map__i32_string
 
 TBinary = bytes
 IntTypedef = int
@@ -126,7 +125,7 @@ TBinary_8623 = bytes
 i32_9314 = int
 list_i32_9187 = List__i32
 map_i32_i32_9565 = Map__i32_i32
-map_i32_string_1261 = Map__i32_string
+map_i32_string_1261 = folly_sorted_vector_map__Map__i32_string
 set_i32_7070 = Set__i32
 set_i32_7194 = folly_sorted_vector_set__Set__i32
 string_5252 = str
@@ -562,29 +561,4 @@ cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]& c_map) except 
         iter.genNextKeyVal(ckey, cval)
         py_items[ckey] = cval
     return Map__i32_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
-
-cdef cmap[cint32_t,string] Map__i32_string__make_instance(object items) except *:
-    cdef cmap[cint32_t,string] c_inst
-    cdef cint32_t c_key
-    if items is None:
-        return cmove(c_inst)
-    for key, item in items.items():
-        if not isinstance(key, int):
-            raise TypeError(f"{key!r} is not of type int")
-        c_key = <cint32_t> key
-        if not isinstance(item, str):
-            raise TypeError(f"{item!r} is not of type str")
-
-        c_inst[c_key] = item.encode('UTF-8')
-    return cmove(c_inst)
-
-cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]& c_map) except *:
-    cdef dict py_items = {}
-    cdef __map_iter[cmap[cint32_t,string]] iter = __map_iter[cmap[cint32_t,string]](c_map)
-    cdef cint32_t ckey = 0
-    cdef string cval
-    for i in range(c_map.size()):
-        iter.genNextKeyVal(ckey, cval)
-        py_items[ckey] = __init_unicode_from_cpp(cval)
-    return Map__i32_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 

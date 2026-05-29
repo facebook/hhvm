@@ -1124,7 +1124,6 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
         }
         NullableTypeSpecifier(c) => Ok(Hoption(p_hint(&c.type_, env)?)),
         LikeTypeSpecifier(c) => Ok(Hlike(p_hint(&c.type_, env)?)),
-        SoftTypeSpecifier(c) => Ok(Hsoft(p_hint(&c.type_, env)?)),
         ClosureTypeSpecifier(c) => {
             let tparams = p_hint_tparam_l(&c.type_parameters, env)?;
 

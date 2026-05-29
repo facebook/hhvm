@@ -38,14 +38,14 @@ constexpr uint16_t kPort = 11303;
 struct ThreadAffinityOnRequest {
   void onRequest(McServerRequestContext&& ctx, HelloRequest&& request) {
     LOG(INFO) << "Hello! Server " << reinterpret_cast<uintptr_t>(this)
-              << " got key " << request.key_ref()->fullKey().str();
+              << " got key " << request.key()->fullKey().str();
     McServerRequestContext::reply(
         std::move(ctx), HelloReply(carbon::Result::OK));
   }
 
   void onRequest(McServerRequestContext&& ctx, GoodbyeRequest&& request) {
     LOG(INFO) << "Good bye! Server " << reinterpret_cast<uintptr_t>(this)
-              << " got key " << request.key_ref()->fullKey().str();
+              << " got key " << request.key()->fullKey().str();
     McServerRequestContext::reply(
         std::move(ctx), GoodbyeReply(carbon::Result::OK));
   }
@@ -86,7 +86,7 @@ void sendHelloRequestSync(
 
   client->send(req, [&baton](const HelloRequest&, HelloReply&& reply) {
     XLOG(INFO) << "Reply received! Result: "
-               << carbon::resultToString(*reply.result_ref());
+               << carbon::resultToString(*reply.result());
     baton.post();
   });
 

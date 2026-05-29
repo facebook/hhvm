@@ -370,8 +370,6 @@ type t = {
   package_config_strict_validation: bool;
       (** POC: @fzn, if true, `hh` fatals if paths specified in PACAKGES.toml `include_paths` do not exists *)
   (* Fields below are primarily for hh_conf equivalence testing *)
-  hackfmt_version: int;  (** hackfmt.version config key *)
-  sharedmem_dep_table_pow: int;  (** sharedmem_dep_table_pow config key *)
   sharedmem_global_size: int;  (** sharedmem_global_size config key *)
   sharedmem_hash_table_pow: int;  (** sharedmem_hash_table_pow config key *)
   sharedmem_heap_size: int;  (** sharedmem_heap_size config key *)

@@ -112,6 +112,14 @@ uint32_t FooStreamEx::serializedSizeZC(Protocol_ const* prot_) const {
 
 template <class Protocol_>
 uint32_t FooStreamEx::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<FooStreamEx>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("FooStreamEx");
   xfer += prot_->writeFieldStop();
@@ -191,6 +199,14 @@ uint32_t FooEx::serializedSizeZC(Protocol_ const* prot_) const {
 
 template <class Protocol_>
 uint32_t FooEx::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<FooEx>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("FooEx");
   xfer += prot_->writeFieldStop();
@@ -270,6 +286,14 @@ uint32_t FooEx2::serializedSizeZC(Protocol_ const* prot_) const {
 
 template <class Protocol_>
 uint32_t FooEx2::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<FooEx2>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("FooEx2");
   xfer += prot_->writeFieldStop();

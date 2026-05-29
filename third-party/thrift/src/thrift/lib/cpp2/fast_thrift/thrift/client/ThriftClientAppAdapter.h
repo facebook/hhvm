@@ -1,0 +1,176 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#pragma once
+
+#include <folly/ExceptionWrapper.h>
+#include <folly/Expected.h>
+#include <folly/Function.h>
+#include <folly/io/async/DelayedDestruction.h>
+#include <folly/logging/xlog.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/DirectStreamMap.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/FastThriftAdapterBase.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/common/ClientAppAdapter.h>
+
+namespace apache::thrift::fast_thrift::thrift {
+
+/**
+ * ThriftClientAppAdapter — lightweight, non-owning base class for generated
+ * fast thrift clients.
+ *
+ * Unlike ThriftClientChannel (which adapts the Thrift RequestChannel API),
+ * this class bypasses RequestChannel entirely and interacts directly with
+ * the pipeline. Generated clients derive from this and call
+ * write() to issue RPCs.
+ *
+ * Non-owning: holds a raw PipelineImpl*, does NOT own the transport or
+ * pipeline (the pipeline owner keeps those alive).
+ *
+ * Implements the ClientInboundAppAdapter concept (onMessage / onException).
+ */
+class ThriftClientAppAdapter : public folly::DelayedDestruction,
+                               public FastThriftAdapterBase {
+ public:
+  using ResponseHandler =
+      folly::Function<void(folly::Expected<
+                           ThriftResponseMessage,
+                           folly::exception_wrapper>&&) noexcept>;
+
+  using Ptr = std::unique_ptr<ThriftClientAppAdapter, Destructor>;
+
+  ThriftClientAppAdapter() = default;
+
+  explicit ThriftClientAppAdapter(uint16_t protocolId)
+      : protocolId_{protocolId} {}
+
+  ThriftClientAppAdapter(const ThriftClientAppAdapter&) = delete;
+  ThriftClientAppAdapter& operator=(const ThriftClientAppAdapter&) = delete;
+  ThriftClientAppAdapter(ThriftClientAppAdapter&&) = delete;
+  ThriftClientAppAdapter& operator=(ThriftClientAppAdapter&&) = delete;
+
+  void setPipeline(
+      apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline) {
+    pipeline_ = pipeline;
+  }
+
+  uint16_t getProtocolId() const noexcept { return protocolId_; }
+
+  void setProtocolId(uint16_t protocolId) noexcept { protocolId_ = protocolId; }
+
+  /**
+   * Send a request message into the pipeline.
+   * If called on the pipeline's EventBase thread, fires immediately.
+   * Otherwise, schedules on the EventBase.
+   *
+   * If fireWrite returns Error, removes the handler from the pending map
+   * and invokes it with an exception_wrapper.
+   */
+  void write(
+      ResponseHandler handler,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
+          msg) noexcept {
+    if (!pipeline_) {
+      (void)handler(
+          folly::makeUnexpected(
+              folly::make_exception_wrapper<std::runtime_error>(
+                  "Pipeline not set")));
+      return;
+    }
+
+    pipeline_->eventBase()->runImmediatelyOrRunInEventBaseThread(
+        [this, msg = std::move(msg), handler = std::move(handler)]() mutable {
+          auto requestId = nextRequestId_++;
+          auto it =
+              pendingRequests_.emplace(requestId, std::move(handler)).first;
+          ThriftRequestMessage& reqMsg = msg.get<ThriftRequestMessage>();
+          reqMsg.requestHandle = requestId;
+          auto result = pipeline_->fireWrite(std::move(msg));
+          if (FOLLY_UNLIKELY(
+                  result ==
+                  apache::thrift::fast_thrift::channel_pipeline::Result::
+                      Error)) {
+            auto respHandler = std::move(it->second);
+            (void)respHandler(
+                folly::makeUnexpected(
+                    folly::make_exception_wrapper<std::runtime_error>(
+                        "Pipeline write failed")));
+            pendingRequests_.erase(it);
+          }
+        });
+  }
+
+  // === ClientInboundAppAdapter interface ===
+
+  apache::thrift::fast_thrift::channel_pipeline::Result onMessage(
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
+          msg) noexcept {
+    auto response = msg.take<ThriftResponseMessage>();
+    auto it = pendingRequests_.find(response.requestHandle);
+    if (it == pendingRequests_.end()) {
+      XLOG(WARN) << "Response for unknown handle: " << response.requestHandle;
+      return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+    }
+    auto handler = std::move(it->second);
+    pendingRequests_.erase(it);
+
+    if (response.requestFrameType !=
+        apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE) {
+      XLOG(ERR) << "Unsupported frame type: "
+                << static_cast<int>(response.requestFrameType);
+      return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
+    }
+
+    handler(handleRequestResponse(std::move(response)));
+    return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+  }
+
+  void onException(folly::exception_wrapper&& e) noexcept {
+    XLOG(ERR) << "Pipeline exception: " << e.what();
+
+    pendingRequests_.forEach([&](uint64_t, ResponseHandler& handler) {
+      (void)handler(folly::makeUnexpected(e));
+    });
+    pendingRequests_.clear();
+  }
+
+ protected:
+  ~ThriftClientAppAdapter() override = default;
+
+ private:
+  apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline_{
+      nullptr};
+  uint16_t protocolId_{0};
+  apache::thrift::fast_thrift::frame::read::DirectStreamMap<
+      ResponseHandler,
+      uint32_t,
+      apache::thrift::fast_thrift::frame::read::SequentialIndex>
+      pendingRequests_;
+  uint32_t nextRequestId_{0};
+};
+
+static_assert(
+    ClientOutboundAppAdapter<ThriftClientAppAdapter>,
+    "ThriftClientAppAdapter must satisfy ClientOutboundAppAdapter concept");
+
+static_assert(
+    ClientInboundAppAdapter<ThriftClientAppAdapter>,
+    "ThriftClientAppAdapter must satisfy ClientInboundAppAdapter concept");
+
+} // namespace apache::thrift::fast_thrift::thrift

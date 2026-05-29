@@ -1,3 +1,7 @@
+WARN: File "sdt_private_method.bad.php", line 16, characters 9-11:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "sdt_private_method.bad.php", line 15, characters 27-33:
+  This expression has type `dynamic`
 ERROR: File "sdt_private_method.bad.php", line 13, characters 12-15:
 Method  `set` in class `C` is not dynamically callable. (Typing[4426])
   File "sdt_private_method.bad.php", line 13, characters 12-15:

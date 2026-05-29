@@ -20,14 +20,14 @@ impl Severity {
     pub fn to_all_caps_string(&self) -> &'static str {
         match self {
             Severity::Err => "ERROR",
-            Severity::Warning => "WARN",
+            Severity::Warning { .. } => "WARN",
         }
     }
 
     pub fn color(&self) -> Color {
         match self {
             Severity::Err => Color::Red,
-            Severity::Warning => Color::Yellow,
+            Severity::Warning { .. } => Color::Yellow,
         }
     }
 }

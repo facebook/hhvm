@@ -20,16 +20,16 @@ Struct builder class implementation.
 
 }}
 {{#import "common/pep484" as pep484}}
-{{#let partial builder_field_type |type| captures |pep484|}}
+{{#let partial builder_field_type |field| captures |pep484|}}
 {{#pragma ignore-newlines}}
-{{#if type.list?}}_typing.Optional[list]
-{{#else if type.map?}}_typing.Optional[dict]
-{{#else if type.set?}}_typing.Optional[set]
-{{#else if type.integer?}}_typing.Optional[int]
-{{#else if type.floating_point?}}_typing.Optional[float]
-{{#else if type.structured?}}_typing.Any
-{{#else if type.cythonTypeNoneable?}}_typing.Optional[{{#partial pep484.type_name type=type}}]
-{{/if type.list?}}
+{{#if field.type.list?}}_typing.Optional[list]
+{{#else if field.type.map?}}_typing.Optional[dict]
+{{#else if field.type.set?}}_typing.Optional[set]
+{{#else if field.type.integer?}}_typing.Optional[int]
+{{#else if field.type.floating_point?}}_typing.Optional[float]
+{{#else if field.type.structured?}}_typing.Any
+{{#else if field.type.cythonTypeNoneable?}}_typing.Optional[{{#partial pep484.field_type_name field=field}}]
+{{/if field.type.list?}}
 {{/let partial}}
 {{> common/auto_generated_py}}
 import typing as _typing
@@ -54,7 +54,7 @@ class {{struct.name}}_Builder(thrift.py3.builder.StructBuilder):
 
     def __init__(self):
   {{#each struct.py3_fields as |f|}}
-        self.{{f.py_name}}: {{#partial builder_field_type type=f.type}} = None
+        self.{{f.py_name}}: {{#partial builder_field_type field=f}} = None
   {{/each}}
   {{#if (array.empty? struct.py3_fields)}}
         pass

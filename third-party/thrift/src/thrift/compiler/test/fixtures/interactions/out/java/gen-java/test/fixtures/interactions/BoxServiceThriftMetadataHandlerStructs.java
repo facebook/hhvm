@@ -21,26 +21,26 @@ import com.facebook.thrift.metadata.ThriftStructType;
 import com.facebook.thrift.metadata.ThriftType;
 
 class BoxServiceThriftMetadataHandlerStructs_0 {
-  static void addStructs(Map<String, ThriftStruct> structs) {
-    structs.put("test.fixtures.interactions.ShouldBeBoxed", new ThriftStruct.Builder()
-        .setName("test.fixtures.interactions.ShouldBeBoxed")
-        .setFields(Arrays.asList(
-            new ThriftField.Builder()
-                .setId(1)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
-                .setName("sessionId")
-                .setIsOptional(false)
-                .build()
-        ))
-        .setIsUnion(false)
-        .build());
-  }
+    static void addStructs(Map<String, ThriftStruct> structs) {
+        structs.put("test.fixtures.interactions.ShouldBeBoxed", new ThriftStruct.Builder()
+            .setName("test.fixtures.interactions.ShouldBeBoxed")
+            .setFields(Arrays.asList(
+                new ThriftField.Builder()
+                    .setId(1)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
+                    .setName("sessionId")
+                    .setIsOptional(false)
+                    .build()
+            ))
+            .setIsUnion(false)
+            .build());
+    }
 }
 
 class BoxServiceThriftMetadataHandlerStructs {
-  static Map<String, ThriftStruct> getStructs() {
-    Map<String, ThriftStruct> structs = new HashMap<>();
-    BoxServiceThriftMetadataHandlerStructs_0.addStructs(structs);
-    return structs;
-  }
+    static Map<String, ThriftStruct> getStructs() {
+        Map<String, ThriftStruct> structs = new HashMap<>();
+        BoxServiceThriftMetadataHandlerStructs_0.addStructs(structs);
+        return structs;
+    }
 }

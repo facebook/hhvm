@@ -36,7 +36,7 @@
 #include <memory>
 #include <vector>
 
-#include <folly/experimental/symbolizer/Elf.h>
+#include <folly/debugging/symbolizer/Elf.h>
 
 namespace HPHP {
 

@@ -23,7 +23,6 @@ use crate::FunctionName;
 use crate::GlobalId;
 use crate::IncDecOp;
 use crate::InitPropOp;
-use crate::IsLogAsDynamicCallOp;
 use crate::IsTypeOp;
 use crate::IterArgs;
 use crate::IterArgsFlags;
@@ -729,11 +728,6 @@ impl CanThrow for MemberOp {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum CallDetail {
-    // A::$b(42);
-    // $a::$b(42);
-    FCallClsMethod {
-        log: IsLogAsDynamicCallOp,
-    },
     // A::foo(42);
     FCallClsMethodD {
         clsid: ClassName,
@@ -742,11 +736,6 @@ pub enum CallDetail {
     // $a::foo(42);
     FCallClsMethodM {
         method: MethodName,
-        log: IsLogAsDynamicCallOp,
-    },
-    // self::$a();
-    FCallClsMethodS {
-        clsref: SpecialClsRef,
     },
     // self::foo();
     FCallClsMethodSD {
@@ -776,11 +765,9 @@ impl CallDetail {
     pub fn args<'a>(&self, operands: &'a [ValueId]) -> &'a [ValueId] {
         let len = operands.len();
         match self {
-            CallDetail::FCallClsMethod { .. } => &operands[..len - 2],
             CallDetail::FCallFunc => &operands[..len - 1],
             CallDetail::FCallObjMethod { .. } => &operands[1..len - 1],
             CallDetail::FCallClsMethodM { .. } => &operands[..len - 1],
-            CallDetail::FCallClsMethodS { .. } => &operands[..len - 1],
             CallDetail::FCallClsMethodD { .. } => operands,
             CallDetail::FCallClsMethodSD { .. } => operands,
             CallDetail::FCallCtor => &operands[1..],
@@ -792,11 +779,8 @@ impl CallDetail {
     pub fn class(&self, operands: &[ValueId]) -> ValueId {
         let len = operands.len();
         match self {
-            CallDetail::FCallClsMethod { .. } | CallDetail::FCallClsMethodM { .. } => {
-                operands[len - 1]
-            }
+            CallDetail::FCallClsMethodM { .. } => operands[len - 1],
             CallDetail::FCallClsMethodD { .. }
-            | CallDetail::FCallClsMethodS { .. }
             | CallDetail::FCallClsMethodSD { .. }
             | CallDetail::FCallCtor
             | CallDetail::FCallFunc
@@ -811,10 +795,7 @@ impl CallDetail {
     pub fn method(&self, operands: &[ValueId]) -> ValueId {
         let len = operands.len();
         match self {
-            CallDetail::FCallClsMethod { .. } => operands[len - 2],
-            CallDetail::FCallClsMethodS { .. } | CallDetail::FCallObjMethod { .. } => {
-                operands[len - 1]
-            }
+            CallDetail::FCallObjMethod { .. } => operands[len - 1],
             CallDetail::FCallClsMethodD { .. }
             | CallDetail::FCallClsMethodM { .. }
             | CallDetail::FCallClsMethodSD { .. }
@@ -832,10 +813,8 @@ impl CallDetail {
             CallDetail::FCallCtor
             | CallDetail::FCallObjMethodD { .. }
             | CallDetail::FCallObjMethod { .. } => operands[0],
-            CallDetail::FCallClsMethod { .. }
-            | CallDetail::FCallClsMethodD { .. }
+            CallDetail::FCallClsMethodD { .. }
             | CallDetail::FCallClsMethodM { .. }
-            | CallDetail::FCallClsMethodS { .. }
             | CallDetail::FCallClsMethodSD { .. }
             | CallDetail::FCallFunc
             | CallDetail::FCallFuncD { .. } => {
@@ -852,8 +831,6 @@ impl CallDetail {
             | CallDetail::FCallObjMethodD { .. }
             | CallDetail::FCallClsMethodD { .. }
             | CallDetail::FCallClsMethodM { .. }
-            | CallDetail::FCallClsMethodS { .. }
-            | CallDetail::FCallClsMethod { .. }
             | CallDetail::FCallObjMethod { .. }
             | CallDetail::FCallClsMethodSD { .. }
             | CallDetail::FCallFuncD { .. } => {

@@ -7,7 +7,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/visitation/visit_by_thrift_field_metadata.h>
-#include "thrift/compiler/test/fixtures/serialization_field_order/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/serialization_field_order/gen-cpp2/module_types.h"
 
 namespace apache {
 namespace thrift {

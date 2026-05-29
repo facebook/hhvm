@@ -2130,14 +2130,6 @@
         { "field_name" : "tilde" },
         { "field_name" : "type" }
       ] },
-    { "kind_name" : "SoftTypeSpecifier",
-      "type_name" : "soft_type_specifier",
-      "description" : "soft_type_specifier",
-      "prefix" : "soft",
-      "fields" : [
-        { "field_name" : "at" },
-        { "field_name" : "type" }
-      ] },
     { "kind_name" : "AttributizedSpecifier",
       "type_name" : "attributized_specifier",
       "description" : "attributized_specifier",

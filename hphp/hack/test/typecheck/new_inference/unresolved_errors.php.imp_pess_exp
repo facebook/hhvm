@@ -1,1 +1,12 @@
-No errors
+WARN: File "unresolved_errors.php", line 16, characters 10-12:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "unresolved_errors.php", line 16, characters 3-7:
+  This expression has type `dynamic`
+WARN: File "unresolved_errors.php", line 19, characters 10-12:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "unresolved_errors.php", line 19, characters 3-7:
+  This expression has type `dynamic`
+WARN: File "unresolved_errors.php", line 22, characters 10-12:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "unresolved_errors.php", line 22, characters 3-7:
+  This expression has type `dynamic`

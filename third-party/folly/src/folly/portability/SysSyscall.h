@@ -29,6 +29,8 @@
 
 #if defined(__APPLE__)
 #define FOLLY_SYS_gettid SYS_thread_selfid
+#elif defined(__EMSCRIPTEN__)
+#define FOLLY_SYS_gettid 0
 #elif defined(SYS_gettid)
 #define FOLLY_SYS_gettid SYS_gettid
 #else
@@ -58,7 +60,8 @@ namespace detail {
 template <typename... A>
 FOLLY_ERASE long linux_syscall(
     [[maybe_unused]] long number, [[maybe_unused]] A... a) {
-#if defined(_WIN32) || (defined(__EMSCRIPTEN__) && !defined(syscall))
+#if defined(_WIN32) || (defined(__EMSCRIPTEN__) && !defined(syscall)) || \
+    FOLLY_APPLE_TVOS
   errno = ENOSYS;
   return -1;
 #else

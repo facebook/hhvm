@@ -31,10 +31,10 @@ function entrypoint_mcrypt_encrypt_variation1(): void {
   set_error_handler(test_error_handler<>);
 
   // Initialise function arguments not being substituted (if any)
-  $key = b'string_val';
-  $data = b'string_val';
+  $key = 'string_val';
+  $data = 'string_val';
   $mode = MCRYPT_MODE_ECB;
-  $iv = b'string_val';
+  $iv = 'string_val';
 
 
   // heredoc string

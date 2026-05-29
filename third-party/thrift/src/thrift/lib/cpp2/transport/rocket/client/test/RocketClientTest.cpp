@@ -100,7 +100,7 @@ class RocketClientTest : public testing::Test {
           getRequestContext()->getConnectionContext()->getTransport();
       auto transport = const_cast<folly::AsyncTransport*>(const_transport);
       auto sock = transport->getUnderlyingTransport<folly::AsyncSocket>();
-      assert(sock->setSendBufSize(1) == 0);
+      CHECK_EQ(sock->setSendBufSize(1), 0);
       int bufsize = 0;
       socklen_t bufsizelen = sizeof(bufsize);
       sock->getSockOpt<int>(SOL_SOCKET, SO_SNDBUF, &bufsize, &bufsizelen);
@@ -126,7 +126,7 @@ TEST_F(RocketClientTest, KeepAliveWatcherLargeRequestTest) {
   auto client = runner.newStickyClient<apache::thrift::Client<TestService>>(
       nullptr, [&](auto socket) {
         // Set send buffer size to minimum to simulate slow network.
-        assert(socket->setSendBufSize(1) == 0);
+        CHECK_EQ(socket->setSendBufSize(1), 0);
         return makeChannelWithMetadata(std::move(socket));
       });
 
@@ -177,7 +177,7 @@ TEST_F(RocketClientTest, KeepAliveWatcherLargeResponseTest) {
   auto client = runner.newStickyClient<apache::thrift::Client<TestService>>(
       nullptr, [&](auto socket) {
         // Set send buffer size to minimum to similate slow network.
-        assert(socket->setSendBufSize(1) == 0);
+        CHECK_EQ(socket->setSendBufSize(1), 0);
         return makeChannelWithMetadata(std::move(socket));
       });
 
@@ -246,7 +246,7 @@ TEST_F(RocketClientTest, KeepAliveEvbDetachAttachTest) {
   auto client = runner.newStickyClient<apache::thrift::Client<TestService>>(
       nullptr, [&](auto socket) {
         // Set send buffer size to minimum to simulate slow network.
-        assert(socket->setSendBufSize(1) == 0);
+        CHECK_EQ(socket->setSendBufSize(1), 0);
         // KeepAlive will be created and started here.
         auto channel = makeChannelWithMetadata(std::move(socket));
         auto evb = channel->getEventBase();

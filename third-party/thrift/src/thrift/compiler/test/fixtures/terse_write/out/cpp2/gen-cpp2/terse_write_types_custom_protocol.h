@@ -140,6 +140,14 @@ uint32_t MyStruct::serializedSizeZC(Protocol_ const* prot_) const {
 
 template <class Protocol_>
 uint32_t MyStruct::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<MyStruct>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("MyStruct");
   xfer += prot_->writeFieldStop();
@@ -763,6 +771,14 @@ uint32_t MyStructWithCustomDefault::serializedSizeZC(Protocol_ const* prot_) con
 
 template <class Protocol_>
 uint32_t MyStructWithCustomDefault::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<MyStructWithCustomDefault>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("MyStructWithCustomDefault");
   bool previousFieldHasValue = true;
@@ -1284,6 +1300,14 @@ uint32_t StructLevelTerseStruct::serializedSizeZC(Protocol_ const* prot_) const 
 
 template <class Protocol_>
 uint32_t StructLevelTerseStruct::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<StructLevelTerseStruct>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("StructLevelTerseStruct");
   bool previousFieldHasValue = true;
@@ -2381,6 +2405,14 @@ uint32_t FieldLevelTerseStruct::serializedSizeZC(Protocol_ const* prot_) const {
 
 template <class Protocol_>
 uint32_t FieldLevelTerseStruct::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<FieldLevelTerseStruct>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("FieldLevelTerseStruct");
   bool previousFieldHasValue = true;
@@ -2786,6 +2818,14 @@ uint32_t AdaptedFields::serializedSizeZC(Protocol_ const* prot_) const {
 
 template <class Protocol_>
 uint32_t AdaptedFields::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<AdaptedFields>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("AdaptedFields");
   bool previousFieldHasValue = true;
@@ -2922,6 +2962,14 @@ uint32_t TerseException::serializedSizeZC(Protocol_ const* prot_) const {
 
 template <class Protocol_>
 uint32_t TerseException::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<TerseException>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("TerseException");
   bool previousFieldHasValue = true;

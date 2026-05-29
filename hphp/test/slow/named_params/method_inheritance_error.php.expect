@@ -5,8 +5,8 @@ vec(4) {
   int(4)
 }
 Function did not throw
-Caught RuntimeException: Named argument x does not match any named parameter in call to C::foo
-Caught RuntimeException: Named argument a does not match any named parameter in call to D::foo
+Caught RuntimeException: Call to C::foo() has no argument matching required named parameter a
+Caught RuntimeException: Call to D::foo() has no argument matching required named parameter x
 vec(4) {
   int(101)
   int(102)

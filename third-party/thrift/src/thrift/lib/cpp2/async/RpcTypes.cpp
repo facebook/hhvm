@@ -150,6 +150,12 @@ void ResponsePayload::transform(
       std::move(buffer_), writeTrans, minCompressBytes);
 }
 
+void ResponsePayload::transform(
+    std::vector<TTransform>& writeTrans, size_t minCompressBytes) {
+  buffer_ = transport::THeader::transform(
+      std::move(buffer_), writeTrans, minCompressBytes);
+}
+
 ResponsePayload SerializedResponse::extractPayload(
     bool includeEnvelope,
     int16_t protocolId,

@@ -323,7 +323,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
+        ) -> _typing.Tuple[_fbthrift_python_types.ImmutableSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteraction.encode",
@@ -463,7 +463,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
+        ) -> _typing.Tuple[_fbthrift_python_types.ImmutableSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteractionFast.encode",
@@ -868,7 +868,7 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
+        ) -> _typing.Tuple[_fbthrift_python_types.ImmutableSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "Factories",
                 "MyInteraction.encode",
@@ -1008,7 +1008,7 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
+        ) -> _typing.Tuple[_fbthrift_python_types.ImmutableSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "Factories",
                 "MyInteractionFast.encode",
@@ -1332,7 +1332,7 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
+        ) -> _typing.Tuple[_fbthrift_python_types.ImmutableSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "Perform",
                 "MyInteraction.encode",
@@ -1472,7 +1472,7 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
+        ) -> _typing.Tuple[_fbthrift_python_types.ImmutableSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "Perform",
                 "MyInteractionFast.encode",
@@ -1798,7 +1798,7 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
+        ) -> _typing.Tuple[_fbthrift_python_types.ImmutableSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "InteractWithShared",
                 "MyInteraction.encode",

@@ -14,17 +14,17 @@ public class BoxServiceReactiveAsyncWrapper
   private BoxService.Reactive _delegate;
 
   public BoxServiceReactiveAsyncWrapper(BoxService.Reactive _delegate) {
-    
-    this._delegate = _delegate;
+      
+      this._delegate = _delegate;
   }
 
   public BoxServiceReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new BoxServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new BoxServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
   @java.lang.Override
@@ -43,7 +43,7 @@ public class BoxServiceReactiveAsyncWrapper
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<test.fixtures.interactions.ShouldBeBoxed>> getABoxSessionWrapper(
     final test.fixtures.interactions.ShouldBeBoxed req,
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.getABoxSessionWrapper(req, rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.getABoxSessionWrapper(req, rpcOptions));
   }
 
   public class BoxedInteractionImpl implements BoxedInteraction {
@@ -61,7 +61,7 @@ public class BoxServiceReactiveAsyncWrapper
     @java.lang.Override
     public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<test.fixtures.interactions.ShouldBeBoxed>> getABoxWrapper(
       com.facebook.thrift.client.RpcOptions rpcOptions) {
-      throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
+        throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
     }
 
     @java.lang.Override
@@ -71,4 +71,5 @@ public class BoxServiceReactiveAsyncWrapper
   public BoxedInteraction createBoxedInteraction() {
       return new BoxedInteractionImpl();
   }
+
 }

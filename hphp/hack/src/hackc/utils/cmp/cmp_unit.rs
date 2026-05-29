@@ -250,17 +250,7 @@ fn cmp_fcallargs(a: &hhbc::FCallArgs, b: &hhbc::FCallArgs) -> Result {
 
 fn cmp_fcall_instr(a: &Opcode, b: &Opcode) -> Result {
     match (a, b) {
-        (hhbc::Opcode::FCallClsMethod(fa, a1, a2), hhbc::Opcode::FCallClsMethod(fb, b1, b2)) => {
-            cmp_fcallargs(fa, fb)?;
-            cmp_eq(a1, b1)?;
-            cmp_eq(a2, b2)?;
-        }
         (hhbc::Opcode::FCallClsMethodD(fa, a1, a2), hhbc::Opcode::FCallClsMethodD(fb, b1, b2)) => {
-            cmp_fcallargs(fa, fb)?;
-            cmp_eq(a1, b1)?;
-            cmp_eq(a2, b2)?;
-        }
-        (hhbc::Opcode::FCallClsMethodS(fa, a1, a2), hhbc::Opcode::FCallClsMethodS(fb, b1, b2)) => {
             cmp_fcallargs(fa, fb)?;
             cmp_eq(a1, b1)?;
             cmp_eq(a2, b2)?;
@@ -270,14 +260,10 @@ fn cmp_fcall_instr(a: &Opcode, b: &Opcode) -> Result {
             cmp_eq(a1, b1)?;
             cmp_eq(a2, b2)?;
         }
-        (
-            hhbc::Opcode::FCallClsMethodM(fa, a1, a2, a3),
-            hhbc::Opcode::FCallClsMethodM(fb, b1, b2, b3),
-        ) => {
+        (hhbc::Opcode::FCallClsMethodM(fa, a1, a2), hhbc::Opcode::FCallClsMethodM(fb, b1, b2)) => {
             cmp_fcallargs(fa, fb)?;
             cmp_eq(a1, b1)?;
             cmp_eq(a2, b2)?;
-            cmp_eq(a3, b3)?;
         }
         (
             hhbc::Opcode::FCallClsMethodSD(fa, a1, a2, a3),
@@ -324,10 +310,8 @@ fn cmp_instr(a: &Instruct, b: &Instruct) -> Result {
     }
     if let (Instruct::Opcode(a), Instruct::Opcode(b)) = (a, b) {
         match a {
-            hhbc::Opcode::FCallClsMethod(..)
-            | hhbc::Opcode::FCallClsMethodM(..)
+            hhbc::Opcode::FCallClsMethodM(..)
             | hhbc::Opcode::FCallClsMethodD(..)
-            | hhbc::Opcode::FCallClsMethodS(..)
             | hhbc::Opcode::FCallClsMethodSD(..)
             | hhbc::Opcode::FCallCtor(..)
             | hhbc::Opcode::FCallFunc(..)

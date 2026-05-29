@@ -42,19 +42,6 @@ module Null_coalesce_always = struct
   }
 end
 
-module Sketchy_null_check = struct
-  type kind =
-    | Coalesce
-    | Eq
-    | Neq
-
-  type t = {
-    name: string option;
-    kind: kind;
-    ty: string;
-  }
-end
-
 module Non_disjoint_check = struct
   type t = {
     name: string;
@@ -262,6 +249,7 @@ module Sealed_not_subtype = struct
   type t = {
     verb: string;
     parent_name: string;
+    parent_method_name: string option;
     child_name: string;
     child_kind: string;
   }
@@ -278,10 +266,33 @@ module Consistent_construct_abstract_final = struct
   }
 end
 
+module Dynamic_call = struct
+  type kind =
+    | Method_invocation
+    | Function_call
+    | Array_index
+    | Array_append
+
+  type t = {
+    kind: kind;
+    actual_type: string;
+    dynamic_reason_pos: Pos_or_decl.t;
+    dynamic_reason_msg: string;
+  }
+end
+
+module Sealed_not_override = struct
+  type t = {
+    method_name: string;
+    method_def: string;
+    allowlist_class_name: string;
+    allowlist_class_kind: string;
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
   | Is_as_always : (Is_as_always.t, migrated) kind
-  | Sketchy_null_check : (Sketchy_null_check.t, migrated) kind
   | Non_disjoint_check : (Non_disjoint_check.t, migrated) kind
   | Cast_non_primitive : (Cast_non_primitive.t, migrated) kind
   | Truthiness_test : (Truthiness_test.t, migrated) kind
@@ -307,5 +318,7 @@ type (_, _) kind =
   | Tany_found : (Tany_found.t, warn) kind
   | Consistent_construct_abstract_final
       : (Consistent_construct_abstract_final.t, warn) kind
+  | Dynamic_call : (Dynamic_call.t, warn) kind
+  | Sealed_not_override : (Sealed_not_override.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

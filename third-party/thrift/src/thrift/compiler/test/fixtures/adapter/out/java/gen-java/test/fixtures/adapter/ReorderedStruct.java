@@ -37,11 +37,11 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(ReorderedStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -67,6 +67,7 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -76,14 +77,13 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
     public static final int _REORDERED_DEPENDENT_ADAPTED = 1;
     private static final TField REORDERED_DEPENDENT_ADAPTED_FIELD_DESC = new TField("reordered_dependent_adapted", TType.STRUCT, (short)1);
     static {
-      NAMES_TO_IDS.put("reorderedDependentAdapted", 1);
-      THRIFT_NAMES_TO_IDS.put("reordered_dependent_adapted", 1);
-      FIELD_METADATA.put(1, REORDERED_DEPENDENT_ADAPTED_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/ReorderedStruct"),
-        ReorderedStruct.class, ReorderedStruct::read0));
+        NAMES_TO_IDS.put("reorderedDependentAdapted", 1);
+        THRIFT_NAMES_TO_IDS.put("reordered_dependent_adapted", 1);
+        FIELD_METADATA.put(1, REORDERED_DEPENDENT_ADAPTED_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/ReorderedStruct"),
+            ReorderedStruct.class, ReorderedStruct::read0));
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="reordered_dependent_adapted", requiredness=Requiredness.NONE)
     public test.fixtures.adapter.DeclaredAfterStruct getReorderedDependentAdapted() { return reorderedDependentAdapted; }
@@ -115,52 +115,52 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(reorderedDependentAdapted);
-            return _hashCode;
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<ReorderedStruct> asReader() {
       return ReorderedStruct::read0;
     }
 
     public static ReorderedStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(ReorderedStruct.NAMES_TO_IDS, ReorderedStruct.THRIFT_NAMES_TO_IDS, ReorderedStruct.FIELD_METADATA);
-      ReorderedStruct.Builder builder = new ReorderedStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _REORDERED_DEPENDENT_ADAPTED:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.adapter.DeclaredAfterStruct reorderedDependentAdapted = test.fixtures.adapter.DeclaredAfterStruct.read0(oprot);
-            builder.setReorderedDependentAdapted(reorderedDependentAdapted);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(ReorderedStruct.NAMES_TO_IDS, ReorderedStruct.THRIFT_NAMES_TO_IDS, ReorderedStruct.FIELD_METADATA);
+        ReorderedStruct.Builder builder = new ReorderedStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _REORDERED_DEPENDENT_ADAPTED:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.adapter.DeclaredAfterStruct _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.adapter.DeclaredAfterStruct.read0(oprot);
+                    builder.setReorderedDependentAdapted(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      test.fixtures.adapter.DeclaredAfterStruct _iter0 = this.reorderedDependentAdapted;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(REORDERED_DEPENDENT_ADAPTED_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            test.fixtures.adapter.DeclaredAfterStruct _fbthriftVar0 = this.reorderedDependentAdapted;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(REORDERED_DEPENDENT_ADAPTED_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _ReorderedStructLazy {

@@ -100,6 +100,7 @@ public interface BoxService extends java.io.Closeable, com.facebook.thrift.util.
         }
 
         public BoxedInteraction createBoxedInteraction();
+
     }
     @java.lang.Override void close();
 
@@ -164,6 +165,7 @@ public interface BoxService extends java.io.Closeable, com.facebook.thrift.util.
         }
 
         public BoxedInteraction createBoxedInteraction();
+
     }
     @com.facebook.swift.service.ThriftInteraction("BoxedInteraction")
     public interface BoxedInteraction extends java.io.Closeable {
@@ -180,4 +182,5 @@ public interface BoxService extends java.io.Closeable, com.facebook.thrift.util.
     }
 
     BoxedInteraction createBoxedInteraction();
+
 }

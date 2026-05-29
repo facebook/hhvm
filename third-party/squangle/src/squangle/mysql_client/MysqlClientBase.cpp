@@ -7,8 +7,12 @@
  */
 
 #include "squangle/mysql_client/MysqlClientBase.h"
+#include "squangle/mysql_client/ChangeUserOperation.h"
 #include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/Connection.h"
+#include "squangle/mysql_client/MultiQueryOperation.h"
+#include "squangle/mysql_client/QueryOperation.h"
+#include "squangle/mysql_client/ResetOperation.h"
 #include "squangle/mysql_client/SpecialOperation.h"
 
 namespace {
@@ -150,6 +154,91 @@ MysqlClientBase::createSpecialOperationImpl(
   return createSpecialOperationImpl(
       std::make_unique<OperationBase::OwnedConnection>(std::move(conn)),
       operation_type);
+}
+
+std::shared_ptr<SpecialOperation> MysqlClientBase::createResetOperation(
+    std::unique_ptr<Connection> conn) const {
+  // Default implementation uses legacy pattern with impl_
+  // Subclasses (AsyncMysqlClient, SyncMysqlClient) can override to return
+  // unified classes like MysqlResetOperation
+  auto resetOp = std::make_shared<ResetOperation>(
+      createSpecialOperationImpl(std::move(conn), db::OperationType::Reset));
+  return resetOp;
+}
+
+std::shared_ptr<SpecialOperation> MysqlClientBase::createChangeUserOperation(
+    std::unique_ptr<Connection> conn,
+    std::shared_ptr<const ConnectionKey> key) const {
+  // Default implementation uses legacy pattern with impl_
+  // Subclasses (AsyncMysqlClient, SyncMysqlClient) can override to return
+  // unified classes like MysqlChangeUserOperation
+  auto changeUserOp = std::make_shared<ChangeUserOperation>(
+      createSpecialOperationImpl(
+          std::move(conn), db::OperationType::ChangeUser),
+      std::move(key));
+  return changeUserOp;
+}
+
+std::shared_ptr<QueryOperation> MysqlClientBase::createQueryOperation(
+    std::unique_ptr<Connection> conn,
+    Query&& query,
+    LoggingFuncsPtr logging_funcs) const {
+  // Wrap in OwnedConnection and call the ConnectionProxy overload
+  return createQueryOperation(
+      std::make_unique<OperationBase::OwnedConnection>(std::move(conn)),
+      std::move(query),
+      std::move(logging_funcs));
+}
+
+std::shared_ptr<MultiQueryOperation> MysqlClientBase::createMultiQueryOperation(
+    std::unique_ptr<Connection> conn,
+    std::vector<Query>&& queries,
+    LoggingFuncsPtr logging_funcs) const {
+  // Wrap in OwnedConnection and call the ConnectionProxy overload
+  return createMultiQueryOperation(
+      std::make_unique<OperationBase::OwnedConnection>(std::move(conn)),
+      std::move(queries),
+      std::move(logging_funcs));
+}
+
+std::shared_ptr<QueryOperation> MysqlClientBase::createQueryOperation(
+    std::unique_ptr<OperationBase::ConnectionProxy> conn_proxy,
+    Query&& query,
+    LoggingFuncsPtr logging_funcs) const {
+  // Default implementation uses legacy pattern
+  // Subclasses can override to return unified classes
+  return std::shared_ptr<QueryOperation>(new QueryOperation(
+      createFetchOperationImpl(
+          std::move(conn_proxy),
+          db::OperationType::Query,
+          std::move(logging_funcs)),
+      std::move(query)));
+}
+
+std::shared_ptr<MultiQueryOperation> MysqlClientBase::createMultiQueryOperation(
+    std::unique_ptr<OperationBase::ConnectionProxy> conn_proxy,
+    std::vector<Query>&& queries,
+    LoggingFuncsPtr logging_funcs) const {
+  // Default implementation uses legacy pattern
+  // Subclasses can override to return unified classes
+  return std::shared_ptr<MultiQueryOperation>(new MultiQueryOperation(
+      createFetchOperationImpl(
+          std::move(conn_proxy),
+          db::OperationType::MultiQuery,
+          std::move(logging_funcs)),
+      std::move(queries)));
+}
+
+std::shared_ptr<ConnectOperation> MysqlClientBase::createConnectOperation(
+    std::shared_ptr<const ConnectionKey> conn_key) {
+  // Default implementation uses legacy pattern
+  // Subclasses can override to return unified classes
+  auto impl = createConnectOperationImpl(this, std::move(conn_key));
+  auto ret = ConnectOperation::create(std::move(impl));
+  if (connection_cb_) {
+    ret->setObserverCallback(connection_cb_);
+  }
+  return ret;
 }
 
 } // namespace facebook::common::mysql_client

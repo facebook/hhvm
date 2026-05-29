@@ -19,11 +19,11 @@
   {{#if enum.docs?}}
 #[doc = {{enum.docs}}]
   {{/if enum.docs?}}
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash{{!
-    }}{{#if enum.serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/if}}{{!
-    }}{{#if enum.program.valuable?}}, ::valuable::Valuable{{/if}}{{!
-    }}{{#if (not (string.empty? enum.derive))}}, {{enum.derive}}{{/if}}{{!
-}})]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash
+    {{~ #if enum.serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/if ~}}
+    {{~ #if enum.program.valuable?}}, ::valuable::Valuable{{/if ~}}
+    {{~ #if (not (string.empty? enum.derive))}}, {{enum.derive}}{{/if ~}}
+)]
 pub struct {{enum.rust_name}}(pub ::std::primitive::{{enum.rust_underlying_or_i32}});
 
 impl {{enum.rust_name}} {
@@ -63,6 +63,13 @@ impl ::fbthrift::ThriftEnum for {{enum.rust_name}} {
     #[allow(clippy::unnecessary_cast)]
     fn inner_value(&self) -> i32 {
         self.0 as i32
+    }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for {{enum.name}}: {e}")
+        })
     }
 }
 

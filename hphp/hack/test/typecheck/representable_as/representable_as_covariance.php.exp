@@ -1,0 +1,6 @@
+ERROR: File "representable_as_covariance.php", line 14, characters 30-32:
+Invalid argument (Typing[4110])
+  File "representable_as_covariance.php", line 5, characters 65-67:
+  Expected `int`
+  File "representable_as_covariance.php", line 12, characters 61-63:
+  But got `num`

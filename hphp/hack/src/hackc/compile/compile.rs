@@ -489,7 +489,6 @@ fn emit_fatal_nast_check_error(err: &NastCheckError) -> Result<Unit, Error> {
         NastCheckError::ContinueInSwitch(_) => todo!(),
         NastCheckError::AwaitInSyncFunction { .. } => todo!(),
         NastCheckError::InterfaceUsesTrait(_) => todo!(),
-        NastCheckError::StaticMemoizedFunction(_) => todo!(),
         NastCheckError::Magic { .. } => todo!(),
         NastCheckError::NonInterface { .. } => todo!(),
         NastCheckError::ToStringReturnsString(_) => todo!(),

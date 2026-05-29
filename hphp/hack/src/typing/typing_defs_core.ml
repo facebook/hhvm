@@ -227,7 +227,8 @@ type 'ty fun_type = {
 (* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
 let _hash_fold_phase hsv _ = hsv
 
-type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
+type 'phase ty =
+  ('phase Reason.t_[@hash.ignore] [@transform.opaque]) * 'phase ty_
 
 and type_tag_generic =
   | Filled of locl_phase ty
@@ -1214,14 +1215,17 @@ and ft_params_compare :
 
 and refined_const_compare : type a. a refined_const -> a refined_const -> int =
  fun a b ->
-  (* Note: `rc_is_ctx` is not used for typing inference, so we can safely ignore it *)
-  match (a.rc_bound, b.rc_bound) with
-  | (TRexact _, TRloose _) -> -1
-  | (TRloose _, TRexact _) -> 1
-  | (TRloose b1, TRloose b2) ->
-    chain_compare (tyl_compare ~sort:true b1.tr_lower b2.tr_lower) (fun _ ->
-        tyl_compare ~sort:true b1.tr_upper b2.tr_upper)
-  | (TRexact ty1, TRexact ty2) -> ty_compare ty1 ty2
+  let rc_is_ctx_cmp = Bool.compare a.rc_is_ctx b.rc_is_ctx in
+  if rc_is_ctx_cmp <> 0 then
+    rc_is_ctx_cmp
+  else
+    match (a.rc_bound, b.rc_bound) with
+    | (TRexact _, TRloose _) -> -1
+    | (TRloose _, TRexact _) -> 1
+    | (TRloose b1, TRloose b2) ->
+      chain_compare (tyl_compare ~sort:true b1.tr_lower b2.tr_lower) (fun _ ->
+          tyl_compare ~sort:true b1.tr_upper b2.tr_upper)
+    | (TRexact ty1, TRexact ty2) -> ty_compare ty1 ty2
 
 and class_refinement_compare :
     type a. a class_refinement -> a class_refinement -> int =

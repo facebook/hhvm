@@ -77,63 +77,62 @@ public final class TerseException extends org.apache.thrift.TBaseException imple
         }
     }
 
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="msg", requiredness=Requiredness.TERSE)
     public String getMsg() { return msg; }
-    
+
     @java.lang.Override
     public String getMessage() {
       return msg;
     }
-    
+
     public static com.facebook.thrift.payload.Reader<TerseException> asReader() {
       return TerseException::read0;
     }
 
     public static TerseException read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(TerseException.NAMES_TO_IDS, TerseException.THRIFT_NAMES_TO_IDS, TerseException.FIELD_METADATA);
-      TerseException.Builder builder = new TerseException.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MSG:
-          if (__field.type == TType.STRING) {
-            String msg = oprot.readString();
-            builder.setMsg(msg);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(TerseException.NAMES_TO_IDS, TerseException.THRIFT_NAMES_TO_IDS, TerseException.FIELD_METADATA);
+        TerseException.Builder builder = new TerseException.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MSG:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMsg(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      int structStart = 0;
-      int pos = 0;
-      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
-      {
-      String _iter0 = this.msg;
-      java.util.Objects.requireNonNull(_iter0, "msg must not be null");
-      
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(_iter0)) {
-        oprot.writeFieldBegin(MSG_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        int structStart = 0;
+        int pos = 0;
+        com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
+        {
+            String _fbthriftVar0 = this.msg;
+            java.util.Objects.requireNonNull(_fbthriftVar0, "msg must not be null");
+            if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(_fbthriftVar0)) {
+              oprot.writeFieldBegin(MSG_FIELD_DESC);
+              oprot.writeString(_fbthriftVar0);
+              oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _TerseExceptionLazy {
@@ -142,4 +141,5 @@ public final class TerseException extends org.apache.thrift.TBaseException imple
 
     public static TerseException defaultInstance() {
         return  _TerseExceptionLazy._DEFAULT;
-    }}
+    }
+}

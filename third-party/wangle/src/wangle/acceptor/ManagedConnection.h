@@ -127,6 +127,14 @@ class ManagedConnection : public folly::HHWheelTimer::Callback,
   virtual void dropConnection(const std::string& errorMsg = "") = 0;
 
   /**
+   * Called when the connection age timeout fires. The default implementation
+   * removes the connection from the ConnectionManager (if
+   * detachOnConnectionAgeTimeout is set) and then calls closeWhenIdle().
+   * Subclasses can override to customize behavior.
+   */
+  virtual void onConnectionAgeTimeout();
+
+  /**
    * Dump the state of the connection to the log
    */
   virtual void dumpConnectionState(uint8_t loglevel) = 0;

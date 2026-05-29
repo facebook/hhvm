@@ -40,11 +40,11 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Range other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -58,7 +58,7 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
 
         public int getMin() { return min; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="max", requiredness=Requiredness.REQUIRED)    public Builder setMax(int max) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="max", requiredness=Requiredness.REQUIRED)    public Builder setMax(int max) {
             this.max = max;
             return this;
         }
@@ -80,6 +80,7 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -88,24 +89,21 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
     private final int min;
     public static final int _MIN = 1;
     private static final TField MIN_FIELD_DESC = new TField("min", TType.I32, (short)1);
-        private final int max;
+    private final int max;
     public static final int _MAX = 2;
     private static final TField MAX_FIELD_DESC = new TField("max", TType.I32, (short)2);
     static {
-      NAMES_TO_IDS.put("min", 1);
-      THRIFT_NAMES_TO_IDS.put("min", 1);
-      FIELD_METADATA.put(1, MIN_FIELD_DESC);
-      NAMES_TO_IDS.put("max", 2);
-      THRIFT_NAMES_TO_IDS.put("max", 2);
-      FIELD_METADATA.put(2, MAX_FIELD_DESC);
+        NAMES_TO_IDS.put("min", 1);
+        THRIFT_NAMES_TO_IDS.put("min", 1);
+        FIELD_METADATA.put(1, MIN_FIELD_DESC);
+        NAMES_TO_IDS.put("max", 2);
+        THRIFT_NAMES_TO_IDS.put("max", 2);
+        FIELD_METADATA.put(2, MAX_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="min", requiredness=Requiredness.REQUIRED)
     public int getMin() { return min; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=2, name="max", requiredness=Requiredness.REQUIRED)
     public int getMax() { return max; }
 
@@ -138,65 +136,66 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Integer.hashCode(min);
-            _hashCode = 31 * _hashCode + Integer.hashCode(max);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Integer.hashCode(max);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Range> asReader() {
       return Range::read0;
     }
 
     public static Range read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Range.NAMES_TO_IDS, Range.THRIFT_NAMES_TO_IDS, Range.FIELD_METADATA);
-      Range.Builder builder = new Range.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MIN:
-          if (__field.type == TType.I32) {
-            int min = oprot.readI32();
-            builder.setMin(min);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAX:
-          if (__field.type == TType.I32) {
-            int max = oprot.readI32();
-            builder.setMax(max);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(Range.NAMES_TO_IDS, Range.THRIFT_NAMES_TO_IDS, Range.FIELD_METADATA);
+        Range.Builder builder = new Range.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MIN:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMin(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAX:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMax(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      int _iter0 = this.min;
-      oprot.writeFieldBegin(MIN_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.max;
-      oprot.writeFieldBegin(MAX_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            int _fbthriftVar0 = this.min;
+            oprot.writeFieldBegin(MIN_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.max;
+            oprot.writeFieldBegin(MAX_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _RangeLazy {

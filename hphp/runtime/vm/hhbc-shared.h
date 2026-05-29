@@ -158,16 +158,6 @@ enum class AsTypeStructExceptionKind : uint8_t {
 #undef KIND
 };
 
-#define IS_LOG_AS_DYNAMIC_CALL_OPS                  \
-  IS_LOG_AS_DYNAMIC_CALL_OP(LogAsDynamicCall)       \
-  IS_LOG_AS_DYNAMIC_CALL_OP(DontLogAsDynamicCall)
-
-enum class IsLogAsDynamicCallOp : uint8_t {
-#define IS_LOG_AS_DYNAMIC_CALL_OP(name) name,
-  IS_LOG_AS_DYNAMIC_CALL_OPS
-#undef IS_LOG_AS_DYNAMIC_CALL_OP
-};
-
 #define READONLY_OPS    \
   OP(Any)               \
   OP(Readonly)          \

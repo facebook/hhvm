@@ -39,6 +39,14 @@ uint32_t {{struct.cpp_underlying_name}}::serializedSizeZC(Protocol_ const* prot_
   {{#if (not (has_compiler_option? "tablebased"))}}
 template <class Protocol_>
 uint32_t {{struct.cpp_underlying_name}}::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<{{struct.cpp_underlying_name}}>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("{{struct.name}}");
     {{#if struct.indexing?}}

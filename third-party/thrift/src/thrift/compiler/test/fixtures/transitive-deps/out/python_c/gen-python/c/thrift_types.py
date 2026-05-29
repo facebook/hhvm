@@ -12,6 +12,7 @@ import folly.iobuf as _fbthrift_iobuf
 from abc import ABCMeta as _fbthrift_ABCMeta
 import c.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
+import thrift.python.container_typedefs as _fbthrift_python_container_typedefs
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 

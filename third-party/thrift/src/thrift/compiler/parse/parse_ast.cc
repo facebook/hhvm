@@ -399,16 +399,9 @@ class ast_builder : public parser_actions {
 
     // Containers always use a new type, so should never show up here.
     assert(!type.is<t_container>());
-    // For all other types, we can just create a dummy typedef node with
-    // the same name. Note that this is not a safe assumption as it breaks all
-    // dynamic casts and t_type::is_* calls.
-    auto unnamed = t_typedef::make_unnamed(
-        const_cast<t_program*>(type.program()), type.name(), {type, range});
-    const t_type* result = unnamed.get();
-    unnamed->set_src_range(range);
-    set_annotations(unnamed.get(), std::move(annotations));
-    program_.add_unnamed_typedef(std::move(unnamed));
-    return {*result, range};
+    // Unstructured annotations are rejected at parse time, so we should never
+    // reach here with annotations on non-primitive, non-container types.
+    return {type, range};
   }
 
   // Creates a reference to a newly instantiated container type.

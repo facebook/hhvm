@@ -21,68 +21,68 @@ import com.facebook.thrift.metadata.ThriftStructType;
 import com.facebook.thrift.metadata.ThriftType;
 
 class MyServiceThriftMetadataHandlerStructs_0 {
-  static void addStructs(Map<String, ThriftStruct> structs) {
-    structs.put("test.fixtures.includes.MyStruct", new ThriftStruct.Builder()
-        .setName("test.fixtures.includes.MyStruct")
-        .setFields(Arrays.asList(
-            new ThriftField.Builder()
-                .setId(1)
-                .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.includes.includes.Included").build()))
-                .setName("MyIncludedField")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(2)
-                .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.includes.includes.Included").build()))
-                .setName("MyOtherIncludedField")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(3)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
-                .setName("MyIncludedInt")
-                .setIsOptional(false)
-                .build()
-        ))
-        .setIsUnion(false)
-        .build());
-    structs.put("test.fixtures.includes.includes.Included", new ThriftStruct.Builder()
-        .setName("test.fixtures.includes.includes.Included")
-        .setFields(Arrays.asList(
-            new ThriftField.Builder()
-                .setId(1)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
-                .setName("MyIntField")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(2)
-                .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.includes.transitive.Foo").build()))
-                .setName("MyTransitiveField")
-                .setIsOptional(false)
-                .build()
-        ))
-        .setIsUnion(false)
-        .build());
-    structs.put("test.fixtures.includes.transitive.Foo", new ThriftStruct.Builder()
-        .setName("test.fixtures.includes.transitive.Foo")
-        .setFields(Arrays.asList(
-            new ThriftField.Builder()
-                .setId(1)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
-                .setName("a")
-                .setIsOptional(false)
-                .build()
-        ))
-        .setIsUnion(false)
-        .build());
-  }
+    static void addStructs(Map<String, ThriftStruct> structs) {
+        structs.put("test.fixtures.includes.MyStruct", new ThriftStruct.Builder()
+            .setName("test.fixtures.includes.MyStruct")
+            .setFields(Arrays.asList(
+                new ThriftField.Builder()
+                    .setId(1)
+                    .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.includes.includes.Included").build()))
+                    .setName("MyIncludedField")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(2)
+                    .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.includes.includes.Included").build()))
+                    .setName("MyOtherIncludedField")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(3)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
+                    .setName("MyIncludedInt")
+                    .setIsOptional(false)
+                    .build()
+            ))
+            .setIsUnion(false)
+            .build());
+        structs.put("test.fixtures.includes.includes.Included", new ThriftStruct.Builder()
+            .setName("test.fixtures.includes.includes.Included")
+            .setFields(Arrays.asList(
+                new ThriftField.Builder()
+                    .setId(1)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
+                    .setName("MyIntField")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(2)
+                    .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.includes.transitive.Foo").build()))
+                    .setName("MyTransitiveField")
+                    .setIsOptional(false)
+                    .build()
+            ))
+            .setIsUnion(false)
+            .build());
+        structs.put("test.fixtures.includes.transitive.Foo", new ThriftStruct.Builder()
+            .setName("test.fixtures.includes.transitive.Foo")
+            .setFields(Arrays.asList(
+                new ThriftField.Builder()
+                    .setId(1)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
+                    .setName("a")
+                    .setIsOptional(false)
+                    .build()
+            ))
+            .setIsUnion(false)
+            .build());
+    }
 }
 
 class MyServiceThriftMetadataHandlerStructs {
-  static Map<String, ThriftStruct> getStructs() {
-    Map<String, ThriftStruct> structs = new HashMap<>();
-    MyServiceThriftMetadataHandlerStructs_0.addStructs(structs);
-    return structs;
-  }
+    static Map<String, ThriftStruct> getStructs() {
+        Map<String, ThriftStruct> structs = new HashMap<>();
+        MyServiceThriftMetadataHandlerStructs_0.addStructs(structs);
+        return structs;
+    }
 }

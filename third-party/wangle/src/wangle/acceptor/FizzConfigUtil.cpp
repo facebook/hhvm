@@ -149,8 +149,12 @@ FizzConfigUtil::createFizzContext(
 
   if (!combinedCAFiles.empty()) {
     try {
-      auto verifier = DefaultCertificateVerifier::createFromCAFiles(
-          VerificationContext::Server, combinedCAFiles);
+      std::unique_ptr<DefaultCertificateVerifier> verifier;
+      fizz::Error err;
+      FIZZ_THROW_ON_ERROR(
+          DefaultCertificateVerifier::createFromCAFiles(
+              verifier, err, VerificationContext::Server, combinedCAFiles),
+          err);
       ctx->setClientCertVerifier(std::move(verifier));
     } catch (const std::runtime_error& ex) {
       auto msg = fmt::format(

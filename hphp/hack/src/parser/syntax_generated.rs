@@ -1880,15 +1880,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_soft_type_specifier(_: &C, soft_at: Self, soft_type: Self) -> Self {
-        let syntax = SyntaxVariant::SoftTypeSpecifier(Box::new(SoftTypeSpecifierChildren {
-            soft_at,
-            soft_type,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_attributized_specifier(_: &C, attributized_specifier_attribute_spec: Self, attributized_specifier_type: Self) -> Self {
         let syntax = SyntaxVariant::AttributizedSpecifier(Box::new(AttributizedSpecifierChildren {
             attributized_specifier_attribute_spec,
@@ -3391,12 +3382,6 @@ where
                 let acc = f(like_type, acc);
                 acc
             },
-            SyntaxVariant::SoftTypeSpecifier(x) => {
-                let SoftTypeSpecifierChildren { soft_at, soft_type } = *x;
-                let acc = f(soft_at, acc);
-                let acc = f(soft_type, acc);
-                acc
-            },
             SyntaxVariant::AttributizedSpecifier(x) => {
                 let AttributizedSpecifierChildren { attributized_specifier_attribute_spec, attributized_specifier_type } = *x;
                 let acc = f(attributized_specifier_attribute_spec, acc);
@@ -3661,7 +3646,6 @@ where
             SyntaxVariant::GenericTypeSpecifier {..} => SyntaxKind::GenericTypeSpecifier,
             SyntaxVariant::NullableTypeSpecifier {..} => SyntaxKind::NullableTypeSpecifier,
             SyntaxVariant::LikeTypeSpecifier {..} => SyntaxKind::LikeTypeSpecifier,
-            SyntaxVariant::SoftTypeSpecifier {..} => SyntaxKind::SoftTypeSpecifier,
             SyntaxVariant::AttributizedSpecifier {..} => SyntaxKind::AttributizedSpecifier,
             SyntaxVariant::ReifiedTypeArgument {..} => SyntaxKind::ReifiedTypeArgument,
             SyntaxVariant::TypeArguments {..} => SyntaxKind::TypeArguments,
@@ -4867,11 +4851,6 @@ where
                  like_tilde: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::SoftTypeSpecifier, 2) => SyntaxVariant::SoftTypeSpecifier(Box::new(SoftTypeSpecifierChildren {
-                 soft_type: ts.pop().unwrap(),
-                 soft_at: ts.pop().unwrap(),
-                 
-             })),
              (SyntaxKind::AttributizedSpecifier, 2) => SyntaxVariant::AttributizedSpecifier(Box::new(AttributizedSpecifierChildren {
                  attributized_specifier_type: ts.pop().unwrap(),
                  attributized_specifier_attribute_spec: ts.pop().unwrap(),
@@ -5123,7 +5102,6 @@ where
             SyntaxVariant::GenericTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.generic_class_type, 2) },
             SyntaxVariant::NullableTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.nullable_question, 2) },
             SyntaxVariant::LikeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.like_tilde, 2) },
-            SyntaxVariant::SoftTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.soft_at, 2) },
             SyntaxVariant::AttributizedSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.attributized_specifier_attribute_spec, 2) },
             SyntaxVariant::ReifiedTypeArgument(x) => unsafe { std::slice::from_raw_parts(&x.reified_type_argument_reified, 2) },
             SyntaxVariant::TypeArguments(x) => unsafe { std::slice::from_raw_parts(&x.type_arguments_left_angle, 3) },
@@ -5312,7 +5290,6 @@ where
             SyntaxVariant::GenericTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.generic_class_type, 2) },
             SyntaxVariant::NullableTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.nullable_question, 2) },
             SyntaxVariant::LikeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.like_tilde, 2) },
-            SyntaxVariant::SoftTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.soft_at, 2) },
             SyntaxVariant::AttributizedSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.attributized_specifier_attribute_spec, 2) },
             SyntaxVariant::ReifiedTypeArgument(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.reified_type_argument_reified, 2) },
             SyntaxVariant::TypeArguments(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_arguments_left_angle, 3) },
@@ -6851,13 +6828,6 @@ pub struct LikeTypeSpecifierChildren<T, V> {
 
 #[derive(Debug, Clone)]
 #[repr(C)]
-pub struct SoftTypeSpecifierChildren<T, V> {
-    pub soft_at: Syntax<T, V>,
-    pub soft_type: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-#[repr(C)]
 pub struct AttributizedSpecifierChildren<T, V> {
     pub attributized_specifier_attribute_spec: Syntax<T, V>,
     pub attributized_specifier_type: Syntax<T, V>,
@@ -7130,7 +7100,6 @@ pub enum SyntaxVariant<T, V> {
     GenericTypeSpecifier(Box<GenericTypeSpecifierChildren<T, V>>),
     NullableTypeSpecifier(Box<NullableTypeSpecifierChildren<T, V>>),
     LikeTypeSpecifier(Box<LikeTypeSpecifierChildren<T, V>>),
-    SoftTypeSpecifier(Box<SoftTypeSpecifierChildren<T, V>>),
     AttributizedSpecifier(Box<AttributizedSpecifierChildren<T, V>>),
     ReifiedTypeArgument(Box<ReifiedTypeArgumentChildren<T, V>>),
     TypeArguments(Box<TypeArgumentsChildren<T, V>>),
@@ -8850,14 +8819,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.like_tilde),
                     1 => Some(&x.like_type),
-                        _ => None,
-                    }
-                })
-            },
-            SoftTypeSpecifier(x) => {
-                get_index(2).and_then(|index| { match index {
-                        0 => Some(&x.soft_at),
-                    1 => Some(&x.soft_type),
                         _ => None,
                     }
                 })

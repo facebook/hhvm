@@ -120,7 +120,7 @@ class Json5ProtocolWriter final {
       Options options = {})
       : options_(options.writer), writer_(options_) {}
 
-  KeyOrder keyOrder() const { return KeyOrder::StableAscending; }
+  static constexpr KeyOrder keyOrder() { return KeyOrder::StableAscending; }
   FieldOrder fieldOrder() const { return FieldOrder::IdAscending; }
 
   static constexpr ProtocolType protocolType() {

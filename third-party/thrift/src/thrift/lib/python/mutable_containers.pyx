@@ -59,7 +59,6 @@ cdef class MutableListTypeFactory:
         return MutableList(self.value_typeinfo, internal_data)
 
 
-@_cython__final
 cdef class MutableList:
     """
     A mutable container used to represent a Thrift mutable list.
@@ -81,7 +80,7 @@ cdef class MutableList:
         _value_type_is_container (bool): Whether the values of this list are (nested)
             containers.
     """
-    def __cinit__(self, TypeInfoBase value_typeinfo, list list_data):
+    def __init__(self, TypeInfoBase value_typeinfo, list list_data):
         self._val_typeinfo = value_typeinfo
         self._list_data = list_data
         self._value_type_is_container = value_typeinfo.is_container()
@@ -217,6 +216,9 @@ cdef class MutableList:
         """
         return cls
 
+    def _fbthrift_same_type(MutableList self, other_elem_type):
+        return self._val_typeinfo.same_as(other_elem_type)
+
     cdef _value_to_internal_data(self, value):
         """
         The `_value_to_internal_data()` method is internal and used to wrap the
@@ -257,7 +259,6 @@ cdef class MutableSetTypeFactory:
         return MutableSet(self.value_typeinfo, internal_data)
 
 
-@_cython__final
 cdef class MutableSet:
     """
     A mutable container used to represent a Thrift mutable set. It implements
@@ -265,7 +266,7 @@ cdef class MutableSet:
     base class
     """
 
-    def __cinit__(MutableSet self, TypeInfoBase value_typeinfo, set set_data):
+    def __init__(MutableSet self, TypeInfoBase value_typeinfo, set set_data):
         """
         Initialize a new `MutableSet` object.
         Args:
@@ -541,6 +542,9 @@ cdef class MutableSet:
 
         return self._val_typeinfo.same_as((<MutableSet>other)._val_typeinfo)
 
+    def _fbthrift_same_type(MutableSet self, other_elem_type):
+        return self._val_typeinfo.same_as(other_elem_type)
+
     @classmethod
     def __class_getitem__(cls, _):
         """
@@ -581,14 +585,13 @@ cdef class MutableMapTypeFactory:
         return MutableMap(self.key_typeinfo, self.value_typeinfo, internal_data)
 
 
-@_cython__final
 cdef class MutableMap:
     """
     A mutable container used to represent a Thrift mutable map. It implements
     the [`MutableMap` abstract base class](https://docs.python.org/3.10/library/collections.abc.html#collections-abstract-base-classes).
     """
 
-    def __cinit__(MutableMap self, TypeInfoBase key_typeinfo, TypeInfoBase value_typeinfo, dict map_data not None):
+    def __init__(MutableMap self, TypeInfoBase key_typeinfo, TypeInfoBase value_typeinfo, dict map_data not None):
         """
         map_data: It should contain valid elements. Any invalid elements within
             `map_data` may lead to undefined behavior.
@@ -742,6 +745,12 @@ cdef class MutableMap:
         return (self._key_typeinfo.same_as((<MutableMap>other)._key_typeinfo)
             and self._val_typeinfo.same_as((<MutableMap>other)._val_typeinfo))
 
+    def _fbthrift_same_type(MutableMap self, other_key_type, other_val_type):
+        return (
+            self._key_typeinfo.same_as(other_key_type) and
+            self._val_typeinfo.same_as(other_val_type)
+        )
+
     # The `_value_to_internal_data()` methods are internal and used to wrap
     # the value or key when they are containers. This should be done implicitly
     # in some cases. For example, for a given map field (map<int, list<int>>),
@@ -779,6 +788,95 @@ cdef class MutableMap:
 
 tag_object_as_mapping(<PyTypeObject*>MutableMap)
 MutableMapping.register(MutableMap)
+
+
+class _MutableListTypedefMeta(type):
+    def __instancecheck__(cls, instance):
+        if type.__instancecheck__(cls, instance):
+            return True
+        if type.__instancecheck__(MutableList, instance):
+            return instance._fbthrift_same_type(cls._fbthrift_mutable_list_type_info)
+        return False
+
+    def __subclasscheck__(cls, subclass):
+        if type.__subclasscheck__(cls, subclass):
+            return True
+        if type.__subclasscheck__(_MutableListTypedefBase, subclass):
+            return subclass._fbthrift_mutable_list_type_info.same_as(cls._fbthrift_mutable_list_type_info)
+        return False
+
+
+class _MutableListTypedefBase(MutableList, metaclass=_MutableListTypedefMeta):
+    _fbthrift_mutable_list_type_info = None
+    __slots__ = ()
+    def __init__(self, values=None):
+        if values is None:
+            super().__init__(self._fbthrift_mutable_list_type_info, [])
+        else:
+            list_typeinfo = MutableListTypeInfo(self._fbthrift_mutable_list_type_info)
+            internal_data = list_typeinfo.to_internal_data(values)
+            super().__init__(self._fbthrift_mutable_list_type_info, internal_data)
+
+
+class _MutableSetTypedefMeta(type):
+    def __instancecheck__(cls, instance):
+        if type.__instancecheck__(cls, instance):
+            return True
+        if type.__instancecheck__(MutableSet, instance):
+            return instance._fbthrift_same_type(cls._fbthrift_mutable_set_type_info)
+        return False
+
+    def __subclasscheck__(cls, subclass):
+        if type.__subclasscheck__(cls, subclass):
+            return True
+        if type.__subclasscheck__(_MutableSetTypedefBase, subclass):
+            return subclass._fbthrift_mutable_set_type_info.same_as(cls._fbthrift_mutable_set_type_info)
+        return False
+
+
+class _MutableSetTypedefBase(MutableSet, metaclass=_MutableSetTypedefMeta):
+    _fbthrift_mutable_set_type_info = None
+    __slots__ = ()
+    def __init__(self, values=None):
+        if values is None:
+            super().__init__(self._fbthrift_mutable_set_type_info, set())
+        else:
+            set_typeinfo = MutableSetTypeInfo(self._fbthrift_mutable_set_type_info)
+            internal_data = set_typeinfo.to_internal_data(values)
+            super().__init__(self._fbthrift_mutable_set_type_info, internal_data)
+
+
+class _MutableMapTypedefMeta(type):
+    def __instancecheck__(cls, instance):
+        if type.__instancecheck__(cls, instance):
+            return True
+        if type.__instancecheck__(MutableMap, instance):
+            return instance._fbthrift_same_type(cls._fbthrift_mutable_map_key_type_info, cls._fbthrift_mutable_map_val_type_info)
+        return False
+
+    def __subclasscheck__(cls, subclass):
+        if type.__subclasscheck__(cls, subclass):
+            return True
+        if type.__subclasscheck__(_MutableMapTypedefBase, subclass):
+            return (
+                subclass._fbthrift_mutable_map_key_type_info.same_as(cls._fbthrift_mutable_map_key_type_info) and
+                subclass._fbthrift_mutable_map_val_type_info.same_as(cls._fbthrift_mutable_map_val_type_info)
+            )
+        return False
+
+
+class _MutableMapTypedefBase(MutableMap, metaclass=_MutableMapTypedefMeta):
+    _fbthrift_mutable_map_key_type_info = None
+    _fbthrift_mutable_map_val_type_info = None
+    __slots__ = ()
+    def __init__(self, values=None):
+        if values is None:
+            super().__init__(self._fbthrift_mutable_map_key_type_info, self._fbthrift_mutable_map_val_type_info, {})
+        else:
+            map_typeinfo = MutableMapTypeInfo(self._fbthrift_mutable_map_key_type_info, self._fbthrift_mutable_map_val_type_info)
+            internal_data = map_typeinfo.to_internal_data(values)
+            super().__init__(self._fbthrift_mutable_map_key_type_info, self._fbthrift_mutable_map_val_type_info, internal_data)
+
 
 @_cython__final
 cdef class MapKeysView:

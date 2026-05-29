@@ -117,11 +117,17 @@ struct UniqueStubs {
   /*
    * Dynamically dispatch to the appropriate func prologue based on the
    * information in func_prologue_regs, while repacking arguments as needed.
+   * The base variant assumes no unpack or named args are present.
+   * The NamedArgs variant assumes that named args are present, but no unpacking
+   * is involved.
+   * The Unpack variant assumes that an unpack is present, and checks
+   * for the presence of named args.
    *
    * @reached:  callphp from TC
    * @context:  func guard
    */
   TCA funcPrologueRedispatch;
+  TCA funcPrologueRedispatchNamedArgs;
   TCA funcPrologueRedispatchUnpack;
 
   /*

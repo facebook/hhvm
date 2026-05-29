@@ -6,9 +6,9 @@
 
 /// Service definitions for `Service1`.
 pub mod service1 {
+
     #[derive(Clone, Debug)]
     pub enum RExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -88,7 +88,6 @@ pub mod service1 {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -98,9 +97,9 @@ pub mod service1 {
 }
 /// Service definitions for `S2`.
 pub mod s2_proxy {
+
     #[derive(Clone, Debug)]
     pub enum RExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -180,7 +179,6 @@ pub mod s2_proxy {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -190,9 +188,9 @@ pub mod s2_proxy {
 }
 /// Service definitions for `AllMethods`.
 pub mod all_methods {
+
     #[derive(Clone, Debug)]
     pub enum FooExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -283,7 +281,6 @@ pub mod all_methods {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -393,9 +390,9 @@ pub mod all_methods {
 }
 /// Service definitions for `OneMethod`.
 pub mod one_method {
+
     #[derive(Clone, Debug)]
     pub enum FooExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -486,7 +483,6 @@ pub mod one_method {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -585,9 +581,9 @@ pub mod one_method {
 }
 /// Service definitions for `OneMethodOptOut`.
 pub mod one_method_opt_out {
+
     #[derive(Clone, Debug)]
     pub enum FooExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -678,7 +674,6 @@ pub mod one_method_opt_out {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();

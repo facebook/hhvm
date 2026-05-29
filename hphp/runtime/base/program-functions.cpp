@@ -30,7 +30,6 @@
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/file-util-defs.h"
-#include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/init-fini-node.h"
@@ -760,14 +759,14 @@ init_command_line_globals(
     if (Cfg::Jit::Enabled) {
       envArr.set(s_HHVM_JIT, 1);
     }
-    switch (arch::get()) {
-    case Arch::X64:
-      envArr.set(s_HHVM_ARCH, "x64");
-      break;
-    case Arch::ARM:
-      envArr.set(s_HHVM_ARCH, "arm");
-      break;
-    }
+    ARCH_MATCH(
+      [&](arch::X64) {
+        envArr.set(s_HHVM_ARCH, "x64");
+      },
+      [&](arch::ARM) {
+        envArr.set(s_HHVM_ARCH, "arm");
+      }
+    );
     php_global_set(s__ENV, std::move(envArr));
   }
 
@@ -2415,7 +2414,7 @@ static int execute_program_impl(int argc, char** argv) {
         }
         execute_command_line_end(true, file.c_str());
 
-        if (i < po.count-1) {
+        if (!last) {
           // If we're running an unit test with multiple runs, provide
           // a separator between the runs.
           if (auto const sep = getenv("HHVM_MULTI_COUNT_SEP")) {
@@ -2589,7 +2588,6 @@ void hphp_thread_exit(bool skipExtensions /* = false */) {
 void cli_client_init() {
   if (*s_sessionInitialized) return;
   Process::InitProcessStatics();
-  HHProf::Init();
   rds::processInit();
   rds::threadInit();
   ServerStats::GetLogger();
@@ -2659,8 +2657,6 @@ void hphp_process_init(bool initForWorkerProcess /* = false */,
 
   Process::InitProcessStatics();
   BootStats::mark("Process::InitProcessStatics");
-
-  HHProf::Init();
 
   // initialize the tzinfo cache.
   timezone_init();
@@ -3187,6 +3183,12 @@ void hphp_session_exit() {
   // RequestLocal is too early.
   ServerNote::Reset();
   IniSetting::ResetSavedDefaults();
+
+  if (Cfg::Jit::WaitForAsyncJITBetweenRequests &&
+      Treadmill::sessionKind() == Treadmill::SessionKind::CLISession) {
+    jit::mcgen::waitForAsyncTranslationWorkerThreadsToEmpty();
+  }
+
   // In JitPGO mode, check if it's time to schedule the retranslation of all
   // profiled functions and, if so, schedule it.
   jit::mcgen::checkRetranslateAll();

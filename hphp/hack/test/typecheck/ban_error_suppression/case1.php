@@ -1,7 +1,7 @@
 <?hh
 
 function hgoldstein(
-  @int $foobar,
+  <<__Soft>> int $foobar,
 ): mixed {
   $_ = @hgoldstein(42);
   $_ = hgoldstein(95);

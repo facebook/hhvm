@@ -292,6 +292,14 @@ uint32_t Internship::serializedSizeZC(Protocol_ const* prot_) const {
 
 template <class Protocol_>
 uint32_t Internship::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<Internship>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("Internship");
   bool previousFieldHasValue = true;
@@ -470,6 +478,14 @@ uint32_t Range::serializedSizeZC(Protocol_ const* prot_) const {
 
 template <class Protocol_>
 uint32_t Range::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<Range>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("Range");
   bool previousFieldHasValue = true;
@@ -623,6 +639,14 @@ uint32_t struct1::serializedSizeZC(Protocol_ const* prot_) const {
 
 template <class Protocol_>
 uint32_t struct1::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<struct1>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("struct1");
   bool previousFieldHasValue = true;
@@ -839,6 +863,14 @@ uint32_t struct2::serializedSizeZC(Protocol_ const* prot_) const {
 
 template <class Protocol_>
 uint32_t struct2::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<struct2>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("struct2");
   bool previousFieldHasValue = true;
@@ -1037,6 +1069,14 @@ uint32_t struct3::serializedSizeZC(Protocol_ const* prot_) const {
 
 template <class Protocol_>
 uint32_t struct3::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<struct3>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("struct3");
   bool previousFieldHasValue = true;
@@ -1226,6 +1266,14 @@ uint32_t struct4::serializedSizeZC(Protocol_ const* prot_) const {
 
 template <class Protocol_>
 uint32_t struct4::write(Protocol_* prot_) const {
+  // If the protocol requests field-id-ascending order and it differs from
+  // the codegen serialization order, delegate to the generic StructEncode
+  // which respects FieldOrder::IdAscending.
+  if constexpr (requires { prot_->fieldOrder(); }) {
+    if (prot_->fieldOrder() == ::apache::thrift::FieldOrder::IdAscending) {
+      return ::apache::thrift::op::detail::StructEncode<struct4>{}(*prot_, *this);
+    }
+  }
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("struct4");
   bool previousFieldHasValue = true;

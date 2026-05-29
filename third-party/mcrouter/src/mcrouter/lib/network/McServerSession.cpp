@@ -259,7 +259,7 @@ void McServerSession::beginClose(folly::StringPiece reason) {
   } else {
     McServerRequestContext ctx(*this, kCaretConnectionControlReqId);
     GoAwayRequest goAway;
-    goAway.reason_ref() = reason.str();
+    goAway.reason() = reason.str();
     McServerRequestContext::reply(std::move(ctx), std::move(goAway));
     goAwayTimeout_ = folly::AsyncTimeout::schedule(
         options_.goAwayTimeout, eventBase_, [this]() noexcept { close(); });
@@ -339,7 +339,7 @@ void McServerSession::onRequest(
 
   if (options_.defaultVersionHandler) {
     McVersionReply reply(carbon::Result::OK);
-    reply.value_ref() =
+    reply.value() =
         folly::IOBuf(folly::IOBuf::COPY_BUFFER, options_.versionString);
     McServerRequestContext::reply(std::move(ctx), std::move(reply));
     return;
@@ -394,7 +394,7 @@ void McServerSession::caretRequestReady(
   if (McVersionRequest::typeId == headerInfo.typeId &&
       options_.defaultVersionHandler) {
     McVersionReply versionReply(carbon::Result::OK);
-    versionReply.value_ref() =
+    versionReply.value() =
         folly::IOBuf(folly::IOBuf::COPY_BUFFER, options_.versionString);
     McServerRequestContext::reply(std::move(ctx), std::move(versionReply));
   } else {
@@ -445,9 +445,8 @@ void McServerSession::parseError(
   }
 
   McVersionReply errorReply(result);
-  errorReply.message_ref() = reason.str();
-  errorReply.value_ref() =
-      folly::IOBuf(folly::IOBuf::COPY_BUFFER, reason.str());
+  errorReply.message() = reason.str();
+  errorReply.value() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, reason.str());
   McServerRequestContext::reply(
       McServerRequestContext(*this, tailReqid_++), std::move(errorReply));
   close();

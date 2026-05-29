@@ -241,14 +241,14 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
       static_assert(offsetof(TypedValue, m_type) == 8, "");
 
       if (dests.size() == 2) {
-        switch (arch::get()) {
-          case Arch::X64:
+        ARCH_MATCH(
+          ([&](arch::X64) {
             v << copyargs{
               v.makeTuple({rret(0), rret(1)}),
               v.makeTuple({dests[0], dests[1]})
             };
-            break;
-          case Arch::ARM:
+          }),
+          ([&](arch::ARM) {
             // For ARM64 we need to clear the bits 8..31 from the type value.
             // That allows us to use the resulting register values in
             // type comparisons without the need for truncation there.
@@ -256,8 +256,8 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
             v << copy{rret(0), dests[0]};
             v << andq{v.cns(0xffffffff000000ff),
                       rret(1), dests[1], v.makeReg()};
-            break;
-        }
+          })
+        );
       } else {
         // We have cases where we statically know the type but need the value
         // from native call.  Even if the type does not really need a register
@@ -352,11 +352,11 @@ void lower(VLS& env, defvmretdata& inst, Vlabel b, size_t i) {
   env.unit.blocks[b].code[i] = copy{rret_data(), inst.data};
 }
 void lower(VLS& env, defvmrettype& inst, Vlabel b, size_t i) {
-  switch (arch::get()) {
-    case Arch::X64:
+  ARCH_MATCH(
+    ([&](arch::X64) {
       env.unit.blocks[b].code[i] = copy{rret_type(), inst.type};
-      break;
-    case Arch::ARM:
+    }),
+    ([&](arch::ARM) {
       // For ARM64 we need to clear the bits 8..31 from the type value.
       // That allows us to use the resulting register values in
       // type comparisons without the need for truncation there.
@@ -364,36 +364,33 @@ void lower(VLS& env, defvmrettype& inst, Vlabel b, size_t i) {
       env.unit.blocks[b].code[i] = andq{
         env.unit.makeConst(Vconst{0xffffffff000000ff}),
         rret_type(), inst.type, env.unit.makeReg()};
-      break;
-  }
+    })
+  );
 }
 void lower(VLS& env, syncvmret& inst, Vlabel b, size_t i) {
-  switch (arch::get()) {
-    case Arch::X64:
+  ARCH_MATCH(
+    ([&](arch::X64) {
       env.unit.blocks[b].code[i] = copyargs{
         env.unit.makeTuple({inst.data, inst.type}),
         env.unit.makeTuple({rret_data(), rret_type()})
       };
-      break;
-    case Arch::ARM:
-      // For ARM64 we need to clear the bits 8..31 from the type value.
-      // That allows us to use the resulting register values in
-      // type comparisons without the need for truncation there.
-      // We must not touch bits 63..32 as they contain the AUX data.
+    }),
+    ([&](arch::ARM) {
+      // prepare_return_regs() already normalizes ARM return types with aux in
+      // bits [63:32] and the middle bits cleared for narrow type operations.
       lower_impl(env.unit, b, i, [&] (Vout& v) {
         v << copy{inst.data, rret_data()};
-        v << andq{v.cns(0xffffffff000000ff),
-                  inst.type, rret_type(), v.makeReg()};
+        v << copy{inst.type, rret_type()};
       });
-      break;
-  }
+    })
+  );
 }
 void lower(VLS& env, syncvmrettype& inst, Vlabel b, size_t i) {
-  switch (arch::get()) {
-    case Arch::X64:
+  ARCH_MATCH(
+    ([&](arch::X64) {
       env.unit.blocks[b].code[i] = copy{inst.type, rret_type()};
-      break;
-    case Arch::ARM:
+    }),
+    ([&](arch::ARM) {
       // For ARM64 we need to clear the bits 8..31 from the type value.
       // That allows us to use the resulting register values in
       // type comparisons without the need for truncation there.
@@ -402,8 +399,8 @@ void lower(VLS& env, syncvmrettype& inst, Vlabel b, size_t i) {
         v << andq{v.cns(0xffffffff000000ff),
                   inst.type, rret_type(), v.makeReg()};
       });
-      break;
-  }
+    })
+  );
 }
 void lower(VLS& env, vregrestrict& /*inst*/, Vlabel b, size_t i) {
   env.vreg_restrict_level--;

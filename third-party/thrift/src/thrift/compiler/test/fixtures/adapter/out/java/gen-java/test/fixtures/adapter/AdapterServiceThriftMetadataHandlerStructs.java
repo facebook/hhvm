@@ -21,44 +21,44 @@ import com.facebook.thrift.metadata.ThriftStructType;
 import com.facebook.thrift.metadata.ThriftType;
 
 class AdapterServiceThriftMetadataHandlerStructs_0 {
-  static void addStructs(Map<String, ThriftStruct> structs) {
-    structs.put("test.fixtures.adapter.CountingStruct", new ThriftStruct.Builder()
-        .setName("test.fixtures.adapter.CountingStruct")
-        .setFields(Arrays.asList(
-            new ThriftField.Builder()
-                .setId(1)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
-                .setName("regularInt")
-                .setIsOptional(true)
-                .build(),
-            new ThriftField.Builder()
-                .setId(2)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
-                .setName("countingInt")
-                .setIsOptional(true)
-                .build(),
-            new ThriftField.Builder()
-                .setId(3)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
-                .setName("regularString")
-                .setIsOptional(true)
-                .build()
-        ))
-        .setIsUnion(false)
-        .build());
-    structs.put("test.fixtures.adapter.HeapAllocated", new ThriftStruct.Builder()
-        .setName("test.fixtures.adapter.HeapAllocated")
-        .setFields(Arrays.asList(
-        ))
-        .setIsUnion(false)
-        .build());
-  }
+    static void addStructs(Map<String, ThriftStruct> structs) {
+        structs.put("test.fixtures.adapter.CountingStruct", new ThriftStruct.Builder()
+            .setName("test.fixtures.adapter.CountingStruct")
+            .setFields(Arrays.asList(
+                new ThriftField.Builder()
+                    .setId(1)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
+                    .setName("regularInt")
+                    .setIsOptional(true)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(2)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
+                    .setName("countingInt")
+                    .setIsOptional(true)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(3)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
+                    .setName("regularString")
+                    .setIsOptional(true)
+                    .build()
+            ))
+            .setIsUnion(false)
+            .build());
+        structs.put("test.fixtures.adapter.HeapAllocated", new ThriftStruct.Builder()
+            .setName("test.fixtures.adapter.HeapAllocated")
+            .setFields(Arrays.asList(
+            ))
+            .setIsUnion(false)
+            .build());
+    }
 }
 
 class AdapterServiceThriftMetadataHandlerStructs {
-  static Map<String, ThriftStruct> getStructs() {
-    Map<String, ThriftStruct> structs = new HashMap<>();
-    AdapterServiceThriftMetadataHandlerStructs_0.addStructs(structs);
-    return structs;
-  }
+    static Map<String, ThriftStruct> getStructs() {
+        Map<String, ThriftStruct> structs = new HashMap<>();
+        AdapterServiceThriftMetadataHandlerStructs_0.addStructs(structs);
+        return structs;
+    }
 }

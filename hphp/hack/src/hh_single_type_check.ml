@@ -276,7 +276,7 @@ let parse_options () =
   let local_coeffects = ref true in
   let strict_contexts = ref true in
   let check_redundant_generics = ref false in
-  let disallow_static_memoized = ref false in
+
   let enable_supportdyn_hint = ref false in
   let glean_reponame = ref (Glean_options.reponame GlobalOptions.default) in
   let disable_xhp_element_mangling = ref false in
@@ -554,9 +554,6 @@ let parse_options () =
       ( "--batch-files",
         Arg.Set batch_mode,
         " Typecheck each file passed in independently" );
-      ( "--disallow-static-memoized",
-        Arg.Set disallow_static_memoized,
-        " Disallow static memoized methods on non-final methods" );
       ( "--rust-provider-backend",
         Arg.Set rust_provider_backend,
         " Use the Rust implementation of Provider_backend (including decl-folding)"
@@ -744,7 +741,8 @@ let parse_options () =
   in
   let () = exit_if_invalid_config_keys config in
   let packages_config_path =
-    config |> Config_file.Getters.string_opt "packages_config_path"
+    config
+    |> Config_file.Getters.string_opt Config_keys.Hhconfig.packages_config_path
   in
   (* --root implies certain things... *)
   let root =
@@ -768,11 +766,13 @@ let parse_options () =
       (* We'll pick up values from .hhconfig, then run [Arg.parse] a second time to let CLI options override. *)
       auto_namespace_map :=
         config
-        |> Config_file.Getters.string_opt "auto_namespace_map"
+        |> Config_file.Getters.string_opt
+             Config_keys.Hhconfig.auto_namespace_map
         |> Option.map ~f:ServerConfig.convert_auto_namespace_to_map;
       allowed_fixme_codes_strict :=
         config
-        |> Config_file.Getters.string_opt "allowed_fixme_codes_strict"
+        |> Config_file.Getters.string_opt
+             Config_keys.Hhconfig.allowed_fixme_codes_strict
         |> Option.map ~f:comma_string_to_iset;
       sharedmem_config :=
         ServerConfig.make_sharedmem_config config ServerLocalConfigLoad.default;
@@ -885,35 +885,27 @@ let parse_options () =
   Diagnostics.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;
 
-  let tco_experimental_features =
-    tcopt.GlobalOptions.tco_experimental_features
+  let tco_legacy_experimental_features =
+    tcopt.GlobalOptions.tco_legacy_experimental_features
   in
-  let tco_experimental_features =
-    if !disallow_static_memoized then
-      SSet.add
-        TypecheckerOptions.experimental_disallow_static_memoized
-        tco_experimental_features
-    else
-      tco_experimental_features
-  in
-  let tco_experimental_features =
+  let tco_legacy_experimental_features =
     if !enable_supportdyn_hint then
       SSet.add
         TypecheckerOptions.experimental_supportdynamic_type_hint
-        tco_experimental_features
+        tco_legacy_experimental_features
     else
-      tco_experimental_features
+      tco_legacy_experimental_features
   in
-  let tco_experimental_features =
+  let tco_legacy_experimental_features =
     if !consider_type_const_enforceable then
       SSet.add
         TypecheckerOptions.experimental_consider_type_const_enforceable
-        tco_experimental_features
+        tco_legacy_experimental_features
     else
-      tco_experimental_features
+      tco_legacy_experimental_features
   in
 
-  let tcopt = { tcopt with GlobalOptions.tco_experimental_features } in
+  let tcopt = { tcopt with GlobalOptions.tco_legacy_experimental_features } in
   let tco_custom_error_config =
     Option.value ~default:Custom_error_config.empty
     @@ Option.bind

@@ -28,10 +28,10 @@ DEFINE_string(proxy_host, "127.0.0.1", "MASQUE proxy hostname/IP");
 DEFINE_int32(proxy_port, 4443, "MASQUE proxy port");
 DEFINE_string(target_host, "127.0.0.1", "Target UDP server hostname/IP");
 DEFINE_int32(target_port, 9999, "Target UDP server port");
-DEFINE_string(
-    masque_template,
-    "https://{proxy_host}:{proxy_port}/masque?h={target_host}&p={target_port}",
-    "URI template for CONNECT-UDP (RFC 9298)");
+DEFINE_string(masque_template,
+              "https://{proxy_host}:{proxy_port}/.well-known/masque/udp/"
+              "{target_host}/{target_port}/",
+              "URI template for CONNECT-UDP (RFC 9298)");
 DEFINE_string(cert, "", "TLS certificate file path");
 DEFINE_string(key, "", "TLS private key file path");
 DEFINE_int32(payload_size, 16, "Size of test payload in bytes (max 1400)");

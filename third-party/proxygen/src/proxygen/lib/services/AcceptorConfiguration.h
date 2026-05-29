@@ -31,6 +31,12 @@ class HeaderIndexingStrategy;
  * cert(s) we use, etc).
  */
 struct AcceptorConfiguration : public wangle::ServerSocketConfig {
+  AcceptorConfiguration() {
+    // HTTP sessions need to stay in the ConnectionManager during graceful
+    // drain (GOAWAY + wait for in-flight transactions) so that
+    // dropAllConnections() can force-close them on shutdown.
+    detachOnConnectionAgeTimeout = false;
+  }
   /**
    * Determines if connection should respect HTTP2 priorities
    **/

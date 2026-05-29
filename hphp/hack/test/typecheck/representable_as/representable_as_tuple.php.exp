@@ -1,0 +1,18 @@
+ERROR: File "representable_as_tuple.php", line 25, characters 34-35:
+Invalid argument (Typing[4110])
+  File "representable_as_tuple.php", line 4, characters 73-75:
+  Expected `int`
+  File "representable_as_tuple.php", line 23, characters 50-55:
+  But got `string`
+ERROR: File "representable_as_tuple.php", line 59, characters 42-43:
+Invalid argument (Typing[4110])
+  File "representable_as_tuple.php", line 32, characters 89-91:
+  Expected `int`
+  File "representable_as_tuple.php", line 57, characters 49-54:
+  But got `string`
+ERROR: File "representable_as_tuple.php", line 64, characters 52-53:
+Invalid argument (Typing[4110])
+  File "representable_as_tuple.php", line 34, characters 109-111:
+  Expected `int`
+  File "representable_as_tuple.php", line 62, characters 59-64:
+  But got `string`

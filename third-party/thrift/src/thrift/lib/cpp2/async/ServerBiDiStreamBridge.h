@@ -31,6 +31,7 @@
 #include <thrift/lib/cpp2/async/StreamMessage.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 #include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
+#include <thrift/lib/cpp2/logging/ThriftBiDiLog.h>
 
 namespace apache::thrift::detail {
 
@@ -57,6 +58,10 @@ class ServerBiDiStreamBridge : public TwoWayBridge<
       : clientCb_(clientCb),
         evb_(evb),
         contextStack_(std::move(contextStack)) {}
+
+  void setBiDiLog(std::shared_ptr<ThriftBiDiLog> biDiLog) {
+    biDiLog_ = std::move(biDiLog);
+  }
 
   //
   // StreamServerCallback methods
@@ -123,6 +128,11 @@ class ServerBiDiStreamBridge : public TwoWayBridge<
             message,
             [&](StreamMessage::RequestN& requestN) {
               notifyBiDiStreamCredit(bridge->contextStack_.get(), requestN.n);
+              if (bridge->biDiLog_) {
+                bridge->biDiLog_->log(
+                    detail::BiDiStreamCreditEvent{
+                        static_cast<uint32_t>(requestN.n)});
+              }
               credits += requestN.n;
               return false;
             },
@@ -136,6 +146,11 @@ class ServerBiDiStreamBridge : public TwoWayBridge<
         notifyBiDiStreamPause(
             bridge->contextStack_.get(),
             details::StreamPauseReason::NO_CREDITS);
+        if (bridge->biDiLog_) {
+          bridge->biDiLog_->log(
+              detail::BiDiStreamPauseEvent{
+                  detail::StreamPauseReason::NO_CREDITS});
+        }
         continue;
       }
 
@@ -164,12 +179,20 @@ class ServerBiDiStreamBridge : public TwoWayBridge<
       bridge->serverPush(StreamMessage::PayloadOrError{(*encode)(**next)});
 
       notifyBiDiStreamNext(bridge->contextStack_.get());
+      if (bridge->biDiLog_) {
+        bridge->biDiLog_->log(detail::BiDiStreamNextEvent{});
+      }
 
       credits--;
       if (credits == 0) {
         notifyBiDiStreamPause(
             bridge->contextStack_.get(),
             details::StreamPauseReason::NO_CREDITS);
+        if (bridge->biDiLog_) {
+          bridge->biDiLog_->log(
+              detail::BiDiStreamPauseEvent{
+                  detail::StreamPauseReason::NO_CREDITS});
+        }
       }
     }
   }
@@ -240,6 +263,7 @@ class ServerBiDiStreamBridge : public TwoWayBridge<
   StreamClientCallback* clientCb_{nullptr};
   folly::EventBase* evb_{nullptr};
   std::shared_ptr<ContextStack> contextStack_;
+  std::shared_ptr<ThriftBiDiLog> biDiLog_;
   folly::CancellationSource cancelSource_;
 };
 

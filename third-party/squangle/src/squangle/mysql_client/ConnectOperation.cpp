@@ -154,7 +154,7 @@ ConnectionHolder* ConnectOperationImpl::mysqlConnection() const {
     std::string apiName,
     std::optional<std::string> location,
     std::optional<std::string> extra) const {
-  auto cbDelay = client_.callbackDelayAvg();
+  auto cbDelay = client().callbackDelayAvg();
   bool stalled = (cbDelay >= kCallbackDelayStallThreshold);
 
   // Overall the message looks like this:

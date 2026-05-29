@@ -152,8 +152,8 @@ impl ::std::default::Default for self::TestStruct {
             unqualified_bool_field: false,
             unqualified_list_field: ::std::vec::Vec::new(),
             unqualified_struct_field: crate::types::EmptyStruct {
-                    ..::std::default::Default::default()
-                },
+                ..::std::default::Default::default()
+            },
             optional_int_field: ::std::option::Option::None,
             optional_bool_field: ::std::option::Option::None,
             optional_list_field: ::std::option::Option::None,

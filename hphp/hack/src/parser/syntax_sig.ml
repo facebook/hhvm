@@ -1034,10 +1034,6 @@ module type Syntax_S = sig
         like_tilde: t;
         like_type: t;
       }
-    | SoftTypeSpecifier of {
-        soft_at: t;
-        soft_type: t;
-      }
     | AttributizedSpecifier of {
         attributized_specifier_attribute_spec: t;
         attributized_specifier_type: t;
@@ -1502,8 +1498,6 @@ module type Syntax_S = sig
 
   val make_like_type_specifier : t -> t -> t
 
-  val make_soft_type_specifier : t -> t -> t
-
   val make_attributized_specifier : t -> t -> t
 
   val make_reified_type_argument : t -> t -> t
@@ -1871,8 +1865,6 @@ module type Syntax_S = sig
   val is_nullable_type_specifier : t -> bool
 
   val is_like_type_specifier : t -> bool
-
-  val is_soft_type_specifier : t -> bool
 
   val is_attributized_specifier : t -> bool
 

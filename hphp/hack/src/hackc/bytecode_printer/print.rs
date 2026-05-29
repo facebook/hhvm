@@ -172,10 +172,8 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit) -> Result<()> 
                     adata.intern_value(a.clone());
                 }
                 Instruct::Opcode(
-                    Opcode::FCallClsMethod(args, _, _)
-                    | Opcode::FCallClsMethodD(args, _, _)
-                    | Opcode::FCallClsMethodM(args, _, _, _)
-                    | Opcode::FCallClsMethodS(args, _, _)
+                    Opcode::FCallClsMethodD(args, _, _)
+                    | Opcode::FCallClsMethodM(args, _, _)
                     | Opcode::FCallClsMethodSD(args, _, _, _)
                     | Opcode::FCallCtor(args, _)
                     | Opcode::FCallFunc(args)

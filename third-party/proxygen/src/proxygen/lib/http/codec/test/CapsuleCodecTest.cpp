@@ -39,10 +39,6 @@ class TestCapsuleCodec : public CapsuleCodec {
 
   folly::Expected<folly::Unit, ErrorCode> parseCapsule(
       io::Cursor& cursor) override {
-    if (cursor.length() > curCapsuleLength_) {
-      VLOG(4) << "remainingLength > curCapsuleLength_";
-      return folly::makeUnexpected(ErrorCode::PARSE_UNDERFLOW);
-    }
     auto payload = cursor.readFixedString(curCapsuleLength_);
     static_cast<TestCapsuleCodecCallback*>(callback_)->onStringCapsule(
         curCapsuleType_, curCapsuleLength_, payload);
@@ -96,10 +92,15 @@ TEST_F(CapsuleCodecTest, InvalidCapsuleType) {
 }
 
 TEST_F(CapsuleCodecTest, TooLargePayloadAndEom) {
+  // Declared length=5 but actual payload="Invalid Payload" (15 bytes).
+  // The codec parses the first 5 bytes as the capsule payload using the
+  // declared length. The remaining bytes are interpreted as subsequent
+  // capsule data.
   auto capsule = generateStringCapsule(0x01, 5, "Invalid Payload");
+  // Remaining bytes "id Payload" are parsed as a new capsule header
+  EXPECT_CALL(*callback_, onCapsule(_, _));
   EXPECT_CALL(*callback_, onCapsule(0x01, 5));
-  EXPECT_CALL(*callback_,
-              onConnectionError(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW));
+  EXPECT_CALL(*callback_, onStringCapsule(0x01, 5, "Inval"));
   codec_->onIngress(capsule.clone(), true);
 }
 

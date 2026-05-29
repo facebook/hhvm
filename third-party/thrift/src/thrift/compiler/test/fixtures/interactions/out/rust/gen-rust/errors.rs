@@ -402,7 +402,6 @@ pub mod my_interaction {
 
     #[derive(Debug)]
     pub enum EncodeSinkError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -526,7 +525,6 @@ pub mod my_interaction {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
                 ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
             }
@@ -537,7 +535,6 @@ pub mod my_interaction {
 
     #[derive(Debug)]
     pub enum EncodeSinkFinalError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -966,7 +963,6 @@ pub mod my_interaction_fast {
 
     #[derive(Debug)]
     pub enum EncodeSinkError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -1090,7 +1086,6 @@ pub mod my_interaction_fast {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
                 ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
             }
@@ -1101,7 +1096,6 @@ pub mod my_interaction_fast {
 
     #[derive(Debug)]
     pub enum EncodeSinkFinalError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }

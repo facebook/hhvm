@@ -660,13 +660,7 @@ void validate_boxed_field_attributes(sema_context& ctx, const t_field& node) {
     return;
   }
 
-  const bool ref = node.has_unstructured_annotation({
-                       "cpp.ref",
-                       "cpp2.ref",
-                       "cpp.ref_type",
-                       "cpp2.ref_type",
-                   }) ||
-      node.has_structured_annotation(kCppRefUri);
+  const bool ref = node.has_structured_annotation(kCppRefUri);
 
   const bool box = node.has_unstructured_annotation({
                        "cpp.box",
@@ -702,18 +696,16 @@ void validate_boxed_field_attributes(sema_context& ctx, const t_field& node) {
           "Make sure `{}` is optional.",
           node.name());
     } else if (ref) {
-      // For @cpp.Ref (and cpp[2].ref[_type]), non-optional fields result in
-      // either a warning or an error, depending on whether the field is
-      // annotated with `@cpp.AllowLegacyNonOptionalRef`.
-
+      // For @cpp.Ref, non-optional fields result in either a warning or an
+      // error, depending on whether the field is annotated with
+      // `@cpp.AllowLegacyNonOptionalRef`.
       const bool report_error =
           !node.has_structured_annotation(kCppAllowLegacyNonOptionalRefUri);
 
       ctx.report(
           node,
           report_error ? diagnostic_level::error : diagnostic_level::warning,
-          "Field with @cpp.Ref (or similar) annotation {} be optional: "
-          "`{}` (in `{}`).",
+          "Field with @cpp.Ref annotation {} be optional: `{}` (in `{}`).",
           report_error ? "must" : "should",
           node.name(),
           parent_node.name());
@@ -1160,35 +1152,14 @@ void validate_cpp_methods(sema_context& ctx, const t_structured& node) {
   }
 }
 
-/**
- * Checks that the given field does not have both the (newer) structured
- * @cpp.Ref annotation and one of the legacy unstructured annotations (cpp.ref,
- * cpp.ref_type, etc.).
- */
 void validate_ref_annotation(sema_context& ctx, const t_field& node) {
-  const bool hasStructuredAnnotation =
-      node.has_structured_annotation(kCppRefUri);
-
-  const bool hasUnstructuredAnnotation = node.has_unstructured_annotation(
-      {"cpp.ref", "cpp2.ref", "cpp.ref_type", "cpp2.ref_type"});
-
-  const int count = hasStructuredAnnotation + hasUnstructuredAnnotation;
-  if (count == 0) {
-    // Neither @cpp.Ref nor cpp[2].ref[_type].
-    // Check that there is no @cpp.AllowedLegacyNonOptionalRef
+  if (!node.has_structured_annotation(kCppRefUri)) {
     ctx.check(
         !node.has_structured_annotation(kCppAllowLegacyNonOptionalRefUri),
         "Cannot annotate field with @cpp.AllowLegacyNonOptionalRef unless it "
         "is a reference field (i.e., @cpp.Ref): `{}`.",
         node.name());
-    return;
   }
-
-  ctx.check(
-      count == 1,
-      "The @cpp.Ref annotation cannot be combined with the `cpp.ref` or "
-      "`cpp.ref_type` annotations. Remove one of the annotations from `{}`.",
-      node.name());
 }
 
 void validate_cpp_adapter_annotation(sema_context& ctx, const t_named& node) {
@@ -1229,8 +1200,8 @@ void validate_java_wrapper_and_adapter_annotation(
 }
 
 /**
- * Suggest @thrift.Box as a replacement for unique reference fields (@cpp.Ref,
- * etc.). Require it for adapted fields with a reference annotation.
+ * Suggest @thrift.Box as a replacement for unique reference fields. Require it
+ * for adapted fields with a reference annotation.
  */
 void validate_ref_unique_and_box_annotation(
     sema_context& ctx, const t_field& node) {
@@ -1241,33 +1212,6 @@ void validate_ref_unique_and_box_annotation(
     return;
   }
 
-  if (node.has_unstructured_annotation({"cpp.ref", "cpp2.ref"})) {
-    if (adapter_annotation) {
-      ctx.error(
-          "cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box "
-          "annotation instead in `{}` with @cpp.Adapter.",
-          node.name());
-    } else if (node.qualifier() == t_field_qualifier::optional) {
-      ctx.warning(
-          "cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box "
-          "annotation instead in `{}`.",
-          node.name());
-    }
-  }
-  if (node.has_unstructured_annotation({"cpp.ref_type", "cpp2.ref_type"})) {
-    if (adapter_annotation) {
-      ctx.error(
-          "cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. "
-          "Please use @thrift.Box annotation instead in `{}` with "
-          "@cpp.Adapter.",
-          node.name());
-    } else if (node.qualifier() == t_field_qualifier::optional) {
-      ctx.warning(
-          "cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. "
-          "Please use @thrift.Box annotation instead in `{}`.",
-          node.name());
-    }
-  }
   if (node.has_structured_annotation(kCppRefUri)) {
     if (adapter_annotation) {
       ctx.error(
@@ -1283,20 +1227,6 @@ void validate_ref_unique_and_box_annotation(
   }
 }
 
-void validate_function_priority_annotation(
-    sema_context& ctx, const t_node& node) {
-  if (auto* priority = node.find_unstructured_annotation_or_null("priority")) {
-    const std::string choices[] = {
-        "HIGH_IMPORTANT", "HIGH", "IMPORTANT", "NORMAL", "BEST_EFFORT"};
-    auto* end = choices + sizeof(choices) / sizeof(choices[0]);
-    ctx.check(
-        std::find(choices, end, *priority) != end,
-        "Bad priority '{}'. Choose one of {}.",
-        *priority,
-        choices);
-  }
-}
-
 void validate_function_exception_field_name_uniqueness(
     sema_context& ctx, const t_function& node) {
   if (node.exceptions() != nullptr) {
@@ -1307,26 +1237,13 @@ void validate_function_exception_field_name_uniqueness(
 
 void validate_exception_message_annotation(
     sema_context& ctx, const t_exception& node) {
-  // Check that value of "message" annotation is
-  // - a valid member of struct
-  // - of type STRING
+  // Check that the field annotated with @thrift.ExceptionMessage is a string.
   const t_field* field = nullptr;
   for (const auto& f : node.fields()) {
     if (f.has_structured_annotation(kExceptionMessageUri)) {
       ctx.check(!field, f, "Duplicate message annotation.");
       field = &f;
     }
-  }
-  if (node.has_unstructured_annotation("message")) {
-    ctx.check(!field, "Duplicate message annotation.");
-    const std::string& v = node.get_unstructured_annotation("message");
-    field = node.get_field_by_name(v);
-    ctx.check(
-        field,
-        "member specified as exception 'message' should be a valid "
-        "struct member, '{}' in '{}' is not",
-        v,
-        node.name());
   }
   if (field) {
     ctx.check(
@@ -2113,6 +2030,10 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
   };
   // cpp[2].ref[_type] are handled in dedicated validators.
   static std::map<std::string, std::string> deprecations = {
+      {"cpp.ref", kCppRefUri},
+      {"cpp2.ref", kCppRefUri},
+      {"cpp.ref_type", kCppRefUri},
+      {"cpp2.ref_type", kCppRefUri},
       {"cpp.type", kCppTypeUri},
       {"cpp2.type", kCppTypeUri},
       {"cpp.template", kCppTypeUri},
@@ -2159,12 +2080,19 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
   std::set<std::string> removed_annotations = {
       "code",
       "cpp.indirection",
+      "cpp.ref",
+      "cpp2.ref",
+      "cpp.ref_type",
+      "cpp2.ref_type",
       "cpp2.declare_bitwise_ops",
       "cpp.enum_type",
       "cpp2.enum_type",
       "cpp2.deprecated_enum_unscoped",
       "cpp2.methods",
+      "message",
+      "priority",
       "process_in_event_base",
+      "thrift.uri",
   };
   std::map<std::string, std::string> removed_prefixes = {{"rust.", "rust"}};
 
@@ -2368,7 +2296,6 @@ ast_validator standard_validator() {
   validator.add_root_definition_visitor(&validate_explicit_uri_value);
 
   validator.add_interface_visitor(&validate_interface_function_name_uniqueness);
-  validator.add_interface_visitor(&validate_function_priority_annotation);
   validator.add_service_visitor(
       &validate_extends_service_function_name_uniqueness);
   validator.add_interaction_visitor(&validate_interaction_nesting);
@@ -2379,7 +2306,6 @@ ast_validator standard_validator() {
       &detail::validate_annotation_scopes<
           detail::scope_check_type::thrown_exception>);
 
-  validator.add_function_visitor(&validate_function_priority_annotation);
   validator.add_function_visitor(ValidateAnnotationPositions{});
   validator.add_function_visitor(&detail::validate_annotation_scopes<>);
   validator.add_function_visitor(

@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 $tmp = tmpfile();
 
-fwrite($tmp, b"12345");
+fwrite($tmp, "12345");
 
 echo stream_get_contents($tmp, 2, 1);
 echo "\n";

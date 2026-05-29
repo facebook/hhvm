@@ -1,3 +1,27 @@
+WARN: File "nonsense_member_access.php", line 6, characters 19-21:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "nonsense_member_access.php", line 6, characters 5-16:
+  This expression has type `dynamic`, the result of accessing a property of a `dynamic` type
+WARN: File "nonsense_member_access.php", line 9, characters 16-18:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "nonsense_member_access.php", line 9, characters 5-13:
+  This expression has type `dynamic`, the result of accessing a property of a `dynamic` type
+WARN: File "nonsense_member_access.php", line 14, characters 16-18:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "nonsense_member_access.php", line 14, characters 5-13:
+  This expression has type `dynamic`, the result of accessing a property of a `dynamic` type
+WARN: File "nonsense_member_access.php", line 15, characters 9-13:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "nonsense_member_access.php", line 12, characters 29-35:
+  This expression has type `dynamic`
+WARN: File "nonsense_member_access.php", line 17, characters 13-15:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "nonsense_member_access.php", line 17, characters 5-10:
+  This expression has type `dynamic`, the result of accessing a property of a `dynamic` type
+WARN: File "nonsense_member_access.php", line 18, characters 9-10:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "nonsense_member_access.php", line 12, characters 29-35:
+  This expression has type `dynamic`
 ERROR: File "nonsense_member_access.php", line 5, characters 12-16:
 Dynamic member access requires a local variable, not `$this`. (Typing[4406])
 ERROR: File "nonsense_member_access.php", line 6, characters 12-16:

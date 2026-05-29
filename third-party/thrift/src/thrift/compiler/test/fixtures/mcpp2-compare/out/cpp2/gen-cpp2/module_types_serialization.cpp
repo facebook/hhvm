@@ -124,7 +124,7 @@ void TccStructTraits<::some::valid::ns::ComplexUnion>::translateFieldName(
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::some::valid::ns::ComplexUnion>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
@@ -145,7 +145,7 @@ void TccStructTraits<::some::valid::ns::AnException>::translateFieldName(
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::some::valid::ns::AnException>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
@@ -187,7 +187,7 @@ void TccStructTraits<::some::valid::ns::ContainerStruct>::translateFieldName(
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::some::valid::ns::ContainerStruct>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
@@ -229,7 +229,7 @@ void TccStructTraits<::some::valid::ns::AnnotatedStruct>::translateFieldName(
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::some::valid::ns::AnnotatedStruct>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),

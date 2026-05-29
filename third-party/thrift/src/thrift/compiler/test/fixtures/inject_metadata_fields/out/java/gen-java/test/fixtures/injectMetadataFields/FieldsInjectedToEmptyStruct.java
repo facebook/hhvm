@@ -37,11 +37,11 @@ public final class FieldsInjectedToEmptyStruct implements com.facebook.thrift.pa
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(FieldsInjectedToEmptyStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -67,6 +67,7 @@ public final class FieldsInjectedToEmptyStruct implements com.facebook.thrift.pa
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -76,11 +77,10 @@ public final class FieldsInjectedToEmptyStruct implements com.facebook.thrift.pa
     public static final int _INJECTED_FIELD = -1100;
     private static final TField INJECTED_FIELD_FIELD_DESC = new TField("injected_field", TType.STRING, (short)-1100);
     static {
-      NAMES_TO_IDS.put("injectedField", -1100);
-      THRIFT_NAMES_TO_IDS.put("injected_field", -1100);
-      FIELD_METADATA.put(-1100, INJECTED_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("injectedField", -1100);
+        THRIFT_NAMES_TO_IDS.put("injected_field", -1100);
+        FIELD_METADATA.put(-1100, INJECTED_FIELD_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=-1100, name="injected_field", isLegacyId=true, requiredness=Requiredness.NONE)
     public String getInjectedField() { return injectedField; }
@@ -112,52 +112,52 @@ public final class FieldsInjectedToEmptyStruct implements com.facebook.thrift.pa
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(injectedField);
-            return _hashCode;
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<FieldsInjectedToEmptyStruct> asReader() {
       return FieldsInjectedToEmptyStruct::read0;
     }
 
     public static FieldsInjectedToEmptyStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(FieldsInjectedToEmptyStruct.NAMES_TO_IDS, FieldsInjectedToEmptyStruct.THRIFT_NAMES_TO_IDS, FieldsInjectedToEmptyStruct.FIELD_METADATA);
-      FieldsInjectedToEmptyStruct.Builder builder = new FieldsInjectedToEmptyStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _INJECTED_FIELD:
-          if (__field.type == TType.STRING) {
-            String injectedField = oprot.readString();
-            builder.setInjectedField(injectedField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(FieldsInjectedToEmptyStruct.NAMES_TO_IDS, FieldsInjectedToEmptyStruct.THRIFT_NAMES_TO_IDS, FieldsInjectedToEmptyStruct.FIELD_METADATA);
+        FieldsInjectedToEmptyStruct.Builder builder = new FieldsInjectedToEmptyStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _INJECTED_FIELD:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setInjectedField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      String _iter0 = this.injectedField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(INJECTED_FIELD_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            String _fbthriftVar0 = this.injectedField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(INJECTED_FIELD_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _FieldsInjectedToEmptyStructLazy {

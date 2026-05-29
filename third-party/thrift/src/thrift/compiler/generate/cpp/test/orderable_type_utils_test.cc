@@ -164,8 +164,9 @@ struct StructWithCustomSetCppTypeWithEnableCustomTypeOrdering {
 
 TEST(OrderableTypeUtilsTest, is_orderable_set_template) {
   t_set set_t(t_primitive_type::t_double());
-  set_t.set_unstructured_annotation("cpp2.template", "blah");
   t_program program_p("path/to/program.thrift", "path/to/program.thrift");
+  auto cpp_type_builder = gen::type_builder(program_p, "cpp");
+  set_t.add_structured_annotation(cpp_type_builder.make_template("blah"));
   t_struct struct_s(&program_p, "struct_name");
   struct_s.create_field(set_t, "set_field", 1);
   EXPECT_FALSE(OrderableTypeUtils::is_orderable(struct_s));

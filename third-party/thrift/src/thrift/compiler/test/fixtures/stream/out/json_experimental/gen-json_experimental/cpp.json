@@ -715,6 +715,23 @@
         "is_union" : false,
         "lineno" : 429
       },
+      "FastClient" : {
+        "name" : "FastClient",
+        "structured_annotations": {
+          "scope.Service" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Service",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "When applied to a service, generates only a FastClient instead of the\nstandard AsyncClient. The FastClient uses the fast_thrift pipeline for\nlower latency serialization and deserialization.\n\nOnly request/response functions are supported. Functions using streams,\nsinks, oneway, or interactions are skipped.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 440
+      },
       "NonOrderable" : {
         "name" : "NonOrderable",
         "structured_annotations": {
@@ -730,7 +747,7 @@
         "docstring" : "Marks a structured type as non-orderable, marking `operator<` as deleted.\nThis is useful when types should never be ordered. By default, `operator<` is\nalways declared, but depending on whether or not the type's shape is considered\norderable, it may or may not be defined. See `EnableCustomTypeOrdering` for more\ndetails.\nNote: The unstructured `cpp_noncomparable` annotation has priority over this one &\nwill cause `operator==` && `operator<` to *not* be declared or defined.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 441
+        "lineno" : 452
       },
       "DeclareHashSpecialization" : {
         "name" : "DeclareHashSpecialization",
@@ -755,7 +772,7 @@
         "docstring" : "Declares a specialization of `std::hash` for the struct or type.\nThis is equivalent to the unstructured `cpp.declare_hash` annotation.\nThe generated code will include a forward declaration of the hash specialization in the std namespace.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 449
+        "lineno" : 460
       },
       "DeclareEqualToSpecialization" : {
         "name" : "DeclareEqualToSpecialization",
@@ -780,7 +797,7 @@
         "docstring" : "Declares a specialization of `std::equal_to` for the struct or type.\nThis is equivalent to the unstructured `cpp.declare_equal_to` annotation.\nThe generated code will include a forward declaration of the equal_to specialization in the std namespace.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 458
+        "lineno" : 469
       }
   },
   "source_path" : "thrift/annotation/cpp",

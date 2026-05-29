@@ -24,7 +24,6 @@ use crate::Flow;
 use crate::FunctionName;
 use crate::IncDecOp;
 use crate::InitPropOp;
-use crate::IsLogAsDynamicCallOp;
 use crate::IsTypeOp;
 use crate::IterArgs;
 use crate::IterId;

@@ -1,0 +1,65 @@
+=== Test 1: Agnostic set then unset ===
+After set:
+  MemoAgnostic exists: true
+  MemoAgnostic get: int(42)
+  MemoSensitive exists: false
+  MemoSensitive get: NULL
+After unset:
+  MemoAgnostic exists: false
+  MemoAgnostic get: NULL
+  MemoSensitive exists: false
+  MemoSensitive get: NULL
+After unset scope:
+  MemoAgnostic exists: true
+  MemoAgnostic get: int(42)
+  MemoSensitive exists: false
+  MemoSensitive get: NULL
+=== Test 2: Sensitive set then unset ===
+After set:
+  MemoAgnostic exists: false
+  MemoAgnostic get: NULL
+  MemoSensitive exists: true
+  MemoSensitive get: int(99)
+After unset:
+  MemoAgnostic exists: false
+  MemoAgnostic get: NULL
+  MemoSensitive exists: false
+  MemoSensitive get: NULL
+After unset scope:
+  MemoAgnostic exists: false
+  MemoAgnostic get: NULL
+  MemoSensitive exists: true
+  MemoSensitive get: int(99)
+=== Test 3: Set both, unset agnostic only ===
+Both set:
+  MemoAgnostic exists: true
+  MemoAgnostic get: int(10)
+  MemoSensitive exists: true
+  MemoSensitive get: int(20)
+Agnostic unset, sensitive remains:
+  MemoAgnostic exists: false
+  MemoAgnostic get: NULL
+  MemoSensitive exists: true
+  MemoSensitive get: int(20)
+=== Test 4: Set both, unset sensitive only ===
+Both set:
+  MemoAgnostic exists: true
+  MemoAgnostic get: int(10)
+  MemoSensitive exists: true
+  MemoSensitive get: int(20)
+Sensitive unset, agnostic remains:
+  MemoAgnostic exists: true
+  MemoAgnostic get: int(10)
+  MemoSensitive exists: false
+  MemoSensitive get: NULL
+=== Test 5: Unset without prior set ===
+Agnostic unset (was never set):
+  MemoAgnostic exists: false
+  MemoAgnostic get: NULL
+  MemoSensitive exists: false
+  MemoSensitive get: NULL
+Sensitive unset (was never set):
+  MemoAgnostic exists: false
+  MemoAgnostic get: NULL
+  MemoSensitive exists: false
+  MemoSensitive get: NULL

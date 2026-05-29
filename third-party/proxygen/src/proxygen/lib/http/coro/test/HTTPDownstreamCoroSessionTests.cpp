@@ -2104,7 +2104,8 @@ TEST_P(H2QDownstreamSessionTest, ResetStreamAwaitingHeaders) {
     }
 
     void stopReading(
-        folly::Optional<const proxygen::coro::HTTPErrorCode>) override {
+        folly::Optional<const proxygen::coro::HTTPErrorCode>) noexcept
+        override {
       XCHECK(false);
     }
   };
@@ -3048,7 +3049,7 @@ class HTTPContinueSource : public HTTPSource {
   }
 
   void stopReading(
-      folly::Optional<const proxygen::coro::HTTPErrorCode>) override {
+      folly::Optional<const proxygen::coro::HTTPErrorCode>) noexcept override {
     delete this;
   }
 

@@ -789,6 +789,7 @@ impl<R: Reason> ToOxidized for shallow::FunDecl<R> {
             support_dynamic_type,
             no_auto_dynamic,
             no_auto_likes,
+            gated_by_feature_flag,
             package_requirement,
         } = self;
         o::shallow_decl_defs::FunDecl {
@@ -800,6 +801,7 @@ impl<R: Reason> ToOxidized for shallow::FunDecl<R> {
             support_dynamic_type,
             no_auto_dynamic,
             no_auto_likes,
+            gated_by_feature_flag,
             module: module.map(|m| {
                 let (pos, id) = m.to_oxidized();
                 o::ast_defs::Id(pos, id)

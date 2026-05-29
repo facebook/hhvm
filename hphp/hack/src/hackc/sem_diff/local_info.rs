@@ -132,10 +132,8 @@ impl LocalInfo {
             | Opcode::Eq
             | Opcode::Eval
             | Opcode::Exit
-            | Opcode::FCallClsMethod(..)
             | Opcode::FCallClsMethodD(..)
             | Opcode::FCallClsMethodM(..)
-            | Opcode::FCallClsMethodS(..)
             | Opcode::FCallClsMethodSD(..)
             | Opcode::FCallCtor(..)
             | Opcode::FCallFunc(..)

@@ -79,8 +79,8 @@ class {{#partial m_types.unadapted_name type=struct}}({{!
     @{{field.py_name}}.setter
     def {{field.py_name}}(self, value: {{#partial m_fields.field_type_pyi field=field}}{{#partial m_types.add_wrapper_if_container field=field}}) -> None: ...
 
-    {{/each}}{{!
-    }}{{/if python.generate_mutable_types?}}
+    {{/each}}
+    {{/if python.generate_mutable_types?}}
     def __init__(
         self,{{#if struct.fields?}} *{{/if}}{{!
         }}{{#each struct.fields_ordered_by_id as |field|}}{{> types/init_and_call_arg_types}}{{/each}}

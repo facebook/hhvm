@@ -310,16 +310,21 @@ void throwMissingPositionalArgument(const Func* func, int got) {
   SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
 }
 
-void throwMissingNamedArgument(const Func* func, int got) {
-  auto const expected = func->numRequiredNamedParams();
-  assertx(got < expected);
+void throwMissingNamedParam(const Func* func, const StringData* paramName) {
   auto const errMsg = folly::sformat(
-    "{}() expects {} required named parameter{}, {} given",
+    "Call to {}() has no argument matching required named parameter {}",
     func->fullNameWithClosureName(),
-    expected,
-    expected == 1 ? "" : "s",
-    got
+    paramName
   );
+
+  SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
+}
+
+void throwUnexpectedNamedArguments(const Func* func) {
+  assertx(func->numNamedParams() == 0);
+  auto const errMsg = folly::sformat(
+    "{}() has no named parameters but was called with named arguments.",
+    func->fullNameWithClosureName());
 
   SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
 }
@@ -333,17 +338,19 @@ void throwNamedArgumentNameMismatch(const Func* func, const StringData* argName)
   SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
 }
 
-// TODO(named_params) this needs to be made named-args aware.
 void raiseTooManyArguments(const Func* func, int got) {
   assertx(!func->hasVariadicCaptureParam());
 
   if (!Cfg::Eval::WarnOnTooManyArguments && !func->isCPPBuiltin()) {
     return;
   }
-
-  auto const total = func->numNonVariadicParams();
+  // The callee arity checks (which raise this error) run *after* optional named
+  // args are passed, and numArgsInclUnpack is updated, so we have the invariant that
+  // numNamedParams named args are passed on the stack.
+  got -= func->numNamedParams();
+  auto const total = func->numNonVariadicParams() - func->numNamedParams();
   assertx(got > total);
-  auto const amount = func->numRequiredParams() < total ? "at most" : "exactly";
+  auto const amount = func->numRequiredPositionalParams() < total ? "at most" : "exactly";
   auto const errMsg = formatArgumentErrMsg(func, amount, total, got);
 
   if (Cfg::Eval::WarnOnTooManyArguments > 1 || func->isCPPBuiltin()) {
@@ -355,7 +362,6 @@ void raiseTooManyArguments(const Func* func, int got) {
   }
 }
 
-// TODO(named_params) this needs to be made named-args aware.
 void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs) {
   SCOPE_EXIT { decRefArr(unpackArgs); };
   if (unpackArgs->empty()) return;

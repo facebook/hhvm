@@ -14,17 +14,17 @@ public class LegacyServiceReactiveAsyncWrapper
   private LegacyService.Reactive _delegate;
 
   public LegacyServiceReactiveAsyncWrapper(LegacyService.Reactive _delegate) {
-    
-    this._delegate = _delegate;
+      
+      this._delegate = _delegate;
   }
 
   public LegacyServiceReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new LegacyServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new LegacyServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
   @java.lang.Override
@@ -45,7 +45,7 @@ public class LegacyServiceReactiveAsyncWrapper
     final Set<String> key,
     final long legacyStuff,
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.getPointsWrapper(key,legacyStuff, rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.getPointsWrapper(key,legacyStuff, rpcOptions));
   }
 
 }

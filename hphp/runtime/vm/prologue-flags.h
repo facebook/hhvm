@@ -68,6 +68,7 @@ struct PrologueFlags {
   }
 
   bool hasGenerics() const { return m_bits & (1 << Flags::HasGenerics); }
+  bool hasNamedArgs() const { return m_bits & (1 << Flags::HasNamedArguments); }
   bool isDynamicCall() const { return m_bits & (1 << Flags::IsDynamicCall); }
   bool asyncEagerReturn() const {
     return m_bits & (1 << Flags::AsyncEagerReturn);

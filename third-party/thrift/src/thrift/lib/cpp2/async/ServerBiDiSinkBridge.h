@@ -28,12 +28,14 @@
 #include <thrift/lib/cpp2/async/StreamMessage.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 #include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
+#include <thrift/lib/cpp2/logging/ThriftBiDiLog.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 
 namespace apache::thrift::detail {
 
-// Server to Client: RequestN (credits)
-using ServerBiDiSinkMessageServerToClient = StreamMessage::RequestN;
+// Server to Client: RequestN (credits) or Cancel (coroutine-side teardown)
+using ServerBiDiSinkMessageServerToClient =
+    std::variant<StreamMessage::RequestN, StreamMessage::Cancel>;
 
 // Client to Server: PayloadOrError (payload/error) or Complete (sink done)
 using ServerBiDiSinkMessageClientToServer =
@@ -54,6 +56,10 @@ class ServerBiDiSinkBridge : public TwoWayBridge<
       : clientCb_(clientCb),
         evb_(evb),
         contextStack_(std::move(contextStack)) {}
+
+  void setBiDiLog(std::shared_ptr<ThriftBiDiLog> biDiLog) {
+    biDiLog_ = std::move(biDiLog);
+  }
 
   //
   // SinkServerCallback
@@ -139,12 +145,14 @@ class ServerBiDiSinkBridge : public TwoWayBridge<
           if (!bridge->isServerClosed()) {
             bridge->serverClose();
           }
-          // If the client is already closed, then the ClientCallback must
-          // already be aware that the server sink side is complete so we
-          // don't need to do anything. Otherwise, we need to close the client
-          if (!bridge->isClientClosed()) {
-            bridge->clientClose(); // Also cancels
-          }
+          // Signal the IO thread to close the client queue. We must not call
+          // clientClose() directly here because the Cleanup destructor runs on
+          // the coroutine thread, while clientClose() must only be called from
+          // the IO thread. Pushing a Cancel message through serverPush()
+          // ensures the close is processed by processClientMessages() on the
+          // correct thread, avoiding a double-close race with onSinkComplete()
+          // or onSinkError().
+          bridge->serverPush(StreamMessage::Cancel{});
         }
       }
       Cleanup(const Cleanup&) = delete;
@@ -192,6 +200,11 @@ class ServerBiDiSinkBridge : public TwoWayBridge<
 
               if (++creditsUsed > bridge->bufferSize_ / 2) {
                 notifyBiDiSinkCredit(bridge->contextStack_.get(), creditsUsed);
+                if (bridge->biDiLog_) {
+                  bridge->biDiLog_->log(
+                      detail::BiDiSinkCreditEvent{
+                          static_cast<uint32_t>(creditsUsed)});
+                }
                 bridge->serverPush(
                     StreamMessage::RequestN{static_cast<int32_t>(creditsUsed)});
                 creditsUsed = 0;
@@ -212,7 +225,20 @@ class ServerBiDiSinkBridge : public TwoWayBridge<
         DCHECK(!isClientClosed());
 
         auto& message = messages.front();
-        if (!clientCb_->onSinkRequestN(message.n)) {
+        if (std::holds_alternative<StreamMessage::Cancel>(message)) {
+          // The coroutine side has been torn down. Close the client queue on
+          // the IO thread where it is safe to do so, then send a final
+          // response if the transport side hasn't been notified yet.
+          clientClose();
+          if (clientCb_ != nullptr) {
+            clientCb_->onFinalResponse(
+                StreamPayload{nullptr, StreamPayloadMetadata{}});
+          }
+          decref();
+          return;
+        }
+        auto& requestN = std::get<StreamMessage::RequestN>(message);
+        if (!clientCb_->onSinkRequestN(requestN.n)) {
           return;
         }
       }
@@ -250,7 +276,12 @@ class ServerBiDiSinkBridge : public TwoWayBridge<
   }
 
   // Instance wrapper methods
-  void notifyBiDiSinkNext() { notifyBiDiSinkNext(contextStack_.get()); }
+  void notifyBiDiSinkNext() {
+    notifyBiDiSinkNext(contextStack_.get());
+    if (biDiLog_) {
+      biDiLog_->log(detail::BiDiSinkNextEvent{});
+    }
+  }
 
   void handleBiDiSinkError(const folly::exception_wrapper& ew) {
     handleBiDiSinkError(contextStack_.get(), ew);
@@ -262,6 +293,7 @@ class ServerBiDiSinkBridge : public TwoWayBridge<
   SinkClientCallback* clientCb_{nullptr};
   folly::EventBase* evb_{nullptr};
   std::shared_ptr<ContextStack> contextStack_;
+  std::shared_ptr<ThriftBiDiLog> biDiLog_;
 
   uint64_t bufferSize_{0};
 };

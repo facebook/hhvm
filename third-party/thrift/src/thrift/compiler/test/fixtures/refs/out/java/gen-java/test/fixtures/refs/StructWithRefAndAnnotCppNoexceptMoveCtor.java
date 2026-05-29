@@ -37,11 +37,11 @@ public final class StructWithRefAndAnnotCppNoexceptMoveCtor implements com.faceb
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(StructWithRefAndAnnotCppNoexceptMoveCtor other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -67,6 +67,7 @@ public final class StructWithRefAndAnnotCppNoexceptMoveCtor implements com.faceb
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -76,11 +77,10 @@ public final class StructWithRefAndAnnotCppNoexceptMoveCtor implements com.faceb
     public static final int _DEF_FIELD = 1;
     private static final TField DEF_FIELD_FIELD_DESC = new TField("def_field", TType.STRUCT, (short)1);
     static {
-      NAMES_TO_IDS.put("defField", 1);
-      THRIFT_NAMES_TO_IDS.put("def_field", 1);
-      FIELD_METADATA.put(1, DEF_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("defField", 1);
+        THRIFT_NAMES_TO_IDS.put("def_field", 1);
+        FIELD_METADATA.put(1, DEF_FIELD_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="def_field", requiredness=Requiredness.NONE)
     public test.fixtures.refs.Empty getDefField() { return defField; }
@@ -112,52 +112,52 @@ public final class StructWithRefAndAnnotCppNoexceptMoveCtor implements com.faceb
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(defField);
-            return _hashCode;
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<StructWithRefAndAnnotCppNoexceptMoveCtor> asReader() {
       return StructWithRefAndAnnotCppNoexceptMoveCtor::read0;
     }
 
     public static StructWithRefAndAnnotCppNoexceptMoveCtor read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(StructWithRefAndAnnotCppNoexceptMoveCtor.NAMES_TO_IDS, StructWithRefAndAnnotCppNoexceptMoveCtor.THRIFT_NAMES_TO_IDS, StructWithRefAndAnnotCppNoexceptMoveCtor.FIELD_METADATA);
-      StructWithRefAndAnnotCppNoexceptMoveCtor.Builder builder = new StructWithRefAndAnnotCppNoexceptMoveCtor.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _DEF_FIELD:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.refs.Empty defField = test.fixtures.refs.Empty.read0(oprot);
-            builder.setDefField(defField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(StructWithRefAndAnnotCppNoexceptMoveCtor.NAMES_TO_IDS, StructWithRefAndAnnotCppNoexceptMoveCtor.THRIFT_NAMES_TO_IDS, StructWithRefAndAnnotCppNoexceptMoveCtor.FIELD_METADATA);
+        StructWithRefAndAnnotCppNoexceptMoveCtor.Builder builder = new StructWithRefAndAnnotCppNoexceptMoveCtor.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _DEF_FIELD:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.refs.Empty _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.refs.Empty.read0(oprot);
+                    builder.setDefField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      test.fixtures.refs.Empty _iter0 = this.defField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(DEF_FIELD_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            test.fixtures.refs.Empty _fbthriftVar0 = this.defField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(DEF_FIELD_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _StructWithRefAndAnnotCppNoexceptMoveCtorLazy {

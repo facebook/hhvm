@@ -1,1 +1,33 @@
-No errors
+warning: Warn[12040] Indexing into a value of type (dynamic & shape('b' => supportdyn<mixed>, _ => supportdyn<mixed>)) [1]
+-> This expression has type dynamic [2]
+
+shape_key_exists.good.php:16:10
+     6 | }
+     7 | 
+[2]  8 | function get_dyn():dynamic {
+     9 |   return shape('a' => 3);
+    10 | }
+       :
+    14 |   $x = get_dyn();
+    15 |   if (Shapes::keyExists($x, 'b')) {
+[1] 16 |     $y = $x['a'];
+    17 |   }
+    18 |   if (Shapes::keyExists($x, 'c')) {
+
+warning: Warn[12040] Indexing into a value of type (dynamic & shape('c' => supportdyn<mixed>, _ => supportdyn<mixed>)) [1]
+-> This expression has type dynamic [2]
+
+shape_key_exists.good.php:19:10
+     6 | }
+     7 | 
+[2]  8 | function get_dyn():dynamic {
+     9 |   return shape('a' => 3);
+    10 | }
+       :
+    17 |   }
+    18 |   if (Shapes::keyExists($x, 'c')) {
+[1] 19 |     $y = $x['a'];
+    20 |   }
+    21 | }
+
+2 errors found

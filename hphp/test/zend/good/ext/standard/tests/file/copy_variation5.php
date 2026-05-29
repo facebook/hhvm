@@ -11,7 +11,7 @@
 echo "*** Test copy() function: checking case sensitivity in creation of destination file names ***\n";
 $src_file_name = sys_get_temp_dir().'/'.'copy_variation5.tmp';
 $file_handle = fopen($src_file_name, "w");
-fwrite( $file_handle, str_repeat(b"Hello2World...\n", 100) );
+fwrite( $file_handle, str_repeat("Hello2World...\n", 100) );
 fclose($file_handle);
 
 /* array of destination file names */

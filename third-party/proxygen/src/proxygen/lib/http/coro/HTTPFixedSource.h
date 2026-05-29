@@ -130,13 +130,13 @@ class HTTPFixedSource : public HTTPSource {
     }
   }
 
-  void stopReading(folly::Optional<const HTTPErrorCode>) override {
+  void stopReading(folly::Optional<const HTTPErrorCode>) noexcept override {
     if (heapAllocated_) {
       delete this;
     }
   }
 
-  void setReadTimeout(std::chrono::milliseconds) override {
+  void setReadTimeout(std::chrono::milliseconds) noexcept override {
   }
 
   std::unique_ptr<HTTPMessage> msg_;
@@ -168,13 +168,13 @@ class HTTPErrorSource : public HTTPSource {
   }
 
   void stopReading(
-      folly::Optional<const HTTPErrorCode> = folly::none) override {
+      folly::Optional<const HTTPErrorCode> = folly::none) noexcept override {
     if (heapAllocated_) {
       delete this;
     }
   }
 
-  void setReadTimeout(std::chrono::milliseconds) override {
+  void setReadTimeout(std::chrono::milliseconds) noexcept override {
   }
 
   HTTPError error_;

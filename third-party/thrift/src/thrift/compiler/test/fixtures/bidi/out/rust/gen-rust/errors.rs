@@ -103,7 +103,6 @@ pub mod bi_di_service {
 
     #[derive(Debug)]
     pub enum SimpleSinkError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -227,7 +226,6 @@ pub mod bi_di_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
                 ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
             }
@@ -348,7 +346,6 @@ pub mod bi_di_service {
 
     #[derive(Debug)]
     pub enum ResponseSinkError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -472,7 +469,6 @@ pub mod bi_di_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
                 ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
             }

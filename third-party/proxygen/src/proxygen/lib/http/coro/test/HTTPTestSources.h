@@ -151,7 +151,7 @@ class TimeoutSource : public HTTPSource {
   }
 
   void stopReading(
-      folly::Optional<const HTTPErrorCode> = folly::none) override {
+      folly::Optional<const HTTPErrorCode> = folly::none) noexcept override {
     if (heapAllocated_) {
       delete this;
     }
@@ -202,7 +202,7 @@ class EchoBodySource : public HTTPSourceFilter {
     co_return bodyEvent;
   }
 
-  void setReadTimeout(std::chrono::milliseconds) override {
+  void setReadTimeout(std::chrono::milliseconds) noexcept override {
   }
 
   std::unique_ptr<HTTPMessage> response_;
@@ -256,7 +256,7 @@ class ByteEventFilter : public HTTPSourceFilter {
   }
 
   void stopReading(
-      folly::Optional<const HTTPErrorCode> = folly::none) override {
+      folly::Optional<const HTTPErrorCode> = folly::none) noexcept override {
     if (heapAllocated_) {
       delete this;
     }
@@ -300,7 +300,7 @@ class YieldExceptionSource : public HTTPSource {
   }
 
   void stopReading(
-      folly::Optional<const HTTPErrorCode> = folly::none) override {
+      folly::Optional<const HTTPErrorCode> = folly::none) noexcept override {
   }
 
  private:

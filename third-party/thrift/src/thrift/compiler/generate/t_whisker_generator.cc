@@ -642,12 +642,13 @@ prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
     m["buffer"] = std::move(id);
     return map::of(std::move(m));
   });
-  def.property("schema_name", [this](const t_program& self) {
-    auto name = detail::schematizer::name_schema(source_mgr_, self);
-    if (self.find({name, source_range{}})) {
-      return object(std::move(name));
-    }
-    return object();
+  def.property("has_schema_const?", [this](const t_program& self) {
+    std::string name =
+        detail::schematizer::schema_const_name(source_mgr_, self);
+    return self.find({name, source_range{}}) != nullptr;
+  });
+  def.property("schema_const_name", [this](const t_program& self) {
+    return detail::schematizer::schema_const_name(source_mgr_, self);
   });
   def.property("uris", [](const t_program& self) {
     array::raw result;
@@ -765,7 +766,7 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
           .get_enum_value()
           ->name();
     }
-    return self.get_unstructured_annotation("priority", "NORMAL");
+    return "NORMAL";
   });
   def.property("qualifier", [](const t_function& self) -> whisker::string {
     switch (self.qualifier()) {

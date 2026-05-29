@@ -37,11 +37,11 @@ public final class ShouldBeBoxed implements com.facebook.thrift.payload.ThriftSe
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(ShouldBeBoxed other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -67,6 +67,7 @@ public final class ShouldBeBoxed implements com.facebook.thrift.payload.ThriftSe
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -76,11 +77,10 @@ public final class ShouldBeBoxed implements com.facebook.thrift.payload.ThriftSe
     public static final int _SESSIONID = 1;
     private static final TField SESSION_ID_FIELD_DESC = new TField("sessionId", TType.STRING, (short)1);
     static {
-      NAMES_TO_IDS.put("sessionId", 1);
-      THRIFT_NAMES_TO_IDS.put("sessionId", 1);
-      FIELD_METADATA.put(1, SESSION_ID_FIELD_DESC);
+        NAMES_TO_IDS.put("sessionId", 1);
+        THRIFT_NAMES_TO_IDS.put("sessionId", 1);
+        FIELD_METADATA.put(1, SESSION_ID_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="sessionId", requiredness=Requiredness.NONE)
     public String getSessionId() { return sessionId; }
@@ -112,52 +112,52 @@ public final class ShouldBeBoxed implements com.facebook.thrift.payload.ThriftSe
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(sessionId);
-            return _hashCode;
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<ShouldBeBoxed> asReader() {
       return ShouldBeBoxed::read0;
     }
 
     public static ShouldBeBoxed read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(ShouldBeBoxed.NAMES_TO_IDS, ShouldBeBoxed.THRIFT_NAMES_TO_IDS, ShouldBeBoxed.FIELD_METADATA);
-      ShouldBeBoxed.Builder builder = new ShouldBeBoxed.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _SESSIONID:
-          if (__field.type == TType.STRING) {
-            String sessionId = oprot.readString();
-            builder.setSessionId(sessionId);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(ShouldBeBoxed.NAMES_TO_IDS, ShouldBeBoxed.THRIFT_NAMES_TO_IDS, ShouldBeBoxed.FIELD_METADATA);
+        ShouldBeBoxed.Builder builder = new ShouldBeBoxed.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _SESSIONID:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setSessionId(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      String _iter0 = this.sessionId;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(SESSION_ID_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            String _fbthriftVar0 = this.sessionId;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(SESSION_ID_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _ShouldBeBoxedLazy {

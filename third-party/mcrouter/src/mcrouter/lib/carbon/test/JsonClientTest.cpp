@@ -56,8 +56,8 @@ class TestJsonClient : public JsonClient {
 struct CarbonTestOnRequest {
   void onRequest(McServerRequestContext&& ctx, TestRequest&& request) {
     TestReply reply(carbon::Result::OK);
-    reply.valInt32_ref() = *request.testInt32_ref() * 2;
-    reply.valInt64_ref() = *request.testInt64_ref() * 2;
+    reply.valInt32() = *request.testInt32() * 2;
+    reply.valInt64() = *request.testInt64() * 2;
     McServerRequestContext::reply(std::move(ctx), std::move(reply));
   }
   void onRequest(

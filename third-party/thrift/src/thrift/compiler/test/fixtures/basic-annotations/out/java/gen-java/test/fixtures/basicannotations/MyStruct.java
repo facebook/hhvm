@@ -61,11 +61,11 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(MyStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -86,56 +86,56 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
 
         public long getMajor() { return major; }
 
-            @com.facebook.swift.codec.ThriftField(value=1, name="abstract", requiredness=Requiredness.NONE)    public Builder setAbstract(String _abstract) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="abstract", requiredness=Requiredness.NONE)    public Builder setAbstract(String _abstract) {
             this._abstract = _abstract;
             return this;
         }
 
         public String getAbstract() { return _abstract; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="annotation_with_quote", requiredness=Requiredness.NONE)    public Builder setAnnotationWithQuote(String annotationWithQuote) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="annotation_with_quote", requiredness=Requiredness.NONE)    public Builder setAnnotationWithQuote(String annotationWithQuote) {
             this.annotationWithQuote = annotationWithQuote;
             return this;
         }
 
         public String getAnnotationWithQuote() { return annotationWithQuote; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="class_", requiredness=Requiredness.NONE)    public Builder setClass_(String class_) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="class_", requiredness=Requiredness.NONE)    public Builder setClass_(String class_) {
             this.class_ = class_;
             return this;
         }
 
         public String getClass_() { return class_; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="annotation_with_trailing_comma", requiredness=Requiredness.NONE)    public Builder setAnnotationWithTrailingComma(String annotationWithTrailingComma) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="annotation_with_trailing_comma", requiredness=Requiredness.NONE)    public Builder setAnnotationWithTrailingComma(String annotationWithTrailingComma) {
             this.annotationWithTrailingComma = annotationWithTrailingComma;
             return this;
         }
 
         public String getAnnotationWithTrailingComma() { return annotationWithTrailingComma; }
 
-            @com.facebook.swift.codec.ThriftField(value=6, name="empty_annotations", requiredness=Requiredness.NONE)    public Builder setEmptyAnnotations(String emptyAnnotations) {
+        @com.facebook.swift.codec.ThriftField(value=6, name="empty_annotations", requiredness=Requiredness.NONE)    public Builder setEmptyAnnotations(String emptyAnnotations) {
             this.emptyAnnotations = emptyAnnotations;
             return this;
         }
 
         public String getEmptyAnnotations() { return emptyAnnotations; }
 
-            @com.facebook.swift.codec.ThriftField(value=7, name="my_enum", requiredness=Requiredness.NONE)    public Builder setMyEnum(test.fixtures.basicannotations.MyEnum myEnum) {
+        @com.facebook.swift.codec.ThriftField(value=7, name="my_enum", requiredness=Requiredness.NONE)    public Builder setMyEnum(test.fixtures.basicannotations.MyEnum myEnum) {
             this.myEnum = myEnum;
             return this;
         }
 
         public test.fixtures.basicannotations.MyEnum getMyEnum() { return myEnum; }
 
-            @com.facebook.swift.codec.ThriftField(value=8, name="cpp_type_annotation", requiredness=Requiredness.NONE)    public Builder setCppTypeAnnotation(List<String> cppTypeAnnotation) {
+        @com.facebook.swift.codec.ThriftField(value=8, name="cpp_type_annotation", requiredness=Requiredness.NONE)    public Builder setCppTypeAnnotation(List<String> cppTypeAnnotation) {
             this.cppTypeAnnotation = cppTypeAnnotation;
             return this;
         }
 
         public List<String> getCppTypeAnnotation() { return cppTypeAnnotation; }
 
-            @com.facebook.swift.codec.ThriftField(value=9, name="my_union", requiredness=Requiredness.NONE)    public Builder setMyUnion(test.fixtures.basicannotations.MyUnion myUnion) {
+        @com.facebook.swift.codec.ThriftField(value=9, name="my_union", requiredness=Requiredness.NONE)    public Builder setMyUnion(test.fixtures.basicannotations.MyUnion myUnion) {
             this.myUnion = myUnion;
             return this;
         }
@@ -171,6 +171,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -179,103 +180,86 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     private final long major;
     public static final int _MAJOR = 2;
     private static final TField MAJOR_FIELD_DESC = new TField("major", TType.I64, (short)2);
-        private final String _abstract;
+    private final String _abstract;
     public static final int _ABSTRACT = 1;
     private static final TField _ABSTRACT_FIELD_DESC = new TField("abstract", TType.STRING, (short)1);
-        private final String annotationWithQuote;
+    private final String annotationWithQuote;
     public static final int _ANNOTATION_WITH_QUOTE = 3;
     private static final TField ANNOTATION_WITH_QUOTE_FIELD_DESC = new TField("annotation_with_quote", TType.STRING, (short)3);
-        private final String class_;
+    private final String class_;
     public static final int _CLASS_ = 4;
     private static final TField CLASS__FIELD_DESC = new TField("class_", TType.STRING, (short)4);
-        private final String annotationWithTrailingComma;
+    private final String annotationWithTrailingComma;
     public static final int _ANNOTATION_WITH_TRAILING_COMMA = 5;
     private static final TField ANNOTATION_WITH_TRAILING_COMMA_FIELD_DESC = new TField("annotation_with_trailing_comma", TType.STRING, (short)5);
-        private final String emptyAnnotations;
+    private final String emptyAnnotations;
     public static final int _EMPTY_ANNOTATIONS = 6;
     private static final TField EMPTY_ANNOTATIONS_FIELD_DESC = new TField("empty_annotations", TType.STRING, (short)6);
-        private final test.fixtures.basicannotations.MyEnum myEnum;
+    private final test.fixtures.basicannotations.MyEnum myEnum;
     public static final int _MY_ENUM = 7;
     private static final TField MY_ENUM_FIELD_DESC = new TField("my_enum", TType.I32, (short)7);
-        private final List<String> cppTypeAnnotation;
+    private final List<String> cppTypeAnnotation;
     public static final int _CPP_TYPE_ANNOTATION = 8;
     private static final TField CPP_TYPE_ANNOTATION_FIELD_DESC = new TField("cpp_type_annotation", TType.LIST, (short)8);
-        private final test.fixtures.basicannotations.MyUnion myUnion;
+    private final test.fixtures.basicannotations.MyUnion myUnion;
     public static final int _MY_UNION = 9;
     private static final TField MY_UNION_FIELD_DESC = new TField("my_union", TType.STRUCT, (short)9);
     static {
-      NAMES_TO_IDS.put("major", 2);
-      THRIFT_NAMES_TO_IDS.put("major", 2);
-      FIELD_METADATA.put(2, MAJOR_FIELD_DESC);
-      NAMES_TO_IDS.put("_abstract", 1);
-      THRIFT_NAMES_TO_IDS.put("abstract", 1);
-      FIELD_METADATA.put(1, _ABSTRACT_FIELD_DESC);
-      NAMES_TO_IDS.put("annotationWithQuote", 3);
-      THRIFT_NAMES_TO_IDS.put("annotation_with_quote", 3);
-      FIELD_METADATA.put(3, ANNOTATION_WITH_QUOTE_FIELD_DESC);
-      NAMES_TO_IDS.put("class_", 4);
-      THRIFT_NAMES_TO_IDS.put("class_", 4);
-      FIELD_METADATA.put(4, CLASS__FIELD_DESC);
-      NAMES_TO_IDS.put("annotationWithTrailingComma", 5);
-      THRIFT_NAMES_TO_IDS.put("annotation_with_trailing_comma", 5);
-      FIELD_METADATA.put(5, ANNOTATION_WITH_TRAILING_COMMA_FIELD_DESC);
-      NAMES_TO_IDS.put("emptyAnnotations", 6);
-      THRIFT_NAMES_TO_IDS.put("empty_annotations", 6);
-      FIELD_METADATA.put(6, EMPTY_ANNOTATIONS_FIELD_DESC);
-      NAMES_TO_IDS.put("myEnum", 7);
-      THRIFT_NAMES_TO_IDS.put("my_enum", 7);
-      FIELD_METADATA.put(7, MY_ENUM_FIELD_DESC);
-      NAMES_TO_IDS.put("cppTypeAnnotation", 8);
-      THRIFT_NAMES_TO_IDS.put("cpp_type_annotation", 8);
-      FIELD_METADATA.put(8, CPP_TYPE_ANNOTATION_FIELD_DESC);
-      NAMES_TO_IDS.put("myUnion", 9);
-      THRIFT_NAMES_TO_IDS.put("my_union", 9);
-      FIELD_METADATA.put(9, MY_UNION_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/compiler/test/fixtures/basic_annotations/src/module/MyStruct"),
-        MyStruct.class, MyStruct::read0));
+        NAMES_TO_IDS.put("major", 2);
+        THRIFT_NAMES_TO_IDS.put("major", 2);
+        FIELD_METADATA.put(2, MAJOR_FIELD_DESC);
+        NAMES_TO_IDS.put("_abstract", 1);
+        THRIFT_NAMES_TO_IDS.put("abstract", 1);
+        FIELD_METADATA.put(1, _ABSTRACT_FIELD_DESC);
+        NAMES_TO_IDS.put("annotationWithQuote", 3);
+        THRIFT_NAMES_TO_IDS.put("annotation_with_quote", 3);
+        FIELD_METADATA.put(3, ANNOTATION_WITH_QUOTE_FIELD_DESC);
+        NAMES_TO_IDS.put("class_", 4);
+        THRIFT_NAMES_TO_IDS.put("class_", 4);
+        FIELD_METADATA.put(4, CLASS__FIELD_DESC);
+        NAMES_TO_IDS.put("annotationWithTrailingComma", 5);
+        THRIFT_NAMES_TO_IDS.put("annotation_with_trailing_comma", 5);
+        FIELD_METADATA.put(5, ANNOTATION_WITH_TRAILING_COMMA_FIELD_DESC);
+        NAMES_TO_IDS.put("emptyAnnotations", 6);
+        THRIFT_NAMES_TO_IDS.put("empty_annotations", 6);
+        FIELD_METADATA.put(6, EMPTY_ANNOTATIONS_FIELD_DESC);
+        NAMES_TO_IDS.put("myEnum", 7);
+        THRIFT_NAMES_TO_IDS.put("my_enum", 7);
+        FIELD_METADATA.put(7, MY_ENUM_FIELD_DESC);
+        NAMES_TO_IDS.put("cppTypeAnnotation", 8);
+        THRIFT_NAMES_TO_IDS.put("cpp_type_annotation", 8);
+        FIELD_METADATA.put(8, CPP_TYPE_ANNOTATION_FIELD_DESC);
+        NAMES_TO_IDS.put("myUnion", 9);
+        THRIFT_NAMES_TO_IDS.put("my_union", 9);
+        FIELD_METADATA.put(9, MY_UNION_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("facebook.com/thrift/compiler/test/fixtures/basic_annotations/src/module/MyStruct"),
+            MyStruct.class, MyStruct::read0));
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=2, name="major", requiredness=Requiredness.NONE)
     public long getMajor() { return major; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="abstract", requiredness=Requiredness.NONE)
     public String getAbstract() { return _abstract; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="annotation_with_quote", requiredness=Requiredness.NONE)
     public String getAnnotationWithQuote() { return annotationWithQuote; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="class_", requiredness=Requiredness.NONE)
     public String getClass_() { return class_; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="annotation_with_trailing_comma", requiredness=Requiredness.NONE)
     public String getAnnotationWithTrailingComma() { return annotationWithTrailingComma; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="empty_annotations", requiredness=Requiredness.NONE)
     public String getEmptyAnnotations() { return emptyAnnotations; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="my_enum", requiredness=Requiredness.NONE)
     public test.fixtures.basicannotations.MyEnum getMyEnum() { return myEnum; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="cpp_type_annotation", requiredness=Requiredness.NONE)
     public List<String> getCppTypeAnnotation() { return cppTypeAnnotation; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="my_union", requiredness=Requiredness.NONE)
     public test.fixtures.basicannotations.MyUnion getMyUnion() { return myUnion; }
@@ -323,198 +307,205 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(major);
-            _hashCode = 31 * _hashCode + Objects.hashCode(_abstract);
-            _hashCode = 31 * _hashCode + Objects.hashCode(annotationWithQuote);
-            _hashCode = 31 * _hashCode + Objects.hashCode(class_);
-            _hashCode = 31 * _hashCode + Objects.hashCode(annotationWithTrailingComma);
-            _hashCode = 31 * _hashCode + Objects.hashCode(emptyAnnotations);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myEnum);
-            _hashCode = 31 * _hashCode + Objects.hashCode(cppTypeAnnotation);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myUnion);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(_abstract);
+        _hashCode = 31 * _hashCode + Objects.hashCode(annotationWithQuote);
+        _hashCode = 31 * _hashCode + Objects.hashCode(class_);
+        _hashCode = 31 * _hashCode + Objects.hashCode(annotationWithTrailingComma);
+        _hashCode = 31 * _hashCode + Objects.hashCode(emptyAnnotations);
+        _hashCode = 31 * _hashCode + Objects.hashCode(myEnum);
+        _hashCode = 31 * _hashCode + Objects.hashCode(cppTypeAnnotation);
+        _hashCode = 31 * _hashCode + Objects.hashCode(myUnion);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyStruct> asReader() {
       return MyStruct::read0;
     }
 
     public static MyStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
-      MyStruct.Builder builder = new MyStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MAJOR:
-          if (__field.type == TType.I64) {
-            long major = oprot.readI64();
-            builder.setMajor(major);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ABSTRACT:
-          if (__field.type == TType.STRING) {
-            String _abstract = oprot.readString();
-            builder.setAbstract(_abstract);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ANNOTATION_WITH_QUOTE:
-          if (__field.type == TType.STRING) {
-            String annotationWithQuote = oprot.readString();
-            builder.setAnnotationWithQuote(annotationWithQuote);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _CLASS_:
-          if (__field.type == TType.STRING) {
-            String class_ = oprot.readString();
-            builder.setClass_(class_);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ANNOTATION_WITH_TRAILING_COMMA:
-          if (__field.type == TType.STRING) {
-            String annotationWithTrailingComma = oprot.readString();
-            builder.setAnnotationWithTrailingComma(annotationWithTrailingComma);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _EMPTY_ANNOTATIONS:
-          if (__field.type == TType.STRING) {
-            String emptyAnnotations = oprot.readString();
-            builder.setEmptyAnnotations(emptyAnnotations);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MY_ENUM:
-          if (__field.type == TType.I32) {
-            test.fixtures.basicannotations.MyEnum myEnum = test.fixtures.basicannotations.MyEnum.fromInteger(oprot.readI32());
-            builder.setMyEnum(myEnum);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _CPP_TYPE_ANNOTATION:
-          if (__field.type == TType.LIST) {
-            List<String> cppTypeAnnotation;
-                {
-                TList _list = oprot.readListBegin();
-                cppTypeAnnotation = new ArrayList<String>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    String _value1 = oprot.readString();
-                    cppTypeAnnotation.add(_value1);
+        TField __field;
+        oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
+        MyStruct.Builder builder = new MyStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MAJOR:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMajor(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _ABSTRACT:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setAbstract(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setCppTypeAnnotation(cppTypeAnnotation);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MY_UNION:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.basicannotations.MyUnion myUnion = test.fixtures.basicannotations.MyUnion.read0(oprot);
-            builder.setMyUnion(myUnion);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            case _ANNOTATION_WITH_QUOTE:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setAnnotationWithQuote(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _CLASS_:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setClass_(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ANNOTATION_WITH_TRAILING_COMMA:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setAnnotationWithTrailingComma(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _EMPTY_ANNOTATIONS:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setEmptyAnnotations(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MY_ENUM:
+                if (__field.type == TType.I32) {
+                    test.fixtures.basicannotations.MyEnum _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.basicannotations.MyEnum.fromInteger(oprot.readI32());
+                    builder.setMyEnum(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _CPP_TYPE_ANNOTATION:
+                if (__field.type == TType.LIST) {
+                    List<String> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<String>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            String _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readString();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setCppTypeAnnotation(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MY_UNION:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.basicannotations.MyUnion _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.basicannotations.MyUnion.read0(oprot);
+                    builder.setMyUnion(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.major;
-      oprot.writeFieldBegin(MAJOR_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this._abstract;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(_ABSTRACT_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.annotationWithQuote;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(ANNOTATION_WITH_QUOTE_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.class_;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(CLASS__FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.annotationWithTrailingComma;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(ANNOTATION_WITH_TRAILING_COMMA_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.emptyAnnotations;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(EMPTY_ANNOTATIONS_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.basicannotations.MyEnum _iter0 = this.myEnum;
-      oprot.writeFieldBegin(MY_ENUM_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      List<String> _iter0 = this.cppTypeAnnotation;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(CPP_TYPE_ANNOTATION_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
-            for (String _iter1 : _iter0) {
-              oprot.writeString(_iter1);
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.major;
+            oprot.writeFieldBegin(MAJOR_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this._abstract;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(_ABSTRACT_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.basicannotations.MyUnion _iter0 = this.myUnion;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_UNION_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        {
+            String _fbthriftVar0 = this.annotationWithQuote;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(ANNOTATION_WITH_QUOTE_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.class_;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(CLASS__FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.annotationWithTrailingComma;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(ANNOTATION_WITH_TRAILING_COMMA_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.emptyAnnotations;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(EMPTY_ANNOTATIONS_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.basicannotations.MyEnum _fbthriftVar0 = this.myEnum;
+            oprot.writeFieldBegin(MY_ENUM_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            List<String> _fbthriftVar0 = this.cppTypeAnnotation;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(CPP_TYPE_ANNOTATION_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.STRING, _fbthriftVar0.size()));
+                for (String _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeString(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.basicannotations.MyUnion _fbthriftVar0 = this.myUnion;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_UNION_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _MyStructLazy {

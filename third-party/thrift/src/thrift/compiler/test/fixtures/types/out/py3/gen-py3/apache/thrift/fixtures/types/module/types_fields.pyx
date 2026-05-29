@@ -52,7 +52,6 @@ from apache.thrift.fixtures.types.module.containers_FBTHRIFT_ONLY_DO_NOT_USE imp
     List__DependentAdaptedListDep,
     Set__i32,
     Map__i32_i32,
-    Map__i32_string,
 )
 
 

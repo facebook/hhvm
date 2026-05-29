@@ -37,12 +37,11 @@
     args := reqStruct.(*req{{svc.go_name}}{{func.go_name}})
     {{/if func.params.fields?}}
     firstResponse := newResp{{svc.go_name}}{{func.go_name}}()
-    {{#if func.creates_interaction?}}fbthriftInteraction, {{/if func.creates_interaction?}}{{#if func.stream_has_first_response?}}retval, {{/if func.stream_has_first_response?}}elemProducerFunc, initialErr := p.handler.{{func.go_name}}({{!
-        }}ctx{{#if func.params.fields?}}, {{/if}}{{!
-        }}{{#each (array.enumerate func.params.fields with_last=true) as |index field last?|}}{{!
-          }}args.{{field.go_name}}{{!
-          }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-        }}{{/each}})
+    {{#if func.creates_interaction?}}fbthriftInteraction, {{/if func.creates_interaction?}}{{#if func.stream_has_first_response?}}retval, {{/if func.stream_has_first_response?}}elemProducerFunc, initialErr := p.handler.{{func.go_name}}(
+        {{~ ! }}ctx{{#if func.params.fields?}}, {{/if ~}}
+        {{#each func.params.fields as |field| separator=", " ~}}
+          args.{{field.go_name}}
+        {{~ /each}})
     if initialErr != nil {
         {{#if func.exceptions?}}
         switch v := initialErr.(type) {
@@ -124,12 +123,11 @@
     {{#if (not func.oneway?)}}
     result := newResp{{svc.go_name}}{{func.go_name}}()
     {{/if (not func.oneway?)}}
-    {{#if func.creates_interaction?}}fbthriftInteraction, {{/if func.creates_interaction?}}{{#if (not func.return_type.void?)}}retval, {{/if (not func.return_type.void?)}}err := p.handler.{{func.go_name}}({{!
-        }}ctx{{#if func.params.fields?}}, {{/if}}{{!
-        }}{{#each (array.enumerate func.params.fields with_last=true) as |index field last?|}}{{!
-          }}args.{{field.go_name}}{{!
-          }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-        }}{{/each}})
+    {{#if func.creates_interaction?}}fbthriftInteraction, {{/if func.creates_interaction?}}{{#if (not func.return_type.void?)}}retval, {{/if (not func.return_type.void?)}}err := p.handler.{{func.go_name}}(
+        {{~ ! }}ctx{{#if func.params.fields?}}, {{/if ~}}
+        {{#each func.params.fields as |field| separator=", " ~}}
+          args.{{field.go_name}}
+        {{~ /each}})
     if err != nil {
         {{#if func.exceptions?}}
         switch v := err.(type) {
@@ -183,12 +181,11 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunSinkContext(
     args := reqStruct.(*req{{svc.go_name}}{{func.go_name}})
     {{/if func.params.fields?}}
     firstResponse := newResp{{svc.go_name}}{{func.go_name}}()
-    {{#if func.creates_interaction?}}fbthriftInteraction, {{/if func.creates_interaction?}}{{#if func.sink_has_first_response?}}retval, {{/if func.sink_has_first_response?}}elemConsumerFunc, initialErr := p.handler.{{func.go_name}}({{!
-        }}ctx{{#if func.params.fields?}}, {{/if}}{{!
-        }}{{#each (array.enumerate func.params.fields with_last=true) as |index field last?|}}{{!
-          }}args.{{field.go_name}}{{!
-          }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-        }}{{/each}})
+    {{#if func.creates_interaction?}}fbthriftInteraction, {{/if func.creates_interaction?}}{{#if func.sink_has_first_response?}}retval, {{/if func.sink_has_first_response?}}elemConsumerFunc, initialErr := p.handler.{{func.go_name}}(
+        {{~ ! }}ctx{{#if func.params.fields?}}, {{/if ~}}
+        {{#each func.params.fields as |field| separator=", " ~}}
+          args.{{field.go_name}}
+        {{~ /each}})
     if initialErr != nil {
         {{#if func.exceptions?}}
         switch v := initialErr.(type) {
@@ -349,9 +346,6 @@ func (p *{{svc.go_name}}Processor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *{{svc.go_name}}Processor) PackageName() string {
-    return "{{svc.program.go_pkg_name}}"
-}
 {{/if (or svc.interaction? (not svc.extends))}}
 
 func (p *{{svc.go_name}}Processor) GetInteractionProcessors() []thrift.Processor {

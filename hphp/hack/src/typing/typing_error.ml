@@ -523,6 +523,11 @@ module Primary = struct
         what: string;
       }
     | Invalid_type_hint of Pos.t
+    | Gated_by_feature_flag of {
+        pos: Pos.t;
+        name: string;
+        feature: string;
+      }
     | Unsatisfied_req of {
         pos: Pos.t;
         trait_pos: Pos_or_decl.t;

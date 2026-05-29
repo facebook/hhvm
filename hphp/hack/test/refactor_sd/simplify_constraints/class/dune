@@ -15,6 +15,8 @@
    --in-extension
    .php
    --flags
+   --config
+   hack_warnings=false
    --refactor-sound-dynamic
    simplify
    Class

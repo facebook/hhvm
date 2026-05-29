@@ -18,8 +18,8 @@ let defer_class_declaration_threshold t =
 
 let language_feature_logging t = t.GlobalOptions.tco_language_feature_logging
 
-let experimental_feature_enabled t feature =
-  SSet.mem feature t.GlobalOptions.tco_experimental_features
+let legacy_experimental_feature_enabled t feature =
+  SSet.mem feature t.GlobalOptions.tco_legacy_experimental_features
 
 let migration_flag_enabled t flag =
   SSet.mem flag t.GlobalOptions.tco_migration_flags
@@ -29,30 +29,6 @@ let log_inference_constraints t = t.GlobalOptions.tco_log_inference_constraints
 let default = GlobalOptions.default
 
 (* TYPECHECKER-SPECIFIC OPTIONS *)
-
-(**
- * Insist on instantiations for all generic types, even in non-strict files
- *)
-let experimental_generics_arity = "generics_arity"
-
-(**
- * Forbid casting nullable values, since they have unexpected semantics. For
- * example, casting `null` to an int results in `0`, which may or may not be
- * what you were expecting.
- *)
-let experimental_forbid_nullable_cast = "forbid_nullable_cast"
-
-(*
-* Disallow static memoized functions in non-final classes
-*)
-let experimental_disallow_static_memoized = "disallow_static_memoized"
-
-(**
- * Enable abstract const type with default syntax, i.e.
- * abstract const type T as num = int;
- *)
-let experimental_abstract_type_const_with_default =
-  "abstract_type_const_with_default"
 
 let experimental_supportdynamic_type_hint = "supportdynamic_type_hint"
 
@@ -70,24 +46,11 @@ let experimental_all =
     ~f:SSet.add
     ~init:SSet.empty
     [
-      experimental_generics_arity;
-      experimental_forbid_nullable_cast;
-      experimental_disallow_static_memoized;
-      experimental_abstract_type_const_with_default;
       experimental_supportdynamic_type_hint;
       experimental_consider_type_const_enforceable;
       experimental_sound_enum_class_type_const;
       experimental_try_constraint_method_inference;
     ]
-
-let experimental_from_flags ~disallow_static_memoized =
-  if disallow_static_memoized then
-    SSet.singleton experimental_disallow_static_memoized
-  else
-    SSet.empty
-
-let enable_experimental t feature =
-  SSet.add feature t.GlobalOptions.tco_experimental_features
 
 let migration_flags_all = List.fold_right ~init:SSet.empty ~f:SSet.add []
 
@@ -105,6 +68,9 @@ let remote_old_decls_no_limit t = t.GlobalOptions.tco_remote_old_decls_no_limit
 let fetch_remote_old_decls t = t.GlobalOptions.tco_fetch_remote_old_decls
 
 let populate_member_heaps t = t.GlobalOptions.tco_populate_member_heaps
+
+let enable_legacy_experimental t feature =
+  SSet.add feature t.GlobalOptions.tco_legacy_experimental_features
 
 let skip_hierarchy_checks t = t.GlobalOptions.tco_skip_hierarchy_checks
 
@@ -342,3 +308,6 @@ let tco_poly_function_pointers t = t.GlobalOptions.tco_poly_function_pointers
 
 let enable_recursive_case_types t =
   { t with GlobalOptions.recursive_case_types = true }
+
+let is_unstable_feature_enabled t name =
+  SSet.mem name t.GlobalOptions.tco_enabled_unstable_features

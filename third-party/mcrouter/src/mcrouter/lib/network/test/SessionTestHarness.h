@@ -216,11 +216,11 @@ class SessionTestHarness {
   std::unique_ptr<Transaction<McGetRequest>> makeTransaction(
       McServerRequestContext&& ctx,
       McGetRequest&& req) {
-    auto value = req.key_ref()->fullKey().str() + "_value";
+    auto value = req.key()->fullKey().str() + "_value";
     auto replyFn = [ctx = std::move(ctx),
                     value = std::move(value)](const McGetRequest&) mutable {
       McGetReply reply(carbon::Result::FOUND);
-      reply.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, value);
+      reply.value() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, value);
       McServerRequestContext::reply(std::move(ctx), std::move(reply));
     };
     return std::make_unique<Transaction<McGetRequest>>(

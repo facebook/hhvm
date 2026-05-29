@@ -24,20 +24,20 @@ TEST(ServiceDataTest, CounterTest) {
   auto counter = ServiceData::createCounter("c1");
   counter->increment();
   {
-    std::map<std::string, int64_t> values;
+    ServiceData::CounterMap values;
     ServiceData::exportAll(values);
     EXPECT_EQ(1, values["c1"]);
   }
   counter->increment();
   counter->increment();
   {
-    std::map<std::string, int64_t> values;
+    ServiceData::CounterMap values;
     ServiceData::exportAll(values);
     EXPECT_EQ(3, values["c1"]);
   }
   counter->setValue(0);
   {
-    std::map<std::string, int64_t> values;
+    ServiceData::CounterMap values;
     ServiceData::exportAll(values);
     EXPECT_EQ(0, values["c1"]);
   }
@@ -47,7 +47,7 @@ TEST(ServiceDataTest, CounterTest) {
   counter->increment();
   counter1->setValue(5);
   {
-    std::map<std::string, int64_t> values;
+    ServiceData::CounterMap values;
     ServiceData::exportAll(values);
     EXPECT_EQ(1, values["c1"]);
     EXPECT_EQ(5, values["c2"]);
@@ -60,7 +60,7 @@ TEST(ServiceDataTest, CounterTest) {
   counter1->increment();
   ServiceData::createCounter("c2")->increment();
   {
-    std::map<std::string, int64_t> values;
+    ServiceData::CounterMap values;
     ServiceData::exportAll(values);
     EXPECT_EQ(8, values["c2"]);
   }
@@ -79,7 +79,7 @@ TEST(ServiceDataTest, TimeSeriesTest) {
   ts->addValue(1);
 
   {
-    std::map<std::string, int64_t> values;
+    ServiceData::CounterMap values;
     ServiceData::exportAll(values);
     EXPECT_EQ(1, values["foo.avg"]);
     EXPECT_EQ(1, values["foo.avg.60"]);
@@ -113,7 +113,7 @@ TEST(ServiceDataTest, Histogram) {
   }
 
   {
-    std::map<std::string, int64_t> values;
+    ServiceData::CounterMap values;
     ServiceData::exportAll(values);
     EXPECT_EQ(5, values["foo.hist.p5"]);
     EXPECT_EQ(50, values["foo.hist.p50"]);

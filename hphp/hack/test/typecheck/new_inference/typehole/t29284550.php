@@ -11,6 +11,6 @@ function myfunc<T as nonnull, Tr super T>(
   return $f() ?? $default;
 }
 
-function breakit(): @int {
+function breakit(): <<__Soft>> int {
   return myfunc(() ==> launder() ? 42 : 'I broke it', -1);
 }

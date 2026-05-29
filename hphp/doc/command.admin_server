@@ -63,17 +63,3 @@ If program was compiled with USE_JEMALLOC, these commands will become available:
 /jemalloc-prof-deactivate: deactivate heap profiling
 /jemalloc-prof-dump: dump heap profile
     file          optional, filesystem path
-
-If program was compiled with USE_JEMALLOC and ENABLE_HHPROF, these commands will
-become available:
-
-/hhprof/start:    start profiling
-    requestType   "all" or "next"*
-    url           profile next matching url for "next"
-    lgSample      lg sample rate
-    profileType   "current"* or "cumulative"
-/hhprof/status:   configuration and current dump status
-/hhprof/stop:     stop profiling
-/pprof/cmdline:   program command line
-/pprof/heap:      heap dump
-/pprof/symbol:    symbol lookup

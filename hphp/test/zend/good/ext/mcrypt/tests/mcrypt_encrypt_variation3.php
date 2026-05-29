@@ -12,7 +12,7 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixe
 class classWithToString
 {
 	public function __toString() :mixed{
-		return b"Class A object";
+		return "Class A object";
 	}
 }
 
@@ -32,13 +32,13 @@ function entrypoint_mcrypt_encrypt_variation3(): void {
 
   // Initialise function arguments not being substituted (if any)
   $cipher = MCRYPT_TRIPLEDES;
-  $key = b"string_val\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+  $key = "string_val\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
   $mode = MCRYPT_MODE_ECB;
-  $iv = b'01234567';
+  $iv = '01234567';
 
 
   // heredoc string
-  $heredoc = b<<<EOT
+  $heredoc = <<<EOT
 hello world
 EOT;
 

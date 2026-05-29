@@ -20,10 +20,6 @@ Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %
 
 Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 136
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 138
-
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 140
-
 Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/forbid-notice.php on line 143
 
 Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/forbid-notice.php on line 145
@@ -106,8 +102,6 @@ Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCal
 Exception: 'A::func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
 Exception: Method A::static_func not marked dynamic
 Exception: Method A::static_async_func not marked dynamic

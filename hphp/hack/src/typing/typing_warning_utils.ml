@@ -10,8 +10,6 @@ open Core
 module Codes = Error_codes.Warning
 module SN = Naming_special_names
 
-let severity = User_diagnostic.Warning
-
 module type Warning = sig
   type t
 
@@ -170,45 +168,6 @@ module Null_coalesce_always = struct
     ]
 
   let quickfixes _t = []
-end
-
-module Sketchy_null_check = struct
-  type t = Typing_warning.Sketchy_null_check.t
-
-  let code = Codes.SketchyNullCheck
-
-  let codes = [code]
-
-  let code _ = code
-
-  let lint_code _ = Lints_codes.Codes.sketchy_null_check
-
-  let lint_severity _ = Lints_core.Lint_warning
-
-  let claim { Typing_warning.Sketchy_null_check.name; kind; ty } =
-    let name = Option.value name ~default:"$x" in
-
-    "This is a sketchy null check on an expression of type "
-    ^ ty
-    ^ ".\n"
-    ^ "It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `\"\"`, `\"0\"`, empty Containers, and more.\n"
-    ^ "If you want to test for them, please consider doing so explicitly.\n"
-    ^ "If you only meant to test for `null`, "
-    ^
-    match kind with
-    | Typing_warning.Sketchy_null_check.Coalesce ->
-      Printf.sprintf
-        "use `%s ?? $default` instead of `%s ?: $default`"
-        name
-        name
-    | Eq -> Printf.sprintf "use `%s is null` instead" name
-    | Neq -> Printf.sprintf "use `%s is nonnull` instead" name
-
-  let reasons _ = []
-
-  let quickfixes _ = []
-
-  let lint_quickfix _ = None
 end
 
 module Non_disjoint_check = struct
@@ -919,9 +878,9 @@ module Sealed_not_subtype = struct
       {
         Typing_warning.Sealed_not_subtype.verb;
         parent_name;
+        parent_method_name;
         child_name;
         child_kind;
-        _;
       } =
     let parent_name = Utils.strip_ns parent_name in
     let child_name = Utils.strip_ns child_name in
@@ -929,6 +888,10 @@ module Sealed_not_subtype = struct
     ^ " "
     ^ Markdown_lite.md_codify child_name
     ^ " in sealed allowlist for "
+    ^ (match parent_method_name with
+      | Some method_name ->
+        "method " ^ Markdown_lite.md_codify method_name ^ " in "
+      | None -> "")
     ^ Markdown_lite.md_codify parent_name
     ^ ", but does not "
     ^ verb
@@ -953,6 +916,43 @@ module Tany_found = struct
     "This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance."
 
   let reasons _ = []
+
+  let quickfixes _ = []
+end
+
+module Dynamic_call_warning = struct
+  type t = Typing_warning.Dynamic_call.t
+
+  let codes =
+    [
+      Codes.DynamicMethodCall;
+      Codes.DynamicFunctionCall;
+      Codes.DynamicArrayAccess;
+    ]
+
+  let code { Typing_warning.Dynamic_call.kind; _ } =
+    match kind with
+    | Typing_warning.Dynamic_call.Method_invocation -> Codes.DynamicMethodCall
+    | Typing_warning.Dynamic_call.Function_call -> Codes.DynamicFunctionCall
+    | Typing_warning.Dynamic_call.Array_index -> Codes.DynamicArrayAccess
+    | Typing_warning.Dynamic_call.Array_append -> Codes.DynamicArrayAccess
+
+  let claim { Typing_warning.Dynamic_call.kind; actual_type; _ } =
+    let ty_str = Markdown_lite.md_codify actual_type in
+    match kind with
+    | Typing_warning.Dynamic_call.Method_invocation ->
+      Printf.sprintf "Method invoked on a value of type %s" ty_str
+    | Typing_warning.Dynamic_call.Function_call ->
+      Printf.sprintf "Value of type %s called as a function" ty_str
+    | Typing_warning.Dynamic_call.Array_index ->
+      Printf.sprintf "Indexing into a value of type %s" ty_str
+    | Typing_warning.Dynamic_call.Array_append ->
+      Printf.sprintf "Appending to a value of type %s" ty_str
+
+  let reasons
+      { Typing_warning.Dynamic_call.dynamic_reason_pos; dynamic_reason_msg; _ }
+      =
+    [(dynamic_reason_pos, dynamic_reason_msg)]
 
   let quickfixes _ = []
 end
@@ -989,12 +989,45 @@ module Consistent_construct_abstract_final = struct
   let quickfixes _ = []
 end
 
+module Sealed_not_override = struct
+  type t = Typing_warning.Sealed_not_override.t
+
+  let code = Codes.SealedNotOverride
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim
+      {
+        Typing_warning.Sealed_not_override.method_name;
+        method_def;
+        allowlist_class_name;
+        allowlist_class_kind;
+      } =
+    let method_name = Utils.strip_ns method_name in
+    let method_def = Utils.strip_ns method_def in
+    let allowlist_class_name = Utils.strip_ns allowlist_class_name in
+    allowlist_class_kind
+    ^ " "
+    ^ Markdown_lite.md_codify allowlist_class_name
+    ^ " in sealed allowlist for method "
+    ^ Markdown_lite.md_codify method_name
+    ^ " in "
+    ^ Markdown_lite.md_codify method_def
+    ^ ", but does not override method "
+    ^ Markdown_lite.md_codify method_name
+
+  let reasons _ = []
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
   | Typing_warning.Sketchy_equality -> (module Sketchy_equality)
   | Typing_warning.Is_as_always -> (module Is_as_always)
-  | Typing_warning.Sketchy_null_check -> (module Sketchy_null_check)
   | Typing_warning.Non_disjoint_check -> (module Non_disjoint_check)
   | Typing_warning.Cast_non_primitive -> (module Cast_non_primitive)
   | Typing_warning.Truthiness_test -> (module Truthiness_test)
@@ -1023,18 +1056,54 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Tany_found -> (module Tany_found)
   | Typing_warning.Consistent_construct_abstract_final ->
     (module Consistent_construct_abstract_final)
+  | Typing_warning.Dynamic_call -> (module Dynamic_call_warning)
+  | Typing_warning.Sealed_not_override -> (module Sealed_not_override)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :
     (module Lint with type t = x) =
   match kind with
   | Typing_warning.Is_as_always -> (module Is_as_always)
-  | Typing_warning.Sketchy_null_check -> (module Sketchy_null_check)
   | Typing_warning.Non_disjoint_check -> (module Non_disjoint_check)
   | Typing_warning.Cast_non_primitive -> (module Cast_non_primitive)
   | Typing_warning.Truthiness_test -> (module Truthiness_test)
   | Typing_warning.Equality_check -> (module Equality_check)
   | Typing_warning.Duplicate_properties -> (module Duplicated_properties)
+
+(** A type-dependent warning is one that does depends on type precision and
+    therefore can be invalidated by dynamic. Warnings which do not depend on
+    type can always trusted. *)
+let is_type_dependent (type a x) (kind : (x, a) Typing_warning.kind) : bool =
+  match kind with
+  (* Structural: don't depend on type information that could be invalidated by dynamic *)
+  | Typing_warning.Static_call_on_trait -> false
+  | Typing_warning.Static_property_override -> false
+  | Typing_warning.Duplicate_properties -> false
+  | Typing_warning.Class_pointer_to_string -> false
+  | Typing_warning.String_to_class_pointer -> false
+  | Typing_warning.Call_needs_concrete -> false
+  | Typing_warning.Abstract_access_via_static -> false
+  | Typing_warning.Uninstantiable_class_via_static -> false
+  | Typing_warning.Needs_concrete_override -> false
+  | Typing_warning.Unbound_name_warning -> false
+  | Typing_warning.Sealed_not_subtype -> false
+  | Typing_warning.Sealed_not_override -> false
+  | Typing_warning.Consistent_construct_abstract_final -> false
+  (* Type-dependent: rely on type precision that could differ under dynamic *)
+  | Typing_warning.Is_as_always -> true
+  | Typing_warning.Non_disjoint_check -> true
+  | Typing_warning.Cast_non_primitive -> true
+  | Typing_warning.Truthiness_test -> true
+  | Typing_warning.Equality_check -> true
+  | Typing_warning.Sketchy_equality -> true
+  | Typing_warning.Null_coalesce_always -> true
+  | Typing_warning.Switch_redundancy -> true
+  | Typing_warning.No_disjoint_union_check -> true
+  | Typing_warning.Expect_bool_for_condition -> true
+  | Typing_warning.Redundant_nullsafe_operation -> true
+  | Typing_warning.Set_or_keyset_array_get -> true
+  | Typing_warning.Dynamic_call -> true
+  | Typing_warning.Tany_found -> true
 
 let code_is_enabled tcopt code =
   match TypecheckerOptions.hack_warnings tcopt with
@@ -1046,6 +1115,9 @@ let add_ tcopt (type a x) ((pos, kind, warning) : (x, a) Typing_warning.t) :
     unit =
   let (module M) = module_of kind in
   if code_is_enabled tcopt (M.code warning) then
+    let severity =
+      User_diagnostic.Warning { is_trusted = not (is_type_dependent kind) }
+    in
     Diagnostics.add_diagnostic
       {
         User_diagnostic.severity;

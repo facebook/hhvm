@@ -18,8 +18,11 @@
 
 #include "hphp/util/arch.h"
 
+#ifdef __aarch64__
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#else
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#endif
 
 namespace HPHP::jit {
 

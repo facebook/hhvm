@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::edenfs_watcher_types::ApplyIncomingChangesTelemetry;
 use crate::edenfs_watcher_types::AsyncTelemetry;
 use crate::edenfs_watcher_types::TranslationTelemetry;
 
@@ -26,6 +27,22 @@ impl TranslationTelemetry {
             raw_changes_count: 0,
             translated_files_count: 0,
             duration: 0,
+        }
+    }
+}
+
+impl ApplyIncomingChangesTelemetry {
+    pub fn add(&mut self, other: &ApplyIncomingChangesTelemetry) {
+        self.init_spurious_enters += other.init_spurious_enters;
+        self.init_spurious_leaves += other.init_spurious_leaves;
+        self.duplicate_leaves += other.duplicate_leaves;
+    }
+
+    pub fn zero() -> Self {
+        Self {
+            init_spurious_enters: 0,
+            init_spurious_leaves: 0,
+            duplicate_leaves: 0,
         }
     }
 }
@@ -54,6 +71,7 @@ impl AsyncTelemetry {
             notification_count: 0,
             worker_restart_count: 0,
             aggregated_translation_telemetry: TranslationTelemetry::zero(),
+            aggregated_apply_incoming_changes_telemetry: ApplyIncomingChangesTelemetry::zero(),
         }
     }
 }

@@ -31,6 +31,13 @@ enum Enum {
   B = 2,
 }
 
+@cpp.EnumType{type = cpp.EnumUnderlyingType.U8}
+enum SmallEnum {
+  X = 0,
+  Y = 1,
+  Z = 2,
+}
+
 struct StructA {
   1: optional i64 i64_field;
   2: optional string opt_str_field;
@@ -40,6 +47,7 @@ struct StructA {
   11: string str_field;
   12: binary bin_field;
   13: Enum enum_field;
+  14: SmallEnum small_enum_field;
 }
 
 struct StructWithRef {

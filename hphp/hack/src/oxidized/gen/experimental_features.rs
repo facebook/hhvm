@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<603b2dcc091215cd355fd8a2e0ec3378>>
+// @generated SignedSource<<2140890007b2327b2ec3d1d2a5396258>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -126,17 +126,6 @@ pub enum FeatureName {
     /// "named_parameters": can use named parameters in function declarations
     /// `function f(int $x, named int $y);
     NamedParameters,
-    /// "named_parameters_use":
-    /// - will cover both named arguments and named parameters in types.
-    /// - will not cover named parameters in function declarations. That will
-    /// be covered by the "named_parameters" feature. This enables us to
-    /// do staged rollout of named parameters in declarations without making
-    /// calling such function awkward.
-    /// ```
-    /// f(x=4);
-    /// function take((function(int, named int $b)) $f): void {}
-    /// ```
-    NamedParametersUse,
     /// "xhp_type_constants": allows type constants in XHP attribute declarations
     /// `attribute MyClass::TMyType attr;`
     XhpTypeConstants,
@@ -144,6 +133,7 @@ pub enum FeatureName {
     AllowExtendedAwaitSyntax,
     AllowConditionalAwaitSyntax,
     ShapeFieldPunning,
+    RepresentableAs,
     TestFeature,
 }
 impl TrivialDrop for FeatureName {}

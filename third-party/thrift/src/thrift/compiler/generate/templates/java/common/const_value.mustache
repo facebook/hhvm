@@ -47,8 +47,8 @@
 
 {{#let partial map_value captures |collection_element types value as_bean field_hasAdapter|}}
 {{#if as_bean}}com.google.common.collect.Maps.newHashMap({{/if}}ImmutableMap.<{{!
-  }}{{#partial types.boxed_type type=value.type.true_type.key_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}, {{!
-  }}{{#partial types.boxed_type type=value.type.true_type.val_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}>builder()
+  }}{{#partial types.boxed_type type=value.type.true_type.key_type field_hasAdapter=field_hasAdapter}}, {{!
+  }}{{#partial types.boxed_type type=value.type.true_type.val_type field_hasAdapter=field_hasAdapter}}>builder()
         {{#each value.map_elements as |elem|}}
         .put({{#partial collection_element element=elem.key}}, {{#partial collection_element element=elem.value}})
         {{/each}}
@@ -57,7 +57,7 @@
 
 {{#let partial list_value captures |collection_element types value as_bean field_hasAdapter|}}
 {{#if as_bean}}com.google.common.collect.Lists.newArrayList({{/if}}ImmutableList.<{{!
-  }}{{#partial types.boxed_type type=value.type.true_type.elem_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}>builder()
+  }}{{#partial types.boxed_type type=value.type.true_type.elem_type field_hasAdapter=field_hasAdapter}}>builder()
         {{#each value.list_elements as |elem|}}
         .add({{#partial collection_element element=elem}})
         {{/each}}
@@ -66,7 +66,7 @@
 
 {{#let partial set_value captures |collection_element types value as_bean field_hasAdapter|}}
 {{#if as_bean}}com.google.common.collect.Sets.newHashSet({{/if}}ImmutableSet.<{{!
-  }}{{#partial types.boxed_type type=value.type.true_type.elem_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}>builder()
+  }}{{#partial types.boxed_type type=value.type.true_type.elem_type field_hasAdapter=field_hasAdapter}}>builder()
         {{#each value.list_elements as |elem|}}
         .add({{#partial collection_element element=elem}})
         {{/each}}
@@ -110,7 +110,7 @@ io.netty.buffer.Unpooled.wrappedBuffer({{value.quotedString}}.getBytes())
 {{value.quotedString}}.getBytes()
     {{/if field_hasAdapter}}
   {{#else if type.enum?}}
-{{#partial types.boxed_type type=type.true_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}.
+{{#partial types.boxed_type type=type.true_type field_hasAdapter=field_hasAdapter}}.
     {{#if type.enumSkipNameMap?}}
 fromInteger({{value.integer_value}})
     {{#else if value.enum_value?}}
@@ -126,23 +126,23 @@ fromInteger({{value.integer_value}})
     {{#else if type.union?}}
       {{#if (object.notnull? value.structured_elements)}}
         {{#each value.structured_elements as |elem|}}
-{{#partial types.boxed_type type=type.true_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}
+{{#partial types.boxed_type type=type.true_type field_hasAdapter=field_hasAdapter}}
 .from{{elem.field.javaCapitalName}}(
 {{#partial const_value value=elem.value root_const=root_const as_bean=type.true_type.asBean? field_hasAdapter=field_hasAdapter}}
 )
           {{#else}}
             {{! For an empty element list, render the same content as null }}
-new {{#partial types.boxed_type type=type.true_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}()
+new {{#partial types.boxed_type type=type.true_type field_hasAdapter=field_hasAdapter}}()
         {{/each}}
       {{#else}}
-new {{#partial types.boxed_type type=type.true_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}()
+new {{#partial types.boxed_type type=type.true_type field_hasAdapter=field_hasAdapter}}()
       {{/if (object.notnull? value.structured_elements)}}
     {{#else}}
 {{! NOTE: It is impossible to have constants if structs are created in mutable
           bean style. If customer specify a constant of mutable struct type.
           Build will fail.
 }}
-new {{#partial types.boxed_type type=type.true_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}
+new {{#partial types.boxed_type type=type.true_type field_hasAdapter=field_hasAdapter}}
 .Builder()
       {{#if (object.notnull? value.structured_elements)}}
         {{#each value.structured_elements as |elem|}}

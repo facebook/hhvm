@@ -1131,7 +1131,7 @@ class ConfigPreprocessor::BuiltIns {
   }
 
   /**
-   * Returns true if A || B. B is evaluated only if A is true.
+   * Returns true if A || B. B is evaluated only if A is false.
    * A and B should be booleans.
    * Usage: @or(A,B)
    */

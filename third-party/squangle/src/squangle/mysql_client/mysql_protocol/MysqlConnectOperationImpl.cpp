@@ -27,6 +27,8 @@ MysqlConnectOperationImpl::MysqlConnectOperationImpl(
       active_in_client_(true),
       tcp_timeout_handler_(mysql_client->getEventBase(), this) {
   DCHECK(conn_key_); // The connection key is a MySQL connection key
+  // Note: initializeFromConnection() is called in specializedRunImpl()
+  // because it requires being in the event base thread
 }
 
 MysqlConnectOperationImpl::~MysqlConnectOperationImpl() {
@@ -76,6 +78,9 @@ void MysqlConnectOperationImpl::attemptSucceeded(OperationResult result) {
 
 void MysqlConnectOperationImpl::specializedRunImpl() {
   if (attempts_made_ == 0) {
+    // Initialize EventHandler/AsyncTimeout now that we're in the event base
+    // thread This only needs to be done on the first attempt
+    initializeFromConnection();
     conn().initialize();
   } else {
     conn().initMysqlOnly();
@@ -243,7 +248,7 @@ void MysqlConnectOperationImpl::logConnectCompleted(OperationResult result) {
     withOptionalConnectionContext([&](auto& context) {
       context.sslVersion = getMysqlConnection()->getTlsVersion();
     });
-    client_.logConnectionSuccess(
+    client().logConnectionSuccess(
         db::CommonLoggingData(
             getOperationType(),
             elapsed(),
@@ -260,7 +265,7 @@ void MysqlConnectOperationImpl::logConnectCompleted(OperationResult result) {
     } else if (result == OperationResult::Cancelled) {
       reason = db::FailureReason::CANCELLED;
     }
-    client_.logConnectionFailure(
+    client().logConnectionFailure(
         db::CommonLoggingData(
             getOperationType(),
             elapsed(),
@@ -289,9 +294,9 @@ void MysqlConnectOperationImpl::maybeStoreSSLSession() {
       if (connection_context_) {
         connection_context_->sslSessionReused = true;
       }
-      client_.stats()->incrReusedSSLSessions(tlsVersion);
+      client().stats()->incrReusedSSLSessions(tlsVersion);
     } else {
-      client_.stats()->incrSSLSessionNotReused(tlsVersion);
+      client().stats()->incrSSLSessionNotReused(tlsVersion);
     }
   });
 }
@@ -352,7 +357,7 @@ void MysqlConnectOperationImpl::removeClientReference() {
     // It's safe to call the client since we still have a ref counting
     // it won't die before it goes to 0
     active_in_client_ = false;
-    client_.activeConnectionRemoved(conn_key_);
+    client().activeConnectionRemoved(conn_key_);
   }
 }
 

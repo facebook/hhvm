@@ -53,9 +53,14 @@ void CapsuleCodec::onIngress(std::unique_ptr<folly::IOBuf> data, bool eom) {
           connError_ = ErrorCode::PARSE_UNDERFLOW;
           break;
         }
+        auto prevPos = cursor.getCurrentPosition();
         auto res = parseCapsule(cursor);
         if (res.hasError()) {
           connError_ = res.error();
+          break;
+        }
+        if (cursor.getCurrentPosition() - prevPos != curCapsuleLength_) {
+          connError_ = ErrorCode::PARSE_ERROR;
           break;
         }
         parseState_ = ParseState::CAPSULE_HEADER_TYPE;

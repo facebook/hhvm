@@ -70,7 +70,7 @@ public final class OptXcep extends org.apache.thrift.TBaseException implements c
 
         public String getMessage() { return message; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="errorCode", requiredness=Requiredness.OPTIONAL)    public Builder setErrorCode(Integer errorCode) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="errorCode", requiredness=Requiredness.OPTIONAL)    public Builder setErrorCode(Integer errorCode) {
             this.errorCode = errorCode;
             return this;
         }
@@ -93,74 +93,73 @@ public final class OptXcep extends org.apache.thrift.TBaseException implements c
         }
     }
 
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.OPTIONAL)
     public String getMessage() { return message; }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="errorCode", requiredness=Requiredness.OPTIONAL)
     public Integer getErrorCode() { return errorCode; }
 
-    
     public static com.facebook.thrift.payload.Reader<OptXcep> asReader() {
       return OptXcep::read0;
     }
 
     public static OptXcep read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(OptXcep.NAMES_TO_IDS, OptXcep.THRIFT_NAMES_TO_IDS, OptXcep.FIELD_METADATA);
-      OptXcep.Builder builder = new OptXcep.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MESSAGE:
-          if (__field.type == TType.STRING) {
-            String message = oprot.readString();
-            builder.setMessage(message);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ERRORCODE:
-          if (__field.type == TType.I32) {
-            Integer errorCode = oprot.readI32();
-            builder.setErrorCode(errorCode);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(OptXcep.NAMES_TO_IDS, OptXcep.THRIFT_NAMES_TO_IDS, OptXcep.FIELD_METADATA);
+        OptXcep.Builder builder = new OptXcep.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MESSAGE:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMessage(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ERRORCODE:
+                if (__field.type == TType.I32) {
+                    Integer _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setErrorCode(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      String _iter0 = this.message;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MESSAGE_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Integer _iter0 = this.errorCode;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(ERROR_CODE_FIELD_DESC);
-        oprot.writeI32(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            String _fbthriftVar0 = this.message;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MESSAGE_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            Integer _fbthriftVar0 = this.errorCode;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(ERROR_CODE_FIELD_DESC);
+                oprot.writeI32(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _OptXcepLazy {
@@ -169,4 +168,5 @@ public final class OptXcep extends org.apache.thrift.TBaseException implements c
 
     public static OptXcep defaultInstance() {
         return  _OptXcepLazy._DEFAULT;
-    }}
+    }
+}

@@ -23,14 +23,10 @@ Class/method string call (laundered)
 
 Warning: Method Klass::funktion not marked dynamic in %s/dyncall-sample.php on line 57
 
-Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 58
-
 Warning: Method Klass::funktion not marked dynamic in %s/dyncall-sample.php on line 59
 Class/method string call
 
 Warning: Method Klass::funktion not marked dynamic in %s/dyncall-sample.php on line 65
-
-Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 66
 
 Warning: Method Klass::funktion not marked dynamic in %s/dyncall-sample.php on line 67
 Class/method array call

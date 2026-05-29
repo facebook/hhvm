@@ -23,10 +23,10 @@ TEST(RequestExpiryTest, BasicTest) {
   McGetReply reply(carbon::Result::REMOTE_ERROR);
 
   const std::string message(1024, 'a');
-  reply.message_ref() = message;
+  reply.message() = message;
 
-  req.key_ref() = "abcd";
-  req.flags_ref() = 1;
+  req.key() = "abcd";
+  req.flags() = 1;
   setRequestDeadline(req, 10);
   EXPECT_FALSE(isRequestDeadlineExceeded(req));
   /* sleep override */

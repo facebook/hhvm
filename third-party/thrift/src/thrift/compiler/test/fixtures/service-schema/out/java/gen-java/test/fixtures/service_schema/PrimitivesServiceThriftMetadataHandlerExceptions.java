@@ -21,31 +21,31 @@ import com.facebook.thrift.metadata.ThriftStructType;
 import com.facebook.thrift.metadata.ThriftType;
 
 class PrimitivesServiceThriftMetadataHandlerExceptions_0 {
-  static void addExceptions(Map<String, ThriftException> exceptions) {
-    exceptions.put("test.fixtures.service_schema.CustomException", new ThriftException.Builder()
-        .setName("test.fixtures.service_schema.CustomException")
-        .setFields(Arrays.asList(
-            new ThriftField.Builder()
-                .setId(1)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
-                .setName("name")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(2)
-                .setType(ThriftType.fromTEnum(new ThriftEnumType.Builder().setName("test.fixtures.service_schema.Result").build()))
-                .setName("result")
-                .setIsOptional(false)
-                .build()
-        ))
-        .build());
-  }
+    static void addExceptions(Map<String, ThriftException> exceptions) {
+        exceptions.put("test.fixtures.service_schema.CustomException", new ThriftException.Builder()
+            .setName("test.fixtures.service_schema.CustomException")
+            .setFields(Arrays.asList(
+                new ThriftField.Builder()
+                    .setId(1)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
+                    .setName("name")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(2)
+                    .setType(ThriftType.fromTEnum(new ThriftEnumType.Builder().setName("test.fixtures.service_schema.Result").build()))
+                    .setName("result")
+                    .setIsOptional(false)
+                    .build()
+            ))
+            .build());
+    }
 }
 
 class PrimitivesServiceThriftMetadataHandlerExceptions {
-  static Map<String, ThriftException> getExceptions() {
-    Map<String, ThriftException> exceptions = new HashMap<>();
-    PrimitivesServiceThriftMetadataHandlerExceptions_0.addExceptions(exceptions);
-    return exceptions;
-  }
+    static Map<String, ThriftException> getExceptions() {
+        Map<String, ThriftException> exceptions = new HashMap<>();
+        PrimitivesServiceThriftMetadataHandlerExceptions_0.addExceptions(exceptions);
+        return exceptions;
+    }
 }

@@ -252,7 +252,7 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1550,7 +1550,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -2417,7 +2417,7 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
 
   public function readFromJson(string $jsonText): void {
     $this->_type = \facebook\thrift\test\fixtures\adapter\BazEnum::_EMPTY_;
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -3069,20 +3069,20 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'structField') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\Foo_6868>($parsed['structField']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\Foo_6868>($parsed['structField']));
       $_tmp1 = \facebook\thrift\test\fixtures\adapter\Foo::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->structField = $_tmp1;
     }
     if (idx($parsed, 'optionalStructField') !== null) {
-      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\Foo_3943>($parsed['optionalStructField']));
+      $_tmp2 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\Foo_3943>($parsed['optionalStructField']));
       $_tmp3 = \facebook\thrift\test\fixtures\adapter\Foo::withDefaultValues();
       $_tmp3->readFromJson($_tmp2);
       $this->optionalStructField = $_tmp3;
@@ -3092,7 +3092,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       $_container8 = Vector {};
       foreach($_json7 as $_key5 => $_value6) {
         $_elem9 = \facebook\thrift\test\fixtures\adapter\Foo::withDefaultValues();
-        $_tmp10 = \json_encode($_value6);
+        $_tmp10 = \fb_json_encode_force_php_arrays($_value6);
         $_tmp11 = \facebook\thrift\test\fixtures\adapter\Foo::withDefaultValues();
         $_tmp11->readFromJson($_tmp10);
         $_elem9 = $_tmp11;
@@ -3105,7 +3105,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       $_container16 = Vector {};
       foreach($_json15 as $_key13 => $_value14) {
         $_elem17 = \facebook\thrift\test\fixtures\adapter\Foo::withDefaultValues();
-        $_tmp18 = \json_encode($_value14);
+        $_tmp18 = \fb_json_encode_force_php_arrays($_value14);
         $_tmp19 = \facebook\thrift\test\fixtures\adapter\Foo::withDefaultValues();
         $_tmp19->readFromJson($_tmp18);
         $_elem17 = $_tmp19;
@@ -3114,19 +3114,19 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       $this->optionalStructListField = $_container16;
     }
     if (idx($parsed, 'unionField') !== null) {
-      $_tmp20 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\Baz_7352>($parsed['unionField']));
+      $_tmp20 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\Baz_7352>($parsed['unionField']));
       $_tmp21 = \facebook\thrift\test\fixtures\adapter\Baz::withDefaultValues();
       $_tmp21->readFromJson($_tmp20);
       $this->unionField = $_tmp21;
     }
     if (idx($parsed, 'optionalUnionField') !== null) {
-      $_tmp22 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\Baz_7352>($parsed['optionalUnionField']));
+      $_tmp22 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\Baz_7352>($parsed['optionalUnionField']));
       $_tmp23 = \facebook\thrift\test\fixtures\adapter\Baz::withDefaultValues();
       $_tmp23->readFromJson($_tmp22);
       $this->optionalUnionField = $_tmp23;
     }
     if (idx($parsed, 'adaptedStructField') !== null) {
-      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\DirectlyAdapted>($parsed['adaptedStructField']));
+      $_tmp24 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\DirectlyAdapted>($parsed['adaptedStructField']));
       $_tmp25 = \facebook\thrift\test\fixtures\adapter\DirectlyAdapted::withDefaultValues();
       $_tmp25->readFromJson($_tmp24);
       $this->adaptedStructField = $_tmp25;
@@ -3136,7 +3136,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       $_container30 = Vector {};
       foreach($_json29 as $_key27 => $_value28) {
         $_elem31 = \facebook\thrift\test\fixtures\adapter\Foo::withDefaultValues();
-        $_tmp32 = \json_encode($_value28);
+        $_tmp32 = \fb_json_encode_force_php_arrays($_value28);
         $_tmp33 = \facebook\thrift\test\fixtures\adapter\Foo::withDefaultValues();
         $_tmp33->readFromJson($_tmp32);
         $_elem31 = $_tmp33;
@@ -3263,7 +3263,7 @@ class DirectlyAdapted implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -3384,7 +3384,7 @@ class IndependentDirectlyAdapted implements \IThriftSyncStruct, \IThriftStructMe
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -3661,7 +3661,7 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetada
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -3908,7 +3908,7 @@ class TerseAdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, 
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -4065,14 +4065,14 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'a') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\AdaptedA>($parsed['a']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\AdaptedA>($parsed['a']));
       $_tmp1 = \facebook\thrift\test\fixtures\adapter\A::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->a = $_tmp1;
@@ -4148,7 +4148,7 @@ class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -4268,7 +4268,7 @@ class Config implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -4462,7 +4462,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -4996,7 +4996,7 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -6210,7 +6210,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -6459,14 +6459,14 @@ class AdaptTemplatedNestedTestStruct implements \IThriftSyncStruct, \IThriftStru
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'adaptedStruct') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\AdaptTemplatedTestStruct>($parsed['adaptedStruct']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\AdaptTemplatedTestStruct>($parsed['adaptedStruct']));
       $_tmp1 = \facebook\thrift\test\fixtures\adapter\AdaptTemplatedTestStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->adaptedStruct = $_tmp1;
@@ -6737,7 +6737,7 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
 
   public function readFromJson(string $jsonText): void {
     $this->_type = \facebook\thrift\test\fixtures\adapter\AdaptTestUnionEnum::_EMPTY_;
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -6857,7 +6857,7 @@ class AdaptedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -6972,7 +6972,7 @@ class DirectlyAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMetadat
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -7243,32 +7243,32 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'adaptedStruct') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\AdaptedStruct>($parsed['adaptedStruct']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\AdaptedStruct>($parsed['adaptedStruct']));
       $_tmp1 = \facebook\thrift\test\fixtures\adapter\AdaptedStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->adaptedStruct = $_tmp1;
     }
     if (idx($parsed, 'adaptedTypedef') !== null) {
-      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\AdaptedTypedef>($parsed['adaptedTypedef']));
+      $_tmp2 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\AdaptedTypedef>($parsed['adaptedTypedef']));
       $_tmp3 = \facebook\thrift\test\fixtures\adapter\AdaptedStruct::withDefaultValues();
       $_tmp3->readFromJson($_tmp2);
       $this->adaptedTypedef = $_tmp3;
     }
     if (idx($parsed, 'directlyAdapted') !== null) {
-      $_tmp4 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\DirectlyAdaptedStruct>($parsed['directlyAdapted']));
+      $_tmp4 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\DirectlyAdaptedStruct>($parsed['directlyAdapted']));
       $_tmp5 = \facebook\thrift\test\fixtures\adapter\DirectlyAdaptedStruct::withDefaultValues();
       $_tmp5->readFromJson($_tmp4);
       $this->directlyAdapted = $_tmp5;
     }
     if (idx($parsed, 'typedefOfAdapted') !== null) {
-      $_tmp6 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\TypedefOfDirect>($parsed['typedefOfAdapted']));
+      $_tmp6 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\TypedefOfDirect>($parsed['typedefOfAdapted']));
       $_tmp7 = \facebook\thrift\test\fixtures\adapter\DirectlyAdaptedStruct::withDefaultValues();
       $_tmp7->readFromJson($_tmp6);
       $this->typedefOfAdapted = $_tmp7;
@@ -7301,7 +7301,7 @@ class CircularAdaptee implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   );
 
   const type TShape = shape(
-    ?'field' => ?\facebook\thrift\test\fixtures\adapter\CircularStruct::TShape,
+    ?'field' => ?mixed,
   );
   const int STRUCTURAL_ID = 1646887748378279811;
   /**
@@ -7364,7 +7364,7 @@ class CircularAdaptee implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'field') |> $$ === null ? null : (\facebook\thrift\test\fixtures\adapter\CircularStruct::__fromShape($$)),
+      Shapes::idx($shape, 'field') |> $$ === null ? null : (\facebook\thrift\test\fixtures\adapter\CircularStruct::__fromShape(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\CircularStruct::TShape>($$, 'recursive thrift shape'))),
     );
   }
 
@@ -7378,14 +7378,14 @@ class CircularAdaptee implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\CircularStruct>($parsed['field']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\CircularStruct>($parsed['field']));
       $_tmp1 = \facebook\thrift\test\fixtures\adapter\CircularStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->field = $_tmp1;
@@ -7418,7 +7418,7 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   );
 
   const type TShape = shape(
-    ?'field' => ?\facebook\thrift\test\fixtures\adapter\CircularAdaptee::TShape,
+    ?'field' => ?mixed,
   );
   const int STRUCTURAL_ID = 7102646879863324559;
   /**
@@ -7509,7 +7509,7 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'field') |> $$ === null ? null : (\facebook\thrift\test\fixtures\adapter\CircularAdaptee::__fromShape($$)),
+      Shapes::idx($shape, 'field') |> $$ === null ? null : (\facebook\thrift\test\fixtures\adapter\CircularAdaptee::__fromShape(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\CircularAdaptee::TShape>($$, 'recursive thrift shape'))),
     );
   }
 
@@ -7523,14 +7523,14 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\AdaptedCircularAdaptee>($parsed['field']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\AdaptedCircularAdaptee>($parsed['field']));
       $_tmp1 = \facebook\thrift\test\fixtures\adapter\CircularAdaptee::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->field = $_tmp1;
@@ -7657,14 +7657,14 @@ class ReorderedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'reordered_dependent_adapted') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\DeclaredAfterStruct>($parsed['reordered_dependent_adapted']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\DeclaredAfterStruct>($parsed['reordered_dependent_adapted']));
       $_tmp1 = \facebook\thrift\test\fixtures\adapter\DeclaredAfterStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->reordered_dependent_adapted = $_tmp1;
@@ -7746,7 +7746,7 @@ class DeclaredAfterStruct implements \IThriftSyncStruct, \IThriftStructMetadata,
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -7859,7 +7859,7 @@ class RenamedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -7976,7 +7976,7 @@ class SameNamespaceStruct implements \IThriftSyncStruct, \IThriftStructMetadata,
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -8063,7 +8063,7 @@ class HeapAllocated implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -8185,14 +8185,14 @@ class MoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'ptr') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\HeapAllocated>($parsed['ptr']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\HeapAllocated>($parsed['ptr']));
       $_tmp1 = \facebook\thrift\test\fixtures\adapter\HeapAllocated::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->ptr = $_tmp1;
@@ -8308,7 +8308,7 @@ class AlsoMoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -8395,7 +8395,7 @@ class ApplyAdapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -8474,7 +8474,7 @@ class TransitiveAdapted implements \IThriftSyncStruct, \IThriftStructMetadata, \
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -8677,7 +8677,7 @@ class CountingStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -8799,7 +8799,7 @@ class Person implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -8908,7 +8908,7 @@ class Person2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -9034,7 +9034,7 @@ class RenamedStructWithStructAdapterAndFieldAdapter implements \IThriftSyncStruc
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");

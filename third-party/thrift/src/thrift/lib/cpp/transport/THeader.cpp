@@ -27,6 +27,7 @@
 #include <folly/lang/Bits.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/concurrency/Thread.h>
+#include <thrift/lib/cpp/protocol/TProtocolException.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp/util/THttpParser.h>
 #include <thrift/lib/cpp/util/VarintUtils.h>
@@ -124,10 +125,16 @@ unique_ptr<IOBuf> THeader::removeUnframed(IOBufQueue* queue, size_t& needed) {
     proto.skip(TType::T_STRUCT);
     proto.readMessageEnd();
   } catch (const std::out_of_range&) {
-    // We don't have the full data yet.  We can't tell exactly
-    // how many bytes we need, but it is at least one.
+    // Cursor underflow — incomplete data.
     needed = 1;
     return nullptr;
+  } catch (const TProtocolException& ex) {
+    if (ex.getType() == TProtocolException::INVALID_DATA) {
+      // Truncated string/container — incomplete data.
+      needed = 1;
+      return nullptr;
+    }
+    throw;
   }
 
   return queue->split(proto.getCursorPosition());

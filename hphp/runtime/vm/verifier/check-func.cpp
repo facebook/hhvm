@@ -871,10 +871,8 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = CV;
     }
     return m_tmp_sig;
-  case Op::FCallClsMethod:
   case Op::FCallClsMethodM:
   case Op::FCallClsMethodD:
-  case Op::FCallClsMethodS:
   case Op::FCallClsMethodSD:
   case Op::FCallCtor:
   case Op::FCallFunc:

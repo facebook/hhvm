@@ -18,6 +18,6 @@ public final class Constants {
     public static final test.fixtures.includes.transitive.Foo EXAMPLE_FOO = construct_EXAMPLE_FOO();
 
     private static test.fixtures.includes.transitive.Foo construct_EXAMPLE_FOO() {
-      return new test.fixtures.includes.transitive.Foo.Builder().setA(2L).build();
+        return new test.fixtures.includes.transitive.Foo.Builder().setA(2L).build();
     }
 }

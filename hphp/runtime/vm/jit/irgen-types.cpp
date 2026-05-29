@@ -1400,10 +1400,18 @@ void raiseClsmethCompatTypeHint(
   }
 }
 
-void verifyRetType(IRGS& env, int32_t id, int32_t ind,
-                       bool onlyCheckNullability) {
+void verifyRetType(
+  IRGS& env,
+  int32_t id,
+  BCSPRelOffset stackOffset,
+  HPHP::VerifyRetKind kind
+) {
   auto const func = curFunc(env);
-  auto const verifyFunc = [&] (const TypeConstraint& tc, SSATmp* inputVal) -> SSATmp* {
+  auto const verifyFunc = [&] (
+    const TypeConstraint& tc,
+    SSATmp* inputVal,
+    bool onlyCheckNullability
+  ) -> SSATmp* {
     return verifyTypeImpl(
       env,
       tc,
@@ -1463,19 +1471,33 @@ void verifyRetType(IRGS& env, int32_t id, int32_t ind,
     );
   };
 
-  auto const val = topC(env, BCSPRelOffset { ind }, DataTypeGeneric);
-  assertx(ind >= 0);
+  auto const val = topC(env, stackOffset, DataTypeGeneric);
+  assertx(stackOffset.offset >= 0);
   auto const& tic = (id == TypeConstraint::ReturnId)
     ? func->returnTypeConstraints()
     : func->params()[id].typeConstraints;
 
   auto updatedVal = val;
-  for (auto const& tc : tic.range()) {
-    updatedVal = verifyFunc(tc, updatedVal);
+  if (Cfg::Eval::EnforceOverriddenReturnTypes
+      && id == TypeConstraint::ReturnId) {
+    for (auto const& tc : tic.range()) {
+      if (!tc.isInherited() && kind == VerifyRetKind::None) continue;
+      updatedVal = verifyFunc(
+        tc,
+        updatedVal,
+        !tc.isInherited() && kind == VerifyRetKind::NonNull
+      );
+    }
+  } else {
+    if (kind == VerifyRetKind::None) return;
+    for (auto const& tc : tic.range()) {
+      if (tc.isInherited()) continue;
+      updatedVal = verifyFunc(tc, updatedVal, kind == VerifyRetKind::NonNull);
+    }
   }
 
   if (updatedVal != val) {
-    auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
+    auto const offset = offsetFromIRSP(env, stackOffset);
     gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), updatedVal);
     env.irb->exceptionStackBoundary();
   }
@@ -1682,7 +1704,7 @@ void emitVerifyTypeTS(IRGS& env) {
 }
 
 void emitVerifyOutType(IRGS& env, int32_t paramId) {
-  verifyRetType(env, paramId, 0, false);
+  verifyRetType(env, paramId, BCSPRelOffset {0}, HPHP::VerifyRetKind::All);
 }
 
 void emitVerifyParamType(IRGS& env, int32_t paramId) {

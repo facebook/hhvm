@@ -650,8 +650,8 @@
         }
       }
     },
-    "NonOrderable" : {
-      "lineno" : 441,
+    "FastClient" : {
+      "lineno" : 440,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -659,17 +659,35 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 441,
+          "line" : 440,
           "column" : 1
         },
         "end" : {
-          "line" : 442,
+          "line" : 441,
+          "column" : 21
+        }
+      }
+    },
+    "NonOrderable" : {
+      "lineno" : 452,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 452,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 453,
           "column" : 23
         }
       }
     },
     "DeclareHashSpecialization" : {
-      "lineno" : 449,
+      "lineno" : 460,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -677,17 +695,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 449,
+          "line" : 460,
           "column" : 1
         },
         "end" : {
-          "line" : 451,
+          "line" : 462,
           "column" : 36
         }
       }
     },
     "DeclareEqualToSpecialization" : {
-      "lineno" : 458,
+      "lineno" : 469,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -695,11 +713,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 458,
+          "line" : 469,
           "column" : 1
         },
         "end" : {
-          "line" : 460,
+          "line" : 471,
           "column" : 39
         }
       }

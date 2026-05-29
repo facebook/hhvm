@@ -405,7 +405,7 @@ void HTTPServer::forceStop() {
     }
     for (auto& it : acceptors_) {
       for (auto& acceptor : it.second) {
-        if (acceptor.getEventBaseKeepalive()) {
+        if (auto keepAlive = acceptor.getEventBaseKeepalive()) {
           acceptor.forceStop();
         } // else, the acceptor already drained
       }

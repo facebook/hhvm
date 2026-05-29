@@ -21,24 +21,24 @@ import com.facebook.thrift.metadata.ThriftStructType;
 import com.facebook.thrift.metadata.ThriftType;
 
 class PubSubStreamingServiceThriftMetadataHandlerExceptions_0 {
-  static void addExceptions(Map<String, ThriftException> exceptions) {
-    exceptions.put("test.fixtures.stream.FooEx", new ThriftException.Builder()
-        .setName("test.fixtures.stream.FooEx")
-        .setFields(Arrays.asList(
-        ))
-        .build());
-    exceptions.put("test.fixtures.stream.FooEx2", new ThriftException.Builder()
-        .setName("test.fixtures.stream.FooEx2")
-        .setFields(Arrays.asList(
-        ))
-        .build());
-  }
+    static void addExceptions(Map<String, ThriftException> exceptions) {
+        exceptions.put("test.fixtures.stream.FooEx", new ThriftException.Builder()
+            .setName("test.fixtures.stream.FooEx")
+            .setFields(Arrays.asList(
+            ))
+            .build());
+        exceptions.put("test.fixtures.stream.FooEx2", new ThriftException.Builder()
+            .setName("test.fixtures.stream.FooEx2")
+            .setFields(Arrays.asList(
+            ))
+            .build());
+    }
 }
 
 class PubSubStreamingServiceThriftMetadataHandlerExceptions {
-  static Map<String, ThriftException> getExceptions() {
-    Map<String, ThriftException> exceptions = new HashMap<>();
-    PubSubStreamingServiceThriftMetadataHandlerExceptions_0.addExceptions(exceptions);
-    return exceptions;
-  }
+    static Map<String, ThriftException> getExceptions() {
+        Map<String, ThriftException> exceptions = new HashMap<>();
+        PubSubStreamingServiceThriftMetadataHandlerExceptions_0.addExceptions(exceptions);
+        return exceptions;
+    }
 }

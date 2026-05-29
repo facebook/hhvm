@@ -34,32 +34,32 @@ struct TypedMockMcOnRequest {
   explicit TypedMockMcOnRequest(MockMc& mc) : mc_(mc) {}
 
   void onRequest(McServerRequestContext&& ctx, McGetRequest&& req) {
-    auto item = mc_.get(req.key_ref()->fullKey());
+    auto item = mc_.get(req.key()->fullKey());
     McGetReply reply;
     if (!item) {
-      reply.result_ref() = carbon::Result::NOTFOUND;
+      reply.result() = carbon::Result::NOTFOUND;
     } else {
-      reply.result_ref() = carbon::Result::FOUND;
-      reply.value_ref() = *item->value;
-      reply.flags_ref() = item->flags;
+      reply.result() = carbon::Result::FOUND;
+      reply.value() = *item->value;
+      reply.flags() = item->flags;
     }
     McServerRequestContext::reply(std::move(ctx), std::move(reply));
   }
 
   void onRequest(McServerRequestContext&& ctx, McSetRequest&& req) {
     mc_.set(
-        req.key_ref()->fullKey(),
-        MockMc::Item(*req.value_ref(), *req.exptime_ref(), *req.flags_ref()));
+        req.key()->fullKey(),
+        MockMc::Item(*req.value(), *req.exptime(), *req.flags()));
     McSetReply reply(carbon::Result::STORED);
     McServerRequestContext::reply(std::move(ctx), std::move(reply));
   }
 
   void onRequest(McServerRequestContext&& ctx, McDeleteRequest&& req) {
     McDeleteReply reply;
-    if (mc_.del(req.key_ref()->fullKey())) {
-      reply.result_ref() = carbon::Result::DELETED;
+    if (mc_.del(req.key()->fullKey())) {
+      reply.result() = carbon::Result::DELETED;
     } else {
-      reply.result_ref() = carbon::Result::NOTFOUND;
+      reply.result() = carbon::Result::NOTFOUND;
     }
 
     McServerRequestContext::reply(std::move(ctx), std::move(reply));
@@ -134,7 +134,7 @@ TEST(CarbonMockMc, basic) {
   McGetReply getReply;
   reader.readRawInto(getReply);
 
-  EXPECT_EQ(carbon::Result::FOUND, *getReply.result_ref());
+  EXPECT_EQ(carbon::Result::FOUND, *getReply.result());
 
   const auto resultVal = carbon::valueRangeSlow(getReply);
   EXPECT_EQ("value", resultVal.str());

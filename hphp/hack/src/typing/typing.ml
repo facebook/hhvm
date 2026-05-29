@@ -483,15 +483,37 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
   with
   | None -> env
   | Some { ua_name = _; ua_params } ->
-    let ( = ) = String.equal in
     List.fold ua_params ~init:env ~f:(fun env (_, _, feature) ->
         match feature with
-        | Aast.String s when s = SN.UnstableFeatures.expression_trees ->
-          Env.map_tcopt
-            ~f:(fun t -> TCO.set_tco_enable_expression_trees t true)
-            env
-        | Aast.String s when s = SN.UnstableFeatures.recursive_case_types ->
-          Env.map_tcopt ~f:TCO.enable_recursive_case_types env
+        | Aast.String s ->
+          (* Always add to the unstable features set *)
+          let env =
+            Env.map_tcopt
+              ~f:(fun t ->
+                GlobalOptions.
+                  {
+                    t with
+                    tco_enabled_unstable_features =
+                      SSet.add s t.tco_enabled_unstable_features;
+                  })
+              env
+          in
+          (* Then set any feature-specific options *)
+          let env =
+            if String.equal s SN.UnstableFeatures.expression_trees then
+              Env.map_tcopt
+                ~f:(fun t -> TCO.set_tco_enable_expression_trees t true)
+                env
+            else
+              env
+          in
+          let env =
+            if String.equal s SN.UnstableFeatures.recursive_case_types then
+              Env.map_tcopt ~f:TCO.enable_recursive_case_types env
+            else
+              env
+          in
+          env
         | _ -> env)
 
 let check_expected_ty_res
@@ -1276,6 +1298,7 @@ end = struct
         fe_internal;
         fe_package;
         fe_package_requirement;
+        fe_gated_by_feature_flag;
         _;
       }
       env =
@@ -1310,7 +1333,20 @@ end = struct
           w.classptr_reference_warning);
     Option.iter
       ~f:(Typing_error_utils.add_typing_error ~env)
-      (Typing_error.multiple_opt (other_errs @ access_errs))
+      (Typing_error.multiple_opt (other_errs @ access_errs));
+    (* Check feature flag gating *)
+    Option.iter fe_gated_by_feature_flag ~f:(fun feature_name ->
+        let tcopt = Env.get_tcopt env in
+        if
+          not
+            (TypecheckerOptions.is_unstable_feature_enabled tcopt feature_name)
+        then
+          Typing_error_utils.add_typing_error
+            ~env
+            Typing_error.(
+              primary
+              @@ Primary.Gated_by_feature_flag
+                   { pos = use_pos; name; feature = feature_name }))
 
   let validate_polymorphic ft_tparams use_pos env =
     let explicit_errs =
@@ -2459,14 +2495,28 @@ type type_split_info = {
 }
 
 module rec Expr : sig
+  (** Controls which access checks are performed when typing expressions
+      inside attribute contexts.
+      - [Check_all]: default — run all visibility, module, and package checks.
+      - [Skip_package]: skip package boundary checks only, keep module/internal
+        and private/protected checks. Used for first-pass attribute constructor
+        arg typing where [is_attribute] suppresses package lint.
+      - [Skip_all_access]: skip all top-level access and class-member visibility
+        checks. Used for the second-pass [user_attribute] re-typing for TAST
+        construction, where checks were already performed in the first pass. *)
+  type attribute_check_policy =
+    | Check_all
+    | Skip_package
+    | Skip_all_access
+
   module Context : sig
     type t = {
       is_using_clause: bool;
           (** Set to [true] when the subexpression we are typing occurs inside a [using_stmt]. *)
       valkind: Valkind.t;
           (** Indicates whether the subexpression we are typing appears in lvalue top-level, lvalue subexpression or another position *)
-      is_attribute_param: bool;
-          (** Set to [true] when the subexpression we are typing occurs inside a [user_attribute]. *)
+      attribute_check_policy: attribute_check_policy;
+          (** Controls which access checks are skipped when typing attribute parameters. *)
       in_await: locl_phase Reason.t_ option;
           (** Set to [Some] when the subexpression we are typing occurs inside an [Await] expression. *)
       lhs_of_null_coalesce: bool;
@@ -2519,6 +2569,7 @@ module rec Expr : sig
   val call :
     expected:ExpectedTy.t option ->
     ?nullsafe:pos option ->
+    ?attribute_check_policy:attribute_check_policy ->
     in_await:locl_phase Reason.t_ option ->
     ?dynamic_func:Typing_argument.dyn_func_kind ->
     (* Span of whole call expression e.g. $x->meth($y) *)
@@ -2565,11 +2616,17 @@ module rec Expr : sig
     Valkind.t ->
     env * Tast.expr * locl_ty
 end = struct
+  type attribute_check_policy =
+    | Check_all
+    | Skip_package
+    | Skip_all_access
+  [@@deriving show]
+
   module Context = struct
     type t = {
       is_using_clause: bool;
       valkind: Valkind.t;
-      is_attribute_param: bool;
+      attribute_check_policy: attribute_check_policy;
       in_await: locl_phase Reason.t_ option; [@opaque]
       lhs_of_null_coalesce: bool;
       accept_using_var: bool;
@@ -2583,7 +2640,7 @@ end = struct
       {
         is_using_clause = false;
         valkind = Valkind.Other;
-        is_attribute_param = false;
+        attribute_check_policy = Check_all;
         in_await = None;
         lhs_of_null_coalesce = false;
         accept_using_var = false;
@@ -2836,8 +2893,7 @@ end = struct
       let (env, tel, tyl) = lvalues env el in
       (env, te :: tel, ty :: tyl)
 
-  (* $x ?? 0 is handled similarly to $x ?: 0, except that the latter will also
-   * look for sketchy null checks in the condition. *)
+  (* $x ?? 0 is handled similarly to $x ?: 0. *)
   (* TODO TAST: type refinement should be made explicit in the typed AST *)
   and eif env ~(expected : ExpectedTy.t option) ~in_await p c e1 e2 =
     let (env, tc, tyc) = expr ~expected:None ~ctxt:Context.default env c in
@@ -3182,7 +3238,7 @@ end = struct
     | Hole (e, _, _, _) ->
       expr_
         ~expected
-        ~ctxt:Context.{ ctxt with is_attribute_param = false }
+        ~ctxt:Context.{ ctxt with attribute_check_policy = Check_all }
         env
         e
     | Invalid expr_opt ->
@@ -3363,7 +3419,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
               }
@@ -3479,7 +3535,7 @@ end = struct
               Context.
                 {
                   default with
-                  is_attribute_param = ctxt.is_attribute_param;
+                  attribute_check_policy = ctxt.attribute_check_policy;
                   accept_using_var = false;
                   check_defined = ctxt.check_defined;
                 }
@@ -3753,7 +3809,7 @@ end = struct
               Context.
                 {
                   default with
-                  is_attribute_param = ctxt.is_attribute_param;
+                  attribute_check_policy = ctxt.attribute_check_policy;
                   accept_using_var = false;
                   check_defined = ctxt.check_defined;
                 }
@@ -3788,7 +3844,7 @@ end = struct
                 Context.
                   {
                     default with
-                    is_attribute_param = ctxt.is_attribute_param;
+                    attribute_check_policy = ctxt.attribute_check_policy;
                     accept_using_var = false;
                     check_defined = ctxt.check_defined;
                   }
@@ -3868,7 +3924,7 @@ end = struct
       let (env, ty) = Env.fresh_type_error env p in
       make_result env p (Aast.Array_get (te, None)) ty
     | Array_get (e1, Some e2) ->
-      let Context.{ is_attribute_param; lhs_of_null_coalesce; valkind; _ } =
+      let Context.{ attribute_check_policy; lhs_of_null_coalesce; valkind; _ } =
         ctxt
       in
       let (env, te1, ty1) =
@@ -3881,7 +3937,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param;
+                attribute_check_policy;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
               }
@@ -3941,7 +3997,7 @@ end = struct
                Context.
                  {
                    default with
-                   is_attribute_param = ctxt.is_attribute_param;
+                   attribute_check_policy = ctxt.attribute_check_policy;
                    accept_using_var = true;
                    check_defined = ctxt.check_defined;
                  })
@@ -4085,7 +4141,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
               }
@@ -4113,7 +4169,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
               }
@@ -4144,7 +4200,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
               }
@@ -4184,7 +4240,7 @@ end = struct
           (Class_id.classname_error
              env
              TypecheckerOptions.class_pointer_ban_classname_class_const)
-        ~is_attribute_param:ctxt.Context.is_attribute_param
+        ~attribute_check_policy:ctxt.Context.attribute_check_policy
         (cid, mid)
     | Class_get (((_, _, cid_) as cid), mid, Is_prop)
       when Env.FakeMembers.is_valid_static env cid_ (snd mid) ->
@@ -4197,7 +4253,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
               }
@@ -4252,7 +4308,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
               }
@@ -4267,7 +4323,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = true;
                 check_defined = ctxt.check_defined;
               }
@@ -4290,7 +4346,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = true;
                 check_defined = ctxt.check_defined;
               }
@@ -4386,7 +4442,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = true;
                 check_defined = ctxt.check_defined;
               }
@@ -4413,7 +4469,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
               }
@@ -4504,7 +4560,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 is_using_clause = ctxt.is_using_clause;
                 in_await = Some (Reason.witness p);
                 accept_using_var = false;
@@ -4523,7 +4579,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
               }
@@ -4553,7 +4609,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 is_using_clause = ctxt.is_using_clause;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
@@ -4597,14 +4653,14 @@ end = struct
         (Aast.New (tc, tal, tel, typed_unpack_element, ctor_fty))
         ty
     | Cast (hint, e) ->
-      let (env, te, ty2) =
+      let (env, te, _ty2) =
         expr
           ~expected:None
           ~ctxt:
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 in_await = ctxt.in_await;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
@@ -4613,31 +4669,10 @@ end = struct
           e
       in
       let env = might_throw ~join_pos:p env in
-      let (env, ty_err_opt1) =
-        if
-          TCO.experimental_feature_enabled
-            (Env.get_tcopt env)
-            TCO.experimental_forbid_nullable_cast
-          && not (TUtils.is_mixed env ty2)
-        then
-          SubType.sub_type_or_fail env ty2 (MakeType.nonnull (get_reason ty2))
-          @@ Some
-               Typing_error.(
-                 primary
-                 @@ Primary.Nullable_cast
-                      {
-                        pos = p;
-                        ty_name = lazy (Typing_print.error env ty2);
-                        ty_pos = get_pos ty2;
-                      })
-        else
-          (env, None)
-      in
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
-      let ((env, ty_err_opt2), ty) =
+      let ((env, ty_err_opt), ty) =
         Phase.localize_hint_no_subst env ~ignore_errors:false hint
       in
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       make_result env p (Aast.Cast (hint, te)) ty
     | ExpressionTree et -> Expression_tree.expression_tree env p et
     | Is (e, hint) ->
@@ -4648,7 +4683,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
               }
@@ -4669,7 +4704,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
               }
@@ -4736,7 +4771,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
               }
@@ -4814,7 +4849,7 @@ end = struct
             Context.
               {
                 default with
-                is_attribute_param = ctxt.is_attribute_param;
+                attribute_check_policy = ctxt.attribute_check_policy;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
               }
@@ -4868,7 +4903,7 @@ end = struct
               Context.
                 {
                   default with
-                  is_attribute_param = ctxt.is_attribute_param;
+                  attribute_check_policy = ctxt.attribute_check_policy;
                   accept_using_var = false;
                   check_defined = ctxt.check_defined;
                 }
@@ -4999,7 +5034,7 @@ end = struct
 
   and class_const
       ~under_type_structure
-      ?(is_attribute_param = false)
+      ?(attribute_check_policy = Check_all)
       ?(incl_tc = false)
       ?(require_class_ptr = Class_id.Pass)
       env
@@ -5008,7 +5043,7 @@ end = struct
     let is_class_ptr = String.equal (snd mid) SN.Members.mClass in
     let (env, _tal, ce, cty) =
       Class_id.class_expr
-        ~is_attribute_param
+        ~attribute_check_policy
         ~is_const:true
         ~is_classptr:is_class_ptr
         ~require_class_ptr
@@ -5365,7 +5400,22 @@ end = struct
       let env = Env.set_tyvar_variance env new_ty in
       let (env, tel, typed_unpack_element, ctor_fty, should_forget_fakes) =
         let env = check_expected_ty "New" env new_ty expected in
-        call_construct p env class_info params el unpacked_element cid new_ty
+        let attribute_check_policy =
+          if is_attribute then
+            Skip_package
+          else
+            Check_all
+        in
+        call_construct
+          ~attribute_check_policy
+          p
+          env
+          class_info
+          params
+          el
+          unpacked_element
+          cid
+          new_ty
       in
       let should_forget_fakes_acc =
         should_forget_fakes_acc || should_forget_fakes
@@ -5455,15 +5505,30 @@ end = struct
         class_types_and_ctor_types
     in
     let check_args env =
+      let attribute_check_policy =
+        if is_attribute then
+          Skip_package
+        else
+          Check_all
+      in
       let (env, tel, _) =
-        argument_list_exprs (expr ~expected:None ~ctxt:Context.default) env el
+        argument_list_exprs
+          (expr
+             ~expected:None
+             ~ctxt:Context.{ default with attribute_check_policy })
+          env
+          el
       in
       let (env, typed_unpack_element, _) =
         match unpacked_element with
         | None -> (env, None, MakeType.nothing Reason.none)
         | Some unpacked_element ->
           let (env, e, ty) =
-            expr ~expected:None ~ctxt:Context.default env unpacked_element
+            expr
+              ~expected:None
+              ~ctxt:Context.{ default with attribute_check_policy }
+              env
+              unpacked_element
           in
           (env, Some e, ty)
       in
@@ -5863,6 +5928,39 @@ end = struct
                  { pos; msg = "Second argument is not a string"; fn });
         expr_error env pos e
     in
+    let type_structure_class_impl ~fn ~make_ty pos =
+      let should_forget_fakes = false in
+      match el with
+      | [e1; e2] ->
+        let (env, te, const_ty) = type_structure_impl ~fn pos e1 e2 in
+        let (env, const_ty) = Env.expand_type env const_ty in
+        let (env, const_ty) = Typing_dynamic_utils.strip_dynamic env const_ty in
+        let result =
+          match get_node const_ty with
+          | Tnewtype (name, [ty_arg], _)
+            when String.equal name SN.FB.cTypeStructure ->
+            if Typing_structure.is_enum_or_classish env ty_arg then
+              let ty = make_ty (get_reason const_ty) ty_arg in
+              (env, te, ty)
+            else begin
+              Typing_error_utils.add_typing_error
+                ~env
+                Typing_error.(
+                  primary
+                  @@ Primary.Illegal_type_structure
+                       {
+                         pos;
+                         msg =
+                           "The type constant does not resolve to a classish type";
+                         fn;
+                       });
+              expr_error env pos e
+            end
+          | _ -> expr_error env pos e
+        in
+        (result, should_forget_fakes)
+      | _ -> assert false
+    in
     match fun_expr with
     (* Special top-level function *)
     | Id ((pos, x) as id) when SN.StdlibFunctions.needs_special_dispatch x ->
@@ -5924,14 +6022,8 @@ end = struct
               match Typing_dynamic_utils.try_strip_dynamic env ty with
               | (env, None) -> (env, ty)
               | (env, Some ty) ->
-                let r =
-                  let into = Reason.unsafe_cast p in
-                  let (ty, _, _) = el in
-                  let from = get_reason ty in
-                  Typing_reason.flow_unsafe_cast ~from ~into
-                in
-
-                (env, MakeType.locl_like r (with_reason ty r))
+                let r = Reason.unsafe_cast p in
+                (env, MakeType.locl_like r (Typing_defs.with_reason ty r))
             in
             make_result env p te ty
         in
@@ -6044,41 +6136,16 @@ end = struct
                SN.StdlibFunctions.type_structure_classname
              && Int.equal (List.length el) 2
              && Option.is_none unpacked_element ->
-        let should_forget_fakes = false in
-        (match el with
-        | [e1; e2] ->
-          let (env, te, const_ty) =
-            type_structure_impl ~fn:type_structure_classname pos e1 e2
-          in
-          let (env, const_ty) = Env.expand_type env const_ty in
-          let (env, const_ty) =
-            Typing_dynamic_utils.strip_dynamic env const_ty
-          in
-          let result =
-            match get_node const_ty with
-            | Tnewtype (name, [ty_arg], _)
-              when String.equal name SN.FB.cTypeStructure ->
-              if Typing_structure.is_enum_or_classish env ty_arg then
-                let ty = MakeType.classname (get_reason const_ty) [ty_arg] in
-                (env, te, ty)
-              else begin
-                Typing_error_utils.add_typing_error
-                  ~env
-                  Typing_error.(
-                    primary
-                    @@ Primary.Illegal_type_structure
-                         {
-                           pos;
-                           msg =
-                             "The type constant does not resolve to a classish type";
-                           fn = type_structure_classname;
-                         });
-                expr_error env pos e
-              end
-            | _ -> expr_error env pos e
-          in
-          (result, should_forget_fakes)
-        | _ -> assert false)
+        let make_ty r ty_arg = MakeType.classname r [ty_arg] in
+        type_structure_class_impl ~fn:type_structure_classname ~make_ty pos
+      | type_structure_class
+        when String.equal
+               type_structure_class
+               SN.StdlibFunctions.type_structure_class
+             && Int.equal (List.length el) 2
+             && Option.is_none unpacked_element ->
+        let make_ty r ty_arg = mk (r, Tclass_ptr ty_arg) in
+        type_structure_class_impl ~fn:type_structure_class ~make_ty pos
       | _ -> dispatch_id env id
     end
     (* Special Shapes:: function *)
@@ -6372,7 +6439,7 @@ end = struct
         else if
           maybe_use_constraint_inference
           && Option.is_some env.in_expr_tree
-          && TypecheckerOptions.experimental_feature_enabled
+          && TypecheckerOptions.legacy_experimental_feature_enabled
                (Env.get_tcopt env)
                TypecheckerOptions.experimental_try_constraint_method_inference
         then
@@ -6424,31 +6491,32 @@ end = struct
         in
         let (env, ty) = Env.fresh_type env p in
         let tfty =
-          ( Reason.witness p,
-            Tfun
-              {
-                ft_tparams = [];
-                ft_where_constraints = [];
-                ft_params = List.map2_exn ~f:make_param arg_posl arg_tys;
-                ft_implicit_params =
-                  {
-                    capability =
-                      CapTy
-                        (Env.get_local_check_defined
-                           env
-                           (p, Typing_coeffects.capability_id))
-                          .Typing_local_types.ty;
-                  };
-                ft_ret = ty;
-                ft_flags =
-                  Typing_defs_flags.Fun.(
-                    set_readonly_this
-                      require_readonly_this
-                      (set_returns_readonly
-                         ctxt.support_readonly_return
-                         default));
-                ft_instantiated = true;
-              } )
+          mk
+            ( Reason.witness p,
+              Tfun
+                {
+                  ft_tparams = [];
+                  ft_where_constraints = [];
+                  ft_params = List.map2_exn ~f:make_param arg_posl arg_tys;
+                  ft_implicit_params =
+                    {
+                      capability =
+                        CapTy
+                          (Env.get_local_check_defined
+                             env
+                             (p, Typing_coeffects.capability_id))
+                            .Typing_local_types.ty;
+                    };
+                  ft_ret = ty;
+                  ft_flags =
+                    Typing_defs_flags.Fun.(
+                      set_readonly_this
+                        require_readonly_this
+                        (set_returns_readonly
+                           ctxt.support_readonly_return
+                           default));
+                  ft_instantiated = true;
+                } )
         in
         let has_member_ty =
           MakeType.has_member
@@ -6608,7 +6676,15 @@ end = struct
       (result, should_forget_fakes)
 
   and call_construct
-      p env class_ params el unpacked_element (_, cid_pos, cid_) cid_ty =
+      ?(attribute_check_policy = Check_all)
+      p
+      env
+      class_
+      params
+      el
+      unpacked_element
+      (_, cid_pos, cid_)
+      cid_ty =
     let r = Reason.witness p in
     let cid_ty =
       if Nast.equal_class_id_ cid_ CIparent then
@@ -6632,7 +6708,12 @@ end = struct
           ~env
           Typing_error.(primary @@ Primary.Constructor_no_args p);
       let (env, tel, _tyl) =
-        argument_list_exprs (expr ~expected:None ~ctxt:Context.default) env el
+        argument_list_exprs
+          (expr
+             ~expected:None
+             ~ctxt:Context.{ default with attribute_check_policy })
+          env
+          el
       in
       let should_forget_fakes = true in
       let ty = MakeType.default_construct r in
@@ -6727,6 +6808,7 @@ end = struct
       let (env, (tel, typed_unpack_element, _ty, should_forget_fakes)) =
         call
           ~expected:None
+          ~attribute_check_policy
           ~expr_pos:p
           ~recv_pos:cid_pos
           ~id_pos:cid_pos
@@ -6760,6 +6842,7 @@ end = struct
   and call
       ~(expected : ExpectedTy.t option)
       ?(nullsafe : Pos.t option = None)
+      ?(attribute_check_policy = Check_all)
       ~(in_await : locl_phase Reason.t_ option)
       ?(dynamic_func : Typing_argument.dyn_func_kind option)
       ~(expr_pos : Pos.t)
@@ -6833,6 +6916,7 @@ end = struct
         call
           ~expected
           ~nullsafe
+          ~attribute_check_policy
           ~in_await
           ?dynamic_func:(to_like_function dynamic_func)
           ~expr_pos
@@ -6861,6 +6945,7 @@ end = struct
           let expected_arg_ty =
             ExpectedTy.make ~is_dynamic_aware:true expr_pos Reason.URparam ty
           in
+          let ctxt = Context.{ default with attribute_check_policy } in
           let ((env, e1), tel) =
             List.map_env_ty_err_opt
               env
@@ -6871,20 +6956,12 @@ end = struct
                   match arg with
                   | Aast_defs.Anormal elt ->
                     let (env, te, ty) =
-                      expr
-                        ~expected:(Some expected_arg_ty)
-                        ~ctxt:Context.default
-                        env
-                        elt
+                      expr ~expected:(Some expected_arg_ty) ~ctxt env elt
                     in
                     (env, (fun e -> Aast_defs.Anormal e), te, ty)
                   | Aast_defs.Ainout (iopos, elt) ->
                     let (env, te, ty) =
-                      expr
-                        ~expected:(Some expected_arg_ty)
-                        ~ctxt:Context.default
-                        env
-                        elt
+                      expr ~expected:(Some expected_arg_ty) ~ctxt env elt
                     in
                     let (_, pos, _) = elt in
                     let (env, _te, _ty) =
@@ -6894,11 +6971,7 @@ end = struct
                     (env, (fun e -> Aast_defs.Ainout (iopos, e)), te, ty)
                   | Aast_defs.Anamed (name, elt) ->
                     let (env, te, ty) =
-                      expr
-                        ~expected:(Some expected_arg_ty)
-                        ~ctxt:Context.default
-                        env
-                        elt
+                      expr ~expected:(Some expected_arg_ty) ~ctxt env elt
                     in
                     (env, (fun e -> Aast_defs.Anamed (name, e)), te, ty)
                 in
@@ -6928,28 +7001,23 @@ end = struct
               ~default:el
               unpacked_element
           in
+          let ctxt = Context.{ default with attribute_check_policy } in
           let (env, tel) =
             List.map_env env el ~f:(fun env arg ->
                 let (env, te, _ty) =
                   match arg with
                   | Aast_defs.Anormal elt ->
-                    let (env, te, ty) =
-                      expr ~expected:None ~ctxt:Context.default env elt
-                    in
+                    let (env, te, ty) = expr ~expected:None ~ctxt env elt in
                     (env, Aast_defs.Anormal te, ty)
                   | Aast_defs.Ainout (iopos, elt) ->
-                    let (env, te, ty) =
-                      expr ~expected:None ~ctxt:Context.default env elt
-                    in
+                    let (env, te, ty) = expr ~expected:None ~ctxt env elt in
                     let (_, pos, _) = elt in
                     let (env, _te, _ty) =
                       Assign.assign_ pos Reason.URparam_inout env elt pos efty
                     in
                     (env, Aast_defs.Ainout (iopos, te), ty)
                   | Aast_defs.Anamed (name, elt) ->
-                    let (env, te, ty) =
-                      expr ~expected:None ~ctxt:Context.default env elt
-                    in
+                    let (env, te, ty) = expr ~expected:None ~ctxt env elt in
                     (env, Aast_defs.Anamed (name, te), ty)
                 in
                 (env, te))
@@ -6974,6 +7042,7 @@ end = struct
           call
             ~expected
             ~nullsafe
+            ~attribute_check_policy
             ~in_await
             ?dynamic_func
             ~expr_pos
@@ -6984,17 +7053,19 @@ end = struct
             el
             unpacked_element
         | (r, Tunion tyl) ->
+          let saved_locals = env.lenv.per_cont_env in
           let (env, resl) =
             List.map_env env tyl ~f:(fun env ty ->
                 call
                   ~expected
                   ~nullsafe
+                  ~attribute_check_policy
                   ~in_await
                   ?dynamic_func
                   ~expr_pos
                   ~recv_pos
                   ~id_pos
-                  env
+                  (Env.env_with_locals env saved_locals)
                   ty
                   el
                   unpacked_element)
@@ -7018,6 +7089,7 @@ end = struct
                 call
                   ~expected
                   ~nullsafe
+                  ~attribute_check_policy
                   ~in_await
                   ?dynamic_func
                   ~expr_pos
@@ -7182,6 +7254,7 @@ end = struct
             | None ->
               (-1, (true, None, named_params_remaining, plain_params_remaining))
           in
+          let ctxt = Context.{ default with attribute_check_policy } in
           let check_arg env arg opt_param ~arg_idx ~param_idx ~is_variadic =
             let (arg_name, param_kind, e) =
               match arg with
@@ -7221,6 +7294,7 @@ end = struct
                     Context.
                       {
                         default with
+                        attribute_check_policy;
                         accept_using_var = get_fp_accept_disposable param;
                       }
                   env
@@ -7268,9 +7342,7 @@ end = struct
                     ty ),
                 used_dynamic_info )
             | None ->
-              let (env, te, ty) =
-                expr ~expected:None ~ctxt:Context.default env e
-              in
+              let (env, te, ty) = expr ~expected:None ~ctxt env e in
               (* If we were using our function subtyping code to handle calls
                  we would have a contravariant function arg projection so
                  replicate that here *)
@@ -7496,7 +7568,7 @@ end = struct
                 | Some e ->
                   let (_, splat_pos, _) = e in
                   let (env, te, unpacked_element_ty) =
-                    expr ~expected:None ~ctxt:Context.default env e
+                    expr ~expected:None ~ctxt env e
                   in
                   ( env,
                     mk
@@ -7565,7 +7637,7 @@ end = struct
                     plain_params_remaining
                 in
                 let (env, te, unpacked_element_ty) =
-                  expr ~expected:None ~ctxt:Context.default env e
+                  expr ~expected:None ~ctxt env e
                 in
                 (* Now that we're considering an splat (Some e) we need to construct a type that
                  * represents the remainder of the function's parameters. `plain_params_remaining` represents those
@@ -7852,6 +7924,7 @@ end = struct
               call
                 ~expected
                 ~nullsafe
+                ~attribute_check_policy
                 ~in_await
                 ?dynamic_func
                 ~expr_pos
@@ -7866,6 +7939,7 @@ end = struct
                 call
                   ~expected
                   ~nullsafe
+                  ~attribute_check_policy
                   ~in_await
                   ?dynamic_func:(Some Supportdyn_function)
                   ~expr_pos
@@ -11322,7 +11396,9 @@ end = struct
           let (env, te, _) =
             Expr.expr
               ~expected:None
-              ~ctxt:Expr.Context.{ default with is_attribute_param = true }
+              ~ctxt:
+                Expr.Context.
+                  { default with attribute_check_policy = Skip_all_access }
               env
               e
           in
@@ -11407,7 +11483,7 @@ and Class_id : sig
   *)
   val class_expr :
     ?check_targs_integrity:bool ->
-    ?is_attribute_param:bool ->
+    ?attribute_check_policy:Expr.attribute_check_policy ->
     ?exact:exact ->
     ?check_explicit_targs:bool ->
     ?inside_nameof:bool ->
@@ -11497,7 +11573,7 @@ end = struct
 
   let class_expr
       ?(check_targs_integrity = false)
-      ?(is_attribute_param = false)
+      ?(attribute_check_policy = Expr.Check_all)
       ?(exact = nonexact)
       ?(check_explicit_targs = false)
       ?(inside_nameof = false)
@@ -11610,9 +11686,20 @@ end = struct
         let (env, ty) = Env.fresh_type_error env p in
         make_result env [] (Aast.CI c) ty
       | Decl_entry.Found class_ ->
-        if not is_attribute_param then (
+        (match attribute_check_policy with
+        | Expr.Skip_all_access -> ()
+        | Expr.Check_all
+        | Expr.Skip_package ->
           let should_check_package_boundary =
-            if inside_nameof || is_attribute || is_catch then
+            if
+              inside_nameof
+              || is_attribute
+              || is_catch
+              ||
+              match attribute_check_policy with
+              | Expr.Skip_package -> true
+              | _ -> false
+            then
               `No
             else if is_const then begin
               if Env.package_allow_classconst_violations env then
@@ -11646,8 +11733,7 @@ end = struct
                 w.target_package
                 w.target_package_before_override
                 w.classptr_reference_warning);
-          List.iter ~f:(Typing_error_utils.add_typing_error ~env) access_errs
-        );
+          List.iter ~f:(Typing_error_utils.add_typing_error ~env) access_errs);
 
         (* Don't add Exact superfluously to class type if it's final *)
         let exact =
@@ -13128,7 +13214,7 @@ and Class_get_expr : sig
       option ->
     coerce_from_ty:
       (pos * Reason.ureason * locl_phase Typing_defs_core.ty) option ->
-    ?is_attribute_param:bool ->
+    ?attribute_check_policy:Expr.attribute_check_policy ->
     ?explicit_targs:Nast.targ list ->
     ?incl_tc:bool ->
     ?is_function_pointer:bool ->
@@ -13159,7 +13245,7 @@ end = struct
       ~is_const
       ~transform_fty
       ~coerce_from_ty
-      ?(is_attribute_param = false)
+      ?(attribute_check_policy = Expr.Check_all)
       ?(explicit_targs = [])
       ?(incl_tc = false)
       ?(is_function_pointer = false)
@@ -13182,7 +13268,7 @@ end = struct
       ~incl_tc
       ~coerce_from_ty
       ~is_function_pointer
-      ~is_attribute_param
+      ~attribute_check_policy
       env
       cid
       cty
@@ -13222,7 +13308,7 @@ end = struct
       ~is_const
       ~transform_fty
       ~coerce_from_ty
-      ?(is_attribute_param = false)
+      ?(attribute_check_policy = Expr.Check_all)
       ?explicit_targs
       ?incl_tc
       ?is_function_pointer
@@ -13236,7 +13322,7 @@ end = struct
         ~is_const
         ~transform_fty
         ~coerce_from_ty
-        ~is_attribute_param
+        ~attribute_check_policy
         ?explicit_targs
         ?incl_tc
         ?is_function_pointer
@@ -13256,7 +13342,7 @@ end = struct
       ?(explicit_targs = [])
       ?(incl_tc = false)
       ?(is_function_pointer = false)
-      ?(is_attribute_param = false)
+      ?(attribute_check_policy = Expr.Check_all)
       env
       ((_, _cid_pos, cid_) as cid)
       cty
@@ -13316,7 +13402,7 @@ end = struct
               ~incl_tc
               ~coerce_from_ty
               ~is_function_pointer
-              ~is_attribute_param
+              ~attribute_check_policy
               env
               cid
               ty
@@ -13340,7 +13426,7 @@ end = struct
         ~incl_tc
         ~coerce_from_ty
         ~is_function_pointer
-        ~is_attribute_param
+        ~attribute_check_policy
         env
         cid
         ty
@@ -13355,7 +13441,7 @@ end = struct
         ~incl_tc
         ~coerce_from_ty
         ~is_function_pointer
-        ~is_attribute_param
+        ~attribute_check_policy
         env
         cid
         ty
@@ -13398,7 +13484,7 @@ end = struct
           ~incl_tc
           ~coerce_from_ty
           ~is_function_pointer
-          ~is_attribute_param
+          ~attribute_check_policy
           env
           cid
           ty
@@ -13503,7 +13589,7 @@ end = struct
               ~incl_tc
               ~coerce_from_ty
               ~is_function_pointer
-              ~is_attribute_param
+              ~attribute_check_policy
               env
               cid
               inter_ty
@@ -13568,7 +13654,10 @@ end = struct
                } as ce) ->
             let def_pos = get_pos member_decl_ty in
             (* Don't need to check visibilty on class constants in an attribute *)
-            if not is_attribute_param then
+            (match attribute_check_policy with
+            | Expr.Skip_all_access -> ()
+            | Expr.Check_all
+            | Expr.Skip_package ->
               Option.iter
                 ~f:(Typing_error_utils.add_typing_error ~env)
                 (TVis.check_class_access
@@ -13578,7 +13667,7 @@ end = struct
                    env
                    (vis, get_ce_lsb ce)
                    cid_
-                   class_);
+                   class_));
             Option.iter
               ~f:(Typing_error_utils.add_typing_error ~env)
               (TVis.check_deprecated ~use_pos:p ~def_pos env ce_deprecated);

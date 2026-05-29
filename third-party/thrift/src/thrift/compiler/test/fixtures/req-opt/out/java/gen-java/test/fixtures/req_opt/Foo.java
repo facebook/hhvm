@@ -46,11 +46,11 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Foo other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -66,21 +66,21 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
 
         public int getMyInteger() { return myInteger; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="myString", requiredness=Requiredness.OPTIONAL)    public Builder setMyString(String myString) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="myString", requiredness=Requiredness.OPTIONAL)    public Builder setMyString(String myString) {
             this.myString = myString;
             return this;
         }
 
         public String getMyString() { return myString; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="myBools", requiredness=Requiredness.NONE)    public Builder setMyBools(List<Boolean> myBools) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="myBools", requiredness=Requiredness.NONE)    public Builder setMyBools(List<Boolean> myBools) {
             this.myBools = myBools;
             return this;
         }
 
         public List<Boolean> getMyBools() { return myBools; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="myNumbers", requiredness=Requiredness.REQUIRED)    public Builder setMyNumbers(List<Integer> myNumbers) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="myNumbers", requiredness=Requiredness.REQUIRED)    public Builder setMyNumbers(List<Integer> myNumbers) {
             this.myNumbers = myNumbers;
             return this;
         }
@@ -106,6 +106,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -114,46 +115,39 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     private final int myInteger;
     public static final int _MYINTEGER = 1;
     private static final TField MY_INTEGER_FIELD_DESC = new TField("myInteger", TType.I32, (short)1);
-        private final String myString;
+    private final String myString;
     public static final int _MYSTRING = 2;
     private static final TField MY_STRING_FIELD_DESC = new TField("myString", TType.STRING, (short)2);
-        private final List<Boolean> myBools;
+    private final List<Boolean> myBools;
     public static final int _MYBOOLS = 3;
     private static final TField MY_BOOLS_FIELD_DESC = new TField("myBools", TType.LIST, (short)3);
-        private final List<Integer> myNumbers;
+    private final List<Integer> myNumbers;
     public static final int _MYNUMBERS = 4;
     private static final TField MY_NUMBERS_FIELD_DESC = new TField("myNumbers", TType.LIST, (short)4);
     static {
-      NAMES_TO_IDS.put("myInteger", 1);
-      THRIFT_NAMES_TO_IDS.put("myInteger", 1);
-      FIELD_METADATA.put(1, MY_INTEGER_FIELD_DESC);
-      NAMES_TO_IDS.put("myString", 2);
-      THRIFT_NAMES_TO_IDS.put("myString", 2);
-      FIELD_METADATA.put(2, MY_STRING_FIELD_DESC);
-      NAMES_TO_IDS.put("myBools", 3);
-      THRIFT_NAMES_TO_IDS.put("myBools", 3);
-      FIELD_METADATA.put(3, MY_BOOLS_FIELD_DESC);
-      NAMES_TO_IDS.put("myNumbers", 4);
-      THRIFT_NAMES_TO_IDS.put("myNumbers", 4);
-      FIELD_METADATA.put(4, MY_NUMBERS_FIELD_DESC);
+        NAMES_TO_IDS.put("myInteger", 1);
+        THRIFT_NAMES_TO_IDS.put("myInteger", 1);
+        FIELD_METADATA.put(1, MY_INTEGER_FIELD_DESC);
+        NAMES_TO_IDS.put("myString", 2);
+        THRIFT_NAMES_TO_IDS.put("myString", 2);
+        FIELD_METADATA.put(2, MY_STRING_FIELD_DESC);
+        NAMES_TO_IDS.put("myBools", 3);
+        THRIFT_NAMES_TO_IDS.put("myBools", 3);
+        FIELD_METADATA.put(3, MY_BOOLS_FIELD_DESC);
+        NAMES_TO_IDS.put("myNumbers", 4);
+        THRIFT_NAMES_TO_IDS.put("myNumbers", 4);
+        FIELD_METADATA.put(4, MY_NUMBERS_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="myInteger", requiredness=Requiredness.REQUIRED)
     public int getMyInteger() { return myInteger; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="myString", requiredness=Requiredness.OPTIONAL)
     public String getMyString() { return myString; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="myBools", requiredness=Requiredness.NONE)
     public List<Boolean> getMyBools() { return myBools; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=4, name="myNumbers", requiredness=Requiredness.REQUIRED)
     public List<Integer> getMyNumbers() { return myNumbers; }
 
@@ -190,129 +184,130 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Integer.hashCode(myInteger);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myString);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myBools);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myNumbers);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(myString);
+        _hashCode = 31 * _hashCode + Objects.hashCode(myBools);
+        _hashCode = 31 * _hashCode + Objects.hashCode(myNumbers);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Foo> asReader() {
       return Foo::read0;
     }
 
     public static Foo read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Foo.NAMES_TO_IDS, Foo.THRIFT_NAMES_TO_IDS, Foo.FIELD_METADATA);
-      Foo.Builder builder = new Foo.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MYINTEGER:
-          if (__field.type == TType.I32) {
-            int myInteger = oprot.readI32();
-            builder.setMyInteger(myInteger);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYSTRING:
-          if (__field.type == TType.STRING) {
-            String myString = oprot.readString();
-            builder.setMyString(myString);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYBOOLS:
-          if (__field.type == TType.LIST) {
-            List<Boolean> myBools;
-                {
-                TList _list = oprot.readListBegin();
-                myBools = new ArrayList<Boolean>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    boolean _value1 = oprot.readBool();
-                    myBools.add(_value1);
+        TField __field;
+        oprot.readStructBegin(Foo.NAMES_TO_IDS, Foo.THRIFT_NAMES_TO_IDS, Foo.FIELD_METADATA);
+        Foo.Builder builder = new Foo.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MYINTEGER:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMyInteger(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _MYSTRING:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMyString(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setMyBools(myBools);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYNUMBERS:
-          if (__field.type == TType.LIST) {
-            List<Integer> myNumbers;
-                {
-                TList _list = oprot.readListBegin();
-                myNumbers = new ArrayList<Integer>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    int _value1 = oprot.readI32();
-                    myNumbers.add(_value1);
+                break;
+            case _MYBOOLS:
+                if (__field.type == TType.LIST) {
+                    List<Boolean> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Boolean>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            boolean _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readBool();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setMyBools(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _MYNUMBERS:
+                if (__field.type == TType.LIST) {
+                    List<Integer> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Integer>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            int _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI32();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setMyNumbers(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setMyNumbers(myNumbers);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      int _iter0 = this.myInteger;
-      oprot.writeFieldBegin(MY_INTEGER_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.myString;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_STRING_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Boolean> _iter0 = this.myBools;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_BOOLS_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.BOOL, _iter0.size()));
-            for (boolean _iter1 : _iter0) {
-              oprot.writeBool(_iter1);
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            int _fbthriftVar0 = this.myInteger;
+            oprot.writeFieldBegin(MY_INTEGER_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.myString;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_STRING_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Integer> _iter0 = this.myNumbers;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_NUMBERS_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
-            for (int _iter1 : _iter0) {
-              oprot.writeI32(_iter1);
+        }
+        {
+            List<Boolean> _fbthriftVar0 = this.myBools;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_BOOLS_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.BOOL, _fbthriftVar0.size()));
+                for (boolean _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeBool(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        {
+            List<Integer> _fbthriftVar0 = this.myNumbers;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_NUMBERS_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.I32, _fbthriftVar0.size()));
+                for (int _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI32(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _FooLazy {

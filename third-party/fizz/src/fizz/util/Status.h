@@ -40,6 +40,67 @@ enum class [[nodiscard]] Status : uint8_t { Fail, Success };
     }                                   \
   } while (0)
 
+/**
+ * This macro catches an exception and convert it to a error status.
+ * It is primarilly used in a mock test to cover the failed path
+ * for a refactored function which returns a status
+ * instead of throwing an exception.
+ */
+#define FIZZ_THROW_TO_ERROR_CATCH_BLOCKS                                     \
+  catch (const FizzVerificationException& e) {                               \
+    return err.error(                                                        \
+        std::string(e.what()), e.getAlert(), Error::Category::Verifier);     \
+  }                                                                          \
+  catch (const FizzException& e) {                                           \
+    return err.error(                                                        \
+        std::string(e.what()), e.getAlert(), Error::Category::Fizz);         \
+  }                                                                          \
+  catch (const std::out_of_range& e) {                                       \
+    return err.error(                                                        \
+        std::string(e.what()), folly::none, Error::Category::StdOutOfRange); \
+  }                                                                          \
+  catch (const std::logic_error& e) {                                        \
+    return err.error(                                                        \
+        std::string(e.what()), folly::none, Error::Category::StdLogic);      \
+  }                                                                          \
+  catch (const std::overflow_error& e) {                                     \
+    return err.error(                                                        \
+        std::string(e.what()), folly::none, Error::Category::StdOverFlow);   \
+  }                                                                          \
+  catch (const std::bad_alloc&) {                                            \
+    return err.error("", folly::none, Error::Category::StdBadAlloc);         \
+  }                                                                          \
+  catch (const std::runtime_error& e) {                                      \
+    return err.error(std::string(e.what()));                                 \
+  }                                                                          \
+  catch (...) {                                                              \
+    return err.error("unknown", folly::none, Error::Category::Unknown);      \
+  }
+
+#define FIZZ_THROW_TO_ERROR_VOID(expr) \
+  do {                                 \
+    try {                              \
+      expr;                            \
+      return Status::Success;          \
+    }                                  \
+    FIZZ_THROW_TO_ERROR_CATCH_BLOCKS   \
+  } while (0)
+
+#define FIZZ_THROW_TO_ERROR_ASSIGN(ret, expr) \
+  do {                                        \
+    try {                                     \
+      ret = expr;                             \
+      return Status::Success;                 \
+    }                                         \
+    FIZZ_THROW_TO_ERROR_CATCH_BLOCKS          \
+  } while (0)
+
+#define FIZZ_THROW_TO_ERROR_SELECT(_1, _2, NAME, ...) NAME
+#define FIZZ_THROW_TO_ERROR(...)                                         \
+  FIZZ_THROW_TO_ERROR_SELECT(                                            \
+      __VA_ARGS__, FIZZ_THROW_TO_ERROR_ASSIGN, FIZZ_THROW_TO_ERROR_VOID) \
+  (__VA_ARGS__)
+
 /*
  * The Error class is used to record error information when a function returns
  * Status::Fail. It stores an error message, alert description, and the source
@@ -77,7 +138,9 @@ class Error {
     StdRuntime,
     StdOverFlow,
     StdLogic,
-    StdOutOfRange
+    StdOutOfRange,
+    StdBadAlloc,
+    Unknown
   };
   // clang-format on
   Error() = default;

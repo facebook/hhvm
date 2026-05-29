@@ -68,14 +68,6 @@ assemble_imm_for_enum!(
 );
 
 assemble_imm_for_enum!(
-    hhbc::IsLogAsDynamicCallOp,
-    [
-        IsLogAsDynamicCallOp::DontLogAsDynamicCall,
-        IsLogAsDynamicCallOp::LogAsDynamicCall,
-    ]
-);
-
-assemble_imm_for_enum!(
     hhbc::IsTypeOp,
     [
         IsTypeOp::ArrLike,

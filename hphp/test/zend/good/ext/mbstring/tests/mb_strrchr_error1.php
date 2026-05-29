@@ -10,8 +10,8 @@ echo "*** Testing mb_strrchr() : error conditions ***\n";
 
 //Test mb_strrchr with one more than the expected number of arguments
 echo "\n-- Testing mb_strrchr() function with more than expected no. of arguments --\n";
-$haystack = b'string_val';
-$needle = b'string_val';
+$haystack = 'string_val';
+$needle = 'string_val';
 $part = true;
 $encoding = 'string_val';
 $extra_arg = 10;
@@ -19,7 +19,7 @@ try { var_dump( mb_strrchr($haystack, $needle, $part, $encoding, $extra_arg) ); 
 
 // Testing mb_strrchr with one less than the expected number of arguments
 echo "\n-- Testing mb_strrchr() function with less than expected no. of arguments --\n";
-$haystack = b'string_val';
+$haystack = 'string_val';
 try { var_dump( mb_strrchr($haystack) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";

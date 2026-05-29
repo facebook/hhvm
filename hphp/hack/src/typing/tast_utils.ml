@@ -42,9 +42,7 @@ let rec type_non_nullable env ty =
 (* Truthiness utilities ******************************************************)
 (* For types other than bool used in condition expressions, boolean binary
    expressions, and casts to bool. An always-truthy type used in a condition is
-   always a logic error. A nullable possibly-falsy type used in a condition is a
-   sketchy null check--it isn't clear whether the user meant to check for null
-   or for one of the other falsy values. *)
+   always a logic error. *)
 
 type truthiness =
   | Unknown
@@ -260,8 +258,6 @@ let rec find_sketchy_types env acc ty =
   | Tlabel _
   | Tneg _ ->
     acc
-  | Tclass_ptr _ ->
-    (* TODO(T199610905) Extend the sketchy null check to support class pointers *)
-    acc
+  | Tclass_ptr _ -> acc
 
 let find_sketchy_types env ty = find_sketchy_types env [] ty

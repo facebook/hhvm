@@ -9,8 +9,12 @@ trait T1 {
   }
 }
 
-class C {}
-trait T2 {}
+class C {
+  // warning as C does not use T1
+}
+trait T2 {
+  // warning as T2 does not use T1
+}
 
 // class D cannot override foo in T1
 class D {

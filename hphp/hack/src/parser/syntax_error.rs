@@ -570,9 +570,6 @@ pub fn elt_abstract_private(elt: &str) -> Error {
 pub const only_soft_allowed: Error = Cow::Borrowed("Only the `__Soft` attribute is allowed here.");
 pub const soft_no_arguments: Error =
     Cow::Borrowed("The `__Soft` attribute does not take arguments.");
-pub const no_legacy_soft_typehints: Error = Cow::Borrowed(
-    "The `@` syntax for soft typehints is not allowed. Use the `__Soft` attribute instead.",
-);
 pub const outside_dollar_str_interp: Error =
     Cow::Borrowed("The `${x}` syntax is disallowed in Hack. Use `{$x}` instead.");
 pub const no_const_interfaces_traits_enums_classes: Error =

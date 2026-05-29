@@ -12,14 +12,14 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 
-$array1 = dict[0 => b"1",
-                 1 => b"hello",
+$array1 = dict[0 => "1",
+                 1 => "hello",
                  2 => "world",
                  "str1" => "hello",
                  "str2" => "world"];
 
-$array2 = dict[b"1" => 'hello',
-                 0 => b"world",
+$array2 = dict["1" => 'hello',
+                 0 => "world",
                  1 => "hello",
                  2 => 'test'];
 

@@ -26,97 +26,97 @@ import com.facebook.thrift.metadata.ThriftType;
 
 public class FooBarBazServiceThriftMetadataHandler implements com.facebook.thrift.server.ThriftMetadataHandler {
 
-  private static void addFunctions_0(List<ThriftFunction> functions) {
-        {
-          List<ThriftField> args = new ArrayList<>();
+    private static void addFunctions_0(List<ThriftFunction> functions) {
+            {
+              List<ThriftField> args = new ArrayList<>();
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("foo")
-              .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-        {
-          List<ThriftField> args = new ArrayList<>();
+              functions.add(new ThriftFunction.Builder()
+                  .setName("foo")
+                  .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+            {
+              List<ThriftField> args = new ArrayList<>();
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("bar")
-              .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-        {
-          List<ThriftField> args = new ArrayList<>();
+              functions.add(new ThriftFunction.Builder()
+                  .setName("bar")
+                  .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+            {
+              List<ThriftField> args = new ArrayList<>();
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("baz")
-              .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-  }
+              functions.add(new ThriftFunction.Builder()
+                  .setName("baz")
+                  .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+    }
 
-  private static final ThriftService THRIFT_SERVICE;
+    private static final ThriftService THRIFT_SERVICE;
 
 
-  static {
-    List<ThriftFunction> functions = new ArrayList<>();
-    addFunctions_0(functions);
-    THRIFT_SERVICE = new ThriftService.Builder()
-        .setName("test.fixtures.basicannotations.FooBarBazService")
-        .setFunctions(functions)
-        .build();
-  }
+    static {
+        List<ThriftFunction> functions = new ArrayList<>();
+        addFunctions_0(functions);
+        THRIFT_SERVICE = new ThriftService.Builder()
+            .setName("test.fixtures.basicannotations.FooBarBazService")
+            .setFunctions(functions)
+            .build();
+    }
 
-  @Override
-  public String getName() {
-    return "FooBarBazService";
-  }
+    @Override
+    public String getName() {
+        return "FooBarBazService";
+    }
 
-  @Override
-  public String getFullyQualifiedName() {
-    return "test.fixtures.basicannotations.FooBarBazService";
-  }
+    @Override
+    public String getFullyQualifiedName() {
+        return "test.fixtures.basicannotations.FooBarBazService";
+    }
 
-  @Override
-  public ThriftService getThriftService() {
-    return THRIFT_SERVICE;
-  }
+    @Override
+    public ThriftService getThriftService() {
+        return THRIFT_SERVICE;
+    }
 
-  @Override
-  public String getParentServiceName() {
-    return null;
-  }
+    @Override
+    public String getParentServiceName() {
+        return null;
+    }
 
-  @Override
-  public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
-    return null;
-  }
+    @Override
+    public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
+        return null;
+    }
 
-  @Override
-  public Map<String, ThriftEnum> getEnums() {
-    return FooBarBazServiceThriftMetadataHandlerEnums.getEnums();
-  }
+    @Override
+    public Map<String, ThriftEnum> getEnums() {
+        return FooBarBazServiceThriftMetadataHandlerEnums.getEnums();
+    }
 
-  @Override
-  public Map<String, ThriftStruct> getStructs() {
-    return FooBarBazServiceThriftMetadataHandlerStructs.getStructs();
-  }
+    @Override
+    public Map<String, ThriftStruct> getStructs() {
+        return FooBarBazServiceThriftMetadataHandlerStructs.getStructs();
+    }
 
-  @Override
-  public Map<String, ThriftException> getExceptions() {
-    return FooBarBazServiceThriftMetadataHandlerExceptions.getExceptions();
-  }
+    @Override
+    public Map<String, ThriftException> getExceptions() {
+        return FooBarBazServiceThriftMetadataHandlerExceptions.getExceptions();
+    }
 }

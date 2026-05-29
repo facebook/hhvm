@@ -8,19 +8,25 @@ abstract class C {
 }
 
 trait T1 {
+  require extends C;
+
   <<__Override>>
-  public function foo(): void { echo "I am foo in T1\n"; }
+  public function foo(): void {
+    echo "I am foo in T1\n";
+  }
 }
 
 trait T2 {
   <<__Override>>
-  public function foo(): void { echo "I am foo in T2\n"; }
+  public function foo(): void {
+    echo "I am foo in T2\n";
+  }
 }
 
 class D1 extends C {
-  use T1;  // this is ok
+  use T1; // this is ok
 }
 
 class D2 extends C {
-  use T2;  // this is rejected
+  use T2; // this is rejected
 }

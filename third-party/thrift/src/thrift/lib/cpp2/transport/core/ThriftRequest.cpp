@@ -17,12 +17,17 @@
 #include <thrift/lib/cpp2/async/InterceptorFrameworkMetadata.h>
 #include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
+#include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
+#include <thrift/lib/cpp2/transport/rocket/ChecksumGenerator.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionAlgorithmSelector.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
 
 THRIFT_FLAG_DEFINE_int64(queue_time_logging_threshold_ms, 5);
 THRIFT_FLAG_DEFINE_bool(enable_request_event_logging, true);
+THRIFT_FLAG_DECLARE_bool(thrift_server_compress_response_on_cpu);
 
 namespace apache::thrift {
 
@@ -434,6 +439,160 @@ ResponseRpcMetadata ThriftRequestCore::makeResponseRpcMetadata(
   }
 
   return metadata;
+}
+
+namespace {
+template <typename Generator>
+Checksum computeChecksum(ChecksumAlgorithm algo, folly::IOBuf& buf) {
+  Generator gen;
+  auto result = gen.calculateChecksumFromIOBuf(buf);
+  Checksum cs;
+  cs.algorithm() = algo;
+  cs.checksum() = result.checksum;
+  cs.salt() = result.salt;
+  return cs;
+}
+
+// Builds PayloadMetadata from the request context, mirroring the logic in
+// processFirstResponseHelper (RocketThriftRequests.cpp). Reads and erases
+// uex/uexw/exMeta headers from writeHeaders for exception responses.
+PayloadMetadata buildPayloadMetadata(Cpp2RequestContext* ctx) {
+  PayloadMetadata payloadMetadata;
+  if (!ctx->isException()) {
+    payloadMetadata.responseMetadata() = PayloadResponseMetadata();
+    return payloadMetadata;
+  }
+
+  PayloadExceptionMetadataBase exceptionMetadataBase;
+  PayloadDeclaredExceptionMetadata declaredExceptionMetadata;
+  auto* writeHeaders = &ctx->getHeader()->mutableWriteHeaders();
+
+  static const auto uex = std::string(detail::kHeaderUex);
+  if (auto uexPtr = folly::get_ptr(*writeHeaders, uex)) {
+    exceptionMetadataBase.name_utf8() = std::move(*uexPtr);
+    writeHeaders->erase(uex);
+  }
+  static const auto uexw = std::string(detail::kHeaderUexw);
+  if (auto uexwPtr = folly::get_ptr(*writeHeaders, uexw)) {
+    exceptionMetadataBase.what_utf8() = std::move(*uexwPtr);
+    writeHeaders->erase(uexw);
+  }
+  static const auto exMeta = std::string(detail::kHeaderExMeta);
+  if (auto metaPtr = folly::get_ptr(*writeHeaders, exMeta)) {
+    declaredExceptionMetadata.errorClassification() =
+        detail::deserializeErrorClassification(*metaPtr);
+    writeHeaders->erase(exMeta);
+  }
+
+  PayloadExceptionMetadata exceptionMetadata;
+  exceptionMetadata.declaredException() = declaredExceptionMetadata;
+  exceptionMetadataBase.metadata() = std::move(exceptionMetadata);
+  payloadMetadata.exceptionMetadata() = std::move(exceptionMetadataBase);
+  return payloadMetadata;
+}
+} // namespace
+
+bool ThriftRequestCore::isCpuCompressionEnabled() const {
+  return THRIFT_FLAG(thrift_server_compress_response_on_cpu);
+}
+
+std::optional<CompressionAlgorithm>
+ThriftRequestCore::getEligibleCompressionAlgorithm(size_t payloadSize) const {
+  if (!THRIFT_FLAG(thrift_server_compress_response_on_cpu) ||
+      !compressionConfig_.has_value()) {
+    return std::nullopt;
+  }
+  const auto& codecConfig = compressionConfig_->codecConfig().as_const();
+  if (!codecConfig) {
+    return std::nullopt;
+  }
+  auto algorithm = rocket::CompressionManager().fromCodecConfig(*codecConfig);
+  if (algorithm == CompressionAlgorithm::NONE ||
+      algorithm == CompressionAlgorithm::CUSTOM) {
+    return std::nullopt;
+  }
+  auto sizeLimit = static_cast<size_t>(
+      compressionConfig_->compressionSizeLimit().value_or(0));
+  if (payloadSize <= sizeLimit) {
+    return std::nullopt;
+  }
+  return algorithm;
+}
+
+bool ThriftRequestCore::shouldDispatchCompressionToCpu(
+    size_t payloadSize) const {
+  return getEligibleCompressionAlgorithm(payloadSize).has_value();
+}
+
+bool ThriftRequestCore::compressResponse(
+    SerializedResponse& response, Cpp2RequestContext* ctx, size_t payloadSize) {
+  auto algorithmOpt = getEligibleCompressionAlgorithm(payloadSize);
+  if (!algorithmOpt) {
+    return false;
+  }
+
+  if (!response.buffer || response.buffer->empty()) {
+    return false;
+  }
+
+  auto algorithm = *algorithmOpt;
+
+  // At this point, response.buffer contains raw serialized struct data
+  // WITHOUT the Thrift message envelope. The envelope is added later by
+  // extractPayload() in HandlerCallbackBase::sendReply(), but only when
+  // preCompressed is false. When we return true here, extractPayload()
+  // skips the envelope, and the pre-compressed path in sendThriftResponse()
+  // skips processFirstResponse() (which normally strips the envelope).
+  // So the data flows through without any envelope add/strip round-trip.
+
+  // Compute checksum on the uncompressed payload (before compression),
+  // matching the order in ChecksumPayloadSerializerStrategy.
+  std::optional<Checksum> checksum;
+  auto requestedChecksum = header_.getChecksum();
+  if (requestedChecksum.has_value()) {
+    auto algo = *requestedChecksum->algorithm();
+    if (algo == ChecksumAlgorithm::CRC32) {
+      checksum = computeChecksum<rocket::ChecksumGenerator<rocket::CRC32C>>(
+          ChecksumAlgorithm::CRC32, *response.buffer);
+    } else if (algo == ChecksumAlgorithm::XXH3_64) {
+      checksum = computeChecksum<rocket::ChecksumGenerator<rocket::XXH3_64>>(
+          ChecksumAlgorithm::XXH3_64, *response.buffer);
+    }
+  }
+
+  // Compress the payload buffer on the CPU thread.
+  // We call the codec directly instead of CompressionManager::compressBuffer()
+  // because compressBuffer takes unique_ptr&&, and passing std::move'd
+  // response.buffer would make error recovery fragile — if compressBuffer
+  // were ever changed to take by value, response.buffer would be null on
+  // exception and the IO-thread fallback would break silently.
+  // By using .get(), response.buffer is never moved from, so on exception
+  // it is guaranteed to still hold the original uncompressed data.
+  try {
+    auto [codecType, level] =
+        rocket::CompressionAlgorithmSelector::toCodecTypeAndLevel(algorithm);
+    auto compressed = folly::compression::getCodec(codecType, level)
+                          ->compress(response.buffer.get());
+    response.buffer = std::move(compressed);
+  } catch (...) {
+    LOG(ERROR) << "CPU-thread response compression failed: "
+               << folly::exceptionStr(folly::current_exception());
+    return false;
+  }
+
+  // Build payload metadata on the CPU thread (normally done by
+  // processFirstResponse on the IO thread). This must happen AFTER
+  // compression succeeds because buildPayloadMetadata erases headers
+  // from writeHeaders — if we returned false after erasing, the IO
+  // thread fallback path (processFirstResponse) would not find them.
+  auto payloadMetadata = buildPayloadMetadata(ctx);
+
+  // Store pre-computed state for the IO thread to use.
+  cpuProcessedResponseInfo_.compressionAlgorithm = algorithm;
+  cpuProcessedResponseInfo_.payloadMetadata = std::move(payloadMetadata);
+  cpuProcessedResponseInfo_.checksum = checksum;
+
+  return true;
 }
 
 } // namespace apache::thrift

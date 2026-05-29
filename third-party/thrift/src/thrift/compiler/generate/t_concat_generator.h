@@ -26,7 +26,7 @@ namespace apache::thrift::compiler {
 /**
  * String concatenation based generator.
  * This is the older way of generating code, new generators should use
- * a template-based approach. See t_mstch_generator.h.
+ * a template-based approach. See t_whisker_generator.h.
  */
 class t_concat_generator : public t_generator {
  public:

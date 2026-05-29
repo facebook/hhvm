@@ -14,17 +14,17 @@ public class MyServicePrioChildReactiveAsyncWrapper  extends test.fixtures.basic
   private MyServicePrioChild.Reactive _delegate;
 
   public MyServicePrioChildReactiveAsyncWrapper(MyServicePrioChild.Reactive _delegate) {
-    super(_delegate);
-    this._delegate = _delegate;
+      super(_delegate);
+      this._delegate = _delegate;
   }
 
   public MyServicePrioChildReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new MyServicePrioChildReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new MyServicePrioChildReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
   @java.lang.Override
@@ -41,7 +41,7 @@ public class MyServicePrioChildReactiveAsyncWrapper  extends test.fixtures.basic
   @java.lang.Override
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> pangWrapper(
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.pangWrapper( rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.pangWrapper( rpcOptions));
   }
 
 }

@@ -2040,6 +2040,72 @@ class GenerateServiceMethodDecorator implements \IThriftSyncStruct, \IThriftStru
 }
 
 /**
+ * When applied to a service, generates only a FastClient instead of the
+ * standard AsyncClient. The FastClient uses the fast_thrift pipeline for
+ * lower latency serialization and deserialization.
+ * 
+ * Only request/response functions are supported. Functions using streams,
+ * sinks, oneway, or interactions are skipped.
+ *
+ * Original thrift struct:-
+ * FastClient
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/FastClient'))>>
+class FastClient implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'FastClient';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "cpp.FastClient",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Service' => \facebook\thrift\annotation\Service::withDefaultValues(),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
  * Marks a structured type as non-orderable, marking `operator<` as deleted.
  * This is useful when types should never be ordered. By default, `operator<` is
  * always declared, but depending on whether or not the type's shape is considered

@@ -19,5 +19,5 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import c.thrift_types as _fbthrift__c__thrift_types
 
 
-B = _typing.List[_fbthrift__c__thrift_types.C]
+B = _fbthrift_python_types.ImmutableList[_fbthrift__c__thrift_types.C]
 E = _fbthrift__c__thrift_types.E

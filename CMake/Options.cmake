@@ -12,8 +12,6 @@ option(EXECUTION_PROFILER "Enable the execution profiler" OFF)
 option(USE_JEMALLOC "Use jemalloc" ON)
 option(FORCE_TP_JEMALLOC "Always build and statically link jemalloc instead of using system version" OFF)
 
-option(ENABLE_HHPROF "Enable HHProf" OFF)
-
 option(CLANG_FORCE_LIBCPP "Force using libc++ as the C++ standard library" OFF)
 
 option(USE_TCMALLOC "Use tcmalloc (if jemalloc is not used)" ON)

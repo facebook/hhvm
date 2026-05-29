@@ -72,6 +72,8 @@ using NativeFunction = void(*)(NativeArgs*);
 
 using StaticCoeffectNamesMap = CompactVector<PackedStringPtr>;
 
+using InheritedRetTypesMap = folly::ConcurrentHashMap<FuncId::Int, TypeIntersectionConstraint>;
+
 ///////////////////////////////////////////////////////////////////////////////
 // EH table.
 
@@ -463,12 +465,21 @@ public:
 
   /*
    * Get the correct entrypoint (whether the main entry or a DV funclet) when
-   * `numArgsPassed' arguments are passed to the function.
+   * `numPositionalsPassed' arguments are passed to the prologue.
+   *
+   * This is the DV funclet offset of the
+   * `numNamedParams + numPositionalsPassed`-th parameter, or the
+   * next parameter that has a DV funclet.
+   */
+  Offset getPrologueEntryForNumPositionals(int numPositionalsPassed) const;
+  /*
+   * Get the correct entrypoint (whether the main entry or a DV funclet) when
+   * `numArgsPassed' arguments are passed to the func entry.
    *
    * This is the DV funclet offset of the numArgsPassed-th parameter, or the
    * next parameter that has a DV funclet.
    */
-  Offset getEntryForNumArgs(int numArgsPassed) const;
+  Offset getFuncEntryForNumArgs(int numArgsPassed) const;
 
   // CTI entry points
   Offset ctiEntry() const;
@@ -507,7 +518,9 @@ public:
   bool hasUntrustedReturnType() const;
 
   /*
-   * The TypeConstraint of the return.
+   * Returns a TypeIntersectionConstraint consisting of all enforced types
+   * for the given method, including any additional return types inherited
+   * from overridden methods.
    */
   const TypeIntersectionConstraint& returnTypeConstraints() const;
 
@@ -515,6 +528,27 @@ public:
    * The user-annotated Hack return type.
    */
   const StringData* returnUserType() const;
+
+  /**
+   * Returns whether this Func has additional return type constraints
+   * inherited from overridden methods.
+   */
+  bool hasInheritedReturnTypes() const;
+
+  /**
+   * Stores the given return types in a side-table keyed by FuncId and
+   * marks this Func as having inherited types.
+   */
+  void storeInheritedReturnTypes(TypeIntersectionConstraint&& tcs);
+
+  /**
+   * Returns true if the return type of the given function is inherently
+   * trust worthy such as:
+   *  - C++ builtins (return type inferred from type hints)
+   *  - Memoize wrappers (return type checks are performed in the impl method)
+   */
+  bool trustReturnType() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Parameters.                                                        [const]
 
@@ -537,9 +571,14 @@ public:
   uint32_t numNamedParams() const;
 
   /**
-   * Number of positional parameters accepted by the function.
+   * Number of positional parameters, not including `...` accepted by the function.
    */
   uint32_t numPositionalParams() const;
+
+  /**
+   * Number of positional parameters, including `...` if present.
+   */
+  uint32_t numPositionalParamsVariadic() const;
 
   /*
    * Number of parameters, not including `...', accepted by the function.
@@ -554,7 +593,7 @@ public:
   /*
    * Number of required positional parameters.
    */
-  uint32_t numRequiredPositionalParams() const;  
+  uint32_t numRequiredPositionalParams() const;
 
   /*
    * Number of required parameters, i.e. all parameters starting from
@@ -1083,6 +1122,10 @@ public:
    * Does this function has reified generics?
    */
   bool hasReifiedGenerics() const;
+  /*
+   * Does this function have named params?
+   */
+  bool hasNamedParams() const;
 
   /*
    * Returns GenericsInfo which contains information about each generic
@@ -1118,7 +1161,7 @@ public:
   static const typename Container::value_type*
   findEH(const Container& ehtab, Offset o);
 
-  bool shouldSampleJit() const { return m_shouldSampleJit; }
+  bool shouldSampleJit() const { return m_allFlags.m_shouldSampleJit; }
 
   /////////////////////////////////////////////////////////////////////////////
   // JIT data.
@@ -1316,6 +1359,7 @@ public:
   OFF(shared)
   OFF(unit)
   OFF(funcEntry)
+  OFF(allFlags)
 #undef OFF
 
   static constexpr ptrdiff_t clsOff() {
@@ -1593,11 +1637,12 @@ private:
 private:
   Func(const Func&) = default;  // used for clone()
   Func& operator=(const Func&) = delete;
-  void init(int numParams);
-  void initProloguesAndFuncEntry(int numParams);
-  void setFullName(int numParams);
+  void init(int numPositionalParams);
+  void initProloguesAndFuncEntry(int numPositionalParams);
+  void setFullName();
   void finishedEmittingParams(std::vector<ParamInfo>& pBuilder);
   void setNamedFunc(const NamedFunc*);
+  const TypeIntersectionConstraint& lookupInheritedReturnTypes() const;
 
   PC loadBytecode();
 
@@ -1692,6 +1737,27 @@ public:
 
   inline AtomicFlags& atomicFlags() {
     return m_atomicFlags;
+  }
+
+  union AllFlags {
+   struct {
+     bool m_isPreFunc : 1;
+     bool m_hasPrivateAncestor : 1;
+     bool m_shouldSampleJit : 1;
+     bool m_hasForeignThis : 1;
+     bool m_registeredInDataMap : 1;
+     bool m_hasNamedParams : 1;
+     // 2 free bits, and there are some more in AtomicFlags.
+   };
+   uint8_t m_allFlags;
+  };
+  static_assert(sizeof(AllFlags) == sizeof(uint8_t));
+
+  static uint8_t hasNamedParamsMask() {
+    AllFlags mask;
+    mask.m_allFlags = 0;
+    mask.m_hasNamedParams = true;
+    return mask.m_allFlags;
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1867,12 +1933,8 @@ private:
 
   mutable ClonedFlag m_cloned;
   mutable AtomicFlags m_atomicFlags;
-  bool m_isPreFunc : 1;
-  bool m_hasPrivateAncestor : 1;
-  bool m_shouldSampleJit : 1;
-  bool m_hasForeignThis : 1;
-  bool m_registeredInDataMap : 1;
-  // 3 free bits, and there are some more in AtomicFlags.
+
+  AllFlags m_allFlags;
 
   // Number of times the function has been considered in `shouldTranslate()`
   // when Eval.JitLiveThreshold or Eval.JitProfileThreshold is set. The counter

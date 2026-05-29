@@ -37,7 +37,7 @@ constexpr auto kKeyLiteral =
 
 template <class Key>
 void checkKeyEmpty(const Key& key) {
-  const auto emptyRoutingKeyHash = TestRequest().key_ref()->routingKeyHash();
+  const auto emptyRoutingKeyHash = TestRequest().key()->routingKeyHash();
 
   EXPECT_TRUE(key.empty());
   EXPECT_EQ(0, key.size());
@@ -176,74 +176,74 @@ TEST(CarbonBasic, defaultConstructed) {
   TestRequestStringKey req2;
 
   // key
-  checkKeyEmpty(*req.key_ref());
-  checkKeyEmpty(*req2.key_ref());
+  checkKeyEmpty(*req.key());
+  checkKeyEmpty(*req2.key());
 
   // bool
-  EXPECT_FALSE(*req.testBool_ref());
+  EXPECT_FALSE(*req.testBool());
   // char
-  EXPECT_EQ('\0', *req.testChar_ref());
+  EXPECT_EQ('\0', *req.testChar());
   // int8_t
-  EXPECT_EQ(0, *req.testInt8_ref());
+  EXPECT_EQ(0, *req.testInt8());
   // int16_t
-  EXPECT_EQ(0, *req.testInt16_ref());
+  EXPECT_EQ(0, *req.testInt16());
   // int32_t
-  EXPECT_EQ(0, *req.testInt32_ref());
+  EXPECT_EQ(0, *req.testInt32());
   // int64_t
-  EXPECT_EQ(0, *req.testInt64_ref());
+  EXPECT_EQ(0, *req.testInt64());
   // uint8_t
-  EXPECT_EQ(0, *req.testUInt8_ref());
+  EXPECT_EQ(0, *req.testUInt8());
   // uint16_t
-  EXPECT_EQ(0, *req.testUInt16_ref());
+  EXPECT_EQ(0, *req.testUInt16());
   // uint32_t
-  EXPECT_EQ(0, *req.testUInt32_ref());
+  EXPECT_EQ(0, *req.testUInt32());
   // uint64_t
-  EXPECT_EQ(0, *req.testUInt64_ref());
+  EXPECT_EQ(0, *req.testUInt64());
 
   // float
-  EXPECT_EQ(0.0, *req.testFloat_ref());
+  EXPECT_EQ(0.0, *req.testFloat());
   // double
-  EXPECT_EQ(0.0, *req.testDouble_ref());
+  EXPECT_EQ(0.0, *req.testDouble());
 
   // string
-  EXPECT_TRUE(req.testShortString_ref()->empty());
-  EXPECT_TRUE(req.testLongString_ref()->empty());
+  EXPECT_TRUE(req.testShortString()->empty());
+  EXPECT_TRUE(req.testLongString()->empty());
   // IOBuf
-  EXPECT_TRUE(req.testIobuf_ref()->empty());
+  EXPECT_TRUE(req.testIobuf()->empty());
 
   // List of strings
-  EXPECT_TRUE(req.testList_ref()->empty());
+  EXPECT_TRUE(req.testList()->empty());
 
   // Vector of vectors
-  EXPECT_TRUE(req.testNestedVec_ref()->empty());
+  EXPECT_TRUE(req.testNestedVec()->empty());
 
   // folly::Optional fields
-  EXPECT_FALSE(req.testOptionalIobuf_ref().has_value());
+  EXPECT_FALSE(req.testOptionalIobuf().has_value());
 
   // optional fields
-  EXPECT_FALSE(req.testOptionalKeywordString_ref().has_value());
-  EXPECT_FALSE(req.testOptionalKeywordIobuf_ref().has_value());
-  EXPECT_FALSE(req.testOptionalKeywordBool_ref().has_value());
+  EXPECT_FALSE(req.testOptionalKeywordString().has_value());
+  EXPECT_FALSE(req.testOptionalKeywordIobuf().has_value());
+  EXPECT_FALSE(req.testOptionalKeywordBool().has_value());
 
   // optional fields field_ref
-  EXPECT_FALSE(req.testOptionalKeywordString_ref().has_value());
-  EXPECT_FALSE(req.testOptionalKeywordIobuf_ref().has_value());
-  EXPECT_FALSE(req.testOptionalKeywordBool_ref().has_value());
+  EXPECT_FALSE(req.testOptionalKeywordString().has_value());
+  EXPECT_FALSE(req.testOptionalKeywordIobuf().has_value());
+  EXPECT_FALSE(req.testOptionalKeywordBool().has_value());
 
   // Unordered map
-  EXPECT_TRUE(req.testUMap_ref()->empty());
+  EXPECT_TRUE(req.testUMap()->empty());
 
   // Ordered map
-  EXPECT_TRUE(req.testMap_ref()->empty());
+  EXPECT_TRUE(req.testMap()->empty());
 
   // Complex map
-  EXPECT_TRUE(req.testComplexMap_ref()->empty());
+  EXPECT_TRUE(req.testComplexMap()->empty());
 
   // Unordered set
-  EXPECT_TRUE(req.testUSet_ref()->empty());
+  EXPECT_TRUE(req.testUSet()->empty());
 
   // Ordered set
-  EXPECT_TRUE(req.testSet_ref()->empty());
+  EXPECT_TRUE(req.testSet()->empty());
 
   // fields generated for every request (will likely be removed in the future)
   EXPECT_EQ(0, facebook::memcache::getExptimeIfExist(req));
@@ -255,194 +255,191 @@ TEST(CarbonBasic, setAndGet) {
   TestRequestStringKey req2(kKeyLiteral);
 
   // key
-  const auto reqKeyPiece = req.key_ref()->fullKey();
+  const auto reqKeyPiece = req.key()->fullKey();
   EXPECT_EQ(kKeyLiteral, reqKeyPiece);
-  EXPECT_EQ(kKeyLiteral, req.key_ref()->fullKey());
-  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz", req.key_ref()->routingKey().str());
-  EXPECT_EQ("/region/cluster/", req.key_ref()->routingPrefix().str());
+  EXPECT_EQ(kKeyLiteral, req.key()->fullKey());
+  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz", req.key()->routingKey().str());
+  EXPECT_EQ("/region/cluster/", req.key()->routingPrefix().str());
   EXPECT_EQ(
       "abcdefghijklmnopqrstuvwxyz|#|afterhashstop",
-      req.key_ref()->keyWithoutRoute().str());
-  EXPECT_EQ("|#|afterhashstop", req.key_ref()->afterRoutingKey().str());
+      req.key()->keyWithoutRoute().str());
+  EXPECT_EQ("|#|afterhashstop", req.key()->afterRoutingKey().str());
 
-  const auto reqKeyPiece2 = req2.key_ref()->fullKey();
+  const auto reqKeyPiece2 = req2.key()->fullKey();
   EXPECT_EQ(kKeyLiteral, reqKeyPiece2);
-  EXPECT_EQ(kKeyLiteral, req2.key_ref()->fullKey());
-  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz", req2.key_ref()->routingKey().str());
-  EXPECT_EQ("/region/cluster/", req2.key_ref()->routingPrefix().str());
+  EXPECT_EQ(kKeyLiteral, req2.key()->fullKey());
+  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz", req2.key()->routingKey().str());
+  EXPECT_EQ("/region/cluster/", req2.key()->routingPrefix().str());
   EXPECT_EQ(
       "abcdefghijklmnopqrstuvwxyz|#|afterhashstop",
-      req2.key_ref()->keyWithoutRoute().str());
-  EXPECT_EQ("|#|afterhashstop", req2.key_ref()->afterRoutingKey().str());
+      req2.key()->keyWithoutRoute().str());
+  EXPECT_EQ("|#|afterhashstop", req2.key()->afterRoutingKey().str());
 
   // bool
-  req.testBool_ref() = true;
-  EXPECT_TRUE(*req.testBool_ref());
+  req.testBool() = true;
+  EXPECT_TRUE(*req.testBool());
   // char
-  req.testChar_ref() = 'A';
-  EXPECT_EQ('A', *req.testChar_ref());
+  req.testChar() = 'A';
+  EXPECT_EQ('A', *req.testChar());
 
   // int8_t
-  req.testInt8_ref() = kMinInt8;
-  EXPECT_EQ(kMinInt8, *req.testInt8_ref());
+  req.testInt8() = kMinInt8;
+  EXPECT_EQ(kMinInt8, *req.testInt8());
   // int16_t
-  req.testInt16_ref() = kMinInt16;
-  EXPECT_EQ(kMinInt16, *req.testInt16_ref());
+  req.testInt16() = kMinInt16;
+  EXPECT_EQ(kMinInt16, *req.testInt16());
   // int32_t
-  req.testInt32_ref() = kMinInt32;
-  EXPECT_EQ(kMinInt32, *req.testInt32_ref());
+  req.testInt32() = kMinInt32;
+  EXPECT_EQ(kMinInt32, *req.testInt32());
   // int64_t
-  req.testInt64_ref() = kMinInt64;
-  EXPECT_EQ(kMinInt64, *req.testInt64_ref());
+  req.testInt64() = kMinInt64;
+  EXPECT_EQ(kMinInt64, *req.testInt64());
   // uint8_t
-  req.testUInt8_ref() = kMaxUInt8;
-  EXPECT_EQ(kMaxUInt8, *req.testUInt8_ref());
+  req.testUInt8() = kMaxUInt8;
+  EXPECT_EQ(kMaxUInt8, *req.testUInt8());
   // uint16_t
-  req.testUInt16_ref() = kMaxUInt16;
-  EXPECT_EQ(kMaxUInt16, *req.testUInt16_ref());
+  req.testUInt16() = kMaxUInt16;
+  EXPECT_EQ(kMaxUInt16, *req.testUInt16());
   // uint32_t
-  req.testUInt32_ref() = kMaxUInt32;
-  EXPECT_EQ(kMaxUInt32, *req.testUInt32_ref());
+  req.testUInt32() = kMaxUInt32;
+  EXPECT_EQ(kMaxUInt32, *req.testUInt32());
   // uint64_t
-  req.testUInt64_ref() = kMaxUInt64;
-  EXPECT_EQ(kMaxUInt64, *req.testUInt64_ref());
+  req.testUInt64() = kMaxUInt64;
+  EXPECT_EQ(kMaxUInt64, *req.testUInt64());
 
   // float
-  req.testFloat_ref() = 12345.789f;
-  EXPECT_FLOAT_EQ(12345.789f, *req.testFloat_ref());
+  req.testFloat() = 12345.789f;
+  EXPECT_FLOAT_EQ(12345.789f, *req.testFloat());
   // double
-  req.testDouble_ref() = 12345.789;
-  EXPECT_DOUBLE_EQ(12345.789, *req.testDouble_ref());
+  req.testDouble() = 12345.789;
+  EXPECT_DOUBLE_EQ(12345.789, *req.testDouble());
 
   // string
-  req.testShortString_ref() = kShortString.str();
-  EXPECT_EQ(kShortString, *req.testShortString_ref());
-  req.testLongString_ref() = longString();
-  EXPECT_EQ(longString(), *req.testLongString_ref());
+  req.testShortString() = kShortString.str();
+  EXPECT_EQ(kShortString, *req.testShortString());
+  req.testLongString() = longString();
+  EXPECT_EQ(longString(), *req.testLongString());
   // IOBuf
   folly::IOBuf iobuf(folly::IOBuf::COPY_BUFFER, longString());
-  req.testIobuf_ref() = iobuf;
+  req.testIobuf() = iobuf;
   EXPECT_EQ(
       coalesceAndGetRange(iobuf).str(),
-      coalesceAndGetRange(req.testIobuf_ref()).str());
+      coalesceAndGetRange(req.testIobuf()).str());
 
   std::vector<std::string> strings = {
       "abcdefg", "xyz", kShortString.str(), longString()};
-  req.testList_ref() = strings;
-  EXPECT_EQ(strings, *req.testList_ref());
+  req.testList() = strings;
+  EXPECT_EQ(strings, *req.testList());
 
   // Vector of vectors
   std::vector<std::vector<uint64_t>> vectors = {{1, 1, 1}, {2, 2}};
-  req.testNestedVec_ref() = vectors;
-  EXPECT_EQ(vectors, *req.testNestedVec_ref());
+  req.testNestedVec() = vectors;
+  EXPECT_EQ(vectors, *req.testNestedVec());
 
   // folly::Optional fields
   const auto s = longString();
-  req.testOptionalIobuf_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, s);
-  EXPECT_EQ(s, coalesceAndGetRange(*req.testOptionalIobuf_ref()));
-  req.testOptionalBool_ref() = false;
-  EXPECT_EQ(false, *req.testOptionalBool_ref());
+  req.testOptionalIobuf() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, s);
+  EXPECT_EQ(s, coalesceAndGetRange(*req.testOptionalIobuf()));
+  req.testOptionalBool() = false;
+  EXPECT_EQ(false, *req.testOptionalBool());
   std::vector<folly::Optional<std::string>> ovec;
   ovec.emplace_back("hello");
 
   // optional fields
   const auto lstring = longString();
-  req.testOptionalKeywordString_ref() = lstring;
-  EXPECT_EQ(lstring, *req.testOptionalKeywordString_ref());
-  req.testOptionalKeywordIobuf_ref() =
+  req.testOptionalKeywordString() = lstring;
+  EXPECT_EQ(lstring, *req.testOptionalKeywordString());
+  req.testOptionalKeywordIobuf() =
       folly::IOBuf(folly::IOBuf::COPY_BUFFER, lstring);
-  EXPECT_EQ(lstring, coalesceAndGetRange(*req.testOptionalKeywordIobuf_ref()));
-  req.testOptionalKeywordBool_ref() = false;
-  EXPECT_EQ(false, *req.testOptionalKeywordBool_ref());
+  EXPECT_EQ(lstring, coalesceAndGetRange(*req.testOptionalKeywordIobuf()));
+  req.testOptionalKeywordBool() = false;
+  EXPECT_EQ(false, *req.testOptionalKeywordBool());
 
   // optional fields ref api
   const auto lstringRef = longString();
-  req.testOptionalKeywordString_ref() = lstringRef;
-  EXPECT_EQ(lstringRef, *req.testOptionalKeywordString_ref());
-  req.testOptionalKeywordIobuf_ref() =
+  req.testOptionalKeywordString() = lstringRef;
+  EXPECT_EQ(lstringRef, *req.testOptionalKeywordString());
+  req.testOptionalKeywordIobuf() =
       folly::IOBuf(folly::IOBuf::COPY_BUFFER, lstringRef);
-  EXPECT_EQ(
-      lstringRef, coalesceAndGetRange(req.testOptionalKeywordIobuf_ref()));
-  req.testOptionalKeywordBool_ref() = false;
-  EXPECT_EQ(false, *req.testOptionalKeywordBool_ref());
+  EXPECT_EQ(lstringRef, coalesceAndGetRange(req.testOptionalKeywordIobuf()));
+  req.testOptionalKeywordBool() = false;
+  EXPECT_EQ(false, *req.testOptionalKeywordBool());
 
   // Unordered map
   std::unordered_map<std::string, std::string> stringmap;
   stringmap.insert({"key", "value"});
-  req.testUMap_ref() = stringmap;
-  EXPECT_EQ(stringmap, *req.testUMap_ref());
+  req.testUMap() = stringmap;
+  EXPECT_EQ(stringmap, *req.testUMap());
 
   // Ordered map
   std::map<double, double> doublemap;
   doublemap.insert({1.08, 8.3});
-  req.testMap_ref() = doublemap;
-  EXPECT_EQ(doublemap, *req.testMap_ref());
+  req.testMap() = doublemap;
+  EXPECT_EQ(doublemap, *req.testMap());
 
   // Complex map
   std::map<std::string, std::vector<uint16_t>> complexmap;
   complexmap.insert({"key", {1, 2}});
-  req.testComplexMap_ref() = complexmap;
-  EXPECT_EQ(complexmap, *req.testComplexMap_ref());
+  req.testComplexMap() = complexmap;
+  EXPECT_EQ(complexmap, *req.testComplexMap());
 
   // Unordered set
   std::unordered_set<std::string> stringset;
   stringset.insert("hello");
   stringset.insert("world");
-  req.testUSet_ref() = stringset;
-  EXPECT_EQ(stringset, *req.testUSet_ref());
+  req.testUSet() = stringset;
+  EXPECT_EQ(stringset, *req.testUSet());
 
   // Ordered set
   std::set<uint64_t> intset;
   intset.insert(1);
   intset.insert(2);
-  req.testSet_ref() = intset;
-  EXPECT_EQ(intset, *req.testSet_ref());
+  req.testSet() = intset;
+  EXPECT_EQ(intset, *req.testSet());
 }
 
 TEST(CarbonTest, serializeDeserialize) {
   // Fill in a request
   TestRequest outRequest("abcdefghijklmnopqrstuvwxyz");
-  outRequest.testBool_ref() = true;
-  outRequest.testChar_ref() = 'A';
-  outRequest.testInt8_ref() = kMinInt8;
-  outRequest.testInt16_ref() = kMinInt16;
-  outRequest.testInt32_ref() = kMinInt32;
-  outRequest.testInt64_ref() = kMinInt64;
-  outRequest.testUInt8_ref() = kMaxUInt8;
-  outRequest.testUInt16_ref() = kMaxUInt16;
-  outRequest.testUInt32_ref() = kMaxUInt32;
-  outRequest.testUInt64_ref() = kMaxUInt64;
-  outRequest.testFloat_ref() = 12345.678f;
-  outRequest.testDouble_ref() = 12345.678;
-  outRequest.testShortString_ref() = kShortString.str();
-  outRequest.testLongString_ref() = longString();
-  outRequest.testIobuf_ref() =
+  outRequest.testBool() = true;
+  outRequest.testChar() = 'A';
+  outRequest.testInt8() = kMinInt8;
+  outRequest.testInt16() = kMinInt16;
+  outRequest.testInt32() = kMinInt32;
+  outRequest.testInt64() = kMinInt64;
+  outRequest.testUInt8() = kMaxUInt8;
+  outRequest.testUInt16() = kMaxUInt16;
+  outRequest.testUInt32() = kMaxUInt32;
+  outRequest.testUInt64() = kMaxUInt64;
+  outRequest.testFloat() = 12345.678f;
+  outRequest.testDouble() = 12345.678;
+  outRequest.testShortString() = kShortString.str();
+  outRequest.testLongString() = longString();
+  outRequest.testIobuf() =
       folly::IOBuf(folly::IOBuf::COPY_BUFFER, kShortString);
   // List of strings
-  outRequest.testList_ref() = {
-      "abcdefg", "xyz", kShortString.str(), longString()};
+  outRequest.testList() = {"abcdefg", "xyz", kShortString.str(), longString()};
   // Other optional field gets a value of zero length
-  outRequest.testOptionalIobuf_ref() =
-      folly::IOBuf(folly::IOBuf::COPY_BUFFER, "");
+  outRequest.testOptionalIobuf() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "");
 
-  outRequest.testNestedVec_ref()->push_back({100, 2000});
+  outRequest.testNestedVec()->push_back({100, 2000});
 
-  outRequest.testUMap_ref()->insert({"hello", "world"});
-  outRequest.testMap_ref()->insert({1.08, 8.3});
-  outRequest.testF14FastMap_ref()->insert({"hello", "F14FastMap"});
-  outRequest.testF14NodeMap_ref()->insert({"hello", "F14NodeMap"});
-  outRequest.testF14ValueMap_ref()->insert({"hello", "F14ValueMap"});
-  outRequest.testF14VectorMap_ref()->insert({"hello", "F14VectorMap"});
-  outRequest.testComplexMap_ref()->insert({"key", {1, 2}});
+  outRequest.testUMap()->insert({"hello", "world"});
+  outRequest.testMap()->insert({1.08, 8.3});
+  outRequest.testF14FastMap()->insert({"hello", "F14FastMap"});
+  outRequest.testF14NodeMap()->insert({"hello", "F14NodeMap"});
+  outRequest.testF14ValueMap()->insert({"hello", "F14ValueMap"});
+  outRequest.testF14VectorMap()->insert({"hello", "F14VectorMap"});
+  outRequest.testComplexMap()->insert({"key", {1, 2}});
 
-  outRequest.testUSet_ref()->insert("hello");
-  outRequest.testSet_ref()->insert(123);
-  outRequest.testF14FastSet_ref()->insert("hello F14FastSet");
-  outRequest.testF14NodeSet_ref()->insert("hello F14NodeSet");
-  outRequest.testF14ValueSet_ref()->insert("hello F14ValueSet");
-  outRequest.testF14VectorSet_ref()->insert("hello F14VectorSet");
-  outRequest.testOptionalBool_ref() = false;
-  outRequest.testIOBufList_ref()->emplace_back();
+  outRequest.testUSet()->insert("hello");
+  outRequest.testSet()->insert(123);
+  outRequest.testF14FastSet()->insert("hello F14FastSet");
+  outRequest.testF14NodeSet()->insert("hello F14NodeSet");
+  outRequest.testF14ValueSet()->insert("hello F14ValueSet");
+  outRequest.testF14VectorSet()->insert("hello F14VectorSet");
+  outRequest.testOptionalBool() = false;
+  outRequest.testIOBufList()->emplace_back();
   const auto inRequest = serializeAndDeserialize(outRequest);
   expectEqTestRequest(outRequest, inRequest);
 }
@@ -452,10 +449,10 @@ TEST(CarbonTest, veryLongString) {
   std::string veryLongString(kVeryLongStringSize, 'x');
 
   TestRequest outRequest(longString());
-  outRequest.testLongString_ref() = std::move(veryLongString);
+  outRequest.testLongString() = std::move(veryLongString);
   const auto inRequest = serializeAndDeserialize(outRequest);
   expectEqTestRequest(outRequest, inRequest);
-  EXPECT_EQ(kVeryLongStringSize, inRequest.testLongString_ref()->length());
+  EXPECT_EQ(kVeryLongStringSize, inRequest.testLongString()->length());
 }
 
 TEST(CarbonTest, repeatStorageUsage) {
@@ -465,7 +462,7 @@ TEST(CarbonTest, repeatStorageUsage) {
   carbon::CarbonProtocolWriter writer(storage);
 
   TestRequest outRequest(longString());
-  outRequest.testLongString_ref() = std::move(testStr);
+  outRequest.testLongString() = std::move(testStr);
 
   for (int i = 0; i < 100; i++) {
     serialize(outRequest, writer);
@@ -480,81 +477,81 @@ TEST(CarbonTest, veryLongIobuf) {
   veryLongIobuf.append(kVeryLongIobufSize);
 
   TestRequest outRequest(longString());
-  outRequest.testIobuf_ref() = std::move(veryLongIobuf);
+  outRequest.testIobuf() = std::move(veryLongIobuf);
   const auto inRequest = serializeAndDeserialize(outRequest);
   expectEqTestRequest(outRequest, inRequest);
-  EXPECT_EQ(kVeryLongIobufSize, inRequest.testIobuf_ref()->length());
+  EXPECT_EQ(kVeryLongIobufSize, inRequest.testIobuf()->length());
 }
 
 TEST(CarbonTest, keysIobuf) {
   {
     TestRequest req;
-    checkKeyEmpty(*req.key_ref());
+    checkKeyEmpty(*req.key());
   }
   {
     TestRequest req;
 
     const folly::IOBuf keyCopy(folly::IOBuf::CopyBufferOp(), kKeyLiteral);
-    req.key_ref() = keyCopy;
-    checkKeyFilledProperly(*req.key_ref());
+    req.key() = keyCopy;
+    checkKeyFilledProperly(*req.key());
 
-    req.key_ref() = "";
-    checkKeyEmpty(*req.key_ref());
+    req.key() = "";
+    checkKeyEmpty(*req.key());
   }
   {
     TestRequest req;
-    checkKeyEmpty(*req.key_ref());
+    checkKeyEmpty(*req.key());
 
-    req.key_ref() = folly::IOBuf(folly::IOBuf::CopyBufferOp(), kKeyLiteral);
-    checkKeyFilledProperly(*req.key_ref());
+    req.key() = folly::IOBuf(folly::IOBuf::CopyBufferOp(), kKeyLiteral);
+    checkKeyFilledProperly(*req.key());
   }
   {
     TestRequest req(kKeyLiteral);
-    checkKeyFilledProperly(*req.key_ref());
+    checkKeyFilledProperly(*req.key());
   }
   {
     TestRequest req{folly::StringPiece(kKeyLiteral)};
-    checkKeyFilledProperly(*req.key_ref());
+    checkKeyFilledProperly(*req.key());
   }
   {
     TestRequest req(folly::IOBuf(folly::IOBuf::CopyBufferOp(), kKeyLiteral));
-    checkKeyFilledProperly(*req.key_ref());
+    checkKeyFilledProperly(*req.key());
   }
 }
 
 TEST(CarbonTest, keysString) {
   {
     TestRequestStringKey req;
-    checkKeyEmpty(*req.key_ref());
+    checkKeyEmpty(*req.key());
   }
   {
     TestRequestStringKey req;
 
     const std::string keyCopy(kKeyLiteral);
-    req.key_ref() = keyCopy;
-    checkKeyFilledProperly(*req.key_ref());
+    req.key() = keyCopy;
+    checkKeyFilledProperly(*req.key());
 
-    req.key_ref() = "";
-    checkKeyEmpty(*req.key_ref());
+    req.key() = "";
+    checkKeyEmpty(*req.key());
   }
   {
     TestRequestStringKey req;
-    checkKeyEmpty(*req.key_ref());
+    checkKeyEmpty(*req.key());
 
-    req.key_ref() = kKeyLiteral;
-    checkKeyFilledProperly(*req.key_ref());
+    req.key() = kKeyLiteral;
+    checkKeyFilledProperly(*req.key());
   }
   {
     TestRequestStringKey req(kKeyLiteral);
-    checkKeyFilledProperly(*req.key_ref());
+    checkKeyFilledProperly(*req.key());
   }
   {
     TestRequest req{folly::StringPiece(kKeyLiteral)};
-    checkKeyFilledProperly(*req.key_ref());
+    checkKeyFilledProperly(*req.key());
   }
   {
     TestRequest req{std::string(kKeyLiteral)};
-    checkKeyFilledProperly(*req.key_ref());
+    checkKeyFilledProperly(*req.key());
   }
 }
 
@@ -563,62 +560,62 @@ TEST(CarbonBasic, defaultConstructedFieldRefAPI) {
   TestRequestStringKey req2;
 
   // key
-  checkKeyEmpty(*req.key_ref());
-  checkKeyEmpty(*req2.key_ref());
+  checkKeyEmpty(*req.key());
+  checkKeyEmpty(*req2.key());
 
   // bool
-  EXPECT_FALSE(*req.testBool_ref());
+  EXPECT_FALSE(*req.testBool());
   // char
-  EXPECT_EQ('\0', *req.testChar_ref());
+  EXPECT_EQ('\0', *req.testChar());
 
   // int8_t
-  EXPECT_EQ(0, *req.testInt8_ref());
+  EXPECT_EQ(0, *req.testInt8());
   // int16_t
-  EXPECT_EQ(0, *req.testInt16_ref());
+  EXPECT_EQ(0, *req.testInt16());
   // int32_t
-  EXPECT_EQ(0, *req.testInt32_ref());
+  EXPECT_EQ(0, *req.testInt32());
   // int64_t
-  EXPECT_EQ(0, *req.testInt64_ref());
+  EXPECT_EQ(0, *req.testInt64());
   // uint8_t
-  EXPECT_EQ(0, *req.testUInt8_ref());
+  EXPECT_EQ(0, *req.testUInt8());
   // uint16_t
-  EXPECT_EQ(0, *req.testUInt16_ref());
+  EXPECT_EQ(0, *req.testUInt16());
   // uint32_t
-  EXPECT_EQ(0, *req.testUInt32_ref());
+  EXPECT_EQ(0, *req.testUInt32());
   // uint64_t
-  EXPECT_EQ(0, *req.testUInt64_ref());
+  EXPECT_EQ(0, *req.testUInt64());
 
   // float
-  EXPECT_EQ(0.0, *req.testFloat_ref());
+  EXPECT_EQ(0.0, *req.testFloat());
   // double
-  EXPECT_EQ(0.0, *req.testDouble_ref());
+  EXPECT_EQ(0.0, *req.testDouble());
 
   // string
-  EXPECT_TRUE(req.testShortString_ref()->empty());
-  EXPECT_TRUE(req.testLongString_ref()->empty());
+  EXPECT_TRUE(req.testShortString()->empty());
+  EXPECT_TRUE(req.testLongString()->empty());
   // IOBuf
-  EXPECT_TRUE(req.testIobuf_ref()->empty());
+  EXPECT_TRUE(req.testIobuf()->empty());
 
   // List of strings
-  EXPECT_TRUE(req.testList_ref()->empty());
+  EXPECT_TRUE(req.testList()->empty());
 
   // Vector of vectors
-  EXPECT_TRUE(req.testNestedVec_ref()->empty());
+  EXPECT_TRUE(req.testNestedVec()->empty());
 
   // Unordered map
-  EXPECT_TRUE(req.testUMap_ref()->empty());
+  EXPECT_TRUE(req.testUMap()->empty());
 
   // Ordered map
-  EXPECT_TRUE(req.testMap_ref()->empty());
+  EXPECT_TRUE(req.testMap()->empty());
 
   // Complex map
-  EXPECT_TRUE(req.testComplexMap_ref()->empty());
+  EXPECT_TRUE(req.testComplexMap()->empty());
 
   // Unordered set
-  EXPECT_TRUE(req.testUSet_ref()->empty());
+  EXPECT_TRUE(req.testUSet()->empty());
 
   // Ordered set
-  EXPECT_TRUE(req.testSet_ref()->empty());
+  EXPECT_TRUE(req.testSet()->empty());
 
   // fields generated for every request (will likely be removed in the future)
   EXPECT_EQ(0, facebook::memcache::getExptimeIfExist(req));
@@ -630,217 +627,216 @@ TEST(CarbonBasic, setAndGetFieldRefAPI) {
   TestRequestStringKey req2(kKeyLiteral);
 
   // key
-  const auto reqKeyPiece = req.key_ref()->fullKey();
+  const auto reqKeyPiece = req.key()->fullKey();
   EXPECT_EQ(kKeyLiteral, reqKeyPiece);
-  EXPECT_EQ(kKeyLiteral, req.key_ref()->fullKey());
-  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz", req.key_ref()->routingKey().str());
-  EXPECT_EQ("/region/cluster/", req.key_ref()->routingPrefix().str());
+  EXPECT_EQ(kKeyLiteral, req.key()->fullKey());
+  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz", req.key()->routingKey().str());
+  EXPECT_EQ("/region/cluster/", req.key()->routingPrefix().str());
   EXPECT_EQ(
       "abcdefghijklmnopqrstuvwxyz|#|afterhashstop",
-      req.key_ref()->keyWithoutRoute().str());
-  EXPECT_EQ("|#|afterhashstop", req.key_ref()->afterRoutingKey().str());
+      req.key()->keyWithoutRoute().str());
+  EXPECT_EQ("|#|afterhashstop", req.key()->afterRoutingKey().str());
 
-  const auto reqKeyPiece2 = req2.key_ref()->fullKey();
+  const auto reqKeyPiece2 = req2.key()->fullKey();
   EXPECT_EQ(kKeyLiteral, reqKeyPiece2);
-  EXPECT_EQ(kKeyLiteral, req2.key_ref()->fullKey());
-  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz", req2.key_ref()->routingKey().str());
-  EXPECT_EQ("/region/cluster/", req2.key_ref()->routingPrefix().str());
+  EXPECT_EQ(kKeyLiteral, req2.key()->fullKey());
+  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz", req2.key()->routingKey().str());
+  EXPECT_EQ("/region/cluster/", req2.key()->routingPrefix().str());
   EXPECT_EQ(
       "abcdefghijklmnopqrstuvwxyz|#|afterhashstop",
-      req2.key_ref()->keyWithoutRoute().str());
-  EXPECT_EQ("|#|afterhashstop", req2.key_ref()->afterRoutingKey().str());
+      req2.key()->keyWithoutRoute().str());
+  EXPECT_EQ("|#|afterhashstop", req2.key()->afterRoutingKey().str());
 
   // bool
-  req.testBool_ref() = true;
-  EXPECT_TRUE(*req.testBool_ref());
+  req.testBool() = true;
+  EXPECT_TRUE(*req.testBool());
   // char
-  req.testChar_ref() = 'A';
-  EXPECT_EQ('A', *req.testChar_ref());
+  req.testChar() = 'A';
+  EXPECT_EQ('A', *req.testChar());
 
   // int8_t
-  req.testInt8_ref() = kMinInt8;
-  EXPECT_EQ(kMinInt8, *req.testInt8_ref());
+  req.testInt8() = kMinInt8;
+  EXPECT_EQ(kMinInt8, *req.testInt8());
   // int16_t
-  req.testInt16_ref() = kMinInt16;
-  EXPECT_EQ(kMinInt16, *req.testInt16_ref());
+  req.testInt16() = kMinInt16;
+  EXPECT_EQ(kMinInt16, *req.testInt16());
   // int32_t
-  req.testInt32_ref() = kMinInt32;
-  EXPECT_EQ(kMinInt32, *req.testInt32_ref());
+  req.testInt32() = kMinInt32;
+  EXPECT_EQ(kMinInt32, *req.testInt32());
   // int64_t
-  req.testInt64_ref() = kMinInt64;
-  EXPECT_EQ(kMinInt64, *req.testInt64_ref());
+  req.testInt64() = kMinInt64;
+  EXPECT_EQ(kMinInt64, *req.testInt64());
   // uint8_t
-  req.testUInt8_ref() = kMaxUInt8;
-  EXPECT_EQ(kMaxUInt8, *req.testUInt8_ref());
+  req.testUInt8() = kMaxUInt8;
+  EXPECT_EQ(kMaxUInt8, *req.testUInt8());
   // uint16_t
-  req.testUInt16_ref() = kMaxUInt16;
-  EXPECT_EQ(kMaxUInt16, *req.testUInt16_ref());
+  req.testUInt16() = kMaxUInt16;
+  EXPECT_EQ(kMaxUInt16, *req.testUInt16());
   // uint32_t
-  req.testUInt32_ref() = kMaxUInt32;
-  EXPECT_EQ(kMaxUInt32, *req.testUInt32_ref());
+  req.testUInt32() = kMaxUInt32;
+  EXPECT_EQ(kMaxUInt32, *req.testUInt32());
   // uint64_t
-  req.testUInt64_ref() = kMaxUInt64;
-  EXPECT_EQ(kMaxUInt64, *req.testUInt64_ref());
+  req.testUInt64() = kMaxUInt64;
+  EXPECT_EQ(kMaxUInt64, *req.testUInt64());
 
   // float
-  req.testFloat_ref() = 12345.789f;
-  EXPECT_FLOAT_EQ(12345.789f, *req.testFloat_ref());
+  req.testFloat() = 12345.789f;
+  EXPECT_FLOAT_EQ(12345.789f, *req.testFloat());
   // double
-  req.testDouble_ref() = 12345.789;
-  EXPECT_DOUBLE_EQ(12345.789, *req.testDouble_ref());
+  req.testDouble() = 12345.789;
+  EXPECT_DOUBLE_EQ(12345.789, *req.testDouble());
 
   // string
-  req.testShortString_ref() = kShortString.str();
-  EXPECT_EQ(kShortString, *req.testShortString_ref());
-  req.testLongString_ref() = longString();
-  EXPECT_EQ(longString(), *req.testLongString_ref());
+  req.testShortString() = kShortString.str();
+  EXPECT_EQ(kShortString, *req.testShortString());
+  req.testLongString() = longString();
+  EXPECT_EQ(longString(), *req.testLongString());
   // IOBuf
   folly::IOBuf iobuf(folly::IOBuf::COPY_BUFFER, longString());
-  req.testIobuf_ref() = iobuf;
+  req.testIobuf() = iobuf;
   EXPECT_EQ(
       coalesceAndGetRange(iobuf).str(),
-      coalesceAndGetRange(req.testIobuf_ref()).str());
+      coalesceAndGetRange(req.testIobuf()).str());
 
   std::vector<std::string> strings = {
       "abcdefg", "xyz", kShortString.str(), longString()};
-  req.testList_ref() = strings;
-  EXPECT_EQ(strings, *req.testList_ref());
+  req.testList() = strings;
+  EXPECT_EQ(strings, *req.testList());
 
   // optionals
-  EXPECT_FALSE(req.testOptionalKeywordString_ref().has_value());
-  EXPECT_FALSE(req.testOptionalKeywordIobuf_ref().has_value());
-  EXPECT_FALSE(req.testOptionalKeywordBool_ref().has_value());
+  EXPECT_FALSE(req.testOptionalKeywordString().has_value());
+  EXPECT_FALSE(req.testOptionalKeywordIobuf().has_value());
+  EXPECT_FALSE(req.testOptionalKeywordBool().has_value());
 
   // optionals field_ref
-  EXPECT_FALSE(req.testOptionalKeywordString_ref().has_value());
-  EXPECT_FALSE(req.testOptionalKeywordIobuf_ref().has_value());
-  EXPECT_FALSE(req.testOptionalKeywordBool_ref().has_value());
+  EXPECT_FALSE(req.testOptionalKeywordString().has_value());
+  EXPECT_FALSE(req.testOptionalKeywordIobuf().has_value());
+  EXPECT_FALSE(req.testOptionalKeywordBool().has_value());
 
   // Vector of vectors
   std::vector<std::vector<uint64_t>> vectors = {{1, 1, 1}, {2, 2}};
-  req.testNestedVec_ref() = vectors;
-  EXPECT_EQ(vectors, *req.testNestedVec_ref());
+  req.testNestedVec() = vectors;
+  EXPECT_EQ(vectors, *req.testNestedVec());
 
   // Unordered map
   std::unordered_map<std::string, std::string> stringmap;
   stringmap.insert({"key", "value"});
-  req.testUMap_ref() = stringmap;
-  EXPECT_EQ(stringmap, *req.testUMap_ref());
+  req.testUMap() = stringmap;
+  EXPECT_EQ(stringmap, *req.testUMap());
 
   // Ordered map
   std::map<double, double> doublemap;
   doublemap.insert({1.08, 8.3});
-  req.testMap_ref() = doublemap;
-  EXPECT_EQ(doublemap, *req.testMap_ref());
+  req.testMap() = doublemap;
+  EXPECT_EQ(doublemap, *req.testMap());
 
   // Complex map
   std::map<std::string, std::vector<uint16_t>> complexmap;
   complexmap.insert({"key", {1, 2}});
-  req.testComplexMap_ref() = complexmap;
-  EXPECT_EQ(complexmap, *req.testComplexMap_ref());
+  req.testComplexMap() = complexmap;
+  EXPECT_EQ(complexmap, *req.testComplexMap());
 
   // Unordered set
   std::unordered_set<std::string> stringset;
   stringset.insert("hello");
   stringset.insert("world");
-  req.testUSet_ref() = stringset;
-  EXPECT_EQ(stringset, *req.testUSet_ref());
+  req.testUSet() = stringset;
+  EXPECT_EQ(stringset, *req.testUSet());
 
   // Ordered set
   std::set<uint64_t> intset;
   intset.insert(1);
   intset.insert(2);
-  req.testSet_ref() = intset;
-  EXPECT_EQ(intset, *req.testSet_ref());
+  req.testSet() = intset;
+  EXPECT_EQ(intset, *req.testSet());
 }
 
 TEST(CarbonBasic, setAndGetFieldRefAPIThrift) {
   DummyThriftRequest req(kKeyLiteral);
 
   // key
-  const auto reqKeyPiece = req.key_ref()->fullKey();
+  const auto reqKeyPiece = req.key()->fullKey();
   EXPECT_EQ(kKeyLiteral, reqKeyPiece);
-  EXPECT_EQ(kKeyLiteral, req.key_ref()->fullKey());
-  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz", req.key_ref()->routingKey().str());
-  EXPECT_EQ("/region/cluster/", req.key_ref()->routingPrefix().str());
+  EXPECT_EQ(kKeyLiteral, req.key()->fullKey());
+  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz", req.key()->routingKey().str());
+  EXPECT_EQ("/region/cluster/", req.key()->routingPrefix().str());
   EXPECT_EQ(
       "abcdefghijklmnopqrstuvwxyz|#|afterhashstop",
-      req.key_ref()->keyWithoutRoute().str());
-  EXPECT_EQ("|#|afterhashstop", req.key_ref()->afterRoutingKey().str());
+      req.key()->keyWithoutRoute().str());
+  EXPECT_EQ("|#|afterhashstop", req.key()->afterRoutingKey().str());
 
   // bool
-  req.testBool_ref() = true;
-  EXPECT_TRUE(*(req.testBool_ref()));
+  req.testBool() = true;
+  EXPECT_TRUE(*(req.testBool()));
 
   // int8_t
-  req.testInt8_ref() = kMinInt8;
-  EXPECT_EQ(kMinInt8, *(req.testInt8_ref()));
+  req.testInt8() = kMinInt8;
+  EXPECT_EQ(kMinInt8, *(req.testInt8()));
   // int16_t
-  req.testInt16_ref() = kMinInt16;
-  EXPECT_EQ(kMinInt16, *(req.testInt16_ref()));
+  req.testInt16() = kMinInt16;
+  EXPECT_EQ(kMinInt16, *(req.testInt16()));
   // int32_t
-  req.testInt32_ref() = kMinInt32;
-  EXPECT_EQ(kMinInt32, *(req.testInt32_ref()));
+  req.testInt32() = kMinInt32;
+  EXPECT_EQ(kMinInt32, *(req.testInt32()));
   // int64_t
-  req.testInt64_ref() = kMinInt64;
-  EXPECT_EQ(kMinInt64, *(req.testInt64_ref()));
+  req.testInt64() = kMinInt64;
+  EXPECT_EQ(kMinInt64, *(req.testInt64()));
   // uint8_t
-  req.testUInt8_ref() = kMaxUInt8;
-  EXPECT_EQ(kMaxUInt8, *(req.testUInt8_ref()));
+  req.testUInt8() = kMaxUInt8;
+  EXPECT_EQ(kMaxUInt8, *(req.testUInt8()));
   // uint16_t
-  req.testUInt16_ref() = kMaxUInt16;
-  EXPECT_EQ(kMaxUInt16, *(req.testUInt16_ref()));
+  req.testUInt16() = kMaxUInt16;
+  EXPECT_EQ(kMaxUInt16, *(req.testUInt16()));
   // uint32_t
-  req.testUInt32_ref() = kMaxUInt32;
-  EXPECT_EQ(kMaxUInt32, *(req.testUInt32_ref()));
+  req.testUInt32() = kMaxUInt32;
+  EXPECT_EQ(kMaxUInt32, *(req.testUInt32()));
   // uint64_t
-  req.testUInt64_ref() = kMaxUInt64;
-  EXPECT_EQ(kMaxUInt64, *(req.testUInt64_ref()));
+  req.testUInt64() = kMaxUInt64;
+  EXPECT_EQ(kMaxUInt64, *(req.testUInt64()));
 
   // float
-  req.testFloat_ref() = 12345.789f;
-  EXPECT_FLOAT_EQ(12345.789f, *(req.testFloat_ref()));
+  req.testFloat() = 12345.789f;
+  EXPECT_FLOAT_EQ(12345.789f, *(req.testFloat()));
   // double
-  req.testDouble_ref() = 12345.789;
-  EXPECT_DOUBLE_EQ(12345.789, *(req.testDouble_ref()));
+  req.testDouble() = 12345.789;
+  EXPECT_DOUBLE_EQ(12345.789, *(req.testDouble()));
 
   // optionals field_ref
   const auto lstringRef = longString();
-  req.testOptionalKeywordString_ref() = lstringRef;
-  EXPECT_EQ(lstringRef, *req.testOptionalKeywordString_ref());
-  req.testOptionalKeywordIobuf_ref() =
+  req.testOptionalKeywordString() = lstringRef;
+  EXPECT_EQ(lstringRef, *req.testOptionalKeywordString());
+  req.testOptionalKeywordIobuf() =
       folly::IOBuf(folly::IOBuf::COPY_BUFFER, lstringRef);
-  EXPECT_EQ(
-      lstringRef, coalesceAndGetRange(req.testOptionalKeywordIobuf_ref()));
-  req.testOptionalKeywordBool_ref() = false;
-  EXPECT_EQ(false, *req.testOptionalKeywordBool_ref());
+  EXPECT_EQ(lstringRef, coalesceAndGetRange(req.testOptionalKeywordIobuf()));
+  req.testOptionalKeywordBool() = false;
+  EXPECT_EQ(false, *req.testOptionalKeywordBool());
 
   // string
-  req.testShortString_ref() = kShortString.str();
-  EXPECT_EQ(kShortString, *(req.testShortString_ref()));
-  req.testLongString_ref() = longString();
-  EXPECT_EQ(longString(), *(req.testLongString_ref()));
+  req.testShortString() = kShortString.str();
+  EXPECT_EQ(kShortString, *(req.testShortString()));
+  req.testLongString() = longString();
+  EXPECT_EQ(longString(), *(req.testLongString()));
   // IOBuf
   folly::IOBuf iobuf(folly::IOBuf::COPY_BUFFER, longString());
-  req.testIobuf_ref() = iobuf;
+  req.testIobuf() = iobuf;
   EXPECT_EQ(
       coalesceAndGetRange(iobuf).str(),
-      coalesceAndGetRange(req.testIobuf_ref()).str());
+      coalesceAndGetRange(req.testIobuf()).str());
 
   std::vector<std::string> strings = {
       "abcdefg", "xyz", kShortString.str(), longString()};
-  req.testList_ref() = strings;
-  EXPECT_EQ(strings, *(req.testList_ref()));
+  req.testList() = strings;
+  EXPECT_EQ(strings, *(req.testList()));
 }
 
 TEST(CarbonBasic, mixinsFieldRefAPIThrift) {
   ThriftTestRequest req;
-  EXPECT_EQ(0, *req.base_ref()->myBaseStruct_ref()->baseInt64Member_ref());
+  EXPECT_EQ(0, *req.base()->myBaseStruct()->baseInt64Member());
 
-  req.base_ref()->myBaseStruct_ref()->baseInt64Member_ref() = 12345;
+  req.base()->myBaseStruct()->baseInt64Member() = 12345;
   // Exercise the different ways we can access the mixed-in baseInt64Member
-  EXPECT_EQ(12345, *req.base_ref()->myBaseStruct_ref()->baseInt64Member_ref());
-  EXPECT_EQ(12345, *req.base_ref()->baseInt64Member());
-  EXPECT_EQ(12345, *req.myBaseStruct()->baseInt64Member_ref());
+  EXPECT_EQ(12345, *req.base()->myBaseStruct()->baseInt64Member());
+  EXPECT_EQ(12345, *req.base()->baseInt64Member());
+  EXPECT_EQ(12345, *req.myBaseStruct()->baseInt64Member());
   EXPECT_EQ(12345, *req.baseInt64Member());
 }

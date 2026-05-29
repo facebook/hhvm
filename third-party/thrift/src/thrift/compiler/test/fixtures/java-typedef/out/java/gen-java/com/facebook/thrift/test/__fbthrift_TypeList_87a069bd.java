@@ -13,16 +13,16 @@ import java.util.List;
 
 public class __fbthrift_TypeList_87a069bd implements TypeList {
 
-  private static List<TypeMapping> list = new ArrayList<>();
+    private static List<TypeMapping> list = new ArrayList<>();
 
-  private static void add(String uri, String className) {
-    list.add(new TypeList.TypeMapping(uri, className));
-  }
+    private static void add(String uri, String className) {
+        list.add(new TypeList.TypeMapping(uri, className));
+    }
 
 
 
-  @java.lang.Override
-  public List<TypeList.TypeMapping> getTypes() {
-    return list;
-  }
+    @java.lang.Override
+    public List<TypeList.TypeMapping> getTypes() {
+        return list;
+    }
 }

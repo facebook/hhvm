@@ -390,7 +390,7 @@ class Service1_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, 
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -400,7 +400,7 @@ class Service1_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, 
       $this->arg1 = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['arg1']);
     }
     if (idx($parsed, 'arg2') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, MyStruct>($parsed['arg2']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, MyStruct>($parsed['arg2']));
       $_tmp1 = MyStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->arg2 = $_tmp1;
@@ -495,14 +495,14 @@ class Service1_func_result extends \ThriftSyncStructWithResult implements \IThri
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'success') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, MyStruct>($parsed['success']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, MyStruct>($parsed['success']));
       $_tmp1 = MyStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->success = $_tmp1;
@@ -645,7 +645,7 @@ class Service1_func1_args implements \IThriftSyncStruct, \IThriftStructMetadata,
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -655,7 +655,7 @@ class Service1_func1_args implements \IThriftSyncStruct, \IThriftStructMetadata,
       $this->arg1 = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['arg1']);
     }
     if (idx($parsed, 'arg2') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, MyStruct>($parsed['arg2']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, MyStruct>($parsed['arg2']));
       $_tmp1 = MyStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->arg2 = $_tmp1;
@@ -750,14 +750,14 @@ class Service1_func1_result extends \ThriftSyncStructWithResult implements \IThr
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'success') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, MyStruct>($parsed['success']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, MyStruct>($parsed['success']));
       $_tmp1 = MyStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->success = $_tmp1;
@@ -955,14 +955,14 @@ class Service1_func2_args implements \IThriftAsyncStruct, \IThriftStructMetadata
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'arg1') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, StructWithWrapper>($parsed['arg1']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, StructWithWrapper>($parsed['arg1']));
       $_tmp1 = StructWithWrapper::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->arg1 = $_tmp1;
@@ -1086,7 +1086,7 @@ class Service1_func2_result extends \ThriftAsyncStructWithResult implements \ITh
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");

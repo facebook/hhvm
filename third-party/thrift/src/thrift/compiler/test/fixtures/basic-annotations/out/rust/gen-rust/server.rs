@@ -40,11 +40,13 @@ pub mod errors {
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::foo_bar_baz_service::*;
+
     #[doc(inline)]
     pub use ::::services::bad_interaction;
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::bad_interaction::*;
+
 }
 
 pub(crate) use crate as server;
@@ -2108,9 +2110,6 @@ where
 pub mod bad_service {
     use super::*;
 
-    
-
-
     /// Processor for BadInteraction's methods.
     #[derive(Clone, Debug)]
     pub struct BadInteractionProcessor<P, H, R, RS> {
@@ -2361,7 +2360,6 @@ pub mod bad_service {
             self.handle_on_termination().await
         }
     }
-
 
 }
 
@@ -3337,4 +3335,3 @@ where
         }
     }
 }
-

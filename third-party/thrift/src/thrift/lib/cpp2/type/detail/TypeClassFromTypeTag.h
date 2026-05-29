@@ -103,7 +103,8 @@ struct from_type_tag<type::cpp_type<T, Tag>> : from_type_tag<Tag> {};
 template <class T, class Tag>
 struct from_type_tag<
     type::adapted<::apache::thrift::IndirectionAdapter<T>, Tag>> {
-  using type = detail::indirection_tag<from_type_tag_t<Tag>, T>;
+  using type =
+      ::apache::thrift::detail::indirection_tag<from_type_tag_t<Tag>, T>;
 };
 template <class Adapter, class Tag>
 struct from_type_tag<type::adapted<Adapter, Tag>> {
@@ -130,7 +131,8 @@ struct remove_indirection_tag<map<Key, Value>> {
       map<remove_indirection_tag_t<Key>, remove_indirection_tag_t<Value>>;
 };
 template <class TC, class T>
-struct remove_indirection_tag<detail::indirection_tag<TC, T>> {
+struct remove_indirection_tag<
+    ::apache::thrift::detail::indirection_tag<TC, T>> {
   using type = TC;
 };
 

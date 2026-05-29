@@ -49,11 +49,11 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(StructWithString other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -70,28 +70,28 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
 
         public String getDefUniqueStringRef() { return defUniqueStringRef; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="def_shared_string_ref", requiredness=Requiredness.NONE)    public Builder setDefSharedStringRef(String defSharedStringRef) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="def_shared_string_ref", requiredness=Requiredness.NONE)    public Builder setDefSharedStringRef(String defSharedStringRef) {
             this.defSharedStringRef = defSharedStringRef;
             return this;
         }
 
         public String getDefSharedStringRef() { return defSharedStringRef; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="def_shared_string_const_ref", requiredness=Requiredness.NONE)    public Builder setDefSharedStringConstRef(String defSharedStringConstRef) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="def_shared_string_const_ref", requiredness=Requiredness.NONE)    public Builder setDefSharedStringConstRef(String defSharedStringConstRef) {
             this.defSharedStringConstRef = defSharedStringConstRef;
             return this;
         }
 
         public String getDefSharedStringConstRef() { return defSharedStringConstRef; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="unique_string_ref", requiredness=Requiredness.NONE)    public Builder setUniqueStringRef(String uniqueStringRef) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="unique_string_ref", requiredness=Requiredness.NONE)    public Builder setUniqueStringRef(String uniqueStringRef) {
             this.uniqueStringRef = uniqueStringRef;
             return this;
         }
 
         public String getUniqueStringRef() { return uniqueStringRef; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="shared_string_ref", requiredness=Requiredness.NONE)    public Builder setSharedStringRef(String sharedStringRef) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="shared_string_ref", requiredness=Requiredness.NONE)    public Builder setSharedStringRef(String sharedStringRef) {
             this.sharedStringRef = sharedStringRef;
             return this;
         }
@@ -119,6 +119,7 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -127,56 +128,47 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
     private final String defUniqueStringRef;
     public static final int _DEF_UNIQUE_STRING_REF = 1;
     private static final TField DEF_UNIQUE_STRING_REF_FIELD_DESC = new TField("def_unique_string_ref", TType.STRING, (short)1);
-        private final String defSharedStringRef;
+    private final String defSharedStringRef;
     public static final int _DEF_SHARED_STRING_REF = 2;
     private static final TField DEF_SHARED_STRING_REF_FIELD_DESC = new TField("def_shared_string_ref", TType.STRING, (short)2);
-        private final String defSharedStringConstRef;
+    private final String defSharedStringConstRef;
     public static final int _DEF_SHARED_STRING_CONST_REF = 3;
     private static final TField DEF_SHARED_STRING_CONST_REF_FIELD_DESC = new TField("def_shared_string_const_ref", TType.STRING, (short)3);
-        private final String uniqueStringRef;
+    private final String uniqueStringRef;
     public static final int _UNIQUE_STRING_REF = 4;
     private static final TField UNIQUE_STRING_REF_FIELD_DESC = new TField("unique_string_ref", TType.STRING, (short)4);
-        private final String sharedStringRef;
+    private final String sharedStringRef;
     public static final int _SHARED_STRING_REF = 5;
     private static final TField SHARED_STRING_REF_FIELD_DESC = new TField("shared_string_ref", TType.STRING, (short)5);
     static {
-      NAMES_TO_IDS.put("defUniqueStringRef", 1);
-      THRIFT_NAMES_TO_IDS.put("def_unique_string_ref", 1);
-      FIELD_METADATA.put(1, DEF_UNIQUE_STRING_REF_FIELD_DESC);
-      NAMES_TO_IDS.put("defSharedStringRef", 2);
-      THRIFT_NAMES_TO_IDS.put("def_shared_string_ref", 2);
-      FIELD_METADATA.put(2, DEF_SHARED_STRING_REF_FIELD_DESC);
-      NAMES_TO_IDS.put("defSharedStringConstRef", 3);
-      THRIFT_NAMES_TO_IDS.put("def_shared_string_const_ref", 3);
-      FIELD_METADATA.put(3, DEF_SHARED_STRING_CONST_REF_FIELD_DESC);
-      NAMES_TO_IDS.put("uniqueStringRef", 4);
-      THRIFT_NAMES_TO_IDS.put("unique_string_ref", 4);
-      FIELD_METADATA.put(4, UNIQUE_STRING_REF_FIELD_DESC);
-      NAMES_TO_IDS.put("sharedStringRef", 5);
-      THRIFT_NAMES_TO_IDS.put("shared_string_ref", 5);
-      FIELD_METADATA.put(5, SHARED_STRING_REF_FIELD_DESC);
+        NAMES_TO_IDS.put("defUniqueStringRef", 1);
+        THRIFT_NAMES_TO_IDS.put("def_unique_string_ref", 1);
+        FIELD_METADATA.put(1, DEF_UNIQUE_STRING_REF_FIELD_DESC);
+        NAMES_TO_IDS.put("defSharedStringRef", 2);
+        THRIFT_NAMES_TO_IDS.put("def_shared_string_ref", 2);
+        FIELD_METADATA.put(2, DEF_SHARED_STRING_REF_FIELD_DESC);
+        NAMES_TO_IDS.put("defSharedStringConstRef", 3);
+        THRIFT_NAMES_TO_IDS.put("def_shared_string_const_ref", 3);
+        FIELD_METADATA.put(3, DEF_SHARED_STRING_CONST_REF_FIELD_DESC);
+        NAMES_TO_IDS.put("uniqueStringRef", 4);
+        THRIFT_NAMES_TO_IDS.put("unique_string_ref", 4);
+        FIELD_METADATA.put(4, UNIQUE_STRING_REF_FIELD_DESC);
+        NAMES_TO_IDS.put("sharedStringRef", 5);
+        THRIFT_NAMES_TO_IDS.put("shared_string_ref", 5);
+        FIELD_METADATA.put(5, SHARED_STRING_REF_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="def_unique_string_ref", requiredness=Requiredness.NONE)
     public String getDefUniqueStringRef() { return defUniqueStringRef; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="def_shared_string_ref", requiredness=Requiredness.NONE)
     public String getDefSharedStringRef() { return defSharedStringRef; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="def_shared_string_const_ref", requiredness=Requiredness.NONE)
     public String getDefSharedStringConstRef() { return defSharedStringConstRef; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="unique_string_ref", requiredness=Requiredness.NONE)
     public String getUniqueStringRef() { return uniqueStringRef; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="shared_string_ref", requiredness=Requiredness.NONE)
     public String getSharedStringRef() { return sharedStringRef; }
@@ -216,120 +208,124 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(defUniqueStringRef);
-            _hashCode = 31 * _hashCode + Objects.hashCode(defSharedStringRef);
-            _hashCode = 31 * _hashCode + Objects.hashCode(defSharedStringConstRef);
-            _hashCode = 31 * _hashCode + Objects.hashCode(uniqueStringRef);
-            _hashCode = 31 * _hashCode + Objects.hashCode(sharedStringRef);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(defSharedStringRef);
+        _hashCode = 31 * _hashCode + Objects.hashCode(defSharedStringConstRef);
+        _hashCode = 31 * _hashCode + Objects.hashCode(uniqueStringRef);
+        _hashCode = 31 * _hashCode + Objects.hashCode(sharedStringRef);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<StructWithString> asReader() {
       return StructWithString::read0;
     }
 
     public static StructWithString read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(StructWithString.NAMES_TO_IDS, StructWithString.THRIFT_NAMES_TO_IDS, StructWithString.FIELD_METADATA);
-      StructWithString.Builder builder = new StructWithString.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _DEF_UNIQUE_STRING_REF:
-          if (__field.type == TType.STRING) {
-            String defUniqueStringRef = oprot.readString();
-            builder.setDefUniqueStringRef(defUniqueStringRef);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _DEF_SHARED_STRING_REF:
-          if (__field.type == TType.STRING) {
-            String defSharedStringRef = oprot.readString();
-            builder.setDefSharedStringRef(defSharedStringRef);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _DEF_SHARED_STRING_CONST_REF:
-          if (__field.type == TType.STRING) {
-            String defSharedStringConstRef = oprot.readString();
-            builder.setDefSharedStringConstRef(defSharedStringConstRef);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _UNIQUE_STRING_REF:
-          if (__field.type == TType.STRING) {
-            String uniqueStringRef = oprot.readString();
-            builder.setUniqueStringRef(uniqueStringRef);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SHARED_STRING_REF:
-          if (__field.type == TType.STRING) {
-            String sharedStringRef = oprot.readString();
-            builder.setSharedStringRef(sharedStringRef);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(StructWithString.NAMES_TO_IDS, StructWithString.THRIFT_NAMES_TO_IDS, StructWithString.FIELD_METADATA);
+        StructWithString.Builder builder = new StructWithString.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _DEF_UNIQUE_STRING_REF:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setDefUniqueStringRef(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _DEF_SHARED_STRING_REF:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setDefSharedStringRef(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _DEF_SHARED_STRING_CONST_REF:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setDefSharedStringConstRef(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _UNIQUE_STRING_REF:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setUniqueStringRef(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _SHARED_STRING_REF:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setSharedStringRef(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      String _iter0 = this.defUniqueStringRef;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(DEF_UNIQUE_STRING_REF_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.defSharedStringRef;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(DEF_SHARED_STRING_REF_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.defSharedStringConstRef;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(DEF_SHARED_STRING_CONST_REF_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.uniqueStringRef;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(UNIQUE_STRING_REF_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.sharedStringRef;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(SHARED_STRING_REF_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            String _fbthriftVar0 = this.defUniqueStringRef;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(DEF_UNIQUE_STRING_REF_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.defSharedStringRef;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(DEF_SHARED_STRING_REF_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.defSharedStringConstRef;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(DEF_SHARED_STRING_CONST_REF_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.uniqueStringRef;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(UNIQUE_STRING_REF_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.sharedStringRef;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(SHARED_STRING_REF_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _StructWithStringLazy {

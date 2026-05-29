@@ -1,1 +1,176 @@
-No errors
+warning: Warn[12040] Indexing into a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+dynamic_array.good.php:14:8
+     5 | 
+     6 | function test_dyn_array<Tk as arraykey>(
+[2]  7 |   dynamic $d,
+     8 |   C1 $c,
+     9 |   int $i,
+       :
+    12 |   arraykey $ak,
+    13 | ): void {
+[1] 14 |   $a = $d[$i];
+    15 |   hh_expect_equivalent<dynamic>($a);
+    16 |   $a = $d[$s];
+
+warning: Warn[12040] Indexing into a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+dynamic_array.good.php:16:8
+     5 | 
+     6 | function test_dyn_array<Tk as arraykey>(
+[2]  7 |   dynamic $d,
+     8 |   C1 $c,
+     9 |   int $i,
+       :
+    14 |   $a = $d[$i];
+    15 |   hh_expect_equivalent<dynamic>($a);
+[1] 16 |   $a = $d[$s];
+    17 |   hh_expect_equivalent<dynamic>($a);
+    18 |   $a = $d[$d];
+
+warning: Warn[12040] Indexing into a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+dynamic_array.good.php:18:8
+     5 | 
+     6 | function test_dyn_array<Tk as arraykey>(
+[2]  7 |   dynamic $d,
+     8 |   C1 $c,
+     9 |   int $i,
+       :
+    16 |   $a = $d[$s];
+    17 |   hh_expect_equivalent<dynamic>($a);
+[1] 18 |   $a = $d[$d];
+    19 |   hh_expect_equivalent<dynamic>($a);
+    20 |   $a = $d[$tk];
+
+warning: Warn[12040] Indexing into a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+dynamic_array.good.php:20:8
+     5 | 
+     6 | function test_dyn_array<Tk as arraykey>(
+[2]  7 |   dynamic $d,
+     8 |   C1 $c,
+     9 |   int $i,
+       :
+    18 |   $a = $d[$d];
+    19 |   hh_expect_equivalent<dynamic>($a);
+[1] 20 |   $a = $d[$tk];
+    21 |   hh_expect_equivalent<dynamic>($a);
+    22 |   $a = $d[$ak];
+
+warning: Warn[12040] Indexing into a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+dynamic_array.good.php:22:8
+     5 | 
+     6 | function test_dyn_array<Tk as arraykey>(
+[2]  7 |   dynamic $d,
+     8 |   C1 $c,
+     9 |   int $i,
+       :
+    20 |   $a = $d[$tk];
+    21 |   hh_expect_equivalent<dynamic>($a);
+[1] 22 |   $a = $d[$ak];
+    23 |   hh_expect_equivalent<dynamic>($a);
+    24 | 
+
+warning: Warn[12040] Indexing into a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+dynamic_array.good.php:25:3
+     5 | 
+     6 | function test_dyn_array<Tk as arraykey>(
+[2]  7 |   dynamic $d,
+     8 |   C1 $c,
+     9 |   int $i,
+       :
+    23 |   hh_expect_equivalent<dynamic>($a);
+    24 | 
+[1] 25 |   $d[$i] = $c;
+    26 |   $d[$s] = $c;
+    27 |   $d[$d] = $c;
+
+warning: Warn[12040] Indexing into a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+dynamic_array.good.php:26:3
+     5 | 
+     6 | function test_dyn_array<Tk as arraykey>(
+[2]  7 |   dynamic $d,
+     8 |   C1 $c,
+     9 |   int $i,
+       :
+    24 | 
+    25 |   $d[$i] = $c;
+[1] 26 |   $d[$s] = $c;
+    27 |   $d[$d] = $c;
+    28 |   $d[$ak] = $c;
+
+warning: Warn[12040] Indexing into a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+dynamic_array.good.php:27:3
+     5 | 
+     6 | function test_dyn_array<Tk as arraykey>(
+[2]  7 |   dynamic $d,
+     8 |   C1 $c,
+     9 |   int $i,
+       :
+    25 |   $d[$i] = $c;
+    26 |   $d[$s] = $c;
+[1] 27 |   $d[$d] = $c;
+    28 |   $d[$ak] = $c;
+    29 |   $d[$tk] = $c;
+
+warning: Warn[12040] Indexing into a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+dynamic_array.good.php:28:3
+     5 | 
+     6 | function test_dyn_array<Tk as arraykey>(
+[2]  7 |   dynamic $d,
+     8 |   C1 $c,
+     9 |   int $i,
+       :
+    26 |   $d[$s] = $c;
+    27 |   $d[$d] = $c;
+[1] 28 |   $d[$ak] = $c;
+    29 |   $d[$tk] = $c;
+    30 |   $d[] = $c;
+
+warning: Warn[12040] Indexing into a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+dynamic_array.good.php:29:3
+     5 | 
+     6 | function test_dyn_array<Tk as arraykey>(
+[2]  7 |   dynamic $d,
+     8 |   C1 $c,
+     9 |   int $i,
+       :
+    27 |   $d[$d] = $c;
+    28 |   $d[$ak] = $c;
+[1] 29 |   $d[$tk] = $c;
+    30 |   $d[] = $c;
+    31 | }
+
+warning: Warn[12040] Appending to a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+dynamic_array.good.php:30:3
+     5 | 
+     6 | function test_dyn_array<Tk as arraykey>(
+[2]  7 |   dynamic $d,
+     8 |   C1 $c,
+     9 |   int $i,
+       :
+    28 |   $d[$ak] = $c;
+    29 |   $d[$tk] = $c;
+[1] 30 |   $d[] = $c;
+    31 | }
+
+11 errors found

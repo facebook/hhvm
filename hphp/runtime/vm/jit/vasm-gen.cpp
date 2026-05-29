@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
@@ -124,16 +123,8 @@ Vauto::~Vauto() {
 
         SCOPE_ASSERT_DETAIL("vasm unit") { return show(unit()); };
         auto const abi = jit::abi(m_kind);
-        switch (arch::get()) {
-          case Arch::X64:
-            optimizeX64(unit(), abi, true /* regalloc */);
-            emitX64(unit(), text, m_fixups, nullptr);
-            break;
-          case Arch::ARM:
-            optimizeARM(unit(), abi, true /* regalloc */);
-            emitARM(unit(), text, m_fixups, nullptr);
-            break;
-        }
+        optimize(unit(), abi, true /* regalloc */);
+        emit(unit(), text, m_fixups, nullptr);
 
         if (m_relocate) {
           tc::relocateTranslation(
@@ -152,14 +143,7 @@ Vauto::~Vauto() {
       if (!main().closed()) main() << fallthru{};
       if (!cold().closed()) cold() << fallthru{};
 
-      switch (arch::get()) {
-        case Arch::X64:
-          emitX64(unit(), m_text, m_fixups, nullptr);
-          break;
-        case Arch::ARM:
-          emitARM(unit(), m_text, m_fixups, nullptr);
-          break;
-      }
+      emit(unit(), m_text, m_fixups, nullptr);
     }
 
     if (m_wasFull) *m_wasFull = false;

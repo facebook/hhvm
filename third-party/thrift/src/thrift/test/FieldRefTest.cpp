@@ -771,7 +771,7 @@ TYPED_TEST(optional_field_ref_typed_test, construct_const_from_mutable) {
   auto s = typename TestFixture::Struct();
   s.opt_name() = "foo";
   auto name = s.opt_name();
-  const auto const_name = name;
+  auto const_name = name;
   EXPECT_TRUE(const_name.has_value());
   EXPECT_EQ(*const_name, "foo");
 }

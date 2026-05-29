@@ -8,12 +8,15 @@ abstract class C {
 }
 
 trait T {
+  require extends C;
+
   <<__Override>>
   public function foo(): void {}
 }
 
 class D extends C {
   use T;
+
   // this should be rejected
   <<__Override>>
   public function foo(): void {

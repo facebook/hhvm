@@ -232,6 +232,10 @@ struct TypeConstraint {
     m_flags = static_cast<TypeConstraintFlags>(m_flags | flags);
   }
 
+  void removeFlags(TypeConstraintFlags flags) {
+    m_flags = m_flags & ~flags;
+  }
+
   /*
    * Returns: whether this constraint implies any runtime checking at
    * all.  If this function returns false, it means the parameter type
@@ -362,8 +366,8 @@ struct TypeConstraint {
    */
   bool isNullable() const { return contains(m_flags, TypeConstraintFlags::Nullable); }
   bool isSingleTypeConstraint() const { return contains(m_flags, TypeConstraintFlags::SingleTypeConstraint); }
-  bool isSoft()     const { return contains(m_flags, TypeConstraintFlags::Soft); }
-  bool isTypeVar()  const { return contains(m_flags, TypeConstraintFlags::TypeVar); }
+  bool isSoft() const { return contains(m_flags, TypeConstraintFlags::Soft); }
+  bool isTypeVar() const { return contains(m_flags, TypeConstraintFlags::TypeVar); }
   bool isTypeConstant() const { return contains(m_flags, TypeConstraintFlags::TypeConstant); }
   bool isUpperBound() const { return contains(m_flags, TypeConstraintFlags::UpperBound); }
   bool isUnion() const { return contains(m_flags, TypeConstraintFlags::Union); }
@@ -372,25 +376,26 @@ struct TypeConstraint {
   }
   bool isInherited() const { return contains(m_flags, TypeConstraintFlags::Inherited); }
 
-  bool isPrecise()  const { return !isUnion() && metaType() == MetaType::Precise; }
-  bool isMixed()    const { return !isUnion() && m_u.single.type == Type::Mixed; }
-  bool isThis()     const { return !isUnion() && m_u.single.type == Type::This; }
+  bool isPrecise() const { return !isUnion() && metaType() == MetaType::Precise; }
+  bool isMixed() const { return !isUnion() && m_u.single.type == Type::Mixed; }
+  bool isThis() const { return !isUnion() && m_u.single.type == Type::This; }
   bool isCallable() const { return !isUnion() && m_u.single.type == Type::Callable; }
-  bool isNumber()   const { return !isUnion() && m_u.single.type == Type::Number; }
-  bool isNothing()  const { return !isUnion() && m_u.single.type == Type::Nothing; }
+  bool isNumber() const { return !isUnion() && m_u.single.type == Type::Number; }
+  bool isNothing() const { return !isUnion() && m_u.single.type == Type::Nothing; }
+  bool isNonnull() const { return !isUnion() && m_u.single.type == Type::Nonnull; }
   bool isNoReturn() const { return !isUnion() && m_u.single.type == Type::NoReturn; }
   bool isArrayKey() const { return !isUnion() && m_u.single.type == Type::ArrayKey; }
-  bool isDict()     const { return !isUnion() && m_u.single.type == Type::Dict; }
-  bool isVec()      const { return !isUnion() && m_u.single.type == Type::Vec; }
-  bool isKeyset()   const { return !isUnion() && m_u.single.type == Type::Keyset; }
+  bool isDict() const { return !isUnion() && m_u.single.type == Type::Dict; }
+  bool isVec() const { return !isUnion() && m_u.single.type == Type::Vec; }
+  bool isKeyset() const { return !isUnion() && m_u.single.type == Type::Keyset; }
   bool isAnyObject() const { return !isUnion() && m_u.single.type == Type::Object; }
   bool isSubObject() const { return !isUnion() && m_u.single.type == Type::SubObject; }
-  bool isInt()       const { return !isUnion() && m_u.single.type == Type::Int; }
-  bool isString()    const { return !isUnion() && m_u.single.type == Type::String; }
+  bool isInt() const { return !isUnion() && m_u.single.type == Type::Int; }
+  bool isString() const { return !isUnion() && m_u.single.type == Type::String; }
   bool isArrayLike() const { return !isUnion() && m_u.single.type == Type::ArrayLike; }
   bool isVecOrDict() const { return !isUnion() && m_u.single.type == Type::VecOrDict; }
   bool isClassname() const { return !isUnion() && m_u.single.type == Type::Classname; }
-  bool isClass()     const { return !isUnion() && m_u.single.type == Type::Class; }
+  bool isClass() const { return !isUnion() && m_u.single.type == Type::Class; }
   bool isClassOrClassname() const { return !isUnion() && m_u.single.type == Type::ClassOrClassname; }
 
   bool isUnresolved() const {
@@ -676,6 +681,12 @@ private:
   };
 };
 
+struct TypeConstraintHasher {
+  size_t operator()(const TypeConstraint& tc) const {
+    return tc.stableHash();
+  }
+};
+
 static_assert(CheckSize<TypeConstraint, use_lowptr ? 16 : 32>(), "");
 static_assert(CheckSize<VMFixedVector<TypeConstraint>, use_lowptr ? 8 : 8>(), "");
 
@@ -771,6 +782,15 @@ struct TypeIntersectionConstraint {
     if (this != &other) {
       this->~TypeIntersectionConstraint();
       new (this)TypeIntersectionConstraint(other);
+    }
+    return *this;
+  }
+
+  TypeIntersectionConstraint& operator=(
+    TypeIntersectionConstraint&& other) {
+    if (this != &other) {
+      this->~TypeIntersectionConstraint();
+      new (this)TypeIntersectionConstraint(std::move(other));
     }
     return *this;
   }
@@ -888,6 +908,9 @@ struct TypeIntersectionConstraint {
     std::vector<TypeConstraint> constraints;
     if (isSimple()) {
       constraints.emplace_back(asSimple());
+      constraints.back().removeFlags(
+        TypeConstraintFlags::SingleTypeConstraint
+      );
     } else {
       constraints.reserve(m_u.m_constraints.size());
       for (auto const& c : m_u.m_constraints) {

@@ -1,3 +1,23 @@
+WARN: File "dynamic_array.bad.php", line 6, characters 3-4:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "dynamic_array.bad.php", line 5, characters 25-31:
+  This expression has type `dynamic`
+WARN: File "dynamic_array.bad.php", line 7, characters 3-4:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "dynamic_array.bad.php", line 5, characters 25-31:
+  This expression has type `dynamic`
+WARN: File "dynamic_array.bad.php", line 8, characters 3-4:
+Appending to a value of type `dynamic` (Warn[12040])
+  File "dynamic_array.bad.php", line 5, characters 25-31:
+  This expression has type `dynamic`
+WARN: File "dynamic_array.bad.php", line 9, characters 3-4:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "dynamic_array.bad.php", line 5, characters 25-31:
+  This expression has type `dynamic`
+WARN: File "dynamic_array.bad.php", line 10, characters 3-4:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "dynamic_array.bad.php", line 5, characters 25-31:
+  This expression has type `dynamic`
 ERROR: File "dynamic_array.bad.php", line 6, characters 3-12:
 Typing error (Typing[4110])
   File "dynamic_array.bad.php", line 5, characters 37-37:

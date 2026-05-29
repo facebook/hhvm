@@ -21,9 +21,13 @@ namespace proxygen::detail {
 // HttpSettings (e.g. MaxData, MaxStreamData, etc.)
 void setEgressWtHttpSettings(HTTPSettings* settings);
 
-// derives the WtConfig from the ingress & egress HttpSettings of HttpCodec
+// derives the h2 WtConfig from the ingress & egress HttpSettings of HttpCodec
 WtStreamManager::WtConfig getWtConfig(const HTTPSettings* ingress,
                                       const HTTPSettings* egress);
+
+// derives the h3 WtConfig from the ingress & egress HttpSettings of HttpCodec
+WtStreamManager::WtConfig getH3WtConfig(const HTTPSettings* ingress,
+                                        const HTTPSettings* egress);
 
 /**
  * http/2 wt draft:

@@ -49,17 +49,17 @@ namespace HH {
   // @oss-disable: <<__Sealed(FBMemoAgnosticImplicitContext::class)>>
   abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
     final protected static async function runWithAsync<Tout>(
-      this::TData $context,
+      ?this::TData $context,
       (function ()[_]: Awaitable<Tout>) $f,
     )[leak_safe, ctx $f]: Awaitable<Tout>;
 
     final protected static function runWith<Tout>(
-      this::TData $context,
+      ?this::TData $context,
       (function ()[_]: Tout) $f,
     )[leak_safe, ctx $f]: Tout;
 
     final protected static function prepare(
-      this::TData $context,
+      ?this::TData $context,
     )[]: \HH\ImplicitContext\PreparedContext;
   }
 
@@ -69,17 +69,17 @@ namespace HH {
     abstract const type TData as IPureMemoizeParam;
 
     final protected static async function runWithAsync<Tout>(
-      this::TData $context,
+      ?this::TData $context,
       (function ()[_]: Awaitable<Tout>) $f,
     )[leak_safe, ctx $f]: Awaitable<Tout>;
 
     final protected static function runWith<Tout>(
-      this::TData $context,
+      ?this::TData $context,
       (function ()[_]: Tout) $f,
     )[leak_safe, ctx $f]: Tout;
 
     final protected static function prepare(
-      this::TData $context,
+      ?this::TData $context,
     )[]: \HH\ImplicitContext\PreparedContext;
   }
 
@@ -91,17 +91,17 @@ namespace HH {
     protected static function get()[this::CRun]: ?this::TData;
 
     abstract protected static function runWithAsync<Tout>(
-      this::TData $context,
+      ?this::TData $context,
       (function ()[_]: Awaitable<Tout>) $f,
     )[leak_safe, ctx $f]: Awaitable<Tout>;
 
     abstract protected static function runWith<Tout>(
-      this::TData $context,
+      ?this::TData $context,
       (function ()[_]: Tout) $f,
     )[leak_safe, ctx $f]: Tout;
 
     abstract protected static function prepare(
-      this::TData $context,
+      ?this::TData $context,
     )[]: \HH\ImplicitContext\PreparedContext;
   }
 

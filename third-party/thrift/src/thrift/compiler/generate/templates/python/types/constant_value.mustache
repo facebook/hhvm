@@ -38,8 +38,8 @@ b"{{value:string_value}}"
 {{#if type:need_module_path?}}{{type:module_name}}.{{/if}}{{> structs/unadapted_name}}
     {{/value:type.true_type}}
 (
-    {{#each (array.enumerate value:structured_elements with_last=true) as |i elem last?|}}
-{{elem.field.py_name}}={{#elem.value}}{{> types/constant_value }}{{/elem.value}}{{^last?}}, {{/last?}}
+    {{#each value:structured_elements as |elem| separator=", "}}
+{{elem.field.py_name}}={{#elem.value}}{{> types/constant_value }}{{/elem.value}}
     {{/each}}
 )
   {{#else if value:map?}}
@@ -48,9 +48,9 @@ _fbthrift_python_types.Map(
 {{#partial m_types.typeinfo type=map:key_type}}, {{!}}
 {{#partial m_types.typeinfo type=map:val_type}}, { {{! purposeful open brace}}
     {{/value:type.true_type}}
-    {{#each (array.enumerate value:map_elements with_last=true) as |i map_elem last?|}}
+    {{#each value:map_elements as |map_elem| separator=", "}}
 {{#map_elem.key}}{{> types/constant_value }}{{/map_elem.key}}: {{!}}
-{{#map_elem.value}}{{> types/constant_value}}{{/map_elem.value}}{{^last?}}, {{/last?}}
+{{#map_elem.value}}{{> types/constant_value}}{{/map_elem.value}}
     {{/each}}{{! purposeful close brace [next line] }}
 })
   {{#else if value:list?}}

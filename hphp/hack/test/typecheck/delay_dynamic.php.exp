@@ -1,3 +1,7 @@
+WARN: File "delay_dynamic.php", line 5, characters 14-15:
+Value of type `dynamic` called as a function (Warn[12039])
+  File "delay_dynamic.php", line 4, characters 20-26:
+  This expression has type `dynamic`
 ERROR: File "delay_dynamic.php", line 5, characters 8-17:
 `delay` can only operate on an `Awaitable` (Typing[4110])
   File "delay_dynamic.php", line 5, characters 8-17:

@@ -47,11 +47,11 @@ public final class SomeStruct implements com.facebook.thrift.payload.ThriftSeria
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(SomeStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -68,21 +68,21 @@ public final class SomeStruct implements com.facebook.thrift.payload.ThriftSeria
 
         public test.fixtures.enums.Metasyntactic getReasonable() { return reasonable; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="fine", requiredness=Requiredness.NONE)    public Builder setFine(test.fixtures.enums.Metasyntactic fine) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="fine", requiredness=Requiredness.NONE)    public Builder setFine(test.fixtures.enums.Metasyntactic fine) {
             this.fine = fine;
             return this;
         }
 
         public test.fixtures.enums.Metasyntactic getFine() { return fine; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="questionable", requiredness=Requiredness.NONE)    public Builder setQuestionable(test.fixtures.enums.Metasyntactic questionable) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="questionable", requiredness=Requiredness.NONE)    public Builder setQuestionable(test.fixtures.enums.Metasyntactic questionable) {
             this.questionable = questionable;
             return this;
         }
 
         public test.fixtures.enums.Metasyntactic getQuestionable() { return questionable; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="tags", requiredness=Requiredness.NONE)    public Builder setTags(Set<Integer> tags) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="tags", requiredness=Requiredness.NONE)    public Builder setTags(Set<Integer> tags) {
             this.tags = tags;
             return this;
         }
@@ -108,6 +108,7 @@ public final class SomeStruct implements com.facebook.thrift.payload.ThriftSeria
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -116,48 +117,41 @@ public final class SomeStruct implements com.facebook.thrift.payload.ThriftSeria
     private final test.fixtures.enums.Metasyntactic reasonable;
     public static final int _REASONABLE = 1;
     private static final TField REASONABLE_FIELD_DESC = new TField("reasonable", TType.I32, (short)1);
-        private final test.fixtures.enums.Metasyntactic fine;
+    private final test.fixtures.enums.Metasyntactic fine;
     public static final int _FINE = 2;
     private static final TField FINE_FIELD_DESC = new TField("fine", TType.I32, (short)2);
-        private final test.fixtures.enums.Metasyntactic questionable;
+    private final test.fixtures.enums.Metasyntactic questionable;
     public static final int _QUESTIONABLE = 3;
     private static final TField QUESTIONABLE_FIELD_DESC = new TField("questionable", TType.I32, (short)3);
-        private final Set<Integer> tags;
+    private final Set<Integer> tags;
     public static final int _TAGS = 4;
     private static final TField TAGS_FIELD_DESC = new TField("tags", TType.SET, (short)4);
     static {
-      NAMES_TO_IDS.put("reasonable", 1);
-      THRIFT_NAMES_TO_IDS.put("reasonable", 1);
-      FIELD_METADATA.put(1, REASONABLE_FIELD_DESC);
-      NAMES_TO_IDS.put("fine", 2);
-      THRIFT_NAMES_TO_IDS.put("fine", 2);
-      FIELD_METADATA.put(2, FINE_FIELD_DESC);
-      NAMES_TO_IDS.put("questionable", 3);
-      THRIFT_NAMES_TO_IDS.put("questionable", 3);
-      FIELD_METADATA.put(3, QUESTIONABLE_FIELD_DESC);
-      NAMES_TO_IDS.put("tags", 4);
-      THRIFT_NAMES_TO_IDS.put("tags", 4);
-      FIELD_METADATA.put(4, TAGS_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/enums/SomeStruct"),
-        SomeStruct.class, SomeStruct::read0));
+        NAMES_TO_IDS.put("reasonable", 1);
+        THRIFT_NAMES_TO_IDS.put("reasonable", 1);
+        FIELD_METADATA.put(1, REASONABLE_FIELD_DESC);
+        NAMES_TO_IDS.put("fine", 2);
+        THRIFT_NAMES_TO_IDS.put("fine", 2);
+        FIELD_METADATA.put(2, FINE_FIELD_DESC);
+        NAMES_TO_IDS.put("questionable", 3);
+        THRIFT_NAMES_TO_IDS.put("questionable", 3);
+        FIELD_METADATA.put(3, QUESTIONABLE_FIELD_DESC);
+        NAMES_TO_IDS.put("tags", 4);
+        THRIFT_NAMES_TO_IDS.put("tags", 4);
+        FIELD_METADATA.put(4, TAGS_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("test.dev/fixtures/enums/SomeStruct"),
+            SomeStruct.class, SomeStruct::read0));
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="reasonable", requiredness=Requiredness.NONE)
     public test.fixtures.enums.Metasyntactic getReasonable() { return reasonable; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="fine", requiredness=Requiredness.NONE)
     public test.fixtures.enums.Metasyntactic getFine() { return fine; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="questionable", requiredness=Requiredness.NONE)
     public test.fixtures.enums.Metasyntactic getQuestionable() { return questionable; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="tags", requiredness=Requiredness.NONE)
     public Set<Integer> getTags() { return tags; }
@@ -195,111 +189,113 @@ public final class SomeStruct implements com.facebook.thrift.payload.ThriftSeria
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(reasonable);
-            _hashCode = 31 * _hashCode + Objects.hashCode(fine);
-            _hashCode = 31 * _hashCode + Objects.hashCode(questionable);
-            _hashCode = 31 * _hashCode + Objects.hashCode(tags);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(fine);
+        _hashCode = 31 * _hashCode + Objects.hashCode(questionable);
+        _hashCode = 31 * _hashCode + Objects.hashCode(tags);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<SomeStruct> asReader() {
       return SomeStruct::read0;
     }
 
     public static SomeStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(SomeStruct.NAMES_TO_IDS, SomeStruct.THRIFT_NAMES_TO_IDS, SomeStruct.FIELD_METADATA);
-      SomeStruct.Builder builder = new SomeStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _REASONABLE:
-          if (__field.type == TType.I32) {
-            test.fixtures.enums.Metasyntactic reasonable = test.fixtures.enums.Metasyntactic.fromInteger(oprot.readI32());
-            builder.setReasonable(reasonable);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _FINE:
-          if (__field.type == TType.I32) {
-            test.fixtures.enums.Metasyntactic fine = test.fixtures.enums.Metasyntactic.fromInteger(oprot.readI32());
-            builder.setFine(fine);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _QUESTIONABLE:
-          if (__field.type == TType.I32) {
-            test.fixtures.enums.Metasyntactic questionable = test.fixtures.enums.Metasyntactic.fromInteger(oprot.readI32());
-            builder.setQuestionable(questionable);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _TAGS:
-          if (__field.type == TType.SET) {
-            Set<Integer> tags;
-                {
-                TSet _set = oprot.readSetBegin();
-                tags = new HashSet<Integer>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    int _value1 = oprot.readI32();
-                    tags.add(_value1);
+        TField __field;
+        oprot.readStructBegin(SomeStruct.NAMES_TO_IDS, SomeStruct.THRIFT_NAMES_TO_IDS, SomeStruct.FIELD_METADATA);
+        SomeStruct.Builder builder = new SomeStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _REASONABLE:
+                if (__field.type == TType.I32) {
+                    test.fixtures.enums.Metasyntactic _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.enums.Metasyntactic.fromInteger(oprot.readI32());
+                    builder.setReasonable(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readSetEnd();
+                break;
+            case _FINE:
+                if (__field.type == TType.I32) {
+                    test.fixtures.enums.Metasyntactic _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.enums.Metasyntactic.fromInteger(oprot.readI32());
+                    builder.setFine(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setTags(tags);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            case _QUESTIONABLE:
+                if (__field.type == TType.I32) {
+                    test.fixtures.enums.Metasyntactic _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.enums.Metasyntactic.fromInteger(oprot.readI32());
+                    builder.setQuestionable(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _TAGS:
+                if (__field.type == TType.SET) {
+                    Set<Integer> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Integer>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            int _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI32();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setTags(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      test.fixtures.enums.Metasyntactic _iter0 = this.reasonable;
-      oprot.writeFieldBegin(REASONABLE_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      test.fixtures.enums.Metasyntactic _iter0 = this.fine;
-      oprot.writeFieldBegin(FINE_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      test.fixtures.enums.Metasyntactic _iter0 = this.questionable;
-      oprot.writeFieldBegin(QUESTIONABLE_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      Set<Integer> _iter0 = this.tags;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(TAGS_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
-            for (int _iter1 : _iter0) {
-              oprot.writeI32(_iter1);
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            test.fixtures.enums.Metasyntactic _fbthriftVar0 = this.reasonable;
+            oprot.writeFieldBegin(REASONABLE_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            test.fixtures.enums.Metasyntactic _fbthriftVar0 = this.fine;
+            oprot.writeFieldBegin(FINE_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            test.fixtures.enums.Metasyntactic _fbthriftVar0 = this.questionable;
+            oprot.writeFieldBegin(QUESTIONABLE_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            Set<Integer> _fbthriftVar0 = this.tags;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(TAGS_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.I32, _fbthriftVar0.size()));
+                for (int _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI32(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _SomeStructLazy {

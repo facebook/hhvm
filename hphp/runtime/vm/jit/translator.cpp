@@ -247,14 +247,10 @@ static const struct {
    * FCall* are special. Like the Ret* instructions, their manipulation of
    * the runtime stack are outside the boundaries of the tracelet abstraction.
    */
-  { OpFCallClsMethod,
-                   {StackTop2,        StackN,       OutUnknown      }},
   { OpFCallClsMethodM,
                    {Stack1,           StackN,       OutUnknown      }},
   { OpFCallClsMethodD,
                    {None,             StackN,       OutUnknown      }},
-  { OpFCallClsMethodS,
-                   {Stack1,           StackN,       OutUnknown      }},
   { OpFCallClsMethodSD,
                    {None,             StackN,       OutUnknown      }},
   { OpFCallCtor,   {None,             StackN,       OutUnknown      }},
@@ -465,10 +461,8 @@ int64_t countOperands(uint64_t mask) {
 int64_t getStackPopped(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
-    case Op::FCallClsMethod:
     case Op::FCallClsMethodM:
     case Op::FCallClsMethodD:
-    case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
     case Op::FCallCtor:
     case Op::FCallFunc:
@@ -515,10 +509,8 @@ int64_t getStackPopped(PC pc) {
 int64_t getStackPushed(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
-    case Op::FCallClsMethod:
     case Op::FCallClsMethodM:
     case Op::FCallClsMethodD:
-    case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
     case Op::FCallCtor:
     case Op::FCallFunc:

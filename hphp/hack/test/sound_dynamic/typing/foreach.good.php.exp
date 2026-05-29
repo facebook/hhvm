@@ -1,1 +1,46 @@
-No errors
+warning: Warn[12038] Method invoked on a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+foreach.good.php:7:20
+    2 | 
+    3 | class C {
+[2] 4 |   public function f(dynamic $d) : dynamic {
+    5 |     foreach ($d as $k => $v) {
+    6 |       if ($d) {
+[1] 7 |         return $v->m();
+    8 |       }
+    9 |       else {
+
+warning: Warn[12038] Method invoked on a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+foreach.good.php:10:20
+     2 | 
+     3 | class C {
+[2]  4 |   public function f(dynamic $d) : dynamic {
+     5 |     foreach ($d as $k => $v) {
+     6 |       if ($d) {
+     7 |         return $v->m();
+     8 |       }
+     9 |       else {
+[1] 10 |         return $k->m();
+    11 |       }
+    12 |     }
+
+warning: Warn[12038] Method invoked on a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+foreach.good.php:14:18
+     2 | 
+     3 | class C {
+[2]  4 |   public function f(dynamic $d) : dynamic {
+     5 |     foreach ($d as $k => $v) {
+     6 |       if ($d) {
+       :
+    12 |     }
+    13 |     foreach ($d as $v) {
+[1] 14 |       return $v->m();
+    15 |     }
+    16 |     return $d;
+
+3 errors found

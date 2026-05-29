@@ -19,7 +19,6 @@
 #include <cmath>
 #include <concepts>
 
-#include <boost/locale/utf.hpp>
 #include <fmt/core.h>
 #include <folly/Exception.h>
 #include <folly/Unicode.h>
@@ -30,15 +29,15 @@ namespace apache::thrift::json5::detail {
 namespace {
 
 bool isValidUtf8(std::string_view str) {
-  const char* begin = str.data();
-  const char* end = begin + str.size();
+  auto p = reinterpret_cast<const unsigned char*>(str.data());
+  auto end = p + str.size();
 
-  while (begin != end) {
-    // Read next codepoint and advance pointer
-    boost::locale::utf::code_point c =
-        boost::locale::utf::utf_traits<char>::decode(begin, end);
-    if (c == boost::locale::utf::illegal ||
-        c == boost::locale::utf::incomplete) {
+  while (p != end) {
+    auto prev = p;
+    char32_t cp = folly::utf8ToCodePoint(p, end, true);
+    // On error, utf8ToCodePoint returns U+FFFD and advances by exactly 1 byte.
+    // A legitimate U+FFFD in the input would advance by 3 bytes.
+    if (cp == U'\ufffd' && p == prev + 1) {
       return false;
     }
   }

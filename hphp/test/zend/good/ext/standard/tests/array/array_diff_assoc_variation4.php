@@ -46,7 +46,7 @@ $inputs = dict[
        // binary data
 /*4*/
 'binary' => dict[
-      b"binary1" => 'binary 1',
+      "binary1" => 'binary 1',
       (string)"binary2" => 'binary 2'],
 ];
 

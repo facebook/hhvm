@@ -66,7 +66,7 @@ $inputs = vec[
        $heredoc,
 
        // binary data
-/*21*/ b"binary",
+/*21*/ "binary",
        (string)"binary",
 
        // object data

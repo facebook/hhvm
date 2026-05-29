@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "common/common" as common}}
 
 {{!
   `type_isAdapterSet` and `field_hasAdapter` are artefacts of mutable properties
@@ -32,14 +33,14 @@
   (equivalent to `.resolved`) and container element types (i.e. `elem_type`,
   `key_type` and `val_type`).
 }}
-{{#let export partial boxed_type |type type_isAdapterSet field_hasAdapter|}}
+{{#let export partial boxed_type |type field_hasAdapter|}}
   {{#pragma ignore-newlines}}
-{{#if (not (string.empty? type.javaType))}}{{type.javaType}}
-{{#else if type.hasAdapter?}}{{type.typeClassName}}
-  {{! Recurse through every layer of typedef, as each layer could have an adapter }}
-  {{#else if (or type.binary? type.isBinaryString?)}}
-{{#if (or type_isAdapterSet field_hasAdapter)}}io.netty.buffer.ByteBuf{{#else}}byte[]{{/if}}
-{{#else if type.typedef?}}{{#partial boxed_type type=type.resolved type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}
+{{#if type.java_type?}}{{type.java_type}}
+{{#else if type.hasAdapter?}}{{type.adapterTypeClassName}}
+{{#else if (or type.binary? type.isBinaryString?)}}
+{{#if field_hasAdapter}}io.netty.buffer.ByteBuf{{#else}}byte[]{{/if}}
+{{! Recurse through every layer of typedef, as each layer could have an adapter }}
+{{#else if type.typedef?}}{{#partial boxed_type type=type.resolved field_hasAdapter=field_hasAdapter}}
 {{#else if type.void?}}Void
 {{#else if type.bool?}}Boolean
 {{#else if type.byte?}}Byte
@@ -48,17 +49,27 @@
 {{#else if type.i64?}}Long
 {{#else if type.double?}}Double
 {{#else if type.float?}}Float
-{{#else if type.list?}}List<{{#partial boxed_type type=type.elem_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}>
-{{#else if type.set?}}Set<{{#partial boxed_type type=type.elem_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}>
+{{#else if type.list?}}List<{{#partial boxed_type type=type.elem_type field_hasAdapter=field_hasAdapter}}>
+{{#else if type.set?}}Set<{{#partial boxed_type type=type.elem_type field_hasAdapter=field_hasAdapter}}>
 {{#else if (or type.structured? type.enum?)}}{{type.program.javaPackage}}.{{type.javaCapitalName}}
   {{#else if type.string?}}
 String
   {{#else if type.map?}}
 Map<
-{{#partial boxed_type type=type.key_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}, {{!}}
-{{#partial boxed_type type=type.val_type type_isAdapterSet=false field_hasAdapter=field_hasAdapter}}
+{{#partial boxed_type type=type.key_type field_hasAdapter=field_hasAdapter}}, {{!}}
+{{#partial boxed_type type=type.val_type field_hasAdapter=field_hasAdapter}}
 >
-  {{/if (not (string.empty? type.javaType))}}
+  {{/if type.java_type?}}
+{{/let partial}}
+
+{{! Resolves through typedef layers (that don't override java_type) before
+    calling boxed_type. This produces the underlying concrete boxed type
+    for container instantiation (e.g. HashSet, ArrayList, HashMap). }}
+{{#let export partial resolved_boxed_type |type field_hasAdapter| captures |boxed_type|}}
+  {{#pragma ignore-newlines}}
+{{#if (and type.typedef? (not type.java_type?))}}{{#partial resolved_boxed_type type=type.resolved field_hasAdapter=field_hasAdapter}}
+{{#else}}{{#partial boxed_type type=type field_hasAdapter=field_hasAdapter}}
+{{/if (and type.typedef? (not type.java_type?))}}
 {{/let partial}}
 
 {{! Resolves the boxed type for Thrift serialization, handling binary/string
@@ -66,7 +77,7 @@ Map<
     Recurses through typedefs one layer at a time. }}
 {{#let export partial thrift_boxed_type |type field_hasAdapter| captures |boxed_type|}}
   {{#pragma ignore-newlines}}
-{{#if (not (string.empty? type.javaType))}}{{type.javaType}}
+{{#if type.java_type?}}{{type.java_type}}
 {{#else if type.typedef?}}
   {{#if type.hasAdapter?}}
     {{#if type.true_type.binary?}}io.netty.buffer.ByteBuf
@@ -93,20 +104,15 @@ Map<
   List<{{#partial thrift_boxed_type type=type.elem_type field_hasAdapter=field_hasAdapter}}>
 {{#else if type.set?}}
   Set<{{#partial thrift_boxed_type type=type.elem_type field_hasAdapter=field_hasAdapter}}>
-{{#else}}{{#partial boxed_type type=type type_isAdapterSet=false field_hasAdapter=false}}
-{{/if (not (string.empty? type.javaType))}}
+{{#else}}{{#partial boxed_type type=type field_hasAdapter=false}}
+{{/if type.java_type?}}
 {{/let partial}}
 
-{{! Defines an unboxed Java type for a given Thrift type.
-    Uses primitive types (boolean, int, long, etc.) for primitives,
-    and falls back to boxed_type for complex types.
-    Recurses through typedefs one layer at a time since each layer
-    could override javaType. }}
-{{#let export partial java_type |type| captures |boxed_type|}}
+{{#let export partial java_type |type has_adapter_override| captures |boxed_type|}}
   {{#pragma ignore-newlines}}
-{{#if (not (string.empty? type.javaType))}}{{type.javaType}}
-{{#else if type.isBinaryString?}}byte[]
-{{#else if type.typedef?}}{{#partial java_type type=type.resolved}}
+{{#if type.java_type?}}{{type.java_type}}
+{{#else if type.isBinaryString?}}{{#if has_adapter_override}}io.netty.buffer.ByteBuf{{#else}}byte[]{{/if}}
+{{#else if type.typedef?}}{{#partial java_type type=type.resolved has_adapter_override=has_adapter_override}}
 {{#else if type.void?}}void
 {{#else if type.bool?}}boolean
 {{#else if type.byte?}}byte
@@ -115,8 +121,8 @@ Map<
 {{#else if type.i64?}}long
 {{#else if type.double?}}double
 {{#else if type.float?}}float
-{{#else}}{{#partial boxed_type type=type type_isAdapterSet=false field_hasAdapter=false}}
-{{/if (not (string.empty? type.javaType))}}
+{{#else}}{{#partial boxed_type type=type field_hasAdapter=has_adapter_override}}
+{{/if type.java_type?}}
 {{/let partial}}
 
 {{! Resolves the boxed type within an adapter context, propagating
@@ -126,8 +132,8 @@ Map<
     binary elements correctly resolve to ByteBuf instead of byte[]. }}
 {{#let partial adapted_inner_boxed_type |type| captures |boxed_type|}}
   {{#pragma ignore-newlines}}
-{{#if (not (string.empty? type.javaType))}}{{type.javaType}}
-{{#else if type.hasAdapter?}}{{type.typeClassName}}
+{{#if type.java_type?}}{{type.java_type}}
+{{#else if type.hasAdapter?}}{{type.adapterTypeClassName}}
 {{#else if (or type.binary? type.isBinaryString?)}}io.netty.buffer.ByteBuf
 {{#else if type.typedef?}}{{#partial adapted_inner_boxed_type type=type.resolved}}
 {{#else if type.list?}}List<{{#partial adapted_inner_boxed_type type=type.elem_type}}>
@@ -135,8 +141,8 @@ Map<
 {{#else if type.map?}}
 Map<{{#partial adapted_inner_boxed_type type=type.key_type}}, {{#partial adapted_inner_boxed_type type=type.val_type}}>
 {{#else}}
-{{#partial boxed_type type=type type_isAdapterSet=true field_hasAdapter=false}}
-{{/if (not (string.empty? type.javaType))}}
+{{#partial boxed_type type=type field_hasAdapter=false}}
+{{/if type.java_type?}}
 {{/let partial}}
 
 {{! Resolves the adapted boxed type for a typedef with an adapter.
@@ -144,12 +150,59 @@ Map<{{#partial adapted_inner_boxed_type type=type.key_type}}, {{#partial adapted
     For nested adapters, gives the typeClassName of the intermediate adapter. }}
 {{#let export partial adapted_boxed_type |type| captures |boxed_type adapted_inner_boxed_type|}}
   {{#pragma ignore-newlines}}
-{{#if (not (string.empty? type.javaType))}}{{type.javaType}}
+{{#if type.java_type?}}{{type.java_type}}
   {{#else if type.typedef?}}
-{{#if type.lastAdapter?}}{{#if type.isBinaryString?}}io.netty.buffer.ByteBuf{{#else}}{{#partial adapted_boxed_type type=type.resolved}}{{/if}}{{#else}}{{type.typeClassName}}{{/if}}
+{{#if type.lastAdapter?}}{{#if type.isBinaryString?}}io.netty.buffer.ByteBuf{{#else}}{{#partial adapted_boxed_type type=type.resolved}}{{/if}}{{#else}}{{type.adapterTypeClassName}}{{/if}}
   {{#else}}
 {{#partial adapted_inner_boxed_type type=type}}
-  {{/if (not (string.empty? type.javaType))}}
+  {{/if type.java_type?}}
+{{/let partial}}
+
+{{! Resolves the boxed type for a field with an adapter, recursing through
+    typedef layers. Unlike adapted_boxed_type (used for TypeAdapter<> type
+    parameters), this resolves to the underlying thrift type for variable
+    declarations in serialization code. }}
+{{#let export partial adapted_field_boxed_type |type field_hasAdapter| captures |boxed_type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.java_type?}}{{type.java_type}}
+{{#else if type.typedef?}}
+  {{#if type.isBinaryString?}}
+    {{#if field_hasAdapter}}io.netty.buffer.ByteBuf{{#else}}byte[]{{/if field_hasAdapter}}
+  {{#else if type.resolved.lastAdapter?}}{{#partial adapted_field_boxed_type type=type.resolved field_hasAdapter=field_hasAdapter}}
+  {{#else}}{{type.resolved.adapterTypeClassName}}
+  {{/if type.isBinaryString?}}
+{{#else}}{{#partial boxed_type type=type field_hasAdapter=field_hasAdapter}}
+{{/if type.java_type?}}
+{{/let partial}}
+
+{{#let export partial adapted_type |type has_adapter_override| captures |java_type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.java_type?}}{{type.java_type}}
+{{#else if type.hasAdapter?}}{{type.adapterTypeClassName}}
+{{#else}}{{#partial java_type type=type has_adapter_override=has_adapter_override}}
+{{/if type.java_type?}}
+{{/let partial}}
+
+{{! Resolves the full Java type for a field, considering wrappers, adapters,
+    and optionality (boxed for optional, unboxed for required). }}
+{{#let export partial field_type |field| captures |boxed_type java_type|}}
+  {{#pragma ignore-newlines}}
+{{#if field.hasWrapper?}}{{field.wrapperType}}
+{{#else if field.hasFieldAdapter?}}{{field.fieldAdapterTypeClassName}}
+{{#else if field.type.hasAdapter?}}{{field.type.adapterTypeClassName}}
+{{#else if field.optional?}}{{#partial boxed_type type=field.type field_hasAdapter=field.hasAdapter?}}
+{{#else}}{{#partial java_type type=field.type has_adapter_override=field.hasAdapter?}}
+{{/if field.hasWrapper?}}
+{{/let partial}}
+
+{{! Same as field_type but without considering wrappers. }}
+{{#let export partial field_type_no_wrapper |field| captures |boxed_type java_type|}}
+  {{#pragma ignore-newlines}}
+{{#if field.hasFieldAdapter?}}{{field.fieldAdapterTypeClassName}}
+{{#else if field.type.hasAdapter?}}{{field.type.adapterTypeClassName}}
+{{#else if field.optional?}}{{#partial boxed_type type=field.type field_hasAdapter=field.hasAdapter?}}
+{{#else}}{{#partial java_type type=field.type has_adapter_override=field.hasAdapter?}}
+{{/if field.hasFieldAdapter?}}
 {{/let partial}}
 
 {{! Defines the mapping of a Thrift type to the Java TType constant name. }}
@@ -209,15 +262,388 @@ Map<{{#partial adapted_inner_boxed_type type=type.key_type}}, {{#partial adapted
 {{/if type.typedef?}}
 {{/let partial}}
 
+{{! Reads a binary value, using ByteBuf when in an adapter context
+    (isAdapted from type-level propagation, or field_hasAdapter from
+    field-level adapter), and byte[] otherwise. }}
+{{#let export partial read_binary |type isAdapted field_hasAdapter|}}
+  {{#pragma ignore-newlines}}
+{{#if (or isAdapted field_hasAdapter)}}org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot)
+{{#else}}oprot.readBinary(){{#if (not type.java_type?)}}.array(){{/if (not type.java_type?)}}
+{{/if (or isAdapted field_hasAdapter)}}
+{{/let partial}}
+
 {{! Resolves the Thrift type name, recursing through typedefs one layer at a time
     to check javaType at each layer. Falls back to java_type at the leaf.
     Only called from adapter contexts (type:hasAdapter? guards), so binary
     always resolves to ByteBuf. }}
 {{#let export partial thrift_type |type| captures |java_type|}}
   {{#pragma ignore-newlines}}
-{{#if (not (string.empty? type.javaType))}}{{type.javaType}}
+{{#if type.java_type?}}{{type.java_type}}
 {{#else if type.typedef?}}{{#partial thrift_type type=type.resolved}}
 {{#else if (or type.binary? type.isBinaryString?)}}io.netty.buffer.ByteBuf
-{{#else}}{{#partial java_type type=type}}
-{{/if (not (string.empty? type.javaType))}}
+{{#else}}{{#partial java_type type=type has_adapter_override=false}}
+{{/if type.java_type?}}
+{{/let partial}}
+
+{{! Resolves the stream return type. For streams with a first response, produces
+    StreamResponse<FirstResponseType, ElemType>. For streams without a first
+    response, produces just the element type. }}
+{{#let export partial stream_return_type |function| captures |boxed_type|}}
+  {{#pragma ignore-newlines}}
+  {{#if function.stream_has_first_response?}}
+com.facebook.thrift.model.StreamResponse<
+{{#partial boxed_type type=function.return_type field_hasAdapter=false}},
+{{#partial boxed_type type=function.stream.elem_type field_hasAdapter=false}}>
+  {{#else}}
+{{#partial boxed_type type=function.stream.elem_type field_hasAdapter=false}}
+  {{/if function.stream_has_first_response?}}
+{{/let partial}}
+
+{{! Resolves the Thrift field type for variable declarations in read/write paths.
+    For optional fields, uses boxed types (with adapted_field_boxed_type when
+    the type has an adapter). For required fields, uses unboxed java_type. }}
+{{#let export partial thrift_field_type |field| captures |adapted_field_boxed_type boxed_type java_type|}}
+  {{#pragma ignore-newlines}}
+{{#if field.optional?}}
+  {{#if field.type.hasAdapter?}}
+{{#partial adapted_field_boxed_type type=field.type field_hasAdapter=field.hasAdapter?}}
+  {{#else}}
+{{#partial boxed_type type=field.type field_hasAdapter=field.hasAdapter?}}
+  {{/if field.type.hasAdapter?}}
+{{#else}}
+{{#partial java_type type=field.type has_adapter_override=field.hasAdapter?}}
+{{/if field.optional?}}
+{{/let partial}}
+
+{{! Generates a Reader expression for deserialization of a given Thrift type.
+    Recursively resolves typedefs and container types (list, map, set),
+    wraps structured/enum types via .asReader(), and returns primitive readers
+    for scalar types. }}
+{{#let export partial type_reader |type| captures |boxed_type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.typedef?}}{{#partial type_reader type=type.true_type}}
+{{#else if type.list?}}Readers.listReader({{#partial type_reader type=type.elem_type}})
+{{#else if type.map?}}Readers.mapReader({{#partial type_reader type=type.key_type}},{{#partial type_reader type=type.val_type}})
+{{#else if type.set?}}Readers.setReader({{#partial type_reader type=type.elem_type}})
+{{#else if type.structured?}}Readers.wrap({{#partial boxed_type type=type field_hasAdapter=false}}.asReader())
+{{#else if type.enum?}}Readers.wrap({{#partial boxed_type type=type field_hasAdapter=false}}.asReader())
+{{#else if type.binary?}}Readers.binaryReader()
+{{#else if type.string?}}Readers.stringReader()
+{{#else if type.bool?}}Readers.booleanReader()
+{{#else if type.byte?}}Readers.byteReader()
+{{#else if type.i16?}}Readers.i16Reader()
+{{#else if type.i32?}}Readers.i32Reader()
+{{#else if type.i64?}}Readers.i64Reader()
+{{#else if type.float?}}Readers.floatReader()
+{{#else if type.double?}}Readers.doubleReader()
+{{#else if type.void?}}Readers.voidReader()
+{{/if type.typedef?}}
+{{/let partial}}
+
+{{! Resolves the stream response generic type used for casting in response
+    mapping. Always wraps in StreamResponse — uses the first response type
+    when present, otherwise Void. }}
+{{#let export partial stream_response_generic |function| captures |boxed_type|}}
+  {{#pragma ignore-newlines}}
+  {{#if function.stream_has_first_response?}}
+com.facebook.thrift.model.StreamResponse<
+{{#partial boxed_type type=function.return_type field_hasAdapter=false}}, {{!}}
+{{#partial boxed_type type=function.stream.elem_type field_hasAdapter=false}}>
+  {{#else}}
+com.facebook.thrift.model.StreamResponse<Void, {{!}}
+{{#partial boxed_type type=function.stream.elem_type field_hasAdapter=false}}>
+  {{/if function.stream_has_first_response?}}
+{{/let partial}}
+
+{{! Resolves the sink return type for a function with a sink.
+    With first response, produces Flux<StreamResponse<FirstResponseType, FinalResponseType>>.
+    Without, produces Mono<FinalResponseType>. }}
+{{#let export partial sink_return_type |function| captures |boxed_type|}}
+  {{#pragma ignore-newlines}}
+  {{#if function.sink_has_first_response?}}
+reactor.core.publisher.Flux<com.facebook.thrift.model.StreamResponse<
+{{#partial boxed_type type=function.return_type field_hasAdapter=false}}, {{!}}
+{{#partial boxed_type type=function.sink.final_response_type field_hasAdapter=false}}>>
+  {{#else}}
+reactor.core.publisher.Mono<
+{{#partial boxed_type type=function.sink.final_response_type field_hasAdapter=false}}>
+  {{/if function.sink_has_first_response?}}
+{{/let partial}}
+
+{{! Resolves the sink wrapper return type for a function with a sink.
+    With first response, produces Flux<ResponseWrapper<StreamResponse<FirstResponseType, FinalResponseType>>>.
+    Without, produces Mono<ResponseWrapper<FinalResponseType>>. }}
+{{#let export partial sink_wrapper_return_type |function| captures |boxed_type|}}
+  {{#pragma ignore-newlines}}
+  {{#if function.sink_has_first_response?}}
+reactor.core.publisher.Flux<ResponseWrapper<com.facebook.thrift.model.StreamResponse<
+{{#partial boxed_type type=function.return_type field_hasAdapter=false}}, {{!}}
+{{#partial boxed_type type=function.sink.final_response_type field_hasAdapter=false}}>>>
+  {{#else}}
+reactor.core.publisher.Mono<ResponseWrapper<
+{{#partial boxed_type type=function.sink.final_response_type field_hasAdapter=false}}>>
+  {{/if function.sink_has_first_response?}}
+{{/let partial}}
+
+{{! Resolves the sink response generic type used for casting in response
+    mapping. Always wraps in StreamResponse — uses the first response type
+    when present, otherwise Void. }}
+{{#let export partial sink_response_generic |function| captures |boxed_type|}}
+  {{#pragma ignore-newlines}}
+  {{#if function.sink_has_first_response?}}
+com.facebook.thrift.model.StreamResponse<
+{{#partial boxed_type type=function.return_type field_hasAdapter=false}}, {{!}}
+{{#partial boxed_type type=function.sink.final_response_type field_hasAdapter=false}}>
+  {{#else}}
+com.facebook.thrift.model.StreamResponse<Void, {{!}}
+{{#partial boxed_type type=function.sink.final_response_type field_hasAdapter=false}}>
+  {{/if function.sink_has_first_response?}}
+{{/let partial}}
+
+{{! Writes a Thrift value to the protocol for struct/union serialization.
+    Takes a field object (for adapter context), type object, and depth integer
+    (suffix for _fbthriftVar variables). The top-level call site passes depth
+    equal to the variable index being written. Handles adapters, containers,
+    and recursion through typedefs. }}
+{{#let export partial write_type |field type depth| captures |ttype adapted_type adapted_boxed_type boxed_type|}}
+  {{#if type.typedef?}}
+    {{#if (or type.isBinaryString? (and type.java_type? type.binary?))}}
+org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _fbthriftVar{{depth}});
+    {{#else}}
+{{#partial write_type field=field type=type.resolved depth=depth}}
+    {{/if (or type.isBinaryString? (and type.java_type? type.binary?))}}
+  {{#else if type.set?}}
+oprot.writeSetBegin(new TSet(TType.{{#partial ttype type=type.elem_type}}, _fbthriftVar{{depth}}.size()));
+for ({{#partial adapted_type type=type.elem_type has_adapter_override=field.hasAdapter?}} _fbthriftVar{{(int.add depth 1)}} : _fbthriftVar{{depth}}) {
+    {{#if type.elem_type.hasAdapter?}}
+    {{#partial adapted_boxed_type type=type.elem_type}} _fbthriftVar{{(int.add depth 2)}} = __{{type.elem_type.name}}_Adapter.toThrift(_fbthriftVar{{(int.add depth 1)}});
+    {{#partial write_type field=field type=type.elem_type depth=(int.add depth 2)}}
+    {{#else}}
+    {{#partial write_type field=field type=type.elem_type depth=(int.add depth 1)}}
+    {{/if type.elem_type.hasAdapter?}}
+}
+oprot.writeSetEnd();
+  {{#else if type.list?}}
+oprot.writeListBegin(new TList(TType.{{#partial ttype type=type.elem_type}}, _fbthriftVar{{depth}}.size()));
+for ({{#partial adapted_type type=type.elem_type has_adapter_override=field.hasAdapter?}} _fbthriftVar{{(int.add depth 1)}} : _fbthriftVar{{depth}}) {
+    {{#if type.elem_type.hasAdapter?}}
+    {{#partial adapted_boxed_type type=type.elem_type}} _fbthriftVar{{(int.add depth 2)}} = __{{type.elem_type.name}}_Adapter.toThrift(_fbthriftVar{{(int.add depth 1)}});
+    {{#partial write_type field=field type=type.elem_type depth=(int.add depth 2)}}
+    {{#else}}
+    {{#partial write_type field=field type=type.elem_type depth=(int.add depth 1)}}
+    {{/if type.elem_type.hasAdapter?}}
+}
+oprot.writeListEnd();
+  {{#else if type.map?}}
+oprot.writeMapBegin(new TMap(TType.{{#partial ttype type=type.key_type}}, TType.{{#partial ttype type=type.val_type}}, _fbthriftVar{{depth}}.size()));
+for (Map.Entry<{{#partial boxed_type type=type.key_type field_hasAdapter=field.hasAdapter?}}, {{#partial boxed_type type=type.val_type field_hasAdapter=field.hasAdapter?}}> _fbthriftVar{{(int.add depth 1)}} : _fbthriftVar{{depth}}.entrySet()) {
+    {
+        {{#partial boxed_type type=type.key_type field_hasAdapter=field.hasAdapter?}} _fbthriftVar{{(int.add depth 2)}} = _fbthriftVar{{(int.add depth 1)}}.getKey();
+        {{#if type.key_type.hasAdapter?}}
+        {{#partial adapted_boxed_type type=type.key_type}} _fbthriftVar{{(int.add depth 3)}} = __{{type.key_type.name}}_Adapter.toThrift(_fbthriftVar{{(int.add depth 2)}});
+        {{#partial write_type field=field type=type.key_type depth=(int.add depth 3)}}
+        {{#else}}
+        {{#partial write_type field=field type=type.key_type depth=(int.add depth 2)}}
+        {{/if type.key_type.hasAdapter?}}
+    }
+    {
+        {{#partial boxed_type type=type.val_type field_hasAdapter=field.hasAdapter?}} _fbthriftVar{{(int.add depth 2)}} = _fbthriftVar{{(int.add depth 1)}}.getValue();
+        {{#if type.val_type.hasAdapter?}}
+        {{#partial adapted_boxed_type type=type.val_type}} _fbthriftVar{{(int.add depth 3)}} = __{{type.val_type.name}}_Adapter.toThrift(_fbthriftVar{{(int.add depth 2)}});
+        {{#partial write_type field=field type=type.val_type depth=(int.add depth 3)}}
+        {{#else}}
+        {{#partial write_type field=field type=type.val_type depth=(int.add depth 2)}}
+        {{/if type.val_type.hasAdapter?}}
+    }
+}
+oprot.writeMapEnd();
+  {{#else if type.structured?}}
+_fbthriftVar{{depth}}.write0(oprot);
+  {{#else if type.enum?}}
+oprot.writeI32(_fbthriftVar{{depth}} == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar{{depth}}));
+  {{#else if type.binary?}}
+org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _fbthriftVar{{depth}});
+  {{#else if type.string?}}
+    {{#if type.isBinaryString?}}
+org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _fbthriftVar{{depth}});
+    {{#else}}
+oprot.writeString(_fbthriftVar{{depth}});
+    {{/if type.isBinaryString?}}
+  {{#else if type.bool?}}
+oprot.writeBool(_fbthriftVar{{depth}});
+  {{#else if type.byte?}}
+oprot.writeByte(_fbthriftVar{{depth}});
+  {{#else if type.i16?}}
+oprot.writeI16(_fbthriftVar{{depth}});
+  {{#else if type.i32?}}
+oprot.writeI32(_fbthriftVar{{depth}});
+  {{#else if type.i64?}}
+oprot.writeI64(_fbthriftVar{{depth}});
+  {{#else if type.float?}}
+oprot.writeFloat(_fbthriftVar{{depth}});
+  {{#else if type.double?}}
+oprot.writeDouble(_fbthriftVar{{depth}});
+  {{/if type.typedef?}}
+{{/let partial}}
+
+{{! Reads a Thrift value from the protocol for struct/union deserialization.
+    Takes a field object (for adapter context), type object, and depth integer
+    (suffix for _fbthriftVar variables). Handles typedefs, containers,
+    structured types, enums, binary/string, and primitives.
+    Replaces the mstch ReadType.mustache and ReadTypeContainerNestedValue.mustache. }}
+{{#let export partial read_type |field type depth| captures |resolved_boxed_type boxed_type thrift_type java_type thrift_field_type read_binary common|}}
+  {{#let partial read_container |field type depth| captures |read_type resolved_boxed_type boxed_type thrift_type java_type read_binary|}}
+    {{#if type.set?}}
+{
+    TSet _set{{depth}} = oprot.readSetBegin();
+    {{#if type.java_type?}}_fbthriftVar{{depth}} = new {{type.java_type}}();{{#else}}_fbthriftVar{{depth}} = new Hash{{#partial resolved_boxed_type type=type field_hasAdapter=field.hasAdapter?}}(Math.max(0, _set{{depth}}.size));{{/if type.java_type?}}
+    for (int _i{{depth}} = 0; (_set{{depth}}.size < 0) ? oprot.peekSet() : (_i{{depth}} < _set{{depth}}.size); _i{{depth}}++) {
+        {{#if type.true_type.elem_type.container?}}
+        {{#partial resolved_boxed_type type=type.true_type.elem_type field_hasAdapter=field.hasAdapter?}} _fbthriftVar{{(int.add depth 1)}};
+        {{#partial read_container field=field type=type.true_type.elem_type depth=(int.add depth 1)}}
+        {{#else}}
+        {{#if type.true_type.elem_type.hasAdapter?}}{{#partial thrift_type type=type.true_type.elem_type}}{{#else}}{{#partial java_type type=type.true_type.elem_type has_adapter_override=field.hasAdapter?}}{{/if type.true_type.elem_type.hasAdapter?}} _fbthriftVar{{(int.add depth 1)}};
+        {{#if type.true_type.elem_type.hasAdapter?}}
+          {{#if type.true_type.elem_type.structured?}}
+        _fbthriftVar{{(int.add depth 1)}} = {{#partial boxed_type type=type.true_type.elem_type.true_type field_hasAdapter=field.hasAdapter?}}.read0(oprot);
+          {{#else if type.true_type.elem_type.binary?}}
+        _fbthriftVar{{(int.add depth 1)}} = {{#partial read_binary type=type.true_type.elem_type.true_type isAdapted=true field_hasAdapter=false}};
+          {{#else}}
+        {{#partial read_type field=field type=type.true_type.elem_type.true_type depth=(int.add depth 1)}}
+          {{/if type.true_type.elem_type.structured?}}
+        {{#else}}
+        {{#partial read_type field=field type=type.true_type.elem_type depth=(int.add depth 1)}}
+        {{/if type.true_type.elem_type.hasAdapter?}}
+        {{/if type.true_type.elem_type.container?}}
+        _fbthriftVar{{depth}}.add({{#if type.true_type.elem_type.hasAdapter?}}__{{type.true_type.elem_type.name}}_Adapter.fromThrift({{/if type.true_type.elem_type.hasAdapter?}}_fbthriftVar{{(int.add depth 1)}}){{#if type.true_type.elem_type.hasAdapter?}}){{/if type.true_type.elem_type.hasAdapter?}};
+    }
+    oprot.readSetEnd();
+}
+    {{#else if type.list?}}
+{
+    TList _list{{depth}} = oprot.readListBegin();
+    {{#if type.java_type?}}_fbthriftVar{{depth}} = new {{type.java_type}}();{{#else}}_fbthriftVar{{depth}} = new Array{{#partial resolved_boxed_type type=type field_hasAdapter=field.hasAdapter?}}(Math.max(0, _list{{depth}}.size));{{/if type.java_type?}}
+    for (int _i{{depth}} = 0; (_list{{depth}}.size < 0) ? oprot.peekList() : (_i{{depth}} < _list{{depth}}.size); _i{{depth}}++) {
+        {{#if type.true_type.elem_type.container?}}
+        {{#partial resolved_boxed_type type=type.true_type.elem_type field_hasAdapter=field.hasAdapter?}} _fbthriftVar{{(int.add depth 1)}};
+        {{#partial read_container field=field type=type.true_type.elem_type depth=(int.add depth 1)}}
+        {{#else}}
+        {{#if type.true_type.elem_type.hasAdapter?}}{{#partial thrift_type type=type.true_type.elem_type}}{{#else}}{{#partial java_type type=type.true_type.elem_type has_adapter_override=field.hasAdapter?}}{{/if type.true_type.elem_type.hasAdapter?}} _fbthriftVar{{(int.add depth 1)}};
+        {{#if type.true_type.elem_type.hasAdapter?}}
+          {{#if type.true_type.elem_type.structured?}}
+        _fbthriftVar{{(int.add depth 1)}} = {{#partial boxed_type type=type.true_type.elem_type.true_type field_hasAdapter=field.hasAdapter?}}.read0(oprot);
+          {{#else if type.true_type.elem_type.binary?}}
+        _fbthriftVar{{(int.add depth 1)}} = {{#partial read_binary type=type.true_type.elem_type.true_type isAdapted=true field_hasAdapter=false}};
+          {{#else}}
+        {{#partial read_type field=field type=type.true_type.elem_type.true_type depth=(int.add depth 1)}}
+          {{/if type.true_type.elem_type.structured?}}
+        {{#else}}
+        {{#partial read_type field=field type=type.true_type.elem_type depth=(int.add depth 1)}}
+        {{/if type.true_type.elem_type.hasAdapter?}}
+        {{/if type.true_type.elem_type.container?}}
+        _fbthriftVar{{depth}}.add({{#if type.true_type.elem_type.hasAdapter?}}__{{type.true_type.elem_type.name}}_Adapter.fromThrift({{/if type.true_type.elem_type.hasAdapter?}}_fbthriftVar{{(int.add depth 1)}}){{#if type.true_type.elem_type.hasAdapter?}}){{/if type.true_type.elem_type.hasAdapter?}};
+    }
+    oprot.readListEnd();
+}
+    {{#else if type.map?}}
+{
+    TMap _map{{depth}} = oprot.readMapBegin();
+    {{#if type.java_type?}}_fbthriftVar{{depth}} = new {{type.java_type}}();{{#else}}_fbthriftVar{{depth}} = new Hash{{#partial resolved_boxed_type type=type field_hasAdapter=field.hasAdapter?}}(Math.max(0, _map{{depth}}.size));{{/if type.java_type?}}
+    for (int _i{{depth}} = 0; (_map{{depth}}.size < 0) ? oprot.peekMap() : (_i{{depth}} < _map{{depth}}.size); _i{{depth}}++) {
+        {{#if type.true_type.key_type.container?}}
+        {{#partial resolved_boxed_type type=type.true_type.key_type field_hasAdapter=field.hasAdapter?}} _fbthriftKey{{(int.add depth 1)}};
+        {{#else}}
+        {{#if type.true_type.key_type.hasAdapter?}}{{#partial thrift_type type=type.true_type.key_type}}{{#else}}{{#partial java_type type=type.true_type.key_type has_adapter_override=field.hasAdapter?}}{{/if type.true_type.key_type.hasAdapter?}} _fbthriftKey{{(int.add depth 1)}};
+        {{/if type.true_type.key_type.container?}}
+        {{#if type.true_type.val_type.container?}}
+        {{#partial resolved_boxed_type type=type.true_type.val_type field_hasAdapter=field.hasAdapter?}} _fbthriftValue{{(int.add depth 1)}};
+        {{#else}}
+        {{#if type.true_type.val_type.hasAdapter?}}{{#partial thrift_type type=type.true_type.val_type}}{{#else}}{{#partial java_type type=type.true_type.val_type has_adapter_override=field.hasAdapter?}}{{/if type.true_type.val_type.hasAdapter?}} _fbthriftValue{{(int.add depth 1)}};
+        {{/if type.true_type.val_type.container?}}
+
+        {
+            {{#if type.true_type.key_type.container?}}
+            {{#partial resolved_boxed_type type=type.true_type.key_type field_hasAdapter=field.hasAdapter?}} _fbthriftVar{{(int.add depth 1)}};
+            {{#partial read_container field=field type=type.true_type.key_type depth=(int.add depth 1)}}
+            {{#else}}
+            {{#if type.true_type.key_type.hasAdapter?}}{{#partial thrift_type type=type.true_type.key_type}}{{#else}}{{#partial java_type type=type.true_type.key_type has_adapter_override=field.hasAdapter?}}{{/if type.true_type.key_type.hasAdapter?}} _fbthriftVar{{(int.add depth 1)}};
+            {{#if type.true_type.key_type.hasAdapter?}}
+              {{#if type.true_type.key_type.structured?}}
+            _fbthriftVar{{(int.add depth 1)}} = {{#partial boxed_type type=type.true_type.key_type.true_type field_hasAdapter=field.hasAdapter?}}.read0(oprot);
+              {{#else if type.true_type.key_type.binary?}}
+            _fbthriftVar{{(int.add depth 1)}} = {{#partial read_binary type=type.true_type.key_type.true_type isAdapted=true field_hasAdapter=false}};
+              {{#else}}
+            {{#partial read_type field=field type=type.true_type.key_type.true_type depth=(int.add depth 1)}}
+              {{/if type.true_type.key_type.structured?}}
+            {{#else}}
+            {{#partial read_type field=field type=type.true_type.key_type depth=(int.add depth 1)}}
+            {{/if type.true_type.key_type.hasAdapter?}}
+            {{/if type.true_type.key_type.container?}}
+            _fbthriftKey{{(int.add depth 1)}} = _fbthriftVar{{(int.add depth 1)}};
+        }
+        {
+            {{#if type.true_type.val_type.container?}}
+            {{#partial resolved_boxed_type type=type.true_type.val_type field_hasAdapter=field.hasAdapter?}} _fbthriftVar{{(int.add depth 1)}};
+            {{#partial read_container field=field type=type.true_type.val_type depth=(int.add depth 1)}}
+            {{#else}}
+            {{#if type.true_type.val_type.hasAdapter?}}{{#partial thrift_type type=type.true_type.val_type}}{{#else}}{{#partial java_type type=type.true_type.val_type has_adapter_override=field.hasAdapter?}}{{/if type.true_type.val_type.hasAdapter?}} _fbthriftVar{{(int.add depth 1)}};
+            {{#if type.true_type.val_type.hasAdapter?}}
+              {{#if type.true_type.val_type.structured?}}
+            _fbthriftVar{{(int.add depth 1)}} = {{#partial boxed_type type=type.true_type.val_type.true_type field_hasAdapter=field.hasAdapter?}}.read0(oprot);
+              {{#else if type.true_type.val_type.binary?}}
+            _fbthriftVar{{(int.add depth 1)}} = {{#partial read_binary type=type.true_type.val_type.true_type isAdapted=true field_hasAdapter=false}};
+              {{#else}}
+            {{#partial read_type field=field type=type.true_type.val_type.true_type depth=(int.add depth 1)}}
+              {{/if type.true_type.val_type.structured?}}
+            {{#else}}
+            {{#partial read_type field=field type=type.true_type.val_type depth=(int.add depth 1)}}
+            {{/if type.true_type.val_type.hasAdapter?}}
+            {{/if type.true_type.val_type.container?}}
+            _fbthriftValue{{(int.add depth 1)}} = _fbthriftVar{{(int.add depth 1)}};
+        }
+        _fbthriftVar{{depth}}.put({{#if type.true_type.key_type.hasAdapter?}}__{{type.true_type.key_type.name}}_Adapter.fromThrift({{/if type.true_type.key_type.hasAdapter?}}_fbthriftKey{{(int.add depth 1)}}{{#if type.true_type.key_type.hasAdapter?}}){{/if type.true_type.key_type.hasAdapter?}}, {{#if type.true_type.val_type.hasAdapter?}}__{{type.true_type.val_type.name}}_Adapter.fromThrift({{/if type.true_type.val_type.hasAdapter?}}_fbthriftValue{{(int.add depth 1)}}{{#if type.true_type.val_type.hasAdapter?}}){{/if type.true_type.val_type.hasAdapter?}});
+    }
+    oprot.readMapEnd();
+}
+    {{/if type.set?}}
+  {{/let partial}}
+  {{#if type.typedef?}}
+    {{#if type.isBinaryString?}}
+_fbthriftVar{{depth}} = {{#partial read_binary type=type isAdapted=false field_hasAdapter=field.hasAdapter?}};
+    {{#else if (and type.java_type? type.container?)}}
+{{#partial read_container field=field type=type depth=depth}}
+    {{#else if (and type.java_type? type.binary?)}}
+_fbthriftVar{{depth}} = {{#partial read_binary type=type isAdapted=false field_hasAdapter=field.hasAdapter?}};
+    {{#else}}
+{{#partial read_type field=field type=type.resolved depth=depth}}
+    {{/if type.isBinaryString?}}
+  {{#else if (or type.set? type.list? type.map?)}}
+{{#partial read_container field=field type=type depth=depth}}
+  {{#else if type.structured?}}
+_fbthriftVar{{depth}} = {{#partial boxed_type type=type field_hasAdapter=field.hasAdapter?}}.read0(oprot);
+  {{#else if type.enum?}}
+_fbthriftVar{{depth}} = {{#partial boxed_type type=type field_hasAdapter=field.hasAdapter?}}.fromInteger(oprot.readI32());
+  {{#else if type.binary?}}
+_fbthriftVar{{depth}} = {{#partial read_binary type=type isAdapted=false field_hasAdapter=field.hasAdapter?}};
+  {{#else if type.string?}}
+    {{#if type.isBinaryString?}}
+_fbthriftVar{{depth}} = {{#partial read_binary type=type isAdapted=false field_hasAdapter=field.hasAdapter?}};
+    {{#else}}
+_fbthriftVar{{depth}} = oprot.readString({{#partial common.utf8_validation field=field}});
+    {{/if type.isBinaryString?}}
+  {{#else if type.bool?}}
+_fbthriftVar{{depth}} = oprot.readBool();
+  {{#else if type.byte?}}
+_fbthriftVar{{depth}} = oprot.readByte();
+  {{#else if type.i16?}}
+_fbthriftVar{{depth}} = oprot.readI16();
+  {{#else if type.i32?}}
+_fbthriftVar{{depth}} = oprot.readI32();
+  {{#else if type.i64?}}
+_fbthriftVar{{depth}} = oprot.readI64();
+  {{#else if type.float?}}
+_fbthriftVar{{depth}} = oprot.readFloat();
+  {{#else if type.double?}}
+_fbthriftVar{{depth}} = oprot.readDouble();
+  {{/if type.typedef?}}
 {{/let partial}}

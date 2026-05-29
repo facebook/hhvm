@@ -14,17 +14,17 @@ public class FooBarBazServiceReactiveAsyncWrapper
   private FooBarBazService.Reactive _delegate;
 
   public FooBarBazServiceReactiveAsyncWrapper(FooBarBazService.Reactive _delegate) {
-    
-    this._delegate = _delegate;
+      
+      this._delegate = _delegate;
   }
 
   public FooBarBazServiceReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new FooBarBazServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new FooBarBazServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
   @java.lang.Override
@@ -41,7 +41,7 @@ public class FooBarBazServiceReactiveAsyncWrapper
   @java.lang.Override
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> fooWrapper(
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.fooWrapper( rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.fooWrapper( rpcOptions));
   }
 
   @java.lang.Override
@@ -58,7 +58,7 @@ public class FooBarBazServiceReactiveAsyncWrapper
   @java.lang.Override
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> barWrapper(
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.barWrapper( rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.barWrapper( rpcOptions));
   }
 
   @java.lang.Override
@@ -75,7 +75,7 @@ public class FooBarBazServiceReactiveAsyncWrapper
   @java.lang.Override
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> bazWrapper(
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.bazWrapper( rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.bazWrapper( rpcOptions));
   }
 
 }

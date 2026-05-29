@@ -14,17 +14,17 @@ public class TestServiceReactiveAsyncWrapper
   private TestService.Reactive _delegate;
 
   public TestServiceReactiveAsyncWrapper(TestService.Reactive _delegate) {
-    
-    this._delegate = _delegate;
+      
+      this._delegate = _delegate;
   }
 
   public TestServiceReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new TestServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new TestServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
   @java.lang.Override
@@ -43,7 +43,7 @@ public class TestServiceReactiveAsyncWrapper
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Long>> initWrapper(
     final long int1,
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.initWrapper(int1, rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.initWrapper(int1, rpcOptions));
   }
 
 }

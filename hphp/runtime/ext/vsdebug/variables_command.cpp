@@ -940,7 +940,7 @@ int VariablesCommand::addClassConstants(
           "::" +
           constant.name->toCppString();
 
-      if (constantNames.find(name) == constantNames.end()) {
+      if (!constantNames.contains(name)) {
         constantNames.insert(name);
         if (vars != nullptr) {
           vars->push_back(
@@ -1376,7 +1376,7 @@ int VariablesCommand::addObjectChildren(
         return true;
       }
 
-      if (properties.find(propName) != properties.end()) {
+      if (properties.contains(propName)) {
         // A property with this name has already been added by a derived class,
         // since we're walking the class inheritance hierarchy from the object
         // upwards, the derived property shadows this property.

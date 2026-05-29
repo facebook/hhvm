@@ -39,6 +39,10 @@ DEFINE_bool(
 DEFINE_bool(io_zctx, false, "");
 DEFINE_int32(io_zctx_arena_mb, 0, "");
 DEFINE_int32(io_zcrx_num_pages, 16384, "");
+DEFINE_int32(
+    io_zcrx_buffer_size_hint,
+    0,
+    "Buffer size hint for ZC Rx, defaults to page size if not specified. Must a power of 2.");
 DEFINE_int32(io_zcrx_refill_entries, 16384, "");
 DEFINE_string(io_zcrx_ifname, "eth0", "");
 DEFINE_int32(io_zcrx_queue_id, 0, "");
@@ -144,6 +148,9 @@ folly::IoUringBackend::Options getIoUringOptions() {
           .setZeroCopyRxRefillEntries(FLAGS_io_zcrx_refill_entries)
           .setResolveNapiCallback(resolve_napi_callback)
           .setZcrxSrcPortCallback(src_port_callback);
+      if (FLAGS_io_zcrx_buffer_size_hint > 0) {
+        options.setZeroCopyRxBufferSizeHint(FLAGS_io_zcrx_buffer_size_hint);
+      }
     } else {
       options.setZeroCopyImport(true);
     }

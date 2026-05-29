@@ -50,7 +50,7 @@ folly::coro::Task<HTTPBodyEvent> ExpectContinueWrapperResponse::readBodyEvent(
 }
 
 void ExpectContinueWrapperResponse::stopReading(
-    folly::Optional<const HTTPErrorCode>) {
+    folly::Optional<const HTTPErrorCode>) noexcept {
   if (heapAllocated_) {
     delete this;
   }

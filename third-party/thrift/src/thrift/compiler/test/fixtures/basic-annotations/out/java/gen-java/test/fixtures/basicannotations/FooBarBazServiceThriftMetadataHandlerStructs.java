@@ -22,8 +22,8 @@ import com.facebook.thrift.metadata.ThriftType;
 
 
 class FooBarBazServiceThriftMetadataHandlerStructs {
-  static Map<String, ThriftStruct> getStructs() {
-    Map<String, ThriftStruct> structs = new HashMap<>();
-    return structs;
-  }
+    static Map<String, ThriftStruct> getStructs() {
+        Map<String, ThriftStruct> structs = new HashMap<>();
+        return structs;
+    }
 }

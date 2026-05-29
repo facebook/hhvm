@@ -178,7 +178,6 @@ pub mod instr {
     use hhbc::IncDecOp;
     use hhbc::InitPropOp;
     use hhbc::Instruct;
-    use hhbc::IsLogAsDynamicCallOp;
     use hhbc::IsTypeOp;
     use hhbc::IterArgs;
     use hhbc::IterId;
@@ -214,7 +213,7 @@ pub mod instr {
     // the definition of define_instr_seq_helpers for details.
     emit_opcodes_macro::define_instr_seq_helpers! {
         // These get custom implementations below.
-        FCallClsMethod | FCallClsMethodM | FCallClsMethodD | FCallClsMethodS | FCallClsMethodSD |
+        FCallClsMethodM | FCallClsMethodD | FCallClsMethodSD |
         FCallCtor | FCallObjMethod | FCallObjMethodD | MemoGetEager |
         NewStructDict | SSwitch | String | Switch => {}
 
@@ -253,23 +252,10 @@ pub mod instr {
         dim(MOpMode::Warn, MemberKey::PT(key, readonly_op))
     }
 
-    pub fn f_call_cls_method(log: IsLogAsDynamicCallOp, fcall_args: FCallArgs) -> InstrSeq {
-        instr(Instruct::Opcode(Opcode::FCallClsMethod(
-            fcall_args,
-            BytesId::EMPTY,
-            log,
-        )))
-    }
-
-    pub fn f_call_cls_method_m(
-        log: IsLogAsDynamicCallOp,
-        fcall_args: FCallArgs,
-        method: MethodName,
-    ) -> InstrSeq {
+    pub fn f_call_cls_method_m(fcall_args: FCallArgs, method: MethodName) -> InstrSeq {
         instr(Instruct::Opcode(Opcode::FCallClsMethodM(
             fcall_args,
             BytesId::EMPTY,
-            log,
             method,
         )))
     }
@@ -281,14 +267,6 @@ pub mod instr {
     ) -> InstrSeq {
         instr(Instruct::Opcode(Opcode::FCallClsMethodD(
             fcall_args, class, method,
-        )))
-    }
-
-    pub fn f_call_cls_method_s(fcall_args: FCallArgs, clsref: SpecialClsRef) -> InstrSeq {
-        instr(Instruct::Opcode(Opcode::FCallClsMethodS(
-            fcall_args,
-            BytesId::EMPTY,
-            clsref,
         )))
     }
 

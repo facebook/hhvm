@@ -7,7 +7,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/visitation/visit_by_thrift_field_metadata.h>
-#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_metadata.h"
+#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_types.h"
 
 namespace apache {
 namespace thrift {

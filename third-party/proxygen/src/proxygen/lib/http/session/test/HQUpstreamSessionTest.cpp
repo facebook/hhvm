@@ -2230,12 +2230,23 @@ class HQUpstreamSessionTestWebTransport : public HQUpstreamSessionTest {
     return handler;
   }
 
+  // Local-initiated close: app calls closeSession() before ingress EOF.
+  // closeSession() sends EOM + stop-sending (abort with NO_ERROR).
   void closeWTSession() {
-    // should this close INGRESS?
-    wt_->closeSession();
-    handler_->expectEOM();
     handler_->expectDetachTransaction();
+    wt_->closeSession();
+    hqSession_->closeWhenIdle();
+    flushAndLoop();
+  }
+
+  // Peer-initiated close: peer sends EOF first, then local app closes.
+  // closeSession() sends only EOM (no abort since ingress EOM already seen).
+  void peerCloseWTSession() {
+    handler_->expectEOM();
     socketDriver_->addReadEOF(sessionId_, std::chrono::milliseconds(0));
+    flushAndLoopN(1);
+    wt_->closeSession();
+    handler_->expectDetachTransaction();
     hqSession_->closeWhenIdle();
     flushAndLoop();
   }
@@ -2280,6 +2291,12 @@ TEST_P(HQUpstreamSessionTestWebTransport, FilterInstallation) {
   EXPECT_NE(filter, nullptr);
 
   closeWTSession();
+}
+
+// Test peer-initiated close: peer sends EOF first, then local app closes.
+// closeSession() sends only EOM (no stop-sending needed).
+TEST_P(HQUpstreamSessionTestWebTransport, PeerClose) {
+  peerCloseWTSession();
 }
 
 TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {

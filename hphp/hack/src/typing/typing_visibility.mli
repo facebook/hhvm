@@ -78,6 +78,9 @@ val check_deprecated :
   string option ->
   Typing_error.t option
 
+val check_gated_by_feature_flag :
+  env -> Pos_or_decl.t -> string -> Typing_defs_core.user_attribute list -> unit
+
 (* Expression Trees can only access publicly accessible properties *)
 val check_expression_tree_vis :
   use_pos:Pos.t ->

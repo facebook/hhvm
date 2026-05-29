@@ -6,21 +6,21 @@
 pub const kOne: crate::types::MyEnum = crate::types::MyEnum::ONE;
 
 pub static enumNames: ::std::sync::LazyLock<::std::collections::BTreeMap<crate::types::MyEnum, ::std::string::String>> = ::std::sync::LazyLock::new(|| {
-            let mut map = ::std::collections::BTreeMap::new();
-            {
-                #[inline(never)]
-                fn __do_insert(map: &mut ::std::collections::BTreeMap<crate::types::MyEnum, ::std::string::String>) {
-                    map.insert(crate::types::MyEnum::ONE, "one".to_owned());
-                }
-                __do_insert(&mut map);
-            }
-            {
-                #[inline(never)]
-                fn __do_insert(map: &mut ::std::collections::BTreeMap<crate::types::MyEnum, ::std::string::String>) {
-                    map.insert(crate::types::MyEnum::TWO, "two".to_owned());
-                }
-                __do_insert(&mut map);
-            }
-            map
-        });
+    let mut map = ::std::collections::BTreeMap::new();
+    {
+        #[inline(never)]
+        fn __do_insert(map: &mut ::std::collections::BTreeMap<crate::types::MyEnum, ::std::string::String>) {
+            map.insert(crate::types::MyEnum::ONE, "one".to_owned());
+        }
+        __do_insert(&mut map);
+    }
+    {
+        #[inline(never)]
+        fn __do_insert(map: &mut ::std::collections::BTreeMap<crate::types::MyEnum, ::std::string::String>) {
+            map.insert(crate::types::MyEnum::TWO, "two".to_owned());
+        }
+        __do_insert(&mut map);
+    }
+    map
+});
 

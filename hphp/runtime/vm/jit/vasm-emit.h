@@ -46,15 +46,13 @@ struct Vcost {
  * Optimize, lower for the specified architecture, register allocate (if
  * desired), and perform more optimizations on the given unit.
  */
-void optimizeX64(Vunit&, const Abi&, bool regalloc);
-void optimizeARM(Vunit&, const Abi&, bool regalloc);
+void optimize(Vunit&, const Abi&, bool regalloc);
 
 /*
  * Emit code for the given unit using the given code areas. The unit must have
- * already been through the corresponding optimizeArch() function.
+ * already been through the optimize() function.
  */
-void emitX64(Vunit&, Vtext&, CGMeta&, AsmInfo*);
-void emitARM(Vunit&, Vtext&, CGMeta&, AsmInfo*);
+void emit(Vunit&, Vtext&, CGMeta&, AsmInfo*);
 
 /*
  * Emit code for the given Vunit, which must already be register-allocated, to

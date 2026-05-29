@@ -19,9 +19,9 @@ class TestEdenWatchParent(WatchmanEdenTestCase.WatchmanEdenTestCase):
             repo.commit("initial commit.")
 
         def get_loaded_count() -> int:
-            with self.eden.get_thrift_client_legacy() as client:
+            with self.eden.get_thrift_client() as client:
                 stats = client.getStatInfo(
-                    GetStatInfoParams(statsMask=STATS_MOUNTS_STATS)._to_py_deprecated()
+                    GetStatInfoParams(statsMask=STATS_MOUNTS_STATS)
                 )
             mountPointInfo = stats.mountPointInfo
             if mountPointInfo is None:

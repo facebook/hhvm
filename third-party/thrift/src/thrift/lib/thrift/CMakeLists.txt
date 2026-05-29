@@ -24,17 +24,6 @@ thrift_generate(
 )
 
 thrift_generate(
-  "reflection" #file_name
-  "" #services
-  "cpp2" #language
-  "templates,no_metadata" #options
-  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
-  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
-  "thrift/lib/thrift" #include_prefix
-  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
-)
-
-thrift_generate(
   "metadata" #file_name
   "" #services
   "cpp2" #language
@@ -214,7 +203,6 @@ set_property(GLOBAL PROPERTY any_rep-cpp2-SOURCES ${any_rep-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY RpcMetadata-cpp2-SOURCES
   ${RpcMetadata-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY frozen-cpp2-SOURCES ${frozen-cpp2-SOURCES})
-set_property(GLOBAL PROPERTY reflection-cpp2-SOURCES ${reflection-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY metadata-cpp2-SOURCES ${metadata-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY RocketUpgrade-cpp2-SOURCES
   ${RocketUpgrade-cpp2-SOURCES})

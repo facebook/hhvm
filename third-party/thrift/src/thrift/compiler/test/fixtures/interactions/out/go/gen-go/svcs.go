@@ -222,9 +222,6 @@ func (p *MyInteractionProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *MyInteractionProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *MyInteractionProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}
@@ -606,9 +603,6 @@ func (p *MyInteractionFastProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *MyInteractionFastProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *MyInteractionFastProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}
@@ -878,9 +872,6 @@ func (p *SerialInteractionProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *SerialInteractionProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *SerialInteractionProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}
@@ -1005,9 +996,6 @@ func (p *BoxedInteractionProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *BoxedInteractionProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *BoxedInteractionProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}
@@ -1228,9 +1216,6 @@ func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *MyServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *MyServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{
@@ -1554,9 +1539,6 @@ func (p *FactoriesProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *FactoriesProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *FactoriesProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{
@@ -1786,9 +1768,6 @@ func (p *PerformProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *PerformProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *PerformProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{
@@ -1910,9 +1889,6 @@ func (p *InteractWithSharedProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *InteractWithSharedProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *InteractWithSharedProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{
@@ -2036,9 +2012,6 @@ func (p *BoxServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *BoxServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *BoxServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{

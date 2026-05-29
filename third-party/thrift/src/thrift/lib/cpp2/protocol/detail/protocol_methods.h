@@ -41,10 +41,12 @@
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/TypeClass.h>
+#include <thrift/lib/cpp2/op/Compare.h>
 #include <thrift/lib/cpp2/protocol/Cpp2Ops.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/protocol/ProtocolReaderWireTypeInfo.h>
 #include <thrift/lib/cpp2/protocol/Traits.h>
+#include <thrift/lib/cpp2/type/detail/TypeClassToTypeTag.h>
 
 /**
  * Specializations of `protocol_methods` encapsulate a collection of
@@ -795,15 +797,27 @@ struct protocol_methods<type_class::set<ElemClass>, Type> {
     xfer += protocol.writeSetBegin(
         elem_ttype::value, checked_container_size(out.size()));
 
-    if (!folly::is_detected_v<detect_key_compare, Type> &&
-        protocol.keyOrder() != KeyOrder::Unspecified) {
+    constexpr bool kContainerIsOrdered =
+        folly::is_detected_v<detect_key_compare, Type>;
+    constexpr KeyOrder kKeyOrder = Protocol::keyOrder();
+    constexpr bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
+        (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
+
+    if constexpr (kShouldSort) {
+      using Tag = type_class::to_type_tag_t<ElemClass, elem_type>;
       std::vector<typename Type::const_iterator> iters;
       iters.reserve(out.size());
       for (auto it = out.begin(); it != out.end(); ++it) {
         iters.push_back(it);
       }
-      std::sort(
-          iters.begin(), iters.end(), [](auto a, auto b) { return *a < *b; });
+      auto compare = [](auto a, auto b) {
+        if constexpr (kKeyOrder == KeyOrder::StableAscending) {
+          return ::apache::thrift::op::detail::StableLessThan<Tag>{}(*a, *b);
+        } else {
+          return *a < *b;
+        }
+      };
+      std::sort(iters.begin(), iters.end(), compare);
       for (auto it : iters) {
         xfer += elem_methods::write(protocol, *it);
       }
@@ -911,22 +925,36 @@ struct protocol_methods<type_class::map<KeyClass, MappedClass>, Type> {
     xfer += protocol.writeMapBegin(
         key_ttype::value,
         mapped_ttype::value,
-        checked_container_size(out.size()));
+        checked_container_size(out.size()),
+        std::is_same_v<KeyClass, type_class::string> ||
+            std::is_same_v<KeyClass, type_class::enumeration>);
 
-    if (!folly::is_detected_v<detect_key_compare, Type> &&
-        protocol.keyOrder() != KeyOrder::Unspecified) {
+    constexpr bool kContainerIsOrdered =
+        folly::is_detected_v<detect_key_compare, Type>;
+    constexpr KeyOrder kKeyOrder = Protocol::keyOrder();
+    constexpr bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
+        (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
+
+    if constexpr (kShouldSort) {
+      using Tag = type_class::to_type_tag_t<KeyClass, key_type>;
       std::vector<typename U::const_iterator> iters;
       iters.reserve(out.size());
       for (auto it = out.begin(); it != out.end(); ++it) {
         iters.push_back(it);
       }
-      std::sort(iters.begin(), iters.end(), [](auto a, auto b) {
-        return (*a).first < (*b).first;
-      });
+      auto compare = [](auto a, auto b) {
+        if constexpr (kKeyOrder == KeyOrder::StableAscending) {
+          return ::apache::thrift::op::detail::StableLessThan<Tag>{}(
+              a->first, b->first);
+        } else {
+          return a->first < b->first;
+        }
+      };
+      std::sort(iters.begin(), iters.end(), compare);
       for (auto it : iters) {
         xfer += writeMapValueBegin(protocol);
-        xfer += key_methods::write(protocol, (*it).first);
-        xfer += mapped_methods::write(protocol, (*it).second);
+        xfer += key_methods::write(protocol, it->first);
+        xfer += mapped_methods::write(protocol, it->second);
         xfer += writeMapValueEnd(protocol);
       }
     } else {

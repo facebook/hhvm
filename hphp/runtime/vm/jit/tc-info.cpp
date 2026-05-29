@@ -190,19 +190,19 @@ std::vector<UsageInfo> getUsageInfo() {
   tcUsageInfo.emplace_back(UsageInfo{
     "RDS",
     rds::usedBytes(),
-    Cfg::Eval::RDSSize * 3 / 4,
+    rds::capacityBytes(),
     false
   });
   tcUsageInfo.emplace_back(UsageInfo{
     "RDSLocal",
     rds::usedLocalBytes(),
-    Cfg::Eval::RDSSize * 3 / 4,
+    rds::capacityLocalBytes(),
     false
   });
   tcUsageInfo.emplace_back(UsageInfo{
     "persistentRDS",
     rds::usedPersistentBytes(),
-    Cfg::Eval::RDSSize / 4,
+    rds::capacityPersistentBytes(),
     false
   });
   return tcUsageInfo;
@@ -264,20 +264,16 @@ std::vector<TCMemInfo> getTCMemoryUsage() {
 }
 
 std::string getRDSUsageJSON() {
-  auto const normalCap = Cfg::Eval::RDSSize * 3 / 4;
-  auto const localCap = normalCap;
-  auto const persistentCap = Cfg::Eval::RDSSize / 4;
-
   folly::dynamic summary = folly::dynamic::object
     ("normal", folly::dynamic::object
       ("used", rds::usedBytes())
-      ("capacity", normalCap))
+      ("capacity", rds::capacityBytes()))
     ("local", folly::dynamic::object
       ("used", rds::usedLocalBytes())
-      ("capacity", localCap))
+      ("capacity", rds::capacityLocalBytes()))
     ("persistent", folly::dynamic::object
       ("used", rds::usedPersistentBytes())
-      ("capacity", persistentCap));
+      ("capacity", rds::capacityPersistentBytes()));
 
   auto const categories = rds::usageByCategory();
   folly::dynamic catArray = folly::dynamic::array;

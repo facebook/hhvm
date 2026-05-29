@@ -26,96 +26,96 @@ import com.facebook.thrift.metadata.ThriftType;
 
 public class DbMixedStackArgumentsThriftMetadataHandler implements com.facebook.thrift.server.ThriftMetadataHandler {
 
-  private static void addFunctions_0(List<ThriftFunction> functions) {
-        {
-          List<ThriftField> args = new ArrayList<>();
-          args.add(new ThriftField.Builder()
-              .setId(1)
-              .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
-              .setName("key")
-              .setIsOptional(false)
-              .build());
+    private static void addFunctions_0(List<ThriftFunction> functions) {
+            {
+              List<ThriftField> args = new ArrayList<>();
+              args.add(new ThriftField.Builder()
+                  .setId(1)
+                  .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
+                  .setName("key")
+                  .setIsOptional(false)
+                  .build());
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("getDataByKey0")
-              .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BINARY_TYPE))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-        {
-          List<ThriftField> args = new ArrayList<>();
-          args.add(new ThriftField.Builder()
-              .setId(1)
-              .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
-              .setName("key")
-              .setIsOptional(false)
-              .build());
+              functions.add(new ThriftFunction.Builder()
+                  .setName("getDataByKey0")
+                  .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BINARY_TYPE))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+            {
+              List<ThriftField> args = new ArrayList<>();
+              args.add(new ThriftField.Builder()
+                  .setId(1)
+                  .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
+                  .setName("key")
+                  .setIsOptional(false)
+                  .build());
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("getDataByKey1")
-              .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BINARY_TYPE))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-  }
+              functions.add(new ThriftFunction.Builder()
+                  .setName("getDataByKey1")
+                  .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BINARY_TYPE))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+    }
 
-  private static final ThriftService THRIFT_SERVICE;
+    private static final ThriftService THRIFT_SERVICE;
 
 
-  static {
-    List<ThriftFunction> functions = new ArrayList<>();
-    addFunctions_0(functions);
-    THRIFT_SERVICE = new ThriftService.Builder()
-        .setName("test.fixtures.basic.DbMixedStackArguments")
-        .setFunctions(functions)
-        .build();
-  }
+    static {
+        List<ThriftFunction> functions = new ArrayList<>();
+        addFunctions_0(functions);
+        THRIFT_SERVICE = new ThriftService.Builder()
+            .setName("test.fixtures.basic.DbMixedStackArguments")
+            .setFunctions(functions)
+            .build();
+    }
 
-  @Override
-  public String getName() {
-    return "DbMixedStackArguments";
-  }
+    @Override
+    public String getName() {
+        return "DbMixedStackArguments";
+    }
 
-  @Override
-  public String getFullyQualifiedName() {
-    return "test.fixtures.basic.DbMixedStackArguments";
-  }
+    @Override
+    public String getFullyQualifiedName() {
+        return "test.fixtures.basic.DbMixedStackArguments";
+    }
 
-  @Override
-  public ThriftService getThriftService() {
-    return THRIFT_SERVICE;
-  }
+    @Override
+    public ThriftService getThriftService() {
+        return THRIFT_SERVICE;
+    }
 
-  @Override
-  public String getParentServiceName() {
-    return null;
-  }
+    @Override
+    public String getParentServiceName() {
+        return null;
+    }
 
-  @Override
-  public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
-    return null;
-  }
+    @Override
+    public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
+        return null;
+    }
 
-  @Override
-  public Map<String, ThriftEnum> getEnums() {
-    return DbMixedStackArgumentsThriftMetadataHandlerEnums.getEnums();
-  }
+    @Override
+    public Map<String, ThriftEnum> getEnums() {
+        return DbMixedStackArgumentsThriftMetadataHandlerEnums.getEnums();
+    }
 
-  @Override
-  public Map<String, ThriftStruct> getStructs() {
-    return DbMixedStackArgumentsThriftMetadataHandlerStructs.getStructs();
-  }
+    @Override
+    public Map<String, ThriftStruct> getStructs() {
+        return DbMixedStackArgumentsThriftMetadataHandlerStructs.getStructs();
+    }
 
-  @Override
-  public Map<String, ThriftException> getExceptions() {
-    return DbMixedStackArgumentsThriftMetadataHandlerExceptions.getExceptions();
-  }
+    @Override
+    public Map<String, ThriftException> getExceptions() {
+        return DbMixedStackArgumentsThriftMetadataHandlerExceptions.getExceptions();
+    }
 }

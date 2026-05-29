@@ -20,8 +20,8 @@
 {{! Render a function's return type, and possible sink/stream types }}
 {{#let partial return_type |function| captures |m_partials|}}
   {{#if (not function.sink_or_stream?)}}
-{{#partial m_partials.type t=function.return_type}}{{!
-}}{{#else if function.sink?}}{
+{{#partial m_partials.type t=function.return_type}}
+{{~ #else if function.sink?}}{
     {{#let sink = function.sink}}
   "type" : "sink",
   "inner_type" : {{#partial m_partials.type t=sink.elem_type}},
@@ -29,16 +29,16 @@
   "first_response_type" : {{#partial m_partials.type t=function.return_type}},
     {{/if function.sink_has_first_response?}}
   "final_response_type" : {{#partial m_partials.type t=sink.final_response_type}}
-}{{!
-}}{{#else if function.stream?}}{
+}
+{{~ #else if function.stream?}}{
     {{#let stream = function.stream}}
   "type" : "streamresponse",
-  "inner_type" : {{#partial m_partials.type t=stream.elem_type}}{{!
-  }}{{#if function.stream_has_first_response?}},
+  "inner_type" : {{#partial m_partials.type t=stream.elem_type}}
+    {{~ #if function.stream_has_first_response?}},
   "first_response_type" : {{#partial m_partials.type t=function.return_type}}
     {{/if function.stream_has_first_response?}}
-}{{/if (not function.sink_or_stream?)}}{{!
-}}{{/let partial}}
+}{{/if (not function.sink_or_stream?)}}
+{{~ /let partial}}
 
 {{#let export partial render_service |service trailing_comma?| captures |m_partials return_type|}}
 {{#let parent = service.extends}}
@@ -97,8 +97,8 @@
           "{{except.name}}" : {
             "name": "{{except.name}}",
             "type" : {{#partial m_partials.type t=except.type}},
-            "id" : {{except.id}}{{!
-            }}{{#if (not (array.empty? except.structured_annotations))}},
+            "id" : {{except.id}}
+            {{~ #if (not (array.empty? except.structured_annotations))}},
             "structured_annotations": {
               {{#partial m_partials.structured_annotations annotations=except.structured_annotations}}
             }{{/if (not (array.empty? except.structured_annotations))}}
@@ -107,8 +107,8 @@
         },
         {{/if function.exceptions?}}
         "returnType" : {{#partial return_type function=function}},
-        "lineno" : {{function.lineno}}{{!
-        }}{{#if (not (array.empty? function.structured_annotations))}},
+        "lineno" : {{function.lineno}}
+        {{~ #if (not (array.empty? function.structured_annotations))}},
         "structured_annotations": {
           {{#partial m_partials.structured_annotations annotations=function.structured_annotations}}
         }{{/if (not (array.empty? function.structured_annotations))}}

@@ -118,11 +118,11 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(MyStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -162,189 +162,189 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
 
         public long getMyIntField() { return myIntField; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
             this.myStringField = myStringField;
             return this;
         }
 
         public String getMyStringField() { return myStringField; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)    public Builder setMyDataField(test.fixtures.complex_struct.MyDataItem myDataField) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)    public Builder setMyDataField(test.fixtures.complex_struct.MyDataItem myDataField) {
             this.myDataField = myDataField;
             return this;
         }
 
         public test.fixtures.complex_struct.MyDataItem getMyDataField() { return myDataField; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="myEnum", requiredness=Requiredness.NONE)    public Builder setMyEnum(test.fixtures.complex_struct.MyEnum myEnum) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="myEnum", requiredness=Requiredness.NONE)    public Builder setMyEnum(test.fixtures.complex_struct.MyEnum myEnum) {
             this.myEnum = myEnum;
             return this;
         }
 
         public test.fixtures.complex_struct.MyEnum getMyEnum() { return myEnum; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="MyBoolField", requiredness=Requiredness.NONE)    public Builder setMyBoolField(boolean myBoolField) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="MyBoolField", requiredness=Requiredness.NONE)    public Builder setMyBoolField(boolean myBoolField) {
             this.myBoolField = myBoolField;
             return this;
         }
 
         public boolean isMyBoolField() { return myBoolField; }
 
-            @com.facebook.swift.codec.ThriftField(value=6, name="MyByteField", requiredness=Requiredness.NONE)    public Builder setMyByteField(byte myByteField) {
+        @com.facebook.swift.codec.ThriftField(value=6, name="MyByteField", requiredness=Requiredness.NONE)    public Builder setMyByteField(byte myByteField) {
             this.myByteField = myByteField;
             return this;
         }
 
         public byte getMyByteField() { return myByteField; }
 
-            @com.facebook.swift.codec.ThriftField(value=7, name="MyShortField", requiredness=Requiredness.NONE)    public Builder setMyShortField(short myShortField) {
+        @com.facebook.swift.codec.ThriftField(value=7, name="MyShortField", requiredness=Requiredness.NONE)    public Builder setMyShortField(short myShortField) {
             this.myShortField = myShortField;
             return this;
         }
 
         public short getMyShortField() { return myShortField; }
 
-            @com.facebook.swift.codec.ThriftField(value=8, name="MyLongField", requiredness=Requiredness.NONE)    public Builder setMyLongField(long myLongField) {
+        @com.facebook.swift.codec.ThriftField(value=8, name="MyLongField", requiredness=Requiredness.NONE)    public Builder setMyLongField(long myLongField) {
             this.myLongField = myLongField;
             return this;
         }
 
         public long getMyLongField() { return myLongField; }
 
-            @com.facebook.swift.codec.ThriftField(value=9, name="MyDoubleField", requiredness=Requiredness.NONE)    public Builder setMyDoubleField(double myDoubleField) {
+        @com.facebook.swift.codec.ThriftField(value=9, name="MyDoubleField", requiredness=Requiredness.NONE)    public Builder setMyDoubleField(double myDoubleField) {
             this.myDoubleField = myDoubleField;
             return this;
         }
 
         public double getMyDoubleField() { return myDoubleField; }
 
-            @com.facebook.swift.codec.ThriftField(value=10, name="lDouble", requiredness=Requiredness.NONE)    public Builder setLDouble(List<Double> lDouble) {
+        @com.facebook.swift.codec.ThriftField(value=10, name="lDouble", requiredness=Requiredness.NONE)    public Builder setLDouble(List<Double> lDouble) {
             this.lDouble = lDouble;
             return this;
         }
 
         public List<Double> getLDouble() { return lDouble; }
 
-            @com.facebook.swift.codec.ThriftField(value=11, name="lShort", requiredness=Requiredness.NONE)    public Builder setLShort(List<Short> lShort) {
+        @com.facebook.swift.codec.ThriftField(value=11, name="lShort", requiredness=Requiredness.NONE)    public Builder setLShort(List<Short> lShort) {
             this.lShort = lShort;
             return this;
         }
 
         public List<Short> getLShort() { return lShort; }
 
-            @com.facebook.swift.codec.ThriftField(value=12, name="lInteger", requiredness=Requiredness.NONE)    public Builder setLInteger(List<Integer> lInteger) {
+        @com.facebook.swift.codec.ThriftField(value=12, name="lInteger", requiredness=Requiredness.NONE)    public Builder setLInteger(List<Integer> lInteger) {
             this.lInteger = lInteger;
             return this;
         }
 
         public List<Integer> getLInteger() { return lInteger; }
 
-            @com.facebook.swift.codec.ThriftField(value=13, name="lLong", requiredness=Requiredness.NONE)    public Builder setLLong(List<Long> lLong) {
+        @com.facebook.swift.codec.ThriftField(value=13, name="lLong", requiredness=Requiredness.NONE)    public Builder setLLong(List<Long> lLong) {
             this.lLong = lLong;
             return this;
         }
 
         public List<Long> getLLong() { return lLong; }
 
-            @com.facebook.swift.codec.ThriftField(value=14, name="lString", requiredness=Requiredness.NONE)    public Builder setLString(List<String> lString) {
+        @com.facebook.swift.codec.ThriftField(value=14, name="lString", requiredness=Requiredness.NONE)    public Builder setLString(List<String> lString) {
             this.lString = lString;
             return this;
         }
 
         public List<String> getLString() { return lString; }
 
-            @com.facebook.swift.codec.ThriftField(value=15, name="lBool", requiredness=Requiredness.NONE)    public Builder setLBool(List<Boolean> lBool) {
+        @com.facebook.swift.codec.ThriftField(value=15, name="lBool", requiredness=Requiredness.NONE)    public Builder setLBool(List<Boolean> lBool) {
             this.lBool = lBool;
             return this;
         }
 
         public List<Boolean> getLBool() { return lBool; }
 
-            @com.facebook.swift.codec.ThriftField(value=16, name="lByte", requiredness=Requiredness.NONE)    public Builder setLByte(List<Byte> lByte) {
+        @com.facebook.swift.codec.ThriftField(value=16, name="lByte", requiredness=Requiredness.NONE)    public Builder setLByte(List<Byte> lByte) {
             this.lByte = lByte;
             return this;
         }
 
         public List<Byte> getLByte() { return lByte; }
 
-            @com.facebook.swift.codec.ThriftField(value=17, name="mShortString", requiredness=Requiredness.NONE)    public Builder setMShortString(Map<Short, String> mShortString) {
+        @com.facebook.swift.codec.ThriftField(value=17, name="mShortString", requiredness=Requiredness.NONE)    public Builder setMShortString(Map<Short, String> mShortString) {
             this.mShortString = mShortString;
             return this;
         }
 
         public Map<Short, String> getMShortString() { return mShortString; }
 
-            @com.facebook.swift.codec.ThriftField(value=18, name="mIntegerString", requiredness=Requiredness.NONE)    public Builder setMIntegerString(Map<Integer, String> mIntegerString) {
+        @com.facebook.swift.codec.ThriftField(value=18, name="mIntegerString", requiredness=Requiredness.NONE)    public Builder setMIntegerString(Map<Integer, String> mIntegerString) {
             this.mIntegerString = mIntegerString;
             return this;
         }
 
         public Map<Integer, String> getMIntegerString() { return mIntegerString; }
 
-            @com.facebook.swift.codec.ThriftField(value=19, name="mStringMyStruct", requiredness=Requiredness.NONE)    public Builder setMStringMyStruct(Map<String, test.fixtures.complex_struct.MyStruct> mStringMyStruct) {
+        @com.facebook.swift.codec.ThriftField(value=19, name="mStringMyStruct", requiredness=Requiredness.NONE)    public Builder setMStringMyStruct(Map<String, test.fixtures.complex_struct.MyStruct> mStringMyStruct) {
             this.mStringMyStruct = mStringMyStruct;
             return this;
         }
 
         public Map<String, test.fixtures.complex_struct.MyStruct> getMStringMyStruct() { return mStringMyStruct; }
 
-            @com.facebook.swift.codec.ThriftField(value=20, name="mStringBool", requiredness=Requiredness.NONE)    public Builder setMStringBool(Map<String, Boolean> mStringBool) {
+        @com.facebook.swift.codec.ThriftField(value=20, name="mStringBool", requiredness=Requiredness.NONE)    public Builder setMStringBool(Map<String, Boolean> mStringBool) {
             this.mStringBool = mStringBool;
             return this;
         }
 
         public Map<String, Boolean> getMStringBool() { return mStringBool; }
 
-            @com.facebook.swift.codec.ThriftField(value=21, name="mIntegerInteger", requiredness=Requiredness.NONE)    public Builder setMIntegerInteger(Map<Integer, Integer> mIntegerInteger) {
+        @com.facebook.swift.codec.ThriftField(value=21, name="mIntegerInteger", requiredness=Requiredness.NONE)    public Builder setMIntegerInteger(Map<Integer, Integer> mIntegerInteger) {
             this.mIntegerInteger = mIntegerInteger;
             return this;
         }
 
         public Map<Integer, Integer> getMIntegerInteger() { return mIntegerInteger; }
 
-            @com.facebook.swift.codec.ThriftField(value=22, name="mIntegerBool", requiredness=Requiredness.NONE)    public Builder setMIntegerBool(Map<Integer, Boolean> mIntegerBool) {
+        @com.facebook.swift.codec.ThriftField(value=22, name="mIntegerBool", requiredness=Requiredness.NONE)    public Builder setMIntegerBool(Map<Integer, Boolean> mIntegerBool) {
             this.mIntegerBool = mIntegerBool;
             return this;
         }
 
         public Map<Integer, Boolean> getMIntegerBool() { return mIntegerBool; }
 
-            @com.facebook.swift.codec.ThriftField(value=23, name="sShort", requiredness=Requiredness.NONE)    public Builder setSShort(Set<Short> sShort) {
+        @com.facebook.swift.codec.ThriftField(value=23, name="sShort", requiredness=Requiredness.NONE)    public Builder setSShort(Set<Short> sShort) {
             this.sShort = sShort;
             return this;
         }
 
         public Set<Short> getSShort() { return sShort; }
 
-            @com.facebook.swift.codec.ThriftField(value=24, name="sMyStruct", requiredness=Requiredness.NONE)    public Builder setSMyStruct(Set<test.fixtures.complex_struct.MyStruct> sMyStruct) {
+        @com.facebook.swift.codec.ThriftField(value=24, name="sMyStruct", requiredness=Requiredness.NONE)    public Builder setSMyStruct(Set<test.fixtures.complex_struct.MyStruct> sMyStruct) {
             this.sMyStruct = sMyStruct;
             return this;
         }
 
         public Set<test.fixtures.complex_struct.MyStruct> getSMyStruct() { return sMyStruct; }
 
-            @com.facebook.swift.codec.ThriftField(value=25, name="sLong", requiredness=Requiredness.NONE)    public Builder setSLong(Set<Long> sLong) {
+        @com.facebook.swift.codec.ThriftField(value=25, name="sLong", requiredness=Requiredness.NONE)    public Builder setSLong(Set<Long> sLong) {
             this.sLong = sLong;
             return this;
         }
 
         public Set<Long> getSLong() { return sLong; }
 
-            @com.facebook.swift.codec.ThriftField(value=26, name="sString", requiredness=Requiredness.NONE)    public Builder setSString(Set<String> sString) {
+        @com.facebook.swift.codec.ThriftField(value=26, name="sString", requiredness=Requiredness.NONE)    public Builder setSString(Set<String> sString) {
             this.sString = sString;
             return this;
         }
 
         public Set<String> getSString() { return sString; }
 
-            @com.facebook.swift.codec.ThriftField(value=27, name="sByte", requiredness=Requiredness.NONE)    public Builder setSByte(Set<Byte> sByte) {
+        @com.facebook.swift.codec.ThriftField(value=27, name="sByte", requiredness=Requiredness.NONE)    public Builder setSByte(Set<Byte> sByte) {
             this.sByte = sByte;
             return this;
         }
 
         public Set<Byte> getSByte() { return sByte; }
 
-            @com.facebook.swift.codec.ThriftField(value=28, name="mListList", requiredness=Requiredness.NONE)    public Builder setMListList(Map<List<Integer>, List<Integer>> mListList) {
+        @com.facebook.swift.codec.ThriftField(value=28, name="mListList", requiredness=Requiredness.NONE)    public Builder setMListList(Map<List<Integer>, List<Integer>> mListList) {
             this.mListList = mListList;
             return this;
         }
@@ -418,6 +418,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -426,309 +427,254 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     private final long myIntField;
     public static final int _MYINTFIELD = 1;
     private static final TField MY_INT_FIELD_FIELD_DESC = new TField("MyIntField", TType.I64, (short)1);
-        private final String myStringField;
+    private final String myStringField;
     public static final int _MYSTRINGFIELD = 2;
     private static final TField MY_STRING_FIELD_FIELD_DESC = new TField("MyStringField", TType.STRING, (short)2);
-        private final test.fixtures.complex_struct.MyDataItem myDataField;
+    private final test.fixtures.complex_struct.MyDataItem myDataField;
     public static final int _MYDATAFIELD = 3;
     private static final TField MY_DATA_FIELD_FIELD_DESC = new TField("MyDataField", TType.STRUCT, (short)3);
-        private final test.fixtures.complex_struct.MyEnum myEnum;
+    private final test.fixtures.complex_struct.MyEnum myEnum;
     public static final int _MYENUM = 4;
     private static final TField MY_ENUM_FIELD_DESC = new TField("myEnum", TType.I32, (short)4);
-        private final boolean myBoolField;
+    private final boolean myBoolField;
     public static final int _MYBOOLFIELD = 5;
     private static final TField MY_BOOL_FIELD_FIELD_DESC = new TField("MyBoolField", TType.BOOL, (short)5);
-        private final byte myByteField;
+    private final byte myByteField;
     public static final int _MYBYTEFIELD = 6;
     private static final TField MY_BYTE_FIELD_FIELD_DESC = new TField("MyByteField", TType.BYTE, (short)6);
-        private final short myShortField;
+    private final short myShortField;
     public static final int _MYSHORTFIELD = 7;
     private static final TField MY_SHORT_FIELD_FIELD_DESC = new TField("MyShortField", TType.I16, (short)7);
-        private final long myLongField;
+    private final long myLongField;
     public static final int _MYLONGFIELD = 8;
     private static final TField MY_LONG_FIELD_FIELD_DESC = new TField("MyLongField", TType.I64, (short)8);
-        private final double myDoubleField;
+    private final double myDoubleField;
     public static final int _MYDOUBLEFIELD = 9;
     private static final TField MY_DOUBLE_FIELD_FIELD_DESC = new TField("MyDoubleField", TType.DOUBLE, (short)9);
-        private final List<Double> lDouble;
+    private final List<Double> lDouble;
     public static final int _LDOUBLE = 10;
     private static final TField L_DOUBLE_FIELD_DESC = new TField("lDouble", TType.LIST, (short)10);
-        private final List<Short> lShort;
+    private final List<Short> lShort;
     public static final int _LSHORT = 11;
     private static final TField L_SHORT_FIELD_DESC = new TField("lShort", TType.LIST, (short)11);
-        private final List<Integer> lInteger;
+    private final List<Integer> lInteger;
     public static final int _LINTEGER = 12;
     private static final TField L_INTEGER_FIELD_DESC = new TField("lInteger", TType.LIST, (short)12);
-        private final List<Long> lLong;
+    private final List<Long> lLong;
     public static final int _LLONG = 13;
     private static final TField L_LONG_FIELD_DESC = new TField("lLong", TType.LIST, (short)13);
-        private final List<String> lString;
+    private final List<String> lString;
     public static final int _LSTRING = 14;
     private static final TField L_STRING_FIELD_DESC = new TField("lString", TType.LIST, (short)14);
-        private final List<Boolean> lBool;
+    private final List<Boolean> lBool;
     public static final int _LBOOL = 15;
     private static final TField L_BOOL_FIELD_DESC = new TField("lBool", TType.LIST, (short)15);
-        private final List<Byte> lByte;
+    private final List<Byte> lByte;
     public static final int _LBYTE = 16;
     private static final TField L_BYTE_FIELD_DESC = new TField("lByte", TType.LIST, (short)16);
-        private final Map<Short, String> mShortString;
+    private final Map<Short, String> mShortString;
     public static final int _MSHORTSTRING = 17;
     private static final TField M_SHORT_STRING_FIELD_DESC = new TField("mShortString", TType.MAP, (short)17);
-        private final Map<Integer, String> mIntegerString;
+    private final Map<Integer, String> mIntegerString;
     public static final int _MINTEGERSTRING = 18;
     private static final TField M_INTEGER_STRING_FIELD_DESC = new TField("mIntegerString", TType.MAP, (short)18);
-        private final Map<String, test.fixtures.complex_struct.MyStruct> mStringMyStruct;
+    private final Map<String, test.fixtures.complex_struct.MyStruct> mStringMyStruct;
     public static final int _MSTRINGMYSTRUCT = 19;
     private static final TField M_STRING_MY_STRUCT_FIELD_DESC = new TField("mStringMyStruct", TType.MAP, (short)19);
-        private final Map<String, Boolean> mStringBool;
+    private final Map<String, Boolean> mStringBool;
     public static final int _MSTRINGBOOL = 20;
     private static final TField M_STRING_BOOL_FIELD_DESC = new TField("mStringBool", TType.MAP, (short)20);
-        private final Map<Integer, Integer> mIntegerInteger;
+    private final Map<Integer, Integer> mIntegerInteger;
     public static final int _MINTEGERINTEGER = 21;
     private static final TField M_INTEGER_INTEGER_FIELD_DESC = new TField("mIntegerInteger", TType.MAP, (short)21);
-        private final Map<Integer, Boolean> mIntegerBool;
+    private final Map<Integer, Boolean> mIntegerBool;
     public static final int _MINTEGERBOOL = 22;
     private static final TField M_INTEGER_BOOL_FIELD_DESC = new TField("mIntegerBool", TType.MAP, (short)22);
-        private final Set<Short> sShort;
+    private final Set<Short> sShort;
     public static final int _SSHORT = 23;
     private static final TField S_SHORT_FIELD_DESC = new TField("sShort", TType.SET, (short)23);
-        private final Set<test.fixtures.complex_struct.MyStruct> sMyStruct;
+    private final Set<test.fixtures.complex_struct.MyStruct> sMyStruct;
     public static final int _SMYSTRUCT = 24;
     private static final TField S_MY_STRUCT_FIELD_DESC = new TField("sMyStruct", TType.SET, (short)24);
-        private final Set<Long> sLong;
+    private final Set<Long> sLong;
     public static final int _SLONG = 25;
     private static final TField S_LONG_FIELD_DESC = new TField("sLong", TType.SET, (short)25);
-        private final Set<String> sString;
+    private final Set<String> sString;
     public static final int _SSTRING = 26;
     private static final TField S_STRING_FIELD_DESC = new TField("sString", TType.SET, (short)26);
-        private final Set<Byte> sByte;
+    private final Set<Byte> sByte;
     public static final int _SBYTE = 27;
     private static final TField S_BYTE_FIELD_DESC = new TField("sByte", TType.SET, (short)27);
-        private final Map<List<Integer>, List<Integer>> mListList;
+    private final Map<List<Integer>, List<Integer>> mListList;
     public static final int _MLISTLIST = 28;
     private static final TField M_LIST_LIST_FIELD_DESC = new TField("mListList", TType.MAP, (short)28);
     static {
-      NAMES_TO_IDS.put("myIntField", 1);
-      THRIFT_NAMES_TO_IDS.put("MyIntField", 1);
-      FIELD_METADATA.put(1, MY_INT_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myStringField", 2);
-      THRIFT_NAMES_TO_IDS.put("MyStringField", 2);
-      FIELD_METADATA.put(2, MY_STRING_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myDataField", 3);
-      THRIFT_NAMES_TO_IDS.put("MyDataField", 3);
-      FIELD_METADATA.put(3, MY_DATA_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myEnum", 4);
-      THRIFT_NAMES_TO_IDS.put("myEnum", 4);
-      FIELD_METADATA.put(4, MY_ENUM_FIELD_DESC);
-      NAMES_TO_IDS.put("myBoolField", 5);
-      THRIFT_NAMES_TO_IDS.put("MyBoolField", 5);
-      FIELD_METADATA.put(5, MY_BOOL_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myByteField", 6);
-      THRIFT_NAMES_TO_IDS.put("MyByteField", 6);
-      FIELD_METADATA.put(6, MY_BYTE_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myShortField", 7);
-      THRIFT_NAMES_TO_IDS.put("MyShortField", 7);
-      FIELD_METADATA.put(7, MY_SHORT_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myLongField", 8);
-      THRIFT_NAMES_TO_IDS.put("MyLongField", 8);
-      FIELD_METADATA.put(8, MY_LONG_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myDoubleField", 9);
-      THRIFT_NAMES_TO_IDS.put("MyDoubleField", 9);
-      FIELD_METADATA.put(9, MY_DOUBLE_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("lDouble", 10);
-      THRIFT_NAMES_TO_IDS.put("lDouble", 10);
-      FIELD_METADATA.put(10, L_DOUBLE_FIELD_DESC);
-      NAMES_TO_IDS.put("lShort", 11);
-      THRIFT_NAMES_TO_IDS.put("lShort", 11);
-      FIELD_METADATA.put(11, L_SHORT_FIELD_DESC);
-      NAMES_TO_IDS.put("lInteger", 12);
-      THRIFT_NAMES_TO_IDS.put("lInteger", 12);
-      FIELD_METADATA.put(12, L_INTEGER_FIELD_DESC);
-      NAMES_TO_IDS.put("lLong", 13);
-      THRIFT_NAMES_TO_IDS.put("lLong", 13);
-      FIELD_METADATA.put(13, L_LONG_FIELD_DESC);
-      NAMES_TO_IDS.put("lString", 14);
-      THRIFT_NAMES_TO_IDS.put("lString", 14);
-      FIELD_METADATA.put(14, L_STRING_FIELD_DESC);
-      NAMES_TO_IDS.put("lBool", 15);
-      THRIFT_NAMES_TO_IDS.put("lBool", 15);
-      FIELD_METADATA.put(15, L_BOOL_FIELD_DESC);
-      NAMES_TO_IDS.put("lByte", 16);
-      THRIFT_NAMES_TO_IDS.put("lByte", 16);
-      FIELD_METADATA.put(16, L_BYTE_FIELD_DESC);
-      NAMES_TO_IDS.put("mShortString", 17);
-      THRIFT_NAMES_TO_IDS.put("mShortString", 17);
-      FIELD_METADATA.put(17, M_SHORT_STRING_FIELD_DESC);
-      NAMES_TO_IDS.put("mIntegerString", 18);
-      THRIFT_NAMES_TO_IDS.put("mIntegerString", 18);
-      FIELD_METADATA.put(18, M_INTEGER_STRING_FIELD_DESC);
-      NAMES_TO_IDS.put("mStringMyStruct", 19);
-      THRIFT_NAMES_TO_IDS.put("mStringMyStruct", 19);
-      FIELD_METADATA.put(19, M_STRING_MY_STRUCT_FIELD_DESC);
-      NAMES_TO_IDS.put("mStringBool", 20);
-      THRIFT_NAMES_TO_IDS.put("mStringBool", 20);
-      FIELD_METADATA.put(20, M_STRING_BOOL_FIELD_DESC);
-      NAMES_TO_IDS.put("mIntegerInteger", 21);
-      THRIFT_NAMES_TO_IDS.put("mIntegerInteger", 21);
-      FIELD_METADATA.put(21, M_INTEGER_INTEGER_FIELD_DESC);
-      NAMES_TO_IDS.put("mIntegerBool", 22);
-      THRIFT_NAMES_TO_IDS.put("mIntegerBool", 22);
-      FIELD_METADATA.put(22, M_INTEGER_BOOL_FIELD_DESC);
-      NAMES_TO_IDS.put("sShort", 23);
-      THRIFT_NAMES_TO_IDS.put("sShort", 23);
-      FIELD_METADATA.put(23, S_SHORT_FIELD_DESC);
-      NAMES_TO_IDS.put("sMyStruct", 24);
-      THRIFT_NAMES_TO_IDS.put("sMyStruct", 24);
-      FIELD_METADATA.put(24, S_MY_STRUCT_FIELD_DESC);
-      NAMES_TO_IDS.put("sLong", 25);
-      THRIFT_NAMES_TO_IDS.put("sLong", 25);
-      FIELD_METADATA.put(25, S_LONG_FIELD_DESC);
-      NAMES_TO_IDS.put("sString", 26);
-      THRIFT_NAMES_TO_IDS.put("sString", 26);
-      FIELD_METADATA.put(26, S_STRING_FIELD_DESC);
-      NAMES_TO_IDS.put("sByte", 27);
-      THRIFT_NAMES_TO_IDS.put("sByte", 27);
-      FIELD_METADATA.put(27, S_BYTE_FIELD_DESC);
-      NAMES_TO_IDS.put("mListList", 28);
-      THRIFT_NAMES_TO_IDS.put("mListList", 28);
-      FIELD_METADATA.put(28, M_LIST_LIST_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField", 1);
+        THRIFT_NAMES_TO_IDS.put("MyIntField", 1);
+        FIELD_METADATA.put(1, MY_INT_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myStringField", 2);
+        THRIFT_NAMES_TO_IDS.put("MyStringField", 2);
+        FIELD_METADATA.put(2, MY_STRING_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myDataField", 3);
+        THRIFT_NAMES_TO_IDS.put("MyDataField", 3);
+        FIELD_METADATA.put(3, MY_DATA_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myEnum", 4);
+        THRIFT_NAMES_TO_IDS.put("myEnum", 4);
+        FIELD_METADATA.put(4, MY_ENUM_FIELD_DESC);
+        NAMES_TO_IDS.put("myBoolField", 5);
+        THRIFT_NAMES_TO_IDS.put("MyBoolField", 5);
+        FIELD_METADATA.put(5, MY_BOOL_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myByteField", 6);
+        THRIFT_NAMES_TO_IDS.put("MyByteField", 6);
+        FIELD_METADATA.put(6, MY_BYTE_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myShortField", 7);
+        THRIFT_NAMES_TO_IDS.put("MyShortField", 7);
+        FIELD_METADATA.put(7, MY_SHORT_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myLongField", 8);
+        THRIFT_NAMES_TO_IDS.put("MyLongField", 8);
+        FIELD_METADATA.put(8, MY_LONG_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myDoubleField", 9);
+        THRIFT_NAMES_TO_IDS.put("MyDoubleField", 9);
+        FIELD_METADATA.put(9, MY_DOUBLE_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("lDouble", 10);
+        THRIFT_NAMES_TO_IDS.put("lDouble", 10);
+        FIELD_METADATA.put(10, L_DOUBLE_FIELD_DESC);
+        NAMES_TO_IDS.put("lShort", 11);
+        THRIFT_NAMES_TO_IDS.put("lShort", 11);
+        FIELD_METADATA.put(11, L_SHORT_FIELD_DESC);
+        NAMES_TO_IDS.put("lInteger", 12);
+        THRIFT_NAMES_TO_IDS.put("lInteger", 12);
+        FIELD_METADATA.put(12, L_INTEGER_FIELD_DESC);
+        NAMES_TO_IDS.put("lLong", 13);
+        THRIFT_NAMES_TO_IDS.put("lLong", 13);
+        FIELD_METADATA.put(13, L_LONG_FIELD_DESC);
+        NAMES_TO_IDS.put("lString", 14);
+        THRIFT_NAMES_TO_IDS.put("lString", 14);
+        FIELD_METADATA.put(14, L_STRING_FIELD_DESC);
+        NAMES_TO_IDS.put("lBool", 15);
+        THRIFT_NAMES_TO_IDS.put("lBool", 15);
+        FIELD_METADATA.put(15, L_BOOL_FIELD_DESC);
+        NAMES_TO_IDS.put("lByte", 16);
+        THRIFT_NAMES_TO_IDS.put("lByte", 16);
+        FIELD_METADATA.put(16, L_BYTE_FIELD_DESC);
+        NAMES_TO_IDS.put("mShortString", 17);
+        THRIFT_NAMES_TO_IDS.put("mShortString", 17);
+        FIELD_METADATA.put(17, M_SHORT_STRING_FIELD_DESC);
+        NAMES_TO_IDS.put("mIntegerString", 18);
+        THRIFT_NAMES_TO_IDS.put("mIntegerString", 18);
+        FIELD_METADATA.put(18, M_INTEGER_STRING_FIELD_DESC);
+        NAMES_TO_IDS.put("mStringMyStruct", 19);
+        THRIFT_NAMES_TO_IDS.put("mStringMyStruct", 19);
+        FIELD_METADATA.put(19, M_STRING_MY_STRUCT_FIELD_DESC);
+        NAMES_TO_IDS.put("mStringBool", 20);
+        THRIFT_NAMES_TO_IDS.put("mStringBool", 20);
+        FIELD_METADATA.put(20, M_STRING_BOOL_FIELD_DESC);
+        NAMES_TO_IDS.put("mIntegerInteger", 21);
+        THRIFT_NAMES_TO_IDS.put("mIntegerInteger", 21);
+        FIELD_METADATA.put(21, M_INTEGER_INTEGER_FIELD_DESC);
+        NAMES_TO_IDS.put("mIntegerBool", 22);
+        THRIFT_NAMES_TO_IDS.put("mIntegerBool", 22);
+        FIELD_METADATA.put(22, M_INTEGER_BOOL_FIELD_DESC);
+        NAMES_TO_IDS.put("sShort", 23);
+        THRIFT_NAMES_TO_IDS.put("sShort", 23);
+        FIELD_METADATA.put(23, S_SHORT_FIELD_DESC);
+        NAMES_TO_IDS.put("sMyStruct", 24);
+        THRIFT_NAMES_TO_IDS.put("sMyStruct", 24);
+        FIELD_METADATA.put(24, S_MY_STRUCT_FIELD_DESC);
+        NAMES_TO_IDS.put("sLong", 25);
+        THRIFT_NAMES_TO_IDS.put("sLong", 25);
+        FIELD_METADATA.put(25, S_LONG_FIELD_DESC);
+        NAMES_TO_IDS.put("sString", 26);
+        THRIFT_NAMES_TO_IDS.put("sString", 26);
+        FIELD_METADATA.put(26, S_STRING_FIELD_DESC);
+        NAMES_TO_IDS.put("sByte", 27);
+        THRIFT_NAMES_TO_IDS.put("sByte", 27);
+        FIELD_METADATA.put(27, S_BYTE_FIELD_DESC);
+        NAMES_TO_IDS.put("mListList", 28);
+        THRIFT_NAMES_TO_IDS.put("mListList", 28);
+        FIELD_METADATA.put(28, M_LIST_LIST_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
     public long getMyIntField() { return myIntField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)
     public String getMyStringField() { return myStringField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)
     public test.fixtures.complex_struct.MyDataItem getMyDataField() { return myDataField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="myEnum", requiredness=Requiredness.NONE)
     public test.fixtures.complex_struct.MyEnum getMyEnum() { return myEnum; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=5, name="MyBoolField", requiredness=Requiredness.NONE)
     public boolean isMyBoolField() { return myBoolField; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=6, name="MyByteField", requiredness=Requiredness.NONE)
     public byte getMyByteField() { return myByteField; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=7, name="MyShortField", requiredness=Requiredness.NONE)
     public short getMyShortField() { return myShortField; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=8, name="MyLongField", requiredness=Requiredness.NONE)
     public long getMyLongField() { return myLongField; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=9, name="MyDoubleField", requiredness=Requiredness.NONE)
     public double getMyDoubleField() { return myDoubleField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=10, name="lDouble", requiredness=Requiredness.NONE)
     public List<Double> getLDouble() { return lDouble; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=11, name="lShort", requiredness=Requiredness.NONE)
     public List<Short> getLShort() { return lShort; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=12, name="lInteger", requiredness=Requiredness.NONE)
     public List<Integer> getLInteger() { return lInteger; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=13, name="lLong", requiredness=Requiredness.NONE)
     public List<Long> getLLong() { return lLong; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=14, name="lString", requiredness=Requiredness.NONE)
     public List<String> getLString() { return lString; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=15, name="lBool", requiredness=Requiredness.NONE)
     public List<Boolean> getLBool() { return lBool; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=16, name="lByte", requiredness=Requiredness.NONE)
     public List<Byte> getLByte() { return lByte; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=17, name="mShortString", requiredness=Requiredness.NONE)
     public Map<Short, String> getMShortString() { return mShortString; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=18, name="mIntegerString", requiredness=Requiredness.NONE)
     public Map<Integer, String> getMIntegerString() { return mIntegerString; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=19, name="mStringMyStruct", requiredness=Requiredness.NONE)
     public Map<String, test.fixtures.complex_struct.MyStruct> getMStringMyStruct() { return mStringMyStruct; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=20, name="mStringBool", requiredness=Requiredness.NONE)
     public Map<String, Boolean> getMStringBool() { return mStringBool; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=21, name="mIntegerInteger", requiredness=Requiredness.NONE)
     public Map<Integer, Integer> getMIntegerInteger() { return mIntegerInteger; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=22, name="mIntegerBool", requiredness=Requiredness.NONE)
     public Map<Integer, Boolean> getMIntegerBool() { return mIntegerBool; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=23, name="sShort", requiredness=Requiredness.NONE)
     public Set<Short> getSShort() { return sShort; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=24, name="sMyStruct", requiredness=Requiredness.NONE)
     public Set<test.fixtures.complex_struct.MyStruct> getSMyStruct() { return sMyStruct; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=25, name="sLong", requiredness=Requiredness.NONE)
     public Set<Long> getSLong() { return sLong; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=26, name="sString", requiredness=Requiredness.NONE)
     public Set<String> getSString() { return sString; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=27, name="sByte", requiredness=Requiredness.NONE)
     public Set<Byte> getSByte() { return sByte; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=28, name="mListList", requiredness=Requiredness.NONE)
     public Map<List<Integer>, List<Integer>> getMListList() { return mListList; }
@@ -814,851 +760,923 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(myIntField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myStringField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myDataField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myEnum);
-            _hashCode = 31 * _hashCode + Boolean.hashCode(myBoolField);
-            _hashCode = 31 * _hashCode + Byte.hashCode(myByteField);
-            _hashCode = 31 * _hashCode + Short.hashCode(myShortField);
-            _hashCode = 31 * _hashCode + Long.hashCode(myLongField);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(lDouble);
-            _hashCode = 31 * _hashCode + Objects.hashCode(lShort);
-            _hashCode = 31 * _hashCode + Objects.hashCode(lInteger);
-            _hashCode = 31 * _hashCode + Objects.hashCode(lLong);
-            _hashCode = 31 * _hashCode + Objects.hashCode(lString);
-            _hashCode = 31 * _hashCode + Objects.hashCode(lBool);
-            _hashCode = 31 * _hashCode + Objects.hashCode(lByte);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mShortString);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mIntegerString);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mStringMyStruct);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mStringBool);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mIntegerInteger);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mIntegerBool);
-            _hashCode = 31 * _hashCode + Objects.hashCode(sShort);
-            _hashCode = 31 * _hashCode + Objects.hashCode(sMyStruct);
-            _hashCode = 31 * _hashCode + Objects.hashCode(sLong);
-            _hashCode = 31 * _hashCode + Objects.hashCode(sString);
-            _hashCode = 31 * _hashCode + Objects.hashCode(sByte);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mListList);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(myStringField);
+        _hashCode = 31 * _hashCode + Objects.hashCode(myDataField);
+        _hashCode = 31 * _hashCode + Objects.hashCode(myEnum);
+        _hashCode = 31 * _hashCode + Boolean.hashCode(myBoolField);
+        _hashCode = 31 * _hashCode + Byte.hashCode(myByteField);
+        _hashCode = 31 * _hashCode + Short.hashCode(myShortField);
+        _hashCode = 31 * _hashCode + Long.hashCode(myLongField);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDoubleField);
+        _hashCode = 31 * _hashCode + Objects.hashCode(lDouble);
+        _hashCode = 31 * _hashCode + Objects.hashCode(lShort);
+        _hashCode = 31 * _hashCode + Objects.hashCode(lInteger);
+        _hashCode = 31 * _hashCode + Objects.hashCode(lLong);
+        _hashCode = 31 * _hashCode + Objects.hashCode(lString);
+        _hashCode = 31 * _hashCode + Objects.hashCode(lBool);
+        _hashCode = 31 * _hashCode + Objects.hashCode(lByte);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mShortString);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mIntegerString);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mStringMyStruct);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mStringBool);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mIntegerInteger);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mIntegerBool);
+        _hashCode = 31 * _hashCode + Objects.hashCode(sShort);
+        _hashCode = 31 * _hashCode + Objects.hashCode(sMyStruct);
+        _hashCode = 31 * _hashCode + Objects.hashCode(sLong);
+        _hashCode = 31 * _hashCode + Objects.hashCode(sString);
+        _hashCode = 31 * _hashCode + Objects.hashCode(sByte);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mListList);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyStruct> asReader() {
       return MyStruct::read0;
     }
 
     public static MyStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
-      MyStruct.Builder builder = new MyStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MYINTFIELD:
-          if (__field.type == TType.I64) {
-            long myIntField = oprot.readI64();
-            builder.setMyIntField(myIntField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYSTRINGFIELD:
-          if (__field.type == TType.STRING) {
-            String myStringField = oprot.readString();
-            builder.setMyStringField(myStringField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDATAFIELD:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.complex_struct.MyDataItem myDataField = test.fixtures.complex_struct.MyDataItem.read0(oprot);
-            builder.setMyDataField(myDataField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYENUM:
-          if (__field.type == TType.I32) {
-            test.fixtures.complex_struct.MyEnum myEnum = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
-            builder.setMyEnum(myEnum);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYBOOLFIELD:
-          if (__field.type == TType.BOOL) {
-            boolean myBoolField = oprot.readBool();
-            builder.setMyBoolField(myBoolField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYBYTEFIELD:
-          if (__field.type == TType.BYTE) {
-            byte myByteField = oprot.readByte();
-            builder.setMyByteField(myByteField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYSHORTFIELD:
-          if (__field.type == TType.I16) {
-            short myShortField = oprot.readI16();
-            builder.setMyShortField(myShortField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYLONGFIELD:
-          if (__field.type == TType.I64) {
-            long myLongField = oprot.readI64();
-            builder.setMyLongField(myLongField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLEFIELD:
-          if (__field.type == TType.DOUBLE) {
-            double myDoubleField = oprot.readDouble();
-            builder.setMyDoubleField(myDoubleField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LDOUBLE:
-          if (__field.type == TType.LIST) {
-            List<Double> lDouble;
-                {
-                TList _list = oprot.readListBegin();
-                lDouble = new ArrayList<Double>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    double _value1 = oprot.readDouble();
-                    lDouble.add(_value1);
+        TField __field;
+        oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
+        MyStruct.Builder builder = new MyStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MYINTFIELD:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMyIntField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _MYSTRINGFIELD:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMyStringField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setLDouble(lDouble);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LSHORT:
-          if (__field.type == TType.LIST) {
-            List<Short> lShort;
-                {
-                TList _list = oprot.readListBegin();
-                lShort = new ArrayList<Short>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    short _value1 = oprot.readI16();
-                    lShort.add(_value1);
+                break;
+            case _MYDATAFIELD:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.complex_struct.MyDataItem _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.complex_struct.MyDataItem.read0(oprot);
+                    builder.setMyDataField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _MYENUM:
+                if (__field.type == TType.I32) {
+                    test.fixtures.complex_struct.MyEnum _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
+                    builder.setMyEnum(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setLShort(lShort);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LINTEGER:
-          if (__field.type == TType.LIST) {
-            List<Integer> lInteger;
-                {
-                TList _list = oprot.readListBegin();
-                lInteger = new ArrayList<Integer>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    int _value1 = oprot.readI32();
-                    lInteger.add(_value1);
+                break;
+            case _MYBOOLFIELD:
+                if (__field.type == TType.BOOL) {
+                    boolean _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBool();
+                    builder.setMyBoolField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _MYBYTEFIELD:
+                if (__field.type == TType.BYTE) {
+                    byte _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readByte();
+                    builder.setMyByteField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setLInteger(lInteger);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LLONG:
-          if (__field.type == TType.LIST) {
-            List<Long> lLong;
-                {
-                TList _list = oprot.readListBegin();
-                lLong = new ArrayList<Long>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    long _value1 = oprot.readI64();
-                    lLong.add(_value1);
+                break;
+            case _MYSHORTFIELD:
+                if (__field.type == TType.I16) {
+                    short _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI16();
+                    builder.setMyShortField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _MYLONGFIELD:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMyLongField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setLLong(lLong);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LSTRING:
-          if (__field.type == TType.LIST) {
-            List<String> lString;
-                {
-                TList _list = oprot.readListBegin();
-                lString = new ArrayList<String>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    String _value1 = oprot.readString();
-                    lString.add(_value1);
+                break;
+            case _MYDOUBLEFIELD:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDoubleField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
-                }
-            builder.setLString(lString);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LBOOL:
-          if (__field.type == TType.LIST) {
-            List<Boolean> lBool;
-                {
-                TList _list = oprot.readListBegin();
-                lBool = new ArrayList<Boolean>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    boolean _value1 = oprot.readBool();
-                    lBool.add(_value1);
-                }
-                oprot.readListEnd();
-                }
-            builder.setLBool(lBool);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LBYTE:
-          if (__field.type == TType.LIST) {
-            List<Byte> lByte;
-                {
-                TList _list = oprot.readListBegin();
-                lByte = new ArrayList<Byte>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    byte _value1 = oprot.readByte();
-                    lByte.add(_value1);
-                }
-                oprot.readListEnd();
-                }
-            builder.setLByte(lByte);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MSHORTSTRING:
-          if (__field.type == TType.MAP) {
-            Map<Short, String> mShortString;
-                {
-                TMap _map = oprot.readMapBegin();
-                mShortString = new HashMap<Short, String>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    short _key1 = oprot.readI16();
-                    String _value1 = oprot.readString();
-                    mShortString.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setMShortString(mShortString);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MINTEGERSTRING:
-          if (__field.type == TType.MAP) {
-            Map<Integer, String> mIntegerString;
-                {
-                TMap _map = oprot.readMapBegin();
-                mIntegerString = new HashMap<Integer, String>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    int _key1 = oprot.readI32();
-                    String _value1 = oprot.readString();
-                    mIntegerString.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setMIntegerString(mIntegerString);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MSTRINGMYSTRUCT:
-          if (__field.type == TType.MAP) {
-            Map<String, test.fixtures.complex_struct.MyStruct> mStringMyStruct;
-                {
-                TMap _map = oprot.readMapBegin();
-                mStringMyStruct = new HashMap<String, test.fixtures.complex_struct.MyStruct>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    test.fixtures.complex_struct.MyStruct _value1 = test.fixtures.complex_struct.MyStruct.read0(oprot);
-                    mStringMyStruct.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setMStringMyStruct(mStringMyStruct);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MSTRINGBOOL:
-          if (__field.type == TType.MAP) {
-            Map<String, Boolean> mStringBool;
-                {
-                TMap _map = oprot.readMapBegin();
-                mStringBool = new HashMap<String, Boolean>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    boolean _value1 = oprot.readBool();
-                    mStringBool.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setMStringBool(mStringBool);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MINTEGERINTEGER:
-          if (__field.type == TType.MAP) {
-            Map<Integer, Integer> mIntegerInteger;
-                {
-                TMap _map = oprot.readMapBegin();
-                mIntegerInteger = new HashMap<Integer, Integer>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    int _key1 = oprot.readI32();
-                    int _value1 = oprot.readI32();
-                    mIntegerInteger.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setMIntegerInteger(mIntegerInteger);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MINTEGERBOOL:
-          if (__field.type == TType.MAP) {
-            Map<Integer, Boolean> mIntegerBool;
-                {
-                TMap _map = oprot.readMapBegin();
-                mIntegerBool = new HashMap<Integer, Boolean>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    int _key1 = oprot.readI32();
-                    boolean _value1 = oprot.readBool();
-                    mIntegerBool.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setMIntegerBool(mIntegerBool);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SSHORT:
-          if (__field.type == TType.SET) {
-            Set<Short> sShort;
-                {
-                TSet _set = oprot.readSetBegin();
-                sShort = new HashSet<Short>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    short _value1 = oprot.readI16();
-                    sShort.add(_value1);
-                }
-                oprot.readSetEnd();
-                }
-            builder.setSShort(sShort);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SMYSTRUCT:
-          if (__field.type == TType.SET) {
-            Set<test.fixtures.complex_struct.MyStruct> sMyStruct;
-                {
-                TSet _set = oprot.readSetBegin();
-                sMyStruct = new HashSet<test.fixtures.complex_struct.MyStruct>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    test.fixtures.complex_struct.MyStruct _value1 = test.fixtures.complex_struct.MyStruct.read0(oprot);
-                    sMyStruct.add(_value1);
-                }
-                oprot.readSetEnd();
-                }
-            builder.setSMyStruct(sMyStruct);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SLONG:
-          if (__field.type == TType.SET) {
-            Set<Long> sLong;
-                {
-                TSet _set = oprot.readSetBegin();
-                sLong = new HashSet<Long>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    long _value1 = oprot.readI64();
-                    sLong.add(_value1);
-                }
-                oprot.readSetEnd();
-                }
-            builder.setSLong(sLong);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SSTRING:
-          if (__field.type == TType.SET) {
-            Set<String> sString;
-                {
-                TSet _set = oprot.readSetBegin();
-                sString = new HashSet<String>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    String _value1 = oprot.readString();
-                    sString.add(_value1);
-                }
-                oprot.readSetEnd();
-                }
-            builder.setSString(sString);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SBYTE:
-          if (__field.type == TType.SET) {
-            Set<Byte> sByte;
-                {
-                TSet _set = oprot.readSetBegin();
-                sByte = new HashSet<Byte>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    byte _value1 = oprot.readByte();
-                    sByte.add(_value1);
-                }
-                oprot.readSetEnd();
-                }
-            builder.setSByte(sByte);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MLISTLIST:
-          if (__field.type == TType.MAP) {
-            Map<List<Integer>, List<Integer>> mListList;
-                {
-                TMap _map = oprot.readMapBegin();
-                mListList = new HashMap<List<Integer>, List<Integer>>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    List<Integer> _key1;
+                break;
+            case _LDOUBLE:
+                if (__field.type == TType.LIST) {
+                    List<Double> _fbthriftVar0;
                     {
-                                TList _list1 = oprot.readListBegin();
-                                _key1 = new ArrayList<Integer>(Math.max(0, _list1.size));
-                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                    
-                                    int _value2 = oprot.readI32();
-                                    _key1.add(_value2);
-                                }
-                                oprot.readListEnd();
-                                }
-                    List<Integer> _value1;
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Double>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            double _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readDouble();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setLDouble(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _LSHORT:
+                if (__field.type == TType.LIST) {
+                    List<Short> _fbthriftVar0;
                     {
-                                TList _list1 = oprot.readListBegin();
-                                _value1 = new ArrayList<Integer>(Math.max(0, _list1.size));
-                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                    
-                                    
-                                    int _value2 = oprot.readI32();
-                                    
-                                    
-                                    _value1.add(_value2);
-                                    
-                                }
-                                oprot.readListEnd();
-                                }
-                    mListList.put(_key1, _value1);
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Short>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            short _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI16();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setLShort(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
+                break;
+            case _LINTEGER:
+                if (__field.type == TType.LIST) {
+                    List<Integer> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Integer>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            int _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI32();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setLInteger(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readMapEnd();
-            builder.setMListList(mListList);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            case _LLONG:
+                if (__field.type == TType.LIST) {
+                    List<Long> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Long>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            long _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI64();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setLLong(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _LSTRING:
+                if (__field.type == TType.LIST) {
+                    List<String> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<String>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            String _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readString();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setLString(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _LBOOL:
+                if (__field.type == TType.LIST) {
+                    List<Boolean> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Boolean>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            boolean _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readBool();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setLBool(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _LBYTE:
+                if (__field.type == TType.LIST) {
+                    List<Byte> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Byte>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            byte _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readByte();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setLByte(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MSHORTSTRING:
+                if (__field.type == TType.MAP) {
+                    Map<Short, String> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<Short, String>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            short _fbthriftKey1;
+                            String _fbthriftValue1;
+
+                            {
+                                short _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI16();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMShortString(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MINTEGERSTRING:
+                if (__field.type == TType.MAP) {
+                    Map<Integer, String> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<Integer, String>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            int _fbthriftKey1;
+                            String _fbthriftValue1;
+
+                            {
+                                int _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI32();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMIntegerString(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MSTRINGMYSTRUCT:
+                if (__field.type == TType.MAP) {
+                    Map<String, test.fixtures.complex_struct.MyStruct> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, test.fixtures.complex_struct.MyStruct>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            test.fixtures.complex_struct.MyStruct _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                test.fixtures.complex_struct.MyStruct _fbthriftVar1;
+                                _fbthriftVar1 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMStringMyStruct(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MSTRINGBOOL:
+                if (__field.type == TType.MAP) {
+                    Map<String, Boolean> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, Boolean>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            boolean _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                boolean _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readBool();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMStringBool(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MINTEGERINTEGER:
+                if (__field.type == TType.MAP) {
+                    Map<Integer, Integer> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<Integer, Integer>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            int _fbthriftKey1;
+                            int _fbthriftValue1;
+
+                            {
+                                int _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI32();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                int _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI32();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMIntegerInteger(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MINTEGERBOOL:
+                if (__field.type == TType.MAP) {
+                    Map<Integer, Boolean> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<Integer, Boolean>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            int _fbthriftKey1;
+                            boolean _fbthriftValue1;
+
+                            {
+                                int _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI32();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                boolean _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readBool();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMIntegerBool(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _SSHORT:
+                if (__field.type == TType.SET) {
+                    Set<Short> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Short>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            short _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI16();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setSShort(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _SMYSTRUCT:
+                if (__field.type == TType.SET) {
+                    Set<test.fixtures.complex_struct.MyStruct> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<test.fixtures.complex_struct.MyStruct>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            test.fixtures.complex_struct.MyStruct _fbthriftVar1;
+                            _fbthriftVar1 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setSMyStruct(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _SLONG:
+                if (__field.type == TType.SET) {
+                    Set<Long> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Long>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            long _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI64();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setSLong(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _SSTRING:
+                if (__field.type == TType.SET) {
+                    Set<String> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<String>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            String _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readString();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setSString(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _SBYTE:
+                if (__field.type == TType.SET) {
+                    Set<Byte> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Byte>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            byte _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readByte();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setSByte(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MLISTLIST:
+                if (__field.type == TType.MAP) {
+                    Map<List<Integer>, List<Integer>> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<List<Integer>, List<Integer>>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            List<Integer> _fbthriftKey1;
+                            List<Integer> _fbthriftValue1;
+
+                            {
+                                List<Integer> _fbthriftVar1;
+                                {
+                                    TList _list1 = oprot.readListBegin();
+                                    _fbthriftVar1 = new ArrayList<Integer>(Math.max(0, _list1.size));
+                                    for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                        int _fbthriftVar2;
+                                        _fbthriftVar2 = oprot.readI32();
+                                        _fbthriftVar1.add(_fbthriftVar2);
+                                    }
+                                    oprot.readListEnd();
+                                }
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                List<Integer> _fbthriftVar1;
+                                {
+                                    TList _list1 = oprot.readListBegin();
+                                    _fbthriftVar1 = new ArrayList<Integer>(Math.max(0, _list1.size));
+                                    for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                        int _fbthriftVar2;
+                                        _fbthriftVar2 = oprot.readI32();
+                                        _fbthriftVar1.add(_fbthriftVar2);
+                                    }
+                                    oprot.readListEnd();
+                                }
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMListList(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.myIntField;
-      oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.myStringField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_STRING_FIELD_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.complex_struct.MyDataItem _iter0 = this.myDataField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_DATA_FIELD_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.complex_struct.MyEnum _iter0 = this.myEnum;
-      oprot.writeFieldBegin(MY_ENUM_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      boolean _iter0 = this.myBoolField;
-      oprot.writeFieldBegin(MY_BOOL_FIELD_FIELD_DESC);
-      oprot.writeBool(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      byte _iter0 = this.myByteField;
-      oprot.writeFieldBegin(MY_BYTE_FIELD_FIELD_DESC);
-      oprot.writeByte(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      short _iter0 = this.myShortField;
-      oprot.writeFieldBegin(MY_SHORT_FIELD_FIELD_DESC);
-      oprot.writeI16(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      long _iter0 = this.myLongField;
-      oprot.writeFieldBegin(MY_LONG_FIELD_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDoubleField;
-      oprot.writeFieldBegin(MY_DOUBLE_FIELD_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      List<Double> _iter0 = this.lDouble;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(L_DOUBLE_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.DOUBLE, _iter0.size()));
-            for (double _iter1 : _iter0) {
-              oprot.writeDouble(_iter1);
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.myIntField;
+            oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.myStringField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_STRING_FIELD_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Short> _iter0 = this.lShort;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(L_SHORT_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
-            for (short _iter1 : _iter0) {
-              oprot.writeI16(_iter1);
+        }
+        {
+            test.fixtures.complex_struct.MyDataItem _fbthriftVar0 = this.myDataField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_DATA_FIELD_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Integer> _iter0 = this.lInteger;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(L_INTEGER_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
-            for (int _iter1 : _iter0) {
-              oprot.writeI32(_iter1);
+        }
+        {
+            test.fixtures.complex_struct.MyEnum _fbthriftVar0 = this.myEnum;
+            oprot.writeFieldBegin(MY_ENUM_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            boolean _fbthriftVar0 = this.myBoolField;
+            oprot.writeFieldBegin(MY_BOOL_FIELD_FIELD_DESC);
+            oprot.writeBool(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            byte _fbthriftVar0 = this.myByteField;
+            oprot.writeFieldBegin(MY_BYTE_FIELD_FIELD_DESC);
+            oprot.writeByte(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            short _fbthriftVar0 = this.myShortField;
+            oprot.writeFieldBegin(MY_SHORT_FIELD_FIELD_DESC);
+            oprot.writeI16(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            long _fbthriftVar0 = this.myLongField;
+            oprot.writeFieldBegin(MY_LONG_FIELD_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDoubleField;
+            oprot.writeFieldBegin(MY_DOUBLE_FIELD_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            List<Double> _fbthriftVar0 = this.lDouble;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(L_DOUBLE_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.DOUBLE, _fbthriftVar0.size()));
+                for (double _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeDouble(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Long> _iter0 = this.lLong;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(L_LONG_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.I64, _iter0.size()));
-            for (long _iter1 : _iter0) {
-              oprot.writeI64(_iter1);
+        }
+        {
+            List<Short> _fbthriftVar0 = this.lShort;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(L_SHORT_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.I16, _fbthriftVar0.size()));
+                for (short _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI16(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<String> _iter0 = this.lString;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(L_STRING_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
-            for (String _iter1 : _iter0) {
-              oprot.writeString(_iter1);
+        }
+        {
+            List<Integer> _fbthriftVar0 = this.lInteger;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(L_INTEGER_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.I32, _fbthriftVar0.size()));
+                for (int _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI32(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Boolean> _iter0 = this.lBool;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(L_BOOL_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.BOOL, _iter0.size()));
-            for (boolean _iter1 : _iter0) {
-              oprot.writeBool(_iter1);
+        }
+        {
+            List<Long> _fbthriftVar0 = this.lLong;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(L_LONG_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.I64, _fbthriftVar0.size()));
+                for (long _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI64(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Byte> _iter0 = this.lByte;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(L_BYTE_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.BYTE, _iter0.size()));
-            for (byte _iter1 : _iter0) {
-              oprot.writeByte(_iter1);
+        }
+        {
+            List<String> _fbthriftVar0 = this.lString;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(L_STRING_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.STRING, _fbthriftVar0.size()));
+                for (String _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeString(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<Short, String> _iter0 = this.mShortString;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(M_SHORT_STRING_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I16, TType.STRING, _iter0.size()));
-            for (Map.Entry<Short, String> _iter1 : _iter0.entrySet()) {
-              {
-                Short _iter2 = _iter1.getKey();
-                oprot.writeI16(_iter2);
-              }
-              {
-                String _iter2 = _iter1.getValue();
-                oprot.writeString(_iter2);
-              }
+        }
+        {
+            List<Boolean> _fbthriftVar0 = this.lBool;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(L_BOOL_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.BOOL, _fbthriftVar0.size()));
+                for (boolean _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeBool(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<Integer, String> _iter0 = this.mIntegerString;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(M_INTEGER_STRING_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter0.size()));
-            for (Map.Entry<Integer, String> _iter1 : _iter0.entrySet()) {
-              {
-                Integer _iter2 = _iter1.getKey();
-                oprot.writeI32(_iter2);
-              }
-              {
-                String _iter2 = _iter1.getValue();
-                oprot.writeString(_iter2);
-              }
+        }
+        {
+            List<Byte> _fbthriftVar0 = this.lByte;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(L_BYTE_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.BYTE, _fbthriftVar0.size()));
+                for (byte _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeByte(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, test.fixtures.complex_struct.MyStruct> _iter0 = this.mStringMyStruct;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(M_STRING_MY_STRUCT_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter0.size()));
-            for (Map.Entry<String, test.fixtures.complex_struct.MyStruct> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                test.fixtures.complex_struct.MyStruct _iter2 = _iter1.getValue();
-                _iter2.write0(oprot);
-              }
+        }
+        {
+            Map<Short, String> _fbthriftVar0 = this.mShortString;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(M_SHORT_STRING_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I16, TType.STRING, _fbthriftVar0.size()));
+                for (Map.Entry<Short, String> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Short _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI16(_fbthriftVar2);
+                    }
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, Boolean> _iter0 = this.mStringBool;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(M_STRING_BOOL_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.BOOL, _iter0.size()));
-            for (Map.Entry<String, Boolean> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                Boolean _iter2 = _iter1.getValue();
-                oprot.writeBool(_iter2);
-              }
+        }
+        {
+            Map<Integer, String> _fbthriftVar0 = this.mIntegerString;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(M_INTEGER_STRING_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _fbthriftVar0.size()));
+                for (Map.Entry<Integer, String> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Integer _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI32(_fbthriftVar2);
+                    }
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<Integer, Integer> _iter0 = this.mIntegerInteger;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(M_INTEGER_INTEGER_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter0.size()));
-            for (Map.Entry<Integer, Integer> _iter1 : _iter0.entrySet()) {
-              {
-                Integer _iter2 = _iter1.getKey();
-                oprot.writeI32(_iter2);
-              }
-              {
-                Integer _iter2 = _iter1.getValue();
-                oprot.writeI32(_iter2);
-              }
+        }
+        {
+            Map<String, test.fixtures.complex_struct.MyStruct> _fbthriftVar0 = this.mStringMyStruct;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(M_STRING_MY_STRUCT_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _fbthriftVar0.size()));
+                for (Map.Entry<String, test.fixtures.complex_struct.MyStruct> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        test.fixtures.complex_struct.MyStruct _fbthriftVar2 = _fbthriftVar1.getValue();
+                        _fbthriftVar2.write0(oprot);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<Integer, Boolean> _iter0 = this.mIntegerBool;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(M_INTEGER_BOOL_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I32, TType.BOOL, _iter0.size()));
-            for (Map.Entry<Integer, Boolean> _iter1 : _iter0.entrySet()) {
-              {
-                Integer _iter2 = _iter1.getKey();
-                oprot.writeI32(_iter2);
-              }
-              {
-                Boolean _iter2 = _iter1.getValue();
-                oprot.writeBool(_iter2);
-              }
+        }
+        {
+            Map<String, Boolean> _fbthriftVar0 = this.mStringBool;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(M_STRING_BOOL_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.BOOL, _fbthriftVar0.size()));
+                for (Map.Entry<String, Boolean> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        Boolean _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeBool(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Set<Short> _iter0 = this.sShort;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(S_SHORT_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.I16, _iter0.size()));
-            for (short _iter1 : _iter0) {
-              oprot.writeI16(_iter1);
+        }
+        {
+            Map<Integer, Integer> _fbthriftVar0 = this.mIntegerInteger;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(M_INTEGER_INTEGER_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _fbthriftVar0.size()));
+                for (Map.Entry<Integer, Integer> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Integer _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI32(_fbthriftVar2);
+                    }
+                    {
+                        Integer _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeI32(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Set<test.fixtures.complex_struct.MyStruct> _iter0 = this.sMyStruct;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(S_MY_STRUCT_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.STRUCT, _iter0.size()));
-            for (test.fixtures.complex_struct.MyStruct _iter1 : _iter0) {
-              _iter1.write0(oprot);
+        }
+        {
+            Map<Integer, Boolean> _fbthriftVar0 = this.mIntegerBool;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(M_INTEGER_BOOL_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I32, TType.BOOL, _fbthriftVar0.size()));
+                for (Map.Entry<Integer, Boolean> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Integer _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI32(_fbthriftVar2);
+                    }
+                    {
+                        Boolean _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeBool(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Set<Long> _iter0 = this.sLong;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(S_LONG_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.I64, _iter0.size()));
-            for (long _iter1 : _iter0) {
-              oprot.writeI64(_iter1);
+        }
+        {
+            Set<Short> _fbthriftVar0 = this.sShort;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(S_SHORT_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.I16, _fbthriftVar0.size()));
+                for (short _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI16(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Set<String> _iter0 = this.sString;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(S_STRING_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
-            for (String _iter1 : _iter0) {
-              oprot.writeString(_iter1);
+        }
+        {
+            Set<test.fixtures.complex_struct.MyStruct> _fbthriftVar0 = this.sMyStruct;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(S_MY_STRUCT_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.STRUCT, _fbthriftVar0.size()));
+                for (test.fixtures.complex_struct.MyStruct _fbthriftVar1 : _fbthriftVar0) {
+                    _fbthriftVar1.write0(oprot);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Set<Byte> _iter0 = this.sByte;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(S_BYTE_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.BYTE, _iter0.size()));
-            for (byte _iter1 : _iter0) {
-              oprot.writeByte(_iter1);
+        }
+        {
+            Set<Long> _fbthriftVar0 = this.sLong;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(S_LONG_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.I64, _fbthriftVar0.size()));
+                for (long _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI64(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<List<Integer>, List<Integer>> _iter0 = this.mListList;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(M_LIST_LIST_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.LIST, TType.LIST, _iter0.size()));
-            for (Map.Entry<List<Integer>, List<Integer>> _iter1 : _iter0.entrySet()) {
-              {
-                List<Integer> _iter2 = _iter1.getKey();
-                oprot.writeListBegin(new TList(TType.I32, _iter2.size()));
-            for (int _iter3 : _iter2) {
-              oprot.writeI32(_iter3);
+        }
+        {
+            Set<String> _fbthriftVar0 = this.sString;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(S_STRING_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.STRING, _fbthriftVar0.size()));
+                for (String _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeString(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-              }
-              {
-                List<Integer> _iter2 = _iter1.getValue();
-                oprot.writeListBegin(new TList(TType.I32, _iter2.size()));
-            for (int _iter3 : _iter2) {
-              oprot.writeI32(_iter3);
+        }
+        {
+            Set<Byte> _fbthriftVar0 = this.sByte;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(S_BYTE_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.BYTE, _fbthriftVar0.size()));
+                for (byte _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeByte(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-              }
+        }
+        {
+            Map<List<Integer>, List<Integer>> _fbthriftVar0 = this.mListList;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(M_LIST_LIST_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.LIST, TType.LIST, _fbthriftVar0.size()));
+                for (Map.Entry<List<Integer>, List<Integer>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        List<Integer> _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeListBegin(new TList(TType.I32, _fbthriftVar2.size()));
+                        for (int _fbthriftVar3 : _fbthriftVar2) {
+                            oprot.writeI32(_fbthriftVar3);
+                        }
+                        oprot.writeListEnd();
+                    }
+                    {
+                        List<Integer> _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeListBegin(new TList(TType.I32, _fbthriftVar2.size()));
+                        for (int _fbthriftVar3 : _fbthriftVar2) {
+                            oprot.writeI32(_fbthriftVar3);
+                        }
+                        oprot.writeListEnd();
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _MyStructLazy {

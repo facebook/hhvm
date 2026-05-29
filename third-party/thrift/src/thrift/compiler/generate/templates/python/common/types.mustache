@@ -97,6 +97,33 @@ _fbthrift_python_types.Struct
 {{#if python.generate_immutable_types?}}_typing.Sequence{{/if}}
 {{/let partial}}
 
+{{! Type hint for sequence return types (struct field declarations).
+    Uses ImmutableList for immutable types instead of Sequence. }}
+{{#let export partial sequence_field_return}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_abstract_types?}}_typing.Sequence{{/if}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableList{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types.ImmutableList{{/if}}
+{{/let partial}}
+
+{{! Type hint for set return types (struct field declarations).
+    Uses ImmutableSet for immutable types instead of AbstractSet. }}
+{{#let export partial set_field_return}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_abstract_types?}}_typing.AbstractSet{{/if}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableSet{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types.ImmutableSet{{/if}}
+{{/let partial}}
+
+{{! Type hint for mapping return types (struct field declarations).
+    Uses ImmutableMap for immutable types instead of Mapping. }}
+{{#let export partial mapping_field_return}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_abstract_types?}}_typing.Mapping{{/if}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableMap{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types.ImmutableMap{{/if}}
+{{/let partial}}
+
 {{! Type hint for abstract, mutable, and immutable sets }}
 {{#let export partial set}}
 {{#pragma ignore-newlines}}

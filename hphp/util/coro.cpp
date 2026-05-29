@@ -208,7 +208,13 @@ TicketExecutor::~TicketExecutor() {
 }
 
 void TicketExecutor::addWithTicket(Func func, Ticket ticket) {
-  CPUTask task{std::move(func), std::chrono::milliseconds{0}, nullptr, 0};
+  CPUTask task{
+    std::move(func),
+    folly::RequestContext::saveContext(),
+    std::chrono::milliseconds{0},
+    nullptr,
+    0
+  };
 
   // See CPUThreadPoolExecutor.cpp why this is needed
   auto const mayNeedToAddThreads =

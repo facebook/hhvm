@@ -25,14 +25,16 @@ _dot_dot_Default_default: {{#if structured.has_adapter?}}super{{#else}}self{{/if
 }}{{#let partial field_default_value |field| captures |constants structured|}}
 {{#pragma ignore-newlines}}
   {{#let is_none_value=(and field.optional? (or (object.eq? null field.default_value) (not (has_compiler_option? "deprecated_optional_with_default_is_some"))))}}
+{{field.rust_name}}: {{!}}
   {{#if is_none_value}}
 ::std::option::Option::None
   {{#else}}
     {{#let has_default_value=(or field.optional? (object.notnull? field.default_value))}}
 {{#if field.has_adapter?}}{{field.adapter_struct_qualified}}::from_thrift_default::<{{structured.rust_name}}>({{/if}}
-{{#if has_default_value}}{{#partial constants.field_value field=field value=field.default_value depth=2}}{{#else}}::std::default::Default::default(){{/if}}
+{{#if has_default_value}}{{#partial constants.field_value field=field value=field.default_value}}{{#else}}::std::default::Default::default(){{/if has_default_value}}
 {{#if field.has_adapter?}}, {{field.id}}){{/if}}
   {{/if is_none_value}}
+,
 {{/let partial}}{{!
 
 }}{{#let partial from_thrift_field |field wrap_some| captures |fields structured|}}
@@ -46,20 +48,22 @@ _dot_dot_Default_default: {{#if structured.has_adapter?}}super{{#else}}self{{/if
 
 }}{{#let partial unwrap_non_optional_field |field| captures |constants fields structured|}}
 {{#pragma ignore-newlines}}
+{{field.rust_name}}: field_{{field.name}}
   {{#if (not field.optional?)}}
     {{#if field.has_adapter?}}
 .unwrap_or_else(|| {{field.adapter_struct_qualified}}::from_thrift_default::<{{structured.rust_name}}>(
-{{#if (object.notnull? field.default_value)}}{{#partial constants.const_value value=field.default_value depth=2}}{{#else}}::std::default::Default::default(){{/if}}
+{{#if (object.notnull? field.default_value)}}{{#partial constants.const_value value=field.default_value}}{{#else}}::std::default::Default::default(){{/if}}
 , {{field.id}}))
     {{#else if (object.notnull? field.default_value)}}
       {{! Primitives and enum variants have simple literals }}
       {{#let simple_literal=(or field.default_value.bool? field.default_value.enum? field.default_value.integer? field.default_value.double?)}}
 {{#if simple_literal}}.unwrap_or({{#else}}.unwrap_or_else(|| {{/if}}
-{{#partial constants.const_value value=field.default_value depth=2}})
+{{#partial constants.const_value value=field.default_value}})
     {{#else}}
 .unwrap_or_default()
     {{/if field.has_adapter?}}
   {{/if (not field.optional?)}}
+,
 {{/let partial}}
 
 {{#if (not structured.union?)}}
@@ -68,7 +72,8 @@ impl ::std::default::Default for self::{{structured.rust_name}} {
     fn default() -> Self {
         Self {
   {{#each structured.fields as |field|}}
-            {{field.rust_name}}: {{#partial field_default_value field=field}},
+            {{#partial field_default_value field=field}}
+
   {{/each}}
             {{#partial structvalue_epilogue}}
 
@@ -126,16 +131,16 @@ where
     {{#if field.optional?}}
         if let ::std::option::Option::Some(some) = &self.{{field.rust_name}} {
             p.write_field_begin("{{field.name}}", {{#partial types.protocol_ttype type=field.type}}, {{field.id}});
-            {{#partial fields.write field=field}}({{!
-            }}{{#if field.has_adapter?}}&{{field.adapter_struct_qualified}}::to_thrift_field::<{{structured.rust_name}}>({{/if}}{{!
-            }}some{{#if field.has_adapter?}}, {{field.id}}){{/if}}, p);
+            {{#partial fields.write field=field}}({{!}}
+                {{~ #if field.has_adapter?}}&{{field.adapter_struct_qualified}}::to_thrift_field::<{{structured.rust_name}}>({{/if ~}}
+                some{{#if field.has_adapter?}}, {{field.id}}){{/if}}, p);
             p.write_field_end();
         }
     {{#else}}
         p.write_field_begin("{{field.name}}", {{#partial types.protocol_ttype type=field.type}}, {{field.id}});
-        {{#partial fields.write field=field}}({{!
-          }}{{#if field.has_adapter?}}&{{field.adapter_struct_qualified}}::to_thrift_field::<{{structured.rust_name}}>({{/if}}{{!
-          }}&self.{{field.rust_name}}{{#if field.has_adapter?}}, {{field.id}}){{/if}}, p);
+        {{#partial fields.write field=field}}({{!}}
+            {{~ #if field.has_adapter?}}&{{field.adapter_struct_qualified}}::to_thrift_field::<{{structured.rust_name}}>({{/if ~}}
+            &self.{{field.rust_name}}{{#if field.has_adapter?}}, {{field.id}}){{/if}}, p);
         p.write_field_end();
     {{/if field.optional?}}
   {{/each}}
@@ -230,7 +235,8 @@ where
     {{#else}}
         ::std::result::Result::Ok(Self {
       {{#each structured.fields as |field|}}
-            {{field.rust_name}}: field_{{field.name}}{{#partial unwrap_non_optional_field field=field}},
+            {{#partial unwrap_non_optional_field field=field}}
+
       {{/each}}
             {{#partial structvalue_epilogue}}
         })
@@ -240,6 +246,7 @@ where
 }
 
   {{#if root_program.rust_gen_native_metadata?}}
+
 {{> lib/metadata/struct}}
   {{/if root_program.rust_gen_native_metadata?}}
 {{/if (not structured.union?)}}

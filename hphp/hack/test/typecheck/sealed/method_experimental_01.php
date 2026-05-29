@@ -5,4 +5,7 @@ class C {
   public function foo(): void {}
 }
 
-class D {}
+class D extends C {
+  <<__Override>>
+  public function foo(): void {}
+}

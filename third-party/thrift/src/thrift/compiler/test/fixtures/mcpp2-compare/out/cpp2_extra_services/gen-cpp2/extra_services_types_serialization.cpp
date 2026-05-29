@@ -19,7 +19,7 @@ void TccStructTraits<::extra::svc::containerStruct2>::translateFieldName(
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::extra::svc::containerStruct2>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),

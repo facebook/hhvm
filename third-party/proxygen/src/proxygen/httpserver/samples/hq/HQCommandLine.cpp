@@ -121,6 +121,10 @@ DEFINE_string(transport_knobs,
               "",
               "If send_knob_frame is set, this is the default transport knobs"
               " sent to peer");
+DEFINE_int32(
+    quic_experiment,
+    0,
+    "Opaque experiment ID sent as a transport parameter to the server");
 DEFINE_bool(use_ack_receive_timestamps,
             false,
             "Replace the ACK frame with ACK_RECEIVE_TIMESTAMPS frame"
@@ -297,6 +301,13 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
     hqParams.transportSettings.knobs.push_back({kDefaultQuicTransportKnobSpace,
                                                 kDefaultQuicTransportKnobId,
                                                 FLAGS_transport_knobs});
+  }
+  if (FLAGS_quic_experiment != 0) {
+    CHECK_GT(FLAGS_quic_experiment, 0) << "--quic_experiment must be positive";
+    CHECK_LE(FLAGS_quic_experiment, 65535)
+        << "--quic_experiment must fit in uint16_t";
+    hqParams.transportSettings.quicExperimentId =
+        static_cast<uint16_t>(FLAGS_quic_experiment);
   }
   hqParams.transportSettings.maxRecvBatchSize = 32;
   hqParams.transportSettings.shouldUseRecvmmsgForBatchRecv = true;

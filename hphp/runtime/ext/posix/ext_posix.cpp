@@ -16,6 +16,7 @@
 */
 #include "hphp/runtime/ext/posix/ext_posix.h"
 
+#include <algorithm>
 #include <memory>
 
 #include <sys/times.h>
@@ -33,10 +34,13 @@
 #include <folly/String.h>
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/util/configs/server.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/sync-signal.h"
 #include "hphp/util/user-info.h"
 
@@ -351,6 +355,21 @@ bool HHVM_FUNCTION(posix_isatty,
 bool HHVM_FUNCTION(posix_kill,
                    int64_t pid,
                    int64_t sig) {
+  auto& blocked = Cfg::Server::PosixKillBlockedSignals;
+  if (std::find(blocked.begin(), blocked.end(), static_cast<int32_t>(sig)) !=
+      blocked.end()) {
+    raise_warning("posix_kill() signal %d is blocked by configuration",
+                  (int)sig);
+    if (StructuredLog::enabled()) {
+      StructuredLogEntry entry;
+      entry.setInt("pid", pid);
+      entry.setInt("signal", sig);
+      addBacktraceToStructLog(createBacktrace(BacktraceArgs()), entry);
+      StructuredLog::log("hhvm_posix_kill_blocked", entry);
+    }
+    return false;
+  }
+
   if (pid == 0 || pid == getpid()) {
     if (is_sync_signal(sig)) {
       // Only send to the current thread, and invoke signal handlers in PHP, if

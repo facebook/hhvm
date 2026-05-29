@@ -70,7 +70,7 @@ public final class UnfortunateException extends org.apache.thrift.TBaseException
 
         public String getAnSnakeString() { return anSnakeString; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="aCamelI32", requiredness=Requiredness.NONE)    public Builder setACamelI32(int aCamelI32) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="aCamelI32", requiredness=Requiredness.NONE)    public Builder setACamelI32(int aCamelI32) {
             this.aCamelI32 = aCamelI32;
             return this;
         }
@@ -93,72 +93,71 @@ public final class UnfortunateException extends org.apache.thrift.TBaseException
         }
     }
 
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="an_snake_string", requiredness=Requiredness.NONE)
     public String getAnSnakeString() { return anSnakeString; }
     
-
     @com.facebook.swift.codec.ThriftField(value=2, name="aCamelI32", requiredness=Requiredness.NONE)
     public int getACamelI32() { return aCamelI32; }
 
-    
     public static com.facebook.thrift.payload.Reader<UnfortunateException> asReader() {
       return UnfortunateException::read0;
     }
 
     public static UnfortunateException read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(UnfortunateException.NAMES_TO_IDS, UnfortunateException.THRIFT_NAMES_TO_IDS, UnfortunateException.FIELD_METADATA);
-      UnfortunateException.Builder builder = new UnfortunateException.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _AN_SNAKE_STRING:
-          if (__field.type == TType.STRING) {
-            String anSnakeString = oprot.readString();
-            builder.setAnSnakeString(anSnakeString);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ACAMELI32:
-          if (__field.type == TType.I32) {
-            int aCamelI32 = oprot.readI32();
-            builder.setACamelI32(aCamelI32);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(UnfortunateException.NAMES_TO_IDS, UnfortunateException.THRIFT_NAMES_TO_IDS, UnfortunateException.FIELD_METADATA);
+        UnfortunateException.Builder builder = new UnfortunateException.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _AN_SNAKE_STRING:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setAnSnakeString(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ACAMELI32:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setACamelI32(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      String _iter0 = this.anSnakeString;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(AN_SNAKE_STRING_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      int _iter0 = this.aCamelI32;
-      oprot.writeFieldBegin(A_CAMEL_I32_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            String _fbthriftVar0 = this.anSnakeString;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(AN_SNAKE_STRING_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            int _fbthriftVar0 = this.aCamelI32;
+            oprot.writeFieldBegin(A_CAMEL_I32_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _UnfortunateExceptionLazy {
@@ -167,4 +166,5 @@ public final class UnfortunateException extends org.apache.thrift.TBaseException
 
     public static UnfortunateException defaultInstance() {
         return  _UnfortunateExceptionLazy._DEFAULT;
-    }}
+    }
+}

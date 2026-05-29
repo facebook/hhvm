@@ -831,27 +831,19 @@ service RPCConformanceService {
   BasicInteraction basicInteractionFactoryFunction(-1: i32 initialSum);
 
   // =================== BiDi Streaming ===================
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<Response> bidiBasic(1: Request req);
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   Response, sink<Request>, stream<Response> bidiInitialResponse(1: Request req);
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<
     Response throws (1: UserException e)
   > bidiStreamDeclaredException(1: Request req);
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<Response> bidiStreamUndeclaredException(1: Request req);
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request throws (1: UserException e)>, stream<
     Response
   > bidiSinkDeclaredException(1: Request req);
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<Response> bidiSinkUndeclaredException(1: Request req);
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<Response> bidiMethodDeclaredException(
     1: Request req,
   ) throws (1: UserException e);
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<Response> bidiMethodUndeclaredException(1: Request req);
 }
 
@@ -904,33 +896,25 @@ service RPCStatelessConformanceService {
   );
 
   // =================== BiDi Streaming ===================
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<Response> bidiBasic(1: ServerInstruction serverInstr);
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   Response, sink<Request>, stream<Response> bidiInitialResponse(
     1: ServerInstruction serverInstr,
   );
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<
     Response throws (1: UserException e)
   > bidiStreamDeclaredException(1: ServerInstruction serverInstr);
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<Response> bidiStreamUndeclaredException(
     1: ServerInstruction serverInstr,
   );
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request throws (1: UserException e)>, stream<
     Response
   > bidiSinkDeclaredException(1: ServerInstruction serverInstr);
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<Response> bidiSinkUndeclaredException(
     1: ServerInstruction serverInstr,
   );
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<Response> bidiMethodDeclaredException(
     1: ServerInstruction serverInstr,
   ) throws (1: UserException e);
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<Response> bidiMethodUndeclaredException(
     1: ServerInstruction serverInstr,
   );

@@ -18,6 +18,16 @@
 {{> Autogen}}
 #pragma once
 
+{{#if service.is_fast_client?}}
+#include <thrift/lib/cpp2/gen/fast_client_h.h>
+
+#include "{{service.program.include_prefix}}{{service.program.name}}_types.h"
+  {{#each service.program.includes_for_codegen as |include|}}
+#include "{{include.program.include_prefix}}{{include.program.name}}_types.h"
+  {{/each}}
+
+{{> service_h/fast_client}}
+{{#else}}
 #include <thrift/lib/cpp2/gen/client_h.h>
 
 #include "{{service.program.include_prefix}}{{service.program.name}}_types.h"
@@ -53,3 +63,4 @@ namespace apache { namespace thrift {
 }}
 
 {{> service_h/async_client}}
+{{/if service.is_fast_client?}}

@@ -182,7 +182,7 @@ class empty_struct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -277,7 +277,7 @@ class decorated_struct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -614,25 +614,16 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
                       "name" => "module.map_i32_string_1261",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_map" => \tmeta_ThriftMapType::fromShape(
                             shape(
-                              "name" => "module.map_i32_string_1261",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                              "keyType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_map" => \tmeta_ThriftMapType::fromShape(
-                                    shape(
-                                      "keyType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                        )
-                                      ),
-                                      "valueType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                                        )
-                                      ),
-                                    )
-                                  ),
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                )
+                              ),
+                              "valueType" => \tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                                 )
                               ),
                             )
@@ -755,7 +746,14 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
               )
             ),
           ],
-          'type' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::withDefaultValues(),
+            '\facebook\thrift\annotation\rust\Type' => \facebook\thrift\annotation\rust\Type::fromShape(
+              shape(
+                "name" => "sorted_vector_map::SortedVectorMap",
+              )
+            ),
+          ],
         ),
         'fieldH' => shape(
           'field' => dict[],
@@ -777,7 +775,7 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1002,7 +1000,7 @@ class CppTypeStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1117,7 +1115,7 @@ class VirtualStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1246,7 +1244,7 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1368,7 +1366,7 @@ class TrivialNumeric implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1505,7 +1503,7 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1520,7 +1518,7 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
       }
     }
     if (idx($parsed, 'n') !== null) {
-      $_tmp1 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\TrivialNumeric>($parsed['n']));
+      $_tmp1 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\TrivialNumeric>($parsed['n']));
       $_tmp2 = \apache\thrift\fixtures\types\TrivialNumeric::withDefaultValues();
       $_tmp2->readFromJson($_tmp1);
       $this->n = $_tmp2;
@@ -1657,7 +1655,7 @@ class ComplexString implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1803,7 +1801,7 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1813,7 +1811,7 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
       $this->z = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['z']);
     }
     if (idx($parsed, 'n') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ComplexString>($parsed['n']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ComplexString>($parsed['n']));
       $_tmp1 = \apache\thrift\fixtures\types\ComplexString::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->n = $_tmp1;
@@ -2032,7 +2030,7 @@ class MinPadding implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -2292,7 +2290,7 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -2516,7 +2514,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -2532,7 +2530,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
       $this->majorVer = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['majorVer']);
     }
     if (idx($parsed, 'data') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\MyDataItem>($parsed['data']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\MyDataItem>($parsed['data']));
       $_tmp1 = \apache\thrift\fixtures\types\MyDataItem::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->data = $_tmp1;
@@ -2605,7 +2603,7 @@ class MyDataItem implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -2713,7 +2711,7 @@ class Renaming implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -2941,7 +2939,7 @@ class AnnotatedTypes implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -3099,20 +3097,20 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'ForwardUsageStruct') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ForwardUsageStruct>($parsed['ForwardUsageStruct']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ForwardUsageStruct>($parsed['ForwardUsageStruct']));
       $_tmp1 = \apache\thrift\fixtures\types\ForwardUsageStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->ForwardUsageStruct = $_tmp1;
     }
     if (idx($parsed, 'ForwardUsageByRef') !== null) {
-      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ForwardUsageByRef>($parsed['ForwardUsageByRef']));
+      $_tmp2 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ForwardUsageByRef>($parsed['ForwardUsageByRef']));
       $_tmp3 = \apache\thrift\fixtures\types\ForwardUsageByRef::withDefaultValues();
       $_tmp3->readFromJson($_tmp2);
       $this->ForwardUsageByRef = $_tmp3;
@@ -3219,14 +3217,14 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'foo') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ForwardUsageRoot>($parsed['foo']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ForwardUsageRoot>($parsed['foo']));
       $_tmp1 = \apache\thrift\fixtures\types\ForwardUsageRoot::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->foo = $_tmp1;
@@ -3333,14 +3331,14 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'foo') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ForwardUsageRoot>($parsed['foo']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\ForwardUsageRoot>($parsed['foo']));
       $_tmp1 = \apache\thrift\fixtures\types\ForwardUsageRoot::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->foo = $_tmp1;
@@ -3459,7 +3457,7 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -3470,7 +3468,7 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
       $_container4 = Map {};
       foreach($_json3 as $_key1 => $_value2) {
         $_value5 = \apache\thrift\fixtures\types\IncompleteMapDep::withDefaultValues();
-        $_tmp6 = \json_encode($_value2);
+        $_tmp6 = \fb_json_encode_force_php_arrays($_value2);
         $_tmp7 = \apache\thrift\fixtures\types\IncompleteMapDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_value5 = $_tmp7;
@@ -3538,7 +3536,7 @@ class IncompleteMapDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -3670,7 +3668,7 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -3681,7 +3679,7 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
       $_container4 = Map {};
       foreach($_json3 as $_key1 => $_value2) {
         $_value5 = \apache\thrift\fixtures\types\CompleteMapDep::withDefaultValues();
-        $_tmp6 = \json_encode($_value2);
+        $_tmp6 = \fb_json_encode_force_php_arrays($_value2);
         $_tmp7 = \apache\thrift\fixtures\types\CompleteMapDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_value5 = $_tmp7;
@@ -3749,7 +3747,7 @@ class CompleteMapDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -3870,7 +3868,7 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -3881,7 +3879,7 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
       $_container4 = Vector {};
       foreach($_json3 as $_key1 => $_value2) {
         $_elem5 = \apache\thrift\fixtures\types\IncompleteListDep::withDefaultValues();
-        $_tmp6 = \json_encode($_value2);
+        $_tmp6 = \fb_json_encode_force_php_arrays($_value2);
         $_tmp7 = \apache\thrift\fixtures\types\IncompleteListDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_elem5 = $_tmp7;
@@ -3949,7 +3947,7 @@ class IncompleteListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -4070,7 +4068,7 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -4081,7 +4079,7 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
       $_container4 = Vector {};
       foreach($_json3 as $_key1 => $_value2) {
         $_elem5 = \apache\thrift\fixtures\types\CompleteListDep::withDefaultValues();
-        $_tmp6 = \json_encode($_value2);
+        $_tmp6 = \fb_json_encode_force_php_arrays($_value2);
         $_tmp7 = \apache\thrift\fixtures\types\CompleteListDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_elem5 = $_tmp7;
@@ -4149,7 +4147,7 @@ class CompleteListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -4260,7 +4258,7 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -4271,7 +4269,7 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
       $_container4 = Vector {};
       foreach($_json3 as $_key1 => $_value2) {
         $_elem5 = \apache\thrift\fixtures\types\AdaptedListDep::withDefaultValues();
-        $_tmp6 = \json_encode($_value2);
+        $_tmp6 = \fb_json_encode_force_php_arrays($_value2);
         $_tmp7 = \apache\thrift\fixtures\types\AdaptedListDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_elem5 = $_tmp7;
@@ -4377,14 +4375,14 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\AdaptedList>($parsed['field']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \apache\thrift\fixtures\types\AdaptedList>($parsed['field']));
       $_tmp1 = \apache\thrift\fixtures\types\AdaptedList::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->field = $_tmp1;
@@ -4494,7 +4492,7 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -4505,7 +4503,7 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
       $_container4 = Vector {};
       foreach($_json3 as $_key1 => $_value2) {
         $_elem5 = \apache\thrift\fixtures\types\DependentAdaptedListDep::withDefaultValues();
-        $_tmp6 = \json_encode($_value2);
+        $_tmp6 = \fb_json_encode_force_php_arrays($_value2);
         $_tmp7 = \apache\thrift\fixtures\types\DependentAdaptedListDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_elem5 = $_tmp7;
@@ -4612,7 +4610,7 @@ class DependentAdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetad
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -5058,7 +5056,7 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -5261,7 +5259,7 @@ class AllocatorAware2 implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -5461,7 +5459,7 @@ class TypedefStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -5577,7 +5575,7 @@ class StructWithDoubleUnderscores implements \IThriftSyncStruct, \IThriftStructM
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");

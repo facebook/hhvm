@@ -1237,7 +1237,7 @@ let ide_diagnostics_to_lsp_diagnostics
           Some
             (match severity with
             | User_diagnostic.Err -> Lsp.PublishDiagnostics.Error
-            | User_diagnostic.Warning -> Lsp.PublishDiagnostics.Warning);
+            | User_diagnostic.Warning _ -> Lsp.PublishDiagnostics.Warning);
         code = PublishDiagnostics.IntCode code;
         source = Some "Hack";
         message;

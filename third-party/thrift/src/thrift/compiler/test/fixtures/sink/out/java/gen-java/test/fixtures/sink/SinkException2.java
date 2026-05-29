@@ -75,51 +75,50 @@ public final class SinkException2 extends org.apache.thrift.TBaseException imple
     }
 
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="reason", requiredness=Requiredness.NONE)
     public long getReason() { return reason; }
 
-    
     public static com.facebook.thrift.payload.Reader<SinkException2> asReader() {
       return SinkException2::read0;
     }
 
     public static SinkException2 read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(SinkException2.NAMES_TO_IDS, SinkException2.THRIFT_NAMES_TO_IDS, SinkException2.FIELD_METADATA);
-      SinkException2.Builder builder = new SinkException2.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _REASON:
-          if (__field.type == TType.I64) {
-            long reason = oprot.readI64();
-            builder.setReason(reason);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(SinkException2.NAMES_TO_IDS, SinkException2.THRIFT_NAMES_TO_IDS, SinkException2.FIELD_METADATA);
+        SinkException2.Builder builder = new SinkException2.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _REASON:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setReason(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.reason;
-      oprot.writeFieldBegin(REASON_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.reason;
+            oprot.writeFieldBegin(REASON_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _SinkException2Lazy {
@@ -128,4 +127,5 @@ public final class SinkException2 extends org.apache.thrift.TBaseException imple
 
     public static SinkException2 defaultInstance() {
         return  _SinkException2Lazy._DEFAULT;
-    }}
+    }
+}

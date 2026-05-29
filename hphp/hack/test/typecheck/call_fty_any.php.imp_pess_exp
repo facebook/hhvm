@@ -6,5 +6,9 @@ WARN: File "call_fty_any.php", line 9, characters 12-14:
 This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
 WARN: File "call_fty_any.php", line 9, characters 17-19:
 This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
+WARN: File "call_fty_any.php", line 10, characters 5-9:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "call_fty_any.php", line 10, characters 5-9:
+  This expression has type `dynamic`
 ERROR: File "call_fty_any.php", line 5, characters 21-24:
 Please add a type hint `public SomeType $foo` (Naming[2001])

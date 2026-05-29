@@ -96,3 +96,9 @@ vec(6) {
   int(3)
   int(4)
 }
+vec(4) {
+  int(3)
+  string(1) "a"
+  int(444)
+  int(4)
+}

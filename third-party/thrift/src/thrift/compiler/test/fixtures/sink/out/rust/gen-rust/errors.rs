@@ -91,7 +91,6 @@ pub mod sink_service {
 
     #[derive(Debug)]
     pub enum MethodSinkError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -215,7 +214,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
                 ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
             }
@@ -226,7 +224,6 @@ pub mod sink_service {
 
     #[derive(Debug)]
     pub enum MethodSinkFinalError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -435,7 +432,6 @@ pub mod sink_service {
 
     #[derive(Debug)]
     pub enum MethodAndReponseSinkError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -559,7 +555,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
                 ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
             }
@@ -570,7 +565,6 @@ pub mod sink_service {
 
     #[derive(Debug)]
     pub enum MethodAndReponseSinkFinalError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -885,7 +879,6 @@ pub mod sink_service {
 
     #[derive(Debug)]
     pub enum MethodThrowSinkError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -1009,7 +1002,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
                 ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
             }
@@ -1020,7 +1012,6 @@ pub mod sink_service {
 
     #[derive(Debug)]
     pub enum MethodThrowSinkFinalError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -1396,7 +1387,6 @@ pub mod sink_service {
 
     #[derive(Debug)]
     pub enum MethodSinkThrowSinkFinalError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -1599,7 +1589,6 @@ pub mod sink_service {
 
     #[derive(Debug)]
     pub enum MethodFinalThrowSinkError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -1723,7 +1712,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
                 ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
             }
@@ -2360,7 +2348,6 @@ pub mod sink_service {
 
     #[derive(Debug)]
     pub enum MethodFastSinkError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }
@@ -2484,7 +2471,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
                 ::std::result::Result::Err(Self::ThriftError(_)) => unreachable!(),
             }
@@ -2495,7 +2481,6 @@ pub mod sink_service {
 
     #[derive(Debug)]
     pub enum MethodFastSinkFinalError {
-
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
     }

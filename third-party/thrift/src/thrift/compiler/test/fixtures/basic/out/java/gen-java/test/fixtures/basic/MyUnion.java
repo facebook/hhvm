@@ -40,32 +40,32 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     private static final TField FLOAT_SET_FIELD_DESC = new TField("floatSet", TType.SET, (short)4);
 
     static {
-      NAMES_TO_IDS.put("myEnum", 1);
-      THRIFT_NAMES_TO_IDS.put("myEnum", 1);
-      FIELD_METADATA.put(1, MY_ENUM_FIELD_DESC);
-      NAMES_TO_IDS.put("myStruct", 2);
-      THRIFT_NAMES_TO_IDS.put("myStruct", 2);
-      FIELD_METADATA.put(2, MY_STRUCT_FIELD_DESC);
-      NAMES_TO_IDS.put("myDataItem", 3);
-      THRIFT_NAMES_TO_IDS.put("myDataItem", 3);
-      FIELD_METADATA.put(3, MY_DATA_ITEM_FIELD_DESC);
-      NAMES_TO_IDS.put("floatSet", 4);
-      THRIFT_NAMES_TO_IDS.put("floatSet", 4);
-      FIELD_METADATA.put(4, FLOAT_SET_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/basic/MyUnion"),
-        MyUnion.class, MyUnion::read0));
+        NAMES_TO_IDS.put("myEnum", 1);
+        THRIFT_NAMES_TO_IDS.put("myEnum", 1);
+        FIELD_METADATA.put(1, MY_ENUM_FIELD_DESC);
+        NAMES_TO_IDS.put("myStruct", 2);
+        THRIFT_NAMES_TO_IDS.put("myStruct", 2);
+        FIELD_METADATA.put(2, MY_STRUCT_FIELD_DESC);
+        NAMES_TO_IDS.put("myDataItem", 3);
+        THRIFT_NAMES_TO_IDS.put("myDataItem", 3);
+        FIELD_METADATA.put(3, MY_DATA_ITEM_FIELD_DESC);
+        NAMES_TO_IDS.put("floatSet", 4);
+        THRIFT_NAMES_TO_IDS.put("floatSet", 4);
+        FIELD_METADATA.put(4, FLOAT_SET_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("test.dev/fixtures/basic/MyUnion"),
+            MyUnion.class, MyUnion::read0));
     }
 
     private java.lang.Object value;
     private short id;
 
     public enum TypeEnum {
-      __FBTHRIFT_EMPTY_UNION__,
-      MY_ENUM,
-      MY_STRUCT,
-      MY_DATA_ITEM,
-      FLOAT_SET,
+        __FBTHRIFT_EMPTY_UNION__,
+        MY_ENUM,
+        MY_STRUCT,
+        MY_DATA_ITEM,
+        FLOAT_SET,
     }
 
     public static MyUnion from(int _id, java.lang.Object _field) {
@@ -78,7 +78,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
             throw new java.lang.IllegalArgumentException("unknown field " + _id);
         }
 
-        MyUnion _u = new  MyUnion();
+        MyUnion _u = new MyUnion();
 
         try {
             switch(_id) {
@@ -99,7 +99,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
                     _u.value = (Set<Float>) _field;
                     return _u;
                 default:
-                throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
+                    throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
             }
         } catch (java.lang.Exception t) {
             throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
@@ -190,7 +190,6 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         return res;
     }
 
-    
 
     @com.facebook.swift.codec.ThriftField(value=1, name="myEnum", requiredness=Requiredness.NONE)
     public test.fixtures.basic.MyEnum getMyEnum() {
@@ -246,20 +245,20 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     }
 
     public TypeEnum getThriftUnionType() {
-      switch(this.id) {
-        case 0:
-          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
-        case 1:
-          return TypeEnum.MY_ENUM;
-        case 2:
-          return TypeEnum.MY_STRUCT;
-        case 3:
-          return TypeEnum.MY_DATA_ITEM;
-        case 4:
-          return TypeEnum.FLOAT_SET;
-        default:
-          throw new IllegalStateException("unreachable");
-      }
+        switch(this.id) {
+            case 0:
+                return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
+            case 1:
+                return TypeEnum.MY_ENUM;
+            case 2:
+                return TypeEnum.MY_STRUCT;
+            case 3:
+                return TypeEnum.MY_DATA_ITEM;
+            case 4:
+                return TypeEnum.FLOAT_SET;
+            default:
+                throw new IllegalStateException("unreachable");
+        }
     }
 
     public String getThriftName() {
@@ -323,7 +322,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
 
     public interface Visitor<T> {
         default T visit(MyUnion acceptor) {
-        return acceptor.accept(this);
+            return acceptor.accept(this);
         }
 
         T visitMyEnum(test.fixtures.basic.MyEnum myEnum);
@@ -333,123 +332,125 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     }
 
     public void write0(TProtocol oprot) throws TException {
-      if (this.id != 0 && this.value == null ){
-        if(allowNullFieldValues) {
-          // Warning: this path will generate corrupt serialized data!
-          return;
-        } else {
-          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        if (this.id != 0 && this.value == null ){
+            if(allowNullFieldValues) {
+                // Warning: this path will generate corrupt serialized data!
+                return;
+            } else {
+                throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+            }
         }
-      }
-      oprot.writeStructBegin(STRUCT_DESC);
-      switch (this.id) {
-      case _MYENUM: {
-        oprot.writeFieldBegin(MY_ENUM_FIELD_DESC);
-        test.fixtures.basic.MyEnum _iter0 = (test.fixtures.basic.MyEnum)this.value;
+        oprot.writeStructBegin(STRUCT_DESC);
+        switch (this.id) {
+        case _MYENUM: {
+            oprot.writeFieldBegin(MY_ENUM_FIELD_DESC);
+            test.fixtures.basic.MyEnum _fbthriftVar0 = (test.fixtures.basic.MyEnum)this.value;
 
-        oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _MYSTRUCT: {
-        oprot.writeFieldBegin(MY_STRUCT_FIELD_DESC);
-        test.fixtures.basic.MyStruct _iter0 = (test.fixtures.basic.MyStruct)this.value;
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _MYSTRUCT: {
+            oprot.writeFieldBegin(MY_STRUCT_FIELD_DESC);
+            test.fixtures.basic.MyStruct _fbthriftVar0 = (test.fixtures.basic.MyStruct)this.value;
 
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _MYDATAITEM: {
-        oprot.writeFieldBegin(MY_DATA_ITEM_FIELD_DESC);
-        test.fixtures.basic.MyDataItem _iter0 = (test.fixtures.basic.MyDataItem)this.value;
+            _fbthriftVar0.write0(oprot);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _MYDATAITEM: {
+            oprot.writeFieldBegin(MY_DATA_ITEM_FIELD_DESC);
+            test.fixtures.basic.MyDataItem _fbthriftVar0 = (test.fixtures.basic.MyDataItem)this.value;
 
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _FLOATSET: {
-        oprot.writeFieldBegin(FLOAT_SET_FIELD_DESC);
-        Set<Float> _iter0 = (Set<Float>)this.value;
+            _fbthriftVar0.write0(oprot);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _FLOATSET: {
+            oprot.writeFieldBegin(FLOAT_SET_FIELD_DESC);
+            Set<Float> _fbthriftVar0 = (Set<Float>)this.value;
 
-        oprot.writeSetBegin(new TSet(TType.FLOAT, _iter0.size()));
-            for (float _iter1 : _iter0) {
-              oprot.writeFloat(_iter1);
+            oprot.writeSetBegin(new TSet(TType.FLOAT, _fbthriftVar0.size()));
+            for (float _fbthriftVar1 : _fbthriftVar0) {
+                oprot.writeFloat(_fbthriftVar1);
             }
             oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-        break;
-      }
-      default:
-          // ignore unknown field
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+            oprot.writeFieldEnd();
+            break;
+        }
+        default:
+            // ignore unknown field
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyUnion> asReader() {
-      return MyUnion::read0;
+        return MyUnion::read0;
     }
 
     public static MyUnion read0(TProtocol oprot) throws TException {
-      MyUnion res = new MyUnion();
-      res.value = null;
-      res.id = (short) 0;
-      oprot.readStructBegin(MyUnion.NAMES_TO_IDS, MyUnion.THRIFT_NAMES_TO_IDS, MyUnion.FIELD_METADATA);
-      TField __field = oprot.readFieldBegin();
-      if (__field.type != TType.STOP) {
-          switch (__field.id) {
-          case _MYENUM:
-            if (__field.type == MY_ENUM_FIELD_DESC.type) {
-              test.fixtures.basic.MyEnum myEnum = test.fixtures.basic.MyEnum.fromInteger(oprot.readI32());
-              res.value = myEnum;
-            }
-            break;
-          case _MYSTRUCT:
-            if (__field.type == MY_STRUCT_FIELD_DESC.type) {
-              test.fixtures.basic.MyStruct myStruct = test.fixtures.basic.MyStruct.read0(oprot);
-              res.value = myStruct;
-            }
-            break;
-          case _MYDATAITEM:
-            if (__field.type == MY_DATA_ITEM_FIELD_DESC.type) {
-              test.fixtures.basic.MyDataItem myDataItem = test.fixtures.basic.MyDataItem.read0(oprot);
-              res.value = myDataItem;
-            }
-            break;
-          case _FLOATSET:
-            if (__field.type == FLOAT_SET_FIELD_DESC.type) {
-              Set<Float> floatSet;
-                {
-                TSet _set = oprot.readSetBegin();
-                floatSet = new HashSet<Float>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    float _value1 = oprot.readFloat();
-                    floatSet.add(_value1);
+        MyUnion res = new MyUnion();
+        res.value = null;
+        res.id = (short) 0;
+        oprot.readStructBegin(MyUnion.NAMES_TO_IDS, MyUnion.THRIFT_NAMES_TO_IDS, MyUnion.FIELD_METADATA);
+        TField __field = oprot.readFieldBegin();
+        if (__field.type != TType.STOP) {
+            switch (__field.id) {
+            case _MYENUM:
+                if (__field.type == MY_ENUM_FIELD_DESC.type) {
+                    test.fixtures.basic.MyEnum _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.basic.MyEnum.fromInteger(oprot.readI32());
+                    res.value = _fbthriftVar0;
                 }
-                oprot.readSetEnd();
+                break;
+            case _MYSTRUCT:
+                if (__field.type == MY_STRUCT_FIELD_DESC.type) {
+                    test.fixtures.basic.MyStruct _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.basic.MyStruct.read0(oprot);
+                    res.value = _fbthriftVar0;
                 }
-              res.value = floatSet;
+                break;
+            case _MYDATAITEM:
+                if (__field.type == MY_DATA_ITEM_FIELD_DESC.type) {
+                    test.fixtures.basic.MyDataItem _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.basic.MyDataItem.read0(oprot);
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _FLOATSET:
+                if (__field.type == FLOAT_SET_FIELD_DESC.type) {
+                    Set<Float> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Float>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            float _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readFloat();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
             }
-            break;
-          default:
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-        if (res.value != null) {
-          res.id = __field.id;
+            if (res.value != null) {
+                res.id = __field.id;
+            }
+            oprot.readFieldEnd();
+            TField __stopField = oprot.readFieldBegin(); // Consume the STOP byte
+            if (__stopField.type != TType.STOP) {
+                throw new TProtocolException(TProtocolException.INVALID_DATA, "Union 'MyUnion' is missing a STOP byte");
+            }
         }
-        oprot.readFieldEnd();
-        TField __stopField = oprot.readFieldBegin(); // Consume the STOP byte
-        if (__stopField.type != TType.STOP) {
-          throw new TProtocolException(TProtocolException.INVALID_DATA, "Union 'MyUnion' is missing a STOP byte");
-        }
-      }
-      oprot.readStructEnd();
-      return res;
+        oprot.readStructEnd();
+        return res;
     }
+
     public static MyUnion defaultInstance() {
         return _DEFAULT;
     }
-
 }

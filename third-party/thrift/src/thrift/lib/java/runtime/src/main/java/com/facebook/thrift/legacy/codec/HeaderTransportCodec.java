@@ -23,7 +23,6 @@ import com.facebook.thrift.metadata.ClientInfo;
 import com.facebook.thrift.protocol.TProtocolType;
 import com.facebook.thrift.util.CompressionUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufUtil;
@@ -31,7 +30,6 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.util.ReferenceCountUtil;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -278,14 +276,20 @@ public final class HeaderTransportCodec extends ChannelDuplexHandler {
       }
     }
 
-    // headers
-    Map<String, String> normalHeaders = decodeHeaders(NORMAL_HEADERS, messageHeader);
-    Map<String, String> persistentHeaders = decodeHeaders(PERSISTENT_HEADERS, messageHeader);
-
-    // NOTE: currently, if normal headers and persistent headers contains the same key.
-    // persistent header will override normal header. This is consistent with Netty 3 implementation
+    // Persistent headers override normal headers on key collision (consistent with Netty 3).
     Map<String, String> allHeaders = new HashMap<>();
-    allHeaders.putAll(normalHeaders);
+    Map<String, String> persistentHeaders = new HashMap<>();
+    while (messageHeader.readableBytes() > 0) {
+      int infoId = readVarInt32(messageHeader);
+      if (infoId == NORMAL_HEADERS) {
+        decodeHeaders(messageHeader, allHeaders);
+      } else if (infoId == PERSISTENT_HEADERS) {
+        decodeHeaders(messageHeader, persistentHeaders);
+      } else {
+        // padding (0) or unknown info id
+        break;
+      }
+    }
     allHeaders.putAll(persistentHeaders);
 
     if (inflate) {
@@ -305,17 +309,7 @@ public final class HeaderTransportCodec extends ChannelDuplexHandler {
     return frame;
   }
 
-  private static Map<String, String> decodeHeaders(int expectedHeadersType, ByteBuf messageHeader) {
-    if (messageHeader.readableBytes() == 0) {
-      return Collections.emptyMap();
-    }
-
-    byte headersType = messageHeader.readByte();
-    if (headersType != expectedHeadersType) {
-      return Collections.emptyMap();
-    }
-
-    ImmutableMap.Builder<String, String> headers = ImmutableMap.builder();
+  private static void decodeHeaders(ByteBuf messageHeader, Map<String, String> headers) {
     int headerCount = readVarInt32(messageHeader);
     for (int i = 0; i < headerCount; i++) {
       String key = readString(messageHeader);
@@ -328,11 +322,16 @@ public final class HeaderTransportCodec extends ChannelDuplexHandler {
       }
       headers.put(key, value);
     }
-    return headers.build();
   }
 
   private static String readString(ByteBuf buffer) {
     int length = readVarInt32(buffer);
+    if (length < 0 || length > buffer.readableBytes()) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Header string length %d exceeds available bytes %d",
+              length, buffer.readableBytes()));
+    }
     return buffer.readCharSequence(length, UTF_8).toString();
   }
 

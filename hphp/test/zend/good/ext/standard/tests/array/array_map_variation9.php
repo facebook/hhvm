@@ -20,13 +20,13 @@ function callback2($a, $b)
 echo "*** Testing array_map() : array with binary data for 'arr1' argument ***\n";
 
 // array with binary data
-$arr1 = vec[b"hello", b"world", "1", b"22.22"];
+$arr1 = vec["hello", "world", "1", "22.22"];
 
 echo "-- checking binary safe array with one parameter callback function --\n";
 var_dump( array_map(callback1<>, $arr1) );
 
 echo "-- checking binary safe array with two parameter callback function --\n";
-try { var_dump( array_map(HH\dynamic_fun(b"callback2"), $arr1) ); } catch (Exception $e) { var_dump($e->getMessage()); }
+try { var_dump( array_map(HH\dynamic_fun("callback2"), $arr1) ); } catch (Exception $e) { var_dump($e->getMessage()); }
 
 echo "Done";
 }

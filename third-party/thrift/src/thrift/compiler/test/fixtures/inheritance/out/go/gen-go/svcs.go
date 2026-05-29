@@ -115,9 +115,6 @@ func (p *MyRootProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *MyRootProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *MyRootProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}

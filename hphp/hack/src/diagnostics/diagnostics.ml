@@ -52,7 +52,7 @@ type severity = User_diagnostic.severity
 let has_severity_err (e : diagnostic) : bool =
   match e.User_diagnostic.severity with
   | User_diagnostic.Err -> true
-  | User_diagnostic.Warning -> false
+  | User_diagnostic.Warning _ -> false
 
 let files_t_fold v ~f ~init =
   Relative_path.Map.fold v ~init ~f:(fun path v acc -> f path v acc)
@@ -235,7 +235,7 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> diagnostic -> 'res) : 'res
     (* We ensure warnings do not affect typechecker behavior and are not lost *)
     (match severity with
     | User_diagnostic.Err -> f2 result error
-    | User_diagnostic.Warning ->
+    | User_diagnostic.Warning _ ->
       if !accumulate_errors then begin
         let current_list =
           Relative_path.Map.find_opt !error_map !current_file
@@ -771,7 +771,7 @@ let try_apply_fixme pos code severity : fixme_outcome =
          warnings become errors, we'll first make the errors have a non-warning code
          but have warning severity at first, and we'll force suppression using HH_FIXME instead of HH_IGNORE. *)
       match Error_codes.Warning.of_enum code with
-      | Some _ -> User_diagnostic.Warning
+      | Some _ -> User_diagnostic.Warning { is_trusted = true }
       | None -> User_diagnostic.Err
     in
     (match (severity_based_on_code, fixme_kind) with
@@ -801,14 +801,14 @@ let try_apply_fixme pos code severity : fixme_outcome =
             code
         in
         Not_fixmed (Some { explanation; fixme_pos })
-    | (User_diagnostic.Warning, Fixme _) ->
+    | (User_diagnostic.Warning _, Fixme _) ->
       let explanation =
         Printf.sprintf
           "You cannot use `HH_FIXME` comments to suppress warnings. Use `HH_IGNORE[%d]` instead."
           code
       in
       Not_fixmed (Some { explanation; fixme_pos })
-    | (User_diagnostic.Warning, Ignore) -> Fixmed
+    | (User_diagnostic.Warning _, Ignore) -> Fixmed
     | (User_diagnostic.Err, Ignore) ->
       let explanation =
         match severity with
@@ -816,7 +816,7 @@ let try_apply_fixme pos code severity : fixme_outcome =
           Printf.sprintf
             "You cannot use `HH_IGNORE` to suppress non-warning code %d. Hack errors should not be suppressed. You should try your best to fix the code causing the error, or incidents will happen."
             code
-        | User_diagnostic.Warning ->
+        | User_diagnostic.Warning _ ->
           Printf.sprintf
             "This warning code %d will soon be migrated to be an error. Try your best to fix it, or if not possible, suppress it with `HH_FIXME` instead of `HH_IGNORE` and report your case to us."
             code
@@ -971,7 +971,7 @@ let per_file_warning_count ?(drop_fixmed = true) (errors : per_file_diagnostics)
       acc
       +
       match diag.User_diagnostic.severity with
-      | User_diagnostic.Warning -> 1
+      | User_diagnostic.Warning _ -> 1
       | User_diagnostic.Err -> 0)
 
 let get_file_diagnostics ?(drop_fixmed = true) (t : t) (file : Relative_path.t)
@@ -1022,7 +1022,7 @@ let warning_counts_by_code : t -> int IMap.t =
   Relative_path.Map.fold errors ~init:IMap.empty ~f:(fun _path errors acc ->
       List.fold errors ~init:acc ~f:(fun acc (diag : diagnostic) ->
           match diag.User_diagnostic.severity with
-          | User_diagnostic.Warning ->
+          | User_diagnostic.Warning _ ->
             let code = diag.User_diagnostic.code in
             let count = IMap.find_opt code acc |> Option.value ~default:0 in
             IMap.add code (count + 1) acc
@@ -1046,7 +1046,7 @@ let first_n_distinct_error_codes ~(n : int) (t : t) : error_code list =
                   raise (Done codes)
                 else
                   codes
-              | User_diagnostic.Warning -> codes))
+              | User_diagnostic.Warning _ -> codes))
     with
     | Done codes -> codes
   in
@@ -1434,7 +1434,7 @@ let count_errors_and_warnings (error_list : (_, _) User_diagnostic.t list) :
     ~init:(0, 0)
     ~f:(fun (err_count, warn_count) { User_diagnostic.severity; _ } ->
       match severity with
-      | User_diagnostic.Warning -> (err_count, warn_count + 1)
+      | User_diagnostic.Warning _ -> (err_count, warn_count + 1)
       | User_diagnostic.Err -> (err_count + 1, warn_count))
 
 let filter_out_mergebase_warnings
@@ -1446,7 +1446,7 @@ let filter_out_mergebase_warnings
     filter errors ~f:(fun _path error ->
         match error.User_diagnostic.severity with
         | User_diagnostic.Err -> true
-        | User_diagnostic.Warning ->
+        | User_diagnostic.Warning _ ->
           not
             (Warnings_saved_state.mem
                (Error.hash_for_saved_state error)
@@ -1456,12 +1456,60 @@ let filter_out_warnings (errors : t) : t =
   filter errors ~f:(fun _path error ->
       match error.User_diagnostic.severity with
       | User_diagnostic.Err -> true
-      | User_diagnostic.Warning -> false)
+      | User_diagnostic.Warning _ -> false)
 
 let make_warning_saved_state (errors : t) : Warnings_saved_state.t =
   fold errors ~init:Warnings_saved_state.empty ~f:(fun _path error ss ->
       match error.User_diagnostic.severity with
       | User_diagnostic.Err -> ss
-      | User_diagnostic.Warning ->
+      | User_diagnostic.Warning _ ->
         let hash = Error.hash_for_saved_state error in
         Warnings_saved_state.add hash ss)
+
+module WarningKey = struct
+  type t = int * Pos.t [@@deriving ord]
+end
+
+module WarningKeySet = Stdlib.Set.Make (WarningKey)
+
+let collect_warning_keys (f : unit -> unit) : (int * Pos.t) list =
+  let (errors, ()) = do_ ~drop_fixmed:false f in
+  Relative_path.Map.fold errors ~init:[] ~f:(fun _path diagnostics acc ->
+      List.fold diagnostics ~init:acc ~f:(fun acc diag ->
+          match diag.User_diagnostic.severity with
+          | User_diagnostic.Warning _ ->
+            (diag.User_diagnostic.code, fst diag.User_diagnostic.claim) :: acc
+          | User_diagnostic.Err -> acc))
+
+let mark_warnings_trusted (keys : (int * Pos.t) list) : unit =
+  let key_set =
+    List.fold keys ~init:WarningKeySet.empty ~f:(fun acc key ->
+        WarningKeySet.add key acc)
+  in
+  error_map :=
+    Relative_path.Map.map !error_map ~f:(fun diagnostics ->
+        List.map diagnostics ~f:(fun diag ->
+            match diag.User_diagnostic.severity with
+            | User_diagnostic.Warning { is_trusted = false }
+              when WarningKeySet.mem
+                     (diag.User_diagnostic.code, fst diag.User_diagnostic.claim)
+                     key_set ->
+              {
+                diag with
+                User_diagnostic.severity =
+                  User_diagnostic.Warning { is_trusted = true };
+              }
+            | _ -> diag))
+
+let mark_all_warnings_trusted () : unit =
+  error_map :=
+    Relative_path.Map.map !error_map ~f:(fun diagnostics ->
+        List.map diagnostics ~f:(fun diag ->
+            match diag.User_diagnostic.severity with
+            | User_diagnostic.Warning { is_trusted = false } ->
+              {
+                diag with
+                User_diagnostic.severity =
+                  User_diagnostic.Warning { is_trusted = true };
+              }
+            | _ -> diag))

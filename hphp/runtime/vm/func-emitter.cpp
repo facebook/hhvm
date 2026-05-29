@@ -294,7 +294,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   assertx(!m_pce == !preClass);
   auto f = allocFunc(unit, name, attrs, params.size());
 
-  f->m_isPreFunc = !!preClass;
+  f->m_allFlags.m_isPreFunc = !!preClass;
 
   // Returns (static coeffects, escapes)
   auto const coeffectsInfo = getCoeffectsInfoFromList(
@@ -341,6 +341,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     }
     namedParamCount++;
   }
+  f->m_allFlags.m_hasNamedParams = namedParamCount > 0;
   bool const needsExtendedSharedData =
     isNative ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
@@ -362,8 +363,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       : new Func::SharedData(m_bc, m_bclen, preClass, m_sn, line1, line2,
                              !containsCalls)
   );
+  auto const posArgc = params.size() - namedParamCount;
 
-  f->init(params.size());
+  f->init(posArgc);
 
   if (auto const ex = f->extShared()) {
     ex->m_allFlags.m_hasExtendedSharedData = true;

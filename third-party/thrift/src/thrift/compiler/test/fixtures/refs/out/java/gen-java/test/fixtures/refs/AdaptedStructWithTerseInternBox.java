@@ -40,11 +40,11 @@ public final class AdaptedStructWithTerseInternBox implements com.facebook.thrif
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(AdaptedStructWithTerseInternBox other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -58,7 +58,7 @@ public final class AdaptedStructWithTerseInternBox implements com.facebook.thrif
 
         public test.fixtures.refs.Empty getField1() { return field1; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.TERSE)    public Builder setField2(test.fixtures.refs.MyField field2) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.TERSE)    public Builder setField2(test.fixtures.refs.MyField field2) {
             this.field2 = field2;
             return this;
         }
@@ -80,6 +80,7 @@ public final class AdaptedStructWithTerseInternBox implements com.facebook.thrif
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -88,23 +89,20 @@ public final class AdaptedStructWithTerseInternBox implements com.facebook.thrif
     private final test.fixtures.refs.Empty field1;
     public static final int _FIELD1 = 1;
     private static final TField FIELD1_FIELD_DESC = new TField("field1", TType.STRUCT, (short)1);
-        private final test.fixtures.refs.MyField field2;
+    private final test.fixtures.refs.MyField field2;
     public static final int _FIELD2 = 2;
     private static final TField FIELD2_FIELD_DESC = new TField("field2", TType.STRUCT, (short)2);
     static {
-      NAMES_TO_IDS.put("field1", 1);
-      THRIFT_NAMES_TO_IDS.put("field1", 1);
-      FIELD_METADATA.put(1, FIELD1_FIELD_DESC);
-      NAMES_TO_IDS.put("field2", 2);
-      THRIFT_NAMES_TO_IDS.put("field2", 2);
-      FIELD_METADATA.put(2, FIELD2_FIELD_DESC);
+        NAMES_TO_IDS.put("field1", 1);
+        THRIFT_NAMES_TO_IDS.put("field1", 1);
+        FIELD_METADATA.put(1, FIELD1_FIELD_DESC);
+        NAMES_TO_IDS.put("field2", 2);
+        THRIFT_NAMES_TO_IDS.put("field2", 2);
+        FIELD_METADATA.put(2, FIELD2_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE)
     public test.fixtures.refs.Empty getField1() { return field1; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.TERSE)
     public test.fixtures.refs.MyField getField2() { return field2; }
@@ -138,82 +136,83 @@ public final class AdaptedStructWithTerseInternBox implements com.facebook.thrif
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(field1);
-            _hashCode = 31 * _hashCode + Objects.hashCode(field2);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(field2);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<AdaptedStructWithTerseInternBox> asReader() {
       return AdaptedStructWithTerseInternBox::read0;
     }
 
     public static AdaptedStructWithTerseInternBox read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(AdaptedStructWithTerseInternBox.NAMES_TO_IDS, AdaptedStructWithTerseInternBox.THRIFT_NAMES_TO_IDS, AdaptedStructWithTerseInternBox.FIELD_METADATA);
-      AdaptedStructWithTerseInternBox.Builder builder = new AdaptedStructWithTerseInternBox.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _FIELD1:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.refs.Empty field1 = test.fixtures.refs.Empty.read0(oprot);
-            builder.setField1(field1);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _FIELD2:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.refs.MyField field2 = test.fixtures.refs.MyField.read0(oprot);
-            builder.setField2(field2);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(AdaptedStructWithTerseInternBox.NAMES_TO_IDS, AdaptedStructWithTerseInternBox.THRIFT_NAMES_TO_IDS, AdaptedStructWithTerseInternBox.FIELD_METADATA);
+        AdaptedStructWithTerseInternBox.Builder builder = new AdaptedStructWithTerseInternBox.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _FIELD1:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.refs.Empty _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.refs.Empty.read0(oprot);
+                    builder.setField1(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _FIELD2:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.refs.MyField _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.refs.MyField.read0(oprot);
+                    builder.setField2(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      int structStart = 0;
-      int pos = 0;
-      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
-      {
-      test.fixtures.refs.Empty _iter0 = this.field1;
-      java.util.Objects.requireNonNull(_iter0, "field1 must not be null");
-      structStart = p.mark();
-        oprot.writeFieldBegin(FIELD1_FIELD_DESC);
-        pos = p.mark();
-        _iter0.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();
-        } else {
-          p.rollback(structStart);
+        oprot.writeStructBegin(STRUCT_DESC);
+        int structStart = 0;
+        int pos = 0;
+        com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
+        {
+            test.fixtures.refs.Empty _fbthriftVar0 = this.field1;
+            java.util.Objects.requireNonNull(_fbthriftVar0, "field1 must not be null");
+            structStart = p.mark();
+              oprot.writeFieldBegin(FIELD1_FIELD_DESC);
+              pos = p.mark();
+              _fbthriftVar0.write0(oprot);
+              if (p.mark() - pos > p.getEmptyStructSize()) {
+                  p.writeFieldEnd();
+              } else {
+                  p.rollback(structStart);
+              }
         }
-      }
-      {
-      test.fixtures.refs.MyField _iter0 = this.field2;
-      java.util.Objects.requireNonNull(_iter0, "field2 must not be null");
-      structStart = p.mark();
-        oprot.writeFieldBegin(FIELD2_FIELD_DESC);
-        pos = p.mark();
-        _iter0.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();
-        } else {
-          p.rollback(structStart);
+        {
+            test.fixtures.refs.MyField _fbthriftVar0 = this.field2;
+            java.util.Objects.requireNonNull(_fbthriftVar0, "field2 must not be null");
+            structStart = p.mark();
+              oprot.writeFieldBegin(FIELD2_FIELD_DESC);
+              pos = p.mark();
+              _fbthriftVar0.write0(oprot);
+              if (p.mark() - pos > p.getEmptyStructSize()) {
+                  p.writeFieldEnd();
+              } else {
+                  p.rollback(structStart);
+              }
         }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _AdaptedStructWithTerseInternBoxLazy {

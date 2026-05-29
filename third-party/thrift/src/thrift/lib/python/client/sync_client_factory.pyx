@@ -33,7 +33,7 @@ def get_client(
     cProtocol protocol = cProtocol.COMPACT,
     thrift_ssl.SSLContext ssl_context=None,
     double ssl_timeout=1,
-    double channel_timeout=0,
+    channel_timeout=None,
 ):
     try:
         channel = create_channel(

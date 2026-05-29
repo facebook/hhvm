@@ -96,9 +96,7 @@ bool is_binary_iobuf_unique_ptr(const t_type* type);
  */
 bool is_binary_iobuf_unique_ptr(const t_field& field);
 
-/**
- * If the field has cpp.ref/cpp2.ref/cpp.ref_type/cpp2.ref_type.
- */
+/** If the field has a structured reference annotation. */
 // TODO(afuller): Remove by actually inlining function.
 inline bool is_explicit_ref(const t_field* f) {
   return gen::cpp::find_ref_type(*f) != gen::cpp::reference_type::none;
@@ -181,9 +179,7 @@ void for_each_transitive_field(const t_structured* s, F f) {
   }
 }
 
-/**
- * If the field has cpp.ref/cpp2.ref or cpp.ref_type/cpp2.ref_type == "unique".
- */
+/** If the field has @cpp.Ref{type = cpp.RefType.Unique}. */
 // TODO(afuller): Remove by actually inlining function.
 inline bool is_unique_ref(const t_field* f) {
   return gen::cpp::find_ref_type(*f) == gen::cpp::reference_type::unique;

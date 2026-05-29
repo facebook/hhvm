@@ -29,17 +29,23 @@ struct DecrypterResult {
 class Decrypter {
  public:
   virtual ~Decrypter() = default;
-  virtual folly::Optional<DecrypterResult> decryptClientHello(
+  virtual Status decryptClientHello(
+      folly::Optional<DecrypterResult>& ret,
+      Error& err,
       const ClientHello& chlo) = 0;
   /**
    * Similar to above, but handles the HRR case. Config ID is always required,
    * and stateful HRR will pass in the existing context while stateless HRR
    * will pass in the encapsulated key to recreate the context.
    */
-  virtual ClientHello decryptClientHelloHRR(
+  virtual Status decryptClientHelloHRR(
+      ClientHello& ret,
+      Error& err,
       const ClientHello& chlo,
       std::unique_ptr<hpke::HpkeContext>& context) = 0;
-  virtual ClientHello decryptClientHelloHRR(
+  virtual Status decryptClientHelloHRR(
+      ClientHello& ret,
+      Error& err,
       const ClientHello& chlo,
       const std::unique_ptr<folly::IOBuf>& encapsulatedKey) = 0;
   virtual std::vector<ech::ECHConfig> getRetryConfigs(
@@ -51,12 +57,18 @@ class ECHConfigManager : public Decrypter {
   explicit ECHConfigManager(std::shared_ptr<Factory> factory)
       : factory_(std::move(factory)) {}
   void addDecryptionConfig(DecrypterParams decrypterParams);
-  folly::Optional<DecrypterResult> decryptClientHello(
+  Status decryptClientHello(
+      folly::Optional<DecrypterResult>& ret,
+      Error& err,
       const ClientHello& chlo) override;
-  ClientHello decryptClientHelloHRR(
+  Status decryptClientHelloHRR(
+      ClientHello& ret,
+      Error& err,
       const ClientHello& chlo,
       std::unique_ptr<hpke::HpkeContext>& context) override;
-  ClientHello decryptClientHelloHRR(
+  Status decryptClientHelloHRR(
+      ClientHello& ret,
+      Error& err,
       const ClientHello& chlo,
       const std::unique_ptr<folly::IOBuf>& encapsulatedKey) override;
   std::vector<ech::ECHConfig> getRetryConfigs(

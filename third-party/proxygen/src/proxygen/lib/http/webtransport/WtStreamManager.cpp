@@ -43,10 +43,9 @@
  *
  * A note about stream states:
  * – An egress handle transitions from [HandleState::Open] ->
- *   [HandleState::Closed] in three cases: fin is dequeued from WriteHandle via
- *   ::dequeue, the application resets the stream (i.e.
- *   WebTransport::WriteHandle::resetStream), or the transport receives a
- *   stop_sending and WtStreamManager::onStopSending is invoked.
+ *   [HandleState::Closed] in two cases: fin is dequeued from WriteHandle via
+ *   ::dequeue or the application resets the stream (i.e.
+ *   WebTransport::WriteHandle::resetStream).
  *
  * – An ingress handle transitions from [HandleState::Open] ->
  *   [HandleState::Closed] in three cases: fin is read via ::readStreamData(),
@@ -191,6 +190,7 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
   Result onMaxData(uint64_t offset);
   WritePromise resetPromise() noexcept;
   void cancel(folly::exception_wrapper ex) noexcept;
+  void onStopSending(uint32_t errCode) noexcept;
   void finish(bool done) noexcept;
 
   Accessor smAccessor_;
@@ -518,9 +518,11 @@ void WtStreamManager::setReadCb(WtReadHandle& rh, ReadCallback* rcb) noexcept {
   readhandle_ref_cast(rh).rcb_ = rcb;
 }
 
-uint64_t WtStreamManager::bufferedBytes(const WtReadHandle& rh) const noexcept {
-  return static_cast<const ReadHandle&>(rh)
-      .ingress_.chain.computeChainDataLength();
+uint64_t WtStreamManager::recvBytesAvail(
+    const WtReadHandle& rh) const noexcept {
+  return std::min(
+      connRecvFc_.getAvailable(),
+      static_cast<const ReadHandle&>(rh).streamRecvFc_.getAvailable());
 }
 
 WtStreamManager::Result WtStreamManager::onMaxData(MaxConnData data) noexcept {
@@ -561,9 +563,7 @@ WtStreamManager::Result WtStreamManager::onStopSending(
     StopSending data) noexcept {
   XLOG(DBG9) << __func__ << "; id=" << data.streamId << "; err=" << data.err;
   if (auto* eh = writehandle_ptr_cast(getEgressHandle(data.streamId))) {
-    auto ex = folly::make_exception_wrapper<WtException>(uint32_t(data.err),
-                                                         "rx stop_sending");
-    eh->cancel(std::move(ex));
+    eh->onStopSending(data.err);
     return Ok;
   }
   return Fail;
@@ -656,11 +656,20 @@ void WtStreamManager::shutdown(CloseSession cs) noexcept {
 }
 
 bool WtStreamManager::canCreateUni() const noexcept {
-  return !streamLimitExceeded(nextStreamIds_.uni);
+  return !shutdown_ && !streamLimitExceeded(nextStreamIds_.uni);
 }
 
 bool WtStreamManager::canCreateBidi() const noexcept {
-  return !streamLimitExceeded(nextStreamIds_.bidi);
+  return !shutdown_ && !streamLimitExceeded(nextStreamIds_.bidi);
+}
+
+std::vector<uint64_t> WtStreamManager::streamIds() const noexcept {
+  std::vector<uint64_t> result;
+  result.reserve(streams_.size());
+  for (const auto& [id, _] : streams_) {
+    result.push_back(id);
+  }
+  return result;
 }
 
 bool WtStreamManager::hasEvent() const noexcept {
@@ -859,10 +868,9 @@ folly::Expected<folly::Unit, ReadHandle::ErrCode> ReadHandle::stopSending(
 }
 
 Result ReadHandle::enqueue(StreamData&& data) noexcept {
-  XCHECK(!ingress_.fin) << "already rx'd eof";
   auto len = computeChainLength(data.data);
-  if (!streamRecvFc_.reserve(len)) {
-    return Result::Fail; // error
+  if (!streamRecvFc_.reserve(len) || ingress_.fin) { // error
+    return Result::Fail;
   }
   if (len > 0) {
     ingress_.chain.appendToChain(std::move(data.data));
@@ -1036,6 +1044,11 @@ void WriteHandle::cancel(folly::exception_wrapper ex) noexcept {
   cs_.requestCancellation();
   // **beware finish must be last** (`this` can be deleted immediately after)
   finish(/*done=*/true);
+}
+
+void WriteHandle::onStopSending(uint32_t errCode) noexcept {
+  ex_ = folly::make_exception_wrapper<WtException>(errCode, "rx stop_sending");
+  cs_.requestCancellation(); // notify applicaiton of stop sending
 }
 
 void WriteHandle::finish(bool done) noexcept {

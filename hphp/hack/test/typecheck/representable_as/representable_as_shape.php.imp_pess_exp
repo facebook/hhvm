@@ -1,0 +1,44 @@
+ERROR: File "representable_as_shape.php", line 27, characters 44-45:
+Invalid argument (Typing[4110])
+  File "representable_as_shape.php", line 4, characters 94-96:
+  Expected `int`
+  File "representable_as_shape.php", line 25, characters 70-75:
+  But got `string`
+ERROR: File "representable_as_shape.php", line 37, characters 39-40:
+Invalid argument (Typing[4110])
+  File "representable_as_shape.php", line 8, characters 79-81:
+  Expected `int`
+  File "representable_as_shape.php", line 35, characters 43-71:
+  But got `string`
+ERROR: File "representable_as_shape.php", line 42, characters 42-43:
+Invalid argument (Typing[4110])
+  File "representable_as_shape.php", line 7, characters 77-93:
+  Expected `dict<string, int>`
+  File "representable_as_shape.php", line 40, characters 44-65:
+  But got `shape('a' => int, ...)`
+ERROR: File "representable_as_shape.php", line 48, characters 44-45:
+Invalid argument (Typing[4110])
+  File "representable_as_shape.php", line 4, characters 79-97:
+  Expected `dict<arraykey, int>`
+  File "representable_as_shape.php", line 45, characters 46-67:
+  But got `shape('a' => int, ...)`
+ERROR: File "representable_as_shape.php", line 87, characters 42-43:
+Invalid argument (Typing[4110])
+  File "representable_as_shape.php", line 7, characters 82-87:
+  Expected `string`
+  File "representable_as_shape.php", line 71, characters 9-11:
+  But got `int`
+  File "representable_as_shape.php", line 71, characters 16-18:
+    by the definition of `F`
+ERROR: File "representable_as_shape.php", line 121, characters 42-43:
+Invalid argument (Typing[4110])
+  File "representable_as_shape.php", line 94, characters 89-91:
+  Expected `int`
+  File "representable_as_shape.php", line 119, characters 75-80:
+  But got `string`
+ERROR: File "representable_as_shape.php", line 126, characters 55-56:
+Invalid argument (Typing[4110])
+  File "representable_as_shape.php", line 96, characters 115-117:
+  Expected `int`
+  File "representable_as_shape.php", line 124, characters 88-93:
+  But got `string`

@@ -21,32 +21,32 @@ import com.facebook.thrift.metadata.ThriftStructType;
 import com.facebook.thrift.metadata.ThriftType;
 
 class InteractWithSharedThriftMetadataHandlerStructs_0 {
-  static void addStructs(Map<String, ThriftStruct> structs) {
-    structs.put("test.fixtures.another_interactions.DoSomethingResult", new ThriftStruct.Builder()
-        .setName("test.fixtures.another_interactions.DoSomethingResult")
-        .setFields(Arrays.asList(
-            new ThriftField.Builder()
-                .setId(1)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
-                .setName("s_res")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(2)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE))
-                .setName("i_res")
-                .setIsOptional(false)
-                .build()
-        ))
-        .setIsUnion(false)
-        .build());
-  }
+    static void addStructs(Map<String, ThriftStruct> structs) {
+        structs.put("test.fixtures.another_interactions.DoSomethingResult", new ThriftStruct.Builder()
+            .setName("test.fixtures.another_interactions.DoSomethingResult")
+            .setFields(Arrays.asList(
+                new ThriftField.Builder()
+                    .setId(1)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
+                    .setName("s_res")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(2)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE))
+                    .setName("i_res")
+                    .setIsOptional(false)
+                    .build()
+            ))
+            .setIsUnion(false)
+            .build());
+    }
 }
 
 class InteractWithSharedThriftMetadataHandlerStructs {
-  static Map<String, ThriftStruct> getStructs() {
-    Map<String, ThriftStruct> structs = new HashMap<>();
-    InteractWithSharedThriftMetadataHandlerStructs_0.addStructs(structs);
-    return structs;
-  }
+    static Map<String, ThriftStruct> getStructs() {
+        Map<String, ThriftStruct> structs = new HashMap<>();
+        InteractWithSharedThriftMetadataHandlerStructs_0.addStructs(structs);
+        return structs;
+    }
 }

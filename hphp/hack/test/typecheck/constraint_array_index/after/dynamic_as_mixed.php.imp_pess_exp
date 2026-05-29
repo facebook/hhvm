@@ -1,1 +1,4 @@
-No errors
+WARN: File "dynamic_as_mixed.php", line 16, characters 8-9:
+Indexing into a value of type `(dynamic & dict<arraykey, mixed>)` (Warn[12040])
+  File "dynamic_as_mixed.php", line 14, characters 12-18:
+  This expression has type `dynamic`

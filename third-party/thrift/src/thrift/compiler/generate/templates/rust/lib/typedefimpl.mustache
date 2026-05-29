@@ -17,9 +17,8 @@
 }}
   {{#if typedef.newtype?}}
 impl ::fbthrift::GetTType for {{typedef.rust_name}} {
-    const TTYPE: ::fbthrift::TType = {{!
-      }}{{#if typedef.has_adapter?}}<{{typedef.adapter_qualified}}::StandardType{{#else}}<{{#partial types.type_name type=typedef.resolved}}{{/if}}{{!
-      }} as ::fbthrift::GetTType>::TTYPE;
+    const TTYPE: ::fbthrift::TType = {{!}}
+        {{~ #if typedef.has_adapter?}}<{{typedef.adapter_qualified}}::StandardType{{#else}}<{{#partial types.type_name type=typedef.resolved}}{{/if}} as ::fbthrift::GetTType>::TTYPE;
 }
 
     {{#if typedef.nonstandard?}}
@@ -59,10 +58,10 @@ where
 {
     #[inline]
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-        {{#if typedef.has_adapter?}}{{typedef.adapter_qualified}}::from_thrift({{/if}}{{!
-        }}::fbthrift::Deserialize::rs_thrift_read(p){{!
-        }}{{#if typedef.has_adapter?}}?).map_err(Into::<::anyhow::Error>::into){{/if}}{{!
-        }}.map({{typedef.rust_name}})
+        {{#if typedef.has_adapter?}}{{typedef.adapter_qualified}}::from_thrift({{/if ~}}
+        ::fbthrift::Deserialize::rs_thrift_read(p)
+        {{~ #if typedef.has_adapter?}}?).map_err(Into::<::anyhow::Error>::into){{/if ~}}
+        .map({{typedef.rust_name}})
     }
 }
     {{/if typedef.nonstandard?}}

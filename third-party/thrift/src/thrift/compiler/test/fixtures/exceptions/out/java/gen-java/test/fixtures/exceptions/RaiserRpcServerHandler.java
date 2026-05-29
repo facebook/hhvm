@@ -177,8 +177,8 @@ public class RaiserRpcServerHandler
 
         oprot.writeFieldBegin(
             new TField("responseField", TType.STRUCT, _fieldId));
-        com.facebook.thrift.payload.ThriftSerializable _iter0 = (com.facebook.thrift.payload.ThriftSerializable)_t;
-        _iter0.write0(oprot);
+        com.facebook.thrift.payload.ThriftSerializable _fbthriftVar0 = (com.facebook.thrift.payload.ThriftSerializable)_t;
+        _fbthriftVar0.write0(oprot);
 
         oprot.writeFieldEnd();
         oprot.writeFieldStop();
@@ -294,9 +294,9 @@ public class RaiserRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        String _iter0 = (String)_r;
+        String _fbthriftVar0 = (String)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.STRING_FIELD);
-        oprot.writeString(_iter0);
+        oprot.writeString(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -380,9 +380,9 @@ public class RaiserRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        String _iter0 = (String)_r;
+        String _fbthriftVar0 = (String)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.STRING_FIELD);
-        oprot.writeString(_iter0);
+        oprot.writeString(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -408,8 +408,8 @@ public class RaiserRpcServerHandler
 
         oprot.writeFieldBegin(
             new TField("responseField", TType.STRUCT, _fieldId));
-        com.facebook.thrift.payload.ThriftSerializable _iter0 = (com.facebook.thrift.payload.ThriftSerializable)_t;
-        _iter0.write0(oprot);
+        com.facebook.thrift.payload.ThriftSerializable _fbthriftVar0 = (com.facebook.thrift.payload.ThriftSerializable)_t;
+        _fbthriftVar0.write0(oprot);
 
         oprot.writeFieldEnd();
         oprot.writeFieldStop();

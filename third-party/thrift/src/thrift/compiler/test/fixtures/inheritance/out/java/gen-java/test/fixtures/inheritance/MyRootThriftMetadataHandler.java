@@ -26,71 +26,71 @@ import com.facebook.thrift.metadata.ThriftType;
 
 public class MyRootThriftMetadataHandler implements com.facebook.thrift.server.ThriftMetadataHandler {
 
-  private static void addFunctions_0(List<ThriftFunction> functions) {
-        {
-          List<ThriftField> args = new ArrayList<>();
+    private static void addFunctions_0(List<ThriftFunction> functions) {
+            {
+              List<ThriftField> args = new ArrayList<>();
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("do_root")
-              .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-  }
+              functions.add(new ThriftFunction.Builder()
+                  .setName("do_root")
+                  .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+    }
 
-  private static final ThriftService THRIFT_SERVICE;
+    private static final ThriftService THRIFT_SERVICE;
 
 
-  static {
-    List<ThriftFunction> functions = new ArrayList<>();
-    addFunctions_0(functions);
-    THRIFT_SERVICE = new ThriftService.Builder()
-        .setName("test.fixtures.inheritance.MyRoot")
-        .setFunctions(functions)
-        .build();
-  }
+    static {
+        List<ThriftFunction> functions = new ArrayList<>();
+        addFunctions_0(functions);
+        THRIFT_SERVICE = new ThriftService.Builder()
+            .setName("test.fixtures.inheritance.MyRoot")
+            .setFunctions(functions)
+            .build();
+    }
 
-  @Override
-  public String getName() {
-    return "MyRoot";
-  }
+    @Override
+    public String getName() {
+        return "MyRoot";
+    }
 
-  @Override
-  public String getFullyQualifiedName() {
-    return "test.fixtures.inheritance.MyRoot";
-  }
+    @Override
+    public String getFullyQualifiedName() {
+        return "test.fixtures.inheritance.MyRoot";
+    }
 
-  @Override
-  public ThriftService getThriftService() {
-    return THRIFT_SERVICE;
-  }
+    @Override
+    public ThriftService getThriftService() {
+        return THRIFT_SERVICE;
+    }
 
-  @Override
-  public String getParentServiceName() {
-    return null;
-  }
+    @Override
+    public String getParentServiceName() {
+        return null;
+    }
 
-  @Override
-  public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
-    return null;
-  }
+    @Override
+    public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
+        return null;
+    }
 
-  @Override
-  public Map<String, ThriftEnum> getEnums() {
-    return MyRootThriftMetadataHandlerEnums.getEnums();
-  }
+    @Override
+    public Map<String, ThriftEnum> getEnums() {
+        return MyRootThriftMetadataHandlerEnums.getEnums();
+    }
 
-  @Override
-  public Map<String, ThriftStruct> getStructs() {
-    return MyRootThriftMetadataHandlerStructs.getStructs();
-  }
+    @Override
+    public Map<String, ThriftStruct> getStructs() {
+        return MyRootThriftMetadataHandlerStructs.getStructs();
+    }
 
-  @Override
-  public Map<String, ThriftException> getExceptions() {
-    return MyRootThriftMetadataHandlerExceptions.getExceptions();
-  }
+    @Override
+    public Map<String, ThriftException> getExceptions() {
+        return MyRootThriftMetadataHandlerExceptions.getExceptions();
+    }
 }

@@ -31,8 +31,16 @@ struct IRGS;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitCalleeNamedArgChecks(IRGS& env, const Func* callee, uint32_t argc,
-                              SSATmp* namedArgNames);
+/*
+ * To facilitate tight code generation for prologues, the definition of namedArgNames
+ * is subtle. A nullptr (as opposed to a cns(env, nullptr)) value indicates that we don't
+ * know the namedArgNames value, and instead must rely on the prologue flags to check for
+ * the existence of any named args. That situation occurs in the prologues of functions
+ * without named args. This behavior allows us to immediately release the named arg names
+ * register in the common case.
+ */
+void emitCalleeNamedArgChecks(IRGS& env, const Func* callee, uint32_t posArgc,
+                              SSATmp* prologueFlags, SSATmp* namedArgNames);
 /*
  * Check for presence, count and wildcard match of generics.
  *

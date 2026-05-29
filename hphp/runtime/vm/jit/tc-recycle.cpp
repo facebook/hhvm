@@ -192,8 +192,15 @@ void clearTCMaps(TCA start, TCA end) {
   while (start < end) {
     bool isBranch, isNop, isCall;
     size_t instSz;
-    switch (arch::get()) {
-      case Arch::ARM: {
+    ARCH_MATCH(
+      [&](arch::X64) {
+        x64::DecodedInstruction di(start);
+        isBranch = di.isBranch();
+        isNop = di.isNop();
+        isCall = di.isCall();
+        instSz = di.size();
+      },
+      [&](arch::ARM) {
         using namespace vixl;
         Instruction* instr = Instruction::Cast(start);
         isBranch = instr->IsCondBranchImm() || instr->IsUncondBranchImm() ||
@@ -204,17 +211,8 @@ void clearTCMaps(TCA start, TCA end) {
         isCall = instr->Mask(UnconditionalBranchMask) == BL ||
           instr->Mask(UnconditionalBranchToRegisterMask) == BLR;
         instSz = vixl::kInstructionSize;
-        break;
       }
-      case Arch::X64: {
-        x64::DecodedInstruction di(start);
-        isBranch = di.isBranch();
-        isNop = di.isNop();
-        isCall = di.isCall();
-        instSz = di.size();
-        break;
-      }
-    }
+    );
 
     if (profData && (isBranch || isNop || isCall)) {
       auto const id = profData->clearJmpTransID(start);
@@ -284,7 +282,7 @@ void clearRange(TCA start, size_t len, const char* info) {
     // In general, fixups should be empty at this point. However, a fallthru
     // instruction is appended to any empty block and, on ARM, fallthru
     // instructions add address immediates in the fixups.addressImmediates.
-    assertx(arch::get() == Arch::ARM || fixups.empty());
+    assertx(arch::any<arch::ARM>() || fixups.empty());
   };
 
   DataBlock db;
@@ -415,13 +413,14 @@ int recordedFuncs()   { return s_funcTCData.size(); }
 
 namespace {
 ServiceData::CounterCallback s_counters(
-  [](std::map<std::string, int64_t>& counters) {
+  [](ServiceData::CounterMap& counters) {
     if (!Cfg::Eval::EnableReusableTC) return;
 
     counters["jit.tc.smashed_calls"] = s_smashedCalls.size();
     counters["jit.tc.recorded_funcs"] = s_funcTCData.size();
     counters["jit.tc.smashed_branches"] = s_smashedBranches.size();
-  }
+  },
+  "jit.tc."
 );
 }
 

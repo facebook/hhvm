@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<976ef4a8720bbb1efa516e8869fe4c7d>>
+// @generated SignedSource<<421aefd1693c39e8e6bbd5b04e6610f5>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -402,8 +402,6 @@ pub enum FlowKind {
     FlowInstantiate(String),
     #[rust_to_ocaml(name = "Flow_elab")]
     FlowElab,
-    #[rust_to_ocaml(name = "Flow_unsafe_cast")]
-    FlowUnsafeCast,
 }
 
 /// Witness the reason for a type during decling using the position of a hint

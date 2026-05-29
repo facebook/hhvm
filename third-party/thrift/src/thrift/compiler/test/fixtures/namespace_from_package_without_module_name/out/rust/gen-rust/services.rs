@@ -6,9 +6,9 @@
 
 /// Service definitions for `TestService`.
 pub mod test_service {
+
     #[derive(Clone, Debug)]
     pub enum InitExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -88,7 +88,6 @@ pub mod test_service {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();

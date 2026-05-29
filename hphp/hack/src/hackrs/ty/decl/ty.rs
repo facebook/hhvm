@@ -699,6 +699,7 @@ pub struct FunElt<R: Reason> {
     pub support_dynamic_type: bool,
     pub no_auto_dynamic: bool,
     pub no_auto_likes: bool,
+    pub gated_by_feature_flag: Option<String>,
     pub package_requirement: PackageRequirement,
 }
 

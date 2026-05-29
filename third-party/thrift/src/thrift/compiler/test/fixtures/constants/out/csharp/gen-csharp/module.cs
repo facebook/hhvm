@@ -31,6 +31,7 @@ namespace test.fixtures.constants
     /// </summary>
     public enum @EmptyEnum : int
     {
+
     }
 
     /// <summary>

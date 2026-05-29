@@ -1,1 +1,2 @@
 --refactor-sound-dynamic dump Class C
+--config hack_warnings=false

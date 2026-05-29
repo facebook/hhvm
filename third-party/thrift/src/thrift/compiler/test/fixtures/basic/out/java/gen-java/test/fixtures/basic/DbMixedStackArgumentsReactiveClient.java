@@ -39,7 +39,6 @@ public class DbMixedStackArgumentsReactiveClient
   }
 
   public DbMixedStackArgumentsReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = reactor.core.publisher.Mono.empty();
@@ -60,7 +59,6 @@ public class DbMixedStackArgumentsReactiveClient
   }
 
   public DbMixedStackArgumentsReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = _headersMono;
@@ -77,9 +75,9 @@ public class DbMixedStackArgumentsReactiveClient
         {
           oprot.writeFieldBegin(_getDataByKey0_KEY_FIELD_DESC);
 
-          String _iter0 = key;
+          String _fbthriftVar0 = key;
 
-          oprot.writeString(_iter0);
+          oprot.writeString(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -134,9 +132,9 @@ public class DbMixedStackArgumentsReactiveClient
         {
           oprot.writeFieldBegin(_getDataByKey1_KEY_FIELD_DESC);
 
-          String _iter0 = key;
+          String _fbthriftVar0 = key;
 
-          oprot.writeString(_iter0);
+          oprot.writeString(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 

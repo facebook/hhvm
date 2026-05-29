@@ -8,7 +8,7 @@
 
 
 import time
-from os import path
+from os import fsencode, path
 
 from watchman.integration.lib import WatchmanEdenTestCase
 
@@ -222,9 +222,10 @@ class TestEdenJournal(WatchmanEdenTestCase.WatchmanEdenTestCase):
 
         clock = self.watchmanCommand("clock", root)
 
-        with self.eden.get_thrift_client_legacy() as thrift_client:
-            thrift_client.setJournalMemoryLimit(root, 0)
-            self.assertEqual(0, thrift_client.getJournalMemoryLimit(root))
+        with self.eden.get_thrift_client() as thrift_client:
+            mount = fsencode(root)
+            thrift_client.setJournalMemoryLimit(mount, 0)
+            self.assertEqual(0, thrift_client.getJournalMemoryLimit(mount))
 
         # Eden's Journal always remembers at least one entry so we will
         # do things in twos

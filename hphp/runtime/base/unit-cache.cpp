@@ -2521,13 +2521,14 @@ void shutdownUnitReaper() {
 namespace {
 
 ServiceData::CounterCallback s_counters(
-  [](std::map<std::string, int64_t>& counters) {
+  [](ServiceData::CounterMap& counters) {
     counters["vm.path-unit-cache-size"] = numLoadedUnits();
     counters["vm.hash-unit-cache-size"] = s_unitByHashCache.size();
     counters["vm.eval-unit-cache-size"] = s_evaledUnits.size();
     counters["vm.live-units"] = Unit::liveUnitCount();
     counters["vm.created-units"] = Unit::createdUnitCount();
-  }
+  },
+  "vm."
 );
 
 }

@@ -46,11 +46,11 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(MyStruct1 other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -66,21 +66,21 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
 
         public long getMyIntField() { return myIntField; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
             this.myStringField = myStringField;
             return this;
         }
 
         public String getMyStringField() { return myStringField; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)    public Builder setMyDataField(test.fixtures.basic_swift_bean.MyDataItem myDataField) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)    public Builder setMyDataField(test.fixtures.basic_swift_bean.MyDataItem myDataField) {
             this.myDataField = myDataField;
             return this;
         }
 
         public test.fixtures.basic_swift_bean.MyDataItem getMyDataField() { return myDataField; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="major", requiredness=Requiredness.NONE)    public Builder setMajor(long major) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="major", requiredness=Requiredness.NONE)    public Builder setMajor(long major) {
             this.major = major;
             return this;
         }
@@ -106,6 +106,7 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -114,46 +115,39 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
     private final long myIntField;
     public static final int _MYINTFIELD = 1;
     private static final TField MY_INT_FIELD_FIELD_DESC = new TField("MyIntField", TType.I64, (short)1);
-        private final String myStringField;
+    private final String myStringField;
     public static final int _MYSTRINGFIELD = 2;
     private static final TField MY_STRING_FIELD_FIELD_DESC = new TField("MyStringField", TType.STRING, (short)2);
-        private final test.fixtures.basic_swift_bean.MyDataItem myDataField;
+    private final test.fixtures.basic_swift_bean.MyDataItem myDataField;
     public static final int _MYDATAFIELD = 3;
     private static final TField MY_DATA_FIELD_FIELD_DESC = new TField("MyDataField", TType.STRUCT, (short)3);
-        private final long major;
+    private final long major;
     public static final int _MAJOR = 4;
     private static final TField MAJOR_FIELD_DESC = new TField("major", TType.I64, (short)4);
     static {
-      NAMES_TO_IDS.put("myIntField", 1);
-      THRIFT_NAMES_TO_IDS.put("MyIntField", 1);
-      FIELD_METADATA.put(1, MY_INT_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myStringField", 2);
-      THRIFT_NAMES_TO_IDS.put("MyStringField", 2);
-      FIELD_METADATA.put(2, MY_STRING_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myDataField", 3);
-      THRIFT_NAMES_TO_IDS.put("MyDataField", 3);
-      FIELD_METADATA.put(3, MY_DATA_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("major", 4);
-      THRIFT_NAMES_TO_IDS.put("major", 4);
-      FIELD_METADATA.put(4, MAJOR_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField", 1);
+        THRIFT_NAMES_TO_IDS.put("MyIntField", 1);
+        FIELD_METADATA.put(1, MY_INT_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myStringField", 2);
+        THRIFT_NAMES_TO_IDS.put("MyStringField", 2);
+        FIELD_METADATA.put(2, MY_STRING_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myDataField", 3);
+        THRIFT_NAMES_TO_IDS.put("MyDataField", 3);
+        FIELD_METADATA.put(3, MY_DATA_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("major", 4);
+        THRIFT_NAMES_TO_IDS.put("major", 4);
+        FIELD_METADATA.put(4, MAJOR_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
     public long getMyIntField() { return myIntField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)
     public String getMyStringField() { return myStringField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)
     public test.fixtures.basic_swift_bean.MyDataItem getMyDataField() { return myDataField; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=4, name="major", requiredness=Requiredness.NONE)
     public long getMajor() { return major; }
 
@@ -190,99 +184,102 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(myIntField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myStringField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myDataField);
-            _hashCode = 31 * _hashCode + Long.hashCode(major);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(myStringField);
+        _hashCode = 31 * _hashCode + Objects.hashCode(myDataField);
+        _hashCode = 31 * _hashCode + Long.hashCode(major);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyStruct1> asReader() {
       return MyStruct1::read0;
     }
 
     public static MyStruct1 read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(MyStruct1.NAMES_TO_IDS, MyStruct1.THRIFT_NAMES_TO_IDS, MyStruct1.FIELD_METADATA);
-      MyStruct1.Builder builder = new MyStruct1.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MYINTFIELD:
-          if (__field.type == TType.I64) {
-            long myIntField = oprot.readI64();
-            builder.setMyIntField(myIntField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYSTRINGFIELD:
-          if (__field.type == TType.STRING) {
-            String myStringField = oprot.readString();
-            builder.setMyStringField(myStringField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDATAFIELD:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.basic_swift_bean.MyDataItem myDataField = test.fixtures.basic_swift_bean.MyDataItem.read0(oprot);
-            builder.setMyDataField(myDataField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAJOR:
-          if (__field.type == TType.I64) {
-            long major = oprot.readI64();
-            builder.setMajor(major);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(MyStruct1.NAMES_TO_IDS, MyStruct1.THRIFT_NAMES_TO_IDS, MyStruct1.FIELD_METADATA);
+        MyStruct1.Builder builder = new MyStruct1.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MYINTFIELD:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMyIntField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYSTRINGFIELD:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMyStringField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYDATAFIELD:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.basic_swift_bean.MyDataItem _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.basic_swift_bean.MyDataItem.read0(oprot);
+                    builder.setMyDataField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAJOR:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMajor(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.myIntField;
-      oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.myStringField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_STRING_FIELD_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.basic_swift_bean.MyDataItem _iter0 = this.myDataField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_DATA_FIELD_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      long _iter0 = this.major;
-      oprot.writeFieldBegin(MAJOR_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.myIntField;
+            oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.myStringField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_STRING_FIELD_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.basic_swift_bean.MyDataItem _fbthriftVar0 = this.myDataField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_DATA_FIELD_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            long _fbthriftVar0 = this.major;
+            oprot.writeFieldBegin(MAJOR_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _MyStruct1Lazy {

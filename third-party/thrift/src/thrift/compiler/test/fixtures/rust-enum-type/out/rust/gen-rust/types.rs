@@ -45,6 +45,13 @@ impl ::fbthrift::ThriftEnum for SmallEnum {
     fn inner_value(&self) -> i32 {
         self.0 as i32
     }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for SmallEnum: {e}")
+        })
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -179,6 +186,13 @@ impl ::fbthrift::ThriftEnum for SignedEnum {
     fn inner_value(&self) -> i32 {
         self.0 as i32
     }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for SignedEnum: {e}")
+        })
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -309,6 +323,13 @@ impl ::fbthrift::ThriftEnum for MediumEnum {
     fn inner_value(&self) -> i32 {
         self.0 as i32
     }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for MediumEnum: {e}")
+        })
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -436,6 +457,13 @@ impl ::fbthrift::ThriftEnum for LargeEnum {
     #[allow(clippy::unnecessary_cast)]
     fn inner_value(&self) -> i32 {
         self.0 as i32
+    }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for LargeEnum: {e}")
+        })
     }
 }
 
@@ -565,6 +593,13 @@ impl ::fbthrift::ThriftEnum for DefaultEnum {
     fn inner_value(&self) -> i32 {
         self.0 as i32
     }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for DefaultEnum: {e}")
+        })
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -658,7 +693,6 @@ where
         ::std::result::Result::Ok(Self::from(underlying))
     }
 }
-
 
 pub(crate) mod r#impl {
     use ::ref_cast::RefCast;

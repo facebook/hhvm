@@ -1194,7 +1194,7 @@ To string conversions:
   this vector is located before the class in memory, so the non-negative slots
   will map to negative offset loads.)
 
-| LookupClsMethod, D(Func|Nullptr), S(Cls) S(Str) S(Obj|Nullptr) S(Func), NF
+| LookupClsMethod, D(Func|Nullptr), S(Cls) CStr() S(Obj|Nullptr) S(Func), NF
 
   Lookup a pointer to a class method for a given class S0 and method name S1,
   assuming caller's $this is S2 and the caller is S3. Throws or
@@ -2041,6 +2041,8 @@ ReqBindJmp and CallFuncEntry.
 
 | DefFuncPrologueNumArgs, D(Int), NA, NF
 
+| DefFuncPrologueNamedArgs, D(Vec), NA, NF
+
 | DefFuncPrologueCtx, DParam(Cls|Obj), NA, NF
 
   Creates a temporary D representing prologue flags, callee function pointer,
@@ -2357,6 +2359,12 @@ ReqBindJmp and CallFuncEntry.
 | CheckClsMethFunc, ND, S(Func), NF
 
   Raises runtime errors if the func in S0 is not a callable static method.
+
+| CheckFunNamedArgsMismatch, ND, S(Func) S(Vec|Nullptr), LA
+
+  Raises a runtime error if the passed named arg names in S1 are incompatible with
+  S0's named param names, either due to missing a required named parameter or
+  passing extra named args.
 
 | CheckClsReifiedGenericMismatch, ND, S(Cls) S(Vec), LA
 
@@ -3501,13 +3509,18 @@ fields of that struct for holding intermediate values.
   Throws an InvalidOperationException indicating a readonly semantics violation
   where a collection is modified.
 
-| ThrowMissingNamedArgument<callee>, ND, S(Int), T
+| ThrowMissingNamedParam<callee>, ND, S(Str), T
   Throws an exception to indicate that too few named arguments were
   passed to the callee.
 
 | ThrowNamedArgumentNameMismatch<callee>, ND, S(Str), T
   Throws an exception to indicate that a named argument not present in
   the named parameter list was passed to the callee.
+
+
+| ThrowUnexpectedNamedArguments<callee>, ND, NA, T
+  Throws a runtime exception to indicate that named arguments were passed
+  to a callee that doesn't accept any.
 
 | ProfileType, ND, S(Cell), NF
 

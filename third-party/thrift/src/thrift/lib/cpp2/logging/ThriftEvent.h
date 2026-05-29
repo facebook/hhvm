@@ -118,4 +118,36 @@ using SinkEvent = std::variant<
     SinkCreditEvent,
     SinkCompleteEvent>;
 
+// ---------------------------------------------------------------------------
+// BiDi events
+// ---------------------------------------------------------------------------
+
+struct BiDiSubscribeEvent {};
+
+struct BiDiSinkNextEvent {};
+
+struct BiDiSinkCreditEvent {
+  uint32_t credits;
+};
+
+struct BiDiStreamNextEvent {};
+
+struct BiDiStreamCreditEvent {
+  uint32_t credits;
+};
+
+struct BiDiStreamPauseEvent {
+  StreamPauseReason reason;
+};
+
+enum class BiDiEndReason {
+  COMPLETE,
+  CANCEL,
+  ERROR,
+};
+
+struct BiDiFinallyEvent {
+  BiDiEndReason reason;
+};
+
 } // namespace apache::thrift::detail

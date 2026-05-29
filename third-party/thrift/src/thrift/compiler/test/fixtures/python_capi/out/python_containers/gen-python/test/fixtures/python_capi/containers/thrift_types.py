@@ -12,6 +12,7 @@ import folly.iobuf as _fbthrift_iobuf
 from abc import ABCMeta as _fbthrift_ABCMeta
 import test.fixtures.python_capi.containers.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
+import thrift.python.container_typedefs as _fbthrift_python_container_typedefs
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
@@ -663,9 +664,21 @@ _fbthrift_all_structs = [
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
 IOBuf = _fbthrift_iobuf.IOBuf
-small_vector_iobuf = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_iobuf)
-fbvector_string = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_string)
-fbvector_fbvector_string = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string))
-ListOfWrapped = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.StructTypeInfo(TWrapped))
-VecOfWrapped = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.StructTypeInfo(TWrapped))
-ListOfWrappedAlias = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.StructTypeInfo(TWrapped))
+class small_vector_iobuf(_fbthrift_python_container_typedefs._ListTypedefBase):
+    __slots__ = ()
+    _fbthrift_list_type_info = _fbthrift_python_types.typeinfo_iobuf
+class fbvector_string(_fbthrift_python_container_typedefs._ListTypedefBase):
+    __slots__ = ()
+    _fbthrift_list_type_info = _fbthrift_python_types.typeinfo_string
+class fbvector_fbvector_string(_fbthrift_python_container_typedefs._ListTypedefBase):
+    __slots__ = ()
+    _fbthrift_list_type_info = _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string)
+class ListOfWrapped(_fbthrift_python_container_typedefs._ListTypedefBase):
+    __slots__ = ()
+    _fbthrift_list_type_info = _fbthrift_python_types.StructTypeInfo(TWrapped)
+class VecOfWrapped(_fbthrift_python_container_typedefs._ListTypedefBase):
+    __slots__ = ()
+    _fbthrift_list_type_info = _fbthrift_python_types.StructTypeInfo(TWrapped)
+class ListOfWrappedAlias(_fbthrift_python_container_typedefs._ListTypedefBase):
+    __slots__ = ()
+    _fbthrift_list_type_info = _fbthrift_python_types.StructTypeInfo(TWrapped)

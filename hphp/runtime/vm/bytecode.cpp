@@ -185,9 +185,6 @@ inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
 inline const char* prettytype(ClassGetCMode) { return "ClassGetCMode"; }
 inline const char* prettytype(CollectionType) { return "CollectionType"; }
-inline const char* prettytype(IsLogAsDynamicCallOp) {
-  return "IsLogAsDynamicCallOp";
-}
 
 // load a T value from *pc without incrementing
 template<class T> T peek(PC pc) {
@@ -759,25 +756,23 @@ Array getDefinedVariables(const ActRec* fp) {
 }
 
 // Unpack or repack positionals as needed to match the function signature.
-// The stack contains numArgs arguments plus an extra cell containing
-// arguments to unpack.
-uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
-                           uint32_t numNamedArgs, bool checkInOutAnnot) {
+// The stack contains numPositionalArgs positionals plus an extra cell
+// containing arguments to unpack.
+uint32_t prepareUnpackArgs(const Func* func, uint32_t numPositionalArgs,
+                           bool checkInOutAnnot) {
   auto& stack = vmStack();
   auto unpackArgs = *stack.topC();
   if (!isContainer(unpackArgs)) throwInvalidUnpackArgs();
   stack.discard();
   SCOPE_EXIT { tvDecRefGen(unpackArgs); };
 
-  auto const numPositionalArgs = numArgs - numNamedArgs;
   auto const numUnpackArgs = getContainerSize(unpackArgs);
   auto const numPositionalParams = func->numPositionalParams();
-
   if (LIKELY(numPositionalArgs == numPositionalParams)) {
     // Convert unpack args to the proper type.
     tvCastToVecInPlace(&unpackArgs);
     stack.pushVec(unpackArgs.m_data.parr);
-    return numNamedArgs + numPositionalParams + 1;
+    return numPositionalParams + 1;
   }
 
   ArrayIter iter(unpackArgs);
@@ -796,7 +791,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
       // empty array for the variadic argument ... that work is left to
       // initFuncInputs.
       assertx(numPositionalArgs + numUnpackArgs <= numPositionalParams);
-      return numArgs + numUnpackArgs;
+      return numPositionalArgs + numUnpackArgs;
     }
   }
 
@@ -824,7 +819,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   assertx(ad->hasExactlyOneRef());
   assertx(ad->size() == numNewUnpackArgs);
   stack.pushArrayLikeNoRc(ad);
-  return numNamedArgs + numPositionalParams + 1;
+  return numPositionalParams + 1;
 }
 
 static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
@@ -840,7 +835,7 @@ static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
 
   vmStack().top() = reinterpret_cast<TypedValue*>(ar) - func->numSlotsInFrame();
   vmfp() = ar;
-  vmpc() = func->entry() + func->getEntryForNumArgs(numArgsInclUnpack);
+  vmpc() = func->entry() + func->getFuncEntryForNumArgs(numArgsInclUnpack);
   vmJitReturnAddr() = nullptr;
 }
 
@@ -2176,26 +2171,29 @@ namespace {
 
 OPTBLD_INLINE void verifyRetTypeImpl(size_t ind, HPHP::VerifyRetKind kind) {
   auto const func = vmfp()->func();
+
+  if (func->trustReturnType()) {
+    assertx(kind == VerifyRetKind::None);
+    return;
+  }
+
+  if (kind == VerifyRetKind::None && !func->hasInheritedReturnTypes()) return;
+
   auto const& constraints = func->returnTypeConstraints();
   auto const& retVal = vmStack().indC(ind);
-  switch (kind) {
-    case HPHP::VerifyRetKind::None:
-      break;
-    case HPHP::VerifyRetKind::NonNull:
-      for (auto const& tc : constraints.range()) {
-        if (!tc.isCheckable()) continue;
-        if (tc.isNullable()) continue;
-        auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
-        tc.verifyReturnNonNull(retVal, ctx, func);
-      }
-      break;
-    case HPHP::VerifyRetKind::All:
-      for (auto const& tc : constraints.range()) {
-        if (!tc.isCheckable()) continue;
-        auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
-        tc.verifyReturn(retVal, ctx, func);
-      }
-      break;
+
+  auto verifyTc = [&](auto const& tc, bool checkNonNull) {
+    if (!tc.isCheckable()) return;
+    if (checkNonNull && tc.isNullable()) return;
+    auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+    return checkNonNull
+      ? tc.verifyReturnNonNull(retVal, ctx, func)
+      : tc.verifyReturn(retVal, ctx, func);
+  };
+
+  for (auto const& tc : constraints.range()) {
+    if (!tc.isInherited() && kind == VerifyRetKind::None) continue;
+    verifyTc(tc, !tc.isInherited() && kind == VerifyRetKind::NonNull);
   }
 }
 
@@ -3621,13 +3619,13 @@ JitResumeAddr fcallImpl(PC origpc, PC& pc, const FCallArgs& fca,
   }
 
   auto const numArgsInclUnpack = [&] {
-    auto numNamedArgs = nameArr ? nameArr->size() : 0;
+    uint32_t numNamedArgs = nameArr ? nameArr->size() : 0;
     assertx(fca.numArgs >= numNamedArgs);
     auto numPositionalArgs = fca.numArgs - numNamedArgs;
     auto numPositionalParams = func->numNonVariadicParams() - func->numNamedParams();
     if (UNLIKELY(fca.hasUnpack())) {
       GenericsSaver gs{fca.hasGenerics()};
-      return prepareUnpackArgs(func, fca.numArgs, numNamedArgs, true);
+      return prepareUnpackArgs(func, numPositionalArgs, true) + numNamedArgs;
     }
     if (UNLIKELY(numPositionalArgs > numPositionalParams)) {
       GenericsSaver gs{fca.hasGenerics()};
@@ -4163,11 +4161,9 @@ OPTBLD_INLINE void iopResolveRClsMethodS(SpecialClsRef ref,
 
 namespace {
 
-template<bool dynamic>
 JitResumeAddr fcallClsMethodImpl(PC origpc, PC& pc,
                                  const FCallArgs& fca, Class* cls,
-                                 StringData* methName, bool forwarding,
-                                 bool logAsDynamicCall = true) {
+                                 const StringData* methName, bool forwarding) {
   auto const ctx = [&] {
     if (!fca.context) return liveClass();
     if (fca.context->tsame(s_DynamicContextOverrideUnsafe.get())) {
@@ -4184,7 +4180,6 @@ JitResumeAddr fcallClsMethodImpl(PC origpc, PC& pc,
   auto const res = lookupClsMethod(func, cls, methName, obj, callCtx,
                                    MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(func);
-  decRefStr(methName);
 
   if (res == LookupResult::MethodFoundNoThis) {
     if (!func->isStaticInPrologue()) {
@@ -4202,8 +4197,7 @@ JitResumeAddr fcallClsMethodImpl(PC origpc, PC& pc,
   }
 
   if (obj) {
-    return fcallImpl<dynamic>(
-      origpc, pc, fca, func, Object(obj), logAsDynamicCall);
+    return fcallImpl<false>(origpc, pc, fca, func, Object(obj), false);
   } else {
     if (forwarding && ctx) {
       /* Propagate the current late bound class if there is one, */
@@ -4214,55 +4208,21 @@ JitResumeAddr fcallClsMethodImpl(PC origpc, PC& pc,
         cls = vmfp()->getClass();
       }
     }
-    return fcallImpl<dynamic>(origpc, pc, fca, func, cls, logAsDynamicCall);
+    return fcallImpl<false>(origpc, pc, fca, func, cls, false);
   }
 }
 
 } // namespace
 
 OPTBLD_INLINE JitResumeAddr
-iopFCallClsMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                  IsLogAsDynamicCallOp op) {
-  auto const c1 = vmStack().topC();
-  if (!isClassType(c1->m_type)) {
-    raise_error("Attempting to use non-class in FCallClsMethod");
-  }
-  auto const cls = c1->m_data.pclass;
-
-  auto const c2 = vmStack().indC(1); // Method name.
-  if (!isStringType(c2->m_type)) {
-    raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
-  }
-  auto methName = c2->m_data.pstr;
-
-  // fcallClsMethodImpl will take care of decReffing method name
-  vmStack().ndiscard(2);
-  assertx(cls && methName);
-  auto const logAsDynamicCall = op == IsLogAsDynamicCallOp::LogAsDynamicCall ||
-    Cfg::Eval::LogKnownMethodsAsDynamicCalls;
-  return fcallClsMethodImpl<true>(
-    origpc, pc, fca, cls, methName, false, logAsDynamicCall);
-}
-
-OPTBLD_INLINE JitResumeAddr
 iopFCallClsMethodM(PC origpc, PC& pc, FCallArgs fca,
-                   const StringData*, IsLogAsDynamicCallOp op,
+                   const StringData*,
                    const StringData* methName) {
   auto const cell = vmStack().topC();
-  auto isString = isStringType(cell->m_type);
   auto const cls = lookupClsRef(cell, jit::StrToClassKind::StaticMethod);
   vmStack().popC();
-  auto const methNameC = const_cast<StringData*>(methName);
-  assertx(cls && methNameC);
-  auto const logAsDynamicCall = op == IsLogAsDynamicCallOp::LogAsDynamicCall ||
-    Cfg::Eval::LogKnownMethodsAsDynamicCalls;
-  if (isString) {
-    return fcallClsMethodImpl<true>(
-      origpc, pc, fca, cls, methNameC, false, logAsDynamicCall);
-  } else {
-    return fcallClsMethodImpl<false>(
-      origpc, pc, fca, cls, methNameC, false, logAsDynamicCall);
-  }
+  assertx(cls && methName);
+  return fcallClsMethodImpl(origpc, pc, fca, cls, methName, false);
 }
 
 OPTBLD_INLINE JitResumeAddr
@@ -4274,26 +4234,7 @@ iopFCallClsMethodD(PC origpc, PC& pc, FCallArgs fca,
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
-  auto const methNameC = const_cast<StringData*>(methName);
-  return fcallClsMethodImpl<false>(
-    origpc, pc, fca, cls, methNameC, false);
-}
-
-OPTBLD_INLINE JitResumeAddr
-iopFCallClsMethodS(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                   SpecialClsRef ref) {
-  auto const c1 = vmStack().topC(); // Method name.
-  if (!isStringType(c1->m_type)) {
-    raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
-  }
-  auto const cls = specialClsRefToCls(ref);
-  auto methName = c1->m_data.pstr;
-
-  // fcallClsMethodImpl will take care of decReffing name
-  vmStack().ndiscard(1);
-  auto const fwd = ref == SpecialClsRef::SelfCls ||
-                   ref == SpecialClsRef::ParentCls;
-  return fcallClsMethodImpl<true>(origpc, pc, fca, cls, methName, fwd);
+  return fcallClsMethodImpl(origpc, pc, fca, cls, methName, false);
 }
 
 OPTBLD_INLINE JitResumeAddr
@@ -4301,10 +4242,9 @@ iopFCallClsMethodSD(PC origpc, PC& pc, FCallArgs fca,
                     const StringData*, SpecialClsRef ref,
                     const StringData* methName) {
   auto const cls = specialClsRefToCls(ref);
-  auto const methNameC = const_cast<StringData*>(methName);
   auto const fwd = ref == SpecialClsRef::SelfCls ||
                    ref == SpecialClsRef::ParentCls;
-  return fcallClsMethodImpl<false>(origpc, pc, fca, cls, methNameC, fwd);
+  return fcallClsMethodImpl(origpc, pc, fca, cls, methName, fwd);
 }
 
 namespace {

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b9ea9d094bfbf032ba5b6a5c84b75bb3>>
+// @generated SignedSource<<72dc0940c966632fc78dd5990cdb1147>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -482,7 +482,7 @@ pub struct FunType {
     pub instantiated: bool,
 }
 
-/// = Reason.t * 'phase ty_
+/// Private type: use mk to construct, deref/get_node/get_reason to access.
 #[derive(
     Clone,
     Debug,

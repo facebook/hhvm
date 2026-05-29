@@ -1,3 +1,15 @@
+WARN: File "meth_call.bad.php", line 7, characters 7-7:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "meth_call.bad.php", line 5, characters 12-18:
+  This expression has type `dynamic`
+WARN: File "meth_call.bad.php", line 8, characters 7-7:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "meth_call.bad.php", line 5, characters 12-18:
+  This expression has type `dynamic`
+WARN: File "meth_call.bad.php", line 9, characters 7-7:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "meth_call.bad.php", line 5, characters 12-18:
+  This expression has type `dynamic`
 ERROR: File "meth_call.bad.php", line 7, characters 3-16:
 Invalid argument (Typing[4110])
   File "meth_call.bad.php", line 7, characters 3-16:

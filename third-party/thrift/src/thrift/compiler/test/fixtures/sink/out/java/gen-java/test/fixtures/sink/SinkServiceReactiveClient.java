@@ -62,7 +62,6 @@ public class SinkServiceReactiveClient
   }
 
   public SinkServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = reactor.core.publisher.Mono.empty();
@@ -83,7 +82,6 @@ public class SinkServiceReactiveClient
   }
 
   public SinkServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = _headersMono;
@@ -106,11 +104,11 @@ public class SinkServiceReactiveClient
     };
   }
 
-  private com.facebook.thrift.payload.Writer _createmethodSinkWriter(test.fixtures.sink.SinkPayload _iter0) {
+  private com.facebook.thrift.payload.Writer _createmethodSinkWriter(test.fixtures.sink.SinkPayload _fbthriftVar0) {
     return oprot -> {
       try {
         oprot.writeFieldBegin(_method_SINK_TFIELD);
-        _iter0.write0(oprot);
+        _fbthriftVar0.write0(oprot);
 
         oprot.writeFieldEnd();
 
@@ -185,11 +183,11 @@ public class SinkServiceReactiveClient
     };
   }
 
-  private com.facebook.thrift.payload.Writer _createmethodAndReponseSinkWriter(test.fixtures.sink.SinkPayload _iter0) {
+  private com.facebook.thrift.payload.Writer _createmethodAndReponseSinkWriter(test.fixtures.sink.SinkPayload _fbthriftVar0) {
     return oprot -> {
       try {
         oprot.writeFieldBegin(_methodAndReponse_SINK_TFIELD);
-        _iter0.write0(oprot);
+        _fbthriftVar0.write0(oprot);
 
         oprot.writeFieldEnd();
 
@@ -205,7 +203,7 @@ public class SinkServiceReactiveClient
   private static final com.facebook.thrift.payload.Reader _methodAndReponse_FIRST_READER = Readers.wrap(test.fixtures.sink.InitialResponse.asReader());
 
   @java.lang.Override
-  public reactor.core.publisher.Flux<ResponseWrapper<com.facebook.thrift.model.StreamResponse<test.fixtures.sink.InitialResponse,test.fixtures.sink.FinalResponse>>> methodAndReponseWrapper( org.reactivestreams.Publisher<test.fixtures.sink.SinkPayload> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
+  public reactor.core.publisher.Flux<ResponseWrapper<com.facebook.thrift.model.StreamResponse<test.fixtures.sink.InitialResponse, test.fixtures.sink.FinalResponse>>> methodAndReponseWrapper( org.reactivestreams.Publisher<test.fixtures.sink.SinkPayload> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
       .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -241,17 +239,17 @@ public class SinkServiceReactiveClient
             return _rpc
                 .streamingRequestStreamingResponse(_sink, rpcOptions)
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());})
-                .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<test.fixtures.sink.InitialResponse,test.fixtures.sink.FinalResponse>)_p.getData()), _p.getHeaders(), _p.getBinaryHeaders()));
+                .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<test.fixtures.sink.InitialResponse, test.fixtures.sink.FinalResponse>)_p.getData()), _p.getHeaders(), _p.getBinaryHeaders()));
       }));
   }
 
   @java.lang.Override
-  public reactor.core.publisher.Flux<com.facebook.thrift.model.StreamResponse<test.fixtures.sink.InitialResponse,test.fixtures.sink.FinalResponse>> methodAndReponse( org.reactivestreams.Publisher<test.fixtures.sink.SinkPayload> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
+  public reactor.core.publisher.Flux<com.facebook.thrift.model.StreamResponse<test.fixtures.sink.InitialResponse, test.fixtures.sink.FinalResponse>> methodAndReponse( org.reactivestreams.Publisher<test.fixtures.sink.SinkPayload> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
       return methodAndReponseWrapper( payloads, rpcOptions).map(_p -> _p.getData());
   }
 
   @java.lang.Override
-  public reactor.core.publisher.Flux<com.facebook.thrift.model.StreamResponse<test.fixtures.sink.InitialResponse,test.fixtures.sink.FinalResponse>> methodAndReponse( org.reactivestreams.Publisher<test.fixtures.sink.SinkPayload> payloads) {
+  public reactor.core.publisher.Flux<com.facebook.thrift.model.StreamResponse<test.fixtures.sink.InitialResponse, test.fixtures.sink.FinalResponse>> methodAndReponse( org.reactivestreams.Publisher<test.fixtures.sink.SinkPayload> payloads) {
       return methodAndReponse( payloads, com.facebook.thrift.client.RpcOptions.EMPTY);
   }
 
@@ -266,11 +264,11 @@ public class SinkServiceReactiveClient
     };
   }
 
-  private com.facebook.thrift.payload.Writer _createmethodThrowSinkWriter(test.fixtures.sink.SinkPayload _iter0) {
+  private com.facebook.thrift.payload.Writer _createmethodThrowSinkWriter(test.fixtures.sink.SinkPayload _fbthriftVar0) {
     return oprot -> {
       try {
         oprot.writeFieldBegin(_methodThrow_SINK_TFIELD);
-        _iter0.write0(oprot);
+        _fbthriftVar0.write0(oprot);
 
         oprot.writeFieldEnd();
 
@@ -345,11 +343,11 @@ public class SinkServiceReactiveClient
     };
   }
 
-  private com.facebook.thrift.payload.Writer _createmethodSinkThrowSinkWriter(test.fixtures.sink.SinkPayload _iter0) {
+  private com.facebook.thrift.payload.Writer _createmethodSinkThrowSinkWriter(test.fixtures.sink.SinkPayload _fbthriftVar0) {
     return oprot -> {
       try {
         oprot.writeFieldBegin(_methodSinkThrow_SINK_TFIELD);
-        _iter0.write0(oprot);
+        _fbthriftVar0.write0(oprot);
 
         oprot.writeFieldEnd();
 
@@ -424,11 +422,11 @@ public class SinkServiceReactiveClient
     };
   }
 
-  private com.facebook.thrift.payload.Writer _createmethodFinalThrowSinkWriter(test.fixtures.sink.SinkPayload _iter0) {
+  private com.facebook.thrift.payload.Writer _createmethodFinalThrowSinkWriter(test.fixtures.sink.SinkPayload _fbthriftVar0) {
     return oprot -> {
       try {
         oprot.writeFieldBegin(_methodFinalThrow_SINK_TFIELD);
-        _iter0.write0(oprot);
+        _fbthriftVar0.write0(oprot);
 
         oprot.writeFieldEnd();
 
@@ -503,11 +501,11 @@ public class SinkServiceReactiveClient
     };
   }
 
-  private com.facebook.thrift.payload.Writer _createmethodBothThrowSinkWriter(test.fixtures.sink.SinkPayload _iter0) {
+  private com.facebook.thrift.payload.Writer _createmethodBothThrowSinkWriter(test.fixtures.sink.SinkPayload _fbthriftVar0) {
     return oprot -> {
       try {
         oprot.writeFieldBegin(_methodBothThrow_SINK_TFIELD);
-        _iter0.write0(oprot);
+        _fbthriftVar0.write0(oprot);
 
         oprot.writeFieldEnd();
 
@@ -582,11 +580,11 @@ public class SinkServiceReactiveClient
     };
   }
 
-  private com.facebook.thrift.payload.Writer _createmethodFastSinkWriter(test.fixtures.sink.SinkPayload _iter0) {
+  private com.facebook.thrift.payload.Writer _createmethodFastSinkWriter(test.fixtures.sink.SinkPayload _fbthriftVar0) {
     return oprot -> {
       try {
         oprot.writeFieldBegin(_methodFast_SINK_TFIELD);
-        _iter0.write0(oprot);
+        _fbthriftVar0.write0(oprot);
 
         oprot.writeFieldEnd();
 

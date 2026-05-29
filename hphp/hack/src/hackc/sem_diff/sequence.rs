@@ -98,22 +98,8 @@ fn compare_instrs(path: &CodePath<'_>, a: &NodeInstr, b: &NodeInstr) -> Result<(
         }
 
         (
-            I::Opcode(O::FCallClsMethod(fca0, a0, b0)),
-            I::Opcode(O::FCallClsMethod(fca1, a1, b1)),
-        ) => {
-            sem_diff_fca(path, fca0, fca1)?;
-            sem_diff_eq(path, &(a0, b0), &(a1, b1))
-        }
-        (
             I::Opcode(O::FCallClsMethodD(fca0, a0, b0)),
             I::Opcode(O::FCallClsMethodD(fca1, a1, b1)),
-        ) => {
-            sem_diff_fca(path, fca0, fca1)?;
-            sem_diff_eq(path, &(a0, b0), &(a1, b1))
-        }
-        (
-            I::Opcode(O::FCallClsMethodS(fca0, a0, b0)),
-            I::Opcode(O::FCallClsMethodS(fca1, a1, b1)),
         ) => {
             sem_diff_fca(path, fca0, fca1)?;
             sem_diff_eq(path, &(a0, b0), &(a1, b1))
@@ -379,10 +365,8 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::CreateCl(..)
             | Opcode::Dim(..)
             | Opcode::Eval
-            | Opcode::FCallClsMethod(..)
             | Opcode::FCallClsMethodD(..)
             | Opcode::FCallClsMethodM(..)
-            | Opcode::FCallClsMethodS(..)
             | Opcode::FCallClsMethodSD(..)
             | Opcode::FCallCtor(..)
             | Opcode::FCallFunc(..)

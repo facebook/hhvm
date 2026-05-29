@@ -49,11 +49,11 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Vehicle other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -70,28 +70,28 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
 
         public test.fixtures.optionals.Color getColor() { return color; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="licensePlate", requiredness=Requiredness.OPTIONAL)    public Builder setLicensePlate(String licensePlate) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="licensePlate", requiredness=Requiredness.OPTIONAL)    public Builder setLicensePlate(String licensePlate) {
             this.licensePlate = licensePlate;
             return this;
         }
 
         public String getLicensePlate() { return licensePlate; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="description", requiredness=Requiredness.OPTIONAL)    public Builder setDescription(String description) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="description", requiredness=Requiredness.OPTIONAL)    public Builder setDescription(String description) {
             this.description = description;
             return this;
         }
 
         public String getDescription() { return description; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="name", requiredness=Requiredness.OPTIONAL)    public Builder setName(String name) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="name", requiredness=Requiredness.OPTIONAL)    public Builder setName(String name) {
             this.name = name;
             return this;
         }
 
         public String getName() { return name; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="hasAC", requiredness=Requiredness.OPTIONAL)    public Builder setHasAC(Boolean hasAC) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="hasAC", requiredness=Requiredness.OPTIONAL)    public Builder setHasAC(Boolean hasAC) {
             this.hasAC = hasAC;
             return this;
         }
@@ -119,6 +119,7 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -127,56 +128,47 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
     private final test.fixtures.optionals.Color color;
     public static final int _COLOR = 1;
     private static final TField COLOR_FIELD_DESC = new TField("color", TType.STRUCT, (short)1);
-        private final String licensePlate;
+    private final String licensePlate;
     public static final int _LICENSEPLATE = 2;
     private static final TField LICENSE_PLATE_FIELD_DESC = new TField("licensePlate", TType.STRING, (short)2);
-        private final String description;
+    private final String description;
     public static final int _DESCRIPTION = 3;
     private static final TField DESCRIPTION_FIELD_DESC = new TField("description", TType.STRING, (short)3);
-        private final String name;
+    private final String name;
     public static final int _NAME = 4;
     private static final TField NAME_FIELD_DESC = new TField("name", TType.STRING, (short)4);
-        private final Boolean hasAC;
+    private final Boolean hasAC;
     public static final int _HASAC = 5;
     private static final TField HAS_AC_FIELD_DESC = new TField("hasAC", TType.BOOL, (short)5);
     static {
-      NAMES_TO_IDS.put("color", 1);
-      THRIFT_NAMES_TO_IDS.put("color", 1);
-      FIELD_METADATA.put(1, COLOR_FIELD_DESC);
-      NAMES_TO_IDS.put("licensePlate", 2);
-      THRIFT_NAMES_TO_IDS.put("licensePlate", 2);
-      FIELD_METADATA.put(2, LICENSE_PLATE_FIELD_DESC);
-      NAMES_TO_IDS.put("description", 3);
-      THRIFT_NAMES_TO_IDS.put("description", 3);
-      FIELD_METADATA.put(3, DESCRIPTION_FIELD_DESC);
-      NAMES_TO_IDS.put("name", 4);
-      THRIFT_NAMES_TO_IDS.put("name", 4);
-      FIELD_METADATA.put(4, NAME_FIELD_DESC);
-      NAMES_TO_IDS.put("hasAC", 5);
-      THRIFT_NAMES_TO_IDS.put("hasAC", 5);
-      FIELD_METADATA.put(5, HAS_AC_FIELD_DESC);
+        NAMES_TO_IDS.put("color", 1);
+        THRIFT_NAMES_TO_IDS.put("color", 1);
+        FIELD_METADATA.put(1, COLOR_FIELD_DESC);
+        NAMES_TO_IDS.put("licensePlate", 2);
+        THRIFT_NAMES_TO_IDS.put("licensePlate", 2);
+        FIELD_METADATA.put(2, LICENSE_PLATE_FIELD_DESC);
+        NAMES_TO_IDS.put("description", 3);
+        THRIFT_NAMES_TO_IDS.put("description", 3);
+        FIELD_METADATA.put(3, DESCRIPTION_FIELD_DESC);
+        NAMES_TO_IDS.put("name", 4);
+        THRIFT_NAMES_TO_IDS.put("name", 4);
+        FIELD_METADATA.put(4, NAME_FIELD_DESC);
+        NAMES_TO_IDS.put("hasAC", 5);
+        THRIFT_NAMES_TO_IDS.put("hasAC", 5);
+        FIELD_METADATA.put(5, HAS_AC_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="color", requiredness=Requiredness.NONE)
     public test.fixtures.optionals.Color getColor() { return color; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="licensePlate", requiredness=Requiredness.OPTIONAL)
     public String getLicensePlate() { return licensePlate; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="description", requiredness=Requiredness.OPTIONAL)
     public String getDescription() { return description; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="name", requiredness=Requiredness.OPTIONAL)
     public String getName() { return name; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="hasAC", requiredness=Requiredness.OPTIONAL)
     public Boolean isHasAC() { return hasAC; }
@@ -216,120 +208,124 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(color);
-            _hashCode = 31 * _hashCode + Objects.hashCode(licensePlate);
-            _hashCode = 31 * _hashCode + Objects.hashCode(description);
-            _hashCode = 31 * _hashCode + Objects.hashCode(name);
-            _hashCode = 31 * _hashCode + Objects.hashCode(hasAC);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(licensePlate);
+        _hashCode = 31 * _hashCode + Objects.hashCode(description);
+        _hashCode = 31 * _hashCode + Objects.hashCode(name);
+        _hashCode = 31 * _hashCode + Objects.hashCode(hasAC);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Vehicle> asReader() {
       return Vehicle::read0;
     }
 
     public static Vehicle read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Vehicle.NAMES_TO_IDS, Vehicle.THRIFT_NAMES_TO_IDS, Vehicle.FIELD_METADATA);
-      Vehicle.Builder builder = new Vehicle.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _COLOR:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.optionals.Color color = test.fixtures.optionals.Color.read0(oprot);
-            builder.setColor(color);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LICENSEPLATE:
-          if (__field.type == TType.STRING) {
-            String licensePlate = oprot.readString();
-            builder.setLicensePlate(licensePlate);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _DESCRIPTION:
-          if (__field.type == TType.STRING) {
-            String description = oprot.readString();
-            builder.setDescription(description);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _NAME:
-          if (__field.type == TType.STRING) {
-            String name = oprot.readString();
-            builder.setName(name);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _HASAC:
-          if (__field.type == TType.BOOL) {
-            Boolean hasAC = oprot.readBool();
-            builder.setHasAC(hasAC);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(Vehicle.NAMES_TO_IDS, Vehicle.THRIFT_NAMES_TO_IDS, Vehicle.FIELD_METADATA);
+        Vehicle.Builder builder = new Vehicle.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _COLOR:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.optionals.Color _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.optionals.Color.read0(oprot);
+                    builder.setColor(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _LICENSEPLATE:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setLicensePlate(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _DESCRIPTION:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setDescription(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _NAME:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setName(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _HASAC:
+                if (__field.type == TType.BOOL) {
+                    Boolean _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBool();
+                    builder.setHasAC(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      test.fixtures.optionals.Color _iter0 = this.color;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(COLOR_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.licensePlate;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(LICENSE_PLATE_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.description;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(DESCRIPTION_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.name;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(NAME_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Boolean _iter0 = this.hasAC;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(HAS_AC_FIELD_DESC);
-        oprot.writeBool(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            test.fixtures.optionals.Color _fbthriftVar0 = this.color;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(COLOR_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.licensePlate;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(LICENSE_PLATE_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.description;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(DESCRIPTION_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.name;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(NAME_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            Boolean _fbthriftVar0 = this.hasAC;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(HAS_AC_FIELD_DESC);
+                oprot.writeBool(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _VehicleLazy {

@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/generics-info.h"
+#include "hphp/runtime/vm/named-params.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/extra-data.h"
@@ -96,40 +97,57 @@ StackCheck stack_check_kind(const Func* func) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-
-void emitCalleeNamedArgChecks(IRGS& env, const Func* callee, uint32_t argc,
-                              SSATmp* namedArgNames) {
-  // TODO(named_params) support named arg checks when we don't know the named arg
-  // names statically (i.e. passed in via a register/stack.) and support optionals.
-  assertx(namedArgNames == nullptr || namedArgNames->hasConstVal(TVec));
-  uint32_t namedParamCount = callee->numNamedParams();
+void emitCalleeNamedArgChecks(IRGS& env, const Func* callee,
+                              uint32_t posArgc,
+                              SSATmp* prologueFlags, SSATmp* namedArgNames) {
+  // As noted in the .h comment, this is a special case to facilitate fast prologues
+  // for functions without named parameters, and we didn't read the named arg names
+  // register. The prologue flags tell us whether any named args were passed.
+  if (namedArgNames == nullptr) {
+    assertx(!callee->hasNamedParams());
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        auto constexpr flag = 1 << PrologueFlags::Flags::HasNamedArguments;
+        auto const hasNamedArgs = gen(env, AndInt, prologueFlags, cns(env, flag));
+        gen(env, JmpNZero, taken, hasNamedArgs);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(env, ThrowUnexpectedNamedArguments, FuncData{callee});
+      });
+    return;
+  }
+  if (!namedArgNames->isA(TNullptr) && !namedArgNames->hasConstVal(TVec)) {
+    assertx(callee->hasNamedParams());
+    // We punt the work to a native helper for now to keep implementation simple
+    // in the case where named params exist.
+    // TODO(named_params) add at least a pointer equality check for the case where
+    // the arrays match exactly.
+    gen(env, CheckFunNamedArgsMismatch, cns(env, callee), namedArgNames);
+    return;
+  }
+  // The rest of the function may assume it's called from a prepareAndCallKnown context,
+  // where we know the arg names.
   auto const namedArgNamesVal =
-    namedArgNames == nullptr ? nullptr : namedArgNames->arrLikeVal();
-  int namedArgNamesSize = namedArgNamesVal ? namedArgNamesVal->size() : 0;
-  // TODO(named_params): These checks match what the interpreter does (it looks ridiculous
-  // because the JIT side doesn't support optionals yet, so the checks we do there reduce
-  // down to this comparison) but once optionals are supported the structure will change.
-  if (namedArgNamesSize > namedParamCount) {
-    auto name = namedArgNamesVal->at(namedParamCount).val().pstr;
-    gen(env, ThrowNamedArgumentNameMismatch,
-        FuncData{callee}, cns(env, name));
-    return;
-  }
-
-  if (namedArgNamesSize < namedParamCount) {
-    gen(env, ThrowMissingNamedArgument, FuncData{callee},
-        cns(env, namedArgNamesSize));
-    return;
-  }
-
-  PackedStringPtr const* namedParamNames = callee->sortedNamedParamNames();
-  for (uint32_t i = 0; i < namedParamCount; ++i) {
-    auto name = namedArgNamesVal->at(i).val().pstr;
-    if (namedParamNames[i] != name) {
-      gen(env, ThrowNamedArgumentNameMismatch,
-          FuncData{callee}, cns(env, name));
+    namedArgNames->isA(TNullptr) ? nullptr : namedArgNames->arrLikeVal();
+  checkNamedArgMismatch(
+    callee, namedArgNamesVal,
+    [&](const Func* callee) {
+      gen(env, ThrowUnexpectedNamedArguments, FuncData{callee});
+    },
+    [&](const Func* callee, const StringData* argName) {
+      gen(env, ThrowNamedArgumentNameMismatch, FuncData{callee},
+          cns(env, argName));
+    },
+    [&](const Func* callee, const StringData* paramName) {
+      gen(env, ThrowMissingNamedParam, FuncData{callee},
+          cns(env, paramName));
     }
-  }
+  );
+  // The helper above will ensure that the named arg count will match
+  // the named param count (or throw), so the rest of codegen may assume
+  // the named params are placed properly.
 }
 
 void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
@@ -234,18 +252,18 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
  * Check for too few or too many arguments and trim extra args.
  */
 void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
-                                   uint32_t& argc) {
+                                   uint32_t& posArgc) {
   // The arity checks are emitted after the named arg ones, which will
   // populate the stack with default values for named params that weren't passed in.
-  uint32_t posArgc = argc - callee->numNamedParams();
   if (posArgc < callee->numRequiredPositionalParams()) {
     gen(env, ThrowMissingArg, FuncArgData { callee, posArgc });
   }
 
-  if (argc > callee->numParams()) {
+  auto numPositionalsInclVariadic = callee->numParams() - callee->numNamedParams();
+  if (posArgc > numPositionalsInclVariadic) {
     assertx(!callee->hasVariadicCaptureParam());
-    assertx(argc == callee->numNonVariadicParams() + 1);
-    --argc;
+    assertx(posArgc == callee->numPositionalParams() + 1);
+    --posArgc;
 
     // Pop unpack args, skipping generics (we already know their type).
     auto const generics = callee->hasReifiedGenerics()
@@ -265,7 +283,8 @@ void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
 }
 
 void emitCalleeArgumentTypeChecks(IRGS& env, const Func* callee,
-                                  uint32_t argc, SSATmp* prologueCtx) {
+                                  uint32_t posArgc, SSATmp* prologueCtx) {
+  auto const argc = posArgc + callee->numNamedParams();
   auto const numArgs = std::min(argc, callee->numNonVariadicParams());
   auto const firstArgIdx = argc - 1 + (callee->hasReifiedGenerics() ? 1 : 0);
   for (auto i = 0; i < numArgs; ++i) {
@@ -305,7 +324,7 @@ void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
 void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
                               SSATmp* prologueFlags, SSATmp* providedCoeffects,
                               bool skipCoeffectsCheck,
-                              uint32_t argc, SSATmp* prologueCtx) {
+                              uint32_t posArgc, SSATmp* prologueCtx) {
   assertx(callee);
   assertx(prologueFlags);
 
@@ -338,7 +357,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     auto required = cns(env, callee->requiredCoeffects().value());
     if (!callee->hasCoeffectRules()) return required;
     for (auto const& rule : callee->getCoeffectRules()) {
-      if (auto const coeffect = rule.emitJit(env, callee, argc, prologueCtx,
+      if (auto const coeffect = rule.emitJit(env, callee, posArgc, prologueCtx,
                                              providedCoeffects)) {
         required = gen(env, OrInt, required, coeffect);
       }
@@ -394,7 +413,7 @@ void emitCalleeRecordFuncCoverage(IRGS& env, const Func* callee) {
 
 namespace {
 
-void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc,
+void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t posArgc,
                        TransID transID) {
   gen(env, EnterPrologue);
 
@@ -409,7 +428,7 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc,
 
     // Make sure we are at the right prologue.
     auto const numArgs = gen(env, DefFuncPrologueNumArgs);
-    auto const numArgsOK = gen(env, EqInt, numArgs, cns(env, argc));
+    auto const numArgsOK = gen(env, EqInt, numArgs, cns(env, posArgc));
     gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), numArgsOK);
   }
 
@@ -428,22 +447,34 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc,
   if (Cfg::Jit::CollectTranslationStats) {
     auto transStats = globalTransStats();
     assertx(transStats != nullptr);
-    auto sk = SrcKey{callee, argc, SrcKey::PrologueTag {}};
+    auto sk = SrcKey{callee, posArgc, SrcKey::PrologueTag {}};
     TransID transStatsID = transStats->initTransStats(env.context.kind, sk);
     assertx(transStatsID != kInvalidTransID);
     gen(env, IncStatCounter, TransIDData{transStatsID});
   }
 }
 
-void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t& argc,
-                      SSATmp* prologueFlags, SSATmp* prologueCtx) {
+void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t& posArgc,
+                      SSATmp* prologueFlags, SSATmp* prologueCtx,
+                      SSATmp* namedArgNames) {
   // Generics are special and need to be checked first, as they may or may not
   // be on the stack. This check makes sure they materialize on the stack
   // if we expect them.
   emitCalleeGenericsChecks(env, callee, prologueFlags, false);
-  emitCalleeArgumentArityChecks(env, callee, argc);
-  emitCalleeArgumentTypeChecks(env, callee, argc, prologueCtx);
+  emitCalleeNamedArgChecks(env, callee, posArgc, prologueFlags, namedArgNames);
+
+  // This is subtle - when we're emitting callee checks from a prologue, the bcsp
+  // depth needs to be fixed up to now include the prologue named args. We place this
+  // here rather than within emitCalleeNamedArgChecks to avoid messing up the stack
+  // for known calls.
+  env.irb->fs().incBCSPDepth(callee->numNamedParams());
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+
+  emitCalleeArgumentArityChecks(env, callee, posArgc);
+  emitCalleeArgumentTypeChecks(env, callee, posArgc, prologueCtx);
   emitCalleeDynamicCallChecks(env, callee, prologueFlags);
+  auto const argc = posArgc + callee->numNamedParams();
   emitCalleeCoeffectChecks(env, callee, prologueFlags, nullptr, false,
                            argc, prologueCtx);
   emitCalleeRecordFuncCoverage(env, callee);
@@ -502,7 +533,8 @@ void emitInitFuncInputsInline(IRGS& env, const Func* callee, uint32_t argc,
   }
 }
 
-void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
+void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t posArgc) {
+  auto argc = callee->numNamedParams() + posArgc;
   assertx(argc <= callee->numParams());
   if (argc == callee->numParams()) return;
 
@@ -549,7 +581,9 @@ namespace {
 
 std::tuple<SSATmp*, SSATmp*> emitPrologueExit(IRGS& env, const Func* callee,
                                               SSATmp* prologueFlags) {
-  auto const arFlags = gen(env, ConvFuncPrologueFlagsToARFlags, prologueFlags);
+
+  auto const arFlags =
+    gen(env, ConvFuncPrologueFlagsToARFlags, FuncData{callee}, prologueFlags);
   auto const calleeId = cns(env, callee->getFuncId().toInt());
   gen(env, ExitPrologue);
   return std::make_tuple(arFlags, calleeId);
@@ -584,18 +618,21 @@ void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc,
 
 namespace {
 
-void definePrologueFrameAndStack(IRGS& env, const Func* callee, uint32_t argc) {
+void definePrologueFrameAndStack(IRGS& env, const Func* callee, uint32_t posArgc) {
   // Define caller's frame. It is unknown if/where it lives on the stack.
   gen(env, DefFP, DefFPData { std::nullopt });
   updateMarker(env);
 
   // The stack base of prologues points to the stack without the potentially
   // uninitialized space reserved for ActRec and inouts. The rvmsp() register
-  // points to the future ActRec. The stack contains additional `argc' inputs
-  // below the ActRec.
+  // points to the future ActRec. The stack contains additional `posArgc' inputs
+  // below the ActRec, as well as an (as of yet) unknown number of named args.
+  // The named parameter checks will ensure that exactly
+  // `callee->numNamedParams()` named arguments will be present in the stack.
+  auto const argc = posArgc + callee->numNamedParams();
   auto const cells = callee->numInOutParamsForArgs(argc) + kNumActRecCells;
   auto const irSPOff = SBInvOffset { safe_cast<int32_t>(cells) };
-  auto const bcSPOff = SBInvOffset { safe_cast<int32_t>(cells + argc) };
+  auto const bcSPOff = SBInvOffset { safe_cast<int32_t>(cells + posArgc) };
   gen(env, DefRegSP, DefStackData { irSPOff, bcSPOff });
 
   // Now that the stack is initialized, update the BC marker and perform
@@ -606,22 +643,44 @@ void definePrologueFrameAndStack(IRGS& env, const Func* callee, uint32_t argc) {
 
 } // namespace
 
-void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
+void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t positionals,
                       TransID transID) {
-  assertx(argc <= callee->numNonVariadicParams() + 1);
+  assertx(positionals <= callee->numPositionalParams() + 1);
 
-  definePrologueFrameAndStack(env, callee, argc);
+  definePrologueFrameAndStack(env, callee, positionals);
 
   // Define register inputs before doing anything else that may clobber them.
   auto const prologueFlags = gen(env, DefFuncPrologueFlags);
   auto const prologueCtx = (callee->isClosureBody() || callee->cls())
     ? gen(env, DefFuncPrologueCtx, callCtxType(callee))
     : cns(env, nullptr);
-
-  emitPrologueEntry(env, callee, argc, transID);
-  emitCalleeChecks(env, callee, argc, prologueFlags, prologueCtx);
-  emitInitFuncInputs(env, callee, argc);
+  // The source register of DefFuncPrologueNamedArgs contains garbage unless
+  // named args were passed. To generate less code, we only compute the named
+  // args if the callee has named params, and the named args check is aware of
+  // how to handle namedArgNames being nullptr.
+  SSATmp* namedArgNames = nullptr;
+  if (callee->hasNamedParams()) {
+    namedArgNames = cond(
+      env,
+      [&] (Block* taken) {
+        auto constexpr flag = 1 << PrologueFlags::Flags::HasNamedArguments;
+        auto const hasNamedArgs = gen(env, AndInt, prologueFlags, cns(env, flag));
+        gen(env, JmpZero, taken, hasNamedArgs);
+      },
+      [&] {
+        return gen(env, DefFuncPrologueNamedArgs);
+      },
+      [&] {
+        return cns(env, nullptr);
+      });
+  }
+  emitPrologueEntry(env, callee, positionals, transID);
+  emitCalleeChecks(env, callee, positionals, prologueFlags, prologueCtx, namedArgNames);
+  emitInitFuncInputs(env, callee, positionals);
   auto [arFlags, calleeId] = emitPrologueExit(env, callee, prologueFlags);
+  auto argc = positionals + callee->numNamedParams();
+  // Func entries are identified with the total number of arguments passed, since
+  // we've already populated any relevant optional named args in the prologue.
   emitJmpFuncBody(env, callee, argc, fp(env), arFlags, calleeId, prologueCtx);
 }
 

@@ -22,7 +22,6 @@ import unittest
 from thrift.protocol import THeaderProtocol
 from thrift.Thrift import TApplicationException, TPriority, TProcessorEventHandler
 from thrift.transport import THeaderTransport, TSocket
-from thrift.transport.TTransport import TTransportException
 from thrift.util.TCppServerTestManager import TCppServerTestManager
 from thrift.util.test_service import PriorityService, SubPriorityService, TestService
 from thrift.util.test_service.ttypes import UserException2
@@ -206,18 +205,18 @@ class TestTCppServerPriorities(BaseTest):
         self.assertEqual(processor.get_priority("bestEffort"), TPriority.BEST_EFFORT)
         self.assertEqual(processor.get_priority("normal"), TPriority.NORMAL)
         self.assertEqual(processor.get_priority("important"), TPriority.IMPORTANT)
-        self.assertEqual(processor.get_priority("unspecified"), TPriority.HIGH)
+        self.assertEqual(processor.get_priority("unspecified"), TPriority.NORMAL)
 
     def test_processor_child_priorities(self):
         handler = self.SubPriorityHandler()
         processor = SubPriorityService.Processor(handler)
 
-        # Parent priorities present in extended services
-        # Make sure parent service priorities don't leak to child services
+        # Parent method priorities remain visible on extended services.
+        # Unspecified methods should still fall back to NORMAL.
         self.assertEqual(processor.get_priority("bestEffort"), TPriority.BEST_EFFORT)
         self.assertEqual(processor.get_priority("normal"), TPriority.NORMAL)
         self.assertEqual(processor.get_priority("important"), TPriority.IMPORTANT)
-        self.assertEqual(processor.get_priority("unspecified"), TPriority.HIGH)
+        self.assertEqual(processor.get_priority("unspecified"), TPriority.NORMAL)
 
         # Child methods
         self.assertEqual(processor.get_priority("child_unspecified"), TPriority.NORMAL)

@@ -20,8 +20,8 @@ class classA
 echo "*** Testing mb_stripos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$needle = b'A';
-$haystack = b'string_val';
+$needle = 'A';
+$haystack = 'string_val';
 $encoding = 'utf-8';
 
 // unexpected values to be passed to $offest argument

@@ -26,6 +26,7 @@ from cython.operator cimport dereference as deref
 from folly.futures cimport bridgeFutureWith
 from libc.stdint cimport uint32_t
 from libcpp.memory cimport make_shared, static_pointer_cast
+from libcpp.optional cimport optional
 from thrift.python.exceptions cimport create_py_exception
 from libcpp.string cimport string
 from libcpp.utility cimport move as cmove
@@ -58,7 +59,7 @@ def get_client(
     cProtocol protocol = cProtocol.COMPACT,
     thrift_ssl.SSLContext ssl_context=None,
     double ssl_timeout=1,
-    double channel_timeout=0,
+    channel_timeout=None,
 ):
     return get_client_with_channel_factory(
         clientKlass,
@@ -88,7 +89,7 @@ cdef object get_client_with_channel_factory(
     cProtocol protocol = cProtocol.COMPACT,
     thrift_ssl.SSLContext ssl_context=None,
     double ssl_timeout=1,
-    double channel_timeout=0,
+    channel_timeout=None,
 ):
     if not issubclass(clientKlass, Client):
         raise TypeError(f"{clientKlass} is not a thrift python client class")
@@ -104,7 +105,9 @@ cdef object get_client_with_channel_factory(
 
     cdef uint32_t _timeout_ms = int(timeout * 1000)
     cdef uint32_t _ssl_timeout_ms = int(ssl_timeout * 1000)
-    cdef uint32_t _channel_timeout_ms = int(channel_timeout * 1000)
+    cdef optional[uint32_t] _channel_timeout_ms
+    if channel_timeout is not None:
+        _channel_timeout_ms = <uint32_t>(channel_timeout * 1000)
     host = str(host)  # Accept ipaddress objects
     client = clientKlass.Async()
 
@@ -196,7 +199,7 @@ cdef class _AsyncResolveCtxManager:
     cdef cProtocol protocol
     cdef thrift_ssl.SSLContext ssl_context
     cdef double ssl_timeout
-    cdef double channel_timeout
+    cdef object channel_timeout
 
     @staticmethod
     cdef _AsyncResolveCtxManager create(
@@ -210,7 +213,7 @@ cdef class _AsyncResolveCtxManager:
         cProtocol protocol = cProtocol.COMPACT,
         thrift_ssl.SSLContext ssl_context=None,
         double ssl_timeout=1,
-        double channel_timeout=0,
+        channel_timeout=None,
     ):
         cdef _AsyncResolveCtxManager ctx_manager = _AsyncResolveCtxManager.__new__(_AsyncResolveCtxManager)
         ctx_manager.clientKlass = clientKlass

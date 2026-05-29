@@ -4,15 +4,15 @@
 //! Thrift constant definitions for `module`.
 
 pub static myStruct: ::std::sync::LazyLock<crate::types::MyStruct> = ::std::sync::LazyLock::new(|| crate::types::MyStruct {
-            major: 42,
-            r#abstract: "abstract".to_owned(),
-            annotation_with_quote: ::std::default::Default::default(),
-            class_: ::std::default::Default::default(),
-            annotation_with_trailing_comma: ::std::default::Default::default(),
-            empty_annotations: ::std::default::Default::default(),
-            my_enum: crate::types::MyEnum::DOMAIN,
-            cpp_type_annotation: ::std::default::Default::default(),
-            my_union: ::std::default::Default::default(),
-            ..::std::default::Default::default()
-        });
+    major: 42,
+    r#abstract: "abstract".to_owned(),
+    annotation_with_quote: ::std::default::Default::default(),
+    class_: ::std::default::Default::default(),
+    annotation_with_trailing_comma: ::std::default::Default::default(),
+    empty_annotations: ::std::default::Default::default(),
+    my_enum: crate::types::MyEnum::DOMAIN,
+    cpp_type_annotation: ::std::default::Default::default(),
+    my_union: ::std::default::Default::default(),
+    ..::std::default::Default::default()
+});
 

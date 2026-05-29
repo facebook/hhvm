@@ -18,5 +18,10 @@ enum class ConnectionDownReason {
   SERVER_GONE_AWAY,
 };
 
+inline bool isConnectionDownReasonConnectFailure(ConnectionDownReason reason) {
+  return reason == ConnectionDownReason::CONNECT_TIMEOUT ||
+      reason == ConnectionDownReason::CONNECT_ERROR;
+}
+
 } // namespace memcache
 } // namespace facebook

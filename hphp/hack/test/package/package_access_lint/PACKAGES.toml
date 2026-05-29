@@ -13,10 +13,12 @@ include_paths=[
     "//warning_cc_02.php",
     "//warning_cc_02b.php",
     "//warning_cc_04.php",
+    "//warning_cc_08.php",
     "//ptr5a.php",
     "//ptr5b.php",
     "//ptr7a.php",
     "//ptr7b.php",
+    "//__tests__/tt_classptr_target.php",
 ]
 includes = ["pkg1"]
 

@@ -316,6 +316,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckClsRGSoft:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
+  case CheckFunNamedArgsMismatch:
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:
   case CheckStackOverflow:
@@ -436,8 +437,9 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseMissingDynamicallyReferenced:
   case RaiseModuleBoundaryViolation:
   case RaiseModulePropertyViolation:
-  case ThrowMissingNamedArgument:
+  case ThrowMissingNamedParam:
   case ThrowNamedArgumentNameMismatch:
+  case ThrowUnexpectedNamedArguments:
   case RaiseNotice:
   case RaiseStrToClassNotice:
   case RaiseTooManyArg:
@@ -648,6 +650,7 @@ bool opcodeMayRaise(Opcode opc) {
   case DefFuncPrologueCtx:
   case DefFuncPrologueFlags:
   case DefFuncPrologueNumArgs:
+  case DefFuncPrologueNamedArgs:
   case DefLabel:
   case DefRegSP:
   case DeserializeLazyProp:

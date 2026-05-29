@@ -166,7 +166,7 @@ bool isObjprofRoot(
   Class* cls = obj->getVMClass();
   auto cls_name = cls->name()->toCppString();
   // Classes in exclude_classes not considered root
-  if (exclude_classes.find(cls_name) != exclude_classes.end()) return false;
+  if (exclude_classes.contains(cls_name)) return false;
   if (obj == *ImplicitContext::emptyCtx) return false;
   // In USER_TYPES_ONLY mode, Classes with "HH\\" prefix not considered root
   if ((flags & ObjprofFlags::USER_TYPES_ONLY) != 0) {
@@ -821,7 +821,7 @@ void attributeMemoizedFootprint(const ObjectData* obj, hphp_fast_map<ClassProp, 
         if(memoslot->isCache()) {
           auto cache = memoslot->getCache();
           // if we have already seen this cache, skip to avoid double counting
-          if(!cache || (seen_caches.find(cache) != seen_caches.end())) {
+          if(!cache || seen_caches.contains(cache)) {
             continue;
           }
           std::vector<PerCacheInfo> cache_mem_footprints;

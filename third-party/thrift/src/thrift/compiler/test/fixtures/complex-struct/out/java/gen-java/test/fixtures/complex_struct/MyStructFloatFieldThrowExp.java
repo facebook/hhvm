@@ -46,11 +46,11 @@ public final class MyStructFloatFieldThrowExp implements com.facebook.thrift.pay
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(MyStructFloatFieldThrowExp other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -66,21 +66,21 @@ public final class MyStructFloatFieldThrowExp implements com.facebook.thrift.pay
 
         public long getMyLongField() { return myLongField; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="MyByteField", requiredness=Requiredness.NONE)    public Builder setMyByteField(byte myByteField) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="MyByteField", requiredness=Requiredness.NONE)    public Builder setMyByteField(byte myByteField) {
             this.myByteField = myByteField;
             return this;
         }
 
         public byte getMyByteField() { return myByteField; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="myStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="myStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
             this.myStringField = myStringField;
             return this;
         }
 
         public String getMyStringField() { return myStringField; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="myFloatField", requiredness=Requiredness.NONE)    public Builder setMyFloatField(float myFloatField) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="myFloatField", requiredness=Requiredness.NONE)    public Builder setMyFloatField(float myFloatField) {
             this.myFloatField = myFloatField;
             return this;
         }
@@ -106,6 +106,7 @@ public final class MyStructFloatFieldThrowExp implements com.facebook.thrift.pay
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -114,46 +115,39 @@ public final class MyStructFloatFieldThrowExp implements com.facebook.thrift.pay
     private final long myLongField;
     public static final int _MYLONGFIELD = 1;
     private static final TField MY_LONG_FIELD_FIELD_DESC = new TField("myLongField", TType.I64, (short)1);
-        private final byte myByteField;
+    private final byte myByteField;
     public static final int _MYBYTEFIELD = 2;
     private static final TField MY_BYTE_FIELD_FIELD_DESC = new TField("MyByteField", TType.BYTE, (short)2);
-        private final String myStringField;
+    private final String myStringField;
     public static final int _MYSTRINGFIELD = 3;
     private static final TField MY_STRING_FIELD_FIELD_DESC = new TField("myStringField", TType.STRING, (short)3);
-        private final float myFloatField;
+    private final float myFloatField;
     public static final int _MYFLOATFIELD = 4;
     private static final TField MY_FLOAT_FIELD_FIELD_DESC = new TField("myFloatField", TType.FLOAT, (short)4);
     static {
-      NAMES_TO_IDS.put("myLongField", 1);
-      THRIFT_NAMES_TO_IDS.put("myLongField", 1);
-      FIELD_METADATA.put(1, MY_LONG_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myByteField", 2);
-      THRIFT_NAMES_TO_IDS.put("MyByteField", 2);
-      FIELD_METADATA.put(2, MY_BYTE_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myStringField", 3);
-      THRIFT_NAMES_TO_IDS.put("myStringField", 3);
-      FIELD_METADATA.put(3, MY_STRING_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myFloatField", 4);
-      THRIFT_NAMES_TO_IDS.put("myFloatField", 4);
-      FIELD_METADATA.put(4, MY_FLOAT_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myLongField", 1);
+        THRIFT_NAMES_TO_IDS.put("myLongField", 1);
+        FIELD_METADATA.put(1, MY_LONG_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myByteField", 2);
+        THRIFT_NAMES_TO_IDS.put("MyByteField", 2);
+        FIELD_METADATA.put(2, MY_BYTE_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myStringField", 3);
+        THRIFT_NAMES_TO_IDS.put("myStringField", 3);
+        FIELD_METADATA.put(3, MY_STRING_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myFloatField", 4);
+        THRIFT_NAMES_TO_IDS.put("myFloatField", 4);
+        FIELD_METADATA.put(4, MY_FLOAT_FIELD_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="myLongField", requiredness=Requiredness.NONE)
     public long getMyLongField() { return myLongField; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=2, name="MyByteField", requiredness=Requiredness.NONE)
     public byte getMyByteField() { return myByteField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="myStringField", requiredness=Requiredness.NONE)
     public String getMyStringField() { return myStringField; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=4, name="myFloatField", requiredness=Requiredness.NONE)
     public float getMyFloatField() { return myFloatField; }
 
@@ -190,97 +184,100 @@ public final class MyStructFloatFieldThrowExp implements com.facebook.thrift.pay
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(myLongField);
-            _hashCode = 31 * _hashCode + Byte.hashCode(myByteField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myStringField);
-            _hashCode = 31 * _hashCode + Float.hashCode(myFloatField);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Byte.hashCode(myByteField);
+        _hashCode = 31 * _hashCode + Objects.hashCode(myStringField);
+        _hashCode = 31 * _hashCode + Float.hashCode(myFloatField);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyStructFloatFieldThrowExp> asReader() {
       return MyStructFloatFieldThrowExp::read0;
     }
 
     public static MyStructFloatFieldThrowExp read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(MyStructFloatFieldThrowExp.NAMES_TO_IDS, MyStructFloatFieldThrowExp.THRIFT_NAMES_TO_IDS, MyStructFloatFieldThrowExp.FIELD_METADATA);
-      MyStructFloatFieldThrowExp.Builder builder = new MyStructFloatFieldThrowExp.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MYLONGFIELD:
-          if (__field.type == TType.I64) {
-            long myLongField = oprot.readI64();
-            builder.setMyLongField(myLongField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYBYTEFIELD:
-          if (__field.type == TType.BYTE) {
-            byte myByteField = oprot.readByte();
-            builder.setMyByteField(myByteField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYSTRINGFIELD:
-          if (__field.type == TType.STRING) {
-            String myStringField = oprot.readString();
-            builder.setMyStringField(myStringField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYFLOATFIELD:
-          if (__field.type == TType.FLOAT) {
-            float myFloatField = oprot.readFloat();
-            builder.setMyFloatField(myFloatField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(MyStructFloatFieldThrowExp.NAMES_TO_IDS, MyStructFloatFieldThrowExp.THRIFT_NAMES_TO_IDS, MyStructFloatFieldThrowExp.FIELD_METADATA);
+        MyStructFloatFieldThrowExp.Builder builder = new MyStructFloatFieldThrowExp.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MYLONGFIELD:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMyLongField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYBYTEFIELD:
+                if (__field.type == TType.BYTE) {
+                    byte _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readByte();
+                    builder.setMyByteField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYSTRINGFIELD:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMyStringField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYFLOATFIELD:
+                if (__field.type == TType.FLOAT) {
+                    float _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readFloat();
+                    builder.setMyFloatField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.myLongField;
-      oprot.writeFieldBegin(MY_LONG_FIELD_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      byte _iter0 = this.myByteField;
-      oprot.writeFieldBegin(MY_BYTE_FIELD_FIELD_DESC);
-      oprot.writeByte(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.myStringField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_STRING_FIELD_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      float _iter0 = this.myFloatField;
-      oprot.writeFieldBegin(MY_FLOAT_FIELD_FIELD_DESC);
-      oprot.writeFloat(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.myLongField;
+            oprot.writeFieldBegin(MY_LONG_FIELD_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            byte _fbthriftVar0 = this.myByteField;
+            oprot.writeFieldBegin(MY_BYTE_FIELD_FIELD_DESC);
+            oprot.writeByte(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.myStringField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_STRING_FIELD_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            float _fbthriftVar0 = this.myFloatField;
+            oprot.writeFieldBegin(MY_FLOAT_FIELD_FIELD_DESC);
+            oprot.writeFloat(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _MyStructFloatFieldThrowExpLazy {

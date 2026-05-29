@@ -394,12 +394,6 @@ public:
   static RepoMode RepoLocalMode;
   static RepoMode RepoCentralMode;
 
-  // pprof/hhprof options
-  static bool HHProfEnabled;
-  static bool HHProfActive;
-  static bool HHProfAccum;
-  static bool HHProfRequest;
-
 #ifdef HHVM_FACEBOOK
   // ThriftFBServer
   static int ThriftFBServerThriftServerIOWorkerThreads;

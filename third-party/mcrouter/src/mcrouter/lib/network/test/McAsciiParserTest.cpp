@@ -206,23 +206,23 @@ McMetagetReply createMetagetHitReply(
     uint64_t /* flags */,
     std::string host) {
   McMetagetReply msg;
-  msg.age_ref() = age;
-  msg.exptime_ref() = exptime;
+  msg.age() = age;
+  msg.exptime() = exptime;
 
   if (host != "unknown") {
     struct in6_addr addr;
     memset(&addr, 0, sizeof(addr));
     if (strchr(host.data(), ':') != nullptr) {
       EXPECT_TRUE(inet_pton(AF_INET6, host.data(), &addr) > 0);
-      msg.ipv_ref() = 6;
+      msg.ipv() = 6;
     } else {
       EXPECT_TRUE(inet_pton(AF_INET, host.data(), &addr) > 0);
-      msg.ipv_ref() = 4;
+      msg.ipv() = 4;
     }
   }
-  msg.result_ref() = carbon::Result::FOUND;
+  msg.result() = carbon::Result::FOUND;
   if (host != "unknown") {
-    msg.ipAddress_ref() = host;
+    msg.ipAddress() = host;
   }
   return msg;
 }

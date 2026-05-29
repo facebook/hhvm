@@ -137,6 +137,14 @@ void HQSessionController::detachSession(const HTTPSessionBase* /*session*/) {
 
 namespace quic::samples {
 
+const proxygen::SettingsList kH3EgressSettings = {
+    {proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL, 1},
+    {proxygen::SettingsId::_HQ_DATAGRAM, 1},
+    {proxygen::SettingsId::_HQ_DATAGRAM_RFC, 1},
+    {proxygen::SettingsId::ENABLE_WEBTRANSPORT, 1},
+    {proxygen::SettingsId::H3_WT_MAX_SESSIONS, 1},
+};
+
 HQServerTransportFactory::HQServerTransportFactory(
     const HQServerParams& params,
     HTTPTransactionHandlerProvider httpTransactionHandlerProvider,
@@ -145,15 +153,18 @@ HQServerTransportFactory::HQServerTransportFactory(
       httpTransactionHandlerProvider_(
           std::move(httpTransactionHandlerProvider)),
       onTransportReadyFn_(std::move(onTransportReadyFn)) {
-  alpnHandlers_[kHQ] = [this](std::shared_ptr<quic::QuicSocket> quicSocket,
-                              wangle::ConnectionManager* connMgr) {
+  h3EarlyDataHandler_.setCurrentSettings(kH3EgressSettings);
+  defaultEarlyDataHandler_ = &h3EarlyDataHandler_;
+
+  alpnHandlers_[kHQ] = {[this](std::shared_ptr<quic::QuicSocket> quicSocket,
+                               wangle::ConnectionManager* connMgr) {
     quicSocket->setConnectionSetupCallback(nullptr);
     return new H1QDownstreamSession(
         std::move(quicSocket),
         new HQSessionController(
             params_, httpTransactionHandlerProvider_, onTransportReadyFn_),
         connMgr);
-  };
+  }};
 }
 
 QuicServerTransport::Ptr HQServerTransportFactory::make(
@@ -168,10 +179,33 @@ QuicServerTransport::Ptr HQServerTransportFactory::make(
     transport->setQLogger(std::make_shared<HQLoggerHelper>(
         params_.qLoggerPath, params_.prettyJson, quic::VantagePoint::Server));
   }
-  if (earlyDataAppParamsHandler_) {
-    transport->setEarlyDataAppParamsHandler(earlyDataAppParamsHandler_);
-  }
+  transport->setEarlyDataAppParamsHandler(this);
   return transport;
+}
+
+bool HQServerTransportFactory::validate(const quic::Optional<std::string>& alpn,
+                                        const quic::BufPtr& appParams) {
+  quic::EarlyDataAppParamsHandler* handler = defaultEarlyDataHandler_;
+  if (alpn) {
+    auto it = alpnHandlers_.find(*alpn);
+    if (it != alpnHandlers_.end() && it->second.earlyDataHandler) {
+      handler = it->second.earlyDataHandler;
+    }
+  }
+  if (handler) {
+    return handler->validate(alpn, appParams);
+  }
+  return true;
+}
+
+quic::BufPtr HQServerTransportFactory::get() {
+  // get() is called when caching a PSK. The factory doesn't know
+  // which ALPN was negotiated for this specific transport, so
+  // delegate to the default handler.
+  if (defaultEarlyDataHandler_) {
+    return defaultEarlyDataHandler_->get();
+  }
+  return nullptr;
 }
 
 void HQServerTransportFactory::onQuicTransportReady(
@@ -192,7 +226,7 @@ void HQServerTransportFactory::onQuicTransportReady(
     // by default, it's H3
     handleHQAlpn(std::move(quicSocket), getConnectionManager(evb));
   } else {
-    it->second(std::move(quicSocket), getConnectionManager(evb));
+    it->second.handler(std::move(quicSocket), getConnectionManager(evb));
   }
 }
 
@@ -226,12 +260,7 @@ void HQServerTransportFactory::handleHQAlpn(
   quicSocket->setConnectionSetupCallback(session);
   quicSocket->setConnectionCallback(session);
   session->setSocket(std::move(quicSocket));
-  session->setEgressSettings(
-      {{proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL, 1},
-       {proxygen::SettingsId::_HQ_DATAGRAM, 1},
-       {proxygen::SettingsId::_HQ_DATAGRAM_RFC, 1},
-       {proxygen::SettingsId::ENABLE_WEBTRANSPORT, 1},
-       {proxygen::SettingsId::H3_WT_MAX_SESSIONS, 1}});
+  session->setEgressSettings(kH3EgressSettings);
 
   session->startNow();
   session->onTransportReady();

@@ -38,6 +38,7 @@ proxygen_add_library(proxygen_hq_server
   EXPORTED_DEPS
     proxygen_http_http_headers
     proxygen_http_codec_codec
+    proxygen_http_codec_h3_early_data_handler
     proxygen_http_session_hq_session
     proxygen_http_session_http_transaction
     proxygen_http_session_server

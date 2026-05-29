@@ -15,6 +15,7 @@
 #include <folly/io/async/EventBaseLocal.h>
 #include <proxygen/httpserver/samples/hq/FizzContext.h>
 #include <proxygen/httpserver/samples/hq/HQParams.h>
+#include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <quic/server/QuicHandshakeSocketHolder.h>
 #include <quic/server/QuicServer.h>
@@ -144,6 +145,7 @@ class ScopedHQServer {
 
 class HQServerTransportFactory
     : public quic::QuicServerTransportFactory
+    , public quic::EarlyDataAppParamsHandler
     , private quic::QuicHandshakeSocketHolder::Callback {
  public:
   explicit HQServerTransportFactory(
@@ -163,15 +165,22 @@ class HQServerTransportFactory
 
   using AlpnHandlerFn = std::function<void(std::shared_ptr<quic::QuicSocket>,
                                            wangle::ConnectionManager*)>;
-  void addAlpnHandler(const std::vector<std::string>& alpns,
-                      const AlpnHandlerFn& handler) {
+  void addAlpnHandler(
+      const std::vector<std::string>& alpns,
+      const AlpnHandlerFn& handler,
+      quic::EarlyDataAppParamsHandler* earlyDataHandler = nullptr) {
     for (auto& alpn : alpns) {
-      alpnHandlers_[alpn] = handler;
+      alpnHandlers_[alpn] = {handler, earlyDataHandler};
     }
   }
 
-  void setEarlyDataAppParamsHandler(quic::EarlyDataAppParamsHandler* handler) {
-    earlyDataAppParamsHandler_ = handler;
+  // EarlyDataAppParamsHandler — dispatches to per-ALPN handlers
+  bool validate(const quic::Optional<std::string>& alpn,
+                const quic::BufPtr& appParams) override;
+  quic::BufPtr get() override;
+
+  void setDefaultEarlyDataHandler(quic::EarlyDataAppParamsHandler* handler) {
+    defaultEarlyDataHandler_ = handler;
   }
 
  private:
@@ -189,8 +198,14 @@ class HQServerTransportFactory
   HTTPTransactionHandlerProvider httpTransactionHandlerProvider_;
   std::function<void(proxygen::HQSession*)> onTransportReadyFn_;
   folly::EventBaseLocal<wangle::ConnectionManager::UniquePtr> connMgr_;
-  std::map<std::string, AlpnHandlerFn> alpnHandlers_;
-  quic::EarlyDataAppParamsHandler* earlyDataAppParamsHandler_{nullptr};
+
+  struct AlpnEntry {
+    AlpnHandlerFn handler;
+    quic::EarlyDataAppParamsHandler* earlyDataHandler{nullptr};
+  };
+  std::map<std::string, AlpnEntry> alpnHandlers_;
+  proxygen::H3EarlyDataHandler h3EarlyDataHandler_;
+  quic::EarlyDataAppParamsHandler* defaultEarlyDataHandler_{nullptr};
 };
 
 } // namespace quic::samples

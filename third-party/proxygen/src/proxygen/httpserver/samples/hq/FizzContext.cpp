@@ -189,7 +189,7 @@ quic::samples::FizzServerContextPtr createFizzServerContextImpl(
   serverCtx->setClientAuthMode(clientAuth);
   serverCtx->setSupportedAlpns(supportedAlpns);
   serverCtx->setAlpnMode(fizz::server::AlpnMode::Required);
-  serverCtx->setSendNewSessionTicket(false);
+  serverCtx->setSendNewSessionTicket(true);
   serverCtx->setEarlyDataFbOnly(false);
   serverCtx->setVersionFallbackEnabled(false);
 

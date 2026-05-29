@@ -108,6 +108,10 @@ DEFINE_string(
     plaintext_parser,
     "",
     "Parser override to use for plaintext connections (strategy, allocating, aligned)");
+DEFINE_uint32(
+    io_uring_dump_stat_interval,
+    0,
+    "Dump io_uring stats every N seconds (0 = disabled)");
 
 #if FOLLY_HAVE_WEAK_SYMBOLS
 FOLLY_ATTR_WEAK int callback_assign_func(
@@ -223,13 +227,21 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   auto ioThreadPool = getIOThreadPool("thrift_eventbase", FLAGS_io_threads);
   server->setIOThreadPool(ioThreadPool);
   server->setNumCPUWorkerThreads(numCpuWorkerThreads);
-  server->addModule(std::make_unique<StressTestServerModule>());
+  auto stressTestServerModule = std::make_unique<StressTestServerModule>();
   if (FLAGS_io_zcrx && FLAGS_io_zcrx_hw_queues > 0) {
     auto evbs = ioThreadPool->getAllEventBases();
     if (!folly::setupIoUringBufferPoolSharing(evbs, FLAGS_io_zcrx_hw_queues)) {
       LOG(FATAL) << "Failed to set up buffer pool sharing";
     }
   }
+  if (FLAGS_io_uring && FLAGS_io_uring_dump_stat_interval > 0) {
+    LOG(INFO) << "IO Uring statistics dump enabled every "
+              << FLAGS_io_uring_dump_stat_interval << " seconds";
+    auto evbs = ioThreadPool->getAllEventBases();
+    stressTestServerModule->initIoUringStatsLogging(
+        evbs, static_cast<uint32_t>(FLAGS_io_uring_dump_stat_interval));
+  }
+  server->addModule(std::move(stressTestServerModule));
   if (FLAGS_io_zctx) {
     server->setZeroCopyEnableFunc(
         [](const std::unique_ptr<folly::IOBuf>&) { return true; });

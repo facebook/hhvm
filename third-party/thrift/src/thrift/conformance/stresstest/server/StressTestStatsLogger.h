@@ -16,28 +16,25 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
+#include <folly/CPortability.h>
 #include <folly/Executor.h>
+#include <folly/io/async/AsyncTimeout.h>
 #include <folly/io/async/EventBase.h>
-#include <thrift/conformance/stresstest/server/StressTestStatsLogger.h>
-#include <thrift/lib/cpp2/server/ServerModule.h>
 
 namespace apache::thrift::stress {
 
-class StressTestServerModule : public ServerModule {
+class StressTestStatsLogger {
  public:
-  std::string getName() const final;
-  std::vector<std::shared_ptr<ServiceInterceptorBase>> getServiceInterceptors()
-      final;
-
-  void initIoUringStatsLogging(
+  void init(
       std::vector<folly::Executor::KeepAlive<folly::EventBase>>& evbs,
-      uint32_t dumpStatInterval);
+      uint32_t intervalSeconds);
 
  private:
-  StressTestStatsLogger stressTestStatsLogger_;
+  std::vector<std::shared_ptr<folly::AsyncTimeout>> timers_;
 };
 
 } // namespace apache::thrift::stress

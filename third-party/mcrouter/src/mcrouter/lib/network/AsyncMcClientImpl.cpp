@@ -568,7 +568,13 @@ void AsyncMcClientImpl::connectErr(
 
   assert(queue_.getInflightRequestCount() == 0);
   connectionState_ = ConnectionState::Down;
-  // We don't need it anymore, so let it perform complete cleanup.
+  // closeNow() before reset() so AsyncFizzClient cancels its
+  // handshake-timeout timer and clears its ConnectCallback pointer
+  // synchronously. Without this, a deferred destroy can keep the
+  // transport alive past reset() with a dangling callback to this.
+  if (socket_) {
+    socket_->closeNow();
+  }
   socket_.reset();
 
   if (ex.getType() == folly::AsyncSocketException::TIMED_OUT &&
@@ -619,7 +625,10 @@ void AsyncMcClientImpl::processShutdown(folly::StringPiece errorMessage) {
         }
 
         connectionState_ = ConnectionState::Down;
-        // We don't need it anymore, so let it perform complete cleanup.
+        // closeNow() before reset(); see connectErr() for rationale.
+        if (socket_) {
+          socket_->closeNow();
+        }
         socket_.reset();
 
         // In case we still have some pending requests, then try reconnecting

@@ -79,6 +79,7 @@ async function main(): Awaitable<void> {
     }
 
     \printf("Starting %s...\n", $class);
+    /* HH_FIXME[4128] Minitest intentionally uses reflection to instantiate test classes */
     $obj = $rc->newInstance() as HackTest;
     await $obj->runAsync();
   }

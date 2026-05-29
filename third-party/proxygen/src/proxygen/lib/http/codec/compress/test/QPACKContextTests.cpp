@@ -10,7 +10,9 @@
 #include <folly/Format.h>
 #include <folly/portability/GTest.h>
 #include <glog/logging.h>
+#include <limits>
 #include <memory>
+#include <proxygen/lib/http/codec/compress/HPACKEncodeBuffer.h>
 #include <proxygen/lib/http/codec/compress/Logging.h>
 #include <proxygen/lib/http/codec/compress/QPACKDecoder.h>
 #include <proxygen/lib/http/codec/compress/QPACKEncoder.h>
@@ -856,6 +858,28 @@ void checkQError(QPACKDecoder& decoder,
   // streamID only matters for cancellation
   decoder.decodeStreaming(0, std::move(buf), len, cb.get());
   EXPECT_EQ(cb->error, err);
+}
+
+TEST(QPACKContextTests, RejectsOverflowingRequiredInsertCount) {
+  QPACKDecoder decoder;
+  HPACKEncodeBuffer insertStream(128, false);
+  const uint32_t maxEntries = HPACK::kTableSize / HPACKHeader::kMinLength;
+  // Prime insertCount so RIC reconstruction uses a non-zero maxWrapped value.
+  for (uint32_t i = 0; i < maxEntries; i++) {
+    insertStream.encodeLiteral(HPACK::Q_INSERT_NO_NAME_REF.code,
+                               HPACK::Q_INSERT_NO_NAME_REF.prefixLength,
+                               folly::to<string>("x-overflow-", i));
+    insertStream.encodeLiteral("v");
+  }
+  EXPECT_EQ(decoder.decodeEncoderStream(insertStream.release()),
+            HPACK::DecodeError::NONE);
+
+  HPACKEncodeBuffer headerBlock(128, false);
+  // This value used to overflow maxWrapped + wireRIC - 1 before validation.
+  headerBlock.encodeInteger(std::numeric_limits<uint64_t>::max() - 154);
+  headerBlock.encodeInteger(0, HPACK::Q_DELTA_BASE);
+  checkQError(
+      decoder, headerBlock.release(), HPACK::DecodeError::INVALID_INDEX);
 }
 
 TEST(QPACKContextTests, DecodeErrors) {

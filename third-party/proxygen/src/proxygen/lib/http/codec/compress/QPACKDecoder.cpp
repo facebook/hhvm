@@ -71,13 +71,19 @@ uint32_t QPACKDecoder::decodePrefix(HPACKDecodeBuffer& dbuf) {
     err_ = HPACK::DecodeError::INVALID_INDEX;
     return 0;
   } else {
+    if (wireRIC > fullRange) {
+      LOG(ERROR) << "Decode error RIC out of range=" << wireRIC
+                 << " fullRange=" << fullRange;
+      err_ = HPACK::DecodeError::INVALID_INDEX;
+      return 0;
+    }
     uint64_t maxValue = table_.getInsertCount() + maxEntries;
     uint64_t maxWrapped = (maxValue / fullRange) * fullRange;
     requiredInsertCount = maxWrapped + wireRIC - 1;
     // If requiredInsertCount exceeds maxValue, the Encoder's value must have
     // wrapped one fewer time
     if (requiredInsertCount > maxValue) {
-      if (wireRIC > fullRange || requiredInsertCount < fullRange) {
+      if (requiredInsertCount < fullRange) {
         LOG(ERROR) << "Decode error RIC out of range=" << wireRIC;
         err_ = HPACK::DecodeError::INVALID_INDEX;
         return 0;

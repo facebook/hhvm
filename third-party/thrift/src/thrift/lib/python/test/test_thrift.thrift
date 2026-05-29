@@ -804,3 +804,11 @@ struct StructDisabledFieldCache {
   8: EmptyStruct empty_struct_field;
   9: easy easy_field;
 }
+
+@python.EnableUnsafeIssetInspection
+struct StructWithIssetInspection {
+  1: i32 int_field;
+  2: optional string opt_str_field;
+  3: bool bool_field;
+  4: optional list<i32> opt_list_field;
+}

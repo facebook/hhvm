@@ -1074,4 +1074,7 @@ int setStructField(PyObject* struct_tuple, int16_t index, PyObject* value);
 PyObject* unionTupleFromValue(int64_t type_key, PyObject* value);
 
 } // namespace capi
+
+void logGetLocallySetFieldsCalledOnDeserializedStruct(const char* structName);
+
 } // namespace apache::thrift::python

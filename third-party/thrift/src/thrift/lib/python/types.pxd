@@ -55,6 +55,8 @@ cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "
         Terse
 
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
+    void logGetLocallySetFieldsCalledOnDeserializedStruct(const char* structName)
+
     cdef cppclass cDynamicStructInfo "::apache::thrift::python::DynamicStructInfo":
         cDynamicStructInfo(
             const char* name, int16_t numFields, bint isUnion, bint isMutable
@@ -207,6 +209,7 @@ cdef class StructInfo:
     cdef tuple type_infos
     cdef tuple[FieldInfo] fields
     cdef dict name_to_index
+    cdef bint enable_isset_inspection
     cdef void _fill_struct_info(self) except *
     cdef void _initialize_default_values(self) except *
 

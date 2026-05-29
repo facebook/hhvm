@@ -190,6 +190,8 @@ inline constexpr auto kPythonConstrainedFloat32 =
     "facebook.com/thrift/annotation/python/ConstrainedFloat32";
 inline constexpr auto kPythonEnumFormatAsIntUri =
     "facebook.com/thrift/annotation/python/EnumFormatAsInt";
+inline constexpr auto kPythonEnableUnsafeIssetInspectionUri =
+    "facebook.com/thrift/annotation/python/EnableUnsafeIssetInspection";
 
 // Hack:
 inline constexpr auto kHackAdapterUri =

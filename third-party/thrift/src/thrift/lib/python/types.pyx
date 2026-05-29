@@ -1325,14 +1325,28 @@ cdef class Struct(StructOrUnion):
             self._fbthrift_field_cache = None
         else:
             self._fbthrift_field_cache = PyTuple_New(len(struct_info.fields))
+        if struct_info.enable_isset_inspection:
+            object.__setattr__(self, '_fbthrift_locally_set_fields', None)
 
     def __init__(self, **kwargs):
         self._initStructTupleWithValues(kwargs)
+        cdef StructInfo struct_info = self._fbthrift_struct_info
+        if struct_info.enable_isset_inspection:
+            object.__setattr__(self, '_fbthrift_locally_set_fields', frozenset(
+                k for k, v in kwargs.items() if v is not None
+            ))
 
     def __call__(self, **kwargs):
         if not kwargs:
             return self
         cdef StructInfo struct_info = self._fbthrift_struct_info
+        if struct_info.enable_isset_inspection:
+            call_keys = frozenset(
+                k for k, v in kwargs.items() if v is not None
+            )
+            none_keys = frozenset(
+                k for k, v in kwargs.items() if v is None
+            )
         klass = type(self)
         # note this puts the set kwargs into new_inst._fbthrift_data
         cdef Struct new_inst = klass._fbthrift_new(**kwargs)
@@ -1355,6 +1369,11 @@ cdef class Struct(StructOrUnion):
                 f"'{type(self).__name__}' object does not have attribute(s): "
                 f"'{', '.join(kwargs.keys())}'"
             )
+        if struct_info.enable_isset_inspection:
+            isset_fields = self._fbthrift_locally_set_fields
+            if isset_fields is not None:
+                updated = (isset_fields | (<frozenset>call_keys)) - (<frozenset>none_keys)
+                object.__setattr__(new_inst, '_fbthrift_locally_set_fields', updated)
         return new_inst
 
     def __copy__(Struct self):
@@ -2064,12 +2083,17 @@ class StructMeta(type):
         # contents of the field spec tuples.
         fields = dct.pop('_fbthrift_SPEC', ())
 
-        dct["_fbthrift_struct_info"] = StructInfo(cls_name, fields)
+        cdef bint enable_isset_inspection = dct.pop('_fbthrift_enable_unsafe_isset_inspection', False)
+        cdef StructInfo struct_info = StructInfo(cls_name, fields)
+        struct_info.enable_isset_inspection = enable_isset_inspection
+        dct["_fbthrift_struct_info"] = struct_info
 
         cdef list slots = []
         for i, field_info in enumerate(fields):
             slots.append(field_info.py_name)
 
+        if enable_isset_inspection:
+            slots.append('_fbthrift_locally_set_fields')
         dct["__slots__"] = slots
         all_bases = bases if bases else (Struct,)
         klass = super().__new__(cls, cls_name, all_bases, dct)
@@ -2867,6 +2891,44 @@ def isset(StructOrError struct):
         DeprecationWarning,
     )
     return isset_DEPRECATED(struct)
+
+
+cdef frozenset _get_set_fields_fallback(StructOrError struct):
+    cdef StructInfo info = struct._fbthrift_struct_info
+    fields = []
+    for field_info in info.fields:
+        if field_info.qualifier == FieldQualifier.Optional:
+            if getattr(struct, field_info.py_name) is not None:
+                fields.append(field_info.py_name)
+        else:
+            fields.append(field_info.py_name)
+    return frozenset(fields)
+
+
+def get_locally_set_fields(StructOrError struct):
+    """Return the frozenset of field names explicitly set in the constructor.
+
+    Only works on structs annotated with @python.EnableUnsafeIssetInspection
+    that were constructed locally (not deserialized from the wire).
+
+    For deserialized structs, logs an error and falls back to considering all
+    unqualified fields as set, and optional fields as set if their value is
+    not None.
+
+    Raises:
+        AttributeError: if the struct is not annotated.
+    """
+    try:
+        result = struct._fbthrift_locally_set_fields
+    except AttributeError:
+        raise AttributeError(
+            f"{type(struct).__name__} does not support locally set field inspection. "
+            "Add @python.EnableUnsafeIssetInspection to the struct definition."
+        ) from None
+    if result is None:
+        logGetLocallySetFieldsCalledOnDeserializedStruct(type(struct).__name__.encode("utf-8"))
+        return _get_set_fields_fallback(struct)
+    return result
 
 
 def update_nested_field(Struct obj, path_to_values):

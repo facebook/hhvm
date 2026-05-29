@@ -2104,3 +2104,16 @@ PyObject* unionTupleFromValue(int64_t type_key, PyObject* value) {
 }
 
 } // namespace apache::thrift::python::capi
+
+namespace apache::thrift::python {
+
+void logGetLocallySetFieldsCalledOnDeserializedStruct(const char* structName) {
+  LOG(ERROR)
+      << structName
+      << " was deserialized, not locally constructed. "
+         "get_locally_set_fields() should only be called on structs created "
+         "in-process. Serialization discards isset status of unqualified "
+         "fields.";
+}
+
+} // namespace apache::thrift::python

@@ -145,12 +145,16 @@ void Extension::deserialize(BlobDecoder& sd) {
     [&](VecInit& v) {
       std::string_view sv;
       sd(sv);
-      FTRACE_MOD(Trace::apc_warmup, 1, "Extension::deserialize [{}]: key '{}'\n", m_name, sv);
+      if (Trace::moduleEnabledRelease(Trace::apc_warmup, 1)) {
+        Trace::ftraceRelease("Extension::deserialize [{}]: key '{}'\n", m_name, sv);
+      }
       auto sd = StringData::MakeUncounted(sv);
       v.append(make_tv<KindOfPersistentString>(sd));
     });
   auto d = init.toArray();
-  FTRACE_MOD(Trace::apc_warmup, 1, "Extension::deserialize [{}]: {} warmup keys\n", m_name, d.size());
+  if (Trace::moduleEnabledRelease(Trace::apc_warmup, 1)) {
+    Trace::ftraceRelease("Extension::deserialize [{}]: {} warmup keys\n", m_name, d.size());
+  }
   MakeUncountedEnv env {nullptr, nullptr};
   setWarmupData(d->makeUncounted(env, false));
 }

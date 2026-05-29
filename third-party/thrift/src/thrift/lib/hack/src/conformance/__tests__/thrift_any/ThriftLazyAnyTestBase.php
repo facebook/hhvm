@@ -74,20 +74,22 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
     self::TProtocolTestDetails $info,
   ): string {
     $serializer = $info['serializer'];
-    return $serializer::serialize(
-      facebook\thrift\test\AnyTestHelper::fromShape(shape(
-        'field' => apache_thrift_type_AnyStruct::fromShape(shape(
-          'type' => ThriftTypeStructAdapter::fromTypeSpec(static::TYPE_SPEC),
-          'protocol' => apache_thrift_type_rep_ProtocolUnion::fromShape(
-            shape('standard' => $info['protocol']),
-          ),
-          'data' => $serializer::serializeData(
-            static::getExampleValue(),
-            static::TYPE_SPEC,
-          ),
+    return HH_FIXME::tryClassnameToClass($serializer)
+      |> $$::serialize(
+        facebook\thrift\test\AnyTestHelper::fromShape(shape(
+          'field' => apache_thrift_type_AnyStruct::fromShape(shape(
+            'type' => ThriftTypeStructAdapter::fromTypeSpec(static::TYPE_SPEC),
+            'protocol' => apache_thrift_type_rep_ProtocolUnion::fromShape(
+              shape('standard' => $info['protocol']),
+            ),
+            'data' => HH_FIXME::tryClassnameToClass($serializer)
+              |> $$::serializeData(
+                static::getExampleValue(),
+                static::TYPE_SPEC,
+              ),
+          )),
         )),
-      )),
-    );
+      );
   }
 
   protected static function getRoundTripTestStruct(
@@ -96,12 +98,13 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
     bool $force_any_deserialization = false,
   ): IThriftStruct {
     $serializer = $info['serializer'];
-    $roundtrip_struct = $serializer::deserialize(
-      $expected_serialized,
-      $info['use_json_struct']
-        ? facebook\thrift\test\MainStructSimpleJson::withDefaultValues()
-        : facebook\thrift\test\MainStruct::withDefaultValues(),
-    );
+    $roundtrip_struct = HH_FIXME::tryClassnameToClass($serializer)
+      |> $$::deserialize(
+        $expected_serialized,
+        $info['use_json_struct']
+          ? facebook\thrift\test\MainStructSimpleJson::withDefaultValues()
+          : facebook\thrift\test\MainStruct::withDefaultValues(),
+      );
     if ($force_any_deserialization) {
       $roundtrip_struct->field
         ?->getNullableUntyped();
@@ -209,14 +212,15 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
       $struct = static::getInitializedTestStruct($details);
       $serializer = $details['serializer'];
 
-      $deserialized_struct = $serializer::deserialize(
-        PHP\hex2bin(static::CPP_HEX_BINARY_SERIALIZED_STRINGS[$prot]),
-        $obj,
-      );
+      $deserialized_struct = HH_FIXME::tryClassnameToClass($serializer)
+        |> $$::deserialize(
+          PHP\hex2bin(static::CPP_HEX_BINARY_SERIALIZED_STRINGS[$prot]),
+          $obj,
+        );
 
       $test_cases[$prot] = tuple(
         $deserialized_struct,
-        $serializer::serialize($struct),
+        HH_FIXME::tryClassnameToClass($serializer) |> $$::serialize($struct),
         static::CPP_HEX_BINARY_SERIALIZED_STRINGS[$prot],
       );
     }
@@ -236,10 +240,14 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
       $serializer = $details['serializer'];
       $serialized =
         (string)PHP\hex2bin(static::CPP_HEX_BINARY_SERIALIZED_EMPTY_ANY[$prot]);
-      $struct = $serializer::deserialize($serialized, $obj);
+      $struct = HH_FIXME::tryClassnameToClass($serializer)
+        |> $$::deserialize($serialized, $obj);
 
-      $test_cases[$prot] =
-        tuple($struct, $serialized, $serializer::serialize($struct));
+      $test_cases[$prot] = tuple(
+        $struct,
+        $serialized,
+        HH_FIXME::tryClassnameToClass($serializer) |> $$::serialize($struct),
+      );
     }
     return $test_cases;
   }
@@ -298,7 +306,8 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
         $test_struct is facebook\thrift\test\MainStructSimpleJson,
       'Invalid object',
     );
-    expect($serializer::serialize($test_struct))->toEqual($expected_serialized);
+    expect(HH\classname_to_class($serializer) |> $$::serialize($test_struct))
+      ->toEqual($expected_serialized);
   }
 
   <<DataProvider('getTestCases')>>

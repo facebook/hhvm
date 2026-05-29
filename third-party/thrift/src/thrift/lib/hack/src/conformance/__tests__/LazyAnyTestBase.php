@@ -137,7 +137,8 @@ abstract class LazyAnyTestBase extends WWWTest {
             ThriftUniversalName::DEFAULT_HASH_LENGTH,
           ),
           'protocol' => static::THRIFT_PROTOCOL,
-          'data' => $s::serialize($expected_value),
+          'data' =>
+            HH_FIXME::tryClassnameToClass($s) |> $$::serialize($expected_value),
         )),
       )),
     );

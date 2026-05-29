@@ -105,12 +105,28 @@ namespace detail {
 /**
  * Layout specialization for Optional<T>, which is used in the codegen for
  * optional fields. Just a boolean and a value.
+ *
+ * The second template parameter `ValueLayout` selects the layout used for the
+ * value half of the optional. It defaults to `Layout<T>` so all existing
+ * call sites (e.g. `Layout<folly::Optional<T>>`) keep their current behavior.
+ *
+ * Codegen for field-level `@cpp.Frozen2Exclude` overrides this with
+ * `ExcludedLayout<T>` so that a populated excluded optional field throws on
+ * freeze (matching struct-level `@cpp.Frozen2Exclude` semantics), while an
+ * unset optional skips the value layout entirely and freezes as a single
+ * `isset=false` bit.
+ *
+ * Invariants (load-bearing for the field-level exclude design):
+ *   - `layout`, `freeze`, and `thaw` MUST gate on the isset bit and MUST NOT
+ *     invoke the value layout when the optional is unset.
+ *   - `maximize`, `print`, `view`, and the `View` typedef defer to
+ *     `ValueLayout` for the value side.
  */
-template <class T>
+template <class T, class ValueLayout = Layout<std::decay_t<T>>>
 struct OptionalLayout : public LayoutBase {
   typedef LayoutBase Base;
   Field<bool> issetField;
-  Field<T> valueField;
+  Field<T, ValueLayout> valueField;
 
   OptionalLayout()
       : LayoutBase(typeid(T)), issetField(1, "isset"), valueField(2, "value") {}
@@ -163,7 +179,7 @@ struct OptionalLayout : public LayoutBase {
     }
   }
 
-  using View = OptionalFieldView<typename Layout<T>::View>;
+  using View = OptionalFieldView<typename ValueLayout::View>;
 
   View view(ViewPosition self) const {
     View v;

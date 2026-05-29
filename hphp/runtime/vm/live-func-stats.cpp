@@ -16,32 +16,37 @@
 
 #include "hphp/runtime/vm/live-func-stats.h"
 
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/util/struct-log.h"
 
 namespace HPHP {
-  LiveFunctionKind inferKindToLog() {
-    return Cfg::Repo::Authoritative
-      ? LiveFunctionKind::RepoAuthoritative
-      : LiveFunctionKind::Sandbox;
-  }
-  const char* liveFunctionKindToString(LiveFunctionKind kind) {
-    switch (kind) {
-      case LiveFunctionKind::RepoAuthoritative: return "prod";
-      case LiveFunctionKind::Sandbox: return "sandbox";
-      case LiveFunctionKind::Test: return "test";
-    }
-    not_reached();
+StaticString s_invoke("__invoke");
+
+LiveFunctionKind inferKindToLog() {
+  return Cfg::Repo::Authoritative
+    ? LiveFunctionKind::RepoAuthoritative
+    : LiveFunctionKind::Sandbox;
+}
+
+const char* liveFunctionKindToString(LiveFunctionKind kind) {
+   switch (kind) {
+     case LiveFunctionKind::RepoAuthoritative: return "prod";
+     case LiveFunctionKind::Sandbox: return "sandbox";
+     case LiveFunctionKind::Test: return "test";
+   }
+   not_reached();
+}
+
+void markFunctionAsLive(const Func* func, Optional<LiveFunctionKind> kind) {
+  if (func->name()->same(s_invoke.get())) return;
+  if (!kind) {
+    kind = inferKindToLog();
   }
 
-  void markFunctionAsLive(const Func* func, Optional<LiveFunctionKind> kind) {
-    if (!kind) {
-      kind = inferKindToLog();
-    }
-
-    StructuredLogEntry entry;
-    entry.force_init = true;
-    entry.setStr("function_name", func->fullName()->data());
-    entry.setStr("mode", liveFunctionKindToString(*kind));
-    StructuredLog::log("hhvm_live_functions", entry);
-  }
+  StructuredLogEntry entry;
+  entry.force_init = true;
+  entry.setStr("function_name", func->fullName()->data());
+  entry.setStr("mode", liveFunctionKindToString(*kind));
+  StructuredLog::log("hhvm_live_functions", entry);
+}
 }

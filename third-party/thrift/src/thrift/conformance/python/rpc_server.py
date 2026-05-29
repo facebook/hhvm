@@ -72,7 +72,7 @@ class Handler(RPCConformanceServiceInterface):
 
 
 async def main():
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     server = ThriftServer(Handler())
     serve_task = asyncio.create_task(server.serve())
     for signal in [SIGINT, SIGTERM]:

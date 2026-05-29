@@ -1013,7 +1013,7 @@ void ThreadManager::Impl::reportTaskStats(
   // Times in this USDT use granularity of std::chrono::steady_clock::duration,
   // which is platform dependent. On Facebook servers, the granularity is
   // nanoseconds. We explicitly do not perform any unit conversions to avoid
-  // unneccessary costs and leave it to consumers of this data to know what
+  // unnecessary costs and leave it to consumers of this data to know what
   // effective clock resolution is.
   FOLLY_SDT(
       thrift,
@@ -1638,7 +1638,7 @@ size_t aggregateForEachThreadManager(
 
 // folly::Executor does not expose these values so currently there is no way to
 // implement this API correctly. However, in many cases, the underlying
-// executors are all be ThreadManager's themselves so aggregating the values
+// executors are all ThreadManagers themselves so aggregating the values
 // should yield the correct result.
 
 size_t ThreadManagerExecutorAdapter::idleWorkerCount() const {

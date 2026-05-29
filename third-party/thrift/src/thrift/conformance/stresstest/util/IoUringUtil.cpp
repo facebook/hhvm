@@ -54,6 +54,11 @@ DEFINE_bool(
     io_uring_async_socket,
     false,
     "Use AsyncSocket with IoUringBackend nativeAsyncSocketSupport instead of AsyncIoUringSocket");
+DEFINE_bool(
+    io_prov_buffs_use_bundles,
+    false,
+    "Enable IORING_RECVSEND_BUNDLE on IoUringBackend multishot recv operations "
+    "(requires kernel support for IORING_FEAT_RECVSEND_BUNDLE). Off by default.");
 #if FOLLY_HAS_LIBURING
 
 namespace apache::thrift::stress {
@@ -165,6 +170,10 @@ folly::IoUringBackend::Options getIoUringOptions() {
 
   if (FLAGS_io_uring_async_socket) {
     options.setNativeAsyncSocketSupport(true);
+  }
+
+  if (FLAGS_io_prov_buffs_use_bundles) {
+    options.setProvidedBufUseBundles(true);
   }
 
   return options;

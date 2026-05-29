@@ -204,7 +204,7 @@ class FramedProtocol(asyncio.Protocol):
     """Unpacks Thrift frames and reads them asynchronously."""
 
     def __init__(self, loop=None):
-        self.loop = loop or asyncio.get_event_loop()
+        self.loop = loop or asyncio.get_running_loop()
         self.recvd = b""
 
     async def message_received(self, frame):

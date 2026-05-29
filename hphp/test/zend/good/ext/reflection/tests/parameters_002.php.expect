@@ -2,7 +2,6 @@
 ===0===
 getName: string(3) "nix"
 isPassedByReference: bool(false)
-getClass: NULL
 getDeclaringClass: NULL
 allowsNull: bool(true)
 isOptional: bool(false)
@@ -10,7 +9,6 @@ isDefaultValueAvailable: bool(false)
 ===1===
 getName: string(2) "ar"
 isPassedByReference: bool(false)
-getClass: NULL
 getDeclaringClass: NULL
 allowsNull: bool(false)
 isOptional: bool(false)
@@ -18,7 +16,6 @@ isDefaultValueAvailable: bool(false)
 ===2===
 getName: string(3) "ref"
 isPassedByReference: bool(true)
-getClass: NULL
 getDeclaringClass: NULL
 allowsNull: bool(true)
 isOptional: bool(false)
@@ -26,7 +23,6 @@ isDefaultValueAvailable: bool(false)
 ===3===
 getName: string(3) "std"
 isPassedByReference: bool(false)
-getClass: stdClass
 getDeclaringClass: NULL
 allowsNull: bool(false)
 isOptional: bool(false)
@@ -34,7 +30,6 @@ isDefaultValueAvailable: bool(false)
 ===4===
 getName: string(2) "na"
 isPassedByReference: bool(false)
-Class NonExistingClass does not exist
 getDeclaringClass: NULL
 allowsNull: bool(false)
 isOptional: bool(false)
@@ -42,7 +37,6 @@ isDefaultValueAvailable: bool(false)
 ===5===
 getName: string(3) "opt"
 isPassedByReference: bool(true)
-getClass: stdClass
 getDeclaringClass: NULL
 allowsNull: bool(false)
 isOptional: bool(false)
@@ -50,7 +44,6 @@ isDefaultValueAvailable: bool(false)
 ===6===
 getName: string(3) "def"
 isPassedByReference: bool(false)
-getClass: NULL
 getDeclaringClass: NULL
 allowsNull: bool(true)
 isOptional: bool(true)
@@ -60,7 +53,6 @@ getDefaultValue: string(6) "FooBar"
 ===0===
 getName: string(3) "nix"
 isPassedByReference: bool(false)
-getClass: NULL
 getDeclaringClass: test
 allowsNull: bool(true)
 isOptional: bool(false)
@@ -68,7 +60,6 @@ isDefaultValueAvailable: bool(false)
 ===1===
 getName: string(2) "ar"
 isPassedByReference: bool(false)
-getClass: NULL
 getDeclaringClass: test
 allowsNull: bool(false)
 isOptional: bool(false)
@@ -76,7 +67,6 @@ isDefaultValueAvailable: bool(false)
 ===2===
 getName: string(3) "ref"
 isPassedByReference: bool(false)
-getClass: NULL
 getDeclaringClass: test
 allowsNull: bool(true)
 isOptional: bool(false)
@@ -84,7 +74,6 @@ isDefaultValueAvailable: bool(false)
 ===3===
 getName: string(3) "std"
 isPassedByReference: bool(false)
-getClass: stdClass
 getDeclaringClass: test
 allowsNull: bool(false)
 isOptional: bool(false)
@@ -92,7 +81,6 @@ isDefaultValueAvailable: bool(false)
 ===4===
 getName: string(2) "na"
 isPassedByReference: bool(false)
-Class NonExistingClass does not exist
 getDeclaringClass: test
 allowsNull: bool(false)
 isOptional: bool(false)
@@ -100,7 +88,6 @@ isDefaultValueAvailable: bool(false)
 ===5===
 getName: string(3) "opt"
 isPassedByReference: bool(false)
-getClass: NULL
 getDeclaringClass: test
 allowsNull: bool(true)
 isOptional: bool(true)
@@ -109,7 +96,6 @@ getDefaultValue: NULL
 ===6===
 getName: string(3) "def"
 isPassedByReference: bool(false)
-getClass: NULL
 getDeclaringClass: test
 allowsNull: bool(true)
 isOptional: bool(true)

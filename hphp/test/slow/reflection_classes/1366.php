@@ -152,10 +152,5 @@ $rf = new ReflectionFunction('ff');
 $rps = $rf->getParameters();
 foreach ($rps as $rp) {
   var_dump($rp->getTypeText());
-  if ($rp->getClass() !== null) {
-    var_dump($rp->getClass()->getName());
-  } else {
-    var_dump("");
-  }
 }
 }

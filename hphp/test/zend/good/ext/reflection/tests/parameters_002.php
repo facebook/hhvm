@@ -40,14 +40,6 @@ function check_params($r)
         $i++;
         check_params_func($p, 'getName');
         check_params_func($p, 'isPassedByReference');
-        try
-        {
-            check_params_decl_class($p, 'getClass');
-        }
-        catch(ReflectionException $e)
-        {
-            echo $e->getMessage() . "\n";
-        }
         check_params_decl_class($p, 'getDeclaringClass');
 //        check_params_decl_func($p, 'getDeclaringFunction');
         check_params_func($p, 'allowsNull');

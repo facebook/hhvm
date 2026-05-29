@@ -50,7 +50,6 @@ function dump_param($param) :mixed{
   var_dump($param->getName());
    var_dump($param->isPassedByReference());
    verify_class($param->getDeclaringClass());
-   verify_class($param->getClass());
    var_dump($param->allowsNull());
    var_dump($param->isOptional());
    var_dump($param->isDefaultValueAvailable());

@@ -51,7 +51,6 @@ function entrypoint_reflection2(): void {
     $r = new ReflectionClass('I');
     foreach ($r->getMethods() as $m) {
       foreach ($m->getParameters() as $p) {
-        $p->getClass();
         var_dump($p);
       }
     }

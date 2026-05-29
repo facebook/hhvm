@@ -123,7 +123,7 @@ class ClientAndServer {
   ChannelType channelType_;
 };
 
-// Creates a map from name to client provider, using lazily initalized
+// Creates a map from name to client provider, using lazily initialized
 // ClientAndServers.
 template <typename Client>
 client_fn_map<Client> getServers(ChannelType channelType) {

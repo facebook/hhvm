@@ -37,7 +37,7 @@ final class ThriftImmutableWrapperTest extends WWWTest {
       SignalsPipeSerializationProtocol::COMPACT_64,
     );
     expect($test_deserialized)->toBePHPEqual($underlying);
-    expect($test_deserialized?->__toShape())->toBePHPEqual(
+    expect($test_deserialized->__toShape())->toBePHPEqual(
       $underlying->__toShape(),
     );
 

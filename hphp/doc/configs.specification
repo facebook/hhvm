@@ -2202,7 +2202,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Max total number of live translation bytes to JIT into the TC for a function
 
-- uint32_t Jit.MaxLiveMainUsage = 2000000000, UNKNOWN
+- uint32_t Jit.MaxLiveMainUsage = 150994944, UNKNOWN
 
   Max total numer of bytes to emit for live translations in the main section.
   Defaults to 2GB.

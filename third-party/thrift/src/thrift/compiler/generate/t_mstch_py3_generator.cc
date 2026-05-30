@@ -1163,6 +1163,11 @@ class t_mstch_py3_generator : public t_whisker_generator {
       return self.has_structured_annotation(
           kPythonMigrationBlockingAllowInheritanceUri);
     });
+    def.property(
+        "enable_unsafe_isset_inspection?", [](const t_structured& self) {
+          return self.has_structured_annotation(
+              kPythonEnableUnsafeIssetInspectionUri);
+        });
     def.property("cpp_noncomparable?", [](const t_structured& self) {
       return self.has_unstructured_annotation(
           {"cpp.noncomparable", "cpp2.noncomparable"});

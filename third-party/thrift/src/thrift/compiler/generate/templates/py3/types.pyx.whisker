@@ -171,6 +171,9 @@ cdef object get_types_reflection():
         {{/if (not struct.allow_inheritance?)}}
 cdef class {{struct.name}}({{#partial types.python_struct_class struct=struct}}):
     __module__ = _fbthrift__module_name__
+    {{#if struct.enable_unsafe_isset_inspection?}}
+    _fbthrift_enable_unsafe_isset_inspection = True
+    {{/if struct.enable_unsafe_isset_inspection?}}
 
     def __init__({{struct.name}} self,{{#if struct.exception?}} *args,{{/if}} **kwargs):
         self.{{#partial types.cpp_obj}} = make_shared[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}]()

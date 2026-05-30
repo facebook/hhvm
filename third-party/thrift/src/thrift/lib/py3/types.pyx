@@ -43,6 +43,7 @@ from thrift.python.types import (
     Set as _fbthrift_python_Set,
     Struct as _fbthrift_python_Struct,
     StructOrUnion as _fbthrift_python_StructOrUnion,
+    get_locally_set_fields as _fbthrift_python_get_locally_set_fields,
     isset as _fbthrift_python_isset,
     Union as _fbthrift_python_Union,
 )
@@ -300,6 +301,24 @@ cdef class Struct:
 
 
 SetMetaClass(<PyTypeObject*> Struct, <PyTypeObject*> StructMeta)
+
+
+def get_locally_set_fields(struct):
+    if isinstance(struct, (_fbthrift_python_Struct, _fbthrift_python_GeneratedError)):
+        return _fbthrift_python_get_locally_set_fields(struct)
+    if isinstance(struct, (Struct, GeneratedError)):
+        if not getattr(type(struct), '_fbthrift_enable_unsafe_isset_inspection', False):
+            raise AttributeError(
+                f"{type(struct).__name__} does not support locally set field inspection. "
+                "Add @python.EnableUnsafeIssetInspection to the struct definition."
+            )
+        isset_result = StructMeta.isset_DEPRECATED(struct)
+        return frozenset(
+            name for name, is_set in vars(isset_result).items() if is_set
+        )
+    raise TypeError(
+        f"{type(struct).__name__} is not a thrift struct"
+    )
 
 
 # used by Union.fromValue to avoid matching a python `float` (64-bit) to

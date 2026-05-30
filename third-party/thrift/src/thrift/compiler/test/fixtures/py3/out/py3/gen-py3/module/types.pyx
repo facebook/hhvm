@@ -685,6 +685,7 @@ cdef class Float32Struct(thrift.py3.types.Struct):
 @__cython.final
 cdef class IssetInspectionStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    _fbthrift_enable_unsafe_isset_inspection = True
 
     def __init__(IssetInspectionStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cIssetInspectionStruct]()

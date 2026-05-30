@@ -44,6 +44,7 @@ from test_thrift.types import (
     SlowCompare,
     StringBucket,
     StructWithEnumFields,
+    StructWithIssetInspection,
     UnusedError,
 )
 from testing.dependency.types import IncludedStruct
@@ -54,7 +55,7 @@ from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
 )
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize, serialize
-from thrift.py3.types import Struct
+from thrift.py3.types import get_locally_set_fields, Struct
 from thrift.python.types import BadEnum
 
 try:
@@ -770,3 +771,19 @@ class MyStrEnum(StrEnum):
 class MyStrEnumBad(str, Enum):
     A = "a"
     B = "b"
+
+
+class GetLocallySetFieldsTests(unittest.TestCase):
+    def test_annotated_struct(self) -> None:
+        s = StructWithIssetInspection(int_field=42, bool_field=True)
+        result = get_locally_set_fields(s)
+        self.assertIn("int_field", result)
+        self.assertIn("bool_field", result)
+        self.assertNotIn("opt_str_field", result)
+
+    def test_not_annotated_raises(self) -> None:
+        s = easy(val=42, name="test")
+        with self.assertRaisesRegex(
+            AttributeError, "does not support locally set field inspection"
+        ):
+            get_locally_set_fields(s)

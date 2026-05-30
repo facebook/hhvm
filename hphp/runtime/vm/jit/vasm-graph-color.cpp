@@ -4005,7 +4005,7 @@ bool mem_read_available_recurse(State& state,
   assertx(!r.isPhys());
   assertx(instIdx <= state.unit.blocks[b].code.size());
 
-  // If the block has a single successor, we'll use iteration instead
+  // If the block has a single predecessor, we'll use iteration instead
   // of recursion (because it's more efficient). However we need to
   // update cache entries on the way out. So store the block/Vreg
   // pairs (the Vreg can change too) here for updates on the exit.
@@ -4030,16 +4030,21 @@ bool mem_read_available_recurse(State& state,
   // result is false, make sure we fixup any cached entries which
   // reached the blocks from a loop.
   auto const exit = [&] (bool result) {
-    for (auto const& update : cacheUpdates) {
+    for (size_t i = 0; i < cacheUpdates.size(); ++i) {
+      auto const& update = cacheUpdates[i];
       auto it = state.memReadAvailableCache.find(update);
       // Nothing should have modified the entries for this block:
       assertx(it != state.memReadAvailableCache.end());
       assertx(it->second == TriBool::Maybe);
-      if (!result && succs(state.unit.blocks[update.first]).size() > 1) {
-        // We're setting this entry to false, so we need to perform
-        // the fixup. We can skip the fixup if the block has only one
-        // successor. If it does, it cannot participate in a loop.
 
+      // If we're setting this entry to false, then we need to perform the
+      // fixup. We can skip the fixup if the block has only one
+      // successor as it would have been processed in the previous iteration of
+      // this loop, except when it is the very first block in cacheUpdates.
+      bool fixupNow = !result
+        && (i == 0 || succs(state.unit.blocks[update.first]).size() > 1);
+
+      if (fixupNow) {
         // fixup_mem_read_available_cache assumes any processably
         // block has a TriBool::Yes entry, so temporarily change it to
         // that.
@@ -4057,6 +4062,7 @@ bool mem_read_available_recurse(State& state,
         it->second = yesOrNo(result);
       }
     }
+
     return result;
   };
 

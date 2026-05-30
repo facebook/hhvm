@@ -10,6 +10,7 @@
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/protocol/ech/Types.h>
 #include <fizz/tool/FizzCommandCommon.h>
+#include <fizz/util/Logging.h>
 #include <folly/FileUtil.h>
 #include <folly/String.h>
 #include <folly/base64.h>
@@ -104,7 +105,7 @@ std::vector<Extension> getExtensions(folly::StringPiece hex) {
     FIZZ_THROW_ON_ERROR(
         detail::readVector<uint16_t>(len, err, extensions, cursor), err);
   }
-  CHECK(cursor.isAtEnd());
+  FIZZ_CHECK(cursor.isAtEnd());
   return extensions;
 }
 

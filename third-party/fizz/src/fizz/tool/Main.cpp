@@ -7,15 +7,11 @@
  */
 
 #include <fizz/tool/Commands.h>
-#include <folly/Conv.h>
-#include <folly/portability/GFlags.h>
-#include <glog/logging.h>
+#include <folly/init/Init.h>
 
 #include <iostream>
 #include <string>
 #include <vector>
-
-DECLARE_string(vmodule);
 
 using namespace fizz::tool;
 
@@ -28,53 +24,26 @@ void showUsage() {
   std::cerr << std::endl;
 }
 
-void parseVerbosityFlags(const std::vector<std::string>& arguments) {
-  // Handle v + vmodule raw, as we need to do it before
-  // logging is initialized.
-  for (size_t i = 2; i < arguments.size(); i++) {
-    if (arguments[i] == "-v") {
-      if (i + 1 == arguments.size()) {
-        throw std::runtime_error("-v requires an argument.");
-      }
-      FLAGS_v = folly::to<int32_t>(arguments[i + 1]);
-    }
-
-    if (arguments[i] == "-vmodule") {
-      if (i + 1 == arguments.size()) {
-        throw std::runtime_error("-vmodule requires an argument.");
-      }
-      FLAGS_vmodule = arguments[i + 1];
-    }
-  }
-}
-
 int main(int argc, char** argv) {
+  // folly::Init parses gflags (consuming flags like --v, --vmodule, --logging)
+  // and initializes whichever logging backend is linked (glog or folly xlog).
+  // It mutates argc/argv to strip parsed flags; the remaining args carry the
+  // subcommand and its arguments.
+  folly::Init init(&argc, &argv);
+
   std::vector<std::string> arguments;
   for (int i = 0; i < argc; i++) {
     arguments.emplace_back(argv[i]);
   }
 
-  try {
-    parseVerbosityFlags(arguments);
-  } catch (const std::exception& e) {
-    std::cerr << "Error parsing verbosity flags: " << e.what() << std::endl;
-    return 1;
-  }
-
-  FLAGS_logtostderr = 1;
-  google::InitGoogleLogging(argv[0]);
-
   if (arguments.size() < 2) {
     showUsage();
     return 1;
-  } else {
-    if (fizzUtilities.contains(arguments[1])) {
-      return fizzUtilities.at(arguments[1])(arguments);
-    } else {
-      std::cerr << "Unknown command '" << arguments[1] << "'." << std::endl;
-      showUsage();
-      return 1;
-    }
   }
-  return 0;
+  if (fizzUtilities.contains(arguments[1])) {
+    return fizzUtilities.at(arguments[1])(arguments);
+  }
+  std::cerr << "Unknown command '" << arguments[1] << "'." << std::endl;
+  showUsage();
+  return 1;
 }

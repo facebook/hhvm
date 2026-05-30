@@ -207,7 +207,7 @@ Status FizzUtil::createKeyExchangeFromBuf(
 
 std::vector<std::string> FizzUtil::getAlpnsFromNpnList(
     const std::list<folly::SSLContext::NextProtocolsItem>& list) {
-  CHECK(!list.empty());
+  FIZZ_CHECK(!list.empty());
   auto maxWeight = list.front().weight;
   auto protoList = &list.front().protocols;
   for (const auto& item : list) {

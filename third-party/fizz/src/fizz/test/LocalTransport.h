@@ -47,7 +47,7 @@ class LocalTransport : public folly::AsyncTransportWrapper {
   void setReadCB(ReadCallback* callback) override {
     callback_ = callback;
     if (callback_) {
-      CHECK(callback->isBufferMovable());
+      FIZZ_CHECK(callback->isBufferMovable());
       deliverData();
     }
   }

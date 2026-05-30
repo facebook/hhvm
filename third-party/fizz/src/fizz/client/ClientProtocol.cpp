@@ -19,6 +19,7 @@
 #include <fizz/protocol/ech/Encryption.h>
 #include <fizz/protocol/ech/GreaseECH.h>
 #include <fizz/record/Extensions.h>
+#include <fizz/util/Logging.h>
 
 using folly::Optional;
 
@@ -2498,7 +2499,7 @@ Status EventHandler<
         AlertDescription::illegal_parameter);
   }
 
-  CHECK(!state.unverifiedCertChain().empty());
+  FIZZ_CHECK(!state.unverifiedCertChain().empty());
   auto leaf = state.unverifiedCertChain().front();
 
   Buf verifyContext;

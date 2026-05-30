@@ -17,6 +17,7 @@
 #include <fizz/protocol/AsyncFizzBase.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <fizz/protocol/Exporter.h>
+#include <fizz/util/Logging.h>
 #include <fizz/util/Tracing.h>
 #include <folly/io/SocketOptionMap.h>
 
@@ -127,7 +128,7 @@ class AsyncFizzClientT : public AsyncFizzBase,
    * early data to be used.
    */
   void setEarlyDataRejectionPolicy(EarlyDataRejectionPolicy policy) {
-    CHECK(!earlyDataState_);
+    FIZZ_CHECK(!earlyDataState_);
     earlyDataRejectionPolicy_ = policy;
   }
 

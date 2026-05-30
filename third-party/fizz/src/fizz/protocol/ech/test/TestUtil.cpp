@@ -24,7 +24,7 @@ std::vector<Extension> getExtensions(folly::StringPiece hex) {
   Error err;
   FIZZ_THROW_ON_ERROR(detail::read(len, err, ext, cursor), err);
   FIZZ_CHECK_EQ(len, buf->computeChainDataLength());
-  CHECK(cursor.isAtEnd());
+  FIZZ_CHECK(cursor.isAtEnd());
   std::vector<Extension> exts;
   exts.push_back(std::move(ext));
   return exts;

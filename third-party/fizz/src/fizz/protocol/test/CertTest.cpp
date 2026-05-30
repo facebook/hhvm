@@ -13,6 +13,7 @@
 #include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/protocol/test/CertTestTypes.h>
+#include <fizz/util/Logging.h>
 #include <folly/String.h>
 
 using namespace folly;
@@ -106,7 +107,7 @@ TEST(CertTest, GetCertMessage) {
   auto firstCertDataPtr = firstCertData.data();
   folly::ssl::X509UniquePtr firstEncodedCert(
       d2i_X509(nullptr, &firstCertDataPtr, firstCertData.size()));
-  CHECK(firstEncodedCert);
+  FIZZ_CHECK(firstEncodedCert);
 
   auto certCopy = getCert(kP256Certificate);
   EXPECT_EQ(X509_cmp(firstEncodedCert.get(), certCopy.get()), 0);

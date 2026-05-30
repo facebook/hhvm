@@ -7,14 +7,14 @@
  */
 #pragma once
 
+#include <fizz/fizz-config.h>
+
 /**
  * fizz/util/Logging.h defines the FIZZ_LOG, FIZZ_VLOG, FIZZ_CHECK, and
- * FIZZ_DCHECK macros.
+ * FIZZ_DCHECK macros. The backend is selected by exactly one of
+ * FIZZ_LOGGING_GLOG, FIZZ_LOGGING_XLOG, or FIZZ_LOGGING_DISABLED
+ * being defined to 1 in <fizz/fizz-config.h>.
  */
-
-// We hardcode this for now as we migrate call sites. In future diffs this
-// will move to fizz-config.h and be configurable at build time.
-#define FIZZ_LOGGING_GLOG 1
 
 #if FIZZ_LOGGING_GLOG
 
@@ -37,7 +37,7 @@
 #define FIZZ_DCHECK_LE DCHECK_LE
 #define FIZZ_DCHECK_LT DCHECK_LT
 
-#elif FIZZ_LOGGING_FOLLY_LOGGING
+#elif FIZZ_LOGGING_XLOG
 
 #include <folly/logging/xlog.h>
 #define FIZZ_LOGGING_CONCAT_(a, b) a##b

@@ -60,8 +60,14 @@ endif()
 find_package(fmt CONFIG REQUIRED)
 
 find_package(OpenSSL REQUIRED)
-find_package(Glog REQUIRED)
-add_compile_definitions(GLOG_USE_GLOG_EXPORT)
+# Define FIZZ_LOGGING_BACKEND before it gates find_package(Glog) below.
+include(FizzOptions)
+# Glog is only required in the default GLOG backend; XLOG routes through
+# folly::xlog and DISABLED strips logging entirely.
+if(FIZZ_LOGGING_BACKEND STREQUAL "GLOG")
+  find_package(Glog REQUIRED)
+  add_compile_definitions(GLOG_USE_GLOG_EXPORT)
+endif()
 find_package(Threads REQUIRED)
 find_package(Zstd REQUIRED)
 if (UNIX AND NOT APPLE)
@@ -119,7 +125,6 @@ if(aegis_FOUND)
     set(FIZZ_HAVE_LIBAEGIS TRUE)
 endif()
 
-include(FizzOptions)
 include(FizzSources)
 
 configure_file(fizz-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/generated/fizz/fizz-config.h)
@@ -214,9 +219,11 @@ target_include_directories(
     ${sodium_INCLUDE_DIR}
     ${ZSTD_INCLUDE_DIR}
   PRIVATE
-    ${GLOG_INCLUDE_DIRS}
     ${FIZZ_INCLUDE_DIRECTORIES}
 )
+if(FIZZ_LOGGING_BACKEND STREQUAL "GLOG")
+  target_include_directories(fizz PRIVATE ${GLOG_INCLUDE_DIRS})
+endif()
 
 
 target_link_libraries(fizz
@@ -266,11 +273,19 @@ target_link_libraries(fizz
     ZLIB::ZLIB
     ${ZSTD_LIBRARY}
   PRIVATE
-    ${GLOG_LIBRARIES}
     ${GFLAGS_LIBRARIES}
     ${FIZZ_LINK_LIBRARIES}
     ${CMAKE_DL_LIBS}
     ${LIBRT_LIBRARIES})
+
+# Logging backend link: glog by default (preserves historical behavior), folly
+# xlog when FIZZ_LOGGING_BACKEND=XLOG, neither when DISABLED. PUBLIC so
+# downstream consumers of fizz/util/Logging.h get the right transitive deps.
+if(FIZZ_LOGGING_BACKEND STREQUAL "XLOG")
+  target_link_libraries(fizz PUBLIC Folly::folly_logging_logging)
+elseif(FIZZ_LOGGING_BACKEND STREQUAL "GLOG")
+  target_link_libraries(fizz PRIVATE ${GLOG_LIBRARIES})
+endif()
 
 if (liboqs_FOUND)
   target_link_libraries(fizz PRIVATE OQS::oqs)
@@ -474,7 +489,11 @@ option(BUILD_EXAMPLES "BUILD_EXAMPLES" ON)
 
 if(BUILD_EXAMPLES)
   add_executable(BogoShim test/BogoShim.cpp)
-  target_link_libraries(BogoShim fizz)
+  target_link_libraries(BogoShim
+    fizz
+    Folly::folly_io_async_async_ssl_socket
+    Folly::folly_io_async_ssl_context
+  )
   set_target_properties(BogoShim PROPERTIES OUTPUT_NAME fizz-bogoshim)
   install(
     TARGETS BogoShim
@@ -488,14 +507,27 @@ if(BUILD_EXAMPLES)
       tool/FizzGenerateDelegatedCredentialCommand.cpp
       tool/FizzServerBenchmarkCommand.cpp
       tool/FizzServerCommand.cpp)
-  target_link_libraries(FizzTool fizz)
+  target_link_libraries(FizzTool
+    fizz
+    Folly::folly_init_init
+    Folly::folly_io_async_async_ssl_socket
+    Folly::folly_io_async_server_socket
+    Folly::folly_io_async_ssl_context
+    Folly::folly_executors_io_thread_pool_executor
+    Folly::folly_stats_histogram
+    Folly::folly_json_dynamic
+  )
   set_target_properties(FizzTool PROPERTIES OUTPUT_NAME fizz)
   install(
     TARGETS FizzTool
     DESTINATION ${BIN_INSTALL_DIR}
   )
   add_executable(EncryptedRecordBench record/test/EncryptedRecordBench.cpp)
-  target_link_libraries(EncryptedRecordBench fizz Folly::folly_benchmark)
+  target_link_libraries(EncryptedRecordBench
+    fizz
+    Folly::follybenchmark
+    Folly::folly_init_init
+  )
   set_target_properties(
     EncryptedRecordBench PROPERTIES OUTPUT_NAME fizz-encryptedrecordbench
   )

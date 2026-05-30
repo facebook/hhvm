@@ -8,6 +8,7 @@
 
 #include <fizz/protocol/AsyncFizzBase.h>
 
+#include <fizz/util/Logging.h>
 #include <folly/Conv.h>
 #include <folly/io/Cursor.h>
 
@@ -105,8 +106,8 @@ void AsyncFizzBase::QueuedWriteRequest::startWriting() {
   size_t len = buf->computeChainDataLength();
   dataWritten_ += len;
 
-  CHECK(asyncFizzBase_);
-  CHECK(asyncFizzBase_->tailWriteRequest_);
+  FIZZ_CHECK(asyncFizzBase_);
+  FIZZ_CHECK(asyncFizzBase_->tailWriteRequest_);
   asyncFizzBase_->tailWriteRequest_->entireChainBytesBuffered -= len;
   asyncFizzBase_->writeAppData(this, std::move(buf), flags);
 }

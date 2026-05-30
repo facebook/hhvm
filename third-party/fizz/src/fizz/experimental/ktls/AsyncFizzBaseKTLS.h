@@ -20,7 +20,6 @@
 #include <fizz/experimental/util/CertExtraction.h>
 #include <fizz/protocol/AsyncFizzBase.h>
 #include <folly/Expected.h>
-#include <glog/logging.h>
 
 namespace fizz {
 namespace client {

@@ -117,7 +117,7 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
       ClientAuthMode mode = ClientAuthMode::Optional) {
     ctx_->setClientAuthMode(mode);
     std::string certData;
-    CHECK(folly::readFile(path.c_str(), certData));
+    FIZZ_CHECK(folly::readFile(path.c_str(), certData));
     auto certRange = folly::ByteRange(folly::StringPiece(certData));
 
     auto clientAuthCerts =
@@ -127,7 +127,7 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
     for (auto& caCert : clientAuthCerts) {
       if (X509_STORE_add_cert(store.get(), caCert.get()) != 1) {
         auto err = ERR_get_error();
-        CHECK(
+        FIZZ_CHECK(
             ERR_GET_LIB(err) == ERR_LIB_X509 &&
             ERR_GET_REASON(err) == X509_R_CERT_ALREADY_IN_HASH_TABLE)
             << "Could not insert CA certificate into store: "

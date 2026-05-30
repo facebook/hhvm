@@ -164,7 +164,7 @@ class FizzExampleServer : public AsyncFizzServer::HandshakeCallback,
   }
 
   void fizzHandshakeAttemptFallback(AttemptVersionFallback fallback) override {
-    CHECK(transport_);
+    FIZZ_CHECK(transport_);
     FIZZ_LOG(INFO) << "Fallback attempt";
     auto socket = transport_->getUnderlyingTransport<AsyncSocket>();
     auto evb = socket->getEventBase();
@@ -946,7 +946,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
         Error err;
         if (getExtension<fizz::extensions::DelegatedCredential>(
                 cred, err, std::move(credVec)) == Status::Fail) {
-          LOG(ERROR) << "Credential parsing failed: " << err.msg();
+          FIZZ_LOG(ERROR) << "Credential parsing failed: " << err.msg();
           return 1;
         }
       } catch (const std::exception& e) {

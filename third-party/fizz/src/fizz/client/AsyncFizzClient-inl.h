@@ -73,7 +73,7 @@ void AsyncFizzClientT<SM>::connect(
   DelayedDestruction::DestructorGuard dg(this);
 
   // shouldn't attempt to connect a second time
-  CHECK(!callback_.hasValue()) << "connect already called";
+  FIZZ_CHECK(!callback_.hasValue()) << "connect already called";
   callback_.emplace(callback);
 
   if (!transport_->good()) {
@@ -121,7 +121,7 @@ void AsyncFizzClientT<SM>::connect(
   DelayedDestruction::DestructorGuard dg(this);
 
   // shouldn't attempt to connect a second time
-  CHECK(!callback_.hasValue()) << "connect already called";
+  FIZZ_CHECK(!callback_.hasValue()) << "connect already called";
   callback_.emplace(callback);
 
   verifier_ = std::move(verifier);

@@ -15,7 +15,7 @@
  */
 
 #include <fizz/experimental/ktls/AsyncKTLSSocket.h>
-#include <glog/logging.h>
+#include <fizz/util/Logging.h>
 
 namespace fizz {
 folly::AsyncSocket::ReadResult AsyncKTLSSocket::performReadMsg(
@@ -317,8 +317,8 @@ void AsyncKTLSRxSocket::QueuedWriteRequest::startWriting() {
   size_t len = buf->computeChainDataLength();
   dataWritten_ += len;
 
-  CHECK(sock_);
-  CHECK(sock_->tailWriteRequest_);
+  FIZZ_CHECK(sock_);
+  FIZZ_CHECK(sock_->tailWriteRequest_);
   sock_->tailWriteRequest_->entireChainBytesBuffered -= len;
   sock_->writeAppData(this, std::move(buf), flags);
 }

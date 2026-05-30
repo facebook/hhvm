@@ -99,7 +99,7 @@ class BogoTestServer : public AsyncSocket::ConnectCallback,
   }
 
   void readDataAvailable(size_t /* len */) noexcept override {
-    CHECK(false) << "readDataAvailable not implemented";
+    FIZZ_CHECK(false) << "readDataAvailable not implemented";
   }
 
   bool isBufferMovable() noexcept override {
@@ -212,7 +212,7 @@ class BogoTestClient : public AsyncSocket::ConnectCallback,
   }
 
   void readDataAvailable(size_t /* len */) noexcept override {
-    CHECK(false) << "readDataAvailable not implemented";
+    FIZZ_CHECK(false) << "readDataAvailable not implemented";
   }
 
   bool isBufferMovable() noexcept override {

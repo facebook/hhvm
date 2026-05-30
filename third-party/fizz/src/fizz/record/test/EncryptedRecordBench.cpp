@@ -10,6 +10,7 @@
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/Utils.h>
 #include <fizz/record/EncryptedRecordLayer.h>
+#include <fizz/util/Logging.h>
 
 using namespace fizz;
 
@@ -52,7 +53,7 @@ std::unique_ptr<folly::IOBuf> makeRandom(size_t n, size_t num = 1) {
 
 std::unique_ptr<folly::IOBuf> toIOBuf(const std::string& hexData) {
   std::string out;
-  CHECK(folly::unhexlify(hexData, out));
+  FIZZ_CHECK(folly::unhexlify(hexData, out));
   return folly::IOBuf::copyBuffer(out);
 }
 

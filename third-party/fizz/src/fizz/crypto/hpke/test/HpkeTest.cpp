@@ -13,6 +13,7 @@
 #include <fizz/crypto/hpke/test/Mocks.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/protocol/DefaultFactory.h>
+#include <fizz/util/Logging.h>
 #include <gtest/gtest.h>
 #include <list>
 
@@ -1994,26 +1995,26 @@ SetupParam getSetupParam(
   switch (group) {
     case NamedGroup::x25519: {
       auto dKex = dynamic_cast<libsodium::X25519KeyExchange*>(kex.get());
-      CHECK(dKex);
+      FIZZ_CHECK(dKex);
       Error err;
       FIZZ_THROW_ON_ERROR(dKex->setPrivateKey(err, toIOBuf(privateKey)), err);
       break;
     }
     case NamedGroup::secp256r1: {
       auto dKex = dynamic_cast<openssl::OpenSSLECKeyExchange*>(kex.get());
-      CHECK(dKex);
+      FIZZ_CHECK(dKex);
       setOpenSSLPrivKey<fizz::P256>(dKex, privateKey, publicKey);
       break;
     }
     case NamedGroup::secp384r1: {
       auto dKex = dynamic_cast<openssl::OpenSSLECKeyExchange*>(kex.get());
-      CHECK(dKex);
+      FIZZ_CHECK(dKex);
       setOpenSSLPrivKey<fizz::P384>(dKex, privateKey, publicKey);
       break;
     }
     case NamedGroup::secp521r1: {
       auto dKex = dynamic_cast<openssl::OpenSSLECKeyExchange*>(kex.get());
-      CHECK(dKex);
+      FIZZ_CHECK(dKex);
       setOpenSSLPrivKey<fizz::P521>(dKex, privateKey, publicKey);
       break;
     }

@@ -28,7 +28,7 @@ std::unique_ptr<folly::IOBuf> defaultCreator(size_t len, size_t) {
 std::unique_ptr<folly::IOBuf>
 toIOBuf(std::string hexData, size_t headroom, size_t tailroom) {
   std::string out;
-  CHECK(folly::unhexlify(hexData, out));
+  FIZZ_CHECK(folly::unhexlify(hexData, out));
   // Manually allocate it to control exact sizing
   size_t bufSize = out.size() + headroom + tailroom;
   char* buf = static_cast<char*>(malloc(bufSize));

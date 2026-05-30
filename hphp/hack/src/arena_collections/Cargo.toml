@@ -18,4 +18,4 @@ ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", b
 serde = { version = "1.0.219", features = ["derive", "rc"] }
 
 [dev-dependencies]
-quickcheck = "1.0"
+quickcheck = "1.1"

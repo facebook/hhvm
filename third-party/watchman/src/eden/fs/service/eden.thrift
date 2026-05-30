@@ -279,6 +279,10 @@ struct MountInfo {
   2: PathString edenClientPath;
   3: MountState state;
   4: optional PathString backingRepoPath;
+  // The filesystem channel type: "fuse", "nfs3", or "prjfs".
+  5: optional string fsChannelType;
+  // The FUSE transport type: "devfuse" or "io_uring". Only set for FUSE mounts.
+  6: optional string fuseTransport;
 }
 
 struct MountArgument {

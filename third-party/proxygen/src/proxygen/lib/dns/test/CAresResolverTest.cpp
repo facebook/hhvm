@@ -6,8 +6,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <algorithm>
+#include <array>
 #include <atomic>
+#include <condition_variable>
 #include <cstring>
+#include <mutex>
 #include <thread>
 
 #include <folly/portability/GMock.h>
@@ -415,6 +419,207 @@ class LoopTerminatingCallback : public CAresResolver::ResolutionCallback {
   folly::EventBase& evb_;
 };
 
+class RecordingStatsCollector : public DNSResolver::StatsCollector {
+ public:
+  void recordSuccess(const std::vector<DNSResolver::Answer>&,
+                     std::chrono::milliseconds) noexcept override {
+  }
+
+  void recordError(const folly::exception_wrapper&,
+                   std::chrono::milliseconds) noexcept override {
+  }
+
+  void recordQueryResult(uint8_t) noexcept override {
+  }
+
+  void recordCAresActiveQueries(size_t count) noexcept override {
+    activeQueries_.push_back(count);
+  }
+
+  void recordCAresOpenSockets(size_t count) noexcept override {
+    openSockets_.push_back(count);
+  }
+  void recordCAresSocketOpen() noexcept override {
+    ++socketOpens_;
+  }
+  void recordCAresSocketClose() noexcept override {
+    ++socketCloses_;
+  }
+
+  const std::vector<size_t>& activeQueries() const {
+    return activeQueries_;
+  }
+
+  const std::vector<size_t>& openSockets() const {
+    return openSockets_;
+  }
+
+  size_t socketOpens() const {
+    return socketOpens_;
+  }
+
+  size_t socketCloses() const {
+    return socketCloses_;
+  }
+
+ private:
+  std::vector<size_t> activeQueries_;
+  std::vector<size_t> openSockets_;
+  size_t socketOpens_{0};
+  size_t socketCloses_{0};
+};
+
+class DelayedDnsServer {
+ public:
+  DelayedDnsServer() {
+    serverSock_ = socket(AF_INET, SOCK_DGRAM, 0);
+    EXPECT_GE(serverSock_, 0);
+
+    struct timeval tv{};
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    setsockopt(serverSock_, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+
+    struct sockaddr_in serverAddr{};
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    serverAddr.sin_port = 0;
+    EXPECT_EQ(
+        bind(serverSock_, (struct sockaddr*)&serverAddr, sizeof(serverAddr)),
+        0);
+
+    socklen_t addrLen = sizeof(serverAddr);
+    EXPECT_EQ(getsockname(serverSock_, (struct sockaddr*)&serverAddr, &addrLen),
+              0);
+    port_ = ntohs(serverAddr.sin_port);
+
+    thread_ = std::thread([this] { run(); });
+  }
+
+  ~DelayedDnsServer() {
+    release(false);
+  }
+
+  uint16_t port() const {
+    return port_;
+  }
+
+  bool waitForQuery(std::chrono::milliseconds timeout) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    return cv_.wait_for(lock, timeout, [&] { return queryReceived_; });
+  }
+
+  void respondAndJoin() {
+    release(true);
+  }
+
+  void stopAndJoin() {
+    release(false);
+  }
+
+ private:
+  void release(bool sendResponse) {
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+      if (released_) {
+        return;
+      }
+      released_ = true;
+      sendResponse_ = sendResponse;
+    }
+    cv_.notify_all();
+    if (thread_.joinable()) {
+      thread_.join();
+    }
+    if (serverSock_ >= 0) {
+      close(serverSock_);
+      serverSock_ = -1;
+    }
+  }
+
+  void run() {
+    struct sockaddr_in clientAddr{};
+    socklen_t clientAddrLen = sizeof(clientAddr);
+    std::array<unsigned char, 512> query;
+    ssize_t n = recvfrom(serverSock_,
+                         query.data(),
+                         query.size(),
+                         0,
+                         (struct sockaddr*)&clientAddr,
+                         &clientAddrLen);
+    if (n <= 0) {
+      return;
+    }
+
+    size_t questionEnd = findQuestionEnd(query, static_cast<size_t>(n));
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+      queryReceived_ = true;
+    }
+    cv_.notify_all();
+
+    std::unique_lock<std::mutex> lock(mutex_);
+    cv_.wait(lock, [&] { return released_; });
+    bool sendResponse = sendResponse_;
+    lock.unlock();
+
+    if (!sendResponse) {
+      return;
+    }
+
+    std::array<unsigned char, 512> resp;
+    memcpy(resp.data(), query.data(), questionEnd);
+    resp[2] = 0x81; // QR=1 (response), RD=1
+    resp[3] = 0x80; // RA=1, RCODE=0 (NOERROR)
+    resp[6] = 0;
+    resp[7] = 1; // 1 answer
+
+    size_t respLen = questionEnd;
+    resp[respLen++] = 0xC0;
+    resp[respLen++] = 0x0C; // name: pointer to question name
+    resp[respLen++] = 0x00;
+    resp[respLen++] = 0x01; // type: A
+    resp[respLen++] = 0x00;
+    resp[respLen++] = 0x01; // class: IN
+    resp[respLen++] = 0x00;
+    resp[respLen++] = 0x00;
+    resp[respLen++] = 0x01;
+    resp[respLen++] = 0x2C; // TTL: 300
+    resp[respLen++] = 0x00;
+    resp[respLen++] = 0x04; // RDLENGTH: 4
+    resp[respLen++] = 192;
+    resp[respLen++] = 0;
+    resp[respLen++] = 2;
+    resp[respLen++] = 1; // 192.0.2.1
+
+    sendto(serverSock_,
+           resp.data(),
+           respLen,
+           0,
+           (struct sockaddr*)&clientAddr,
+           clientAddrLen);
+  }
+
+  int serverSock_{-1};
+  uint16_t port_{0};
+  std::thread thread_;
+  std::mutex mutex_;
+  std::condition_variable cv_;
+  bool queryReceived_{false};
+  bool released_{false};
+  bool sendResponse_{false};
+};
+
+bool containsSample(const std::vector<size_t>& samples, size_t value) {
+  return std::find(samples.begin(), samples.end(), value) != samples.end();
+}
+
+bool containsSampleAtLeast(const std::vector<size_t>& samples, size_t value) {
+  return std::any_of(samples.begin(), samples.end(), [&](size_t sample) {
+    return sample >= value;
+  });
+}
+
 // Verify that the c-ares query cache (qcache) is disabled. The qcache (enabled
 // by default since c-ares 1.31.0) caches DNS responses keyed by query name/type
 // and replays them for subsequent identical queries. This is undesirable for
@@ -539,4 +744,95 @@ TEST_F(CAresResolverTest, QCacheDisabledResponsesNotCached) {
 
   testResolver.reset();
   close(serverSock);
+}
+
+TEST_F(CAresResolverTest, SamplesCAresActiveQueriesAndOpenSockets) {
+  DelayedDnsServer server;
+
+  folly::EventBase evb;
+  auto testResolver = CAresResolver::newResolver();
+  RecordingStatsCollector stats;
+  testResolver->attachEventBase(&evb);
+  testResolver->enableCAresStateSampling();
+  testResolver->setServers({folly::SocketAddress("127.0.0.1", server.port())});
+  testResolver->setPort(server.port());
+  testResolver->setStatsCollector(&stats);
+  testResolver->init();
+
+  LoopTerminatingCallback cb(evb);
+  testResolver->resolveHostname(
+      &cb, "test.example.com", std::chrono::milliseconds(5000), AF_INET);
+
+  ASSERT_TRUE(server.waitForQuery(std::chrono::seconds(1)));
+  EXPECT_TRUE(containsSampleAtLeast(stats.activeQueries(), 1));
+  EXPECT_TRUE(containsSampleAtLeast(stats.openSockets(), 1));
+  EXPECT_GE(stats.socketOpens(), size_t{1});
+
+  server.respondAndJoin();
+  evb.loopForever();
+
+  EXPECT_TRUE(cb.success_);
+  EXPECT_TRUE(containsSample(stats.activeQueries(), 0));
+
+  testResolver.reset();
+  EXPECT_TRUE(containsSample(stats.openSockets(), 0));
+  EXPECT_GE(stats.socketCloses(), size_t{1});
+}
+
+TEST_F(CAresResolverTest, CAresStateSamplingIsDisabledByDefault) {
+  DelayedDnsServer server;
+
+  folly::EventBase evb;
+  auto testResolver = CAresResolver::newResolver();
+  RecordingStatsCollector stats;
+  testResolver->attachEventBase(&evb);
+  testResolver->setServers({folly::SocketAddress("127.0.0.1", server.port())});
+  testResolver->setPort(server.port());
+  testResolver->setStatsCollector(&stats);
+  testResolver->init();
+
+  LoopTerminatingCallback cb(evb);
+  testResolver->resolveHostname(
+      &cb, "disabled.example.com", std::chrono::milliseconds(5000), AF_INET);
+
+  ASSERT_TRUE(server.waitForQuery(std::chrono::seconds(1)));
+
+  server.respondAndJoin();
+  evb.loopForever();
+
+  EXPECT_TRUE(cb.success_);
+  EXPECT_TRUE(stats.activeQueries().empty());
+  EXPECT_TRUE(stats.openSockets().empty());
+  EXPECT_EQ(stats.socketOpens(), size_t{0});
+  EXPECT_EQ(stats.socketCloses(), size_t{0});
+
+  testResolver.reset();
+}
+
+TEST_F(CAresResolverTest, TimeoutStillSamplesActiveCAresQuery) {
+  DelayedDnsServer server;
+
+  folly::EventBase evb;
+  auto testResolver = CAresResolver::newResolver();
+  RecordingStatsCollector stats;
+  testResolver->attachEventBase(&evb);
+  testResolver->enableCAresStateSampling();
+  testResolver->setServers({folly::SocketAddress("127.0.0.1", server.port())});
+  testResolver->setPort(server.port());
+  testResolver->setStatsCollector(&stats);
+  testResolver->init();
+
+  LoopTerminatingCallback cb(evb);
+  testResolver->resolveHostname(
+      &cb, "timeout.example.com", std::chrono::milliseconds(20), AF_INET);
+
+  ASSERT_TRUE(server.waitForQuery(std::chrono::seconds(1)));
+  evb.loopForever();
+
+  EXPECT_FALSE(cb.success_);
+  ASSERT_FALSE(stats.activeQueries().empty());
+  EXPECT_GE(stats.activeQueries().back(), size_t{1});
+
+  server.stopAndJoin();
+  testResolver.reset();
 }

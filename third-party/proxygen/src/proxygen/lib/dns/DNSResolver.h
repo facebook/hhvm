@@ -361,6 +361,16 @@ class DNSResolver : public folly::DelayedDestruction {
       * Optional: record the current number of open c-ares sockets.
       */
      virtual void recordCAresOpenSockets(size_t /*count*/) noexcept {}
+
+     /**
+      * Optional: record that c-ares opened a socket.
+      */
+     virtual void recordCAresSocketOpen() noexcept {}
+
+     /**
+      * Optional: record that c-ares closed a socket.
+      */
+     virtual void recordCAresSocketClose() noexcept {}
 };
 
 

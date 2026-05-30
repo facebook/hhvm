@@ -697,6 +697,19 @@ void CAresResolver::sampleOpenSockets() {
   getStatsCollector()->recordCAresOpenSockets(socketHandlers_.size());
 }
 
+void CAresResolver::recordSocketOpened() {
+  if (!caresStateSamplingEnabled_) {
+    return;
+  }
+  getStatsCollector()->recordCAresSocketOpen();
+}
+
+void CAresResolver::recordSocketClosed() {
+  if (!caresStateSamplingEnabled_) {
+    return;
+  }
+  getStatsCollector()->recordCAresSocketClose();
+}
 void CAresResolver::init() {
   CHECK(base_ != nullptr);
 
@@ -1057,6 +1070,7 @@ void CAresResolver::dnsSocketReady(void* data,
         << "dnsSocketReady() asked to close a socket that we don't kow about";
     if (it != self->socketHandlers_.end()) {
       self->socketHandlers_.erase(it);
+      self->recordSocketClosed();
       self->sampleOpenSockets();
     }
 
@@ -1066,10 +1080,12 @@ void CAresResolver::dnsSocketReady(void* data,
   // Find the EventHandler that's managing our socket, creating one if it does
   // not already exist
   SocketHandler* shp = nullptr;
+  bool inserted = false;
   if (it == self->socketHandlers_.end()) {
     shp = new SocketHandler(
         self, self->base_, folly::NetworkSocket(sock), self->channel_);
     self->socketHandlers_[sock].reset(shp);
+    inserted = true;
   } else {
     shp = it->second.get();
   }
@@ -1081,7 +1097,8 @@ void CAresResolver::dnsSocketReady(void* data,
   if (!shp->registerHandler(events)) {
     LOG(DFATAL) << "Failed to register SocketHandler";
   }
-  if (it == self->socketHandlers_.end()) {
+  if (inserted) {
+    self->recordSocketOpened();
     self->sampleOpenSockets();
   }
 }

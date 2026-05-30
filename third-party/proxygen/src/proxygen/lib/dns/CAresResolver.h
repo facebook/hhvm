@@ -248,6 +248,8 @@ class CAresResolver : public DNSResolver {
   // state callback.
   void sampleActiveQueries();
   void sampleOpenSockets();
+  void recordSocketOpened();
+  void recordSocketClosed();
 
   // Attempt to resolve literal IPs, invoking the callback and returning
   // true if we succeeded.

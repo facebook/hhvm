@@ -30,6 +30,7 @@ from thrift.python.serializer import (
     JSON5_MODE,
     Json5ProtocolWriterOptions,
     JsonWriterOptions,
+    KeyOrder,
     Protocol,
     serialize,
     serialize_iobuf,
@@ -295,3 +296,19 @@ class Json5SerializerOptionTest(unittest.TestCase):
                 Protocol.COMPACT,
                 options=Json5ProtocolWriterOptions(),
             )
+
+    def test_serialize_unspecified_preserves_iteration_order(self) -> None:
+        """With key_order=UNSPECIFIED the C++ writer must not sort: keys
+        appear in the container's iteration order. Python dicts preserve
+        insertion order, so the emitted order must match the Python
+        insertion order.
+        """
+        keys = [3, 1, 2]  # intentionally unsorted insertion order
+        example = test_types.Example(i32AsKey={k: k * 10 for k in keys})
+        options = Json5ProtocolWriterOptions(key_order=KeyOrder.UNSPECIFIED)
+        result = serialize(example, Protocol.JSON5, options=options).decode()
+
+        parsed = json.loads(result)
+        emitted_keys = [entry["key"] for entry in parsed["i32AsKey"]]
+        # No sorting: C++ order must match Python's insertion order.
+        self.assertEqual(emitted_keys, keys)

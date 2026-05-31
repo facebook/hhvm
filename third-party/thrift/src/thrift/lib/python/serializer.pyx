@@ -19,7 +19,7 @@ from libcpp.utility cimport move as cmove
 from thrift.python.exceptions cimport Error, GeneratedError
 from thrift.python.types cimport Struct, StructOrUnion, StructInfo, Union, UnionInfo
 from thrift.python.protocol import Protocol
-from thrift.python.serializer cimport cJsonWriterOptions, cJson5ProtocolWriterOptions
+from thrift.python.serializer cimport cJsonWriterOptions, cJson5ProtocolWriterOptions, KeyOrder
 
 cdef extern from *:
     """
@@ -49,6 +49,31 @@ cdef class JsonWriterOptions:
         self._writer_options.allowNanInf = allow_nan_inf
         self._writer_options.indentWidth = indent_width
 
+
+cdef class Json5ProtocolWriterOptions:
+    """Options for the JSON5 protocol writer that are passed to C++."""
+    cdef public JsonWriterOptions writer
+    cdef public bint enum_as_integer
+    cdef public bint binary_as_base64_string
+    cdef public bint map_primitive_keys_as_member_names
+    cdef public object key_order
+
+    def __init__(
+        self,
+        *,
+        writer=None,
+        enum_as_integer=False,
+        binary_as_base64_string=False,
+        map_primitive_keys_as_member_names=False,
+        key_order=KeyOrder.STABLE_ASCENDING,
+    ):
+        self.writer = writer if writer is not None else JsonWriterOptions()
+        self.enum_as_integer = enum_as_integer
+        self.binary_as_base64_string = binary_as_base64_string
+        self.map_primitive_keys_as_member_names = map_primitive_keys_as_member_names
+        self.key_order = KeyOrder(key_order)
+
+
 JSON5_MODE = Json5ProtocolWriterOptions(
     writer=JsonWriterOptions(
         list_trailing_comma=True,
@@ -60,33 +85,13 @@ JSON5_MODE = Json5ProtocolWriterOptions(
 )
 
 
-cdef class Json5ProtocolWriterOptions:
-    """Options for the JSON5 protocol writer that are passed to C++."""
-    cdef public JsonWriterOptions writer
-    cdef public bint enum_as_integer
-    cdef public bint binary_as_base64_string
-    cdef public bint map_primitive_keys_as_member_names
-
-    def __init__(
-        self,
-        *,
-        writer=None,
-        enum_as_integer=False,
-        binary_as_base64_string=False,
-        map_primitive_keys_as_member_names=False,
-    ):
-        self.writer = writer if writer is not None else JsonWriterOptions()
-        self.enum_as_integer = enum_as_integer
-        self.binary_as_base64_string = binary_as_base64_string
-        self.map_primitive_keys_as_member_names = map_primitive_keys_as_member_names
-
-
 cdef cJson5ProtocolWriterOptions _to_c_options(Json5ProtocolWriterOptions options):
     cdef cJson5ProtocolWriterOptions c_options
     c_options.writer = options.writer._writer_options
     c_options.enumAsInteger = options.enum_as_integer
     c_options.binaryAsBase64String = options.binary_as_base64_string
     c_options.mapPrimitiveKeysAsMemberNames = options.map_primitive_keys_as_member_names
+    c_options.keyOrder = <KeyOrder>(<int>options.key_order)
     return cmove(c_options)
 
 

@@ -19,6 +19,7 @@
 #include <memory>
 
 #include <folly/io/IOBuf.h>
+#include <thrift/lib/cpp2/protocol/Protocol.h>
 
 #ifdef THRIFT_HAS_JSON5_PROTOCOL
 #include <thrift/lib/cpp2/protocol/detail/Json5ProtocolWriter.h>
@@ -37,6 +38,8 @@ struct Json5ProtocolWriter {
     bool enumAsInteger = false;
     bool binaryAsBase64String = false;
     bool mapPrimitiveKeysAsMemberNames = false;
+    ::apache::thrift::KeyOrder keyOrder =
+        ::apache::thrift::KeyOrder::StableAscending;
   };
 };
 } // namespace apache::thrift::json5::detail

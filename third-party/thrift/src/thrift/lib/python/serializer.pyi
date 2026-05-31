@@ -39,11 +39,17 @@ class JsonWriterOptions:
 
 JSON5_MODE: Json5ProtocolWriterOptions
 
+class KeyOrder(Enum):
+    UNSPECIFIED: KeyOrder = ...
+    NATIVE_ASCENDING: KeyOrder = ...
+    STABLE_ASCENDING: KeyOrder = ...
+
 class Json5ProtocolWriterOptions:
     writer: JsonWriterOptions
     enum_as_integer: bool
     binary_as_base64_string: bool
     map_primitive_keys_as_member_names: bool
+    key_order: KeyOrder
     def __init__(
         self,
         *,
@@ -51,6 +57,7 @@ class Json5ProtocolWriterOptions:
         enum_as_integer: bool = False,
         binary_as_base64_string: bool = False,
         map_primitive_keys_as_member_names: bool = False,
+        key_order: KeyOrder = KeyOrder.STABLE_ASCENDING,
     ) -> None: ...
 
 def serialize_iobuf(

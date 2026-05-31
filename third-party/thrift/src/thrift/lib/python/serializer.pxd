@@ -21,6 +21,13 @@ from thrift.python.types cimport cDynamicStructInfo
 from thrift.python.protocol cimport Protocol as cProtocol
 
 
+cdef extern from "<thrift/lib/cpp2/protocol/Protocol.h>" namespace "::apache::thrift":
+    cpdef enum KeyOrder "::apache::thrift::KeyOrder":
+        UNSPECIFIED "::apache::thrift::KeyOrder::Unspecified"
+        NATIVE_ASCENDING "::apache::thrift::KeyOrder::NativeAscending"
+        STABLE_ASCENDING "::apache::thrift::KeyOrder::StableAscending"
+
+
 cdef extern from "<thrift/lib/python/Serializer.h>" namespace "apache::thrift::json5::detail":
     cdef cppclass cJsonWriterOptions "apache::thrift::json5::detail::JsonWriterOptions":
         cbool listTrailingComma
@@ -36,6 +43,7 @@ cdef extern from "<thrift/lib/python/Serializer.h>" namespace "apache::thrift::j
         cbool enumAsInteger
         cbool binaryAsBase64String
         cbool mapPrimitiveKeysAsMemberNames
+        KeyOrder keyOrder
 
 
 cdef extern from "<thrift/lib/python/Serializer.h>" namespace "::apache::thrift::python":

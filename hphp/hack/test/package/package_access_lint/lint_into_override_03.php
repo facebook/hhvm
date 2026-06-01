@@ -13,10 +13,12 @@ class N1 {} // this extra class silences the filename linter
 //// warning_03b.php
 <?hh
 
-// package pkg2
+// package pkg2. Override pulls C3 into pkg1 (which pkg2 includes), not into
+// pkg2 itself, so no lint: 5655 only fires for overrides into the caller's
+// own package.
 class D3 {
   public function bar(): void {
-    (new C3())->foo(); // should raise a lint error
+    (new C3())->foo(); // should NOT raise a lint error
   }
 }
 

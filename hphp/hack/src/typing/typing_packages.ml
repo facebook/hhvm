@@ -179,11 +179,14 @@ let can_access_by_package_rules
     match get_package_violation env current_pkg target_pkg with
     | None ->
       (* There are no package errrors, but emit a warning if the edge introduces a new dependency
-       * from a file in a package due to package rules to a file with a packageoverride *)
+       * from a file in a package due to package rules to a file pulled into that same package
+       * (not merely an included one) via a packageoverride *)
       (match (current_package_membership, target_package_membership) with
-      | ( Some (Aast_defs.PackageConfigAssignment _),
-          Some (Aast_defs.PackageOverride _) )
-        when package_includes current_pkg target_pkg ->
+      | ( Some (Aast_defs.PackageConfigAssignment current_name),
+          Some (Aast_defs.PackageOverride (_, target_name)) )
+      (* Only lint when the override pulls the callee into the caller's own
+       * package, not merely one the caller includes. *)
+        when String.equal current_name target_name ->
         can_access_ignoring_package_override
           ~env
           ~current_package

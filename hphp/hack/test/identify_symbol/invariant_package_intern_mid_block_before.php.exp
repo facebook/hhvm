@@ -1,0 +1,21 @@
+name: \BeforeInvariantClass, kind: class, span: line 7, characters 17-36, is_declaration: false
+affects_prod_build: true
+definition:
+ BeforeInvariantClass
+   kind: class
+   id: type_id::BeforeInvariantClass
+   position: line 3, characters 7-26
+   span: line 3, character 1 - line 3, character 29
+   modifiers: 
+
+
+name: \BeforeInvariantClass::__construct, kind: method, span: line 7, characters 17-36, is_declaration: false
+affects_prod_build: true
+definition:
+ BeforeInvariantClass
+   kind: class
+   id: type_id::BeforeInvariantClass
+   position: line 3, characters 7-26
+   span: line 3, character 1 - line 3, character 29
+   modifiers: 
+

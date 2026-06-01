@@ -1,0 +1,21 @@
+name: \AfterInvariantClass, kind: class, span: line 9, characters 16-34, is_declaration: false
+affects_prod_build: false
+definition:
+ AfterInvariantClass
+   kind: class
+   id: type_id::AfterInvariantClass
+   position: line 4, characters 7-25
+   span: line 4, character 1 - line 4, character 28
+   modifiers: 
+
+
+name: \AfterInvariantClass::__construct, kind: method, span: line 9, characters 16-34, is_declaration: false
+affects_prod_build: false
+definition:
+ AfterInvariantClass
+   kind: class
+   id: type_id::AfterInvariantClass
+   position: line 4, characters 7-25
+   span: line 4, character 1 - line 4, character 28
+   modifiers: 
+

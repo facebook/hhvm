@@ -1,0 +1,21 @@
+name: \InvariantIfContinuationClass, kind: class, span: line 14, characters 23-50, is_declaration: false
+affects_prod_build: true
+definition:
+ InvariantIfContinuationClass
+   kind: class
+   id: type_id::InvariantIfContinuationClass
+   position: line 5, characters 7-34
+   span: line 5, character 1 - line 5, character 37
+   modifiers: 
+
+
+name: \InvariantIfContinuationClass::__construct, kind: method, span: line 14, characters 23-50, is_declaration: false
+affects_prod_build: true
+definition:
+ InvariantIfContinuationClass
+   kind: class
+   id: type_id::InvariantIfContinuationClass
+   position: line 5, characters 7-34
+   span: line 5, character 1 - line 5, character 37
+   modifiers: 
+

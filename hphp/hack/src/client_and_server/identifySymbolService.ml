@@ -375,13 +375,15 @@ let remove_apostrophes_from_function_eval (mid : Ast_defs.pstring) :
   let new_pos = Pos.shrink_by_one_char_both_sides pos in
   (new_pos, member_name)
 
+let is_pkg_name_intern s = String.equal s "intern"
+
 let has_require_package_intern (attrs : ('a, 'b) Aast.user_attribute list) :
     bool =
   List.exists attrs ~f:(fun ua ->
       String.equal (snd ua.Aast.ua_name) SN.UserAttributes.uaRequirePackage
       && List.exists ua.Aast.ua_params ~f:(fun (_, _, e) ->
              match e with
-             | Aast.String pkg -> String.equal pkg "intern"
+             | Aast.String pkg -> is_pkg_name_intern pkg
              | _ -> false))
 
 let set_affects_prod_build_false result_set =
@@ -390,11 +392,42 @@ let set_affects_prod_build_false result_set =
     result_set
     Result_set.empty
 
+let is_package_intern_expr (_, _, expr_) =
+  match expr_ with
+  | Aast.Package (_, pkg) -> is_pkg_name_intern pkg
+  | _ -> false
+
+let is_not_package_intern_expr (_, _, expr_) =
+  match expr_ with
+  | Aast.Unop (Ast_defs.Unot, e) -> is_package_intern_expr e
+  | _ -> false
+
+let is_invariant_package_intern_call (_, _, expr_) =
+  match expr_ with
+  | Aast.Call
+      {
+        Aast.func = (_, _, Aast.Id (_, fun_name));
+        args = Aast_defs.Anormal arg :: _;
+        _;
+      }
+    when String.equal fun_name SN.AutoimportedFunctions.invariant ->
+    is_package_intern_expr arg
+  | _ -> false
+
+let stmt_is_invariant_package_intern env (_, stmt_) =
+  match stmt_ with
+  | Aast.If (cond, then_block, _) ->
+    Option.exists
+      (ServerUtils.resugar_invariant_call env cond then_block)
+      ~f:is_invariant_package_intern_call
+  | _ -> false
+
 let visitor =
   let class_name = ref None in
   let parent_class_hint = ref None in
   let method_name = ref None in
 
+  (* state for computing affects_prod_build *)
   let in_nameof = ref false in
   let in_class_ptr = ref false in
   let in_attribute = ref false in
@@ -410,6 +443,27 @@ let visitor =
     method zero = Result_set.empty
 
     method plus = Result_set.union
+
+    method! on_block env block =
+      let (_is_after_package_intern_invariant, acc) =
+        List.fold
+          block
+          ~init:(false, self#zero)
+          ~f:(fun (is_after_package_intern_invariant, acc) stmt ->
+            let stmt_result = self#on_stmt env stmt in
+            let stmt_result =
+              if is_after_package_intern_invariant then
+                set_affects_prod_build_false stmt_result
+              else
+                stmt_result
+            in
+            let is_after_package_intern_invariant =
+              is_after_package_intern_invariant
+              || stmt_is_invariant_package_intern env stmt
+            in
+            (is_after_package_intern_invariant, self#plus acc stmt_result))
+      in
+      acc
 
     method! on_expr env expr =
       let (_, pos, expr_) = expr in
@@ -561,6 +615,18 @@ let visitor =
     method! on_If env cond then_block else_block : Result_set.t =
       match ServerUtils.resugar_invariant_call env cond then_block with
       | Some e -> self#on_expr env e
+      | None when is_package_intern_expr cond ->
+        self#plus
+          (self#on_expr env cond)
+          (self#plus
+             (set_affects_prod_build_false (self#on_block env then_block))
+             (self#on_block env else_block))
+      | None when is_not_package_intern_expr cond ->
+        self#plus
+          (self#on_expr env cond)
+          (self#plus
+             (self#on_block env then_block)
+             (set_affects_prod_build_false (self#on_block env else_block)))
       | None -> super#on_If env cond then_block else_block
 
     method! on_Is env e h =

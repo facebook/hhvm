@@ -1,0 +1,22 @@
+name: \IfNotPackageElseClass, kind: class, span: line 10, characters 17-37, is_declaration: false
+affects_prod_build: false
+definition:
+ IfNotPackageElseClass
+   kind: class
+   id: type_id::IfNotPackageElseClass
+   position: line 4, characters 7-27
+   span: line 4, character 1 - line 4, character 30
+   modifiers: 
+
+
+name: \IfNotPackageElseClass::__construct, kind: method, span: line 10, characters 17-37, is_declaration: false
+affects_prod_build: false
+definition:
+ IfNotPackageElseClass
+   kind: class
+   id: type_id::IfNotPackageElseClass
+   position: line 4, characters 7-27
+   span: line 4, character 1 - line 4, character 30
+   modifiers: 
+
+

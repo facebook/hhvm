@@ -1,0 +1,21 @@
+name: \AfterInvariantContinuationClass, kind: class, span: line 14, characters 23-53, is_declaration: false
+affects_prod_build: false
+definition:
+ AfterInvariantContinuationClass
+   kind: class
+   id: type_id::AfterInvariantContinuationClass
+   position: line 5, characters 7-37
+   span: line 5, character 1 - line 5, character 40
+   modifiers: 
+
+
+name: \AfterInvariantContinuationClass::__construct, kind: method, span: line 14, characters 23-53, is_declaration: false
+affects_prod_build: false
+definition:
+ AfterInvariantContinuationClass
+   kind: class
+   id: type_id::AfterInvariantContinuationClass
+   position: line 5, characters 7-37
+   span: line 5, character 1 - line 5, character 40
+   modifiers: 
+

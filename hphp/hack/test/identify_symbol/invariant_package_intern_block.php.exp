@@ -1,0 +1,21 @@
+name: \InternBlockClass, kind: class, span: line 7, characters 12-27, is_declaration: false
+affects_prod_build: false
+definition:
+ InternBlockClass
+   kind: class
+   id: type_id::InternBlockClass
+   position: line 3, characters 7-22
+   span: line 3, character 1 - line 3, character 25
+   modifiers: 
+
+
+name: \InternBlockClass::__construct, kind: method, span: line 7, characters 12-27, is_declaration: false
+affects_prod_build: false
+definition:
+ InternBlockClass
+   kind: class
+   id: type_id::InternBlockClass
+   position: line 3, characters 7-22
+   span: line 3, character 1 - line 3, character 25
+   modifiers: 
+

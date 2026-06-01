@@ -1,0 +1,21 @@
+name: \ThenBranchClass, kind: class, span: line 9, characters 17-31, is_declaration: false
+affects_prod_build: false
+definition:
+ ThenBranchClass
+   kind: class
+   id: type_id::ThenBranchClass
+   position: line 3, characters 7-21
+   span: line 3, character 1 - line 3, character 24
+   modifiers: 
+
+
+name: \ThenBranchClass::__construct, kind: method, span: line 9, characters 17-31, is_declaration: false
+affects_prod_build: false
+definition:
+ ThenBranchClass
+   kind: class
+   id: type_id::ThenBranchClass
+   position: line 3, characters 7-21
+   span: line 3, character 1 - line 3, character 24
+   modifiers: 
+

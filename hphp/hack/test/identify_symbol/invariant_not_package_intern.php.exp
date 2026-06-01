@@ -1,0 +1,21 @@
+name: \NotInternBlockClass, kind: class, span: line 7, characters 12-30, is_declaration: false
+affects_prod_build: true
+definition:
+ NotInternBlockClass
+   kind: class
+   id: type_id::NotInternBlockClass
+   position: line 3, characters 7-25
+   span: line 3, character 1 - line 3, character 28
+   modifiers: 
+
+
+name: \NotInternBlockClass::__construct, kind: method, span: line 7, characters 12-30, is_declaration: false
+affects_prod_build: true
+definition:
+ NotInternBlockClass
+   kind: class
+   id: type_id::NotInternBlockClass
+   position: line 3, characters 7-25
+   span: line 3, character 1 - line 3, character 28
+   modifiers: 
+

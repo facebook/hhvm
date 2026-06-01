@@ -1,0 +1,21 @@
+name: \NestedInvariantClass, kind: class, span: line 9, characters 21-40, is_declaration: false
+affects_prod_build: false
+definition:
+ NestedInvariantClass
+   kind: class
+   id: type_id::NestedInvariantClass
+   position: line 3, characters 7-26
+   span: line 3, character 1 - line 3, character 29
+   modifiers: 
+
+
+name: \NestedInvariantClass::__construct, kind: method, span: line 9, characters 21-40, is_declaration: false
+affects_prod_build: false
+definition:
+ NestedInvariantClass
+   kind: class
+   id: type_id::NestedInvariantClass
+   position: line 3, characters 7-26
+   span: line 3, character 1 - line 3, character 29
+   modifiers: 
+

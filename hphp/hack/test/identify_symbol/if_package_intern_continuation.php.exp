@@ -1,0 +1,22 @@
+name: \IfPackageContinuationClass, kind: class, span: line 13, characters 23-48, is_declaration: false
+affects_prod_build: true
+definition:
+ IfPackageContinuationClass
+   kind: class
+   id: type_id::IfPackageContinuationClass
+   position: line 5, characters 7-32
+   span: line 5, character 1 - line 5, character 35
+   modifiers: 
+
+
+name: \IfPackageContinuationClass::__construct, kind: method, span: line 13, characters 23-48, is_declaration: false
+affects_prod_build: true
+definition:
+ IfPackageContinuationClass
+   kind: class
+   id: type_id::IfPackageContinuationClass
+   position: line 5, characters 7-32
+   span: line 5, character 1 - line 5, character 35
+   modifiers: 
+
+

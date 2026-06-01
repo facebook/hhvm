@@ -58,7 +58,7 @@ impl FeatureName {
             CapturePipeVariables => Unstable,
             AllowExtendedAwaitSyntax => Unstable,
             AllowConditionalAwaitSyntax => Unstable,
-            ExpressionTreeHackArrays => Preview,
+            ExpressionTreeHackArrays => OngoingRelease,
             ShapeFieldPunning => Unstable,
             RepresentableAs => Preview,
             ClassAliasesEverywhere => Unstable,

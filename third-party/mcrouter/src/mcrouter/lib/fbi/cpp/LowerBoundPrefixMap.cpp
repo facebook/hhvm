@@ -13,11 +13,36 @@
 namespace facebook::memcache::detail {
 namespace {
 
-// .starts_with is not avaliable before C++20 and this needs to compile with an
+// .starts_with is not available before C++20 and this needs to compile with an
 // older standard
 bool std_string_view_starts_with(std::string_view what, std::string_view with) {
   return what.substr(0, with.size()) == with;
 }
+
+#ifdef __aarch64__
+// Branchless upper_bound on ARM. Conditional index updates compile to CSEL
+// instructions, avoiding branch mispredictions that hurt
+// sorted_vector_map::upper_bound() through iterator/comparator wrappers.
+// On x86, the hardware branch predictor handles upper_bound well so this
+// is not beneficial there.
+template <typename I, typename T, typename Compare>
+I branchlessUpperBound(I f, I l, const T& x, Compare comp) {
+  auto len = static_cast<std::size_t>(l - f);
+  if (len == 0) {
+    return f;
+  }
+
+  while (len > 1) {
+    auto half = len / 2;
+    f += comp(x, f[half]) ? 0 : half;
+    len -= half;
+  }
+  f += comp(x, *f) ? 0 : 1;
+
+  return f;
+}
+
+#endif
 
 } // namespace
 
@@ -65,8 +90,16 @@ LowerBoundPrefixMapCommon::LowerBoundPrefixMapCommon(
 
 std::uint32_t LowerBoundPrefixMapCommon::findPrefix(
     std::string_view query) const noexcept {
+#ifdef __aarch64__
+  auto afterPrefix = branchlessUpperBound(
+      smallPrefixes_.begin(),
+      smallPrefixes_.end(),
+      SmallPrefix{query},
+      [](const SmallPrefix& v, const auto& elem) { return v < elem.first; });
+#else
   // Due to a sentinel - guaranteed to not be .begin()
   auto afterPrefix = smallPrefixes_.upper_bound(SmallPrefix{query});
+#endif
   auto [roughFrom, roughTo] = std::prev(afterPrefix)->second;
 
   // Binary search complete strings between rough boundaries.

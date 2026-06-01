@@ -7,8 +7,11 @@
 
 #include "mcrouter/lib/fbi/cpp/LowerBoundPrefixMap.h"
 
+#include <cassert>
 #include <cstring>
 #include <ostream>
+
+#include <folly/lang/Bits.h>
 
 namespace facebook::memcache::detail {
 namespace {
@@ -46,6 +49,14 @@ I branchlessUpperBound(I f, I l, const T& x, Compare comp) {
 
 } // namespace
 
+FOLLY_ALWAYS_INLINE
+bool checkSmallPrefixStartsWith(
+    SmallPrefix full,
+    SmallPrefix start,
+    std::uint64_t lengthMask) {
+  return (full.data_ & lengthMask) == start.data_;
+}
+
 std::ostream& operator<<(std::ostream& os, const SmallPrefix& self) {
   std::uint64_t correctOrder = folly::Endian::swap(self.data_);
   std::string_view s(reinterpret_cast<const char*>(correctOrder), 8u);
@@ -57,6 +68,7 @@ LowerBoundPrefixMapCommon::LowerBoundPrefixMapCommon(
     : fullPrefixes_(std::move(sortedUniquePrefixes)) {
   smallPrefixes_.reserve(fullPrefixes_.size() + 1);
   previousPrefix_.reserve(fullPrefixes_.size());
+  smallPrefixExtraInfo_.reserve(fullPrefixes_.size());
 
   // Adding an empty string with no matches.
   // This acts as a sentinel so we are always guranteed to find an
@@ -68,10 +80,17 @@ LowerBoundPrefixMapCommon::LowerBoundPrefixMapCommon(
 
   for (std::size_t i = 0; i != fullPrefixes_.size(); ++i) {
     const auto& prefix = fullPrefixes_[i];
+    // Null bytes are not expected. If present it would break the
+    // findPrefix fast SmallPrefix path (e.g. SmallPrefix "ab\0", query "ab").
+    assert(prefix.find('\0') == std::string_view::npos);
 
     // Prefixes always come before lexicographically, so if there is one
     // we will find it.
     previousPrefix_.push_back(findPrefix(prefix));
+
+    auto len = std::min<size_t>(prefix.size(), (size_t)8);
+    auto mask = folly::n_most_significant_bits<std::uint64_t>(len * 8);
+    smallPrefixExtraInfo_.push_back({SmallPrefix{prefix}, mask});
 
     // Add small prefix ---
     // if it is there already - update existing, otherwise insert [i, i+1]
@@ -90,26 +109,38 @@ LowerBoundPrefixMapCommon::LowerBoundPrefixMapCommon(
 
 std::uint32_t LowerBoundPrefixMapCommon::findPrefix(
     std::string_view query) const noexcept {
+  SmallPrefix qSmall{query};
 #ifdef __aarch64__
   auto afterPrefix = branchlessUpperBound(
       smallPrefixes_.begin(),
       smallPrefixes_.end(),
-      SmallPrefix{query},
+      qSmall,
       [](const SmallPrefix& v, const auto& elem) { return v < elem.first; });
 #else
   // Due to a sentinel - guaranteed to not be .begin()
-  auto afterPrefix = smallPrefixes_.upper_bound(SmallPrefix{query});
+  auto afterPrefix = smallPrefixes_.upper_bound(qSmall);
 #endif
-  auto [roughFrom, roughTo] = std::prev(afterPrefix)->second;
+  const auto bucketIt = std::prev(afterPrefix);
+  auto [roughFrom, roughTo] = bucketIt->second;
 
-  // Binary search complete strings between rough boundaries.
-  // NOTE: which array we search - doesn't matter -
-  //       we just want indexes.
-  auto cur = std::upper_bound(
-                 fullPrefixes_.begin() + roughFrom,
-                 fullPrefixes_.begin() + roughTo,
-                 query) -
-      fullPrefixes_.begin();
+  if (bucketIt->first < qSmall || query.size() < 8) {
+    std::uint32_t cur = roughTo;
+    while (cur != 0 &&
+           !checkSmallPrefixStartsWith(
+               qSmall,
+               smallPrefixExtraInfo_[cur - 1].smallPrefix,
+               smallPrefixExtraInfo_[cur - 1].lengthMask)) {
+      cur = previousPrefix_[cur - 1];
+    }
+    return cur;
+  }
+
+  std::uint32_t cur = static_cast<std::uint32_t>(
+      std::upper_bound(
+          fullPrefixes_.begin() + roughFrom,
+          fullPrefixes_.begin() + roughTo,
+          query) -
+      fullPrefixes_.begin());
 
   while (cur != 0 &&
          !std_string_view_starts_with(query, fullPrefixes_[cur - 1])) {

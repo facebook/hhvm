@@ -81,9 +81,18 @@ class SmallPrefix {
   }
 
   friend std::ostream& operator<<(std::ostream& os, const SmallPrefix& self);
+  friend bool checkSmallPrefixStartsWith(
+      SmallPrefix full,
+      SmallPrefix start,
+      std::uint64_t lengthMask);
 
  private:
   std::uint64_t data_ = 0;
+};
+
+struct SmallPrefixExtraInfo {
+  SmallPrefix smallPrefix;
+  std::uint64_t lengthMask = 0;
 };
 
 // What is the idea
@@ -125,6 +134,14 @@ struct LowerBoundPrefixMapCommon {
   //     ^________|
   // This is the index of that prefix, base 1 (0 means absence).
   std::vector<std::uint32_t> previousPrefix_;
+
+  // Sometimes we get to check SmallPrefixes for starts with instead of full
+  // prefixes. This is faster but we need some extra information - which we
+  // store for each full prefix.
+  // NOTE: in theory this is suboptimal, because we iterate through a list of
+  // full prefixes and there are less SmallPrefixes but our experiments with
+  // that so far were unfruitful.
+  std::vector<SmallPrefixExtraInfo> smallPrefixExtraInfo_;
 };
 
 template <typename Storage>

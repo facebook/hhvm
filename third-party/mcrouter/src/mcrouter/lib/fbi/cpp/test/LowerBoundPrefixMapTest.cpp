@@ -210,5 +210,53 @@ TEST(LowerBoundPrefixMapTest, NullKey) {
   ASSERT_EQ(lbMap.findPrefix(std::string_view{}), lbMap.end());
 }
 
+TEST(LowerBoundPrefixMapTest, LongPrefixShortQuery) {
+  // Entries sharing the same 8-byte prefix but with different lengths.
+  // Queries of exactly 8 bytes must not falsely match longer entries.
+  std::vector<KeyValue> kv = {
+      KeyValue{"abcdefgh", 1},
+      KeyValue{"abcdefghijk", 2},
+  };
+  LowerBoundPrefixMap<int> lbMap{kv};
+
+  // "abcdefgh" matches exactly
+  ASSERT_NE(lbMap.end(), lbMap.findPrefix("abcdefgh"));
+  ASSERT_EQ("abcdefgh", lbMap.findPrefix("abcdefgh")->key());
+  ASSERT_EQ(1, lbMap.findPrefix("abcdefgh")->value());
+
+  // "abcdefghij" — "abcdefgh" is a prefix, not "abcdefghijk"
+  ASSERT_NE(lbMap.end(), lbMap.findPrefix("abcdefghij"));
+  ASSERT_EQ("abcdefgh", lbMap.findPrefix("abcdefghij")->key());
+
+  // "abcdefghijk" matches the longer entry exactly
+  ASSERT_NE(lbMap.end(), lbMap.findPrefix("abcdefghijk"));
+  ASSERT_EQ("abcdefghijk", lbMap.findPrefix("abcdefghijk")->key());
+  ASSERT_EQ(2, lbMap.findPrefix("abcdefghijk")->value());
+
+  // "abcdefghijkz" — "abcdefghijk" is the longest prefix
+  ASSERT_NE(lbMap.end(), lbMap.findPrefix("abcdefghijkz"));
+  ASSERT_EQ("abcdefghijk", lbMap.findPrefix("abcdefghijkz")->key());
+
+  // "abcdefg" (7 bytes) — no entry is a prefix of this
+  ASSERT_EQ(lbMap.end(), lbMap.findPrefix("abcdefg"));
+}
+
+TEST(LowerBoundPrefixMapTest, SameBucketWalkSkipsSuffix) {
+  // Entries share the same 8-byte prefix. "abcdefghXXX" is NOT a prefix of
+  // "abcdefghYYY", but "abcdefgh" IS. The walk must check the suffix (bytes
+  // 8+) before accepting a match, not stop at the first SmallPrefix match.
+  std::vector<KeyValue> kv = {
+      KeyValue{"abcdefgh", 1},
+      KeyValue{"abcdefghXXX", 2},
+  };
+  LowerBoundPrefixMap<int> lbMap{kv};
+
+  // Query "abcdefghYYY": "abcdefghXXX" shares the 8-byte prefix but is not
+  // a prefix. Must walk past it to find "abcdefgh".
+  ASSERT_NE(lbMap.end(), lbMap.findPrefix("abcdefghYYY"));
+  ASSERT_EQ("abcdefgh", lbMap.findPrefix("abcdefghYYY")->key());
+  ASSERT_EQ(1, lbMap.findPrefix("abcdefghYYY")->value());
+}
+
 } // namespace
 } // namespace facebook::memcache

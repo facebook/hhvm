@@ -1115,6 +1115,7 @@ let main_internal
           | None ->
             Method { class_name; member_name }
           | Some "Typeconst" -> Typeconst { class_name; member_name }
+          | Some "Class_const" -> Class_const { class_name; member_name }
           | Some _ -> raise Exit_status.(Exit_with Input_error))
         ~name_only_action:(fun name ->
           match kind with

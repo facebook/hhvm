@@ -166,6 +166,7 @@ module Find_my_tests = struct
     | Typedef of { name: string }
     | Method of member
     | Typeconst of member
+    | Class_const of member
   [@@deriving show]
 
   type provenance = { root_indices: int list } [@@deriving yojson]

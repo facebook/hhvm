@@ -218,7 +218,7 @@ final class TClientSink {
           list($encoded_ex, $is_application_ex) = $payloadEncode(null, $ex);
           $this->sendClientException(
             $encoded_ex,
-            $is_application_ex ? $ex->getMessage() : null,
+            \HH\legacy_is_truthy($is_application_ex) ? $ex->getMessage() : null,
           );
           // send exception back to the client, don't wait for final response
           throw $ex;

@@ -1724,6 +1724,10 @@ static struct HHExtension final : Extension {
     X(reflection_class_is_interface);
 #undef X
   }
+
+  std::vector<std::string> hackFiles() const override {
+    return {"hh.php", "hh_functions.php"}; // ext_hh.php ext_hh_functions.php
+  }
 } s_hh_extension;
 
 static struct XHPExtension final : Extension {

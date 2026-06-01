@@ -387,9 +387,6 @@ function unit_schema(?string $repo = null): string {
   return mangle_unit_sha1('', '.php', $repo);
 }
 
-<<__IsFoldable, __Native>>
-function legacy_is_truthy(readonly mixed $val)[]: bool;
-
 } // HH
 
 namespace HH\Rx {

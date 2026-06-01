@@ -59,7 +59,7 @@ final class Vector<T> implements \MutableVector<T> {
    * @return bool
    */
   public readonly function isEmpty()[]: bool {
-    return !$this->count();
+    return $this->count() === 0;
   }
 
   /** Returns the number of values in the Vector.
@@ -359,7 +359,7 @@ final class Vector<T> implements \MutableVector<T> {
    */
   public readonly function toKeysArray()[]: varray<int> {
     $count = $this->count();
-    return $count
+    return $count !== 0
       ? varray(HH\FIXME\UNSAFE_CAST<mixed, varray<int>>(\range(0, $count - 1)))
       : vec[];
   }
@@ -593,7 +593,7 @@ final class Vector<T> implements \MutableVector<T> {
    * @return mixed
    */
   public readonly function firstKey()[]: mixed {
-    return $this->count() ? 0 : null;
+    return $this->count() !== 0 ? 0 : null;
   }
 
   /** Returns the last value from this Vector, or null if this Vector is empty.
@@ -601,7 +601,7 @@ final class Vector<T> implements \MutableVector<T> {
    */
   public function lastValue()[]: mixed {
     $count = $this->count();
-    return $count ? $this[$count - 1] : null;
+    return $count !== 0 ? $this[$count - 1] : null;
   }
 
   /** Returns the last key from this Vector, or null if this Vector is empty.
@@ -609,7 +609,7 @@ final class Vector<T> implements \MutableVector<T> {
    */
   public readonly function lastKey()[]: mixed {
     $count = $this->count();
-    return $count ? ($count - 1) : null;
+    return $count !== 0 ? ($count - 1) : null;
   }
 
   /** Reverses the values of the Vector in place.
@@ -728,7 +728,7 @@ final class ImmVector<T> implements \ConstVector<T> {
    * @return bool
    */
   public readonly function isEmpty()[]: bool {
-    return !$this->count();
+      return $this->count() === 0;
   }
 
   /** Returns the number of values in the ImmVector.
@@ -1002,7 +1002,7 @@ final class ImmVector<T> implements \ConstVector<T> {
    * @return mixed
    */
   public readonly function firstKey()[]: mixed {
-    return $this->count() ? 0 : null;
+    return $this->count() !== 0 ? 0 : null;
   }
 
   /** Returns the last value from this ImmVector, or null if this ImmVector is
@@ -1011,7 +1011,7 @@ final class ImmVector<T> implements \ConstVector<T> {
    */
   public function lastValue()[]: mixed {
     $count = $this->count();
-    return $count ? $this[$count - 1] : null;
+    return $count !== 0 ? $this[$count - 1] : null;
   }
 
   /** Returns the last key from this ImmVector, or null if this ImmVector is
@@ -1020,7 +1020,7 @@ final class ImmVector<T> implements \ConstVector<T> {
    */
   public readonly function lastKey()[]: mixed {
     $count = $this->count();
-    return $count ? ($count - 1) : null;
+    return $count !== 0 ? ($count - 1) : null;
   }
 
   /** Returns an Iterable that produces the keys from this ImmVector.
@@ -1123,7 +1123,7 @@ final class ImmVector<T> implements \ConstVector<T> {
    */
   public readonly function toKeysArray()[]: varray<int> {
     $count = $this->count();
-    return $count
+    return $count !== 0
       ? varray(HH\FIXME\UNSAFE_CAST<mixed, varray<int>>(\range(0, $count - 1)))
       : vec[];
   }

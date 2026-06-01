@@ -14,7 +14,6 @@
 #include <proxygen/lib/http/webtransport/WtStreamManager.h>
 #include <proxygen/lib/http/webtransport/WtUtils.h>
 #include <quic/codec/QuicInteger.h>
-#include <quic/folly_utils/Utils.h>
 #include <quic/priority/HTTPPriorityQueue.h>
 
 using namespace proxygen;

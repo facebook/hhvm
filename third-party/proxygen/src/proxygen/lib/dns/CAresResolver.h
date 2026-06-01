@@ -191,6 +191,15 @@ class CAresResolver : public DNSResolver {
     caresStateSamplingEnabled_ = true;
   }
 
+  // Overrides for ares_init_options(); 0 = use c-ares default.
+  struct ChannelInitOptions {
+    std::chrono::milliseconds timeout{DNSResolver::kMaxTimeout};
+    int tries{0};
+  };
+  void setChannelInitOptions(ChannelInitOptions opts) {
+    channelInitOptions_ = opts;
+  }
+
   /**
    * Initialize the resolver.
    */
@@ -237,6 +246,7 @@ class CAresResolver : public DNSResolver {
   TimeUtil timeUtil_;
   bool resolveSRVRecord_{false};
   bool caresStateSamplingEnabled_{false};
+  ChannelInitOptions channelInitOptions_;
 
   // Tracks the number of queries still owned by c-ares. This intentionally
   // outlives app-level timeouts so we can see work that c-ares is still

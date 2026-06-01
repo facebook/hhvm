@@ -727,10 +727,15 @@ void CAresResolver::init() {
   opts.flags = ARES_FLAG_STAYOPEN;
   optmask |= ARES_OPT_FLAGS;
 
-  // Set the timeout to something obscenely large that will "never" fire since
-  // we're managing timeouts ourself on a per-request basis
-  opts.timeout = kMaxTimeout.count();
-  optmask |= ARES_OPT_TIMEOUTMS;
+  if (channelInitOptions_.timeout.count() > 0) {
+    opts.timeout = static_cast<int>(channelInitOptions_.timeout.count());
+    optmask |= ARES_OPT_TIMEOUTMS;
+  }
+
+  if (channelInitOptions_.tries > 0) {
+    opts.tries = channelInitOptions_.tries;
+    optmask |= ARES_OPT_TRIES;
+  }
 
   if (port_) {
     opts.udp_port = opts.tcp_port = port_;

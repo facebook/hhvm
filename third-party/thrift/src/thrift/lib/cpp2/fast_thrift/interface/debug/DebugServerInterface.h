@@ -25,9 +25,9 @@ namespace apache::thrift::fast_thrift {
  * debug connections (the fast_thrift counterpart of
  * `apache::thrift::DebugServerInterface` from the legacy stack).
  *
- * thriftdbg's `sendRequest`, `getServerDbgInfo`, and `info` TUI call into
- * this interface. The marker is a type-system guardrail — passing a
- * user-facing handler to setDebugInterface is a compile error.
+ * Debug RPC clients (`sendRequest`, `getServerDbgInfo`, and the `info`
+ * TUI) call into this interface. The marker is a type-system guardrail —
+ * passing a user-facing handler to setDebugInterface is a compile error.
  *
  * Implementations should NOT keep back-references to a single
  * FastThriftServer; iterate

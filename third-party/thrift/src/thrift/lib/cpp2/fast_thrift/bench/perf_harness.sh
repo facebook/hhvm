@@ -34,7 +34,7 @@ set -euo pipefail
 # Configuration
 # =============================================================================
 
-FBSOURCE="/data/users/rroeser/fbsource"
+FBSOURCE="${FBSOURCE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../.." && pwd)}"
 BENCH_TARGET="fbcode//thrift/lib/cpp2/fast_thrift/thrift/client/bench:thrift_client_integration_bench"
 BUILD_MODE="@fbcode//mode/opt-clang-lto"
 RESULTS_DIR="${FBSOURCE}/fbcode/thrift/lib/cpp2/fast_thrift/bench/perf_results"

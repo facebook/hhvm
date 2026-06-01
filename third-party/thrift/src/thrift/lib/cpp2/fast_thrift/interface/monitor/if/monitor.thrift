@@ -32,9 +32,9 @@ namespace cpp2 apache.thrift.fast_thrift
  * relevant to monitoring, which excludes dangerous methods like
  * `shutdown()`.
  *
- * NOTE: All methods defined here are ignored by ServiceFramework's
- * ACLChecker module. Thus, these methods must be read-only and expose no
- * sensitive information.
+ * NOTE: All methods defined here are exempt from ACL enforcement by the
+ * surrounding service framework. Thus, these methods must be read-only and
+ * expose no sensitive information.
  */
 @cpp.FastServer
 service Monitor {

@@ -103,7 +103,7 @@ class FastThriftServer {
    * ThriftServer::setStatusInterface). Must be called before
    * start()/serve().
    *
-   * Tupperware health checks call `getStatus()` on this interface.
+   * Container scheduler health checks call `getStatus()` on this interface.
    *
    * The handler must derive from fast_thrift::StatusServerInterface — a
    * marker base that exists purely as a type-system guardrail.
@@ -118,8 +118,8 @@ class FastThriftServer {
    * ThriftServer::setDebugInterface). Must be called before
    * start()/serve().
    *
-   * thriftdbg's `sendRequest`, `getServerDbgInfo`, and `info` TUI call
-   * into this interface.
+   * Debug RPC clients (`sendRequest`, `getServerDbgInfo`, and the `info`
+   * TUI) call into this interface.
    *
    * The handler must derive from fast_thrift::DebugServerInterface — a
    * marker base that exists purely as a type-system guardrail.

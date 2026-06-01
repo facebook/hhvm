@@ -22,9 +22,9 @@ namespace cpp2 apache.thrift.fast_thrift
 
 /**
  * Wire-format-compatible mirror of fb303_status from
- * fb303/thrift/fb303_core.thrift. Values must remain in lockstep — TW and
- * thriftdbg expect the same i32 codes regardless of which server stack
- * answered.
+ * fb303/thrift/fb303_core.thrift. Values must remain in lockstep — container
+ * scheduler health checks and debug RPC clients expect the same i32 codes
+ * regardless of which server stack answered.
  */
 enum fast_fb303_status {
   DEAD = 0,
@@ -42,12 +42,12 @@ enum fast_fb303_status {
  * other. Lives in a separate IDL because `@cpp.FastServer` is exclusive
  * with the legacy SvIf codegen.
  *
- * Tupperware health checks call `getStatus()` on this interface; thriftdbg
- * uses it for the ServerHealth tab in `info`.
+ * Container scheduler health checks call `getStatus()` on this interface;
+ * debug RPC clients render it in their server-health view.
  *
- * NOTE: All methods defined here are ignored by ServiceFramework's
- * ACLChecker module. Thus, these methods must be read-only and expose no
- * sensitive information.
+ * NOTE: All methods defined here are exempt from ACL enforcement by the
+ * surrounding service framework. Thus, these methods must be read-only and
+ * expose no sensitive information.
  */
 @cpp.FastServer
 service Status {

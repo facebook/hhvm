@@ -201,8 +201,8 @@ void FastThriftServer::start() {
   // the response's `context` reflects the user service (matching legacy
   // multiplex behaviour — extras are siblings, not the primary).
   //
-  // Without the merge, thriftdbg sendRequest <monitor-method> fails with
-  // "Function not found" because the metadata lookup misses Monitor /
+  // Without the merge, a debug-client `sendRequest <monitor-method>` fails
+  // with "Function not found" because the metadata lookup misses Monitor /
   // Status / Debug methods even though they are dispatchable on the wire.
   if (config_.enableMetadataService) {
     auto resp = std::make_shared<

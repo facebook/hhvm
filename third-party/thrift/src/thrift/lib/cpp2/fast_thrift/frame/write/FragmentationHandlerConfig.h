@@ -43,7 +43,7 @@ struct FragmentationHandlerConfig {
    *
    * Default: `0xffffff - 512` (~16 MiB minus 512 bytes) — matches legacy
    * `apache::thrift::rocket::kMaxFragmentedPayloadSize`
-   * (`fbcode/thrift/lib/cpp2/transport/rocket/framing/Frames.h`). The
+   * (`thrift/lib/cpp2/transport/rocket/framing/Frames.h`). The
    * 3-byte RSocket frame-length field caps at `0xffffff`; the 512-byte
    * margin leaves room for the per-frame header.
    *

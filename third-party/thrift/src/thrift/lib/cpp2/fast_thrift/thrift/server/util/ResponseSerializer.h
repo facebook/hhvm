@@ -27,10 +27,6 @@ inline constexpr size_t kServerDataHeadroomBytes = 128;
 // headroom reserved at the front. Codegen calls this with a presult
 // write/size pair; the resulting IOBuf flows through the response-message
 // helpers in util/ResponsePayloads.h.
-//
-// Mirrors GeneratedAsyncProcessorBase::serializeResponse from legacy
-// (fbcode/thrift/lib/cpp2/async/processor/GeneratedAsyncProcessorBase.h),
-// without the ContextStack/header-transform tail.
 template <typename ProtocolWriter, typename SerializeFn, typename SizeFn>
 std::unique_ptr<folly::IOBuf> serializeResponse(
     SerializeFn&& serializeFn, SizeFn&& sizeFn) {

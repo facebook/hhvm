@@ -26,7 +26,7 @@ namespace apache::thrift::fast_thrift {
  * apache::thrift::StatusServerInterface from
  * thrift/lib/cpp2/server/StatusServerInterface.h).
  *
- * Tupperware health checks and thriftdbg's ServerHealth tab call
+ * Container scheduler health checks and debug RPC clients call
  * `getStatus()` on this interface. Marker exists purely as a type-system
  * guardrail — passing a user-facing handler to setStatusInterface is a
  * compile error.

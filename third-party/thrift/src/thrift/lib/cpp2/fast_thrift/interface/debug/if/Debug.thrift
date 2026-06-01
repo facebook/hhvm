@@ -25,14 +25,15 @@ namespace cpp2 apache.thrift.fast_thrift
  * fast_thrift counterpart of `service Debug` in
  * `common/thrift/thrift/debug.thrift`. Field IDs and method signatures are
  * intentionally kept in lockstep with that file — the wire format must
- * match so thriftdbg (whose client codegens off the legacy IDL) can talk
- * to either stack interchangeably.
+ * match so debug RPC clients (whose code generates off the legacy IDL) can
+ * talk to either stack interchangeably.
  *
- * v1 ships the three methods needed for thriftdbg's `sendRequest`,
- * `getServerDbgInfo`, and `info` TUI baseline. Other legacy methods
- * (`dumpRequests`, `dumpThriftServiceSchema`, `dumpThriftServiceMetadataV1`,
- * `getThriftServiceConfiguration`) are not declared here yet and will land
- * as the corresponding fast_thrift subsystems materialize.
+ * v1 ships the three methods needed for debug clients' baseline
+ * send-request, server-info, and interactive-info flows. Other legacy
+ * methods (`dumpRequests`, `dumpThriftServiceSchema`,
+ * `dumpThriftServiceMetadataV1`, `getThriftServiceConfiguration`) are not
+ * declared here yet and will land as the corresponding fast_thrift
+ * subsystems materialize.
  */
 
 // === Identity ===
@@ -68,7 +69,7 @@ struct DumpMetadataResponse {
 //
 // Substructs absent from this v1 (resourcePools, cpuCc, dls,
 // runtimeServerActions, genericConfig, thriftServerConfig) require fast_thrift
-// subsystems we haven't built. thriftdbg's info-tab JSON renderer treats
+// subsystems we haven't built. Debug clients' info-tab JSON renderer treats
 // missing optional fields as empty objects, so this is graceful.
 
 struct HostDbgInfo {
@@ -115,7 +116,8 @@ struct UncategorizedDbgInfo {
 
 struct ServerDbgInfo {
   // Field IDs aligned with legacy ServerDbgInfo so an opaque deserializer
-  // (thriftdbg generic JSON) renders the same shape as for legacy servers.
+  // (debug clients' generic JSON renderer) renders the same shape as for
+  // legacy servers.
   1: HostDbgInfo hostDbgInfo;
   2: ProcessDbgInfo processDbgInfo;
   // 3-5 reserved for resourcePoolsDbgInfo / cpuCcDbgInfo / dlsDbgInfo
@@ -132,8 +134,9 @@ struct ServerDbgInfo {
 }
 
 struct ServerDbgInfoRequest {
-  // Used by callers (e.g. thriftdbg) to pick a specific FastThriftServer
-  // when multiple are registered in the process. Zero matches any.
+  // Used by callers (e.g. debug RPC clients) to pick a specific
+  // FastThriftServer when multiple are registered in the process. Zero
+  // matches any.
   1: i32 thriftServerLookupPort;
 }
 

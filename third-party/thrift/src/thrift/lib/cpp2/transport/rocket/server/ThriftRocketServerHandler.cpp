@@ -64,6 +64,7 @@ THRIFT_FLAG_DEFINE_bool(rocket_server_legacy_protocol_key, true);
 THRIFT_FLAG_DEFINE_int64(rocket_server_max_version, kRocketServerMaxVersion);
 THRIFT_FLAG_DEFINE_bool(client_authwall_server_enabled, false);
 THRIFT_FLAG_DEFINE_bool(client_authwall_server_enabled_logging, false);
+THRIFT_FLAG_DECLARE_bool(server_request_encryption_tracking_enabled);
 
 namespace apache::thrift::rocket {
 

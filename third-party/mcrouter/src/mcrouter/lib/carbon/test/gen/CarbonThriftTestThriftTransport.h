@@ -58,6 +58,10 @@ folly::Try<apache::thrift::RpcResponseComplete<carbon::test::CustomReply>> sendS
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kPrivacyLibAgenticContextHeader}, request.getPrivacyLibAgenticContext().value());
   }
+  if (FOLLY_UNLIKELY(request.getKcbIdentity().has_value())) {
+    rpcOptions.setWriteHeader(
+        std::string{carbon::MessageCommon::kKcbIdentityHeader}, request.getKcbIdentity().value());
+  }
   rpcOptions.setContextPropMask(0);
 
 #ifndef LIBMC_FBTRACE_DISABLE
@@ -101,6 +105,10 @@ folly::Try<apache::thrift::RpcResponseComplete<carbon::test::DummyThriftReply>> 
   if (FOLLY_UNLIKELY(request.getPrivacyLibAgenticContext().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kPrivacyLibAgenticContextHeader}, request.getPrivacyLibAgenticContext().value());
+  }
+  if (FOLLY_UNLIKELY(request.getKcbIdentity().has_value())) {
+    rpcOptions.setWriteHeader(
+        std::string{carbon::MessageCommon::kKcbIdentityHeader}, request.getKcbIdentity().value());
   }
   rpcOptions.setContextPropMask(0);
 
@@ -146,6 +154,10 @@ folly::Try<apache::thrift::RpcResponseComplete<carbon::test::ThriftTestReply>> s
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kPrivacyLibAgenticContextHeader}, request.getPrivacyLibAgenticContext().value());
   }
+  if (FOLLY_UNLIKELY(request.getKcbIdentity().has_value())) {
+    rpcOptions.setWriteHeader(
+        std::string{carbon::MessageCommon::kKcbIdentityHeader}, request.getKcbIdentity().value());
+  }
   rpcOptions.setContextPropMask(0);
 
 #ifndef LIBMC_FBTRACE_DISABLE
@@ -189,6 +201,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McVersionReply>> sendSyncHelper(
   if (FOLLY_UNLIKELY(request.getPrivacyLibAgenticContext().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kPrivacyLibAgenticContextHeader}, request.getPrivacyLibAgenticContext().value());
+  }
+  if (FOLLY_UNLIKELY(request.getKcbIdentity().has_value())) {
+    rpcOptions.setWriteHeader(
+        std::string{carbon::MessageCommon::kKcbIdentityHeader}, request.getKcbIdentity().value());
   }
   rpcOptions.setContextPropMask(0);
 

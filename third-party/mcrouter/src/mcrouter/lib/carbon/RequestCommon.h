@@ -76,6 +76,12 @@ class RequestCommon : public MessageCommon {
 
   void setPrivacyLibAgenticContext(std::string&& context);
 
+  // Returns the resolved Generalized KCB ACL identity name, if any.
+  // Used by the transport layer to write the kcb_identity thrift header.
+  const std::optional<std::string>& getKcbIdentity() const noexcept;
+
+  void setKcbIdentity(folly::StringPiece kcbIdentity) noexcept;
+
   const std::optional<folly::IPAddress>& getSourceIpAddr() const noexcept;
 
   void setSourceIpAddr(const folly::IPAddress& sourceIpAddr) noexcept;
@@ -101,6 +107,10 @@ class RequestCommon : public MessageCommon {
   std::optional<std::string> clientIdentifier_;
   // Privacylib agentic context in base64-encoded serialized format
   std::optional<std::string> privacyLibAgenticContext_;
+  // Resolved Generalized KCB ACL identity name (DataTypeConfig.kcbIdentity).
+  // When set, the transport writes it as the kcb_identity thrift header so
+  // the UCache server can bind the cache key to this ACL group.
+  std::optional<std::string> kcbIdentity_;
   // Source ip address.
   std::optional<folly::IPAddress> sourceIpAddr_;
   // write timestamp

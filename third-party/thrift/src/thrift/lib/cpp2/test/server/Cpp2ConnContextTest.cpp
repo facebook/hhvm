@@ -53,3 +53,85 @@ TEST(Cpp2ConnContextTest, getPeerCredentials) {
   EXPECT_EQ(geteuid(), creds.uid);
   EXPECT_EQ(getegid(), creds.gid);
 }
+
+TEST(Cpp2ConnContextTest, isTransportEncrypted_plaintext) {
+  folly::EventBase evb;
+  auto worker = Cpp2Worker::createDummy(&evb);
+  // Default construction — no transport, securityProtocol is empty
+  Cpp2ConnContext ctx(
+      nullptr, nullptr, nullptr, nullptr, nullptr, worker.get(), 0);
+  EXPECT_FALSE(ctx.isTransportEncrypted());
+  EXPECT_FALSE(ctx.isTransportAuthenticated());
+}
+
+TEST(Cpp2ConnContextTest, isTransportEncrypted_TLS) {
+  folly::EventBase evb;
+  auto worker = Cpp2Worker::createDummy(&evb);
+  Cpp2ConnContext ctx(
+      nullptr, nullptr, nullptr, nullptr, nullptr, worker.get(), 0);
+  detail::Cpp2ConnContextInternalAPI(ctx).setSecurityProtocol("TLS");
+  EXPECT_TRUE(ctx.isTransportEncrypted());
+  EXPECT_TRUE(ctx.isTransportAuthenticated());
+}
+
+TEST(Cpp2ConnContextTest, isTransportEncrypted_Fizz) {
+  folly::EventBase evb;
+  auto worker = Cpp2Worker::createDummy(&evb);
+  Cpp2ConnContext ctx(
+      nullptr, nullptr, nullptr, nullptr, nullptr, worker.get(), 0);
+  detail::Cpp2ConnContextInternalAPI(ctx).setSecurityProtocol("Fizz");
+  EXPECT_TRUE(ctx.isTransportEncrypted());
+  EXPECT_TRUE(ctx.isTransportAuthenticated());
+}
+
+TEST(Cpp2ConnContextTest, isTransportEncrypted_KTLS) {
+  folly::EventBase evb;
+  auto worker = Cpp2Worker::createDummy(&evb);
+  Cpp2ConnContext ctx(
+      nullptr, nullptr, nullptr, nullptr, nullptr, worker.get(), 0);
+  detail::Cpp2ConnContextInternalAPI(ctx).setSecurityProtocol("Fizz/KTLS");
+  EXPECT_TRUE(ctx.isTransportEncrypted());
+  EXPECT_TRUE(ctx.isTransportAuthenticated());
+}
+
+TEST(Cpp2ConnContextTest, isTransportEncrypted_stopTLS) {
+  folly::EventBase evb;
+  auto worker = Cpp2Worker::createDummy(&evb);
+  Cpp2ConnContext ctx(
+      nullptr, nullptr, nullptr, nullptr, nullptr, worker.get(), 0);
+  detail::Cpp2ConnContextInternalAPI(ctx).setSecurityProtocol("stopTLS");
+  EXPECT_FALSE(ctx.isTransportEncrypted());
+  EXPECT_TRUE(ctx.isTransportAuthenticated());
+}
+
+TEST(Cpp2ConnContextTest, isTransportEncrypted_StopTLSV2) {
+  folly::EventBase evb;
+  auto worker = Cpp2Worker::createDummy(&evb);
+  Cpp2ConnContext ctx(
+      nullptr, nullptr, nullptr, nullptr, nullptr, worker.get(), 0);
+  detail::Cpp2ConnContextInternalAPI(ctx).setSecurityProtocol("Fizz/StopTLSV2");
+  EXPECT_FALSE(ctx.isTransportEncrypted());
+  EXPECT_TRUE(ctx.isTransportAuthenticated());
+}
+
+TEST(Cpp2ConnContextTest, isTransportEncrypted_PSP) {
+  folly::EventBase evb;
+  auto worker = Cpp2Worker::createDummy(&evb);
+  Cpp2ConnContext ctx(
+      nullptr, nullptr, nullptr, nullptr, nullptr, worker.get(), 0);
+  // PSP uses hardware-accelerated encryption — data IS encrypted on the wire
+  detail::Cpp2ConnContextInternalAPI(ctx).setSecurityProtocol("thriftPSPV0");
+  EXPECT_TRUE(ctx.isTransportEncrypted());
+  EXPECT_TRUE(ctx.isTransportAuthenticated());
+}
+
+TEST(Cpp2ConnContextTest, isTransportEncrypted_unknownProtocol) {
+  folly::EventBase evb;
+  auto worker = Cpp2Worker::createDummy(&evb);
+  Cpp2ConnContext ctx(
+      nullptr, nullptr, nullptr, nullptr, nullptr, worker.get(), 0);
+  detail::Cpp2ConnContextInternalAPI(ctx).setSecurityProtocol(
+      "SomeNewProtocol");
+  EXPECT_FALSE(ctx.isTransportEncrypted());
+  EXPECT_TRUE(ctx.isTransportAuthenticated());
+}

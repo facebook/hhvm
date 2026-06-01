@@ -268,6 +268,46 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
     return transportInfo_.securityProtocol;
   }
 
+  /**
+   * Returns true if the transport is currently encrypting data on the wire.
+   * True for: "TLS" (OpenSSL), "Fizz" (TLS 1.3), "Fizz/KTLS" (kernel TLS),
+   *           "thriftPSPV0" (hardware-accelerated encryption).
+   * False for: stopTLS variants (authenticated but plaintext data),
+   *            plaintext, and unknown protocols.
+   *
+   * Note: this intentionally differs from SecureThriftUtil::isTls() —
+   * isTls() asks "is this TLS?" while this asks "is data encrypted?"
+   * PSP encrypts data via hardware acceleration (not TLS), so it is
+   * encrypted but not TLS.
+   *
+   * If you need to check whether any security protocol is active
+   * (including stopTLS), use isTransportAuthenticated() instead.
+   */
+  bool isTransportEncrypted() const {
+    const auto& p = getSecurityProtocol();
+    return p == "TLS" || p == "Fizz" || p == "Fizz/KTLS" || p == "thriftPSPV0";
+  }
+
+  /**
+   * Returns true if any security protocol is active on this connection.
+   * This covers all non-plaintext transports: TLS, Fizz, Fizz/KTLS,
+   * stopTLS (authenticated but may skip encryption), PSP (hardware-
+   * accelerated encryption), etc.
+   *
+   * Implementation: returns true for any non-empty security protocol
+   * string. This is intentionally loose for forward compatibility —
+   * any new transport type that sets a security protocol string will
+   * be "authenticated" by default, which is the safe direction to fail.
+   * This matches the existing pattern used by proxygen, mcrouter, and
+   * AI auth service for TLS detection.
+   *
+   * If you need to check whether data is actually encrypted on the wire,
+   * use isTransportEncrypted() instead.
+   */
+  bool isTransportAuthenticated() const {
+    return !getSecurityProtocol().empty();
+  }
+
   virtual void* getPeerIdentities() const {
     return transportInfo_.peerIdentities.get();
   }
@@ -624,6 +664,10 @@ class Cpp2ConnContextInternalAPI {
   }
 
   size_t getNumTiles() const { return connContext_.tiles_.size(); }
+
+  void setSecurityProtocol(std::string protocol) {
+    connContext_.transportInfo_.securityProtocol = std::move(protocol);
+  }
 
  private:
   Cpp2ConnContext& connContext_;

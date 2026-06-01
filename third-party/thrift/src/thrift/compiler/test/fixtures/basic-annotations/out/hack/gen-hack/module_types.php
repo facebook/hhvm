@@ -633,7 +633,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
               "id" => 9,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_union" => tmeta_ThriftUnionType::fromShape(
                     shape(
                       "name" => "module.MyUnion",
                     )

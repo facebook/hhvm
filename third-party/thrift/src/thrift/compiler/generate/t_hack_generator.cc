@@ -2638,14 +2638,6 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
 
     tmeta_ThriftType->add_map(
         std::make_unique<t_const_value>("t_enum"), std::move(tenum_tmeta));
-  } else if (type->is<t_structured>()) {
-    auto tstruct_tmeta = t_const_value::make_map();
-    tstruct_tmeta->add_map(
-        std::make_unique<t_const_value>("name"),
-        std::make_unique<t_const_value>(type->get_scoped_name()));
-
-    tmeta_ThriftType->add_map(
-        std::make_unique<t_const_value>("t_struct"), std::move(tstruct_tmeta));
   } else if (type->is<t_union>()) {
     auto tunion_tmeta = t_const_value::make_map();
     tunion_tmeta->add_map(
@@ -2654,6 +2646,14 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
 
     tmeta_ThriftType->add_map(
         std::make_unique<t_const_value>("t_union"), std::move(tunion_tmeta));
+  } else if (type->is<t_structured>()) {
+    auto tstruct_tmeta = t_const_value::make_map();
+    tstruct_tmeta->add_map(
+        std::make_unique<t_const_value>("name"),
+        std::make_unique<t_const_value>(type->get_scoped_name()));
+
+    tmeta_ThriftType->add_map(
+        std::make_unique<t_const_value>("t_struct"), std::move(tstruct_tmeta));
   } else if (const auto* ttypedef = type->try_as<t_typedef>()) {
     auto ttypedef_tmeta = t_const_value::make_map();
     ttypedef_tmeta->add_map(

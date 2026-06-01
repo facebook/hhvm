@@ -1612,7 +1612,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
               "id" => 18,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                  "t_union" => \tmeta_ThriftUnionType::fromShape(
                     shape(
                       "name" => "module.Union",
                     )

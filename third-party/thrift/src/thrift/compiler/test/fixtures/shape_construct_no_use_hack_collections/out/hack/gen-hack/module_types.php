@@ -929,7 +929,7 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
               "id" => 2,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_union" => tmeta_ThriftUnionType::fromShape(
                     shape(
                       "name" => "module.TestUnion",
                     )

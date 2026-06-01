@@ -145,7 +145,7 @@ class MyException extends \TException implements \IThriftSyncStruct, \IThriftExc
               "id" => 4,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                  "t_union" => \tmeta_ThriftUnionType::fromShape(
                     shape(
                       "name" => "module.MyUnion",
                     )

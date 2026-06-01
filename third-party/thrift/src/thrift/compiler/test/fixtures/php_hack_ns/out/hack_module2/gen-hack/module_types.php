@@ -382,7 +382,7 @@ class Double_Prefixed_ implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => 3,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                  "t_union" => \tmeta_ThriftUnionType::fromShape(
                     shape(
                       "name" => "module.TestUnion",
                     )

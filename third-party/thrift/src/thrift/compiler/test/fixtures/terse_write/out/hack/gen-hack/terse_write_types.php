@@ -1829,7 +1829,7 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
               "id" => 15,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                  "t_union" => \tmeta_ThriftUnionType::fromShape(
                     shape(
                       "name" => "terse_write.MyUnion",
                     )
@@ -2748,7 +2748,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
               "id" => 29,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                  "t_union" => \tmeta_ThriftUnionType::fromShape(
                     shape(
                       "name" => "terse_write.MyUnion",
                     )
@@ -2954,7 +2954,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
               "id" => 30,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                  "t_union" => \tmeta_ThriftUnionType::fromShape(
                     shape(
                       "name" => "terse_write.MyUnion",
                     )

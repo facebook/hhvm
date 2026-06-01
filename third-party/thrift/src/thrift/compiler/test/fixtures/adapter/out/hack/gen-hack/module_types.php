@@ -2806,7 +2806,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
                       "name" => "module.Baz_7352",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                          "t_union" => \tmeta_ThriftUnionType::fromShape(
                             shape(
                               "name" => "module.Baz",
                             )
@@ -2830,7 +2830,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
                       "name" => "module.Baz_7352",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                          "t_union" => \tmeta_ThriftUnionType::fromShape(
                             shape(
                               "name" => "module.Baz",
                             )

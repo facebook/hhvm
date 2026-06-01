@@ -1469,7 +1469,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
               "id" => 10,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_union" => tmeta_ThriftUnionType::fromShape(
                     shape(
                       "name" => "standard.TypeUri",
                     )
@@ -1484,7 +1484,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
               "id" => 17,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_union" => tmeta_ThriftUnionType::fromShape(
                     shape(
                       "name" => "standard.TypeUri",
                     )
@@ -1499,7 +1499,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
               "id" => 11,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_union" => tmeta_ThriftUnionType::fromShape(
                     shape(
                       "name" => "standard.TypeUri",
                     )
@@ -1514,7 +1514,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
               "id" => 12,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_union" => tmeta_ThriftUnionType::fromShape(
                     shape(
                       "name" => "standard.TypeUri",
                     )
@@ -1529,7 +1529,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
               "id" => 13,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_union" => tmeta_ThriftUnionType::fromShape(
                     shape(
                       "name" => "standard.TypeUri",
                     )

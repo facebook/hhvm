@@ -69,9 +69,9 @@ public class PrimitivesServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        long _iter0 = (long)_r;
+        long _fbthriftVar0 = (long)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I64_FIELD);
-        oprot.writeI64(_iter0);
+        oprot.writeI64(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -157,9 +157,9 @@ public class PrimitivesServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        test.fixtures.service_schema.Result _iter0 = (test.fixtures.service_schema.Result)_r;
+        test.fixtures.service_schema.Result _fbthriftVar0 = (test.fixtures.service_schema.Result)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
-        oprot.writeI32(_iter0 == null ? 0 : _iter0.getValue());
+        oprot.writeI32(_fbthriftVar0 == null ? 0 : _fbthriftVar0.getValue());
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -185,8 +185,8 @@ public class PrimitivesServiceRpcServerHandler
 
         oprot.writeFieldBegin(
             new TField("responseField", TType.STRUCT, _fieldId));
-        com.facebook.thrift.payload.ThriftSerializable _iter0 = (com.facebook.thrift.payload.ThriftSerializable)_t;
-        _iter0.write0(oprot);
+        com.facebook.thrift.payload.ThriftSerializable _fbthriftVar0 = (com.facebook.thrift.payload.ThriftSerializable)_t;
+        _fbthriftVar0.write0(oprot);
 
         oprot.writeFieldEnd();
         oprot.writeFieldStop();

@@ -55,37 +55,44 @@ OpenSSLCertificateVerifier::createFromCAFile(
       context, std::move(store));
 }
 
-/* static */ std::unique_ptr<OpenSSLCertificateVerifier>
-OpenSSLCertificateVerifier::createFromCAFiles(
+/* static */ Status OpenSSLCertificateVerifier::createFromCAFiles(
+    std::unique_ptr<OpenSSLCertificateVerifier>& ret,
+    Error& err,
     VerificationContext context,
     const std::vector<std::string>& caFiles) {
   std::string certBuffer;
   for (const auto& caFile : caFiles) {
     std::string readBuffer;
     if (!folly::readFile(caFile.c_str(), readBuffer)) {
-      throw std::runtime_error(
+      return err.error(
           folly::to<std::string>("Could not read store file: ", caFile));
     }
     folly::toAppend(readBuffer, &certBuffer);
   }
-  return std::make_unique<OpenSSLCertificateVerifier>(
+  ret = std::make_unique<OpenSSLCertificateVerifier>(
       context,
       folly::ssl::OpenSSLCertUtils::readStoreFromBuffer(
           folly::StringPiece(certBuffer)));
+  return Status::Success;
 }
 
-std::shared_ptr<const Cert> OpenSSLCertificateVerifier::verify(
+Status OpenSSLCertificateVerifier::verify(
+    std::shared_ptr<const Cert>& ret,
+    Error& err,
     const std::vector<std::shared_ptr<const fizz::PeerCert>>& certs) const {
-  std::ignore = verifyWithX509StoreCtx(certs);
+  folly::ssl::X509StoreCtxUniquePtr ctx;
+  FIZZ_RETURN_ON_ERROR(verifyWithX509StoreCtx(ctx, err, certs));
   // Just return the original cert in the default case
-  return certs.front();
+  ret = certs.front();
+  return Status::Success;
 }
 
-folly::ssl::X509StoreCtxUniquePtr
-OpenSSLCertificateVerifier::verifyWithX509StoreCtx(
+Status OpenSSLCertificateVerifier::verifyWithX509StoreCtx(
+    folly::ssl::X509StoreCtxUniquePtr& ret,
+    Error& err,
     const std::vector<std::shared_ptr<const fizz::PeerCert>>& certs) const {
   if (certs.empty()) {
-    throw std::runtime_error("no certificates to verify");
+    return err.error("no certificates to verify");
   }
 
   auto leafCert = certs.front()->getX509();
@@ -93,7 +100,7 @@ OpenSSLCertificateVerifier::verifyWithX509StoreCtx(
   auto certChainStack = std::unique_ptr<STACK_OF(X509), STACK_OF_X509_deleter>(
       sk_X509_new_null());
   if (!certChainStack) {
-    throw std::bad_alloc();
+    return err.error("", folly::none, Error::Category::StdBadAlloc);
   }
 
   for (size_t i = 1; i < certs.size(); i++) {
@@ -102,7 +109,7 @@ OpenSSLCertificateVerifier::verifyWithX509StoreCtx(
 
   auto ctx = folly::ssl::X509StoreCtxUniquePtr(X509_STORE_CTX_new());
   if (!ctx) {
-    throw std::bad_alloc();
+    return err.error("", folly::none, Error::Category::StdBadAlloc);
   }
 
   if (X509_STORE_CTX_init(
@@ -110,14 +117,14 @@ OpenSSLCertificateVerifier::verifyWithX509StoreCtx(
           x509Store_ ? x509Store_.get() : getDefaultX509Store(),
           leafCert.get(),
           certChainStack.get()) != 1) {
-    throw std::runtime_error("failed to initialize store context");
+    return err.error("failed to initialize store context");
   }
 
   if (X509_STORE_CTX_set_default(
           ctx.get(),
           context_ == VerificationContext::Server ? "ssl_client"
                                                   : "ssl_server") != 1) {
-    throw std::runtime_error("failed to set default verification method");
+    return err.error("failed to set default verification method");
   }
 
   if (customVerifyCallback_) {
@@ -126,36 +133,38 @@ OpenSSLCertificateVerifier::verifyWithX509StoreCtx(
 
   folly::ssl::X509VerifyParam param(X509_VERIFY_PARAM_new());
   if (!param) {
-    throw std::bad_alloc();
+    return err.error("", folly::none, Error::Category::StdBadAlloc);
   }
 
   if (X509_VERIFY_PARAM_set_flags(param.get(), X509_V_FLAG_X509_STRICT) != 1) {
-    throw std::runtime_error("failed to set strict certificate checking");
+    return err.error("failed to set strict certificate checking");
   }
 
   if (X509_VERIFY_PARAM_set1(
           X509_STORE_CTX_get0_param(ctx.get()), param.get()) != 1) {
-    throw std::runtime_error("failed to apply verification parameters");
+    return err.error("failed to apply verification parameters");
   }
 
-  int ret = 0;
+  int result = 0;
   // if openssl is not built with TSAN then we can get a TSAN false positive
   // when calling X509_verify_cert from multiple threads
   {
     folly::annotate_ignore_thread_sanitizer_guard g(__FILE__, __LINE__);
-    ret = X509_verify_cert(ctx.get());
+    result = X509_verify_cert(ctx.get());
   }
 
-  if (ret != 1) {
+  if (result != 1) {
     const auto errorInt = X509_STORE_CTX_get_error(ctx.get());
-    throw FizzVerificationException(
+    return err.error(
         fmt::format(
             "certificate verification failed: {}",
             X509_verify_cert_error_string(errorInt)),
-        toTLSAlert(errorInt));
+        toTLSAlert(errorInt),
+        Error::Category::Verifier);
   }
 
-  return ctx;
+  ret = std::move(ctx);
+  return Status::Success;
 }
 
 void OpenSSLCertificateVerifier::createAuthorities() {
@@ -204,14 +213,15 @@ X509_STORE* OpenSSLCertificateVerifier::getDefaultX509Store() {
   return defaultStore.get();
 }
 
-std::vector<Extension>
-OpenSSLCertificateVerifier::getCertificateRequestExtensions() const {
+Status OpenSSLCertificateVerifier::getCertificateRequestExtensions(
+    std::vector<Extension>& ret,
+    Error& err) const {
   std::vector<Extension> exts;
   Extension ext;
-  Error err;
-  FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, authorities_), err);
+  FIZZ_RETURN_ON_ERROR(encodeExtension(ext, err, authorities_));
   exts.push_back(std::move(ext));
-  return exts;
+  ret = std::move(exts);
+  return Status::Success;
 }
 
 } // namespace openssl

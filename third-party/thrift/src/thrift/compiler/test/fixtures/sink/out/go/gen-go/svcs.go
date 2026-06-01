@@ -443,9 +443,6 @@ func (p *SinkServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *SinkServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *SinkServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}

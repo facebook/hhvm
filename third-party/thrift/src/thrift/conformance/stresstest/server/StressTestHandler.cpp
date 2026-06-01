@@ -299,4 +299,38 @@ void StressTestHandler::async_eb_alignedRequestResponseEb(
   alignedRequestResponseImpl(std::move(callback), std::move(request));
 }
 
+void StressTestHandler::async_tm_storageReadTm(
+    HandlerCallbackPtr<std::unique_ptr<StorageReadResponse>> callback,
+    std::unique_ptr<StorageReadRequest> request) {
+  auto response = std::make_unique<StorageReadResponse>();
+  auto size = *request->responseBytes();
+  if (size > 0) {
+    response->payload() = std::string(size, 'x');
+  }
+  callback->result(std::move(response));
+}
+
+void StressTestHandler::async_eb_storageReadEb(
+    HandlerCallbackPtr<std::unique_ptr<StorageReadResponse>> callback,
+    std::unique_ptr<StorageReadRequest> request) {
+  auto response = std::make_unique<StorageReadResponse>();
+  auto size = *request->responseBytes();
+  if (size > 0) {
+    response->payload() = std::string(size, 'x');
+  }
+  callback->result(std::move(response));
+}
+
+void StressTestHandler::async_tm_storageWriteTm(
+    HandlerCallbackPtr<std::unique_ptr<StorageWriteResponse>> callback,
+    std::unique_ptr<StorageWriteRequest> /*request*/) {
+  callback->result(std::make_unique<StorageWriteResponse>());
+}
+
+void StressTestHandler::async_eb_storageWriteEb(
+    HandlerCallbackPtr<std::unique_ptr<StorageWriteResponse>> callback,
+    std::unique_ptr<StorageWriteRequest> /*request*/) {
+  callback->result(std::make_unique<StorageWriteResponse>());
+}
+
 } // namespace apache::thrift::stress

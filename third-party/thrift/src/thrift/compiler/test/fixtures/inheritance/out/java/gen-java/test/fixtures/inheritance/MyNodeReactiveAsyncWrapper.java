@@ -14,17 +14,17 @@ public class MyNodeReactiveAsyncWrapper  extends test.fixtures.inheritance.MyRoo
   private MyNode.Reactive _delegate;
 
   public MyNodeReactiveAsyncWrapper(MyNode.Reactive _delegate) {
-    super(_delegate);
-    this._delegate = _delegate;
+      super(_delegate);
+      this._delegate = _delegate;
   }
 
   public MyNodeReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new MyNodeReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new MyNodeReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
   @java.lang.Override
@@ -41,7 +41,7 @@ public class MyNodeReactiveAsyncWrapper  extends test.fixtures.inheritance.MyRoo
   @java.lang.Override
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> doMidWrapper(
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.doMidWrapper( rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.doMidWrapper( rpcOptions));
   }
 
 }

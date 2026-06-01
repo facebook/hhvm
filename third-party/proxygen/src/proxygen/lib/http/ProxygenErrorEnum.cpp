@@ -8,10 +8,13 @@
 
 #include <proxygen/lib/http/ProxygenErrorEnum.h>
 
+#include <array>
+
 #define PROXYGEN_ERROR_STR(error) #error
 
 namespace {
-static const char* errorStrings[] = {PROXYGEN_ERROR_GEN(PROXYGEN_ERROR_STR)};
+constexpr auto errorStrings =
+    std::to_array<const char*>({PROXYGEN_ERROR_GEN(PROXYGEN_ERROR_STR)});
 }
 
 namespace proxygen {

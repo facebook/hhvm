@@ -50,6 +50,10 @@ class MysqlOperationImpl : virtual public OperationBase,
  protected:
   MysqlOperationImpl();
 
+  // Must be called after the connection is set up to properly initialize
+  // the EventHandler and AsyncTimeout with the correct event base.
+  void initializeFromConnection();
+
   MysqlConnection* getMysqlConnection();
   const MysqlConnection* getMysqlConnection() const;
 
@@ -69,9 +73,7 @@ class MysqlOperationImpl : virtual public OperationBase,
   void handlerReady(uint16_t /*events*/) noexcept override;
 
   // AsyncTimeout override
-  void timeoutExpired() noexcept override {
-    timeoutTriggered();
-  }
+  void timeoutExpired() noexcept override;
 
   // Called by AsyncTimeout::timeoutExpired when the operation timed out
   void timeoutTriggered() override;

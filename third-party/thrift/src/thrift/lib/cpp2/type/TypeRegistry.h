@@ -48,32 +48,17 @@ class TypeRegistry {
   // Store a value in an AnyData using the registered serializers.
   //
   // Throws std::out_of_range if no matching serializer has been registered.
+  AnyData store(AnyConstRef value, const Protocol& protocol) const;
+  template <StandardProtocol P>
+  AnyData store(AnyConstRef value) const {
+    return store(value, Protocol::get<P>());
+  }
+
+  // Overloads accepting ConstRef (from the Dyn type system).
   AnyData store(ConstRef value, const Protocol& protocol) const;
   template <StandardProtocol P>
   AnyData store(ConstRef value) const {
     return store(value, Protocol::get<P>());
-  }
-  template <
-      typename T,
-      std::enable_if_t<!std::is_constructible_v<ConstRef, T>, bool> = true>
-  AnyData store(T&& value, const Protocol& protocol) const {
-    return storeImpl(AnyConstRef(value), protocol);
-  }
-  template <
-      StandardProtocol P,
-      typename T,
-      std::enable_if_t<!std::is_constructible_v<ConstRef, T>, bool> = true>
-  AnyData store(T&& value) const {
-    return store(std::forward<T>(value), Protocol::get<P>());
-  }
-
-  template <typename Tag>
-  AnyData store(const native_type<Tag>& value, const Protocol& protocol) const {
-    return store(Ref::to<Tag>(value), protocol);
-  }
-  template <typename Tag, StandardProtocol P>
-  AnyData store(const native_type<Tag>& value) const {
-    return store(Ref::to<Tag>(value), Protocol::get<P>());
   }
 
   // Load a value from an AnyData using the registered serializers.
@@ -85,7 +70,6 @@ class TypeRegistry {
   //
   // Throws std::out_of_range if no matching serializer has been registered.
   // Throws std::bad_any_cast if value cannot be stored in out.
-  void load(const AnyData& data, Ref out) const;
   void load(const AnyData& data, AnyRef out) const;
   AnyValue load(const AnyData& data) const;
 
@@ -134,9 +118,6 @@ class TypeRegistry {
   std::forward_list<std::unique_ptr<op::Serializer>> ownedSerializers_;
 
   const TypeEntry& getEntry(const Type& type) const;
-
-  template <typename T>
-  AnyData storeImpl(T&& value, const Protocol& protocol) const;
 };
 
 // Implementation details
@@ -158,30 +139,6 @@ bool TypeRegistry::registerSerializer(
   }
   ownedSerializers_.emplace_front(std::move(serializer));
   return registerSerializer(*ownedSerializers_.front(), types);
-}
-
-template <typename T>
-AnyData TypeRegistry::storeImpl(T&& value, const Protocol& protocol) const {
-  if (value.type() == Type::get<type::void_t>()) {
-    return {};
-  }
-
-  // Encode the value.
-  const auto& serializer = getEntry(value.type()).getSerializer(protocol);
-  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
-
-  // Allocate 16KB at a time; leave some room for the IOBuf overhead
-  // TODO(afuller): This is the size we use by default, for structs. Consider
-  // adjusting it, based on what is being encoded.
-  constexpr size_t kDesiredGrowth = (1 << 14) - 64;
-  serializer.encode(value, folly::io::QueueAppender(&queue, kDesiredGrowth));
-
-  // Return the resulting Any.
-  SemiAny builder;
-  builder.data() = queue.moveAsValue();
-  builder.protocol() = protocol;
-  builder.type() = value.type();
-  return AnyData{std::move(builder)};
 }
 
 } // namespace apache::thrift::type

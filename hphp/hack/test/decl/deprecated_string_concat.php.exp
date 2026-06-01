@@ -18,7 +18,7 @@
              ft_instantiated = true }));
        fe_pos = [4:10-22]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-       fe_no_auto_likes = false;
+       fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\doubledouble",
    (Shallow_decl_defs.Fun
@@ -40,7 +40,7 @@
               ft_instantiated = true }));
         fe_pos = [7:10-22]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\singledouble",
    (Shallow_decl_defs.Fun
@@ -62,7 +62,7 @@
               ft_instantiated = true }));
         fe_pos = [10:10-22]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\singledoublesingle",
    (Shallow_decl_defs.Fun
@@ -84,7 +84,7 @@
               ft_instantiated = true }));
         fe_pos = [13:10-28]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\heredoc",
    (Shallow_decl_defs.Fun
@@ -106,7 +106,7 @@
               ft_instantiated = true }));
         fe_pos = [19:10-17]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\nowdoc",
    (Shallow_decl_defs.Fun
@@ -128,6 +128,6 @@
               ft_instantiated = true }));
         fe_pos = [25:10-16]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }))
   ]

@@ -37,11 +37,11 @@ public final class ReservedKeyword implements com.facebook.thrift.payload.Thrift
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(ReservedKeyword other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -67,6 +67,7 @@ public final class ReservedKeyword implements com.facebook.thrift.payload.Thrift
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -76,15 +77,14 @@ public final class ReservedKeyword implements com.facebook.thrift.payload.Thrift
     public static final int _RESERVED_FIELD = 1;
     private static final TField RESERVED_FIELD_FIELD_DESC = new TField("reserved_field", TType.I32, (short)1);
     static {
-      NAMES_TO_IDS.put("reservedField", 1);
-      THRIFT_NAMES_TO_IDS.put("reserved_field", 1);
-      FIELD_METADATA.put(1, RESERVED_FIELD_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/basic/ReservedKeyword"),
-        ReservedKeyword.class, ReservedKeyword::read0));
+        NAMES_TO_IDS.put("reservedField", 1);
+        THRIFT_NAMES_TO_IDS.put("reserved_field", 1);
+        FIELD_METADATA.put(1, RESERVED_FIELD_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("test.dev/fixtures/basic/ReservedKeyword"),
+            ReservedKeyword.class, ReservedKeyword::read0));
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="reserved_field", requiredness=Requiredness.NONE)
     public int getReservedField() { return reservedField; }
 
@@ -115,50 +115,50 @@ public final class ReservedKeyword implements com.facebook.thrift.payload.Thrift
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Integer.hashCode(reservedField);
-            return _hashCode;
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<ReservedKeyword> asReader() {
       return ReservedKeyword::read0;
     }
 
     public static ReservedKeyword read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(ReservedKeyword.NAMES_TO_IDS, ReservedKeyword.THRIFT_NAMES_TO_IDS, ReservedKeyword.FIELD_METADATA);
-      ReservedKeyword.Builder builder = new ReservedKeyword.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _RESERVED_FIELD:
-          if (__field.type == TType.I32) {
-            int reservedField = oprot.readI32();
-            builder.setReservedField(reservedField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(ReservedKeyword.NAMES_TO_IDS, ReservedKeyword.THRIFT_NAMES_TO_IDS, ReservedKeyword.FIELD_METADATA);
+        ReservedKeyword.Builder builder = new ReservedKeyword.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _RESERVED_FIELD:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setReservedField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      int _iter0 = this.reservedField;
-      oprot.writeFieldBegin(RESERVED_FIELD_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            int _fbthriftVar0 = this.reservedField;
+            oprot.writeFieldBegin(RESERVED_FIELD_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _ReservedKeywordLazy {

@@ -251,7 +251,7 @@ mod fixups {
                 replace_imm("str2", ImmType::SA, ImmType::OA("ClassName")),
             ],
             "FCallClsMethodM" => vec![
-                replace_imm("str4", ImmType::SA, ImmType::OA("MethodName")),
+                replace_imm("str3", ImmType::SA, ImmType::OA("MethodName")),
             ],
             "FCallClsMethodD" => vec![
                 replace_imm("str2", ImmType::SA, ImmType::OA("ClassName")),

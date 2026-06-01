@@ -655,6 +655,21 @@ void ContextStack::onBiDiStreamNext() {
   }
 }
 
+void ContextStack::onBiDiStreamNextSent() {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_bidi_stream_next_sent,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      if (auto* bidiEventHandler = (*handlers_)[i]->getBiDiEventHandler()) {
+        bidiEventHandler->onBiDiStreamNextSent(contextAt(i));
+      }
+    }
+  }
+}
+
 void ContextStack::onBiDiStreamCredit(uint32_t credits) {
   FOLLY_SDT(
       thrift,

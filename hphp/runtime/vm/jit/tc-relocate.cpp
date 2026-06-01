@@ -101,7 +101,7 @@ void relocateTranslation(
   }
   memset(main.base(), 0xcc, main.frontier() - main.base());
   memset(cold.base(), 0xcc, cold.frontier() - cold.base());
-  if (arch::get() == Arch::ARM) {
+  if (arch::any<arch::ARM>()) {
     main.sync();
     cold.sync();
   }

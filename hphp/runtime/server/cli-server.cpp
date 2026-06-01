@@ -2036,6 +2036,9 @@ CLIContext CLIContext::initFromClient(int client) {
     cli_write(client, "version_ok");
   }
 
+  // UnixServerProxyXbox is used to communicate between the CLI client and
+  // server and should not be deleted.
+  static_assert(std::is_same_v<decltype(Cfg::Eval::UnixServerProxyXbox), bool>);
   auto const proxy_xbox = get_setting_bool(shared.ini,
                                            "hhvm.unix_server_proxy_xbox");
 

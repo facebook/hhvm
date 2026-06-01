@@ -20,9 +20,22 @@ void MysqlOperationImpl::protocolCompleteOperation(OperationResult result) {
 }
 
 MysqlOperationImpl::MysqlOperationImpl()
-    : OperationBase(nullptr),
-      EventHandler(client_.getEventBase()),
-      AsyncTimeout(client_.getEventBase()) {}
+    : OperationBase(),
+      EventHandler(nullptr, folly::NetworkSocket()),
+      AsyncTimeout() {}
+
+void MysqlOperationImpl::initializeFromConnection() {
+  // Re-initialize EventHandler and AsyncTimeout with the correct event base
+  // now that the connection is set up.
+  // Note: For sync clients, getEventBase() returns nullptr, and that's OK -
+  // we only attach when there's actually an EventBase available.
+  auto* eventBase = conn().getEventBase();
+  if (eventBase) {
+    EventHandler::changeHandlerFD(folly::NetworkSocket());
+    EventHandler::attachEventBase(eventBase);
+    AsyncTimeout::attachEventBase(eventBase);
+  }
+}
 
 bool MysqlOperationImpl::isInEventBaseThread() const {
   return conn().isInEventBaseThread();
@@ -82,16 +95,34 @@ void MysqlOperationImpl::waitForActionable() {
 }
 
 void MysqlOperationImpl::handlerReady(uint16_t /*events*/) noexcept {
-  DCHECK(conn().isInEventBaseThread());
-  CHECK_THROW(
-      state() != OperationState::Completed &&
-          state() != OperationState::Unstarted,
-      db::OperationStateException);
+  // handlerReady is `noexcept` so we can't throw from it.
+  try {
+    DCHECK(conn().isInEventBaseThread());
 
-  if (state() == OperationState::Cancelling) {
-    cancel();
-  } else {
-    invokeActionable();
+    auto st = state();
+    if (st == OperationState::Cancelling) {
+      cancel();
+    } else if (
+        st != OperationState::Completed && st != OperationState::Unstarted) {
+      invokeActionable();
+    } else {
+      LOG(WARNING) << "handlerReady() called in unexpected state: " << st;
+    }
+  } catch (const std::exception& ex) {
+    LOG(ERROR) << "Exception in handlerReady: " << ex.what();
+  } catch (...) {
+    LOG(ERROR) << "Unknown exception in handlerReady";
+  }
+}
+
+void MysqlOperationImpl::timeoutExpired() noexcept {
+  // timeoutExpired is `noexcept` so we can't throw from it.
+  try {
+    timeoutTriggered();
+  } catch (const std::exception& ex) {
+    LOG(ERROR) << "Exception in timeoutExpired: " << ex.what();
+  } catch (...) {
+    LOG(ERROR) << "Unknown exception in timeoutExpired";
   }
 }
 

@@ -192,7 +192,6 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::GenericTypeSpecifier {..} => SyntaxKind::GenericTypeSpecifier,
             SyntaxVariant::NullableTypeSpecifier {..} => SyntaxKind::NullableTypeSpecifier,
             SyntaxVariant::LikeTypeSpecifier {..} => SyntaxKind::LikeTypeSpecifier,
-            SyntaxVariant::SoftTypeSpecifier {..} => SyntaxKind::SoftTypeSpecifier,
             SyntaxVariant::AttributizedSpecifier {..} => SyntaxKind::AttributizedSpecifier,
             SyntaxVariant::ReifiedTypeArgument {..} => SyntaxKind::ReifiedTypeArgument,
             SyntaxVariant::TypeArguments {..} => SyntaxKind::TypeArguments,

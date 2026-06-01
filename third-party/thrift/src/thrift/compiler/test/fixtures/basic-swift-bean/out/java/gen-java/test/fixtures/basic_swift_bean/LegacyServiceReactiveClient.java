@@ -38,7 +38,6 @@ public class LegacyServiceReactiveClient
   }
 
   public LegacyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = reactor.core.publisher.Mono.empty();
@@ -59,7 +58,6 @@ public class LegacyServiceReactiveClient
   }
 
   public LegacyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = _headersMono;
@@ -76,11 +74,11 @@ public class LegacyServiceReactiveClient
         {
           oprot.writeFieldBegin(_getPoints_KEY_FIELD_DESC);
 
-          Set<String> _iter0 = key;
+          Set<String> _fbthriftVar0 = key;
 
-          oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
-          for (String _iter1 : _iter0) {
-            oprot.writeString(_iter1);
+          oprot.writeSetBegin(new TSet(TType.STRING, _fbthriftVar0.size()));
+          for (String _fbthriftVar1 : _fbthriftVar0) {
+            oprot.writeString(_fbthriftVar1);
           }
           oprot.writeSetEnd();
           oprot.writeFieldEnd();
@@ -89,9 +87,9 @@ public class LegacyServiceReactiveClient
         {
           oprot.writeFieldBegin(_getPoints_LEGACY_STUFF_FIELD_DESC);
 
-          long _iter0 = legacyStuff;
+          long _fbthriftVar0 = legacyStuff;
 
-          oprot.writeI64(_iter0);
+          oprot.writeI64(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 

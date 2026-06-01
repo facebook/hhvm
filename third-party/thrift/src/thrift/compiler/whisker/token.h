@@ -65,6 +65,7 @@ enum class tok : unsigned {
   star,      // "*"
   dollar,    // "$"
   colon,     // ":"
+  tilde,     // "~"
   // clang-format on
 
   // Literals:

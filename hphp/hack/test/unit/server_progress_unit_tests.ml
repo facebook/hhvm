@@ -1010,8 +1010,8 @@ let test_check_jsonl_full_output () : bool Lwt.t =
         let prefix = Path.to_string root ^ "/" in
         let expected =
           Printf.sprintf
-            {|{"kind":"diagnostic","severity":"error","message":[{"descr":"type mismatch","path":"%se.php","line":0,"start":0,"end":0,"code":4110}],"custom_messages":[]}
-{"kind":"diagnostic","severity":"warning","message":[{"descr":"sketchy","path":"%sw.php","line":0,"start":0,"end":0,"code":12001}],"custom_messages":[]}
+            {|{"kind":"diagnostic","severity":"error","is_trusted":true,"message":[{"descr":"type mismatch","path":"%se.php","line":0,"start":0,"end":0,"code":4110}],"custom_messages":[]}
+{"kind":"diagnostic","severity":"warning","is_trusted":true,"message":[{"descr":"sketchy","path":"%sw.php","line":0,"start":0,"end":0,"code":12001}],"custom_messages":[]}
 {"kind":"summary","passed":false,"version":"<VERSION>","error_count":1,"warning_count":1}|}
             prefix
             prefix
@@ -1240,7 +1240,7 @@ let test_filter_warnings () : bool =
       [
         Filter_diagnostics.Code_off Error_codes.Warning.SketchyEquality;
         Filter_diagnostics.Ignored_files (Str.regexp "def");
-        Filter_diagnostics.Code_off Error_codes.Warning.SketchyNullCheck;
+        Filter_diagnostics.Code_off Error_codes.Warning.NonDisjointCheck;
         Filter_diagnostics.Code_on Error_codes.Warning.SketchyEquality;
         Filter_diagnostics.Ignored_files (Str.regexp "abc");
       ]
@@ -1249,7 +1249,7 @@ let test_filter_warnings () : bool =
     make_diagnostics
       [
         (12001, "a", "SketchyEquality in non-ignored file. Show");
-        (12003, "a", "SketchyNullCheck in non-ignored file. Hide");
+        (12004, "a", "NonDisjointCheck in non-ignored file. Hide");
         (12001, "defgh", "SketchyEquality in ignored file. Hide");
         (12004, "abcd", "other warning in ignored file. Hide");
         (4110, "abc", "non-warning in ignored file. Show");

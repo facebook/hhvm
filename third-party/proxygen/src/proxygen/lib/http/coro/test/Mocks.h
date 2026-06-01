@@ -30,9 +30,12 @@ class MockHTTPSource : public proxygen::coro::HTTPSource {
               readBodyEvent,
               (uint32_t));
 
-  MOCK_METHOD(void, stopReading, (folly::Optional<const HTTPErrorCode> error));
+  MOCK_METHOD(void,
+              stopReading,
+              (folly::Optional<const HTTPErrorCode> error),
+              (noexcept));
 
-  MOCK_METHOD(folly::Optional<uint64_t>, getStreamID, (), (const));
+  MOCK_METHOD(folly::Optional<uint64_t>, getStreamID, (), (const, noexcept));
 };
 
 class MockHTTPSessionContext : public HTTPSessionContext {

@@ -26,90 +26,90 @@ import com.facebook.thrift.metadata.ThriftType;
 
 public class AdapterServiceThriftMetadataHandler implements com.facebook.thrift.server.ThriftMetadataHandler {
 
-  private static void addFunctions_0(List<ThriftFunction> functions) {
-        {
-          List<ThriftField> args = new ArrayList<>();
+    private static void addFunctions_0(List<ThriftFunction> functions) {
+            {
+              List<ThriftField> args = new ArrayList<>();
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("count")
-              .setReturnType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.adapter.CountingStruct").build()))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-        {
-          List<ThriftField> args = new ArrayList<>();
-          args.add(new ThriftField.Builder()
-              .setId(1)
-              .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.adapter.HeapAllocated").build()))
-              .setName("arg")
-              .setIsOptional(false)
-              .build());
+              functions.add(new ThriftFunction.Builder()
+                  .setName("count")
+                  .setReturnType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.adapter.CountingStruct").build()))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+            {
+              List<ThriftField> args = new ArrayList<>();
+              args.add(new ThriftField.Builder()
+                  .setId(1)
+                  .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.adapter.HeapAllocated").build()))
+                  .setName("arg")
+                  .setIsOptional(false)
+                  .build());
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("adaptedTypes")
-              .setReturnType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.adapter.HeapAllocated").build()))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-  }
+              functions.add(new ThriftFunction.Builder()
+                  .setName("adaptedTypes")
+                  .setReturnType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.adapter.HeapAllocated").build()))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+    }
 
-  private static final ThriftService THRIFT_SERVICE;
+    private static final ThriftService THRIFT_SERVICE;
 
 
-  static {
-    List<ThriftFunction> functions = new ArrayList<>();
-    addFunctions_0(functions);
-    THRIFT_SERVICE = new ThriftService.Builder()
-        .setName("test.fixtures.adapter.AdapterService")
-        .setFunctions(functions)
-        .build();
-  }
+    static {
+        List<ThriftFunction> functions = new ArrayList<>();
+        addFunctions_0(functions);
+        THRIFT_SERVICE = new ThriftService.Builder()
+            .setName("test.fixtures.adapter.AdapterService")
+            .setFunctions(functions)
+            .build();
+    }
 
-  @Override
-  public String getName() {
-    return "AdapterService";
-  }
+    @Override
+    public String getName() {
+        return "AdapterService";
+    }
 
-  @Override
-  public String getFullyQualifiedName() {
-    return "test.fixtures.adapter.AdapterService";
-  }
+    @Override
+    public String getFullyQualifiedName() {
+        return "test.fixtures.adapter.AdapterService";
+    }
 
-  @Override
-  public ThriftService getThriftService() {
-    return THRIFT_SERVICE;
-  }
+    @Override
+    public ThriftService getThriftService() {
+        return THRIFT_SERVICE;
+    }
 
-  @Override
-  public String getParentServiceName() {
-    return null;
-  }
+    @Override
+    public String getParentServiceName() {
+        return null;
+    }
 
-  @Override
-  public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
-    return null;
-  }
+    @Override
+    public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
+        return null;
+    }
 
-  @Override
-  public Map<String, ThriftEnum> getEnums() {
-    return AdapterServiceThriftMetadataHandlerEnums.getEnums();
-  }
+    @Override
+    public Map<String, ThriftEnum> getEnums() {
+        return AdapterServiceThriftMetadataHandlerEnums.getEnums();
+    }
 
-  @Override
-  public Map<String, ThriftStruct> getStructs() {
-    return AdapterServiceThriftMetadataHandlerStructs.getStructs();
-  }
+    @Override
+    public Map<String, ThriftStruct> getStructs() {
+        return AdapterServiceThriftMetadataHandlerStructs.getStructs();
+    }
 
-  @Override
-  public Map<String, ThriftException> getExceptions() {
-    return AdapterServiceThriftMetadataHandlerExceptions.getExceptions();
-  }
+    @Override
+    public Map<String, ThriftException> getExceptions() {
+        return AdapterServiceThriftMetadataHandlerExceptions.getExceptions();
+    }
 }

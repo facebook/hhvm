@@ -920,6 +920,34 @@ class DynamicStructInfo {
   std::vector<std::string> fieldNames_;
 };
 
+/**
+ * This struct holds metadata for thrift-python enum
+ * types.
+ *
+ * Each instance corresponds to one Python enum class. It stores:
+ *  - An enum_find instance for bidirectional name/value lookup used by the
+ *    table-based serializer.
+ *
+ * The string_view entries in names_ point into the internal UTF-8 buffers of
+ * the Python enum member name strings. The Cython EnumTypeInfo._class
+ * reference keeps the enum class (and hence all member name strings) alive
+ * for the lifetime of this object.
+ */
+class EnumTypeInfo {
+ public:
+  explicit EnumTypeInfo(
+      std::vector<std::string_view> names, std::vector<std::int32_t> values);
+  const ::apache::thrift::detail::TypeInfo* get() const { return &typeinfo_; }
+
+ private:
+  std::vector<std::string_view> names_;
+  std::vector<std::int32_t> values_;
+  ::apache::thrift::detail::st::enum_find<std::int32_t>::metadata meta_;
+  ::apache::thrift::detail::st::enum_find<std::int32_t> find_;
+  ::apache::thrift::detail::EnumFieldExt ext_;
+  const ::apache::thrift::detail::TypeInfo typeinfo_;
+};
+
 ::apache::thrift::detail::TypeInfo createImmutableStructTypeInfo(
     const DynamicStructInfo& dynamicStructInfo);
 

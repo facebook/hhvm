@@ -1813,6 +1813,7 @@ private:
   void setParent();
   void setSpecial();
   void setMethods();
+  void propagateReturnTypes() const;
   void setRTAttributes();
   void setConstants();
   void setProperties();

@@ -1,5 +1,4 @@
 assume_php=false
-enable_experimental_tc_features = no_fallback_in_namespaces
 safe_array = true
 safe_vector_array = true
 unsafe_rx = false

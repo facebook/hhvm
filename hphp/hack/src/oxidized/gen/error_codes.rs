@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<692ead7808811ad4a915e61e454d9771>>
+// @generated SignedSource<<8541b6ab282f2695c6d3e94045884fcf>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -195,7 +195,6 @@ pub enum NastCheck {
     ConstructorRequired = 3030,
     InterfaceWithPartialTypeconst = 3031,
     MultipleXhpCategory = 3032,
-    StaticMemoizedFunction = 3041,
     InoutParamsSpecial = 3043,
     InoutParamsMemoize = 3045,
     ReadingFromAppend = 3047,
@@ -572,6 +571,8 @@ pub enum Typing {
     NeedsConcreteInFinalClass = 4505,
     NeedsConcreteOnInstanceMethod = 4506,
     NeedsConcreteOnConstructor = 4507,
+    ConsistentConstructAbstractExtendsNonAbstract = 4508,
+    GatedByFeatureFlag = 4509,
 }
 impl TrivialDrop for Typing {}
 arena_deserializer::impl_deserialize_in_arena!(Typing);
@@ -597,7 +598,6 @@ arena_deserializer::impl_deserialize_in_arena!(Typing);
 #[repr(C)]
 pub enum Warning {
     SketchyEquality = 12001,
-    SketchyNullCheck = 12003,
     NonDisjointCheck = 12004,
     CastNonPrimitive = 12005,
     TruthinessTest = 12006,
@@ -629,6 +629,10 @@ pub enum Warning {
     SealedNotSubtype = 12035,
     TanyFound = 12036,
     ConsistentConstructAbstractFinal = 12037,
+    DynamicMethodCall = 12038,
+    DynamicFunctionCall = 12039,
+    DynamicArrayAccess = 12040,
+    SealedNotOverride = 12041,
 }
 impl TrivialDrop for Warning {}
 arena_deserializer::impl_deserialize_in_arena!(Warning);

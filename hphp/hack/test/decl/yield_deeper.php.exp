@@ -24,7 +24,7 @@
              ft_instantiated = true }));
        fe_pos = [3:10-11]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-       fe_no_auto_likes = false;
+       fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\g",
    (Shallow_decl_defs.Fun
@@ -45,7 +45,7 @@
               ft_instantiated = true }));
         fe_pos = [7:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\h",
    (Shallow_decl_defs.Fun
@@ -66,7 +66,7 @@
               ft_instantiated = true }));
         fe_pos = [13:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\i",
    (Shallow_decl_defs.Fun
@@ -90,7 +90,7 @@
               ft_instantiated = true }));
         fe_pos = [19:16-17]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\j",
    (Shallow_decl_defs.Fun
@@ -117,6 +117,6 @@
               ft_instantiated = true }));
         fe_pos = [26:16-17]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }))
   ]

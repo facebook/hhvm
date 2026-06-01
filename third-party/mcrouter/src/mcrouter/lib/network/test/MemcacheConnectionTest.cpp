@@ -68,14 +68,14 @@ TEST(MemcacheExternalConnectionTest, simpleExternalConnection) {
       facebook::memcache::ConnectionOptions(
           "localhost", server->getListenPort(), mc_caret_protocol));
   facebook::memcache::McSetRequest request("hello");
-  request.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "world");
+  request.value() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "world");
   folly::fibers::Baton baton;
   conn->sendRequestOne(
       request,
       [&baton](
           const facebook::memcache::McSetRequest& /* req */,
           facebook::memcache::McSetReply&& reply) {
-        EXPECT_EQ(carbon::Result::STORED, *reply.result_ref());
+        EXPECT_EQ(carbon::Result::STORED, *reply.result());
         baton.post();
       });
   baton.wait();
@@ -86,8 +86,8 @@ TEST(MemcacheExternalConnectionTest, simpleExternalConnection) {
       [&baton](
           const facebook::memcache::McGetRequest& /* req */,
           facebook::memcache::McGetReply&& reply) {
-        EXPECT_EQ(carbon::Result::FOUND, *reply.result_ref());
-        EXPECT_EQ("hello", folly::StringPiece(reply.value_ref()->coalesce()));
+        EXPECT_EQ(carbon::Result::FOUND, *reply.result());
+        EXPECT_EQ("hello", folly::StringPiece(reply.value()->coalesce()));
         baton.post();
       });
   baton.wait();
@@ -103,14 +103,14 @@ TEST(MemcacheExternalConnectionTest, simpleExternalConnectionThrift) {
       facebook::memcache::ConnectionOptions(
           "localhost", socket.getPort(), mc_thrift_protocol));
   facebook::memcache::McSetRequest request("hello");
-  request.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "world");
+  request.value() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "world");
   folly::fibers::Baton baton;
   conn->sendRequestOne(
       request,
       [&baton](
           const facebook::memcache::McSetRequest& /* req */,
           facebook::memcache::McSetReply&& reply) {
-        EXPECT_EQ(carbon::Result::STORED, *reply.result_ref());
+        EXPECT_EQ(carbon::Result::STORED, *reply.result());
         baton.post();
       });
   baton.wait();
@@ -121,8 +121,8 @@ TEST(MemcacheExternalConnectionTest, simpleExternalConnectionThrift) {
       [&baton](
           const facebook::memcache::McGetRequest& /* req */,
           facebook::memcache::McGetReply&& reply) {
-        EXPECT_EQ(carbon::Result::FOUND, *reply.result_ref());
-        EXPECT_EQ("world", folly::StringPiece(reply.value_ref()->coalesce()));
+        EXPECT_EQ(carbon::Result::FOUND, *reply.result());
+        EXPECT_EQ("world", folly::StringPiece(reply.value()->coalesce()));
         baton.post();
       });
   baton.wait();
@@ -147,14 +147,14 @@ TEST(MemcachePooledConnectionTest, PooledExternalConnection) {
       std::make_unique<facebook::memcache::MemcachePooledConnection>(
           std::move(conns));
   facebook::memcache::McSetRequest request("pooled");
-  request.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "connection");
+  request.value() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "connection");
   folly::fibers::Baton baton;
   pooledConn->sendRequestOne(
       request,
       [&baton](
           const facebook::memcache::McSetRequest& /* req */,
           facebook::memcache::McSetReply&& reply) {
-        EXPECT_EQ(carbon::Result::STORED, *reply.result_ref());
+        EXPECT_EQ(carbon::Result::STORED, *reply.result());
         baton.post();
       });
   baton.wait();
@@ -165,8 +165,8 @@ TEST(MemcachePooledConnectionTest, PooledExternalConnection) {
       [&baton](
           const facebook::memcache::McGetRequest& /* req */,
           facebook::memcache::McGetReply&& reply) {
-        EXPECT_EQ(carbon::Result::FOUND, *reply.result_ref());
-        EXPECT_EQ("pooled", folly::StringPiece(reply.value_ref()->coalesce()));
+        EXPECT_EQ(carbon::Result::FOUND, *reply.result());
+        EXPECT_EQ("pooled", folly::StringPiece(reply.value()->coalesce()));
         baton.post();
       });
   baton.wait();
@@ -204,14 +204,14 @@ TEST(MemcacheInternalConnectionTest, simpleInternalConnection) {
   auto conn = std::make_unique<facebook::memcache::MemcacheInternalConnection>(
       "simple-internal-test", mcrouterOptions);
   facebook::memcache::McSetRequest request("internal");
-  request.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "connection");
+  request.value() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "connection");
   folly::fibers::Baton baton;
   conn->sendRequestOne(
       request,
       [&baton](
           const facebook::memcache::McSetRequest& /* req */,
           facebook::memcache::McSetReply&& reply) {
-        EXPECT_EQ(carbon::Result::STORED, *reply.result_ref());
+        EXPECT_EQ(carbon::Result::STORED, *reply.result());
         baton.post();
       });
   baton.wait();
@@ -222,9 +222,8 @@ TEST(MemcacheInternalConnectionTest, simpleInternalConnection) {
       [&baton](
           const facebook::memcache::McGetRequest& /* req */,
           facebook::memcache::McGetReply&& reply) {
-        EXPECT_EQ(carbon::Result::FOUND, *reply.result_ref());
-        EXPECT_EQ(
-            "internal", folly::StringPiece(reply.value_ref()->coalesce()));
+        EXPECT_EQ(carbon::Result::FOUND, *reply.result());
+        EXPECT_EQ("internal", folly::StringPiece(reply.value()->coalesce()));
         baton.post();
       });
   baton.wait();
@@ -269,14 +268,14 @@ TEST(MemcachePooledConnectionTest, PooledInternalConnection) {
       std::make_unique<facebook::memcache::MemcachePooledConnection>(
           std::move(conns));
   facebook::memcache::McSetRequest request("pooled");
-  request.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "internal");
+  request.value() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "internal");
   folly::fibers::Baton baton;
   pooledConn->sendRequestOne(
       request,
       [&baton](
           const facebook::memcache::McSetRequest& /* req */,
           facebook::memcache::McSetReply&& reply) {
-        EXPECT_EQ(carbon::Result::STORED, *reply.result_ref());
+        EXPECT_EQ(carbon::Result::STORED, *reply.result());
         baton.post();
       });
   baton.wait();
@@ -287,8 +286,8 @@ TEST(MemcachePooledConnectionTest, PooledInternalConnection) {
       [&baton](
           const facebook::memcache::McGetRequest& /* req */,
           facebook::memcache::McGetReply&& reply) {
-        EXPECT_EQ(carbon::Result::FOUND, *reply.result_ref());
-        EXPECT_EQ("pooled", folly::StringPiece(reply.value_ref()->coalesce()));
+        EXPECT_EQ(carbon::Result::FOUND, *reply.result());
+        EXPECT_EQ("pooled", folly::StringPiece(reply.value()->coalesce()));
         baton.post();
       });
   baton.wait();
@@ -312,7 +311,7 @@ TEST(MemcacheResultTest, testThriftResult) {
       loadSheddingReq,
       [&](const facebook::memcache::McGetRequest& /* req */,
           facebook::memcache::McGetReply&& reply) {
-        res = *reply.result_ref();
+        res = *reply.result();
         baton.post();
       });
   baton.wait();
@@ -337,7 +336,7 @@ TEST(MemcacheResultTest, testThriftResultForServerRestart) {
           req,
           [&](const facebook::memcache::McGetRequest& /* req */,
               facebook::memcache::McGetReply&& reply) {
-            counts[*reply.result_ref()]++;
+            counts[*reply.result()]++;
             baton.post();
           });
       baton.wait();

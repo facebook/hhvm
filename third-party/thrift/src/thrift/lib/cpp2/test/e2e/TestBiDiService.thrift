@@ -36,16 +36,12 @@ exception BiDiMethodException {
 }
 
 service TestBiDiService {
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<string>, stream<string> echo();
 
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   string, sink<string>, stream<string> echoWithResponse(1: string initial);
 
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<i64>, stream<i64> intStream();
 
-  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<i64 throws (1: BiDiSinkException sinkEx)>, stream<
     i64 throws (1: BiDiStreamException sinkEx)
   > canThrow() throws (1: BiDiMethodException methodEx);

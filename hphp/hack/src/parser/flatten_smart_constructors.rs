@@ -1383,14 +1383,6 @@ pub trait FlattenSmartConstructors: SmartConstructors
         }
     }
 
-    fn make_soft_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
-          Self::zero(SyntaxKind::SoftTypeSpecifier)
-        } else {
-          self.flatten(SyntaxKind::SoftTypeSpecifier, vec!(arg0, arg1))
-        }
-    }
-
     fn make_attributized_specifier(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero(SyntaxKind::AttributizedSpecifier)

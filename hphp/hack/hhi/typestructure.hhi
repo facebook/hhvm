@@ -134,6 +134,16 @@ namespace HH {
   )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 
   /*
+   * Replacement for type_structure(C::class, 'T')['classname']
+   * for type constants that point to classes. Returns a resolved
+   * class pointer instead of the string name of the class.
+   */
+  function type_structure_class(
+    mixed $cls_or_obj,
+    string $cns_name,
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
+
+  /*
    * Retrieves the TypeStructure for a type alias.
    */
   function type_structure_for_alias<T>(

@@ -50,6 +50,7 @@ class BiDiEventHandler {
 
   // Stream (from server to client) events
   virtual void onBiDiStreamNext(void*) {}
+  virtual void onBiDiStreamNextSent(void*) {}
   virtual void onBiDiStreamCredit(void*, uint32_t) {}
   virtual void onBiDiStreamPause(void*, details::StreamPauseReason) {}
 

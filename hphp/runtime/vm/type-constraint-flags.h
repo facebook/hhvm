@@ -84,9 +84,10 @@ enum class TypeConstraintFlags : uint16_t {
    * Indicates that a type-constraint came from an upper-bound constraint.
    */
   UpperBound = 0x200,
+
   /*
-   * Temporary flag intended to identify type constraints that have been
-   * inherited from overidden methods.
+   * Indicates that this type constraint has been inherited from a parent
+   * method (for e.g. to enforce monotonicity)
    */
   Inherited = 0x400,
 };

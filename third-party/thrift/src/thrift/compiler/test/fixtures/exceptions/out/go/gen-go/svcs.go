@@ -178,9 +178,6 @@ func (p *RaiserProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *RaiserProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *RaiserProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}

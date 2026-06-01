@@ -77,7 +77,6 @@ use crate::parse::parse_class_get_c_kind;
 use crate::parse::parse_class_name;
 use crate::parse::parse_comma_list;
 use crate::parse::parse_const_name;
-use crate::parse::parse_dynamic_call_op;
 use crate::parse::parse_fatal_op;
 use crate::parse::parse_func_name;
 use crate::parse::parse_i64;
@@ -476,29 +475,15 @@ impl FunctionParser<'_> {
             "cls_method" => {
                 if let Some(clsref) = parse_special_cls_ref_opt(tokenizer)? {
                     tokenizer.expect_identifier("::")?;
-                    if let Some(vid) = self.vid_opt(tokenizer)? {
-                        // clsref::vid => FCallClsMethodS
-                        operands_suffix.push(vid);
-                        CallDetail::FCallClsMethodS { clsref }
-                    } else {
-                        // clsref::id => FCallClsMethodSD
-                        let method = parse_method_name(tokenizer)?;
-                        CallDetail::FCallClsMethodSD { clsref, method }
-                    }
+                    // clsref::id => FCallClsMethodSD
+                    let method = parse_method_name(tokenizer)?;
+                    CallDetail::FCallClsMethodSD { clsref, method }
                 } else if let Some(cls_vid) = self.vid_opt(tokenizer)? {
                     operands_suffix.push(cls_vid);
                     tokenizer.expect_identifier("::")?;
-                    if let Some(vid) = self.vid_opt(tokenizer)? {
-                        // vid::vid dc => FCallClsMethod
-                        operands_suffix.push(vid);
-                        let log = parse_dynamic_call_op(tokenizer)?;
-                        CallDetail::FCallClsMethod { log }
-                    } else {
-                        // vid::id dc => FCallClsMethodM
-                        let method = parse_method_name(tokenizer)?;
-                        let log = parse_dynamic_call_op(tokenizer)?;
-                        CallDetail::FCallClsMethodM { method, log }
-                    }
+                    // vid::id dc => FCallClsMethodM
+                    let method = parse_method_name(tokenizer)?;
+                    CallDetail::FCallClsMethodM { method }
                 } else {
                     // id::id => FCallClsMethodD
                     let clsid = parse_class_name(tokenizer)?;

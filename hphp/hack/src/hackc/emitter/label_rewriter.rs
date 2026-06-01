@@ -142,10 +142,8 @@ where
             *label = f(*label);
         }
         Instruct::Opcode(
-            Opcode::FCallClsMethod(fca, _, _)
-            | Opcode::FCallClsMethodD(fca, _, _)
-            | Opcode::FCallClsMethodM(fca, _, _, _)
-            | Opcode::FCallClsMethodS(fca, _, _)
+            Opcode::FCallClsMethodD(fca, _, _)
+            | Opcode::FCallClsMethodM(fca, _, _)
             | Opcode::FCallClsMethodSD(fca, _, _, _)
             | Opcode::FCallCtor(fca, _)
             | Opcode::FCallFunc(fca)

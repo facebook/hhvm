@@ -748,10 +748,6 @@ where
         Node(self.0.make_like_type_specifier(tilde.0, type_.0), self.1.make_like_type_specifier(tilde.1, type_.1))
     }
 
-    fn make_soft_type_specifier(&mut self, at: Self::Output, type_: Self::Output) -> Self::Output {
-        Node(self.0.make_soft_type_specifier(at.0, type_.0), self.1.make_soft_type_specifier(at.1, type_.1))
-    }
-
     fn make_attributized_specifier(&mut self, attribute_spec: Self::Output, type_: Self::Output) -> Self::Output {
         Node(self.0.make_attributized_specifier(attribute_spec.0, type_.0), self.1.make_attributized_specifier(attribute_spec.1, type_.1))
     }

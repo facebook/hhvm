@@ -426,7 +426,7 @@ class SimpleServiceInterface(
     async def fib(
             self,
             n: builtins.int
-        ) -> _typing.Sequence[builtins.int]:
+        ) -> _fbthrift_python_types.ImmutableList[builtins.int]:
         raise NotImplementedError("async def fib is not implemented")
 
     async def _fbthrift__handler_fib(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -439,7 +439,7 @@ class SimpleServiceInterface(
     async def unique_words(
             self,
             words: _typing.Sequence[builtins.str]
-        ) -> _typing.AbstractSet[builtins.str]:
+        ) -> _fbthrift_python_types.ImmutableSet[builtins.str]:
         raise NotImplementedError("async def unique_words is not implemented")
 
     async def _fbthrift__handler_unique_words(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -452,7 +452,7 @@ class SimpleServiceInterface(
     async def words_count(
             self,
             words: _typing.Sequence[builtins.str]
-        ) -> _typing.Mapping[builtins.str, builtins.int]:
+        ) -> _fbthrift_python_types.ImmutableMap[builtins.str, builtins.int]:
         raise NotImplementedError("async def words_count is not implemented")
 
     async def _fbthrift__handler_words_count(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -479,7 +479,7 @@ class SimpleServiceInterface(
             self,
             num_lists: builtins.int,
             num_items: builtins.int
-        ) -> _typing.Sequence[_typing.Sequence[builtins.int]]:
+        ) -> _fbthrift_python_types.ImmutableList[_fbthrift_python_types.ImmutableList[builtins.int]]:
         raise NotImplementedError("async def list_of_lists is not implemented")
 
     async def _fbthrift__handler_list_of_lists(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -492,7 +492,7 @@ class SimpleServiceInterface(
     async def word_character_frequency(
             self,
             sentence: builtins.str
-        ) -> _typing.Mapping[builtins.str, _typing.Mapping[builtins.str, builtins.int]]:
+        ) -> _fbthrift_python_types.ImmutableMap[builtins.str, _fbthrift_python_types.ImmutableMap[builtins.str, builtins.int]]:
         raise NotImplementedError("async def word_character_frequency is not implemented")
 
     async def _fbthrift__handler_word_character_frequency(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -505,7 +505,7 @@ class SimpleServiceInterface(
     async def list_of_sets(
             self,
             some_words: builtins.str
-        ) -> _typing.Sequence[_typing.AbstractSet[builtins.str]]:
+        ) -> _fbthrift_python_types.ImmutableList[_fbthrift_python_types.ImmutableSet[builtins.str]]:
         raise NotImplementedError("async def list_of_sets is not implemented")
 
     async def _fbthrift__handler_list_of_sets(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -544,7 +544,7 @@ class SimpleServiceInterface(
     async def get_union(
             self,
             sets: _typing.Sequence[_typing.AbstractSet[builtins.int]]
-        ) -> _typing.AbstractSet[builtins.int]:
+        ) -> _fbthrift_python_types.ImmutableSet[builtins.int]:
         raise NotImplementedError("async def get_union is not implemented")
 
     async def _fbthrift__handler_get_union(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -557,7 +557,7 @@ class SimpleServiceInterface(
     async def get_keys(
             self,
             string_map: _typing.Sequence[_typing.Mapping[builtins.str, builtins.str]]
-        ) -> _typing.AbstractSet[builtins.str]:
+        ) -> _fbthrift_python_types.ImmutableSet[builtins.str]:
         raise NotImplementedError("async def get_keys is not implemented")
 
     async def _fbthrift__handler_get_keys(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -596,7 +596,7 @@ class SimpleServiceInterface(
     async def contain_binary(
             self,
             binaries: _typing.Sequence[builtins.bytes]
-        ) -> _typing.AbstractSet[builtins.bytes]:
+        ) -> _fbthrift_python_types.ImmutableSet[builtins.bytes]:
         raise NotImplementedError("async def contain_binary is not implemented")
 
     async def _fbthrift__handler_contain_binary(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -609,7 +609,7 @@ class SimpleServiceInterface(
     async def contain_enum(
             self,
             the_enum: _typing.Sequence[_fbthrift__module__thrift_types.AnEnum]
-        ) -> _typing.Sequence[_fbthrift__module__thrift_types.AnEnum]:
+        ) -> _fbthrift_python_types.ImmutableList[_fbthrift__module__thrift_types.AnEnum]:
         raise NotImplementedError("async def contain_enum is not implemented")
 
     async def _fbthrift__handler_contain_enum(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:

@@ -807,7 +807,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     // PatchOp::Remove
     using PatchOpRemoveId = field_id<7>;
     uint32_t s = 0;
-    s += prot.writeStructBegin(op::get_class_name_v<Patch>.data());
+    s += prot.writeStructBegin(op::get_class_name<Patch>().data());
     const auto remove = removedFields();
     op::for_each_field_id<Patch>([&](auto id) {
       using Id = decltype(id);
@@ -825,7 +825,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
       }
 
       s += prot.writeFieldBegin(
-          &*op::get_name_v<Patch, Id>.begin(),
+          op::get_field_name<Patch, Id>().data(),
           typeTagToTType<Tag>,
           folly::to_underlying(Id::value));
       if constexpr (isRemoveField) {

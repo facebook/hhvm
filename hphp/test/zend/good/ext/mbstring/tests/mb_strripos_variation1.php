@@ -13,20 +13,20 @@
 class classA
 {
   public function __toString() :mixed{
-    return b"Class A object";
+    return "Class A object";
   }
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strripos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$needle = b'string_val';
+$needle = 'string_val';
 $offset = 0;
 $encoding = 'utf-8';
 
 
 // heredoc string
-$heredoc = b<<<EOT
+$heredoc = <<<EOT
 hello world
 EOT;
 

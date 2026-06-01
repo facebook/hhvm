@@ -175,7 +175,7 @@ ProxygenServer::ProxygenEventBaseObserver::ProxygenEventBaseObserver(
                                    worker),
                                  {ServiceData::StatsType::COUNT},
                                  {std::chrono::seconds(60)}, 60)) {
-  m_counterCallback.init([this, worker](std::map<std::string, int64_t>& values){
+  m_counterCallback.init([this, worker](ServiceData::CounterMap& values){
     auto now = ClockT::now();
     // export p90 p99 for evb busy time
     const std::array<double, 2> quantiles_busytime {0.9, 0.99};
@@ -200,7 +200,7 @@ ProxygenServer::ProxygenEventBaseObserver::ProxygenEventBaseObserver(
     auto const p10_idle_name = folly::to<std::string>(
         "proxygen_evb_idle_time_us_", worker, ".p10.60");
     values[p10_idle_name] = estimates[1].second;
-  });
+  }, "proxygen_evb_");
 }
 
 void ProxygenServer::ProxygenEventBaseObserver::loopSample(

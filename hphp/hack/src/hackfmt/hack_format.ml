@@ -159,7 +159,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.GenericTypeSpecifier _
     | Syntax.NullableTypeSpecifier _
     | Syntax.LikeTypeSpecifier _
-    | Syntax.SoftTypeSpecifier _
     | Syntax.VariablePattern _
     | Syntax.ListItem _ ->
       transform_simple env node

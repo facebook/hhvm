@@ -3,12 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<151623cae266dfed04f2a0b4afc458c6>>
+// @generated SignedSource<<a3b5ed99c9d0b7ea1f981b17a664df39>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
-use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep::FromOcamlRep;
@@ -38,13 +37,16 @@ use crate::*;
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving (eq, hash, show, ord)")]
-#[repr(u8)]
+#[repr(C, u8)]
 pub enum Severity {
-    Warning,
+    Warning {
+        #[rust_to_ocaml(attr = "hash.ignore")]
+        #[rust_to_ocaml(attr = "equal fun _ _ -> true")]
+        #[rust_to_ocaml(attr = "compare fun _ _ -> 0")]
+        is_trusted: bool,
+    },
     Err,
 }
-impl TrivialDrop for Severity {}
-arena_deserializer::impl_deserialize_in_arena!(Severity);
 
 #[derive(
     Clone,

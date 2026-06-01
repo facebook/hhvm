@@ -5165,6 +5165,155 @@ end = struct
                   ty_super = ty_dyn;
                 }
     end
+    (* -- C-RepresentableAs-R ------------------------------------------------- *)
+    (* x <: RepresentableAs<u> *)
+    | ( _,
+        (_r_representable_as, Tnewtype (name_super, [lty_inner], _bound_super))
+      )
+      when String.equal name_super SN.Classes.cRepresentableAs -> begin
+      match deref ty_sub with
+      (* RepresentableAs<t> <: RepresentableAs<u> ==> t <: u (covariance) *)
+      | (_r_sub, Tnewtype (name_sub, [tyarg_sub], _))
+        when String.equal name_sub SN.Classes.cRepresentableAs ->
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = tyarg_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
+          env
+      | (_, Tvar _) ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super }
+          env
+      | (r_sub, Tprim Nast.Tvoid) ->
+        (* void <: RepresentableAs<U> when null <: U OR void <: U *)
+        let ( ||| ) = ( ||| ) ~fail in
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = MakeType.null r_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
+          env
+        ||| simplify
+              ~subtype_env
+              ~this_ty
+              ~lhs:{ sub_supportdyn; ty_sub }
+              ~rhs:
+                { super_like; super_supportdyn = false; ty_super = lty_inner }
+      | (r_sub, Ttuple { t_required; t_optional; t_extra }) ->
+        (* (T1, T2, ...Tn) <: RepresentableAs<U>
+           when vec<T1 | T2 | ... | Tn> <: U OR (T1, T2, ...Tn) <: U *)
+        let elem_tys =
+          t_required
+          @ t_optional
+          @
+          match t_extra with
+          | Tvariadic ty
+          | Tsplat ty ->
+            [ty]
+        in
+        let union_ty = MakeType.union r_sub elem_tys in
+        let vec_ty = MakeType.vec r_sub union_ty in
+        let ( ||| ) = ( ||| ) ~fail in
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = vec_ty }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
+          env
+        ||| simplify
+              ~subtype_env
+              ~this_ty
+              ~lhs:{ sub_supportdyn; ty_sub }
+              ~rhs:
+                { super_like; super_supportdyn = false; ty_super = lty_inner }
+      | (r_sub, Tshape { s_fields; s_unknown_value; _ }) ->
+        (* shape('a' => T1, 'b' => T2, ...) <: RepresentableAs<U>
+           when dict<key, V1 | V2 | ... | Vn> <: U
+           OR   shape('a' => T1, 'b' => T2, ...) <: U
+           For closed shapes, the key type is the union of the per-field key
+           types: TSFlit_str => string, TSFregex_group => int,
+           TSFclass_const => looked up from the class constant's declared type.
+           For open shapes, key = arraykey.
+           For open shapes, s_unknown_value is included in the value union.
+           If s_unknown_value is mixed, the value union is just mixed. *)
+        let is_closed = TUtils.is_nothing env s_unknown_value in
+        let (env, key_ty) =
+          if not is_closed then
+            (env, MakeType.arraykey r_sub)
+          else
+            let (env, key_tys) =
+              TShapeMap.fold
+                (fun key _ (env, acc) ->
+                  match key with
+                  | TSFlit_str _ ->
+                    (env, Typing_set.add (MakeType.string r_sub) acc)
+                  | TSFregex_group _ ->
+                    (env, Typing_set.add (MakeType.int r_sub) acc)
+                  | TSFclass_const ((_, cid), (_, mid)) ->
+                    (match Env.get_class env cid with
+                    | Decl_entry.Found cls ->
+                      (match Env.get_const env cls mid with
+                      | Some const ->
+                        let ((env, _ty_err_opt), lty) =
+                          Phase.localize_no_subst
+                            env
+                            ~ignore_errors:true
+                            const.cc_type
+                        in
+                        (env, Typing_set.add lty acc)
+                      | None ->
+                        (env, Typing_set.add (MakeType.arraykey r_sub) acc))
+                    | Decl_entry.DoesNotExist
+                    | Decl_entry.NotYetAvailable ->
+                      (env, Typing_set.add (MakeType.arraykey r_sub) acc)))
+                s_fields
+                (env, Typing_set.empty)
+            in
+            (env, MakeType.union r_sub (Typing_set.elements key_tys))
+        in
+        let value_union =
+          if TUtils.is_mixed env s_unknown_value then
+            s_unknown_value
+          else
+            let value_tys =
+              TShapeMap.fold
+                (fun _key { sft_ty; _ } acc -> sft_ty :: acc)
+                s_fields
+                (if is_closed then
+                  []
+                else
+                  [s_unknown_value])
+            in
+            MakeType.union r_sub value_tys
+        in
+        let dict_ty = MakeType.dict r_sub key_ty value_union in
+        let ( ||| ) = ( ||| ) ~fail in
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = dict_ty }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
+          env
+        ||| simplify
+              ~subtype_env
+              ~this_ty
+              ~lhs:{ sub_supportdyn; ty_sub }
+              ~rhs:
+                { super_like; super_supportdyn = false; ty_super = lty_inner }
+      | _ ->
+        (* T <: RepresentableAs<U> iff T <: U *)
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super = lty_inner }
+          env
+    end
     (* #A <: \\HH\\EnumClass\\Label<u, v> *)
     | ((r_sub, Tlabel name), (r_sup, Tnewtype (label_kind, [ty_from; ty_to], _)))
       when String.equal label_kind SN.Classes.cEnumClassLabel ->
@@ -8329,7 +8478,7 @@ end = struct
           let ety_env = { empty_expand_env with this_ty } in
           let ((env, _ty_err_opt), lty) =
             if
-              TypecheckerOptions.experimental_feature_enabled
+              TypecheckerOptions.legacy_experimental_feature_enabled
                 (Env.get_tcopt env)
                 TypecheckerOptions.experimental_sound_enum_class_type_const
             then

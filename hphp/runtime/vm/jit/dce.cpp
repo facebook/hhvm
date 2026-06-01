@@ -506,6 +506,7 @@ bool canDCE(const IRInstruction& inst) {
   case DefFuncPrologueCtx:
   case DefFuncPrologueFlags:
   case DefFuncPrologueNumArgs:
+  case DefFuncPrologueNamedArgs:
   case DefFuncEntryFP:
   case DefFuncEntryPrevFP:
   case DefFuncEntryArFlags:
@@ -554,12 +555,14 @@ bool canDCE(const IRInstruction& inst) {
   case RaiseStrToClassNotice:
   case RaiseModuleBoundaryViolation:
   case RaiseModulePropertyViolation:
-  case ThrowMissingNamedArgument:
+  case ThrowMissingNamedParam:
   case ThrowNamedArgumentNameMismatch:
+  case ThrowUnexpectedNamedArguments:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckClsRGSoft:
   case CheckFunReifiedGenericMismatch:
+  case CheckFunNamedArgsMismatch:
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:
   case PrintStr:

@@ -80,8 +80,14 @@ void Validator::verify(
     auto ecdsa = constructECDSASig(signature);
 
     std::array<uint8_t, fizz::Sha256::HashLen> hashedMessage;
+    const HasherFactoryWithMetadata* hasherFactory = nullptr;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        fizz::DefaultFactory().makeHasherFactory(
+            hasherFactory, err, fizz::HashFunction::Sha256),
+        err);
     fizz::hash(
-        fizz::DefaultFactory().makeHasherFactory(fizz::HashFunction::Sha256),
+        hasherFactory,
         *message,
         folly::MutableByteRange(hashedMessage.data(), hashedMessage.size()));
     if (ECDSA_do_verify(

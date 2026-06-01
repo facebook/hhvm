@@ -8,6 +8,8 @@ class C {
 }
 
 trait C_Async {
+  require extends C;
+
   public final function foo(): void {}
 }
 

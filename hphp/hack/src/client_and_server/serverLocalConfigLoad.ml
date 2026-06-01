@@ -113,8 +113,6 @@ let default =
     warnings_in_sandcastle = true;
     package_config_strict_validation = false;
     (* Fields primarily for hh_conf equivalence testing *)
-    hackfmt_version = 0;
-    sharedmem_dep_table_pow = 0;
     sharedmem_global_size = 0;
     sharedmem_hash_table_pow = 0;
     sharedmem_heap_size = 0;
@@ -968,18 +966,6 @@ let load_
       config
   in
   (* Fields primarily for hh_conf equivalence testing *)
-  let hackfmt_version =
-    int_
-      Config_keys.Hhconf.hackfmt_version
-      ~default:default.hackfmt_version
-      config
-  in
-  let sharedmem_dep_table_pow =
-    int_
-      Config_keys.Hhconf.sharedmem_dep_table_pow
-      ~default:default.sharedmem_dep_table_pow
-      config
-  in
   let sharedmem_global_size =
     int_
       Config_keys.Hhconfig.sharedmem_global_size
@@ -1180,8 +1166,6 @@ let load_
     warnings_default_all;
     warnings_in_sandcastle;
     package_config_strict_validation;
-    hackfmt_version;
-    sharedmem_dep_table_pow;
     sharedmem_global_size;
     sharedmem_hash_table_pow;
     sharedmem_heap_size;

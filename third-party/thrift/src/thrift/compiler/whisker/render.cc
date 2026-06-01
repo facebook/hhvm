@@ -1276,6 +1276,28 @@ class render_engine {
     const ast::expression& expr = each_block.iterable;
     object result = vm_.evaluate(expr);
 
+    // Lazily evaluate the separator expression on first use. This avoids
+    // evaluating the expression when the array is empty (else branch).
+    auto separator =
+        [&,
+         memo = std::optional<std::string>()]() mutable -> const std::string* {
+      if (!each_block.separator.has_value()) {
+        return nullptr;
+      }
+      if (!memo.has_value()) {
+        object sep_obj = vm_.evaluate(*each_block.separator);
+        if (!sep_obj.is_string()) {
+          vm_.diags().report_fatal_error(
+              each_block.separator->loc.begin,
+              "Separator must evaluate to a string. "
+              "The encountered value is:\n{}",
+              to_string(sep_obj));
+        }
+        memo = std::string(sep_obj.as_string());
+      }
+      return std::addressof(*memo);
+    };
+
     const auto do_visit = [this, &each_block, &expr](i64 index, object scope) {
       const std::vector<ast::identifier>& captured = each_block.captured;
       if (captured.empty()) {
@@ -1336,6 +1358,9 @@ class render_engine {
             return;
           }
           for (std::size_t i = 0; i < size; ++i) {
+            if (const std::string* sep = separator(); sep != nullptr && i > 0) {
+              out_.write(*sep);
+            }
             do_visit(i64(i), arr->at(i));
           }
         },

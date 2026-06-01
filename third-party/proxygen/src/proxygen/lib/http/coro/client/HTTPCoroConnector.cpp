@@ -723,12 +723,18 @@ HTTPCoroConnector::makeFizzClientContext(const TLSParams& params) {
 
 std::shared_ptr<const fizz::CertificateVerifier>
 HTTPCoroConnector::makeFizzCertVerifier(const TLSParams& params) {
-  std::shared_ptr<const fizz::CertificateVerifier> fizzCertVerifier;
+  std::unique_ptr<fizz::DefaultCertificateVerifier> fizzCertVerifier;
   if (params.caPaths.size() > 0) {
-    fizzCertVerifier = fizz::DefaultCertificateVerifier::createFromCAFiles(
-        fizz::VerificationContext::Client, params.caPaths);
+    Error err;
+    FIZZ_THROW_ON_ERROR(fizz::DefaultCertificateVerifier::createFromCAFiles(
+                            fizzCertVerifier,
+                            err,
+                            fizz::VerificationContext::Client,
+                            params.caPaths),
+                        err);
   }
-  return fizzCertVerifier;
+  return static_cast<std::shared_ptr<const fizz::CertificateVerifier>>(
+      std::move(fizzCertVerifier));
 }
 
 HTTPCoroConnector::FizzContextAndVerifier

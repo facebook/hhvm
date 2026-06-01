@@ -175,10 +175,9 @@ struct WtStreamManager {
     virtual void readReady(WtReadHandle&) noexcept = 0;
   };
   void setReadCb(WtReadHandle& rh, ReadCallback* rcb) noexcept;
-  // ignores wt connection-level flow control (this should be set to kMaxVarint
-  // in quic)
-  [[nodiscard]] bool hasPendingData(const WtWriteHandle& wh) const noexcept;
-  [[nodiscard]] uint64_t bufferedBytes(const WtReadHandle& rh) const noexcept;
+
+  // returns min(recv_conn_fc_avail, recv_stream_fc_avail)
+  [[nodiscard]] uint64_t recvBytesAvail(const WtReadHandle& rh) const noexcept;
 
   enum Result : uint8_t { Fail = 0, Ok = 1 };
   /**
@@ -323,6 +322,9 @@ struct WtStreamManager {
   // returns true iff we can create self-initiated uni/bidi streams
   [[nodiscard]] bool canCreateUni() const noexcept;
   [[nodiscard]] bool canCreateBidi() const noexcept;
+
+  // returns the ids of open streams
+  std::vector<uint64_t> streamIds() const noexcept;
 
  private:
   [[nodiscard]] bool isSelf(uint64_t streamId) const noexcept;

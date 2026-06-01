@@ -16,6 +16,7 @@ import re
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -457,7 +458,7 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
             cls.createNonHackFile("ignored.php", base=cls.eden_mount_point)
 
     def assertStateForSeconds(
-        self, state_name: str, duration_secs: int
+        self, state_name: str, duration_secs: float
     ) -> Tuple[Callable[[], None], Callable[[], bool], Callable[[], None]]:
         """Asserts the given state for the given number of seconds with Eden.
 
@@ -1508,6 +1509,53 @@ function test_deprecated() : void {
                 "ERROR: {root}during_state.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
             ]
         )
+
+    def test_deferral13(self) -> None:
+        """Regression test: state changes during EdenfsWatcherInstance::init
+
+        State changes during EdenfsWatcherInstance::init can lead to some duplicate state
+        enter/leave events reaching apply_incoming_changes. The latter must tolerate them in its
+        invariant checks and filter them out.
+        """
+        config = self.test_driver.getConfig()
+        config.state_tracking = True
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
+
+        # We cannot exactly time when hh_server initializes Edenfs_watcher during server startup.
+        # Instead, we run a background thread that continuously asserts and deasserts a test state
+        # every 100ms. (until stop_event tells it to stop)
+
+        stop_event: threading.Event = threading.Event()
+
+        def assert_deassert_loop() -> None:
+            while not stop_event.is_set():
+                duration_secs = 0.1
+                wait_for, _, _ = self.test_driver.assertStateForSeconds(
+                    TEST_STATE_0, duration_secs
+                )
+                wait_for()
+                time.sleep(duration_secs)
+
+        loop_thread = threading.Thread(target=assert_deassert_loop)
+        loop_thread.start()
+
+        try:
+            for i in range(10):
+                self.test_driver.start_hh_server()
+                self.test_driver.check_cmd(["No errors!"])
+                self.test_driver.stop_hh_server()
+                assertServerNotCrashed(self.test_driver)
+                print(f"iteration {i} passed")
+        finally:
+            stop_event.set()
+            loop_thread.join()
+
+        # Start a final server so tearDown's assertEdenFsWatcherInitialized
+        # and stop_hh_server work.
+        self.test_driver.start_hh_server()
 
 
 class EdenfsWatcherNonMountPointRepoTests(EdenfsWatcherTests):

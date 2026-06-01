@@ -91,7 +91,8 @@ class HTTPRedirectHandler {
 
     folly::coro::Task<HTTPHeaderEvent> readHeaderEvent() override;
     // default readBodyEvent
-    void stopReading(folly::Optional<const HTTPErrorCode> error) override;
+    void stopReading(
+        folly::Optional<const HTTPErrorCode> error) noexcept override;
 
    private:
     HTTPRedirectHandler& handler_;

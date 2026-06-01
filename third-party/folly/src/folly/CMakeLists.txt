@@ -186,9 +186,14 @@ folly_add_library(
   HEADERS
     ClockGettimeWrappers.h
   DEPS
+    folly_c_portability
     folly_likely
   EXPORTED_DEPS
     folly_portability_time
+)
+
+folly_add_library(
+  NAME comparison_operator_test_util
 )
 
 folly_add_library(
@@ -336,8 +341,36 @@ folly_add_library(
     dynamic-inl.h
     dynamic.h
     json.h
+  DEPS
+    folly_utility
   EXPORTED_DEPS
+    folly_c_portability
+    folly_container_access
+    folly_container_enumerate
+    folly_container_f14_hash
+    folly_conv
+    folly_detail_iterators
+    folly_expected
+    folly_format
+    folly_function
+    folly_hash_hash
     folly_json_dynamic
+    folly_json_pointer
+    folly_lang_assume
+    folly_lang_bits
+    folly_lang_exception
+    folly_likely
+    folly_optional
+    folly_portability
+    folly_portability_constexpr
+    folly_range
+    folly_string
+    folly_traits
+    folly_unicode
+    folly_utility
+  EXTERNAL_DEPS
+    ${GLOG_LIBRARIES}
+    Boost::headers
 )
 
 folly_add_library(
@@ -649,6 +682,12 @@ folly_add_library(
 )
 
 folly_add_library(
+  NAME json_mock_util
+  EXPORTED_DEPS
+    folly_json_json_mock_util
+)
+
+folly_add_library(
   NAME json_patch
   HEADERS
     json_patch.h
@@ -662,6 +701,14 @@ folly_add_library(
     json_pointer.h
   EXPORTED_DEPS
     folly_json_json_pointer
+)
+
+folly_add_library(
+  NAME json_test_util
+  HEADERS
+    test/JsonTestUtil.h
+  EXPORTED_DEPS
+    folly_json_json_test_util
 )
 
 folly_add_library(
@@ -854,6 +901,7 @@ folly_add_library(
     folly_c_portability
     folly_constexpr_math
     folly_conv
+    folly_cpp_attributes
     folly_detail_ip_address
     folly_expected
     folly_fbstring
@@ -1089,8 +1137,8 @@ folly_add_library(
     Singleton-inl.h
     Singleton.h
   DEPS
+    folly_debugging_symbolizer_symbolizer
     folly_demangle
-    folly_experimental_symbolizer_symbolizer
     folly_lang_safe_assert
     folly_portability_config
     folly_portability_fmt_compile
@@ -1252,6 +1300,28 @@ folly_add_library(
 )
 
 folly_add_library(
+  NAME test_socket_address_test_helper
+  SRCS
+    test/SocketAddressTestHelper.cpp
+  HEADERS
+    test/SocketAddressTestHelper.h
+  DEPS
+    folly_net_tcpinfo_dispatcher
+)
+
+folly_add_library(
+  NAME test_test_utils
+  HEADERS
+    test/TestUtils.h
+  EXPORTED_DEPS
+    folly_conv
+    folly_exception_string
+    folly_fbstring
+    folly_fixed_string
+    folly_range
+)
+
+folly_add_library(
   NAME thread_cached_int
   HEADERS
     ThreadCachedInt.h
@@ -1361,6 +1431,14 @@ folly_add_library(
     folly_range
   EXTERNAL_DEPS
     Boost::regex
+)
+
+folly_add_library(
+  NAME utf8_string_icu
+  HEADERS
+    UTF8String.h
+  DEPS
+    folly_range
 )
 
 folly_add_library(

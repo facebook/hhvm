@@ -14,8 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/containers.h"
+#ifdef __aarch64__
+#include "hphp/runtime/vm/jit/abi-arm.h"
+#endif
 #include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
@@ -48,6 +53,12 @@ std::string stripWhitespace(std::string str) {
     pos = spc;
   }
   return str;
+}
+
+template<class F>
+void testPostRAWithTraceAndPrologueAbi(F f) {
+  f(abi(CodeKind::Trace));
+  f(abi(CodeKind::Prologue));
 }
 
 void testSetccXor() {
@@ -195,12 +206,254 @@ void testSetccXor() {
       stripWhitespace(show(unit))
     );
   }
+
+}
+
+void testPostRACopyFold() {
+  // Use register numbers valid on both x64 (0-15) and ARM (0-30),
+  // avoiding rsp (4 on x64, 31 on ARM).
+  auto const r0 = Vreg{Reg64{0}};
+  auto const r1 = Vreg{Reg64{1}};
+  auto const r8 = Vreg{Reg64{8}};
+  auto const r9 = Vreg{Reg64{9}};
+  auto const r10 = Vreg{Reg64{10}};
+
+  // Post-RA fold: shrli{2, r8, r8}; copy{r8, r0} -> shrli{2, r8, r0}
+  testPostRAWithTraceAndPrologueAbi([&] (const Abi& postRAAbi) {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const sf = v.makeReg();
+    v << shrli{2, Vreg32(r8), Vreg32(r8), sf, 0};
+    v << copy{r8, r0};
+
+    postRASimplify(unit, postRAAbi);
+
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(1, code.size());
+    EXPECT_EQ(Vinstr::shrli, code[0].op);
+    EXPECT_EQ(Vreg32(r0), code[0].shrli_.d);
+  });
+
+  // Post-RA fold: load{[r10-0x10], r8}; copy{r8, r0} -> load{[r10-0x10], r0}
+  testPostRAWithTraceAndPrologueAbi([&] (const Abi& postRAAbi) {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    v << load{r10[-0x10], r8};
+    v << copy{r8, r0};
+
+    postRASimplify(unit, postRAAbi);
+
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(1, code.size());
+    EXPECT_EQ(Vinstr::load, code[0].op);
+    EXPECT_EQ(r0, code[0].load_.d);
+  });
+
+  // Negative: copy source used after the copy — should NOT fold.
+  testPostRAWithTraceAndPrologueAbi([&] (const Abi& postRAAbi) {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const sf = v.makeReg();
+    v << shrli{2, Vreg32(r8), Vreg32(r8), sf, 0};
+    v << copy{r8, r0};
+    v << copy{r8, r1};  // r8 still used
+
+    postRASimplify(unit, postRAAbi);
+
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(3, code.size());
+    EXPECT_EQ(Vinstr::shrli, code[0].op);
+    EXPECT_EQ(Vreg32(r8), code[0].shrli_.d);
+    EXPECT_EQ(Vinstr::copy, code[1].op);
+    EXPECT_EQ(Vinstr::copy, code[2].op);
+  });
+
+  // Negative: intervening instruction reads cp.d — should NOT fold.
+  testPostRAWithTraceAndPrologueAbi([&] (const Abi& postRAAbi) {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const sf = v.makeReg();
+    v << shrli{2, Vreg32(r8), Vreg32(r8), sf, 0};
+    v << copy{r0, r10};  // reads r0 (the copy dest)
+    v << copy{r8, r0};
+
+    postRASimplify(unit, postRAAbi);
+
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(3, code.size());
+    EXPECT_EQ(Vinstr::shrli, code[0].op);
+    EXPECT_EQ(Vreg32(r8), code[0].shrli_.d);
+    EXPECT_EQ(Vinstr::copy, code[1].op);
+    EXPECT_EQ(Vinstr::copy, code[2].op);
+  });
+
+  // Negative: intervening call may clobber cp.d implicitly — should NOT fold.
+  testPostRAWithTraceAndPrologueAbi([&] (const Abi& postRAAbi) {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const sf = v.makeReg();
+    v << shrli{2, Vreg32(r8), Vreg32(r8), sf, 0};
+    v << callr{Vreg64(r9), RegSet{}};
+    v << copy{r8, r0};
+
+    postRASimplify(unit, postRAAbi);
+
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(3, code.size());
+    EXPECT_EQ(Vinstr::shrli, code[0].op);
+    EXPECT_EQ(Vreg32(r8), code[0].shrli_.d);
+    EXPECT_EQ(Vinstr::callr, code[1].op);
+    EXPECT_EQ(Vinstr::copy, code[2].op);
+  });
+}
+
+void testArmLeaLowering() {
+#ifndef __aarch64__
+  GTEST_SKIP() << "ARM-specific lea lowering test";
+#else
+  auto const test = [] (Vptr ptr) {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const dst = arm::rret(0);
+    v << lea{ptr, Vreg64{dst}};
+    v << ret{RegSet{dst}};
+
+    optimize(unit, arm::abi(), false);
+    return stripWhitespace(show(unit));
+  };
+
+  auto const base = Vreg64{arm::rarg(2)};
+  auto const index = Vreg64{arm::rarg(3)};
+
+  auto const scaled = test(Vptr{base, index, 8, 0});
+  EXPECT_EQ(scaled.find("shlqi"), std::string::npos);
+  EXPECT_NE(scaled.find("lea ["), std::string::npos);
+  EXPECT_NE(scaled.find("* 8"), std::string::npos);
+
+  auto const scaledDisp = test(Vptr{base, index, 8, 16});
+  EXPECT_EQ(scaledDisp.find("shlqi"), std::string::npos);
+  EXPECT_NE(scaledDisp.find("lea ["), std::string::npos);
+  EXPECT_NE(scaledDisp.find("* 8"), std::string::npos);
+  EXPECT_NE(scaledDisp.find("0x10"), std::string::npos);
+#endif
 }
 
 }
 
 TEST(Vasm, Simplifier) {
   testSetccXor();
+  testPostRACopyFold();
+}
+
+TEST(Vasm, ArmLeaLowering) {
+  testArmLeaLowering();
+}
+
+void testArmLoadPairNoClobberBase() {
+#ifndef __aarch64__
+  GTEST_SKIP() << "ARM-specific loadpair test";
+#else
+  // Test that two adjacent loads are NOT combined when the first load's
+  // destination overwrites the second load's base register.
+  {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const base = v.makeReg();
+    auto const dst2 = v.makeReg();
+    v << ldimmq{uintptr_t(0x1000), base};
+    // First load writes to 'base', clobbering the second load's base.
+    v << load{base[0x10], base};
+    v << load{base[0x18], dst2};
+    v << ret{RegSet{base} | RegSet{dst2}};
+
+    simplify(unit);
+
+    auto const result = stripWhitespace(show(unit));
+    // Should NOT be combined — first load overwrites the base of the second.
+    EXPECT_EQ(result.find("loadpair"), std::string::npos)
+      << "Should not combine dependent loads (base), got:\n" << result;
+  }
+
+  // Test that two adjacent loads are NOT combined when the first load's
+  // destination overwrites the second load's index register.
+  {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const base = v.makeReg();
+    auto const idx = v.makeReg();
+    auto const dst2 = v.makeReg();
+    v << ldimmq{uintptr_t(0x1000), base};
+    v << ldimmq{uintptr_t(0x8), idx};
+    // First load writes to 'idx', clobbering the second load's index.
+    v << load{Vptr{base, idx, 1, 0x10}, idx};
+    v << load{Vptr{base, idx, 1, 0x18}, dst2};
+    v << ret{RegSet{idx} | RegSet{dst2}};
+
+    simplify(unit);
+
+    auto const result = stripWhitespace(show(unit));
+    // Should NOT be combined — first load overwrites the index of the second.
+    EXPECT_EQ(result.find("loadpair"), std::string::npos)
+      << "Should not combine dependent loads (index), got:\n" << result;
+  }
+
+  // Test that two adjacent loads with the same destination are NOT combined,
+  // and the dead first load is removed by DCE.
+  {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const base = v.makeReg();
+    auto const dst = v.makeReg();
+    v << ldimmq{uintptr_t(0x1000), base};
+    v << load{base[0x10], dst};
+    v << load{base[0x18], dst};
+    v << ret{RegSet{dst}};
+
+    simplify(unit);
+
+    auto result = stripWhitespace(show(unit));
+    // Should NOT be fused — both loads write to the same destination.
+    EXPECT_EQ(result.find("loadpair"), std::string::npos)
+      << "Should not fuse loads with same destination, got:\n" << result;
+
+    // The first load's destination is redefined by the second load and has
+    // no other uses, so DCE should remove it.
+    removeDeadCode(unit);
+
+    result = stripWhitespace(show(unit));
+    // Only one load should remain (the second one at offset 0x18).
+    size_t pos = 0;
+    int loadCount = 0;
+    while ((pos = result.find("load ", pos)) != std::string::npos) {
+      loadCount++;
+      pos++;
+    }
+    EXPECT_EQ(loadCount, 1)
+      << "Expected DCE to remove first dead load, got:\n" << result;
+  }
+#endif
+}
+
+TEST(Vasm, ArmLoadPairNoClobberBase) {
+  testArmLoadPairNoClobberBase();
 }
 
 }

@@ -106,7 +106,7 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase,
   }
 
   void slowMode() {
-    while (isSlowModeEnabled()) {
+    while (isSlowModeEnabled() && !stopped_.load(std::memory_order_acquire)) {
       blockingConsumeToken();
       executor_.add([this]() {
         while (auto requestOpt = pile_.dequeue()) {
@@ -141,7 +141,9 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase,
   }
 
   void stop() override {
-    // do nothing
+    stopped_.store(true, std::memory_order_release);
+    clearSlowMode();
+    innerExecutor_->join();
   }
 
   uint64_t requestCount() const override {
@@ -174,14 +176,6 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase,
   }
 
  private:
-  // We already acquired a token, so now we should make as much progress as
-  // possible given one token. We will process and require requests from the
-  // pile until we find a request that haven't expired yet. We will then process
-  // that request and return. To make further progress we need to wait for
-  // another token.
-  void makeProgress();
-  void fastPath();
-
   static bool expired(const ServerRequest& request);
   void release(ServerRequest&& request);
   void execute(ServerRequest&& request);
@@ -192,6 +186,7 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase,
     if (qpsLimit == 0) {
       XLOG_EVERY_MS(WARNING, 60'000)
           << "QPS limit is 0, so TokenBucketConcurrencyController is not enforcing any limit, your DLS might be misconfigured";
+      return true;
     }
 
     return qpsTokenBucket_.consume(tokens, qpsLimit, qpsLimit);
@@ -203,6 +198,7 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase,
     if (qpsLimit == 0) {
       XLOG_EVERY_MS(WARNING, 60'000)
           << "QPS limit is 0, so TokenBucketConcurrencyController is not enforcing any limit, your DLS might be misconfigured";
+      return true;
     }
 
     return qpsTokenBucket_.consumeWithBorrowAndWait(tokens, qpsLimit, qpsLimit);
@@ -210,6 +206,9 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase,
 
   void returnTokens(double tokens) {
     auto qpsLimit = qpsLimit_.load();
+    if (qpsLimit == 0) {
+      return;
+    }
     qpsTokenBucket_.returnTokens(tokens, qpsLimit);
   }
 
@@ -219,24 +218,18 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase,
 
   void returnToken() { returnTokens(1.0); }
 
-  void clearSlowMode() { slowMode_.store(0); }
+  void clearSlowMode() { slowMode_.store(0, std::memory_order_release); }
 
-  bool isSlowModeEnabled() { return slowMode_.load() == 1; }
+  bool isSlowModeEnabled() {
+    return slowMode_.load(std::memory_order_acquire) == 1;
+  }
 
   // If slow mode is disabled this method will thread-safely enable it and
   // return true. If slow mode is already enabled it will return false.
   bool enableSlowModeOnce() {
-    for (;;) {
-      auto old = slowMode_.load();
-      if (old == 1) {
-        return false;
-      }
-      if (old == 0) {
-        if (slowMode_.compare_exchange_weak(old, 1)) {
-          return true;
-        }
-      }
-    }
+    uint16_t expected = 0;
+    return slowMode_.compare_exchange_strong(
+        expected, 1, std::memory_order_acq_rel, std::memory_order_acquire);
   }
 
   RequestPileInterface& pile_;
@@ -245,7 +238,8 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase,
   folly::DynamicTokenBucket qpsTokenBucket_;
   folly::relaxed_atomic<uint64_t> qpsLimit_{
       std::numeric_limits<uint64_t>::max()};
-  folly::relaxed_atomic<uint16_t> slowMode_{0};
+  std::atomic<uint16_t> slowMode_{0};
+  std::atomic<bool> stopped_{false};
   std::unique_ptr<folly::CPUThreadPoolExecutor> innerExecutor_;
 
   std::atomic<uint64_t> pendingDequeueOps_{0};

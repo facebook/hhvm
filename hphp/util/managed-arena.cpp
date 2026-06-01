@@ -168,7 +168,7 @@ ServiceData::CounterCallback s_arena_usage([](ServiceData::CounterMap& counters)
 
   INSERT(low)
   INSERT(high)
-});
+}, "admin.");
 }
 
 }

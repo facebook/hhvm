@@ -163,11 +163,11 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(B other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -236,245 +236,245 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
 
         public test.fixtures.shapes.A getJustAnA() { return justAnA; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="set_of_i32", requiredness=Requiredness.NONE)    public Builder setSetOfI32(Set<Integer> setOfI32) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="set_of_i32", requiredness=Requiredness.NONE)    public Builder setSetOfI32(Set<Integer> setOfI32) {
             this.setOfI32 = setOfI32;
             return this;
         }
 
         public Set<Integer> getSetOfI32() { return setOfI32; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="list_of_i32", requiredness=Requiredness.NONE)    public Builder setListOfI32(List<Integer> listOfI32) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="list_of_i32", requiredness=Requiredness.NONE)    public Builder setListOfI32(List<Integer> listOfI32) {
             this.listOfI32 = listOfI32;
             return this;
         }
 
         public List<Integer> getListOfI32() { return listOfI32; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="list_of_string", requiredness=Requiredness.NONE)    public Builder setListOfString(List<String> listOfString) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="list_of_string", requiredness=Requiredness.NONE)    public Builder setListOfString(List<String> listOfString) {
             this.listOfString = listOfString;
             return this;
         }
 
         public List<String> getListOfString() { return listOfString; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="map_of_string_to_i32", requiredness=Requiredness.NONE)    public Builder setMapOfStringToI32(Map<String, Integer> mapOfStringToI32) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="map_of_string_to_i32", requiredness=Requiredness.NONE)    public Builder setMapOfStringToI32(Map<String, Integer> mapOfStringToI32) {
             this.mapOfStringToI32 = mapOfStringToI32;
             return this;
         }
 
         public Map<String, Integer> getMapOfStringToI32() { return mapOfStringToI32; }
 
-            @com.facebook.swift.codec.ThriftField(value=6, name="map_of_string_to_A", requiredness=Requiredness.NONE)    public Builder setMapOfStringToA(Map<String, test.fixtures.shapes.A> mapOfStringToA) {
+        @com.facebook.swift.codec.ThriftField(value=6, name="map_of_string_to_A", requiredness=Requiredness.NONE)    public Builder setMapOfStringToA(Map<String, test.fixtures.shapes.A> mapOfStringToA) {
             this.mapOfStringToA = mapOfStringToA;
             return this;
         }
 
         public Map<String, test.fixtures.shapes.A> getMapOfStringToA() { return mapOfStringToA; }
 
-            @com.facebook.swift.codec.ThriftField(value=7, name="map_of_string_to_list_of_i32", requiredness=Requiredness.NONE)    public Builder setMapOfStringToListOfI32(Map<String, List<Integer>> mapOfStringToListOfI32) {
+        @com.facebook.swift.codec.ThriftField(value=7, name="map_of_string_to_list_of_i32", requiredness=Requiredness.NONE)    public Builder setMapOfStringToListOfI32(Map<String, List<Integer>> mapOfStringToListOfI32) {
             this.mapOfStringToListOfI32 = mapOfStringToListOfI32;
             return this;
         }
 
         public Map<String, List<Integer>> getMapOfStringToListOfI32() { return mapOfStringToListOfI32; }
 
-            @com.facebook.swift.codec.ThriftField(value=8, name="map_of_string_to_list_of_A", requiredness=Requiredness.NONE)    public Builder setMapOfStringToListOfA(Map<String, List<test.fixtures.shapes.A>> mapOfStringToListOfA) {
+        @com.facebook.swift.codec.ThriftField(value=8, name="map_of_string_to_list_of_A", requiredness=Requiredness.NONE)    public Builder setMapOfStringToListOfA(Map<String, List<test.fixtures.shapes.A>> mapOfStringToListOfA) {
             this.mapOfStringToListOfA = mapOfStringToListOfA;
             return this;
         }
 
         public Map<String, List<test.fixtures.shapes.A>> getMapOfStringToListOfA() { return mapOfStringToListOfA; }
 
-            @com.facebook.swift.codec.ThriftField(value=9, name="map_of_string_to_set_of_i32", requiredness=Requiredness.NONE)    public Builder setMapOfStringToSetOfI32(Map<String, Set<Integer>> mapOfStringToSetOfI32) {
+        @com.facebook.swift.codec.ThriftField(value=9, name="map_of_string_to_set_of_i32", requiredness=Requiredness.NONE)    public Builder setMapOfStringToSetOfI32(Map<String, Set<Integer>> mapOfStringToSetOfI32) {
             this.mapOfStringToSetOfI32 = mapOfStringToSetOfI32;
             return this;
         }
 
         public Map<String, Set<Integer>> getMapOfStringToSetOfI32() { return mapOfStringToSetOfI32; }
 
-            @com.facebook.swift.codec.ThriftField(value=10, name="map_of_string_to_map_of_string_to_i32", requiredness=Requiredness.NONE)    public Builder setMapOfStringToMapOfStringToI32(Map<String, Map<String, Integer>> mapOfStringToMapOfStringToI32) {
+        @com.facebook.swift.codec.ThriftField(value=10, name="map_of_string_to_map_of_string_to_i32", requiredness=Requiredness.NONE)    public Builder setMapOfStringToMapOfStringToI32(Map<String, Map<String, Integer>> mapOfStringToMapOfStringToI32) {
             this.mapOfStringToMapOfStringToI32 = mapOfStringToMapOfStringToI32;
             return this;
         }
 
         public Map<String, Map<String, Integer>> getMapOfStringToMapOfStringToI32() { return mapOfStringToMapOfStringToI32; }
 
-            @com.facebook.swift.codec.ThriftField(value=11, name="map_of_string_to_map_of_string_to_A", requiredness=Requiredness.NONE)    public Builder setMapOfStringToMapOfStringToA(Map<String, Map<String, test.fixtures.shapes.A>> mapOfStringToMapOfStringToA) {
+        @com.facebook.swift.codec.ThriftField(value=11, name="map_of_string_to_map_of_string_to_A", requiredness=Requiredness.NONE)    public Builder setMapOfStringToMapOfStringToA(Map<String, Map<String, test.fixtures.shapes.A>> mapOfStringToMapOfStringToA) {
             this.mapOfStringToMapOfStringToA = mapOfStringToMapOfStringToA;
             return this;
         }
 
         public Map<String, Map<String, test.fixtures.shapes.A>> getMapOfStringToMapOfStringToA() { return mapOfStringToMapOfStringToA; }
 
-            @com.facebook.swift.codec.ThriftField(value=12, name="list_of_set_of_i32", requiredness=Requiredness.NONE)    public Builder setListOfSetOfI32(List<Set<Integer>> listOfSetOfI32) {
+        @com.facebook.swift.codec.ThriftField(value=12, name="list_of_set_of_i32", requiredness=Requiredness.NONE)    public Builder setListOfSetOfI32(List<Set<Integer>> listOfSetOfI32) {
             this.listOfSetOfI32 = listOfSetOfI32;
             return this;
         }
 
         public List<Set<Integer>> getListOfSetOfI32() { return listOfSetOfI32; }
 
-            @com.facebook.swift.codec.ThriftField(value=13, name="list_of_map_of_string_to_list_of_A", requiredness=Requiredness.NONE)    public Builder setListOfMapOfStringToListOfA(List<Map<String, List<test.fixtures.shapes.A>>> listOfMapOfStringToListOfA) {
+        @com.facebook.swift.codec.ThriftField(value=13, name="list_of_map_of_string_to_list_of_A", requiredness=Requiredness.NONE)    public Builder setListOfMapOfStringToListOfA(List<Map<String, List<test.fixtures.shapes.A>>> listOfMapOfStringToListOfA) {
             this.listOfMapOfStringToListOfA = listOfMapOfStringToListOfA;
             return this;
         }
 
         public List<Map<String, List<test.fixtures.shapes.A>>> getListOfMapOfStringToListOfA() { return listOfMapOfStringToListOfA; }
 
-            @com.facebook.swift.codec.ThriftField(value=14, name="list_of_map_of_string_to_A", requiredness=Requiredness.NONE)    public Builder setListOfMapOfStringToA(List<Map<String, test.fixtures.shapes.A>> listOfMapOfStringToA) {
+        @com.facebook.swift.codec.ThriftField(value=14, name="list_of_map_of_string_to_A", requiredness=Requiredness.NONE)    public Builder setListOfMapOfStringToA(List<Map<String, test.fixtures.shapes.A>> listOfMapOfStringToA) {
             this.listOfMapOfStringToA = listOfMapOfStringToA;
             return this;
         }
 
         public List<Map<String, test.fixtures.shapes.A>> getListOfMapOfStringToA() { return listOfMapOfStringToA; }
 
-            @com.facebook.swift.codec.ThriftField(value=17, name="just_an_enum", requiredness=Requiredness.NONE)    public Builder setJustAnEnum(test.fixtures.shapes.Enum justAnEnum) {
+        @com.facebook.swift.codec.ThriftField(value=17, name="just_an_enum", requiredness=Requiredness.NONE)    public Builder setJustAnEnum(test.fixtures.shapes.Enum justAnEnum) {
             this.justAnEnum = justAnEnum;
             return this;
         }
 
         public test.fixtures.shapes.Enum getJustAnEnum() { return justAnEnum; }
 
-            @com.facebook.swift.codec.ThriftField(value=18, name="just_a_union", requiredness=Requiredness.NONE)    public Builder setJustAUnion(test.fixtures.shapes.Union justAUnion) {
+        @com.facebook.swift.codec.ThriftField(value=18, name="just_a_union", requiredness=Requiredness.NONE)    public Builder setJustAUnion(test.fixtures.shapes.Union justAUnion) {
             this.justAUnion = justAUnion;
             return this;
         }
 
         public test.fixtures.shapes.Union getJustAUnion() { return justAUnion; }
 
-            @com.facebook.swift.codec.ThriftField(value=51, name="optional_just_an_A", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalJustAnA(test.fixtures.shapes.A optionalJustAnA) {
+        @com.facebook.swift.codec.ThriftField(value=51, name="optional_just_an_A", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalJustAnA(test.fixtures.shapes.A optionalJustAnA) {
             this.optionalJustAnA = optionalJustAnA;
             return this;
         }
 
         public test.fixtures.shapes.A getOptionalJustAnA() { return optionalJustAnA; }
 
-            @com.facebook.swift.codec.ThriftField(value=52, name="optional_set_of_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalSetOfI32(Set<Integer> optionalSetOfI32) {
+        @com.facebook.swift.codec.ThriftField(value=52, name="optional_set_of_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalSetOfI32(Set<Integer> optionalSetOfI32) {
             this.optionalSetOfI32 = optionalSetOfI32;
             return this;
         }
 
         public Set<Integer> getOptionalSetOfI32() { return optionalSetOfI32; }
 
-            @com.facebook.swift.codec.ThriftField(value=53, name="optional_list_of_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalListOfI32(List<Integer> optionalListOfI32) {
+        @com.facebook.swift.codec.ThriftField(value=53, name="optional_list_of_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalListOfI32(List<Integer> optionalListOfI32) {
             this.optionalListOfI32 = optionalListOfI32;
             return this;
         }
 
         public List<Integer> getOptionalListOfI32() { return optionalListOfI32; }
 
-            @com.facebook.swift.codec.ThriftField(value=54, name="optional_list_of_string", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalListOfString(List<String> optionalListOfString) {
+        @com.facebook.swift.codec.ThriftField(value=54, name="optional_list_of_string", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalListOfString(List<String> optionalListOfString) {
             this.optionalListOfString = optionalListOfString;
             return this;
         }
 
         public List<String> getOptionalListOfString() { return optionalListOfString; }
 
-            @com.facebook.swift.codec.ThriftField(value=55, name="optional_map_of_string_to_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToI32(Map<String, Integer> optionalMapOfStringToI32) {
+        @com.facebook.swift.codec.ThriftField(value=55, name="optional_map_of_string_to_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToI32(Map<String, Integer> optionalMapOfStringToI32) {
             this.optionalMapOfStringToI32 = optionalMapOfStringToI32;
             return this;
         }
 
         public Map<String, Integer> getOptionalMapOfStringToI32() { return optionalMapOfStringToI32; }
 
-            @com.facebook.swift.codec.ThriftField(value=56, name="optional_map_of_string_to_A", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToA(Map<String, test.fixtures.shapes.A> optionalMapOfStringToA) {
+        @com.facebook.swift.codec.ThriftField(value=56, name="optional_map_of_string_to_A", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToA(Map<String, test.fixtures.shapes.A> optionalMapOfStringToA) {
             this.optionalMapOfStringToA = optionalMapOfStringToA;
             return this;
         }
 
         public Map<String, test.fixtures.shapes.A> getOptionalMapOfStringToA() { return optionalMapOfStringToA; }
 
-            @com.facebook.swift.codec.ThriftField(value=57, name="optional_map_of_string_to_list_of_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToListOfI32(Map<String, List<Integer>> optionalMapOfStringToListOfI32) {
+        @com.facebook.swift.codec.ThriftField(value=57, name="optional_map_of_string_to_list_of_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToListOfI32(Map<String, List<Integer>> optionalMapOfStringToListOfI32) {
             this.optionalMapOfStringToListOfI32 = optionalMapOfStringToListOfI32;
             return this;
         }
 
         public Map<String, List<Integer>> getOptionalMapOfStringToListOfI32() { return optionalMapOfStringToListOfI32; }
 
-            @com.facebook.swift.codec.ThriftField(value=58, name="optional_map_of_string_to_list_of_A", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToListOfA(Map<String, List<test.fixtures.shapes.A>> optionalMapOfStringToListOfA) {
+        @com.facebook.swift.codec.ThriftField(value=58, name="optional_map_of_string_to_list_of_A", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToListOfA(Map<String, List<test.fixtures.shapes.A>> optionalMapOfStringToListOfA) {
             this.optionalMapOfStringToListOfA = optionalMapOfStringToListOfA;
             return this;
         }
 
         public Map<String, List<test.fixtures.shapes.A>> getOptionalMapOfStringToListOfA() { return optionalMapOfStringToListOfA; }
 
-            @com.facebook.swift.codec.ThriftField(value=59, name="optional_map_of_string_to_set_of_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToSetOfI32(Map<String, Set<Integer>> optionalMapOfStringToSetOfI32) {
+        @com.facebook.swift.codec.ThriftField(value=59, name="optional_map_of_string_to_set_of_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToSetOfI32(Map<String, Set<Integer>> optionalMapOfStringToSetOfI32) {
             this.optionalMapOfStringToSetOfI32 = optionalMapOfStringToSetOfI32;
             return this;
         }
 
         public Map<String, Set<Integer>> getOptionalMapOfStringToSetOfI32() { return optionalMapOfStringToSetOfI32; }
 
-            @com.facebook.swift.codec.ThriftField(value=60, name="optional_enum", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalEnum(test.fixtures.shapes.Enum optionalEnum) {
+        @com.facebook.swift.codec.ThriftField(value=60, name="optional_enum", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalEnum(test.fixtures.shapes.Enum optionalEnum) {
             this.optionalEnum = optionalEnum;
             return this;
         }
 
         public test.fixtures.shapes.Enum getOptionalEnum() { return optionalEnum; }
 
-            @com.facebook.swift.codec.ThriftField(value=70, name="required_enum_with_default", requiredness=Requiredness.REQUIRED)    public Builder setRequiredEnumWithDefault(test.fixtures.shapes.Enum requiredEnumWithDefault) {
+        @com.facebook.swift.codec.ThriftField(value=70, name="required_enum_with_default", requiredness=Requiredness.REQUIRED)    public Builder setRequiredEnumWithDefault(test.fixtures.shapes.Enum requiredEnumWithDefault) {
             this.requiredEnumWithDefault = requiredEnumWithDefault;
             return this;
         }
 
         public test.fixtures.shapes.Enum getRequiredEnumWithDefault() { return requiredEnumWithDefault; }
 
-            @com.facebook.swift.codec.ThriftField(value=80, name="string_with_default_value", requiredness=Requiredness.NONE)    public Builder setStringWithDefaultValue(String stringWithDefaultValue) {
+        @com.facebook.swift.codec.ThriftField(value=80, name="string_with_default_value", requiredness=Requiredness.NONE)    public Builder setStringWithDefaultValue(String stringWithDefaultValue) {
             this.stringWithDefaultValue = stringWithDefaultValue;
             return this;
         }
 
         public String getStringWithDefaultValue() { return stringWithDefaultValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=81, name="i32_with_default_value", requiredness=Requiredness.NONE)    public Builder setI32WithDefaultValue(int i32WithDefaultValue) {
+        @com.facebook.swift.codec.ThriftField(value=81, name="i32_with_default_value", requiredness=Requiredness.NONE)    public Builder setI32WithDefaultValue(int i32WithDefaultValue) {
             this.i32WithDefaultValue = i32WithDefaultValue;
             return this;
         }
 
         public int getI32WithDefaultValue() { return i32WithDefaultValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=82, name="double_with_default_value", requiredness=Requiredness.NONE)    public Builder setDoubleWithDefaultValue(double doubleWithDefaultValue) {
+        @com.facebook.swift.codec.ThriftField(value=82, name="double_with_default_value", requiredness=Requiredness.NONE)    public Builder setDoubleWithDefaultValue(double doubleWithDefaultValue) {
             this.doubleWithDefaultValue = doubleWithDefaultValue;
             return this;
         }
 
         public double getDoubleWithDefaultValue() { return doubleWithDefaultValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=83, name="enum_with_default_value", requiredness=Requiredness.NONE)    public Builder setEnumWithDefaultValue(test.fixtures.shapes.Enum enumWithDefaultValue) {
+        @com.facebook.swift.codec.ThriftField(value=83, name="enum_with_default_value", requiredness=Requiredness.NONE)    public Builder setEnumWithDefaultValue(test.fixtures.shapes.Enum enumWithDefaultValue) {
             this.enumWithDefaultValue = enumWithDefaultValue;
             return this;
         }
 
         public test.fixtures.shapes.Enum getEnumWithDefaultValue() { return enumWithDefaultValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=84, name="A_with_default_value", requiredness=Requiredness.NONE)    public Builder setAWithDefaultValue(test.fixtures.shapes.A aWithDefaultValue) {
+        @com.facebook.swift.codec.ThriftField(value=84, name="A_with_default_value", requiredness=Requiredness.NONE)    public Builder setAWithDefaultValue(test.fixtures.shapes.A aWithDefaultValue) {
             this.aWithDefaultValue = aWithDefaultValue;
             return this;
         }
 
         public test.fixtures.shapes.A getAWithDefaultValue() { return aWithDefaultValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=85, name="set_of_i32_with_default_value", requiredness=Requiredness.NONE)    public Builder setSetOfI32WithDefaultValue(Set<Integer> setOfI32WithDefaultValue) {
+        @com.facebook.swift.codec.ThriftField(value=85, name="set_of_i32_with_default_value", requiredness=Requiredness.NONE)    public Builder setSetOfI32WithDefaultValue(Set<Integer> setOfI32WithDefaultValue) {
             this.setOfI32WithDefaultValue = setOfI32WithDefaultValue;
             return this;
         }
 
         public Set<Integer> getSetOfI32WithDefaultValue() { return setOfI32WithDefaultValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=86, name="map_of_i32_to_string_with_default_value", requiredness=Requiredness.NONE)    public Builder setMapOfI32ToStringWithDefaultValue(Map<Integer, String> mapOfI32ToStringWithDefaultValue) {
+        @com.facebook.swift.codec.ThriftField(value=86, name="map_of_i32_to_string_with_default_value", requiredness=Requiredness.NONE)    public Builder setMapOfI32ToStringWithDefaultValue(Map<Integer, String> mapOfI32ToStringWithDefaultValue) {
             this.mapOfI32ToStringWithDefaultValue = mapOfI32ToStringWithDefaultValue;
             return this;
         }
 
         public Map<Integer, String> getMapOfI32ToStringWithDefaultValue() { return mapOfI32ToStringWithDefaultValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=87, name="list_of_string_with_default_value", requiredness=Requiredness.NONE)    public Builder setListOfStringWithDefaultValue(List<String> listOfStringWithDefaultValue) {
+        @com.facebook.swift.codec.ThriftField(value=87, name="list_of_string_with_default_value", requiredness=Requiredness.NONE)    public Builder setListOfStringWithDefaultValue(List<String> listOfStringWithDefaultValue) {
             this.listOfStringWithDefaultValue = listOfStringWithDefaultValue;
             return this;
         }
 
         public List<String> getListOfStringWithDefaultValue() { return listOfStringWithDefaultValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=88, name="map_of_string_to_list_of_i32_with_default_value", requiredness=Requiredness.NONE)    public Builder setMapOfStringToListOfI32WithDefaultValue(Map<String, List<Integer>> mapOfStringToListOfI32WithDefaultValue) {
+        @com.facebook.swift.codec.ThriftField(value=88, name="map_of_string_to_list_of_i32_with_default_value", requiredness=Requiredness.NONE)    public Builder setMapOfStringToListOfI32WithDefaultValue(Map<String, List<Integer>> mapOfStringToListOfI32WithDefaultValue) {
             this.mapOfStringToListOfI32WithDefaultValue = mapOfStringToListOfI32WithDefaultValue;
             return this;
         }
@@ -564,6 +564,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -572,397 +573,326 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
     private final test.fixtures.shapes.A justAnA;
     public static final int _JUST_AN_A = 1;
     private static final TField JUST_AN_A_FIELD_DESC = new TField("just_an_A", TType.STRUCT, (short)1);
-        private final Set<Integer> setOfI32;
+    private final Set<Integer> setOfI32;
     public static final int _SET_OF_I32 = 2;
     private static final TField SET_OF_I32_FIELD_DESC = new TField("set_of_i32", TType.SET, (short)2);
-        private final List<Integer> listOfI32;
+    private final List<Integer> listOfI32;
     public static final int _LIST_OF_I32 = 3;
     private static final TField LIST_OF_I32_FIELD_DESC = new TField("list_of_i32", TType.LIST, (short)3);
-        private final List<String> listOfString;
+    private final List<String> listOfString;
     public static final int _LIST_OF_STRING = 4;
     private static final TField LIST_OF_STRING_FIELD_DESC = new TField("list_of_string", TType.LIST, (short)4);
-        private final Map<String, Integer> mapOfStringToI32;
+    private final Map<String, Integer> mapOfStringToI32;
     public static final int _MAP_OF_STRING_TO_I32 = 5;
     private static final TField MAP_OF_STRING_TO_I32_FIELD_DESC = new TField("map_of_string_to_i32", TType.MAP, (short)5);
-        private final Map<String, test.fixtures.shapes.A> mapOfStringToA;
+    private final Map<String, test.fixtures.shapes.A> mapOfStringToA;
     public static final int _MAP_OF_STRING_TO_A = 6;
     private static final TField MAP_OF_STRING_TO_A_FIELD_DESC = new TField("map_of_string_to_A", TType.MAP, (short)6);
-        private final Map<String, List<Integer>> mapOfStringToListOfI32;
+    private final Map<String, List<Integer>> mapOfStringToListOfI32;
     public static final int _MAP_OF_STRING_TO_LIST_OF_I32 = 7;
     private static final TField MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC = new TField("map_of_string_to_list_of_i32", TType.MAP, (short)7);
-        private final Map<String, List<test.fixtures.shapes.A>> mapOfStringToListOfA;
+    private final Map<String, List<test.fixtures.shapes.A>> mapOfStringToListOfA;
     public static final int _MAP_OF_STRING_TO_LIST_OF_A = 8;
     private static final TField MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC = new TField("map_of_string_to_list_of_A", TType.MAP, (short)8);
-        private final Map<String, Set<Integer>> mapOfStringToSetOfI32;
+    private final Map<String, Set<Integer>> mapOfStringToSetOfI32;
     public static final int _MAP_OF_STRING_TO_SET_OF_I32 = 9;
     private static final TField MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC = new TField("map_of_string_to_set_of_i32", TType.MAP, (short)9);
-        private final Map<String, Map<String, Integer>> mapOfStringToMapOfStringToI32;
+    private final Map<String, Map<String, Integer>> mapOfStringToMapOfStringToI32;
     public static final int _MAP_OF_STRING_TO_MAP_OF_STRING_TO_I32 = 10;
     private static final TField MAP_OF_STRING_TO_MAP_OF_STRING_TO_I32_FIELD_DESC = new TField("map_of_string_to_map_of_string_to_i32", TType.MAP, (short)10);
-        private final Map<String, Map<String, test.fixtures.shapes.A>> mapOfStringToMapOfStringToA;
+    private final Map<String, Map<String, test.fixtures.shapes.A>> mapOfStringToMapOfStringToA;
     public static final int _MAP_OF_STRING_TO_MAP_OF_STRING_TO_A = 11;
     private static final TField MAP_OF_STRING_TO_MAP_OF_STRING_TO_A_FIELD_DESC = new TField("map_of_string_to_map_of_string_to_A", TType.MAP, (short)11);
-        private final List<Set<Integer>> listOfSetOfI32;
+    private final List<Set<Integer>> listOfSetOfI32;
     public static final int _LIST_OF_SET_OF_I32 = 12;
     private static final TField LIST_OF_SET_OF_I32_FIELD_DESC = new TField("list_of_set_of_i32", TType.LIST, (short)12);
-        private final List<Map<String, List<test.fixtures.shapes.A>>> listOfMapOfStringToListOfA;
+    private final List<Map<String, List<test.fixtures.shapes.A>>> listOfMapOfStringToListOfA;
     public static final int _LIST_OF_MAP_OF_STRING_TO_LIST_OF_A = 13;
     private static final TField LIST_OF_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC = new TField("list_of_map_of_string_to_list_of_A", TType.LIST, (short)13);
-        private final List<Map<String, test.fixtures.shapes.A>> listOfMapOfStringToA;
+    private final List<Map<String, test.fixtures.shapes.A>> listOfMapOfStringToA;
     public static final int _LIST_OF_MAP_OF_STRING_TO_A = 14;
     private static final TField LIST_OF_MAP_OF_STRING_TO_A_FIELD_DESC = new TField("list_of_map_of_string_to_A", TType.LIST, (short)14);
-        private final test.fixtures.shapes.Enum justAnEnum;
+    private final test.fixtures.shapes.Enum justAnEnum;
     public static final int _JUST_AN_ENUM = 17;
     private static final TField JUST_AN_ENUM_FIELD_DESC = new TField("just_an_enum", TType.I32, (short)17);
-        private final test.fixtures.shapes.Union justAUnion;
+    private final test.fixtures.shapes.Union justAUnion;
     public static final int _JUST_A_UNION = 18;
     private static final TField JUST_AUNION_FIELD_DESC = new TField("just_a_union", TType.STRUCT, (short)18);
-        private final test.fixtures.shapes.A optionalJustAnA;
+    private final test.fixtures.shapes.A optionalJustAnA;
     public static final int _OPTIONAL_JUST_AN_A = 51;
     private static final TField OPTIONAL_JUST_AN_A_FIELD_DESC = new TField("optional_just_an_A", TType.STRUCT, (short)51);
-        private final Set<Integer> optionalSetOfI32;
+    private final Set<Integer> optionalSetOfI32;
     public static final int _OPTIONAL_SET_OF_I32 = 52;
     private static final TField OPTIONAL_SET_OF_I32_FIELD_DESC = new TField("optional_set_of_i32", TType.SET, (short)52);
-        private final List<Integer> optionalListOfI32;
+    private final List<Integer> optionalListOfI32;
     public static final int _OPTIONAL_LIST_OF_I32 = 53;
     private static final TField OPTIONAL_LIST_OF_I32_FIELD_DESC = new TField("optional_list_of_i32", TType.LIST, (short)53);
-        private final List<String> optionalListOfString;
+    private final List<String> optionalListOfString;
     public static final int _OPTIONAL_LIST_OF_STRING = 54;
     private static final TField OPTIONAL_LIST_OF_STRING_FIELD_DESC = new TField("optional_list_of_string", TType.LIST, (short)54);
-        private final Map<String, Integer> optionalMapOfStringToI32;
+    private final Map<String, Integer> optionalMapOfStringToI32;
     public static final int _OPTIONAL_MAP_OF_STRING_TO_I32 = 55;
     private static final TField OPTIONAL_MAP_OF_STRING_TO_I32_FIELD_DESC = new TField("optional_map_of_string_to_i32", TType.MAP, (short)55);
-        private final Map<String, test.fixtures.shapes.A> optionalMapOfStringToA;
+    private final Map<String, test.fixtures.shapes.A> optionalMapOfStringToA;
     public static final int _OPTIONAL_MAP_OF_STRING_TO_A = 56;
     private static final TField OPTIONAL_MAP_OF_STRING_TO_A_FIELD_DESC = new TField("optional_map_of_string_to_A", TType.MAP, (short)56);
-        private final Map<String, List<Integer>> optionalMapOfStringToListOfI32;
+    private final Map<String, List<Integer>> optionalMapOfStringToListOfI32;
     public static final int _OPTIONAL_MAP_OF_STRING_TO_LIST_OF_I32 = 57;
     private static final TField OPTIONAL_MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC = new TField("optional_map_of_string_to_list_of_i32", TType.MAP, (short)57);
-        private final Map<String, List<test.fixtures.shapes.A>> optionalMapOfStringToListOfA;
+    private final Map<String, List<test.fixtures.shapes.A>> optionalMapOfStringToListOfA;
     public static final int _OPTIONAL_MAP_OF_STRING_TO_LIST_OF_A = 58;
     private static final TField OPTIONAL_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC = new TField("optional_map_of_string_to_list_of_A", TType.MAP, (short)58);
-        private final Map<String, Set<Integer>> optionalMapOfStringToSetOfI32;
+    private final Map<String, Set<Integer>> optionalMapOfStringToSetOfI32;
     public static final int _OPTIONAL_MAP_OF_STRING_TO_SET_OF_I32 = 59;
     private static final TField OPTIONAL_MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC = new TField("optional_map_of_string_to_set_of_i32", TType.MAP, (short)59);
-        private final test.fixtures.shapes.Enum optionalEnum;
+    private final test.fixtures.shapes.Enum optionalEnum;
     public static final int _OPTIONAL_ENUM = 60;
     private static final TField OPTIONAL_ENUM_FIELD_DESC = new TField("optional_enum", TType.I32, (short)60);
-        private final test.fixtures.shapes.Enum requiredEnumWithDefault;
+    private final test.fixtures.shapes.Enum requiredEnumWithDefault;
     public static final int _REQUIRED_ENUM_WITH_DEFAULT = 70;
     private static final TField REQUIRED_ENUM_WITH_DEFAULT_FIELD_DESC = new TField("required_enum_with_default", TType.I32, (short)70);
-        private final String stringWithDefaultValue;
+    private final String stringWithDefaultValue;
     public static final int _STRING_WITH_DEFAULT_VALUE = 80;
     private static final TField STRING_WITH_DEFAULT_VALUE_FIELD_DESC = new TField("string_with_default_value", TType.STRING, (short)80);
-        private final int i32WithDefaultValue;
+    private final int i32WithDefaultValue;
     public static final int _I32_WITH_DEFAULT_VALUE = 81;
     private static final TField I32_WITH_DEFAULT_VALUE_FIELD_DESC = new TField("i32_with_default_value", TType.I32, (short)81);
-        private final double doubleWithDefaultValue;
+    private final double doubleWithDefaultValue;
     public static final int _DOUBLE_WITH_DEFAULT_VALUE = 82;
     private static final TField DOUBLE_WITH_DEFAULT_VALUE_FIELD_DESC = new TField("double_with_default_value", TType.DOUBLE, (short)82);
-        private final test.fixtures.shapes.Enum enumWithDefaultValue;
+    private final test.fixtures.shapes.Enum enumWithDefaultValue;
     public static final int _ENUM_WITH_DEFAULT_VALUE = 83;
     private static final TField ENUM_WITH_DEFAULT_VALUE_FIELD_DESC = new TField("enum_with_default_value", TType.I32, (short)83);
-        private final test.fixtures.shapes.A aWithDefaultValue;
+    private final test.fixtures.shapes.A aWithDefaultValue;
     public static final int _A_WITH_DEFAULT_VALUE = 84;
     private static final TField A_WITH_DEFAULT_VALUE_FIELD_DESC = new TField("A_with_default_value", TType.STRUCT, (short)84);
-        private final Set<Integer> setOfI32WithDefaultValue;
+    private final Set<Integer> setOfI32WithDefaultValue;
     public static final int _SET_OF_I32_WITH_DEFAULT_VALUE = 85;
     private static final TField SET_OF_I32_WITH_DEFAULT_VALUE_FIELD_DESC = new TField("set_of_i32_with_default_value", TType.SET, (short)85);
-        private final Map<Integer, String> mapOfI32ToStringWithDefaultValue;
+    private final Map<Integer, String> mapOfI32ToStringWithDefaultValue;
     public static final int _MAP_OF_I32_TO_STRING_WITH_DEFAULT_VALUE = 86;
     private static final TField MAP_OF_I32_TO_STRING_WITH_DEFAULT_VALUE_FIELD_DESC = new TField("map_of_i32_to_string_with_default_value", TType.MAP, (short)86);
-        private final List<String> listOfStringWithDefaultValue;
+    private final List<String> listOfStringWithDefaultValue;
     public static final int _LIST_OF_STRING_WITH_DEFAULT_VALUE = 87;
     private static final TField LIST_OF_STRING_WITH_DEFAULT_VALUE_FIELD_DESC = new TField("list_of_string_with_default_value", TType.LIST, (short)87);
-        private final Map<String, List<Integer>> mapOfStringToListOfI32WithDefaultValue;
+    private final Map<String, List<Integer>> mapOfStringToListOfI32WithDefaultValue;
     public static final int _MAP_OF_STRING_TO_LIST_OF_I32_WITH_DEFAULT_VALUE = 88;
     private static final TField MAP_OF_STRING_TO_LIST_OF_I32_WITH_DEFAULT_VALUE_FIELD_DESC = new TField("map_of_string_to_list_of_i32_with_default_value", TType.MAP, (short)88);
     static {
-      NAMES_TO_IDS.put("justAnA", 1);
-      THRIFT_NAMES_TO_IDS.put("just_an_A", 1);
-      FIELD_METADATA.put(1, JUST_AN_A_FIELD_DESC);
-      NAMES_TO_IDS.put("setOfI32", 2);
-      THRIFT_NAMES_TO_IDS.put("set_of_i32", 2);
-      FIELD_METADATA.put(2, SET_OF_I32_FIELD_DESC);
-      NAMES_TO_IDS.put("listOfI32", 3);
-      THRIFT_NAMES_TO_IDS.put("list_of_i32", 3);
-      FIELD_METADATA.put(3, LIST_OF_I32_FIELD_DESC);
-      NAMES_TO_IDS.put("listOfString", 4);
-      THRIFT_NAMES_TO_IDS.put("list_of_string", 4);
-      FIELD_METADATA.put(4, LIST_OF_STRING_FIELD_DESC);
-      NAMES_TO_IDS.put("mapOfStringToI32", 5);
-      THRIFT_NAMES_TO_IDS.put("map_of_string_to_i32", 5);
-      FIELD_METADATA.put(5, MAP_OF_STRING_TO_I32_FIELD_DESC);
-      NAMES_TO_IDS.put("mapOfStringToA", 6);
-      THRIFT_NAMES_TO_IDS.put("map_of_string_to_A", 6);
-      FIELD_METADATA.put(6, MAP_OF_STRING_TO_A_FIELD_DESC);
-      NAMES_TO_IDS.put("mapOfStringToListOfI32", 7);
-      THRIFT_NAMES_TO_IDS.put("map_of_string_to_list_of_i32", 7);
-      FIELD_METADATA.put(7, MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC);
-      NAMES_TO_IDS.put("mapOfStringToListOfA", 8);
-      THRIFT_NAMES_TO_IDS.put("map_of_string_to_list_of_A", 8);
-      FIELD_METADATA.put(8, MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
-      NAMES_TO_IDS.put("mapOfStringToSetOfI32", 9);
-      THRIFT_NAMES_TO_IDS.put("map_of_string_to_set_of_i32", 9);
-      FIELD_METADATA.put(9, MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC);
-      NAMES_TO_IDS.put("mapOfStringToMapOfStringToI32", 10);
-      THRIFT_NAMES_TO_IDS.put("map_of_string_to_map_of_string_to_i32", 10);
-      FIELD_METADATA.put(10, MAP_OF_STRING_TO_MAP_OF_STRING_TO_I32_FIELD_DESC);
-      NAMES_TO_IDS.put("mapOfStringToMapOfStringToA", 11);
-      THRIFT_NAMES_TO_IDS.put("map_of_string_to_map_of_string_to_A", 11);
-      FIELD_METADATA.put(11, MAP_OF_STRING_TO_MAP_OF_STRING_TO_A_FIELD_DESC);
-      NAMES_TO_IDS.put("listOfSetOfI32", 12);
-      THRIFT_NAMES_TO_IDS.put("list_of_set_of_i32", 12);
-      FIELD_METADATA.put(12, LIST_OF_SET_OF_I32_FIELD_DESC);
-      NAMES_TO_IDS.put("listOfMapOfStringToListOfA", 13);
-      THRIFT_NAMES_TO_IDS.put("list_of_map_of_string_to_list_of_A", 13);
-      FIELD_METADATA.put(13, LIST_OF_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
-      NAMES_TO_IDS.put("listOfMapOfStringToA", 14);
-      THRIFT_NAMES_TO_IDS.put("list_of_map_of_string_to_A", 14);
-      FIELD_METADATA.put(14, LIST_OF_MAP_OF_STRING_TO_A_FIELD_DESC);
-      NAMES_TO_IDS.put("justAnEnum", 17);
-      THRIFT_NAMES_TO_IDS.put("just_an_enum", 17);
-      FIELD_METADATA.put(17, JUST_AN_ENUM_FIELD_DESC);
-      NAMES_TO_IDS.put("justAUnion", 18);
-      THRIFT_NAMES_TO_IDS.put("just_a_union", 18);
-      FIELD_METADATA.put(18, JUST_AUNION_FIELD_DESC);
-      NAMES_TO_IDS.put("optionalJustAnA", 51);
-      THRIFT_NAMES_TO_IDS.put("optional_just_an_A", 51);
-      FIELD_METADATA.put(51, OPTIONAL_JUST_AN_A_FIELD_DESC);
-      NAMES_TO_IDS.put("optionalSetOfI32", 52);
-      THRIFT_NAMES_TO_IDS.put("optional_set_of_i32", 52);
-      FIELD_METADATA.put(52, OPTIONAL_SET_OF_I32_FIELD_DESC);
-      NAMES_TO_IDS.put("optionalListOfI32", 53);
-      THRIFT_NAMES_TO_IDS.put("optional_list_of_i32", 53);
-      FIELD_METADATA.put(53, OPTIONAL_LIST_OF_I32_FIELD_DESC);
-      NAMES_TO_IDS.put("optionalListOfString", 54);
-      THRIFT_NAMES_TO_IDS.put("optional_list_of_string", 54);
-      FIELD_METADATA.put(54, OPTIONAL_LIST_OF_STRING_FIELD_DESC);
-      NAMES_TO_IDS.put("optionalMapOfStringToI32", 55);
-      THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_i32", 55);
-      FIELD_METADATA.put(55, OPTIONAL_MAP_OF_STRING_TO_I32_FIELD_DESC);
-      NAMES_TO_IDS.put("optionalMapOfStringToA", 56);
-      THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_A", 56);
-      FIELD_METADATA.put(56, OPTIONAL_MAP_OF_STRING_TO_A_FIELD_DESC);
-      NAMES_TO_IDS.put("optionalMapOfStringToListOfI32", 57);
-      THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_list_of_i32", 57);
-      FIELD_METADATA.put(57, OPTIONAL_MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC);
-      NAMES_TO_IDS.put("optionalMapOfStringToListOfA", 58);
-      THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_list_of_A", 58);
-      FIELD_METADATA.put(58, OPTIONAL_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
-      NAMES_TO_IDS.put("optionalMapOfStringToSetOfI32", 59);
-      THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_set_of_i32", 59);
-      FIELD_METADATA.put(59, OPTIONAL_MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC);
-      NAMES_TO_IDS.put("optionalEnum", 60);
-      THRIFT_NAMES_TO_IDS.put("optional_enum", 60);
-      FIELD_METADATA.put(60, OPTIONAL_ENUM_FIELD_DESC);
-      NAMES_TO_IDS.put("requiredEnumWithDefault", 70);
-      THRIFT_NAMES_TO_IDS.put("required_enum_with_default", 70);
-      FIELD_METADATA.put(70, REQUIRED_ENUM_WITH_DEFAULT_FIELD_DESC);
-      NAMES_TO_IDS.put("stringWithDefaultValue", 80);
-      THRIFT_NAMES_TO_IDS.put("string_with_default_value", 80);
-      FIELD_METADATA.put(80, STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("i32WithDefaultValue", 81);
-      THRIFT_NAMES_TO_IDS.put("i32_with_default_value", 81);
-      FIELD_METADATA.put(81, I32_WITH_DEFAULT_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("doubleWithDefaultValue", 82);
-      THRIFT_NAMES_TO_IDS.put("double_with_default_value", 82);
-      FIELD_METADATA.put(82, DOUBLE_WITH_DEFAULT_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("enumWithDefaultValue", 83);
-      THRIFT_NAMES_TO_IDS.put("enum_with_default_value", 83);
-      FIELD_METADATA.put(83, ENUM_WITH_DEFAULT_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("aWithDefaultValue", 84);
-      THRIFT_NAMES_TO_IDS.put("A_with_default_value", 84);
-      FIELD_METADATA.put(84, A_WITH_DEFAULT_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("setOfI32WithDefaultValue", 85);
-      THRIFT_NAMES_TO_IDS.put("set_of_i32_with_default_value", 85);
-      FIELD_METADATA.put(85, SET_OF_I32_WITH_DEFAULT_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("mapOfI32ToStringWithDefaultValue", 86);
-      THRIFT_NAMES_TO_IDS.put("map_of_i32_to_string_with_default_value", 86);
-      FIELD_METADATA.put(86, MAP_OF_I32_TO_STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("listOfStringWithDefaultValue", 87);
-      THRIFT_NAMES_TO_IDS.put("list_of_string_with_default_value", 87);
-      FIELD_METADATA.put(87, LIST_OF_STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("mapOfStringToListOfI32WithDefaultValue", 88);
-      THRIFT_NAMES_TO_IDS.put("map_of_string_to_list_of_i32_with_default_value", 88);
-      FIELD_METADATA.put(88, MAP_OF_STRING_TO_LIST_OF_I32_WITH_DEFAULT_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("justAnA", 1);
+        THRIFT_NAMES_TO_IDS.put("just_an_A", 1);
+        FIELD_METADATA.put(1, JUST_AN_A_FIELD_DESC);
+        NAMES_TO_IDS.put("setOfI32", 2);
+        THRIFT_NAMES_TO_IDS.put("set_of_i32", 2);
+        FIELD_METADATA.put(2, SET_OF_I32_FIELD_DESC);
+        NAMES_TO_IDS.put("listOfI32", 3);
+        THRIFT_NAMES_TO_IDS.put("list_of_i32", 3);
+        FIELD_METADATA.put(3, LIST_OF_I32_FIELD_DESC);
+        NAMES_TO_IDS.put("listOfString", 4);
+        THRIFT_NAMES_TO_IDS.put("list_of_string", 4);
+        FIELD_METADATA.put(4, LIST_OF_STRING_FIELD_DESC);
+        NAMES_TO_IDS.put("mapOfStringToI32", 5);
+        THRIFT_NAMES_TO_IDS.put("map_of_string_to_i32", 5);
+        FIELD_METADATA.put(5, MAP_OF_STRING_TO_I32_FIELD_DESC);
+        NAMES_TO_IDS.put("mapOfStringToA", 6);
+        THRIFT_NAMES_TO_IDS.put("map_of_string_to_A", 6);
+        FIELD_METADATA.put(6, MAP_OF_STRING_TO_A_FIELD_DESC);
+        NAMES_TO_IDS.put("mapOfStringToListOfI32", 7);
+        THRIFT_NAMES_TO_IDS.put("map_of_string_to_list_of_i32", 7);
+        FIELD_METADATA.put(7, MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC);
+        NAMES_TO_IDS.put("mapOfStringToListOfA", 8);
+        THRIFT_NAMES_TO_IDS.put("map_of_string_to_list_of_A", 8);
+        FIELD_METADATA.put(8, MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
+        NAMES_TO_IDS.put("mapOfStringToSetOfI32", 9);
+        THRIFT_NAMES_TO_IDS.put("map_of_string_to_set_of_i32", 9);
+        FIELD_METADATA.put(9, MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC);
+        NAMES_TO_IDS.put("mapOfStringToMapOfStringToI32", 10);
+        THRIFT_NAMES_TO_IDS.put("map_of_string_to_map_of_string_to_i32", 10);
+        FIELD_METADATA.put(10, MAP_OF_STRING_TO_MAP_OF_STRING_TO_I32_FIELD_DESC);
+        NAMES_TO_IDS.put("mapOfStringToMapOfStringToA", 11);
+        THRIFT_NAMES_TO_IDS.put("map_of_string_to_map_of_string_to_A", 11);
+        FIELD_METADATA.put(11, MAP_OF_STRING_TO_MAP_OF_STRING_TO_A_FIELD_DESC);
+        NAMES_TO_IDS.put("listOfSetOfI32", 12);
+        THRIFT_NAMES_TO_IDS.put("list_of_set_of_i32", 12);
+        FIELD_METADATA.put(12, LIST_OF_SET_OF_I32_FIELD_DESC);
+        NAMES_TO_IDS.put("listOfMapOfStringToListOfA", 13);
+        THRIFT_NAMES_TO_IDS.put("list_of_map_of_string_to_list_of_A", 13);
+        FIELD_METADATA.put(13, LIST_OF_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
+        NAMES_TO_IDS.put("listOfMapOfStringToA", 14);
+        THRIFT_NAMES_TO_IDS.put("list_of_map_of_string_to_A", 14);
+        FIELD_METADATA.put(14, LIST_OF_MAP_OF_STRING_TO_A_FIELD_DESC);
+        NAMES_TO_IDS.put("justAnEnum", 17);
+        THRIFT_NAMES_TO_IDS.put("just_an_enum", 17);
+        FIELD_METADATA.put(17, JUST_AN_ENUM_FIELD_DESC);
+        NAMES_TO_IDS.put("justAUnion", 18);
+        THRIFT_NAMES_TO_IDS.put("just_a_union", 18);
+        FIELD_METADATA.put(18, JUST_AUNION_FIELD_DESC);
+        NAMES_TO_IDS.put("optionalJustAnA", 51);
+        THRIFT_NAMES_TO_IDS.put("optional_just_an_A", 51);
+        FIELD_METADATA.put(51, OPTIONAL_JUST_AN_A_FIELD_DESC);
+        NAMES_TO_IDS.put("optionalSetOfI32", 52);
+        THRIFT_NAMES_TO_IDS.put("optional_set_of_i32", 52);
+        FIELD_METADATA.put(52, OPTIONAL_SET_OF_I32_FIELD_DESC);
+        NAMES_TO_IDS.put("optionalListOfI32", 53);
+        THRIFT_NAMES_TO_IDS.put("optional_list_of_i32", 53);
+        FIELD_METADATA.put(53, OPTIONAL_LIST_OF_I32_FIELD_DESC);
+        NAMES_TO_IDS.put("optionalListOfString", 54);
+        THRIFT_NAMES_TO_IDS.put("optional_list_of_string", 54);
+        FIELD_METADATA.put(54, OPTIONAL_LIST_OF_STRING_FIELD_DESC);
+        NAMES_TO_IDS.put("optionalMapOfStringToI32", 55);
+        THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_i32", 55);
+        FIELD_METADATA.put(55, OPTIONAL_MAP_OF_STRING_TO_I32_FIELD_DESC);
+        NAMES_TO_IDS.put("optionalMapOfStringToA", 56);
+        THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_A", 56);
+        FIELD_METADATA.put(56, OPTIONAL_MAP_OF_STRING_TO_A_FIELD_DESC);
+        NAMES_TO_IDS.put("optionalMapOfStringToListOfI32", 57);
+        THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_list_of_i32", 57);
+        FIELD_METADATA.put(57, OPTIONAL_MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC);
+        NAMES_TO_IDS.put("optionalMapOfStringToListOfA", 58);
+        THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_list_of_A", 58);
+        FIELD_METADATA.put(58, OPTIONAL_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
+        NAMES_TO_IDS.put("optionalMapOfStringToSetOfI32", 59);
+        THRIFT_NAMES_TO_IDS.put("optional_map_of_string_to_set_of_i32", 59);
+        FIELD_METADATA.put(59, OPTIONAL_MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC);
+        NAMES_TO_IDS.put("optionalEnum", 60);
+        THRIFT_NAMES_TO_IDS.put("optional_enum", 60);
+        FIELD_METADATA.put(60, OPTIONAL_ENUM_FIELD_DESC);
+        NAMES_TO_IDS.put("requiredEnumWithDefault", 70);
+        THRIFT_NAMES_TO_IDS.put("required_enum_with_default", 70);
+        FIELD_METADATA.put(70, REQUIRED_ENUM_WITH_DEFAULT_FIELD_DESC);
+        NAMES_TO_IDS.put("stringWithDefaultValue", 80);
+        THRIFT_NAMES_TO_IDS.put("string_with_default_value", 80);
+        FIELD_METADATA.put(80, STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("i32WithDefaultValue", 81);
+        THRIFT_NAMES_TO_IDS.put("i32_with_default_value", 81);
+        FIELD_METADATA.put(81, I32_WITH_DEFAULT_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("doubleWithDefaultValue", 82);
+        THRIFT_NAMES_TO_IDS.put("double_with_default_value", 82);
+        FIELD_METADATA.put(82, DOUBLE_WITH_DEFAULT_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("enumWithDefaultValue", 83);
+        THRIFT_NAMES_TO_IDS.put("enum_with_default_value", 83);
+        FIELD_METADATA.put(83, ENUM_WITH_DEFAULT_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("aWithDefaultValue", 84);
+        THRIFT_NAMES_TO_IDS.put("A_with_default_value", 84);
+        FIELD_METADATA.put(84, A_WITH_DEFAULT_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("setOfI32WithDefaultValue", 85);
+        THRIFT_NAMES_TO_IDS.put("set_of_i32_with_default_value", 85);
+        FIELD_METADATA.put(85, SET_OF_I32_WITH_DEFAULT_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("mapOfI32ToStringWithDefaultValue", 86);
+        THRIFT_NAMES_TO_IDS.put("map_of_i32_to_string_with_default_value", 86);
+        FIELD_METADATA.put(86, MAP_OF_I32_TO_STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("listOfStringWithDefaultValue", 87);
+        THRIFT_NAMES_TO_IDS.put("list_of_string_with_default_value", 87);
+        FIELD_METADATA.put(87, LIST_OF_STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("mapOfStringToListOfI32WithDefaultValue", 88);
+        THRIFT_NAMES_TO_IDS.put("map_of_string_to_list_of_i32_with_default_value", 88);
+        FIELD_METADATA.put(88, MAP_OF_STRING_TO_LIST_OF_I32_WITH_DEFAULT_VALUE_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="just_an_A", requiredness=Requiredness.NONE)
     public test.fixtures.shapes.A getJustAnA() { return justAnA; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="set_of_i32", requiredness=Requiredness.NONE)
     public Set<Integer> getSetOfI32() { return setOfI32; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="list_of_i32", requiredness=Requiredness.NONE)
     public List<Integer> getListOfI32() { return listOfI32; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="list_of_string", requiredness=Requiredness.NONE)
     public List<String> getListOfString() { return listOfString; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="map_of_string_to_i32", requiredness=Requiredness.NONE)
     public Map<String, Integer> getMapOfStringToI32() { return mapOfStringToI32; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="map_of_string_to_A", requiredness=Requiredness.NONE)
     public Map<String, test.fixtures.shapes.A> getMapOfStringToA() { return mapOfStringToA; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="map_of_string_to_list_of_i32", requiredness=Requiredness.NONE)
     public Map<String, List<Integer>> getMapOfStringToListOfI32() { return mapOfStringToListOfI32; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="map_of_string_to_list_of_A", requiredness=Requiredness.NONE)
     public Map<String, List<test.fixtures.shapes.A>> getMapOfStringToListOfA() { return mapOfStringToListOfA; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="map_of_string_to_set_of_i32", requiredness=Requiredness.NONE)
     public Map<String, Set<Integer>> getMapOfStringToSetOfI32() { return mapOfStringToSetOfI32; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=10, name="map_of_string_to_map_of_string_to_i32", requiredness=Requiredness.NONE)
     public Map<String, Map<String, Integer>> getMapOfStringToMapOfStringToI32() { return mapOfStringToMapOfStringToI32; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=11, name="map_of_string_to_map_of_string_to_A", requiredness=Requiredness.NONE)
     public Map<String, Map<String, test.fixtures.shapes.A>> getMapOfStringToMapOfStringToA() { return mapOfStringToMapOfStringToA; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=12, name="list_of_set_of_i32", requiredness=Requiredness.NONE)
     public List<Set<Integer>> getListOfSetOfI32() { return listOfSetOfI32; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=13, name="list_of_map_of_string_to_list_of_A", requiredness=Requiredness.NONE)
     public List<Map<String, List<test.fixtures.shapes.A>>> getListOfMapOfStringToListOfA() { return listOfMapOfStringToListOfA; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=14, name="list_of_map_of_string_to_A", requiredness=Requiredness.NONE)
     public List<Map<String, test.fixtures.shapes.A>> getListOfMapOfStringToA() { return listOfMapOfStringToA; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=17, name="just_an_enum", requiredness=Requiredness.NONE)
     public test.fixtures.shapes.Enum getJustAnEnum() { return justAnEnum; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=18, name="just_a_union", requiredness=Requiredness.NONE)
     public test.fixtures.shapes.Union getJustAUnion() { return justAUnion; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=51, name="optional_just_an_A", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.shapes.A getOptionalJustAnA() { return optionalJustAnA; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=52, name="optional_set_of_i32", requiredness=Requiredness.OPTIONAL)
     public Set<Integer> getOptionalSetOfI32() { return optionalSetOfI32; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=53, name="optional_list_of_i32", requiredness=Requiredness.OPTIONAL)
     public List<Integer> getOptionalListOfI32() { return optionalListOfI32; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=54, name="optional_list_of_string", requiredness=Requiredness.OPTIONAL)
     public List<String> getOptionalListOfString() { return optionalListOfString; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=55, name="optional_map_of_string_to_i32", requiredness=Requiredness.OPTIONAL)
     public Map<String, Integer> getOptionalMapOfStringToI32() { return optionalMapOfStringToI32; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=56, name="optional_map_of_string_to_A", requiredness=Requiredness.OPTIONAL)
     public Map<String, test.fixtures.shapes.A> getOptionalMapOfStringToA() { return optionalMapOfStringToA; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=57, name="optional_map_of_string_to_list_of_i32", requiredness=Requiredness.OPTIONAL)
     public Map<String, List<Integer>> getOptionalMapOfStringToListOfI32() { return optionalMapOfStringToListOfI32; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=58, name="optional_map_of_string_to_list_of_A", requiredness=Requiredness.OPTIONAL)
     public Map<String, List<test.fixtures.shapes.A>> getOptionalMapOfStringToListOfA() { return optionalMapOfStringToListOfA; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=59, name="optional_map_of_string_to_set_of_i32", requiredness=Requiredness.OPTIONAL)
     public Map<String, Set<Integer>> getOptionalMapOfStringToSetOfI32() { return optionalMapOfStringToSetOfI32; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=60, name="optional_enum", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.shapes.Enum getOptionalEnum() { return optionalEnum; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=70, name="required_enum_with_default", requiredness=Requiredness.REQUIRED)
     public test.fixtures.shapes.Enum getRequiredEnumWithDefault() { return requiredEnumWithDefault; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=80, name="string_with_default_value", requiredness=Requiredness.NONE)
     public String getStringWithDefaultValue() { return stringWithDefaultValue; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=81, name="i32_with_default_value", requiredness=Requiredness.NONE)
     public int getI32WithDefaultValue() { return i32WithDefaultValue; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=82, name="double_with_default_value", requiredness=Requiredness.NONE)
     public double getDoubleWithDefaultValue() { return doubleWithDefaultValue; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=83, name="enum_with_default_value", requiredness=Requiredness.NONE)
     public test.fixtures.shapes.Enum getEnumWithDefaultValue() { return enumWithDefaultValue; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=84, name="A_with_default_value", requiredness=Requiredness.NONE)
     public test.fixtures.shapes.A getAWithDefaultValue() { return aWithDefaultValue; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=85, name="set_of_i32_with_default_value", requiredness=Requiredness.NONE)
     public Set<Integer> getSetOfI32WithDefaultValue() { return setOfI32WithDefaultValue; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=86, name="map_of_i32_to_string_with_default_value", requiredness=Requiredness.NONE)
     public Map<Integer, String> getMapOfI32ToStringWithDefaultValue() { return mapOfI32ToStringWithDefaultValue; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=87, name="list_of_string_with_default_value", requiredness=Requiredness.NONE)
     public List<String> getListOfStringWithDefaultValue() { return listOfStringWithDefaultValue; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=88, name="map_of_string_to_list_of_i32_with_default_value", requiredness=Requiredness.NONE)
     public Map<String, List<Integer>> getMapOfStringToListOfI32WithDefaultValue() { return mapOfStringToListOfI32WithDefaultValue; }
@@ -1064,1377 +994,1490 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(justAnA);
-            _hashCode = 31 * _hashCode + Objects.hashCode(setOfI32);
-            _hashCode = 31 * _hashCode + Objects.hashCode(listOfI32);
-            _hashCode = 31 * _hashCode + Objects.hashCode(listOfString);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToI32);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToA);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToListOfI32);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToListOfA);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToSetOfI32);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToMapOfStringToI32);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToMapOfStringToA);
-            _hashCode = 31 * _hashCode + Objects.hashCode(listOfSetOfI32);
-            _hashCode = 31 * _hashCode + Objects.hashCode(listOfMapOfStringToListOfA);
-            _hashCode = 31 * _hashCode + Objects.hashCode(listOfMapOfStringToA);
-            _hashCode = 31 * _hashCode + Objects.hashCode(justAnEnum);
-            _hashCode = 31 * _hashCode + Objects.hashCode(justAUnion);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optionalJustAnA);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optionalSetOfI32);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optionalListOfI32);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optionalListOfString);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optionalMapOfStringToI32);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optionalMapOfStringToA);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optionalMapOfStringToListOfI32);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optionalMapOfStringToListOfA);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optionalMapOfStringToSetOfI32);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optionalEnum);
-            _hashCode = 31 * _hashCode + Objects.hashCode(requiredEnumWithDefault);
-            _hashCode = 31 * _hashCode + Objects.hashCode(stringWithDefaultValue);
-            _hashCode = 31 * _hashCode + Integer.hashCode(i32WithDefaultValue);
-            _hashCode = 31 * _hashCode + Double.hashCode(doubleWithDefaultValue);
-            _hashCode = 31 * _hashCode + Objects.hashCode(enumWithDefaultValue);
-            _hashCode = 31 * _hashCode + Objects.hashCode(aWithDefaultValue);
-            _hashCode = 31 * _hashCode + Objects.hashCode(setOfI32WithDefaultValue);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mapOfI32ToStringWithDefaultValue);
-            _hashCode = 31 * _hashCode + Objects.hashCode(listOfStringWithDefaultValue);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToListOfI32WithDefaultValue);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(setOfI32);
+        _hashCode = 31 * _hashCode + Objects.hashCode(listOfI32);
+        _hashCode = 31 * _hashCode + Objects.hashCode(listOfString);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToI32);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToA);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToListOfI32);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToListOfA);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToSetOfI32);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToMapOfStringToI32);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToMapOfStringToA);
+        _hashCode = 31 * _hashCode + Objects.hashCode(listOfSetOfI32);
+        _hashCode = 31 * _hashCode + Objects.hashCode(listOfMapOfStringToListOfA);
+        _hashCode = 31 * _hashCode + Objects.hashCode(listOfMapOfStringToA);
+        _hashCode = 31 * _hashCode + Objects.hashCode(justAnEnum);
+        _hashCode = 31 * _hashCode + Objects.hashCode(justAUnion);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optionalJustAnA);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optionalSetOfI32);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optionalListOfI32);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optionalListOfString);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optionalMapOfStringToI32);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optionalMapOfStringToA);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optionalMapOfStringToListOfI32);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optionalMapOfStringToListOfA);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optionalMapOfStringToSetOfI32);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optionalEnum);
+        _hashCode = 31 * _hashCode + Objects.hashCode(requiredEnumWithDefault);
+        _hashCode = 31 * _hashCode + Objects.hashCode(stringWithDefaultValue);
+        _hashCode = 31 * _hashCode + Integer.hashCode(i32WithDefaultValue);
+        _hashCode = 31 * _hashCode + Double.hashCode(doubleWithDefaultValue);
+        _hashCode = 31 * _hashCode + Objects.hashCode(enumWithDefaultValue);
+        _hashCode = 31 * _hashCode + Objects.hashCode(aWithDefaultValue);
+        _hashCode = 31 * _hashCode + Objects.hashCode(setOfI32WithDefaultValue);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mapOfI32ToStringWithDefaultValue);
+        _hashCode = 31 * _hashCode + Objects.hashCode(listOfStringWithDefaultValue);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mapOfStringToListOfI32WithDefaultValue);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<B> asReader() {
       return B::read0;
     }
 
     public static B read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(B.NAMES_TO_IDS, B.THRIFT_NAMES_TO_IDS, B.FIELD_METADATA);
-      B.Builder builder = new B.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _JUST_AN_A:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.shapes.A justAnA = test.fixtures.shapes.A.read0(oprot);
-            builder.setJustAnA(justAnA);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SET_OF_I32:
-          if (__field.type == TType.SET) {
-            Set<Integer> setOfI32;
-                {
-                TSet _set = oprot.readSetBegin();
-                setOfI32 = new HashSet<Integer>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    int _value1 = oprot.readI32();
-                    setOfI32.add(_value1);
+        TField __field;
+        oprot.readStructBegin(B.NAMES_TO_IDS, B.THRIFT_NAMES_TO_IDS, B.FIELD_METADATA);
+        B.Builder builder = new B.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _JUST_AN_A:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.shapes.A _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.shapes.A.read0(oprot);
+                    builder.setJustAnA(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readSetEnd();
-                }
-            builder.setSetOfI32(setOfI32);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LIST_OF_I32:
-          if (__field.type == TType.LIST) {
-            List<Integer> listOfI32;
-                {
-                TList _list = oprot.readListBegin();
-                listOfI32 = new ArrayList<Integer>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    int _value1 = oprot.readI32();
-                    listOfI32.add(_value1);
-                }
-                oprot.readListEnd();
-                }
-            builder.setListOfI32(listOfI32);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LIST_OF_STRING:
-          if (__field.type == TType.LIST) {
-            List<String> listOfString;
-                {
-                TList _list = oprot.readListBegin();
-                listOfString = new ArrayList<String>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    String _value1 = oprot.readString();
-                    listOfString.add(_value1);
-                }
-                oprot.readListEnd();
-                }
-            builder.setListOfString(listOfString);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAP_OF_STRING_TO_I32:
-          if (__field.type == TType.MAP) {
-            Map<String, Integer> mapOfStringToI32;
-                {
-                TMap _map = oprot.readMapBegin();
-                mapOfStringToI32 = new HashMap<String, Integer>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    int _value1 = oprot.readI32();
-                    mapOfStringToI32.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setMapOfStringToI32(mapOfStringToI32);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAP_OF_STRING_TO_A:
-          if (__field.type == TType.MAP) {
-            Map<String, test.fixtures.shapes.A> mapOfStringToA;
-                {
-                TMap _map = oprot.readMapBegin();
-                mapOfStringToA = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    test.fixtures.shapes.A _value1 = test.fixtures.shapes.A.read0(oprot);
-                    mapOfStringToA.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setMapOfStringToA(mapOfStringToA);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAP_OF_STRING_TO_LIST_OF_I32:
-          if (__field.type == TType.MAP) {
-            Map<String, List<Integer>> mapOfStringToListOfI32;
-                {
-                TMap _map = oprot.readMapBegin();
-                mapOfStringToListOfI32 = new HashMap<String, List<Integer>>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    List<Integer> _value1;
+                break;
+            case _SET_OF_I32:
+                if (__field.type == TType.SET) {
+                    Set<Integer> _fbthriftVar0;
                     {
-                                TList _list1 = oprot.readListBegin();
-                                _value1 = new ArrayList<Integer>(Math.max(0, _list1.size));
-                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                    
-                                    
-                                    int _value2 = oprot.readI32();
-                                    
-                                    
-                                    _value1.add(_value2);
-                                    
-                                }
-                                oprot.readListEnd();
-                                }
-                    mapOfStringToListOfI32.put(_key1, _value1);
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Integer>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            int _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI32();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setSetOfI32(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                }
-                oprot.readMapEnd();
-            builder.setMapOfStringToListOfI32(mapOfStringToListOfI32);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAP_OF_STRING_TO_LIST_OF_A:
-          if (__field.type == TType.MAP) {
-            Map<String, List<test.fixtures.shapes.A>> mapOfStringToListOfA;
-                {
-                TMap _map = oprot.readMapBegin();
-                mapOfStringToListOfA = new HashMap<String, List<test.fixtures.shapes.A>>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    List<test.fixtures.shapes.A> _value1;
+                break;
+            case _LIST_OF_I32:
+                if (__field.type == TType.LIST) {
+                    List<Integer> _fbthriftVar0;
                     {
-                                TList _list1 = oprot.readListBegin();
-                                _value1 = new ArrayList<test.fixtures.shapes.A>(Math.max(0, _list1.size));
-                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                    
-                                    
-                                    test.fixtures.shapes.A _value2 = test.fixtures.shapes.A.read0(oprot);
-                                    
-                                    
-                                    _value1.add(_value2);
-                                    
-                                }
-                                oprot.readListEnd();
-                                }
-                    mapOfStringToListOfA.put(_key1, _value1);
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Integer>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            int _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI32();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setListOfI32(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                }
-                oprot.readMapEnd();
-            builder.setMapOfStringToListOfA(mapOfStringToListOfA);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAP_OF_STRING_TO_SET_OF_I32:
-          if (__field.type == TType.MAP) {
-            Map<String, Set<Integer>> mapOfStringToSetOfI32;
-                {
-                TMap _map = oprot.readMapBegin();
-                mapOfStringToSetOfI32 = new HashMap<String, Set<Integer>>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    Set<Integer> _value1;
+                break;
+            case _LIST_OF_STRING:
+                if (__field.type == TType.LIST) {
+                    List<String> _fbthriftVar0;
                     {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<String>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            String _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readString();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setListOfString(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAP_OF_STRING_TO_I32:
+                if (__field.type == TType.MAP) {
+                    Map<String, Integer> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, Integer>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            int _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                int _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI32();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMapOfStringToI32(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAP_OF_STRING_TO_A:
+                if (__field.type == TType.MAP) {
+                    Map<String, test.fixtures.shapes.A> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            test.fixtures.shapes.A _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                test.fixtures.shapes.A _fbthriftVar1;
+                                _fbthriftVar1 = test.fixtures.shapes.A.read0(oprot);
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMapOfStringToA(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAP_OF_STRING_TO_LIST_OF_I32:
+                if (__field.type == TType.MAP) {
+                    Map<String, List<Integer>> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, List<Integer>>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            List<Integer> _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                List<Integer> _fbthriftVar1;
+                                {
+                                    TList _list1 = oprot.readListBegin();
+                                    _fbthriftVar1 = new ArrayList<Integer>(Math.max(0, _list1.size));
+                                    for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                        int _fbthriftVar2;
+                                        _fbthriftVar2 = oprot.readI32();
+                                        _fbthriftVar1.add(_fbthriftVar2);
+                                    }
+                                    oprot.readListEnd();
+                                }
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMapOfStringToListOfI32(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAP_OF_STRING_TO_LIST_OF_A:
+                if (__field.type == TType.MAP) {
+                    Map<String, List<test.fixtures.shapes.A>> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, List<test.fixtures.shapes.A>>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            List<test.fixtures.shapes.A> _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                List<test.fixtures.shapes.A> _fbthriftVar1;
+                                {
+                                    TList _list1 = oprot.readListBegin();
+                                    _fbthriftVar1 = new ArrayList<test.fixtures.shapes.A>(Math.max(0, _list1.size));
+                                    for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                        test.fixtures.shapes.A _fbthriftVar2;
+                                        _fbthriftVar2 = test.fixtures.shapes.A.read0(oprot);
+                                        _fbthriftVar1.add(_fbthriftVar2);
+                                    }
+                                    oprot.readListEnd();
+                                }
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMapOfStringToListOfA(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAP_OF_STRING_TO_SET_OF_I32:
+                if (__field.type == TType.MAP) {
+                    Map<String, Set<Integer>> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, Set<Integer>>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            Set<Integer> _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                Set<Integer> _fbthriftVar1;
+                                {
+                                    TSet _set1 = oprot.readSetBegin();
+                                    _fbthriftVar1 = new HashSet<Integer>(Math.max(0, _set1.size));
+                                    for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                        int _fbthriftVar2;
+                                        _fbthriftVar2 = oprot.readI32();
+                                        _fbthriftVar1.add(_fbthriftVar2);
+                                    }
+                                    oprot.readSetEnd();
+                                }
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMapOfStringToSetOfI32(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAP_OF_STRING_TO_MAP_OF_STRING_TO_I32:
+                if (__field.type == TType.MAP) {
+                    Map<String, Map<String, Integer>> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, Map<String, Integer>>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            Map<String, Integer> _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                Map<String, Integer> _fbthriftVar1;
+                                {
+                                    TMap _map1 = oprot.readMapBegin();
+                                    _fbthriftVar1 = new HashMap<String, Integer>(Math.max(0, _map1.size));
+                                    for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                        String _fbthriftKey2;
+                                        int _fbthriftValue2;
+
+                                        {
+                                            String _fbthriftVar2;
+                                            _fbthriftVar2 = oprot.readString();
+                                            _fbthriftKey2 = _fbthriftVar2;
+                                        }
+                                        {
+                                            int _fbthriftVar2;
+                                            _fbthriftVar2 = oprot.readI32();
+                                            _fbthriftValue2 = _fbthriftVar2;
+                                        }
+                                        _fbthriftVar1.put(_fbthriftKey2, _fbthriftValue2);
+                                    }
+                                    oprot.readMapEnd();
+                                }
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMapOfStringToMapOfStringToI32(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAP_OF_STRING_TO_MAP_OF_STRING_TO_A:
+                if (__field.type == TType.MAP) {
+                    Map<String, Map<String, test.fixtures.shapes.A>> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, Map<String, test.fixtures.shapes.A>>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            Map<String, test.fixtures.shapes.A> _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                Map<String, test.fixtures.shapes.A> _fbthriftVar1;
+                                {
+                                    TMap _map1 = oprot.readMapBegin();
+                                    _fbthriftVar1 = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map1.size));
+                                    for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                        String _fbthriftKey2;
+                                        test.fixtures.shapes.A _fbthriftValue2;
+
+                                        {
+                                            String _fbthriftVar2;
+                                            _fbthriftVar2 = oprot.readString();
+                                            _fbthriftKey2 = _fbthriftVar2;
+                                        }
+                                        {
+                                            test.fixtures.shapes.A _fbthriftVar2;
+                                            _fbthriftVar2 = test.fixtures.shapes.A.read0(oprot);
+                                            _fbthriftValue2 = _fbthriftVar2;
+                                        }
+                                        _fbthriftVar1.put(_fbthriftKey2, _fbthriftValue2);
+                                    }
+                                    oprot.readMapEnd();
+                                }
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMapOfStringToMapOfStringToA(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _LIST_OF_SET_OF_I32:
+                if (__field.type == TType.LIST) {
+                    List<Set<Integer>> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Set<Integer>>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            Set<Integer> _fbthriftVar1;
+                            {
                                 TSet _set1 = oprot.readSetBegin();
-                                _value1 = new HashSet<Integer>(Math.max(0, _set1.size));
+                                _fbthriftVar1 = new HashSet<Integer>(Math.max(0, _set1.size));
                                 for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
-                                    
-                                    
-                                    int _value2 = oprot.readI32();
-                                    
-                                    
-                                    _value1.add(_value2);
-                                    
+                                    int _fbthriftVar2;
+                                    _fbthriftVar2 = oprot.readI32();
+                                    _fbthriftVar1.add(_fbthriftVar2);
                                 }
                                 oprot.readSetEnd();
-                                }
-                    mapOfStringToSetOfI32.put(_key1, _value1);
+                            }
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setListOfSetOfI32(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                }
-                oprot.readMapEnd();
-            builder.setMapOfStringToSetOfI32(mapOfStringToSetOfI32);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAP_OF_STRING_TO_MAP_OF_STRING_TO_I32:
-          if (__field.type == TType.MAP) {
-            Map<String, Map<String, Integer>> mapOfStringToMapOfStringToI32;
-                {
-                TMap _map = oprot.readMapBegin();
-                mapOfStringToMapOfStringToI32 = new HashMap<String, Map<String, Integer>>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    Map<String, Integer> _value1;
+                break;
+            case _LIST_OF_MAP_OF_STRING_TO_LIST_OF_A:
+                if (__field.type == TType.LIST) {
+                    List<Map<String, List<test.fixtures.shapes.A>>> _fbthriftVar0;
                     {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Map<String, List<test.fixtures.shapes.A>>>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            Map<String, List<test.fixtures.shapes.A>> _fbthriftVar1;
+                            {
                                 TMap _map1 = oprot.readMapBegin();
-                                _value1 = new HashMap<String, Integer>(Math.max(0, _map1.size));
+                                _fbthriftVar1 = new HashMap<String, List<test.fixtures.shapes.A>>(Math.max(0, _map1.size));
                                 for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                    
-                                    
-                                    String _key2 = oprot.readString();
-                                    
+                                    String _fbthriftKey2;
+                                    List<test.fixtures.shapes.A> _fbthriftValue2;
 
-                                    
-                                    int _value2 = oprot.readI32();
-                                    
-                                    
-                                    _value1.put(_key2, _value2);
-                                    
-                                }
-                                }
-                                oprot.readMapEnd();
-                    mapOfStringToMapOfStringToI32.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setMapOfStringToMapOfStringToI32(mapOfStringToMapOfStringToI32);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAP_OF_STRING_TO_MAP_OF_STRING_TO_A:
-          if (__field.type == TType.MAP) {
-            Map<String, Map<String, test.fixtures.shapes.A>> mapOfStringToMapOfStringToA;
-                {
-                TMap _map = oprot.readMapBegin();
-                mapOfStringToMapOfStringToA = new HashMap<String, Map<String, test.fixtures.shapes.A>>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    Map<String, test.fixtures.shapes.A> _value1;
-                    {
-                                TMap _map1 = oprot.readMapBegin();
-                                _value1 = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map1.size));
-                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                    
-                                    
-                                    String _key2 = oprot.readString();
-                                    
-
-                                    
-                                    test.fixtures.shapes.A _value2 = test.fixtures.shapes.A.read0(oprot);
-                                    
-                                    
-                                    _value1.put(_key2, _value2);
-                                    
-                                }
-                                }
-                                oprot.readMapEnd();
-                    mapOfStringToMapOfStringToA.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setMapOfStringToMapOfStringToA(mapOfStringToMapOfStringToA);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LIST_OF_SET_OF_I32:
-          if (__field.type == TType.LIST) {
-            List<Set<Integer>> listOfSetOfI32;
-                {
-                TList _list = oprot.readListBegin();
-                listOfSetOfI32 = new ArrayList<Set<Integer>>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    Set<Integer> _value1;
-                    {
-                                TSet _set1 = oprot.readSetBegin();
-                                _value1 = new HashSet<Integer>(Math.max(0, _set1.size));
-                                for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
-                                    
-                                    
-                                    int _value2 = oprot.readI32();
-                                    
-                                    
-                                    _value1.add(_value2);
-                                    
-                                }
-                                oprot.readSetEnd();
-                                }
-    listOfSetOfI32.add(_value1);
-                }
-                oprot.readListEnd();
-                }
-            builder.setListOfSetOfI32(listOfSetOfI32);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LIST_OF_MAP_OF_STRING_TO_LIST_OF_A:
-          if (__field.type == TType.LIST) {
-            List<Map<String, List<test.fixtures.shapes.A>>> listOfMapOfStringToListOfA;
-                {
-                TList _list = oprot.readListBegin();
-                listOfMapOfStringToListOfA = new ArrayList<Map<String, List<test.fixtures.shapes.A>>>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    Map<String, List<test.fixtures.shapes.A>> _value1;
-                    {
-                                TMap _map1 = oprot.readMapBegin();
-                                _value1 = new HashMap<String, List<test.fixtures.shapes.A>>(Math.max(0, _map1.size));
-                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                    
-                                    
-                                    String _key2 = oprot.readString();
-                                    
-
-                                    
-                                    List<test.fixtures.shapes.A> _value2;
                                     {
-                                                TList _list2 = oprot.readListBegin();
-                                                _value2 = new ArrayList<test.fixtures.shapes.A>(Math.max(0, _list2.size));
-                                                for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
-                                                    
-                                                    
-                                                    test.fixtures.shapes.A _value3 = test.fixtures.shapes.A.read0(oprot);
-                                                    
-                                                    
-                                                    _value2.add(_value3);
-                                                    
-                                                }
-                                                oprot.readListEnd();
-                                                }
-                                    
-                                    
-                                    _value1.put(_key2, _value2);
-                                    
-                                }
+                                        String _fbthriftVar2;
+                                        _fbthriftVar2 = oprot.readString();
+                                        _fbthriftKey2 = _fbthriftVar2;
+                                    }
+                                    {
+                                        List<test.fixtures.shapes.A> _fbthriftVar2;
+                                        {
+                                            TList _list2 = oprot.readListBegin();
+                                            _fbthriftVar2 = new ArrayList<test.fixtures.shapes.A>(Math.max(0, _list2.size));
+                                            for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
+                                                test.fixtures.shapes.A _fbthriftVar3;
+                                                _fbthriftVar3 = test.fixtures.shapes.A.read0(oprot);
+                                                _fbthriftVar2.add(_fbthriftVar3);
+                                            }
+                                            oprot.readListEnd();
+                                        }
+                                        _fbthriftValue2 = _fbthriftVar2;
+                                    }
+                                    _fbthriftVar1.put(_fbthriftKey2, _fbthriftValue2);
                                 }
                                 oprot.readMapEnd();
-    listOfMapOfStringToListOfA.add(_value1);
+                            }
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setListOfMapOfStringToListOfA(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
-                }
-            builder.setListOfMapOfStringToListOfA(listOfMapOfStringToListOfA);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LIST_OF_MAP_OF_STRING_TO_A:
-          if (__field.type == TType.LIST) {
-            List<Map<String, test.fixtures.shapes.A>> listOfMapOfStringToA;
-                {
-                TList _list = oprot.readListBegin();
-                listOfMapOfStringToA = new ArrayList<Map<String, test.fixtures.shapes.A>>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    Map<String, test.fixtures.shapes.A> _value1;
+                break;
+            case _LIST_OF_MAP_OF_STRING_TO_A:
+                if (__field.type == TType.LIST) {
+                    List<Map<String, test.fixtures.shapes.A>> _fbthriftVar0;
                     {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Map<String, test.fixtures.shapes.A>>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            Map<String, test.fixtures.shapes.A> _fbthriftVar1;
+                            {
                                 TMap _map1 = oprot.readMapBegin();
-                                _value1 = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map1.size));
+                                _fbthriftVar1 = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map1.size));
                                 for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                    
-                                    
-                                    String _key2 = oprot.readString();
-                                    
+                                    String _fbthriftKey2;
+                                    test.fixtures.shapes.A _fbthriftValue2;
 
-                                    
-                                    test.fixtures.shapes.A _value2 = test.fixtures.shapes.A.read0(oprot);
-                                    
-                                    
-                                    _value1.put(_key2, _value2);
-                                    
-                                }
+                                    {
+                                        String _fbthriftVar2;
+                                        _fbthriftVar2 = oprot.readString();
+                                        _fbthriftKey2 = _fbthriftVar2;
+                                    }
+                                    {
+                                        test.fixtures.shapes.A _fbthriftVar2;
+                                        _fbthriftVar2 = test.fixtures.shapes.A.read0(oprot);
+                                        _fbthriftValue2 = _fbthriftVar2;
+                                    }
+                                    _fbthriftVar1.put(_fbthriftKey2, _fbthriftValue2);
                                 }
                                 oprot.readMapEnd();
-    listOfMapOfStringToA.add(_value1);
+                            }
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setListOfMapOfStringToA(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _JUST_AN_ENUM:
+                if (__field.type == TType.I32) {
+                    test.fixtures.shapes.Enum _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.shapes.Enum.fromInteger(oprot.readI32());
+                    builder.setJustAnEnum(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setListOfMapOfStringToA(listOfMapOfStringToA);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _JUST_AN_ENUM:
-          if (__field.type == TType.I32) {
-            test.fixtures.shapes.Enum justAnEnum = test.fixtures.shapes.Enum.fromInteger(oprot.readI32());
-            builder.setJustAnEnum(justAnEnum);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _JUST_A_UNION:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.shapes.Union justAUnion = test.fixtures.shapes.Union.read0(oprot);
-            builder.setJustAUnion(justAUnion);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPTIONAL_JUST_AN_A:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.shapes.A optionalJustAnA = test.fixtures.shapes.A.read0(oprot);
-            builder.setOptionalJustAnA(optionalJustAnA);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPTIONAL_SET_OF_I32:
-          if (__field.type == TType.SET) {
-            Set<Integer> optionalSetOfI32;
-                {
-                TSet _set = oprot.readSetBegin();
-                optionalSetOfI32 = new HashSet<Integer>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    int _value1 = oprot.readI32();
-                    optionalSetOfI32.add(_value1);
+                break;
+            case _JUST_A_UNION:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.shapes.Union _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.shapes.Union.read0(oprot);
+                    builder.setJustAUnion(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readSetEnd();
+                break;
+            case _OPTIONAL_JUST_AN_A:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.shapes.A _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.shapes.A.read0(oprot);
+                    builder.setOptionalJustAnA(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setOptionalSetOfI32(optionalSetOfI32);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPTIONAL_LIST_OF_I32:
-          if (__field.type == TType.LIST) {
-            List<Integer> optionalListOfI32;
-                {
-                TList _list = oprot.readListBegin();
-                optionalListOfI32 = new ArrayList<Integer>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    int _value1 = oprot.readI32();
-                    optionalListOfI32.add(_value1);
-                }
-                oprot.readListEnd();
-                }
-            builder.setOptionalListOfI32(optionalListOfI32);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPTIONAL_LIST_OF_STRING:
-          if (__field.type == TType.LIST) {
-            List<String> optionalListOfString;
-                {
-                TList _list = oprot.readListBegin();
-                optionalListOfString = new ArrayList<String>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    String _value1 = oprot.readString();
-                    optionalListOfString.add(_value1);
-                }
-                oprot.readListEnd();
-                }
-            builder.setOptionalListOfString(optionalListOfString);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPTIONAL_MAP_OF_STRING_TO_I32:
-          if (__field.type == TType.MAP) {
-            Map<String, Integer> optionalMapOfStringToI32;
-                {
-                TMap _map = oprot.readMapBegin();
-                optionalMapOfStringToI32 = new HashMap<String, Integer>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    int _value1 = oprot.readI32();
-                    optionalMapOfStringToI32.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setOptionalMapOfStringToI32(optionalMapOfStringToI32);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPTIONAL_MAP_OF_STRING_TO_A:
-          if (__field.type == TType.MAP) {
-            Map<String, test.fixtures.shapes.A> optionalMapOfStringToA;
-                {
-                TMap _map = oprot.readMapBegin();
-                optionalMapOfStringToA = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    test.fixtures.shapes.A _value1 = test.fixtures.shapes.A.read0(oprot);
-                    optionalMapOfStringToA.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setOptionalMapOfStringToA(optionalMapOfStringToA);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPTIONAL_MAP_OF_STRING_TO_LIST_OF_I32:
-          if (__field.type == TType.MAP) {
-            Map<String, List<Integer>> optionalMapOfStringToListOfI32;
-                {
-                TMap _map = oprot.readMapBegin();
-                optionalMapOfStringToListOfI32 = new HashMap<String, List<Integer>>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    List<Integer> _value1;
+                break;
+            case _OPTIONAL_SET_OF_I32:
+                if (__field.type == TType.SET) {
+                    Set<Integer> _fbthriftVar0;
                     {
-                                TList _list1 = oprot.readListBegin();
-                                _value1 = new ArrayList<Integer>(Math.max(0, _list1.size));
-                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                    
-                                    
-                                    int _value2 = oprot.readI32();
-                                    
-                                    
-                                    _value1.add(_value2);
-                                    
-                                }
-                                oprot.readListEnd();
-                                }
-                    optionalMapOfStringToListOfI32.put(_key1, _value1);
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Integer>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            int _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI32();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setOptionalSetOfI32(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                }
-                oprot.readMapEnd();
-            builder.setOptionalMapOfStringToListOfI32(optionalMapOfStringToListOfI32);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPTIONAL_MAP_OF_STRING_TO_LIST_OF_A:
-          if (__field.type == TType.MAP) {
-            Map<String, List<test.fixtures.shapes.A>> optionalMapOfStringToListOfA;
-                {
-                TMap _map = oprot.readMapBegin();
-                optionalMapOfStringToListOfA = new HashMap<String, List<test.fixtures.shapes.A>>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    List<test.fixtures.shapes.A> _value1;
+                break;
+            case _OPTIONAL_LIST_OF_I32:
+                if (__field.type == TType.LIST) {
+                    List<Integer> _fbthriftVar0;
                     {
-                                TList _list1 = oprot.readListBegin();
-                                _value1 = new ArrayList<test.fixtures.shapes.A>(Math.max(0, _list1.size));
-                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                    
-                                    
-                                    test.fixtures.shapes.A _value2 = test.fixtures.shapes.A.read0(oprot);
-                                    
-                                    
-                                    _value1.add(_value2);
-                                    
-                                }
-                                oprot.readListEnd();
-                                }
-                    optionalMapOfStringToListOfA.put(_key1, _value1);
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Integer>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            int _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI32();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setOptionalListOfI32(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                }
-                oprot.readMapEnd();
-            builder.setOptionalMapOfStringToListOfA(optionalMapOfStringToListOfA);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPTIONAL_MAP_OF_STRING_TO_SET_OF_I32:
-          if (__field.type == TType.MAP) {
-            Map<String, Set<Integer>> optionalMapOfStringToSetOfI32;
-                {
-                TMap _map = oprot.readMapBegin();
-                optionalMapOfStringToSetOfI32 = new HashMap<String, Set<Integer>>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    Set<Integer> _value1;
+                break;
+            case _OPTIONAL_LIST_OF_STRING:
+                if (__field.type == TType.LIST) {
+                    List<String> _fbthriftVar0;
                     {
-                                TSet _set1 = oprot.readSetBegin();
-                                _value1 = new HashSet<Integer>(Math.max(0, _set1.size));
-                                for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
-                                    
-                                    
-                                    int _value2 = oprot.readI32();
-                                    
-                                    
-                                    _value1.add(_value2);
-                                    
-                                }
-                                oprot.readSetEnd();
-                                }
-                    optionalMapOfStringToSetOfI32.put(_key1, _value1);
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<String>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            String _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readString();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setOptionalListOfString(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                }
-                oprot.readMapEnd();
-            builder.setOptionalMapOfStringToSetOfI32(optionalMapOfStringToSetOfI32);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPTIONAL_ENUM:
-          if (__field.type == TType.I32) {
-            test.fixtures.shapes.Enum optionalEnum = test.fixtures.shapes.Enum.fromInteger(oprot.readI32());
-            builder.setOptionalEnum(optionalEnum);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _REQUIRED_ENUM_WITH_DEFAULT:
-          if (__field.type == TType.I32) {
-            test.fixtures.shapes.Enum requiredEnumWithDefault = test.fixtures.shapes.Enum.fromInteger(oprot.readI32());
-            builder.setRequiredEnumWithDefault(requiredEnumWithDefault);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _STRING_WITH_DEFAULT_VALUE:
-          if (__field.type == TType.STRING) {
-            String stringWithDefaultValue = oprot.readString();
-            builder.setStringWithDefaultValue(stringWithDefaultValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _I32_WITH_DEFAULT_VALUE:
-          if (__field.type == TType.I32) {
-            int i32WithDefaultValue = oprot.readI32();
-            builder.setI32WithDefaultValue(i32WithDefaultValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _DOUBLE_WITH_DEFAULT_VALUE:
-          if (__field.type == TType.DOUBLE) {
-            double doubleWithDefaultValue = oprot.readDouble();
-            builder.setDoubleWithDefaultValue(doubleWithDefaultValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ENUM_WITH_DEFAULT_VALUE:
-          if (__field.type == TType.I32) {
-            test.fixtures.shapes.Enum enumWithDefaultValue = test.fixtures.shapes.Enum.fromInteger(oprot.readI32());
-            builder.setEnumWithDefaultValue(enumWithDefaultValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _A_WITH_DEFAULT_VALUE:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.shapes.A aWithDefaultValue = test.fixtures.shapes.A.read0(oprot);
-            builder.setAWithDefaultValue(aWithDefaultValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SET_OF_I32_WITH_DEFAULT_VALUE:
-          if (__field.type == TType.SET) {
-            Set<Integer> setOfI32WithDefaultValue;
-                {
-                TSet _set = oprot.readSetBegin();
-                setOfI32WithDefaultValue = new HashSet<Integer>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    int _value1 = oprot.readI32();
-                    setOfI32WithDefaultValue.add(_value1);
-                }
-                oprot.readSetEnd();
-                }
-            builder.setSetOfI32WithDefaultValue(setOfI32WithDefaultValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAP_OF_I32_TO_STRING_WITH_DEFAULT_VALUE:
-          if (__field.type == TType.MAP) {
-            Map<Integer, String> mapOfI32ToStringWithDefaultValue;
-                {
-                TMap _map = oprot.readMapBegin();
-                mapOfI32ToStringWithDefaultValue = new HashMap<Integer, String>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    int _key1 = oprot.readI32();
-                    String _value1 = oprot.readString();
-                    mapOfI32ToStringWithDefaultValue.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setMapOfI32ToStringWithDefaultValue(mapOfI32ToStringWithDefaultValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LIST_OF_STRING_WITH_DEFAULT_VALUE:
-          if (__field.type == TType.LIST) {
-            List<String> listOfStringWithDefaultValue;
-                {
-                TList _list = oprot.readListBegin();
-                listOfStringWithDefaultValue = new ArrayList<String>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    String _value1 = oprot.readString();
-                    listOfStringWithDefaultValue.add(_value1);
-                }
-                oprot.readListEnd();
-                }
-            builder.setListOfStringWithDefaultValue(listOfStringWithDefaultValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAP_OF_STRING_TO_LIST_OF_I32_WITH_DEFAULT_VALUE:
-          if (__field.type == TType.MAP) {
-            Map<String, List<Integer>> mapOfStringToListOfI32WithDefaultValue;
-                {
-                TMap _map = oprot.readMapBegin();
-                mapOfStringToListOfI32WithDefaultValue = new HashMap<String, List<Integer>>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    List<Integer> _value1;
+                break;
+            case _OPTIONAL_MAP_OF_STRING_TO_I32:
+                if (__field.type == TType.MAP) {
+                    Map<String, Integer> _fbthriftVar0;
                     {
-                                TList _list1 = oprot.readListBegin();
-                                _value1 = new ArrayList<Integer>(Math.max(0, _list1.size));
-                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                    
-                                    
-                                    int _value2 = oprot.readI32();
-                                    
-                                    
-                                    _value1.add(_value2);
-                                    
-                                }
-                                oprot.readListEnd();
-                                }
-                    mapOfStringToListOfI32WithDefaultValue.put(_key1, _value1);
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, Integer>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            int _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                int _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI32();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setOptionalMapOfStringToI32(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
+                break;
+            case _OPTIONAL_MAP_OF_STRING_TO_A:
+                if (__field.type == TType.MAP) {
+                    Map<String, test.fixtures.shapes.A> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            test.fixtures.shapes.A _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                test.fixtures.shapes.A _fbthriftVar1;
+                                _fbthriftVar1 = test.fixtures.shapes.A.read0(oprot);
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setOptionalMapOfStringToA(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readMapEnd();
-            builder.setMapOfStringToListOfI32WithDefaultValue(mapOfStringToListOfI32WithDefaultValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            case _OPTIONAL_MAP_OF_STRING_TO_LIST_OF_I32:
+                if (__field.type == TType.MAP) {
+                    Map<String, List<Integer>> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, List<Integer>>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            List<Integer> _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                List<Integer> _fbthriftVar1;
+                                {
+                                    TList _list1 = oprot.readListBegin();
+                                    _fbthriftVar1 = new ArrayList<Integer>(Math.max(0, _list1.size));
+                                    for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                        int _fbthriftVar2;
+                                        _fbthriftVar2 = oprot.readI32();
+                                        _fbthriftVar1.add(_fbthriftVar2);
+                                    }
+                                    oprot.readListEnd();
+                                }
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setOptionalMapOfStringToListOfI32(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _OPTIONAL_MAP_OF_STRING_TO_LIST_OF_A:
+                if (__field.type == TType.MAP) {
+                    Map<String, List<test.fixtures.shapes.A>> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, List<test.fixtures.shapes.A>>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            List<test.fixtures.shapes.A> _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                List<test.fixtures.shapes.A> _fbthriftVar1;
+                                {
+                                    TList _list1 = oprot.readListBegin();
+                                    _fbthriftVar1 = new ArrayList<test.fixtures.shapes.A>(Math.max(0, _list1.size));
+                                    for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                        test.fixtures.shapes.A _fbthriftVar2;
+                                        _fbthriftVar2 = test.fixtures.shapes.A.read0(oprot);
+                                        _fbthriftVar1.add(_fbthriftVar2);
+                                    }
+                                    oprot.readListEnd();
+                                }
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setOptionalMapOfStringToListOfA(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _OPTIONAL_MAP_OF_STRING_TO_SET_OF_I32:
+                if (__field.type == TType.MAP) {
+                    Map<String, Set<Integer>> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, Set<Integer>>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            Set<Integer> _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                Set<Integer> _fbthriftVar1;
+                                {
+                                    TSet _set1 = oprot.readSetBegin();
+                                    _fbthriftVar1 = new HashSet<Integer>(Math.max(0, _set1.size));
+                                    for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                        int _fbthriftVar2;
+                                        _fbthriftVar2 = oprot.readI32();
+                                        _fbthriftVar1.add(_fbthriftVar2);
+                                    }
+                                    oprot.readSetEnd();
+                                }
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setOptionalMapOfStringToSetOfI32(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _OPTIONAL_ENUM:
+                if (__field.type == TType.I32) {
+                    test.fixtures.shapes.Enum _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.shapes.Enum.fromInteger(oprot.readI32());
+                    builder.setOptionalEnum(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _REQUIRED_ENUM_WITH_DEFAULT:
+                if (__field.type == TType.I32) {
+                    test.fixtures.shapes.Enum _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.shapes.Enum.fromInteger(oprot.readI32());
+                    builder.setRequiredEnumWithDefault(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _STRING_WITH_DEFAULT_VALUE:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setStringWithDefaultValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _I32_WITH_DEFAULT_VALUE:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setI32WithDefaultValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _DOUBLE_WITH_DEFAULT_VALUE:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setDoubleWithDefaultValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ENUM_WITH_DEFAULT_VALUE:
+                if (__field.type == TType.I32) {
+                    test.fixtures.shapes.Enum _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.shapes.Enum.fromInteger(oprot.readI32());
+                    builder.setEnumWithDefaultValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _A_WITH_DEFAULT_VALUE:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.shapes.A _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.shapes.A.read0(oprot);
+                    builder.setAWithDefaultValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _SET_OF_I32_WITH_DEFAULT_VALUE:
+                if (__field.type == TType.SET) {
+                    Set<Integer> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Integer>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            int _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI32();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setSetOfI32WithDefaultValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAP_OF_I32_TO_STRING_WITH_DEFAULT_VALUE:
+                if (__field.type == TType.MAP) {
+                    Map<Integer, String> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<Integer, String>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            int _fbthriftKey1;
+                            String _fbthriftValue1;
+
+                            {
+                                int _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI32();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMapOfI32ToStringWithDefaultValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _LIST_OF_STRING_WITH_DEFAULT_VALUE:
+                if (__field.type == TType.LIST) {
+                    List<String> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<String>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            String _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readString();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setListOfStringWithDefaultValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAP_OF_STRING_TO_LIST_OF_I32_WITH_DEFAULT_VALUE:
+                if (__field.type == TType.MAP) {
+                    Map<String, List<Integer>> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, List<Integer>>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            List<Integer> _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                List<Integer> _fbthriftVar1;
+                                {
+                                    TList _list1 = oprot.readListBegin();
+                                    _fbthriftVar1 = new ArrayList<Integer>(Math.max(0, _list1.size));
+                                    for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                        int _fbthriftVar2;
+                                        _fbthriftVar2 = oprot.readI32();
+                                        _fbthriftVar1.add(_fbthriftVar2);
+                                    }
+                                    oprot.readListEnd();
+                                }
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMapOfStringToListOfI32WithDefaultValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      test.fixtures.shapes.A _iter0 = this.justAnA;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(JUST_AN_A_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Set<Integer> _iter0 = this.setOfI32;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(SET_OF_I32_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
-            for (int _iter1 : _iter0) {
-              oprot.writeI32(_iter1);
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            test.fixtures.shapes.A _fbthriftVar0 = this.justAnA;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(JUST_AN_A_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Integer> _iter0 = this.listOfI32;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(LIST_OF_I32_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
-            for (int _iter1 : _iter0) {
-              oprot.writeI32(_iter1);
+        }
+        {
+            Set<Integer> _fbthriftVar0 = this.setOfI32;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(SET_OF_I32_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.I32, _fbthriftVar0.size()));
+                for (int _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI32(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<String> _iter0 = this.listOfString;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(LIST_OF_STRING_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
-            for (String _iter1 : _iter0) {
-              oprot.writeString(_iter1);
+        }
+        {
+            List<Integer> _fbthriftVar0 = this.listOfI32;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(LIST_OF_I32_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.I32, _fbthriftVar0.size()));
+                for (int _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI32(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, Integer> _iter0 = this.mapOfStringToI32;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MAP_OF_STRING_TO_I32_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter0.size()));
-            for (Map.Entry<String, Integer> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                Integer _iter2 = _iter1.getValue();
-                oprot.writeI32(_iter2);
-              }
+        }
+        {
+            List<String> _fbthriftVar0 = this.listOfString;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(LIST_OF_STRING_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.STRING, _fbthriftVar0.size()));
+                for (String _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeString(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, test.fixtures.shapes.A> _iter0 = this.mapOfStringToA;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MAP_OF_STRING_TO_A_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter0.size()));
-            for (Map.Entry<String, test.fixtures.shapes.A> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                test.fixtures.shapes.A _iter2 = _iter1.getValue();
-                _iter2.write0(oprot);
-              }
+        }
+        {
+            Map<String, Integer> _fbthriftVar0 = this.mapOfStringToI32;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MAP_OF_STRING_TO_I32_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _fbthriftVar0.size()));
+                for (Map.Entry<String, Integer> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        Integer _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeI32(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, List<Integer>> _iter0 = this.mapOfStringToListOfI32;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-            for (Map.Entry<String, List<Integer>> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                List<Integer> _iter2 = _iter1.getValue();
-                oprot.writeListBegin(new TList(TType.I32, _iter2.size()));
-            for (int _iter3 : _iter2) {
-              oprot.writeI32(_iter3);
+        }
+        {
+            Map<String, test.fixtures.shapes.A> _fbthriftVar0 = this.mapOfStringToA;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MAP_OF_STRING_TO_A_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _fbthriftVar0.size()));
+                for (Map.Entry<String, test.fixtures.shapes.A> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        test.fixtures.shapes.A _fbthriftVar2 = _fbthriftVar1.getValue();
+                        _fbthriftVar2.write0(oprot);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-              }
+        }
+        {
+            Map<String, List<Integer>> _fbthriftVar0 = this.mapOfStringToListOfI32;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _fbthriftVar0.size()));
+                for (Map.Entry<String, List<Integer>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        List<Integer> _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeListBegin(new TList(TType.I32, _fbthriftVar2.size()));
+                        for (int _fbthriftVar3 : _fbthriftVar2) {
+                            oprot.writeI32(_fbthriftVar3);
+                        }
+                        oprot.writeListEnd();
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, List<test.fixtures.shapes.A>> _iter0 = this.mapOfStringToListOfA;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-            for (Map.Entry<String, List<test.fixtures.shapes.A>> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                List<test.fixtures.shapes.A> _iter2 = _iter1.getValue();
-                oprot.writeListBegin(new TList(TType.STRUCT, _iter2.size()));
-            for (test.fixtures.shapes.A _iter3 : _iter2) {
-              _iter3.write0(oprot);
+        }
+        {
+            Map<String, List<test.fixtures.shapes.A>> _fbthriftVar0 = this.mapOfStringToListOfA;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _fbthriftVar0.size()));
+                for (Map.Entry<String, List<test.fixtures.shapes.A>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        List<test.fixtures.shapes.A> _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeListBegin(new TList(TType.STRUCT, _fbthriftVar2.size()));
+                        for (test.fixtures.shapes.A _fbthriftVar3 : _fbthriftVar2) {
+                            _fbthriftVar3.write0(oprot);
+                        }
+                        oprot.writeListEnd();
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-              }
+        }
+        {
+            Map<String, Set<Integer>> _fbthriftVar0 = this.mapOfStringToSetOfI32;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.SET, _fbthriftVar0.size()));
+                for (Map.Entry<String, Set<Integer>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        Set<Integer> _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeSetBegin(new TSet(TType.I32, _fbthriftVar2.size()));
+                        for (int _fbthriftVar3 : _fbthriftVar2) {
+                            oprot.writeI32(_fbthriftVar3);
+                        }
+                        oprot.writeSetEnd();
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, Set<Integer>> _iter0 = this.mapOfStringToSetOfI32;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.SET, _iter0.size()));
-            for (Map.Entry<String, Set<Integer>> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                Set<Integer> _iter2 = _iter1.getValue();
-                oprot.writeSetBegin(new TSet(TType.I32, _iter2.size()));
-            for (int _iter3 : _iter2) {
-              oprot.writeI32(_iter3);
+        }
+        {
+            Map<String, Map<String, Integer>> _fbthriftVar0 = this.mapOfStringToMapOfStringToI32;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MAP_OF_STRING_TO_MAP_OF_STRING_TO_I32_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, _fbthriftVar0.size()));
+                for (Map.Entry<String, Map<String, Integer>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        Map<String, Integer> _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _fbthriftVar2.size()));
+                        for (Map.Entry<String, Integer> _fbthriftVar3 : _fbthriftVar2.entrySet()) {
+                            {
+                                String _fbthriftVar4 = _fbthriftVar3.getKey();
+                                oprot.writeString(_fbthriftVar4);
+                            }
+                            {
+                                Integer _fbthriftVar4 = _fbthriftVar3.getValue();
+                                oprot.writeI32(_fbthriftVar4);
+                            }
+                        }
+                        oprot.writeMapEnd();
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-              }
+        }
+        {
+            Map<String, Map<String, test.fixtures.shapes.A>> _fbthriftVar0 = this.mapOfStringToMapOfStringToA;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MAP_OF_STRING_TO_MAP_OF_STRING_TO_A_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, _fbthriftVar0.size()));
+                for (Map.Entry<String, Map<String, test.fixtures.shapes.A>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        Map<String, test.fixtures.shapes.A> _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _fbthriftVar2.size()));
+                        for (Map.Entry<String, test.fixtures.shapes.A> _fbthriftVar3 : _fbthriftVar2.entrySet()) {
+                            {
+                                String _fbthriftVar4 = _fbthriftVar3.getKey();
+                                oprot.writeString(_fbthriftVar4);
+                            }
+                            {
+                                test.fixtures.shapes.A _fbthriftVar4 = _fbthriftVar3.getValue();
+                                _fbthriftVar4.write0(oprot);
+                            }
+                        }
+                        oprot.writeMapEnd();
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, Map<String, Integer>> _iter0 = this.mapOfStringToMapOfStringToI32;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MAP_OF_STRING_TO_MAP_OF_STRING_TO_I32_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, _iter0.size()));
-            for (Map.Entry<String, Map<String, Integer>> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                Map<String, Integer> _iter2 = _iter1.getValue();
-                oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter2.size()));
-            for (Map.Entry<String, Integer> _iter3 : _iter2.entrySet()) {
-              {
-                String _iter4 = _iter3.getKey();
-                oprot.writeString(_iter4);
-              }
-              {
-                Integer _iter4 = _iter3.getValue();
-                oprot.writeI32(_iter4);
-              }
+        }
+        {
+            List<Set<Integer>> _fbthriftVar0 = this.listOfSetOfI32;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(LIST_OF_SET_OF_I32_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.SET, _fbthriftVar0.size()));
+                for (Set<Integer> _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeSetBegin(new TSet(TType.I32, _fbthriftVar1.size()));
+                    for (int _fbthriftVar2 : _fbthriftVar1) {
+                        oprot.writeI32(_fbthriftVar2);
+                    }
+                    oprot.writeSetEnd();
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-              }
+        }
+        {
+            List<Map<String, List<test.fixtures.shapes.A>>> _fbthriftVar0 = this.listOfMapOfStringToListOfA;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(LIST_OF_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.MAP, _fbthriftVar0.size()));
+                for (Map<String, List<test.fixtures.shapes.A>> _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _fbthriftVar1.size()));
+                    for (Map.Entry<String, List<test.fixtures.shapes.A>> _fbthriftVar2 : _fbthriftVar1.entrySet()) {
+                        {
+                            String _fbthriftVar3 = _fbthriftVar2.getKey();
+                            oprot.writeString(_fbthriftVar3);
+                        }
+                        {
+                            List<test.fixtures.shapes.A> _fbthriftVar3 = _fbthriftVar2.getValue();
+                            oprot.writeListBegin(new TList(TType.STRUCT, _fbthriftVar3.size()));
+                            for (test.fixtures.shapes.A _fbthriftVar4 : _fbthriftVar3) {
+                                _fbthriftVar4.write0(oprot);
+                            }
+                            oprot.writeListEnd();
+                        }
+                    }
+                    oprot.writeMapEnd();
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, Map<String, test.fixtures.shapes.A>> _iter0 = this.mapOfStringToMapOfStringToA;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MAP_OF_STRING_TO_MAP_OF_STRING_TO_A_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, _iter0.size()));
-            for (Map.Entry<String, Map<String, test.fixtures.shapes.A>> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                Map<String, test.fixtures.shapes.A> _iter2 = _iter1.getValue();
-                oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter2.size()));
-            for (Map.Entry<String, test.fixtures.shapes.A> _iter3 : _iter2.entrySet()) {
-              {
-                String _iter4 = _iter3.getKey();
-                oprot.writeString(_iter4);
-              }
-              {
-                test.fixtures.shapes.A _iter4 = _iter3.getValue();
-                _iter4.write0(oprot);
-              }
+        }
+        {
+            List<Map<String, test.fixtures.shapes.A>> _fbthriftVar0 = this.listOfMapOfStringToA;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(LIST_OF_MAP_OF_STRING_TO_A_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.MAP, _fbthriftVar0.size()));
+                for (Map<String, test.fixtures.shapes.A> _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _fbthriftVar1.size()));
+                    for (Map.Entry<String, test.fixtures.shapes.A> _fbthriftVar2 : _fbthriftVar1.entrySet()) {
+                        {
+                            String _fbthriftVar3 = _fbthriftVar2.getKey();
+                            oprot.writeString(_fbthriftVar3);
+                        }
+                        {
+                            test.fixtures.shapes.A _fbthriftVar3 = _fbthriftVar2.getValue();
+                            _fbthriftVar3.write0(oprot);
+                        }
+                    }
+                    oprot.writeMapEnd();
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-              }
+        }
+        {
+            test.fixtures.shapes.Enum _fbthriftVar0 = this.justAnEnum;
+            oprot.writeFieldBegin(JUST_AN_ENUM_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            test.fixtures.shapes.Union _fbthriftVar0 = this.justAUnion;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(JUST_AUNION_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Set<Integer>> _iter0 = this.listOfSetOfI32;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(LIST_OF_SET_OF_I32_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.SET, _iter0.size()));
-            for (Set<Integer> _iter1 : _iter0) {
-              oprot.writeSetBegin(new TSet(TType.I32, _iter1.size()));
-            for (int _iter2 : _iter1) {
-              oprot.writeI32(_iter2);
+        }
+        {
+            test.fixtures.shapes.A _fbthriftVar0 = this.optionalJustAnA;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPTIONAL_JUST_AN_A_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
+        }
+        {
+            Set<Integer> _fbthriftVar0 = this.optionalSetOfI32;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPTIONAL_SET_OF_I32_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.I32, _fbthriftVar0.size()));
+                for (int _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI32(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Map<String, List<test.fixtures.shapes.A>>> _iter0 = this.listOfMapOfStringToListOfA;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(LIST_OF_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
-            for (Map<String, List<test.fixtures.shapes.A>> _iter1 : _iter0) {
-              oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter1.size()));
-            for (Map.Entry<String, List<test.fixtures.shapes.A>> _iter2 : _iter1.entrySet()) {
-              {
-                String _iter3 = _iter2.getKey();
-                oprot.writeString(_iter3);
-              }
-              {
-                List<test.fixtures.shapes.A> _iter3 = _iter2.getValue();
-                oprot.writeListBegin(new TList(TType.STRUCT, _iter3.size()));
-            for (test.fixtures.shapes.A _iter4 : _iter3) {
-              _iter4.write0(oprot);
+        }
+        {
+            List<Integer> _fbthriftVar0 = this.optionalListOfI32;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPTIONAL_LIST_OF_I32_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.I32, _fbthriftVar0.size()));
+                for (int _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI32(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-              }
+        }
+        {
+            List<String> _fbthriftVar0 = this.optionalListOfString;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPTIONAL_LIST_OF_STRING_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.STRING, _fbthriftVar0.size()));
+                for (String _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeString(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
+        }
+        {
+            Map<String, Integer> _fbthriftVar0 = this.optionalMapOfStringToI32;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_I32_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _fbthriftVar0.size()));
+                for (Map.Entry<String, Integer> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        Integer _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeI32(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Map<String, test.fixtures.shapes.A>> _iter0 = this.listOfMapOfStringToA;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(LIST_OF_MAP_OF_STRING_TO_A_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
-            for (Map<String, test.fixtures.shapes.A> _iter1 : _iter0) {
-              oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter1.size()));
-            for (Map.Entry<String, test.fixtures.shapes.A> _iter2 : _iter1.entrySet()) {
-              {
-                String _iter3 = _iter2.getKey();
-                oprot.writeString(_iter3);
-              }
-              {
-                test.fixtures.shapes.A _iter3 = _iter2.getValue();
-                _iter3.write0(oprot);
-              }
+        }
+        {
+            Map<String, test.fixtures.shapes.A> _fbthriftVar0 = this.optionalMapOfStringToA;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_A_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _fbthriftVar0.size()));
+                for (Map.Entry<String, test.fixtures.shapes.A> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        test.fixtures.shapes.A _fbthriftVar2 = _fbthriftVar1.getValue();
+                        _fbthriftVar2.write0(oprot);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
+        }
+        {
+            Map<String, List<Integer>> _fbthriftVar0 = this.optionalMapOfStringToListOfI32;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _fbthriftVar0.size()));
+                for (Map.Entry<String, List<Integer>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        List<Integer> _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeListBegin(new TList(TType.I32, _fbthriftVar2.size()));
+                        for (int _fbthriftVar3 : _fbthriftVar2) {
+                            oprot.writeI32(_fbthriftVar3);
+                        }
+                        oprot.writeListEnd();
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.shapes.Enum _iter0 = this.justAnEnum;
-      oprot.writeFieldBegin(JUST_AN_ENUM_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      test.fixtures.shapes.Union _iter0 = this.justAUnion;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(JUST_AUNION_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.shapes.A _iter0 = this.optionalJustAnA;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPTIONAL_JUST_AN_A_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Set<Integer> _iter0 = this.optionalSetOfI32;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPTIONAL_SET_OF_I32_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
-            for (int _iter1 : _iter0) {
-              oprot.writeI32(_iter1);
+        }
+        {
+            Map<String, List<test.fixtures.shapes.A>> _fbthriftVar0 = this.optionalMapOfStringToListOfA;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _fbthriftVar0.size()));
+                for (Map.Entry<String, List<test.fixtures.shapes.A>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        List<test.fixtures.shapes.A> _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeListBegin(new TList(TType.STRUCT, _fbthriftVar2.size()));
+                        for (test.fixtures.shapes.A _fbthriftVar3 : _fbthriftVar2) {
+                            _fbthriftVar3.write0(oprot);
+                        }
+                        oprot.writeListEnd();
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Integer> _iter0 = this.optionalListOfI32;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPTIONAL_LIST_OF_I32_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
-            for (int _iter1 : _iter0) {
-              oprot.writeI32(_iter1);
+        }
+        {
+            Map<String, Set<Integer>> _fbthriftVar0 = this.optionalMapOfStringToSetOfI32;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.SET, _fbthriftVar0.size()));
+                for (Map.Entry<String, Set<Integer>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        Set<Integer> _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeSetBegin(new TSet(TType.I32, _fbthriftVar2.size()));
+                        for (int _fbthriftVar3 : _fbthriftVar2) {
+                            oprot.writeI32(_fbthriftVar3);
+                        }
+                        oprot.writeSetEnd();
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<String> _iter0 = this.optionalListOfString;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPTIONAL_LIST_OF_STRING_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
-            for (String _iter1 : _iter0) {
-              oprot.writeString(_iter1);
+        }
+        {
+            test.fixtures.shapes.Enum _fbthriftVar0 = this.optionalEnum;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPTIONAL_ENUM_FIELD_DESC);
+                oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, Integer> _iter0 = this.optionalMapOfStringToI32;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_I32_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter0.size()));
-            for (Map.Entry<String, Integer> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                Integer _iter2 = _iter1.getValue();
-                oprot.writeI32(_iter2);
-              }
+        }
+        {
+            test.fixtures.shapes.Enum _fbthriftVar0 = this.requiredEnumWithDefault;
+            oprot.writeFieldBegin(REQUIRED_ENUM_WITH_DEFAULT_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.stringWithDefaultValue;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, test.fixtures.shapes.A> _iter0 = this.optionalMapOfStringToA;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_A_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter0.size()));
-            for (Map.Entry<String, test.fixtures.shapes.A> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                test.fixtures.shapes.A _iter2 = _iter1.getValue();
-                _iter2.write0(oprot);
-              }
+        }
+        {
+            int _fbthriftVar0 = this.i32WithDefaultValue;
+            oprot.writeFieldBegin(I32_WITH_DEFAULT_VALUE_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.doubleWithDefaultValue;
+            oprot.writeFieldBegin(DOUBLE_WITH_DEFAULT_VALUE_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            test.fixtures.shapes.Enum _fbthriftVar0 = this.enumWithDefaultValue;
+            oprot.writeFieldBegin(ENUM_WITH_DEFAULT_VALUE_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            test.fixtures.shapes.A _fbthriftVar0 = this.aWithDefaultValue;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(A_WITH_DEFAULT_VALUE_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, List<Integer>> _iter0 = this.optionalMapOfStringToListOfI32;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-            for (Map.Entry<String, List<Integer>> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                List<Integer> _iter2 = _iter1.getValue();
-                oprot.writeListBegin(new TList(TType.I32, _iter2.size()));
-            for (int _iter3 : _iter2) {
-              oprot.writeI32(_iter3);
+        }
+        {
+            Set<Integer> _fbthriftVar0 = this.setOfI32WithDefaultValue;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(SET_OF_I32_WITH_DEFAULT_VALUE_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.I32, _fbthriftVar0.size()));
+                for (int _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI32(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-              }
+        }
+        {
+            Map<Integer, String> _fbthriftVar0 = this.mapOfI32ToStringWithDefaultValue;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MAP_OF_I32_TO_STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _fbthriftVar0.size()));
+                for (Map.Entry<Integer, String> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Integer _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI32(_fbthriftVar2);
+                    }
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, List<test.fixtures.shapes.A>> _iter0 = this.optionalMapOfStringToListOfA;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_LIST_OF_A_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-            for (Map.Entry<String, List<test.fixtures.shapes.A>> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                List<test.fixtures.shapes.A> _iter2 = _iter1.getValue();
-                oprot.writeListBegin(new TList(TType.STRUCT, _iter2.size()));
-            for (test.fixtures.shapes.A _iter3 : _iter2) {
-              _iter3.write0(oprot);
+        }
+        {
+            List<String> _fbthriftVar0 = this.listOfStringWithDefaultValue;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(LIST_OF_STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.STRING, _fbthriftVar0.size()));
+                for (String _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeString(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-              }
+        }
+        {
+            Map<String, List<Integer>> _fbthriftVar0 = this.mapOfStringToListOfI32WithDefaultValue;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MAP_OF_STRING_TO_LIST_OF_I32_WITH_DEFAULT_VALUE_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _fbthriftVar0.size()));
+                for (Map.Entry<String, List<Integer>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        List<Integer> _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeListBegin(new TList(TType.I32, _fbthriftVar2.size()));
+                        for (int _fbthriftVar3 : _fbthriftVar2) {
+                            oprot.writeI32(_fbthriftVar3);
+                        }
+                        oprot.writeListEnd();
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, Set<Integer>> _iter0 = this.optionalMapOfStringToSetOfI32;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.SET, _iter0.size()));
-            for (Map.Entry<String, Set<Integer>> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                Set<Integer> _iter2 = _iter1.getValue();
-                oprot.writeSetBegin(new TSet(TType.I32, _iter2.size()));
-            for (int _iter3 : _iter2) {
-              oprot.writeI32(_iter3);
-            }
-            oprot.writeSetEnd();
-              }
-            }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.shapes.Enum _iter0 = this.optionalEnum;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPTIONAL_ENUM_FIELD_DESC);
-        oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.shapes.Enum _iter0 = this.requiredEnumWithDefault;
-      oprot.writeFieldBegin(REQUIRED_ENUM_WITH_DEFAULT_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.stringWithDefaultValue;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      int _iter0 = this.i32WithDefaultValue;
-      oprot.writeFieldBegin(I32_WITH_DEFAULT_VALUE_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.doubleWithDefaultValue;
-      oprot.writeFieldBegin(DOUBLE_WITH_DEFAULT_VALUE_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      test.fixtures.shapes.Enum _iter0 = this.enumWithDefaultValue;
-      oprot.writeFieldBegin(ENUM_WITH_DEFAULT_VALUE_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      test.fixtures.shapes.A _iter0 = this.aWithDefaultValue;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(A_WITH_DEFAULT_VALUE_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Set<Integer> _iter0 = this.setOfI32WithDefaultValue;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(SET_OF_I32_WITH_DEFAULT_VALUE_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
-            for (int _iter1 : _iter0) {
-              oprot.writeI32(_iter1);
-            }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<Integer, String> _iter0 = this.mapOfI32ToStringWithDefaultValue;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MAP_OF_I32_TO_STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter0.size()));
-            for (Map.Entry<Integer, String> _iter1 : _iter0.entrySet()) {
-              {
-                Integer _iter2 = _iter1.getKey();
-                oprot.writeI32(_iter2);
-              }
-              {
-                String _iter2 = _iter1.getValue();
-                oprot.writeString(_iter2);
-              }
-            }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<String> _iter0 = this.listOfStringWithDefaultValue;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(LIST_OF_STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
-            for (String _iter1 : _iter0) {
-              oprot.writeString(_iter1);
-            }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, List<Integer>> _iter0 = this.mapOfStringToListOfI32WithDefaultValue;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MAP_OF_STRING_TO_LIST_OF_I32_WITH_DEFAULT_VALUE_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-            for (Map.Entry<String, List<Integer>> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                List<Integer> _iter2 = _iter1.getValue();
-                oprot.writeListBegin(new TList(TType.I32, _iter2.size()));
-            for (int _iter3 : _iter2) {
-              oprot.writeI32(_iter3);
-            }
-            oprot.writeListEnd();
-              }
-            }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _BLazy {

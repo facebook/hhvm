@@ -138,7 +138,9 @@ static bool echConfigHasMandatoryExtension(const ParsedECHConfig& config) {
       });
 }
 
-folly::Optional<NegotiatedECHConfig> negotiateECHConfig(
+Status negotiateECHConfig(
+    folly::Optional<NegotiatedECHConfig>& ret,
+    Error& err,
     const std::vector<ParsedECHConfig>& configs,
     std::vector<hpke::KEMId> supportedKEMs,
     std::vector<hpke::AeadId> supportedAeads) {
@@ -174,22 +176,28 @@ folly::Optional<NegotiatedECHConfig> negotiateECHConfig(
               supportedAeads.begin(), supportedAeads.end(), suite.aead_id) !=
           supportedAeads.end();
       if (isCipherSupported) {
-        auto associatedCipherKdf =
-            hpke::getKDFId(getHashFunction(getCipherSuite(suite.aead_id)));
+        HashFunction hashFunc;
+        FIZZ_RETURN_ON_ERROR(
+            getHashFunction(hashFunc, err, getCipherSuite(suite.aead_id)));
+        auto associatedCipherKdf = hpke::getKDFId(hashFunc);
         if (suite.kdf_id == associatedCipherKdf) {
           auto negotiatedECHConfig = config;
           auto configId = config.key_config.config_id;
           auto maxLen = config.maximum_name_length;
-          return NegotiatedECHConfig{
-              negotiatedECHConfig, configId, maxLen, suite};
+          ret =
+              NegotiatedECHConfig{negotiatedECHConfig, configId, maxLen, suite};
+          return Status::Success;
         }
       }
     }
   }
-  return folly::none;
+  ret = folly::none;
+  return Status::Success;
 }
 
-static hpke::SetupParam getSetupParam(
+static Status getSetupParam(
+    hpke::SetupParam& ret,
+    Error& err,
     const fizz::Factory& factory,
     std::unique_ptr<DHKEM> dhkem,
     hpke::KEMId kemId,
@@ -200,15 +208,22 @@ static hpke::SetupParam getSetupParam(
   auto suite = getCipherSuite(cipherSuite.aead_id);
   auto suiteId = hpke::generateHpkeSuiteId(group, hash, suite);
 
-  auto hkdf = std::make_unique<fizz::hpke::Hkdf>(
-      fizz::hpke::Hkdf::v1(factory.makeHasherFactory(hash)));
+  const HasherFactoryWithMetadata* hasherFactory = nullptr;
+  FIZZ_RETURN_ON_ERROR(factory.makeHasherFactory(hasherFactory, err, hash));
+  auto hkdf =
+      std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::v1(hasherFactory));
 
-  return hpke::SetupParam{
+  std::unique_ptr<Aead> aead;
+  FIZZ_RETURN_ON_ERROR(
+      factory.makeAead(aead, err, getCipherSuite(cipherSuite.aead_id)));
+
+  ret = hpke::SetupParam{
       std::move(dhkem),
-      factory.makeAead(getCipherSuite(cipherSuite.aead_id)),
+      std::move(aead),
       std::move(hkdf),
       std::move(suiteId),
       0};
+  return Status::Success;
 }
 
 hpke::SetupResult constructHpkeSetupResult(
@@ -220,8 +235,11 @@ hpke::SetupResult constructHpkeSetupResult(
   auto hash = getHashFunction(cipherSuite.kdf_id);
 
   // Get shared secret
-  auto hkdf = std::make_unique<fizz::hpke::Hkdf>(
-      fizz::hpke::Hkdf::v1(factory.makeHasherFactory(hash)));
+  const HasherFactoryWithMetadata* hasherFactory = nullptr;
+  Error err;
+  FIZZ_THROW_ON_ERROR(factory.makeHasherFactory(hasherFactory, err, hash), err);
+  auto hkdf =
+      std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::v1(hasherFactory));
   std::unique_ptr<DHKEM> dhkem = std::make_unique<DHKEM>(
       std::move(kex),
       getKexGroup(echConfigContent.key_config.kem_id),
@@ -231,16 +249,22 @@ hpke::SetupResult constructHpkeSetupResult(
   std::unique_ptr<folly::IOBuf> info =
       makeHpkeContextInfoParam(negotiatedECHConfig.config);
 
+  hpke::SetupParam setupParam;
+  FIZZ_THROW_ON_ERROR(
+      getSetupParam(
+          setupParam,
+          err,
+          factory,
+          std::move(dhkem),
+          echConfigContent.key_config.kem_id,
+          cipherSuite),
+      err);
   return setupWithEncap(
       hpke::Mode::Base,
       echConfigContent.key_config.public_key->clone()->coalesce(),
       std::move(info),
       folly::none,
-      getSetupParam(
-          factory,
-          std::move(dhkem),
-          echConfigContent.key_config.kem_id,
-          cipherSuite));
+      std::move(setupParam));
 }
 
 ServerHello makeDummyServerHello(const ServerHello& shlo) {
@@ -294,7 +318,9 @@ HelloRetryRequest makeDummyHRR(const HelloRetryRequest& hrr) {
 
 namespace {
 
-std::vector<uint8_t> calculateAcceptConfirmation(
+Status calculateAcceptConfirmation(
+    std::vector<uint8_t>& ret,
+    Error& err,
     const ServerHello& shlo,
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler) {
@@ -302,19 +328,21 @@ std::vector<uint8_t> calculateAcceptConfirmation(
   // deriving a secret from it.
   auto shloEch = makeDummyServerHello(shlo);
   Buf encodedShloEch;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      encodeHandshake(encodedShloEch, err, std::move(shloEch)), err);
+  FIZZ_RETURN_ON_ERROR(
+      encodeHandshake(encodedShloEch, err, std::move(shloEch)));
   context->appendToTranscript(encodedShloEch);
 
   auto hsc = context->getHandshakeContext();
   auto echAcceptance = scheduler->getSecret(
       EarlySecrets::ECHAcceptConfirmation, hsc->coalesce());
 
-  return std::move(echAcceptance.secret);
+  ret = std::move(echAcceptance.secret);
+  return Status::Success;
 }
 
-std::vector<uint8_t> calculateAcceptConfirmation(
+Status calculateAcceptConfirmation(
+    std::vector<uint8_t>& ret,
+    Error& err,
     const HelloRetryRequest& hrr,
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler) {
@@ -322,9 +350,7 @@ std::vector<uint8_t> calculateAcceptConfirmation(
   // putting it into the transcript, and deriving a secret.
   auto hrrEch = makeDummyHRR(hrr);
   Buf encodedHrrEch;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      encodeHandshake(encodedHrrEch, err, std::move(hrrEch)), err);
+  FIZZ_RETURN_ON_ERROR(encodeHandshake(encodedHrrEch, err, std::move(hrrEch)));
   context->appendToTranscript(encodedHrrEch);
 
   auto hsc = context->getHandshakeContext();
@@ -333,87 +359,101 @@ std::vector<uint8_t> calculateAcceptConfirmation(
 
   if (echAcceptance.secret.size() < kEchAcceptConfirmationSize) {
     FIZZ_VLOG(8) << "ECH acceptance secret too small?";
-    throw std::runtime_error("ech acceptance secret too small");
+    return err.error("ech acceptance secret too small");
   }
 
-  return std::move(echAcceptance.secret);
+  ret = std::move(echAcceptance.secret);
+  return Status::Success;
 }
 
 } // namespace
 
-bool checkECHAccepted(
+Status checkECHAccepted(
+    bool& ret,
+    Error& err,
     const ServerHello& shlo,
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler) {
-  auto acceptConfirmation = calculateAcceptConfirmation(
-      shlo, std::move(context), std::move(scheduler));
+  std::vector<uint8_t> acceptConfirmation;
+  FIZZ_RETURN_ON_ERROR(calculateAcceptConfirmation(
+      acceptConfirmation, err, shlo, std::move(context), std::move(scheduler)));
   // ECH accepted if the 8 bytes match the accept_confirmation
-  return CryptoUtils::equal(
+  ret = CryptoUtils::equal(
       folly::ByteRange(
           shlo.random.data() +
               (shlo.random.size() - kEchAcceptConfirmationSize),
           kEchAcceptConfirmationSize),
       folly::ByteRange(acceptConfirmation.data(), kEchAcceptConfirmationSize));
+  return Status::Success;
 }
 
-bool checkECHAccepted(
+Status checkECHAccepted(
+    bool& ret,
+    Error& err,
     const HelloRetryRequest& hrr,
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler) {
-  auto acceptConfirmation = calculateAcceptConfirmation(
-      hrr, std::move(context), std::move(scheduler));
+  std::vector<uint8_t> acceptConfirmation;
+  FIZZ_RETURN_ON_ERROR(calculateAcceptConfirmation(
+      acceptConfirmation, err, hrr, std::move(context), std::move(scheduler)));
 
   // ECH accepted if the 8 bytes match the accept_confirmation in the
   // extension
   folly::Optional<ECHHelloRetryRequest> echConf;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      getExtension<ECHHelloRetryRequest>(echConf, err, hrr.extensions), err);
+  FIZZ_RETURN_ON_ERROR(
+      getExtension<ECHHelloRetryRequest>(echConf, err, hrr.extensions));
   if (!echConf) {
     FIZZ_VLOG(8) << "HRR ECH extension missing, rejected...";
-    return false;
+    ret = false;
+    return Status::Success;
   }
 
-  return CryptoUtils::equal(
+  ret = CryptoUtils::equal(
       folly::ByteRange(
           echConf->confirmation.data(), kEchAcceptConfirmationSize),
       folly::ByteRange(acceptConfirmation.data(), kEchAcceptConfirmationSize));
+  return Status::Success;
 }
 
-void setAcceptConfirmation(
+Status setAcceptConfirmation(
+    Error& err,
     ServerHello& shlo,
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler) {
-  auto acceptConfirmation = calculateAcceptConfirmation(
-      shlo, std::move(context), std::move(scheduler));
+  std::vector<uint8_t> acceptConfirmation;
+  FIZZ_RETURN_ON_ERROR(calculateAcceptConfirmation(
+      acceptConfirmation, err, shlo, std::move(context), std::move(scheduler)));
 
   // Copy the acceptance confirmation bytes to the end
   memcpy(
       shlo.random.data() + (shlo.random.size() - kEchAcceptConfirmationSize),
       acceptConfirmation.data(),
       kEchAcceptConfirmationSize);
+  return Status::Success;
 }
 
-void setAcceptConfirmation(
+Status setAcceptConfirmation(
+    Error& err,
     HelloRetryRequest& hrr,
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler) {
   // Add an ECH confirmation extension. The calculation code will ignore its
   // contents but expects it to be there.
   Extension ext;
-  Error err;
-  FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, ECHHelloRetryRequest()), err);
+  FIZZ_RETURN_ON_ERROR(encodeExtension(ext, err, ECHHelloRetryRequest()));
   hrr.extensions.push_back(std::move(ext));
 
   // Calculate it.
-  auto acceptConfirmation = calculateAcceptConfirmation(
-      hrr, std::move(context), std::move(scheduler));
+  std::vector<uint8_t> acceptConfirmation;
+  FIZZ_RETURN_ON_ERROR(calculateAcceptConfirmation(
+      acceptConfirmation, err, hrr, std::move(context), std::move(scheduler)));
 
   // Copy the acceptance confirmation bytes to the payload
   memcpy(
       hrr.extensions.back().extension_data->writableData(),
       acceptConfirmation.data(),
       kEchAcceptConfirmationSize);
+  return Status::Success;
 }
 
 namespace {
@@ -654,7 +694,9 @@ OuterECHClientHello encryptClientHello(
   return echExtension;
 }
 
-ClientHello decryptECHWithContext(
+Status decryptECHWithContext(
+    ClientHello& ret,
+    Error& err,
     const ClientHello& clientHelloOuter,
     const ParsedECHConfig& /*echConfig*/,
     HpkeSymmetricCipherSuite& /*cipherSuite*/,
@@ -669,30 +711,34 @@ ClientHello decryptECHWithContext(
   // Set actual client hello, ECH acceptance
   folly::io::Cursor encodedECHInnerCursor(encodedClientHelloInner.get());
   ClientHello decodedChlo;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      decode<ClientHello>(decodedChlo, err, encodedECHInnerCursor), err);
+  FIZZ_RETURN_ON_ERROR(
+      decode<ClientHello>(decodedChlo, err, encodedECHInnerCursor));
 
   // Skip any padding and check that we don't have any data left.
   encodedECHInnerCursor.skipWhile([](uint8_t b) { return b == 0; });
   if (!encodedECHInnerCursor.isAtEnd()) {
-    throw std::runtime_error("ech padding contains nonzero byte");
+    return err.error("ech padding contains nonzero byte");
   }
 
   // Replace legacy_session_id that got removed during encryption
   decodedChlo.legacy_session_id = clientHelloOuter.legacy_session_id->clone();
 
   // Expand extensions
-  auto expandedExtensions = substituteOuterExtensions(
-      std::move(decodedChlo.extensions), clientHelloOuter.extensions);
+  std::vector<Extension> expandedExtensions;
+  FIZZ_RETURN_ON_ERROR(substituteOuterExtensions(
+      expandedExtensions,
+      err,
+      std::move(decodedChlo.extensions),
+      clientHelloOuter.extensions));
   decodedChlo.extensions = std::move(expandedExtensions);
 
   // Update encoding
   Buf originalEncoding;
-  FIZZ_THROW_ON_ERROR(encodeHandshake(originalEncoding, err, decodedChlo), err);
+  FIZZ_RETURN_ON_ERROR(encodeHandshake(originalEncoding, err, decodedChlo));
   decodedChlo.originalEncoding = std::move(originalEncoding);
 
-  return decodedChlo;
+  ret = std::move(decodedChlo);
+  return Status::Success;
 }
 
 std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
@@ -707,19 +753,27 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
   auto kemId = echConfig.key_config.kem_id;
   NamedGroup group = hpke::getKexGroup(kemId);
   auto hash = getHashFunction(cipherSuite.kdf_id);
-  auto hkdf = std::make_unique<fizz::hpke::Hkdf>(
-      fizz::hpke::Hkdf::v1(factory.makeHasherFactory(hash)));
+  const HasherFactoryWithMetadata* hasherFactory = nullptr;
+  Error err;
+  FIZZ_THROW_ON_ERROR(factory.makeHasherFactory(hasherFactory, err, hash), err);
+  auto hkdf =
+      std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::v1(hasherFactory));
 
   auto dhkem = std::make_unique<DHKEM>(std::move(kex), group, std::move(hkdf));
   auto aeadId = cipherSuite.aead_id;
   auto suiteId = hpke::generateHpkeSuiteId(
       group, hpke::getHashFunction(kdfId), hpke::getCipherSuite(aeadId));
 
+  std::unique_ptr<Aead> aead;
+  FIZZ_THROW_ON_ERROR(factory.makeAead(aead, err, getCipherSuite(aeadId)), err);
+
+  const HasherFactoryWithMetadata* hasherFactory2 = nullptr;
+  FIZZ_THROW_ON_ERROR(
+      factory.makeHasherFactory(hasherFactory2, err, hash), err);
   hpke::SetupParam setupParam{
       std::move(dhkem),
-      factory.makeAead(getCipherSuite(aeadId)),
-      std::make_unique<fizz::hpke::Hkdf>(
-          fizz::hpke::Hkdf::v1(factory.makeHasherFactory(hash))),
+      std::move(aead),
+      std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::v1(hasherFactory2)),
       std::move(suiteId),
       seqNum};
 
@@ -734,23 +788,30 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
       std::move(setupParam));
 }
 
-std::vector<Extension> substituteOuterExtensions(
+Status substituteOuterExtensions(
+    std::vector<Extension>& ret,
+    Error& err,
     std::vector<Extension>&& chloInnerExt,
     const std::vector<Extension>& chloOuterExt) {
   std::vector<Extension> expandedInnerExt;
 
-  // This will throw if we duplicate an extension (or if we try to put an
-  // ech_outer_extensions in the resulting inner chlo)
+  // Track seen types to detect duplicates
   std::unordered_set<ExtensionType> seenTypes;
-  auto dupeCheck = [&seenTypes](ExtensionType t) {
+  auto dupeCheck = [&seenTypes](Error& errInner, ExtensionType t) {
     if (seenTypes.count(t) != 0) {
-      throw OuterExtensionsError("inner client hello has duplicate extensions");
+      return errInner.error(
+          "inner client hello has duplicate extensions",
+          folly::none,
+          Error::Category::OuterExtensions);
     }
     seenTypes.insert(t);
+    return Status::Success;
   };
 
   for (auto& ext : chloInnerExt) {
-    dupeCheck(ext.extension_type);
+    // Check for duplicate extension types
+    FIZZ_RETURN_ON_ERROR(dupeCheck(err, ext.extension_type));
+
     if (ExtensionType::ech_outer_extensions != ext.extension_type) {
       expandedInnerExt.push_back(std::move(ext));
     } else {
@@ -758,21 +819,28 @@ std::vector<Extension> substituteOuterExtensions(
       OuterExtensions outerExtensions;
       try {
         folly::io::Cursor cursor(ext.extension_data.get());
-        Error err;
-        FIZZ_THROW_ON_ERROR(
-            getExtension<OuterExtensions>(outerExtensions, err, cursor), err);
+        FIZZ_RETURN_ON_ERROR(
+            getExtension<OuterExtensions>(outerExtensions, err, cursor));
       } catch (...) {
-        throw OuterExtensionsError("ech_outer_extensions malformed");
+        return err.error(
+            "ech_outer_extensions malformed",
+            folly::none,
+            Error::Category::OuterExtensions);
       }
 
       // Use the linear approach suggested by the RFC.
       auto outerIt = chloOuterExt.cbegin();
       auto outerEnd = chloOuterExt.cend();
       for (const auto extType : outerExtensions.types) {
-        // Check types for dupes and ech
-        dupeCheck(extType);
+        // Check types for dupes
+        FIZZ_RETURN_ON_ERROR(dupeCheck(err, extType));
+
+        // Check for ech in outer extensions
         if (extType == ExtensionType::encrypted_client_hello) {
-          throw OuterExtensionsError("ech is not allowed in outer extensions");
+          return err.error(
+              "ech is not allowed in outer extensions",
+              folly::none,
+              Error::Category::OuterExtensions);
         }
 
         // Scan
@@ -782,8 +850,10 @@ std::vector<Extension> substituteOuterExtensions(
 
         // If at end, error
         if (outerIt == outerEnd) {
-          throw OuterExtensionsError(
-              "ech outer extensions references a missing extension");
+          return err.error(
+              "ech outer extensions references a missing extension",
+              folly::none,
+              Error::Category::OuterExtensions);
         }
 
         // Add it and increment
@@ -793,7 +863,8 @@ std::vector<Extension> substituteOuterExtensions(
     }
   }
 
-  return expandedInnerExt;
+  ret = std::move(expandedInnerExt);
+  return Status::Success;
 }
 
 } // namespace ech

@@ -33,6 +33,8 @@ using namespace fizz::server::detail;
 // We only ever use the first PSK sent.
 static constexpr uint16_t kPskIndex = 0;
 
+#define TRY FIZZ_RETURN_ON_ERROR
+
 namespace fizz {
 namespace sm {
 
@@ -512,7 +514,9 @@ static void validateClientHello(const ClientHello& chlo) {
         "client compression methods not exactly NULL",
         AlertDescription::illegal_parameter);
   }
-  Protocol::checkDuplicateExtensions(chlo.extensions);
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      Protocol::checkDuplicateExtensions(err, chlo.extensions), err);
 }
 
 static Optional<ProtocolVersion> negotiateVersion(
@@ -669,7 +673,12 @@ static bool validateResumptionState(
     return false;
   }
 
-  if (getHashFunction(resState.cipher) != getHashFunction(cipher)) {
+  HashFunction resHash;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getHashFunction(resHash, err, resState.cipher), err);
+  HashFunction cipherHash;
+  FIZZ_THROW_ON_ERROR(getHashFunction(cipherHash, err, cipher), err);
+  if (resHash != cipherHash) {
     FOLLY_SDT(fizz, resumption_state_HashFunctionMismatch);
     FIZZ_VLOG(8) << "Hash mismatch, rejecting PSK.";
     return false;
@@ -735,7 +744,11 @@ static std::
   }
 
   if (resState) {
-    scheduler->deriveEarlySecret(resState->resumptionSecret->coalesce());
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        scheduler->deriveEarlySecret(
+            err, resState->resumptionSecret->coalesce()),
+        err);
 
     auto binderKey = scheduler
                          ->getSecret(
@@ -748,7 +761,6 @@ static std::
     folly::IOBufQueue chloQueue(folly::IOBufQueue::cacheChainLength());
     chloQueue.append((*chlo.originalEncoding)->clone());
     size_t binderLength;
-    Error err;
     FIZZ_THROW_ON_ERROR(getBinderLength(binderLength, err, chlo), err);
     auto chloPrefix = chloQueue.split(chloQueue.chainLength() - binderLength);
     handshakeContext->appendToTranscript(chloPrefix);
@@ -1186,7 +1198,10 @@ static std::pair<std::vector<ExtensionType>, Buf> getCertificateRequest(
   FIZZ_THROW_ON_ERROR(encodeExtension(encodedExt, err, algos), err);
   request.extensions.push_back(std::move(encodedExt));
   if (verifier) {
-    auto verifierExtensions = verifier->getCertificateRequestExtensions();
+    std::vector<Extension> verifierExtensions;
+    FIZZ_THROW_ON_ERROR(
+        verifier->getCertificateRequestExtensions(verifierExtensions, err),
+        err);
     for (auto& ext : verifierExtensions) {
       certReqExtensions.push_back(ext.extension_type);
       request.extensions.push_back(std::move(ext));
@@ -1255,8 +1270,10 @@ static std::tuple<ECHStatus, uint8_t> processECHHRR(
           "ech hrr config id mismatch", AlertDescription::illegal_parameter);
     }
 
-    chlo =
-        decrypter->decryptClientHelloHRR(chlo, state.echState()->hpkeContext);
+    FIZZ_THROW_ON_ERROR(
+        decrypter->decryptClientHelloHRR(
+            chlo, err, chlo, state.echState()->hpkeContext),
+        err);
 
     return {ECHStatus::Accepted, echExt->config_id};
   } else if (cookieHasECH) {
@@ -1270,7 +1287,9 @@ static std::tuple<ECHStatus, uint8_t> processECHHRR(
           "ech hrr config id mismatch", AlertDescription::illegal_parameter);
     }
 
-    chlo = decrypter->decryptClientHelloHRR(chlo, cookieState->echEnc);
+    FIZZ_THROW_ON_ERROR(
+        decrypter->decryptClientHelloHRR(chlo, err, chlo, cookieState->echEnc),
+        err);
 
     return {ECHStatus::Accepted, echExt->config_id};
   }
@@ -1337,7 +1356,9 @@ static std::pair<ECHStatus, folly::Optional<ECHState>> processECH(
       echState = ECHState{
           echExt->cipher_suite, echExt->config_id, nullptr, getSNI(chlo)};
       if (decrypter) {
-        auto gotChlo = decrypter->decryptClientHello(chlo);
+        folly::Optional<ech::DecrypterResult> gotChlo;
+        FIZZ_THROW_ON_ERROR(
+            decrypter->decryptClientHello(gotChlo, err, chlo), err);
         if (gotChlo.has_value()) {
           echStatus = ECHStatus::Accepted;
           echState->hpkeContext = std::move(gotChlo->context);
@@ -1641,10 +1662,18 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
               // Set up acceptance scheduler
               auto echScheduler =
                   state.context()->getFactory()->makeKeyScheduler(cipher);
-              echScheduler->deriveEarlySecret(folly::range(chlo.random));
+              FIZZ_THROW_ON_ERROR(
+                  echScheduler->deriveEarlySecret(
+                      err, folly::range(chlo.random)),
+                  err);
               // Add acceptance extension
-              ech::setAcceptConfirmation(
-                  hrr, handshakeContext->clone(), std::move(echScheduler));
+              FIZZ_THROW_ON_ERROR(
+                  ech::setAcceptConfirmation(
+                      err,
+                      hrr,
+                      handshakeContext->clone(),
+                      std::move(echScheduler)),
+                  err);
             }
 
             Buf encodedHelloRetryRequest;
@@ -1714,8 +1743,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
 
           // The exceptions in SemiFutures will be processed in
           // detail::processEvent.
-          kex = state.context()->getFactory()->makeKeyExchange(
-              *group, KeyExchangeRole::Server);
+          FIZZ_THROW_ON_ERROR(
+              state.context()->getFactory()->makeKeyExchange(
+                  kex, err, *group, KeyExchangeRole::Server),
+              err);
           kexResultFuture =
               doKexFuture(kex.get(), std::move(clientShare.value()));
         } else {
@@ -1803,12 +1834,18 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                 // Set up acceptance scheduler
                 auto echScheduler =
                     state.context()->getFactory()->makeKeyScheduler(cipher);
-                echScheduler->deriveEarlySecret(folly::range(chlo.random));
+                FIZZ_THROW_ON_ERROR(
+                    echScheduler->deriveEarlySecret(
+                        err, folly::range(chlo.random)),
+                    err);
                 // Add acceptance extension
-                ech::setAcceptConfirmation(
-                    serverHello,
-                    handshakeContext->clone(),
-                    std::move(echScheduler));
+                FIZZ_THROW_ON_ERROR(
+                    ech::setAcceptConfirmation(
+                        err,
+                        serverHello,
+                        handshakeContext->clone(),
+                        std::move(echScheduler)),
+                    err);
               } else if (echStatus == ECHStatus::Rejected) {
                 auto decrypter = state.context()->getECHDecrypter();
                 FIZZ_DCHECK(decrypter);
@@ -2433,7 +2470,7 @@ Status
 EventHandler<ServerTypes, StateEnum::ExpectingCertificate, Event::Certificate>::
     handle(
         AsyncActions& ret,
-        InvocationContext& /* ctx */,
+        InvocationContext& ctx,
         const State& state,
         Param& param) {
   auto certMsg = std::move(*param.asCertificateMsg());
@@ -2450,7 +2487,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingCertificate, Event::Certificate>::
   bool leaf = true;
   const auto& certExtensionsSupported = state.certReqExtensions();
   for (auto& certEntry : certMsg.certificate_list) {
-    Protocol::checkAllowedExtensions(certEntry, certExtensionsSupported);
+    FIZZ_THROW_ON_ERROR(
+        Protocol::checkAllowedExtensions(
+            ctx.err, certEntry, certExtensionsSupported),
+        ctx.err);
     clientCerts.emplace_back(state.context()->getFactory()->makePeerCert(
         std::move(certEntry), leaf));
     leaf = false;
@@ -2486,7 +2526,7 @@ Status EventHandler<
     Event::CertificateVerify>::
     handle(
         AsyncActions& ret,
-        InvocationContext& /* ctx */,
+        InvocationContext& ctx,
         const State& state,
         Param& param) {
   auto certVerify = std::move(*param.asCertificateVerify());
@@ -2516,7 +2556,10 @@ Status EventHandler<
   try {
     const auto& verifier = state.context()->getClientCertVerifier();
     if (verifier) {
-      if (auto verifiedCert = verifier->verify(certs)) {
+      std::shared_ptr<const Cert> verifiedCert;
+      FIZZ_THROW_ON_ERROR(
+          verifier->verify(verifiedCert, ctx.err, certs), ctx.err);
+      if (verifiedCert) {
         newCert = std::move(verifiedCert);
       } else {
         newCert = std::move(leafCert);
@@ -2596,12 +2639,14 @@ EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::Finished>::
               MasterSecrets::ResumptionMaster,
               state.handshakeContext()->getHandshakeContext()->coalesce())
           .secret;
-  state.keyScheduler()->clearMasterSecret();
+  FIZZ_THROW_ON_ERROR(state.keyScheduler()->clearMasterSecret(err), err);
 
   MutateState saveState([readRecordLayer = std::move(readRecordLayer),
                          resumptionMasterSecret](State& newState) mutable {
     newState.readRecordLayer() = std::move(readRecordLayer);
     newState.resumptionMasterSecret() = std::move(resumptionMasterSecret);
+    newState.handshakeContext().reset();
+    newState.clientHandshakeSecret() = folly::none;
   });
 
   SecretAvailable appReadTrafficSecretAvailable(std::move(readSecret));

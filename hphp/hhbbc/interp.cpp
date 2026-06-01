@@ -4820,42 +4820,6 @@ void in(ISS& env, const bc::FCallClsMethodD& op) {
   fcallClsMethodImpl(env, op, clsTy, op.str3, false, 0, nullptr, updateBC);
 }
 
-void in(ISS& env, const bc::FCallClsMethod& op) {
-  auto const methName = getNameFromType(topC(env, 1));
-  if (!methName) {
-    popC(env);
-    popC(env);
-    fcallUnknownImpl(env, op.fca);
-    return;
-  }
-
-  auto const clsTy = topC(env);
-  auto const ctxTy = clsTy.couldBe(BCls)
-    ? intersection_of(clsTy, TCls)
-    : TCls;
-  auto const rfunc = env.index.resolve_method(env.ctx, ctxTy, methName);
-  auto const skipLogAsDynamicCall =
-    !Cfg::Eval::LogKnownMethodsAsDynamicCalls &&
-      op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
-  if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
-      module_check_always_passes(env, dcls_of(clsTy)) &&
-      (!rfunc.mightCareAboutDynCalls() || skipLogAsDynamicCall)) {
-    auto const clsName = dcls_of(clsTy).cls().name();
-    return reduce(
-      env,
-      bc::PopC {},
-      bc::PopC {},
-      bc::FCallClsMethodD { op.fca, clsName, methName }
-    );
-  }
-
-  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
-    if (!clsHint) clsHint = op.str2;
-    return bc::FCallClsMethod { std::move(fca), clsHint, op.subop3 };
-  };
-  fcallClsMethodImpl(env, op, clsTy, methName, true, 2, op.str2, updateBC);
-}
-
 void in(ISS& env, const bc::FCallClsMethodM& op) {
   auto const throws = [&] {
     if (op.fca.asyncEagerTarget() != NoBlockId) {
@@ -4865,8 +4829,7 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
         bc::FCallClsMethodM {
           op.fca.withoutAsyncEagerTarget(),
           op.str2,
-          op.subop3,
-          op.str4
+          op.str3
         }
       );
     }
@@ -4892,18 +4855,14 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
   }();
   if (clsTy.is(BBottom)) return throws();
 
-  auto const methName = op.str4;
+  auto const methName = op.str3;
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
   auto const maybeDynamicCall = t.couldBe(TStr);
-  auto const skipLogAsDynamicCall =
-    !Cfg::Eval::LogKnownMethodsAsDynamicCalls &&
-      op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
       module_check_always_passes(env, dcls_of(clsTy)) &&
       !maybeDynamicCall &&
       (!rfunc.mightCareAboutDynCalls() ||
-        !maybeDynamicCall ||
-        skipLogAsDynamicCall
+        !maybeDynamicCall
       )
   ) {
     auto const clsName = dcls_of(clsTy).cls().name();
@@ -4916,7 +4875,7 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
 
   auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
     if (!clsHint) clsHint = op.str2;
-    return bc::FCallClsMethodM { std::move(fca), clsHint, op.subop3 , methName};
+    return bc::FCallClsMethodM { std::move(fca), clsHint, methName};
   };
   fcallClsMethodImpl(env, op, clsTy, methName, maybeDynamicCall, 1, op.str2, updateBC);
 }
@@ -4985,31 +4944,6 @@ void in(ISS& env, const bc::FCallClsMethodSD& op) {
     return bc::FCallClsMethodSD { std::move(fca), clsHint, op.subop3, op.str4 };
   };
   fcallClsMethodSImpl(env, op, op.str4, false, false, updateBC);
-}
-
-void in(ISS& env, const bc::FCallClsMethodS& op) {
-  auto const methName = getNameFromType(topC(env));
-  if (!methName) {
-    popC(env);
-    fcallUnknownImpl(env, op.fca);
-    return;
-  }
-
-  auto const clsTy = specialClsRefToCls(env, op.subop3);
-  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
-  if (!rfunc.mightCareAboutDynCalls() && !rfunc.couldHaveReifiedGenerics()) {
-    return reduce(
-      env,
-      bc::PopC {},
-      bc::FCallClsMethodSD { op.fca, op.str2, op.subop3, methName }
-    );
-  }
-
-  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
-    if (!clsHint) clsHint = op.str2;
-    return bc::FCallClsMethodS { std::move(fca), clsHint, op.subop3 };
-  };
-  fcallClsMethodSImpl(env, op, methName, true, true, updateBC);
 }
 
 void in(ISS& env, const bc::NewObjD& op)  {

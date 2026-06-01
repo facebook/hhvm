@@ -564,6 +564,13 @@ impl ::fbthrift::ThriftEnum for Color {
     fn inner_value(&self) -> i32 {
         self.0 as i32
     }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for Color: {e}")
+        })
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -695,6 +702,13 @@ impl ::fbthrift::ThriftEnum for ThriftAdaptedEnum {
     #[allow(clippy::unnecessary_cast)]
     fn inner_value(&self) -> i32 {
         self.0 as i32
+    }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for ThriftAdaptedEnum: {e}")
+        })
     }
 }
 
@@ -4344,38 +4358,38 @@ impl ::std::default::Default for self::AdaptTemplatedTestStruct {
             adaptedStringDefault: "6".to_owned(),
             adaptedEnum: crate::types::AdaptedEnum::One,
             adaptedListDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<AdaptTemplatedTestStruct>({
-                    let mut list = ::std::vec::Vec::new();
-                    {
-                        #[inline(never)]
-                        fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i64>) {
-                            list.push(1);
-                        }
-                        __do_push(&mut list);
+                let mut list = ::std::vec::Vec::new();
+                {
+                    #[inline(never)]
+                    fn __do_push(list: &mut ::std::vec::Vec<::std::primitive::i64>) {
+                        list.push(1);
                     }
-                    list
-                }, 19),
+                    __do_push(&mut list);
+                }
+                list
+            }, 19),
             adaptedSetDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<AdaptTemplatedTestStruct>({
-                    let mut set = ::std::collections::BTreeSet::new();
-                    {
-                        #[inline(never)]
-                        fn __do_insert(set: &mut ::std::collections::BTreeSet<::std::primitive::i64>) {
-                            set.insert(1);
-                        }
-                        __do_insert(&mut set);
+                let mut set = ::std::collections::BTreeSet::new();
+                {
+                    #[inline(never)]
+                    fn __do_insert(set: &mut ::std::collections::BTreeSet<::std::primitive::i64>) {
+                        set.insert(1);
                     }
-                    set
-                }, 20),
+                    __do_insert(&mut set);
+                }
+                set
+            }, 20),
             adaptedMapDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<AdaptTemplatedTestStruct>({
-                    let mut map = ::std::collections::BTreeMap::new();
-                    {
-                        #[inline(never)]
-                        fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::primitive::i64, ::std::primitive::i64>) {
-                            map.insert(1, 1);
-                        }
-                        __do_insert(&mut map);
+                let mut map = ::std::collections::BTreeMap::new();
+                {
+                    #[inline(never)]
+                    fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::primitive::i64, ::std::primitive::i64>) {
+                        map.insert(1, 1);
                     }
-                    map
-                }, 21),
+                    __do_insert(&mut map);
+                }
+                map
+            }, 21),
             doubleTypedefBool: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }

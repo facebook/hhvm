@@ -596,9 +596,6 @@ func (p *GetEntityProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *GetEntityProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *GetEntityProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}

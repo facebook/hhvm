@@ -20,7 +20,7 @@ class classA
 echo "*** Testing mb_stripos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$haystack = b'string_val';
+$haystack = 'string_val';
 $offset = 0;
 $encoding = 'utf-8';
 
@@ -37,8 +37,8 @@ $inputs = vec[
        '',
 
        // string data
-/*18*/ b"string",
-       b'string',
+/*18*/ "string",
+       'string',
        $heredoc,
 ];
 

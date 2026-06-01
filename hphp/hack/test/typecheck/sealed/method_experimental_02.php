@@ -12,4 +12,9 @@ trait T {
   public function foo(): void {}
 }
 
-class D {}
+class D extends C {
+  use T;
+
+  <<__Override>>
+  public function foo(): void {}
+}

@@ -92,4 +92,5 @@ public class BadServiceBlockingReactiveWrapper
     public BadInteraction createBadInteraction() {
         return new BadInteractionImpl(_delegate.createBadInteraction());
     }
+
 }

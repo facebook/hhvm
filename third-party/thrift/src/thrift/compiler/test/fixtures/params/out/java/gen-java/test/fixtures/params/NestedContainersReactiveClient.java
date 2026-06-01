@@ -45,7 +45,6 @@ public class NestedContainersReactiveClient
   }
 
   public NestedContainersReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = reactor.core.publisher.Mono.empty();
@@ -66,7 +65,6 @@ public class NestedContainersReactiveClient
   }
 
   public NestedContainersReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = _headersMono;
@@ -83,19 +81,19 @@ public class NestedContainersReactiveClient
         {
           oprot.writeFieldBegin(_mapList_FOO_FIELD_DESC);
 
-          Map<Integer, List<Integer>> _iter0 = foo;
+          Map<Integer, List<Integer>> _fbthriftVar0 = foo;
 
-          oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
-          for (Map.Entry<Integer, List<Integer>> _iter1 : _iter0.entrySet()) {
+          oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _fbthriftVar0.size()));
+          for (Map.Entry<Integer, List<Integer>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
             {
-              Integer _iter2 = _iter1.getKey();
-              oprot.writeI32(_iter2);
+              Integer _fbthriftVar2 = _fbthriftVar1.getKey();
+              oprot.writeI32(_fbthriftVar2);
             }
             {
-              List<Integer> _iter2 = _iter1.getValue();
-              oprot.writeListBegin(new TList(TType.I32, _iter2.size()));
-              for (int _iter3 : _iter2) {
-                oprot.writeI32(_iter3);
+              List<Integer> _fbthriftVar2 = _fbthriftVar1.getValue();
+              oprot.writeListBegin(new TList(TType.I32, _fbthriftVar2.size()));
+              for (int _fbthriftVar3 : _fbthriftVar2) {
+                oprot.writeI32(_fbthriftVar3);
               }
               oprot.writeListEnd();
             }
@@ -155,19 +153,19 @@ public class NestedContainersReactiveClient
         {
           oprot.writeFieldBegin(_mapSet_FOO_FIELD_DESC);
 
-          Map<Integer, Set<Integer>> _iter0 = foo;
+          Map<Integer, Set<Integer>> _fbthriftVar0 = foo;
 
-          oprot.writeMapBegin(new TMap(TType.I32, TType.SET, _iter0.size()));
-          for (Map.Entry<Integer, Set<Integer>> _iter1 : _iter0.entrySet()) {
+          oprot.writeMapBegin(new TMap(TType.I32, TType.SET, _fbthriftVar0.size()));
+          for (Map.Entry<Integer, Set<Integer>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
             {
-              Integer _iter2 = _iter1.getKey();
-              oprot.writeI32(_iter2);
+              Integer _fbthriftVar2 = _fbthriftVar1.getKey();
+              oprot.writeI32(_fbthriftVar2);
             }
             {
-              Set<Integer> _iter2 = _iter1.getValue();
-              oprot.writeSetBegin(new TSet(TType.I32, _iter2.size()));
-              for (int _iter3 : _iter2) {
-                oprot.writeI32(_iter3);
+              Set<Integer> _fbthriftVar2 = _fbthriftVar1.getValue();
+              oprot.writeSetBegin(new TSet(TType.I32, _fbthriftVar2.size()));
+              for (int _fbthriftVar3 : _fbthriftVar2) {
+                oprot.writeI32(_fbthriftVar3);
               }
               oprot.writeSetEnd();
             }
@@ -227,19 +225,19 @@ public class NestedContainersReactiveClient
         {
           oprot.writeFieldBegin(_listMap_FOO_FIELD_DESC);
 
-          List<Map<Integer, Integer>> _iter0 = foo;
+          List<Map<Integer, Integer>> _fbthriftVar0 = foo;
 
-          oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
-          for (Map<Integer, Integer> _iter1 : _iter0) {
-            oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter1.size()));
-            for (Map.Entry<Integer, Integer> _iter2 : _iter1.entrySet()) {
+          oprot.writeListBegin(new TList(TType.MAP, _fbthriftVar0.size()));
+          for (Map<Integer, Integer> _fbthriftVar1 : _fbthriftVar0) {
+            oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _fbthriftVar1.size()));
+            for (Map.Entry<Integer, Integer> _fbthriftVar2 : _fbthriftVar1.entrySet()) {
               {
-                Integer _iter3 = _iter2.getKey();
-                oprot.writeI32(_iter3);
+                Integer _fbthriftVar3 = _fbthriftVar2.getKey();
+                oprot.writeI32(_fbthriftVar3);
               }
               {
-                Integer _iter3 = _iter2.getValue();
-                oprot.writeI32(_iter3);
+                Integer _fbthriftVar3 = _fbthriftVar2.getValue();
+                oprot.writeI32(_fbthriftVar3);
               }
             }
             oprot.writeMapEnd();
@@ -299,13 +297,13 @@ public class NestedContainersReactiveClient
         {
           oprot.writeFieldBegin(_listSet_FOO_FIELD_DESC);
 
-          List<Set<Integer>> _iter0 = foo;
+          List<Set<Integer>> _fbthriftVar0 = foo;
 
-          oprot.writeListBegin(new TList(TType.SET, _iter0.size()));
-          for (Set<Integer> _iter1 : _iter0) {
-            oprot.writeSetBegin(new TSet(TType.I32, _iter1.size()));
-            for (int _iter2 : _iter1) {
-              oprot.writeI32(_iter2);
+          oprot.writeListBegin(new TList(TType.SET, _fbthriftVar0.size()));
+          for (Set<Integer> _fbthriftVar1 : _fbthriftVar0) {
+            oprot.writeSetBegin(new TSet(TType.I32, _fbthriftVar1.size()));
+            for (int _fbthriftVar2 : _fbthriftVar1) {
+              oprot.writeI32(_fbthriftVar2);
             }
             oprot.writeSetEnd();
           }
@@ -364,31 +362,31 @@ public class NestedContainersReactiveClient
         {
           oprot.writeFieldBegin(_turtles_FOO_FIELD_DESC);
 
-          List<List<Map<Integer, Map<Integer, Set<Integer>>>>> _iter0 = foo;
+          List<List<Map<Integer, Map<Integer, Set<Integer>>>>> _fbthriftVar0 = foo;
 
-          oprot.writeListBegin(new TList(TType.LIST, _iter0.size()));
-          for (List<Map<Integer, Map<Integer, Set<Integer>>>> _iter1 : _iter0) {
-            oprot.writeListBegin(new TList(TType.MAP, _iter1.size()));
-            for (Map<Integer, Map<Integer, Set<Integer>>> _iter2 : _iter1) {
-              oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, _iter2.size()));
-              for (Map.Entry<Integer, Map<Integer, Set<Integer>>> _iter3 : _iter2.entrySet()) {
+          oprot.writeListBegin(new TList(TType.LIST, _fbthriftVar0.size()));
+          for (List<Map<Integer, Map<Integer, Set<Integer>>>> _fbthriftVar1 : _fbthriftVar0) {
+            oprot.writeListBegin(new TList(TType.MAP, _fbthriftVar1.size()));
+            for (Map<Integer, Map<Integer, Set<Integer>>> _fbthriftVar2 : _fbthriftVar1) {
+              oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, _fbthriftVar2.size()));
+              for (Map.Entry<Integer, Map<Integer, Set<Integer>>> _fbthriftVar3 : _fbthriftVar2.entrySet()) {
                 {
-                  Integer _iter4 = _iter3.getKey();
-                  oprot.writeI32(_iter4);
+                  Integer _fbthriftVar4 = _fbthriftVar3.getKey();
+                  oprot.writeI32(_fbthriftVar4);
                 }
                 {
-                  Map<Integer, Set<Integer>> _iter4 = _iter3.getValue();
-                  oprot.writeMapBegin(new TMap(TType.I32, TType.SET, _iter4.size()));
-                  for (Map.Entry<Integer, Set<Integer>> _iter5 : _iter4.entrySet()) {
+                  Map<Integer, Set<Integer>> _fbthriftVar4 = _fbthriftVar3.getValue();
+                  oprot.writeMapBegin(new TMap(TType.I32, TType.SET, _fbthriftVar4.size()));
+                  for (Map.Entry<Integer, Set<Integer>> _fbthriftVar5 : _fbthriftVar4.entrySet()) {
                     {
-                      Integer _iter6 = _iter5.getKey();
-                      oprot.writeI32(_iter6);
+                      Integer _fbthriftVar6 = _fbthriftVar5.getKey();
+                      oprot.writeI32(_fbthriftVar6);
                     }
                     {
-                      Set<Integer> _iter6 = _iter5.getValue();
-                      oprot.writeSetBegin(new TSet(TType.I32, _iter6.size()));
-                      for (int _iter7 : _iter6) {
-                        oprot.writeI32(_iter7);
+                      Set<Integer> _fbthriftVar6 = _fbthriftVar5.getValue();
+                      oprot.writeSetBegin(new TSet(TType.I32, _fbthriftVar6.size()));
+                      for (int _fbthriftVar7 : _fbthriftVar6) {
+                        oprot.writeI32(_fbthriftVar7);
                       }
                       oprot.writeSetEnd();
                     }

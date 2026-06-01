@@ -38,4 +38,12 @@ std::unique_ptr<ThriftSinkLog> ThriftConnectionLog::createSinkLog(
   return std::make_unique<ThriftSinkLog>(methodName, counters_, logging_);
 }
 
+std::shared_ptr<ThriftBiDiLog> ThriftConnectionLog::createBiDiLog(
+    std::string_view methodName) const {
+  if (!counters_ && !logging_) {
+    return nullptr;
+  }
+  return std::make_shared<ThriftBiDiLog>(methodName, counters_, logging_);
+}
+
 } // namespace apache::thrift

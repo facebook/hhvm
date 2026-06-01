@@ -34,17 +34,17 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
     private static final TField INT_FIELD_FIELD_DESC = new TField("intField", TType.I32, (short)1);
 
     static {
-      NAMES_TO_IDS.put("intField", 1);
-      THRIFT_NAMES_TO_IDS.put("int_field", 1);
-      FIELD_METADATA.put(1, INT_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("intField", 1);
+        THRIFT_NAMES_TO_IDS.put("int_field", 1);
+        FIELD_METADATA.put(1, INT_FIELD_FIELD_DESC);
     }
 
     private java.lang.Object value;
     private short id;
 
     public enum TypeEnum {
-      __FBTHRIFT_EMPTY_UNION__,
-      INT_FIELD,
+        __FBTHRIFT_EMPTY_UNION__,
+        INT_FIELD,
     }
 
     public static NonTriviallyDestructibleUnion from(int _id, java.lang.Object _field) {
@@ -57,7 +57,7 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
             throw new java.lang.IllegalArgumentException("unknown field " + _id);
         }
 
-        NonTriviallyDestructibleUnion _u = new  NonTriviallyDestructibleUnion();
+        NonTriviallyDestructibleUnion _u = new NonTriviallyDestructibleUnion();
 
         try {
             switch(_id) {
@@ -66,7 +66,7 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
                     _u.value = (int) _field;
                     return _u;
                 default:
-                throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
+                    throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
             }
         } catch (java.lang.Exception t) {
             throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
@@ -91,7 +91,6 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
         return res;
     }
 
-    
 
     @com.facebook.swift.codec.ThriftField(value=1, name="int_field", requiredness=Requiredness.NONE)
     public int getIntField() {
@@ -111,14 +110,14 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
     }
 
     public TypeEnum getThriftUnionType() {
-      switch(this.id) {
-        case 0:
-          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
-        case 1:
-          return TypeEnum.INT_FIELD;
-        default:
-          throw new IllegalStateException("unreachable");
-      }
+        switch(this.id) {
+            case 0:
+                return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
+            case 1:
+                return TypeEnum.INT_FIELD;
+            default:
+                throw new IllegalStateException("unreachable");
+        }
     }
 
     public String getThriftName() {
@@ -173,74 +172,74 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
 
     public interface Visitor<T> {
         default T visit(NonTriviallyDestructibleUnion acceptor) {
-        return acceptor.accept(this);
+            return acceptor.accept(this);
         }
 
         T visitIntField(int intField);
     }
 
     public void write0(TProtocol oprot) throws TException {
-      if (this.id != 0 && this.value == null ){
-        if(allowNullFieldValues) {
-          // Warning: this path will generate corrupt serialized data!
-          return;
-        } else {
-          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        if (this.id != 0 && this.value == null ){
+            if(allowNullFieldValues) {
+                // Warning: this path will generate corrupt serialized data!
+                return;
+            } else {
+                throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+            }
         }
-      }
-      oprot.writeStructBegin(STRUCT_DESC);
-      switch (this.id) {
-      case _INT_FIELD: {
-        oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
-        int _iter0 = (int)this.value;
+        oprot.writeStructBegin(STRUCT_DESC);
+        switch (this.id) {
+        case _INT_FIELD: {
+            oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
+            int _fbthriftVar0 = (int)this.value;
 
-        oprot.writeI32(_iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      default:
-          // ignore unknown field
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        default:
+            // ignore unknown field
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
-    
     public static com.facebook.thrift.payload.Reader<NonTriviallyDestructibleUnion> asReader() {
-      return NonTriviallyDestructibleUnion::read0;
+        return NonTriviallyDestructibleUnion::read0;
     }
 
     public static NonTriviallyDestructibleUnion read0(TProtocol oprot) throws TException {
-      NonTriviallyDestructibleUnion res = new NonTriviallyDestructibleUnion();
-      res.value = null;
-      res.id = (short) 0;
-      oprot.readStructBegin(NonTriviallyDestructibleUnion.NAMES_TO_IDS, NonTriviallyDestructibleUnion.THRIFT_NAMES_TO_IDS, NonTriviallyDestructibleUnion.FIELD_METADATA);
-      TField __field = oprot.readFieldBegin();
-      if (__field.type != TType.STOP) {
-          switch (__field.id) {
-          case _INT_FIELD:
-            if (__field.type == INT_FIELD_FIELD_DESC.type) {
-              int intField = oprot.readI32();
-              res.value = intField;
+        NonTriviallyDestructibleUnion res = new NonTriviallyDestructibleUnion();
+        res.value = null;
+        res.id = (short) 0;
+        oprot.readStructBegin(NonTriviallyDestructibleUnion.NAMES_TO_IDS, NonTriviallyDestructibleUnion.THRIFT_NAMES_TO_IDS, NonTriviallyDestructibleUnion.FIELD_METADATA);
+        TField __field = oprot.readFieldBegin();
+        if (__field.type != TType.STOP) {
+            switch (__field.id) {
+            case _INT_FIELD:
+                if (__field.type == INT_FIELD_FIELD_DESC.type) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
             }
-            break;
-          default:
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-        if (res.value != null) {
-          res.id = __field.id;
+            if (res.value != null) {
+                res.id = __field.id;
+            }
+            oprot.readFieldEnd();
+            TField __stopField = oprot.readFieldBegin(); // Consume the STOP byte
+            if (__stopField.type != TType.STOP) {
+                throw new TProtocolException(TProtocolException.INVALID_DATA, "Union 'NonTriviallyDestructibleUnion' is missing a STOP byte");
+            }
         }
-        oprot.readFieldEnd();
-        TField __stopField = oprot.readFieldBegin(); // Consume the STOP byte
-        if (__stopField.type != TType.STOP) {
-          throw new TProtocolException(TProtocolException.INVALID_DATA, "Union 'NonTriviallyDestructibleUnion' is missing a STOP byte");
-        }
-      }
-      oprot.readStructEnd();
-      return res;
+        oprot.readStructEnd();
+        return res;
     }
+
     public static NonTriviallyDestructibleUnion defaultInstance() {
         return _DEFAULT;
     }
-
 }

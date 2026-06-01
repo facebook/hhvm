@@ -152,6 +152,7 @@ public interface Perform extends java.io.Closeable, com.facebook.thrift.util.Blo
         }
 
         public SerialInteraction createSerialInteraction();
+
     }
     @java.lang.Override void close();
 
@@ -282,6 +283,7 @@ public interface Perform extends java.io.Closeable, com.facebook.thrift.util.Blo
         }
 
         public SerialInteraction createSerialInteraction();
+
     }
     @com.facebook.swift.service.ThriftInteraction("MyInteraction")
     public interface MyInteraction extends java.io.Closeable {
@@ -351,4 +353,5 @@ public interface Perform extends java.io.Closeable, com.facebook.thrift.util.Blo
     }
 
     SerialInteraction createSerialInteraction();
+
 }

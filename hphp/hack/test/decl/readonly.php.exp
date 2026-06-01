@@ -35,7 +35,7 @@
               ft_instantiated = true }));
         fe_pos = [5:16-32]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\returns_normal",
    (Shallow_decl_defs.Fun
@@ -60,7 +60,7 @@
               ft_instantiated = true }));
         fe_pos = [9:16-30]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\Bar",
    (Shallow_decl_defs.Class

@@ -24,8 +24,8 @@
   {{#if field.optional?}}
 public {{#partial types.csharp_type type=field.type}}? {{field.csharp_property_name}} { get; set; }
   {{#else if field.type.nullable?}}
-private {{#partial types.csharp_type type=field.type}} _{{field.name}} = {{!
-    }}{{#if (object.notnull? field.default_value)}}{{#partial constants.csharp_const_value value=field.default_value}}{{#else}}{{#partial defaults.csharp_default_value type=field.type}}{{/if (object.notnull? field.default_value)}};
+private {{#partial types.csharp_type type=field.type}} _{{field.name}} = {{!}}
+    {{~ #if (object.notnull? field.default_value)}}{{#partial constants.csharp_const_value value=field.default_value}}{{#else}}{{#partial defaults.csharp_default_value type=field.type}}{{/if (object.notnull? field.default_value)}};
 public {{#partial types.csharp_type type=field.type}} {{field.csharp_property_name}}
 {
     get => _{{field.name}};

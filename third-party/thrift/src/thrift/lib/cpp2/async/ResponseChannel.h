@@ -36,6 +36,11 @@ namespace folly {
 class IOBuf;
 }
 
+namespace apache::thrift {
+class Cpp2RequestContext;
+struct SerializedResponse;
+} // namespace apache::thrift
+
 extern const std::string kUnknownErrorCode;
 extern const std::string kOverloadedErrorCode;
 extern const std::string kAppOverloadedErrorCode;
@@ -180,6 +185,31 @@ class ResponseChannelRequest {
 
   virtual void sendQueueTimeoutResponse(
       bool /*interactionIsTerminated*/ = false) {}
+
+  // Virtual hook for compressing a response on the CPU thread (before sending
+  // to the IO thread). Overridden by concrete request types that support
+  // pre-compression. Returns true if compression was performed.
+  virtual bool compressResponse(
+      SerializedResponse& /*response*/,
+      Cpp2RequestContext* /*ctx*/,
+      size_t /*payloadSize*/) {
+    return false;
+  }
+
+  // Returns true if the CPU compression feature is enabled. Used as a cheap
+  // guard so that sendReply avoids computing payload size and making virtual
+  // calls when the feature is off. The base class returns false;
+  // ThriftRequestCore overrides based on the
+  // thrift_server_compress_response_on_cpu flag.
+  virtual bool isCpuCompressionEnabled() const { return false; }
+
+  // Returns true if compression is configured and the CPU compression flag is
+  // enabled, indicating that sendReply should dispatch to a CPU executor when
+  // called on the IO thread. The base class returns false; ThriftRequestCore
+  // overrides based on flag + compression config.
+  virtual bool shouldDispatchCompressionToCpu(size_t /*payloadSize*/) const {
+    return false;
+  }
 
   virtual ~ResponseChannelRequest() = default;
 

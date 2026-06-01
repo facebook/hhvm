@@ -245,7 +245,7 @@ class MyServiceInterface(
 
     async def invalid_return_for_hack(
             self
-        ) -> _typing.AbstractSet[builtins.float]:
+        ) -> _fbthrift_python_types.ImmutableSet[builtins.float]:
         raise NotImplementedError("async def invalid_return_for_hack is not implemented")
 
     async def _fbthrift__handler_invalid_return_for_hack(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:

@@ -8,19 +8,21 @@
 
 #include <proxygen/lib/http/session/ByteEvents.h>
 
+#include <array>
+
 #include <folly/Conv.h>
 #include <proxygen/lib/utils/Time.h>
 
 namespace proxygen {
 
-const char* const kTypeStrings[] = {
+constexpr auto kTypeStrings = std::to_array<const char*>({
     "FIRST_BYTE",
     "LAST_BYTE",
     "PING_REPLY_SENT",
     "FIRST_HEADER_BYTE",
     "TRACKED_BYTE",
     "SECOND_TO_LAST_PACKET",
-};
+});
 
 std::ostream& operator<<(std::ostream& os, const ByteEvent& be) {
   os << folly::to<std::string>(

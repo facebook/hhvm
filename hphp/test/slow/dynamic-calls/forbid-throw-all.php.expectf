@@ -9,8 +9,6 @@ Exception: 'A::func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
 
 Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/forbid-throw-all.php on line 142
 
@@ -65,7 +63,6 @@ Exception: 'HH\Vector::fromItems' called dynamically without using a function po
 Exception: 'HH\Vector::fromItems' called dynamically without using a function pointer
 Exception: 'HH\Vector::fromItems' called dynamically without using a function pointer
 Exception: 'HH\Vector::firstValue' called dynamically without using a function pointer
-Exception: 'HH\Vector::fromItems' called dynamically without using a function pointer
 Exception: 'HH\Vector::firstValue' called dynamically without using a function pointer
 Exception: 'HH\Vector::fromItems' called dynamically without using a function pointer
 Exception: 'HH\Vector::fromItems' called dynamically without using a function pointer
@@ -91,8 +88,6 @@ Exception: 'A::static_async_func2' called dynamically without using a function p
 Exception: 'A::func2' called dynamically without using a function pointer
 Exception: 'A::static_func2' called dynamically without using a function pointer
 Exception: 'A::async_func2' called dynamically without using a function pointer
-Exception: 'A::static_async_func2' called dynamically without using a function pointer
-Exception: 'A::static_func2' called dynamically without using a function pointer
 Exception: 'A::static_async_func2' called dynamically without using a function pointer
 Exception: 'A::func2' called dynamically without using a function pointer
 Exception: 'A::async_func2' called dynamically without using a function pointer

@@ -142,6 +142,7 @@ public interface InteractWithShared extends java.io.Closeable, com.facebook.thri
         }
 
         public SharedInteraction createSharedInteraction();
+
     }
     @java.lang.Override void close();
 
@@ -253,6 +254,7 @@ public interface InteractWithShared extends java.io.Closeable, com.facebook.thri
         }
 
         public SharedInteraction createSharedInteraction();
+
     }
     @com.facebook.swift.service.ThriftInteraction("MyInteraction")
     public interface MyInteraction extends java.io.Closeable {
@@ -313,4 +315,5 @@ public interface InteractWithShared extends java.io.Closeable, com.facebook.thri
     }
 
     SharedInteraction createSharedInteraction();
+
 }

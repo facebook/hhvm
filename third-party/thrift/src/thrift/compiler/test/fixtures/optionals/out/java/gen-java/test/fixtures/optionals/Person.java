@@ -64,11 +64,11 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Person other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -90,63 +90,63 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
 
         public long getId() { return id; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)    public Builder setName(String name) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)    public Builder setName(String name) {
             this.name = name;
             return this;
         }
 
         public String getName() { return name; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="age", requiredness=Requiredness.OPTIONAL)    public Builder setAge(Short age) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="age", requiredness=Requiredness.OPTIONAL)    public Builder setAge(Short age) {
             this.age = age;
             return this;
         }
 
         public Short getAge() { return age; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="address", requiredness=Requiredness.OPTIONAL)    public Builder setAddress(String address) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="address", requiredness=Requiredness.OPTIONAL)    public Builder setAddress(String address) {
             this.address = address;
             return this;
         }
 
         public String getAddress() { return address; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="favoriteColor", requiredness=Requiredness.OPTIONAL)    public Builder setFavoriteColor(test.fixtures.optionals.Color favoriteColor) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="favoriteColor", requiredness=Requiredness.OPTIONAL)    public Builder setFavoriteColor(test.fixtures.optionals.Color favoriteColor) {
             this.favoriteColor = favoriteColor;
             return this;
         }
 
         public test.fixtures.optionals.Color getFavoriteColor() { return favoriteColor; }
 
-            @com.facebook.swift.codec.ThriftField(value=6, name="friends", requiredness=Requiredness.OPTIONAL)    public Builder setFriends(Set<Long> friends) {
+        @com.facebook.swift.codec.ThriftField(value=6, name="friends", requiredness=Requiredness.OPTIONAL)    public Builder setFriends(Set<Long> friends) {
             this.friends = friends;
             return this;
         }
 
         public Set<Long> getFriends() { return friends; }
 
-            @com.facebook.swift.codec.ThriftField(value=7, name="bestFriend", requiredness=Requiredness.OPTIONAL)    public Builder setBestFriend(Long bestFriend) {
+        @com.facebook.swift.codec.ThriftField(value=7, name="bestFriend", requiredness=Requiredness.OPTIONAL)    public Builder setBestFriend(Long bestFriend) {
             this.bestFriend = bestFriend;
             return this;
         }
 
         public Long getBestFriend() { return bestFriend; }
 
-            @com.facebook.swift.codec.ThriftField(value=8, name="petNames", requiredness=Requiredness.OPTIONAL)    public Builder setPetNames(Map<test.fixtures.optionals.Animal, String> petNames) {
+        @com.facebook.swift.codec.ThriftField(value=8, name="petNames", requiredness=Requiredness.OPTIONAL)    public Builder setPetNames(Map<test.fixtures.optionals.Animal, String> petNames) {
             this.petNames = petNames;
             return this;
         }
 
         public Map<test.fixtures.optionals.Animal, String> getPetNames() { return petNames; }
 
-            @com.facebook.swift.codec.ThriftField(value=9, name="afraidOfAnimal", requiredness=Requiredness.OPTIONAL)    public Builder setAfraidOfAnimal(test.fixtures.optionals.Animal afraidOfAnimal) {
+        @com.facebook.swift.codec.ThriftField(value=9, name="afraidOfAnimal", requiredness=Requiredness.OPTIONAL)    public Builder setAfraidOfAnimal(test.fixtures.optionals.Animal afraidOfAnimal) {
             this.afraidOfAnimal = afraidOfAnimal;
             return this;
         }
 
         public test.fixtures.optionals.Animal getAfraidOfAnimal() { return afraidOfAnimal; }
 
-            @com.facebook.swift.codec.ThriftField(value=10, name="vehicles", requiredness=Requiredness.OPTIONAL)    public Builder setVehicles(List<test.fixtures.optionals.Vehicle> vehicles) {
+        @com.facebook.swift.codec.ThriftField(value=10, name="vehicles", requiredness=Requiredness.OPTIONAL)    public Builder setVehicles(List<test.fixtures.optionals.Vehicle> vehicles) {
             this.vehicles = vehicles;
             return this;
         }
@@ -184,6 +184,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -192,111 +193,92 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
     private final long id;
     public static final int _ID = 1;
     private static final TField ID_FIELD_DESC = new TField("id", TType.I64, (short)1);
-        private final String name;
+    private final String name;
     public static final int _NAME = 2;
     private static final TField NAME_FIELD_DESC = new TField("name", TType.STRING, (short)2);
-        private final Short age;
+    private final Short age;
     public static final int _AGE = 3;
     private static final TField AGE_FIELD_DESC = new TField("age", TType.I16, (short)3);
-        private final String address;
+    private final String address;
     public static final int _ADDRESS = 4;
     private static final TField ADDRESS_FIELD_DESC = new TField("address", TType.STRING, (short)4);
-        private final test.fixtures.optionals.Color favoriteColor;
+    private final test.fixtures.optionals.Color favoriteColor;
     public static final int _FAVORITECOLOR = 5;
     private static final TField FAVORITE_COLOR_FIELD_DESC = new TField("favoriteColor", TType.STRUCT, (short)5);
-        private final Set<Long> friends;
+    private final Set<Long> friends;
     public static final int _FRIENDS = 6;
     private static final TField FRIENDS_FIELD_DESC = new TField("friends", TType.SET, (short)6);
-        private final Long bestFriend;
+    private final Long bestFriend;
     public static final int _BESTFRIEND = 7;
     private static final TField BEST_FRIEND_FIELD_DESC = new TField("bestFriend", TType.I64, (short)7);
-        private final Map<test.fixtures.optionals.Animal, String> petNames;
+    private final Map<test.fixtures.optionals.Animal, String> petNames;
     public static final int _PETNAMES = 8;
     private static final TField PET_NAMES_FIELD_DESC = new TField("petNames", TType.MAP, (short)8);
-        private final test.fixtures.optionals.Animal afraidOfAnimal;
+    private final test.fixtures.optionals.Animal afraidOfAnimal;
     public static final int _AFRAIDOFANIMAL = 9;
     private static final TField AFRAID_OF_ANIMAL_FIELD_DESC = new TField("afraidOfAnimal", TType.I32, (short)9);
-        private final List<test.fixtures.optionals.Vehicle> vehicles;
+    private final List<test.fixtures.optionals.Vehicle> vehicles;
     public static final int _VEHICLES = 10;
     private static final TField VEHICLES_FIELD_DESC = new TField("vehicles", TType.LIST, (short)10);
     static {
-      NAMES_TO_IDS.put("id", 1);
-      THRIFT_NAMES_TO_IDS.put("id", 1);
-      FIELD_METADATA.put(1, ID_FIELD_DESC);
-      NAMES_TO_IDS.put("name", 2);
-      THRIFT_NAMES_TO_IDS.put("name", 2);
-      FIELD_METADATA.put(2, NAME_FIELD_DESC);
-      NAMES_TO_IDS.put("age", 3);
-      THRIFT_NAMES_TO_IDS.put("age", 3);
-      FIELD_METADATA.put(3, AGE_FIELD_DESC);
-      NAMES_TO_IDS.put("address", 4);
-      THRIFT_NAMES_TO_IDS.put("address", 4);
-      FIELD_METADATA.put(4, ADDRESS_FIELD_DESC);
-      NAMES_TO_IDS.put("favoriteColor", 5);
-      THRIFT_NAMES_TO_IDS.put("favoriteColor", 5);
-      FIELD_METADATA.put(5, FAVORITE_COLOR_FIELD_DESC);
-      NAMES_TO_IDS.put("friends", 6);
-      THRIFT_NAMES_TO_IDS.put("friends", 6);
-      FIELD_METADATA.put(6, FRIENDS_FIELD_DESC);
-      NAMES_TO_IDS.put("bestFriend", 7);
-      THRIFT_NAMES_TO_IDS.put("bestFriend", 7);
-      FIELD_METADATA.put(7, BEST_FRIEND_FIELD_DESC);
-      NAMES_TO_IDS.put("petNames", 8);
-      THRIFT_NAMES_TO_IDS.put("petNames", 8);
-      FIELD_METADATA.put(8, PET_NAMES_FIELD_DESC);
-      NAMES_TO_IDS.put("afraidOfAnimal", 9);
-      THRIFT_NAMES_TO_IDS.put("afraidOfAnimal", 9);
-      FIELD_METADATA.put(9, AFRAID_OF_ANIMAL_FIELD_DESC);
-      NAMES_TO_IDS.put("vehicles", 10);
-      THRIFT_NAMES_TO_IDS.put("vehicles", 10);
-      FIELD_METADATA.put(10, VEHICLES_FIELD_DESC);
+        NAMES_TO_IDS.put("id", 1);
+        THRIFT_NAMES_TO_IDS.put("id", 1);
+        FIELD_METADATA.put(1, ID_FIELD_DESC);
+        NAMES_TO_IDS.put("name", 2);
+        THRIFT_NAMES_TO_IDS.put("name", 2);
+        FIELD_METADATA.put(2, NAME_FIELD_DESC);
+        NAMES_TO_IDS.put("age", 3);
+        THRIFT_NAMES_TO_IDS.put("age", 3);
+        FIELD_METADATA.put(3, AGE_FIELD_DESC);
+        NAMES_TO_IDS.put("address", 4);
+        THRIFT_NAMES_TO_IDS.put("address", 4);
+        FIELD_METADATA.put(4, ADDRESS_FIELD_DESC);
+        NAMES_TO_IDS.put("favoriteColor", 5);
+        THRIFT_NAMES_TO_IDS.put("favoriteColor", 5);
+        FIELD_METADATA.put(5, FAVORITE_COLOR_FIELD_DESC);
+        NAMES_TO_IDS.put("friends", 6);
+        THRIFT_NAMES_TO_IDS.put("friends", 6);
+        FIELD_METADATA.put(6, FRIENDS_FIELD_DESC);
+        NAMES_TO_IDS.put("bestFriend", 7);
+        THRIFT_NAMES_TO_IDS.put("bestFriend", 7);
+        FIELD_METADATA.put(7, BEST_FRIEND_FIELD_DESC);
+        NAMES_TO_IDS.put("petNames", 8);
+        THRIFT_NAMES_TO_IDS.put("petNames", 8);
+        FIELD_METADATA.put(8, PET_NAMES_FIELD_DESC);
+        NAMES_TO_IDS.put("afraidOfAnimal", 9);
+        THRIFT_NAMES_TO_IDS.put("afraidOfAnimal", 9);
+        FIELD_METADATA.put(9, AFRAID_OF_ANIMAL_FIELD_DESC);
+        NAMES_TO_IDS.put("vehicles", 10);
+        THRIFT_NAMES_TO_IDS.put("vehicles", 10);
+        FIELD_METADATA.put(10, VEHICLES_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE)
     public long getId() { return id; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)
     public String getName() { return name; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="age", requiredness=Requiredness.OPTIONAL)
     public Short getAge() { return age; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="address", requiredness=Requiredness.OPTIONAL)
     public String getAddress() { return address; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="favoriteColor", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.optionals.Color getFavoriteColor() { return favoriteColor; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="friends", requiredness=Requiredness.OPTIONAL)
     public Set<Long> getFriends() { return friends; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="bestFriend", requiredness=Requiredness.OPTIONAL)
     public Long getBestFriend() { return bestFriend; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="petNames", requiredness=Requiredness.OPTIONAL)
     public Map<test.fixtures.optionals.Animal, String> getPetNames() { return petNames; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="afraidOfAnimal", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.optionals.Animal getAfraidOfAnimal() { return afraidOfAnimal; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=10, name="vehicles", requiredness=Requiredness.OPTIONAL)
     public List<test.fixtures.optionals.Vehicle> getVehicles() { return vehicles; }
@@ -346,253 +328,269 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(id);
-            _hashCode = 31 * _hashCode + Objects.hashCode(name);
-            _hashCode = 31 * _hashCode + Objects.hashCode(age);
-            _hashCode = 31 * _hashCode + Objects.hashCode(address);
-            _hashCode = 31 * _hashCode + Objects.hashCode(favoriteColor);
-            _hashCode = 31 * _hashCode + Objects.hashCode(friends);
-            _hashCode = 31 * _hashCode + Objects.hashCode(bestFriend);
-            _hashCode = 31 * _hashCode + Objects.hashCode(petNames);
-            _hashCode = 31 * _hashCode + Objects.hashCode(afraidOfAnimal);
-            _hashCode = 31 * _hashCode + Objects.hashCode(vehicles);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(name);
+        _hashCode = 31 * _hashCode + Objects.hashCode(age);
+        _hashCode = 31 * _hashCode + Objects.hashCode(address);
+        _hashCode = 31 * _hashCode + Objects.hashCode(favoriteColor);
+        _hashCode = 31 * _hashCode + Objects.hashCode(friends);
+        _hashCode = 31 * _hashCode + Objects.hashCode(bestFriend);
+        _hashCode = 31 * _hashCode + Objects.hashCode(petNames);
+        _hashCode = 31 * _hashCode + Objects.hashCode(afraidOfAnimal);
+        _hashCode = 31 * _hashCode + Objects.hashCode(vehicles);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Person> asReader() {
       return Person::read0;
     }
 
     public static Person read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Person.NAMES_TO_IDS, Person.THRIFT_NAMES_TO_IDS, Person.FIELD_METADATA);
-      Person.Builder builder = new Person.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _ID:
-          if (__field.type == TType.I64) {
-            long id = oprot.readI64();
-            builder.setId(id);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _NAME:
-          if (__field.type == TType.STRING) {
-            String name = oprot.readString();
-            builder.setName(name);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _AGE:
-          if (__field.type == TType.I16) {
-            Short age = oprot.readI16();
-            builder.setAge(age);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADDRESS:
-          if (__field.type == TType.STRING) {
-            String address = oprot.readString();
-            builder.setAddress(address);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _FAVORITECOLOR:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.optionals.Color favoriteColor = test.fixtures.optionals.Color.read0(oprot);
-            builder.setFavoriteColor(favoriteColor);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _FRIENDS:
-          if (__field.type == TType.SET) {
-            Set<Long> friends;
-                {
-                TSet _set = oprot.readSetBegin();
-                friends = new HashSet<Long>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    long _value1 = oprot.readI64();
-                    friends.add(_value1);
+        TField __field;
+        oprot.readStructBegin(Person.NAMES_TO_IDS, Person.THRIFT_NAMES_TO_IDS, Person.FIELD_METADATA);
+        Person.Builder builder = new Person.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _ID:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setId(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readSetEnd();
+                break;
+            case _NAME:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setName(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setFriends(friends);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _BESTFRIEND:
-          if (__field.type == TType.I64) {
-            Long bestFriend = oprot.readI64();
-            builder.setBestFriend(bestFriend);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _PETNAMES:
-          if (__field.type == TType.MAP) {
-            Map<test.fixtures.optionals.Animal, String> petNames;
-                {
-                TMap _map = oprot.readMapBegin();
-                petNames = new HashMap<test.fixtures.optionals.Animal, String>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    test.fixtures.optionals.Animal _key1 = test.fixtures.optionals.Animal.fromInteger(oprot.readI32());
-                    String _value1 = oprot.readString();
-                    petNames.put(_key1, _value1);
+                break;
+            case _AGE:
+                if (__field.type == TType.I16) {
+                    Short _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI16();
+                    builder.setAge(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
+                break;
+            case _ADDRESS:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setAddress(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readMapEnd();
-            builder.setPetNames(petNames);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _AFRAIDOFANIMAL:
-          if (__field.type == TType.I32) {
-            test.fixtures.optionals.Animal afraidOfAnimal = test.fixtures.optionals.Animal.fromInteger(oprot.readI32());
-            builder.setAfraidOfAnimal(afraidOfAnimal);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _VEHICLES:
-          if (__field.type == TType.LIST) {
-            List<test.fixtures.optionals.Vehicle> vehicles;
-                {
-                TList _list = oprot.readListBegin();
-                vehicles = new ArrayList<test.fixtures.optionals.Vehicle>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    test.fixtures.optionals.Vehicle _value1 = test.fixtures.optionals.Vehicle.read0(oprot);
-                    vehicles.add(_value1);
+                break;
+            case _FAVORITECOLOR:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.optionals.Color _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.optionals.Color.read0(oprot);
+                    builder.setFavoriteColor(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _FRIENDS:
+                if (__field.type == TType.SET) {
+                    Set<Long> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Long>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            long _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI64();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setFriends(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setVehicles(vehicles);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            case _BESTFRIEND:
+                if (__field.type == TType.I64) {
+                    Long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setBestFriend(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _PETNAMES:
+                if (__field.type == TType.MAP) {
+                    Map<test.fixtures.optionals.Animal, String> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<test.fixtures.optionals.Animal, String>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            test.fixtures.optionals.Animal _fbthriftKey1;
+                            String _fbthriftValue1;
+
+                            {
+                                test.fixtures.optionals.Animal _fbthriftVar1;
+                                _fbthriftVar1 = test.fixtures.optionals.Animal.fromInteger(oprot.readI32());
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setPetNames(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _AFRAIDOFANIMAL:
+                if (__field.type == TType.I32) {
+                    test.fixtures.optionals.Animal _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.optionals.Animal.fromInteger(oprot.readI32());
+                    builder.setAfraidOfAnimal(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _VEHICLES:
+                if (__field.type == TType.LIST) {
+                    List<test.fixtures.optionals.Vehicle> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<test.fixtures.optionals.Vehicle>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            test.fixtures.optionals.Vehicle _fbthriftVar1;
+                            _fbthriftVar1 = test.fixtures.optionals.Vehicle.read0(oprot);
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setVehicles(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.id;
-      oprot.writeFieldBegin(ID_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.name;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(NAME_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Short _iter0 = this.age;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(AGE_FIELD_DESC);
-        oprot.writeI16(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.address;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(ADDRESS_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.optionals.Color _iter0 = this.favoriteColor;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(FAVORITE_COLOR_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Set<Long> _iter0 = this.friends;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(FRIENDS_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.I64, _iter0.size()));
-            for (long _iter1 : _iter0) {
-              oprot.writeI64(_iter1);
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.id;
+            oprot.writeFieldBegin(ID_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.name;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(NAME_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Long _iter0 = this.bestFriend;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(BEST_FRIEND_FIELD_DESC);
-        oprot.writeI64(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<test.fixtures.optionals.Animal, String> _iter0 = this.petNames;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(PET_NAMES_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter0.size()));
-            for (Map.Entry<test.fixtures.optionals.Animal, String> _iter1 : _iter0.entrySet()) {
-              {
-                test.fixtures.optionals.Animal _iter2 = _iter1.getKey();
-                oprot.writeI32(_iter2 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter2));
-              }
-              {
-                String _iter2 = _iter1.getValue();
-                oprot.writeString(_iter2);
-              }
+        }
+        {
+            Short _fbthriftVar0 = this.age;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(AGE_FIELD_DESC);
+                oprot.writeI16(_fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.optionals.Animal _iter0 = this.afraidOfAnimal;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(AFRAID_OF_ANIMAL_FIELD_DESC);
-        oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<test.fixtures.optionals.Vehicle> _iter0 = this.vehicles;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(VEHICLES_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.STRUCT, _iter0.size()));
-            for (test.fixtures.optionals.Vehicle _iter1 : _iter0) {
-              _iter1.write0(oprot);
+        }
+        {
+            String _fbthriftVar0 = this.address;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(ADDRESS_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        {
+            test.fixtures.optionals.Color _fbthriftVar0 = this.favoriteColor;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(FAVORITE_COLOR_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            Set<Long> _fbthriftVar0 = this.friends;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(FRIENDS_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.I64, _fbthriftVar0.size()));
+                for (long _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI64(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            Long _fbthriftVar0 = this.bestFriend;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(BEST_FRIEND_FIELD_DESC);
+                oprot.writeI64(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            Map<test.fixtures.optionals.Animal, String> _fbthriftVar0 = this.petNames;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(PET_NAMES_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _fbthriftVar0.size()));
+                for (Map.Entry<test.fixtures.optionals.Animal, String> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        test.fixtures.optionals.Animal _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI32(_fbthriftVar2 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar2));
+                    }
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.optionals.Animal _fbthriftVar0 = this.afraidOfAnimal;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(AFRAID_OF_ANIMAL_FIELD_DESC);
+                oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            List<test.fixtures.optionals.Vehicle> _fbthriftVar0 = this.vehicles;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(VEHICLES_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.STRUCT, _fbthriftVar0.size()));
+                for (test.fixtures.optionals.Vehicle _fbthriftVar1 : _fbthriftVar0) {
+                    _fbthriftVar1.write0(oprot);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _PersonLazy {

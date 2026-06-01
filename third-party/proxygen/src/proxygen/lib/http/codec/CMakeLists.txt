@@ -144,6 +144,20 @@ proxygen_add_library(proxygen_http_codec_codec_factory
     proxygen_http_codec_direction
 )
 
+proxygen_add_library(proxygen_http_codec_h3_early_data_handler
+  SRCS
+    H3EarlyDataHandler.cpp
+  DEPS
+    proxygen_http_codec_hq_codec
+    mvfst::mvfst_codec_types
+    mvfst::mvfst_folly_utils
+    Folly::folly_io_iobuf
+    Folly::folly_logging_logging
+  EXPORTED_DEPS
+    proxygen_http_codec_codec_common
+    mvfst::mvfst_state_early_data_app_params_handler
+)
+
 proxygen_add_library(proxygen_http_codec_hq_codec
   SRCS
     HQControlCodec.cpp

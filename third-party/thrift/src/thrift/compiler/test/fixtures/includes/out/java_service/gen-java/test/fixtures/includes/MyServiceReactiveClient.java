@@ -41,7 +41,6 @@ public class MyServiceReactiveClient
   }
 
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = reactor.core.publisher.Mono.empty();
@@ -62,7 +61,6 @@ public class MyServiceReactiveClient
   }
 
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = _headersMono;
@@ -79,18 +77,18 @@ public class MyServiceReactiveClient
         {
           oprot.writeFieldBegin(_query_S_FIELD_DESC);
 
-          test.fixtures.includes.MyStruct _iter0 = s;
+          test.fixtures.includes.MyStruct _fbthriftVar0 = s;
 
-          _iter0.write0(oprot);
+          _fbthriftVar0.write0(oprot);
           oprot.writeFieldEnd();
         }
 
         {
           oprot.writeFieldBegin(_query_I_FIELD_DESC);
 
-          test.fixtures.includes.includes.Included _iter0 = i;
+          test.fixtures.includes.includes.Included _fbthriftVar0 = i;
 
-          _iter0.write0(oprot);
+          _fbthriftVar0.write0(oprot);
           oprot.writeFieldEnd();
         }
 
@@ -145,18 +143,18 @@ public class MyServiceReactiveClient
         {
           oprot.writeFieldBegin(_hasArgDocs_S_FIELD_DESC);
 
-          test.fixtures.includes.MyStruct _iter0 = s;
+          test.fixtures.includes.MyStruct _fbthriftVar0 = s;
 
-          _iter0.write0(oprot);
+          _fbthriftVar0.write0(oprot);
           oprot.writeFieldEnd();
         }
 
         {
           oprot.writeFieldBegin(_hasArgDocs_I_FIELD_DESC);
 
-          test.fixtures.includes.includes.Included _iter0 = i;
+          test.fixtures.includes.includes.Included _fbthriftVar0 = i;
 
-          _iter0.write0(oprot);
+          _fbthriftVar0.write0(oprot);
           oprot.writeFieldEnd();
         }
 

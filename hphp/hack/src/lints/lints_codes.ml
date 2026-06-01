@@ -53,7 +53,7 @@ module Codes = struct
 
   let missing_override_attribute = 5616
 
-  let sketchy_null_check = 5618
+  (* let sketchy_null_check = 5618 *)
 
   let invalid_truthiness_test = 5622
 

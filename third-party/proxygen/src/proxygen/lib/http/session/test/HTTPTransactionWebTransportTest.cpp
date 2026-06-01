@@ -87,7 +87,9 @@ class HTTPTransactionWebTransportTest : public testing::Test {
 
   void TearDown() override {
     if (txn_) {
-      EXPECT_CALL(transport_, sendAbort(txn_.get(), _));
+      // closeSession() may have already sent an abort if ingress EOM was not
+      // seen, so allow 0 or 1 calls here.
+      EXPECT_CALL(transport_, sendAbort(txn_.get(), _)).Times(AtMost(1));
       txn_->sendAbort();
     }
   }
@@ -206,6 +208,7 @@ TEST_F(HTTPTransactionWebTransportTest, CreateStreams) {
             WebTransport::ErrorCode::STREAM_CREATION_ERROR);
 
   EXPECT_CALL(transport_, sendEOM(txn_.get(), nullptr));
+  EXPECT_CALL(transport_, sendAbort(txn_.get(), _));
   wt_->closeSession();
 }
 

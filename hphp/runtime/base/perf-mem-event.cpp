@@ -48,7 +48,7 @@
 #include <folly/ScopeGuard.h>
 #ifdef HHVM_FACEBOOK
 #include <folly/Demangle.h>
-#include <folly/experimental/symbolizer/Symbolizer.h>
+#include <folly/debugging/symbolizer/Symbolizer.h>
 #endif
 
 namespace HPHP {

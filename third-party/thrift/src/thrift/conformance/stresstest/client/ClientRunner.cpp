@@ -72,6 +72,9 @@ class ClientThread : public folly::HHWheelTimer::Callback {
         folly::EventBase::Options().setBackendFactory(factoryFunction),
         ebm,
         threadName);
+  }
+
+  void initClients(const ClientConfig& cfg) {
     auto* evb = thread_->getEventBase();
     // create clients in event base thread
     evb->runInEventBaseThreadAndWait([&]() {
@@ -267,6 +270,10 @@ ClientRunner::ClientRunner(const ClientConfig& config)
     if (!folly::setupIoUringBufferPoolSharing(evbs, FLAGS_io_zcrx_hw_queues)) {
       LOG(FATAL) << "Failed to set up buffer pool sharing";
     }
+  }
+
+  for (auto& ct : clientThreads_) {
+    ct->initClients(configCopy);
   }
 }
 

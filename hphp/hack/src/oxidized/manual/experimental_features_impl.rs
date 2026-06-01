@@ -54,12 +54,12 @@ impl FeatureName {
             ExpressionTreeCoalesceOperator => OngoingRelease,
             ExpressionTreeNullsafeObjGet => OngoingRelease,
             NamedParameters => Unstable,
-            NamedParametersUse => OngoingRelease,
             XhpTypeConstants => OngoingRelease,
             CapturePipeVariables => Unstable,
             AllowExtendedAwaitSyntax => Unstable,
             AllowConditionalAwaitSyntax => Unstable,
             ShapeFieldPunning => Unstable,
+            RepresentableAs => Unstable,
             TestFeature => Unstable,
         }
     }

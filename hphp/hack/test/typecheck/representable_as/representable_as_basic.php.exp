@@ -1,0 +1,12 @@
+ERROR: File "representable_as_basic.php", line 19, characters 30-31:
+Invalid argument (Typing[4110])
+  File "representable_as_basic.php", line 4, characters 65-67:
+  Expected `int`
+  File "representable_as_basic.php", line 17, characters 50-52:
+  But got `num`
+ERROR: File "representable_as_basic.php", line 24, characters 30-31:
+Invalid argument (Typing[4110])
+  File "representable_as_basic.php", line 4, characters 65-67:
+  Expected `int`
+  File "representable_as_basic.php", line 22, characters 53-58:
+  But got `string`

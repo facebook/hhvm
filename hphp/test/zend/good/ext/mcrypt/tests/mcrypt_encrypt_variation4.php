@@ -32,9 +32,9 @@ function entrypoint_mcrypt_encrypt_variation4(): void {
 
   // Initialise function arguments not being substituted (if any)
   $cipher = MCRYPT_TRIPLEDES;
-  $key = b'string_val';
-  $data = b'string_val';
-  $iv = b'01234567';
+  $key = 'string_val';
+  $data = 'string_val';
+  $iv = '01234567';
 
 
   // heredoc string

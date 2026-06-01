@@ -1,0 +1,16 @@
+Caught RuntimeException: Call to C::foo() has no argument matching required named parameter b
+Caught RuntimeException: Named argument c does not match any named parameter in call to C::foo
+Caught RuntimeException: Call to C::foo() has no argument matching required named parameter a
+Caught RuntimeException: Named argument x does not match any named parameter in call to C::foo
+Caught RuntimeException: Call to C::foo() has no argument matching required named parameter b
+Caught RuntimeException: C::foo() expects exactly 2 positional parameters, 1 given
+Caught RuntimeException: Call to C::takes_one_named() has no argument matching required named parameter x
+Caught RuntimeException: C::takes_no_named() has no named parameters but was called with named arguments.
+Caught RuntimeException: Call to D::foo() has no argument matching required named parameter b
+Caught RuntimeException: Named argument c does not match any named parameter in call to D::foo
+Caught RuntimeException: Call to D::foo() has no argument matching required named parameter a
+Caught RuntimeException: Named argument x does not match any named parameter in call to D::foo
+Caught RuntimeException: Call to D::foo() has no argument matching required named parameter b
+Caught RuntimeException: D::foo() expects exactly 2 positional parameters, 1 given
+Caught RuntimeException: Call to D::takes_one_named() has no argument matching required named parameter x
+Caught RuntimeException: D::takes_no_named() has no named parameters but was called with named arguments.

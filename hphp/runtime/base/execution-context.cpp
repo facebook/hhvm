@@ -49,7 +49,6 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/extended-logger.h"
@@ -1461,8 +1460,6 @@ void ExecutionContext::requestInit() {
 
   profileRequestStart();
 
-  HHProf::Request::StartProfiling();
-
 #ifndef NDEBUG
   Class* cls = NamedType::getOrCreate(s_stdClass.get())->clsList();
   assertx(cls);
@@ -1500,7 +1497,6 @@ void ExecutionContext::requestExit() {
   apcExtension::purgeDeferred(std::move(m_apcDeferredExpire));
 
   autoTypecheckRequestExit();
-  HHProf::Request::FinishProfiling();
 
   manageAPCHandle();
   syncGdbState();
@@ -1688,8 +1684,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   if (numArgs > 0) {
     assertx(isContainer(args));
     tvDup(args, *vmStack().allocC());
-    // TODO(named_params) support invoke with named args.
-    numArgs = prepareUnpackArgs(f, 0, 0, checkRefAnnot);
+    numArgs = prepareUnpackArgs(f, 0, checkRefAnnot);
   }
 
   // Push generics.

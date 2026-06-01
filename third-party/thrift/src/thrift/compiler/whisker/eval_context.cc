@@ -79,9 +79,6 @@ std::optional<object> find_property(
       [&](const map::ptr& m) -> result {
         // A map doesn't have a prototype, so we treat the lookup as just a
         // simple string key regardless of qualifier.
-        // Specifically for the case of mstch_compat, mstch_object_proxy is in
-        // fact a Whisker map, so this also provides backwards compatibility for
-        // legacy mstch properties which have colons in the name.
         return m->lookup_property(component.as_string());
       },
       [](const native_function::ptr&) -> result { return std::nullopt; },

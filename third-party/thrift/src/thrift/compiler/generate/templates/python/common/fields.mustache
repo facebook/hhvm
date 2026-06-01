@@ -66,13 +66,14 @@ None
   {{/if (object.notnull? adapter)}}
 {{/let partial}}
 
-{{! Adapted type hint if field has adapter, otherwise the original type }}
+{{! Adapted type hint if field has adapter, otherwise the original type.
+    Uses pep484_field_return_type so struct fields use ImmutableList instead of Sequence. }}
 {{#let export partial adapted_type_pyi |type adapter| captures |typehints|}}
   {{#pragma ignore-newlines}}
   {{#if (object.notnull? adapter)}}
-{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial typehints.pep484_type type=type}}]{{/if}}
+{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial typehints.pep484_field_return_type type=type}}]{{/if}}
   {{#else}}
-{{#partial typehints.pep484_type type=type}}
+{{#partial typehints.pep484_field_return_type type=type}}
   {{/if (object.notnull? adapter)}}
 {{/let partial}}
 
@@ -92,8 +93,7 @@ _fbthrift_iobuf.IOBuf
 {{! `__iter__()` return type }}
 {{#pragma ignore-newlines}}
 _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[
-  {{#each (array.enumerate fields with_first=true) as |i field first?|}}
-{{#if (not first?)}}, {{/if}}
+  {{#each fields as |field| separator=", "}}
 {{#if (and field.is_type_iobuf? (not field.has_adapter?) (not field.type.has_adapter?))}}
 _fbthrift_iobuf.IOBuf
 {{#else}}

@@ -316,6 +316,9 @@ fn hint_to_type_constraint(
                 [h] if s == typehints::POISON_MARKER || s == typehints::HH_FUNCTIONREF => {
                     return hint_to_type_constraint(kind, tparams, false, h);
                 }
+                [h] if is_representable_as(s) => {
+                    return hint_to_type_constraint(kind, tparams, false, h);
+                }
                 _ => {}
             };
             type_application_helper(tparams, kind, s)?
@@ -338,6 +341,10 @@ fn hint_to_type_constraint(
 
 fn is_awaitable(s: &str) -> bool {
     s == classes::AWAITABLE
+}
+
+fn is_representable_as(s: &str) -> bool {
+    s == classes::REPRESENTABLE_AS
 }
 
 fn is_typedef(kind: &Kind) -> bool {

@@ -61,7 +61,6 @@ type t =
       keyword: string;
     }
   | Interface_uses_trait of Pos.t
-  | Static_memoized_function of Pos.t
   | Magic of {
       pos: Pos.t;
       meth_name: string;
@@ -426,14 +425,6 @@ let interface_uses_trait pos =
   User_diagnostic.make_err
     Error_code.(to_enum InterfaceUsesTrait)
     (pos, "Interfaces cannot use traits")
-    []
-
-let static_memoized_function pos =
-  User_diagnostic.make_err
-    Error_code.(to_enum StaticMemoizedFunction)
-    ( pos,
-      "`memoize` is not allowed on static methods in classes that aren't final "
-    )
     []
 
 let magic pos meth_name =
@@ -980,7 +971,6 @@ let to_user_diagnostic t =
     | Await_in_sync_function { pos; func_pos; keyword } ->
       await_in_sync_function pos func_pos keyword
     | Interface_uses_trait pos -> interface_uses_trait pos
-    | Static_memoized_function pos -> static_memoized_function pos
     | Magic { pos; meth_name } -> magic pos meth_name
     | ToString_returns_string pos -> toString_returns_string pos
     | ToString_visibility pos -> toString_visibility pos

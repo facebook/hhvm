@@ -430,6 +430,17 @@ struct EnableCustomTypeOrdering {}
 struct GenerateServiceMethodDecorator {}
 
 /**
+ * When applied to a service, generates only a FastClient instead of the
+ * standard AsyncClient. The FastClient uses the fast_thrift pipeline for
+ * lower latency serialization and deserialization.
+ *
+ * Only request/response functions are supported. Functions using streams,
+ * sinks, oneway, or interactions are skipped.
+ */
+@scope.Service
+struct FastClient {}
+
+/**
  * Marks a structured type as non-orderable, marking `operator<` as deleted.
  * This is useful when types should never be ordered. By default, `operator<` is
  * always declared, but depending on whether or not the type's shape is considered

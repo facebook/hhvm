@@ -43,11 +43,11 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(TerseAdaptedFields other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -62,14 +62,14 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
 
         public int getIntField() { return intField; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="string_field", requiredness=Requiredness.TERSE)    public Builder setStringField(String stringField) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="string_field", requiredness=Requiredness.TERSE)    public Builder setStringField(String stringField) {
             this.stringField = stringField;
             return this;
         }
 
         public String getStringField() { return stringField; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="set_field", requiredness=Requiredness.TERSE)    public Builder setSetField(Set<Integer> setField) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="set_field", requiredness=Requiredness.TERSE)    public Builder setSetField(Set<Integer> setField) {
             this.setField = setField;
             return this;
         }
@@ -93,6 +93,7 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -101,37 +102,32 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
     private final int intField;
     public static final int _INT_FIELD = 1;
     private static final TField INT_FIELD_FIELD_DESC = new TField("int_field", TType.I32, (short)1);
-        private final String stringField;
+    private final String stringField;
     public static final int _STRING_FIELD = 2;
     private static final TField STRING_FIELD_FIELD_DESC = new TField("string_field", TType.STRING, (short)2);
-        private final Set<Integer> setField;
+    private final Set<Integer> setField;
     public static final int _SET_FIELD = 3;
     private static final TField SET_FIELD_FIELD_DESC = new TField("set_field", TType.SET, (short)3);
     static {
-      NAMES_TO_IDS.put("intField", 1);
-      THRIFT_NAMES_TO_IDS.put("int_field", 1);
-      FIELD_METADATA.put(1, INT_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("stringField", 2);
-      THRIFT_NAMES_TO_IDS.put("string_field", 2);
-      FIELD_METADATA.put(2, STRING_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("setField", 3);
-      THRIFT_NAMES_TO_IDS.put("set_field", 3);
-      FIELD_METADATA.put(3, SET_FIELD_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/TerseAdaptedFields"),
-        TerseAdaptedFields.class, TerseAdaptedFields::read0));
+        NAMES_TO_IDS.put("intField", 1);
+        THRIFT_NAMES_TO_IDS.put("int_field", 1);
+        FIELD_METADATA.put(1, INT_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("stringField", 2);
+        THRIFT_NAMES_TO_IDS.put("string_field", 2);
+        FIELD_METADATA.put(2, STRING_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("setField", 3);
+        THRIFT_NAMES_TO_IDS.put("set_field", 3);
+        FIELD_METADATA.put(3, SET_FIELD_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/TerseAdaptedFields"),
+            TerseAdaptedFields.class, TerseAdaptedFields::read0));
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="int_field", requiredness=Requiredness.TERSE)
     public int getIntField() { return intField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="string_field", requiredness=Requiredness.TERSE)
     public String getStringField() { return stringField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="set_field", requiredness=Requiredness.TERSE)
     public Set<Integer> getSetField() { return setField; }
@@ -167,107 +163,106 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Integer.hashCode(intField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(stringField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(setField);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(stringField);
+        _hashCode = 31 * _hashCode + Objects.hashCode(setField);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<TerseAdaptedFields> asReader() {
       return TerseAdaptedFields::read0;
     }
 
     public static TerseAdaptedFields read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(TerseAdaptedFields.NAMES_TO_IDS, TerseAdaptedFields.THRIFT_NAMES_TO_IDS, TerseAdaptedFields.FIELD_METADATA);
-      TerseAdaptedFields.Builder builder = new TerseAdaptedFields.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _INT_FIELD:
-          if (__field.type == TType.I32) {
-            int intField = oprot.readI32();
-            builder.setIntField(intField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _STRING_FIELD:
-          if (__field.type == TType.STRING) {
-            String stringField = oprot.readString();
-            builder.setStringField(stringField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SET_FIELD:
-          if (__field.type == TType.SET) {
-            Set<Integer> setField;
-                {
-                TSet _set = oprot.readSetBegin();
-                setField = new HashSet<Integer>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    int _value1 = oprot.readI32();
-                    setField.add(_value1);
+        TField __field;
+        oprot.readStructBegin(TerseAdaptedFields.NAMES_TO_IDS, TerseAdaptedFields.THRIFT_NAMES_TO_IDS, TerseAdaptedFields.FIELD_METADATA);
+        TerseAdaptedFields.Builder builder = new TerseAdaptedFields.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _INT_FIELD:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setIntField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readSetEnd();
+                break;
+            case _STRING_FIELD:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setStringField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setSetField(setField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            case _SET_FIELD:
+                if (__field.type == TType.SET) {
+                    Set<Integer> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Integer>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            int _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI32();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setSetField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      int structStart = 0;
-      int pos = 0;
-      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
-      {
-      int _iter0 = this.intField;
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(_iter0)) {
-        oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
-        oprot.writeI32(_iter0);
-        oprot.writeFieldEnd();
-      };
-      }
-      {
-      String _iter0 = this.stringField;
-      java.util.Objects.requireNonNull(_iter0, "stringField must not be null");
-      
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(_iter0)) {
-        oprot.writeFieldBegin(STRING_FIELD_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Set<Integer> _iter0 = this.setField;
-      java.util.Objects.requireNonNull(_iter0, "setField must not be null");
-      
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(_iter0)) {
-        oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
-            for (int _iter1 : _iter0) {
-              oprot.writeI32(_iter1);
+        oprot.writeStructBegin(STRUCT_DESC);
+        int structStart = 0;
+        int pos = 0;
+        com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
+        {
+            int _fbthriftVar0 = this.intField;
+            if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(_fbthriftVar0)) {
+              oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
+              oprot.writeI32(_fbthriftVar0);
+              oprot.writeFieldEnd();
+            };
+        }
+        {
+            String _fbthriftVar0 = this.stringField;
+            java.util.Objects.requireNonNull(_fbthriftVar0, "stringField must not be null");
+            if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(_fbthriftVar0)) {
+              oprot.writeFieldBegin(STRING_FIELD_FIELD_DESC);
+              oprot.writeString(_fbthriftVar0);
+              oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        {
+            Set<Integer> _fbthriftVar0 = this.setField;
+            java.util.Objects.requireNonNull(_fbthriftVar0, "setField must not be null");
+            if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(_fbthriftVar0)) {
+              oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
+              oprot.writeSetBegin(new TSet(TType.I32, _fbthriftVar0.size()));
+              for (int _fbthriftVar1 : _fbthriftVar0) {
+                  oprot.writeI32(_fbthriftVar1);
+              }
+              oprot.writeSetEnd();
+              oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _TerseAdaptedFieldsLazy {

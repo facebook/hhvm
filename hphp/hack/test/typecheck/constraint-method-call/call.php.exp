@@ -1,3 +1,7 @@
+WARN: File "call.php", line 49, characters 14-14:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "call.php", line 48, characters 25-31:
+  This expression has type `dynamic`
 ERROR: File "call.php", line 29, characters 10-70:
 Typing error (Typing[4110])
   File "call.php", line 30, characters 15-16:

@@ -55,6 +55,7 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
       fe_support_dynamic_type = false;
       fe_no_auto_dynamic = false;
       fe_no_auto_likes = false;
+      fe_gated_by_feature_flag = None;
       fe_package_requirement = sm_package_requirement;
     }
 
@@ -126,6 +127,7 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
       fe_support_dynamic_type = support_dynamic_type;
       fe_no_auto_dynamic;
       fe_no_auto_likes;
+      fe_gated_by_feature_flag = None;
       fe_package_requirement = sm_package_requirement;
     }
 end

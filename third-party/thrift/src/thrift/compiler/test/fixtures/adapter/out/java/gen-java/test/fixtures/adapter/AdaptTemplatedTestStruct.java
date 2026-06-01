@@ -106,11 +106,11 @@ public final class AdaptTemplatedTestStruct implements com.facebook.thrift.paylo
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(AdaptTemplatedTestStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -150,147 +150,147 @@ public final class AdaptTemplatedTestStruct implements com.facebook.thrift.paylo
 
         public boolean isAdaptedBool() { return adaptedBool; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="adaptedByte", requiredness=Requiredness.NONE)    public Builder setAdaptedByte(byte adaptedByte) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="adaptedByte", requiredness=Requiredness.NONE)    public Builder setAdaptedByte(byte adaptedByte) {
             this.adaptedByte = adaptedByte;
             return this;
         }
 
         public byte getAdaptedByte() { return adaptedByte; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="adaptedShort", requiredness=Requiredness.NONE)    public Builder setAdaptedShort(short adaptedShort) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="adaptedShort", requiredness=Requiredness.NONE)    public Builder setAdaptedShort(short adaptedShort) {
             this.adaptedShort = adaptedShort;
             return this;
         }
 
         public short getAdaptedShort() { return adaptedShort; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="adaptedInteger", requiredness=Requiredness.NONE)    public Builder setAdaptedInteger(int adaptedInteger) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="adaptedInteger", requiredness=Requiredness.NONE)    public Builder setAdaptedInteger(int adaptedInteger) {
             this.adaptedInteger = adaptedInteger;
             return this;
         }
 
         public int getAdaptedInteger() { return adaptedInteger; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="adaptedLong", requiredness=Requiredness.NONE)    public Builder setAdaptedLong(long adaptedLong) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="adaptedLong", requiredness=Requiredness.NONE)    public Builder setAdaptedLong(long adaptedLong) {
             this.adaptedLong = adaptedLong;
             return this;
         }
 
         public long getAdaptedLong() { return adaptedLong; }
 
-            @com.facebook.swift.codec.ThriftField(value=6, name="adaptedDouble", requiredness=Requiredness.NONE)    public Builder setAdaptedDouble(double adaptedDouble) {
+        @com.facebook.swift.codec.ThriftField(value=6, name="adaptedDouble", requiredness=Requiredness.NONE)    public Builder setAdaptedDouble(double adaptedDouble) {
             this.adaptedDouble = adaptedDouble;
             return this;
         }
 
         public double getAdaptedDouble() { return adaptedDouble; }
 
-            @com.facebook.swift.codec.ThriftField(value=7, name="adaptedString", requiredness=Requiredness.NONE)    public Builder setAdaptedString(String adaptedString) {
+        @com.facebook.swift.codec.ThriftField(value=7, name="adaptedString", requiredness=Requiredness.NONE)    public Builder setAdaptedString(String adaptedString) {
             this.adaptedString = adaptedString;
             return this;
         }
 
         public String getAdaptedString() { return adaptedString; }
 
-            @com.facebook.swift.codec.ThriftField(value=8, name="adaptedList", requiredness=Requiredness.NONE)    public Builder setAdaptedList(List<Long> adaptedList) {
+        @com.facebook.swift.codec.ThriftField(value=8, name="adaptedList", requiredness=Requiredness.NONE)    public Builder setAdaptedList(List<Long> adaptedList) {
             this.adaptedList = adaptedList;
             return this;
         }
 
         public List<Long> getAdaptedList() { return adaptedList; }
 
-            @com.facebook.swift.codec.ThriftField(value=9, name="adaptedSet", requiredness=Requiredness.NONE)    public Builder setAdaptedSet(Set<Long> adaptedSet) {
+        @com.facebook.swift.codec.ThriftField(value=9, name="adaptedSet", requiredness=Requiredness.NONE)    public Builder setAdaptedSet(Set<Long> adaptedSet) {
             this.adaptedSet = adaptedSet;
             return this;
         }
 
         public Set<Long> getAdaptedSet() { return adaptedSet; }
 
-            @com.facebook.swift.codec.ThriftField(value=10, name="adaptedMap", requiredness=Requiredness.NONE)    public Builder setAdaptedMap(Map<Long, Long> adaptedMap) {
+        @com.facebook.swift.codec.ThriftField(value=10, name="adaptedMap", requiredness=Requiredness.NONE)    public Builder setAdaptedMap(Map<Long, Long> adaptedMap) {
             this.adaptedMap = adaptedMap;
             return this;
         }
 
         public Map<Long, Long> getAdaptedMap() { return adaptedMap; }
 
-            @com.facebook.swift.codec.ThriftField(value=11, name="adaptedBoolDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedBoolDefault(boolean adaptedBoolDefault) {
+        @com.facebook.swift.codec.ThriftField(value=11, name="adaptedBoolDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedBoolDefault(boolean adaptedBoolDefault) {
             this.adaptedBoolDefault = adaptedBoolDefault;
             return this;
         }
 
         public boolean isAdaptedBoolDefault() { return adaptedBoolDefault; }
 
-            @com.facebook.swift.codec.ThriftField(value=12, name="adaptedByteDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedByteDefault(byte adaptedByteDefault) {
+        @com.facebook.swift.codec.ThriftField(value=12, name="adaptedByteDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedByteDefault(byte adaptedByteDefault) {
             this.adaptedByteDefault = adaptedByteDefault;
             return this;
         }
 
         public byte getAdaptedByteDefault() { return adaptedByteDefault; }
 
-            @com.facebook.swift.codec.ThriftField(value=13, name="adaptedShortDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedShortDefault(short adaptedShortDefault) {
+        @com.facebook.swift.codec.ThriftField(value=13, name="adaptedShortDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedShortDefault(short adaptedShortDefault) {
             this.adaptedShortDefault = adaptedShortDefault;
             return this;
         }
 
         public short getAdaptedShortDefault() { return adaptedShortDefault; }
 
-            @com.facebook.swift.codec.ThriftField(value=14, name="adaptedIntegerDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedIntegerDefault(int adaptedIntegerDefault) {
+        @com.facebook.swift.codec.ThriftField(value=14, name="adaptedIntegerDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedIntegerDefault(int adaptedIntegerDefault) {
             this.adaptedIntegerDefault = adaptedIntegerDefault;
             return this;
         }
 
         public int getAdaptedIntegerDefault() { return adaptedIntegerDefault; }
 
-            @com.facebook.swift.codec.ThriftField(value=15, name="adaptedLongDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedLongDefault(long adaptedLongDefault) {
+        @com.facebook.swift.codec.ThriftField(value=15, name="adaptedLongDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedLongDefault(long adaptedLongDefault) {
             this.adaptedLongDefault = adaptedLongDefault;
             return this;
         }
 
         public long getAdaptedLongDefault() { return adaptedLongDefault; }
 
-            @com.facebook.swift.codec.ThriftField(value=16, name="adaptedDoubleDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedDoubleDefault(double adaptedDoubleDefault) {
+        @com.facebook.swift.codec.ThriftField(value=16, name="adaptedDoubleDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedDoubleDefault(double adaptedDoubleDefault) {
             this.adaptedDoubleDefault = adaptedDoubleDefault;
             return this;
         }
 
         public double getAdaptedDoubleDefault() { return adaptedDoubleDefault; }
 
-            @com.facebook.swift.codec.ThriftField(value=17, name="adaptedStringDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedStringDefault(String adaptedStringDefault) {
+        @com.facebook.swift.codec.ThriftField(value=17, name="adaptedStringDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedStringDefault(String adaptedStringDefault) {
             this.adaptedStringDefault = adaptedStringDefault;
             return this;
         }
 
         public String getAdaptedStringDefault() { return adaptedStringDefault; }
 
-            @com.facebook.swift.codec.ThriftField(value=18, name="adaptedEnum", requiredness=Requiredness.NONE)    public Builder setAdaptedEnum(test.fixtures.adapter.ThriftAdaptedEnum adaptedEnum) {
+        @com.facebook.swift.codec.ThriftField(value=18, name="adaptedEnum", requiredness=Requiredness.NONE)    public Builder setAdaptedEnum(test.fixtures.adapter.ThriftAdaptedEnum adaptedEnum) {
             this.adaptedEnum = adaptedEnum;
             return this;
         }
 
         public test.fixtures.adapter.ThriftAdaptedEnum getAdaptedEnum() { return adaptedEnum; }
 
-            @com.facebook.swift.codec.ThriftField(value=19, name="adaptedListDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedListDefault(List<Long> adaptedListDefault) {
+        @com.facebook.swift.codec.ThriftField(value=19, name="adaptedListDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedListDefault(List<Long> adaptedListDefault) {
             this.adaptedListDefault = adaptedListDefault;
             return this;
         }
 
         public List<Long> getAdaptedListDefault() { return adaptedListDefault; }
 
-            @com.facebook.swift.codec.ThriftField(value=20, name="adaptedSetDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedSetDefault(Set<Long> adaptedSetDefault) {
+        @com.facebook.swift.codec.ThriftField(value=20, name="adaptedSetDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedSetDefault(Set<Long> adaptedSetDefault) {
             this.adaptedSetDefault = adaptedSetDefault;
             return this;
         }
 
         public Set<Long> getAdaptedSetDefault() { return adaptedSetDefault; }
 
-            @com.facebook.swift.codec.ThriftField(value=21, name="adaptedMapDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedMapDefault(Map<Long, Long> adaptedMapDefault) {
+        @com.facebook.swift.codec.ThriftField(value=21, name="adaptedMapDefault", requiredness=Requiredness.NONE)    public Builder setAdaptedMapDefault(Map<Long, Long> adaptedMapDefault) {
             this.adaptedMapDefault = adaptedMapDefault;
             return this;
         }
 
         public Map<Long, Long> getAdaptedMapDefault() { return adaptedMapDefault; }
 
-            @com.facebook.swift.codec.ThriftField(value=22, name="doubleTypedefBool", requiredness=Requiredness.NONE)    public Builder setDoubleTypedefBool(boolean doubleTypedefBool) {
+        @com.facebook.swift.codec.ThriftField(value=22, name="doubleTypedefBool", requiredness=Requiredness.NONE)    public Builder setDoubleTypedefBool(boolean doubleTypedefBool) {
             this.doubleTypedefBool = doubleTypedefBool;
             return this;
         }
@@ -352,6 +352,7 @@ public final class AdaptTemplatedTestStruct implements com.facebook.thrift.paylo
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -360,247 +361,204 @@ public final class AdaptTemplatedTestStruct implements com.facebook.thrift.paylo
     private final boolean adaptedBool;
     public static final int _ADAPTEDBOOL = 1;
     private static final TField ADAPTED_BOOL_FIELD_DESC = new TField("adaptedBool", TType.BOOL, (short)1);
-        private final byte adaptedByte;
+    private final byte adaptedByte;
     public static final int _ADAPTEDBYTE = 2;
     private static final TField ADAPTED_BYTE_FIELD_DESC = new TField("adaptedByte", TType.BYTE, (short)2);
-        private final short adaptedShort;
+    private final short adaptedShort;
     public static final int _ADAPTEDSHORT = 3;
     private static final TField ADAPTED_SHORT_FIELD_DESC = new TField("adaptedShort", TType.I16, (short)3);
-        private final int adaptedInteger;
+    private final int adaptedInteger;
     public static final int _ADAPTEDINTEGER = 4;
     private static final TField ADAPTED_INTEGER_FIELD_DESC = new TField("adaptedInteger", TType.I32, (short)4);
-        private final long adaptedLong;
+    private final long adaptedLong;
     public static final int _ADAPTEDLONG = 5;
     private static final TField ADAPTED_LONG_FIELD_DESC = new TField("adaptedLong", TType.I64, (short)5);
-        private final double adaptedDouble;
+    private final double adaptedDouble;
     public static final int _ADAPTEDDOUBLE = 6;
     private static final TField ADAPTED_DOUBLE_FIELD_DESC = new TField("adaptedDouble", TType.DOUBLE, (short)6);
-        private final String adaptedString;
+    private final String adaptedString;
     public static final int _ADAPTEDSTRING = 7;
     private static final TField ADAPTED_STRING_FIELD_DESC = new TField("adaptedString", TType.STRING, (short)7);
-        private final List<Long> adaptedList;
+    private final List<Long> adaptedList;
     public static final int _ADAPTEDLIST = 8;
     private static final TField ADAPTED_LIST_FIELD_DESC = new TField("adaptedList", TType.LIST, (short)8);
-        private final Set<Long> adaptedSet;
+    private final Set<Long> adaptedSet;
     public static final int _ADAPTEDSET = 9;
     private static final TField ADAPTED_SET_FIELD_DESC = new TField("adaptedSet", TType.SET, (short)9);
-        private final Map<Long, Long> adaptedMap;
+    private final Map<Long, Long> adaptedMap;
     public static final int _ADAPTEDMAP = 10;
     private static final TField ADAPTED_MAP_FIELD_DESC = new TField("adaptedMap", TType.MAP, (short)10);
-        private final boolean adaptedBoolDefault;
+    private final boolean adaptedBoolDefault;
     public static final int _ADAPTEDBOOLDEFAULT = 11;
     private static final TField ADAPTED_BOOL_DEFAULT_FIELD_DESC = new TField("adaptedBoolDefault", TType.BOOL, (short)11);
-        private final byte adaptedByteDefault;
+    private final byte adaptedByteDefault;
     public static final int _ADAPTEDBYTEDEFAULT = 12;
     private static final TField ADAPTED_BYTE_DEFAULT_FIELD_DESC = new TField("adaptedByteDefault", TType.BYTE, (short)12);
-        private final short adaptedShortDefault;
+    private final short adaptedShortDefault;
     public static final int _ADAPTEDSHORTDEFAULT = 13;
     private static final TField ADAPTED_SHORT_DEFAULT_FIELD_DESC = new TField("adaptedShortDefault", TType.I16, (short)13);
-        private final int adaptedIntegerDefault;
+    private final int adaptedIntegerDefault;
     public static final int _ADAPTEDINTEGERDEFAULT = 14;
     private static final TField ADAPTED_INTEGER_DEFAULT_FIELD_DESC = new TField("adaptedIntegerDefault", TType.I32, (short)14);
-        private final long adaptedLongDefault;
+    private final long adaptedLongDefault;
     public static final int _ADAPTEDLONGDEFAULT = 15;
     private static final TField ADAPTED_LONG_DEFAULT_FIELD_DESC = new TField("adaptedLongDefault", TType.I64, (short)15);
-        private final double adaptedDoubleDefault;
+    private final double adaptedDoubleDefault;
     public static final int _ADAPTEDDOUBLEDEFAULT = 16;
     private static final TField ADAPTED_DOUBLE_DEFAULT_FIELD_DESC = new TField("adaptedDoubleDefault", TType.DOUBLE, (short)16);
-        private final String adaptedStringDefault;
+    private final String adaptedStringDefault;
     public static final int _ADAPTEDSTRINGDEFAULT = 17;
     private static final TField ADAPTED_STRING_DEFAULT_FIELD_DESC = new TField("adaptedStringDefault", TType.STRING, (short)17);
-        private final test.fixtures.adapter.ThriftAdaptedEnum adaptedEnum;
+    private final test.fixtures.adapter.ThriftAdaptedEnum adaptedEnum;
     public static final int _ADAPTEDENUM = 18;
     private static final TField ADAPTED_ENUM_FIELD_DESC = new TField("adaptedEnum", TType.I32, (short)18);
-        private final List<Long> adaptedListDefault;
+    private final List<Long> adaptedListDefault;
     public static final int _ADAPTEDLISTDEFAULT = 19;
     private static final TField ADAPTED_LIST_DEFAULT_FIELD_DESC = new TField("adaptedListDefault", TType.LIST, (short)19);
-        private final Set<Long> adaptedSetDefault;
+    private final Set<Long> adaptedSetDefault;
     public static final int _ADAPTEDSETDEFAULT = 20;
     private static final TField ADAPTED_SET_DEFAULT_FIELD_DESC = new TField("adaptedSetDefault", TType.SET, (short)20);
-        private final Map<Long, Long> adaptedMapDefault;
+    private final Map<Long, Long> adaptedMapDefault;
     public static final int _ADAPTEDMAPDEFAULT = 21;
     private static final TField ADAPTED_MAP_DEFAULT_FIELD_DESC = new TField("adaptedMapDefault", TType.MAP, (short)21);
-        private final boolean doubleTypedefBool;
+    private final boolean doubleTypedefBool;
     public static final int _DOUBLETYPEDEFBOOL = 22;
     private static final TField DOUBLE_TYPEDEF_BOOL_FIELD_DESC = new TField("doubleTypedefBool", TType.BOOL, (short)22);
     static {
-      NAMES_TO_IDS.put("adaptedBool", 1);
-      THRIFT_NAMES_TO_IDS.put("adaptedBool", 1);
-      FIELD_METADATA.put(1, ADAPTED_BOOL_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedByte", 2);
-      THRIFT_NAMES_TO_IDS.put("adaptedByte", 2);
-      FIELD_METADATA.put(2, ADAPTED_BYTE_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedShort", 3);
-      THRIFT_NAMES_TO_IDS.put("adaptedShort", 3);
-      FIELD_METADATA.put(3, ADAPTED_SHORT_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedInteger", 4);
-      THRIFT_NAMES_TO_IDS.put("adaptedInteger", 4);
-      FIELD_METADATA.put(4, ADAPTED_INTEGER_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedLong", 5);
-      THRIFT_NAMES_TO_IDS.put("adaptedLong", 5);
-      FIELD_METADATA.put(5, ADAPTED_LONG_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedDouble", 6);
-      THRIFT_NAMES_TO_IDS.put("adaptedDouble", 6);
-      FIELD_METADATA.put(6, ADAPTED_DOUBLE_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedString", 7);
-      THRIFT_NAMES_TO_IDS.put("adaptedString", 7);
-      FIELD_METADATA.put(7, ADAPTED_STRING_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedList", 8);
-      THRIFT_NAMES_TO_IDS.put("adaptedList", 8);
-      FIELD_METADATA.put(8, ADAPTED_LIST_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedSet", 9);
-      THRIFT_NAMES_TO_IDS.put("adaptedSet", 9);
-      FIELD_METADATA.put(9, ADAPTED_SET_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedMap", 10);
-      THRIFT_NAMES_TO_IDS.put("adaptedMap", 10);
-      FIELD_METADATA.put(10, ADAPTED_MAP_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedBoolDefault", 11);
-      THRIFT_NAMES_TO_IDS.put("adaptedBoolDefault", 11);
-      FIELD_METADATA.put(11, ADAPTED_BOOL_DEFAULT_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedByteDefault", 12);
-      THRIFT_NAMES_TO_IDS.put("adaptedByteDefault", 12);
-      FIELD_METADATA.put(12, ADAPTED_BYTE_DEFAULT_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedShortDefault", 13);
-      THRIFT_NAMES_TO_IDS.put("adaptedShortDefault", 13);
-      FIELD_METADATA.put(13, ADAPTED_SHORT_DEFAULT_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedIntegerDefault", 14);
-      THRIFT_NAMES_TO_IDS.put("adaptedIntegerDefault", 14);
-      FIELD_METADATA.put(14, ADAPTED_INTEGER_DEFAULT_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedLongDefault", 15);
-      THRIFT_NAMES_TO_IDS.put("adaptedLongDefault", 15);
-      FIELD_METADATA.put(15, ADAPTED_LONG_DEFAULT_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedDoubleDefault", 16);
-      THRIFT_NAMES_TO_IDS.put("adaptedDoubleDefault", 16);
-      FIELD_METADATA.put(16, ADAPTED_DOUBLE_DEFAULT_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedStringDefault", 17);
-      THRIFT_NAMES_TO_IDS.put("adaptedStringDefault", 17);
-      FIELD_METADATA.put(17, ADAPTED_STRING_DEFAULT_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedEnum", 18);
-      THRIFT_NAMES_TO_IDS.put("adaptedEnum", 18);
-      FIELD_METADATA.put(18, ADAPTED_ENUM_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedListDefault", 19);
-      THRIFT_NAMES_TO_IDS.put("adaptedListDefault", 19);
-      FIELD_METADATA.put(19, ADAPTED_LIST_DEFAULT_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedSetDefault", 20);
-      THRIFT_NAMES_TO_IDS.put("adaptedSetDefault", 20);
-      FIELD_METADATA.put(20, ADAPTED_SET_DEFAULT_FIELD_DESC);
-      NAMES_TO_IDS.put("adaptedMapDefault", 21);
-      THRIFT_NAMES_TO_IDS.put("adaptedMapDefault", 21);
-      FIELD_METADATA.put(21, ADAPTED_MAP_DEFAULT_FIELD_DESC);
-      NAMES_TO_IDS.put("doubleTypedefBool", 22);
-      THRIFT_NAMES_TO_IDS.put("doubleTypedefBool", 22);
-      FIELD_METADATA.put(22, DOUBLE_TYPEDEF_BOOL_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/AdaptTemplatedTestStruct"),
-        AdaptTemplatedTestStruct.class, AdaptTemplatedTestStruct::read0));
+        NAMES_TO_IDS.put("adaptedBool", 1);
+        THRIFT_NAMES_TO_IDS.put("adaptedBool", 1);
+        FIELD_METADATA.put(1, ADAPTED_BOOL_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedByte", 2);
+        THRIFT_NAMES_TO_IDS.put("adaptedByte", 2);
+        FIELD_METADATA.put(2, ADAPTED_BYTE_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedShort", 3);
+        THRIFT_NAMES_TO_IDS.put("adaptedShort", 3);
+        FIELD_METADATA.put(3, ADAPTED_SHORT_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedInteger", 4);
+        THRIFT_NAMES_TO_IDS.put("adaptedInteger", 4);
+        FIELD_METADATA.put(4, ADAPTED_INTEGER_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedLong", 5);
+        THRIFT_NAMES_TO_IDS.put("adaptedLong", 5);
+        FIELD_METADATA.put(5, ADAPTED_LONG_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedDouble", 6);
+        THRIFT_NAMES_TO_IDS.put("adaptedDouble", 6);
+        FIELD_METADATA.put(6, ADAPTED_DOUBLE_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedString", 7);
+        THRIFT_NAMES_TO_IDS.put("adaptedString", 7);
+        FIELD_METADATA.put(7, ADAPTED_STRING_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedList", 8);
+        THRIFT_NAMES_TO_IDS.put("adaptedList", 8);
+        FIELD_METADATA.put(8, ADAPTED_LIST_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedSet", 9);
+        THRIFT_NAMES_TO_IDS.put("adaptedSet", 9);
+        FIELD_METADATA.put(9, ADAPTED_SET_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedMap", 10);
+        THRIFT_NAMES_TO_IDS.put("adaptedMap", 10);
+        FIELD_METADATA.put(10, ADAPTED_MAP_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedBoolDefault", 11);
+        THRIFT_NAMES_TO_IDS.put("adaptedBoolDefault", 11);
+        FIELD_METADATA.put(11, ADAPTED_BOOL_DEFAULT_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedByteDefault", 12);
+        THRIFT_NAMES_TO_IDS.put("adaptedByteDefault", 12);
+        FIELD_METADATA.put(12, ADAPTED_BYTE_DEFAULT_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedShortDefault", 13);
+        THRIFT_NAMES_TO_IDS.put("adaptedShortDefault", 13);
+        FIELD_METADATA.put(13, ADAPTED_SHORT_DEFAULT_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedIntegerDefault", 14);
+        THRIFT_NAMES_TO_IDS.put("adaptedIntegerDefault", 14);
+        FIELD_METADATA.put(14, ADAPTED_INTEGER_DEFAULT_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedLongDefault", 15);
+        THRIFT_NAMES_TO_IDS.put("adaptedLongDefault", 15);
+        FIELD_METADATA.put(15, ADAPTED_LONG_DEFAULT_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedDoubleDefault", 16);
+        THRIFT_NAMES_TO_IDS.put("adaptedDoubleDefault", 16);
+        FIELD_METADATA.put(16, ADAPTED_DOUBLE_DEFAULT_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedStringDefault", 17);
+        THRIFT_NAMES_TO_IDS.put("adaptedStringDefault", 17);
+        FIELD_METADATA.put(17, ADAPTED_STRING_DEFAULT_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedEnum", 18);
+        THRIFT_NAMES_TO_IDS.put("adaptedEnum", 18);
+        FIELD_METADATA.put(18, ADAPTED_ENUM_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedListDefault", 19);
+        THRIFT_NAMES_TO_IDS.put("adaptedListDefault", 19);
+        FIELD_METADATA.put(19, ADAPTED_LIST_DEFAULT_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedSetDefault", 20);
+        THRIFT_NAMES_TO_IDS.put("adaptedSetDefault", 20);
+        FIELD_METADATA.put(20, ADAPTED_SET_DEFAULT_FIELD_DESC);
+        NAMES_TO_IDS.put("adaptedMapDefault", 21);
+        THRIFT_NAMES_TO_IDS.put("adaptedMapDefault", 21);
+        FIELD_METADATA.put(21, ADAPTED_MAP_DEFAULT_FIELD_DESC);
+        NAMES_TO_IDS.put("doubleTypedefBool", 22);
+        THRIFT_NAMES_TO_IDS.put("doubleTypedefBool", 22);
+        FIELD_METADATA.put(22, DOUBLE_TYPEDEF_BOOL_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/AdaptTemplatedTestStruct"),
+            AdaptTemplatedTestStruct.class, AdaptTemplatedTestStruct::read0));
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="adaptedBool", requiredness=Requiredness.NONE)
     public boolean isAdaptedBool() { return adaptedBool; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=2, name="adaptedByte", requiredness=Requiredness.NONE)
     public byte getAdaptedByte() { return adaptedByte; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=3, name="adaptedShort", requiredness=Requiredness.NONE)
     public short getAdaptedShort() { return adaptedShort; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=4, name="adaptedInteger", requiredness=Requiredness.NONE)
     public int getAdaptedInteger() { return adaptedInteger; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=5, name="adaptedLong", requiredness=Requiredness.NONE)
     public long getAdaptedLong() { return adaptedLong; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=6, name="adaptedDouble", requiredness=Requiredness.NONE)
     public double getAdaptedDouble() { return adaptedDouble; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="adaptedString", requiredness=Requiredness.NONE)
     public String getAdaptedString() { return adaptedString; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="adaptedList", requiredness=Requiredness.NONE)
     public List<Long> getAdaptedList() { return adaptedList; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="adaptedSet", requiredness=Requiredness.NONE)
     public Set<Long> getAdaptedSet() { return adaptedSet; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=10, name="adaptedMap", requiredness=Requiredness.NONE)
     public Map<Long, Long> getAdaptedMap() { return adaptedMap; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=11, name="adaptedBoolDefault", requiredness=Requiredness.NONE)
     public boolean isAdaptedBoolDefault() { return adaptedBoolDefault; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=12, name="adaptedByteDefault", requiredness=Requiredness.NONE)
     public byte getAdaptedByteDefault() { return adaptedByteDefault; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=13, name="adaptedShortDefault", requiredness=Requiredness.NONE)
     public short getAdaptedShortDefault() { return adaptedShortDefault; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=14, name="adaptedIntegerDefault", requiredness=Requiredness.NONE)
     public int getAdaptedIntegerDefault() { return adaptedIntegerDefault; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=15, name="adaptedLongDefault", requiredness=Requiredness.NONE)
     public long getAdaptedLongDefault() { return adaptedLongDefault; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=16, name="adaptedDoubleDefault", requiredness=Requiredness.NONE)
     public double getAdaptedDoubleDefault() { return adaptedDoubleDefault; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=17, name="adaptedStringDefault", requiredness=Requiredness.NONE)
     public String getAdaptedStringDefault() { return adaptedStringDefault; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=18, name="adaptedEnum", requiredness=Requiredness.NONE)
     public test.fixtures.adapter.ThriftAdaptedEnum getAdaptedEnum() { return adaptedEnum; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=19, name="adaptedListDefault", requiredness=Requiredness.NONE)
     public List<Long> getAdaptedListDefault() { return adaptedListDefault; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=20, name="adaptedSetDefault", requiredness=Requiredness.NONE)
     public Set<Long> getAdaptedSetDefault() { return adaptedSetDefault; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=21, name="adaptedMapDefault", requiredness=Requiredness.NONE)
     public Map<Long, Long> getAdaptedMapDefault() { return adaptedMapDefault; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=22, name="doubleTypedefBool", requiredness=Requiredness.NONE)
     public boolean isDoubleTypedefBool() { return doubleTypedefBool; }
 
@@ -673,481 +631,516 @@ public final class AdaptTemplatedTestStruct implements com.facebook.thrift.paylo
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Boolean.hashCode(adaptedBool);
-            _hashCode = 31 * _hashCode + Byte.hashCode(adaptedByte);
-            _hashCode = 31 * _hashCode + Short.hashCode(adaptedShort);
-            _hashCode = 31 * _hashCode + Integer.hashCode(adaptedInteger);
-            _hashCode = 31 * _hashCode + Long.hashCode(adaptedLong);
-            _hashCode = 31 * _hashCode + Double.hashCode(adaptedDouble);
-            _hashCode = 31 * _hashCode + Objects.hashCode(adaptedString);
-            _hashCode = 31 * _hashCode + Objects.hashCode(adaptedList);
-            _hashCode = 31 * _hashCode + Objects.hashCode(adaptedSet);
-            _hashCode = 31 * _hashCode + Objects.hashCode(adaptedMap);
-            _hashCode = 31 * _hashCode + Boolean.hashCode(adaptedBoolDefault);
-            _hashCode = 31 * _hashCode + Byte.hashCode(adaptedByteDefault);
-            _hashCode = 31 * _hashCode + Short.hashCode(adaptedShortDefault);
-            _hashCode = 31 * _hashCode + Integer.hashCode(adaptedIntegerDefault);
-            _hashCode = 31 * _hashCode + Long.hashCode(adaptedLongDefault);
-            _hashCode = 31 * _hashCode + Double.hashCode(adaptedDoubleDefault);
-            _hashCode = 31 * _hashCode + Objects.hashCode(adaptedStringDefault);
-            _hashCode = 31 * _hashCode + Objects.hashCode(adaptedEnum);
-            _hashCode = 31 * _hashCode + Objects.hashCode(adaptedListDefault);
-            _hashCode = 31 * _hashCode + Objects.hashCode(adaptedSetDefault);
-            _hashCode = 31 * _hashCode + Objects.hashCode(adaptedMapDefault);
-            _hashCode = 31 * _hashCode + Boolean.hashCode(doubleTypedefBool);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Byte.hashCode(adaptedByte);
+        _hashCode = 31 * _hashCode + Short.hashCode(adaptedShort);
+        _hashCode = 31 * _hashCode + Integer.hashCode(adaptedInteger);
+        _hashCode = 31 * _hashCode + Long.hashCode(adaptedLong);
+        _hashCode = 31 * _hashCode + Double.hashCode(adaptedDouble);
+        _hashCode = 31 * _hashCode + Objects.hashCode(adaptedString);
+        _hashCode = 31 * _hashCode + Objects.hashCode(adaptedList);
+        _hashCode = 31 * _hashCode + Objects.hashCode(adaptedSet);
+        _hashCode = 31 * _hashCode + Objects.hashCode(adaptedMap);
+        _hashCode = 31 * _hashCode + Boolean.hashCode(adaptedBoolDefault);
+        _hashCode = 31 * _hashCode + Byte.hashCode(adaptedByteDefault);
+        _hashCode = 31 * _hashCode + Short.hashCode(adaptedShortDefault);
+        _hashCode = 31 * _hashCode + Integer.hashCode(adaptedIntegerDefault);
+        _hashCode = 31 * _hashCode + Long.hashCode(adaptedLongDefault);
+        _hashCode = 31 * _hashCode + Double.hashCode(adaptedDoubleDefault);
+        _hashCode = 31 * _hashCode + Objects.hashCode(adaptedStringDefault);
+        _hashCode = 31 * _hashCode + Objects.hashCode(adaptedEnum);
+        _hashCode = 31 * _hashCode + Objects.hashCode(adaptedListDefault);
+        _hashCode = 31 * _hashCode + Objects.hashCode(adaptedSetDefault);
+        _hashCode = 31 * _hashCode + Objects.hashCode(adaptedMapDefault);
+        _hashCode = 31 * _hashCode + Boolean.hashCode(doubleTypedefBool);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<AdaptTemplatedTestStruct> asReader() {
       return AdaptTemplatedTestStruct::read0;
     }
 
     public static AdaptTemplatedTestStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(AdaptTemplatedTestStruct.NAMES_TO_IDS, AdaptTemplatedTestStruct.THRIFT_NAMES_TO_IDS, AdaptTemplatedTestStruct.FIELD_METADATA);
-      AdaptTemplatedTestStruct.Builder builder = new AdaptTemplatedTestStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _ADAPTEDBOOL:
-          if (__field.type == TType.BOOL) {
-            boolean adaptedBool = oprot.readBool();
-            builder.setAdaptedBool(adaptedBool);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDBYTE:
-          if (__field.type == TType.BYTE) {
-            byte adaptedByte = oprot.readByte();
-            builder.setAdaptedByte(adaptedByte);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDSHORT:
-          if (__field.type == TType.I16) {
-            short adaptedShort = oprot.readI16();
-            builder.setAdaptedShort(adaptedShort);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDINTEGER:
-          if (__field.type == TType.I32) {
-            int adaptedInteger = oprot.readI32();
-            builder.setAdaptedInteger(adaptedInteger);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDLONG:
-          if (__field.type == TType.I64) {
-            long adaptedLong = oprot.readI64();
-            builder.setAdaptedLong(adaptedLong);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDDOUBLE:
-          if (__field.type == TType.DOUBLE) {
-            double adaptedDouble = oprot.readDouble();
-            builder.setAdaptedDouble(adaptedDouble);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDSTRING:
-          if (__field.type == TType.STRING) {
-            String adaptedString = oprot.readString();
-            builder.setAdaptedString(adaptedString);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDLIST:
-          if (__field.type == TType.LIST) {
-            List<Long> adaptedList;
-                {
-                TList _list = oprot.readListBegin();
-                adaptedList = new ArrayList<Long>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    long _value1 = oprot.readI64();
-                    adaptedList.add(_value1);
+        TField __field;
+        oprot.readStructBegin(AdaptTemplatedTestStruct.NAMES_TO_IDS, AdaptTemplatedTestStruct.THRIFT_NAMES_TO_IDS, AdaptTemplatedTestStruct.FIELD_METADATA);
+        AdaptTemplatedTestStruct.Builder builder = new AdaptTemplatedTestStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _ADAPTEDBOOL:
+                if (__field.type == TType.BOOL) {
+                    boolean _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBool();
+                    builder.setAdaptedBool(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _ADAPTEDBYTE:
+                if (__field.type == TType.BYTE) {
+                    byte _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readByte();
+                    builder.setAdaptedByte(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setAdaptedList(adaptedList);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDSET:
-          if (__field.type == TType.SET) {
-            Set<Long> adaptedSet;
-                {
-                TSet _set = oprot.readSetBegin();
-                adaptedSet = new HashSet<Long>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    long _value1 = oprot.readI64();
-                    adaptedSet.add(_value1);
+                break;
+            case _ADAPTEDSHORT:
+                if (__field.type == TType.I16) {
+                    short _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI16();
+                    builder.setAdaptedShort(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readSetEnd();
+                break;
+            case _ADAPTEDINTEGER:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setAdaptedInteger(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setAdaptedSet(adaptedSet);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDMAP:
-          if (__field.type == TType.MAP) {
-            Map<Long, Long> adaptedMap;
-                {
-                TMap _map = oprot.readMapBegin();
-                adaptedMap = new HashMap<Long, Long>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    long _key1 = oprot.readI64();
-                    long _value1 = oprot.readI64();
-                    adaptedMap.put(_key1, _value1);
+                break;
+            case _ADAPTEDLONG:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setAdaptedLong(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
+                break;
+            case _ADAPTEDDOUBLE:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setAdaptedDouble(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readMapEnd();
-            builder.setAdaptedMap(adaptedMap);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDBOOLDEFAULT:
-          if (__field.type == TType.BOOL) {
-            boolean adaptedBoolDefault = oprot.readBool();
-            builder.setAdaptedBoolDefault(adaptedBoolDefault);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDBYTEDEFAULT:
-          if (__field.type == TType.BYTE) {
-            byte adaptedByteDefault = oprot.readByte();
-            builder.setAdaptedByteDefault(adaptedByteDefault);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDSHORTDEFAULT:
-          if (__field.type == TType.I16) {
-            short adaptedShortDefault = oprot.readI16();
-            builder.setAdaptedShortDefault(adaptedShortDefault);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDINTEGERDEFAULT:
-          if (__field.type == TType.I32) {
-            int adaptedIntegerDefault = oprot.readI32();
-            builder.setAdaptedIntegerDefault(adaptedIntegerDefault);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDLONGDEFAULT:
-          if (__field.type == TType.I64) {
-            long adaptedLongDefault = oprot.readI64();
-            builder.setAdaptedLongDefault(adaptedLongDefault);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDDOUBLEDEFAULT:
-          if (__field.type == TType.DOUBLE) {
-            double adaptedDoubleDefault = oprot.readDouble();
-            builder.setAdaptedDoubleDefault(adaptedDoubleDefault);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDSTRINGDEFAULT:
-          if (__field.type == TType.STRING) {
-            String adaptedStringDefault = oprot.readString();
-            builder.setAdaptedStringDefault(adaptedStringDefault);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDENUM:
-          if (__field.type == TType.I32) {
-            test.fixtures.adapter.ThriftAdaptedEnum adaptedEnum = test.fixtures.adapter.ThriftAdaptedEnum.fromInteger(oprot.readI32());
-            builder.setAdaptedEnum(adaptedEnum);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDLISTDEFAULT:
-          if (__field.type == TType.LIST) {
-            List<Long> adaptedListDefault;
-                {
-                TList _list = oprot.readListBegin();
-                adaptedListDefault = new ArrayList<Long>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    long _value1 = oprot.readI64();
-                    adaptedListDefault.add(_value1);
+                break;
+            case _ADAPTEDSTRING:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setAdaptedString(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _ADAPTEDLIST:
+                if (__field.type == TType.LIST) {
+                    List<Long> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Long>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            long _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI64();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setAdaptedList(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setAdaptedListDefault(adaptedListDefault);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDSETDEFAULT:
-          if (__field.type == TType.SET) {
-            Set<Long> adaptedSetDefault;
-                {
-                TSet _set = oprot.readSetBegin();
-                adaptedSetDefault = new HashSet<Long>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    long _value1 = oprot.readI64();
-                    adaptedSetDefault.add(_value1);
+                break;
+            case _ADAPTEDSET:
+                if (__field.type == TType.SET) {
+                    Set<Long> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Long>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            long _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI64();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setAdaptedSet(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readSetEnd();
+                break;
+            case _ADAPTEDMAP:
+                if (__field.type == TType.MAP) {
+                    Map<Long, Long> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<Long, Long>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            long _fbthriftKey1;
+                            long _fbthriftValue1;
+
+                            {
+                                long _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI64();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                long _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI64();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setAdaptedMap(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setAdaptedSetDefault(adaptedSetDefault);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ADAPTEDMAPDEFAULT:
-          if (__field.type == TType.MAP) {
-            Map<Long, Long> adaptedMapDefault;
-                {
-                TMap _map = oprot.readMapBegin();
-                adaptedMapDefault = new HashMap<Long, Long>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    long _key1 = oprot.readI64();
-                    long _value1 = oprot.readI64();
-                    adaptedMapDefault.put(_key1, _value1);
+                break;
+            case _ADAPTEDBOOLDEFAULT:
+                if (__field.type == TType.BOOL) {
+                    boolean _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBool();
+                    builder.setAdaptedBoolDefault(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
+                break;
+            case _ADAPTEDBYTEDEFAULT:
+                if (__field.type == TType.BYTE) {
+                    byte _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readByte();
+                    builder.setAdaptedByteDefault(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readMapEnd();
-            builder.setAdaptedMapDefault(adaptedMapDefault);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _DOUBLETYPEDEFBOOL:
-          if (__field.type == TType.BOOL) {
-            boolean doubleTypedefBool = oprot.readBool();
-            builder.setDoubleTypedefBool(doubleTypedefBool);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            case _ADAPTEDSHORTDEFAULT:
+                if (__field.type == TType.I16) {
+                    short _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI16();
+                    builder.setAdaptedShortDefault(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ADAPTEDINTEGERDEFAULT:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setAdaptedIntegerDefault(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ADAPTEDLONGDEFAULT:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setAdaptedLongDefault(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ADAPTEDDOUBLEDEFAULT:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setAdaptedDoubleDefault(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ADAPTEDSTRINGDEFAULT:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setAdaptedStringDefault(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ADAPTEDENUM:
+                if (__field.type == TType.I32) {
+                    test.fixtures.adapter.ThriftAdaptedEnum _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.adapter.ThriftAdaptedEnum.fromInteger(oprot.readI32());
+                    builder.setAdaptedEnum(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ADAPTEDLISTDEFAULT:
+                if (__field.type == TType.LIST) {
+                    List<Long> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<Long>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            long _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI64();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setAdaptedListDefault(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ADAPTEDSETDEFAULT:
+                if (__field.type == TType.SET) {
+                    Set<Long> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<Long>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            long _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readI64();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setAdaptedSetDefault(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ADAPTEDMAPDEFAULT:
+                if (__field.type == TType.MAP) {
+                    Map<Long, Long> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<Long, Long>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            long _fbthriftKey1;
+                            long _fbthriftValue1;
+
+                            {
+                                long _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI64();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                long _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI64();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setAdaptedMapDefault(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _DOUBLETYPEDEFBOOL:
+                if (__field.type == TType.BOOL) {
+                    boolean _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBool();
+                    builder.setDoubleTypedefBool(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      boolean _iter0 = this.adaptedBool;
-      oprot.writeFieldBegin(ADAPTED_BOOL_FIELD_DESC);
-      oprot.writeBool(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      byte _iter0 = this.adaptedByte;
-      oprot.writeFieldBegin(ADAPTED_BYTE_FIELD_DESC);
-      oprot.writeByte(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      short _iter0 = this.adaptedShort;
-      oprot.writeFieldBegin(ADAPTED_SHORT_FIELD_DESC);
-      oprot.writeI16(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.adaptedInteger;
-      oprot.writeFieldBegin(ADAPTED_INTEGER_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      long _iter0 = this.adaptedLong;
-      oprot.writeFieldBegin(ADAPTED_LONG_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.adaptedDouble;
-      oprot.writeFieldBegin(ADAPTED_DOUBLE_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.adaptedString;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(ADAPTED_STRING_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<Long> _iter0 = this.adaptedList;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(ADAPTED_LIST_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.I64, _iter0.size()));
-            for (long _iter1 : _iter0) {
-              oprot.writeI64(_iter1);
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            boolean _fbthriftVar0 = this.adaptedBool;
+            oprot.writeFieldBegin(ADAPTED_BOOL_FIELD_DESC);
+            oprot.writeBool(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            byte _fbthriftVar0 = this.adaptedByte;
+            oprot.writeFieldBegin(ADAPTED_BYTE_FIELD_DESC);
+            oprot.writeByte(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            short _fbthriftVar0 = this.adaptedShort;
+            oprot.writeFieldBegin(ADAPTED_SHORT_FIELD_DESC);
+            oprot.writeI16(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.adaptedInteger;
+            oprot.writeFieldBegin(ADAPTED_INTEGER_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            long _fbthriftVar0 = this.adaptedLong;
+            oprot.writeFieldBegin(ADAPTED_LONG_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.adaptedDouble;
+            oprot.writeFieldBegin(ADAPTED_DOUBLE_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.adaptedString;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(ADAPTED_STRING_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Set<Long> _iter0 = this.adaptedSet;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(ADAPTED_SET_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.I64, _iter0.size()));
-            for (long _iter1 : _iter0) {
-              oprot.writeI64(_iter1);
+        }
+        {
+            List<Long> _fbthriftVar0 = this.adaptedList;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(ADAPTED_LIST_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.I64, _fbthriftVar0.size()));
+                for (long _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI64(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<Long, Long> _iter0 = this.adaptedMap;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(ADAPTED_MAP_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I64, TType.I64, _iter0.size()));
-            for (Map.Entry<Long, Long> _iter1 : _iter0.entrySet()) {
-              {
-                Long _iter2 = _iter1.getKey();
-                oprot.writeI64(_iter2);
-              }
-              {
-                Long _iter2 = _iter1.getValue();
-                oprot.writeI64(_iter2);
-              }
+        }
+        {
+            Set<Long> _fbthriftVar0 = this.adaptedSet;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(ADAPTED_SET_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.I64, _fbthriftVar0.size()));
+                for (long _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI64(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      boolean _iter0 = this.adaptedBoolDefault;
-      oprot.writeFieldBegin(ADAPTED_BOOL_DEFAULT_FIELD_DESC);
-      oprot.writeBool(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      byte _iter0 = this.adaptedByteDefault;
-      oprot.writeFieldBegin(ADAPTED_BYTE_DEFAULT_FIELD_DESC);
-      oprot.writeByte(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      short _iter0 = this.adaptedShortDefault;
-      oprot.writeFieldBegin(ADAPTED_SHORT_DEFAULT_FIELD_DESC);
-      oprot.writeI16(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.adaptedIntegerDefault;
-      oprot.writeFieldBegin(ADAPTED_INTEGER_DEFAULT_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      long _iter0 = this.adaptedLongDefault;
-      oprot.writeFieldBegin(ADAPTED_LONG_DEFAULT_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.adaptedDoubleDefault;
-      oprot.writeFieldBegin(ADAPTED_DOUBLE_DEFAULT_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.adaptedStringDefault;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(ADAPTED_STRING_DEFAULT_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.adapter.ThriftAdaptedEnum _iter0 = this.adaptedEnum;
-      oprot.writeFieldBegin(ADAPTED_ENUM_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      List<Long> _iter0 = this.adaptedListDefault;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(ADAPTED_LIST_DEFAULT_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.I64, _iter0.size()));
-            for (long _iter1 : _iter0) {
-              oprot.writeI64(_iter1);
+        }
+        {
+            Map<Long, Long> _fbthriftVar0 = this.adaptedMap;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(ADAPTED_MAP_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I64, TType.I64, _fbthriftVar0.size()));
+                for (Map.Entry<Long, Long> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Long _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI64(_fbthriftVar2);
+                    }
+                    {
+                        Long _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeI64(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Set<Long> _iter0 = this.adaptedSetDefault;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(ADAPTED_SET_DEFAULT_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.I64, _iter0.size()));
-            for (long _iter1 : _iter0) {
-              oprot.writeI64(_iter1);
+        }
+        {
+            boolean _fbthriftVar0 = this.adaptedBoolDefault;
+            oprot.writeFieldBegin(ADAPTED_BOOL_DEFAULT_FIELD_DESC);
+            oprot.writeBool(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            byte _fbthriftVar0 = this.adaptedByteDefault;
+            oprot.writeFieldBegin(ADAPTED_BYTE_DEFAULT_FIELD_DESC);
+            oprot.writeByte(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            short _fbthriftVar0 = this.adaptedShortDefault;
+            oprot.writeFieldBegin(ADAPTED_SHORT_DEFAULT_FIELD_DESC);
+            oprot.writeI16(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.adaptedIntegerDefault;
+            oprot.writeFieldBegin(ADAPTED_INTEGER_DEFAULT_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            long _fbthriftVar0 = this.adaptedLongDefault;
+            oprot.writeFieldBegin(ADAPTED_LONG_DEFAULT_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.adaptedDoubleDefault;
+            oprot.writeFieldBegin(ADAPTED_DOUBLE_DEFAULT_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.adaptedStringDefault;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(ADAPTED_STRING_DEFAULT_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<Long, Long> _iter0 = this.adaptedMapDefault;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(ADAPTED_MAP_DEFAULT_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I64, TType.I64, _iter0.size()));
-            for (Map.Entry<Long, Long> _iter1 : _iter0.entrySet()) {
-              {
-                Long _iter2 = _iter1.getKey();
-                oprot.writeI64(_iter2);
-              }
-              {
-                Long _iter2 = _iter1.getValue();
-                oprot.writeI64(_iter2);
-              }
+        }
+        {
+            test.fixtures.adapter.ThriftAdaptedEnum _fbthriftVar0 = this.adaptedEnum;
+            oprot.writeFieldBegin(ADAPTED_ENUM_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            List<Long> _fbthriftVar0 = this.adaptedListDefault;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(ADAPTED_LIST_DEFAULT_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.I64, _fbthriftVar0.size()));
+                for (long _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI64(_fbthriftVar1);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      boolean _iter0 = this.doubleTypedefBool;
-      oprot.writeFieldBegin(DOUBLE_TYPEDEF_BOOL_FIELD_DESC);
-      oprot.writeBool(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        {
+            Set<Long> _fbthriftVar0 = this.adaptedSetDefault;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(ADAPTED_SET_DEFAULT_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.I64, _fbthriftVar0.size()));
+                for (long _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI64(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            Map<Long, Long> _fbthriftVar0 = this.adaptedMapDefault;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(ADAPTED_MAP_DEFAULT_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I64, TType.I64, _fbthriftVar0.size()));
+                for (Map.Entry<Long, Long> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Long _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI64(_fbthriftVar2);
+                    }
+                    {
+                        Long _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeI64(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            boolean _fbthriftVar0 = this.doubleTypedefBool;
+            oprot.writeFieldBegin(DOUBLE_TYPEDEF_BOOL_FIELD_DESC);
+            oprot.writeBool(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _AdaptTemplatedTestStructLazy {

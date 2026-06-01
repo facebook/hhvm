@@ -485,7 +485,7 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
 
   public function readFromJson(string $jsonText): void {
     $this->_type = ComplexUnionEnum::_EMPTY_;
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -754,7 +754,7 @@ class ListUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftP
 
   public function readFromJson(string $jsonText): void {
     $this->_type = ListUnionEnum::_EMPTY_;
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -975,7 +975,7 @@ class DataUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftP
 
   public function readFromJson(string $jsonText): void {
     $this->_type = DataUnionEnum::_EMPTY_;
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1153,7 +1153,7 @@ class Val implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1382,21 +1382,21 @@ class ValUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftPr
 
   public function readFromJson(string $jsonText): void {
     $this->_type = ValUnionEnum::_EMPTY_;
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'v1') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, Val>($parsed['v1']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, Val>($parsed['v1']));
       $_tmp1 = Val::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->v1 = $_tmp1;
       $this->_type = ValUnionEnum::v1;
     }
     if (idx($parsed, 'v2') !== null) {
-      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, Val>($parsed['v2']));
+      $_tmp2 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, Val>($parsed['v2']));
       $_tmp3 = Val::withDefaultValues();
       $_tmp3->readFromJson($_tmp2);
       $this->v2 = $_tmp3;
@@ -1602,7 +1602,7 @@ class VirtualComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata,
 
   public function readFromJson(string $jsonText): void {
     $this->_type = VirtualComplexUnionEnum::_EMPTY_;
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1709,7 +1709,7 @@ class NonCopyableStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1879,14 +1879,14 @@ class NonCopyableUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \I
 
   public function readFromJson(string $jsonText): void {
     $this->_type = NonCopyableUnionEnum::_EMPTY_;
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 's') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, NonCopyableStruct>($parsed['s']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, NonCopyableStruct>($parsed['s']));
       $_tmp1 = NonCopyableStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->s = $_tmp1;

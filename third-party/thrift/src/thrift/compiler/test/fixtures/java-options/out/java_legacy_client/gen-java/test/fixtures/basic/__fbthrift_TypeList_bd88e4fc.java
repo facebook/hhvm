@@ -13,25 +13,25 @@ import java.util.List;
 
 public class __fbthrift_TypeList_bd88e4fc implements TypeList {
 
-  private static List<TypeMapping> list = new ArrayList<>();
+    private static List<TypeMapping> list = new ArrayList<>();
 
-  private static void add(String uri, String className) {
-    list.add(new TypeList.TypeMapping(uri, className));
-  }
+    private static void add(String uri, String className) {
+        list.add(new TypeList.TypeMapping(uri, className));
+    }
 
-  private static void addToList0() {
-    add("test.dev/fixtures/java_options/MyStruct", "test.fixtures.basic.MyStruct");
-    add("test.dev/fixtures/java_options/MyDataItem", "test.fixtures.basic.MyDataItem");
-    add("test.dev/fixtures/java_options/MyUnion", "test.fixtures.basic.MyUnion");
-    add("test.dev/fixtures/java_options/MyEnum", "test.fixtures.basic.MyEnum");
-  }
+    private static void addToList0() {
+        add("test.dev/fixtures/java_options/MyStruct", "test.fixtures.basic.MyStruct");
+        add("test.dev/fixtures/java_options/MyDataItem", "test.fixtures.basic.MyDataItem");
+        add("test.dev/fixtures/java_options/MyUnion", "test.fixtures.basic.MyUnion");
+        add("test.dev/fixtures/java_options/MyEnum", "test.fixtures.basic.MyEnum");
+    }
 
-  static {
-    addToList0();
-  }
+    static {
+        addToList0();
+    }
 
-  @java.lang.Override
-  public List<TypeList.TypeMapping> getTypes() {
-    return list;
-  }
+    @java.lang.Override
+    public List<TypeList.TypeMapping> getTypes() {
+        return list;
+    }
 }

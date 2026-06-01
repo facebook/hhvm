@@ -75,53 +75,52 @@ public final class Fiery extends org.apache.thrift.TBaseException implements com
     }
 
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.REQUIRED)
     public String getMessage() { return message; }
 
-    
     public static com.facebook.thrift.payload.Reader<Fiery> asReader() {
       return Fiery::read0;
     }
 
     public static Fiery read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Fiery.NAMES_TO_IDS, Fiery.THRIFT_NAMES_TO_IDS, Fiery.FIELD_METADATA);
-      Fiery.Builder builder = new Fiery.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MESSAGE:
-          if (__field.type == TType.STRING) {
-            String message = oprot.readString();
-            builder.setMessage(message);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(Fiery.NAMES_TO_IDS, Fiery.THRIFT_NAMES_TO_IDS, Fiery.FIELD_METADATA);
+        Fiery.Builder builder = new Fiery.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MESSAGE:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMessage(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      String _iter0 = this.message;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MESSAGE_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            String _fbthriftVar0 = this.message;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MESSAGE_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _FieryLazy {
@@ -130,4 +129,5 @@ public final class Fiery extends org.apache.thrift.TBaseException implements com
 
     public static Fiery defaultInstance() {
         return  _FieryLazy._DEFAULT;
-    }}
+    }
+}

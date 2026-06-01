@@ -19,13 +19,12 @@
 {{#import "lib/types" as types}}
   {{#let partial lazy_constant |constant| captures |constants types|}}
 {{#pragma ignore-newlines}}
-  {{! TODO(T261463864): Preserved legacy behavior: explicit prototype qualified
-      `type:*` ignores t_typedef's overrides for adapter properties }}
+  {{! See type_adapter_read in lib/errors.mustache for why `type:` is used here. }}
 pub static {{constant.rust_name}}: ::std::sync::LazyLock<
 {{#if constant.type.type:has_adapter?}}{{constant.type.type:adapter_qualified}}::AdaptedType{{#else}}{{#partial types.type_name type=constant.type}}{{/if}}
 > = ::std::sync::LazyLock::new(|| {{!}}
 {{#if constant.type.type:has_adapter?}}{{constant.type.type:adapter_qualified}}::from_thrift({{/if}}
-{{#partial constants.const_value value=constant.value depth=0}}
+{{#partial constants.const_value value=constant.value}}
 {{#if constant.type.type:has_adapter?}}).expect("constant Thrift value should adapt without error"){{/if}}
 );
   {{/let partial}}
@@ -44,25 +43,24 @@ pub static {{constant.rust_name}}: ::std::sync::LazyLock<
     {{#else if constant.type.string?}}
 pub const {{constant.rust_name}}: &::std::primitive::str = {{(rust_quote constant.value.string_value)}};
     {{#else}}
-pub const {{constant.rust_name}}: {{#partial types.type_name type=constant.type}} = {{#partial constants.const_value value=constant.value depth=0}};
+pub const {{constant.rust_name}}: {{#partial types.type_name type=constant.type}} = {{#partial constants.const_value value=constant.value}};
     {{/if constant.lazy?}}
 
   {{/each}}
   {{#if program.has_const_tests?}}
-    {{! TODO(T261463864): Preserved legacy indentation level }}
-    /// These are here to ensure adapted consts do not panic with `from_thrift`.
-    #[cfg(test)]
-    mod tests {
-        {{#each program.consts_for_test as |constant|}}
-        #[test]
-        fn test_const_{{constant.name}}_force_does_not_panic() {
-            let _ = ::std::sync::LazyLock::force(&super::{{constant.name}});
-        }
-        {{/each}}
+/// These are here to ensure adapted consts do not panic with `from_thrift`.
+#[cfg(test)]
+mod tests {
+    {{#each program.consts_for_test as |constant|}}
+    #[test]
+    fn test_const_{{constant.name}}_force_does_not_panic() {
+        let _ = ::std::sync::LazyLock::force(&super::{{constant.name}});
     }
+    {{/each}}
+}
 
-    // This is here to ensure you enable unittests on your Thrift library.
-    #[cfg(feature = "thrift_library_unittests_disabled")]
-    compile_error!("You are using Rust adapters in a Thrift library that does not have unittests enabled. For safety reasons, this is forbidden. Please enable Rust unittests for this Thrift library.");
+// This is here to ensure you enable unittests on your Thrift library.
+#[cfg(feature = "thrift_library_unittests_disabled")]
+compile_error!("You are using Rust adapters in a Thrift library that does not have unittests enabled. For safety reasons, this is forbidden. Please enable Rust unittests for this Thrift library.");
 
   {{/if program.has_const_tests?}}

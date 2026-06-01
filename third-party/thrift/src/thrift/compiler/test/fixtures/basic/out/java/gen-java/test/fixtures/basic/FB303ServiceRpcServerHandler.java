@@ -62,9 +62,9 @@ public class FB303ServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        test.fixtures.basic.ReservedKeyword _iter0 = (test.fixtures.basic.ReservedKeyword)_r;
+        test.fixtures.basic.ReservedKeyword _fbthriftVar0 = (test.fixtures.basic.ReservedKeyword)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.STRUCT_FIELD);
-        _iter0.write0(oprot);
+        _fbthriftVar0.write0(oprot);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();

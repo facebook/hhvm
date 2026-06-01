@@ -89,7 +89,7 @@ class ConnectSource : public HTTPSource {
     co_return HTTPBodyEvent(readBuf.move(), *nread == 0);
   }
 
-  void stopReading(folly::Optional<const HTTPErrorCode>) override {
+  void stopReading(folly::Optional<const HTTPErrorCode>) noexcept override {
     if (inRead_) {
       cancellationSource_.requestCancellation();
     } else {
@@ -97,7 +97,7 @@ class ConnectSource : public HTTPSource {
     }
   }
 
-  void setReadTimeout(std::chrono::milliseconds timeout) override {
+  void setReadTimeout(std::chrono::milliseconds timeout) noexcept override {
     readTimeout_ = timeout;
   }
   void setWriteTimeout(std::chrono::milliseconds timeout) {

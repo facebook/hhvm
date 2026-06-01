@@ -42,7 +42,8 @@ folly::coro::Task<HTTPBodyEvent> HTTPSourceFilter::readBodyEventImpl(
   co_return event;
 }
 
-void HTTPSourceFilter::stopReading(folly::Optional<const HTTPErrorCode> error) {
+void HTTPSourceFilter::stopReading(
+    folly::Optional<const HTTPErrorCode> error) noexcept {
   XCHECK(source_);
   source_->stopReading(error);
   source_ = nullptr;

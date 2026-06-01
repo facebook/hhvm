@@ -34,6 +34,8 @@ class Handler(ConformanceServiceInterface):
         protocol = request.targetProtocol
         if protocol is None:
             protocol = request.value.protocol
+        # pyre-fixme[6]: For 2nd argument expected `Optional[StandardProtocol]` but
+        #  got `Union[None, StandardProtocol, ProtocolStruct]`.
         return RoundTripResponse(value=registry.store(obj, protocol))
 
     async def patch(self, request: PatchOpRequest) -> PatchOpResponse:

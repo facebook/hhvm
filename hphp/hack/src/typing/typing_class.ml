@@ -25,6 +25,101 @@ module SN = Naming_special_names
 module Profile = Typing_toplevel_profile
 module Enable = Typing_toplevel_enable
 
+(* emit a warning if a method is sealed to a class that does not override it *)
+let check_sealed_override env cls m =
+  let method_name = snd m.m_name in
+  let is_sealed (attr : Nast.user_attribute) =
+    String.equal (snd attr.ua_name) SN.UserAttributes.uaSealed
+  in
+  match List.find m.m_user_attributes ~f:is_sealed with
+  | None -> ()
+  | Some sealed_attr ->
+    let iter_item ((_, pos, expr_) : Nast.expr) =
+      match expr_ with
+      | Class_const ((_, _, cid), _) ->
+        let allowlist_class_name = Nast.class_id_to_str cid in
+        (match Typing_env.get_class env allowlist_class_name with
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          ()
+        | Decl_entry.Found allowlist_cls ->
+          let (allowlist_class_kind, verb) =
+            let open Ast_defs in
+            match (Cls.kind allowlist_cls, Cls.kind cls) with
+            | (Cclass _, Ctrait) -> ("Class", "use")
+            | (Cclass _, _) -> ("Class", "extend")
+            | (Ctrait, Ctrait) -> ("Trait", "use")
+            | (Ctrait, _) -> ("Trait", "require extends")
+            | (Cinterface, _)
+            | (Cenum, _)
+            | (Cenum_class _, _) ->
+              ("", "")
+          in
+          if
+            (not (Cls.has_ancestor allowlist_cls (Cls.name cls)))
+            && not (Cls.requires_ancestor allowlist_cls (Cls.name cls))
+          then
+            Typing_warning_utils.add
+              env
+              ( pos,
+                Typing_warning.Sealed_not_subtype,
+                {
+                  Typing_warning.Sealed_not_subtype.verb;
+                  parent_name = Cls.name cls;
+                  parent_method_name = Some method_name;
+                  child_name = allowlist_class_name;
+                  child_kind = allowlist_class_kind;
+                } )
+          else
+            let method_decl_in_allowlist_class =
+              if m.m_static then
+                Typing_env.get_static_member true env allowlist_cls method_name
+              else
+                Typing_env.get_method env allowlist_cls (snd m.m_name)
+            in
+            (match method_decl_in_allowlist_class with
+            | None ->
+              (* the class in the sealed attribute does not define m, raise a warning *)
+              Typing_warning_utils.add
+                env
+                ( pos,
+                  Typing_warning.Sealed_not_override,
+                  {
+                    Typing_warning.Sealed_not_override.method_name;
+                    method_def = Cls.name cls;
+                    allowlist_class_name;
+                    allowlist_class_kind;
+                  } )
+            | Some m_allowlist_class ->
+              (* the method is defined in the allowlist_class
+                 check that the method is defined by the class itself or inherited from a trait *)
+              let is_origin_trait =
+                match Env.get_class env m_allowlist_class.ce_origin with
+                | Decl_entry.Found cls_origin ->
+                  Cls.kind cls_origin |> Ast_defs.is_c_trait
+                | Decl_entry.DoesNotExist
+                | Decl_entry.NotYetAvailable ->
+                  false
+              in
+              if
+                not
+                  (String.equal m_allowlist_class.ce_origin allowlist_class_name
+                  || is_origin_trait)
+              then
+                Typing_warning_utils.add
+                  env
+                  ( pos,
+                    Typing_warning.Sealed_not_override,
+                    {
+                      Typing_warning.Sealed_not_override.method_name;
+                      method_def = Cls.name cls;
+                      allowlist_class_name;
+                      allowlist_class_kind;
+                    } )))
+      | _ -> ()
+    in
+    List.iter sealed_attr.ua_params ~f:iter_item
+
 let method_dynamically_callable env cls m params_decl_ty return =
   let env = { env with checked = Tast.CUnderDynamicAssumptions } in
   let ret_locl_ty = return.Typing_env_return_info.return_type in
@@ -185,6 +280,7 @@ let method_def ~is_disposable env cls m =
     else
       env
   in
+  check_sealed_override env cls m;
   let env = Env.assert_packages_loaded_from_attr env m.m_user_attributes in
   let env = Env.set_soft_package_from_attr env m.m_user_attributes in
   let (env, cap_ty, unsafe_cap_ty) =
@@ -554,6 +650,7 @@ let sealed_subtype (c : Nast.class_) ~is_enum ~env =
                 {
                   Typing_warning.Sealed_not_subtype.verb;
                   parent_name;
+                  parent_method_name = None;
                   child_name;
                   child_kind;
                 } ))

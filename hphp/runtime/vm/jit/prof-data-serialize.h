@@ -232,7 +232,7 @@ T read_raw(ProfDataDeserializer& ser) {
 void write_raw_string(ProfDataSerializer& ser, const StringData* str);
 StringData* read_raw_string(ProfDataDeserializer& ser, bool skip = false);
 void write_string(ProfDataSerializer& ser, const StringData* str);
-void write_string(ProfDataSerializer& ser, const std::string& str);
+void write_string(ProfDataSerializer& ser, const std::string_view& str);
 StringData* read_string(ProfDataDeserializer& ser);
 std::string read_cpp_string(ProfDataDeserializer& ser);
 void write_array(ProfDataSerializer& ser, const ArrayData* arr);

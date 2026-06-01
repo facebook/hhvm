@@ -1,6 +1,5 @@
 # a reasonable set of options, based on a snapshot from WWW of November 2023
 
-enable_experimental_tc_features = case_sensitive_inheritance
 deregister_php_stdlib = true
 enable_xhp_class_modifier = false
 disable_xhp_element_mangling = false

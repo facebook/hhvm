@@ -39,7 +39,6 @@ public class ServiceReactiveClient
   }
 
   public ServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = reactor.core.publisher.Mono.empty();
@@ -60,7 +59,6 @@ public class ServiceReactiveClient
   }
 
   public ServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = _headersMono;
@@ -77,27 +75,27 @@ public class ServiceReactiveClient
         {
           oprot.writeFieldBegin(_func_ARG1_FIELD_DESC);
 
-          com.facebook.thrift.my.AdaptedString_1 _iter0 = arg1;
+          com.facebook.thrift.my.AdaptedString_1 _fbthriftVar0 = arg1;
 
-          oprot.writeString(_iter0);
+          oprot.writeString(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
         {
           oprot.writeFieldBegin(_func_ARG2_FIELD_DESC);
 
-          String _iter0 = arg2;
+          String _fbthriftVar0 = arg2;
 
-          oprot.writeString(_iter0);
+          oprot.writeString(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
         {
           oprot.writeFieldBegin(_func_ARG3_FIELD_DESC);
 
-          test.fixtures.adapter.Foo _iter0 = arg3;
+          test.fixtures.adapter.Foo _fbthriftVar0 = arg3;
 
-          _iter0.write0(oprot);
+          _fbthriftVar0.write0(oprot);
           oprot.writeFieldEnd();
         }
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3b25173958fe094aa1360a573369f7a0>>
+// @generated SignedSource<<bfc105a817ab1a0cac62b967213bd4d3>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -62,10 +62,34 @@ pub struct TranslationTelemetry {
 )]
 #[rust_to_ocaml(attr = "deriving yojson_of")]
 #[repr(C)]
+pub struct ApplyIncomingChangesTelemetry {
+    pub init_spurious_enters: isize,
+    pub init_spurious_leaves: isize,
+    pub duplicate_leaves: isize,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving yojson_of")]
+#[repr(C)]
 pub struct AsyncTelemetry {
     pub worker_restart_count: isize,
     pub notification_count: isize,
     pub aggregated_translation_telemetry: TranslationTelemetry,
+    pub aggregated_apply_incoming_changes_telemetry: ApplyIncomingChangesTelemetry,
 }
 
 #[derive(
@@ -91,6 +115,7 @@ pub struct InstanceGetChangesSyncTelemetry {
     pub async_telemetry: AsyncTelemetry,
     pub worker_reset_duration: isize,
     pub translation_telemetry: Option<TranslationTelemetry>,
+    pub apply_incoming_changes_telemetry: ApplyIncomingChangesTelemetry,
 }
 
 #[derive(

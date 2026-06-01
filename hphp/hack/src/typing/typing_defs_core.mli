@@ -209,8 +209,9 @@ type 'ty fun_type = {
 }
 [@@deriving hash, show, map]
 
-(** = Reason.t * 'phase ty_ *)
-type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
+(** Private type: use mk to construct, deref/get_node/get_reason to access. *)
+type 'phase ty = private
+  ('phase Reason.t_[@hash.ignore] [@transform.opaque]) * 'phase ty_
 
 and type_tag_generic =
   | Filled of locl_phase ty

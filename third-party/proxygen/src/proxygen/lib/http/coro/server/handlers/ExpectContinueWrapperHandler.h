@@ -36,7 +36,8 @@ class ExpectContinueWrapperResponse : public HTTPSource {
   folly::coro::Task<HTTPBodyEvent> readBodyEvent(
       uint32_t max = std::numeric_limits<uint32_t>::max()) override;
 
-  void stopReading(folly::Optional<const HTTPErrorCode> = folly::none) override;
+  void stopReading(
+      folly::Optional<const HTTPErrorCode> = folly::none) noexcept override;
 
  private:
   folly::coro::Task<void> ensureNextHandlerInvoked();

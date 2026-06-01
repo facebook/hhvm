@@ -16,6 +16,8 @@ type repo_transition =
           or may not have changed. *)
 [@@deriving show]
 
+exception Informant_edenfs_watcher_failed of string
+
 type t
 
 (** Non-blocking. The refs are updated whenever the file watcher informs us about entering or

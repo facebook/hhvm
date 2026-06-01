@@ -525,7 +525,6 @@ type env = {
   (* Reports for an Active informant are made by pinging the
    * revision_tracker. *)
   revision_tracker: Revision_tracker.t;
-  watchman_event_watcher: WatchmanEventWatcherClient.t;
 }
 
 type t =
@@ -574,7 +573,6 @@ let init
               ~is_saved_state_precomputed
               notifier
               root;
-          watchman_event_watcher = WatchmanEventWatcherClient.init root;
         }
 
 let reinit t =
@@ -584,41 +582,7 @@ let reinit t =
     Hh_logger.log "Reinitializing Informant";
     Revision_tracker.reinit env.revision_tracker
 
-let should_start_first_server t =
-  match t with
-  | Resigned ->
-    (* If Informant doesn't control the server lifetime, then the first server
-     * instance should always be started during startup. *)
-    true
-  | Active env ->
-    let status =
-      WatchmanEventWatcherClient.get_status env.watchman_event_watcher
-    in
-    begin
-      match status with
-      | None ->
-        (*
-         * Watcher is not running, or connection to watcher collapsed.
-         * So we let the first server start up.
-         *)
-        HackEventLogger.informant_watcher_not_available ();
-        true
-      | Some WatchmanEventWatcherConfig.Responses.Unknown ->
-        (*
-         * Watcher doens't know what state the repo is. We don't
-         * know when the next "hg update" will happen, so we let the
-         * first Hack Server start up to avoid wedging.
-         *)
-        HackEventLogger.informant_watcher_unknown_state ();
-        true
-      | Some WatchmanEventWatcherConfig.Responses.Mid_update ->
-        (* Wait until the update is finished  *)
-        HackEventLogger.informant_watcher_mid_update_state ();
-        false
-      | Some WatchmanEventWatcherConfig.Responses.Settled ->
-        HackEventLogger.informant_watcher_settled_state ();
-        true
-    end
+let should_start_first_server _t = true
 
 let should_ignore_hh_version init_env = init_env.ignore_hh_version
 

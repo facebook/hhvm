@@ -13,23 +13,23 @@ import java.util.List;
 
 public class __fbthrift_TypeList_71342c3d implements TypeList {
 
-  private static List<TypeMapping> list = new ArrayList<>();
+    private static List<TypeMapping> list = new ArrayList<>();
 
-  private static void add(String uri, String className) {
-    list.add(new TypeList.TypeMapping(uri, className));
-  }
+    private static void add(String uri, String className) {
+        list.add(new TypeList.TypeMapping(uri, className));
+    }
 
-  private static void addToList0() {
-    add("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/EmptyStruct", "com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct");
-    add("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/TestStruct", "com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.TestStruct");
-  }
+    private static void addToList0() {
+        add("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/EmptyStruct", "com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.EmptyStruct");
+        add("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/TestStruct", "com.facebook.thrift.compiler.test.fixtures.default_values_rectification_after.TestStruct");
+    }
 
-  static {
-    addToList0();
-  }
+    static {
+        addToList0();
+    }
 
-  @java.lang.Override
-  public List<TypeList.TypeMapping> getTypes() {
-    return list;
-  }
+    @java.lang.Override
+    public List<TypeList.TypeMapping> getTypes() {
+        return list;
+    }
 }

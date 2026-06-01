@@ -7,8 +7,6 @@ without changing its value, see [type assertions](/hack/expressions-and-operator
 (float)1; // 1.0
 (int)3.14; // 3, rounds towards zero
 
-(bool)0; // false
-
 (string)false; // ""
 ```
 

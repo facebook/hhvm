@@ -60,6 +60,8 @@ class SerializerTestBase(unittest.TestCase):
         self, control: Union[Struct, PythonStruct], fixtures: Mapping[Protocol, bytes]
     ) -> None:
         for proto in Protocol:
+            if proto.name == "JSON5":
+                continue
             encoded = serialize(control, protocol=proto)
             self.assertIsInstance(encoded, bytes)
             decoded = deserialize(type(control), encoded, protocol=proto)
@@ -72,6 +74,8 @@ class SerializerTestBase(unittest.TestCase):
         control: Union[Struct, PythonStruct],
     ) -> None:
         for proto in Protocol:
+            if proto.name == "JSON5":
+                continue
             for transform in Transform:
                 if (
                     proto == Protocol.DEPRECATED_VERBOSE_JSON
@@ -93,6 +97,8 @@ class SerializerTestBase(unittest.TestCase):
         control: Union[Struct, PythonStruct],
     ) -> None:
         for proto in Protocol:
+            if proto.name == "JSON5":
+                continue
             encoded = serialize(control, protocol=proto)
             decoded, length = deserialize_with_length(
                 type(control), encoded, protocol=proto
@@ -362,6 +368,8 @@ class SerializerTests(SerializerTestBase):
         )
         empty = EmptyStruct()
         for proto in Protocol:
+            if proto.name == "JSON5":
+                continue
             encoded = serialize(obj, protocol=proto)
             decoded, length = deserialize_with_length(
                 type(obj), encoded, protocol=proto
@@ -401,6 +409,8 @@ class SerializerTests(SerializerTestBase):
             union_field=MyUnion(),
         )
         for proto in Protocol:
+            if proto.name == "JSON5":
+                continue
             encoded = serialize(obj, protocol=proto)
             encoded_empty = serialize(empty, protocol=proto)
             self.assertEqual(encoded, encoded_empty)

@@ -86,7 +86,7 @@ class EchoResponse : public HTTPSource {
   }
 
   void stopReading(
-      folly::Optional<const proxygen::coro::HTTPErrorCode>) override {
+      folly::Optional<const proxygen::coro::HTTPErrorCode>) noexcept override {
     // This could run into trouble if there is an active guard on the stack?
     delete this;
   }

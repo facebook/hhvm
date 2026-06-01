@@ -15,8 +15,11 @@
 */
 
 #include "hphp/runtime/vm/jit/relocation.h"
+#ifdef __aarch64__
 #include "hphp/runtime/vm/jit/relocation-arm.h"
+#else
 #include "hphp/runtime/vm/jit/relocation-x64.h"
+#endif
 #include "hphp/runtime/vm/jit/asm-info.h"
 
 #include "hphp/util/arch.h"

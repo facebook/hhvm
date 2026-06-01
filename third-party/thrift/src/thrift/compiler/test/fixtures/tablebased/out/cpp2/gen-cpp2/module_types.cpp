@@ -711,7 +711,7 @@ const TypeInfo TypeToInfo<
     /* .type */ protocol::TType::T_I32,
     /* .get */ get<int32_t, ::test::fixtures::tablebased::ExampleEnum>,
     /* .set */ eraseFuncPtr(set<::test::fixtures::tablebased::ExampleEnum, int32_t>),
-    /* .typeExt */ nullptr,
+    /* .typeExt */ &getEnumFieldExt<::test::fixtures::tablebased::ExampleEnum>(),
 };
 const TypeInfo TypeToInfo<
     type_class::structure,

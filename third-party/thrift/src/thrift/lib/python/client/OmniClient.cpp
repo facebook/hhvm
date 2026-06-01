@@ -392,7 +392,7 @@ void OmniClient::sendImpl(
   // Create the request context.
   auto [ctx, header] = makeOmniClientRequestContext(
       protocolId,
-      rpcOptions.releaseWriteHeaders(),
+      rpcOptions.getWriteHeaders(),
       handlers_,
       THRIFT_FLAG(enable_python_client_interceptors)
           ? apache::thrift::runtime::getGlobalClientInterceptors()

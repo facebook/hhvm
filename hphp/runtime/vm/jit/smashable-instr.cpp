@@ -16,8 +16,11 @@
 
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 
+#ifdef __aarch64__
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
+#else
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
+#endif
 #include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/util/arch.h"

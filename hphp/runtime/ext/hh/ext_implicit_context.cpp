@@ -55,34 +55,15 @@ using ICMemoKeyToIntMap = req::hash_map<StringData*, int64_t, string_data_hash, 
 
 RDS_LOCAL(ICMemoKeyToIntMap, rl_memoKeyToInt);
 
-InitFiniNode s_clear_IC_map([]{
-  rl_memoKeyToInt.destroy();
-}, InitFiniNode::When::RequestFini, "s_clear_IC_map");
-
-InitFiniNode s_init_IC_map([]{
-  rl_memoKeyToInt.create();
-  *(rl_nextMemoKey) = kAgnosticMemoKey;
-}, InitFiniNode::When::RequestStart, "s_init_IC_map");
-
-
 struct ImplicitContextLoader :
   SystemLib::ClassLoader<"HH\\ImplicitContext\\_Private\\ImplicitContextData"> {};
 
 // converts key + memokey into a memokey int by leveraging side map
-int64_t memoKeyForInsert(const Class* key, const Variant& serializedValue) {
-  StringBuffer sb;
-  auto const prev = *ImplicitContext::activeCtx;
-  auto prev_ctx = Native::data<ImplicitContext>(prev);
-  using Elem = std::pair<const Class*, TypedValue>;
-  req::vector<Elem> vec;
+using Elem = std::pair<const Class*, TypedValue>;
 
-  auto& existing_m_map = prev_ctx->m_map;
-  for (auto const& p : existing_m_map) {
-    if (p.second.second.m_type != KindOfUninit && p.first != key) {
-      vec.push_back(std::make_pair(p.first, p.second.second));
-    }
-  }
-  vec.push_back(std::make_pair(key, *serializedValue.asTypedValue()));
+// serializes vec of sensitive entries into a memo key int
+int64_t memoKeyFromVec(req::vector<Elem>& vec) {
+  StringBuffer sb;
   std::sort(
     vec.begin(),
     vec.end(),
@@ -110,6 +91,39 @@ int64_t memoKeyForInsert(const Class* key, const Variant& serializedValue) {
   return memoKey;
 }
 
+int64_t memoKeyForInsert(ObjectData* ic, const Class* key, const Variant& serializedValue) {
+  auto const icData = Native::data<ImplicitContext>(ic);
+  req::vector<Elem> vec;
+
+  for (auto const& p : icData->m_map) {
+    if (p.second.second.m_type != KindOfUninit && p.first != key) {
+      vec.push_back(std::make_pair(p.first, p.second.second));
+    }
+  }
+  vec.push_back(std::make_pair(key, *serializedValue.asTypedValue()));
+
+  return memoKeyFromVec(vec);
+}
+
+// computes memo key after removing a sensitive entry
+// returns kAgnosticMemoKey if no sensitive entries remain
+int64_t memoKeyForRemove(ObjectData* ic, const Class* keyToRemove) {
+  auto const icData = Native::data<ImplicitContext>(ic);
+  req::vector<Elem> vec;
+
+  for (auto const& p : icData->m_map) {
+    if (p.second.second.m_type != KindOfUninit && p.first != keyToRemove) {
+      vec.push_back(std::make_pair(p.first, p.second.second));
+    }
+  }
+
+  if (vec.empty()) {
+    return kAgnosticMemoKey;
+  }
+
+  return memoKeyFromVec(vec);
+}
+
 Object createICWithParams(int64_t memoKey, auto&& map, ObjectData* agnosticIC) {
   auto ic_obj = Object{ ImplicitContextLoader::classof() };
   auto ic = Native::data<ImplicitContext>(ic_obj.get());
@@ -125,16 +139,38 @@ Object createICWithParams(int64_t memoKey, auto&& map, ObjectData* agnosticIC) {
  * Creates a new Memo Agnostic IC
  * Inherits values from prev_agnostic_obj
 */
-Object create_memo_agnostic_IC(ObjectData* prev_agnostic_obj,
+Object create_memo_agnostic_IC(ObjectData* agnosticIC,
                                TypedValue data,
                                const Class* key) {
-  auto prev_agnostic_ctx = Native::data<ImplicitContext>(prev_agnostic_obj);
-  assertx(prev_agnostic_ctx->m_memoKey == kAgnosticMemoKey);
-  auto updated_map = prev_agnostic_ctx->m_map;
+  auto agnosticICData = Native::data<ImplicitContext>(agnosticIC);
+  assertx(agnosticICData->m_memoKey == kAgnosticMemoKey);
+  auto mapCopy = agnosticICData->m_map;
   tvIncRefGen(data);
-  updated_map.insert_or_assign(
+  mapCopy.insert_or_assign(
     key, std::make_pair(data, make_tv<KindOfUninit>()));
-  return createICWithParams(kAgnosticMemoKey, std::move(updated_map), nullptr /* self */);
+  return createICWithParams(kAgnosticMemoKey, std::move(mapCopy), nullptr /* self */);
+}
+
+/*
+ * Removes key from an IC, producing a new IC with the given memoKey
+ * and agnosticIC pointer.
+*/
+Object removeFromIC(ObjectData* ic, const Class* key,
+                    int64_t memoKey, ObjectData* agnosticIC) {
+  auto const icData = Native::data<ImplicitContext>(ic);
+  auto mapCopy = icData->m_map;
+  mapCopy.erase(key);
+  return createICWithParams(memoKey, std::move(mapCopy), agnosticIC);
+}
+
+/*
+ * Creates a new Memo Agnostic IC by cloning agnosticIC
+ * and removing key from its map.
+*/
+Object removeFromAgnosticIC(ObjectData* agnosticIC,
+                            const Class* key) {
+  assertx(Native::data<ImplicitContext>(agnosticIC)->m_memoKey == kAgnosticMemoKey);
+  return removeFromIC(agnosticIC, key, kAgnosticMemoKey, nullptr /* self */);
 }
 
 /*
@@ -145,12 +181,12 @@ Object create_memo_agnostic_IC(ObjectData* prev_agnostic_obj,
  * key: class used for this IC
  * memo_key_int: 0 for memo agnostic, >0 for memo sensitive
 */
-Object create_implicit_context_impl(TypedValue data, Variant serializedValue,
+Object create_implicit_context_impl(ObjectData* ic, TypedValue data,
+                                    Variant serializedValue,
                                     const Class* key, int64_t memo_key_int) {
   assertx(data.m_type != KindOfUninit);
-  assertx(*ImplicitContext::activeCtx);
-  auto const prev = *ImplicitContext::activeCtx;
-  auto prev_ctx = Native::data<ImplicitContext>(prev);
+  assertx(ic);
+  auto const icData = Native::data<ImplicitContext>(ic);
 
   /*
    * Memo sensitive IC creation necessarily returns the
@@ -175,22 +211,22 @@ Object create_implicit_context_impl(TypedValue data, Variant serializedValue,
   */
 
   bool memo_agnostic_ic_requested = !serializedValue.isInitialized();
-  bool is_prev_agnostic = prev_ctx->m_memoKey == kAgnosticMemoKey;
+  bool is_prev_agnostic = icData->m_memoKey == kAgnosticMemoKey;
 
   if (is_prev_agnostic && memo_agnostic_ic_requested) {
-    return create_memo_agnostic_IC(prev, data, key);
+    return create_memo_agnostic_IC(ic, data, key);
   }
 
 
   // new_ic is the default IC, create the memo agnostic branch ptr for it
   auto memo_agnostic_obj = memo_agnostic_ic_requested
-                           ? create_memo_agnostic_IC(prev_ctx->m_memoAgnosticIC, data, key).get()
-                           : prev_ctx->m_memoAgnosticIC;
-  auto updated_map = prev_ctx->m_map;
+                           ? create_memo_agnostic_IC(icData->m_memoAgnosticIC, data, key).get()
+                           : icData->m_memoAgnosticIC;
+  auto updated_map = icData->m_map;
   tvIncRefGen(data);
   updated_map.insert_or_assign(
     key, std::make_pair(data, serializedValue.detach()));
-  auto new_ic_memokey = memo_agnostic_ic_requested ? prev_ctx->m_memoKey : memo_key_int;
+  auto new_ic_memokey = memo_agnostic_ic_requested ? icData->m_memoKey : memo_key_int;
   return createICWithParams(new_ic_memokey, std::move(updated_map), memo_agnostic_obj);
 }
 
@@ -287,22 +323,64 @@ Array HHVM_FUNCTION(get_implicit_context_debug_info) {
 }
 
 
-ObjectRet HHVM_FUNCTION(create_memo_agnostic, TypedValue key,
-                                              TypedValue context) {
-  assertx(*ImplicitContext::activeCtx);
+ObjectRet HHVM_FUNCTION(set_memo_agnostic, ObjectArg ic,
+                                           TypedValue key,
+                                           TypedValue context) {
+  assertx(ic.get());
   return create_implicit_context_impl(
-    context, Variant{}, resolveClass(key), kAgnosticMemoKey);
+    ic.get(), context, Variant{}, resolveClass(key), kAgnosticMemoKey);
 }
 
-ObjectRet HHVM_FUNCTION(create_memo_sensitive, TypedValue keyArg,
-                                               ObjectArg context,
-                                               StringArg contextKey) {
-  assertx(*ImplicitContext::activeCtx);
+ObjectRet HHVM_FUNCTION(set_memo_sensitive, ObjectArg ic,
+                                            TypedValue keyArg,
+                                            ObjectArg context,
+                                            StringArg contextKey) {
+  assertx(ic.get());
   auto const key = resolveClass(keyArg);
-  auto memoKey = memoKeyForInsert(key, VarNR{contextKey.get()});
+  auto memoKey = memoKeyForInsert(ic.get(), key, VarNR{contextKey.get()});
   return create_implicit_context_impl(
-    make_tv<KindOfObject>(context.get()), VarNR{contextKey.get()}, key, memoKey
+    ic.get(), make_tv<KindOfObject>(context.get()), VarNR{contextKey.get()}, key, memoKey
   );
+}
+
+ObjectRet HHVM_FUNCTION(unset_memo_agnostic, ObjectArg ic,
+                                             TypedValue key) {
+  assertx(ic.get());
+  auto const cls = resolveClass(key);
+  auto const icData = Native::data<ImplicitContext>(ic.get());
+  bool wasAgnostic = icData->m_memoKey == kAgnosticMemoKey;
+
+  if (wasAgnostic) {
+    return removeFromAgnosticIC(ic.get(), cls);
+  }
+
+  // IC is sensitive: remove from both default map and agnostic branch
+  auto newAgnosticIC = removeFromAgnosticIC(
+    icData->m_memoAgnosticIC, cls).get();
+  // memo key unchanged since agnostic entries don't affect it
+  return removeFromIC(ic.get(), cls, icData->m_memoKey, newAgnosticIC);
+}
+
+ObjectRet HHVM_FUNCTION(unset_memo_sensitive, ObjectArg ic,
+                                              TypedValue key) {
+  assertx(ic.get());
+  auto const cls = resolveClass(key);
+  auto const icData = Native::data<ImplicitContext>(ic.get());
+
+  if (icData->m_memoKey == kAgnosticMemoKey) {
+    // IC is agnostic, no sensitive entries to remove
+    return Object{ic.get()};
+  }
+
+  auto newMemoKey = memoKeyForRemove(ic.get(), cls);
+
+  if (newMemoKey == kAgnosticMemoKey) {
+    // Was sensitive, now all sensitive keys are gone
+    return Object{icData->m_memoAgnosticIC};
+  }
+
+  // Still have sensitive entries remaining
+  return removeFromIC(ic.get(), cls, newMemoKey, icData->m_memoAgnosticIC);
 }
 
 namespace {
@@ -344,15 +422,35 @@ static struct HHImplicitContext final : Extension {
                   HHVM_FN(get_state_unsafe));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context,
                   HHVM_FN(get_implicit_context));
-    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\create_memo_agnostic,
-                  HHVM_FN(create_memo_agnostic));
-    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\create_memo_sensitive,
-                  HHVM_FN(create_memo_sensitive));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\set_memo_agnostic,
+                  HHVM_FN(set_memo_agnostic));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\set_memo_sensitive,
+                  HHVM_FN(set_memo_sensitive));
+    // clang doesn't like HHVM_NAMED_FE with \\u (unicode escape)
+    HHVM_NAMED_FE_STR(
+      "HH\\ImplicitContext\\_Private\\unset_memo_agnostic",
+      HHVM_FN(unset_memo_agnostic),
+      nativeFuncs()
+    );
+    HHVM_NAMED_FE_STR(
+      "HH\\ImplicitContext\\_Private\\unset_memo_sensitive",
+      HHVM_FN(unset_memo_sensitive),
+      nativeFuncs()
+    );
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key,
                   HHVM_FN(get_implicit_context_memo_key));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_debug_info,
                   HHVM_FN(get_implicit_context_debug_info));
 
+  }
+
+  void requestInit() override {
+    rl_memoKeyToInt.create();
+    *(rl_nextMemoKey) = kAgnosticMemoKey;
+  }
+
+  void requestShutdown() override {
+    rl_memoKeyToInt.destroy();
   }
 } s_hh_implicit_context;
 

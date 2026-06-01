@@ -43,11 +43,11 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Internship other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -62,14 +62,14 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
 
         public int getWeeks() { return weeks; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="title", requiredness=Requiredness.NONE)    public Builder setTitle(String title) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="title", requiredness=Requiredness.NONE)    public Builder setTitle(String title) {
             this.title = title;
             return this;
         }
 
         public String getTitle() { return title; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="employer", requiredness=Requiredness.OPTIONAL)    public Builder setEmployer(test.fixtures.lazy_constants.Company employer) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="employer", requiredness=Requiredness.OPTIONAL)    public Builder setEmployer(test.fixtures.lazy_constants.Company employer) {
             this.employer = employer;
             return this;
         }
@@ -93,6 +93,7 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -101,34 +102,29 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
     private final int weeks;
     public static final int _WEEKS = 1;
     private static final TField WEEKS_FIELD_DESC = new TField("weeks", TType.I32, (short)1);
-        private final String title;
+    private final String title;
     public static final int _TITLE = 2;
     private static final TField TITLE_FIELD_DESC = new TField("title", TType.STRING, (short)2);
-        private final test.fixtures.lazy_constants.Company employer;
+    private final test.fixtures.lazy_constants.Company employer;
     public static final int _EMPLOYER = 3;
     private static final TField EMPLOYER_FIELD_DESC = new TField("employer", TType.I32, (short)3);
     static {
-      NAMES_TO_IDS.put("weeks", 1);
-      THRIFT_NAMES_TO_IDS.put("weeks", 1);
-      FIELD_METADATA.put(1, WEEKS_FIELD_DESC);
-      NAMES_TO_IDS.put("title", 2);
-      THRIFT_NAMES_TO_IDS.put("title", 2);
-      FIELD_METADATA.put(2, TITLE_FIELD_DESC);
-      NAMES_TO_IDS.put("employer", 3);
-      THRIFT_NAMES_TO_IDS.put("employer", 3);
-      FIELD_METADATA.put(3, EMPLOYER_FIELD_DESC);
+        NAMES_TO_IDS.put("weeks", 1);
+        THRIFT_NAMES_TO_IDS.put("weeks", 1);
+        FIELD_METADATA.put(1, WEEKS_FIELD_DESC);
+        NAMES_TO_IDS.put("title", 2);
+        THRIFT_NAMES_TO_IDS.put("title", 2);
+        FIELD_METADATA.put(2, TITLE_FIELD_DESC);
+        NAMES_TO_IDS.put("employer", 3);
+        THRIFT_NAMES_TO_IDS.put("employer", 3);
+        FIELD_METADATA.put(3, EMPLOYER_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="weeks", requiredness=Requiredness.REQUIRED)
     public int getWeeks() { return weeks; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="title", requiredness=Requiredness.NONE)
     public String getTitle() { return title; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="employer", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.lazy_constants.Company getEmployer() { return employer; }
@@ -164,84 +160,86 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Integer.hashCode(weeks);
-            _hashCode = 31 * _hashCode + Objects.hashCode(title);
-            _hashCode = 31 * _hashCode + Objects.hashCode(employer);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(title);
+        _hashCode = 31 * _hashCode + Objects.hashCode(employer);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Internship> asReader() {
       return Internship::read0;
     }
 
     public static Internship read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Internship.NAMES_TO_IDS, Internship.THRIFT_NAMES_TO_IDS, Internship.FIELD_METADATA);
-      Internship.Builder builder = new Internship.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _WEEKS:
-          if (__field.type == TType.I32) {
-            int weeks = oprot.readI32();
-            builder.setWeeks(weeks);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _TITLE:
-          if (__field.type == TType.STRING) {
-            String title = oprot.readString();
-            builder.setTitle(title);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _EMPLOYER:
-          if (__field.type == TType.I32) {
-            test.fixtures.lazy_constants.Company employer = test.fixtures.lazy_constants.Company.fromInteger(oprot.readI32());
-            builder.setEmployer(employer);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(Internship.NAMES_TO_IDS, Internship.THRIFT_NAMES_TO_IDS, Internship.FIELD_METADATA);
+        Internship.Builder builder = new Internship.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _WEEKS:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setWeeks(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _TITLE:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setTitle(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _EMPLOYER:
+                if (__field.type == TType.I32) {
+                    test.fixtures.lazy_constants.Company _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.lazy_constants.Company.fromInteger(oprot.readI32());
+                    builder.setEmployer(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      int _iter0 = this.weeks;
-      oprot.writeFieldBegin(WEEKS_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.title;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(TITLE_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.lazy_constants.Company _iter0 = this.employer;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(EMPLOYER_FIELD_DESC);
-        oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            int _fbthriftVar0 = this.weeks;
+            oprot.writeFieldBegin(WEEKS_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.title;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(TITLE_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.lazy_constants.Company _fbthriftVar0 = this.employer;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(EMPLOYER_FIELD_DESC);
+                oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _InternshipLazy {

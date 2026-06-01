@@ -675,7 +675,10 @@ static inline bool hugePagesSoundNice() {
 
 static inline uint32_t hotTextHugePagesDefault() {
   if (!hugePagesSoundNice()) return 0;
-  return arch::get() == Arch::ARM ? 12 : 8;
+  return ARCH_MATCH(
+    [](arch::X64) { return 8; },
+    [](arch::ARM) { return 12; }
+  );
 }
 
 static inline std::string reorderPropsDefault() {
@@ -753,11 +756,6 @@ hphp_string_map<TypedValue> RuntimeOption::ConstantFunctions;
 
 RepoMode RuntimeOption::RepoLocalMode = RepoMode::ReadOnly;
 RepoMode RuntimeOption::RepoCentralMode = RepoMode::ReadWrite;
-
-bool RuntimeOption::HHProfEnabled = false;
-bool RuntimeOption::HHProfActive = false;
-bool RuntimeOption::HHProfAccum = false;
-bool RuntimeOption::HHProfRequest = false;
 
 #ifdef HHVM_FACEBOOK
 
@@ -1379,14 +1377,6 @@ void RuntimeOption::Load(
     }
   }
 
-  if (use_jemalloc) {
-    // HHProf
-    Config::Bind(HHProfEnabled, ini, config, "HHProf.Enabled", false);
-    Config::Bind(HHProfActive, ini, config, "HHProf.Active", false);
-    Config::Bind(HHProfAccum, ini, config, "HHProf.Accum", false);
-    Config::Bind(HHProfRequest, ini, config, "HHProf.Request", false);
-  }
-
   {
     // Eval
     static std::string jitSerdesMode;
@@ -1787,7 +1777,7 @@ ServiceData::CounterCallback s_build_info([](ServiceData::CounterMap& counters) 
   if (!ss.fail()) {
     counters.emplace("admin.build.age", std::time(nullptr) - mktime(&t));
   }
-});
+}, "admin.build.");
 
 }
 

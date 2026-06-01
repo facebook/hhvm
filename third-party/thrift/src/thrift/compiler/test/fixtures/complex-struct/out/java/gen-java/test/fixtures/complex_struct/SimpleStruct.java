@@ -40,11 +40,11 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(SimpleStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -58,7 +58,7 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
 
         public long getAge() { return age; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)    public Builder setName(String name) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)    public Builder setName(String name) {
             this.name = name;
             return this;
         }
@@ -80,6 +80,7 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -88,23 +89,20 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
     private final long age;
     public static final int _AGE = 1;
     private static final TField AGE_FIELD_DESC = new TField("age", TType.I64, (short)1);
-        private final String name;
+    private final String name;
     public static final int _NAME = 2;
     private static final TField NAME_FIELD_DESC = new TField("name", TType.STRING, (short)2);
     static {
-      NAMES_TO_IDS.put("age", 1);
-      THRIFT_NAMES_TO_IDS.put("age", 1);
-      FIELD_METADATA.put(1, AGE_FIELD_DESC);
-      NAMES_TO_IDS.put("name", 2);
-      THRIFT_NAMES_TO_IDS.put("name", 2);
-      FIELD_METADATA.put(2, NAME_FIELD_DESC);
+        NAMES_TO_IDS.put("age", 1);
+        THRIFT_NAMES_TO_IDS.put("age", 1);
+        FIELD_METADATA.put(1, AGE_FIELD_DESC);
+        NAMES_TO_IDS.put("name", 2);
+        THRIFT_NAMES_TO_IDS.put("name", 2);
+        FIELD_METADATA.put(2, NAME_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="age", requiredness=Requiredness.NONE)
     public long getAge() { return age; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)
     public String getName() { return name; }
@@ -138,67 +136,68 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(age);
-            _hashCode = 31 * _hashCode + Objects.hashCode(name);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(name);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<SimpleStruct> asReader() {
       return SimpleStruct::read0;
     }
 
     public static SimpleStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(SimpleStruct.NAMES_TO_IDS, SimpleStruct.THRIFT_NAMES_TO_IDS, SimpleStruct.FIELD_METADATA);
-      SimpleStruct.Builder builder = new SimpleStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _AGE:
-          if (__field.type == TType.I64) {
-            long age = oprot.readI64();
-            builder.setAge(age);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _NAME:
-          if (__field.type == TType.STRING) {
-            String name = oprot.readString();
-            builder.setName(name);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(SimpleStruct.NAMES_TO_IDS, SimpleStruct.THRIFT_NAMES_TO_IDS, SimpleStruct.FIELD_METADATA);
+        SimpleStruct.Builder builder = new SimpleStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _AGE:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setAge(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _NAME:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setName(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.age;
-      oprot.writeFieldBegin(AGE_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.name;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(NAME_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.age;
+            oprot.writeFieldBegin(AGE_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.name;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(NAME_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _SimpleStructLazy {

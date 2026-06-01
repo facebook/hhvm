@@ -90,6 +90,20 @@ struct AlignedResponse {
   1: bool aligned;
 }
 
+struct StorageReadRequest {
+  1: i64 responseBytes;
+}
+
+struct StorageReadResponse {
+  1: binary payload;
+}
+
+struct StorageWriteRequest {
+  1: binary payload;
+}
+
+struct StorageWriteResponse {}
+
 service StressTest {
   @cpp.ProcessInEbThreadUnsafe
   void ping();
@@ -111,4 +125,11 @@ service StressTest {
   AlignedResponse alignedRequestResponseTm(1: AlignedRequest req);
   @cpp.ProcessInEbThreadUnsafe
   AlignedResponse alignedRequestResponseEb(1: AlignedRequest req);
+
+  StorageReadResponse storageReadTm(1: StorageReadRequest req);
+  @cpp.ProcessInEbThreadUnsafe
+  StorageReadResponse storageReadEb(1: StorageReadRequest req);
+  StorageWriteResponse storageWriteTm(1: StorageWriteRequest req);
+  @cpp.ProcessInEbThreadUnsafe
+  StorageWriteResponse storageWriteEb(1: StorageWriteRequest req);
 }

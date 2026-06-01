@@ -143,9 +143,10 @@ static InitFiniNode initCodeSizeCounters([] {
 static std::atomic<bool> s_warmedUp{false};
 
 static ServiceData::CounterCallback s_warmedUpCounter(
-  [](std::map<std::string, int64_t>& counters) {
+  [](ServiceData::CounterMap& counters) {
     counters["jit.warmed-up"] = warmupStatusString().empty() ? 1 : 0;
-  }
+  },
+  "jit.warmed-up"
 );
 
 /*

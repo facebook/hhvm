@@ -22,7 +22,7 @@ public final class Constants {
     public static final List<Map<String, Integer>> STATES = construct_STATES();
 
     private static List<Map<String, Integer>> construct_STATES() {
-      return ImmutableList.<Map<String, Integer>>builder()
+        return ImmutableList.<Map<String, Integer>>builder()
         .add(ImmutableMap.<String, Integer>builder()
         .put("San Diego", 3211000)
         .put("Sacramento", 479600)
@@ -38,7 +38,7 @@ public final class Constants {
     public static final Set<String> CITIES = construct_CITIES();
 
     private static Set<String> construct_CITIES() {
-      return ImmutableSet.<String>builder()
+        return ImmutableSet.<String>builder()
         .add("New York")
         .add("Sacramento")
         .build();
@@ -53,7 +53,7 @@ public final class Constants {
     public static final Map<test.fixtures.lazy_constants.Company, Integer> CONST_ENUM_MAP = construct_CONST_ENUM_MAP();
 
     private static Map<test.fixtures.lazy_constants.Company, Integer> construct_CONST_ENUM_MAP() {
-      return ImmutableMap.<test.fixtures.lazy_constants.Company, Integer>builder()
+        return ImmutableMap.<test.fixtures.lazy_constants.Company, Integer>builder()
         .put(test.fixtures.lazy_constants.Company.FACEBOOK, 123)
         .put(test.fixtures.lazy_constants.Company.WHATSAPP, 2)
         .build();
@@ -62,13 +62,13 @@ public final class Constants {
     public static final test.fixtures.lazy_constants.Internship INSTAGRAM = construct_INSTAGRAM();
 
     private static test.fixtures.lazy_constants.Internship construct_INSTAGRAM() {
-      return new test.fixtures.lazy_constants.Internship.Builder().setWeeks(12).setTitle("Software Engineer").setEmployer(test.fixtures.lazy_constants.Company.INSTAGRAM).build();
+        return new test.fixtures.lazy_constants.Internship.Builder().setWeeks(12).setTitle("Software Engineer").setEmployer(test.fixtures.lazy_constants.Company.INSTAGRAM).build();
     }
 
     public static final List<test.fixtures.lazy_constants.Range> K_RANGES = construct_K_RANGES();
 
     private static List<test.fixtures.lazy_constants.Range> construct_K_RANGES() {
-      return ImmutableList.<test.fixtures.lazy_constants.Range>builder()
+        return ImmutableList.<test.fixtures.lazy_constants.Range>builder()
         .add(new test.fixtures.lazy_constants.Range.Builder().setMin(1).setMax(2).build())
         .add(new test.fixtures.lazy_constants.Range.Builder().setMin(5).setMax(6).build())
         .build();
@@ -77,7 +77,7 @@ public final class Constants {
     public static final List<test.fixtures.lazy_constants.Internship> INTERN_LIST = construct_INTERN_LIST();
 
     private static List<test.fixtures.lazy_constants.Internship> construct_INTERN_LIST() {
-      return ImmutableList.<test.fixtures.lazy_constants.Internship>builder()
+        return ImmutableList.<test.fixtures.lazy_constants.Internship>builder()
         .add(test.fixtures.lazy_constants.Constants.INSTAGRAM)
         .add(new test.fixtures.lazy_constants.Internship.Builder().setWeeks(10).setTitle("Sales Intern").setEmployer(test.fixtures.lazy_constants.Company.FACEBOOK).build())
         .build();
@@ -96,7 +96,7 @@ public final class Constants {
     public static final Map<String, Integer> CHAR2ASCII = construct_CHAR2ASCII();
 
     private static Map<String, Integer> construct_CHAR2ASCII() {
-      return ImmutableMap.<String, Integer>builder()
+        return ImmutableMap.<String, Integer>builder()
         .put("'", 39)
         .put("\"", 34)
         .put("\\", 92)

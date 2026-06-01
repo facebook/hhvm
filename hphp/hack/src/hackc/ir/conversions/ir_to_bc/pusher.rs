@@ -333,10 +333,8 @@ impl PushInserter {
         let num_inouts = call.inouts.as_ref().map_or(0, |inouts| inouts.len());
 
         let has_class = match &call.detail {
-            ir::instr::CallDetail::FCallClsMethod { .. }
-            | ir::instr::CallDetail::FCallClsMethodD { .. }
+            ir::instr::CallDetail::FCallClsMethodD { .. }
             | ir::instr::CallDetail::FCallClsMethodM { .. }
-            | ir::instr::CallDetail::FCallClsMethodS { .. }
             | ir::instr::CallDetail::FCallClsMethodSD { .. }
             | ir::instr::CallDetail::FCallFuncD { .. }
             | ir::instr::CallDetail::FCallFunc => false,

@@ -734,10 +734,6 @@ impl<'o, 't> SmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         <Self as FlattenSmartConstructors>::make_like_type_specifier(self, tilde, type_)
     }
 
-    fn make_soft_type_specifier(&mut self, at: Self::Output, type_: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_soft_type_specifier(self, at, type_)
-    }
-
     fn make_attributized_specifier(&mut self, attribute_spec: Self::Output, type_: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_attributized_specifier(self, attribute_spec, type_)
     }

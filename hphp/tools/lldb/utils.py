@@ -884,6 +884,7 @@ def read_cstring(
         error = lldb.SBError()
         cstring = process.ReadCStringFromMemory(addr, len, error)
         if error.Success():
+            # pyre-fixme[16]: ReadCStringFromMemory returns str at runtime
             return cstring if keep_case else cstring.lower()
         else:
             err = error
@@ -1311,6 +1312,7 @@ def parse_argv(
 
     if limit is None:
         limit = len(args)
+    # pyre-fixme[7]: Beyond limit, args remain as strings
     return [
         target.EvaluateExpression(arg) if i < limit else arg
         for i, arg in enumerate(shlex.split(args))

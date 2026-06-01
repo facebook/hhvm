@@ -42,9 +42,15 @@ void TokenBucketConcurrencyController::execute(ServerRequest&& request) {
   if (onExecuteFunction_) {
     onExecuteFunction_(request);
   }
-  request.requestData().setRequestExecutionBegin();
+  // Save a reference to requestData before moving the request.
+  // requestData_ is a value member of ServerRequest, so the reference
+  // remains valid after the move (the object still exists, just in a
+  // moved-from state; requestData_ contains only trivial scalars that
+  // survive the default move intact).
+  auto& reqData = request.requestData();
+  reqData.setRequestExecutionBegin();
   AsyncProcessorHelper::executeRequest(std::move(request));
-  request.requestData().setRequestExecutionEnd();
+  reqData.setRequestExecutionEnd();
   notifyOnFinishExecution(request);
 }
 

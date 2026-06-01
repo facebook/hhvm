@@ -68,24 +68,17 @@ end = struct
       (f : 'input -> fuel:t -> t * Doc.t)
       (inputs : 'input list)
       ~(out_of_fuel_message : string) : t * Doc.t list =
-    let ((fuel, ran_out), docs) =
-      List.fold
-        inputs
-        ~init:((fuel, false), [])
-        ~f:(fun ((fuel, _), docs) input ->
-          let (fuel, doc) = provide_ fuel (f input) in
-          match doc with
-          | Some doc -> ((fuel, false), doc :: docs)
-          | None -> ((fuel, true), docs))
+    let rec go fuel acc = function
+      | [] -> (fuel, List.rev acc)
+      | _ when not (has_enough fuel) ->
+        let acc = Doc.text (Printf.sprintf "[%s]" out_of_fuel_message) :: acc in
+        (fuel, List.rev acc)
+      | input :: rest ->
+        let fuel = deplete fuel in
+        let (fuel, doc) = f input ~fuel in
+        go fuel (doc :: acc) rest
     in
-    let docs =
-      if ran_out then
-        Doc.text (Printf.sprintf "[%s]" out_of_fuel_message) :: docs
-      else
-        docs
-    in
-    let docs = List.rev docs in
-    (fuel, docs)
+    go fuel [] inputs
 
   let provide fuel f =
     let (fuel, doc) = provide_ fuel f in
@@ -1281,63 +1274,65 @@ module Full = struct
         (fuel, to_doc s ^^ targs_doc)
     in
     let rec predicate_doc fuel predicate =
-      match snd predicate with
-      | IsTag tag -> tag_doc fuel tag
-      | IsTupleOf { tp_required } ->
-        let (fuel, texts) =
-          List.fold_map ~init:fuel tp_required ~f:predicate_doc
-        in
-        ( fuel,
-          Concat
-            ([text "("] @ List.intersperse texts ~sep:(text ", ") @ [text ")"])
-        )
-      | IsShapeOf { sp_fields; sp_allows_unknown_fields } ->
-        let (fuel, texts) =
-          List.fold_map
-            ~init:fuel
-            (TShapeMap.elements sp_fields)
-            ~f:(fun fuel (key, { sfp_predicate; sfp_optional }) ->
-              let key_delim =
-                match key with
-                | Typing_defs.TSFlit_str _ -> text "'"
-                | _ -> Nothing
-              in
-              let (fuel, pdoc) = predicate_doc fuel sfp_predicate in
-              ( fuel,
-                Concat
-                  [
-                    (if sfp_optional then
-                      text "?"
-                    else
-                      Nothing);
-                    key_delim;
-                    text_strip_ns @@ Typing_defs.TShapeField.name key;
-                    key_delim;
-                    Space;
-                    text "=>";
-                    Space;
-                    pdoc;
-                  ] ))
-        in
-        let texts =
-          if sp_allows_unknown_fields then
-            texts @ [text "..."]
-          else
-            texts
-        in
-        ( fuel,
-          Concat
-            ([text "shape("]
-            @ List.intersperse texts ~sep:(text ", ")
-            @ [text ")"]) )
-      | IsUnionOf predicates ->
-        let (fuel, texts) =
-          List.fold_map ~init:fuel predicates ~f:predicate_doc
-        in
-        ( fuel,
-          Concat (List.intersperse texts ~sep:(Concat [Space; text "|"; Space]))
-        )
-      (* TODO: T196048813 fuel? *)
+      Fuel.provide fuel (fun ~fuel ->
+          match snd predicate with
+          | IsTag tag -> tag_doc fuel tag
+          | IsTupleOf { tp_required } ->
+            let (fuel, texts) =
+              List.fold_map ~init:fuel tp_required ~f:predicate_doc
+            in
+            ( fuel,
+              Concat
+                ([text "("]
+                @ List.intersperse texts ~sep:(text ", ")
+                @ [text ")"]) )
+          | IsShapeOf { sp_fields; sp_allows_unknown_fields } ->
+            let (fuel, texts) =
+              List.fold_map
+                ~init:fuel
+                (TShapeMap.elements sp_fields)
+                ~f:(fun fuel (key, { sfp_predicate; sfp_optional }) ->
+                  let key_delim =
+                    match key with
+                    | Typing_defs.TSFlit_str _ -> text "'"
+                    | _ -> Nothing
+                  in
+                  let (fuel, pdoc) = predicate_doc fuel sfp_predicate in
+                  ( fuel,
+                    Concat
+                      [
+                        (if sfp_optional then
+                          text "?"
+                        else
+                          Nothing);
+                        key_delim;
+                        text_strip_ns @@ Typing_defs.TShapeField.name key;
+                        key_delim;
+                        Space;
+                        text "=>";
+                        Space;
+                        pdoc;
+                      ] ))
+            in
+            let texts =
+              if sp_allows_unknown_fields then
+                texts @ [text "..."]
+              else
+                texts
+            in
+            ( fuel,
+              Concat
+                ([text "shape("]
+                @ List.intersperse texts ~sep:(text ", ")
+                @ [text ")"]) )
+          | IsUnionOf predicates ->
+            let (fuel, texts) =
+              List.fold_map ~init:fuel predicates ~f:predicate_doc
+            in
+            ( fuel,
+              Concat
+                (List.intersperse texts ~sep:(Concat [Space; text "|"; Space]))
+            ))
     in
     let (fuel, pdoc) = predicate_doc fuel predicate in
     let doc =

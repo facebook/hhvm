@@ -58,11 +58,11 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Limits other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -82,49 +82,49 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
 
         public long getMaxI64Field() { return maxI64Field; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="min_i64_field", requiredness=Requiredness.NONE)    public Builder setMinI64Field(long minI64Field) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="min_i64_field", requiredness=Requiredness.NONE)    public Builder setMinI64Field(long minI64Field) {
             this.minI64Field = minI64Field;
             return this;
         }
 
         public long getMinI64Field() { return minI64Field; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="max_i32_field", requiredness=Requiredness.NONE)    public Builder setMaxI32Field(int maxI32Field) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="max_i32_field", requiredness=Requiredness.NONE)    public Builder setMaxI32Field(int maxI32Field) {
             this.maxI32Field = maxI32Field;
             return this;
         }
 
         public int getMaxI32Field() { return maxI32Field; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="min_i32_field", requiredness=Requiredness.NONE)    public Builder setMinI32Field(int minI32Field) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="min_i32_field", requiredness=Requiredness.NONE)    public Builder setMinI32Field(int minI32Field) {
             this.minI32Field = minI32Field;
             return this;
         }
 
         public int getMinI32Field() { return minI32Field; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="max_i16_field", requiredness=Requiredness.NONE)    public Builder setMaxI16Field(short maxI16Field) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="max_i16_field", requiredness=Requiredness.NONE)    public Builder setMaxI16Field(short maxI16Field) {
             this.maxI16Field = maxI16Field;
             return this;
         }
 
         public short getMaxI16Field() { return maxI16Field; }
 
-            @com.facebook.swift.codec.ThriftField(value=6, name="min_i16_field", requiredness=Requiredness.NONE)    public Builder setMinI16Field(short minI16Field) {
+        @com.facebook.swift.codec.ThriftField(value=6, name="min_i16_field", requiredness=Requiredness.NONE)    public Builder setMinI16Field(short minI16Field) {
             this.minI16Field = minI16Field;
             return this;
         }
 
         public short getMinI16Field() { return minI16Field; }
 
-            @com.facebook.swift.codec.ThriftField(value=7, name="max_byte_field", requiredness=Requiredness.NONE)    public Builder setMaxByteField(byte maxByteField) {
+        @com.facebook.swift.codec.ThriftField(value=7, name="max_byte_field", requiredness=Requiredness.NONE)    public Builder setMaxByteField(byte maxByteField) {
             this.maxByteField = maxByteField;
             return this;
         }
 
         public byte getMaxByteField() { return maxByteField; }
 
-            @com.facebook.swift.codec.ThriftField(value=8, name="min_byte_field", requiredness=Requiredness.NONE)    public Builder setMinByteField(byte minByteField) {
+        @com.facebook.swift.codec.ThriftField(value=8, name="min_byte_field", requiredness=Requiredness.NONE)    public Builder setMinByteField(byte minByteField) {
             this.minByteField = minByteField;
             return this;
         }
@@ -158,6 +158,7 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -166,90 +167,75 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
     private final long maxI64Field;
     public static final int _MAX_I64_FIELD = 1;
     private static final TField MAX_I64_FIELD_FIELD_DESC = new TField("max_i64_field", TType.I64, (short)1);
-        private final long minI64Field;
+    private final long minI64Field;
     public static final int _MIN_I64_FIELD = 2;
     private static final TField MIN_I64_FIELD_FIELD_DESC = new TField("min_i64_field", TType.I64, (short)2);
-        private final int maxI32Field;
+    private final int maxI32Field;
     public static final int _MAX_I32_FIELD = 3;
     private static final TField MAX_I32_FIELD_FIELD_DESC = new TField("max_i32_field", TType.I32, (short)3);
-        private final int minI32Field;
+    private final int minI32Field;
     public static final int _MIN_I32_FIELD = 4;
     private static final TField MIN_I32_FIELD_FIELD_DESC = new TField("min_i32_field", TType.I32, (short)4);
-        private final short maxI16Field;
+    private final short maxI16Field;
     public static final int _MAX_I16_FIELD = 5;
     private static final TField MAX_I16_FIELD_FIELD_DESC = new TField("max_i16_field", TType.I16, (short)5);
-        private final short minI16Field;
+    private final short minI16Field;
     public static final int _MIN_I16_FIELD = 6;
     private static final TField MIN_I16_FIELD_FIELD_DESC = new TField("min_i16_field", TType.I16, (short)6);
-        private final byte maxByteField;
+    private final byte maxByteField;
     public static final int _MAX_BYTE_FIELD = 7;
     private static final TField MAX_BYTE_FIELD_FIELD_DESC = new TField("max_byte_field", TType.BYTE, (short)7);
-        private final byte minByteField;
+    private final byte minByteField;
     public static final int _MIN_BYTE_FIELD = 8;
     private static final TField MIN_BYTE_FIELD_FIELD_DESC = new TField("min_byte_field", TType.BYTE, (short)8);
     static {
-      NAMES_TO_IDS.put("maxI64Field", 1);
-      THRIFT_NAMES_TO_IDS.put("max_i64_field", 1);
-      FIELD_METADATA.put(1, MAX_I64_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("minI64Field", 2);
-      THRIFT_NAMES_TO_IDS.put("min_i64_field", 2);
-      FIELD_METADATA.put(2, MIN_I64_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("maxI32Field", 3);
-      THRIFT_NAMES_TO_IDS.put("max_i32_field", 3);
-      FIELD_METADATA.put(3, MAX_I32_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("minI32Field", 4);
-      THRIFT_NAMES_TO_IDS.put("min_i32_field", 4);
-      FIELD_METADATA.put(4, MIN_I32_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("maxI16Field", 5);
-      THRIFT_NAMES_TO_IDS.put("max_i16_field", 5);
-      FIELD_METADATA.put(5, MAX_I16_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("minI16Field", 6);
-      THRIFT_NAMES_TO_IDS.put("min_i16_field", 6);
-      FIELD_METADATA.put(6, MIN_I16_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("maxByteField", 7);
-      THRIFT_NAMES_TO_IDS.put("max_byte_field", 7);
-      FIELD_METADATA.put(7, MAX_BYTE_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("minByteField", 8);
-      THRIFT_NAMES_TO_IDS.put("min_byte_field", 8);
-      FIELD_METADATA.put(8, MIN_BYTE_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("maxI64Field", 1);
+        THRIFT_NAMES_TO_IDS.put("max_i64_field", 1);
+        FIELD_METADATA.put(1, MAX_I64_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("minI64Field", 2);
+        THRIFT_NAMES_TO_IDS.put("min_i64_field", 2);
+        FIELD_METADATA.put(2, MIN_I64_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("maxI32Field", 3);
+        THRIFT_NAMES_TO_IDS.put("max_i32_field", 3);
+        FIELD_METADATA.put(3, MAX_I32_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("minI32Field", 4);
+        THRIFT_NAMES_TO_IDS.put("min_i32_field", 4);
+        FIELD_METADATA.put(4, MIN_I32_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("maxI16Field", 5);
+        THRIFT_NAMES_TO_IDS.put("max_i16_field", 5);
+        FIELD_METADATA.put(5, MAX_I16_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("minI16Field", 6);
+        THRIFT_NAMES_TO_IDS.put("min_i16_field", 6);
+        FIELD_METADATA.put(6, MIN_I16_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("maxByteField", 7);
+        THRIFT_NAMES_TO_IDS.put("max_byte_field", 7);
+        FIELD_METADATA.put(7, MAX_BYTE_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("minByteField", 8);
+        THRIFT_NAMES_TO_IDS.put("min_byte_field", 8);
+        FIELD_METADATA.put(8, MIN_BYTE_FIELD_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="max_i64_field", requiredness=Requiredness.NONE)
     public long getMaxI64Field() { return maxI64Field; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=2, name="min_i64_field", requiredness=Requiredness.NONE)
     public long getMinI64Field() { return minI64Field; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=3, name="max_i32_field", requiredness=Requiredness.NONE)
     public int getMaxI32Field() { return maxI32Field; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=4, name="min_i32_field", requiredness=Requiredness.NONE)
     public int getMinI32Field() { return minI32Field; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=5, name="max_i16_field", requiredness=Requiredness.NONE)
     public short getMaxI16Field() { return maxI16Field; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=6, name="min_i16_field", requiredness=Requiredness.NONE)
     public short getMinI16Field() { return minI16Field; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=7, name="max_byte_field", requiredness=Requiredness.NONE)
     public byte getMaxByteField() { return maxByteField; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=8, name="min_byte_field", requiredness=Requiredness.NONE)
     public byte getMinByteField() { return minByteField; }
 
@@ -294,155 +280,162 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(maxI64Field);
-            _hashCode = 31 * _hashCode + Long.hashCode(minI64Field);
-            _hashCode = 31 * _hashCode + Integer.hashCode(maxI32Field);
-            _hashCode = 31 * _hashCode + Integer.hashCode(minI32Field);
-            _hashCode = 31 * _hashCode + Short.hashCode(maxI16Field);
-            _hashCode = 31 * _hashCode + Short.hashCode(minI16Field);
-            _hashCode = 31 * _hashCode + Byte.hashCode(maxByteField);
-            _hashCode = 31 * _hashCode + Byte.hashCode(minByteField);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Long.hashCode(minI64Field);
+        _hashCode = 31 * _hashCode + Integer.hashCode(maxI32Field);
+        _hashCode = 31 * _hashCode + Integer.hashCode(minI32Field);
+        _hashCode = 31 * _hashCode + Short.hashCode(maxI16Field);
+        _hashCode = 31 * _hashCode + Short.hashCode(minI16Field);
+        _hashCode = 31 * _hashCode + Byte.hashCode(maxByteField);
+        _hashCode = 31 * _hashCode + Byte.hashCode(minByteField);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Limits> asReader() {
       return Limits::read0;
     }
 
     public static Limits read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Limits.NAMES_TO_IDS, Limits.THRIFT_NAMES_TO_IDS, Limits.FIELD_METADATA);
-      Limits.Builder builder = new Limits.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MAX_I64_FIELD:
-          if (__field.type == TType.I64) {
-            long maxI64Field = oprot.readI64();
-            builder.setMaxI64Field(maxI64Field);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MIN_I64_FIELD:
-          if (__field.type == TType.I64) {
-            long minI64Field = oprot.readI64();
-            builder.setMinI64Field(minI64Field);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAX_I32_FIELD:
-          if (__field.type == TType.I32) {
-            int maxI32Field = oprot.readI32();
-            builder.setMaxI32Field(maxI32Field);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MIN_I32_FIELD:
-          if (__field.type == TType.I32) {
-            int minI32Field = oprot.readI32();
-            builder.setMinI32Field(minI32Field);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAX_I16_FIELD:
-          if (__field.type == TType.I16) {
-            short maxI16Field = oprot.readI16();
-            builder.setMaxI16Field(maxI16Field);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MIN_I16_FIELD:
-          if (__field.type == TType.I16) {
-            short minI16Field = oprot.readI16();
-            builder.setMinI16Field(minI16Field);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAX_BYTE_FIELD:
-          if (__field.type == TType.BYTE) {
-            byte maxByteField = oprot.readByte();
-            builder.setMaxByteField(maxByteField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MIN_BYTE_FIELD:
-          if (__field.type == TType.BYTE) {
-            byte minByteField = oprot.readByte();
-            builder.setMinByteField(minByteField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(Limits.NAMES_TO_IDS, Limits.THRIFT_NAMES_TO_IDS, Limits.FIELD_METADATA);
+        Limits.Builder builder = new Limits.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MAX_I64_FIELD:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMaxI64Field(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MIN_I64_FIELD:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMinI64Field(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAX_I32_FIELD:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMaxI32Field(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MIN_I32_FIELD:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setMinI32Field(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAX_I16_FIELD:
+                if (__field.type == TType.I16) {
+                    short _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI16();
+                    builder.setMaxI16Field(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MIN_I16_FIELD:
+                if (__field.type == TType.I16) {
+                    short _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI16();
+                    builder.setMinI16Field(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAX_BYTE_FIELD:
+                if (__field.type == TType.BYTE) {
+                    byte _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readByte();
+                    builder.setMaxByteField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MIN_BYTE_FIELD:
+                if (__field.type == TType.BYTE) {
+                    byte _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readByte();
+                    builder.setMinByteField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.maxI64Field;
-      oprot.writeFieldBegin(MAX_I64_FIELD_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      long _iter0 = this.minI64Field;
-      oprot.writeFieldBegin(MIN_I64_FIELD_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.maxI32Field;
-      oprot.writeFieldBegin(MAX_I32_FIELD_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.minI32Field;
-      oprot.writeFieldBegin(MIN_I32_FIELD_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      short _iter0 = this.maxI16Field;
-      oprot.writeFieldBegin(MAX_I16_FIELD_FIELD_DESC);
-      oprot.writeI16(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      short _iter0 = this.minI16Field;
-      oprot.writeFieldBegin(MIN_I16_FIELD_FIELD_DESC);
-      oprot.writeI16(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      byte _iter0 = this.maxByteField;
-      oprot.writeFieldBegin(MAX_BYTE_FIELD_FIELD_DESC);
-      oprot.writeByte(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      byte _iter0 = this.minByteField;
-      oprot.writeFieldBegin(MIN_BYTE_FIELD_FIELD_DESC);
-      oprot.writeByte(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.maxI64Field;
+            oprot.writeFieldBegin(MAX_I64_FIELD_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            long _fbthriftVar0 = this.minI64Field;
+            oprot.writeFieldBegin(MIN_I64_FIELD_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.maxI32Field;
+            oprot.writeFieldBegin(MAX_I32_FIELD_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.minI32Field;
+            oprot.writeFieldBegin(MIN_I32_FIELD_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            short _fbthriftVar0 = this.maxI16Field;
+            oprot.writeFieldBegin(MAX_I16_FIELD_FIELD_DESC);
+            oprot.writeI16(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            short _fbthriftVar0 = this.minI16Field;
+            oprot.writeFieldBegin(MIN_I16_FIELD_FIELD_DESC);
+            oprot.writeI16(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            byte _fbthriftVar0 = this.maxByteField;
+            oprot.writeFieldBegin(MAX_BYTE_FIELD_FIELD_DESC);
+            oprot.writeByte(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            byte _fbthriftVar0 = this.minByteField;
+            oprot.writeFieldBegin(MIN_BYTE_FIELD_FIELD_DESC);
+            oprot.writeByte(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _LimitsLazy {

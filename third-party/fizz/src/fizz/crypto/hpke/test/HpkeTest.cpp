@@ -1957,7 +1957,10 @@ std::unique_ptr<KeyExchange> generateAuthKex(
 }
 
 std::unique_ptr<fizz::hpke::Hkdf> genHKDF(HashFunction f) {
-  auto hasher = fizz::DefaultFactory().makeHasherFactory(f);
+  const HasherFactoryWithMetadata* hasher = nullptr;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizz::DefaultFactory().makeHasherFactory(hasher, err, f), err);
   return std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::v1(hasher));
 }
 

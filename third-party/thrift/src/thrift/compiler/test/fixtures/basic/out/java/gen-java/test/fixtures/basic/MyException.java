@@ -93,21 +93,21 @@ public final class MyException extends org.apache.thrift.TBaseException implemen
 
         public long getMyIntField() { return myIntField; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
             this.myStringField = myStringField;
             return this;
         }
 
         public String getMyStringField() { return myStringField; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="myStruct", requiredness=Requiredness.NONE)    public Builder setMyStruct(test.fixtures.basic.MyStruct myStruct) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="myStruct", requiredness=Requiredness.NONE)    public Builder setMyStruct(test.fixtures.basic.MyStruct myStruct) {
             this.myStruct = myStruct;
             return this;
         }
 
         public test.fixtures.basic.MyStruct getMyStruct() { return myStruct; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="myUnion", requiredness=Requiredness.NONE)    public Builder setMyUnion(test.fixtures.basic.MyUnion myUnion) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="myUnion", requiredness=Requiredness.NONE)    public Builder setMyUnion(test.fixtures.basic.MyUnion myUnion) {
             this.myUnion = myUnion;
             return this;
         }
@@ -135,111 +135,110 @@ public final class MyException extends org.apache.thrift.TBaseException implemen
     }
 
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
     public long getMyIntField() { return myIntField; }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)
     public String getMyStringField() { return myStringField; }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="myStruct", requiredness=Requiredness.NONE)
     public test.fixtures.basic.MyStruct getMyStruct() { return myStruct; }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="myUnion", requiredness=Requiredness.NONE)
     public test.fixtures.basic.MyUnion getMyUnion() { return myUnion; }
 
-    
     public static com.facebook.thrift.payload.Reader<MyException> asReader() {
       return MyException::read0;
     }
 
     public static MyException read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(MyException.NAMES_TO_IDS, MyException.THRIFT_NAMES_TO_IDS, MyException.FIELD_METADATA);
-      MyException.Builder builder = new MyException.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MYINTFIELD:
-          if (__field.type == TType.I64) {
-            long myIntField = oprot.readI64();
-            builder.setMyIntField(myIntField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYSTRINGFIELD:
-          if (__field.type == TType.STRING) {
-            String myStringField = oprot.readString();
-            builder.setMyStringField(myStringField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYSTRUCT:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.basic.MyStruct myStruct = test.fixtures.basic.MyStruct.read0(oprot);
-            builder.setMyStruct(myStruct);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYUNION:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.basic.MyUnion myUnion = test.fixtures.basic.MyUnion.read0(oprot);
-            builder.setMyUnion(myUnion);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(MyException.NAMES_TO_IDS, MyException.THRIFT_NAMES_TO_IDS, MyException.FIELD_METADATA);
+        MyException.Builder builder = new MyException.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MYINTFIELD:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMyIntField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYSTRINGFIELD:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setMyStringField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYSTRUCT:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.basic.MyStruct _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.basic.MyStruct.read0(oprot);
+                    builder.setMyStruct(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYUNION:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.basic.MyUnion _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.basic.MyUnion.read0(oprot);
+                    builder.setMyUnion(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.myIntField;
-      oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.myStringField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_STRING_FIELD_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.basic.MyStruct _iter0 = this.myStruct;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_STRUCT_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.basic.MyUnion _iter0 = this.myUnion;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_UNION_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.myIntField;
+            oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.myStringField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_STRING_FIELD_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.basic.MyStruct _fbthriftVar0 = this.myStruct;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_STRUCT_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.basic.MyUnion _fbthriftVar0 = this.myUnion;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_UNION_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _MyExceptionLazy {
@@ -248,4 +247,5 @@ public final class MyException extends org.apache.thrift.TBaseException implemen
 
     public static MyException defaultInstance() {
         return  _MyExceptionLazy._DEFAULT;
-    }}
+    }
+}

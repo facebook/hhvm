@@ -37,11 +37,11 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(CompatibleWithKeywordSink other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -67,6 +67,7 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -76,11 +77,10 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
     public static final int _SINK = 1;
     private static final TField SINK_FIELD_DESC = new TField("sink", TType.STRING, (short)1);
     static {
-      NAMES_TO_IDS.put("sink", 1);
-      THRIFT_NAMES_TO_IDS.put("sink", 1);
-      FIELD_METADATA.put(1, SINK_FIELD_DESC);
+        NAMES_TO_IDS.put("sink", 1);
+        THRIFT_NAMES_TO_IDS.put("sink", 1);
+        FIELD_METADATA.put(1, SINK_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="sink", requiredness=Requiredness.NONE)
     public String getSink() { return sink; }
@@ -112,52 +112,52 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(sink);
-            return _hashCode;
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<CompatibleWithKeywordSink> asReader() {
       return CompatibleWithKeywordSink::read0;
     }
 
     public static CompatibleWithKeywordSink read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(CompatibleWithKeywordSink.NAMES_TO_IDS, CompatibleWithKeywordSink.THRIFT_NAMES_TO_IDS, CompatibleWithKeywordSink.FIELD_METADATA);
-      CompatibleWithKeywordSink.Builder builder = new CompatibleWithKeywordSink.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _SINK:
-          if (__field.type == TType.STRING) {
-            String sink = oprot.readString();
-            builder.setSink(sink);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(CompatibleWithKeywordSink.NAMES_TO_IDS, CompatibleWithKeywordSink.THRIFT_NAMES_TO_IDS, CompatibleWithKeywordSink.FIELD_METADATA);
+        CompatibleWithKeywordSink.Builder builder = new CompatibleWithKeywordSink.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _SINK:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setSink(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      String _iter0 = this.sink;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(SINK_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            String _fbthriftVar0 = this.sink;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(SINK_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _CompatibleWithKeywordSinkLazy {

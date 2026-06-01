@@ -43,7 +43,8 @@ ConnectionManager::ConnectionManager(
     folly::EventBase* eventBase,
     milliseconds idleTimeout,
     milliseconds connAgeTimeout,
-    Callback* callback)
+    Callback* callback,
+    bool detachOnConnectionAgeTimeout)
     : callback_(callback),
       eventBase_(eventBase),
       drainIterator_(conns_.end()),
@@ -51,7 +52,8 @@ ConnectionManager::ConnectionManager(
       drainHelper_(*this),
       idleTimeout_(idleTimeout),
       connectionAgeTimeout_(connAgeTimeout),
-      idleConnEarlyDropThreshold_(idleTimeout / 2) {}
+      idleConnEarlyDropThreshold_(idleTimeout / 2),
+      detachOnConnectionAgeTimeout_(detachOnConnectionAgeTimeout) {}
 
 void ConnectionManager::addConnection(
     ManagedConnection* connection,

@@ -747,10 +747,6 @@ where
         <Self as SyntaxSmartConstructors<S, TF, St>>::make_like_type_specifier(self, arg0, arg1)
     }
 
-    fn make_soft_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {
-        <Self as SyntaxSmartConstructors<S, TF, St>>::make_soft_type_specifier(self, arg0, arg1)
-    }
-
     fn make_attributized_specifier(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {
         <Self as SyntaxSmartConstructors<S, TF, St>>::make_attributized_specifier(self, arg0, arg1)
     }

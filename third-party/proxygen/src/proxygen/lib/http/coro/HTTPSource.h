@@ -75,13 +75,13 @@ class HTTPSource {
 
   // Call stopReading if you do not intend to read the object to completion
   virtual void stopReading(
-      folly::Optional<const HTTPErrorCode> = folly::none) = 0;
+      folly::Optional<const HTTPErrorCode> = folly::none) noexcept = 0;
 
-  [[nodiscard]] virtual folly::Optional<uint64_t> getStreamID() const {
+  [[nodiscard]] virtual folly::Optional<uint64_t> getStreamID() const noexcept {
     return folly::none;
   }
 
-  virtual void setReadTimeout(std::chrono::milliseconds /*timeout*/) {
+  virtual void setReadTimeout(std::chrono::milliseconds /*timeout*/) noexcept {
   }
 
   void setHeapAllocated() {

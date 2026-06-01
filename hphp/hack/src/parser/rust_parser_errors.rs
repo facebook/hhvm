@@ -2359,18 +2359,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         });
     }
 
-    fn named_argument_errors(&mut self, node: S<'a>) {
-        if !FeatureName::NamedParametersUse.can_use(
-            &self.env.parser_options,
-            &self.env.context.active_experimental_features,
-        ) {
-            self.errors.push(make_error_from_node(
-                node,
-                errors::cannot_use_feature("named_parameters_use"),
-            ));
-        }
-    }
-
     fn check_parameter_this(&mut self, node: S<'a>) {
         let mut this_param = None;
         if let ParameterDeclaration(p) = &node.children {
@@ -3247,12 +3235,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     self_.errors.push(make_error_from_node(
                         hint,
                         errors::invalid_is_as_expression_hint(n, "__Callable"),
-                    ));
-                }
-                SoftTypeSpecifier(_) => {
-                    self_.errors.push(make_error_from_node(
-                        hint,
-                        errors::invalid_is_as_expression_hint(n, "__Soft"),
                     ));
                 }
                 AttributizedSpecifier(x)
@@ -5409,13 +5391,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.namespace_name.clone()
     }
 
-    fn disabled_legacy_soft_typehint_errors(&mut self, node: S<'a>) {
-        if let SoftTypeSpecifier(_) = node.children {
-            self.errors
-                .push(make_error_from_node(node, errors::no_legacy_soft_typehints))
-        }
-    }
-
     fn param_default_decl_errors(&mut self, node: S<'a>) {
         if let ParameterDeclaration(x) = &node.children {
             if !x.named.is_missing() {
@@ -5642,9 +5617,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.assignment_errors(node);
             }
 
-            NamedArgument(_) => {
-                self.named_argument_errors(node);
-            }
+            NamedArgument(_) => {}
 
             ParameterDeclaration(_) => self.param_default_decl_errors(node),
             RequireClause(_) => self.require_errors(node),
@@ -5709,7 +5682,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 // properties ...
                 self.check_constant_expression_allow_static(&x.initializer);
             }
-            SoftTypeSpecifier(_) => self.disabled_legacy_soft_typehint_errors(node),
             QualifiedName(_) => self.check_qualified_name(node),
             UnsetStatement(x) => {
                 for expr in syntax_to_list_no_separators(&x.variables) {

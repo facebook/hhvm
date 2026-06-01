@@ -531,9 +531,6 @@ func (p *PubSubStreamingServiceProcessor) FunctionServiceMap() map[string]string
     return p.functionServiceMap
 }
 
-func (p *PubSubStreamingServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *PubSubStreamingServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}

@@ -111,6 +111,11 @@ void cgDefFuncPrologueNumArgs(IRLS& env, const IRInstruction* inst) {
   v << copy{r_func_prologue_num_args(), dstLoc(env, inst, 0).reg()};
 }
 
+void cgDefFuncPrologueNamedArgs(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{r_func_prologue_named_args(), dstLoc(env, inst, 0).reg()};
+}
+
 void cgDefFuncPrologueCtx(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   v << copy{r_func_prologue_ctx(), dstLoc(env, inst, 0).reg()};

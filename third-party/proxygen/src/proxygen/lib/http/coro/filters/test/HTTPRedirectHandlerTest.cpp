@@ -234,8 +234,8 @@ CO_TEST_F(HTTPRedirectHandlerTest, InvalidLocation) {
 CO_TEST_F(HTTPRedirectHandlerTest, AbortIncompleteSourceOnError) {
   class StopFilter : public HTTPSourceFilter {
    public:
-    void stopReading(
-        folly::Optional<const proxygen::coro::HTTPErrorCode> err) override {
+    void stopReading(folly::Optional<const proxygen::coro::HTTPErrorCode>
+                         err) noexcept override {
       stopped_ = true;
       HTTPSourceFilter::stopReading(err);
     }

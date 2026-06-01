@@ -36,7 +36,6 @@ get_property(any_rep-cpp2-SOURCES GLOBAL PROPERTY any_rep-cpp2-SOURCES)
 get_property(RpcMetadata-cpp2-SOURCES GLOBAL PROPERTY RpcMetadata-cpp2-SOURCES)
 get_property(metadata-cpp2-SOURCES GLOBAL PROPERTY metadata-cpp2-SOURCES)
 get_property(frozen-cpp2-SOURCES GLOBAL PROPERTY frozen-cpp2-SOURCES)
-get_property(reflection-cpp2-SOURCES GLOBAL PROPERTY reflection-cpp2-SOURCES)
 get_property(RocketUpgrade-cpp2-SOURCES GLOBAL PROPERTY
   RocketUpgrade-cpp2-SOURCES)
 get_property(id-cpp2-SOURCES GLOBAL PROPERTY id-cpp2-SOURCES)
@@ -254,7 +253,6 @@ add_library(
   protocol/CompactProtocol.cpp # can't link against thriftprotocol, dep cycle
   protocol/JSONProtocolCommon.cpp
   ../cpp/protocol/TBase64Utils.cpp
-  ../cpp/protocol/TJSONProtocol.cpp
   ../cpp/protocol/TProtocolException.cpp
   ../cpp/util/VarintUtils.cpp
 )
@@ -278,7 +276,6 @@ target_link_libraries(
     Folly::folly
 )
 
-bypass_source_check("${reflection-cpp2-SOURCES}")
 add_library(
   thriftprotocol
 
@@ -294,16 +291,11 @@ add_library(
   protocol/TableBasedSerializerImpl.cpp
   protocol/VirtualProtocol.cpp
 
-  ../cpp/protocol/TDebugProtocol.cpp
-  ../cpp/protocol/TJSONProtocol.cpp
   ../cpp/protocol/TBase64Utils.cpp
   ../cpp/protocol/TProtocolException.cpp
-  ../cpp/protocol/TSimpleJSONProtocol.cpp
   ../cpp/protocol/TType.cpp
   ../cpp/util/VarintUtils.cpp
-  ${reflection-cpp2-SOURCES}
 )
-add_dependencies(thriftprotocol reflection-cpp2-target)
 target_link_libraries(
   thriftprotocol
   PUBLIC
@@ -377,6 +369,13 @@ add_library(
   gen/module_constants_cpp.cpp
   gen/module_types_cpp.cpp
   detail/Enum.cpp
+  fast_thrift/channel_pipeline/PipelineImpl.cpp
+  fast_thrift/channel_pipeline/detail/ContextImpl.cpp
+  fast_thrift/frame/write/FrameWriter.cpp
+  fast_thrift/thrift/FastThriftAdapterBase.cpp
+  fast_thrift/thrift/client/ThriftClientChannel.cpp
+  fast_thrift/thrift/server/ThriftServerChannel.cpp
+  logging/ThriftBiDiLog.cpp
   logging/ThriftConnectionLog.cpp
   logging/ThriftSinkLog.cpp
   logging/ThriftStreamLog.cpp
@@ -469,6 +468,7 @@ add_library(
   transport/rocket/server/RocketServerConnectionPlugins.cpp
   transport/rocket/server/RocketServerFrameContext.cpp
   transport/rocket/server/RocketSinkClientCallback.cpp
+  transport/rocket/server/RocketServerUtil.cpp
   transport/rocket/server/RocketStreamClientCallback.cpp
   transport/rocket/server/RocketBiDiClientCallback.cpp
   transport/rocket/server/RocketThriftRequests.cpp
@@ -545,6 +545,7 @@ target_link_libraries(
 # Install includes
 set(THRIFT2_HEADER_DIRS
   async
+  fast_thrift
   frozen
   protocol
   server

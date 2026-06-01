@@ -782,6 +782,25 @@ class map_get : public dsl::function {
   }
 };
 
+/**
+ * A function that sets a bool to true when invoked. Returns a fixed string.
+ * Used to detect whether an expression was evaluated.
+ */
+class set_flag : public dsl::function {
+ public:
+  explicit set_flag(bool& flag) : flag_(flag) {}
+
+ private:
+  object invoke(context ctx) override {
+    ctx.declare_arity(0);
+    ctx.declare_named_arguments({});
+    flag_ = true;
+    return w::null;
+  }
+
+  bool& flag_;
+};
+
 } // namespace functions
 } // namespace
 
@@ -1700,6 +1719,254 @@ TEST_F(RenderTest, each_block_not_enough_captures) {
           "├─ [0] 'foo'\n"
           "├─ [1] 'bar'\n"
           "╰─ [2] 'baz'\n",
+          path_to_file,
+          1)));
+}
+
+TEST_F(RenderTest, each_separator_basic) {
+  auto result = render(
+      R"({{#each items as |item| separator=", " ~}})"
+      "\n"
+      "{{~ item ~}}"
+      "\n"
+      "{{~ /each}}",
+      w::map(
+          {{"items",
+            w::array({w::string("a"), w::string("b"), w::string("c")})}}));
+  EXPECT_EQ(*result, "a, b, c");
+}
+
+TEST_F(RenderTest, each_separator_single_item) {
+  auto result = render(
+      R"({{#each items as |item| separator=", " ~}})"
+      "\n"
+      "{{~ item ~}}"
+      "\n"
+      "{{~ /each}}",
+      w::map({{"items", w::array({w::string("only")})}}));
+  EXPECT_EQ(*result, "only");
+}
+
+TEST_F(RenderTest, each_separator_empty_array_else) {
+  auto result = render(
+      R"({{#each items as |item| separator=", " ~}})"
+      "\n"
+      "{{~ item ~}}"
+      "\n"
+      "{{~ #else ~}}"
+      "\n"
+      "none"
+      "\n"
+      "{{~ /each}}",
+      w::map({{"items", w::array()}}));
+  EXPECT_EQ(*result, "none");
+}
+
+TEST_F(RenderTest, each_separator_not_evaluated_for_empty_array) {
+  bool separator_evaluated = false;
+  auto result = render(
+      "{{#each items as |item| separator=(make_sep) ~}}"
+      "{{~ item ~}}"
+      "{{~ #else ~}}"
+      "none"
+      "{{~ /each}}",
+      w::map({
+          {"items", w::array()},
+          {"make_sep",
+           w::make_native_function<functions::set_flag>(separator_evaluated)},
+      }));
+  EXPECT_EQ(*result, "none");
+  EXPECT_FALSE(separator_evaluated);
+}
+
+TEST_F(RenderTest, each_separator_empty_string) {
+  auto result = render(
+      R"({{#each items as |item| separator="" ~}})"
+      "\n"
+      "{{~ item ~}}"
+      "\n"
+      "{{~ /each}}",
+      w::map(
+          {{"items",
+            w::array({w::string("a"), w::string("b"), w::string("c")})}}));
+  EXPECT_EQ(*result, "abc");
+}
+
+TEST_F(RenderTest, each_separator_variable) {
+  auto result = render(
+      "{{#each items as |item| separator=sep ~}}"
+      "\n"
+      "{{~ item ~}}"
+      "\n"
+      "{{~ /each}}",
+      w::map({
+          {"items", w::array({w::string("x"), w::string("y")})},
+          {"sep", w::string(" | ")},
+      }));
+  EXPECT_EQ(*result, "x | y");
+}
+
+TEST_F(RenderTest, each_separator_function_call) {
+  use_library(load_standard_library);
+  auto result = render(
+      R"({{#each items as |item| separator=(string.concat "-" "-") ~}})"
+      "\n"
+      "{{~ item ~}}"
+      "\n"
+      "{{~ /each}}",
+      w::map({{"items", w::array({w::string("a"), w::string("b")})}}));
+  EXPECT_EQ(*result, "a--b");
+}
+
+TEST_F(RenderTest, each_separator_no_tildes) {
+  auto result = render(
+      R"({{#each items as |item| separator=", "}})"
+      "\n"
+      "{{item}}\n"
+      "{{/each}}",
+      w::map({{"items", w::array({w::string("a"), w::string("b")})}}));
+  EXPECT_EQ(*result, "a\n, b\n");
+}
+
+TEST_F(RenderTest, each_separator_no_captures) {
+  auto result = render(
+      R"({{#each items separator="-" ~}})"
+      "\n"
+      "{{~ . ~}}"
+      "\n"
+      "{{~ /each}}",
+      w::map(
+          {{"items",
+            w::array({w::string("x"), w::string("y"), w::string("z")})}}));
+  EXPECT_EQ(*result, "x-y-z");
+}
+
+TEST_F(RenderTest, each_separator_multiple_captures) {
+  use_library(load_standard_library);
+  auto result = render(
+      R"({{#each (array.enumerate items) as |i item| separator="; " ~}})"
+      "\n"
+      "{{~ i}}={{item ~}}"
+      "\n"
+      "{{~ /each}}",
+      w::map({{"items", w::array({w::string("a"), w::string("b")})}}));
+  EXPECT_EQ(*result, "0=a; 1=b");
+}
+
+TEST_F(RenderTest, each_separator_empty_iteration) {
+  auto result = render(
+      R"({{#each items as |item| separator=", " ~}})"
+      "\n"
+      "{{~ #if item.show ~}}{{item.name}}{{~ /if ~}}"
+      "\n"
+      "{{~ /each}}",
+      w::map(
+          {{"items",
+            w::array(
+                {w::map({{"name", w::string("a")}, {"show", w::true_value}}),
+                 w::map({{"name", w::string("b")}, {"show", w::false_value}}),
+                 w::map(
+                     {{"name", w::string("c")}, {"show", w::true_value}})})}}));
+  EXPECT_EQ(*result, "a, , c");
+}
+
+TEST_F(RenderTest, each_separator_non_string_error) {
+  auto result = render(
+      "{{#each items as |item| separator=sep ~}}"
+      "\n"
+      "{{~ item ~}}"
+      "\n"
+      "{{~ /each}}",
+      w::map({
+          {"items", w::array({w::string("a")})},
+          {"sep", w::i64(42)},
+      }));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Separator must evaluate to a string. "
+          "The encountered value is:\n"
+          "i64(42)\n",
+          path_to_file,
+          1)));
+}
+
+TEST_F(RenderTest, each_separator_capture_named_separator) {
+  auto result = render(
+      R"({{#each items as |separator| separator=", " ~}})"
+      "\n"
+      "{{~ separator ~}}"
+      "\n"
+      "{{~ /each}}",
+      w::map({{"items", w::array({w::string("a"), w::string("b")})}}));
+  EXPECT_EQ(*result, "a, b");
+}
+
+TEST_F(RenderTest, each_separator_evaluated_in_outer_scope) {
+  // The separator expression is evaluated once in the outer scope before the
+  // loop. Here 'item' in the outer scope is "+", while the capture 'item'
+  // inside the loop takes on each element's value.
+  auto result = render(
+      "{{#each items as |item| separator=item ~}}"
+      "\n"
+      "{{~ item ~}}"
+      "\n"
+      "{{~ /each}}",
+      w::map({
+          {"items", w::array({w::string("a"), w::string("b"), w::string("c")})},
+          {"item", w::string("+")},
+      }));
+  EXPECT_EQ(*result, "a+b+c");
+}
+
+TEST_F(RenderTest, each_separator_evaluated_once) {
+  auto result = render(
+      "{{#each items as |item| separator=delim ~}}"
+      "\n"
+      "{{~ item ~}}"
+      "\n"
+      "{{~ /each}}",
+      w::map({
+          {"items", w::array({w::string("a"), w::string("b"), w::string("c")})},
+          {"delim", w::string("+")},
+      }));
+  EXPECT_EQ(*result, "a+b+c");
+}
+
+TEST_F(RenderTest, each_separator_with_pragma_ignore_newlines) {
+  // #pragma ignore-newlines suppresses AST newline nodes in the body,
+  // but newlines within the separator string are preserved because they
+  // are written via out_.write(std::string_view), not as AST newline nodes.
+  auto result = render(
+      "{{#pragma ignore-newlines}}\n"
+      "{{#each items as |item| separator=sep}}\n"
+      "{{item}}\n"
+      "{{/each}}",
+      w::map({
+          {"items", w::array({w::string("a"), w::string("b"), w::string("c")})},
+          {"sep", w::string(",\n")},
+      }));
+  EXPECT_EQ(*result, "a,\nb,\nc");
+}
+
+TEST_F(RenderTest, each_separator_non_array_error) {
+  auto result = render(
+      R"({{#each number as |n| separator=", " ~}})"
+      "\n"
+      "{{~ n ~}}"
+      "\n"
+      "{{~ /each}}",
+      w::map({{"number", w::i64(2)}}));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Expression 'number' does not evaluate to an array. "
+          "The encountered value is:\n"
+          "i64(2)\n",
           path_to_file,
           1)));
 }
@@ -2998,6 +3265,565 @@ TEST_F(RenderTest, pragma_ignore_newlines) {
   EXPECT_EQ(*result, "This is\nnot\n!\n all one line");
 }
 
+// --- Tilde whitespace stripping tests ---
+
+TEST_F(RenderTest, tilde_strip_left_whitespace) {
+  auto result = render("foo   {{~ bar}}", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "fooBAR");
+}
+
+TEST_F(RenderTest, tilde_strip_right_whitespace) {
+  auto result = render("{{bar ~}}   baz", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "BARbaz");
+}
+
+TEST_F(RenderTest, tilde_strip_both) {
+  auto result = render("  {{~ bar ~}}  ", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "BAR");
+}
+
+TEST_F(RenderTest, tilde_strip_left_across_newlines) {
+  auto result =
+      render("foo\n   {{~ bar}}", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "fooBAR");
+}
+
+TEST_F(RenderTest, tilde_strip_right_across_newlines) {
+  auto result =
+      render("{{bar ~}}\n   baz", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "BARbaz");
+}
+
+TEST_F(RenderTest, tilde_stops_at_non_whitespace) {
+  auto result =
+      render("foo  bar  {{~ baz}}", w::map({{"baz", w::string("BAZ")}}));
+  EXPECT_EQ(*result, "foo  barBAZ");
+}
+
+TEST_F(RenderTest, tilde_strip_left_multiple_newlines) {
+  auto result =
+      render("foo\n\n\n   {{~ bar}}", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "fooBAR");
+}
+
+TEST_F(RenderTest, tilde_if_block_all_tildes) {
+  auto result = render(
+      "  {{~ #if cond ~}}  \n  yes  \n  {{~ /if cond ~}}  ",
+      w::map({{"cond", w::true_value}}));
+  EXPECT_EQ(*result, "yes");
+}
+
+TEST_F(RenderTest, tilde_if_block_false_condition) {
+  auto result = render(
+      "before  {{~ #if cond ~}}  skipped  {{~ /if cond ~}}  after",
+      w::map({{"cond", w::false_value}}));
+  EXPECT_EQ(*result, "beforeafter");
+}
+
+TEST_F(RenderTest, tilde_each_block) {
+  // Parse-time tilde stripping removes body whitespace/newlines for all
+  // iterations uniformly, matching Handlebars' AST-level stripping.
+  auto result = render(
+      "items:{{~ #each items as |item| ~}}\n  {{item}},\n{{~ /each ~}}\n done",
+      w::map({{"items", w::array({w::string("a"), w::string("b")})}}));
+  EXPECT_EQ(*result, "items:a,b,done");
+}
+
+TEST_F(RenderTest, tilde_else_clause) {
+  auto result = render(
+      "{{#if cond ~}} yes {{~ #else ~}} no {{~ /if cond}}",
+      w::map({{"cond", w::false_value}}));
+  EXPECT_EQ(*result, "no");
+}
+
+TEST_F(RenderTest, tilde_with_block) {
+  auto result = render(
+      "{{~ #with obj ~}}{{name}}{{~ /with ~}}",
+      w::map({{"obj", w::map({{"name", w::string("hello")}})}}));
+  EXPECT_EQ(*result, "hello");
+}
+
+TEST_F(RenderTest, tilde_at_start_of_file) {
+  auto result = render("{{~ bar}}", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "BAR");
+}
+
+TEST_F(RenderTest, tilde_at_end_of_file) {
+  auto result = render("{{bar ~}}", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "BAR");
+}
+
+TEST_F(RenderTest, tilde_with_pragma_ignore_newlines) {
+  auto result = render(
+      "{{#pragma ignore-newlines}}\nfoo  {{~ bar ~}}  baz\n",
+      w::map({{"bar", w::string("X")}}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "fooXbaz");
+}
+
+TEST_F(RenderTest, tilde_consecutive_tags) {
+  auto result = render(
+      "{{a ~}} {{~ b}}",
+      w::map({{"a", w::string("A")}, {"b", w::string("B")}}));
+  EXPECT_EQ(*result, "AB");
+}
+
+TEST_F(RenderTest, tilde_no_whitespace_to_strip) {
+  auto result = render("foo{{~ bar}}", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "fooBAR");
+}
+
+TEST_F(RenderTest, tilde_derive_example) {
+  auto result = render(
+      "#[derive(\n"
+      "    {{~ #if copy }}Copy, {{/if copy ~}}\n"
+      "    Clone, PartialEq\n"
+      "    {{~ #if ord }}, Eq, Hash{{/if ord ~}}\n"
+      ")]\n",
+      w::map({{"copy", w::true_value}, {"ord", w::true_value}}));
+  EXPECT_EQ(*result, "#[derive(Copy, Clone, PartialEq, Eq, Hash)]\n");
+}
+
+TEST_F(RenderTest, tilde_standalone_right_eats_next_line_indent) {
+  // {{#if ~}} has tilde → NOT standalone. The indent before the tag is
+  // preserved. Right tilde eats \n + indent of next line.
+  // {{/if}} has no tilde → standalone (stripped).
+  auto result = render(
+      "    {{#if cond ~}}\n    content\n    {{/if cond}}",
+      w::map({{"cond", w::true_value}}));
+  EXPECT_EQ(*result, "    content\n");
+}
+
+TEST_F(RenderTest, tilde_standalone_left_eats_prev_line_trailing) {
+  auto result = render(
+      "{{#if cond}}\ncontent\n    {{~ /if cond}}",
+      w::map({{"cond", w::true_value}}));
+  EXPECT_EQ(*result, "content");
+}
+
+TEST_F(RenderTest, tilde_nested_blocks) {
+  auto result = render(
+      "{{~ #if x ~}}{{~ #if y ~}}content{{~ /if y ~}}{{~ /if x ~}}",
+      w::map({{"x", w::true_value}, {"y", w::true_value}}));
+  EXPECT_EQ(*result, "content");
+}
+
+TEST_F(RenderTest, tilde_each_else_clause) {
+  auto result = render(
+      "{{~ #each empty as |item| ~}}...{{~ #else ~}}fallback{{~ /each ~}}",
+      w::map({{"empty", w::array()}}));
+  EXPECT_EQ(*result, "fallback");
+}
+
+TEST_F(RenderTest, tilde_empty_body) {
+  auto result = render(
+      "before{{~ #if cond ~}}{{~ /if cond ~}}after",
+      w::map({{"cond", w::true_value}}));
+  EXPECT_EQ(*result, "beforeafter");
+}
+
+TEST_F(RenderTest, tilde_else_if) {
+  auto result = render(
+      "{{~ #if a ~}}A{{~ #else if b ~}}B{{~ /if a ~}}",
+      w::map({{"a", w::false_value}, {"b", w::true_value}}));
+  EXPECT_EQ(*result, "B");
+}
+
+TEST_F(RenderTest, tilde_strip_tabs) {
+  auto result = render("foo\t\t{{~ bar}}", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "fooBAR");
+}
+
+TEST_F(RenderTest, tilde_right_stops_at_non_whitespace) {
+  auto result =
+      render("{{bar ~}}text  baz", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "BARtext  baz");
+}
+
+TEST_F(RenderTest, tilde_let_statement) {
+  auto result = render("before {{~ #let x = 42 ~}} {{x}} after", w::map());
+  EXPECT_EQ(*result, "before42 after");
+}
+
+TEST_F(RenderTest, tilde_section_block) {
+  auto result = render(
+      "  {{~ #var ~}}  content  {{~ /var ~}}  ",
+      w::map({{"var", w::true_value}}));
+  EXPECT_EQ(*result, "content");
+}
+
+// --- Tilde trimming: additional edge cases ---
+
+TEST_F(RenderTest, tilde_left_only_on_open_tag) {
+  // Left tilde on opening tag only — strips before, not after.
+  auto result = render(
+      "before  {{~ #if cond}}  after{{/if cond}}",
+      w::map({{"cond", w::true_value}}));
+  EXPECT_EQ(*result, "before  after");
+}
+
+TEST_F(RenderTest, tilde_right_only_on_close_tag) {
+  // Right tilde on closing tag only — strips after, not before.
+  auto result = render(
+      "{{#if cond}}before  {{/if cond ~}}  after",
+      w::map({{"cond", w::true_value}}));
+  EXPECT_EQ(*result, "before  after");
+}
+
+TEST_F(RenderTest, tilde_mixed_whitespace_spaces_and_tabs) {
+  auto result = render(
+      "foo \t \t {{~ bar ~}} \t \t baz", w::map({{"bar", w::string("X")}}));
+  EXPECT_EQ(*result, "fooXbaz");
+}
+
+TEST_F(RenderTest, tilde_left_preserves_content_on_same_line) {
+  // Left tilde only strips whitespace — non-whitespace is preserved.
+  auto result =
+      render("hello world  {{~ bar}}", w::map({{"bar", w::string("!")}}));
+  EXPECT_EQ(*result, "hello world!");
+}
+
+TEST_F(RenderTest, tilde_right_preserves_content_on_same_line) {
+  auto result =
+      render("{{bar ~}}  hello world", w::map({{"bar", w::string("!")}}));
+  EXPECT_EQ(*result, "!hello world");
+}
+
+TEST_F(RenderTest, tilde_multiple_interpolations_on_one_line) {
+  auto result = render(
+      "  {{~ a ~}}  {{~ b ~}}  {{~ c ~}}  ",
+      w::map(
+          {{"a", w::string("1")},
+           {"b", w::string("2")},
+           {"c", w::string("3")}}));
+  EXPECT_EQ(*result, "123");
+}
+
+TEST_F(RenderTest, tilde_chain_of_consecutive_tags_with_whitespace) {
+  auto result = render(
+      "start {{a ~}}   {{~ b ~}}   {{~ c}} end",
+      w::map(
+          {{"a", w::string("A")},
+           {"b", w::string("B")},
+           {"c", w::string("C")}}));
+  EXPECT_EQ(*result, "start ABC end");
+}
+
+TEST_F(RenderTest, tilde_if_true_else_with_left_tilde_on_else) {
+  // When condition is true, the else clause's left tilde strips trailing
+  // whitespace of the if-body.
+  auto result = render(
+      "{{#if cond}}yes   {{~ #else}}no{{/if cond}}",
+      w::map({{"cond", w::true_value}}));
+  EXPECT_EQ(*result, "yes");
+}
+
+TEST_F(RenderTest, tilde_if_false_else_with_right_tilde_on_else) {
+  // When condition is false, the else clause's right tilde strips leading
+  // whitespace of the else-body.
+  auto result = render(
+      "{{#if cond}}yes{{#else ~}}   no{{/if cond}}",
+      w::map({{"cond", w::false_value}}));
+  EXPECT_EQ(*result, "no");
+}
+
+TEST_F(RenderTest, tilde_else_if_chain_all_false) {
+  // All conditions false, falls through to else.
+  auto result = render(
+      "{{~ #if a ~}}A{{~ #else if b ~}}B{{~ #else ~}}C{{~ /if a ~}}",
+      w::map({{"a", w::false_value}, {"b", w::false_value}}));
+  EXPECT_EQ(*result, "C");
+}
+
+TEST_F(RenderTest, tilde_else_if_chain_middle_true) {
+  auto result = render(
+      "  {{~ #if a ~}}  A  "
+      "{{~ #else if b ~}}  B  "
+      "{{~ #else ~}}  C  {{~ /if a ~}}  ",
+      w::map({{"a", w::false_value}, {"b", w::true_value}}));
+  EXPECT_EQ(*result, "B");
+}
+
+TEST_F(RenderTest, tilde_nested_if_outer_false) {
+  // Outer false — entire block (including inner) is invisible.
+  auto result = render(
+      "before {{~ #if outer ~}} {{~ #if inner ~}} content "
+      "{{~ /if inner ~}} {{~ /if outer ~}} after",
+      w::map({{"outer", w::false_value}, {"inner", w::true_value}}));
+  EXPECT_EQ(*result, "beforeafter");
+}
+
+TEST_F(RenderTest, tilde_each_single_element) {
+  auto result = render(
+      "[{{~ #each items as |item| ~}}, {{item}}{{~ /each ~}}]",
+      w::map({{"items", w::array({w::string("only")})}}));
+  EXPECT_EQ(*result, "[, only]");
+}
+
+TEST_F(RenderTest, tilde_each_empty) {
+  // Empty array with tildes — entire block is invisible.
+  auto result = render(
+      "before {{~ #each items as |item| ~}} {{item}} {{~ /each ~}} after",
+      w::map({{"items", w::array()}}));
+  EXPECT_EQ(*result, "beforeafter");
+}
+
+TEST_F(RenderTest, tilde_with_integer_interpolation) {
+  auto result = render("value: {{~ x ~}} !", w::map({{"x", w::i64(42)}}));
+  EXPECT_EQ(*result, "value:42!");
+}
+
+TEST_F(RenderTest, tilde_strip_crlf_newlines) {
+  auto result =
+      render("foo\r\n   {{~ bar}}", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "fooBAR");
+}
+
+TEST_F(RenderTest, tilde_right_strip_crlf_newlines) {
+  auto result =
+      render("{{bar ~}}\r\n   baz", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "BARbaz");
+}
+
+TEST_F(RenderTest, tilde_partial_statement) {
+  auto result = render(
+      "{{#let partial greet |name|}}\n"
+      "hello {{name}}\n"
+      "{{/let partial}}\n"
+      "before {{~ #partial greet name=\"world\" ~}} after",
+      w::map());
+  EXPECT_EQ(*result, "beforehello world\nafter");
+}
+
+TEST_F(RenderTest, tilde_left_at_start_of_file_is_noop) {
+  // Left tilde at start of file — nothing to strip, should be harmless.
+  auto result = render("{{~ bar}} end", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "BAR end");
+}
+
+TEST_F(RenderTest, tilde_right_at_end_of_file_is_noop) {
+  // Right tilde at end of file — nothing to strip, should be harmless.
+  auto result = render("start {{bar ~}}", w::map({{"bar", w::string("BAR")}}));
+  EXPECT_EQ(*result, "start BAR");
+}
+
+TEST_F(RenderTest, tilde_whitespace_only_file_with_strip) {
+  // Entire file is whitespace around a tilde-stripped interpolation.
+  auto result =
+      render("   \n  {{~ bar ~}}  \n   ", w::map({{"bar", w::string("X")}}));
+  EXPECT_EQ(*result, "X");
+}
+
+TEST_F(RenderTest, tilde_empty_string_interpolation) {
+  // Interpolation produces empty string — tildes still strip surrounding ws.
+  auto result =
+      render("before  {{~ bar ~}}  after", w::map({{"bar", w::string("")}}));
+  EXPECT_EQ(*result, "beforeafter");
+}
+
+TEST_F(RenderTest, tilde_if_block_open_left_close_right_only) {
+  // Only left tilde on open and right tilde on close.
+  auto result = render(
+      "  {{~ #if cond}}content{{/if cond ~}}  ",
+      w::map({{"cond", w::true_value}}));
+  EXPECT_EQ(*result, "content");
+}
+
+TEST_F(RenderTest, tilde_if_block_open_right_close_left_only) {
+  // Only right tilde on open and left tilde on close — strips body edges.
+  auto result = render(
+      "{{#if cond ~}}  content  {{~ /if cond}}",
+      w::map({{"cond", w::true_value}}));
+  EXPECT_EQ(*result, "content");
+}
+
+TEST_F(RenderTest, tilde_section_block_array_iteration) {
+  strict_boolean_conditional(diagnostic_level::warning);
+  // Parse-time tilde stripping removes body whitespace/newlines for all
+  // iterations uniformly, matching Handlebars' AST-level stripping.
+  auto result = render(
+      "items:{{~ #items ~}}\n  ({{.}}){{~ /items ~}}\ndone",
+      w::map({{"items", w::array({w::i64(1), w::i64(2), w::i64(3)})}}));
+  EXPECT_EQ(*result, "items:(1)(2)(3)done");
+}
+
+TEST_F(RenderTest, tilde_standalone_both_sides) {
+  // Tilde prevents standalone. Both tildes strip whitespace on both sides,
+  // producing the same result as if standalone had fired.
+  auto result = render(
+      "before\n    {{~ #if cond ~}}\nafter\n    {{~ /if cond ~}}\n",
+      w::map({{"cond", w::true_value}}));
+  EXPECT_EQ(*result, "beforeafter");
+}
+
+TEST_F(RenderTest, tilde_let_in_block) {
+  // The right tilde on #let strips whitespace before {{x}}, so the leading
+  // "  " on the {{x}} line is eaten.
+  auto result = render(
+      "{{#if cond}}\n"
+      "  {{~ #let x = 42 ~}}\n"
+      "  {{x}}\n"
+      "{{/if cond}}",
+      w::map({{"cond", w::true_value}}));
+  EXPECT_EQ(*result, "42\n");
+}
+
+TEST_F(RenderTest, tilde_derive_example_some_false) {
+  // Same derive pattern but with some conditions false.
+  auto result = render(
+      "#[derive(\n"
+      "    {{~ #if copy }}Copy, {{/if copy ~}}\n"
+      "    Clone, PartialEq\n"
+      "    {{~ #if ord }}, Eq, Hash{{/if ord ~}}\n"
+      ")]\n",
+      w::map({{"copy", w::false_value}, {"ord", w::false_value}}));
+  EXPECT_EQ(*result, "#[derive(Clone, PartialEq)]\n");
+}
+
+TEST_F(RenderTest, tilde_preserves_interpolation_whitespace_both_sides) {
+  // Both tildes strip the template "  " between tags, but the trailing
+  // spaces in a's output and leading spaces in b's output are preserved.
+  auto result = render(
+      "{{a ~}}  {{~ b}}",
+      w::map({{"a", w::string("hello  ")}, {"b", w::string("  world")}}));
+  EXPECT_EQ(*result, "hello    world");
+}
+
+TEST_F(RenderTest, tilde_left_preserves_interpolation_trailing_spaces) {
+  // Left tilde on b strips the template "  " between tags.
+  // a's trailing spaces are interpolation output and are not stripped.
+  auto result = render(
+      "{{a}}  {{~ b}}",
+      w::map({{"a", w::string("hello  ")}, {"b", w::string("X")}}));
+  EXPECT_EQ(*result, "hello  X");
+}
+
+TEST_F(RenderTest, tilde_left_preserves_interpolation_trailing_tabs) {
+  auto result = render(
+      "{{a}}\t\t{{~ b}}",
+      w::map({{"a", w::string("hello\t\t")}, {"b", w::string("X")}}));
+  EXPECT_EQ(*result, "hello\t\tX");
+}
+
+TEST_F(RenderTest, tilde_left_preserves_interpolation_trailing_newline) {
+  // a's output ends with a newline. The left tilde strips the template
+  // whitespace "  " between tags but does not touch a's trailing newline.
+  auto result = render(
+      "{{a}}  {{~ b}}",
+      w::map({{"a", w::string("hello\n")}, {"b", w::string("X")}}));
+  EXPECT_EQ(*result, "hello\nX");
+}
+
+TEST_F(RenderTest, tilde_right_preserves_interpolation_leading_spaces) {
+  // Right tilde on a strips the template "  " between tags.
+  // b's leading spaces are interpolation output and are not stripped.
+  auto result = render(
+      "{{a ~}}  {{b}}",
+      w::map({{"a", w::string("X")}, {"b", w::string("  world")}}));
+  EXPECT_EQ(*result, "X  world");
+}
+
+TEST_F(RenderTest, tilde_right_preserves_interpolation_leading_tabs) {
+  auto result = render(
+      "{{a ~}}\t\t{{b}}",
+      w::map({{"a", w::string("X")}, {"b", w::string("\t\tworld")}}));
+  EXPECT_EQ(*result, "X\t\tworld");
+}
+
+TEST_F(RenderTest, tilde_right_preserves_interpolation_leading_newline) {
+  auto result = render(
+      "{{a ~}}  {{b}}",
+      w::map({{"a", w::string("X")}, {"b", w::string("\nworld")}}));
+  EXPECT_EQ(*result, "X\nworld");
+}
+
+TEST_F(RenderTest, tilde_left_no_template_whitespace_between_tags) {
+  // No template whitespace between tags — left tilde is a no-op.
+  // a's trailing whitespace is interpolation output, untouched.
+  auto result = render(
+      "{{a}}{{~ b}}",
+      w::map({{"a", w::string("hello  ")}, {"b", w::string("X")}}));
+  EXPECT_EQ(*result, "hello  X");
+}
+
+TEST_F(RenderTest, tilde_right_no_template_whitespace_between_tags) {
+  // No template whitespace between tags — right tilde is a no-op.
+  // b's leading whitespace is interpolation output, untouched.
+  auto result = render(
+      "{{a ~}}{{b}}",
+      w::map({{"a", w::string("X")}, {"b", w::string("  world")}}));
+  EXPECT_EQ(*result, "X  world");
+}
+
+TEST_F(RenderTest, tilde_preserves_whitespace_only_interpolation) {
+  // Interpolation produces only whitespace. Tildes strip the template
+  // whitespace around it but do not strip the interpolation output itself.
+  auto result =
+      render("before  {{~ a ~}}  after", w::map({{"a", w::string("   ")}}));
+  EXPECT_EQ(*result, "before   after");
+}
+
+TEST_F(RenderTest, tilde_preserves_interpolation_across_newline_template) {
+  // Template has a newline between tags. Right tilde strips the template
+  // newline and following whitespace, but b's leading whitespace is preserved.
+  auto result = render(
+      "{{a ~}}\n  {{b}}",
+      w::map({{"a", w::string("X")}, {"b", w::string("\tY")}}));
+  EXPECT_EQ(*result, "X\tY");
+}
+
+TEST_F(
+    RenderTest,
+    tilde_left_preserves_interpolation_whitespace_in_indented_partial) {
+  // An indented partial application contains an interpolation whose output has
+  // trailing whitespace, followed by a left-tilde tag. The left tilde must
+  // strip only the template whitespace between the two tags, not the trailing
+  // whitespace from the interpolation output. Indentation from the partial
+  // application site must also be applied correctly (once per line).
+  auto result = render(
+      "{{#let partial greet |name greeting|}}\n"
+      "{{name}}  {{~ greeting}}\n"
+      "{{/let partial}}\n"
+      "  {{#partial greet name=\"hello  \" greeting=\"world\"}}",
+      w::map());
+  EXPECT_EQ(*result, "  hello  world\n");
+}
+
+TEST_F(RenderTest, tilde_comment_left_strips_whitespace) {
+  auto result = render("foo   {{~ ! comment }}bar", w::map());
+  EXPECT_EQ(*result, "foobar");
+}
+
+TEST_F(RenderTest, tilde_comment_right_strips_whitespace) {
+  auto result = render("foo{{! comment ~}}   bar", w::map());
+  EXPECT_EQ(*result, "foobar");
+}
+
+TEST_F(RenderTest, tilde_comment_both_strips_whitespace) {
+  auto result = render("foo   {{~ ! comment ~}}   bar", w::map());
+  EXPECT_EQ(*result, "foobar");
+}
+
+TEST_F(RenderTest, tilde_comment_strips_across_newlines) {
+  auto result = render("foo\n   {{~ ! comment ~}}\n   bar", w::map());
+  EXPECT_EQ(*result, "foobar");
+}
+
+TEST_F(RenderTest, tilde_escaped_comment_left_strips_whitespace) {
+  auto result = render("foo   {{~ !-- comment --}}bar", w::map());
+  EXPECT_EQ(*result, "foobar");
+}
+
+TEST_F(RenderTest, tilde_escaped_comment_right_strips_whitespace) {
+  auto result = render("foo{{!-- comment -- ~}}   bar", w::map());
+  EXPECT_EQ(*result, "foobar");
+}
+
+TEST_F(RenderTest, tilde_escaped_comment_both_strips_whitespace) {
+  auto result = render("foo   {{~ !-- comment -- ~}}   bar", w::map());
+  EXPECT_EQ(*result, "foobar");
+}
+
 // Explicitly triggering a potential stack overflow, and checking the Whisker VM
 // will handle it and emit a useful error. Disable this test in ASAN builds, as
 // ASAN is not a fan of stack overflows.
@@ -3046,5 +3872,73 @@ Recursive {{#partial inner}}
 }
 
 #endif
+
+TEST_F(RenderTest, partial_trailing_newline_no_tilde) {
+  // Plain close tag on standalone line — should be standalone-stripped
+  auto result = render(
+      "{{#let partial foo}}\n"
+      "body\n"
+      "}\n"
+      "{{/let partial}}\n"
+      "{{#partial foo}}",
+      w::map());
+  // If /let partial is standalone-stripped, the \n after } is preserved
+  // but the /let partial line + its newline are removed.
+  // Body: body\n}\n then close tag (standalone-stripped).
+  // Partial output: body\n}\n (trailing \n from } line)
+  EXPECT_EQ(*result, "body\n}\n");
+}
+
+TEST_F(RenderTest, partial_trailing_newline_tilde) {
+  // {{~ /let partial}} has tilde → NOT standalone. Left tilde eats \n after }.
+  // The line's trailing \n is preserved (not standalone-stripped), so it
+  // appears in the output before the partial invocation.
+  auto result = render(
+      "{{#let partial foo}}\n"
+      "body\n"
+      "}\n"
+      "{{~ /let partial}}\n"
+      "{{#partial foo}}",
+      w::map());
+  EXPECT_EQ(*result, "\nbody\n}");
+}
+
+TEST_F(RenderTest, tilde_prevents_standalone_left_only) {
+  auto result = render(
+      "{{#if cond}}\n"
+      "content_A\n"
+      "{{~ /if cond}}\n"
+      "\n"
+      "content_B",
+      w::map({{"cond", w::true_value}}));
+  // {{#if}} is standalone (stripped). content_A is output.
+  // {{~ /if}} has tilde → NOT standalone. Left tilde eats \n after
+  // content_A. The /if line's trailing \n is preserved (not standalone-
+  // stripped).
+  EXPECT_EQ(*result, "content_A\n\ncontent_B");
+}
+
+TEST_F(RenderTest, tilde_prevents_standalone_right_only) {
+  auto result = render(
+      "content_A\n"
+      "    {{#if cond ~}}\n"
+      "content_B\n"
+      "    {{/if cond}}",
+      w::map({{"cond", w::true_value}}));
+  // {{#if ~}} has tilde → NOT standalone. The indent before the tag
+  // is preserved. Right tilde eats \n + indent of next line.
+  // {{/if}} is standalone (stripped).
+  EXPECT_EQ(*result, "content_A\n    content_B\n");
+}
+
+TEST_F(RenderTest, tilde_no_tilde_still_standalone) {
+  // Verify that tags without tildes are still standalone-stripped.
+  auto result = render(
+      "    {{#if cond}}\n"
+      "content\n"
+      "    {{/if cond}}\n",
+      w::map({{"cond", w::true_value}}));
+  EXPECT_EQ(*result, "content\n");
+}
 
 } // namespace whisker

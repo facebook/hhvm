@@ -22,7 +22,7 @@ function main(): void {
   // AssertRATStk 0 Cls
   $cm = HH\get_class_from_object($m);
 
-  // FCallClsMethodM <SkipRepack SkipCoeffectsCheck> 0 1 "" "" - "" "" DontLogAsDynamicCall "f"
+  // FCallClsMethodM <SkipRepack SkipCoeffectsCheck> 0 1 "" "" - "" "" "f"
   $cm::f();
 
   //// CASE: !couldBe(BObj)

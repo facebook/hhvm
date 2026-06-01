@@ -21,110 +21,110 @@ import com.facebook.thrift.metadata.ThriftStructType;
 import com.facebook.thrift.metadata.ThriftType;
 
 class ServiceThriftMetadataHandlerStructs_0 {
-  static void addStructs(Map<String, ThriftStruct> structs) {
-    structs.put("test.fixtures.adapter.Foo", new ThriftStruct.Builder()
-        .setName("test.fixtures.adapter.Foo")
-        .setFields(Arrays.asList(
-            new ThriftField.Builder()
-                .setId(1)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE))
-                .setName("intField")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(2)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE))
-                .setName("optionalIntField")
-                .setIsOptional(true)
-                .build(),
-            new ThriftField.Builder()
-                .setId(3)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE))
-                .setName("intFieldWithDefault")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(4)
-                .setType(ThriftType.fromTSet(new ThriftSetType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).build()))
-                .setName("setField")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(5)
-                .setType(ThriftType.fromTSet(new ThriftSetType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).build()))
-                .setName("optionalSetField")
-                .setIsOptional(true)
-                .build(),
-            new ThriftField.Builder()
-                .setId(6)
-                .setType(ThriftType.fromTMap(new ThriftMapType.Builder().setKeyType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).setValueType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).build())).build()))
-                .setName("mapField")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(7)
-                .setType(ThriftType.fromTMap(new ThriftMapType.Builder().setKeyType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).setValueType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).build())).build()))
-                .setName("optionalMapField")
-                .setIsOptional(true)
-                .build(),
-            new ThriftField.Builder()
-                .setId(8)
-                .setType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BINARY_TYPE)).build()))
-                .setName("binaryField")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(9)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
-                .setName("longField")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(10)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
-                .setName("adaptedLongField")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(11)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
-                .setName("doubleAdaptedField")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(12)
-                .setType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE)).build()))
-                .setName("adapted_list")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(13)
-                .setType(ThriftType.fromTSet(new ThriftSetType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE)).build()))
-                .setName("adapted_set")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(14)
-                .setType(ThriftType.fromTMap(new ThriftMapType.Builder().setKeyType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE)).build()))
-                .setName("adapted_map")
-                .setIsOptional(false)
-                .build(),
-            new ThriftField.Builder()
-                .setId(15)
-                .setType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTMap(new ThriftMapType.Builder().setKeyType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE)).setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE)).build())).build())).build()))
-                .setName("adapted_list_nested")
-                .setIsOptional(false)
-                .build()
-        ))
-        .setIsUnion(false)
-        .build());
-  }
+    static void addStructs(Map<String, ThriftStruct> structs) {
+        structs.put("test.fixtures.adapter.Foo", new ThriftStruct.Builder()
+            .setName("test.fixtures.adapter.Foo")
+            .setFields(Arrays.asList(
+                new ThriftField.Builder()
+                    .setId(1)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE))
+                    .setName("intField")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(2)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE))
+                    .setName("optionalIntField")
+                    .setIsOptional(true)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(3)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE))
+                    .setName("intFieldWithDefault")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(4)
+                    .setType(ThriftType.fromTSet(new ThriftSetType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).build()))
+                    .setName("setField")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(5)
+                    .setType(ThriftType.fromTSet(new ThriftSetType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).build()))
+                    .setName("optionalSetField")
+                    .setIsOptional(true)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(6)
+                    .setType(ThriftType.fromTMap(new ThriftMapType.Builder().setKeyType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).setValueType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).build())).build()))
+                    .setName("mapField")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(7)
+                    .setType(ThriftType.fromTMap(new ThriftMapType.Builder().setKeyType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).setValueType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).build())).build()))
+                    .setName("optionalMapField")
+                    .setIsOptional(true)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(8)
+                    .setType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BINARY_TYPE)).build()))
+                    .setName("binaryField")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(9)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
+                    .setName("longField")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(10)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
+                    .setName("adaptedLongField")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(11)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
+                    .setName("doubleAdaptedField")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(12)
+                    .setType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE)).build()))
+                    .setName("adapted_list")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(13)
+                    .setType(ThriftType.fromTSet(new ThriftSetType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE)).build()))
+                    .setName("adapted_set")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(14)
+                    .setType(ThriftType.fromTMap(new ThriftMapType.Builder().setKeyType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE)).build()))
+                    .setName("adapted_map")
+                    .setIsOptional(false)
+                    .build(),
+                new ThriftField.Builder()
+                    .setId(15)
+                    .setType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTMap(new ThriftMapType.Builder().setKeyType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE)).setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE)).build())).build())).build()))
+                    .setName("adapted_list_nested")
+                    .setIsOptional(false)
+                    .build()
+            ))
+            .setIsUnion(false)
+            .build());
+    }
 }
 
 class ServiceThriftMetadataHandlerStructs {
-  static Map<String, ThriftStruct> getStructs() {
-    Map<String, ThriftStruct> structs = new HashMap<>();
-    ServiceThriftMetadataHandlerStructs_0.addStructs(structs);
-    return structs;
-  }
+    static Map<String, ThriftStruct> getStructs() {
+        Map<String, ThriftStruct> structs = new HashMap<>();
+        ServiceThriftMetadataHandlerStructs_0.addStructs(structs);
+        return structs;
+    }
 }

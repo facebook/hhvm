@@ -85,13 +85,24 @@ void cgConvFuncPrologueFlagsToARFlags(IRLS& env, const IRInstruction* inst) {
   // TODO(named_params) translate prologue flags to actrec flags and add a
   // check for PrologueFlags::Flags::HasNamedArguments. If a call has named
   // arguments, we'll need to zero out the HasNamedArguments flag.
-  assertx(PrologueFlags::Flags::HasNamedArguments == flagsDelta);
+  assertx(PrologueFlags::Flags::HasNamedArguments == flagsDelta + 0);
   assertx(PrologueFlags::Flags::ReservedZeroForIsInlined == flagsDelta + 1);
   assertx(PrologueFlags::Flags::AsyncEagerReturn == flagsDelta + 2);
   assertx(PrologueFlags::Flags::CallOffsetStart == flagsDelta + 3);
+  auto const func = inst->extra<FuncData>()->func;
   auto const prologueFlagsLow32 = v.makeReg();
-  v << movtql{src, prologueFlagsLow32};
-  v << shrli{flagsDelta, prologueFlagsLow32, dst, v.makeReg()};
+  if (func->hasNamedParams()) {
+    // HasNamedArguments clashes with the LocalsDecRefd bit, so explicitly
+    // zero if it may exist. 
+    int32_t constexpr namedArgMask = ~(1 << PrologueFlags::Flags::HasNamedArguments);
+    v << andli{namedArgMask, src, prologueFlagsLow32, v.makeReg()};
+    v << shrli{flagsDelta, prologueFlagsLow32, dst, v.makeReg()};
+  } else {
+    // In the no-named-params case we already checked that no named arguments
+    // were passed, so we can avoid the bitwise and.
+    v << movtql{src, prologueFlagsLow32};
+    v << shrli{flagsDelta, prologueFlagsLow32, dst, v.makeReg()};
+  }
 }
 
 void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {

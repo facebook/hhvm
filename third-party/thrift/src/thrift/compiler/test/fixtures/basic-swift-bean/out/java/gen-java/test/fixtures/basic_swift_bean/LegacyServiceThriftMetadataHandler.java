@@ -26,83 +26,83 @@ import com.facebook.thrift.metadata.ThriftType;
 
 public class LegacyServiceThriftMetadataHandler implements com.facebook.thrift.server.ThriftMetadataHandler {
 
-  private static void addFunctions_0(List<ThriftFunction> functions) {
-        {
-          List<ThriftField> args = new ArrayList<>();
-          args.add(new ThriftField.Builder()
-              .setId(1)
-              .setType(ThriftType.fromTSet(new ThriftSetType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).build()))
-              .setName("key")
-              .setIsOptional(false)
-              .build());
-          args.add(new ThriftField.Builder()
-              .setId(-1)
-              .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
-              .setName("legacyStuff")
-              .setIsOptional(false)
-              .build());
+    private static void addFunctions_0(List<ThriftFunction> functions) {
+            {
+              List<ThriftField> args = new ArrayList<>();
+              args.add(new ThriftField.Builder()
+                  .setId(1)
+                  .setType(ThriftType.fromTSet(new ThriftSetType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).build()))
+                  .setName("key")
+                  .setIsOptional(false)
+                  .build());
+              args.add(new ThriftField.Builder()
+                  .setId(-1)
+                  .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
+                  .setName("legacyStuff")
+                  .setIsOptional(false)
+                  .build());
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("getPoints")
-              .setReturnType(ThriftType.fromTMap(new ThriftMapType.Builder().setKeyType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).setValueType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE)).build())).build()))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-  }
+              functions.add(new ThriftFunction.Builder()
+                  .setName("getPoints")
+                  .setReturnType(ThriftType.fromTMap(new ThriftMapType.Builder().setKeyType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)).setValueType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE)).build())).build()))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+    }
 
-  private static final ThriftService THRIFT_SERVICE;
+    private static final ThriftService THRIFT_SERVICE;
 
 
-  static {
-    List<ThriftFunction> functions = new ArrayList<>();
-    addFunctions_0(functions);
-    THRIFT_SERVICE = new ThriftService.Builder()
-        .setName("test.fixtures.basic_swift_bean.LegacyService")
-        .setFunctions(functions)
-        .build();
-  }
+    static {
+        List<ThriftFunction> functions = new ArrayList<>();
+        addFunctions_0(functions);
+        THRIFT_SERVICE = new ThriftService.Builder()
+            .setName("test.fixtures.basic_swift_bean.LegacyService")
+            .setFunctions(functions)
+            .build();
+    }
 
-  @Override
-  public String getName() {
-    return "LegacyService";
-  }
+    @Override
+    public String getName() {
+        return "LegacyService";
+    }
 
-  @Override
-  public String getFullyQualifiedName() {
-    return "test.fixtures.basic_swift_bean.LegacyService";
-  }
+    @Override
+    public String getFullyQualifiedName() {
+        return "test.fixtures.basic_swift_bean.LegacyService";
+    }
 
-  @Override
-  public ThriftService getThriftService() {
-    return THRIFT_SERVICE;
-  }
+    @Override
+    public ThriftService getThriftService() {
+        return THRIFT_SERVICE;
+    }
 
-  @Override
-  public String getParentServiceName() {
-    return null;
-  }
+    @Override
+    public String getParentServiceName() {
+        return null;
+    }
 
-  @Override
-  public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
-    return null;
-  }
+    @Override
+    public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
+        return null;
+    }
 
-  @Override
-  public Map<String, ThriftEnum> getEnums() {
-    return LegacyServiceThriftMetadataHandlerEnums.getEnums();
-  }
+    @Override
+    public Map<String, ThriftEnum> getEnums() {
+        return LegacyServiceThriftMetadataHandlerEnums.getEnums();
+    }
 
-  @Override
-  public Map<String, ThriftStruct> getStructs() {
-    return LegacyServiceThriftMetadataHandlerStructs.getStructs();
-  }
+    @Override
+    public Map<String, ThriftStruct> getStructs() {
+        return LegacyServiceThriftMetadataHandlerStructs.getStructs();
+    }
 
-  @Override
-  public Map<String, ThriftException> getExceptions() {
-    return LegacyServiceThriftMetadataHandlerExceptions.getExceptions();
-  }
+    @Override
+    public Map<String, ThriftException> getExceptions() {
+        return LegacyServiceThriftMetadataHandlerExceptions.getExceptions();
+    }
 }

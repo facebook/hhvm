@@ -31,13 +31,16 @@
 #include <thrift/lib/cpp2/logging/ThriftConnectionLog.h>
 #include <thrift/lib/cpp2/logging/ThriftSinkLog.h>
 #include <thrift/lib/cpp2/logging/ThriftStreamLog.h>
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/cpp2/transport/core/SendCallbacks.h>
+#include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketServerUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -480,11 +483,35 @@ void ThriftServerRequestResponse::sendThriftResponse(
     ResponseRpcMetadata&& metadata,
     std::unique_ptr<folly::IOBuf> data,
     apache::thrift::MessageChannel::SendCallbackPtr cb) noexcept {
-  auto responseRpcError = processFirstResponse(
-      metadata, data, getProtoId(), version_, getCompressionConfig());
-  // When creating request logging callback, we need to access payload metadata
-  // which is populated in the processFirstResponse, so
-  // createRequestLoggingCallback must happen after processFirstResponse.
+  // Pre-compressed path: response was already compressed on CPU thread via
+  // compressResponse(). The envelope was never added (extractPayload skipped
+  // it), so we skip processFirstResponse() (which normally strips the envelope
+  // and sets compression). Set up metadata with the pre-computed values.
+  const bool preCompressed = isResponsePreCompressed();
+  std::optional<ResponseRpcError> responseRpcError;
+
+  if (preCompressed) {
+    applyPreCompressedMetadata(metadata);
+    // Log write headers (normally done inside processFirstResponse).
+    THRIFT_APPLICATION_EVENT(server_write_headers).log([&] {
+      auto size =
+          metadata.otherMetadata() ? metadata.otherMetadata()->size() : 0;
+      std::vector<folly::dynamic> keys;
+      if (size) {
+        keys.reserve(size);
+        for (auto& [k, v] : *metadata.otherMetadata()) {
+          keys.emplace_back(k);
+        }
+      }
+      return folly::dynamic::object("size", size)(
+          "keys", folly::dynamic::array(std::move(keys)));
+    });
+  } else {
+    responseRpcError = processFirstResponse(
+        metadata, data, getProtoId(), version_, getCompressionConfig());
+  }
+
+  // Shared: create logging callback after metadata is populated.
   cb = createRequestLoggingCallback(std::move(cb), metadata, responseRpcError);
 
   auto payloadSerializerPtr = context_.connection().getPayloadSerializer();
@@ -494,33 +521,43 @@ void ThriftServerRequestResponse::sendThriftResponse(
     return;
   }
 
-  // Prevents potential complexity (e.g. using custom compression to
-  // encode custom compression failures, or to that matter, any failure at all),
-  // we use ZSTD to compress exception payloads.
-  // custom compression implies ZSTD, so it is safe to fallback to it.
-  if (metadata.compression().value_or(CompressionAlgorithm::NONE) ==
-      CompressionAlgorithm::CUSTOM) {
-    auto payloadIsException = false;
-    if (!metadata.payloadMetadata()) {
-      // unexpected, handle it conservatively
-      payloadIsException = true;
-    } else if (metadata.payloadMetadata()->exceptionMetadata()) {
-      payloadIsException = true;
-    }
-
-    if (payloadIsException) {
-      metadata.compression() = CompressionAlgorithm::ZSTD;
-    }
-  }
-
+  // Build the payload — pre-compressed path serializes metadata directly,
+  // normal path uses packWithFds (which handles compression + FDs).
   rocket::Payload payload;
   try {
-    payload = payloadSerializerPtr->packWithFds(
-        &metadata,
-        std::move(data),
-        std::move(getRequestContext()->getHeader()->fds),
-        context_.connection().isDecodingMetadataUsingBinaryProtocol(),
-        context_.connection().getRawSocket());
+    if (preCompressed) {
+      payload = rocket::makePreCompressedPayload(
+          context_.connection(),
+          metadata,
+          std::move(data),
+          std::move(getRequestContext()->getHeader()->fds));
+    } else {
+      // Prevents potential complexity (e.g. using custom compression to
+      // encode custom compression failures, or to that matter, any failure at
+      // all), we use ZSTD to compress exception payloads.
+      // custom compression implies ZSTD, so it is safe to fallback to it.
+      if (metadata.compression().value_or(CompressionAlgorithm::NONE) ==
+          CompressionAlgorithm::CUSTOM) {
+        auto payloadIsException = false;
+        if (!metadata.payloadMetadata()) {
+          // unexpected, handle it conservatively
+          payloadIsException = true;
+        } else if (metadata.payloadMetadata()->exceptionMetadata()) {
+          payloadIsException = true;
+        }
+
+        if (payloadIsException) {
+          metadata.compression() = CompressionAlgorithm::ZSTD;
+        }
+      }
+
+      payload = payloadSerializerPtr->packWithFds(
+          &metadata,
+          std::move(data),
+          std::move(getRequestContext()->getHeader()->fds),
+          context_.connection().isDecodingMetadataUsingBinaryProtocol(),
+          context_.connection().getRawSocket());
+    }
   } catch (std::exception const& ex) {
     auto error = makeResponseRpcError(
         ResponseRpcErrorCode::UNKNOWN,
@@ -531,6 +568,7 @@ void ThriftServerRequestResponse::sendThriftResponse(
     return;
   }
 
+  // Shared: write-timeout wrapping and final send.
   if (maxResponseWriteTime_ > std::chrono::milliseconds{0}) {
     cb = apache::thrift::MessageChannel::SendCallbackPtr(
         new ResponseWriteTimeoutSendCallback(
@@ -677,6 +715,28 @@ bool ThriftServerRequestStream::sendStreamThriftResponse(
     sendSerializedError(std::move(metadata), std::move(data));
     return false;
   }
+
+  if (isResponsePreCompressed()) {
+    // Pre-compressed path: skip processFirstResponse() since compression
+    // was already done on the CPU thread. The envelope was never added
+    // (extractPayload was called with includeEnvelope=false).
+    applyPreCompressedMetadata(metadata);
+
+    auto& fds = getRequestContext()->getHeader()->fds;
+    if (!fds.empty()) {
+      metadata.fdMetadata() =
+          makeFdMetadata(fds, context_.connection().getRawSocket());
+    }
+
+    context_.unsetMarkRequestComplete();
+    stream->resetClientCallback(*clientCallback_);
+    clientCallback_->setProtoId(getProtoId());
+    auto payload = FirstResponsePayload{std::move(data), std::move(metadata)};
+    payload.fds = std::move(fds.dcheckToSendOrEmpty());
+    return clientCallback_->onFirstResponse(
+        std::move(payload), nullptr /* evb */, stream.release());
+  }
+
   if (auto responseRpcError = processFirstResponse(
           metadata, data, getProtoId(), version_, getCompressionConfig())) {
     auto ex = makeRocketException(
@@ -702,6 +762,36 @@ void ThriftServerRequestStream::sendStreamThriftResponse(
     sendSerializedError(std::move(metadata), std::move(data));
     return;
   }
+
+  if (isResponsePreCompressed()) {
+    // Pre-compressed path: skip processFirstResponse() since compression
+    // was already done on the CPU thread. The envelope was never added
+    // (extractPayload was called with includeEnvelope=false).
+    applyPreCompressedMetadata(metadata);
+
+    auto& fds = getRequestContext()->getHeader()->fds;
+    if (!fds.empty()) {
+      metadata.fdMetadata() =
+          makeFdMetadata(fds, context_.connection().getRawSocket());
+    }
+
+    context_.unsetMarkRequestComplete();
+    clientCallback_->setProtoId(getProtoId());
+    clientCallback_->setContextStack(stream.getContextStack());
+
+    if (auto* connLog = getRequestContext()
+                            ->getConnectionContext()
+                            ->getThriftConnectionLog()) {
+      stream.setStreamLog(connLog->createStreamLog(stream.getMethodName()));
+    }
+
+    auto payload = apache::thrift::FirstResponsePayload{
+        std::move(data), std::move(metadata)};
+    payload.fds = std::move(fds.dcheckToSendOrEmpty());
+    stream(std::move(payload), clientCallback_, &evb_);
+    return;
+  }
+
   if (auto responseRpcError = processFirstResponse(
           metadata, data, getProtoId(), version_, getCompressionConfig())) {
     auto ex = makeRocketException(
@@ -913,6 +1003,15 @@ void ThriftServerRequestBiDi::sendBiDiThriftResponse(
 
   context_.unsetMarkRequestComplete();
   clientCallback_->setChunkTimeout(bidiStreamFactory.getChunkTimeout());
+
+  // Create unified bidi log if connection log is available.
+  if (auto* connLog = getRequestContext()
+                          ->getConnectionContext()
+                          ->getThriftConnectionLog()) {
+    bidiStreamFactory.setBiDiLog(
+        connLog->createBiDiLog(bidiStreamFactory.getMethodName()));
+  }
+
   auto payload = apache::thrift::FirstResponsePayload{
       std::move(data), std::move(metadata)};
   payload.fds =

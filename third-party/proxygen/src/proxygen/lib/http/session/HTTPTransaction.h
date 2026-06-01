@@ -1981,6 +1981,7 @@ class HTTPTransaction
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> closeSession(
       folly::Optional<uint32_t> error) override {
+    DestructorGuard dg(this);
     if (error.has_value()) {
       sendCloseWebTransportSessionCapsule(error.value(), "");
     }
@@ -1988,6 +1989,9 @@ class HTTPTransaction
 
     if (!isEgressEOMSeen()) {
       sendEOM();
+    }
+    if (!isIngressEOMSeen()) {
+      sendAbort(ErrorCode::NO_ERROR);
     }
 
     return folly::unit;

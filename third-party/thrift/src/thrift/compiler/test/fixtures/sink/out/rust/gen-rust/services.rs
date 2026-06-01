@@ -6,6 +6,7 @@
 
 /// Service definitions for `SinkService`.
 pub mod sink_service {
+
     pub struct MethodSinkResult {
         pub stream_handler: ::std::boxed::Box<dyn ::std::ops::FnOnce(
             ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::SinkPayload, crate::services::sink_service::MethodSinkExn>>
@@ -44,7 +45,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodSinkExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -108,7 +108,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -171,7 +170,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodSinkFinalExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -235,7 +233,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -245,7 +242,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -324,7 +320,6 @@ pub mod sink_service {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -373,7 +368,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodAndReponseSinkExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -437,7 +431,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -500,7 +493,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodAndReponseSinkFinalExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -564,7 +556,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -574,7 +565,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodAndReponseExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -654,7 +644,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -700,7 +689,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodThrowSinkExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -764,7 +752,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -828,7 +815,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodThrowSinkFinalExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -892,7 +878,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1175,7 +1160,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodSinkThrowSinkFinalExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1239,7 +1223,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1249,7 +1232,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodSinkThrowExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1328,7 +1310,6 @@ pub mod sink_service {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1374,7 +1355,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodFinalThrowSinkExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1438,7 +1418,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1593,7 +1572,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodFinalThrowExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1672,7 +1650,6 @@ pub mod sink_service {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1959,7 +1936,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodBothThrowExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -2038,7 +2014,6 @@ pub mod sink_service {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -2084,7 +2059,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodFastSinkExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -2148,7 +2122,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -2211,7 +2184,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodFastSinkFinalExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -2275,7 +2247,6 @@ pub mod sink_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -2285,7 +2256,6 @@ pub mod sink_service {
 
     #[derive(Clone, Debug)]
     pub enum MethodFastExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -2364,7 +2334,6 @@ pub mod sink_service {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();

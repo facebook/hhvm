@@ -147,8 +147,7 @@ class OperationBase {
  public:
   virtual ~OperationBase() = default;
 
-  // No default constructor or copy constructor/assignment operators
-  OperationBase() = delete;
+  // No copy constructor/assignment operators
   explicit OperationBase(const Operation&) = delete;
   OperationBase& operator=(const Operation&) = delete;
 
@@ -341,7 +340,26 @@ class OperationBase {
  protected:
   friend class Operation;
 
+  // Default constructor for virtual inheritance shim.
+  // When using this constructor, initializeConnection() MUST be called
+  // before the operation is used.
+  OperationBase() = default;
+
   explicit OperationBase(std::unique_ptr<ConnectionProxy> safe_conn);
+
+  // Initialize the connection for operations created with the default
+  // constructor. This must be called before any methods that access
+  // client_ or conn_proxy_ are used.
+  void initializeConnection(std::unique_ptr<ConnectionProxy> conn);
+
+  // Common setup logic shared by the constructor and initializeConnection().
+  void initializeOperationState();
+
+  // Safe accessor for the client pointer. Asserts that client_ is initialized.
+  MysqlClientBase& client() const {
+    DCHECK(client_ != nullptr) << "client_ not initialized";
+    return *client_;
+  }
 
   // An owned connection is one where the operation fully owns the connection.
   // This occurs when a query is started via a semi-future and the connection is
@@ -407,7 +425,10 @@ class OperationBase {
       ChainedCallback orgCallback,
       ChainedCallback newCallback);
 
-  MysqlClientBase& client_;
+  // Pointer to the client. May be nullptr if the operation was constructed
+  // with the default constructor and initializeConnection() hasn't been called.
+  // Use client() accessor for safe access.
+  MysqlClientBase* client_{nullptr};
 
   // Our Connection object.  Created by ConnectOperation and moved
   // into QueryOperations.
@@ -437,7 +458,7 @@ class OperationBase {
   DbMultiQueryResult callPostQueryCallback(DbMultiQueryResult result) const;
   AsyncPostQueryCallback stealPostQueryCallback();
 
-  Operation* op_;
+  Operation* op_{nullptr};
 
   // Errors that may have occurred.
   unsigned int mysql_errno_{0};
@@ -500,7 +521,7 @@ class OperationBase {
   AttributeMap attributes_;
 
   // timeout specified for this operation
-  Duration timeout_;
+  Duration timeout_{};
 
   using StopWatch = folly::stop_watch<Duration>;
   std::unique_ptr<StopWatch> stopwatch_;
@@ -519,11 +540,30 @@ class OperationBase {
 };
 
 //  Public facing Operation API
-class Operation : public std::enable_shared_from_this<Operation> {
+//
+//  Operation virtually inherits from OperationBase to enable future unification
+//  of the Operation and OperationImpl class hierarchies. This virtual
+//  inheritance allows concrete protocol classes (e.g., MysqlQueryOperation)
+//  to inherit from both Operation and OperationImpl without duplicating
+//  OperationBase members.
+//
+//  Current structure (with delegation via impl_):
+//    Operation --virtual--> OperationBase
+//    *OperationImpl --virtual--> OperationBase
+//    ConnectOperation has impl_ -> ConnectOperationImpl
+//
+//  Future structure (unified, no delegation):
+//    MysqlConnectOperation : ConnectOperation, MysqlProtocolMixin
+//    ConnectOperation --virtual--> OperationBase
+//    MysqlProtocolMixin --virtual--> OperationBase
+//
+class Operation : public std::enable_shared_from_this<Operation>,
+                  virtual public OperationBase {
  public:
-  virtual ~Operation() = default;
+  virtual ~Operation() override = default;
 
-  virtual db::OperationType getOperationType() const = 0;
+  // Note: getOperationType() is inherited from OperationBase and must be
+  // implemented by concrete Operation subclasses.
 
   // Did the operation succeed?
   bool ok() const;
@@ -536,7 +576,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
   OperationState state() const;
 
   Operation& run();
-  void cancel() {
+  void cancel() override {
     impl()->cancel();
   }
 
@@ -692,7 +732,14 @@ class Operation : public std::enable_shared_from_this<Operation> {
     return impl()->callPostQueryCallback(std::move(result));
   }
 
-  void timeoutTriggered() {
+  // OperationBase pure virtual methods - delegate to impl
+  void specializedRun() override {
+    impl()->specializedRun();
+  }
+  void protocolCompleteOperation(OperationResult result) override {
+    impl()->protocolCompleteOperation(result);
+  }
+  void timeoutTriggered() override {
     impl()->timeoutTriggered();
   }
 

@@ -309,4 +309,5 @@ public class MyServiceBlockingReactiveWrapper
     public SerialInteraction createSerialInteraction() {
         return new SerialInteractionImpl(_delegate.createSerialInteraction());
     }
+
 }

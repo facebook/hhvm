@@ -7,7 +7,7 @@
  *)
 
 type severity =
-  | Warning
+  | Warning of { is_trusted: bool }
   | Err
 [@@deriving ord]
 
@@ -58,8 +58,11 @@ val make_err :
   'b Explanation.t ->
   ('a, 'b) t
 
-(** Make a User_diagnostic.t with severity Warning *)
+(** Make a User_diagnostic.t with severity Warning.
+    [is_trusted] defaults to [true]; set to [false] for type-dependent
+    warnings that have not been verified under dynamic assumptions. *)
 val make_warning :
+  ?is_trusted:bool ->
   int ->
   ?is_fixmed:bool ->
   ?quickfixes:'a Quickfix.t list ->

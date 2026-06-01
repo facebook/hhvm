@@ -1,6 +1,6 @@
 <?hh
 <<file:__EnableExperimentalFeatures('interpret_soft_types_as_like_types')>>
 
-function tcopt_soft_as_like_enabled(<<__Soft>> int $x): @int {
+function tcopt_soft_as_like_enabled(<<__Soft>> int $x): <<__Soft>> int {
   return $x + 1;
 }

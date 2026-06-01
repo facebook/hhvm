@@ -378,6 +378,7 @@ final class Options {
     public bool $list_tests = false;
     public ?string $recycle_tc;
     public ?string $retranslate_all;
+    public bool $async_jit_profile = false;
     public ?string $jit_serialize;
     public ?string $hhvm_binary_path;
     public ?string $working_dir;
@@ -439,6 +440,7 @@ function get_options(
     'list-tests' => '',
     '*recycle-tc:' => '',
     '*retranslate-all:' => '',
+    '*async-jit-profile' => '',
     '*jit-serialize:' => '',
     '*hhvm-binary-path:' => 'b:',
     '*working-dir:' => 'w:',
@@ -769,7 +771,7 @@ function find_tests(
   if ($options->include_pattern is nonnull) {
     $include = $options->include_pattern;
     $tests = vec(array_filter($tests, function($test) use ($include) {
-      return (bool)preg_match($include, $test);
+      return preg_match($include, $test) === 1;
     }));
   }
   return $tests;
@@ -1116,8 +1118,9 @@ function hhvm_cmd_impl(
       $args[] = '-vEval.JitRetranslateAllRequest='.$options->retranslate_all;
       // Set to timeout.  We want requests to trigger retranslate all.
       $args[] = '-vEval.JitRetranslateAllSeconds=' . TIMEOUT_SECONDS;
+      $args[] = '-vEval.JitWaitForAsyncJITBetweenRequests=1';
     }
-    $args[] = '-vEval.EnableAsyncJITProfile=' . ($options->retranslate_all is nonnull ? '1' : '0');
+    $args[] = '-vEval.EnableAsyncJITProfile=' . (($options->retranslate_all is nonnull && $options->async_jit_profile) ? '1' : '0');
 
     if ($options->recycle_tc is nonnull) {
       $args[] = '--count='.$options->recycle_tc;
@@ -4390,7 +4393,7 @@ function runner_precheck(): void {
   // Basic checking for runner.
   $server = HH\global_get('_SERVER');
   $env = HH\global_get('_ENV');
-  if (!((bool)$server) || !((bool)$env)) {
+  if (!HH\legacy_is_truthy($server) || !HH\legacy_is_truthy($env)) {
     error("\\HH\global_get('_SERVER')/\\HH\global_get('_ENV') variables not available");
   }
 }

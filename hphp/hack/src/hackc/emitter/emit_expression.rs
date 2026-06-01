@@ -31,7 +31,6 @@ use hhbc::FCallArgsFlags;
 use hhbc::IncDecOp;
 use hhbc::IncludePath;
 use hhbc::Instruct;
-use hhbc::IsLogAsDynamicCallOp;
 use hhbc::IsTypeOp;
 use hhbc::IterArgs;
 use hhbc::IterArgsFlags;
@@ -2275,11 +2274,7 @@ fn emit_call_lhs_and_fcall<'a>(
                             emit_expr(e, env, &expr)?,
                             emit_pos_then(
                                 call_pos,
-                                instr::f_call_cls_method_m(
-                                    IsLogAsDynamicCallOp::DontLogAsDynamicCall,
-                                    fcall_args,
-                                    method_name,
-                                ),
+                                instr::f_call_cls_method_m(fcall_args, method_name),
                             ),
                         ]),
                     )
@@ -2295,11 +2290,7 @@ fn emit_call_lhs_and_fcall<'a>(
                         ]),
                         InstrSeq::gather(vec![
                             instr::push_l(tmp),
-                            instr::f_call_cls_method_m(
-                                IsLogAsDynamicCallOp::DontLogAsDynamicCall,
-                                fcall_args,
-                                method_name,
-                            ),
+                            instr::f_call_cls_method_m(fcall_args, method_name),
                         ]),
                     )
                 }
@@ -6661,6 +6652,7 @@ fn fixup_type_arg<'a, 'b>(
         fn visit_hint_fun(&mut self, c: &mut (), hf: &ast::HintFun) -> Result<(), Option<Error>> {
             hf.tparams.accept(c, self.object())?;
             hf.param_tys.accept(c, self.object())?;
+            hf.variadic_ty.accept(c, self.object())?;
             hf.return_ty.accept(c, self.object())
         }
 
@@ -6709,6 +6701,11 @@ fn fixup_type_arg<'a, 'b>(
                 self.object(),
             )?;
             <Vec<ast::Hint> as NodeMut<Self::Params>>::accept(&mut hf.param_tys, c, self.object())?;
+            <Option<ast::Hint> as NodeMut<Self::Params>>::accept(
+                &mut hf.variadic_ty,
+                c,
+                self.object(),
+            )?;
             <ast::Hint as NodeMut<Self::Params>>::accept(&mut hf.return_ty, c, self.object())
         }
 

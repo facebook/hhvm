@@ -1209,12 +1209,7 @@ class t_mstch_py3_generator : public t_whisker_generator {
     });
 
     // Overrides for `t_named` properties, resolving typedefs before computing
-    // the value. This is necessary because the py3 generator previously used to
-    // erase typedefs when initializing mstch_type, but still used the
-    // unresolved type in the constructor to resolve context properties.
-    // To resolve context properties in Whisker, we need to use the unresolved
-    // type as the key, but that requires us to resolve typedefs for all other
-    // properties to maintain compatibility.
+    // the value.
     def.property("py_name", [](const t_type& self) {
       return python::get_py3_name(*self.get_true_type());
     });

@@ -19,7 +19,6 @@
 #include <stdint.h>
 #include <initializer_list>
 #include <string>
-#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -155,8 +154,7 @@ class cpp_name_resolver {
 
   // Returns the C++ type that should be used to store the field's value.
   //
-  // This differs from the type name, when a 'cpp.ref' or 'cpp.ref_type'
-  // annotation is applied to the field.
+  // This differs from the type name when @cpp.Ref is applied to the field.
   const std::string& get_storage_type(
       const t_field& field, const t_structured& parent);
 
@@ -174,13 +172,12 @@ class cpp_name_resolver {
   static const t_const* find_nontransitive_adapter(const t_type& node);
 
   static const std::string* find_type(const t_type& node) {
-    return find_cpp_type_annotation(node, {"cpp.type", "cpp2.type"}, "name");
+    return find_cpp_type_annotation(node, "name");
   }
   static const std::string* find_first_adapter(const t_type& node);
   static const std::string* find_first_adapter(const t_field& node);
   static const std::string* find_template(const t_type& node) {
-    return find_cpp_type_annotation(
-        node, {"cpp.template", "cpp2.template"}, "template");
+    return find_cpp_type_annotation(node, "template");
   }
 
   static bool is_directly_adapted(const t_type& node) {
@@ -214,25 +211,13 @@ class cpp_name_resolver {
       const t_program& program, const t_named& node) {
     return get_namespace(program) + "::" + get_cpp_name(node);
   }
-  // Shared helper for find_type and find_template. Checks unstructured
-  // annotations (only for non-user-defined typedefs) then structured @cpp.Type.
+
+  // Checks for @cpp.Type structured annotation on a type node.
+  // `key` should be "name" (for cpp.type) or "template" (for cpp.template).
   static const std::string* find_cpp_type_annotation(
-      const t_type& node,
-      const std::vector<std::string_view>& unstructured_keys,
-      const char* structured_key) {
-    // Unstructured annotations are not supported on user-defined typedefs.
-    // They must use structured @cpp.Type. Unnamed typedefs (from field
-    // annotation lowering) still carry unstructured annotations from sema.
-    if (auto* td = node.try_as<t_typedef>();
-        !td || td->typedef_kind() != t_typedef::kind::defined) {
-      if (auto* val =
-              node.find_unstructured_annotation_or_null(unstructured_keys)) {
-        return val;
-      }
-    }
+      const t_type& node, const char* key) {
     if (auto* annot = node.find_structured_annotation_or_null(kCppTypeUri)) {
-      if (auto* v = annot->get_value_from_structured_annotation_or_null(
-              structured_key)) {
+      if (auto* v = annot->get_value_from_structured_annotation_or_null(key)) {
         return &v->get_string();
       }
     }
@@ -244,6 +229,10 @@ class cpp_name_resolver {
 
   static const std::string& default_type(t_primitive_type::type btype);
   static const std::string& default_template(const t_container& ctype);
+
+  // If the node has a @cpp.Type override, resolves the type name accounting
+  // for typedef kind and adapters. Returns nullptr if no override applies.
+  const std::string* resolve_cpp_type_name(const t_type& node);
 
   // Generating functions.
   std::string gen_type(const t_type& node);

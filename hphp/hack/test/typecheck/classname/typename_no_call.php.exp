@@ -1,2 +1,6 @@
+WARN: File "typename_no_call.php", line 14, characters 3-9:
+Value of type `dynamic` called as a function (Warn[12039])
+  File "classname.hhi", line 14, characters 27-32:
+  This expression has type `dynamic`
 ERROR: File "typename_no_call.php", line 14, characters 3-4:
 Was expecting a class, but got a string (Typing[4026])

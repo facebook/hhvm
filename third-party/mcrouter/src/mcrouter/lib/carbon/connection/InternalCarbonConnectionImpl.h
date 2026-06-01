@@ -15,16 +15,10 @@
 #include <mcrouter/McrouterClient.h>
 #include <mcrouter/lib/CacheClientStats.h>
 #include <mcrouter/lib/carbon/connection/CarbonConnectionUtil.h>
+#include <mcrouter/lib/carbon/connection/InternalCarbonConnectionOptions.h>
 #include <mcrouter/options.h>
 
 namespace carbon {
-
-struct InternalCarbonConnectionOptions {
-  InternalCarbonConnectionOptions() = default;
-  size_t maxOutstanding{1024};
-  size_t maxOutstandingError{false};
-  std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreads{nullptr};
-};
 
 template <class If>
 class InternalCarbonConnectionImpl {

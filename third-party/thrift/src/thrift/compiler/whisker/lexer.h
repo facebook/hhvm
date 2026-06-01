@@ -221,6 +221,8 @@ class lexer {
   };
   // parses raw text
   class state_text;
+  // entered after "{{" to determine the next state
+  class state_template_choice;
   // parses interpolation of variables "{{ ... }}" or blocks "{{# ...}}"
   class state_template;
   // parses interpolation of macros "{{> ... }}"

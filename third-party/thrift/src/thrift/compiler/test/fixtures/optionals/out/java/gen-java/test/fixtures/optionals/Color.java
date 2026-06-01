@@ -46,11 +46,11 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Color other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -66,21 +66,21 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
 
         public double getRed() { return red; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="green", requiredness=Requiredness.NONE)    public Builder setGreen(double green) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="green", requiredness=Requiredness.NONE)    public Builder setGreen(double green) {
             this.green = green;
             return this;
         }
 
         public double getGreen() { return green; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="blue", requiredness=Requiredness.NONE)    public Builder setBlue(double blue) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="blue", requiredness=Requiredness.NONE)    public Builder setBlue(double blue) {
             this.blue = blue;
             return this;
         }
 
         public double getBlue() { return blue; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="alpha", requiredness=Requiredness.NONE)    public Builder setAlpha(double alpha) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="alpha", requiredness=Requiredness.NONE)    public Builder setAlpha(double alpha) {
             this.alpha = alpha;
             return this;
         }
@@ -106,6 +106,7 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -114,46 +115,39 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
     private final double red;
     public static final int _RED = 1;
     private static final TField RED_FIELD_DESC = new TField("red", TType.DOUBLE, (short)1);
-        private final double green;
+    private final double green;
     public static final int _GREEN = 2;
     private static final TField GREEN_FIELD_DESC = new TField("green", TType.DOUBLE, (short)2);
-        private final double blue;
+    private final double blue;
     public static final int _BLUE = 3;
     private static final TField BLUE_FIELD_DESC = new TField("blue", TType.DOUBLE, (short)3);
-        private final double alpha;
+    private final double alpha;
     public static final int _ALPHA = 4;
     private static final TField ALPHA_FIELD_DESC = new TField("alpha", TType.DOUBLE, (short)4);
     static {
-      NAMES_TO_IDS.put("red", 1);
-      THRIFT_NAMES_TO_IDS.put("red", 1);
-      FIELD_METADATA.put(1, RED_FIELD_DESC);
-      NAMES_TO_IDS.put("green", 2);
-      THRIFT_NAMES_TO_IDS.put("green", 2);
-      FIELD_METADATA.put(2, GREEN_FIELD_DESC);
-      NAMES_TO_IDS.put("blue", 3);
-      THRIFT_NAMES_TO_IDS.put("blue", 3);
-      FIELD_METADATA.put(3, BLUE_FIELD_DESC);
-      NAMES_TO_IDS.put("alpha", 4);
-      THRIFT_NAMES_TO_IDS.put("alpha", 4);
-      FIELD_METADATA.put(4, ALPHA_FIELD_DESC);
+        NAMES_TO_IDS.put("red", 1);
+        THRIFT_NAMES_TO_IDS.put("red", 1);
+        FIELD_METADATA.put(1, RED_FIELD_DESC);
+        NAMES_TO_IDS.put("green", 2);
+        THRIFT_NAMES_TO_IDS.put("green", 2);
+        FIELD_METADATA.put(2, GREEN_FIELD_DESC);
+        NAMES_TO_IDS.put("blue", 3);
+        THRIFT_NAMES_TO_IDS.put("blue", 3);
+        FIELD_METADATA.put(3, BLUE_FIELD_DESC);
+        NAMES_TO_IDS.put("alpha", 4);
+        THRIFT_NAMES_TO_IDS.put("alpha", 4);
+        FIELD_METADATA.put(4, ALPHA_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="red", requiredness=Requiredness.NONE)
     public double getRed() { return red; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=2, name="green", requiredness=Requiredness.NONE)
     public double getGreen() { return green; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=3, name="blue", requiredness=Requiredness.NONE)
     public double getBlue() { return blue; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=4, name="alpha", requiredness=Requiredness.NONE)
     public double getAlpha() { return alpha; }
 
@@ -190,95 +184,98 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Double.hashCode(red);
-            _hashCode = 31 * _hashCode + Double.hashCode(green);
-            _hashCode = 31 * _hashCode + Double.hashCode(blue);
-            _hashCode = 31 * _hashCode + Double.hashCode(alpha);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Double.hashCode(green);
+        _hashCode = 31 * _hashCode + Double.hashCode(blue);
+        _hashCode = 31 * _hashCode + Double.hashCode(alpha);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Color> asReader() {
       return Color::read0;
     }
 
     public static Color read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Color.NAMES_TO_IDS, Color.THRIFT_NAMES_TO_IDS, Color.FIELD_METADATA);
-      Color.Builder builder = new Color.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _RED:
-          if (__field.type == TType.DOUBLE) {
-            double red = oprot.readDouble();
-            builder.setRed(red);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _GREEN:
-          if (__field.type == TType.DOUBLE) {
-            double green = oprot.readDouble();
-            builder.setGreen(green);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _BLUE:
-          if (__field.type == TType.DOUBLE) {
-            double blue = oprot.readDouble();
-            builder.setBlue(blue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ALPHA:
-          if (__field.type == TType.DOUBLE) {
-            double alpha = oprot.readDouble();
-            builder.setAlpha(alpha);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(Color.NAMES_TO_IDS, Color.THRIFT_NAMES_TO_IDS, Color.FIELD_METADATA);
+        Color.Builder builder = new Color.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _RED:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setRed(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _GREEN:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setGreen(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _BLUE:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setBlue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ALPHA:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setAlpha(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      double _iter0 = this.red;
-      oprot.writeFieldBegin(RED_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.green;
-      oprot.writeFieldBegin(GREEN_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.blue;
-      oprot.writeFieldBegin(BLUE_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.alpha;
-      oprot.writeFieldBegin(ALPHA_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            double _fbthriftVar0 = this.red;
+            oprot.writeFieldBegin(RED_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.green;
+            oprot.writeFieldBegin(GREEN_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.blue;
+            oprot.writeFieldBegin(BLUE_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.alpha;
+            oprot.writeFieldBegin(ALPHA_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _ColorLazy {

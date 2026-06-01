@@ -72,7 +72,7 @@ File root|module_enums.php--X.php
               ft_instantiated = true }));
         fe_pos = [12:19-21]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\f2",
    (Shallow_decl_defs.Fun
@@ -104,7 +104,7 @@ File root|module_enums.php--X.php
               ft_instantiated = true }));
         fe_pos = [15:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\f5",
    (Shallow_decl_defs.Fun
@@ -125,7 +125,7 @@ File root|module_enums.php--X.php
               ft_instantiated = true }));
         fe_pos = [18:19-21]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }));
   ("\\f6",
    (Shallow_decl_defs.Fun
@@ -146,7 +146,7 @@ File root|module_enums.php--X.php
               ft_instantiated = true }));
         fe_pos = [23:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }))
   ]
 
@@ -181,7 +181,7 @@ File root|module_enums.php--Y.php
              ft_instantiated = true }));
        fe_pos = [6:10-12]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-       fe_no_auto_likes = false;
+       fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\f7",
    (Shallow_decl_defs.Fun
@@ -202,7 +202,7 @@ File root|module_enums.php--Y.php
               ft_instantiated = true }));
         fe_pos = [10:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }))
   ]
 
@@ -237,7 +237,7 @@ File root|module_enums.php--no-module.php
              ft_instantiated = true }));
        fe_pos = [3:10-12]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-       fe_no_auto_likes = false;
+       fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\f8",
    (Shallow_decl_defs.Fun
@@ -258,6 +258,6 @@ File root|module_enums.php--no-module.php
               ft_instantiated = true }));
         fe_pos = [5:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }))
   ]

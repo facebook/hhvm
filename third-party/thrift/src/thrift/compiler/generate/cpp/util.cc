@@ -58,45 +58,10 @@ bool has_dependent_adapter(const t_type& node) {
   return false;
 }
 
-} // namespace
-
-bool is_custom_type(const t_type& type) {
-  return t_typedef::get_first_unstructured_annotation_or_null(
-             &type,
-             {
-                 "cpp.template",
-                 "cpp2.template",
-                 "cpp.type",
-                 "cpp2.type",
-             }) ||
-      t_typedef::get_first_structured_annotation_or_null(&type, kCppTypeUri) ||
-      t_typedef::get_first_structured_annotation_or_null(&type, kCppAdapterUri);
-}
-
-bool is_custom_type(const t_field& field) {
-  return cpp_name_resolver::find_first_adapter(field) ||
-      field.has_structured_annotation(kCppTypeUri) ||
-      is_custom_type(*field.type());
-}
-
-bool container_supports_incomplete_params(const t_type& type) {
-  if (t_typedef::get_first_structured_annotation_or_null(
-          &type,
-          "facebook.com/thrift/annotation/cpp/Frozen2RequiresCompleteContainerParams")) {
-    return false;
-  }
-
-  if (t_typedef::get_first_unstructured_annotation_or_null(
-          &type,
-          {
-              "cpp.container_supports_incomplete_params",
-          }) ||
-      !is_custom_type(type)) {
-    return true;
-  }
-
-  static const std::unordered_set<std::string> template_exceptions = [] {
-    std::unordered_set<std::string> types;
+// Container templates known to support incomplete element types.
+const std::unordered_set<std::string>& get_template_exceptions() {
+  static const std::unordered_set<std::string> types = [] {
+    std::unordered_set<std::string> s;
     for (auto& type : {
              "folly::F14NodeMap",
              "folly::F14VectorMap",
@@ -113,23 +78,63 @@ bool container_supports_incomplete_params(const t_type& type) {
 
              "::apache::thrift::metadata::detail::LimitedVector",
          }) {
-      types.insert(type);
-      types.insert(fmt::format("::{}", type));
+      s.insert(type);
+      s.insert(fmt::format("::{}", type));
     }
-    return types;
+    return s;
   }();
-  {
-    auto cpp_template = t_typedef::get_first_unstructured_annotation_or_null(
-        &type,
-        {
-            "cpp.template",
-            "cpp2.template",
-        });
-    if (cpp_template && template_exceptions.count(*cpp_template)) {
-      return true;
-    }
+  return types;
+}
+
+// Check if a field's @cpp.Type template supports incomplete container params.
+// Returns true if there is no field-level @cpp.Type or if the template is
+// known to support incomplete params.
+bool field_cpp_type_supports_incomplete_params(const t_field& field) {
+  auto* annot = field.find_structured_annotation_or_null(kCppTypeUri);
+  if (!annot) {
+    return true;
   }
-  // Also check structured @cpp.Type for template.
+  const auto& exceptions = get_template_exceptions();
+  if (auto* tmpl =
+          annot->get_value_from_structured_annotation_or_null("template")) {
+    return exceptions.count(tmpl->get_string()) > 0;
+  }
+  if (auto* name =
+          annot->get_value_from_structured_annotation_or_null("name")) {
+    auto cpp_template =
+        name->get_string().substr(0, name->get_string().find('<'));
+    return exceptions.count(cpp_template) > 0;
+  }
+  // Has @cpp.Type but no template or name — assume requires complete types.
+  return false;
+}
+
+} // namespace
+
+bool is_custom_type(const t_type& type) {
+  return t_typedef::get_first_structured_annotation_or_null(
+             &type, kCppTypeUri) ||
+      t_typedef::get_first_structured_annotation_or_null(&type, kCppAdapterUri);
+}
+
+bool is_custom_type(const t_field& field) {
+  return cpp_name_resolver::find_first_adapter(field) ||
+      field.has_structured_annotation(kCppTypeUri) ||
+      is_custom_type(*field.type());
+}
+
+bool container_supports_incomplete_params(const t_type& type) {
+  if (t_typedef::get_first_structured_annotation_or_null(
+          &type,
+          "facebook.com/thrift/annotation/cpp/Frozen2RequiresCompleteContainerParams")) {
+    return false;
+  }
+
+  if (!is_custom_type(type)) {
+    return true;
+  }
+
+  const auto& template_exceptions = get_template_exceptions();
   if (auto* annot = t_typedef::get_first_structured_annotation_or_null(
           &type, kCppTypeUri)) {
     if (auto* tmpl =
@@ -147,20 +152,6 @@ bool container_supports_incomplete_params(const t_type& type) {
       }
     }
   }
-  {
-    auto cpp_type = t_typedef::get_first_unstructured_annotation_or_null(
-        &type,
-        {
-            "cpp.type",
-            "cpp2.type",
-        });
-    if (cpp_type) {
-      auto cpp_template = cpp_type->substr(0, cpp_type->find('<'));
-      if (template_exceptions.count(cpp_template)) {
-        return true;
-      }
-    }
-  }
 
   return false;
 }
@@ -173,8 +164,14 @@ gen_dependency_graph(
   for (const auto* obj : types) {
     auto& deps = edges[obj];
 
-    std::function<void(const t_type*, bool)> add_dependency =
-        [&](const t_type* type, bool include_structured_types) {
+    // force_complete_container: when true, overrides
+    // container_supports_incomplete_params for the first container
+    // encountered. Used when a field has @cpp.Type that requires complete
+    // element types (the annotation is on the field, not the type node).
+    std::function<void(const t_type*, bool, bool)> add_dependency =
+        [&](const t_type* type,
+            bool include_structured_types,
+            bool force_complete_container) {
           if (const auto* typedf = type->try_as<t_typedef>()) {
             // Resolve unnamed typedefs
             if (typedf->typedef_kind() != t_typedef::kind::defined) {
@@ -183,24 +180,30 @@ gen_dependency_graph(
           }
 
           if (const auto* map = type->try_as<t_map>()) {
+            bool supports_incomplete = !force_complete_container &&
+                container_supports_incomplete_params(*map);
             add_dependency(
                 map->key_type().get_type(),
-                include_structured_types &&
-                    !container_supports_incomplete_params(*map));
+                include_structured_types && !supports_incomplete,
+                false);
             return add_dependency(
                 map->val_type().get_type(),
-                include_structured_types &&
-                    !container_supports_incomplete_params(*map));
+                include_structured_types && !supports_incomplete,
+                false);
           } else if (const auto* set = type->try_as<t_set>()) {
+            bool supports_incomplete = !force_complete_container &&
+                container_supports_incomplete_params(*set);
             return add_dependency(
                 set->elem_type().get_type(),
-                include_structured_types &&
-                    !container_supports_incomplete_params(*set));
+                include_structured_types && !supports_incomplete,
+                false);
           } else if (const auto* list = type->try_as<t_list>()) {
+            bool supports_incomplete = !force_complete_container &&
+                container_supports_incomplete_params(*list);
             return add_dependency(
                 list->elem_type().get_type(),
-                include_structured_types &&
-                    !container_supports_incomplete_params(*list));
+                include_structured_types && !supports_incomplete,
+                false);
           } else if (const auto* typedf = type->try_as<t_typedef>()) {
             // Transitively depend on true type if necessary, since typedefs
             // generally don't depend on their underlying types.
@@ -220,19 +223,21 @@ gen_dependency_graph(
               if (true_type->try_as<t_container>() != nullptr &&
                   !container_supports_incomplete_params(*typedf)) {
                 if (const auto* inner_map = true_type->try_as<t_map>()) {
-                  add_dependency(inner_map->key_type().get_type(), true);
-                  add_dependency(inner_map->val_type().get_type(), true);
+                  add_dependency(inner_map->key_type().get_type(), true, false);
+                  add_dependency(inner_map->val_type().get_type(), true, false);
                 } else if (const auto* inner_set = true_type->try_as<t_set>()) {
-                  add_dependency(inner_set->elem_type().get_type(), true);
+                  add_dependency(
+                      inner_set->elem_type().get_type(), true, false);
                 } else if (const auto* list_t = true_type->try_as<t_list>()) {
-                  add_dependency(list_t->elem_type().get_type(), true);
+                  add_dependency(list_t->elem_type().get_type(), true, false);
                 }
               } else {
                 add_dependency(
-                    typedf->get_true_type(), include_structured_types);
+                    typedf->get_true_type(), include_structured_types, false);
               }
             } else {
-              add_dependency(typedf->get_true_type(), include_structured_types);
+              add_dependency(
+                  typedf->get_true_type(), include_structured_types, false);
             }
           } else if (!(type->is<t_structured>() &&
                        (include_structured_types ||
@@ -255,7 +260,7 @@ gen_dependency_graph(
       // specified.
       const auto* type = &*typedf->type();
       bool include_structured = has_dependent_adapter(*typedf);
-      add_dependency(type, include_structured);
+      add_dependency(type, include_structured, false);
     } else if (auto* strct = dynamic_cast<t_structured const*>(obj)) {
       // The adjacency list of a struct is the structs and typedefs named in its
       // fields.
@@ -266,7 +271,12 @@ gen_dependency_graph(
           continue;
         }
         const auto* type = &*ftype;
-        add_dependency(type, !cpp2::is_explicit_ref(&field));
+        bool include_structured = !cpp2::is_explicit_ref(&field);
+        // When @cpp.Type is on the field (not the type node), check if the
+        // field's custom container requires complete element types.
+        bool force_complete = include_structured &&
+            !field_cpp_type_supports_incomplete_params(field);
+        add_dependency(type, include_structured, force_complete);
       }
     } else {
       assert(false);
@@ -334,8 +344,23 @@ bool field_transitively_refers_to_unique(const t_field* field) {
       return false;
     }
   }
+  // Check field-level @cpp.Type for iobuf first.
+  if (cpp2::is_binary_iobuf_unique_ptr(*field)) {
+    return true;
+  }
+  // Then walk container element types (type-only check).
   std::queue<const t_type*> queue;
-  queue.push(field->type().get_type());
+  {
+    auto type = field->type().get_type()->get_true_type();
+    if (const t_list* list = type->try_as<t_list>()) {
+      queue.push(list->elem_type().get_type());
+    } else if (const t_set* set = type->try_as<t_set>()) {
+      queue.push(set->elem_type().get_type());
+    } else if (const t_map* map = type->try_as<t_map>()) {
+      queue.push(map->key_type().get_type());
+      queue.push(map->val_type().get_type());
+    }
+  }
   while (!queue.empty()) {
     auto orig_type = queue.front();
     auto type = orig_type->get_true_type();
@@ -385,6 +410,17 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
   if (const auto* s = dynamic_cast<const t_structured*>(type)) {
     result = eligible::yes;
     for_each_transitive_field(s, [&](const t_field* field) {
+      // Field-level @cpp.Type{name=...} on a named type (typedef/struct)
+      // means the C++ type may have non-trivial constructors.
+      if (auto* annot = field->find_structured_annotation_or_null(kCppTypeUri);
+          annot &&
+          (annot->get_value_from_structured_annotation_or_null("name") ||
+           annot->get_value_from_structured_annotation_or_null("template")) &&
+          !field->type()->get_true_type()->is<t_primitive_type>() &&
+          !field->type()->get_true_type()->is<t_container>()) {
+        result = eligible::no;
+        return false;
+      }
       result = check(field->type().get_type());
       if (result == eligible::no) {
         return false;

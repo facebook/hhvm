@@ -144,6 +144,13 @@ impl ::fbthrift::ThriftEnum for EmptyEnum {
     fn inner_value(&self) -> i32 {
         self.0 as i32
     }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for EmptyEnum: {e}")
+        })
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -269,6 +276,13 @@ impl ::fbthrift::ThriftEnum for City {
     #[allow(clippy::unnecessary_cast)]
     fn inner_value(&self) -> i32 {
         self.0 as i32
+    }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for City: {e}")
+        })
     }
 }
 
@@ -407,6 +421,13 @@ impl ::fbthrift::ThriftEnum for Company {
     #[allow(clippy::unnecessary_cast)]
     fn inner_value(&self) -> i32 {
         self.0 as i32
+    }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for Company: {e}")
+        })
     }
 }
 

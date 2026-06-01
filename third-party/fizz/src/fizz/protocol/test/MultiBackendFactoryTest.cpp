@@ -69,7 +69,11 @@ class MultiBackendFactoryDigestTest
 TEST_P(MultiBackendFactoryDigestTest, Test) {
   auto testCase = GetParam();
 
-  auto makeHasher = factory_.makeHasherFactory(testCase.algorithm);
+  const HasherFactoryWithMetadata* makeHasher = nullptr;
+  Error err;
+  EXPECT_EQ(
+      factory_.makeHasherFactory(makeHasher, err, testCase.algorithm),
+      Status::Success);
   auto hasher = makeHasher->make();
   ASSERT_NE(hasher, nullptr);
 

@@ -2,4 +2,7 @@ File "variableprop.php", line 5, characters 3-13:
   dynamic
 File "variableprop.php", line 7, characters 3-13:
   dynamic
-No errors
+WARN: File "variableprop.php", line 4, characters 12-13:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "variableprop.php", line 3, characters 26-32:
+  This expression has type `dynamic`

@@ -1,4 +1,10 @@
 Errors:
+  [24:3-10] Value of type `dynamic` called as a function
+  [20:22-29] This expression has type `dynamic`
+  [29:7-14] Value of type `dynamic` called as a function
+  [20:22-29] This expression has type `dynamic`
+  [115:7-13] Value of type `dynamic` called as a function
+  [107:20-27] This expression has type `dynamic`
   [9:22-27] Cannot declare a constant named `class`. The name `class` is reserved for the class constant that represents the name of the class
   [31:8-15] No class constant `bar\baz` in `Foo`
   [10:17-34] Did you mean `$_` instead?

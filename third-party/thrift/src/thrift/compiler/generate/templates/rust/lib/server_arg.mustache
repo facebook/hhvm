@@ -15,39 +15,49 @@
   limitations under the License.
 
 }}
-{{#service:functions}}{{#if (not function:starts_interaction?)}}
+{{#import "lib/fields" as fields}}
+{{#import "lib/types" as types}}
 
-struct Args_{{service:rust_name}}_{{function:name}} {
-    {{#each function:params.fields as |param|}}
+{{#let partial read_param |function param| captures |fields|}}
+{{#pragma ignore-newlines}}
+field_{{param.name}} = ::std::option::Option::Some(
+{{#if param.has_adapter?}}{{param.adapter_qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>({{/if}}
+::anyhow::Context::context({{#partial fields.read field=param}}(p), ::fbthrift::errors::DeserializingArgError { arg: "{{param.name}}", function: "{{function.name}}"})?
+{{#if param.has_adapter?}}, {{param.id}})?{{/if}}
+),
+{{/let partial}}
+
+
+{{#let export partial server_arg |interface| captures |fields types read_param|}}
+  {{#each interface.functions as |function|}}
+    {{#if (not function.starts_interaction?)}}
+
+struct Args_{{interface.rust_name}}_{{function.name}} {
+      {{#each function.params.fields as |param|}}
     {{param.rust_name}}: {{#partial fields.type_name field=param}},
-    {{/each}}
+      {{/each}}
 }
 
-impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{service:rust_name}}_{{function:name}} {
+impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{interface.rust_name}}_{{function.name}} {
     #[inline]{{! No cost because there's only one caller; with luck will mitigate move cost of args. }}
-    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "{{service:name}}.{{function:name}}"))]
+    #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "{{interface.name}}.{{function.name}}"))]
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
-            {{#each function:params.fields_by_name as |field|}}
-            ::fbthrift::Field::new("{{field.name}}", {{#partial types.protocol_ttype type=field.type}}, {{field.id}}),
-            {{/each}}
+      {{#each function.params.fields_by_name as |param|}}
+            ::fbthrift::Field::new("{{param.name}}", {{#partial types.protocol_ttype type=param.type}}, {{param.id}}),
+      {{/each}}
         ];
-        {{#function:args}}
-        let mut field_{{field:name}} = ::std::option::Option::None;
-        {{/function:args}}
+      {{#each function.params.fields as |param|}}
+        let mut field_{{param.name}} = ::std::option::Option::None;
+      {{/each}}
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
             match (fty, fid as ::std::primitive::i32) {
-                (::fbthrift::TType::Stop, _) => break,{{!
-                }}{{#function:args}}
-                ({{#partial types.protocol_ttype type=field:self.type}}, {{field:id}}) => {{!
-                    }}field_{{field:name}} = ::std::option::Option::Some({{!
-                    }}{{#if field:has_adapter?}}{{field:adapter_qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>({{/if field:has_adapter?}}{{!
-                    }}::anyhow::Context::context({{#partial fields.read field=field:self}}(p), ::fbthrift::errors::DeserializingArgError { arg: "{{field:name}}", function: "{{function:name}}"})?{{!
-                    }}{{#if field:has_adapter?}}, {{field:id}})?{{/if field:has_adapter?}}{{!
-                    }}),{{!
-                }}{{/function:args}}
+                (::fbthrift::TType::Stop, _) => break,
+      {{#each function.params.fields as |param|}}
+                ({{#partial types.protocol_ttype type=param.type}}, {{param.id}}) => {{#partial read_param function=function param=param}}
+      {{/each}}
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -55,11 +65,13 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{
         p.read_struct_end()?;
         {{! Use formatting in errors to try to maximize string sharing }}
         ::std::result::Result::Ok(Self {
-          {{#each function:params.fields as |param|}}
-            {{param.rust_name}}: field_{{param.name}}.ok_or_else(|| ::anyhow::anyhow!("`{}` missing arg `{}`", "{{service:name}}.{{function:name}}", "{{param.name}}"))?,
-          {{/each}}
+      {{#each function.params.fields as |param|}}
+            {{param.rust_name}}: field_{{param.name}}.ok_or_else(|| ::anyhow::anyhow!("`{}` missing arg `{}`", "{{interface.name}}.{{function.name}}", "{{param.name}}"))?,
+      {{/each}}
         })
     }
 }
 
-{{/if (not function:starts_interaction?)}}{{/service:functions}}
+    {{/if (not function.starts_interaction?)}}
+  {{/each}}
+{{/let partial}}

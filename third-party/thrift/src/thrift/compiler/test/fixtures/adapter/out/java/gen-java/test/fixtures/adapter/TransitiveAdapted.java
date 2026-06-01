@@ -30,18 +30,17 @@ public final class TransitiveAdapted implements com.facebook.thrift.payload.Thri
     }
 
 
-
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(TransitiveAdapted other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
 
-    public Builder() { }
+        public Builder() { }
         public Builder(TransitiveAdapted other) {
         }
 
@@ -52,16 +51,18 @@ public final class TransitiveAdapted implements com.facebook.thrift.payload.Thri
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("TransitiveAdapted");
-static {
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/TransitiveAdapted"),
-        TransitiveAdapted.class, TransitiveAdapted::read0));
+    static {
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/TransitiveAdapted"),
+            TransitiveAdapted.class, TransitiveAdapted::read0));
     }
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -89,33 +90,32 @@ static {
         return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<TransitiveAdapted> asReader() {
       return TransitiveAdapted::read0;
     }
 
     public static TransitiveAdapted read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(TransitiveAdapted.NAMES_TO_IDS, TransitiveAdapted.THRIFT_NAMES_TO_IDS, TransitiveAdapted.FIELD_METADATA);
-      TransitiveAdapted.Builder builder = new TransitiveAdapted.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(TransitiveAdapted.NAMES_TO_IDS, TransitiveAdapted.THRIFT_NAMES_TO_IDS, TransitiveAdapted.FIELD_METADATA);
+        TransitiveAdapted.Builder builder = new TransitiveAdapted.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _TransitiveAdaptedLazy {

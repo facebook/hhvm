@@ -57,6 +57,10 @@
 
 #pragma once
 
+// Json5 Protocol is only available in fbcode builds. THRIFT_HAS_JSON5_PROTOCOL
+// is defined via BUCK exported_preprocessor_flags on the Json5Protocol target.
+// It's not enabled on mobile/xplat since many targets blocklisted RE2 as deps.
+#ifdef THRIFT_HAS_JSON5_PROTOCOL
 #include <thrift/lib/cpp2/protocol/detail/Json5ProtocolReader.h>
 #include <thrift/lib/cpp2/protocol/detail/Json5ProtocolWriter.h>
 
@@ -175,3 +179,4 @@ class Json5ProtocolUtils final {
   }
 };
 } // namespace apache::thrift
+#endif

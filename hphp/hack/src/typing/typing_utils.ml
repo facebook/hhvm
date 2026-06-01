@@ -518,7 +518,7 @@ let run_on_intersection :
       let warnings_only =
         Diagnostics.filter err ~f:(fun _path error ->
             match error.User_diagnostic.severity with
-            | User_diagnostic.Warning -> true
+            | User_diagnostic.Warning _ -> true
             | User_diagnostic.Err -> false)
       in
       Diagnostics.merge_into_current warnings_only);

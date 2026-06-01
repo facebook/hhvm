@@ -25,6 +25,7 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/StreamMessage.h>
 #include <thrift/lib/cpp2/async/StreamPayload.h>
+#include <thrift/lib/cpp2/logging/ThriftBiDiLog.h>
 
 namespace apache::thrift {
 
@@ -38,7 +39,8 @@ class ServerBiDiStreamFactory {
       TilePtr&&,
       FirstResponsePayload&&,
       BiDiClientCallback*,
-      folly::EventBase*)>;
+      folly::EventBase*,
+      std::shared_ptr<ThriftBiDiLog>)>;
 
  public:
   /**
@@ -81,9 +83,13 @@ class ServerBiDiStreamFactory {
             TilePtr&& /* interaction */,
             FirstResponsePayload&& payload,
             BiDiClientCallback* clientCb,
-            folly::EventBase* evb) mutable -> void {
+            folly::EventBase* evb,
+            std::shared_ptr<ThriftBiDiLog> biDiLog) mutable -> void {
       if (contextStack) {
         contextStack->onBiDiSubscribe();
+      }
+      if (biDiLog) {
+        biDiLog->log(detail::BiDiSubscribeEvent{});
       }
 
       auto stapled = new ServerCallbackStapler();
@@ -91,6 +97,9 @@ class ServerBiDiStreamFactory {
           new ServerBiDiStreamBridge(stapled, evb, contextStack);
       auto sinkBridge = new ServerBiDiSinkBridge(stapled, evb, contextStack);
       stapled->setContextStack(contextStack);
+      stapled->setBiDiLog(biDiLog);
+      streamBridge->setBiDiLog(biDiLog);
+      sinkBridge->setBiDiLog(biDiLog);
       stapled->setSinkServerCallback(sinkBridge);
       stapled->setStreamServerCallback(streamBridge);
       stapled->resetClientCallback(*clientCb);
@@ -120,6 +129,13 @@ class ServerBiDiStreamFactory {
 
   void setInteraction(TilePtr&& interaction);
 
+  void setMethodName(std::string_view methodName) { methodName_ = methodName; }
+  std::string_view getMethodName() const { return methodName_; }
+
+  void setBiDiLog(std::shared_ptr<ThriftBiDiLog> biDiLog) {
+    biDiLog_ = std::move(biDiLog);
+  }
+
   bool valid() const;
 
   std::chrono::milliseconds getChunkTimeout() const { return chunkTimeout_; }
@@ -141,6 +157,8 @@ class ServerBiDiStreamFactory {
   std::shared_ptr<ContextStack> contextStack_{nullptr};
   TilePtr interaction_{};
   std::chrono::milliseconds chunkTimeout_{0};
+  std::string_view methodName_;
+  std::shared_ptr<ThriftBiDiLog> biDiLog_;
 };
 
 } // namespace detail

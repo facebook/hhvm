@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -172,12 +173,20 @@ struct TargetProfile {
    */
   void data(T& out, uint32_t size) const {
     assertx(optimizing());
-    for (auto const& link : m_links) {
-      if (link.bound()) {
-        reduce(out, link.handle(), size);
+    auto s = profDataTargetProfile();
+    if (s) {
+      for (auto const& key : m_keys) {
+        if (auto const v = s->get<T>(key)) {
+          detail::call_reduce(out, *v, size);
+        }
+      }
+    } else {
+      for (auto const& link : getLinks()) {
+        if (link.bound()) {
+          reduce(out, link.handle(), size);
+        }
       }
     }
-
     if (Cfg::Eval::DumpTargetProfiles) {
       for (auto const& key : m_keys) {
         detail::addTargetProfileInfo(key, detail::call_tostring(out, size));
@@ -185,9 +194,9 @@ struct TargetProfile {
     }
   }
 
-  T data(uint32_t size = sizeof(T)) const {
+  T data() const {
     auto accum = T{};
-    data(accum, size);
+    data(accum, sizeof(T));
     return accum;
   }
 
@@ -200,10 +209,18 @@ struct TargetProfile {
   bool profiling() const {
     return isProfiling(m_kind);
   }
+
   bool optimizing() const {
     if (!isOptimized(m_kind)) return false;
-    for (auto const& link : m_links) {
-      if (link.bound()) return true;
+    auto s = profDataTargetProfile();
+    if (s) {
+      for (auto const& key : m_keys) {
+        if (s->get<T>(key)) return true;
+      }
+    } else {
+      for (auto const& link : getLinks()) {
+        if (link.bound()) return true;
+      }
     }
     return false;
   }
@@ -213,13 +230,13 @@ struct TargetProfile {
    */
   rds::Handle handle() const {
     assertx(profiling());
-    assertx(m_links.size() == 1);
-    return m_links.front().handle();
+    assertx(getLinks().size() == 1);
+    return getLinks().front().handle();
   }
   T& value() const {
     assertx(profiling());
-    assertx(m_links.size() == 1);
-    return *m_links.front();
+    assertx(getLinks().size() == 1);
+    return *getLinks().front();
   }
 
 private:
@@ -229,8 +246,8 @@ private:
                 const StringData* name,
                 size_t extraSize)
     : m_kind(kind)
-    , m_links(createLinks(profTransIDs, kind, bcOff, name, extraSize))
     , m_keys(createKeys(profTransIDs, bcOff, name))
+    , m_extraSize(extraSize)
   {}
 
   static constexpr Offset kPrologueOffset = -1;
@@ -276,24 +293,14 @@ private:
   }
 
   static jit::vector<rds::Link<T, rds::Mode::Local>>
-  createLinks(const TransIDSet& profTransIDs,
+  createLinks(const jit::vector<rds::Profile>& keys,
               TransKind kind,
-              Offset bcOff,
-              const StringData* name,
               size_t extraSize) {
-    auto const size = profTransIDs.size();
-    // NB: size can be zero during tracelet formation. In this case, create a
-    // dummy link corresponding to kInvalidTransID.
-    if (size == 0) {
-      jit::vector<rds::Link<T, rds::Mode::Local>> links;
-      links.push_back(createLink(kInvalidTransID, kind, bcOff, name,
-                                 extraSize));
-      return links;
-    }
+    assertx(!keys.empty());
     jit::vector<rds::Link<T, rds::Mode::Local>> links;
-    links.reserve(size);
-    for (auto tid : profTransIDs) {
-      links.push_back(createLink(tid, kind, bcOff, name, extraSize));
+    links.reserve(keys.size());
+    for (auto key : keys) {
+      links.push_back(createLink(key.transId, kind, key.bcOff, key.name, extraSize));
     }
     return links;
   }
@@ -318,10 +325,20 @@ private:
     return keys;
   }
 
+  jit::vector<rds::Link<T, rds::Mode::Local>> getLinks() const {
+    if (!m_links.empty()) {
+      return m_links;
+    }
+
+    m_links = createLinks(m_keys, m_kind, m_extraSize);
+    return m_links;
+  }
+
 private:
   const TransKind m_kind;
-  const jit::vector<rds::Link<T, rds::Mode::Local>> m_links;
+  mutable jit::vector<rds::Link<T, rds::Mode::Local>> m_links = {};
   const jit::vector<rds::Profile> m_keys;
+  const uint32_t m_extraSize;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

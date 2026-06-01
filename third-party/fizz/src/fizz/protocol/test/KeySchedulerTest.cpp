@@ -38,7 +38,8 @@ class KeySchedulerTest : public testing::Test {
 TEST_F(KeySchedulerTest, TestEarly) {
   StringPiece psk{"psk"};
   EXPECT_CALL(*kd_, hkdfExtract(_, _));
-  ks_->deriveEarlySecret(psk);
+  Error err;
+  EXPECT_EQ(ks_->deriveEarlySecret(err, psk), Status::Success);
   EXPECT_CALL(*kd_, deriveSecret(_, _, _, _)).Times(4);
   ks_->getSecret(EarlySecrets::ExternalPskBinder, transcript_);
   ks_->getSecret(EarlySecrets::ResumptionPskBinder, transcript_);
@@ -68,7 +69,8 @@ TEST_F(KeySchedulerTest, TestEarly) {
 TEST_F(KeySchedulerTest, TestEarlyEcdhe) {
   StringPiece psk{"psk"};
   EXPECT_CALL(*kd_, hkdfExtract(_, _));
-  ks_->deriveEarlySecret(psk);
+  Error err;
+  EXPECT_EQ(ks_->deriveEarlySecret(err, psk), Status::Success);
   EXPECT_CALL(*kd_, deriveSecret(_, _, _, _)).Times(4);
   ks_->getSecret(EarlySecrets::ExternalPskBinder, transcript_);
   ks_->getSecret(EarlySecrets::ResumptionPskBinder, transcript_);

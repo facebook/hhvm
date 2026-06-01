@@ -388,9 +388,9 @@ TCA handlePostInterpRet(uint32_t callOffAndFlags) noexcept {
   return resume(sk, getTranslation(sk));
 }
 
-TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs) {
-  TRACE(2, "bindCall %s, numArgs %d\n", func->fullName()->data(), numArgs);
-  auto const trans = mcgen::getFuncPrologue(func, numArgs);
+TCA handleBindCall(TCA toSmash, Func* func, int32_t numPosArgs) {
+  TRACE(2, "bindCall %s, numArgs %d\n", func->fullName()->data(), numPosArgs);
+  auto const trans = mcgen::getFuncPrologue(func, numPosArgs);
   TRACE(2, "bindCall immutably %s -> %p\n",
         func->fullName()->data(), trans.addr());
 
@@ -402,13 +402,13 @@ TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs) {
       toSmash,
       tc::ustubs().fcallHelperNoTranslateThunk,
       func,
-      numArgs
+      numPosArgs
     );
     return tc::ustubs().fcallHelperNoTranslateThunk;
   } else if (trans.addr()) {
     // Using start is racy but bindCall will recheck the start address after
     // acquiring a lock on the ProfTransRec
-    tc::bindCall(toSmash, trans.addr(), func, numArgs);
+    tc::bindCall(toSmash, trans.addr(), func, numPosArgs);
     return trans.addr();
   } else {
     // We couldn't get a prologue address. Return a stub that will finish

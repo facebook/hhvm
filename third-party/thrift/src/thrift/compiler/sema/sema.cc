@@ -620,55 +620,6 @@ void update_annotations(
   node.reset_annotations(std::move(annotations));
 }
 
-// Updates field or typedef's type field to hold annotations
-template <typename Node>
-void add_annotations_to_node_type(
-    Node& node,
-    std::map<std::string, std::string> annotations,
-    t_program& program,
-    deprecated_annotation_value::origin origin) {
-  const t_type* node_type = node.type().get_type();
-
-  if (annotations.empty()) {
-    if (!node_type->unstructured_annotations().empty()) {
-      update_annotations(const_cast<t_type&>(*node_type));
-    }
-    return;
-  }
-
-  if (node_type->is<t_container>() ||
-      (node_type->is<t_typedef>() &&
-       static_cast<const t_typedef*>(node_type)->typedef_kind() !=
-           t_typedef::kind::defined) ||
-      (node_type->is<t_primitive_type>() &&
-       !node_type->unstructured_annotations().empty())) {
-    // This is a new type we can modify in place
-    update_annotations(
-        const_cast<t_type&>(*node_type), std::move(annotations), origin);
-  } else if (
-      const t_primitive_type* primitive =
-          node_type->try_as<t_primitive_type>()) {
-    // Copy type as we don't handle unnamed typedefs to base types :(
-    auto unnamed = std::make_unique<t_primitive_type>(*primitive);
-    for (auto& pair : annotations) {
-      unnamed->set_unstructured_annotation(pair.first, pair.second, {}, origin);
-    }
-    node.set_type(t_type_ref::from_ptr(unnamed.get()));
-    program.add_unnamed_type(std::move(unnamed));
-  } else {
-    // Wrap in an unnamed typedef :(
-    auto unnamed = t_typedef::make_unnamed(
-        const_cast<t_program*>(node_type->program()),
-        node_type->name(),
-        t_type_ref::from_ptr(node_type));
-    for (auto& pair : annotations) {
-      unnamed->set_unstructured_annotation(pair.first, pair.second, {}, origin);
-    }
-    node.set_type(t_type_ref::from_ptr(unnamed.get()));
-    program.add_unnamed_typedef(std::move(unnamed));
-  }
-}
-
 void lower_deprecated_annotations(
     sema_context& ctx, mutator_context&, t_named& node) {
   if (auto cnst = node.find_structured_annotation_or_null(
@@ -728,32 +679,6 @@ void normalize_return_type(
   }
 }
 
-template <typename Node>
-void lower_cpp_type_annotations(
-    sema_context& ctx, mutator_context& mctx, Node& node) {
-  std::map<std::string, std::string> unstructured;
-
-  if (!ctx.sema_parameters().skip_lowering_cpp_type_annotations) {
-    if (const t_const* annot =
-            node.find_structured_annotation_or_null(kCppTypeUri)) {
-      if (auto type =
-              annot->get_value_from_structured_annotation_or_null("name")) {
-        unstructured.insert({"cpp.type", type->get_string()});
-      } else if (
-          auto tmplate =
-              annot->get_value_from_structured_annotation_or_null("template")) {
-        unstructured.insert({"cpp.template", tmplate->get_string()});
-      }
-    }
-  }
-
-  add_annotations_to_node_type(
-      node,
-      std::move(unstructured),
-      mctx.program(),
-      deprecated_annotation_value::origin::lowered_cpp_type);
-}
-
 void inject_schema_const(sema_context& ctx, mutator_context&, t_program& prog) {
   if (prog.has_structured_annotation(kDisableSchemaConstUri)) {
     return;
@@ -777,7 +702,7 @@ void inject_schema_const(sema_context& ctx, mutator_context&, t_program& prog) {
   auto cnst = std::make_unique<t_const>(
       &prog,
       t_primitive_type::t_binary(),
-      detail::schematizer::name_schema(ctx.source_mgr(), prog),
+      detail::schematizer::schema_const_name(ctx.source_mgr(), prog),
       std::make_unique<t_const_value>(std::move(serialized)));
   // Since schema injection happens after 'match_const_type_with_value' mutator
   // we need to set the explicitly type to binary here.
@@ -827,17 +752,22 @@ std::vector<ast_mutator> pre_validation_standard_mutators() {
   std::vector<ast_mutator> mutators;
 
   ast_mutator initial;
-  initial.add_field_visitor(&lower_cpp_type_annotations<t_field>);
-  // Strip hs.* annotations from typedef inner types. This was previously a
-  // side effect of lowering @cpp.Type on typedefs (which is no longer done).
-  initial.add_typedef_visitor(
-      [](sema_context&, mutator_context& mctx, t_typedef& node) {
-        add_annotations_to_node_type(
-            node,
-            {},
-            mctx.program(),
-            deprecated_annotation_value::origin::lowered_cpp_type);
-      });
+  // For fields with @cpp.Type on a container type (unique per field
+  // declaration), propagate the structured annotation to the type node so
+  // consumers that resolve types from the type node (e.g. ThriftCppUtils)
+  // can see it.
+  initial.add_field_visitor([](sema_context&, mutator_context&, t_field& node) {
+    if (const auto* annot =
+            node.find_structured_annotation_or_null(kCppTypeUri)) {
+      const t_type* node_type = node.type().get_type();
+      if (node_type->is<t_container>()) {
+        auto generated_annot = annot->clone();
+        generated_annot->set_generated();
+        const_cast<t_type&>(*node_type)
+            .add_structured_annotation(std::move(generated_annot));
+      }
+    }
+  });
   initial.add_function_visitor(&normalize_return_type);
   initial.add_named_visitor(&lower_deprecated_annotations);
   mutators.push_back(std::move(initial));

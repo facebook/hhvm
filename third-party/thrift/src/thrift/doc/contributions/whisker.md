@@ -489,14 +489,219 @@ There are no people.
 
 </Example>
 
+#### Separator
+
+The `{{#each}}` block supports an optional `separator` parameter that inserts a string
+between iterations:
+
+```
+{{#each <iterable> [as |<captures>|] [separator=<expression>]}}
+  <body>
+{{/each}}
+```
+
+The separator expression is evaluated **once** — lazily on the first iteration — and
+must produce a string value. If the array is empty (and the `{{#else}}` clause is used),
+the separator expression is not evaluated. The separator is written to the output before
+each non-first iteration.
+The expression can be a string literal (`separator=", "`), a variable lookup
+(`separator=my_sep`), or a function call (`separator=(string.concat "," " ")`).
+
+<Example title="Comma-separated list">
+
+```whisker
+{{#each items as |item| separator=", " ~}}
+    {{~ item ~}}
+{{~ /each}}
+```
+
+```json title=Context
+{"items": ["alpha", "beta", "gamma"]}
+```
+
+```text title=Output
+alpha, beta, gamma
+```
+
+</Example>
+
+<Example title="Single item produces no separator">
+
+```whisker
+{{#each items as |item| separator=", " ~}}
+    {{~ item ~}}
+{{~ /each}}
+```
+
+```json title=Context
+{"items": ["only"]}
+```
+
+```text title=Output
+only
+```
+
+</Example>
+
+<Example title="Empty separator concatenates iterations">
+
+```whisker
+{{#each chars as |c| separator="" ~}}
+    {{~ c ~}}
+{{~ /each}}
+```
+
+```json title=Context
+{"chars": ["a", "b", "c"]}
+```
+
+```text title=Output
+abc
+```
+
+</Example>
+
+<Example title="Separator from variable or function call">
+
+The separator can be any expression that evaluates to a string — a literal, a variable
+lookup, or a function call:
+
+```whisker
+{{#each items as |item| separator=my_separator ~}}
+    {{~ item ~}}
+{{~ /each}}
+```
+
+```json title=Context
+{"items": ["x", "y", "z"], "my_separator": " | "}
+```
+
+```text title=Output
+x | y | z
+```
+
+</Example>
+
+<Example title="Building a function call with separator">
+
+A common pattern in code generation — building a comma-separated argument list:
+
+```whisker
+fn {{func_name}}(
+    {{~ #each args as |arg| separator=", " ~}}
+    {{~ arg.type}} {{arg.name ~}}
+    {{~ /each ~}}
+)
+```
+
+```json title=Context
+{
+  "func_name": "process",
+  "args": [
+    {"type": "int", "name": "count"},
+    {"type": "string", "name": "label"},
+    {"type": "bool", "name": "verbose"}
+  ]
+}
+```
+
+```text title=Output
+fn process(int count, string label, bool verbose)
+```
+
+Note the use of tildes (`~`) to strip template indentation and newlines. The separator
+inserts `, ` between arguments. Without tildes, the template whitespace would appear in
+the output — the separator parameter does not implicitly trim iteration output.
+
+</Example>
+
+<Example title="Separator with #else for empty arrays">
+
+The `{{#else}}` clause is supported and renders when the iterable is empty:
+
+```whisker
+[{{#each items as |item| separator=", " ~}}
+    {{~ item ~}}
+{{~ #else ~}}
+    empty
+{{~ /each}}]
+```
+
+```json title=Context
+{"items": []}
+```
+
+```text title=Output
+[empty]
+```
+
+</Example>
+
+##### Whitespace Control
+
+The separator parameter does **not** implicitly trim whitespace from each iteration's
+output. It behaves identically to `{{#each}}` without `separator`, except that the
+separator string is written between iterations.
+
+To produce single-line output from multi-line template source, use
+[tilde trimming](#tilde-whitespace-trimming) on the `{{#each}}`, body tags, and
+`{{/each}}` tags:
+
+```whisker
+{{! Without tildes — template whitespace leaks into output: }}
+{{#each items as |item| separator=", "}}
+    {{item}}
+{{/each}}
+{{! Output: "    alpha\n,     beta\n,     gamma\n" }}
+
+{{! With tildes — clean single-line output: }}
+{{#each items as |item| separator=", " ~}}
+    {{~ item ~}}
+{{~ /each}}
+{{! Output: "alpha, beta, gamma" }}
+```
+
+##### Interaction with Conditional Content
+
+If a conditional within the loop body produces empty output for some iterations, the
+separator is still inserted. Use array filtering upstream to exclude items:
+
+<Example title="Separator is inserted even for empty iterations">
+
+```whisker
+{{#each items as |item| separator=", " ~}}
+    {{~ #if item.visible ~}}{{item.name}}{{~ /if ~}}
+{{~ /each}}
+```
+
+```json title=Context
+{
+  "items": [
+    {"name": "a", "visible": true},
+    {"name": "b", "visible": false},
+    {"name": "c", "visible": true}
+  ]
+}
+```
+
+```text title=Output
+a, , c
+```
+
+Note the empty segment between separators — the separator is inserted between every
+pair of iterations regardless of whether the body produces output.
+
+</Example>
+
 <Grammar>
 
 ```
-each-block         → { each-block-open ~ body* ~ else-block ~ each-block-close }
-each-block-open    → { "{{" ~ "#" ~ "each" ~ expression ~ each-block-capture? ~ "}}" }
-each-block-capture → { "as" ~ "|" ~ identifier+ ~ "|" }
-else-block         → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
-each-block-close   → { "{{" ~ "/" ~ "each" ~ "}}"  }
+each-block          → { each-block-open ~ body* ~ else-block ~ each-block-close }
+each-block-open     → { "{{" ~ "#" ~ "each" ~ expression ~ each-block-capture? ~ separator-clause? ~ "}}" }
+each-block-capture  → { "as" ~ "|" ~ identifier+ ~ "|" }
+separator-clause    → { "separator" ~ "=" ~ expression }
+else-block          → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
+each-block-close    → { "{{" ~ "/" ~ "each" ~ "}}"  }
 ```
 
 </Grammar>
@@ -1479,7 +1684,366 @@ Whisker supports such behavior to retain compatibility with [`mstch`](https://gi
 
 </Example>
 
+## Tilde Whitespace Trimming
+
+[Standalone line stripping](#standalone-tags) automatically removes lines that contain only tags. However, there are cases where this is insufficient — inline conditionals, multi-tag lines where some tags produce output, or situations where template structure and output structure intentionally diverge. For these cases, Whisker supports **tilde whitespace trimming**.
+
+Adding a `~` inside the `{{`/`}}` delimiters strips whitespace (including newlines) on the indicated side of the tag:
+
+* `{{~ expr }}` — **left tilde**: strips all adjacent whitespace *before* the tag.
+* `{{ expr ~}}` — **right tilde**: strips all adjacent whitespace *after* the tag.
+* `{{~ expr ~}}` — **both tildes**: strips whitespace on both sides.
+* `{{ expr }}` — **no tildes**: no trimming (status quo).
+
+Whitespace **must** separate the `~` from the tag content. This is a deliberate readability constraint:
+
+```whisker
+{{~ #if condition ~}}     ✓  Correct — tilde is visually distinct
+{{~#if condition~}}       ✗  Parse error — no whitespace after/before tilde
+```
+
+Tilde trimming applies to interpolations (`{{ }}`), blocks (`{{# }}`), closing tags (`{{/ }}`), statements (`{{# }}`), macros (`{{> }}`), partial statements, and comments (`{{! }}`). Import statements (`{{#import}}`) do not support tilde trimming.
+
+<Grammar>
+
+```
+template-open  → { "{{" ~ "~"? }
+template-close → { "~"? ~ "}}" }
+```
+
+When a `~` is present, whitespace is required between it and the tag content.
+
+</Grammar>
+
+Left tilde strips **all** adjacent whitespace characters (spaces, tabs, newlines) before the tag in the template source, up to the nearest non-whitespace content or tag boundary. Right tilde strips **all** adjacent whitespace characters after the tag, up to the nearest non-whitespace content or tag boundary.
+
+:::note
+Tilde trimming only strips **template whitespace** — whitespace that appears literally in the template source text. Whitespace that originates from **interpolation output** (the result of evaluating an expression like `{{name}}`) is never stripped. Tildes walk through the token stream and stop at tag boundaries (`{{` and `}}`), so they cannot cross into adjacent tags or affect their output.
+:::
+
+<Example title="Left tilde">
+
+```whisker title=example.whisker
+foo   {{~ bar}}
+```
+
+```json title=Context
+{ "bar": "BAR" }
+```
+
+```text title=Output
+fooBAR
+```
+
+The three spaces between `foo` and the tag are stripped by the left tilde.
+
+</Example>
+
+<Example title="Right tilde">
+
+```whisker title=example.whisker
+{{bar ~}}   baz
+```
+
+```json title=Context
+{ "bar": "BAR" }
+```
+
+```text title=Output
+BARbaz
+```
+
+The three spaces after the tag are stripped by the right tilde.
+
+</Example>
+
+<Example title="Both tildes">
+
+```whisker title=example.whisker
+  {{~ bar ~}}
+```
+
+```json title=Context
+{ "bar": "BAR" }
+```
+
+```text title=Output
+BAR
+```
+
+</Example>
+
+<Example title="Stripping across newlines">
+
+```whisker title=example.whisker
+foo
+  {{~ bar}}
+```
+
+```json title=Context
+{ "bar": "BAR" }
+```
+
+```text title=Output
+fooBAR
+```
+
+The left tilde strips the newline after `foo` and the two spaces of indentation.
+
+</Example>
+
+<Example title="Interpolation output is not stripped">
+
+Tilde trimming only strips template whitespace — whitespace written literally in the template. Whitespace that comes from interpolation output is preserved.
+
+```whisker title=example.whisker
+{{a}}  {{~ b}}
+```
+
+```json title=Context
+{ "a": "hello  ", "b": "world" }
+```
+
+```text title=Output
+hello  world
+```
+
+The left tilde on `b` strips the two template spaces between the tags. However, the trailing spaces in `a`'s interpolation output (`"hello  "`) are **not** stripped — they are part of the rendered value, not template text.
+
+</Example>
+
+<Example title="Right tilde does not strip interpolation output">
+
+```whisker title=example.whisker
+{{a ~}}  {{b}}
+```
+
+```json title=Context
+{ "a": "X", "b": "  world" }
+```
+
+```text title=Output
+X  world
+```
+
+The right tilde on `a` strips the two template spaces after the tag. The leading spaces in `b`'s output (`"  world"`) are preserved because they are interpolation output.
+
+</Example>
+
+<Example title="Whitespace-only interpolation is preserved">
+
+Even if an interpolation produces only whitespace, tildes do not strip it.
+
+```whisker title=example.whisker
+before  {{~ spacer ~}}  after
+```
+
+```json title=Context
+{ "spacer": "   " }
+```
+
+```text title=Output
+before   after
+```
+
+The tildes strip the template spaces around the tag, but `spacer`'s three-space output is preserved intact.
+
+</Example>
+
+<Example title="Inline conditional content">
+
+Tildes strip whitespace, joining content from adjacent lines. Since a tilde prevents standalone stripping, use both tildes to control whitespace on both sides:
+
+```whisker title=example.whisker
+{{~ #if has_namespace ~}}
+    namespace {{namespace}} {
+{{/if has_namespace}}
+```
+
+```json title=Context
+{
+  "has_namespace": true,
+  "namespace": "my_ns"
+}
+```
+
+The left `~` strips any whitespace before the tag, and the right `~` eats the newline and the 4 spaces of the next line's indentation.
+
+```text title=Output
+namespace my_ns {
+```
+
+</Example>
+
+<Example title="Derive macro">
+
+```whisker title=example.whisker
+#[derive(
+    {{~ #if copy? }}Copy, {{/if copy? ~}}
+    Clone, PartialEq
+    {{~ #if ord? }}, Eq, PartialOrd, Ord, Hash{{/if ord? ~}}
+    {{~ #if serde? }}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/if serde? ~}}
+)]
+```
+
+```json title=Context
+{
+  "copy?": true,
+  "ord?": true,
+  "serde?": false
+}
+```
+
+```text title=Output
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+```
+
+Conditional derive traits are inlined without the `{{!` comment hack that was previously needed.
+
+</Example>
+
+<Example title="Untaken branch">
+
+When an `{{#if}}` condition is false and there is no `{{#else}}`, a right tilde on the opening tag strips whitespace *through* the empty block.
+
+```whisker title=example.whisker
+before  {{~ #if cond ~}}  skipped  {{~ /if cond ~}}  after
+```
+
+```json title=Context
+{ "cond": false }
+```
+
+```text title=Output
+beforeafter
+```
+
+The block body is not rendered. The right tilde on `{{#if ~}}` strips whitespace after the opening tag (into the body), and the left tilde on `{{~ /if}}` strips whitespace before the closing tag (end of the body). The right tilde on `{{/if ~}}` strips whitespace after the closing tag. Together, all whitespace between `before` and `after` is removed.
+
+</Example>
+
+### Tilde on Comments
+
+Comments (`{{! }}` and `{{!-- --}}`) support tilde trimming with the same rules as other tags. This is useful when a comment appears inline and you want to suppress surrounding whitespace:
+
+<Example title="Comment with tildes">
+
+```whisker title=example.whisker
+foo   {{~ ! annotation ~}}   bar
+```
+
+```text title=Output
+foobar
+```
+
+The left tilde strips the spaces after `foo`, and the right tilde strips the spaces before `bar`. The comment produces no output, so the result is `foobar`.
+
+</Example>
+
+Escaped comments require whitespace between `--` and `~}}`:
+
+```whisker
+{{~ !-- long comment --}}        left tilde
+{{!-- long comment -- ~}}        right tilde
+{{~ !-- long comment -- ~}}      both tildes
+```
+
+### Interaction with Standalone Line Stripping
+
+Tilde trimming and [standalone line stripping](#standalone-tags) are **mutually exclusive** mechanisms:
+
+- **Standalone stripping** is automatic and handles the common case: lines containing only tags are removed entirely.
+- **Tilde trimming** is explicit and handles edge cases where standalone stripping is insufficient.
+
+A line containing any tag with a tilde (`~`) is **not standalone-eligible**. When a template author uses a tilde, they opt into explicit whitespace control, and the automatic standalone mechanism steps aside. This ensures unsurprising behavior: tildes and standalone never interact, so there is no "double-stripping." If you want whitespace stripped on both sides of a tag, use both tildes (`{{~ expr ~}}`).
+
+<Example title="Both tildes for full whitespace control">
+
+```whisker title=example.whisker
+    {{~ #if has_namespace ~}}
+    namespace {{namespace}} {
+    {{/if has_namespace}}
+```
+
+```json title=Context
+{
+  "has_namespace": true,
+  "namespace": "my_ns"
+}
+```
+
+```text title=Output
+namespace my_ns {
+```
+
+The `{{~ #if ~}}` tag has tildes, so its line is **not** standalone-stripped. Instead, the left `~` strips the 4 spaces of leading indentation, and the right `~` strips the newline and the 4 spaces of the next line's indentation — producing `namespace my_ns {` with no leading whitespace.
+
+Note that both tildes are needed. A right-only tilde (`{{#if has_namespace ~}}`) would preserve the leading indent because the line is not standalone.
+
+</Example>
+
+#### Behavior Matrix
+
+The following table summarizes the interaction between standalone stripping and tilde trimming:
+
+| Template Line | Standalone? | Tildes | Behavior |
+|---|---|---|---|
+| `    {{#if x}}` | Yes | None | Line removed (standalone). |
+| `    {{#if x ~}}` | No | Right | Not standalone (has tilde). `~` strips whitespace/newline to the right. Leading indent preserved. |
+| `    {{~ #if x}}` | No | Left | Not standalone (has tilde). `~` strips whitespace/newline to the left. Trailing newline preserved. |
+| `    {{~ #if x ~}}` | No | Both | Not standalone (has tilde). `~` strips whitespace on both sides. |
+| `foo {{#if x}}` | No | None | Tag removed; surrounding text and whitespace preserved. |
+| `foo {{~ #if x}}` | No | Left | Tag removed; `~` eats whitespace between `foo` and the tag. |
+| `foo {{#if x ~}}` | No | Right | Tag removed; `~` eats whitespace/newline after the tag. |
+
 ## Built-in functions
+
+### `newline`
+
+A built-in string constant containing a newline character (`"\n"`).
+Since `newline` forms an interpolation, it can be used in conjunction with whitespace control features such as tilde whitespace trimming or standalone lines to get the desired output.
+
+<Example>
+
+```whisker title=example.whisker
+first line{{newline}}second line
+```
+
+```text title=Output
+first line
+second line
+```
+
+</Example>
+
+<Example title="Example with tilde stripping">
+
+When using tildes to build single-line output, `{{newline}}` can reintroduce line breaks where needed.
+
+```whisker title=example.whisker
+{{~ #if has_doc ~}}
+  {{~ doc ~}}
+  {{~ newline ~}}
+{{~ /if ~}}
+void {{name}}();
+```
+
+```json title=Context
+{
+  "has_doc": true,
+  "doc": "// Does important things.",
+  "name": "process"
+}
+```
+
+```text title=Output
+// Does important things.
+void process();
+```
+
+Without `{{newline}}`, the tildes would collapse everything into `// Does important things.void process();`. Here, `{{newline}}` inserts an explicit line break between the doc comment and the declaration.
+
+</Example>
 
 ### Boolean logic
 

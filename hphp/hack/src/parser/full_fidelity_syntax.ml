@@ -232,7 +232,6 @@ module WithToken (Token : TokenType) = struct
       | GenericTypeSpecifier _ -> SyntaxKind.GenericTypeSpecifier
       | NullableTypeSpecifier _ -> SyntaxKind.NullableTypeSpecifier
       | LikeTypeSpecifier _ -> SyntaxKind.LikeTypeSpecifier
-      | SoftTypeSpecifier _ -> SyntaxKind.SoftTypeSpecifier
       | AttributizedSpecifier _ -> SyntaxKind.AttributizedSpecifier
       | ReifiedTypeArgument _ -> SyntaxKind.ReifiedTypeArgument
       | TypeArguments _ -> SyntaxKind.TypeArguments
@@ -632,8 +631,6 @@ module WithToken (Token : TokenType) = struct
     let is_nullable_type_specifier = has_kind SyntaxKind.NullableTypeSpecifier
 
     let is_like_type_specifier = has_kind SyntaxKind.LikeTypeSpecifier
-
-    let is_soft_type_specifier = has_kind SyntaxKind.SoftTypeSpecifier
 
     let is_attributized_specifier = has_kind SyntaxKind.AttributizedSpecifier
 
@@ -2525,10 +2522,6 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc like_tilde in
         let acc = f acc like_type in
         acc
-      | SoftTypeSpecifier { soft_at; soft_type } ->
-        let acc = f acc soft_at in
-        let acc = f acc soft_type in
-        acc
       | AttributizedSpecifier
           { attributized_specifier_attribute_spec; attributized_specifier_type }
         ->
@@ -4316,7 +4309,6 @@ module WithToken (Token : TokenType) = struct
       | NullableTypeSpecifier { nullable_question; nullable_type } ->
         [nullable_question; nullable_type]
       | LikeTypeSpecifier { like_tilde; like_type } -> [like_tilde; like_type]
-      | SoftTypeSpecifier { soft_at; soft_type } -> [soft_at; soft_type]
       | AttributizedSpecifier
           { attributized_specifier_attribute_spec; attributized_specifier_type }
         ->
@@ -6120,7 +6112,6 @@ module WithToken (Token : TokenType) = struct
         ["nullable_question"; "nullable_type"]
       | LikeTypeSpecifier { like_tilde; like_type } ->
         ["like_tilde"; "like_type"]
-      | SoftTypeSpecifier { soft_at; soft_type } -> ["soft_at"; "soft_type"]
       | AttributizedSpecifier
           { attributized_specifier_attribute_spec; attributized_specifier_type }
         ->
@@ -8144,8 +8135,6 @@ module WithToken (Token : TokenType) = struct
         NullableTypeSpecifier { nullable_question; nullable_type }
       | (SyntaxKind.LikeTypeSpecifier, [like_tilde; like_type]) ->
         LikeTypeSpecifier { like_tilde; like_type }
-      | (SyntaxKind.SoftTypeSpecifier, [soft_at; soft_type]) ->
-        SoftTypeSpecifier { soft_at; soft_type }
       | ( SyntaxKind.AttributizedSpecifier,
           [attributized_specifier_attribute_spec; attributized_specifier_type]
         ) ->
@@ -10703,11 +10692,6 @@ module WithToken (Token : TokenType) = struct
 
       let make_like_type_specifier like_tilde like_type =
         let syntax = LikeTypeSpecifier { like_tilde; like_type } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_soft_type_specifier soft_at soft_type =
-        let syntax = SoftTypeSpecifier { soft_at; soft_type } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 

@@ -126,8 +126,8 @@ class map {
    *      lookups.
    *   2. *Technically* neither std::map or std::unordered_map are supposed to
    *      be instantiated with an incomplete type. However, the standard library
-   *      implementations we use do support it. We know this because mstch has
-   *      been doing this for years in production at this point.
+   *      implementations we use do support it. We know this because we have
+   *      been relying on this for years in production at this point.
    *      std::unordered_map actually breaks for incomplete types in practice.
    */
   using raw = std::map<std::string, object, std::less<>>;

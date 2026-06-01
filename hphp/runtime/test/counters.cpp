@@ -108,13 +108,13 @@ TEST(COUNTERS, expensive_test) {
   int expensive_calls = 0;
   int cheap_calls = 0;
   auto expensive_counter_callback = ServiceData::ExpensiveCounterCallback(
-    [&](std::map<std::string, int64_t>& counters) {
+    [&](ServiceData::CounterMap& counters) {
       counters.emplace("expensive_key", 42);
       ++expensive_calls;
     }
   );
   auto _ = ServiceData::CounterCallback(
-    [&](std::map<std::string, int64_t>& counters) {
+    [&](ServiceData::CounterMap& counters) {
       ++cheap_calls;
       counters.emplace("cheap_key", 1337);
     }
@@ -172,7 +172,7 @@ TEST(COUNTERS, selected_counters_test) {
   int expensive_calls = 0;
   int cheap_calls = 0;
   auto _1 = ServiceData::ExpensiveCounterCallback(
-    [&](std::map<std::string, int64_t>& counters) {
+    [&](ServiceData::CounterMap& counters) {
       static int key_value = 0;
       counters.emplace("expensive_key", 10 + key_value);
       counters.emplace("expensive_key_2", 15 + key_value);
@@ -181,7 +181,7 @@ TEST(COUNTERS, selected_counters_test) {
     }
   );
   auto _2 = ServiceData::CounterCallback(
-    [&](std::map<std::string, int64_t>& counters) {
+    [&](ServiceData::CounterMap& counters) {
       static int key_value = 0;
       counters.emplace("cheap_key", 100 + key_value++);
       ++cheap_calls;
@@ -190,7 +190,7 @@ TEST(COUNTERS, selected_counters_test) {
 
   int cheap_two_calls = 0;
   auto _3 = ServiceData::CounterCallback(
-    [&](std::map<std::string, int64_t>& counters) {
+    [&](ServiceData::CounterMap& counters) {
       static int key_value = 0;
       counters.emplace("cheap_key_2", 200 + key_value++);
       ++cheap_two_calls;

@@ -74,54 +74,53 @@ public final class InitialException extends org.apache.thrift.TBaseException imp
         }
     }
 
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="reason", requiredness=Requiredness.NONE)
     public String getReason() { return reason; }
 
-    
     public static com.facebook.thrift.payload.Reader<InitialException> asReader() {
       return InitialException::read0;
     }
 
     public static InitialException read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(InitialException.NAMES_TO_IDS, InitialException.THRIFT_NAMES_TO_IDS, InitialException.FIELD_METADATA);
-      InitialException.Builder builder = new InitialException.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _REASON:
-          if (__field.type == TType.STRING) {
-            String reason = oprot.readString();
-            builder.setReason(reason);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(InitialException.NAMES_TO_IDS, InitialException.THRIFT_NAMES_TO_IDS, InitialException.FIELD_METADATA);
+        InitialException.Builder builder = new InitialException.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _REASON:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setReason(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      String _iter0 = this.reason;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(REASON_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            String _fbthriftVar0 = this.reason;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(REASON_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _InitialExceptionLazy {
@@ -130,4 +129,5 @@ public final class InitialException extends org.apache.thrift.TBaseException imp
 
     public static InitialException defaultInstance() {
         return  _InitialExceptionLazy._DEFAULT;
-    }}
+    }
+}

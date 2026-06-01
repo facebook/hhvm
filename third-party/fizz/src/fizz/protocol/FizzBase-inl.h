@@ -142,9 +142,7 @@ void FizzBase<Derived, ActionMoveVisitor, StateMachine>::processActions(
 template <typename Derived, typename ActionMoveVisitor, typename StateMachine>
 void FizzBase<Derived, ActionMoveVisitor, StateMachine>::addProcessingActions(
     typename StateMachine::ProcessingActions actions) {
-  if (actionGuard_) {
-    throw std::runtime_error("actions already processing");
-  }
+  FIZZ_DCHECK(!actionGuard_);
 
   actionGuard_ = folly::DelayedDestruction::DestructorGuard(owner_);
 
@@ -220,12 +218,19 @@ Buf FizzBase<Derived, ActionMoveVisitor, StateMachine>::
   if (!state_.cipher() || !state_.exporterMasterSecret()) {
     return nullptr;
   }
-  return Exporter::getExportedKeyingMaterial(
-      factory,
-      *state_.cipher(),
-      (*state_.exporterMasterSecret())->coalesce(),
-      label,
-      std::move(context),
-      length);
+  Buf ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      Exporter::getExportedKeyingMaterial(
+          ret,
+          err,
+          factory,
+          *state_.cipher(),
+          (*state_.exporterMasterSecret())->coalesce(),
+          label,
+          std::move(context),
+          length),
+      err);
+  return ret;
 }
 } // namespace fizz

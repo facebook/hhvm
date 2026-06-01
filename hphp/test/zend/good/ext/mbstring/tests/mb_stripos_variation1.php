@@ -20,7 +20,7 @@ class classA
 echo "*** Testing mb_stripos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$needle = b'string_val';
+$needle = 'string_val';
 $offset = 0;
 $encoding = 'utf-8';
 

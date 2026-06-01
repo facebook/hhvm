@@ -60,7 +60,7 @@ struct StructuredOp : BaseOp<Tag> {
       const auto& name = n.as<type::string_t>();
       check_found(find_by_field_id<T>([&](auto id) {
         using Id = decltype(id);
-        return putIf<Id>(op::get_name_v<T, Id> == name, ref(s), val);
+        return putIf<Id>(op::get_field_name<T, Id>() == name, ref(s), val);
       }));
     } else {
       check_found(find_by_field_id<T>([&](auto id) {
@@ -86,7 +86,7 @@ struct StructuredOp : BaseOp<Tag> {
       const auto& name = n.as<type::string_t>();
       check_found(find_by_field_id<T>([&](auto id) {
         using Id = decltype(id);
-        return getIf<Id>(op::get_name_v<T, Id> == name, ref(s), result);
+        return getIf<Id>(op::get_field_name<T, Id>() == name, ref(s), result);
       }));
     } else { // Get by field id.
       check_found(find_by_field_id<T>([&](auto id) {
@@ -115,7 +115,8 @@ struct StructuredOp : BaseOp<Tag> {
     static const NameList& kNames = *([]() {
       auto result = std::make_unique<NameList>();
       op::for_each_ordinal<T>([&](auto ord) {
-        (*result)[type::toPosition(ord)] = op::get_name_v<T, decltype(ord)>;
+        (*result)[type::toPosition(ord)] =
+            op::get_field_name<T, decltype(ord)>();
       });
       return result.release();
     })();
@@ -161,7 +162,8 @@ struct StructuredOp : BaseOp<Tag> {
       const auto& name = n.as<type::string_t>();
       check_found(find_by_field_id<T>([&](auto id) {
         using Id = decltype(id);
-        return ensureIf<Id>(op::get_name_v<T, Id> == name, ref(s), val, result);
+        return ensureIf<Id>(
+            op::get_field_name<T, Id>() == name, ref(s), val, result);
       }));
     } else { // Ensure by field id.
       check_found(find_by_field_id<T>([&](auto id) {

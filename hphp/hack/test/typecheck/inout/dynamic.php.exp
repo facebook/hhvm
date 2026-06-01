@@ -1,1 +1,4 @@
-No errors
+WARN: File "dynamic.php", line 8, characters 3-4:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "dynamic.php", line 3, characters 18-24:
+  This expression has type `dynamic`

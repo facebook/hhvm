@@ -44,6 +44,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/reified-generics.h"
+#include "hphp/runtime/vm/named-params.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -58,6 +59,7 @@
 #include "hphp/util/portability.h"
 #include "hphp/util/random.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP {
 
@@ -702,6 +704,15 @@ void raiseCoeffectsCallViolationHelper(const Func* callee,
   raiseCoeffectsCallViolation(callee,
                               RuntimeCoeffects::fromValue(providedCoeffects),
                               RuntimeCoeffects::fromValue(requiredCoeffects));
+}
+
+void checkFunNamedArgsMismatch(const Func* callee, const ArrayData* namedArgNames) {
+  assertx(callee->hasNamedParams());
+  checkNamedArgMismatch(
+    callee, namedArgNames, throwUnexpectedNamedArguments,
+    throwNamedArgumentNameMismatch, throwMissingNamedParam
+  );
+  // TODO(named_params) also push optionals to vm stack 
 }
 
 void throwOOBException(TypedValue base, TypedValue key) {

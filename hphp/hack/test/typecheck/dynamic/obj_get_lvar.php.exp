@@ -6,6 +6,10 @@ WARN: File "obj_get_lvar.php", line 15, characters 5-23:
 You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. (Warn[12030])
 WARN: File "obj_get_lvar.php", line 15, characters 6-17:
 This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `null` which is a subtype of `?Bar`. (Warn[12011])
+WARN: File "obj_get_lvar.php", line 21, characters 9-10:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "obj_get_lvar.php", line 6, characters 34-40:
+  This expression has type `dynamic`
 ERROR: File "obj_get_lvar.php", line 8, characters 18-19:
 Dynamic access of properties and methods is only permitted on values of type `dynamic`. (Naming[2011])
   File "obj_get_lvar.php", line 8, characters 18-19:

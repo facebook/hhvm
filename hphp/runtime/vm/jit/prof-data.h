@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/treadmill.h"
 
+#include "hphp/runtime/vm/jit/prof-data-target-profile.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -587,6 +588,14 @@ struct ProfData {
     m_baseProfCount = c;
   }
 
+  void setTargetProfile(std::unique_ptr<ProfDataTargetProfile> targetProfile) {
+    m_targetProfile = std::move(targetProfile);
+  }
+
+  ProfDataTargetProfile* targetProfile() {
+    return m_targetProfile.get();
+  }
+
  private:
   struct PrologueID {
     FuncId func;
@@ -661,6 +670,8 @@ struct ProfData {
    */
   uint64_t m_baseProfCount;
 
+  std::unique_ptr<ProfDataTargetProfile> m_targetProfile = nullptr;
+
   /*
    * The following static variables need to be alive for the lifetime of the
    * process, even after profile data are freed.
@@ -683,6 +694,12 @@ struct ProfData {
   static ServiceData::ExportedCounter* s_tried_deserialze;
   static ServiceData::ExportedCounter* s_deserialize_succ;
 };
+
+inline ProfDataTargetProfile* profDataTargetProfile() {
+  auto pd = profData();
+  if (!pd) return nullptr;
+  return pd->targetProfile();
+}
 
 //////////////////////////////////////////////////////////////////////
 

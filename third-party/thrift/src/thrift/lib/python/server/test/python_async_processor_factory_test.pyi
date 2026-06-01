@@ -26,3 +26,10 @@ class PythonAsyncProcessorFactoryCTest:
         rpc_kind: RpcKind,
         expected: bytes,
     ) -> None: ...
+    def test_make_handler_func_full_name(
+        self,
+        service_name: bytes,
+        function_name: bytes,
+        rpc_kind: RpcKind,
+        expected: bytes,
+    ) -> None: ...

@@ -44,7 +44,6 @@ public class PrimitivesServiceReactiveClient
   }
 
   public PrimitivesServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = reactor.core.publisher.Mono.empty();
@@ -65,7 +64,6 @@ public class PrimitivesServiceReactiveClient
   }
 
   public PrimitivesServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = _headersMono;
@@ -82,18 +80,18 @@ public class PrimitivesServiceReactiveClient
         {
           oprot.writeFieldBegin(_init_PARAM0_FIELD_DESC);
 
-          long _iter0 = param0;
+          long _fbthriftVar0 = param0;
 
-          oprot.writeI64(_iter0);
+          oprot.writeI64(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
         {
           oprot.writeFieldBegin(_init_PARAM1_FIELD_DESC);
 
-          long _iter0 = param1;
+          long _fbthriftVar0 = param1;
 
-          oprot.writeI64(_iter0);
+          oprot.writeI64(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -196,18 +194,18 @@ public class PrimitivesServiceReactiveClient
         {
           oprot.writeFieldBegin(_returnVoidMethod_ID_FIELD_DESC);
 
-          long _iter0 = id;
+          long _fbthriftVar0 = id;
 
-          oprot.writeI64(_iter0);
+          oprot.writeI64(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
         {
           oprot.writeFieldBegin(_returnVoidMethod_I_FIELD_DESC);
 
-          test.fixtures.service_schema.I _iter0 = i;
+          test.fixtures.service_schema.I _fbthriftVar0 = i;
 
-          _iter0.write0(oprot);
+          _fbthriftVar0.write0(oprot);
           oprot.writeFieldEnd();
         }
 

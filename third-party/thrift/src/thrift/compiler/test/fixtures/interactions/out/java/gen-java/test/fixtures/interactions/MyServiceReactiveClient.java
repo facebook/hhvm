@@ -51,7 +51,6 @@ public class MyServiceReactiveClient
   }
 
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = reactor.core.publisher.Mono.empty();
@@ -72,7 +71,6 @@ public class MyServiceReactiveClient
   }
 
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = _headersMono;
@@ -137,9 +135,9 @@ public class MyServiceReactiveClient
         {
           oprot.writeFieldBegin(_interact_ARG_FIELD_DESC);
 
-          int _iter0 = arg;
+          int _fbthriftVar0 = arg;
 
-          oprot.writeI32(_iter0);
+          oprot.writeI32(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -276,7 +274,7 @@ public class MyServiceReactiveClient
             return _rpc
                 .singleRequestStreamingResponse(_crp, rpcOptions)
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());})
-                .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Integer,Integer>)_p.getData()), _p.getHeaders(), _p.getBinaryHeaders()));
+                .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Integer, Integer>)_p.getData()), _p.getHeaders(), _p.getBinaryHeaders()));
       }));
   }
 
@@ -824,6 +822,7 @@ public class MyServiceReactiveClient
   public SerialInteraction createSerialInteraction() {
       return new SerialInteractionImpl(_interactionCounter.incrementAndGet());
   }
+
 
   private reactor.core.publisher.Mono<Map<String, String>> getHeaders(com.facebook.thrift.client.RpcOptions rpcOptions) {
       Map<String, String> requestHeaders = new HashMap<>();

@@ -9,4 +9,11 @@ val program : Provider_context.t -> Tast.program -> unit
 
 val def : Provider_context.t -> Tast.def -> unit
 
+(** Run only warning-producing TAST checks. Used for running warning checks
+    on the dynamic TAST to determine which warnings are trusted. *)
+val warning_def : Provider_context.t -> Tast.def -> unit
+
+(** Run only warning-producing TAST checks on a full program. *)
+val warning_program : Provider_context.t -> Tast.program -> unit
+
 val warning_checks : (module Handler.Warning.S) list

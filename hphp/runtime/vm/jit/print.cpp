@@ -641,19 +641,17 @@ void disasmRange(std::ostream& os,
   assertx(begin <= end);
   if (!dumpIREnabled(kind, kDisasmLevel)) return;
   int const indent = kIndent + 4;
-  bool const printEncoding = dumpIREnabled(kind, kAsmEncodingLevel);
   char const* colorStr = useColor ? color(ANSI_COLOR_BROWN) : "";
 
-  switch (arch::get()) {
-    case Arch::X64: {
+  ARCH_MATCH(
+    [&](arch::X64) {
+      bool const printEncoding = dumpIREnabled(kind, kAsmEncodingLevel);
       Disasm disasm(Disasm::Options().indent(indent)
                     .printEncoding(printEncoding)
                     .color(colorStr));
       disasm.disasm(os, begin, end, adjust);
-      return;
-    }
-
-    case Arch::ARM: {
+    },
+    [&](arch::ARM) {
       auto const endClr = colorStr[0] ? color(ANSI_COLOR_END) : "";
       vixl::Decoder dec;
       vixl::Disassembler disasm;
@@ -670,11 +668,8 @@ void disasmRange(std::ostream& os,
            << disasm.GetOutput()
            << endClr << "\n";
       }
-      return;
     }
-
-  }
-  not_reached();
+  );
 }
 
 template <typename T>

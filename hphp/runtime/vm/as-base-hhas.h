@@ -48,6 +48,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrStatic,                   F|P,     "static");               \
   X(AttrEnum,                     C,       "enum");                 \
   X(AttrDeepInit,                 P,       "deep_init");            \
+  X(AttrHasInheritedReturnTypes,  F,       "has_inherited_return_types"); \
   X(AttrInterface,                C,       "interface");            \
   X(AttrNoExpandTrait,            C,       "no_expand_trait");      \
   X(AttrAbstract,                 C|F|T|K, "abstract");             \

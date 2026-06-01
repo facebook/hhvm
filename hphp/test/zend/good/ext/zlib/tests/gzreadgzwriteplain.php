@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$original = str_repeat(b"hallo php",4096);
+$original = str_repeat("hallo php",4096);
 $filename = tempnam(sys_get_temp_dir(), "phpt");
 
 $fp = fopen($filename, "wb");

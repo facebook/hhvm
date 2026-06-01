@@ -10,4 +10,11 @@ File "inout.php", line 12, characters 3-13:
   dynamic
 File "inout.php", line 13, characters 3-13:
   string
-No errors
+WARN: File "inout.php", line 6, characters 8-9:
+Value of type `dynamic` called as a function (Warn[12039])
+  File "inout.php", line 3, characters 21-27:
+  This expression has type `dynamic`
+WARN: File "inout.php", line 11, characters 12-17:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "inout.php", line 3, characters 21-27:
+  This expression has type `dynamic`

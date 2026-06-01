@@ -1344,11 +1344,10 @@ State make_state(Vunit& unit, const Abi& abi) {
 
   // Reserve a SIMD scratch register to resolve register shuffles.
   auto const scratch = [&] () -> PhysReg {
-    switch (arch::get()) {
-      case Arch::X64:   return reg::xmm15;
-      case Arch::ARM:   return vixl::d31;
-    }
-    always_assert(false);
+    return ARCH_MATCH(
+      [](arch::X64) { return reg::xmm15; },
+      [](arch::ARM) { return vixl::d31; }
+    );
   }();
   assertx(scratch.isSIMD());
 
@@ -3724,7 +3723,7 @@ Optional<int64_t> used_physical_registers_recoverable(State& state,
 // within the allowed range for the architecture.
 bool can_merge_disps(int64_t disp1, int64_t disp2) {
   auto const total = disp1 + disp2;
-  if (arch::get() == Arch::ARM) {
+  if (arch::any<arch::ARM>()) {
     return total >= -256 && total <= 255;
   } else {
     using DispType = decltype(std::declval<Vptr>().disp);
@@ -4652,7 +4651,7 @@ SpillWithRematResult spill_with_remat(State& state,
   // We can't use the spill immediate instructions on non-X86 because
   // they'd have to be lowered (and that has to be done before
   // register allocation).
-  if (arch::get() != Arch::X64) {
+  if (!arch::any<arch::X64>()) {
     if (remat.op == Vinstr::reload || !useDst) {
       if (!useSrc) return {0, false};
       v << spill{src, dst};
@@ -9778,7 +9777,7 @@ BlockVector calculate_block_color_order(const State& state) {
 // which uses them. This makes instructions larger, so we want to
 // prefer registers (all else being equal) which do not require them.
 bool isREXRegister(PhysReg r) {
-  if (arch::get() != Arch::X64) return false;
+  if (!arch::any<arch::X64>()) return false;
   return
     Vreg{r} >= Vreg{reg::r8} &&
     (Vreg{r} < Vreg{reg::xmm0} || Vreg{r} > Vreg{reg::xmm7});
@@ -10236,11 +10235,10 @@ void release_dead_regs(State& state,
 // Whether two physical registers can be exchanged with a single
 // instruction.
 bool can_single_swap(PhysReg r1, PhysReg r2) {
-  switch (arch::get()) {
-    case Arch::X64:   return r1.isGP() && r2.isGP();
-    case Arch::ARM:   return false;
-  }
-  always_assert(false);
+  return ARCH_MATCH(
+    [&](arch::X64) { return r1.isGP() && r2.isGP(); },
+    [](arch::ARM) { return false; }
+  );
 }
 
 // Run the coloring logic for a single instruction. Returns the number

@@ -177,7 +177,7 @@ end = struct
     let tcopt = ContextAccess.get_tcopt ctx in
     let tc_enforced =
       TypecheckerOptions.(
-        experimental_feature_enabled
+        legacy_experimental_feature_enabled
           tcopt
           experimental_consider_type_const_enforceable)
     in

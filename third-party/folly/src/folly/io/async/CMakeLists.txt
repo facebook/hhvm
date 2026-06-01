@@ -178,7 +178,6 @@ folly_add_library(
     folly_detail_file_util_detail
     folly_file_util
     folly_io_async_async_socket_exception
-    folly_utility
   EXPORTED_DEPS
     folly_io_async_async_base
     folly_io_async_async_transport
@@ -669,7 +668,7 @@ folly_add_library(
   HEADERS
     IoUringZeroCopyBufferPool.h
   DEPS
-    folly_container_fixed_capacity_ring_queue
+    folly_container_dynamic_ring_queue
     folly_conv
     folly_lang_align
     folly_portability_sys_mman

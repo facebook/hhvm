@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $tmp = tmpfile();
-fwrite($tmp, b'test');
+fwrite($tmp, 'test');
 fseek($tmp, 0, SEEK_SET);
 
 echo "-- stream_copy_to_stream() --\n";

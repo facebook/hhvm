@@ -1192,6 +1192,7 @@ struct Attributes {
     dynamically_referenced: bool,
     needs_concrete: bool,
     require_package: Option<PackageRequirement>,
+    gated_by_feature_flag: Option<String>,
 }
 
 impl<'o, 't> Impl<'o, 't> {
@@ -1616,6 +1617,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             dynamically_referenced: false,
             needs_concrete: false,
             require_package: None,
+            gated_by_feature_flag: None,
         };
 
         let nodes = match node {
@@ -1719,6 +1721,12 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                                     ),
                                 );
                             });
+                    }
+                    "__GatedByFeatureFlag" => {
+                        attributes.gated_by_feature_flag = attribute
+                            .string_literal_param
+                            .as_ref()
+                            .map(|(_, x)| Self::str_from_utf8(x).into_owned());
                     }
                     _ => {}
                 }
@@ -4010,6 +4018,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                         || parsed_attributes.dynamically_callable,
                     no_auto_dynamic: self.under_no_auto_dynamic,
                     no_auto_likes: parsed_attributes.no_auto_likes,
+                    gated_by_feature_flag: parsed_attributes.gated_by_feature_flag.clone(),
                     package: self.package.clone(),
                     package_requirement: parsed_attributes
                         .require_package
@@ -6400,29 +6409,6 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             reason,
             Box::new(Ty_::Trefinement(root_type, class_ref)),
         )))
-    }
-
-    fn make_soft_type_specifier(
-        &mut self,
-        at_token: Self::Output,
-        hint: Self::Output,
-    ) -> Self::Output {
-        let pos = self.merge_positions(&at_token, &hint);
-        let hint = match self.node_to_ty(hint) {
-            Some(ty) => ty,
-            None => return Node::Ignored(SK::SoftTypeSpecifier),
-        };
-        // Use the type of the hint as-is (i.e., throw away the knowledge that
-        // we had a soft type specifier here--the typechecker does not use it).
-        // Replace its Reason with one including the position of the `@` token.
-        self.hint_ty(
-            pos,
-            if self.opts.interpret_soft_types_as_like_types {
-                Ty_::Tlike(hint)
-            } else {
-                *hint.1
-            },
-        )
     }
 
     // A type specifier preceded by an attribute list. At the time of writing,

@@ -1506,6 +1506,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefFuncPrologueCtx:
   case DefFuncPrologueFlags:
   case DefFuncPrologueNumArgs:
+  case DefFuncPrologueNamedArgs:
   case DefRegSP:
   case DictIterEnd:
   case EndGuards:
@@ -1874,8 +1875,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdCoeffectFunParamNaive:
   case RaiseModuleBoundaryViolation:
   case RaiseModulePropertyViolation:
-  case ThrowMissingNamedArgument:
+  case ThrowMissingNamedParam:
   case ThrowNamedArgumentNameMismatch:
+  case ThrowUnexpectedNamedArguments:
     return may_load_store(AEmpty, AEmpty);
 
   case StaticAnalysisError:
@@ -1905,6 +1907,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckClsReifiedGenericMismatch:
   case CheckClsRGSoft:
   case CheckFunReifiedGenericMismatch:
+  case CheckFunNamedArgsMismatch:
   case GetClsRGProp:
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:

@@ -394,13 +394,16 @@ void write_tc_cie(EHFrameWriter& ehfw, PersonalityFunc personality) {
   // The following calculation is related to the "top" of the record.  There is
   // an implicit -8 factor as defined by EHFrameWriter::m_cie.data_align.
 
-  switch (arch::get()) {
-    case Arch::ARM:
-    case Arch::X64:
+  ARCH_MATCH(
+    [&](arch::X64) {
       ehfw.offset_extended_sf(dw_reg::IP,
                               (record_size - AROFF(m_savedRip)) / 8);
-      break;
-  }
+    },
+    [&](arch::ARM) {
+      ehfw.offset_extended_sf(dw_reg::IP,
+                              (record_size - AROFF(m_savedRip)) / 8);
+    }
+  );
 
   ehfw.offset_extended_sf(dw_reg::FP, (record_size - AROFF(m_sfp)) / 8);
 

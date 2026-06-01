@@ -40,7 +40,7 @@ class MockMcThriftServerHandler
       apache::thrift::HandlerCallbackPtr<facebook::memcache::McGetReply>
           callback,
       const facebook::memcache::McGetRequest& request) override final {
-    auto key = request.key_ref()->fullKey();
+    auto key = request.key()->fullKey();
     if (key == "__mockmc__.want_load_shedding") {
       callback->appOverloadedException("load shedding");
       return;

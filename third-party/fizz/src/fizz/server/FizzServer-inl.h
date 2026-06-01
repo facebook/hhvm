@@ -56,13 +56,20 @@ Buf FizzServer<ActionMoveVisitor, SM>::getEarlyEkm(
   if (!this->state_.earlyExporterMasterSecret()) {
     throw std::runtime_error("early ekm not available");
   }
-  return Exporter::getExportedKeyingMaterial(
-      factory,
-      *this->state_.cipher(),
-      (*this->state_.earlyExporterMasterSecret())->coalesce(),
-      label,
-      context ? context->clone() : nullptr,
-      length);
+  Buf ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      Exporter::getExportedKeyingMaterial(
+          ret,
+          err,
+          factory,
+          *this->state_.cipher(),
+          (*this->state_.earlyExporterMasterSecret())->coalesce(),
+          label,
+          context ? context->clone() : nullptr,
+          length),
+      err);
+  return ret;
 }
 
 template <typename ActionMoveVisitor, typename SM>

@@ -609,7 +609,7 @@ class ThreadManager::Impl::Worker : public Runnable, public WorkerBaseHook {
     auto collectorPtr = manager_->threadIdCollector_.get();
     collectorPtr->addTid(folly::getOSThreadID());
     // On exit, we should remove the thread ID from the collector's tracking
-    // list.e
+    // list.
     auto threadIdsGuard = folly::makeGuard([collectorPtr]() {
       // The observer could be capturing a stack trace from this thread
       // so it should block until the collection finishes to exit.

@@ -21,19 +21,19 @@ import com.facebook.thrift.metadata.ThriftStructType;
 import com.facebook.thrift.metadata.ThriftType;
 
 class MyServiceThriftMetadataHandlerExceptions_0 {
-  static void addExceptions(Map<String, ThriftException> exceptions) {
-    exceptions.put("test.fixtures.basicannotations.MyException", new ThriftException.Builder()
-        .setName("test.fixtures.basicannotations.MyException")
-        .setFields(Arrays.asList(
-        ))
-        .build());
-  }
+    static void addExceptions(Map<String, ThriftException> exceptions) {
+        exceptions.put("test.fixtures.basicannotations.MyException", new ThriftException.Builder()
+            .setName("test.fixtures.basicannotations.MyException")
+            .setFields(Arrays.asList(
+            ))
+            .build());
+    }
 }
 
 class MyServiceThriftMetadataHandlerExceptions {
-  static Map<String, ThriftException> getExceptions() {
-    Map<String, ThriftException> exceptions = new HashMap<>();
-    MyServiceThriftMetadataHandlerExceptions_0.addExceptions(exceptions);
-    return exceptions;
-  }
+    static Map<String, ThriftException> getExceptions() {
+        Map<String, ThriftException> exceptions = new HashMap<>();
+        MyServiceThriftMetadataHandlerExceptions_0.addExceptions(exceptions);
+        return exceptions;
+    }
 }

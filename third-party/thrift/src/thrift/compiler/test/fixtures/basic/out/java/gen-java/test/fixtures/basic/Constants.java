@@ -30,7 +30,7 @@ public final class Constants {
     public static final List<Integer> ALIST = construct_ALIST();
 
     private static List<Integer> construct_ALIST() {
-      return ImmutableList.<Integer>builder()
+        return ImmutableList.<Integer>builder()
         .add(2)
         .add(3)
         .add(5)
@@ -41,7 +41,7 @@ public final class Constants {
     public static final Set<String> ASET = construct_ASET();
 
     private static Set<String> construct_ASET() {
-      return ImmutableSet.<String>builder()
+        return ImmutableSet.<String>builder()
         .add("foo")
         .add("bar")
         .add("baz")
@@ -51,7 +51,7 @@ public final class Constants {
     public static final Map<String, List<Integer>> AMAP = construct_AMAP();
 
     private static Map<String, List<Integer>> construct_AMAP() {
-      return ImmutableMap.<String, List<Integer>>builder()
+        return ImmutableMap.<String, List<Integer>>builder()
         .put("foo", ImmutableList.<Integer>builder()
         .add(1)
         .add(2)

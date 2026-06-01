@@ -88,6 +88,9 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const coeffects = srcLoc(env, inst, 4).reg();
   auto const extra = inst->extra<Call>();
   auto const numArgsInclUnpack = extra->numArgs + (extra->hasUnpack ? 1 : 0);
+  auto const numPositionalsInclUnpack = static_cast<uint32_t>(
+    numArgsInclUnpack - (extra->namedArgNames ? extra->namedArgNames->size() : 0)
+  );
   auto const func = inst->src(2)->hasConstVal(TFunc)
     ? inst->src(2)->funcVal() : nullptr;
   // Upgrade skipRepack if HHIR opts inferred the callee. We can't do this for
@@ -95,7 +98,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   // We can also special-case calls with 0 args as never needing a repack since there's
   // no unpack argument and param counts are non-negative.
   auto const skipRepack = extra->skipRepack || (
-    func && !extra->hasUnpack && extra->numArgs <= func->numNonVariadicParams()
+    func && !extra->hasUnpack && numPositionalsInclUnpack <= func->numPositionalParams()
   ) || numArgsInclUnpack == 0;
   auto const coeffectsVal = inst->src(4)->hasConstVal(TInt)
     ? RuntimeCoeffects::fromValue(inst->src(4)->intVal())
@@ -106,8 +109,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const prologueFlags = PrologueFlags(
     extra->hasGenerics,
     extra->dynamicCall,
-    // TODO(named_params) thread this information to the jit.
-    false,
+    extra->namedArgNames != nullptr,
     extra->asyncEagerReturn,
     extra->callOffset,
     extra->genericsBitmap,
@@ -133,7 +135,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   }
 
   v << copy{callee, r_func_prologue_callee()};
-  v << copy{v.cns(numArgsInclUnpack), r_func_prologue_num_args()};
+  v << copy{v.cns(numPositionalsInclUnpack), r_func_prologue_num_args()};
   auto const withCtx =
     setCtxReg(v, func, inst->src(3), ctx, r_func_prologue_ctx());
 
@@ -143,6 +145,10 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   v << syncvmsp{ssp};
 
   auto const done = v.makeBlock();
+  auto withNamedArgNames = extra->namedArgNames != nullptr;
+  if (withNamedArgNames) {
+    v << copy{v.cns(extra->namedArgNames), r_func_prologue_named_args()};
+  }
   if (skipRepack && func) {
     // Emit a smashable call that initially calls a recyclable service request
     // stub.  The stub and the eventual targets take rvmfp() as an argument,
@@ -151,8 +157,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
       (!extra->hasUnpack && extra->numArgs <= func->numNonVariadicParams()) ||
       (extra->hasUnpack && extra->numArgs == func->numNonVariadicParams()));
     v << callphps{tc::ustubs().immutableBindCallStub,
-                  func_prologue_regs(withCtx),
-                  func, numArgsInclUnpack};
+                  func_prologue_regs(withCtx, withNamedArgNames),
+                  func, numPositionalsInclUnpack};
   } else if (skipRepack) {
     // If we've statically determined the provided number of arguments
     // doesn't exceed what the target expects, we can skip the stub
@@ -160,8 +166,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
     auto const ptrSize = safe_cast<int32_t>(sizeof(LowTCA));
     auto const dest = v.makeReg();
-    v << loadzlq{r_func_prologue_callee()[numArgsInclUnpack * ptrSize + pTabOff], dest};
-    v << callphpr{dest, func_prologue_regs(withCtx)};
+    v << loadzlq{r_func_prologue_callee()[numPositionalsInclUnpack * ptrSize + pTabOff], dest};
+    v << callphpr{dest, func_prologue_regs(withCtx, withNamedArgNames)};
   } else {
     // It was not statically determined that the arguments are passed in a way
     // the callee expects. Use the redispatch stub to repack them as needed and
@@ -170,9 +176,11 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     // - the callee inferred later in HHIR opts, but arguments mispacked
     // - unpack used in a different position than callee's variadic param
     auto const stub = !extra->hasUnpack
-      ? tc::ustubs().funcPrologueRedispatch
+      ? (extra->namedArgNames == nullptr
+         ? tc::ustubs().funcPrologueRedispatch
+         : tc::ustubs().funcPrologueRedispatchNamedArgs)
       : tc::ustubs().funcPrologueRedispatchUnpack;
-    v << callphp{stub, func_prologue_regs(withCtx)};
+    v << callphp{stub, func_prologue_regs(withCtx, withNamedArgNames)};
   }
 
   // The prologue is responsible for unwinding all inputs. We could have

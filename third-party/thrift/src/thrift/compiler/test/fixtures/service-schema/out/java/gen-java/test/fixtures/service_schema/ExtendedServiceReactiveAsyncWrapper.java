@@ -14,17 +14,17 @@ public class ExtendedServiceReactiveAsyncWrapper  extends com.facebook.thrift.te
   private ExtendedService.Reactive _delegate;
 
   public ExtendedServiceReactiveAsyncWrapper(ExtendedService.Reactive _delegate) {
-    super(_delegate);
-    this._delegate = _delegate;
+      super(_delegate);
+      this._delegate = _delegate;
   }
 
   public ExtendedServiceReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new ExtendedServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new ExtendedServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
   @java.lang.Override
@@ -45,7 +45,7 @@ public class ExtendedServiceReactiveAsyncWrapper  extends com.facebook.thrift.te
     final long param0,
     final long param1,
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.initWrapper(param0,param1, rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.initWrapper(param0,param1, rpcOptions));
   }
 
 }

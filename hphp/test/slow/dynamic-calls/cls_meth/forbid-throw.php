@@ -134,9 +134,9 @@ async function positive_tests() :Awaitable<mixed>{
   try { $x = vec[new A, 'async_func']; await $x(); } catch (Exception $e) { wrap($e); }
   try { $x = vec[new A, 'static_async_func']; await $x(); } catch (Exception $e) { wrap($e); }
 
-  try { $x = 'A'; $x::static_func(); } catch (Exception $e) { wrap($e); }
+  $x = 'A'; $x::static_func();
 
-  try { $x = 'A'; await $x::static_async_func(); } catch (Exception $e) { wrap($e); }
+  $x = 'A'; await $x::static_async_func();
 
 
   try { $x = 'static_func'; HH\dynamic_class_meth(A::class, $x)(); } catch (Exception $e) { wrap($e); }

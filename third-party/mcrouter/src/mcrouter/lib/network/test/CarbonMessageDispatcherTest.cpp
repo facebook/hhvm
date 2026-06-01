@@ -49,7 +49,7 @@ struct TestCallback
 TEST(CarbonMessage, basic) {
   /* construct a request */
   McGetRequest get;
-  get.key_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "12345");
+  get.key() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "12345");
 
   /* serialize into an iobuf */
   carbon::CarbonQueueAppenderStorage storage;
@@ -90,7 +90,7 @@ TEST(CarbonMessage, basic) {
       [&getCalled](McGetRequest&& req) {
         /* check unserialized request is the same as sent */
         getCalled = true;
-        EXPECT_EQ(req.key_ref()->fullKey(), folly::StringPiece("12345"));
+        EXPECT_EQ(req.key()->fullKey(), folly::StringPiece("12345"));
       },
       [&setCalled](McSetRequest&&) { setCalled = true; });
 

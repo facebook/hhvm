@@ -207,9 +207,7 @@ class t_whisker_generator : public t_generator {
       const whisker::object& context);
 
   // Whisker-based code generators are designed to work directly against the
-  // Thrift AST node types (t_<node_type> classes). This is different from the
-  // mstch-based code generators which have an additional conversion layer from
-  // the AST node types → mstch::node.
+  // Thrift AST node types (t_<node_type> classes).
   //
   // In Whisker, passing around the AST nodes (C++ objects) is achieved using
   // whisker::native_handle. Whisker templates cannot directly interact with

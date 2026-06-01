@@ -94,7 +94,6 @@ class TestFreshInit(common_tests.CommonTests):
                   /* HH_FIXME[4099] We can delete this one */
                   /* HH_FIXME[4098] We can delete this one */
                   print "done\n";
-                  /* HH_IGNORE[12003] We can delete this one */
                   /* HH_IGNORE[4110] We can delete this one */
                   /* HH_IGNORE[12001] We can delete this one */
                   print "sauerkraut";
@@ -102,10 +101,9 @@ class TestFreshInit(common_tests.CommonTests):
                     print "hello";
                   } else if ($s /* HH_FIXME[4011] We can delete this one */) {
                     print "world";
-                  } else if (/* HH_IGNORE[12003] We need to keep this one */   $s) {
+                  } else if ($s) {
                     print "hello";
                   }
-                  /* HH_IGNORE[12003] We can delete this one */
                   /* HH_IGNORE[12001] We need to keep this one */
                   /* HH_FIXME[4099] We can delete this one */
                   /* HH_IGNORE[12004] We can delete this one */
@@ -144,7 +142,7 @@ class TestFreshInit(common_tests.CommonTests):
                     print "hello";
                   } else if ($s ) {
                     print "world";
-                  } else if (/* HH_IGNORE[12003] We need to keep this one */   $s) {
+                  } else if ($s) {
                     print "hello";
                   }
                   /* HH_IGNORE[12001] We need to keep this one */

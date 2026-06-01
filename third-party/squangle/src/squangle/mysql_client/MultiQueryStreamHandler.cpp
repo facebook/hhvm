@@ -161,7 +161,6 @@ MultiQueryStreamHandler::MultiQueryStreamHandler(
 }
 
 MultiQueryStreamHandler::~MultiQueryStreamHandler() {
-  in_callback_baton_.wait();
   op_done_baton_.wait();
 }
 

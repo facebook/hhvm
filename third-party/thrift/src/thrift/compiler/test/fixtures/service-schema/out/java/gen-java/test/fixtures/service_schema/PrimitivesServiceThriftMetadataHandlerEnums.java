@@ -13,24 +13,24 @@ import com.facebook.thrift.metadata.ThriftEnum;
 
 
 class PrimitivesServiceThriftMetadataHandlerEnums_0 {
-  static void addEnums(Map<String, ThriftEnum> enums) {
-    {
-      Map<Integer, String> elements = new HashMap<>();
-      elements.put(0, "OK");
-      elements.put(1, "SO_SO");
-      elements.put(2, "GOOD");
-      enums.put("test.fixtures.service_schema.Result", new ThriftEnum.Builder()
-          .setName("test.fixtures.service_schema.Result")
-          .setElements(elements)
-          .build());
+    static void addEnums(Map<String, ThriftEnum> enums) {
+        {
+            Map<Integer, String> elements = new HashMap<>();
+            elements.put(0, "OK");
+            elements.put(1, "SO_SO");
+            elements.put(2, "GOOD");
+            enums.put("test.fixtures.service_schema.Result", new ThriftEnum.Builder()
+                .setName("test.fixtures.service_schema.Result")
+                .setElements(elements)
+                .build());
+        }
     }
-  }
 }
 
 class PrimitivesServiceThriftMetadataHandlerEnums {
-  static Map<String, ThriftEnum> getEnums() {
-    Map<String, ThriftEnum> enums = new HashMap<>();
-    PrimitivesServiceThriftMetadataHandlerEnums_0.addEnums(enums);
-    return enums;
-  }
+    static Map<String, ThriftEnum> getEnums() {
+        Map<String, ThriftEnum> enums = new HashMap<>();
+        PrimitivesServiceThriftMetadataHandlerEnums_0.addEnums(enums);
+        return enums;
+    }
 }

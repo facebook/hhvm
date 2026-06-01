@@ -209,6 +209,15 @@ class ConnectionOptions {
     return crypt_auth_token_list_;
   }
 
+  ConnectionOptions& setEnableTLS13(bool enable) noexcept {
+    enable_tls13_ = enable;
+    return *this;
+  }
+
+  [[nodiscard]] bool isEnableTLS13() const noexcept {
+    return enable_tls13_;
+  }
+
  private:
   Duration connection_timeout_;
   folly::Optional<Duration> connection_tcp_timeout_;
@@ -225,6 +234,7 @@ class ConnectionOptions {
   bool reset_conn_before_close_ = false;
   bool delayed_reset_conn_ = false;
   bool change_user_ = false;
+  bool enable_tls13_ = false;
   CertValidatorCallback certValidationCallback_{nullptr};
 };
 

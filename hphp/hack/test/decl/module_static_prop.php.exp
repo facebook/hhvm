@@ -49,7 +49,7 @@ File root|module_static_prop.php--A.php
               ft_instantiated = true }));
         fe_pos = [12:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-        fe_no_auto_likes = false;
+        fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
         fe_package_requirement = Typing_defs.RPNormal }))
   ]
 
@@ -73,7 +73,7 @@ File root|module_static_prop.php--B.php
              ft_instantiated = true }));
        fe_pos = [8:10-11]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-       fe_no_auto_likes = false;
+       fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
        fe_package_requirement = Typing_defs.RPNormal }))
   ]
 
@@ -97,6 +97,6 @@ File root|module_static_prop.php--no-module.php
              ft_instantiated = true }));
        fe_pos = [4:10-14]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
-       fe_no_auto_likes = false;
+       fe_no_auto_likes = false; fe_gated_by_feature_flag = None;
        fe_package_requirement = Typing_defs.RPNormal }))
   ]

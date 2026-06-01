@@ -1,0 +1,1 @@
+Catchable fatal error: Value returned from async function returns_bad_async() must be of type int, string given in %s on line %d

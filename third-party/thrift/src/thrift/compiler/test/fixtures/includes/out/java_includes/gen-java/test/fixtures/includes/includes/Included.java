@@ -40,11 +40,11 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Included other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -58,7 +58,7 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
 
         public long getMyIntField() { return myIntField; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="MyTransitiveField", requiredness=Requiredness.NONE)    public Builder setMyTransitiveField(test.fixtures.includes.transitive.Foo myTransitiveField) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="MyTransitiveField", requiredness=Requiredness.NONE)    public Builder setMyTransitiveField(test.fixtures.includes.transitive.Foo myTransitiveField) {
             this.myTransitiveField = myTransitiveField;
             return this;
         }
@@ -80,6 +80,7 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -88,23 +89,20 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
     private final long myIntField;
     public static final int _MYINTFIELD = 1;
     private static final TField MY_INT_FIELD_FIELD_DESC = new TField("MyIntField", TType.I64, (short)1);
-        private final test.fixtures.includes.transitive.Foo myTransitiveField;
+    private final test.fixtures.includes.transitive.Foo myTransitiveField;
     public static final int _MYTRANSITIVEFIELD = 2;
     private static final TField MY_TRANSITIVE_FIELD_FIELD_DESC = new TField("MyTransitiveField", TType.STRUCT, (short)2);
     static {
-      NAMES_TO_IDS.put("myIntField", 1);
-      THRIFT_NAMES_TO_IDS.put("MyIntField", 1);
-      FIELD_METADATA.put(1, MY_INT_FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("myTransitiveField", 2);
-      THRIFT_NAMES_TO_IDS.put("MyTransitiveField", 2);
-      FIELD_METADATA.put(2, MY_TRANSITIVE_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myIntField", 1);
+        THRIFT_NAMES_TO_IDS.put("MyIntField", 1);
+        FIELD_METADATA.put(1, MY_INT_FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("myTransitiveField", 2);
+        THRIFT_NAMES_TO_IDS.put("MyTransitiveField", 2);
+        FIELD_METADATA.put(2, MY_TRANSITIVE_FIELD_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
     public long getMyIntField() { return myIntField; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="MyTransitiveField", requiredness=Requiredness.NONE)
     public test.fixtures.includes.transitive.Foo getMyTransitiveField() { return myTransitiveField; }
@@ -138,67 +136,68 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(myIntField);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myTransitiveField);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(myTransitiveField);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Included> asReader() {
       return Included::read0;
     }
 
     public static Included read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Included.NAMES_TO_IDS, Included.THRIFT_NAMES_TO_IDS, Included.FIELD_METADATA);
-      Included.Builder builder = new Included.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MYINTFIELD:
-          if (__field.type == TType.I64) {
-            long myIntField = oprot.readI64();
-            builder.setMyIntField(myIntField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYTRANSITIVEFIELD:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.includes.transitive.Foo myTransitiveField = test.fixtures.includes.transitive.Foo.read0(oprot);
-            builder.setMyTransitiveField(myTransitiveField);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(Included.NAMES_TO_IDS, Included.THRIFT_NAMES_TO_IDS, Included.FIELD_METADATA);
+        Included.Builder builder = new Included.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MYINTFIELD:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMyIntField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYTRANSITIVEFIELD:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.includes.transitive.Foo _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.includes.transitive.Foo.read0(oprot);
+                    builder.setMyTransitiveField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.myIntField;
-      oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      test.fixtures.includes.transitive.Foo _iter0 = this.myTransitiveField;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_TRANSITIVE_FIELD_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.myIntField;
+            oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            test.fixtures.includes.transitive.Foo _fbthriftVar0 = this.myTransitiveField;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_TRANSITIVE_FIELD_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _IncludedLazy {

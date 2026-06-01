@@ -73,6 +73,14 @@ TEST(RendezvousHashFunc, rendezvous_10) {
           {947, 1026, 1028, 981, 1016, 970, 1013, 939, 1023, 1057}));
 }
 
+TEST(RendezvousHashFunc, operator_matches_begin) {
+  auto func = genRendezvousHashFunc(343);
+  for (size_t i = 0; i < 10000; ++i) {
+    auto key = "mykey:" + folly::to<std::string>(i);
+    EXPECT_EQ(func(key), *func.begin(key));
+  }
+}
+
 TEST(RendezvousHashFunc, rendezvous_rehash) {
   const uint32_t n = 499;
   auto combined = test::genEndpoints(n);

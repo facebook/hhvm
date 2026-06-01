@@ -25,6 +25,7 @@
 
 namespace HPHP::jit {
 
+#ifdef __x86_64__
 namespace x64 { struct ImmFolder; }
 
 namespace {
@@ -92,9 +93,13 @@ std::string genTestCode(int argPos, Arg constArg) {
   return stripWhitespace(show(unit));
 }
 
-}
+} // namespace
+#endif
 
 TEST(Vasm, FoldImms) {
+#ifndef __x86_64__
+  GTEST_SKIP() << "x86-specific foldImms test";
+#else
   //
   // add
   //
@@ -247,6 +252,7 @@ TEST(Vasm, FoldImms) {
     "ret {}\n",
     genTestCode<xorq>(1, -1) // xorq r,-1
   );
+#endif
 }
 
 }

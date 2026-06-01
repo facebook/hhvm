@@ -82,11 +82,12 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::handlePythonServerCallback(
     apache::thrift::HandlerCallback<std::unique_ptr<::folly::IOBuf>>::Ptr
         callback) {
   do_python_import();
+  const auto& function = functions_.at(context->getMethodName());
   auto [promise, future] =
       folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
   const int retcode = handleServerCallback(
-      functions_.at(context->getMethodName()).funcObject,
-      serviceName_ + "." + context->getMethodName(),
+      function.funcObject,
+      function.fullName,
       context,
       std::move(promise),
       std::move(serializedRequest),
@@ -113,13 +114,14 @@ PythonAsyncProcessor::handlePythonServerCallbackStreaming(
         std::unique_ptr<::folly::IOBuf>,
         std::unique_ptr<::folly::IOBuf>>>::Ptr callback) {
   do_python_import();
+  const auto& function = functions_.at(context->getMethodName());
   auto [promise, future] =
       folly::makePromiseContract<::apache::thrift::ResponseAndServerStream<
           std::unique_ptr<::folly::IOBuf>,
           std::unique_ptr<::folly::IOBuf>>>();
   const int retcode = handleServerStreamCallback(
-      functions_.at(context->getMethodName()).funcObject,
-      serviceName_ + "." + context->getMethodName(),
+      function.funcObject,
+      function.fullName,
       context,
       std::move(promise),
       std::move(serializedRequest),
@@ -147,14 +149,15 @@ PythonAsyncProcessor::handlePythonServerCallbackSink(
         std::unique_ptr<::folly::IOBuf>,
         std::unique_ptr<::folly::IOBuf>>>::Ptr callback) {
   do_python_import();
+  const auto& function = functions_.at(context->getMethodName());
   auto [promise, future] =
       folly::makePromiseContract<::apache::thrift::ResponseAndSinkConsumer<
           std::unique_ptr<::folly::IOBuf>,
           std::unique_ptr<::folly::IOBuf>,
           std::unique_ptr<::folly::IOBuf>>>();
   const int retcode = handleServerSinkCallback(
-      functions_.at(context->getMethodName()).funcObject,
-      serviceName_ + "." + context->getMethodName(),
+      function.funcObject,
+      function.fullName,
       context,
       std::move(promise),
       std::move(serializedRequest),
@@ -183,14 +186,15 @@ PythonAsyncProcessor::handlePythonServerCallbackBidi(
             std::unique_ptr<::folly::IOBuf>,
             std::unique_ptr<::folly::IOBuf>>>::Ptr callback) {
   do_python_import();
+  const auto& function = functions_.at(context->getMethodName());
   auto [promise, future] = folly::makePromiseContract<
       ::apache::thrift::ResponseAndStreamTransformation<
           std::unique_ptr<::folly::IOBuf>,
           std::unique_ptr<::folly::IOBuf>,
           std::unique_ptr<::folly::IOBuf>>>();
   const int retcode = handleServerBidiCallback(
-      functions_.at(context->getMethodName()).funcObject,
-      serviceName_ + "." + context->getMethodName(),
+      function.funcObject,
+      function.fullName,
       context,
       std::move(promise),
       std::move(serializedRequest),
@@ -215,10 +219,11 @@ PythonAsyncProcessor::handlePythonServerCallbackOneway(
     apache::thrift::RpcKind kind,
     apache::thrift::HandlerCallbackBase::Ptr callback) {
   do_python_import();
+  const auto& function = functions_.at(context->getMethodName());
   auto [promise, future] = folly::makePromiseContract<folly::Unit>();
   const int retcode = handleServerCallbackOneway(
-      functions_.at(context->getMethodName()).funcObject,
-      serviceName_ + "." + context->getMethodName(),
+      function.funcObject,
+      function.fullName,
       context,
       std::move(promise),
       std::move(serializedRequest),
@@ -278,10 +283,11 @@ void PythonAsyncProcessor::executeRequest(
   }
 
   const char* serviceName = serviceName_.c_str();
+  const auto& function = functions_.at(ctx->getMethodName());
   auto ctxStack = apache::thrift::ContextStack::create(
       this->getEventHandlersSharedPtr(),
       serviceName,
-      functions_.at(ctx->getMethodName()).fullName.c_str(),
+      function.fullName.c_str(),
       ctx);
 
   auto serializedRequest =
@@ -303,12 +309,7 @@ void PythonAsyncProcessor::executeRequest(
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
     auto throw_func = get_deserialize_error_function(protocol);
-    throw_func(
-        ew,
-        std::move(req),
-        ctx,
-        eb,
-        functions_.at(ctx->getMethodName()).fullName.c_str());
+    throw_func(ew, std::move(req), ctx, eb, function.fullName.c_str());
     return;
   }
 
@@ -323,6 +324,7 @@ void PythonAsyncProcessor::executeRequest(
                    eb,
                    executor,
                    serviceName,
+                   qualifiedMethodName = function.fullName.c_str(),
                    kind,
                    requestData = std::move(requestData),
                    req = std::move(req),
@@ -338,6 +340,7 @@ void PythonAsyncProcessor::executeRequest(
             std::move(req),
             std::move(ctxStack),
             serviceName,
+            qualifiedMethodName,
             std::move(serializedRequest),
             kind.value());
       })
@@ -526,6 +529,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
     apache::thrift::ResponseChannelRequest::UniquePtr req,
     apache::thrift::ContextStack::UniquePtr ctxStack,
     const char* serviceName,
+    const char* qualifiedMethodName,
     apache::thrift::SerializedRequest serializedRequest,
     apache::thrift::RpcKind kind) {
   const char* methodName = ctx->getMethodName().c_str();
@@ -549,8 +553,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
               .serviceName = serviceName,
               .definingServiceName = serviceName,
               .methodName = methodName,
-              .qualifiedMethodName =
-                  fmt::format("{}.{}", serviceName, methodName)},
+              .qualifiedMethodName = qualifiedMethodName},
           nullptr,
           eb,
           executor,
@@ -585,8 +588,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
                   .serviceName = serviceName,
                   .definingServiceName = serviceName,
                   .methodName = methodName,
-                  .qualifiedMethodName =
-                      fmt::format("{}.{}", serviceName, methodName)},
+                  .qualifiedMethodName = qualifiedMethodName},
               return_streaming,
               get_throw_wrapped(protocol),
               ctx->getProtoSeqId(),
@@ -624,8 +626,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
                   .serviceName = serviceName,
                   .definingServiceName = serviceName,
                   .methodName = methodName,
-                  .qualifiedMethodName =
-                      fmt::format("{}.{}", serviceName, methodName)},
+                  .qualifiedMethodName = qualifiedMethodName},
               return_sink,
               get_throw_wrapped(protocol),
               ctx->getProtoSeqId(),
@@ -663,8 +664,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
                   .serviceName = serviceName,
                   .definingServiceName = serviceName,
                   .methodName = methodName,
-                  .qualifiedMethodName =
-                      fmt::format("{}.{}", serviceName, methodName)},
+                  .qualifiedMethodName = qualifiedMethodName},
               return_bidistream,
               get_throw_wrapped(protocol),
               ctx->getProtoSeqId(),
@@ -698,8 +698,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
                   .serviceName = serviceName,
                   .definingServiceName = serviceName,
                   .methodName = methodName,
-                  .qualifiedMethodName =
-                      fmt::format("{}.{}", serviceName, methodName)},
+                  .qualifiedMethodName = qualifiedMethodName},
               return_serialized,
               get_throw_wrapped(protocol),
               ctx->getProtoSeqId(),

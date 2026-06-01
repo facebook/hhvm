@@ -218,7 +218,7 @@ module NastCheck = struct
     (* | SuspendOutsideOfCoroutineDEPRECATED [@value 3038] *)
     (* | SuspendInFinallyDEPRECATED [@value 3039] *)
     (* | BreakContinueNNotSupportedDEPRECATED [@value 3040] *)
-    | StaticMemoizedFunction [@value 3041]
+    (* | StaticMemoizedFunctionDEPRECATED [@value 3041] *)
     (* | InoutParamsInCoroutineDEPRECATED [@value 3042] *)
     | InoutParamsSpecial [@value 3043]
     (* | InoutParamsMixByrefDEPRECATED [@value 3044] *)
@@ -797,7 +797,8 @@ module Typing = struct
     | NeedsConcreteInFinalClass [@value 4505]
     | NeedsConcreteOnInstanceMethod [@value 4506]
     | NeedsConcreteOnConstructor [@value 4507]
-  (* | ConsistentConstructAbstractExtendsNonAbstract [@value 4508] *)
+    | ConsistentConstructAbstractExtendsNonAbstract [@value 4508]
+    | GatedByFeatureFlag [@value 4509]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 
@@ -807,7 +808,7 @@ end
 module Warning = struct
   type t =
     | SketchyEquality [@value 12001]
-    | SketchyNullCheck [@value 12003]
+    (* | SketchyNullCheckDEPRECATED [@value 12003] *)
     | NonDisjointCheck [@value 12004]
     | CastNonPrimitive [@value 12005]
     | TruthinessTest [@value 12006]
@@ -839,6 +840,10 @@ module Warning = struct
     | SealedNotSubtype [@value 12035]
     | TanyFound [@value 12036]
     | ConsistentConstructAbstractFinal [@value 12037]
+    | DynamicMethodCall [@value 12038]
+    | DynamicFunctionCall [@value 12039]
+    | DynamicArrayAccess [@value 12040]
+    | SealedNotOverride [@value 12041]
       (* Add new Warning codes here! Comment out when deprecating. *)
   [@@deriving enum, ord, show { with_path = false }]
 end

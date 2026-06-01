@@ -29,6 +29,17 @@ namespace whisker {
 namespace {
 using apache::thrift::detail::escape;
 
+std::string tilde_strip(const ast::strip_whitespace_rule& strip) {
+  if (strip.left && strip.right) {
+    return " [strip-left, strip-right]";
+  } else if (strip.left) {
+    return " [strip-left]";
+  } else if (strip.right) {
+    return " [strip-right]";
+  }
+  return "";
+}
+
 std::string to_string(
     const source_range& loc, const source_manager& src_manager) {
   resolved_location begin = src_manager.resolve_location(loc.begin);
@@ -63,53 +74,96 @@ struct ast_visitor {
   void visit(
       const ast::section_block& section, tree_printer::scope& scope) const {
     scope.print(
-        "section-block{} {}",
+        "section-block{}{} {}",
         section.inverted ? " <inverted>" : "",
+        tilde_strip(section.open_strip_whitespace),
         location(section.loc));
     visit(section.variable, scope.make_child());
     visit(section.body_elements, scope);
+    if (auto close = tilde_strip(section.close_strip_whitespace);
+        !close.empty()) {
+      scope.make_child().print("close{}", close);
+    }
   }
   void visit(
       const ast::conditional_block& conditional_block,
       tree_printer::scope& scope) const {
-    scope.print("if-block {}", location(conditional_block.loc));
+    scope.print(
+        "if-block{} {}",
+        tilde_strip(conditional_block.open_strip_whitespace),
+        location(conditional_block.loc));
     visit(conditional_block.condition, scope.make_child());
     visit(conditional_block.body_elements, scope);
 
     for (const auto& else_if_clause : conditional_block.else_if_clauses) {
       tree_printer::scope& else_if_scope = scope.make_child();
-      else_if_scope.print("else-if-block {}", location(else_if_clause.loc));
+      else_if_scope.print(
+          "else-if-block{} {}",
+          tilde_strip(else_if_clause.strip_whitespace),
+          location(else_if_clause.loc));
       visit(else_if_clause.body_elements, else_if_scope);
     }
 
     if (const auto& else_clause = conditional_block.else_clause) {
       tree_printer::scope& else_scope = scope.make_child();
-      else_scope.print("else-block {}", location(else_clause->loc));
+      else_scope.print(
+          "else-block{} {}",
+          tilde_strip(else_clause->strip_whitespace),
+          location(else_clause->loc));
       visit(else_clause->body_elements, else_scope);
+    }
+    if (auto close = tilde_strip(conditional_block.close_strip_whitespace);
+        !close.empty()) {
+      scope.make_child().print("close{}", close);
     }
   }
   void visit(
       const ast::with_block& with_block, tree_printer::scope& scope) const {
-    scope.print("with-block {}", location(with_block.loc));
+    scope.print(
+        "with-block{} {}",
+        tilde_strip(with_block.open_strip_whitespace),
+        location(with_block.loc));
     visit(with_block.value, scope.make_child());
     visit(with_block.body_elements, scope);
+    if (auto close = tilde_strip(with_block.close_strip_whitespace);
+        !close.empty()) {
+      scope.make_child().print("close{}", close);
+    }
   }
   void visit(
       const ast::each_block& each_block, tree_printer::scope& scope) const {
-    scope.print("each-block {}", location(each_block.loc));
+    scope.print(
+        "each-block{} {}",
+        tilde_strip(each_block.open_strip_whitespace),
+        location(each_block.loc));
     visit(each_block.iterable, scope.make_child());
     for (const ast::identifier& captured : each_block.captured) {
       scope.make_child().print("element-capture '{}'", captured.name);
     }
+    if (each_block.separator.has_value()) {
+      scope.make_child().print(
+          "separator '{}'", escape(each_block.separator->to_string()));
+    }
     visit(each_block.body_elements, scope);
     if (const auto& else_clause = each_block.else_clause) {
       tree_printer::scope& else_scope = scope.make_child();
-      else_scope.print("else-block {}", location(else_clause->loc));
+      else_scope.print(
+          "else-block{} {}",
+          tilde_strip(else_clause->strip_whitespace),
+          location(else_clause->loc));
       visit(else_clause->body_elements, else_scope);
+    }
+    if (auto close = tilde_strip(each_block.close_strip_whitespace);
+        !close.empty()) {
+      scope.make_child().print("close{}", close);
     }
   }
   void visit(const ast::macro& macro, tree_printer::scope& scope) const {
-    scope.print("macro {} '{}'", location(macro.loc), macro.path_string());
+    scope.print(
+        "macro{} {} '{}'",
+        tilde_strip(macro.strip_whitespace),
+        location(macro.loc),
+        macro.path_string());
     if (const auto& indentation = macro.standalone_indentation_within_line;
         indentation.has_value()) {
       scope.make_child().print(
@@ -117,7 +171,11 @@ struct ast_visitor {
     }
   }
   void visit(const ast::comment& comment, tree_printer::scope& scope) const {
-    scope.print("comment {} '{}'", location(comment.loc), escape(comment.text));
+    scope.print(
+        "comment{} {} '{}'",
+        tilde_strip(comment.strip_whitespace),
+        location(comment.loc),
+        escape(comment.text));
   }
   void visit(
       const ast::variable_lookup& variable, tree_printer::scope& scope) const {
@@ -133,14 +191,18 @@ struct ast_visitor {
       const ast::interpolation& interpolation,
       tree_printer::scope& scope) const {
     scope.print(
-        "interpolation {} '{}'",
+        "interpolation{} {} '{}'",
+        tilde_strip(interpolation.strip_whitespace),
         location(interpolation.loc),
         interpolation.to_string());
   }
   void visit(
       const ast::let_statement& let_statement,
       tree_printer::scope& scope) const {
-    scope.print("let-statement {}", location(let_statement.loc));
+    scope.print(
+        "let-statement{} {}",
+        tilde_strip(let_statement.strip_whitespace),
+        location(let_statement.loc));
     if (let_statement.exported) {
       scope.make_child().print("exported");
     }
@@ -151,7 +213,8 @@ struct ast_visitor {
       const ast::pragma_statement& pragma_statement,
       tree_printer::scope& scope) const {
     scope.print(
-        "pragma-statement '{}' {}",
+        "pragma-statement{} '{}' {}",
+        tilde_strip(pragma_statement.strip_whitespace),
         pragma_statement.to_string(),
         location(pragma_statement.loc));
   }
@@ -159,7 +222,8 @@ struct ast_visitor {
       const ast::partial_block& partial_block,
       tree_printer::scope& scope) const {
     scope.print(
-        "partial-block {} '{}'",
+        "partial-block{} {} '{}'",
+        tilde_strip(partial_block.open_strip_whitespace),
         location(partial_block.loc),
         partial_block.name.name);
     if (partial_block.exported) {
@@ -172,12 +236,17 @@ struct ast_visitor {
       scope.make_child().print("capture '{}'", capture.name);
     }
     visit(partial_block.body_elements, scope);
+    if (auto close = tilde_strip(partial_block.close_strip_whitespace);
+        !close.empty()) {
+      scope.make_child().print("close{}", close);
+    }
   }
   void visit(
       const ast::partial_statement& partial_statement,
       tree_printer::scope& scope) const {
     scope.print(
-        "partial-statement {} '{}'",
+        "partial-statement{} {} '{}'",
+        tilde_strip(partial_statement.strip_whitespace),
         location(partial_statement.loc),
         partial_statement.partial.to_string());
     if (const auto& indentation =

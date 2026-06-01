@@ -92,7 +92,7 @@ type extended_reasons_config =
 type t = {
   po: ParserOptions.t;
   tco_saved_state: saved_state;
-  tco_experimental_features: SSet.t;
+  tco_legacy_experimental_features: SSet.t;
   tco_migration_flags: SSet.t;
   tco_num_local_workers: int option;
   tco_defer_class_declaration_threshold: int option;
@@ -189,6 +189,7 @@ type t = {
   hh_distc_should_disable_trace_store: bool;
   hh_distc_exponential_backoff_num_retries: int;
   recursive_case_types: bool;
+  tco_enabled_unstable_features: SSet.t;
   class_sub_classname: bool;
   class_class_type: bool;
   needs_concrete: bool;
@@ -208,7 +209,7 @@ let default =
   {
     po = ParserOptions.default;
     tco_saved_state = default_saved_state;
-    tco_experimental_features = SSet.empty;
+    tco_legacy_experimental_features = SSet.empty;
     tco_migration_flags = SSet.empty;
     tco_num_local_workers = None;
     tco_defer_class_declaration_threshold = None;
@@ -306,6 +307,7 @@ let default =
     hh_distc_should_disable_trace_store = false;
     hh_distc_exponential_backoff_num_retries = 10;
     recursive_case_types = false;
+    tco_enabled_unstable_features = SSet.empty;
     class_sub_classname = true;
     class_class_type = true;
     needs_concrete = false;
@@ -326,7 +328,7 @@ let set
     ?po_disallow_toplevel_requires
     ?tco_log_large_fanouts_threshold
     ?tco_log_inference_constraints
-    ?tco_experimental_features
+    ?tco_legacy_experimental_features
     ?tco_migration_flags
     ?tco_num_local_workers
     ?tco_defer_class_declaration_threshold
@@ -420,6 +422,7 @@ let set
     ?hh_distc_should_disable_trace_store
     ?hh_distc_exponential_backoff_num_retries
     ?recursive_case_types
+    ?tco_enabled_unstable_features
     ?class_sub_classname
     ?class_class_type
     ?needs_concrete
@@ -446,8 +449,10 @@ let set
   {
     po = setting po options.po;
     tco_saved_state = setting tco_saved_state options.tco_saved_state;
-    tco_experimental_features =
-      setting tco_experimental_features options.tco_experimental_features;
+    tco_legacy_experimental_features =
+      setting
+        tco_legacy_experimental_features
+        options.tco_legacy_experimental_features;
     tco_migration_flags =
       setting tco_migration_flags options.tco_migration_flags;
     tco_num_local_workers =
@@ -707,6 +712,10 @@ let set
         options.hh_distc_exponential_backoff_num_retries;
     recursive_case_types =
       setting recursive_case_types options.recursive_case_types;
+    tco_enabled_unstable_features =
+      setting
+        tco_enabled_unstable_features
+        options.tco_enabled_unstable_features;
     class_sub_classname =
       setting class_sub_classname options.class_sub_classname;
     class_class_type = setting class_class_type options.class_class_type;

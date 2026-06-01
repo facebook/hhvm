@@ -19,7 +19,7 @@ class classA
 echo "*** Testing iconv_mime_decode() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$header = b'Subject: =?UTF-8?B?UHLDvGZ1bmcgUHLDvGZ1bmc=?=';
+$header = 'Subject: =?UTF-8?B?UHLDvGZ1bmcgUHLDvGZ1bmc=?=';
 $mode = ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
 $charset = 'UTF-8';
 

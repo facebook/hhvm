@@ -59,7 +59,7 @@ _readField_{{field.cpp_name}}:
   std::as_const(*this).__fbthrift_read_field_{{field.cpp_name}}();
   if (auto iobuf = _readState.template tryFastSkip<
           {{field.type.type_class}},
-          {{field.type.cpp_type}}
+          {{field.cpp_type}}
       >(iprot,
         {{field.id}},
         {{#partial types.protocol_type type=field.type}})) {

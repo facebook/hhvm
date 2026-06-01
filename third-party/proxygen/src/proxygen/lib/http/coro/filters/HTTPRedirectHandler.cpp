@@ -88,7 +88,7 @@ HTTPRedirectHandler::ResponseFilter::readHeaderEvent() {
 }
 
 void HTTPRedirectHandler::ResponseFilter::stopReading(
-    folly::Optional<const HTTPErrorCode> error) {
+    folly::Optional<const HTTPErrorCode> error) noexcept {
   cancellationSource_.requestCancellation();
   if (readable()) {
     HTTPSourceFilter::stopReading(error);

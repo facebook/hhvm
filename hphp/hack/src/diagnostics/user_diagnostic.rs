@@ -49,7 +49,7 @@ pub fn to_json(e: &UserDiagnostic<Pos, Pos>, ctx: &RelativePathCtx) -> serde_jso
         "message": messages,
         "severity": match e.severity {
             Severity::Err => "error",
-            Severity::Warning => "warning",
+            Severity::Warning { .. } => "warning",
         },
     })
 }
@@ -96,7 +96,7 @@ fn to_lint_message(e: &UserDiagnostic<Pos, Pos>, ctx: &RelativePathCtx) -> LintM
         code: "HACKWARNING".to_string(),
         severity: match severity {
             Severity::Err => LinterSeverity::Error,
-            Severity::Warning => LinterSeverity::Warning,
+            Severity::Warning { .. } => LinterSeverity::Warning,
         },
         name: code.to_string(),
         description: Some(claim_descr.to_string()),

@@ -290,10 +290,8 @@ fn num_outputs(opcode: &Opcode, opcode_data: &OpcodeData) -> u32 {
         Outputs::NOV => 0,
         Outputs::Fixed(n) => n.len() as u32,
         Outputs::FCall => match opcode {
-            Opcode::FCallClsMethod(fca, _, _)
-            | Opcode::FCallClsMethodM(fca, _, _, _)
+            Opcode::FCallClsMethodM(fca, _, _)
             | Opcode::FCallClsMethodD(fca, _, _)
-            | Opcode::FCallClsMethodS(fca, _, _)
             | Opcode::FCallClsMethodSD(fca, _, _, _)
             | Opcode::FCallCtor(fca, _)
             | Opcode::FCallFunc(fca)

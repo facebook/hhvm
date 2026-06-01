@@ -39,14 +39,14 @@ constexpr uint16_t kPort2 = 11305;
 struct HelloGoodbyeOnRequest {
   void onRequest(McServerRequestContext&& ctx, HelloRequest&& request) {
     LOG(INFO) << "Hello! Server " << reinterpret_cast<uintptr_t>(this)
-              << " got key " << request.key_ref()->fullKey().str();
+              << " got key " << request.key()->fullKey().str();
     McServerRequestContext::reply(
         std::move(ctx), HelloReply(carbon::Result::OK));
   }
 
   void onRequest(McServerRequestContext&& ctx, GoodbyeRequest&& request) {
     LOG(INFO) << "Good bye! Server " << reinterpret_cast<uintptr_t>(this)
-              << " got key " << request.key_ref()->fullKey().str();
+              << " got key " << request.key()->fullKey().str();
     McServerRequestContext::reply(
         std::move(ctx), GoodbyeReply(carbon::Result::OK));
   }
@@ -61,7 +61,7 @@ class ThriftHandler : virtual public hellogoodbye::thrift::HelloGoodbyeSvIf {
       apache::thrift::HandlerCallbackPtr<hellogoodbye::HelloReply> callback,
       const hellogoodbye::HelloRequest& request) override {
     LOG(INFO) << "Hello! Thrift server " << reinterpret_cast<uintptr_t>(this)
-              << " got key " << request.key_ref()->fullKey().str();
+              << " got key " << request.key()->fullKey().str();
     auto ctx = callback->getConnectionContext();
     if (ctx) {
       auto headers = ctx->getHeaders();
@@ -98,7 +98,7 @@ class ThriftHandler : virtual public hellogoodbye::thrift::HelloGoodbyeSvIf {
       apache::thrift::HandlerCallbackPtr<hellogoodbye::GoodbyeReply> callback,
       const hellogoodbye::GoodbyeRequest& request) override {
     LOG(INFO) << "Good bye! Thrift server " << reinterpret_cast<uintptr_t>(this)
-              << " got key " << request.key_ref()->fullKey().str();
+              << " got key " << request.key()->fullKey().str();
     hellogoodbye::GoodbyeReply reply(carbon::Result::OK);
     callback->result(std::move(reply));
   }
@@ -148,18 +148,18 @@ AsyncMcServer::Options getOpts(uint16_t port) {
       fm.addTask([&client, i]() {
         auto reply =
             client.sendSync(HelloRequest(fmt::format("key:{}", i)), 200ms);
-        if (*reply.result_ref() != carbon::Result::OK) {
+        if (*reply.result() != carbon::Result::OK) {
           LOG(ERROR) << "Unexpected result: "
-                     << carbon::resultToString(*reply.result_ref());
+                     << carbon::resultToString(*reply.result());
         }
       });
     } else {
       fm.addTask([&client, i]() {
         auto reply =
             client.sendSync(GoodbyeRequest(fmt::format("key:{}", i)), 200ms);
-        if (*reply.result_ref() != carbon::Result::OK) {
+        if (*reply.result() != carbon::Result::OK) {
           LOG(ERROR) << "Unexpected result: "
-                     << carbon::resultToString(*reply.result_ref());
+                     << carbon::resultToString(*reply.result());
         }
       });
     }
@@ -179,16 +179,16 @@ void sendHelloRequestSync(
     std::string key) {
   HelloRequest req(std::move(key));
   req.setCryptoAuthToken("test_cat_token_from_client_req");
-  req.shardId_ref() = 1;
-  req.message_ref() = "test";
-  req.priority_ref() = EnumUInt32::YESTERDAY;
+  req.shardId() = 1;
+  req.message() = "test";
+  req.priority() = EnumUInt32::YESTERDAY;
   ;
   folly::fibers::Baton baton;
 
   client->send(req, [&baton](const HelloRequest&, HelloReply&& reply) {
     LOG(INFO) << "Reply received! Result: "
-              << carbon::resultToString(*reply.result_ref())
-              << ". Message: " << *reply.message_ref();
+              << carbon::resultToString(*reply.result())
+              << ". Message: " << *reply.message();
     baton.post();
   });
 

@@ -338,6 +338,12 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Allow process execution APIs like proc_open, system, exec, etc.
 
+- std::vector<int32_t> Server.PosixKillBlockedSignals = {}, UNKNOWN
+
+  Signal numbers blocked for posix_kill(). Empty vector means no signals
+  are blocked (default). Blocked calls are no-oped with a warning and
+  logged to hhvm_posix_kill_blocked.
+
 - int64_t Server.RequestMemoryMaxBytes = 16LL << 30, UNKNOWN, staticdefault(INT64_MAX)
 - int64_t Server.LowestMaxPostSize = INT64_MAX, UNKNOWN, nobind
 - int64_t Server.Upload.MaxFileSize = 100, UNKNOWN, postprocess|lookuppath(Server.Upload.UploadMaxFileSize)
@@ -455,8 +461,9 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t CodeCache.GlobalDataSize, UNKNOWN
 - bool CodeCache.MapTCHuge, UNKNOWN, lookuppath(Eval.MapTCHuge)
 - uint32_t CodeCache.TCNumHugeHotMB = 64, UNKNOWN, lookuppath(Eval.TCNumHugeHotMB)
-- uint32_t CodeCache.TCNumHugeMainMB = 16, UNKNOWN, lookuppath(Eval.TCNumHugeMainMB)
+- uint32_t CodeCache.TCNumHugeMainMB = 12, UNKNOWN, lookuppath(Eval.TCNumHugeMainMB)
 - uint32_t CodeCache.TCNumHugeColdMB = 4, UNKNOWN, lookuppath(Eval.TCNumHugeColdMB)
+- uint32_t CodeCache.TCNumHugeLiveMainMB = 4, UNKNOWN, lookuppath(Eval.TCNumHugeLiveMainMB)
 - uint32_t CodeCache.AutoTCShift = 1, UNKNOWN
 
 # Configerator
@@ -754,12 +761,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   encoding when Hack array types are used in contexts that historically
   expected legacy PHP arrays.
 
-- bool Eval.LogKnownMethodsAsDynamicCalls = true, UNKNOWN, globaldata(onlyhhbbc)|compileroption(LogKnownMethodsAsDynamicCalls)|unitcacheflag
-
-  If set to true calls to class methods of form $cls::meth() will not be
-  logged as dynamic calls, which means behavior for such calls would be
-  as if ForbidDynamicCallsToClsMeth was set to 0.
-
 - bool Eval.IsVecNotices = false, UNKNOWN, globaldata(onlyhhbbc)
 
   Raise a notice if a ClsMeth type is passed to is_vec/is_array.
@@ -799,6 +800,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Eval.SynchronizeClassLoading = false, voork
 
   Synchronize class loading between threads
+
+- uint32_t Eval.ServiceRouterJumpstartWarmup = 0, nikunjm
+
+  Maximum number of ServiceRouter tiers to store in the jumpstart profile.
+  Tiers are recorded during profiling and warmed up when the profile is loaded.
 
 - uint64_t Eval.VMStackElms, UNKNOWN
 
@@ -1491,6 +1497,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.UnixServerRunPSPInBackground = true, UNKNOWN
 
+- bool Eval.UnixServerProxyXbox = true, UNKNOWN
+
 - bool Eval.UnixServerAssumeRepoReadable = true, UNKNOWN
 
 - bool Eval.UnixServerAssumeRepoRealpath = true, UNKNOWN
@@ -1699,6 +1707,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Eval.UseTopologicalMerge = true, paulbiss
 
   Use a topological sort of dependencies when loading units
+
+- int Eval.EnforceOverriddenReturnTypes = 0, niharikad
+
+  Enforce consistent return types across function hierarchies. 0 indicates no checks are performed, 1 indicates warn on violation and 2 indicates error on violation
 
 # Hack.Lang
 
@@ -1989,6 +2001,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t Jit.ResetProfCountersRequest, UNKNOWN
 - uint32_t Jit.RetranslateAllRequest, UNKNOWN
 - uint32_t Jit.RetranslateAllSeconds, UNKNOWN
+- bool Jit.WaitForAsyncJITBetweenRequests = false, emil
+
+  When running unit tests this controls whether we wait for the async JIT between requests
+
 - bool Jit.RerunRetranslateAll = false, UNKNOWN
 - bool Jit.PGOLayoutSplitHotCold = true, UNKNOWN
 - bool Jit.PGOLayoutResplitFrozen = true, UNKNOWN
@@ -2104,6 +2120,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Max total number of live translation bytes to JIT into the TC for a function
 
 - uint32_t Jit.MaxLiveMainUsage = 150994944, UNKNOWN
+- uint32_t Jit.MaxLiveSeconds = 7200, UNKNOWN
 - uint32_t Jit.SampleRate = 0, UNKNOWN
 - bool Jit.AlignMacroFusionPairs, UNKNOWN
 - bool Jit.AlignUniqueStubs = true, UNKNOWN

@@ -115,9 +115,6 @@ func (p *FooServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *FooServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *FooServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}
@@ -236,9 +233,6 @@ func (p *FB303ServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *FB303ServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *FB303ServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}
@@ -544,9 +538,6 @@ func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *MyServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *MyServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}
@@ -894,9 +885,6 @@ func (p *DbMixedStackArgumentsProcessor) FunctionServiceMap() map[string]string 
     return p.functionServiceMap
 }
 
-func (p *DbMixedStackArgumentsProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *DbMixedStackArgumentsProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}

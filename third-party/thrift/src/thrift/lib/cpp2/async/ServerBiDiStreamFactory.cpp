@@ -27,15 +27,22 @@ ServerBiDiStreamFactory::ServerBiDiStreamFactory(
                        TilePtr&& /* interaction */,
                        FirstResponsePayload&& payload,
                        BiDiClientCallback* clientCb,
-                       folly::EventBase* evb) -> void {
+                       folly::EventBase* evb,
+                       std::shared_ptr<ThriftBiDiLog> biDiLog) -> void {
     if (contextStack) {
       contextStack->onBiDiSubscribe();
+    }
+    if (biDiLog) {
+      biDiLog->log(detail::BiDiSubscribeEvent{});
     }
 
     auto stapled = new ServerCallbackStapler();
     auto streamBridge = new ServerBiDiStreamBridge(stapled, evb, contextStack);
     auto sinkBridge = new ServerBiDiSinkBridge(stapled, evb, contextStack);
     stapled->setContextStack(contextStack);
+    stapled->setBiDiLog(biDiLog);
+    streamBridge->setBiDiLog(biDiLog);
+    sinkBridge->setBiDiLog(biDiLog);
     stapled->setSinkServerCallback(sinkBridge);
     stapled->setStreamServerCallback(streamBridge);
     stapled->resetClientCallback(*clientCb);
@@ -93,7 +100,8 @@ void ServerBiDiStreamFactory::start(
       std::move(interaction_),
       std::move(payload),
       clientCallback,
-      eventBase);
+      eventBase,
+      std::move(biDiLog_));
 }
 
 } // namespace apache::thrift::detail

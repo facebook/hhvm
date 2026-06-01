@@ -14,17 +14,17 @@ public class PerformReactiveAsyncWrapper
   private Perform.Reactive _delegate;
 
   public PerformReactiveAsyncWrapper(Perform.Reactive _delegate) {
-    
-    this._delegate = _delegate;
+      
+      this._delegate = _delegate;
   }
 
   public PerformReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new PerformReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new PerformReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
   @java.lang.Override
@@ -41,7 +41,7 @@ public class PerformReactiveAsyncWrapper
   @java.lang.Override
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> fooWrapper(
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.fooWrapper( rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.fooWrapper( rpcOptions));
   }
 
   public class MyInteractionImpl implements MyInteraction {
@@ -59,7 +59,7 @@ public class PerformReactiveAsyncWrapper
     @java.lang.Override
     public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Integer>> frobnicateWrapper(
       com.facebook.thrift.client.RpcOptions rpcOptions) {
-      throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
+        throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
     }
 
     @java.lang.Override
@@ -76,7 +76,7 @@ public class PerformReactiveAsyncWrapper
     @java.lang.Override
     public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> pingWrapper(
       com.facebook.thrift.client.RpcOptions rpcOptions) {
-      throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
+        throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
     }
 
     @java.lang.Override
@@ -102,7 +102,7 @@ public class PerformReactiveAsyncWrapper
     @java.lang.Override
     public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Integer>> frobnicateWrapper(
       com.facebook.thrift.client.RpcOptions rpcOptions) {
-      throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
+        throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
     }
 
     @java.lang.Override
@@ -119,7 +119,7 @@ public class PerformReactiveAsyncWrapper
     @java.lang.Override
     public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> pingWrapper(
       com.facebook.thrift.client.RpcOptions rpcOptions) {
-      throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
+        throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
     }
 
     @java.lang.Override
@@ -145,7 +145,7 @@ public class PerformReactiveAsyncWrapper
     @java.lang.Override
     public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> frobnicateWrapper(
       com.facebook.thrift.client.RpcOptions rpcOptions) {
-      throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
+        throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
     }
 
     @java.lang.Override
@@ -155,4 +155,5 @@ public class PerformReactiveAsyncWrapper
   public SerialInteraction createSerialInteraction() {
       return new SerialInteractionImpl();
   }
+
 }

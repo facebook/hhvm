@@ -496,6 +496,20 @@ let nast_to_tast ~(do_tast_checks : bool) (ctx : Provider_context.t) nast :
   if do_tast_checks then Nast_check.program ctx nast;
   let tast = List.filter_map nast ~f:convert_def |> Tast_with_dynamic.collect in
   (* We only do TAST checks for non-dynamic components *)
-  if do_tast_checks then
+  if do_tast_checks then begin
     Tast_check.program ctx tast.Tast_with_dynamic.under_normal_assumptions;
+    (* Intersect warning checks with dynamic TAST to determine trust *)
+    match tast.Tast_with_dynamic.under_dynamic_assumptions with
+    | None ->
+      (* If there is no dynamic TAST, everything is trusted *)
+      Diagnostics.mark_all_warnings_trusted ()
+    | Some dyn_tast ->
+      (* Otherwise, find which warnings also fire under the dynamic TAST; since
+         these cannot be false positives we can mark the as trusted *)
+      let dynamic_keys =
+        Diagnostics.collect_warning_keys (fun () ->
+            Tast_check.warning_program ctx dyn_tast)
+      in
+      Diagnostics.mark_warnings_trusted dynamic_keys
+  end;
   tast

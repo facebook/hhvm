@@ -155,9 +155,15 @@ auto hpkeContext(OuterECHClientHello& clientECH) {
       std::make_unique<fizz::hpke::Hkdf>(
           fizz::hpke::Hkdf::v1(openssl::hasherFactory<fizz::Sha256>())));
 
+  std::unique_ptr<Aead> aead;
+  FIZZ_THROW_ON_ERROR(
+      fizz::DefaultFactory().makeAead(
+          aead, err, CipherSuite::TLS_AES_128_GCM_SHA256),
+      err);
+
   hpke::SetupParam setupParam{
       std::move(dhkem),
-      fizz::DefaultFactory().makeAead(CipherSuite::TLS_AES_128_GCM_SHA256),
+      std::move(aead),
       std::make_unique<fizz::hpke::Hkdf>(
           fizz::hpke::Hkdf::v1(openssl::hasherFactory<fizz::Sha256>())),
       std::move(suiteId),
@@ -178,14 +184,21 @@ auto hpkeContext(OuterECHClientHello& clientECH) {
 TEST(EncryptionTest, TestNegotiatedParsedECHConfig) {
   std::vector<ParsedECHConfig> configs = {
       getUnsupportedParsedECHConfig(), getParsedECHConfig()};
-  auto result = negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+  folly::Optional<NegotiatedECHConfig> result;
+  Error err;
+  EXPECT_EQ(
+      negotiateECHConfig(result, err, configs, supportedKEMs, supportedAeads),
+      Status::Success);
   checkSupportedConfigValid(result, getParsedECHConfig());
 }
 
 TEST(EncryptionTest, TestNoNegotiatedParsedECHConfig) {
   std::vector<ParsedECHConfig> configs = {getUnsupportedParsedECHConfig()};
-  folly::Optional<NegotiatedECHConfig> result =
-      negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+  folly::Optional<NegotiatedECHConfig> result;
+  Error err;
+  EXPECT_EQ(
+      negotiateECHConfig(result, err, configs, supportedKEMs, supportedAeads),
+      Status::Success);
   EXPECT_FALSE(result.hasValue());
 }
 
@@ -194,40 +207,55 @@ TEST(EncryptionTest, TestNegotiatedECHPublicNameValidationFails) {
     auto echConfig = getParsedECHConfig();
     echConfig.public_name = "";
     std::vector<ParsedECHConfig> configs = {std::move(echConfig)};
-    folly::Optional<NegotiatedECHConfig> result =
-        negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+    folly::Optional<NegotiatedECHConfig> result;
+    Error err;
+    EXPECT_EQ(
+        negotiateECHConfig(result, err, configs, supportedKEMs, supportedAeads),
+        Status::Success);
     EXPECT_FALSE(result.hasValue());
   }
   {
     auto echConfig = getParsedECHConfig();
     echConfig.public_name = ".dummy.com";
     std::vector<ParsedECHConfig> configs = {std::move(echConfig)};
-    folly::Optional<NegotiatedECHConfig> result =
-        negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+    folly::Optional<NegotiatedECHConfig> result;
+    Error err;
+    EXPECT_EQ(
+        negotiateECHConfig(result, err, configs, supportedKEMs, supportedAeads),
+        Status::Success);
     EXPECT_FALSE(result.hasValue());
   }
   {
     auto echConfig = getParsedECHConfig();
     echConfig.public_name = "dummy.com.";
     std::vector<ParsedECHConfig> configs = {std::move(echConfig)};
-    folly::Optional<NegotiatedECHConfig> result =
-        negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+    folly::Optional<NegotiatedECHConfig> result;
+    Error err;
+    EXPECT_EQ(
+        negotiateECHConfig(result, err, configs, supportedKEMs, supportedAeads),
+        Status::Success);
     EXPECT_FALSE(result.hasValue());
   }
   {
     auto echConfig = getParsedECHConfig();
     echConfig.public_name = "public..dummy.com";
     std::vector<ParsedECHConfig> configs = {std::move(echConfig)};
-    folly::Optional<NegotiatedECHConfig> result =
-        negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+    folly::Optional<NegotiatedECHConfig> result;
+    Error err;
+    EXPECT_EQ(
+        negotiateECHConfig(result, err, configs, supportedKEMs, supportedAeads),
+        Status::Success);
     EXPECT_FALSE(result.hasValue());
   }
   {
     auto echConfig = getParsedECHConfig();
     echConfig.public_name = "dummy!.com";
     std::vector<ParsedECHConfig> configs = {std::move(echConfig)};
-    folly::Optional<NegotiatedECHConfig> result =
-        negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+    folly::Optional<NegotiatedECHConfig> result;
+    Error err;
+    EXPECT_EQ(
+        negotiateECHConfig(result, err, configs, supportedKEMs, supportedAeads),
+        Status::Success);
     EXPECT_FALSE(result.hasValue());
   }
 }
@@ -246,8 +274,11 @@ TEST(EncryptionTest, TestUnsupportedMandatoryExtension) {
 
   std::vector<ParsedECHConfig> configs = {std::move(invalidConfigContent)};
 
-  folly::Optional<NegotiatedECHConfig> result =
-      negotiateECHConfig(configs, supportedKEMs, supportedAeads);
+  folly::Optional<NegotiatedECHConfig> result;
+  Error err;
+  EXPECT_EQ(
+      negotiateECHConfig(result, err, configs, supportedKEMs, supportedAeads),
+      Status::Success);
 
   // Expect no result thanks to mandatory extension.
   EXPECT_FALSE(result.hasValue());
@@ -343,15 +374,20 @@ TEST(EncryptionTest, TestTryToDecryptECH) {
       std::move(kex),
       0);
 
-  auto chlo = decryptECHWithContext(
-      chloOuter,
-      getParsedECHConfig(),
-      testECH.cipher_suite,
-      std::move(testECH.enc),
-      std::move(testECH.config_id),
-      std::move(testECH.payload),
-      ECHVersion::Draft15,
-      context);
+  ClientHello chlo;
+  EXPECT_EQ(
+      decryptECHWithContext(
+          chlo,
+          err,
+          chloOuter,
+          getParsedECHConfig(),
+          testECH.cipher_suite,
+          std::move(testECH.enc),
+          std::move(testECH.config_id),
+          std::move(testECH.payload),
+          ECHVersion::Draft15,
+          context),
+      Status::Success);
 
   checkDecodedChlo(std::move(chlo), std::move(expectedChlo));
 }
@@ -382,15 +418,20 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsSuccess) {
   EXPECT_EQ(encodeExtension(clientECHExt, err, clientECH), Status::Success);
   outerChlo.extensions.push_back(std::move(clientECHExt));
 
-  auto decryptedChlo = decryptECHWithContext(
-      outerChlo,
-      getParsedECHConfig(),
-      clientECH.cipher_suite,
-      std::move(clientECH.enc),
-      std::move(clientECH.config_id),
-      std::move(clientECH.payload),
-      ECHVersion::Draft15,
-      context);
+  ClientHello decryptedChlo;
+  EXPECT_EQ(
+      decryptECHWithContext(
+          decryptedChlo,
+          err,
+          outerChlo,
+          getParsedECHConfig(),
+          clientECH.cipher_suite,
+          std::move(clientECH.enc),
+          std::move(clientECH.config_id),
+          std::move(clientECH.payload),
+          ECHVersion::Draft15,
+          context),
+      Status::Success);
 
   auto decryptedClientKeyShare =
       findExtension(decryptedChlo.extensions, ExtensionType::key_share)
@@ -420,16 +461,21 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsECH) {
   EXPECT_EQ(encodeExtension(clientECHExt, err, clientECH), Status::Success);
   outerChlo.extensions.push_back(std::move(clientECHExt));
 
+  ClientHello result;
   EXPECT_THROW(
-      decryptECHWithContext(
-          outerChlo,
-          getParsedECHConfig(),
-          clientECH.cipher_suite,
-          std::move(clientECH.enc),
-          std::move(clientECH.config_id),
-          std::move(clientECH.payload),
-          ECHVersion::Draft15,
-          context),
+      FIZZ_THROW_ON_ERROR(
+          decryptECHWithContext(
+              result,
+              err,
+              outerChlo,
+              getParsedECHConfig(),
+              clientECH.cipher_suite,
+              std::move(clientECH.enc),
+              std::move(clientECH.config_id),
+              std::move(clientECH.payload),
+              ECHVersion::Draft15,
+              context),
+          err),
       OuterExtensionsError);
 }
 
@@ -450,16 +496,21 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsDupes) {
   EXPECT_EQ(encodeExtension(clientECHExt, err, clientECH), Status::Success);
   outerChlo.extensions.push_back(std::move(clientECHExt));
 
+  ClientHello result;
   EXPECT_THROW(
-      decryptECHWithContext(
-          outerChlo,
-          getParsedECHConfig(),
-          clientECH.cipher_suite,
-          std::move(clientECH.enc),
-          std::move(clientECH.config_id),
-          std::move(clientECH.payload),
-          ECHVersion::Draft15,
-          context),
+      FIZZ_THROW_ON_ERROR(
+          decryptECHWithContext(
+              result,
+              err,
+              outerChlo,
+              getParsedECHConfig(),
+              clientECH.cipher_suite,
+              std::move(clientECH.enc),
+              std::move(clientECH.config_id),
+              std::move(clientECH.payload),
+              ECHVersion::Draft15,
+              context),
+          err),
       OuterExtensionsError);
 }
 
@@ -510,8 +561,12 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
    * result: [A, B, C, D, E, F, G]
    */
 
-  auto actualRes =
-      substituteOuterExtensions(std::move(innerChlo.extensions), {});
+  std::vector<Extension> actualRes;
+  Error err;
+  EXPECT_EQ(
+      substituteOuterExtensions(
+          actualRes, err, std::move(innerChlo.extensions), {}),
+      Status::Success);
 
   expectedRes = {&extA, &extB, &extC, &extD, &extE, &extF, &extG};
 
@@ -529,7 +584,6 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
   innerChlo = TestMessages::clientHello();
 
   echOuterExt.extensionTypes.push_back(ExtensionType::early_data);
-  Error err;
   {
     Extension echOuterExtension;
     EXPECT_EQ(
@@ -538,7 +592,10 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
   }
 
   EXPECT_THROW(
-      substituteOuterExtensions(std::move(innerChlo.extensions), {}),
+      FIZZ_THROW_ON_ERROR(
+          substituteOuterExtensions(
+              actualRes, err, std::move(innerChlo.extensions), {}),
+          err),
       OuterExtensionsError);
 
   /**
@@ -569,7 +626,10 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
   }
 
   EXPECT_THROW(
-      substituteOuterExtensions(std::move(innerChlo.extensions), outerExt),
+      FIZZ_THROW_ON_ERROR(
+          substituteOuterExtensions(
+              actualRes, err, std::move(innerChlo.extensions), outerExt),
+          err),
       OuterExtensionsError);
 
   /**
@@ -598,8 +658,10 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
     innerChlo.extensions.push_back(std::move(echOuterExtension));
   }
 
-  actualRes =
-      substituteOuterExtensions(std::move(innerChlo.extensions), outerExt);
+  EXPECT_EQ(
+      substituteOuterExtensions(
+          actualRes, err, std::move(innerChlo.extensions), outerExt),
+      Status::Success);
   expectedRes = {&extD, &extF, &extG};
 
   EXPECT_THAT(std::ref(actualRes), ExtensionEq(expectedRes));
@@ -627,8 +689,10 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
   innerChlo.extensions =
       cloneExtensionList({&extA, &extB, &extC, &encodedEchOuterExt, &extG});
 
-  actualRes =
-      substituteOuterExtensions(std::move(innerChlo.extensions), outerExt);
+  EXPECT_EQ(
+      substituteOuterExtensions(
+          actualRes, err, std::move(innerChlo.extensions), outerExt),
+      Status::Success);
 
   expectedRes = {&extA, &extB, &extC, &extD, &extE, &extF, &extG};
 
@@ -651,7 +715,10 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
   innerChlo.extensions = cloneExtensionList({&extD, &extE, &extF, &extF});
 
   EXPECT_THROW(
-      substituteOuterExtensions(std::move(innerChlo.extensions), outerExt),
+      FIZZ_THROW_ON_ERROR(
+          substituteOuterExtensions(
+              actualRes, err, std::move(innerChlo.extensions), outerExt),
+          err),
       OuterExtensionsError);
 
   /*
@@ -677,7 +744,10 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
       cloneExtensionList({&extD, &extE, &extF, &encodedEchOuterExt});
 
   EXPECT_THROW(
-      substituteOuterExtensions(std::move(innerChlo.extensions), outerExt),
+      FIZZ_THROW_ON_ERROR(
+          substituteOuterExtensions(
+              actualRes, err, std::move(innerChlo.extensions), outerExt),
+          err),
       OuterExtensionsError);
 
   /*
@@ -702,7 +772,10 @@ TEST(EncryptionTest, TestSubstituteOuterExtensions) {
   innerChlo.extensions = cloneExtensionList({&encodedEchOuterExt, &extB});
 
   EXPECT_THROW(
-      substituteOuterExtensions(std::move(innerChlo.extensions), outerExt),
+      FIZZ_THROW_ON_ERROR(
+          substituteOuterExtensions(
+              actualRes, err, std::move(innerChlo.extensions), outerExt),
+          err),
       OuterExtensionsError);
 }
 
@@ -813,7 +886,11 @@ TEST(EncryptionTest, TestSetShloAcceptance) {
         return DerivedSecret(acceptSecret, EarlySecrets::ECHAcceptConfirmation);
       }));
   std::unique_ptr<KeyScheduler> schedulerBasePtr = std::move(scheduler);
-  setAcceptConfirmation(shlo, std::move(context), std::move(schedulerBasePtr));
+  Error err;
+  EXPECT_EQ(
+      setAcceptConfirmation(
+          err, shlo, std::move(context), std::move(schedulerBasePtr)),
+      Status::Success);
   auto shloIt = shlo.random.end() - kEchAcceptConfirmationSize;
   auto secretIt = acceptSecret.begin();
   for (size_t i = 0; i < kEchAcceptConfirmationSize; i++) {
@@ -847,7 +924,11 @@ TEST(EncryptionTest, TestSetHRRAcceptance) {
             acceptSecret, EarlySecrets::HRRECHAcceptConfirmation);
       }));
   std::unique_ptr<KeyScheduler> schedulerBasePtr = std::move(scheduler);
-  setAcceptConfirmation(hrr, std::move(context), std::move(schedulerBasePtr));
+  Error err;
+  EXPECT_EQ(
+      setAcceptConfirmation(
+          err, hrr, std::move(context), std::move(schedulerBasePtr)),
+      Status::Success);
   auto echExtensionRange = hrr.extensions.back().extension_data->coalesce();
   auto echExtensionIt = echExtensionRange.begin();
   auto secretIt = acceptSecret.begin();
@@ -874,8 +955,13 @@ TEST(EncryptionTest, TestCheckShloAcceptance) {
         return DerivedSecret(acceptSecret, EarlySecrets::ECHAcceptConfirmation);
       }));
   std::unique_ptr<KeyScheduler> schedulerBasePtr = std::move(scheduler);
-  EXPECT_TRUE(
-      checkECHAccepted(shlo, std::move(context), std::move(schedulerBasePtr)));
+  bool accepted = false;
+  Error err;
+  EXPECT_EQ(
+      checkECHAccepted(
+          accepted, err, shlo, std::move(context), std::move(schedulerBasePtr)),
+      Status::Success);
+  EXPECT_TRUE(accepted);
 }
 
 TEST(EncryptionTest, TestCheckHrrAcceptance) {
@@ -897,8 +983,13 @@ TEST(EncryptionTest, TestCheckHrrAcceptance) {
             acceptSecret, EarlySecrets::HRRECHAcceptConfirmation);
       }));
   std::unique_ptr<KeyScheduler> schedulerBasePtr = std::move(scheduler);
-  EXPECT_TRUE(
-      checkECHAccepted(hrr, std::move(context), std::move(schedulerBasePtr)));
+  bool accepted = false;
+  Error err;
+  EXPECT_EQ(
+      checkECHAccepted(
+          accepted, err, hrr, std::move(context), std::move(schedulerBasePtr)),
+      Status::Success);
+  EXPECT_TRUE(accepted);
 }
 
 TEST(EncryptionTest, TestGenerateGreasePsk) {

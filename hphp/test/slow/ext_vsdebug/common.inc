@@ -97,7 +97,19 @@ function resumeTarget() {
     "type" => "request",
     "threadId" => 1
   ];
-  sendVsCommand($contCommand);
+  $seq = sendVsCommand($contCommand);
+
+  // Continue response (DAP spec requires a response for every request).
+  $msg = json_decode(getNextVsDebugMessage(), true);
+  checkObjEqualRecursively($msg, dict[
+    "type" => "response",
+    "command" => "continue",
+    "success" => true,
+    "request_seq" => $seq,
+    "body" => dict[
+        "allThreadsContinued" => false,
+    ],
+  ]);
 
   // Target resume event (not thread specific)
   $msg = json_decode(getNextVsDebugMessage(), true);

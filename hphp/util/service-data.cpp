@@ -18,14 +18,16 @@
 
 #include <array>
 #include <memory>
+#include <string_view>
 #include <vector>
-#include <tbb/concurrent_unordered_map.h>
 
 #include <folly/Conv.h>
 #include <folly/MapUtil.h>
+#include <folly/container/HeterogeneousAccess.h>
 #include <folly/Random.h>
 #include <folly/stats/Histogram.h>
 
+#include "hphp/util/hash-map.h"
 #include "hphp/util/portability.h"
 
 namespace HPHP {
@@ -152,99 +154,31 @@ void ExportedHistogram::exportAll(const std::string& prefix,
   }
 }
 
-namespace detail {
-template <class ClassWithPrivateDestructor>
-struct FriendDeleter {
-  template <class... Args>
-  explicit FriendDeleter(Args&&... args)
-      : m_instance(new ClassWithPrivateDestructor(
-                     std::forward<Args>(args)...)) {}
-  ~FriendDeleter() { delete m_instance; }
-
-  ClassWithPrivateDestructor* get() const { return m_instance; }
-  ClassWithPrivateDestructor* release() {
-    auto r = m_instance;
-    m_instance = nullptr;
-    return r;
-  }
-
- private:
-  ClassWithPrivateDestructor* m_instance;
-};
-} // namespace detail
-
 namespace {
-
-// Find 'key' in concurrent_unordered_map 'map'. Return true iff the key is
-// found.
-template<class Key, class Value>
-bool concurrentMapGet(const tbb::concurrent_unordered_map<Key, Value>& map,
-                      const Key& key,
-                      Value& value) {
-  auto iterator = map.find(key);
-  if (iterator != map.end()) {
-    value = iterator->second;
-    return true;
-  }
-  return false;
-}
-
-// Find or insert 'key' into concurrent_unordered_map 'map'.
-//
-// Return the value pointer from 'map' if it exists. Otherwise, insert it into
-// the map by creating a new object on the heap using the supplied arguments.
-//
-// Note that this function could be called concurrently. If the insertion to
-// 'map' is successful, we release the ownership of value object from
-// valuePtr. If the key is already in the map because someone else beat us to
-// the insertion, we will return the existing value and delete the object we
-// created.
-//
-template <class Key, class Value, class... Args>
-Value* getOrCreateWithArgs(tbb::concurrent_unordered_map<Key, Value*>& map,
-                           const Key& key,
-                           Args&&... args) {
-  // Optimistic case: the object might already be created. Do a simple look
-  // up.
-  Value* ret = nullptr;
-  if (concurrentMapGet(map, key, ret)) {
-    return ret;
-  }
-
-  // We didn't find an existing value for the key. Create it. Hold the new
-  // object in a deleter and release it later if the insert is successful.
-  detail::FriendDeleter<Value> deleter(std::forward<Args>(args)...);
-
-  auto result = map.insert(std::make_pair(key, deleter.get()));
-  if (result.second) {
-    // insert successfully. release the memory.
-    deleter.release();
-  } else {
-    // key is already inserted. This can happen if two threads were racing
-    // to create the counter. In this case, nothing further needs to be done.
-    // valuePtr's object will get destroyed when we go out of scope.
-  }
-  return result.first->second;
-}
 
 struct Impl {
   ExportedCounter* getCounterIfExists(const std::string& name) {
-    ExportedCounter* ret = nullptr;
-    if (concurrentMapGet(m_counterMap, name, ret)) {
-      return ret;
+    auto it = m_counterMap.find(name);
+    if (it != m_counterMap.end()) {
+      return it->second.get();
     }
     return nullptr;
   }
 
   ExportedCounter* createCounter(const std::string& name) {
-    return getOrCreateWithArgs(m_counterMap, name);
+    auto [it, inserted] = m_counterMap.try_emplace(
+      name, std::make_unique<ExportedCounter>());
+    return it->second.get();
   }
 
-  CounterHandle registerCounterCallback(CounterFunc func, bool expensive) {
+  CounterHandle registerCounterCallback(
+      CounterFunc func, bool expensive, std::string prefix) {
     auto handle = folly::Random::rand32();
     SYNCHRONIZED(m_counterFuncs) {
       while (m_counterFuncs.contains(handle)) ++handle;
-      m_counterFuncs.emplace(handle, std::make_pair(std::move(func), expensive));
+      m_counterFuncs.emplace(
+        handle,
+        CallbackEntry{std::move(func), expensive, std::move(prefix)});
     }
     return handle;
   }
@@ -261,8 +195,9 @@ struct Impl {
       const std::vector<ServiceData::StatsType>& types,
       const std::vector<std::chrono::seconds>& levels,
       int numBuckets) {
-    return getOrCreateWithArgs(
-      m_timeseriesMap, name, numBuckets, levels, types);
+    auto [it, inserted] = m_timeseriesMap.try_emplace(
+      name, std::make_unique<ExportedTimeSeries>(numBuckets, levels, types));
+    return it->second.get();
   }
 
   ExportedHistogram* createHistogram(
@@ -271,8 +206,11 @@ struct Impl {
       int64_t min,
       int64_t max,
       const std::vector<double>& exportPercentiles) {
-    return getOrCreateWithArgs(
-      m_histogramMap, name, bucketSize, min, max, exportPercentiles);
+    auto [it, inserted] = m_histogramMap.try_emplace(
+      name,
+      std::make_unique<ExportedHistogram>(
+        bucketSize, min, max, exportPercentiles));
+    return it->second.get();
   }
 
   void exportAll(CounterMap& statsMap) {
@@ -288,11 +226,20 @@ struct Impl {
       histogram.second->exportAll(histogram.first, statsMap);
     }
 
+    std::vector<CounterFunc> expensiveCallbacks;
     SYNCHRONIZED_CONST(m_counterFuncs) {
-      for (auto& pair : m_counterFuncs) {
-        // we don't care if it's expensive because we're exporting everything
-        pair.second.first(statsMap);
+      expensiveCallbacks.reserve(m_counterFuncs.size());
+      for (auto& [handle, entry] : m_counterFuncs) {
+        if (entry.expensive) {
+          expensiveCallbacks.push_back(entry.func);
+        } else {
+          entry.func(statsMap);
+        }
       }
+    }
+    // exportAll still runs expensive callbacks, just not while holding the lock.
+    for (auto& cb : expensiveCallbacks) {
+      cb(statsMap);
     }
   }
 
@@ -316,15 +263,15 @@ struct Impl {
       // build the counterFuncsMap and expensiveCounterFuncs if we haven't already
       if (counterFuncMap.empty()) {
         SYNCHRONIZED_CONST(m_counterFuncs) {
-          for (auto& pair : m_counterFuncs) {
+          for (auto& [handle, entry] : m_counterFuncs) {
             // only actually compute the "cheap" ones immediately
-            if (!pair.second.second) {
-              pair.second.first(counterFuncMap);
+            if (!entry.expensive) {
+              entry.func(counterFuncMap);
             } else {
               // grab a copy so we don't need to resynchronize.
               // if someone deregisters a counter while we're doing this
               // that's already a race so being opinionated isn't a big deal
-              expensiveCounterFuncs.push_back(pair.second.first);
+              expensiveCounterFuncs.push_back(entry.func);
             }
           }
         }
@@ -354,11 +301,10 @@ struct Impl {
           statsMap[key] = iter->second;
         }
 
-        counterFuncMap.merge(results);
+        counterFuncMap.insert(results.begin(), results.end());
         ++nextExpensiveCounterFunc;
 
-        // checking iter against results.end() after a merge operation seems
-        // sus, so using a bool to be safe
+        // using a bool because iter may be invalidated by the insert
         if (found) break;
       }
     }
@@ -371,16 +317,18 @@ struct Impl {
       return counterIter->second->getValue();
     }
 
-    // Check cheap callbacks
+    // Check cheap callbacks, skipping those whose prefix doesn't match.
     CounterMap statsMap;
     std::vector<CounterFunc> expensiveCounterFuncs;
     SYNCHRONIZED_CONST(m_counterFuncs) {
-      for (auto& pair : m_counterFuncs) {
-        // only run the "cheap" ones initially
-        if (pair.second.second) {
-          expensiveCounterFuncs.push_back(pair.second.first);
+      for (auto& [handle, entry] : m_counterFuncs) {
+        if (!entry.prefix.empty() && !key.starts_with(entry.prefix)) {
+          continue;
+        }
+        if (entry.expensive) {
+          expensiveCounterFuncs.push_back(entry.func);
         } else {
-          pair.second.first(statsMap);
+          entry.func(statsMap);
         }
       }
     }
@@ -390,10 +338,8 @@ struct Impl {
     // See if it's a time series value
     if (auto ts_val = ExportTimeSeriesCounterForKey(key)) return ts_val;
 
-    // check expensive callbacks
+    // Check expensive callbacks that matched the prefix.
     for (const auto& cb: expensiveCounterFuncs) {
-      // run one at a time and check for result so we can avoid running
-      // unecessary ones if we hit the key early.
       statsMap.clear();
       cb(statsMap);
       iter = statsMap.find(key);
@@ -408,58 +354,67 @@ struct Impl {
   // implementation note below.
   ~Impl() = delete;
 
+  // Parses timeseries keys of the form <name>.<type>[.<duration>]
+  // where type ∈ {avg, sum, pct, rate, count} and duration is an integer
+  // (omitted for all-time counters, i.e. duration 0).
   Optional<int64_t> ExportTimeSeriesCounterForKey(const std::string& key) {
-    auto const data = key.c_str();
-    ServiceData::StatsType type = ServiceData::StatsType::AVG;
+    auto sv = std::string_view(key);
+    auto lastDot = sv.rfind('.');
+    if (lastDot == sv.npos || lastDot == 0) {
+      return std::nullopt;
+    }
+
+    auto tail = sv.substr(lastDot + 1);
     int duration = 0;
-    size_t index = key.size() - 1;
-    while (isdigit(data[index])) {
-      if (index == 0) return std::nullopt;
-      --index;
-    }
-    if (data[index] == '.') {
-      sscanf(data + index + 1, "%d", &duration);
-      if (index == 0) return std::nullopt;
-      --index;
-    }
-    // Find the StatsType from: avg, sum, pct, rate, count
-    auto const typeEnd = index;
-    while (index > 0 && data[index] != '.') --index;
-    if (index == 0) return std::nullopt;
-    if (typeEnd - index == 3) {
-      if (!memcmp(data + index, ".avg", 4)) {
-        type = ServiceData::StatsType::AVG;
-      } else if (!memcmp(data + index, ".sum", 4)) {
-        type = ServiceData::StatsType::SUM;
-      } else if (!memcmp(data + index, ".pct", 4)) {
-        type = ServiceData::StatsType::PCT;
-      } else {
+
+    // If the trailing segment is numeric, it's the duration — peel it off
+    // to expose the type segment underneath.
+    if (auto d = folly::tryTo<int>(tail)) {
+      duration = *d;
+      sv = sv.substr(0, lastDot);
+      lastDot = sv.rfind('.');
+      if (lastDot == sv.npos || lastDot == 0) {
         return std::nullopt;
       }
-    } else if (typeEnd - index == 4) {
-      if (!memcmp(data + index, ".rate", 5)) {
-        type = ServiceData::StatsType::RATE;
-      } else {
-        return std::nullopt;
-      }
-    } else if (typeEnd - index == 5) {
-      if (!memcmp(data + index, ".count", 6)) {
-        type = ServiceData::StatsType::COUNT;
-      } else {
-        return std::nullopt;
-      }
+      tail = sv.substr(lastDot + 1);
     }
-    auto const tsName = key.substr(0, index);
-    auto const tsIter = m_timeseriesMap.find(tsName);
-    if (tsIter == m_timeseriesMap.end()) return std::nullopt;
-    auto const ts = tsIter->second;
-    return ts->getCounter(type, duration);
+
+    StatsType type;
+    if (tail == "avg") {
+      type = StatsType::AVG;
+    } else if (tail == "sum") {
+      type = StatsType::SUM;
+    } else if (tail == "pct") {
+      type = StatsType::PCT;
+    } else if (tail == "rate") {
+      type = StatsType::RATE;
+    } else if (tail == "count") {
+      type = StatsType::COUNT;
+    } else {
+      return std::nullopt;
+    }
+
+    auto tsIter = m_timeseriesMap.find(sv.substr(0, lastDot));
+    if (tsIter == m_timeseriesMap.end()) {
+      return std::nullopt;
+    }
+    return tsIter->second->getCounter(type, duration);
   }
 
-  using ExportedCounterMap = tbb::concurrent_unordered_map<std::string, ExportedCounter*>;
-  using CounterFuncMap = std::unordered_map<CounterHandle, std::pair<CounterFunc, bool>>;
-  using ExportedTimeSeriesMap = tbb::concurrent_unordered_map<std::string, ExportedTimeSeries*>;
-  using ExportedHistogramMap = tbb::concurrent_unordered_map<std::string, ExportedHistogram*>;
+  struct CallbackEntry {
+    CounterFunc func;
+    bool expensive;
+    std::string prefix;
+  };
+  using CounterFuncMap = folly::F14FastMap<CounterHandle, CallbackEntry>;
+  using ExportedCounterMap = folly_concurrent_hash_map_simd<
+      std::string, std::unique_ptr<ExportedCounter>>;
+  using ExportedTimeSeriesMap = folly_concurrent_hash_map_simd<
+      std::string, std::unique_ptr<ExportedTimeSeries>,
+      folly::HeterogeneousAccessHash<std::string>,
+      folly::HeterogeneousAccessEqualTo<std::string>>;
+  using ExportedHistogramMap = folly_concurrent_hash_map_simd<
+      std::string, std::unique_ptr<ExportedHistogram>>;
 
   ExportedCounterMap m_counterMap;
   folly::Synchronized<CounterFuncMap> m_counterFuncs;
@@ -507,8 +462,10 @@ ExportedCounter* getCounterIfExists(const std::string& name) {
   return getServiceDataInstance().getCounterIfExists(name);
 }
 
-CounterHandle registerCounterCallback(CounterFunc func, bool expensive) {
-  return getServiceDataInstance().registerCounterCallback(std::move(func), expensive);
+CounterHandle registerCounterCallback(
+    CounterFunc func, bool expensive, std::string prefix) {
+  return getServiceDataInstance().registerCounterCallback(
+    std::move(func), expensive, std::move(prefix));
 }
 
 void deregisterCounterCallback(CounterHandle key) {

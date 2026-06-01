@@ -83,7 +83,7 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
 namespace {
 
 ServiceData::CounterCallback s_counters(
-  [](std::map<std::string, int64_t>& counters) {
+  [](ServiceData::CounterMap& counters) {
     counters["mem.low-mapped"] = alloc::getLowMapped();
     counters["mem.mid-mapped"] = alloc::getMidMapped();
     // this isn't really a counter, but whatever. we need a way for callers
@@ -120,7 +120,8 @@ ServiceData::CounterCallback s_counters(
     if (ProcStatus::valid()) {
       counters["mem.vm-rss-adjusted-kb"] = ProcStatus::adjustedRssKb();
     }
-  }
+  },
+  "mem."
 );
 
 }

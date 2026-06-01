@@ -390,7 +390,10 @@ class ServerPublisherStream : private StreamServerCallback {
         if (payload.hasValue()) {
           bool hasPayload = payload->payload || payload->isOrderedHeader;
           if (hasPayload && streamLog_) {
-            streamLog_->log(detail::StreamNextEvent{});
+            uint64_t payloadBytes = payload->payload
+                ? payload->payload->computeChainDataLength()
+                : 0;
+            streamLog_->log(detail::StreamNextEvent{payloadBytes});
           }
           auto alive = hasPayload
               ? streamClientCallback_->onStreamNext(std::move(payload.value()))

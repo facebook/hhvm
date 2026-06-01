@@ -23,5 +23,6 @@
 namespace apache::thrift::python {
 
 std::string_view extractStringViewFromBytes(PyObject* bytes);
+std::string_view extractStringViewFromUnicode(PyObject* unicode);
 
 } // namespace apache::thrift::python

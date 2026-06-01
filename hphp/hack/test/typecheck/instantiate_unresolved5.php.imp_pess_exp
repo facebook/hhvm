@@ -1,0 +1,14 @@
+WARN: File "instantiate_unresolved5.php", line 20, characters 12-16:
+This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
+WARN: File "instantiate_unresolved5.php", line 22, characters 5-6:
+Appending to a value of type `dynamic` (Warn[12040])
+  File "instantiate_unresolved5.php", line 21, characters 12-16:
+  This expression has type `dynamic`
+WARN: File "instantiate_unresolved5.php", line 22, characters 5-8:
+This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
+WARN: File "instantiate_unresolved5.php", line 22, characters 5-16:
+This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
+WARN: File "instantiate_unresolved5.php", line 22, characters 12-16:
+This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
+ERROR: File "instantiate_unresolved5.php", line 12, characters 10-12:
+Was expecting a return type hint (Typing[4030])

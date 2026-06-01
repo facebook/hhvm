@@ -32,18 +32,18 @@ class A {
     $x = vec[new A, 'func3']; $x($v);
     $x = vec[new A, 'func3$memoize_impl']; $x($v);
 
-
-    $x = 'A'; $x::func3($v);
-
-
-
     $x = 'func3'; HH\dynamic_class_meth(A::class, $x)($v);
     $x = 'func3$memoize_impl'; HH\dynamic_class_meth(A::class, $x)($v);
 
     $obj = new A; $x = 'func2'; $obj->$x($v);
     $obj = new A; $x = 'func2$memoize_impl'; $obj->$x($v);
 
+  }
 
+  public static function negative_tests(): void {
+    echo "====================== negative tests (A) ==================\n";
+    $v = 123;
+    $x = 'A'; $x::func3($v);
   }
 }
 
@@ -72,7 +72,7 @@ class B {
   }
 
   public static function negative_tests() :mixed{
-    echo "====================== negative tests ======================\n";
+    echo "====================== negative tests (B) ==================\n";
     $v = 123;
 
     $x = 'func4'; $x($v);
@@ -93,6 +93,7 @@ class B {
 }
 <<__EntryPoint>> function main(): void {
 A::positive_tests();
+A::negative_tests();
 B::positive_tests();
 B::negative_tests();
 }

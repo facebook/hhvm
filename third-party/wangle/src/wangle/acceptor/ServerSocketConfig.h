@@ -134,6 +134,14 @@ struct ServerSocketConfig {
   std::chrono::milliseconds connectionAgeTimeout{0};
 
   /**
+   * Whether to remove the connection from the ConnectionManager when the
+   * connection age timeout fires. When false, the connection stays in the
+   * ConnectionManager during graceful close so dropAllConnections() can still
+   * find it during shutdown.
+   */
+  bool detachOnConnectionAgeTimeout{true};
+
+  /**
    * The number of milliseconds a ssl handshake can timeout (60s)
    */
   std::chrono::milliseconds sslHandshakeTimeout{60000};

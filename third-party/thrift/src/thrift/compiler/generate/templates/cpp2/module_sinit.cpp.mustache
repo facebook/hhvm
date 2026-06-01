@@ -19,9 +19,9 @@
 
 {{#if (has_compiler_option? "any")}}
 
-  {{#if program.has_schema?}}{{! avoids circular dependency }}
+  {{#if program.has_schema_const?}}{{! avoids circular dependency }}
 #include <thrift/lib/cpp2/gen/module_sinit_cpp.h>
-  {{/if program.has_schema?}}
+  {{/if program.has_schema_const?}}
 
 namespace {{program.cpp_qualified_namespace}} {
 // Call all static init functions.
@@ -37,12 +37,12 @@ void __fbthrift_static_init_{{struct.cpp_underlying_name}}();
     {{/each}}
   {{/if (has_compiler_option? "any")}}
 
-  {{#if program.has_schema?}}
+  {{#if program.has_schema_const?}}
 namespace {{program.name}}_constants {
-extern ::folly::Range<const ::std::string_view*> {{program.schema_name}}_includes();
-extern ::folly::Range<const ::std::string_view*> {{program.schema_name}}_uris();
+extern ::folly::Range<const ::std::string_view*> {{program.schema_const_name}}_includes();
+extern ::folly::Range<const ::std::string_view*> {{program.schema_const_name}}_uris();
 }
-  {{/if program.has_schema?}}
+  {{/if program.has_schema_const?}}
 
 namespace {
 
@@ -56,15 +56,15 @@ struct StaticInit {
       {{/each}}
     {{/if (has_compiler_option? "any")}}
 
-    {{#if program.has_schema?}}
+    {{#if program.has_schema_const?}}
     ::apache::thrift::BaseSchemaRegistry::get().registerSchema(
-      "{{program.schema_name}}",
-      {{program.name}}_constants::{{program.schema_name}}_includes(),
+      "{{program.schema_const_name}}",
+      {{program.name}}_constants::{{program.schema_const_name}}_includes(),
       "{{program.autogen_path}}",
       {{program.definition_key.buffer}},
-      {{program.name}}_constants::{{program.schema_name}}_uris()
+      {{program.name}}_constants::{{program.schema_const_name}}_uris()
     );
-    {{/if program.has_schema?}}
+    {{/if program.has_schema_const?}}
   }
 };
 

@@ -57,4 +57,5 @@ public class BadServiceAsyncReactiveWrapper
     public BadInteraction createBadInteraction() {
         return new BadInteractionImpl(_delegate.createBadInteraction());
     }
+
 }

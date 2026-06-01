@@ -20,7 +20,7 @@
 
 using apache::thrift::compiler::test::check_compile;
 
-TEST(StandardValidatorTest, BadPriority) {
+TEST(StandardValidatorTest, RemovedPriority) {
   check_compile(R"(
     package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
@@ -30,20 +30,27 @@ TEST(StandardValidatorTest, BadPriority) {
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"priority": "bad2"}}
       void foo();
     }
-    # expected-error@-5: Bad priority 'bad1'. Choose one of ["HIGH_IMPORTANT", "HIGH", "IMPORTANT", "NORMAL", "BEST_EFFORT"].
-    # expected-warning@-6: The annotation priority is deprecated. Please use @thrift.Priority instead.
-    # expected-error@-5: Bad priority 'bad2'. Choose one of ["HIGH_IMPORTANT", "HIGH", "IMPORTANT", "NORMAL", "BEST_EFFORT"].
-    # expected-warning@-6: The annotation priority is deprecated. Please use @thrift.Priority instead.
+    # expected-error@5: The annotation priority has been removed. Please use @thrift.Priority instead.
+    # expected-error@7: The annotation priority has been removed. Please use @thrift.Priority instead.
 
     @thrift.DeprecatedUnvalidatedAnnotations{items = {"priority": "bad3"}}
     interaction Interaction {
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"priority": "bad4"}}
       void foo();
     }
-    # expected-error@-5: Bad priority 'bad3'. Choose one of ["HIGH_IMPORTANT", "HIGH", "IMPORTANT", "NORMAL", "BEST_EFFORT"].
-    # expected-warning@-6: The annotation priority is deprecated. Please use @thrift.Priority instead.
-    # expected-error@-5: Bad priority 'bad4'. Choose one of ["HIGH_IMPORTANT", "HIGH", "IMPORTANT", "NORMAL", "BEST_EFFORT"].
-    # expected-warning@-6: The annotation priority is deprecated. Please use @thrift.Priority instead.
+    # expected-error@13: The annotation priority has been removed. Please use @thrift.Priority instead.
+    # expected-error@15: The annotation priority has been removed. Please use @thrift.Priority instead.
+  )");
+}
+
+TEST(StandardValidatorTest, RemovedThriftUri) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+    include "thrift/annotation/thrift.thrift"
+
+    @thrift.DeprecatedUnvalidatedAnnotations{items = {"thrift.uri": "facebook.com/thrift/test/S"}}
+    struct S {}
+    # expected-error@5: The annotation thrift.uri has been removed. Please use @thrift.Uri instead.
   )");
 }
 
@@ -103,8 +110,7 @@ TEST(StandardValidatorTest, ValidateExceptionMessage) {
 
     @thrift.DeprecatedUnvalidatedAnnotations{items = {"message": "invalid_message"}}
     exception MyExceptionWithDuplicatedDeprecatedExceptionMessage {
-      # expected-error@-2: Duplicate message annotation.
-      # expected-warning@-3: The annotation message is deprecated. Please use @thrift.ExceptionMessage instead.
+      # expected-error@-2: The annotation message has been removed. Please use @thrift.ExceptionMessage instead.
       @thrift.ExceptionMessage
       1: string valid_message;
       2: string invalid_message;

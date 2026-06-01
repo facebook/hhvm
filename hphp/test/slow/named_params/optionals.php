@@ -67,4 +67,5 @@ function main() {
 
     $v = vec[3, 4];
     qux(1, 2, a="aaa", ...$v);
+    qux(b=444, ...$v);
 }

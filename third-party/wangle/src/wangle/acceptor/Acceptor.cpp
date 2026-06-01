@@ -150,7 +150,8 @@ void Acceptor::initDownstreamConnectionManager(EventBase* eventBase) {
       eventBase,
       accConfig_->connectionIdleTimeout,
       accConfig_->connectionAgeTimeout,
-      this);
+      this,
+      accConfig_->detachOnConnectionAgeTimeout);
 }
 
 std::shared_ptr<fizz::server::FizzServerContext> Acceptor::createFizzContext(

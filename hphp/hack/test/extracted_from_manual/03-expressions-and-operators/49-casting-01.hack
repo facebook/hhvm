@@ -4,7 +4,5 @@ async function example_snippet_wrapper(): Awaitable<void> {
   (float)1; // 1.0
   (int)3.14; // 3, rounds towards zero
   
-  (bool)0; // false
-  
   (string)false; // ""
 }

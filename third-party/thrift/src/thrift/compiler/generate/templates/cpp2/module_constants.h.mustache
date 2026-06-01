@@ -47,11 +47,11 @@ namespace {{program.name}}_constants {
 
   {{/each}}
 {{! Generate empty schema const if none was injected. }}
-  {{#if (not program.has_schema?)}}
-  FOLLY_EXPORT ::std::string_view {{program.schema_name}}();
-  {{/if (not program.has_schema?)}}
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> {{program.schema_name}}_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> {{program.schema_name}}_uris();
+  {{#if (not program.has_schema_const?)}}
+  FOLLY_EXPORT ::std::string_view {{program.schema_const_name}}();
+  {{/if (not program.has_schema_const?)}}
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> {{program.schema_const_name}}_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> {{program.schema_const_name}}_uris();
 
 } // namespace {{program.name}}_constants
 } // namespace {{program.cpp_qualified_namespace}}

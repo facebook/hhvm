@@ -1,1 +1,12 @@
-No errors
+warning: Warn[12040] Indexing into a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+type_structure_dynamic.good.php:7:27
+    4 | function expect_dynamic(dynamic $_):void { }
+    5 | 
+[2] 6 | function test(dynamic $d):void {
+[1] 7 |   $s = type_structure($d, 'TC')['fields'];
+    8 |   expect_dynamic($s);
+    9 | }
+
+1 error found

@@ -91,8 +91,14 @@ class AuthenticatorTest : public ::testing::Test {
   }
 
   const HasherFactoryWithMetadata* hasher() {
-    return ::fizz::DefaultFactory().makeHasherFactory(
-        getHashFunction(CipherSuite::TLS_AEGIS_128L_SHA256));
+    const HasherFactoryWithMetadata* ret = nullptr;
+    HashFunction hash;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        getHashFunction(hash, err, CipherSuite::TLS_AEGIS_128L_SHA256), err);
+    FIZZ_THROW_ON_ERROR(
+        ::fizz::DefaultFactory().makeHasherFactory(ret, err, hash), err);
+    return ret;
   }
 
  protected:
@@ -170,8 +176,14 @@ class ValidateAuthenticatorTest : public ::testing::Test {
   }
 
   const HasherFactoryWithMetadata* hasher() {
-    return ::fizz::DefaultFactory().makeHasherFactory(
-        getHashFunction(CipherSuite::TLS_AEGIS_128L_SHA256));
+    const HasherFactoryWithMetadata* ret = nullptr;
+    HashFunction hash;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        getHashFunction(hash, err, CipherSuite::TLS_AEGIS_128L_SHA256), err);
+    FIZZ_THROW_ON_ERROR(
+        ::fizz::DefaultFactory().makeHasherFactory(ret, err, hash), err);
+    return ret;
   }
 
  protected:

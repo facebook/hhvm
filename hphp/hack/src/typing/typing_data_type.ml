@@ -816,6 +816,11 @@ module Make (Set : SET) = struct
     | Tnewtype (name, _, _)
       when String.equal name Naming_special_names.Classes.cEnumClassLabel ->
       (env, label_to_datatypes ~trail)
+    (* RepresentableAs<T> has the same runtime data type as T *)
+    | Tnewtype (name, [ty_arg], _)
+      when String.equal name Naming_special_names.Classes.cRepresentableAs ->
+      let trail = DataTypeReason.newtype ~trail (get_reason ty_arg) name in
+      cycle_handler ~env ~trail ty_arg
     | Tnewtype (name, ty_args, _) ->
       let (env, as_ty) =
         Typing_utils.get_newtype_super env (get_reason ty) name ty_args

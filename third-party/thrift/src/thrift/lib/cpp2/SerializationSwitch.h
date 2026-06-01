@@ -23,9 +23,14 @@
 namespace apache::thrift::detail {
 
 template <typename Protocol, typename Args>
+void deserializeRequestBodySimple(Protocol* prot, Args* args) {
+  ::apache::thrift::Cpp2Ops<Args>::read(prot, args);
+}
+
+template <typename Protocol, typename Args>
 uint32_t deserializeRequestBody(Protocol* prot, Args* args) {
   auto xferStart = prot->getCursorPosition();
-  ::apache::thrift::Cpp2Ops<Args>::read(prot, args);
+  deserializeRequestBodySimple(prot, args);
   return folly::to_narrow(prot->getCursorPosition() - xferStart);
 }
 

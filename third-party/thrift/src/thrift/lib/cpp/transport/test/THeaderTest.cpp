@@ -74,10 +74,18 @@ TEST(THeaderTest, http_clear_header) {
   header.setHttpClientParser(parser);
   header.setHeader("WriteHeader", "foo");
 
+  // Verify write header was set before addHeader
+  EXPECT_FALSE(header.isWriteHeadersEmpty());
+  auto writeHeaders = header.getWriteHeaders();
+  EXPECT_NE(writeHeaders.find("WriteHeader"), writeHeaders.end());
+  EXPECT_EQ(writeHeaders.at("WriteHeader"), "foo");
+
   size_t buf_size = 1000000;
   std::unique_ptr<IOBuf> buf(IOBuf::create(buf_size));
   buf = header.addHeader(std::move(buf));
 
+  // Verify addHeader produced output and cleared write headers
+  EXPECT_NE(buf, nullptr);
   EXPECT_TRUE(header.isWriteHeadersEmpty());
 }
 

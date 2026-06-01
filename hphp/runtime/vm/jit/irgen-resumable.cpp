@@ -83,11 +83,19 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
     locals.push_back(env.irb->fs().typeOf(loc));
   }
 
+  auto const isRetCNop = [&]() {
+    return getImm(sk.pc(), 0).u_OA == folly::to_underlying(VerifyRetKind::None)
+      && (!Cfg::Eval::EnforceOverriddenReturnTypes
+          || func->trustReturnType()
+          || !func->hasInheritedReturnTypes()
+      );
+  };
+
   // Place a limit on the number of iterations in case of infinite loops.
   for (auto i = 256; i-- > 0;) {
     FTRACE(2, "  {}\n", instrToString(sk.pc(), func));
     switch (sk.op()) {
-      case Op::RetC:         return (uint8_t)getImm(sk.pc(), 0).u_OA == (uint8_t)VerifyRetKind::None &&  resultLocal == kInvalidId;
+      case Op::RetC: return isRetCNop() && resultLocal == kInvalidId;
       case Op::AssertRATStk: break;
       case Op::AssertRATL: {
         auto const type = typeFromRAT(getImm(sk.pc(), 1, unit).u_RATA, cls);

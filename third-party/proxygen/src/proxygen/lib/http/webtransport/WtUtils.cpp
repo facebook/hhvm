@@ -109,6 +109,16 @@ WtStreamManager::WtConfig getWtConfig(const HTTPSettings* ingress,
   return config;
 }
 
+WtStreamManager::WtConfig getH3WtConfig(const HTTPSettings* ingress,
+                                        const HTTPSettings* egress) {
+  WtStreamManager::WtConfig config = getWtConfig(ingress, egress);
+  // disables peer&self MaxStreamData(Uni|Bidi) as these are derived from quic
+  // transport params
+  config.peerMaxStreamDataBidi = config.peerMaxStreamDataUni =
+      config.selfMaxStreamDataBidi = config.selfMaxStreamDataUni = kMaxVarint;
+  return config;
+}
+
 bool supportsWt(std::initializer_list<const HTTPSettings*> settings) {
   constexpr auto kEnableConnectProto = SettingsId::ENABLE_CONNECT_PROTOCOL;
   constexpr auto kEnableWtMaxSess = SettingsId::WT_MAX_SESSIONS;

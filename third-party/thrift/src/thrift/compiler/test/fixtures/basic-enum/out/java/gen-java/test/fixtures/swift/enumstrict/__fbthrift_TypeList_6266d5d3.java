@@ -13,26 +13,26 @@ import java.util.List;
 
 public class __fbthrift_TypeList_6266d5d3 implements TypeList {
 
-  private static List<TypeMapping> list = new ArrayList<>();
+    private static List<TypeMapping> list = new ArrayList<>();
 
-  private static void add(String uri, String className) {
-    list.add(new TypeList.TypeMapping(uri, className));
-  }
+    private static void add(String uri, String className) {
+        list.add(new TypeList.TypeMapping(uri, className));
+    }
 
-  private static void addToList0() {
-    add("facebook.com/thrift/test/fixtures/basic_enum/MyStruct", "test.fixtures.swift.enumstrict.MyStruct");
-    add("facebook.com/thrift/test/fixtures/basic_enum/EmptyEnum", "test.fixtures.swift.enumstrict.EmptyEnum");
-    add("facebook.com/thrift/test/fixtures/basic_enum/MyEnum", "test.fixtures.swift.enumstrict.MyEnum");
-    add("facebook.com/thrift/test/fixtures/basic_enum/MyUseIntrinsicDefaultEnum", "test.fixtures.swift.enumstrict.MyUseIntrinsicDefaultEnum");
-    add("facebook.com/thrift/test/fixtures/basic_enum/MyBigEnum", "test.fixtures.swift.enumstrict.MyBigEnum");
-  }
+    private static void addToList0() {
+        add("facebook.com/thrift/test/fixtures/basic_enum/MyStruct", "test.fixtures.swift.enumstrict.MyStruct");
+        add("facebook.com/thrift/test/fixtures/basic_enum/EmptyEnum", "test.fixtures.swift.enumstrict.EmptyEnum");
+        add("facebook.com/thrift/test/fixtures/basic_enum/MyEnum", "test.fixtures.swift.enumstrict.MyEnum");
+        add("facebook.com/thrift/test/fixtures/basic_enum/MyUseIntrinsicDefaultEnum", "test.fixtures.swift.enumstrict.MyUseIntrinsicDefaultEnum");
+        add("facebook.com/thrift/test/fixtures/basic_enum/MyBigEnum", "test.fixtures.swift.enumstrict.MyBigEnum");
+    }
 
-  static {
-    addToList0();
-  }
+    static {
+        addToList0();
+    }
 
-  @java.lang.Override
-  public List<TypeList.TypeMapping> getTypes() {
-    return list;
-  }
+    @java.lang.Override
+    public List<TypeList.TypeMapping> getTypes() {
+        return list;
+    }
 }

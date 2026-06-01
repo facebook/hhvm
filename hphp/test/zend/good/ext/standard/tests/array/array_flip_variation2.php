@@ -42,7 +42,7 @@ $input = dict[
 
   // binary key
   "a".chr(0)."b" => 'binary_key1',
-  b"binary" => 'binary_key2',
+  "binary" => 'binary_key2',
 
   //heredoc keys
   $empty_heredoc => 'empty_heredoc',

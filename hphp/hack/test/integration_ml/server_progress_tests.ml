@@ -1092,6 +1092,62 @@ let test_client_valid_local_config_key () : bool Lwt.t =
   in
   Lwt.return_true
 
+let test_server_invalid_config_key () : bool Lwt.t =
+  let%lwt () =
+    try_with_server [a_php] (fun ~tmp ~root ~hhi ->
+        (* Start the server with an unrecognized config key *)
+        let%lwt (stdout, stderr) =
+          hh_with_stderr
+            ~root
+            ~tmp
+            [|
+              "start";
+              "--no-load";
+              "--config";
+              "max_workers=1";
+              "--config";
+              "nonexistent_server_option=value";
+              "--custom-hhi-path";
+              Path.to_string hhi;
+            |]
+        in
+        (* Verify the warning does NOT appear on stdout or stderr of the start command *)
+        assert_no_substring
+          stdout
+          ~substring:"Unrecognized --config config option";
+        assert_no_substring
+          stderr
+          ~substring:"Unrecognized --config config option";
+        let%lwt () =
+          wait_for_progress
+            ~deadline:(Unix.gettimeofday () +. 60.0)
+            ~expected:"[DReady] ready"
+        in
+        (* Verify the warning IS in the monitor log file *)
+        let monitor_log_file = ServerFiles.monitor_log_link root in
+        let monitor_log =
+          try Sys_utils.cat monitor_log_file with
+          | exn ->
+            failwith
+              (Printf.sprintf
+                 "could not read monitor log %s: %s"
+                 monitor_log_file
+                 (Exn.to_string exn))
+        in
+        assert_substring
+          monitor_log
+          ~substring:
+            "Unrecognized --config config option: nonexistent_server_option";
+        (* Also verify that max_workers (a valid local config key) does NOT
+           produce a warning — this tests that hh_server validates against
+           both hhconfig and local config key sets *)
+        assert_no_substring
+          monitor_log
+          ~substring:"Unrecognized --config config option: max_workers";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
 let () =
   Printexc.record_backtrace true;
   EventLogger.init_fake ();
@@ -1117,6 +1173,7 @@ let () =
       ( "test_client_invalid_config_key_did_you_mean",
         test_client_invalid_config_key_did_you_mean );
       ("test_client_valid_local_config_key", test_client_valid_local_config_key);
+      ("test_server_invalid_config_key", test_server_invalid_config_key);
     ]
     |> List.map ~f:(fun (name, f) ->
            ( name,

@@ -37,13 +37,21 @@ std::unique_ptr<KeyScheduler> Factory::makeKeyScheduler(
 
 std::unique_ptr<HandshakeContext> Factory::makeHandshakeContext(
     CipherSuite cipher) const {
-  auto hasherFactory = makeHasherFactory(getHashFunction(cipher));
+  HashFunction hash;
+  const HasherFactoryWithMetadata* hasherFactory = nullptr;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getHashFunction(hash, err, cipher), err);
+  FIZZ_THROW_ON_ERROR(makeHasherFactory(hasherFactory, err, hash), err);
   return std::make_unique<HandshakeContextImpl>(hasherFactory);
 }
 
 std::unique_ptr<KeyDerivation> Factory::makeKeyDeriver(
     CipherSuite cipher) const {
-  auto hasher = makeHasherFactory(getHashFunction(cipher));
+  HashFunction hash;
+  const HasherFactoryWithMetadata* hasher = nullptr;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getHashFunction(hash, err, cipher), err);
+  FIZZ_THROW_ON_ERROR(makeHasherFactory(hasher, err, hash), err);
   return std::make_unique<KeyDerivationImpl>(hasher);
 }
 

@@ -7,7 +7,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/visitation/visit_by_thrift_field_metadata.h>
-#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_metadata.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_types.h"
 
 namespace apache {
 namespace thrift {

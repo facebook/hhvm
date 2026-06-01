@@ -12,7 +12,7 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixe
 class classWithToString
 {
 	public function __toString() :mixed{
-		return b"Class A object";
+		return "Class A object";
 	}
 }
 
@@ -31,13 +31,13 @@ function entrypoint_mb_strrchr_variation1(): void {
   set_error_handler(test_error_handler<>);
 
   // Initialise function arguments not being substituted (if any)
-  $needle = b'string_val';
+  $needle = 'string_val';
   $part = true;
   $encoding = 'utf-8';
 
 
   // heredoc string
-  $heredoc = b<<<EOT
+  $heredoc = <<<EOT
 hello world
 EOT;
 

@@ -116,9 +116,6 @@ func (p *TestServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *TestServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *TestServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}

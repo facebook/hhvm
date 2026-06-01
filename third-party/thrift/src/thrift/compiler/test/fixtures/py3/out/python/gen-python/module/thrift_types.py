@@ -14,6 +14,7 @@ import folly.iobuf as _fbthrift_iobuf
 from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import fbcode.thrift.python.types as _fbthrift_python_types
+import fbcode.thrift.python.container_typedefs as _fbthrift_python_container_typedefs
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 
 
@@ -1493,18 +1494,32 @@ CustomInteger = int
 CustomDouble = float
 CustomString = str
 CustomBinary = bytes
-CustomList = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
-CustomSet = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
-CustomMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
+class CustomList(_fbthrift_python_container_typedefs._ListTypedefBase):
+    __slots__ = ()
+    _fbthrift_list_type_info = _fbthrift_python_types.typeinfo_i32
+class CustomSet(_fbthrift_python_container_typedefs._SetTypedefBase):
+    __slots__ = ()
+    _fbthrift_set_type_info = _fbthrift_python_types.typeinfo_i32
+class CustomMap(_fbthrift_python_container_typedefs._MapTypedefBase):
+    __slots__ = ()
+    _fbthrift_map_key_type_info = _fbthrift_python_types.typeinfo_i32
+    _fbthrift_map_val_type_info = _fbthrift_python_types.typeinfo_i32
 CustomStruct = _fbthrift_SimpleStruct
 AdaptedBool = bool
 AdaptedInteger = int
 AdaptedDouble = float
 AdaptedString = str
 AdaptedBinary = bytes
-AdaptedList = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
-AdaptedSet = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
-AdaptedMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
+class AdaptedList(_fbthrift_python_container_typedefs._ListTypedefBase):
+    __slots__ = ()
+    _fbthrift_list_type_info = _fbthrift_python_types.typeinfo_i32
+class AdaptedSet(_fbthrift_python_container_typedefs._SetTypedefBase):
+    __slots__ = ()
+    _fbthrift_set_type_info = _fbthrift_python_types.typeinfo_i32
+class AdaptedMap(_fbthrift_python_container_typedefs._MapTypedefBase):
+    __slots__ = ()
+    _fbthrift_map_key_type_info = _fbthrift_python_types.typeinfo_i32
+    _fbthrift_map_val_type_info = _fbthrift_python_types.typeinfo_i32
 AdaptedStruct = _fbthrift_SimpleStruct
 
 

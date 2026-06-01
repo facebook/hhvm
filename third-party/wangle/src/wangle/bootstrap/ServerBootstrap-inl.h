@@ -120,6 +120,11 @@ class ServerAcceptor : public Acceptor,
           AcceptorException::ExceptionType::DROPPED, "dropped");
       pipeline_->readException(ew);
     }
+    void onConnectionAgeTimeout() override {
+      // ServerConnection has no graceful drain (closeWhenIdle is a no-op),
+      // so drop the connection immediately.
+      dropConnection();
+    }
     void dumpConnectionState(uint8_t /* loglevel */) override {}
 
     void deletePipeline(wangle::PipelineBase* p) override {

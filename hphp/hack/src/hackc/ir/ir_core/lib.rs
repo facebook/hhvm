@@ -69,7 +69,6 @@ pub use hhbc::FunctionName;
 pub use hhbc::IncDecOp;
 pub use hhbc::IncludePath;
 pub use hhbc::InitPropOp;
-pub use hhbc::IsLogAsDynamicCallOp;
 pub use hhbc::IsTypeOp;
 pub use hhbc::IterArgs;
 pub use hhbc::IterArgsFlags;

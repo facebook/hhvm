@@ -45,6 +45,9 @@ namespace HPHP {
      simply memcpy-ing from the initializer vector. */                         \
   ATTR(DeepInit, 0)                      /*       |    X     |         */      \
                                          /*       |          |         */      \
+  /* Indicates if a given method has any return types inherited from its      \
+     parents. */                                                               \
+  ATTR(HasInheritedReturnTypes, 0)       /*       |          |    X    */      \
   /* Method visibility.  The relative ordering of these is important.          \
      N.B. the values are overlayed with some of the no-override bits for magic \
      class methods (next), since they don't apply to classes. */               \

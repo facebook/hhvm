@@ -76,13 +76,13 @@ TCA handlePostInterpRet(uint32_t callOffAndFlags) noexcept;
 
 /*
  * Handle a bindcall request---i.e., look up (or create) the appropriate func
- * prologue for `func' and `numArgs', then smash the call instruction
+ * prologue for `func' and `numPosArgs', then smash the call instruction
  * at `toSmash'.
  *
  * If we can't find or make a translation, may return fcallHelperThunk instead,
  * which uses C++ helpers to act like a prologue.
  */
-TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs);
+TCA handleBindCall(TCA toSmash, Func* func, int32_t numPosArgs);
 
 /*
  * Flags used by handleResume().

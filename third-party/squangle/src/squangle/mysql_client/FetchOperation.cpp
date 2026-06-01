@@ -92,7 +92,7 @@ const InternalConnection& FetchOperationImpl::getInternalConnection() const {
 std::string FetchOperationImpl::generateTimeoutError(
     std::string rowdata,
     Millis elapsed) const {
-  auto cbDelay = client_.callbackDelayAvg();
+  auto cbDelay = client().callbackDelayAvg();
   bool stalled = cbDelay >= kCallbackDelayStallThreshold;
 
   std::vector<std::string> parts;
@@ -121,10 +121,10 @@ void FetchOperationImpl::cancel() {
     current_row_stream_ = folly::none;
     OperationBase::cancel();
   };
-  if (client_.isInCorrectThread(true)) {
+  if (client().isInCorrectThread(true)) {
     cancelFn();
   } else {
-    client_.runInThread(std::move(cancelFn), true /*wait*/);
+    client().runInThread(std::move(cancelFn), true /*wait*/);
   }
 }
 

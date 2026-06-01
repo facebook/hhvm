@@ -1713,14 +1713,10 @@ FCallObjMethodD <fca> <class hint> <nullsafe> <litstr id>
   The string in %2 provides a static analysis hint. If it is non-empty, it is
   the class name with the implementation of method y that will be called.
 
-FCallClsMethod <fca> <class hint> <op>
-  [U U C|V..C|V C C:Class]  ->  [C..C]
-FCallClsMethodM <fca> <class hint> <op> <litstr id>
+FCallClsMethodM <fca> <class hint> <litstr id>
   [U U C|V..C|V C]    ->  [C..C]
 FCallClsMethodD <fca> <litstr id> <litstr id>
   [U U C|V..C|V]    ->  [C..C]
-FCallClsMethodS <fca> <class hint> <mode>
-  [U U C|V..C|V C]  ->  [C..C]
 FCallClsMethodSD <fca> <class hint> <mode> <litstr id>
   [U U C|V..C|V]    ->  [C..C]
 
@@ -1729,19 +1725,16 @@ FCallClsMethodSD <fca> <class hint> <mode> <litstr id>
 
     instruction            x    y
     --------------------+----+-----
-      FCallClsMethod    | $1 | $2
-      FCallClsMethodM   | $1 | %4
+      FCallClsMethodM   | $1 | %3
       FCallClsMethodD   | %2 | %3
-      FCallClsMethodS   | %3 | $1
       FCallClsMethodSD  | %3 | %4
 
   When loading litstr id %2 into x, FCallClsMethodD will perform the work
   performed by the ClassGetC instruction to convert the name given by %2 into
   a class. Similarly, FCallClsMethodM will convert $1 into a class.
 
-  When loading mode %3 into x, FCallClsMethodS and FCallClsMethodSD will
-  perform the work performed by LateBoundCls/SelfCls/ParentCls depending
-  on the specified mode.
+  When loading mode %3 into x, FCallClsMethodSD will perform the work
+  performed by LateBoundCls/SelfCls/ParentCls depending on the specified mode.
 
   If y is not a string, this instruction throws a fatal error. Next, this
   instruction checks if class x has an accessible method named y. If it does,
@@ -1752,9 +1745,6 @@ FCallClsMethodSD <fca> <class hint> <mode> <litstr id>
 
   The string in %2 provides a static analysis hint. If it is non-empty, it is
   the class name with the implementation of method y that will be called.
-
-  If op is DontLogAsDynamicCall all logging set up for dynamic calls will be
-  skipped.
 
 FCallCtor <fca> <class hint>  [C:Obj U C|V..C|V]  ->  [C]
 

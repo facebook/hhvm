@@ -63,9 +63,9 @@ public class ExtendedServiceRpcServerHandler  extends com.facebook.thrift.test.f
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        long _iter0 = (long)_r;
+        long _fbthriftVar0 = (long)_r;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I64_FIELD);
-        oprot.writeI64(_iter0);
+        oprot.writeI64(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();

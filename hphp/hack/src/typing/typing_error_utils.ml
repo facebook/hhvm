@@ -4796,6 +4796,17 @@ end = struct
     | Explain_constraint pos -> explain_constraint pos
     | Rigid_tvar_escape { pos; what } -> rigid_tvar_escape pos what
     | Invalid_type_hint pos -> invalid_type_hint pos
+    | Gated_by_feature_flag { pos; name; feature } ->
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "`%s` requires the unstable feature `%s`. Add `<<file: __EnableUnstableFeatures('%s')>>` to use it."
+              (Utils.strip_ns name)
+              feature
+              feature )
+      in
+      create ~code:Error_code.GatedByFeatureFlag ~claim ()
     | Unsatisfied_req { pos; trait_pos; req_name; req_pos } ->
       unsatisfied_req pos trait_pos req_name req_pos
     | Unsatisfied_req_class { pos; trait_pos; req_name; req_pos } ->

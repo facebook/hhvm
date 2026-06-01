@@ -175,6 +175,18 @@ struct CodeCache {
       m_hugePageBudget = budget;
     }
 
+    void addHugePageBudget(size_t budget) {
+      m_hugePageBudget += budget;
+    }
+
+    void releaseBlock() {
+      auto state = m_state.load(std::memory_order_relaxed);
+      if (!state.m_last) return;
+      state.m_used += state.m_last->used();
+      state.m_last = nullptr;
+      m_state.store(std::move(state), std::memory_order_release);
+    }
+
   protected:
     struct State { size_t m_used{0}; CodeBlock* m_last{nullptr}; };
     std::atomic<State> m_state;
@@ -185,6 +197,16 @@ struct CodeCache {
   const Section& coldSection() const { return m_cold; }
   const Section& frozenSection() const { return m_frozen; }
   const Section& dataSection() const { return m_data; }
+
+  void addMainHugePageBudget(size_t budgetMBs) {
+    m_main.addHugePageBudget(budgetMBs);
+  }
+
+  void releaseMainBlock() {
+    if (m_all.available() < DataBlock::kPageSize) return;    
+    m_main.releaseBlock();
+    m_main.ensure(*this, DataBlock::kPageSize);
+  }
 
   std::string blockMap() const;
 

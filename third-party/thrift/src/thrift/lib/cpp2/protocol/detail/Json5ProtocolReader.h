@@ -104,6 +104,9 @@ namespace apache::thrift::json5::detail {
  */
 class Json5ProtocolReader final {
  public:
+  explicit Json5ProtocolReader(
+      ExternalBufferSharing /*sharing*/ = COPY_EXTERNAL_BUFFER /* ignored */) {}
+
   static constexpr bool kUsesFieldNames() { return true; }
   static constexpr bool kOmitsContainerSizes() { return true; }
   static constexpr bool kOmitsStringSizes() { return true; }

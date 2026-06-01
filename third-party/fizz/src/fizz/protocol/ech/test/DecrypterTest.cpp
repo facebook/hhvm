@@ -150,13 +150,15 @@ TEST(DecrypterTest, TestDecodeSuccess) {
   decrypter.addDecryptionConfig(
       DecrypterParams{getParsedECHConfig(), kex->clone()});
   auto chloOuter = getChloOuterWithExt(kex->clone());
-  auto gotChlo = decrypter.decryptClientHello(chloOuter);
+  folly::Optional<DecrypterResult> gotChlo;
+  Error err;
+  EXPECT_EQ(
+      decrypter.decryptClientHello(gotChlo, err, chloOuter), Status::Success);
 
   EXPECT_TRUE(gotChlo.has_value());
 
   auto expectedChloInner = TestMessages::clientHello();
   Buf encodedOuter;
-  Error err;
   EXPECT_EQ(encodeHandshake(encodedOuter, err, chloOuter), Status::Success);
   Buf encodedExpectedOuter;
   EXPECT_EQ(
@@ -192,10 +194,13 @@ TEST(DecrypterTest, TestDecodeHRRSuccess) {
   Buf enc;
   ClientHello initialChlo;
   auto chloOuter = getChloOuterHRRWithExt(kex->clone(), enc, initialChlo);
-  auto gotChlo = decrypter.decryptClientHelloHRR(chloOuter, enc);
+  ClientHello gotChlo;
+  Error err;
+  EXPECT_EQ(
+      decrypter.decryptClientHelloHRR(gotChlo, err, chloOuter, enc),
+      Status::Success);
 
   auto expectedChloInner = TestMessages::clientHello();
-  Error err;
   {
     Buf encodedOuter;
     EXPECT_EQ(encodeHandshake(encodedOuter, err, chloOuter), Status::Success);
@@ -235,14 +240,19 @@ TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
   auto chloOuter = getChloOuterHRRWithExt(kex->clone(), enc, initialChlo);
 
   // Get context from initial chlo
-  auto gotChlo = decrypter.decryptClientHello(initialChlo);
+  folly::Optional<DecrypterResult> gotChlo;
+  Error err;
+  EXPECT_EQ(
+      decrypter.decryptClientHello(gotChlo, err, initialChlo), Status::Success);
   EXPECT_TRUE(gotChlo.has_value());
   auto chlo = std::move(gotChlo.value());
 
-  auto gotChloHRR = decrypter.decryptClientHelloHRR(chloOuter, chlo.context);
+  ClientHello gotChloHRR;
+  EXPECT_EQ(
+      decrypter.decryptClientHelloHRR(gotChloHRR, err, chloOuter, chlo.context),
+      Status::Success);
 
   auto expectedChloInner = TestMessages::clientHello();
-  Error err;
   {
     Buf encodedOuter;
     EXPECT_EQ(encodeHandshake(encodedOuter, err, chloOuter), Status::Success);
@@ -278,7 +288,11 @@ TEST(DecrypterTest, TestDecodeFailure) {
   ECHConfigManager decrypter(std::make_shared<fizz::DefaultFactory>());
   decrypter.addDecryptionConfig(
       DecrypterParams{getParsedECHConfig(), kex->clone()});
-  auto gotChlo = decrypter.decryptClientHello(TestMessages::clientHello());
+  folly::Optional<DecrypterResult> gotChlo;
+  Error err;
+  EXPECT_EQ(
+      decrypter.decryptClientHello(gotChlo, err, TestMessages::clientHello()),
+      Status::Success);
 
   EXPECT_FALSE(gotChlo.has_value());
 }
@@ -295,9 +309,12 @@ TEST(DecrypterTest, TestDecodeHRRFailure) {
   ClientHello initialClientHello;
   getChloOuterHRRWithExt(kex->clone(), enc, initialClientHello);
 
-  EXPECT_THROW(
-      decrypter.decryptClientHelloHRR(TestMessages::clientHello(), enc),
-      FizzException);
+  ClientHello result;
+  Error err;
+  EXPECT_EQ(
+      decrypter.decryptClientHelloHRR(
+          result, err, TestMessages::clientHello(), enc),
+      Status::Fail);
 }
 
 TEST(DecrypterTest, TestDecodeHRRWithContextFailure) {
@@ -309,12 +326,16 @@ TEST(DecrypterTest, TestDecodeHRRWithContextFailure) {
       DecrypterParams{getParsedECHConfig(), kex->clone()});
   // Get a context to use.
   auto chloOuter = getChloOuterWithExt(kex->clone());
-  auto gotChlo = decrypter.decryptClientHello(chloOuter);
+  folly::Optional<DecrypterResult> gotChlo;
+  Error err;
+  EXPECT_EQ(
+      decrypter.decryptClientHello(gotChlo, err, chloOuter), Status::Success);
 
-  EXPECT_THROW(
+  ClientHello result;
+  EXPECT_EQ(
       decrypter.decryptClientHelloHRR(
-          TestMessages::clientHello(), gotChlo->context),
-      FizzException);
+          result, err, TestMessages::clientHello(), gotChlo->context),
+      Status::Fail);
 }
 
 TEST(DecrypterTest, TestDecodeMultipleDecrypterParam) {
@@ -334,7 +355,9 @@ TEST(DecrypterTest, TestDecodeMultipleDecrypterParam) {
   auto chlo = getChloOuterWithExt(kex->clone(), targetECHConfigContent);
 
   // Decrypting chlo should result in the second decrypter param being used
-  auto result = decrypter.decryptClientHello(chlo);
+  folly::Optional<DecrypterResult> result;
+  Error err;
+  EXPECT_EQ(decrypter.decryptClientHello(result, err, chlo), Status::Success);
   ASSERT_TRUE(result.has_value());
   EXPECT_TRUE(result->configId == 2);
 }

@@ -49,8 +49,8 @@ enum class KeyExchangeType { None, OneRtt, HelloRetryRequest };
 
 enum class EarlyDataType { NotAttempted, Attempted, Rejected, Accepted };
 
-HashFunction getHashFunction(CipherSuite cipher);
-size_t getHashSize(HashFunction hash);
+Status getHashFunction(HashFunction& ret, Error& err, CipherSuite cipher);
+Status getHashSize(size_t& ret, Error& err, HashFunction hash);
 
 folly::StringPiece toString(PskType pskType);
 folly::StringPiece toString(KeyExchangeType kexType);

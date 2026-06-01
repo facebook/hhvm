@@ -573,13 +573,13 @@ TEST(McServerAsciiParserHarness, delete) {
       .run("delete  test:stepan:1  noreply   \r\n");
 
   McDeleteRequest r("test:stepan:1");
-  r.exptime_ref() = -10;
+  r.exptime() = -10;
   TestRunner()
       .expectNext(r)
       .run("delete test:stepan:1 -10\r\n")
       .run("delete  test:stepan:1  -10  \r\n");
 
-  r.exptime_ref() = 1234123;
+  r.exptime() = 1234123;
   TestRunner()
       .expectNext(r)
       .run("delete test:stepan:1 1234123\r\n")
@@ -592,7 +592,7 @@ TEST(McServerAsciiParserHarness, delete) {
 
 TEST(McServerAsciiParserHarness, touch) {
   McTouchRequest r("test:key:1");
-  r.exptime_ref() = -10;
+  r.exptime() = -10;
   TestRunner()
       .expectNext(r)
       .run("touch test:key:1 -10\r\n")
@@ -602,7 +602,7 @@ TEST(McServerAsciiParserHarness, touch) {
       .run("touch test:key:1 -10 noreply\r\n")
       .run("touch  test:key:1  -10  noreply   \r\n");
 
-  r.exptime_ref() = 1234567;
+  r.exptime() = 1234567;
   TestRunner()
       .expectNext(r)
       .run("touch test:key:1 1234567\r\n")
@@ -628,7 +628,7 @@ TEST(McServerAsciiParserHarness, flush_all) {
       .run("flush_all     \r\n");
 
   McFlushAllRequest r;
-  r.delay_ref() = 123456789;
+  r.delay() = 123456789;
   TestRunner()
       .expectNext(std::move(r))
       .run("flush_all 123456789\r\n")
@@ -650,7 +650,7 @@ TEST(McServerAsciiParserHarness, flush_regex) {
 TEST(McServerAsciiParserHarness, lease_set) {
   auto r =
       createUpdateLike<McLeaseSetRequest>("test:stepan:1", kTestValue, 1, 65);
-  r.leaseToken_ref() = 123;
+  r.leaseToken() = 123;
 
   TestRunner()
       .expectNext(r)
@@ -671,7 +671,7 @@ TEST(McServerAsciiParserHarness, lease_set) {
 
 TEST(McServerAsciiParserHarness, cas) {
   auto r = createUpdateLike<McCasRequest>("test:stepan:1", kTestValue, 1, 65);
-  r.casToken_ref() = 123;
+  r.casToken() = 123;
 
   TestRunner()
       .expectNext(r)
@@ -693,14 +693,14 @@ TEST(McServerAsciiParserHarness, cas) {
 TEST(McServerAsciiParserHarness, allOps) {
   auto casRequest =
       createUpdateLike<McCasRequest>("test:stepan:11", "Facebook", 765, -1);
-  casRequest.casToken_ref() = 893;
+  casRequest.casToken() = 893;
 
   auto leaseSetRequest =
       createUpdateLike<McLeaseSetRequest>("test:stepan:12", "hAcK", 294, 563);
-  leaseSetRequest.leaseToken_ref() = 846;
+  leaseSetRequest.leaseToken() = 846;
 
   McDeleteRequest deleteRequest("test:stepan:13");
-  deleteRequest.exptime_ref() = 2345234;
+  deleteRequest.exptime() = 2345234;
 
   TestRunner()
       .expectNext(McGetRequest("test:stepan:1"))

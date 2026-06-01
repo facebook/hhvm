@@ -14,7 +14,7 @@ echo "*** Testing strip_tags() : usage variations ***\n";
 $strings = vec[
   "<html> I am html string </html>".chr(0)."<?hh I am php string ?>",
   "<html> I am html string\0 </html><?hh I am php string ?>",
-  b"<a>I am html string</a>",
+  "<a>I am html string</a>",
   "<html>I am html string</html>".decbin(65)."<?hh I am php string?>"
 ];
 

@@ -15,6 +15,7 @@
 import sys
 cimport cython
 from thrift.python.exceptions cimport create_py_exception
+from libcpp.optional cimport optional
 from thrift.python.common import Protocol
 from thrift.python.client.request_channel import ClientType
 from thrift.python.client.request_channel cimport DefaultChannelFactory, ChannelFactory
@@ -174,7 +175,7 @@ def get_client(
     protocol = Protocol.COMPACT,
     thrift_ssl.SSLContext ssl_context=None,
     double ssl_timeout=1,
-    double channel_timeout=0
+    channel_timeout=None
 ):
     if not isinstance(protocol, Protocol):
         raise TypeError(f'protocol={protocol} is not a valid {Protocol}')
@@ -201,7 +202,9 @@ def get_client(
 
     cdef uint32_t _timeout_ms = int(timeout * 1000)
     cdef uint32_t _ssl_timeout_ms = int(ssl_timeout * 1000)
-    cdef uint32_t _channel_timeout_ms = int(channel_timeout * 1000)
+    cdef optional[uint32_t] _channel_timeout_ms
+    if channel_timeout is not None:
+        _channel_timeout_ms = <uint32_t>(channel_timeout * 1000)
     cdef string cstr
 
     endpoint = b''

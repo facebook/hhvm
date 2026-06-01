@@ -253,12 +253,13 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind,
   }
 
   const bool reachedMaxLiveMainLimit =
-    getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage;
-
+    getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage || mcgen::liveMaxSecondsExpired();
   if (!reachedMaxLiveMainLimit) {
     return shouldTranslateNoSizeLimit(sk, kind, noThreshold);
   }
 
+    // Set this so that next checks are faster.
+  s_TCisFull.store(true, std::memory_order_release);
   auto const main_under = code().mainUsed() < Cfg::CodeCache::AMaxUsage;
   auto const cold_under = code().coldUsed() < Cfg::CodeCache::AColdMaxUsage;
   auto const froz_under = code().frozenUsed() < Cfg::CodeCache::AFrozenMaxUsage;
@@ -598,32 +599,18 @@ Translator::translate(Optional<CodeCache::View> view) {
       }
   };
 
-  auto codeLock = lockCode(false);
   if (!view.has_value()) {
-    if (Cfg::Eval::EnableReusableTC) {
-      auto const initialSize = 256;
-      m_localBuffer = std::make_unique<uint8_t[]>(initialSize);
-      m_localTCBuffer =
-        std::make_unique<LocalTCBuffer>(m_localBuffer.get(), initialSize);
-      view = m_localTCBuffer->view();
-    } else {
-      // Using the global TC view.  Better lock things.
-      codeLock.lock();
-    }
+    auto const initialSize = 512;
+    m_localBuffer = std::make_unique<uint8_t[]>(initialSize);
+    m_localTCBuffer =
+      std::make_unique<LocalTCBuffer>(m_localBuffer.get(), initialSize);
+    view = m_localTCBuffer->view();
   }
+  assertx(view->isLocal());
 
   // Tag the translation start, and build the trans meta.
   // Generate vasm into the code view, retrying if we fill hot.
   while (true) {
-    if (!view.has_value() || !view->isLocal()) {
-      try {
-        view.emplace(code().view(kind));
-      } catch (const DataBlockFull&) {
-        setTcIsFull();
-        reset();
-        return TranslationResult::failForProcess();
-      }
-    }
     CGMeta fixups;
     TransLocMaker maker{*view};
     const bool align = isPrologue(kind);
@@ -656,10 +643,6 @@ Translator::translate(Optional<CodeCache::View> view) {
     transMeta->fixups = std::move(fixups);
     transMeta->range = maker.markEnd();
     break;
-  }
-
-  if (isProfiling(kind)) {
-    profData()->setProfiling(sk.func());
   }
 
   Timer metaTimer(Timer::mcg_finishTranslation_metadata, nullptr);
@@ -833,6 +816,9 @@ void Translator::publishMetaInternal() {
     this->publishMetaImpl();
   } else {
     this->publishMetaImpl();
+  }
+  if (isProfiling(kind)) {
+    profData()->setProfiling(sk.func());
   }
 }
 

@@ -74,6 +74,15 @@ class AsyncFizzServerT : public AsyncFizzBase {
   }
 
   /**
+   * Release handshake logging data from the connection state to free memory.
+   * After this call, getState().handshakeLogging() returns nullptr.
+   * Callers should copy any needed data before calling this method.
+   */
+  void releaseHandshakeLogging() {
+    state_.handshakeLogging().reset();
+  }
+
+  /**
    * Exposes API for application to send client a new session ticket containing
    * the provided appToken.
    */

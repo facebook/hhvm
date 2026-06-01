@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$plaintxt = b<<<EOT
+$plaintxt = <<<EOT
 hello world
 is a very common test
 for all languages

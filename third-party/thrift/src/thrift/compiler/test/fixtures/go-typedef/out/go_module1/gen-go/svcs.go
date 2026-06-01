@@ -164,9 +164,6 @@ func (p *FinderProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *FinderProcessor) PackageName() string {
-    return "module1"
-}
 
 func (p *FinderProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}

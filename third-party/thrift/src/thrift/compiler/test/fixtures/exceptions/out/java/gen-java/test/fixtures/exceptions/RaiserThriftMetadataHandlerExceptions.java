@@ -21,41 +21,41 @@ import com.facebook.thrift.metadata.ThriftStructType;
 import com.facebook.thrift.metadata.ThriftType;
 
 class RaiserThriftMetadataHandlerExceptions_0 {
-  static void addExceptions(Map<String, ThriftException> exceptions) {
-    exceptions.put("test.fixtures.exceptions.Banal", new ThriftException.Builder()
-        .setName("test.fixtures.exceptions.Banal")
-        .setFields(Arrays.asList(
-        ))
-        .build());
-    exceptions.put("test.fixtures.exceptions.Fiery", new ThriftException.Builder()
-        .setName("test.fixtures.exceptions.Fiery")
-        .setFields(Arrays.asList(
-            new ThriftField.Builder()
-                .setId(1)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
-                .setName("message")
-                .setIsOptional(false)
-                .build()
-        ))
-        .build());
-    exceptions.put("test.fixtures.exceptions.Serious", new ThriftException.Builder()
-        .setName("test.fixtures.exceptions.Serious")
-        .setFields(Arrays.asList(
-            new ThriftField.Builder()
-                .setId(1)
-                .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
-                .setName("sonnet")
-                .setIsOptional(true)
-                .build()
-        ))
-        .build());
-  }
+    static void addExceptions(Map<String, ThriftException> exceptions) {
+        exceptions.put("test.fixtures.exceptions.Banal", new ThriftException.Builder()
+            .setName("test.fixtures.exceptions.Banal")
+            .setFields(Arrays.asList(
+            ))
+            .build());
+        exceptions.put("test.fixtures.exceptions.Fiery", new ThriftException.Builder()
+            .setName("test.fixtures.exceptions.Fiery")
+            .setFields(Arrays.asList(
+                new ThriftField.Builder()
+                    .setId(1)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
+                    .setName("message")
+                    .setIsOptional(false)
+                    .build()
+            ))
+            .build());
+        exceptions.put("test.fixtures.exceptions.Serious", new ThriftException.Builder()
+            .setName("test.fixtures.exceptions.Serious")
+            .setFields(Arrays.asList(
+                new ThriftField.Builder()
+                    .setId(1)
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
+                    .setName("sonnet")
+                    .setIsOptional(true)
+                    .build()
+            ))
+            .build());
+    }
 }
 
 class RaiserThriftMetadataHandlerExceptions {
-  static Map<String, ThriftException> getExceptions() {
-    Map<String, ThriftException> exceptions = new HashMap<>();
-    RaiserThriftMetadataHandlerExceptions_0.addExceptions(exceptions);
-    return exceptions;
-  }
+    static Map<String, ThriftException> getExceptions() {
+        Map<String, ThriftException> exceptions = new HashMap<>();
+        RaiserThriftMetadataHandlerExceptions_0.addExceptions(exceptions);
+        return exceptions;
+    }
 }

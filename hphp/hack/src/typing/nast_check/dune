@@ -15,7 +15,6 @@
  (modules
    attribute_nast_checks
    class_tparams_check
-   class_typeconst_check
    const_prohibited_check
    control_context_check
    duplicate_class_member_check

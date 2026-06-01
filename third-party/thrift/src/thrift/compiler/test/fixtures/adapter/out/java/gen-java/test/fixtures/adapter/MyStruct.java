@@ -40,11 +40,11 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(MyStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -58,7 +58,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
 
         public int getField() { return field; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="set_string", requiredness=Requiredness.NONE)    public Builder setSetString(com.facebook.thrift.my.AdaptedSet_2 setString) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="set_string", requiredness=Requiredness.NONE)    public Builder setSetString(com.facebook.thrift.my.AdaptedSet_2 setString) {
             this.setString = setString;
             return this;
         }
@@ -80,6 +80,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
+
     private static final com.facebook.thrift.adapter.TypeAdapter<Set<String>, com.facebook.thrift.my.AdaptedSet_2> __SetWithAdapter_Adapter = new com.facebook.thrift.my.Adapter2();
 
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
@@ -89,26 +90,23 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     private final int field;
     public static final int _FIELD = 1;
     private static final TField FIELD_FIELD_DESC = new TField("field", TType.I32, (short)1);
-        private final com.facebook.thrift.my.AdaptedSet_2 setString;
+    private final com.facebook.thrift.my.AdaptedSet_2 setString;
     public static final int _SET_STRING = 2;
     private static final TField SET_STRING_FIELD_DESC = new TField("set_string", TType.SET, (short)2);
     static {
-      NAMES_TO_IDS.put("field", 1);
-      THRIFT_NAMES_TO_IDS.put("field", 1);
-      FIELD_METADATA.put(1, FIELD_FIELD_DESC);
-      NAMES_TO_IDS.put("setString", 2);
-      THRIFT_NAMES_TO_IDS.put("set_string", 2);
-      FIELD_METADATA.put(2, SET_STRING_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/MyStruct"),
-        MyStruct.class, MyStruct::read0));
+        NAMES_TO_IDS.put("field", 1);
+        THRIFT_NAMES_TO_IDS.put("field", 1);
+        FIELD_METADATA.put(1, FIELD_FIELD_DESC);
+        NAMES_TO_IDS.put("setString", 2);
+        THRIFT_NAMES_TO_IDS.put("set_string", 2);
+        FIELD_METADATA.put(2, SET_STRING_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/MyStruct"),
+            MyStruct.class, MyStruct::read0));
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)
     public int getField() { return field; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="set_string", requiredness=Requiredness.NONE)
     public com.facebook.thrift.my.AdaptedSet_2 getSetString() { return setString; }
@@ -134,7 +132,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
 
         return
             Objects.equals(field, other.field) &&
-            __SetWithAdapter_Adapter.equals(setString, other.setString) && 
+            __SetWithAdapter_Adapter.equals(setString, other.setString) &&
             true;
     }
 
@@ -142,81 +140,81 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Integer.hashCode(field);
-            _hashCode = 31 * _hashCode + Objects.hashCode(setString);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(setString);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyStruct> asReader() {
       return MyStruct::read0;
     }
 
     public static MyStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
-      MyStruct.Builder builder = new MyStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _FIELD:
-          if (__field.type == TType.I32) {
-            int field = oprot.readI32();
-            builder.setField(field);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SET_STRING:
-          if (__field.type == TType.SET) {
-            Set<String> setString;
-                {
-                TSet _set = oprot.readSetBegin();
-                setString = new HashSet<String>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    String _value1 = oprot.readString();
-                    setString.add(_value1);
+        TField __field;
+        oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
+        MyStruct.Builder builder = new MyStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _FIELD:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setField(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readSetEnd();
+                break;
+            case _SET_STRING:
+                if (__field.type == TType.SET) {
+                    Set<String> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<String>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            String _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readString();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setSetString(__SetWithAdapter_Adapter.fromThrift(_fbthriftVar0));
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setSetString(__SetWithAdapter_Adapter.fromThrift(setString));
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      int _iter0 = this.field;
-      oprot.writeFieldBegin(FIELD_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      Set<String> _iter0 = __SetWithAdapter_Adapter.toThrift(this.setString);
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(SET_STRING_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
-            for (String _iter1 : _iter0) {
-              oprot.writeString(_iter1);
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            int _fbthriftVar0 = this.field;
+            oprot.writeFieldBegin(FIELD_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            Set<String>   _fbthriftVar0 = __SetWithAdapter_Adapter.toThrift(this.setString);
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(SET_STRING_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.STRING, _fbthriftVar0.size()));
+                for (String _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeString(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _MyStructLazy {

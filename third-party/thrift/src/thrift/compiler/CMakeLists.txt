@@ -175,7 +175,6 @@ add_library(
   whisker/detail/string.cc
   whisker/eval_context.cc
   whisker/lexer.cc
-  whisker/mstch_compat.cc
   whisker/object.cc
   whisker/parser.cc
   whisker/print_ast.cc

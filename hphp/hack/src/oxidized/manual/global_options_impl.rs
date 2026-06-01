@@ -42,7 +42,7 @@ impl Default for GlobalOptions {
         Self {
             po: ParserOptions::default(),
             tco_saved_state: SavedState::default(),
-            tco_experimental_features: s_set::SSet::new(),
+            tco_legacy_experimental_features: s_set::SSet::new(),
             tco_migration_flags: s_set::SSet::new(),
             tco_num_local_workers: None,
             tco_defer_class_declaration_threshold: None,
@@ -141,6 +141,7 @@ impl Default for GlobalOptions {
             hh_distc_should_disable_trace_store: false,
             hh_distc_exponential_backoff_num_retries: 10,
             recursive_case_types: false,
+            tco_enabled_unstable_features: Default::default(),
             class_sub_classname: true,
             class_class_type: true,
             needs_concrete: false,

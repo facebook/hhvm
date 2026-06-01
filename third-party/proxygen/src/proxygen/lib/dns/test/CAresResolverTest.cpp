@@ -6,8 +6,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <atomic>
+#include <cstring>
+#include <thread>
+
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <folly/portability/Sockets.h>
+#include <folly/portability/Unistd.h>
 
 #include "proxygen/lib/dns/CAresResolver.h"
 
@@ -367,4 +373,170 @@ TEST_F(CAresResolverTest, CheckForCNameSynchronousCallbackNoUAF) {
 
   // Verify queryFinished was called twice (once for each query)
   EXPECT_EQ(cnameResolver->queryFinishedCount(), 2);
+}
+
+// Helper: find the end offset of the DNS question section in a query packet.
+// The question section starts at byte 12 (after the fixed header) and contains
+// a variable-length domain name followed by type (2 bytes) and class (2 bytes).
+namespace {
+size_t findQuestionEnd(std::array<unsigned char, 512>& query, size_t len) {
+  size_t pos = 12;
+  while (pos < len && query[pos] != 0) {
+    pos += query[pos] + 1;
+  }
+  pos += 5; // null terminator (1) + type (2) + class (2)
+  return pos;
+}
+} // namespace
+
+// Callback that terminates the EventBase loop when a resolution completes.
+class LoopTerminatingCallback : public CAresResolver::ResolutionCallback {
+ public:
+  explicit LoopTerminatingCallback(folly::EventBase& evb) : evb_(evb) {
+  }
+
+  void resolutionSuccess(
+      std::vector<DNSResolver::Answer> answers) noexcept override {
+    success_ = true;
+    answers_ = std::move(answers);
+    evb_.terminateLoopSoon();
+  }
+
+  void resolutionError(
+      const folly::exception_wrapper& /*ew*/) noexcept override {
+    success_ = false;
+    evb_.terminateLoopSoon();
+  }
+
+  bool success_ = false;
+  std::vector<DNSResolver::Answer> answers_;
+
+ private:
+  folly::EventBase& evb_;
+};
+
+// Verify that the c-ares query cache (qcache) is disabled. The qcache (enabled
+// by default since c-ares 1.31.0) caches DNS responses keyed by query name/type
+// and replays them for subsequent identical queries. This is undesirable for
+// CAresResolver because proxygen manages its own caching layer.
+//
+// This test uses a fake DNS server that returns different A record IPs for two
+// identical queries. With qcache disabled, both queries reach the server and
+// the second returns the updated IP. With qcache enabled, the second query
+// would return the stale cached first IP without contacting the server.
+TEST_F(CAresResolverTest, QCacheDisabledResponsesNotCached) {
+  // Set up a UDP socket as a fake DNS server on localhost
+  int serverSock = socket(AF_INET, SOCK_DGRAM, 0);
+  ASSERT_GE(serverSock, 0);
+
+  // Set a receive timeout so the server thread doesn't block forever on failure
+  struct timeval tv{};
+  tv.tv_sec = 10;
+  tv.tv_usec = 0;
+  setsockopt(serverSock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+
+  struct sockaddr_in serverAddr{};
+  serverAddr.sin_family = AF_INET;
+  serverAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  serverAddr.sin_port = 0; // Let OS assign a port
+  ASSERT_EQ(bind(serverSock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)),
+            0);
+
+  socklen_t addrLen = sizeof(serverAddr);
+  ASSERT_EQ(getsockname(serverSock, (struct sockaddr*)&serverAddr, &addrLen),
+            0);
+  uint16_t serverPort = ntohs(serverAddr.sin_port);
+
+  // Fake DNS server thread: handles exactly 2 queries for the same name.
+  // First responds with A record 192.0.2.1, second with 192.0.2.2.
+  // Both have TTL=300 so that qcache (if enabled) would cache the first.
+  std::atomic<int> queriesHandled{0};
+  std::thread serverThread([serverSock, &queriesHandled]() {
+    for (int i = 0; i < 2; i++) {
+      struct sockaddr_in clientAddr{};
+      socklen_t clientAddrLen = sizeof(clientAddr);
+      std::array<unsigned char, 512> query;
+      ssize_t n = recvfrom(serverSock,
+                           query.data(),
+                           query.size(),
+                           0,
+                           (struct sockaddr*)&clientAddr,
+                           &clientAddrLen);
+      if (n <= 0) {
+        break;
+      }
+
+      size_t questionEnd = findQuestionEnd(query, static_cast<size_t>(n));
+
+      // Build response: copy header + question section from the query
+      std::array<unsigned char, 512> resp;
+      memcpy(resp.data(), query.data(), questionEnd);
+      resp[2] = 0x81; // QR=1 (response), RD=1
+      resp[3] = 0x80; // RA=1, RCODE=0 (NOERROR)
+      resp[6] = 0;
+      resp[7] = 1; // 1 answer
+
+      // Answer section: A record with TTL=300
+      size_t respLen = questionEnd;
+      resp[respLen++] = 0xC0;
+      resp[respLen++] = 0x0C; // name: pointer to question name
+      resp[respLen++] = 0x00;
+      resp[respLen++] = 0x01; // type: A
+      resp[respLen++] = 0x00;
+      resp[respLen++] = 0x01; // class: IN
+      resp[respLen++] = 0x00;
+      resp[respLen++] = 0x00;
+      resp[respLen++] = 0x01;
+      resp[respLen++] = 0x2C; // TTL: 300
+      resp[respLen++] = 0x00;
+      resp[respLen++] = 0x04; // RDLENGTH: 4
+      resp[respLen++] = 192;
+      resp[respLen++] = 0;
+      resp[respLen++] = 2;
+      resp[respLen++] = static_cast<unsigned char>(i + 1); // 192.0.2.1 or .2
+
+      sendto(serverSock,
+             resp.data(),
+             respLen,
+             0,
+             (struct sockaddr*)&clientAddr,
+             clientAddrLen);
+      queriesHandled++;
+    }
+  });
+
+  // Set up resolver pointing at the fake DNS server
+  folly::EventBase evb;
+  auto testResolver = CAresResolver::newResolver();
+  testResolver->attachEventBase(&evb);
+  testResolver->setServers({folly::SocketAddress("127.0.0.1", serverPort)});
+  testResolver->setPort(serverPort);
+  testResolver->init();
+
+  // First query: should get 192.0.2.1
+  LoopTerminatingCallback cb1(evb);
+  testResolver->resolveHostname(
+      &cb1, "test.example.com", std::chrono::milliseconds(5000), AF_INET);
+  evb.loopForever();
+  EXPECT_TRUE(cb1.success_);
+  ASSERT_EQ(cb1.answers_.size(), 1u);
+  EXPECT_EQ(cb1.answers_[0].address.getAddressStr(), "192.0.2.1");
+
+  // Second query for the same name: with qcache disabled, this goes to the
+  // server and gets the updated IP (192.0.2.2). If qcache were enabled, we
+  // would get the stale cached 192.0.2.1 instead.
+  LoopTerminatingCallback cb2(evb);
+  testResolver->resolveHostname(
+      &cb2, "test.example.com", std::chrono::milliseconds(5000), AF_INET);
+  evb.loopForever();
+  EXPECT_TRUE(cb2.success_);
+  ASSERT_EQ(cb2.answers_.size(), 1u);
+  EXPECT_EQ(cb2.answers_[0].address.getAddressStr(), "192.0.2.2");
+
+  // Verify both queries were sent to the server (not served from cache)
+  serverThread.join();
+  EXPECT_EQ(queriesHandled.load(), 2);
+
+  testResolver.reset();
+  close(serverSock);
 }

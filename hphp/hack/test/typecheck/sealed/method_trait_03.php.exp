@@ -1,6 +1,10 @@
-ERROR: File "method_trait_03.php", line 22, characters 19-21:
+WARN: File "method_trait_03.php", line 6, characters 14-21:
+Class `C` in sealed allowlist for method `foo` in `T1`, but does not use `T1` (Warn[12035])
+WARN: File "method_trait_03.php", line 6, characters 24-32:
+Trait `T2` in sealed allowlist for method `foo` in `T1`, but does not use `T1` (Warn[12035])
+ERROR: File "method_trait_03.php", line 26, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "method_trait_03.php", line 22, characters 19-21:
+  File "method_trait_03.php", line 26, characters 19-21:
   You cannot override the method because it is sealed.
   File "method_trait_03.php", line 7, characters 19-21:
   Declaration is here

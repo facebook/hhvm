@@ -177,6 +177,9 @@ TEST_P(Json5EncoderTest, SerializeString) {
 world!)""")),
       "\"Hello,\\nworld!\"");
   EXPECT_EQ(encode<type::string_t>(std::string("👋")), R"("👋")");
+  // U+FFFD (replacement character) is valid UTF-8
+  EXPECT_EQ(
+      encode<type::string_t>(std::string("\xEF\xBF\xBD")), "\"\xEF\xBF\xBD\"");
 }
 
 TEST_P(Json5EncoderTest, StringValueInvalidUtf8) {

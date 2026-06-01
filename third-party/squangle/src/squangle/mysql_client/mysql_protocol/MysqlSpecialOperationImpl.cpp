@@ -35,6 +35,10 @@ void MysqlSpecialOperationImpl::specializedTimeoutTriggered() {
 }
 
 void MysqlSpecialOperationImpl::specializedRun() {
+  // Initialize EventHandler/AsyncTimeout now that we're in the event base
+  // thread
+  initializeFromConnection();
+
   const auto* mysql_conn = getMysqlConnection();
   changeHandlerFD(
       folly::NetworkSocket::fromFd(mysql_conn->getSocketDescriptor()));

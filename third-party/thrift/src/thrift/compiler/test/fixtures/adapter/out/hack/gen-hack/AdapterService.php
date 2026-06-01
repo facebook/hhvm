@@ -173,7 +173,7 @@ class AdapterService_count_args implements \IThriftSyncStruct, \IThriftStructMet
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -263,14 +263,14 @@ class AdapterService_count_result extends \ThriftSyncStructWithResult implements
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'success') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\CountingStruct>($parsed['success']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\CountingStruct>($parsed['success']));
       $_tmp1 = \facebook\thrift\test\fixtures\adapter\CountingStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->success = $_tmp1;
@@ -382,14 +382,14 @@ class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftSt
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'arg') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\HeapAllocated>($parsed['arg']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\HeapAllocated>($parsed['arg']));
       $_tmp1 = \facebook\thrift\test\fixtures\adapter\HeapAllocated::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->arg = $_tmp1;
@@ -489,14 +489,14 @@ class AdapterService_adaptedTypes_result extends \ThriftSyncStructWithResult imp
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'success') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\HeapAllocated>($parsed['success']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\adapter\HeapAllocated>($parsed['success']));
       $_tmp1 = \facebook\thrift\test\fixtures\adapter\HeapAllocated::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->success = $_tmp1;

@@ -24,7 +24,7 @@ using namespace std::chrono_literals;
 namespace facebook::common::mysql_client {
 
 void OperationBase::run() {
-  client_.addOperation(op_->shared_from_this());
+  client().addOperation(op_->shared_from_this());
   stopwatch_ = std::make_unique<StopWatch>();
   if (callbacks_.pre_operation_callback_) {
     CHECK_THROW(
@@ -313,7 +313,7 @@ InternalConnection& OperationBase::getInternalConnection() {
 }
 
 void OperationBase::deferRemoveOperation(Operation* op) const {
-  client_.deferRemoveOperation(op);
+  client().deferRemoveOperation(op);
 }
 
 std::string OperationBase::timeoutMessage(Millis delta) const {
@@ -327,7 +327,7 @@ std::string OperationBase::threadOverloadMessage(Duration cbDelay) const {
   return fmt::format(
       "(CLIENT_OVERLOADED: cb delay {}, {} active conns)",
       std::chrono::duration_cast<std::chrono::milliseconds>(cbDelay),
-      client_.numStartedAndOpenConnections());
+      client().numStartedAndOpenConnections());
 }
 
 void OperationBase::setPreOperationCallback(ChainedCallback chainedCallback) {
@@ -343,10 +343,22 @@ void OperationBase::setPostOperationCallback(ChainedCallback chainedCallback) {
 }
 
 OperationBase::OperationBase(std::unique_ptr<ConnectionProxy> safe_conn)
-    : client_(safe_conn->get()->client()),
-      conn_proxy_(std::move(safe_conn)),
-      observer_callback_(nullptr) {
-  conn().resetActionable();
+    : conn_proxy_(std::move(safe_conn)), observer_callback_(nullptr) {
+  initializeOperationState();
+}
+
+void OperationBase::initializeConnection(
+    std::unique_ptr<ConnectionProxy> conn) {
+  DCHECK(conn_proxy_ == nullptr) << "Connection already initialized";
+  conn_proxy_ = std::move(conn);
+  initializeOperationState();
+}
+
+void OperationBase::initializeOperationState() {
+  if (conn_proxy_ && conn_proxy_->get()) {
+    client_ = &conn_proxy_->get()->client();
+    conn().resetActionable();
+  }
   timeout_ = Duration(FLAGS_async_mysql_timeout_micros);
   request_context_.store(
       folly::RequestContext::saveContext(), std::memory_order_relaxed);

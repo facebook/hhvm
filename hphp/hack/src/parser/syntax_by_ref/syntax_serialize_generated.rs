@@ -1562,13 +1562,6 @@ SyntaxVariant::LikeTypeSpecifier (LikeTypeSpecifierChildren{tilde,type_} ) => {
 ss.serialize_field("like_type", &self.with(type_))?;
       ss.end()
 } 
-SyntaxVariant::SoftTypeSpecifier (SoftTypeSpecifierChildren{at,type_} ) => {
-      let mut ss = s.serialize_struct("", 3)?;
-      ss.serialize_field("kind", "soft_type_specifier")?;
-      ss.serialize_field("soft_at", &self.with(at))?;
-ss.serialize_field("soft_type", &self.with(type_))?;
-      ss.end()
-} 
 SyntaxVariant::AttributizedSpecifier (AttributizedSpecifierChildren{attribute_spec,type_} ) => {
       let mut ss = s.serialize_struct("", 3)?;
       ss.serialize_field("kind", "attributized_specifier")?;

@@ -140,9 +140,6 @@ func (p *SomeServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *SomeServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *SomeServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}

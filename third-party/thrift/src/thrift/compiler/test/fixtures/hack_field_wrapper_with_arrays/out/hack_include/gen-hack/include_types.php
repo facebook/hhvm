@@ -93,7 +93,7 @@ class AnnotationStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \I
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -221,14 +221,14 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
     if (idx($parsed, 'nested_struct') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, MyNestedStruct>($parsed['nested_struct']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, MyNestedStruct>($parsed['nested_struct']));
       $_tmp1 = MyNestedStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->nested_struct = $_tmp1;
@@ -932,7 +932,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -957,7 +957,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
       $this->wrapped_type_int = HH\FIXME\UNSAFE_CAST<mixed, i64WithWrapper>($parsed['wrapped_type_int']);
     }
     if (idx($parsed, 'double_wrapped_struct') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, StructWithWrapper>($parsed['double_wrapped_struct']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, StructWithWrapper>($parsed['double_wrapped_struct']));
       $_tmp1 = StructWithWrapper::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->double_wrapped_struct = $_tmp1;
@@ -967,7 +967,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
       $_container6 = dict[];
       foreach($_json5 as $_key3 => $_value4) {
         $_value7 = MyStruct::withDefaultValues();
-        $_tmp8 = \json_encode($_value4);
+        $_tmp8 = \fb_json_encode_force_php_arrays($_value4);
         $_tmp9 = MyStruct::withDefaultValues();
         $_tmp9->readFromJson($_tmp8);
         $_value7 = $_tmp9;
@@ -976,7 +976,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
       $this->optional_adapted_and_wrapped_type_map = $_container6;
     }
     if (idx($parsed, 'optional_adapted_and_wrapped_type_struct') !== null) {
-      $_tmp10 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, AdaptedStruct>($parsed['optional_adapted_and_wrapped_type_struct']));
+      $_tmp10 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, AdaptedStruct>($parsed['optional_adapted_and_wrapped_type_struct']));
       $_tmp11 = MyStruct::withDefaultValues();
       $_tmp11->readFromJson($_tmp10);
       $this->optional_adapted_and_wrapped_type_struct = $_tmp11;
@@ -1755,7 +1755,7 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1766,7 +1766,7 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
       $_container4 = dict[];
       foreach($_json3 as $_key1 => $_value2) {
         $_value5 = MyStruct::withDefaultValues();
-        $_tmp6 = \json_encode($_value2);
+        $_tmp6 = \fb_json_encode_force_php_arrays($_value2);
         $_tmp7 = MyStruct::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_value5 = $_tmp7;
@@ -1783,7 +1783,7 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
         $_container18 = vec[];
         foreach($_json17 as $_key15 => $_value16) {
           $_elem19 = MyStruct::withDefaultValues();
-          $_tmp20 = \json_encode($_value16);
+          $_tmp20 = \fb_json_encode_force_php_arrays($_value16);
           $_tmp21 = MyStruct::withDefaultValues();
           $_tmp21->readFromJson($_tmp20);
           $_elem19 = $_tmp21;
@@ -1825,7 +1825,7 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
         $_container45 = dict[];
         foreach($_json44 as $_key42 => $_value43) {
           $_value46 = MyStruct::withDefaultValues();
-          $_tmp47 = \json_encode($_value43);
+          $_tmp47 = \fb_json_encode_force_php_arrays($_value43);
           $_tmp48 = MyStruct::withDefaultValues();
           $_tmp48->readFromJson($_tmp47);
           $_value46 = $_tmp48;
@@ -1849,7 +1849,7 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
           $_container65 = vec[];
           foreach($_json64 as $_key62 => $_value63) {
             $_elem66 = MyStruct::withDefaultValues();
-            $_tmp67 = \json_encode($_value63);
+            $_tmp67 = \fb_json_encode_force_php_arrays($_value63);
             $_tmp68 = MyStruct::withDefaultValues();
             $_tmp68->readFromJson($_tmp67);
             $_elem66 = $_tmp68;
@@ -1872,7 +1872,7 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
         $_container79 = dict[];
         foreach($_json78 as $_key76 => $_value77) {
           $_value80 = MyStruct::withDefaultValues();
-          $_tmp81 = \json_encode($_value77);
+          $_tmp81 = \fb_json_encode_force_php_arrays($_value77);
           $_tmp82 = MyStruct::withDefaultValues();
           $_tmp82->readFromJson($_tmp81);
           $_value80 = $_tmp82;
@@ -1892,7 +1892,7 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
         $_container93 = dict[];
         foreach($_json92 as $_key90 => $_value91) {
           $_value94 = StructWithWrapper::withDefaultValues();
-          $_tmp95 = \json_encode($_value91);
+          $_tmp95 = \fb_json_encode_force_php_arrays($_value91);
           $_tmp96 = StructWithWrapper::withDefaultValues();
           $_tmp96->readFromJson($_tmp95);
           $_value94 = $_tmp96;

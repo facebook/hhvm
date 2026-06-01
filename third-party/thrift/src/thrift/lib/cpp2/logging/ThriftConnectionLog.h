@@ -21,6 +21,7 @@
 
 #include <thrift/lib/cpp2/logging/IThriftRequestLogging.h>
 #include <thrift/lib/cpp2/logging/IThriftServerCounters.h>
+#include <thrift/lib/cpp2/logging/ThriftBiDiLog.h>
 #include <thrift/lib/cpp2/logging/ThriftSinkLog.h>
 #include <thrift/lib/cpp2/logging/ThriftStreamLog.h>
 
@@ -48,6 +49,13 @@ class ThriftConnectionLog {
    * Create a new sink log for the given method.
    */
   std::unique_ptr<ThriftSinkLog> createSinkLog(
+      std::string_view methodName) const;
+
+  /**
+   * Create a new bidi log for the given method.
+   * Returns shared_ptr because the bidi log is shared across bridges + stapler.
+   */
+  std::shared_ptr<ThriftBiDiLog> createBiDiLog(
       std::string_view methodName) const;
 
  private:

@@ -4154,6 +4154,13 @@ SSATmp* simplifyStructDictTypeBoundCheck(State& env,
   auto const arr  = inst->src(1);
   auto const slot = inst->src(2);
 
+  if ((inst->dst() != nullptr && inst->dst()->type() == TBottom) ||
+      (inst->next() != nullptr && inst->next()->isUnreachable())) {
+    // The check always branches, convert it to a Jmp to taken.
+    gen(env, Jmp, inst->taken());
+    return cns(env, TBottom);
+  }
+
   auto const& layout = arr->type().arrSpec().layout();
   assertx(layout.is_struct());
   if (!layout.bespokeLayout()->isConcrete()) return nullptr;

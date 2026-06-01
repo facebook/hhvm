@@ -856,18 +856,27 @@ TEST(CompilerTest, deprecated_annotations) {
   check_compile(R"(
     package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
-    include "thrift/annotation/hack.thrift"
     include "thrift/annotation/thrift.thrift"
 
-    @hack.Attributes{attributes=[]}
     struct A {
-        1: optional i64 field (cpp.box) # expected-error: Unstructured annotation `cpp.box` is not allowed. Use a structured annotation instead.
-        2: i64 with (py3.name = "w", go.name = "w")
-        # expected-error@-1: Unstructured annotation `py3.name` is not allowed. Use a structured annotation instead.
-        # expected-error@-2: Unstructured annotation `go.name` is not allowed. Use a structured annotation instead.
-    } (hack.attributes = "") # expected-error: Unstructured annotation `hack.attributes` is not allowed. Use a structured annotation instead.
+      @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.box": "1"}}
+      1: optional i64 field;
+      # expected-warning@-2: The annotation cpp.box is deprecated. Please use @thrift.Box instead.
 
-    typedef i64 (cpp.type = "std::uint64_t") T # expected-error: Unstructured annotation `cpp.type` is not allowed. Use a structured annotation instead.
+      @thrift.DeprecatedUnvalidatedAnnotations{items = {"py3.name": "w", "go.name": "w"}}
+      2: i64 with;
+      # expected-warning@-2: The annotation py3.name is deprecated. Please use @python.Name instead.
+      # expected-warning@-3: The annotation go.name is deprecated. Please use @go.Name instead.
+    }
+
+    @thrift.DeprecatedUnvalidatedAnnotations{items = {"hack.attributes": ""}}
+    struct B {}
+    # expected-warning@17: The annotation hack.attributes is deprecated. Please use @hack.Attributes instead.
+
+    @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.type": "std::uint64_t"}}
+    typedef i64 T
+    # expected-warning@21: The annotation cpp.type is deprecated. Please use @cpp.Type instead.
+    # expected-warning@21: Unstructured annotation cpp.type/cpp.template on typedef `T` is ignored. Use @cpp.Type instead.
 
     # This should not produce a warning even though the annotation is currently lowered.
     @cpp.Type{name = "std::uint64_t"}
@@ -880,13 +889,57 @@ TEST(CompilerTest, removed_annotations) {
     package "test.dev/thrift/removed_annotations"
     include "thrift/annotation/thrift.thrift"
 
+    @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp2.declare_bitwise_ops": "1"}}
+    enum E1 {}
+    # expected-error@5: The annotation cpp2.declare_bitwise_ops has been removed. Please use @thrift.BitmaskEnum instead.
+
+    @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp2.deprecated_enum_unscoped": "1"}}
+    enum E3 {}
+    # expected-error@9: invalid annotation cpp2.deprecated_enum_unscoped
+
+    @thrift.DeprecatedUnvalidatedAnnotations{items = {"rust.foo": "1"}}
+    struct A {
+      1: i64 removed_unstructured;
+    }
+    # expected-error@13: The annotation rust.foo has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
+
+    @thrift.DeprecatedUnvalidatedAnnotations{items = {"rust.type": "HashMap"}}
+    typedef map<string, string> HashMap
+    # expected-error@19: The annotation rust.type has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
+
+    service J {
+      @thrift.DeprecatedUnvalidatedAnnotations{items = {"rust.name": "bar"}}
+      i64 foo(1: i64 arg);
+      # expected-error@24: The annotation rust.name has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
+    }
+  )");
+}
+
+TEST(CompilerTest, legacy_annotation_syntax_rejected) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+
+    struct A {
+      1: optional i64 field (cpp.box)
+      # expected-error@-1: Unstructured annotation `cpp.box` is not allowed. Use a structured annotation instead.
+      2: i64 with (py3.name = "w", go.name = "w")
+      # expected-error@-1: Unstructured annotation `py3.name` is not allowed. Use a structured annotation instead.
+      # expected-error@-2: Unstructured annotation `go.name` is not allowed. Use a structured annotation instead.
+    }
+
+    struct B {} (hack.attributes = "")
+    # expected-error@-1: Unstructured annotation `hack.attributes` is not allowed. Use a structured annotation instead.
+
+    typedef i64 (cpp.type = "std::uint64_t") T
+    # expected-error@-1: Unstructured annotation `cpp.type` is not allowed. Use a structured annotation instead.
+
     enum E1 {} (cpp2.declare_bitwise_ops)
     # expected-error@-1: Unstructured annotation `cpp2.declare_bitwise_ops` is not allowed. Use a structured annotation instead.
 
     enum E3 {} (cpp2.deprecated_enum_unscoped)
     # expected-error@-1: Unstructured annotation `cpp2.deprecated_enum_unscoped` is not allowed. Use a structured annotation instead.
 
-    struct A {
+    struct C {
       1: i64 removed_unstructured (rust.foo)
       # expected-error@-1: Unstructured annotation `rust.foo` is not allowed. Use a structured annotation instead.
     }
@@ -894,11 +947,9 @@ TEST(CompilerTest, removed_annotations) {
     typedef map<string, string> (rust.type = "HashMap") HashMap
     # expected-error@-1: Unstructured annotation `rust.type` is not allowed. Use a structured annotation instead.
 
-    struct S {} (cpp.type = "foo") # expected-error: Unstructured annotation `cpp.type` is not allowed. Use a structured annotation instead.
-    typedef S T
-
     service J {
-      i64 foo(1: i64 arg (rust.name = "bar")) # expected-error: Unstructured annotation `rust.name` is not allowed. Use a structured annotation instead.
+      i64 foo(1: i64 arg (rust.name = "bar"))
+      # expected-error@-1: Unstructured annotation `rust.name` is not allowed. Use a structured annotation instead.
     }
   )");
 }
@@ -1078,16 +1129,15 @@ TEST(CompilerTest, structured_ref) {
     struct Foo {
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.ref": "1"}}
       1: optional Foo field1;
-        # expected-warning@-2: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field1`.
+        # expected-error@-2: The annotation cpp.ref has been removed. Please use @cpp.Ref instead.
 
       @cpp.Ref{type = cpp.RefType.Unique}
         # expected-warning@-1: @cpp.Ref{type = cpp.RefType.Unique} is deprecated. Please use @thrift.Box annotation instead in `field2`.
       2: optional Foo field2;
 
       @cpp.Ref{type = cpp.RefType.Unique}
-        # expected-error@-1: The @cpp.Ref annotation cannot be combined with the `cpp.ref` or `cpp.ref_type` annotations. Remove one of the annotations from `field3`.
-        # expected-warning@-2: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field3`.
-        # expected-warning@-3: @cpp.Ref{type = cpp.RefType.Unique} is deprecated. Please use @thrift.Box annotation instead in `field3`.
+        # expected-error@-1: Duplicate annotations cpp.ref and @cpp.Ref.
+        # expected-warning@15: @cpp.Ref{type = cpp.RefType.Unique} is deprecated. Please use @thrift.Box annotation instead in `field3`.
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.ref": "1"}}
       3: optional Foo field3;
 
@@ -1112,12 +1162,12 @@ TEST(CompilerTest, unstructured_and_structured_adapter) {
         @hack.Adapter{name="MyAdapter"}
         2: i64 my_field2;
         @cpp.Adapter{name="MyAdapter"}
-          # expected-error@-1: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `my_field3` with @cpp.Adapter.
+          # expected-error@-1: The annotation cpp.ref has been removed. Please use @cpp.Ref instead.
         @hack.Adapter{name="MyAdapter"}
         @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.ref": "1"}}
         3: optional i64 my_field3;
         @cpp.Adapter{name="MyAdapter"}
-          # expected-error@-1: cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. Please use @thrift.Box annotation instead in `my_field4` with @cpp.Adapter.
+          # expected-error@-1: The annotation cpp.ref_type has been removed. Please use @cpp.Ref instead.
         @hack.Adapter{name="MyAdapter"}
         @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.ref_type": "unique"}}
         4: optional i64 my_field4;
@@ -1410,11 +1460,11 @@ TEST(CompilerTest, unique_ref) {
     struct Bar {
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.ref": "1"}}
       1: optional Foo field1;
-        # expected-warning@-2: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field1`.
+        # expected-error@-2: The annotation cpp.ref has been removed. Please use @cpp.Ref instead.
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp2.ref": "1"}}
       2: optional Foo field2;
-        # expected-warning@-2: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field2`.
+        # expected-error@-2: The annotation cpp2.ref has been removed. Please use @cpp.Ref instead.
 
       @cpp.Ref{type = cpp.RefType.Unique}
       3: optional Foo field3;
@@ -1428,25 +1478,27 @@ TEST(CompilerTest, unique_ref) {
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.ref_type": "unique"}}
       6: optional Foo field6;
-        # expected-warning@-2: cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. Please use @thrift.Box annotation instead in `field6`.
+        # expected-error@-2: The annotation cpp.ref_type has been removed. Please use @cpp.Ref instead.
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp2.ref_type": "unique"}}
       7: optional Foo field7;
-        # expected-warning@-2: cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. Please use @thrift.Box annotation instead in `field7`.
+        # expected-error@-2: The annotation cpp2.ref_type has been removed. Please use @cpp.Ref instead.
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.ref_type": "shared"}}
       8: optional Foo field8;
+        # expected-error@-2: The annotation cpp.ref_type has been removed. Please use @cpp.Ref instead.
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp2.ref_type": "shared"}}
       9: optional Foo field9;
+        # expected-error@-2: The annotation cpp2.ref_type has been removed. Please use @cpp.Ref instead.
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.ref": "true"}}
       10: optional Foo field10;
-        # expected-warning@-2: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field10`.
+        # expected-error@-2: The annotation cpp.ref has been removed. Please use @cpp.Ref instead.
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp2.ref": "true"}}
       11: optional Foo field11;
-        # expected-warning@-2: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field11`.
+        # expected-error@-2: The annotation cpp2.ref has been removed. Please use @cpp.Ref instead.
 
       12: optional Foo field12;
 
@@ -1467,47 +1519,47 @@ TEST(CompilerTest, non_optional_ref_and_box_forbidden) {
     struct Bar {
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.ref": "1"}}
       1: Foo field1;
-        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field1` (in `Bar`).
+        # expected-error@-2: The annotation cpp.ref has been removed. Please use @cpp.Ref instead.
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp2.ref": "1"}}
       2: Foo field2;
-        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field2` (in `Bar`).
+        # expected-error@-2: The annotation cpp2.ref has been removed. Please use @cpp.Ref instead.
 
       @cpp.Ref{type = cpp.RefType.Unique}
       3: Foo field3;
-        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field3` (in `Bar`).
+        # expected-error@-2: Field with @cpp.Ref annotation must be optional: `field3` (in `Bar`).
 
       @cpp.Ref{type = cpp.RefType.Shared}
       4: Foo field4;
-        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field4` (in `Bar`).
+        # expected-error@-2: Field with @cpp.Ref annotation must be optional: `field4` (in `Bar`).
 
       @cpp.Ref{type = cpp.RefType.SharedMutable}
       5: Foo field5;
-        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field5` (in `Bar`).
+        # expected-error@-2: Field with @cpp.Ref annotation must be optional: `field5` (in `Bar`).
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.ref_type": "unique"}}
       6: Foo field6;
-        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field6` (in `Bar`).
+        # expected-error@-2: The annotation cpp.ref_type has been removed. Please use @cpp.Ref instead.
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp2.ref_type": "unique"}}
       7: Foo field7;
-        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field7` (in `Bar`).
+        # expected-error@-2: The annotation cpp2.ref_type has been removed. Please use @cpp.Ref instead.
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.ref_type": "shared"}}
       8: Foo field8;
-        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field8` (in `Bar`).
+        # expected-error@-2: The annotation cpp.ref_type has been removed. Please use @cpp.Ref instead.
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp2.ref_type": "shared"}}
       9: Foo field9;
-        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field9` (in `Bar`).
+        # expected-error@-2: The annotation cpp2.ref_type has been removed. Please use @cpp.Ref instead.
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.ref": "true"}}
       10: Foo field10;
-        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field10` (in `Bar`).
+        # expected-error@-2: The annotation cpp.ref has been removed. Please use @cpp.Ref instead.
 
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp2.ref": "true"}}
       11: Foo field11;
-        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field11` (in `Bar`).
+        # expected-error@-2: The annotation cpp2.ref has been removed. Please use @cpp.Ref instead.
 
       12: Foo field12;
 
@@ -1530,7 +1582,7 @@ TEST(CompilerTest, non_optional_ref_legacy_allowed_annotation_on_wrong_field) {
     struct Bar {
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.ref": "1"}}
       1: Foo field1;
-        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field1` (in `Bar`).
+        # expected-error@-2: The annotation cpp.ref has been removed. Please use @cpp.Ref instead.
 
       @cpp.AllowLegacyNonOptionalRef
       2: Foo field2;
@@ -2659,27 +2711,6 @@ TEST(CompilerTest, rust_adapter_serde_strict_error) {
       {"--gen", "mstch_rust:serde"});
 }
 
-TEST(CompilerTest, rust_deprecated_loose_adapter_serde_warning) {
-  check_compile(
-      R"(
-    include "thrift/annotation/rust.thrift"
-    package "facebook.com/thrift/test"
-    struct S {
-      @rust.Adapter{name = "::some::Adapter"}
-      # expected-warning@-1: Field `field` has an @rust.Adapter without `serde = true` in a context where serde is enabled. Set `serde = true` on the @rust.Adapter annotation if the adapter's AdaptedType implements serde::Serialize and serde::Deserialize. [rust-field-adapter-rule]
-      1: i64 field;
-
-      @rust.Adapter{name = "::some::Adapter", serde = true}
-      2: i64 field_with_serde_adapter;
-
-      @rust.Adapter{name = "::some::Adapter"} # expected-error: Field `field_with_type` cannot have both an adapter and `rust.type` or `rust.newtype` [rust-field-adapter-rule]
-      @rust.Type{name = "::some::Type"}
-      3: i64 field_with_type;
-    }
-  )",
-      {"--gen", "mstch_rust:serde,deprecated_loose_adapter_serde"});
-}
-
 TEST(CompilerTest, cursor_serialization_adapter) {
   check_compile(R"(
     package "facebook.com/thrift/test"
@@ -3056,7 +3087,7 @@ TEST(CompilerTest, cpp_deprecated_terse_write) {
       @cpp.AllowLegacyDeprecatedTerseWritesRef
       @cpp.Ref{type = cpp.RefType.Unique}
       6: Bar field6;
-        # expected-warning@-5: Field with @cpp.Ref (or similar) annotation should be optional: `field6` (in `Foo`).
+        # expected-warning@-5: Field with @cpp.Ref annotation should be optional: `field6` (in `Foo`).
     }
   )");
 }
@@ -3072,7 +3103,7 @@ TEST(CompilerTest, cpp_deprecated_terse_write_ref) {
       @cpp.DeprecatedTerseWrite
       @cpp.Ref{type = cpp.RefType.Unique}
       1: string field1;
-        # expected-warning@-4: Field with @cpp.Ref (or similar) annotation should be optional: `field1` (in `Foo`).
+        # expected-warning@-4: Field with @cpp.Ref annotation should be optional: `field1` (in `Foo`).
         # expected-error@-5: @cpp.Ref{Unique} can not be applied to `field1` since it's cpp.DeprecatedTerseWrite field.
 
       @cpp.AllowLegacyNonOptionalRef
@@ -3080,7 +3111,7 @@ TEST(CompilerTest, cpp_deprecated_terse_write_ref) {
       @cpp.AllowLegacyDeprecatedTerseWritesRef
       @cpp.Ref{type = cpp.RefType.Unique}
       2: string field2;
-        # expected-warning@-5: Field with @cpp.Ref (or similar) annotation should be optional: `field2` (in `Foo`).
+        # expected-warning@-5: Field with @cpp.Ref annotation should be optional: `field2` (in `Foo`).
 
       @cpp.DeprecatedTerseWrite
       @cpp.AllowLegacyDeprecatedTerseWritesRef
@@ -3091,7 +3122,7 @@ TEST(CompilerTest, cpp_deprecated_terse_write_ref) {
       @cpp.AllowLegacyDeprecatedTerseWritesRef
       @cpp.Ref{type = cpp.RefType.Unique}
       4: string field4;
-        # expected-warning@-4: Field with @cpp.Ref (or similar) annotation should be optional: `field4` (in `Foo`).
+        # expected-warning@-4: Field with @cpp.Ref annotation should be optional: `field4` (in `Foo`).
         # expected-error@-5: @cpp.AllowLegacyDeprecatedTerseWritesRef can not be applied to `field4` since it's not cpp.DeprecatedTerseWrite field.
     }
   )");

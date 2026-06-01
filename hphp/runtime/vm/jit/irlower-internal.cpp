@@ -127,13 +127,7 @@ void prepareArg(const ArgDesc& arg,
 
 Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
   assertx(marker.valid());
-  // We can get here if we are memory profiling, since we override the
-  // normal sync settings and sync anyway.
-  always_assert(
-    sync == SyncOptions::Sync ||
-    Cfg::Jit::ForceVMRegSync ||
-    RuntimeOption::HHProfEnabled
-  );
+  always_assert(sync == SyncOptions::Sync || Cfg::Jit::ForceVMRegSync);
 
   // Stublogue code operates on behalf of the caller, so it needs an indirect
   // fixup to obtain the real savedRip from the native frame. The stack base
@@ -175,11 +169,7 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
   assertx(IMPLIES(sync != SyncOptions::None, inst->maySyncVMRegsWithSources()));
 
   auto const syncFixup = [&] {
-    if (RuntimeOption::HHProfEnabled ||
-        Cfg::Jit::ForceVMRegSync ||
-        sync != SyncOptions::None) {
-      // If we are profiling the heap, we always need to sync because regs need
-      // to be correct during allocations no matter what.
+    if (Cfg::Jit::ForceVMRegSync || sync != SyncOptions::None) {
       return makeFixup(inst->marker(), sync);
     }
     return Fixup::none();
@@ -275,7 +265,7 @@ void cgCallNative(Vout& v, IRLS& env, const IRInstruction* inst) {
 Vreg emitHashInt64(IRLS& env, const IRInstruction* inst, Vreg arr) {
   auto& v = vmain(env);
   auto const hash = v.makeReg();
-  if (arch::any(Arch::X64, Arch::ARM)) {
+  if (arch::any<arch::X64, arch::ARM>()) {
 #if defined(USE_HWCRC) && (defined(__SSE4_2__) || \
     (defined(__aarch64__) && defined(__ARM_FEATURE_CRC32)))
     v << crc32q{arr, v.cns(0), hash};

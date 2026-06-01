@@ -14,17 +14,17 @@ public class AdapterServiceReactiveAsyncWrapper
   private AdapterService.Reactive _delegate;
 
   public AdapterServiceReactiveAsyncWrapper(AdapterService.Reactive _delegate) {
-    
-    this._delegate = _delegate;
+      
+      this._delegate = _delegate;
   }
 
   public AdapterServiceReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new AdapterServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new AdapterServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
   @java.lang.Override
@@ -41,7 +41,7 @@ public class AdapterServiceReactiveAsyncWrapper
   @java.lang.Override
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<test.fixtures.adapter.CountingStruct>> countWrapper(
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.countWrapper( rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.countWrapper( rpcOptions));
   }
 
   @java.lang.Override
@@ -60,7 +60,7 @@ public class AdapterServiceReactiveAsyncWrapper
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<test.fixtures.adapter.HeapAllocated>> adaptedTypesWrapper(
     final test.fixtures.adapter.HeapAllocated arg,
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.adaptedTypesWrapper(arg, rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.adaptedTypesWrapper(arg, rpcOptions));
   }
 
 }

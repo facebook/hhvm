@@ -277,9 +277,9 @@ public class PubSubStreamingServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        int _iter0 = (int)_o;
+        int _fbthriftVar0 = (int)_o;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
-        oprot.writeI32(_iter0);
+        oprot.writeI32(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -307,9 +307,9 @@ public class PubSubStreamingServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        int _iter0 = (int)_o;
+        int _fbthriftVar0 = (int)_o;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
-        oprot.writeI32(_iter0);
+        oprot.writeI32(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -337,9 +337,9 @@ public class PubSubStreamingServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        int _iter0 = (int)_o;
+        int _fbthriftVar0 = (int)_o;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
-        oprot.writeI32(_iter0);
+        oprot.writeI32(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -367,9 +367,9 @@ public class PubSubStreamingServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        int _iter0 = (int)_o;
+        int _fbthriftVar0 = (int)_o;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
-        oprot.writeI32(_iter0);
+        oprot.writeI32(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -397,9 +397,9 @@ public class PubSubStreamingServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        int _iter0 = (int)_o;
+        int _fbthriftVar0 = (int)_o;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
-        oprot.writeI32(_iter0);
+        oprot.writeI32(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -427,9 +427,9 @@ public class PubSubStreamingServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        int _iter0 = (int)_o;
+        int _fbthriftVar0 = (int)_o;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
-        oprot.writeI32(_iter0);
+        oprot.writeI32(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -448,9 +448,9 @@ public class PubSubStreamingServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        int _iter0 = (int)_o;
+        int _fbthriftVar0 = (int)_o;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
-        oprot.writeI32(_iter0);
+        oprot.writeI32(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -478,9 +478,9 @@ public class PubSubStreamingServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        int _iter0 = (int)_o;
+        int _fbthriftVar0 = (int)_o;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
-        oprot.writeI32(_iter0);
+        oprot.writeI32(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -499,9 +499,9 @@ public class PubSubStreamingServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        int _iter0 = (int)_o;
+        int _fbthriftVar0 = (int)_o;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
-        oprot.writeI32(_iter0);
+        oprot.writeI32(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -529,9 +529,9 @@ public class PubSubStreamingServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        int _iter0 = (int)_o;
+        int _fbthriftVar0 = (int)_o;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
-        oprot.writeI32(_iter0);
+        oprot.writeI32(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -550,9 +550,9 @@ public class PubSubStreamingServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        int _iter0 = (int)_o;
+        int _fbthriftVar0 = (int)_o;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
-        oprot.writeI32(_iter0);
+        oprot.writeI32(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
@@ -581,9 +581,9 @@ public class PubSubStreamingServiceRpcServerHandler
       try {
         oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
 
-        int _iter0 = (int)_o;
+        int _fbthriftVar0 = (int)_o;
         oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
-        oprot.writeI32(_iter0);
+        oprot.writeI32(_fbthriftVar0);
         oprot.writeFieldEnd();
 
         oprot.writeFieldStop();

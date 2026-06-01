@@ -1,1 +1,2 @@
-No errors
+WARN: File "method_abstractclass_03.php", line 6, characters 14-21:
+Trait `T` in sealed allowlist for method `foo` in `C`, but does not require extends `C` (Warn[12035])

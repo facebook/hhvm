@@ -44,7 +44,8 @@ class HTTPHybridSource : public HTTPSourceFilter {
     }
   }
 
-  void stopReading(folly::Optional<const HTTPErrorCode> error) override {
+  void stopReading(
+      folly::Optional<const HTTPErrorCode> error) noexcept override {
     if (bool((HTTPSourceFilter&)*this)) {
       HTTPSourceFilter::stopReading(error);
     } else if (heapAllocated_) {

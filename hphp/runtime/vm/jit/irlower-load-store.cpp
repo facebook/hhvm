@@ -78,7 +78,7 @@ void cgLdLoc(IRLS& env, const IRInstruction* inst) {
   // For ARM, if we need to load the type, then request 'aux' too -- even though
   // the value is unneeded, it allows for the type and the value to be merged
   // into a single loadpair.
-  const bool loadAux = arch::get() == Arch::ARM && inst->dst()->type().needsReg();
+  const bool loadAux = arch::any<arch::ARM>() && inst->dst()->type().needsReg();
 
   loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), fp[off], loadAux);
 }
@@ -113,7 +113,7 @@ void cgStLoc(IRLS& env, const IRInstruction* inst) {
   // For ARM, we request the `aux' field to be stored too.  That's unused, but
   // having a wider store for the type allows it to be merged with the store of
   // the value into a single storepair instruction.
-  const bool storeAux = arch::get() == Arch::ARM;
+  const bool storeAux = arch::any<arch::ARM>();
 
   storeTV(vmain(env), fp[off], srcLoc(env, inst, 1), inst->src(1),
           TBottom, storeAux);
@@ -171,7 +171,7 @@ void cgLdStk(IRLS& env, const IRInstruction* inst) {
   // For ARM, if we need to load the type, then request 'aux' too -- even though
   // the value is unneeded, it allows for the type and the value to be merged
   // into a single loadpair.
-  const bool loadAux = arch::get() == Arch::ARM && inst->dst()->type().needsReg();
+  const bool loadAux = arch::any<arch::ARM>() && inst->dst()->type().needsReg();
 
   loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), sp[off], loadAux);
 }
@@ -193,7 +193,7 @@ void cgStStk(IRLS& env, const IRInstruction* inst) {
   // For ARM, we request the `aux' field to be stored too.  That's unused, but
   // having a wider store for the type allows it to be merged with the store of
   // the value into a single storepair instruction.
-  const bool storeAux = arch::get() == Arch::ARM;
+  const bool storeAux = arch::any<arch::ARM>();
 
   storeTV(vmain(env), sp[off], srcLoc(env, inst, 1), inst->src(1), type,
           storeAux);

@@ -31,11 +31,11 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(LegacyStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -49,7 +49,7 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
 
         public int getNormal() { return normal; }
 
-            @com.facebook.swift.codec.ThriftField(value=-1, name="bad", isLegacyId=true, requiredness=Requiredness.NONE)    public Builder setBad(int bad) {
+        @com.facebook.swift.codec.ThriftField(value=-1, name="bad", isLegacyId=true, requiredness=Requiredness.NONE)    public Builder setBad(int bad) {
             this.bad = bad;
             return this;
         }
@@ -67,8 +67,10 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
             LegacyStruct result = new LegacyStruct();
                 result.normal = this.normal;
                 result.bad = this.bad;
-            return result;    }
+            return result;
+        }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -77,19 +79,18 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
     private int normal;
     public static final int _NORMAL = 1;
     private static final TField NORMAL_FIELD_DESC = new TField("normal", TType.I32, (short)1);
-        private int bad;
+    private int bad;
     public static final int _BAD = -1;
     private static final TField BAD_FIELD_DESC = new TField("bad", TType.I32, (short)-1);
     static {
-      NAMES_TO_IDS.put("normal", 1);
-      THRIFT_NAMES_TO_IDS.put("normal", 1);
-      FIELD_METADATA.put(1, NORMAL_FIELD_DESC);
-      NAMES_TO_IDS.put("bad", -1);
-      THRIFT_NAMES_TO_IDS.put("bad", -1);
-      FIELD_METADATA.put(-1, BAD_FIELD_DESC);
+        NAMES_TO_IDS.put("normal", 1);
+        THRIFT_NAMES_TO_IDS.put("normal", 1);
+        FIELD_METADATA.put(1, NORMAL_FIELD_DESC);
+        NAMES_TO_IDS.put("bad", -1);
+        THRIFT_NAMES_TO_IDS.put("bad", -1);
+        FIELD_METADATA.put(-1, BAD_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="normal", requiredness=Requiredness.NONE)
     public int getNormal() { return normal; }
 
@@ -98,9 +99,7 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
         this.normal = normal;
         return this;
     }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=-1, name="bad", isLegacyId=true, requiredness=Requiredness.NONE)
     public int getBad() { return bad; }
 
@@ -139,66 +138,66 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Integer.hashCode(normal);
-            _hashCode = 31 * _hashCode + Integer.hashCode(bad);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Integer.hashCode(bad);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<LegacyStruct> asReader() {
       return LegacyStruct::read0;
     }
 
     public static LegacyStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(LegacyStruct.NAMES_TO_IDS, LegacyStruct.THRIFT_NAMES_TO_IDS, LegacyStruct.FIELD_METADATA);
-      LegacyStruct.Builder builder = new LegacyStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _NORMAL:
-          if (__field.type == TType.I32) {
-            int normal = oprot.readI32();
-            builder.setNormal(normal);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _BAD:
-          if (__field.type == TType.I32) {
-            int bad = oprot.readI32();
-            builder.setBad(bad);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(LegacyStruct.NAMES_TO_IDS, LegacyStruct.THRIFT_NAMES_TO_IDS, LegacyStruct.FIELD_METADATA);
+        LegacyStruct.Builder builder = new LegacyStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _NORMAL:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setNormal(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _BAD:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setBad(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      int _iter0 = this.normal;
-      oprot.writeFieldBegin(NORMAL_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.bad;
-      oprot.writeFieldBegin(BAD_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            int _fbthriftVar0 = this.normal;
+            oprot.writeFieldBegin(NORMAL_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.bad;
+            oprot.writeFieldBegin(BAD_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
-
 
 }

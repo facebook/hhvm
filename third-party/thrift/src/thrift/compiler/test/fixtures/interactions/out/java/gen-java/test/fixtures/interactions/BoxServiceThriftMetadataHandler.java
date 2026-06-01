@@ -26,77 +26,77 @@ import com.facebook.thrift.metadata.ThriftType;
 
 public class BoxServiceThriftMetadataHandler implements com.facebook.thrift.server.ThriftMetadataHandler {
 
-  private static void addFunctions_0(List<ThriftFunction> functions) {
-        {
-          List<ThriftField> args = new ArrayList<>();
-          args.add(new ThriftField.Builder()
-              .setId(1)
-              .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.interactions.ShouldBeBoxed").build()))
-              .setName("req")
-              .setIsOptional(false)
-              .build());
+    private static void addFunctions_0(List<ThriftFunction> functions) {
+            {
+              List<ThriftField> args = new ArrayList<>();
+              args.add(new ThriftField.Builder()
+                  .setId(1)
+                  .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.interactions.ShouldBeBoxed").build()))
+                  .setName("req")
+                  .setIsOptional(false)
+                  .build());
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("getABoxSession")
-              .setReturnType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.interactions.ShouldBeBoxed").build()))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-  }
+              functions.add(new ThriftFunction.Builder()
+                  .setName("getABoxSession")
+                  .setReturnType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.interactions.ShouldBeBoxed").build()))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+    }
 
-  private static final ThriftService THRIFT_SERVICE;
+    private static final ThriftService THRIFT_SERVICE;
 
 
-  static {
-    List<ThriftFunction> functions = new ArrayList<>();
-    addFunctions_0(functions);
-    THRIFT_SERVICE = new ThriftService.Builder()
-        .setName("test.fixtures.interactions.BoxService")
-        .setFunctions(functions)
-        .build();
-  }
+    static {
+        List<ThriftFunction> functions = new ArrayList<>();
+        addFunctions_0(functions);
+        THRIFT_SERVICE = new ThriftService.Builder()
+            .setName("test.fixtures.interactions.BoxService")
+            .setFunctions(functions)
+            .build();
+    }
 
-  @Override
-  public String getName() {
-    return "BoxService";
-  }
+    @Override
+    public String getName() {
+        return "BoxService";
+    }
 
-  @Override
-  public String getFullyQualifiedName() {
-    return "test.fixtures.interactions.BoxService";
-  }
+    @Override
+    public String getFullyQualifiedName() {
+        return "test.fixtures.interactions.BoxService";
+    }
 
-  @Override
-  public ThriftService getThriftService() {
-    return THRIFT_SERVICE;
-  }
+    @Override
+    public ThriftService getThriftService() {
+        return THRIFT_SERVICE;
+    }
 
-  @Override
-  public String getParentServiceName() {
-    return null;
-  }
+    @Override
+    public String getParentServiceName() {
+        return null;
+    }
 
-  @Override
-  public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
-    return null;
-  }
+    @Override
+    public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
+        return null;
+    }
 
-  @Override
-  public Map<String, ThriftEnum> getEnums() {
-    return BoxServiceThriftMetadataHandlerEnums.getEnums();
-  }
+    @Override
+    public Map<String, ThriftEnum> getEnums() {
+        return BoxServiceThriftMetadataHandlerEnums.getEnums();
+    }
 
-  @Override
-  public Map<String, ThriftStruct> getStructs() {
-    return BoxServiceThriftMetadataHandlerStructs.getStructs();
-  }
+    @Override
+    public Map<String, ThriftStruct> getStructs() {
+        return BoxServiceThriftMetadataHandlerStructs.getStructs();
+    }
 
-  @Override
-  public Map<String, ThriftException> getExceptions() {
-    return BoxServiceThriftMetadataHandlerExceptions.getExceptions();
-  }
+    @Override
+    public Map<String, ThriftException> getExceptions() {
+        return BoxServiceThriftMetadataHandlerExceptions.getExceptions();
+    }
 }

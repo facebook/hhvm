@@ -28,14 +28,14 @@ class ExecutorSourceFilter : public HTTPSourceFilter {
 
   folly::coro::Task<HTTPHeaderEvent> readHeaderEvent() override;
   folly::coro::Task<HTTPBodyEvent> readBodyEvent(uint32_t max) override;
-  void stopReading(
-      folly::Optional<const HTTPErrorCode> error = folly::none) override;
+  void stopReading(folly::Optional<const HTTPErrorCode> error =
+                       folly::none) noexcept override;
 
   // const access, ok to read
-  folly::Optional<uint64_t> getStreamID() const override {
+  folly::Optional<uint64_t> getStreamID() const noexcept override {
     return HTTPSourceFilter::getStreamID();
   }
-  void setReadTimeout(std::chrono::milliseconds timeout) override {
+  void setReadTimeout(std::chrono::milliseconds timeout) noexcept override {
     evb_.runImmediatelyOrRunInEventBaseThread(
         [this, timeout]() { HTTPSourceFilter::setReadTimeout(timeout); });
   }

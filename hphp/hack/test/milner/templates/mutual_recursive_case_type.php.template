@@ -1,0 +1,8 @@
+<?hh
+
+<<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+
+// Mutually recursive case types with random base type
+// Tests that the type checker terminates and correctly rejects mutual cycles
+case type MutRecA = TYPE#1 | MutRecB;
+case type MutRecB = vec<MutRecA>;

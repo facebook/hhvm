@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/abi-regs.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/util/asm-x64.h"
 
@@ -79,4 +80,3 @@ inline Vflags required_flags(jit::ConditionCode /*cc*/) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

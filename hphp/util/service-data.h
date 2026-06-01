@@ -23,6 +23,7 @@
 #include <vector>
 
 #include <folly/Synchronized.h>
+#include <folly/container/F14Map.h>
 #include <folly/stats/Histogram.h>
 #include <folly/stats/MultiLevelTimeSeries.h>
 
@@ -75,7 +76,7 @@ namespace HPHP {
  * histogram->addValue(10);
  *
  * // You can report the data like so.
- * std::map<std::string, int64_t> statsMap;
+ * ServiceData::CounterMap statsMap;
  * ServiceData::exportAll(statsMap);
  *
  * and statsMap will contain these keys:
@@ -97,11 +98,6 @@ namespace ServiceData {
 struct ExportedCounter;
 struct ExportedHistogram;
 struct ExportedTimeSeries;
-
-namespace detail {
-template <class ClassWithPrivateDestructor>
-struct FriendDeleter;
-}
 
 enum class StatsType { AVG, SUM, RATE, COUNT, PCT };
 
@@ -132,32 +128,34 @@ ExportedCounter* getCounterIfExists(const std::string& name);
  *
  * Once registered, callbacks must be safe to call at any time, from any
  * thread, and may even be called before registerCounterCallback()
- * returns. Callbacks are passed a reference to the std::map<std::string,
- * int64_t> being populated, so one callback can add many counters (callbacks
+ * returns. Callbacks are passed a reference to the CounterMap being
+ * populated, so one callback can add many counters (callbacks
  * can also remove or modify existing counters, but this is discouraged).
  */
-using CounterMap = std::map<std::string, int64_t>;
+using CounterMap = folly::F14FastMap<std::string, int64_t>;
 using CounterFunc = std::function<void(CounterMap&)>;
 using CounterHandle = uint32_t;
 
-CounterHandle registerCounterCallback(CounterFunc func, bool expensive);
+CounterHandle registerCounterCallback(
+    CounterFunc func, bool expensive, std::string prefix = {});
 void deregisterCounterCallback(CounterHandle key);
 
 template<bool expensive>
 struct CounterCallbackBase {
  CounterCallbackBase() = default;
 
- explicit CounterCallbackBase(CounterFunc func) {
-    init(std::move(func));
+ explicit CounterCallbackBase(CounterFunc func, std::string prefix = {}) {
+    init(std::move(func), std::move(prefix));
   }
 
   ~CounterCallbackBase() {
     deinit();
   }
 
-  void init(CounterFunc func) {
+  void init(CounterFunc func, std::string prefix = {}) {
     assertx(!m_key);
-    m_key = registerCounterCallback(std::move(func), expensive);
+    m_key = registerCounterCallback(std::move(func), expensive,
+                                    std::move(prefix));
   }
 
   void deinit() {
@@ -259,9 +257,6 @@ struct ExportedCounter {
   int64_t getValue() const { return m_value.load(std::memory_order_acquire); }
 
  private:
-  friend struct detail::FriendDeleter<ExportedCounter>;
-  ~ExportedCounter() {}
-
   std::atomic_int_fast64_t m_value;
 };
 
@@ -283,9 +278,6 @@ struct ExportedTimeSeries {
   void exportAll(const std::string& prefix, CounterMap& statsMap);
 
  private:
-  friend struct detail::FriendDeleter<ExportedTimeSeries>;
-  ~ExportedTimeSeries() {}
-
   folly::Synchronized<folly::MultiLevelTimeSeries<int64_t>> m_timeseries;
   const std::vector<ServiceData::StatsType> m_exportTypes;
 };
@@ -299,9 +291,6 @@ struct ExportedHistogram {
   void exportAll(const std::string& prefix, CounterMap& statsMap);
 
  private:
-  friend struct detail::FriendDeleter<ExportedHistogram>;
-  ~ExportedHistogram() {}
-
   folly::Synchronized<folly::Histogram<int64_t>> m_histogram;
   const std::vector<double> m_exportPercentiles;
 };

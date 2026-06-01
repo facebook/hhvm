@@ -646,7 +646,6 @@ bool TypeConstraint::operator==(const TypeConstraint& o) const {
   if (isUnion()) {
     return m_u.union_ == o.m_u.union_;
   }
-
   auto& a = m_u.single;
   auto& b = o.m_u.single;
   return a.type == b.type && a.class_ == b.class_;
@@ -827,6 +826,7 @@ std::string show(TypeConstraintFlags flags) {
   bitName(res, flags, TypeConstraintFlags::DisplayNullable, "DisplayNullable");
   bitName(res, flags, TypeConstraintFlags::UpperBound, "UpperBound");
   bitName(res, flags, TypeConstraintFlags::Union, "Union");
+  bitName(res, flags, TypeConstraintFlags::Inherited, "Inherited");
   assertx(flags == TypeConstraintFlags::NoFlags
       || flags == TypeConstraintFlags::SingleTypeConstraint);
   return res;
@@ -1995,11 +1995,12 @@ void TypeConstraint::verifyReturnFail(tv_lval c, const Class* ctx,
   } else {
     msg =
       folly::format(
-        "Value returned from {}{} {}() must be {} {}, {} given",
+        "Value returned from {}{} {}() must be {}{} {}, {} given",
         func->isAsync() ? "async " : "",
         func->preClass() ? "method" : "function",
         func->fullName(),
-        isUpperBound() ? "upper-bounded by" : "of type",
+        isUpperBound() ? "upper-bounded by" : "of",
+        isInherited() ? " inherited type" : (isUpperBound() ? "" : " type"),
         name,
         givenType
       ).str();

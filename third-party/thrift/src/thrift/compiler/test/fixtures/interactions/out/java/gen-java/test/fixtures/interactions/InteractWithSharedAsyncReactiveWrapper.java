@@ -127,4 +127,5 @@ public class InteractWithSharedAsyncReactiveWrapper
     public SharedInteraction createSharedInteraction() {
         return new SharedInteractionImpl(_delegate.createSharedInteraction());
     }
+
 }

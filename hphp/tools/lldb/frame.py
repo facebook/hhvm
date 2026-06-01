@@ -35,7 +35,7 @@ class Frame:
     rip: str
     func: str
     file: typing.Optional[str] = None
-    line: typing.Optional[str] = None
+    line: typing.Optional[int] = None
 
 
 # ------------------------------------------------------------------------------
@@ -70,6 +70,7 @@ def is_jitted(ip: lldb.SBValue) -> bool:
         tc_base = tc_base.unsigned
         tc_end = tc_end.GetLoadAddress(ip.target)
 
+    # pyre-fixme[58]: tc_base is SBAddress in fallback path, comparable at runtime
     return ip.unsigned >= tc_base and ip.unsigned < tc_end
 
 
@@ -204,7 +205,6 @@ def create_php(
         )
 
     frame.file = php_filename(func, ar.target)
-    # pyre-fixme[8]: Attribute has type `Optional[str]`; used as `Optional[int]`.
     frame.line = php_line_number(func, pc)
 
     return frame

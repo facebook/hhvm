@@ -18,6 +18,8 @@
 #include <thrift/compiler/test/gen_testing.h>
 
 #include <gtest/gtest.h>
+#include <thrift/compiler/ast/t_const.h>
+#include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
 
@@ -32,44 +34,63 @@ TEST_F(ReferenceTypeTest, None) {
 }
 
 TEST_F(ReferenceTypeTest, CppRef) {
+  t_program program{"path/to/program.thrift", "/root/path/to/program.thrift"};
+  auto ref = gen::cpp_ref_builder(program);
   t_field tfield(t_primitive_type::t_string(), "my_string");
-  tfield.set_unstructured_annotation("cpp.ref", "");
+  tfield.add_structured_annotation(ref.unique());
   EXPECT_EQ(find_ref_type(tfield), reference_type::unique);
 }
 
 TEST_F(ReferenceTypeTest, Cpp2Ref) {
+  t_program program{"path/to/program.thrift", "/root/path/to/program.thrift"};
+  auto ref = gen::cpp_ref_builder(program);
   t_field tfield(t_primitive_type::t_string(), "my_string");
-  tfield.set_unstructured_annotation("cpp2.ref", "");
+  tfield.add_structured_annotation(ref.unique());
   EXPECT_EQ(find_ref_type(tfield), reference_type::unique);
 }
 
 TEST_F(ReferenceTypeTest, CppRefType_Unique) {
+  t_program program{"path/to/program.thrift", "/root/path/to/program.thrift"};
+  auto ref = gen::cpp_ref_builder(program);
   t_field tfield(t_primitive_type::t_string(), "my_string");
-  tfield.set_unstructured_annotation("cpp.ref_type", "unique");
+  tfield.add_structured_annotation(ref.unique());
   EXPECT_EQ(find_ref_type(tfield), reference_type::unique);
 }
 
 TEST_F(ReferenceTypeTest, CppRefType_Shared) {
+  t_program program{"path/to/program.thrift", "/root/path/to/program.thrift"};
+  auto ref = gen::cpp_ref_builder(program);
   t_field tfield(t_primitive_type::t_string(), "my_string");
-  tfield.set_unstructured_annotation("cpp.ref_type", "shared");
-  EXPECT_EQ(find_ref_type(tfield), reference_type::shared_mutable);
+  tfield.add_structured_annotation(ref.shared());
+  EXPECT_EQ(find_ref_type(tfield), reference_type::shared_const);
 }
 
 TEST_F(ReferenceTypeTest, CppRefType_SharedMutable) {
+  t_program program{"path/to/program.thrift", "/root/path/to/program.thrift"};
+  auto ref = gen::cpp_ref_builder(program);
   t_field tfield(t_primitive_type::t_string(), "my_string");
-  tfield.set_unstructured_annotation("cpp.ref_type", "shared_mutable");
+  tfield.add_structured_annotation(ref.shared_mutable());
   EXPECT_EQ(find_ref_type(tfield), reference_type::shared_mutable);
 }
 
 TEST_F(ReferenceTypeTest, CppRefType_SharedConst) {
+  t_program program{"path/to/program.thrift", "/root/path/to/program.thrift"};
+  auto ref = gen::cpp_ref_builder(program);
   t_field tfield(t_primitive_type::t_string(), "my_string");
-  tfield.set_unstructured_annotation("cpp.ref_type", "shared_const");
+  tfield.add_structured_annotation(ref.shared());
   EXPECT_EQ(find_ref_type(tfield), reference_type::shared_const);
 }
 
 TEST_F(ReferenceTypeTest, CppRefType_Unknown) {
+  t_program program{"path/to/program.thrift", "/root/path/to/program.thrift"};
+  auto ref = gen::cpp_ref_builder(program);
   t_field tfield(t_primitive_type::t_string(), "my_string");
-  tfield.set_unstructured_annotation("cpp.ref_type", "blah");
+  auto value = t_const_value::make_map();
+  value->add_map(
+      std::make_unique<t_const_value>("type"),
+      std::make_unique<t_const_value>(99));
+  tfield.add_structured_annotation(
+      std::make_unique<t_const>(&program, ref.type, "", std::move(value)));
   EXPECT_THROW(find_ref_type(tfield), std::runtime_error);
 }
 

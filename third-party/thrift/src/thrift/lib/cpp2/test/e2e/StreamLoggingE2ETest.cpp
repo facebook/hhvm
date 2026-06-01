@@ -338,6 +338,7 @@ CO_TEST_F(StreamLoggingE2ETest, PublisherStreamLogsSubscribeNextAndComplete) {
     EXPECT_GE(logging_->lastSummary.chunksGenerated, 5);
     EXPECT_EQ(
         logging_->lastSummary.endReason, detail::StreamEndReason::COMPLETE);
+    EXPECT_GT(logging_->lastSummary.totalBytes, 0);
   }
 }
 

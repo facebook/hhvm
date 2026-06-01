@@ -62,7 +62,7 @@ pub struct ContainerStruct {
     pub fieldD: ::std::vec::Vec<::std::primitive::i32>,
     pub fieldE: ::std::vec::Vec<::std::primitive::i32>,
     pub fieldF: ::sorted_vector_map::SortedVectorSet<::std::primitive::i32>,
-    pub fieldG: crate::types::map_i32_string_1261,
+    pub fieldG: ::sorted_vector_map::SortedVectorMap<::std::primitive::i32, ::std::string::String>,
     pub fieldH: included__types::SomeMap,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
@@ -492,6 +492,13 @@ impl ::fbthrift::ThriftEnum for has_bitwise_ops {
     fn inner_value(&self) -> i32 {
         self.0 as i32
     }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for has_bitwise_ops: {e}")
+        })
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -626,6 +633,13 @@ impl ::fbthrift::ThriftEnum for is_unscoped {
     fn inner_value(&self) -> i32 {
         self.0 as i32
     }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for is_unscoped: {e}")
+        })
+    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -753,6 +767,13 @@ impl ::fbthrift::ThriftEnum for MyForwardRefEnum {
     #[allow(clippy::unnecessary_cast)]
     fn inner_value(&self) -> i32 {
         self.0 as i32
+    }
+
+    #[allow(clippy::useless_conversion)]
+    fn from_inner_value(inner_value: i32) -> ::anyhow::Result<Self> {
+        inner_value.try_into().map(Self).map_err(|e| {
+            ::anyhow::anyhow!("Value {inner_value} is out of range for MyForwardRefEnum: {e}")
+        })
     }
 }
 
@@ -1189,7 +1210,7 @@ where
         crate::r#impl::rs_thrift_write(&self.fieldF, p);
         p.write_field_end();
         p.write_field_begin("fieldG", ::fbthrift::TType::Map, 7);
-        ::fbthrift::Serialize::rs_thrift_write(&self.fieldG, p);
+        crate::r#impl::rs_thrift_write(&self.fieldG, p);
         p.write_field_end();
         p.write_field_begin("fieldH", ::fbthrift::TType::Map, 8);
         ::fbthrift::Serialize::rs_thrift_write(&self.fieldH, p);
@@ -1265,7 +1286,7 @@ where
             }
             (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             if (fty, fid) == (::fbthrift::TType::Map, 7) {
-                output.fieldG = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldG", strct: "ContainerStruct"})?;
+                output.fieldG = ::anyhow::Context::context(crate::r#impl::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldG", strct: "ContainerStruct"})?;
                 p.read_field_end()?;
             } else {
                 break 'fastpath true;
@@ -1292,7 +1313,7 @@ where
                     (::fbthrift::TType::List, 4) => output.fieldD = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldD", strct: "ContainerStruct"})?,
                     (::fbthrift::TType::List, 5) => output.fieldE = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldE", strct: "ContainerStruct"})?,
                     (::fbthrift::TType::Set, 6) => output.fieldF = ::anyhow::Context::context(crate::r#impl::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldF", strct: "ContainerStruct"})?,
-                    (::fbthrift::TType::Map, 7) => output.fieldG = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldG", strct: "ContainerStruct"})?,
+                    (::fbthrift::TType::Map, 7) => output.fieldG = ::anyhow::Context::context(crate::r#impl::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldG", strct: "ContainerStruct"})?,
                     (::fbthrift::TType::Map, 8) => output.fieldH = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fieldH", strct: "ContainerStruct"})?,
                     (fty, _) => p.skip(fty)?,
                 }
@@ -1986,10 +2007,10 @@ impl ::std::default::Default for self::TrivialNestedWithDefault {
         Self {
             z: 4,
             n: crate::types::TrivialNumeric {
-                    a: 3,
-                    b: true,
-                    ..::std::default::Default::default()
-                },
+                a: 3,
+                b: true,
+                ..::std::default::Default::default()
+            },
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -2272,20 +2293,20 @@ impl ::std::default::Default for self::ComplexNestedWithDefault {
         Self {
             z: "4".to_owned(),
             n: crate::types::ComplexString {
-                    a: "3".to_owned(),
-                    b: {
-                        let mut map = ::std::collections::BTreeMap::new();
-                        {
-                            #[inline(never)]
-                            fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>) {
-                                map.insert("a".to_owned(), 3);
-                            }
-                            __do_insert(&mut map);
+                a: "3".to_owned(),
+                b: {
+                    let mut map = ::std::collections::BTreeMap::new();
+                    {
+                        #[inline(never)]
+                        fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>) {
+                            map.insert("a".to_owned(), 3);
                         }
-                        map
-                    },
-                    ..::std::default::Default::default()
+                        __do_insert(&mut map);
+                    }
+                    map
                 },
+                ..::std::default::Default::default()
+            },
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }

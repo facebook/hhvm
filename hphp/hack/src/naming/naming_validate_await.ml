@@ -224,7 +224,7 @@ let visitor =
     inherit [_] Aast.iter as super
 
     method! on_stmt on_error stmt =
-      let (stmt_pos, stmt_) = stmt in
+      let (_, stmt_) = stmt in
       match stmt_ with
       | Expr expr
       | Return (Some expr) ->
@@ -316,10 +316,8 @@ let visitor =
                            quickfixes = [];
                          }))
               | _ -> ())
-            | _ ->
-              failwith
-                ("Concurrent block contains a statement that is not an expression-statement. "
-                ^ Pos.string_no_file stmt_pos))
+            (* The rest is handled by parser *)
+            | _ -> ())
   end
 
 let validate_fun_def on_error elem = visitor#on_fun_def on_error elem

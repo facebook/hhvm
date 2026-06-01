@@ -25,7 +25,8 @@ void TccStructTraits<{{struct.cpp_fullname}}>::translateFieldName(
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<{{struct.cpp_fullname}}>;
-  static const st::translate_field_name_table table{
+  {{! For small structs, linear scan is faster than hash table lookup. Threshold of 12 determined by benchmarking. }}
+  static const {{#if (int.le? (array.len struct.fields) 12)}}st::translate_field_name_table{{#else}}st::translate_field_name_hash_table{{/if}} table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),

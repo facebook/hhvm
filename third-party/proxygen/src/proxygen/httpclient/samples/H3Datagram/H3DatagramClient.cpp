@@ -33,7 +33,7 @@ DEFINE_string(
     masque_template,
     "",
     "URI template for RFC 9298 CONNECT-UDP (e.g., "
-    "https://proxy:4443/masque?h={target_host}&p={target_port}). "
+    "https://proxy:4443/.well-known/masque/udp/{target_host}/{target_port}/). "
     "When set, uses RFC 9298 Extended CONNECT instead of legacy CONNECT-UDP.");
 
 constexpr size_t kMaxReadBufferSize{1232};

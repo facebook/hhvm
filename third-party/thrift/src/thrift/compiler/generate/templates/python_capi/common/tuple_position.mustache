@@ -19,9 +19,9 @@
   {{^struct:union?}}
   {{#struct:fields?}}
   static constexpr std::int16_t _fbthrift__{{struct:py_name}}__tuple_pos[{{struct:num_fields}}] = {
-    {{#each (array.enumerate struct:tuple_positions with_last=true) as |i tuple_index last?|}}{{!
-      }}{{tuple_index}}{{#if (not last?)}}, {{/if}}{{!
-    }}{{/each}}
+    {{#each struct:tuple_positions as |tuple_index| separator=", " ~}}
+      {{~ tuple_index ~}}
+    {{~ /each}}
   };
   {{/struct:fields?}}
   {{/struct:union?}}

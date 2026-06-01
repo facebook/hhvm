@@ -79,15 +79,15 @@ uint32_t JitLoader::PGOVasmBlockCountersMinEntryValueDefault() {
 }
 
 bool JitLoader::LayoutLiveSplitHotColdDefault() {
-  return arch::get() != Arch::ARM;
+  return !arch::any<arch::ARM>();
 }
 
 bool JitLoader::LayoutProfileSplitHotColdDefault() {
-  return arch::get() != Arch::ARM;
+  return !arch::any<arch::ARM>();
 }
 
 bool JitLoader::DynamicTCSectionsDefault() {
-  return arch::get() != Arch::ARM;
+  return !arch::any<arch::ARM>();
 }
 
 bool JitLoader::PGODefault() {

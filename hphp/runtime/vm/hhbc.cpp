@@ -974,11 +974,6 @@ static const char* ContCheckOp_names[] = {
 #undef CONT_CHECK_OP
 };
 
-static const char* IsLogAsDynamicCallOp_names[] = {
-#define IS_LOG_AS_DYNAMIC_CALL_OP(x) #x,
-  IS_LOG_AS_DYNAMIC_CALL_OPS
-#undef IS_LOG_AS_DYNAMIC_CALL_OP
-};
 
 static const char* SpecialClsRef_names[] = {
 #define REF(x) #x,
@@ -1074,8 +1069,6 @@ X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(SpecialClsRef,  static_cast<int>(SpecialClsRef::SelfCls))
 X(ClassGetCMode,  static_cast<int>(ClassGetCMode::Normal))
-X(IsLogAsDynamicCallOp,
-                  static_cast<int>(IsLogAsDynamicCallOp::LogAsDynamicCall))
 X(ReadonlyOp,     static_cast<int>(ReadonlyOp::Any))
 #undef X
 

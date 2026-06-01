@@ -1,3 +1,7 @@
+WARN: File "unknown_class.php--file2.php", line 8, characters 3-9:
+Value of type `dynamic` called as a function (Warn[12039])
+  File "unknown_class.php--file1.php", line 5, characters 16-19:
+  This expression has type `dynamic` because this is an internal symbol from module foo, which is opaque outside of the module.
 ERROR: File "unknown_class.php--file2.php", line 6, characters 14-15:
 Invalid argument (Typing[4110])
   File "unknown_class.php--file1.php", line 29, characters 21-24:

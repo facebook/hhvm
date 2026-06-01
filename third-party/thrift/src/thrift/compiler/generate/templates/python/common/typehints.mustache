@@ -22,7 +22,7 @@
 {{#let export partial typedef_container |type| captures |m_types|}}
   {{#pragma ignore-newlines}}
   {{#if python.generate_immutable_types?}}
-{{#if type.list?}}_typing.List
+{{#if type.list?}}_fbthrift_python_types.ImmutableList
 {{#else if type.set?}}_typing.Set
 {{#else if type.map?}}_typing.Dict{{/if type.list?}}
   {{#else}}
@@ -110,6 +110,46 @@ None
 {{#partial pep484_type_impl type=type unadapted=false}}
 {{/let partial}}
 
+{{! Like pep484_type_impl, but uses sequence_field_return, set_field_return,
+    and mapping_field_return for container types so that struct field
+    declarations use ImmutableList/ImmutableSet/ImmutableMap instead of
+    Sequence/AbstractSet/Mapping. }}
+{{#let partial pep484_field_return_type_impl |type unadapted| captures |m_common m_types unadapted_builtin|}}
+{{#pragma ignore-newlines}}
+  {{#if (and (not unadapted) type.has_adapter?)}}
+    {{#let adapter = type.adapter}}
+{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial pep484_field_return_type_impl type=type unadapted=true}}]{{/if}}
+  {{#else if type.void?}}
+None
+  {{#else if type.primitive?}}
+{{#partial unadapted_builtin type=type}}
+  {{#else if type.structured?}}
+{{#if type.need_module_path?}}{{type.module_mangle}}.{{/if}}
+{{#if (not (or type.need_module_path? type.true_type.has_adapter?))}}{{#partial m_common.private_alias_prefix}}{{/if}}
+{{#partial m_types.unadapted_name type=type.true_type}}
+  {{#else if type.list?}}
+{{#partial m_types.sequence_field_return}}[{{#partial pep484_field_return_type_impl type=type.true_type.elem_type unadapted=false}}]
+  {{#else if type.set?}}
+{{#partial m_types.set_field_return}}[{{#partial pep484_field_return_type_impl type=type.true_type.elem_type unadapted=false}}]
+  {{#else if type.map?}}
+{{#partial m_types.mapping_field_return}}[
+{{#partial pep484_field_return_type_impl type=type.true_type.key_type unadapted=false}}, {{!}}
+{{#partial pep484_field_return_type_impl type=type.true_type.val_type unadapted=false}}
+]
+  {{#else if type.enum?}}
+    {{#if type.need_module_path?}}
+{{type.module_mangle}}.
+    {{#else}}
+{{#partial m_common.private_alias_prefix}}
+    {{/if type.need_module_path?}}
+{{type.true_type.py_name}}
+  {{/if (and (not unadapted) type.has_adapter?)}}
+{{/let partial}}
+
+{{#let export partial pep484_field_return_type |type| captures |pep484_field_return_type_impl|}}
+{{#pragma ignore-newlines}}
+{{#partial pep484_field_return_type_impl type=type unadapted=false}}
+{{/let partial}}
 
 {{! Field-aware pep484 type: checks field-level @cpp.Type for IOBuf before
     delegating to the type-level pep484_type partial. }}

@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncSocketException.h>
@@ -40,7 +42,7 @@ class ConnectHandler : public folly::AsyncSocket::ConnectCallback,
       const uint16_t port,
       const uint32_t connect_timeout,
       const uint32_t ssl_timeout,
-      const uint32_t channel_timeout,
+      std::optional<uint32_t> channel_timeout,
       CLIENT_TYPE client_t,
       apache::thrift::protocol::PROTOCOL_TYPES proto,
       const std::string& endpoint);
@@ -58,7 +60,7 @@ class ConnectHandler : public folly::AsyncSocket::ConnectCallback,
   const uint16_t port_;
   const uint32_t connect_timeout_;
   const uint32_t ssl_timeout_;
-  const uint32_t channel_timeout_;
+  std::optional<uint32_t> channel_timeout_;
   CLIENT_TYPE client_t_;
   apache::thrift::protocol::PROTOCOL_TYPES proto_;
   std::string endpoint_;

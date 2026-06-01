@@ -85,7 +85,8 @@ class ConnectionManager : public folly::DelayedDestruction,
       folly::EventBase* eventBase,
       std::chrono::milliseconds idleTimeout,
       std::chrono::milliseconds connAgeTimeout,
-      Callback* callback = nullptr);
+      Callback* callback = nullptr,
+      bool detachOnConnectionAgeTimeout = true);
 
   /**
    * Add a connection to the set of connections managed by this
@@ -213,6 +214,10 @@ class ConnectionManager : public folly::DelayedDestruction,
 
   std::chrono::milliseconds getDefaultTimeout() const {
     return idleTimeout_;
+  }
+
+  bool getDetachOnConnectionAgeTimeout() const {
+    return detachOnConnectionAgeTimeout_;
   }
 
   std::chrono::milliseconds getIdleConnEarlyDropThreshold() const {
@@ -419,6 +424,15 @@ class ConnectionManager : public folly::DelayedDestruction,
    * time is less than idleConnEarlyDropThreshold_.
    */
   std::chrono::milliseconds idleConnEarlyDropThreshold_;
+
+  /**
+   * Whether to remove the connection from the ConnectionManager when the
+   * connection age timeout fires. When true (the default), the connection is
+   * removed before closeWhenIdle() is called. When false, the connection
+   * stays in the ConnectionManager so dropAllConnections() can still find it
+   * during shutdown.
+   */
+  bool detachOnConnectionAgeTimeout_{true};
 
   size_t idleConnections_{0};
 };

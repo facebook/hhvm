@@ -690,7 +690,9 @@ TEST(HTTPMessage, TestMoveCopy) {
   HTTPMessage m2;
   m2.setURL(std::string(32, 'b'));
   m2 = m1;
+  EXPECT_EQ(m2.getURL(), std::string(32, 'a'));
   m2 = std::move(m1);
+  EXPECT_EQ(m2.getURL(), std::string(32, 'a'));
 }
 
 namespace {

@@ -22,6 +22,10 @@ WARN: File "questionquestion.php", line 19, characters 12-21:
 This null coalesce will always evaluate to its right-hand side. (Warn[12023])
   File "questionquestion.php", line 19, characters 12-15:
   The expression on the left has type `null` which is always `null`.
+WARN: File "questionquestion.php", line 30, characters 5-6:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "questionquestion.php", line 29, characters 20-26:
+  This expression has type `dynamic`
 ERROR: File "questionquestion.php", line 30, characters 5-9:
 Indexing with `[]` is not supported in expression trees. (Parsing[1002])
 ERROR: File "questionquestion.php", line 30, characters 5-14:

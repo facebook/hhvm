@@ -983,6 +983,9 @@ let rec check_and_run_loop
       Exit.exit Exit_status.No_server_running_should_retry
     | Watchman.Watchman_restarted ->
       Exit.exit Exit_status.Watchman_fresh_instance
+    | InformantNotifier.Informant_edenfs_watcher_failed msg ->
+      Hh_logger.log "Informant Edenfs_watcher failed: %s. Exiting." msg;
+      Exit.exit Exit_status.Edenfs_watcher_failed
     | Exit_status.Exit_with _ as exn ->
       let e = Exception.wrap exn in
       Exception.reraise e

@@ -37,7 +37,7 @@ let get_error_list_json
           (List.exists error_list ~f:(fun error ->
                match error.severity with
                | Err -> true
-               | Warning -> false))
+               | Warning _ -> false))
       in
       ( List.map
           ~f:(fun e ->

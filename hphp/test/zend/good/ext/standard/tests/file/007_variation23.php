@@ -18,7 +18,7 @@
    and fclose function */
 <<__EntryPoint>> function main(): void {
 
-$string = b"abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
+$string = "abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
 $file = sys_get_temp_dir().'/'.'007_variation23.tmp';
 
 echo "*** Test fopen() & fclose() functions:  with 'xb' mode ***\n";

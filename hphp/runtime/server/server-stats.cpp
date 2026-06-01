@@ -817,11 +817,12 @@ void server_stats_log_mutex(const std::string& stack, int64_t elapsed_us) {
 
 namespace {
 ServiceData::ExpensiveCounterCallback s_counters(
-  [](std::map<std::string, int64_t>& counters) {
+  [](ServiceData::CounterMap& counters) {
     const auto stats =
       ServerStats::Report(Cfg::Stats::TrackedKeys, "admin.server_stats");
     counters.insert(begin(stats), end(stats));
-  }
+  },
+  "admin.server_stats."
 );
 }
 

@@ -37,22 +37,22 @@ int PhysReg::getNumSIMD() {
 }
 
 std::string show(PhysReg r) {
-  switch (arch::get()) {
-    case Arch::X64:
+  return ARCH_MATCH(
+    [&](arch::X64) {
       return r.type() == PhysReg::GP   ? reg::regname(Reg64(r)) :
              r.type() == PhysReg::SIMD ? reg::regname(RegXMM(r)) :
           /* r.type() == PhysReg::SF)  ? */ reg::regname(RegSF(r));
-
-    case Arch::ARM:
-      if (r.isSF()) return "SF";
+    },
+    [&](arch::ARM) {
+      if (r.isSF()) return std::string("SF");
 
       return folly::to<std::string>(
         r.isGP() ? (vixl::Register(r).size() == vixl::kXRegSize ? 'x' : 'w')
                  : (vixl::VRegister(r).size() == vixl::kSRegSize ? 's' : 'd'),
         ((vixl::CPURegister)r).code()
       );
-  }
-  not_reached();
+    }
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

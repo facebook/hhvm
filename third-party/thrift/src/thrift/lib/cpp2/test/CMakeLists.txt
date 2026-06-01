@@ -74,10 +74,11 @@ add_executable(ProtocolBench
   ${ADDITIONAL_SOURCE_FILES}
   ${GENERATED_THRIFT_SOURCES}
 )
+find_package(benchmark CONFIG REQUIRED)
 target_link_libraries(ProtocolBench
   thriftcpp2
   Folly::folly
-  Folly::follybenchmark
+  benchmark::benchmark
 )
 
 install(

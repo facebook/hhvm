@@ -211,6 +211,7 @@ StringData* loadClsTypeCnsClsNameHelper(const Class* cls,
                                         const StringData* name);
 
 void raiseCoeffectsCallViolationHelper(const Func*, uint64_t, uint64_t);
+void checkFunNamedArgsMismatch(const Func*, const ArrayData*);
 
 [[noreturn]] void throwOOBException(TypedValue base, TypedValue key);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);

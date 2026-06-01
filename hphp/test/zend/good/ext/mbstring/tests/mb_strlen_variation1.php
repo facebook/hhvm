@@ -12,7 +12,7 @@
 class classA
 {
   public function __toString() :mixed{
-    return b"Class A object";
+    return "Class A object";
   }
 }
 <<__EntryPoint>> function main(): void {
@@ -23,7 +23,7 @@ $encoding = 'utf-8';
 
 
 // heredoc string
-$heredoc = b<<<EOT
+$heredoc = <<<EOT
 hello world
 EOT;
 
@@ -34,8 +34,8 @@ $inputs = vec[
        '',
 
        // string data
-/*18*/ b"string",
-       b'string',
+/*18*/ "string",
+       'string',
        $heredoc,
 ];
 

@@ -370,7 +370,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -383,7 +383,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       $this->MyStringField = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['MyStringField']);
     }
     if (idx($parsed, 'MyDataField') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyDataItem>($parsed['MyDataField']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyDataItem>($parsed['MyDataField']));
       $_tmp1 = \test\fixtures\basic\MyDataItem::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->MyDataField = $_tmp1;
@@ -603,7 +603,7 @@ class Containers implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -716,7 +716,7 @@ class MyDataItem implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1022,7 +1022,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 
   public function readFromJson(string $jsonText): void {
     $this->_type = \test\fixtures\basic\MyUnionEnum::_EMPTY_;
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1033,14 +1033,14 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       $this->_type = \test\fixtures\basic\MyUnionEnum::myEnum;
     }
     if (idx($parsed, 'myStruct') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyStruct>($parsed['myStruct']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyStruct>($parsed['myStruct']));
       $_tmp1 = \test\fixtures\basic\MyStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->myStruct = $_tmp1;
       $this->_type = \test\fixtures\basic\MyUnionEnum::myStruct;
     }
     if (idx($parsed, 'myDataItem') !== null) {
-      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyDataItem>($parsed['myDataItem']));
+      $_tmp2 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyDataItem>($parsed['myDataItem']));
       $_tmp3 = \test\fixtures\basic\MyDataItem::withDefaultValues();
       $_tmp3->readFromJson($_tmp2);
       $this->myDataItem = $_tmp3;
@@ -1214,7 +1214,7 @@ class MyException extends \TException implements \IThriftSyncStruct, \IThriftExc
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1227,13 +1227,13 @@ class MyException extends \TException implements \IThriftSyncStruct, \IThriftExc
       $this->MyStringField = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['MyStringField']);
     }
     if (idx($parsed, 'myStruct') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyStruct>($parsed['myStruct']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyStruct>($parsed['myStruct']));
       $_tmp1 = \test\fixtures\basic\MyStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->myStruct = $_tmp1;
     }
     if (idx($parsed, 'myUnion') !== null) {
-      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyUnion>($parsed['myUnion']));
+      $_tmp2 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyUnion>($parsed['myUnion']));
       $_tmp3 = \test\fixtures\basic\MyUnion::withDefaultValues();
       $_tmp3->readFromJson($_tmp2);
       $this->myUnion = $_tmp3;
@@ -1417,7 +1417,7 @@ class MyExceptionWithMessage extends \TException implements \IThriftSyncStruct, 
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1430,13 +1430,13 @@ class MyExceptionWithMessage extends \TException implements \IThriftSyncStruct, 
       $this->MyStringField = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['MyStringField']);
     }
     if (idx($parsed, 'myStruct') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyStruct>($parsed['myStruct']));
+      $_tmp0 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyStruct>($parsed['myStruct']));
       $_tmp1 = \test\fixtures\basic\MyStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->myStruct = $_tmp1;
     }
     if (idx($parsed, 'myUnion') !== null) {
-      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyUnion>($parsed['myUnion']));
+      $_tmp2 = \fb_json_encode_force_php_arrays(HH\FIXME\UNSAFE_CAST<mixed, \test\fixtures\basic\MyUnion>($parsed['myUnion']));
       $_tmp3 = \test\fixtures\basic\MyUnion::withDefaultValues();
       $_tmp3->readFromJson($_tmp2);
       $this->myUnion = $_tmp3;
@@ -1558,7 +1558,7 @@ class MyRenamedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   }
 
   public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
@@ -1740,7 +1740,7 @@ class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
 
   public function readFromJson(string $jsonText): void {
     $this->_type = \test\fixtures\basic\UnionToBeRenamedEnum::_EMPTY_;
-    $parsed = json_decode($jsonText, true);
+    $parsed = PHP\json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");

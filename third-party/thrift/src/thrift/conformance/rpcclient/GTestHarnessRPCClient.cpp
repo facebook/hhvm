@@ -21,6 +21,14 @@
 #include <stdexcept>
 #include <string_view>
 
+// Sanitizers add 2-5x overhead to startup; use a longer timeout to avoid flakes
+#if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__) || \
+    __has_feature(thread_sanitizer) || defined(__SANITIZE_THREAD__)
+constexpr auto kClientTimeout = std::chrono::seconds(60);
+#else
+constexpr auto kClientTimeout = std::chrono::seconds(10);
+#endif
+
 #include <fmt/core.h>
 #include <folly/Subprocess.h>
 #include <folly/coro/AsyncGenerator.h>
@@ -585,8 +593,7 @@ class RPCClientConformanceTest : public testing::Test {
   void TearDown() override {
     if (!connectViaServer_ && clientProcess_.returnCode().running()) {
       clientProcess_.sendSignal(SIGINT);
-      clientProcess_.waitOrTerminateOrKill(
-          std::chrono::seconds(10), std::chrono::seconds(10));
+      clientProcess_.waitOrTerminateOrKill(kClientTimeout, kClientTimeout);
     }
   }
 
@@ -608,8 +615,7 @@ class RPCClientConformanceTest : public testing::Test {
   }
   testing::AssertionResult runTest() {
     try { // Wait for client to fetch test case
-      bool getTestReceived =
-          handler_->getTestReceived().wait(std::chrono::seconds(10));
+      bool getTestReceived = handler_->getTestReceived().wait(kClientTimeout);
 
       // End test if client was unable to fetch test case
       if (!getTestReceived) {
@@ -619,8 +625,7 @@ class RPCClientConformanceTest : public testing::Test {
 
       // Wait for result from client, polling subprocess health
       auto resultFuture = handler_->clientResult();
-      auto deadline =
-          std::chrono::steady_clock::now() + std::chrono::seconds(10);
+      auto deadline = std::chrono::steady_clock::now() + kClientTimeout;
       while (!resultFuture.isReady() &&
              std::chrono::steady_clock::now() < deadline) {
         if (!connectViaServer_) {

@@ -24,7 +24,7 @@
 #include <folly/Overload.h>
 #include <folly/lang/Assume.h>
 
-THRIFT_FLAG_DEFINE_bool(cpucc_enable_ema_load_smoothing, false);
+THRIFT_FLAG_DEFINE_bool(cpucc_enable_ema_load_smoothing, true);
 
 namespace apache::thrift {
 
@@ -133,8 +133,9 @@ void CPUConcurrencyController::cycleOnce() {
     // the raw reading.
     auto alpha = std::clamp(config->cpuLoadSmoothingCoeff, 0.0, 1.0);
     if (smoothedLoad_ < 0) {
-      // First sample: seed the EMA directly.
-      smoothedLoad_ = rawLoad;
+      // First sample: seed the EMA at zero so it ramps up to real load. This
+      // prevents using a CPU spike as the first sample.
+      smoothedLoad_ = 0;
     } else {
       smoothedLoad_ = alpha * rawLoad + (1.0 - alpha) * smoothedLoad_;
     }

@@ -15,33 +15,44 @@
   limitations under the License.
 
 }}
+{{! Serialize a function parameter, applying type-level adapter conversion
+    if needed. See type_adapter_read in lib/errors.mustache for why the `type:`
+    prototype qualifier is used here. }}
+  {{#let partial type_adapter_write_param |param| captures |types|}}
+{{#pragma ignore-newlines}}
+  {{#if param.type.type:has_adapter?}}
+::fbthrift::Serialize::rs_thrift_write(&{{param.type.type:adapter_qualified}}::to_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(&self.{{param.rust_name}}, {{param.id}}), p)
+  {{#else}}
+{{#partial types.write type=param.type}}(&self.{{param.rust_name}}, p)
+  {{/if param.type.type:has_adapter?}}
+  {{/let partial}}
+  {{#let service_extends = (if interface.interaction? null interface.extends)}}
 {{> lib/client_trait}}
 
-/// Client definitions for `{{service:rust_name}}`.
-pub struct {{service:rust_name}}Impl<P, T, S = ::fbthrift::NoopSpawner> {
-    {{#if service:interaction?}}
+/// Client definitions for `{{interface.rust_name}}`.
+pub struct {{interface.rust_name}}Impl<P, T, S = ::fbthrift::NoopSpawner> {
+  {{#if interface.interaction?}}
     #[allow(dead_code)]
-    names: &'static {{service:rust_name}}Names,
-    {{/if service:interaction?}}
-    {{#service:extends}}
-    parent: {{service:client_package}}::{{service:rust_name}}Impl<P, T, S>,
-    {{/service:extends}}
-    {{^service:extends}}
+    names: &'static {{interface.rust_name}}Names,
+  {{/if interface.interaction?}}
+  {{#if (object.notnull? service_extends)}}
+    parent: {{service_extends.client_package}}::{{service_extends.rust_name}}Impl<P, T, S>,
+  {{#else}}
     transport: T,
     _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
-    {{/service:extends}}
+  {{/if (object.notnull? service_extends)}}
 }
 
-{{#if service:interaction?}}
-pub struct {{service:rust_name}}Names {
+  {{#if interface.interaction?}}
+pub struct {{interface.rust_name}}Names {
     pub service: &'static ::std::ffi::CStr,
-    {{#service:functions}}
-    pub method_{{function:name}}: &'static ::std::ffi::CStr,
-    {{/service:functions}}
+    {{#each interface.functions as |function|}}
+    pub method_{{function.name}}: &'static ::std::ffi::CStr,
+    {{/each}}
 }
-{{/if service:interaction?}}
+  {{/if interface.interaction?}}
 
-impl<P, T, S> {{service:rust_name}}Impl<P, T, S>
+impl<P, T, S> {{interface.rust_name}}Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -53,21 +64,21 @@ where
 {
     pub fn new(
         transport: T,
-        {{#if service:interaction?}}
-        names: &'static {{service:rust_name}}Names,
-        {{/if service:interaction?}}
+      {{#if interface.interaction?}}
+        names: &'static {{interface.rust_name}}Names,
+      {{/if interface.interaction?}}
     ) -> Self {
         Self {
-            {{#if service:interaction?}}
+          {{#if interface.interaction?}}
             names,
-            {{/if service:interaction?}}
-            {{#service:extends}}
-            parent: {{service:client_package}}::{{service:rust_name}}Impl::<P, T, S>::new(transport),
-            {{/service:extends}}
-            {{^service:extends}}
             transport,
             _phantom: ::std::marker::PhantomData,
-            {{/service:extends}}
+          {{#else if (object.notnull? service_extends)}}
+            parent: {{service_extends.client_package}}::{{service_extends.rust_name}}Impl::<P, T, S>::new(transport),
+          {{#else}}
+            transport,
+            _phantom: ::std::marker::PhantomData,
+          {{/if interface.interaction?}}
         }
     }
 
@@ -75,103 +86,98 @@ where
         ::fbthrift::help::GetTransport::transport(self)
     }
 
-    {{#let parent_service_name = service:name}}
-    {{#service:interactions}}
-    const NAMES_{{service:rust_name}}: {{service:client_package}}::{{service:rust_name}}Names = {{service:client_package}}::{{service:rust_name}}Names {
-        service: c"{{parent_service_name}}",
-        {{#service:functions}}
-        method_{{function:name}}: c"{{parent_service_name}}.{{service:name}}.{{function:name}}",
-        {{/service:functions}}
+  {{#if (not interface.interaction?)}}
+    {{#each interface.interactions as |interaction|}}
+    const NAMES_{{interaction.rust_name}}: {{interaction.client_package}}::{{interaction.rust_name}}Names = {{interaction.client_package}}::{{interaction.rust_name}}Names {
+        service: c"{{interface.name}}",
+        {{#each interaction.functions as |function|}}
+        method_{{function.name}}: c"{{interface.name}}.{{interaction.name}}.{{function.name}}",
+        {{/each}}
     };
-    {{/service:interactions}}
+    {{/each}}
+  {{/if (not interface.interaction?)}}
 
-    {{#service:functions}}
-    {{#if (not function:starts_interaction?)}}
+    {{#each interface.functions as |function|}}
+    {{#if (not function.starts_interaction?)}}
 
-    fn _{{function:name}}_impl(
-        &self,{{!
-        }}{{#function:args}}
-        arg_{{field:name}}: {{#partial rpc.arg field=field:self}},{{!
-        }}{{/function:args}}
+    fn _{{function.name}}_impl(
+        &self,
+      {{#each function.params.fields as |param|}}
+        arg_{{param.name}}: {{#partial rpc.arg field=param}},
+      {{/each}}
         rpc_options: T::RpcOptions,
-    ) -> {{#partial rpc.client_return_type function=function:self service=service:self}} {
+    ) -> {{#partial rpc.client_return_type function=function service=interface}} {
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
-        {{#if function:bidirectional_stream?}}
+        {{#if function.bidirectional_stream?}}
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
         use ::futures::TryFutureExt as _;
-        {{/if function:bidirectional_stream?}}
-        {{#if (not function:bidirectional_stream?)}}{{#if function:stream?}}
+        {{#else if function.stream?}}
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
-        {{/if function:stream?}}{{/if (not function:bidirectional_stream?)}}
-        {{#if function:sink?}}{{#if (not function:bidirectional_stream?)}}
+        {{#else if function.sink?}}
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
         use ::futures::TryFutureExt as _;
-        {{/if (not function:bidirectional_stream?)}}{{/if function:sink?}}
+        {{/if function.bidirectional_stream?}}
 
-        let service_name = {{!
-            }}{{#if (not service:interaction?)}}c"{{service:name}}"{{#else}}self.names.service{{/if (not service:interaction?)}}{{!
-        }};
-        let service_method_name = {{!
-            }}{{#if (not service:interaction?)}}c"{{service:name}}.{{function:name}}"{{#else}}self.names.method_{{function:name}}{{/if (not service:interaction?)}}{{!
-        }};
+        let service_name = {{#if interface.interaction?}}self.names.service{{#else}}c"{{interface.name}}"{{/if}};
+        let service_method_name = {{#if interface.interaction?}}self.names.method_{{function.name}}{{#else}}c"{{interface.name}}.{{function.name}}"{{/if}};
 
-        {{#if function:creates_interaction?}}
-        const INTERACTION_NAME: &::std::ffi::CStr = c"{{function:interaction_name}}";
-        {{/if function:creates_interaction?}}
-        let args = self::Args_{{service:rust_name}}_{{function:name}} {
-            {{#function:args}}
-            {{field:rust_name}}: arg_{{field:name}},
-            {{/function:args}}
+        {{#if function.creates_interaction?}}
+        const INTERACTION_NAME: &::std::ffi::CStr = c"{{function.interaction_name}}";
+        {{/if function.creates_interaction?}}
+        let args = self::Args_{{interface.rust_name}}_{{function.name}} {
+        {{#each function.params.fields as |param|}}
+            {{param.rust_name}}: arg_{{param.name}},
+        {{/each}}
             _phantom: ::std::marker::PhantomData,
         };
 
-        {{#if function:creates_interaction?}}
+        {{#if function.creates_interaction?}}
         let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME) {
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
-        let interaction_impl = {{program:crate}}::{{function:interaction_name}}Impl::<P, T, S>::new(interaction_transport, &Self::NAMES_{{function:interaction_name}});
+        let interaction_impl = {{program.crate}}::{{function.interaction_name}}Impl::<P, T, S>::new(interaction_transport, &Self::NAMES_{{function.interaction_name}});
         let transport = interaction_impl.transport();
         {{#else}}
         let transport = self.transport();
-        {{/if function:creates_interaction?}}
+        {{/if function.creates_interaction?}}
 
         // need to do call setup outside of async block because T: Transport isn't Send
-        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("{{#if service:interaction?}}{{service:name}}.{{/if service:interaction?}}{{function:name}}", &args) {
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("{{#if interface.interaction?}}{{interface.name}}.{{/if}}{{function.name}}", &args) {
             ::std::result::Result::Ok(res) => res,
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
 
-        {{#if function:bidirectional_stream?}}
+        {{#if function.bidirectional_stream?}}
         let call_bidirectional = transport
             .call_bidirectional(service_name, service_method_name, request_env, rpc_options)
-            .instrument(::tracing::trace_span!("call_bidirectional", method = "{{service:name}}.{{function:name}}"));
-        {{/if function:bidirectional_stream?}}{{#if (not function:bidirectional_stream?)}}{{#if function:stream?}}
+            .instrument(::tracing::trace_span!("call_bidirectional", method = "{{interface.name}}.{{function.name}}"));
+        {{#else if function.stream?}}
         let call_stream = transport
             .call_stream(service_name, service_method_name, request_env, rpc_options)
-            .instrument(::tracing::trace_span!("call_stream", method = "{{service:name}}.{{function:name}}"));
-        {{/if function:stream?}}{{/if (not function:bidirectional_stream?)}}{{#if function:sink?}}{{#if (not function:bidirectional_stream?)}}
+            .instrument(::tracing::trace_span!("call_stream", method = "{{interface.name}}.{{function.name}}"));
+        {{#else if function.sink?}}
         let call_sink = transport
             .call_sink(service_name, service_method_name, request_env, rpc_options)
-            .instrument(::tracing::trace_span!("call_sink", method = "{{service:name}}.{{function:name}}"));
-        {{/if (not function:bidirectional_stream?)}}{{/if function:sink?}}{{#if (not function:sink?)}}{{#if (not function:stream?)}}
+            .instrument(::tracing::trace_span!("call_sink", method = "{{interface.name}}.{{function.name}}"));
+        {{#else}}
         let call = transport
             .call(service_name, service_method_name, request_env, rpc_options)
-            .instrument(::tracing::trace_span!("call", method = "{{service:name}}.{{function:name}}"));
-        {{/if (not function:stream?)}}{{/if (not function:sink?)}}
+            .instrument(::tracing::trace_span!("call", method = "{{interface.name}}.{{function.name}}"));
+        {{/if function.bidirectional_stream?}}
 
         async move {
-            {{#if function:bidirectional_stream?}}{{!
+        {{#if function.bidirectional_stream?}}{{!
 
             ******************************
             *** BIDIRECTIONAL BODY ******
             ******************************
 
-            }}
+        }}
             let ::fbthrift::BidiReply {
                 initial_response: _initial_response,
                 stream,
@@ -180,29 +186,29 @@ where
 
             // Deserialize the initial response (should be empty for bidirectional)
             let de = P::deserializer(_initial_response);
-            let _initial_result = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Reader, S>(de).await??;
+            let _initial_result = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}Reader, S>(de).await??;
 
             // Process the server-to-client stream
             let server_stream = stream.then(|item_res| {
                 async move {
                     match item_res {
                         ::std::result::Result::Err(err) =>
-                            ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError::from(err)),
+                            ::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}StreamError::from(err)),
                         ::std::result::Result::Ok(item_enc) => {
                             S::spawn(move || {
                                 match item_enc {
                                     ::fbthrift::ClientStreamElement::Reply(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        <{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                        <{{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}StreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                     ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
                                         let mut de = P::deserializer(payload);
                                         let aexn = ::fbthrift::ApplicationException::rs_thrift_read(&mut de)?;
-                                        ::std::result::Result::Ok(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError::ApplicationException(aexn)))
+                                        ::std::result::Result::Ok(::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}StreamError::ApplicationException(aexn)))
                                     }
                                     ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        <{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                        <{{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}StreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
@@ -214,29 +220,29 @@ where
 
             // Create the sink handler that accepts client stream and sends to server
             let sink_helper_fn = move |stream: ::futures::stream::BoxStream<'static, ::std::result::Result<
-                {{#partial types.type_name type=function:sink.elem_type}},
-                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError
+                {{#partial types.type_name type=function.sink.elem_type}},
+                {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError
             >>| {
                 let new_stream = stream.map(|item| {
                     match item {
                         ::std::result::Result::Ok(res) => {
-                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Ok(res), "{{#if service:interaction?}}{{service:name}}.{{/if service:interaction?}}{{function:name}}");
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>(::std::result::Result::Ok(res), "{{#if interface.interaction?}}{{interface.name}}.{{/if}}{{function.name}}");
                             ::fbthrift::ClientStreamElement::Reply(enc)
                         }
-                        ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ApplicationException(aexn)) => {
-                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ApplicationException(aexn)), "{{#if service:interaction?}}{{service:name}}.{{/if service:interaction?}}{{function:name}}");
+                        ::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError::ApplicationException(aexn)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>(::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError::ApplicationException(aexn)), "{{#if interface.interaction?}}{{interface.name}}.{{/if}}{{function.name}}");
                             ::fbthrift::ClientStreamElement::ApplicationEx(enc)
                         }
-                        ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ThriftError(err)) => {
-                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ThriftError(err)), "{{#if service:interaction?}}{{service:name}}.{{/if service:interaction?}}{{function:name}}");
+                        ::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError::ThriftError(err)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>(::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError::ThriftError(err)), "{{#if interface.interaction?}}{{interface.name}}.{{/if}}{{function.name}}");
                             ::fbthrift::ClientStreamElement::ApplicationEx(enc)
                         }
-                        {{#if (not (array.empty? function:sink.exceptions))}}
+          {{#if (not (array.empty? function.sink.exceptions))}}
                         ::std::result::Result::Err(other_err) => {
-                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err(other_err), "{{#if service:interaction?}}{{service:name}}.{{/if service:interaction?}}{{function:name}}");
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>(::std::result::Result::Err(other_err), "{{#if interface.interaction?}}{{interface.name}}.{{/if}}{{function.name}}");
                             ::fbthrift::ClientStreamElement::DeclaredEx(enc)
                         }
-                        {{/if (not (array.empty? function:sink.exceptions))}}
+          {{/if (not (array.empty? function.sink.exceptions))}}
                     }
                 }).boxed();
                 let sinker = sink_processor;
@@ -247,36 +253,36 @@ where
                 }.boxed()
             };
 
-            let res = ::std::result::Result::Ok((server_stream, Box::new(sink_helper_fn) as Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<{{#partial types.type_name type=function:sink.elem_type}}, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>> + ::std::marker::Send>));
-            {{/if function:bidirectional_stream?}}{{#if (not function:bidirectional_stream?)}}{{#if function:stream?}}{{!
+            let res = ::std::result::Result::Ok((server_stream, Box::new(sink_helper_fn) as Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<{{#partial types.type_name type=function.sink.elem_type}}, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>> + ::std::marker::Send>));
+        {{#else if function.stream?}}{{!
 
             ******************************
             ******* STREAMING BODY *******
             ******************************
 
-            }}
+        }}
             let (initial, stream) = call_stream.await?;
 
             let new_stream = stream.then(|item_res| {
                 async move {
                     match item_res {
                         ::std::result::Result::Err(err) =>
-                            ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError::from(err)),
+                            ::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}StreamError::from(err)),
                         ::std::result::Result::Ok(item_enc) => {
                             S::spawn(move || {
                                 match item_enc {
                                     ::fbthrift::ClientStreamElement::Reply(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        <{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                        <{{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}StreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                     ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
                                         let mut de = P::deserializer(payload);
                                         let aexn = ::fbthrift::ApplicationException::rs_thrift_read(&mut de)?;
-                                        ::std::result::Result::Ok(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError::ApplicationException(aexn)))
+                                        ::std::result::Result::Ok(::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}StreamError::ApplicationException(aexn)))
                                     }
                                     ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
                                         let mut de = P::deserializer(payload);
-                                        <{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                        <{{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}StreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
@@ -287,62 +293,60 @@ where
             .boxed();
 
             let de = P::deserializer(initial);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Reader, S>(de)
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}Reader, S>(de)
                 .await??
-                .map({{!
-                    }}{{#if function:stream_has_first_response?}}move |initial| (initial, new_stream){{#else}}move |_| new_stream{{/if function:stream_has_first_response?}}{{!
-                }});
-            {{/if function:stream?}}{{/if (not function:bidirectional_stream?)}}{{#if function:sink?}}{{#if (not function:bidirectional_stream?)}}{{!
+                .map(move {{#if function.stream_has_first_response?}}|initial| (initial, new_stream){{#else}}|_| new_stream{{/if}});
+        {{#else if function.sink?}}{{!
 
             ******************************
             **** SINK BODY ****
             ******************************
 
-            }}
+        }}
             let ::fbthrift::SinkReply {
                 initial_response: _initial_response,
                 sink_processor,
             } = call_sink.await?;
 
-            {{#if function:sink_has_first_response?}}
+          {{#if function.sink_has_first_response?}}
             let de = P::deserializer(_initial_response);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Reader, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}Reader, S>(de).await?;
 
             let initial_response = match res {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
-                    ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ApplicationException(aexn))
+                    ::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}Error::ApplicationException(aexn))
                 }
             }?;
-            {{#else}}
+          {{#else}}
             let initial_response = ();
-            {{/if function:sink_has_first_response?}}
+          {{/if function.sink_has_first_response?}}
 
             let sink_helper_fn = move |stream: ::futures::stream::BoxStream<'static, ::std::result::Result<
-                {{#partial types.type_name type=function:sink.elem_type}},
-                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError
+                {{#partial types.type_name type=function.sink.elem_type}},
+                {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError
             >>| {
                 {{!TODO (seanlawlor): This decoding should be done on the blocking thread, not the IO thread. }}
                 let new_stream = stream.map(|item| {
                     match item {
                         ::std::result::Result::Ok(res) => {
-                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Ok(res), "{{#if service:interaction?}}{{service:name}}.{{/if service:interaction?}}{{function:name}}");
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>(::std::result::Result::Ok(res), "{{#if interface.interaction?}}{{interface.name}}.{{/if}}{{function.name}}");
                             ::fbthrift::ClientStreamElement::Reply(enc)
                         }
-                        ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ApplicationException(aexn)) => {
-                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ApplicationException(aexn)), "{{#if service:interaction?}}{{service:name}}.{{/if service:interaction?}}{{function:name}}");
+                        ::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError::ApplicationException(aexn)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>(::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError::ApplicationException(aexn)), "{{#if interface.interaction?}}{{interface.name}}.{{/if}}{{function.name}}");
                             ::fbthrift::ClientStreamElement::ApplicationEx(enc)
                         }
-                        ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ThriftError(err)) => {
-                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ThriftError(err)), "{{#if service:interaction?}}{{service:name}}.{{/if service:interaction?}}{{function:name}}");
+                        ::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError::ThriftError(err)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>(::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError::ThriftError(err)), "{{#if interface.interaction?}}{{interface.name}}.{{/if}}{{function.name}}");
                             ::fbthrift::ClientStreamElement::ApplicationEx(enc)
                         }
-                        {{#if (not (array.empty? function:sink.exceptions))}}
+                        {{#if (not (array.empty? function.sink.exceptions))}}
                         ::std::result::Result::Err(other_err) => {
-                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err(other_err), "{{#if service:interaction?}}{{service:name}}.{{/if service:interaction?}}{{function:name}}");
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError>(::std::result::Result::Err(other_err), "{{#if interface.interaction?}}{{interface.name}}.{{/if}}{{function.name}}");
                             ::fbthrift::ClientStreamElement::DeclaredEx(enc)
                         }
-                        {{/if (not (array.empty? function:sink.exceptions))}}
+                        {{/if (not (array.empty? function.sink.exceptions))}}
                     }
                 }).boxed();
                 let sinker = sink_processor;
@@ -350,87 +354,80 @@ where
                     let payload = (sinker)(new_stream).await?;
                     S::spawn(move || {
                         let mut de = P::deserializer(payload);
-                        <{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkFinalReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                        <{{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkFinalReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                     }).await.map_err(::anyhow::Error::from)??
                 }.boxed()
             };
 
             let res = Ok(::fbthrift::SinkResult::<
-                {{#if function:sink_has_first_response?}}{{#partial types.type_name type=function:self.return_type}}{{#else}}(){{/if}},
-                {{#partial types.type_name type=function:sink.elem_type}},
-                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError,
-                {{#partial types.type_name type=function:sink.final_response_type}},
-                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkFinalError,
+                {{#if function.sink_has_first_response?}}{{#partial types.type_name type=function.return_type}}{{#else}}(){{/if}},
+                {{#partial types.type_name type=function.sink.elem_type}},
+                {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkError,
+                {{#partial types.type_name type=function.sink.final_response_type}},
+                {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}SinkFinalError,
             > {
                 initial_response,
                 sink: Box::new(sink_helper_fn),
             });
-            {{/if (not function:bidirectional_stream?)}}{{/if function:sink?}}{{#if (not function:sink?)}}{{#if (not function:stream?)}}{{!
+        {{#else}}{{!
 
             ******************************
             **** SINGLE RESPONSE BODY ****
             ******************************
 
-            }}
+        }}
             let reply_env = call.await?;
 
             let de = P::deserializer(reply_env);
-            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Reader, S>(de).await?;
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}Reader, S>(de).await?;
 
             let res = match res {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(aexn) => {
-                    ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ApplicationException(aexn))
+                    ::std::result::Result::Err({{program.crate}}::errors::{{interface.snake}}::{{function.upcamel}}Error::ApplicationException(aexn))
                 }
             };
-            {{/if (not function:stream?)}}{{/if (not function:sink?)}}
-            {{#function:return_type}}{{#if function:creates_interaction?}}{{!
+        {{/if function.bidirectional_stream?}}
+        {{#if function.creates_interaction?}}{{!
 
             ***********************************
             **** Add interaction to result ****
             ***********************************
 
-            }}
-            let interaction_client: {{program:crate}}::client::{{function:interaction_name}}Client = ::std::sync::Arc::new(interaction_impl);
-            {{#if function:stream?}}
+        }}
+            let interaction_client: {{program.crate}}::client::{{function.interaction_name}}Client = ::std::sync::Arc::new(interaction_impl);
+          {{#if function.stream?}}
             ::std::result::Result::Ok((interaction_client, res?))
-            {{#else}}
-            {{#if type:void?}}
+          {{#else if function.return_type.void?}}
             res?;
             ::std::result::Result::Ok(interaction_client)
-            {{#else}}
+          {{#else}}
             ::std::result::Result::Ok((interaction_client, res?))
-            {{/if type:void?}}{{/if function:stream?}}{{!
-            }}{{#else}}
+          {{/if function.stream?}}
+        {{#else}}
             res
-            {{/if function:creates_interaction?}}{{/function:return_type}}
+        {{/if function.creates_interaction?}}
         }
-        .instrument(::tracing::info_span!("stream", method = "{{service:name}}.{{function:name}}"))
+        .instrument(::tracing::info_span!("stream", method = "{{interface.name}}.{{function.name}}"))
         .boxed()
     }
-    {{/if (not function:starts_interaction?)}}
-    {{/service:functions}}
+    {{/if (not function.starts_interaction?)}}
+  {{/each}}
 }
 
-impl<P, T, S> ::fbthrift::help::GetTransport<T> for {{service:rust_name}}Impl<P, T, S>
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for {{interface.rust_name}}Impl<P, T, S>
 where
     T: ::fbthrift::Transport,
 {
     fn transport(&self) -> &T {
-        {{#service:extends}}
-        self.parent.transport()
-        {{/service:extends}}
-        {{^service:extends}}
-        &self.transport
-        {{/service:extends}}
+        {{#if (object.notnull? service_extends)}}self.parent.transport(){{#else}}&self.transport{{/if}}
     }
 }
 
-{{#each (array.enumerate service:all_parent_services with_first=true) as |_index ancestor first?|}}
+  {{#if (not interface.interaction?)}}
+    {{#each (array.enumerate interface.all_parent_services with_first=true) as |_index ancestor first?|}}
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
-impl<'a, P, T, S> {{!
-    }}::std::convert::AsRef<dyn {{ancestor.client_package}}::{{ancestor.rust_name}} + 'a> {{!
-    }}for {{service:rust_name}}Impl<P, T, S>
+impl<'a, P, T, S> ::std::convert::AsRef<dyn {{ancestor.client_package}}::{{ancestor.rust_name}} + 'a> for {{interface.rust_name}}Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -440,18 +437,14 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn {{!
-        }}{{ancestor.client_package}}::{{ancestor.rust_name}}{{!
-        }} + 'a)
+    fn as_ref(&self) -> &(dyn {{ancestor.client_package}}::{{ancestor.rust_name}} + 'a)
     {
         {{#if first?}}&self.parent{{#else}}self.parent.as_ref(){{/if}}
     }
 }
 
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
-impl<'a, P, T, S> {{!
-    }}::std::convert::AsRef<dyn {{ancestor.client_package}}::{{ancestor.rust_name}}Ext<T> + 'a> {{!
-    }}for {{service:rust_name}}Impl<P, T, S>
+impl<'a, P, T, S> ::std::convert::AsRef<dyn {{ancestor.client_package}}::{{ancestor.rust_name}}Ext<T> + 'a> for {{interface.rust_name}}Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -461,53 +454,43 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    fn as_ref(&self) -> &(dyn {{!
-        }}{{ancestor.client_package}}::{{ancestor.rust_name}}Ext<T>{{!
-        }} + 'a)
+    fn as_ref(&self) -> &(dyn {{ancestor.client_package}}::{{ancestor.rust_name}}Ext<T> + 'a)
     {
         {{#if first?}}&self.parent{{#else}}self.parent.as_ref(){{/if}}
     }
 }
 
-{{/each}}
+    {{/each}}
+  {{/if (not interface.interaction?)}}
 
-{{#service:functions}}{{#if (not function:starts_interaction?)}}
+  {{#each interface.functions as |function|}}
+    {{#if (not function.starts_interaction?)}}
 
-struct Args_{{service:rust_name}}_{{function:name}}<'a> {
-    {{#function:args}}
-    {{field:rust_name}}: {{#partial rpc.arg_life field=field:self}},
-    {{/function:args}}
+struct Args_{{interface.rust_name}}_{{function.name}}<'a> {
+      {{#each function.params.fields as |param|}}
+    {{param.rust_name}}: {{#partial rpc.arg_life field=param}},
+      {{/each}}
     _phantom: ::std::marker::PhantomData<&'a ()>,
 }
 
-impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_{{service:rust_name}}_{{function:name}}<'a> {
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_{{interface.rust_name}}_{{function.name}}<'a> {
     #[inline]{{! No cost because there's only one caller; with luck will mitigate move cost of args. }}
-    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "{{service:name}}.{{function:name}}"))]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "{{interface.name}}.{{function.name}}"))]
     fn rs_thrift_write(&self, p: &mut P) {
-        p.write_struct_begin("args");{{!
-        }}{{#function:args}}
-        p.write_field_begin({{!
-            }}"{{field:name}}", {{!
-            }}{{#partial types.protocol_ttype type=field:self.type}}, {{!
-            }}{{field:id}}i16{{!
-        }});
-        {{#field:type}}{{!
-          }}{{#if type:has_adapter?}}{{!
-            }}::fbthrift::Serialize::rs_thrift_write(&{{type:adapter_qualified}}::to_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(&self.{{field:rust_name}}, {{field:id}}), p){{!
-          }}{{/if type:has_adapter?}}{{!
-          }}{{#if (not type:has_adapter?)}}{{!
-            }}{{#partial types.write type=field:self.type}}(&self.{{field:rust_name}}, p){{!
-          }}{{/if (not type:has_adapter?)}}{{!
-        }}{{/field:type}};
-        p.write_field_end();{{!
-        }}{{/function:args}}
+        p.write_struct_begin("args");
+      {{#each function.params.fields as |param|}}
+        p.write_field_begin("{{param.name}}", {{#partial types.protocol_ttype type=param.type}}, {{param.id}}i16);
+        {{#partial type_adapter_write_param param=param}};
+        p.write_field_end();
+      {{/each}}
         p.write_field_stop();
         p.write_struct_end();
     }
 }
-{{/if (not function:starts_interaction?)}}{{/service:functions}}
+    {{/if (not function.starts_interaction?)}}
+  {{/each}}
 
-impl<P, T, S> {{service:rust_name}} for {{service:rust_name}}Impl<P, T, S>
+impl<P, T, S> {{interface.rust_name}} for {{interface.rust_name}}Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -517,42 +500,41 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    {{#service:functions}}
-    {{#if (not function:starts_interaction?)}}
-    fn {{function:rust_name}}(
-        &self,{{!
-        }}{{#function:args}}
-        arg_{{field:name}}: {{#partial rpc.arg field=field:self}},{{!
-        }}{{/function:args}}
-    ) -> {{#partial rpc.client_return_type function=function:self service=service:self}} {
+  {{#each interface.functions as |function|}}
+    {{#if (not function.starts_interaction?)}}
+    fn {{function.rust_name}}(
+        &self,
+      {{#each function.params.fields as |param|}}
+        arg_{{param.name}}: {{#partial rpc.arg field=param}},
+      {{/each}}
+    ) -> {{#partial rpc.client_return_type function=function service=interface}} {
         let rpc_options = T::RpcOptions::default();
-        self._{{function:name}}_impl(
-            {{#function:args}}
-            arg_{{field:name}},
-            {{/function:args}}
+        self._{{function.name}}_impl(
+      {{#each function.params.fields as |param|}}
+            arg_{{param.name}},
+      {{/each}}
             rpc_options,
         )
     }
-    {{/if (not function:starts_interaction?)}}{{#if function:starts_interaction?}}
+    {{#else}}
 
-    fn {{function:name}}(
+    fn {{function.name}}(
         &self,
-    ) -> ::std::result::Result<{{!
-    }}{{program:crate}}::client::{{function:interaction_name}}Client, {{!
-    }}::anyhow::Error> {
+    ) -> ::std::result::Result<{{program.crate}}::client::{{function.interaction_name}}Client, ::anyhow::Error> {
         ::std::result::Result::Ok(
             ::std::sync::Arc::new(
-                {{program:crate}}::client::{{function:interaction_name}}Impl::<P, T, S>::new(
-                    self.transport().create_interaction(c"{{function:interaction_name}}")?,
-                    &Self::NAMES_{{function:interaction_name}},
+                {{program.crate}}::client::{{function.interaction_name}}Impl::<P, T, S>::new(
+                    self.transport().create_interaction(c"{{function.interaction_name}}")?,
+                    &Self::NAMES_{{function.interaction_name}},
                 )
             )
         )
     }
-    {{/if function:starts_interaction?}}{{/service:functions}}
+    {{/if (not function.starts_interaction?)}}
+  {{/each}}
 }
 
-impl<P, T, S> {{service:rust_name}}Ext<T> for {{service:rust_name}}Impl<P, T, S>
+impl<P, T, S> {{interface.rust_name}}Ext<T> for {{interface.rust_name}}Impl<P, T, S>
 where
     P: ::fbthrift::Protocol,
     T: ::fbthrift::Transport,
@@ -562,40 +544,39 @@ where
     P::Deserializer: ::std::marker::Send,
     S: ::fbthrift::help::Spawner,
 {
-    {{#service:functions}}
-    {{#if (not function:starts_interaction?)}}
-    fn {{function:rust_name}}_with_rpc_opts(
-        &self,{{!
-        }}{{#function:args}}
-        arg_{{field:name}}: {{#partial rpc.arg field=field:self}},{{!
-        }}{{/function:args}}
+  {{#each interface.functions as |function|}}
+    {{#if (not function.starts_interaction?)}}
+    fn {{function.rust_name}}_with_rpc_opts(
+        &self,
+      {{#each function.params.fields as |param|}}
+        arg_{{param.name}}: {{#partial rpc.arg field=param}},
+      {{/each}}
         rpc_options: T::RpcOptions,
-    ) -> {{#partial rpc.client_return_type function=function:self service=service:self}} {
-        self._{{function:name}}_impl(
-            {{#function:args}}
-            arg_{{field:name}},
-            {{/function:args}}
+    ) -> {{#partial rpc.client_return_type function=function service=interface}} {
+        self._{{function.name}}_impl(
+      {{#each function.params.fields as |param|}}
+            arg_{{param.name}},
+      {{/each}}
             rpc_options,
         )
     }
-    {{/if (not function:starts_interaction?)}}
-    {{/service:functions}}
-    {{#if (array.empty? service:all_parent_services)}}
+    {{/if (not function.starts_interaction?)}}
+  {{/each}}
+  {{#if (or interface.interaction? (array.empty? interface.all_parent_services))}}
 
     fn transport(&self) -> &T {
         self.transport()
     }
-    {{/if (array.empty? service:all_parent_services)}}
+  {{/if (or interface.interaction? (array.empty? interface.all_parent_services))}}
 }
 
-{{#if service:interaction?}}
-pub type {{service:rust_name}}DynClient = dyn {{service:rust_name}} + ::std::marker::Send + ::std::marker::Sync + 'static;
-pub type {{service:rust_name}}Client = ::std::sync::Arc<{{service:rust_name}}DynClient>;
+  {{#if interface.interaction?}}
+pub type {{interface.rust_name}}DynClient = dyn {{interface.rust_name}} + ::std::marker::Send + ::std::marker::Sync + 'static;
+pub type {{interface.rust_name}}Client = ::std::sync::Arc<{{interface.rust_name}}DynClient>;
 
-{{/if service:interaction?}}
-{{#if (not service:interaction?)}}
+  {{#else}}
 #[derive(Clone)]
-pub struct make_{{service:rust_name}};
+pub struct make_{{interface.rust_name}};
 
 /// To be called by user directly setting up a client. Avoids
 /// needing ClientFactory trait in scope, avoids unidiomatic
@@ -610,16 +591,16 @@ pub struct make_{{service:rust_name}};
 /// let client = <dyn BuckGraphService>::new(protocol, transport);
 /// # };
 /// ```
-impl dyn {{service:rust_name}} {
-    {{#each service:unstructured_annotations as |annotation|}}
-    {{#if (not (string.empty? annotation.value))}}
+impl dyn {{interface.rust_name}} {
+    {{#each interface.unstructured_annotations as |annotation|}}
+      {{#if (not (string.empty? annotation.value))}}
     pub const {{(rust_annotation_name annotation.key)}}: &'static ::std::primitive::str = {{(rust_quote annotation.value escape_backslashes=true)}};
-    {{/if (not (string.empty? annotation.value))}}
+      {{/if (not (string.empty? annotation.value))}}
     {{/each}}
     pub fn new<P, T>(
         protocol: P,
         transport: T,
-    ) -> ::std::sync::Arc<impl {{service:rust_name}} + ::std::marker::Send + ::std::marker::Sync + 'static>
+    ) -> ::std::sync::Arc<impl {{interface.rust_name}} + ::std::marker::Send + ::std::marker::Sync + 'static>
     where
         P: ::fbthrift::Protocol<Frame = T>,
         T: ::fbthrift::Transport,
@@ -633,7 +614,7 @@ impl dyn {{service:rust_name}} {
         protocol: P,
         transport: T,
         spawner: S,
-    ) -> ::std::sync::Arc<impl {{service:rust_name}} + ::std::marker::Send + ::std::marker::Sync + 'static>
+    ) -> ::std::sync::Arc<impl {{interface.rust_name}} + ::std::marker::Send + ::std::marker::Sync + 'static>
     where
         P: ::fbthrift::Protocol<Frame = T>,
         T: ::fbthrift::Transport,
@@ -642,18 +623,18 @@ impl dyn {{service:rust_name}} {
     {
         let _ = protocol;
         let _ = spawner;
-        ::std::sync::Arc::new({{service:rust_name}}Impl::<P, T, S>::new(transport))
+        ::std::sync::Arc::new({{interface.rust_name}}Impl::<P, T, S>::new(transport))
     }
 }
 
-impl<T> dyn {{service:rust_name}}Ext<T>
+impl<T> dyn {{interface.rust_name}}Ext<T>
 where
     T: ::fbthrift::Transport,
 {
     pub fn new<P>(
         protocol: P,
         transport: T,
-    ) -> ::std::sync::Arc<impl {{service:rust_name}}Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    ) -> ::std::sync::Arc<impl {{interface.rust_name}}Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
     where
         P: ::fbthrift::Protocol<Frame = T>,
         P::Deserializer: ::std::marker::Send,
@@ -666,7 +647,7 @@ where
         protocol: P,
         transport: T,
         spawner: S,
-    ) -> ::std::sync::Arc<impl {{service:rust_name}}Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    ) -> ::std::sync::Arc<impl {{interface.rust_name}}Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
     where
         P: ::fbthrift::Protocol<Frame = T>,
         P::Deserializer: ::std::marker::Send,
@@ -674,17 +655,17 @@ where
     {
         let _ = protocol;
         let _ = spawner;
-        ::std::sync::Arc::new({{service:rust_name}}Impl::<P, T, S>::new(transport))
+        ::std::sync::Arc::new({{interface.rust_name}}Impl::<P, T, S>::new(transport))
     }
 }
 
-pub type {{service:rust_name}}DynClient = <make_{{service:rust_name}} as ::fbthrift::ClientFactory>::Api;
-pub type {{service:rust_name}}Client = ::std::sync::Arc<{{service:rust_name}}DynClient>;
+pub type {{interface.rust_name}}DynClient = <make_{{interface.rust_name}} as ::fbthrift::ClientFactory>::Api;
+pub type {{interface.rust_name}}Client = ::std::sync::Arc<{{interface.rust_name}}DynClient>;
 
 /// The same thing, but to be called from generic contexts where we are
 /// working with a type parameter `C: ClientFactory` to produce clients.
-impl ::fbthrift::ClientFactory for make_{{service:rust_name}} {
-    type Api = dyn {{service:rust_name}} + ::std::marker::Send + ::std::marker::Sync + 'static;
+impl ::fbthrift::ClientFactory for make_{{interface.rust_name}} {
+    type Api = dyn {{interface.rust_name}} + ::std::marker::Send + ::std::marker::Sync + 'static;
 
     fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
     where
@@ -693,9 +674,7 @@ impl ::fbthrift::ClientFactory for make_{{service:rust_name}} {
         P::Deserializer: ::std::marker::Send,
         S: ::fbthrift::help::Spawner,
     {
-        <dyn {{service:rust_name}}>::with_spawner(protocol, transport, spawner)
+        <dyn {{interface.rust_name}}>::with_spawner(protocol, transport, spawner)
     }
 }
-{{/if (not service:interaction?)}}
-
-{{!newline}}
+  {{/if interface.interaction?}}

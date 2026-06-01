@@ -38,10 +38,9 @@ public final class EmptyXcep extends org.apache.thrift.TBaseException implements
     }
 
 
-
     public static class Builder {
 
-    public Builder() { }
+        public Builder() { }
         public Builder(EmptyXcep other) {
         }
 
@@ -54,33 +53,32 @@ public final class EmptyXcep extends org.apache.thrift.TBaseException implements
     }
 
 
-    
     public static com.facebook.thrift.payload.Reader<EmptyXcep> asReader() {
       return EmptyXcep::read0;
     }
 
     public static EmptyXcep read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(EmptyXcep.NAMES_TO_IDS, EmptyXcep.THRIFT_NAMES_TO_IDS, EmptyXcep.FIELD_METADATA);
-      EmptyXcep.Builder builder = new EmptyXcep.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(EmptyXcep.NAMES_TO_IDS, EmptyXcep.THRIFT_NAMES_TO_IDS, EmptyXcep.FIELD_METADATA);
+        EmptyXcep.Builder builder = new EmptyXcep.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _EmptyXcepLazy {
@@ -89,4 +87,5 @@ public final class EmptyXcep extends org.apache.thrift.TBaseException implements
 
     public static EmptyXcep defaultInstance() {
         return  _EmptyXcepLazy._DEFAULT;
-    }}
+    }
+}

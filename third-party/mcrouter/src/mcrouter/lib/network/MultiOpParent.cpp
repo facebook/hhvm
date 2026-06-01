@@ -26,8 +26,8 @@ bool MultiOpParent::reply(
     stolen = true;
     error_ = true;
     reply_.emplace(result);
-    reply_->message_ref() = std::move(errorMessage);
-    reply_->appSpecificErrorCode_ref() = errorCode;
+    reply_->message() = std::move(errorMessage);
+    reply_->appSpecificErrorCode() = errorCode;
   }
 
   assert(waiting_ > 0);

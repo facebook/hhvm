@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7f3cf0fb3397a7655bdf71b9544be53b>>
+// @generated SignedSource<<27316952400a13b8b1418b31545cb41a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -165,8 +165,10 @@ pub struct GlobalOptions {
     /// Set of typechecker-only experimental features, in lowercase.
     /// NB, *not* the experimental features that are controlled by the
     /// file level <<__EnableUnstableFeatures('feature_name')>> attribute.
-    /// Those are in ParserOptions.
-    pub tco_experimental_features: s_set::SSet,
+    /// Those are in ParserOptions and tco_enabled_unstable_features.
+    /// DO NOT add new features here. Instead, introduce new feature-specific field and add to Config_keys,
+    /// OR use EnableUnstableFeatures as mentioned above.
+    pub tco_legacy_experimental_features: s_set::SSet,
     /// Set of opt-in migration behavior flags, in lowercase.
     pub tco_migration_flags: s_set::SSet,
     /// If set to 0, only the type check delegate's logic will be used.
@@ -383,6 +385,8 @@ pub struct GlobalOptions {
     pub hh_distc_exponential_backoff_num_retries: isize,
     /// Enable recursive case types
     pub recursive_case_types: bool,
+    /// Set of unstable features enabled for the current file
+    pub tco_enabled_unstable_features: s_set::SSet,
     /// Whether class<T> <: classname<T>
     pub class_sub_classname: bool,
     /// When true, C::class : class<C>

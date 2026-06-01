@@ -53,7 +53,7 @@ impl Flags {
         );
         flags.set(
             Self::SUPPORTDYNAMIC_TYPE_HINT_ENABLED,
-            tco.tco_experimental_features
+            tco.tco_legacy_experimental_features
                 .contains("supportdynamic_type_hint"),
         );
         flags.set(Self::EVERYTHING_SDT, tco.po.everything_sdt);
@@ -69,7 +69,7 @@ impl Flags {
 
         flags.set(
             Self::INFER_FLOWS,
-            tco.tco_experimental_features
+            tco.tco_legacy_experimental_features
                 .contains(EXPERIMENTAL_INFER_FLOWS),
         );
 

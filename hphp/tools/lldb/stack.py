@@ -393,7 +393,10 @@ The output backtrace has the following format:
                     result.write(
                         frame.stringify(
                             frame.create_php(
-                                idx=i, ar=utils.unsigned_cast(fp, ar_type), rip=rip
+                                idx=i,
+                                # pyre-fixme[6]: ar_type may be None, guarded by try/except
+                                ar=utils.unsigned_cast(fp, ar_type),
+                                rip=rip,
                             )
                         )
                         + "\n"

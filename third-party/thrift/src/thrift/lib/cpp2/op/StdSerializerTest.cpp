@@ -19,12 +19,13 @@
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/op/Testing.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
+#include <thrift/lib/cpp2/type/Any.h>
 
 namespace apache::thrift::op {
 namespace {
 
 template <typename Tag, typename S, typename T>
-void testTypeRegistryLoad(const S& serializer, const T& value) {
+void testAnyDataGet(const S& serializer, const T& value) {
   folly::IOBufQueue queue;
   serializer.encode(value, folly::io::QueueAppender{&queue, 2 << 4});
   type::SemiAnyStruct sa;
@@ -32,24 +33,27 @@ void testTypeRegistryLoad(const S& serializer, const T& value) {
   sa.data() = *queue.front();
   sa.type() = type::Type::get<Tag>();
   type::AnyData anyData(sa);
-  auto result = type::TypeRegistry::generated().load(anyData);
-  EXPECT_EQ(result.as<Tag>(), value);
+  EXPECT_EQ(anyData.get<Tag>(), value);
 }
 
-template <typename Tag, typename S, typename T>
-void testTypeRegistryStore(const S& serializer, const T& value) {
-  auto anyData = type::TypeRegistry::generated().store(
-      type::ConstRef(Tag{}, value), serializer.getProtocol());
+template <typename Tag, type::StandardProtocol P, typename T>
+void testAnyDataStore(const T& value) {
+  auto anyData = type::AnyData::toAny<Tag, P>(value);
   folly::io::Cursor cursor(&anyData.data());
+  StdSerializer<Tag, P> serializer;
   auto actual = serializer.template decode<Tag>(cursor);
   EXPECT_EQ(actual, value);
 }
 
-template <typename Tag, typename S, typename T>
-void testSerialization(const S& serializer, const T& value) {
+template <typename Tag, type::StandardProtocol P, typename T>
+void testSerialization(const T& value) {
+  StdSerializer<Tag, P> serializer;
   test::expectRoundTrip<Tag>(serializer, value);
-  testTypeRegistryLoad<Tag>(serializer, value);
-  testTypeRegistryStore<Tag>(serializer, value);
+  testAnyDataStore<Tag, P>(value);
+  // AnyData::get only supports Binary and Compact protocols.
+  if constexpr (P != type::StandardProtocol::SimpleJson) {
+    testAnyDataGet<Tag>(serializer, value);
+  }
 }
 
 // Checks that the value roundtrips correctly for all standard protocols.
@@ -57,14 +61,11 @@ template <typename T, typename Tag = type::infer_tag<T>>
 void testRoundTrip(const T& value) {
   using type::StandardProtocol;
   FBTHRIFT_SCOPED_CHECK(
-      testSerialization<Tag>(
-          StdSerializer<Tag, StandardProtocol::Binary>(), value));
+      (testSerialization<Tag, StandardProtocol::Binary>(value)));
   FBTHRIFT_SCOPED_CHECK(
-      testSerialization<Tag>(
-          StdSerializer<Tag, StandardProtocol::Compact>(), value));
+      (testSerialization<Tag, StandardProtocol::Compact>(value)));
   FBTHRIFT_SCOPED_CHECK(
-      testSerialization<Tag>(
-          StdSerializer<Tag, StandardProtocol::SimpleJson>(), value));
+      (testSerialization<Tag, StandardProtocol::SimpleJson>(value)));
 }
 
 TEST(StdSerializerTest, Struct) {
@@ -95,17 +96,10 @@ TEST(StdSerializerTest, PrimaryTypes) {
 TEST(StdSerializerTest, ContainerWithString) {
   using namespace type;
   using Tag = map<string_t, list<set<string_t>>>;
-  apache::thrift::op::
-      StdSerializer<Tag, apache::thrift::type::StandardProtocol::Compact>
-          serializer;
-  auto& registry = apache::thrift::type::detail::getGeneratedTypeRegistry();
-  registry.registerSerializer(serializer, Tag{});
   std::map<std::string, std::vector<std::set<std::string>>> myData;
   myData["foo"] = {{"1"}, {"2"}};
-  auto anyData =
-      registry.store<apache::thrift::type::StandardProtocol::Compact>(
-          apache::thrift::type::ConstRef(Tag{}, myData));
-  auto myData2 = registry.load(anyData).as<Tag>();
+  auto anyData = AnyData::toAny<Tag, StandardProtocol::Compact>(myData);
+  auto myData2 = anyData.get<Tag>();
   EXPECT_EQ(myData, myData2);
 }
 

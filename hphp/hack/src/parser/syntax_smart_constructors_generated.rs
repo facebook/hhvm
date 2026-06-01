@@ -885,11 +885,6 @@ where
         Self::Output::make_like_type_specifier(self.state_mut(), arg0, arg1)
     }
 
-    fn make_soft_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
-        self.state_mut().next(&[&arg0, &arg1]);
-        Self::Output::make_soft_type_specifier(self.state_mut(), arg0, arg1)
-    }
-
     fn make_attributized_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
         self.state_mut().next(&[&arg0, &arg1]);
         Self::Output::make_attributized_specifier(self.state_mut(), arg0, arg1)

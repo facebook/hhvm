@@ -68,9 +68,17 @@ static void expectThrowWithAlert(F f, AlertDescription ad) {
 }
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifySuccess) {
-  verifier_->verify({getPeerCert(leafCertAndKey_)});
+  Error err;
+  std::shared_ptr<const Cert> verifiedCert;
+  EXPECT_EQ(
+      verifier_->verify(verifiedCert, err, {getPeerCert(leafCertAndKey_)}),
+      Status::Success);
 
-  auto ctx = verifier_->verifyWithX509StoreCtx({getPeerCert(leafCertAndKey_)});
+  folly::ssl::X509StoreCtxUniquePtr ctx;
+  EXPECT_EQ(
+      verifier_->verifyWithX509StoreCtx(
+          ctx, err, {getPeerCert(leafCertAndKey_)}),
+      Status::Success);
   STACK_OF(X509)* certChain = X509_STORE_CTX_get0_chain(ctx.get());
   X509* rootX509 = sk_X509_value(certChain, sk_X509_num(certChain) - 1);
   auto rootCertName = folly::ssl::OpenSSLCertUtils::getCommonName(*rootX509);
@@ -80,10 +88,19 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifySuccess) {
 TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediates) {
   auto subauth = createCert("subauth", true, &rootCertAndKey_, KeyType::P256);
   auto subleaf = createCert("subleaf", false, &subauth, KeyType::P256);
-  verifier_->verify({getPeerCert(subleaf), getPeerCert(subauth)});
 
-  auto ctx = verifier_->verifyWithX509StoreCtx(
-      {getPeerCert(subleaf), getPeerCert(subauth)});
+  Error err;
+  std::shared_ptr<const Cert> verifiedCert;
+  EXPECT_EQ(
+      verifier_->verify(
+          verifiedCert, err, {getPeerCert(subleaf), getPeerCert(subauth)}),
+      Status::Success);
+
+  folly::ssl::X509StoreCtxUniquePtr ctx;
+  EXPECT_EQ(
+      verifier_->verifyWithX509StoreCtx(
+          ctx, err, {getPeerCert(subleaf), getPeerCert(subauth)}),
+      Status::Success);
   STACK_OF(X509)* certChain = X509_STORE_CTX_get0_chain(ctx.get());
   X509* rootX509 = sk_X509_value(certChain, sk_X509_num(certChain) - 1);
   auto rootCertName = folly::ssl::OpenSSLCertUtils::getCommonName(*rootX509);
@@ -93,7 +110,13 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediates) {
 TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCert) {
   auto selfsigned = createCert("self", false, nullptr, KeyType::P256);
   expectThrowWithAlert(
-      [&] { verifier_->verify({getPeerCert(selfsigned)}); },
+      [&] {
+        Error err;
+        std::shared_ptr<const Cert> verifiedCert;
+        FIZZ_THROW_ON_ERROR(
+            verifier_->verify(verifiedCert, err, {getPeerCert(selfsigned)}),
+            err);
+      },
       AlertDescription::unknown_ca);
 }
 
@@ -102,8 +125,16 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCertWithOverride) {
   verifier_->setCustomVerifyCallback(
       &DefaultCertificateVerifierTest::allowSelfSignedLeafCertCallback);
   // Will not throw because the override allows for this type of error.
-  verifier_->verify({getPeerCert(selfsigned)});
-  auto ctx = verifier_->verifyWithX509StoreCtx({getPeerCert(selfsigned)});
+  Error err;
+  std::shared_ptr<const Cert> verifiedCert;
+  EXPECT_EQ(
+      verifier_->verify(verifiedCert, err, {getPeerCert(selfsigned)}),
+      Status::Success);
+
+  folly::ssl::X509StoreCtxUniquePtr ctx;
+  EXPECT_EQ(
+      verifier_->verifyWithX509StoreCtx(ctx, err, {getPeerCert(selfsigned)}),
+      Status::Success);
   STACK_OF(X509)* certChain = X509_STORE_CTX_get0_chain(ctx.get());
   X509* rootX509 = sk_X509_value(certChain, sk_X509_num(certChain) - 1);
   auto rootCertName = folly::ssl::OpenSSLCertUtils::getCommonName(*rootX509);
@@ -114,7 +145,12 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediateMissing) {
   auto subauth = createCert("subauth", true, &rootCertAndKey_, KeyType::P256);
   auto subleaf = createCert("subleaf", false, &subauth, KeyType::P256);
   expectThrowWithAlert(
-      [&] { verifier_->verify({getPeerCert(subleaf)}); },
+      [&] {
+        Error err;
+        std::shared_ptr<const Cert> verifiedCert;
+        FIZZ_THROW_ON_ERROR(
+            verifier_->verify(verifiedCert, err, {getPeerCert(subleaf)}), err);
+      },
       AlertDescription::unknown_ca);
 }
 
@@ -130,7 +166,12 @@ TEST_F(
   // should effectively be a no-op and normal certificate verification
   // should take place.
   expectThrowWithAlert(
-      [&] { verifier_->verify({getPeerCert(subleaf)}); },
+      [&] {
+        Error err;
+        std::shared_ptr<const Cert> verifiedCert;
+        FIZZ_THROW_ON_ERROR(
+            verifier_->verify(verifiedCert, err, {getPeerCert(subleaf)}), err);
+      },
       AlertDescription::unknown_ca);
 }
 
@@ -139,7 +180,12 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadIntermediate) {
       createCert("badsubauth", false, &rootCertAndKey_, KeyType::P256);
   auto subleaf = createCert("badsubleaf", false, &subauth, KeyType::P256);
   expectThrowWithAlert(
-      [&] { verifier_->verify({getPeerCert(subleaf)}); },
+      [&] {
+        Error err;
+        std::shared_ptr<const Cert> verifiedCert;
+        FIZZ_THROW_ON_ERROR(
+            verifier_->verify(verifiedCert, err, {getPeerCert(subleaf)}), err);
+      },
       AlertDescription::unknown_ca);
 }
 
@@ -148,7 +194,16 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadRoot) {
   auto subauth = createCert("subauth2", true, &newroot, KeyType::P256);
   auto subleaf = createCert("leaf2", false, &subauth, KeyType::P256);
   expectThrowWithAlert(
-      [&] { verifier_->verify({getPeerCert(subleaf), getPeerCert(subauth)}); },
+      [&] {
+        Error err;
+        std::shared_ptr<const Cert> verifiedCert;
+        FIZZ_THROW_ON_ERROR(
+            verifier_->verify(
+                verifiedCert,
+                err,
+                {getPeerCert(subleaf), getPeerCert(subauth)}),
+            err);
+      },
       AlertDescription::unknown_ca);
 }
 TEST_F(DefaultCertificateVerifierTest, TestVerifyWithExpiredLeafTooOld) {
@@ -162,7 +217,12 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithExpiredLeafTooOld) {
   });
 
   expectThrowWithAlert(
-      [&] { verifier_->verify({getPeerCert(newLeaf)}); },
+      [&] {
+        Error err;
+        std::shared_ptr<const Cert> verifiedCert;
+        FIZZ_THROW_ON_ERROR(
+            verifier_->verify(verifiedCert, err, {getPeerCert(newLeaf)}), err);
+      },
       AlertDescription::certificate_expired);
 }
 
@@ -177,7 +237,12 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithExpiredLeafTooNew) {
   });
 
   expectThrowWithAlert(
-      [&] { verifier_->verify({getPeerCert(newLeaf)}); },
+      [&] {
+        Error err;
+        std::shared_ptr<const Cert> verifiedCert;
+        FIZZ_THROW_ON_ERROR(
+            verifier_->verify(verifiedCert, err, {getPeerCert(newLeaf)}), err);
+      },
       AlertDescription::certificate_expired);
 }
 } // namespace test

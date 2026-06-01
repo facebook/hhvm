@@ -14,17 +14,17 @@ public class PubSubStreamingServiceReactiveAsyncWrapper
   private PubSubStreamingService.Reactive _delegate;
 
   public PubSubStreamingServiceReactiveAsyncWrapper(PubSubStreamingService.Reactive _delegate) {
-    
-    this._delegate = _delegate;
+      
+      this._delegate = _delegate;
   }
 
   public PubSubStreamingServiceReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new PubSubStreamingServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new PubSubStreamingServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
 }

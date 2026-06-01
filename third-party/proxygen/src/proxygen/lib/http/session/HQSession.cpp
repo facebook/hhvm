@@ -1558,8 +1558,6 @@ void HQSession::applySettings(const SettingsList& settings) {
   uint32_t tableSize = kDefaultIngressHeaderTableSize;
   uint32_t blocked = kDefaultIngressQpackBlockedStream;
   bool datagram = false;
-  bool hasWT = false;
-  [[maybe_unused]] uint32_t numPlaceholders = kDefaultIngressNumPlaceHolders;
   for (auto& setting : settings) {
     auto id = httpToHqSettingsId(setting.id);
     if (id) {
@@ -1583,17 +1581,15 @@ void HQSession::applySettings(const SettingsList& settings) {
           datagram = static_cast<bool>(setting.value);
           break;
         case hq::SettingId::ENABLE_WEBTRANSPORT:
-          hasWT = setting.value;
-          VLOG(3) << "Peer sent ENABLE_WEBTRANSPORT: " << uint32_t(hasWT);
+          VLOG(3) << "Peer sent ENABLE_WEBTRANSPORT=" << setting.value;
           supportsWebTransport_.set(folly::to_underlying(SettingEnabled::PEER));
           break;
         case hq::SettingId::H3_WT_MAX_SESSIONS:
-          hasWT = setting.value > 0;
-          VLOG(3) << "Peer sent WEBTRANSPORT_MAX_SESSIONS: " << uint32_t(hasWT);
+          VLOG(3) << "Peer sent WEBTRANSPORT_MAX_SESSIONS=" << setting.value;
           supportsWebTransport_.set(folly::to_underlying(SettingEnabled::PEER));
           break;
         case hq::SettingId::WT_INITIAL_MAX_DATA:
-          VLOG(3) << "Peer sent WT_INITIAL_MAX_DATA: " << setting.value;
+          VLOG(3) << "Peer sent WT_INITIAL_MAX_DATA=" << setting.value;
           wtInitialSendWindow_ = setting.value;
           break;
       }

@@ -70,10 +70,16 @@ ManagedConnection::getLastActivityElapsedTime() const {
 }
 
 void ConnectionAgeTimeout::timeoutExpired() noexcept {
-  if (auto connectionManager = connection_.getConnectionManager()) {
-    connectionManager->removeConnection(&connection_);
+  connection_.onConnectionAgeTimeout();
+}
+
+void ManagedConnection::onConnectionAgeTimeout() {
+  if (auto connectionManager = getConnectionManager()) {
+    if (connectionManager->getDetachOnConnectionAgeTimeout()) {
+      connectionManager->removeConnection(this);
+    }
   }
-  connection_.closeWhenIdle();
+  closeWhenIdle();
 }
 
 ////////////////////// Globals /////////////////////

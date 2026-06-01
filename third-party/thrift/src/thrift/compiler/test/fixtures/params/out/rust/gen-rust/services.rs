@@ -6,9 +6,9 @@
 
 /// Service definitions for `NestedContainers`.
 pub mod nested_containers {
+
     #[derive(Clone, Debug)]
     pub enum MapListExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -88,7 +88,6 @@ pub mod nested_containers {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -98,7 +97,6 @@ pub mod nested_containers {
 
     #[derive(Clone, Debug)]
     pub enum MapSetExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -178,7 +176,6 @@ pub mod nested_containers {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -188,7 +185,6 @@ pub mod nested_containers {
 
     #[derive(Clone, Debug)]
     pub enum ListMapExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -268,7 +264,6 @@ pub mod nested_containers {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -278,7 +273,6 @@ pub mod nested_containers {
 
     #[derive(Clone, Debug)]
     pub enum ListSetExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -358,7 +352,6 @@ pub mod nested_containers {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -368,7 +361,6 @@ pub mod nested_containers {
 
     #[derive(Clone, Debug)]
     pub enum TurtlesExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -448,7 +440,6 @@ pub mod nested_containers {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();

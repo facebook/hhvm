@@ -181,7 +181,6 @@ def subop_to_name(
         "HPHP::MOpMode": ("MOpMode", "None"),
         "HPHP::ContCheckOp": ("ContCheckOp", "IgnoreStarted"),
         "HPHP::SpecialClsRef": ("SpecialClsRef", "SelfCls"),
-        "HPHP::IsLogAsDynamicCallOp": ("IsLogAsDynamicCallOp", "LogAsDynamicCall"),
         "HPHP::ReadonlyOp": ("ReadonlyOp", "Any"),
     }
     enum_name, member = subop_names_and_table_starting_indices[enum_type_name]
@@ -226,6 +225,7 @@ def show_fca_num_args(numArgs: int, boolVecArgs: lldb.SBValue) -> str:
         if (i % 8) == 0:
             tmp = boolVecArgs.deref
             boolVecArgs = utils.ptr_add(boolVecArgs, 1)
+        # pyre-fixme[16]: SBValue.deref returns SBValue at runtime
         out += "1" if ((tmp.unsigned >> (i % 8)) & 1) else "0"
     return out
 
@@ -249,6 +249,7 @@ class HHBC:
             and utils.Value("HPHP::Op_count", pc.target).unsigned > 256
         ):
             byte = utils.ptr_add(pc, 1).deref
+            # pyre-fixme[6]: LLDB auto-converts int expression to str
             raw_val = pc.CreateValueFromExpression("tmp", byte.unsigned + 0xFF)
             size = 2
         else:
@@ -273,7 +274,9 @@ class HHBC:
             utils.debug_print("decode_iva(): large IVA immediate")
             large = pc.Cast(utils.Type("uint32_t", pc.target).GetPointerType()).deref
             info["value"] = large.CreateValueFromExpression(
-                "tmp", ((large.unsigned & 0xFFFFFF00) >> 1) | (large.unsigned & 0x7F)
+                "tmp",
+                # pyre-fixme[6]: LLDB auto-converts int expression to str
+                ((large.unsigned & 0xFFFFFF00) >> 1) | (large.unsigned & 0x7F),
             )
             info["size"] = 4
         else:

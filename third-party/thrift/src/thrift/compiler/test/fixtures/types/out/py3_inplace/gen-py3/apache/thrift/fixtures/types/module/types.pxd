@@ -116,6 +116,3 @@ cdef object Set__i32__from_cpp(const cset[cint32_t]&) except *
 cdef cmap[cint32_t,cint32_t] Map__i32_i32__make_instance(object items) except *
 cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]&) except *
 
-cdef cmap[cint32_t,string] Map__i32_string__make_instance(object items) except *
-cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]&) except *
-

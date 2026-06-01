@@ -6,6 +6,7 @@
 
 /// Service definitions for `MyInteraction`.
 pub mod my_interaction {
+
     #[derive(Clone, Debug)]
     pub enum FrobnicateExn {
         ex(crate::types::CustomException),
@@ -97,7 +98,6 @@ pub mod my_interaction {
 
     #[derive(Clone, Debug)]
     pub enum PingExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -177,7 +177,6 @@ pub mod my_interaction {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -187,7 +186,6 @@ pub mod my_interaction {
 
     #[derive(Clone, Debug)]
     pub enum TruthifyStreamExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -251,7 +249,6 @@ pub mod my_interaction {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -261,7 +258,6 @@ pub mod my_interaction {
 
     #[derive(Clone, Debug)]
     pub enum TruthifyExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -340,7 +336,6 @@ pub mod my_interaction {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -389,7 +384,6 @@ pub mod my_interaction {
 
     #[derive(Clone, Debug)]
     pub enum EncodeSinkExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -453,7 +447,6 @@ pub mod my_interaction {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -516,7 +509,6 @@ pub mod my_interaction {
 
     #[derive(Clone, Debug)]
     pub enum EncodeSinkFinalExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -580,7 +572,6 @@ pub mod my_interaction {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -590,7 +581,6 @@ pub mod my_interaction {
 
     #[derive(Clone, Debug)]
     pub enum EncodeExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -670,7 +660,6 @@ pub mod my_interaction {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -680,9 +669,9 @@ pub mod my_interaction {
 }
 /// Service definitions for `MyInteractionFast`.
 pub mod my_interaction_fast {
+
     #[derive(Clone, Debug)]
     pub enum FrobnicateExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -762,7 +751,6 @@ pub mod my_interaction_fast {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -772,7 +760,6 @@ pub mod my_interaction_fast {
 
     #[derive(Clone, Debug)]
     pub enum PingExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -852,7 +839,6 @@ pub mod my_interaction_fast {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -862,7 +848,6 @@ pub mod my_interaction_fast {
 
     #[derive(Clone, Debug)]
     pub enum TruthifyStreamExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -926,7 +911,6 @@ pub mod my_interaction_fast {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -936,7 +920,6 @@ pub mod my_interaction_fast {
 
     #[derive(Clone, Debug)]
     pub enum TruthifyExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1015,7 +998,6 @@ pub mod my_interaction_fast {
                     p.write_field_begin("Success", ::fbthrift::TType::Void, 0i16);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1064,7 +1046,6 @@ pub mod my_interaction_fast {
 
     #[derive(Clone, Debug)]
     pub enum EncodeSinkExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1128,7 +1109,6 @@ pub mod my_interaction_fast {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1191,7 +1171,6 @@ pub mod my_interaction_fast {
 
     #[derive(Clone, Debug)]
     pub enum EncodeSinkFinalExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1255,7 +1234,6 @@ pub mod my_interaction_fast {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1265,7 +1243,6 @@ pub mod my_interaction_fast {
 
     #[derive(Clone, Debug)]
     pub enum EncodeExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1345,7 +1322,6 @@ pub mod my_interaction_fast {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1355,9 +1331,9 @@ pub mod my_interaction_fast {
 }
 /// Service definitions for `SerialInteraction`.
 pub mod serial_interaction {
+
     #[derive(Clone, Debug)]
     pub enum FrobnicateExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1437,7 +1413,6 @@ pub mod serial_interaction {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1447,9 +1422,9 @@ pub mod serial_interaction {
 }
 /// Service definitions for `BoxedInteraction`.
 pub mod boxed_interaction {
+
     #[derive(Clone, Debug)]
     pub enum GetABoxExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1529,7 +1504,6 @@ pub mod boxed_interaction {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1539,9 +1513,9 @@ pub mod boxed_interaction {
 }
 /// Service definitions for `MyService`.
 pub mod my_service {
+
     #[derive(Clone, Debug)]
     pub enum FooExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1621,7 +1595,6 @@ pub mod my_service {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1631,7 +1604,6 @@ pub mod my_service {
 
     #[derive(Clone, Debug)]
     pub enum InteractExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1711,7 +1683,6 @@ pub mod my_service {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1721,7 +1692,6 @@ pub mod my_service {
 
     #[derive(Clone, Debug)]
     pub enum InteractFastExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1801,7 +1771,6 @@ pub mod my_service {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1811,7 +1780,6 @@ pub mod my_service {
 
     #[derive(Clone, Debug)]
     pub enum SerializeStreamExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1875,7 +1843,6 @@ pub mod my_service {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1885,7 +1852,6 @@ pub mod my_service {
 
     #[derive(Clone, Debug)]
     pub enum SerializeExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -1965,7 +1931,6 @@ pub mod my_service {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -1975,9 +1940,9 @@ pub mod my_service {
 }
 /// Service definitions for `Factories`.
 pub mod factories {
+
     #[derive(Clone, Debug)]
     pub enum FooExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -2057,7 +2022,6 @@ pub mod factories {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -2067,7 +2031,6 @@ pub mod factories {
 
     #[derive(Clone, Debug)]
     pub enum InteractExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -2147,7 +2110,6 @@ pub mod factories {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -2157,7 +2119,6 @@ pub mod factories {
 
     #[derive(Clone, Debug)]
     pub enum InteractFastExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -2237,7 +2198,6 @@ pub mod factories {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -2247,7 +2207,6 @@ pub mod factories {
 
     #[derive(Clone, Debug)]
     pub enum SerializeStreamExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -2311,7 +2270,6 @@ pub mod factories {
                     ::fbthrift::Serialize::rs_thrift_write(success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_)) => unreachable!(),
             }
             p.write_field_stop();
@@ -2321,7 +2279,6 @@ pub mod factories {
 
     #[derive(Clone, Debug)]
     pub enum SerializeExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -2401,7 +2358,6 @@ pub mod factories {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -2411,9 +2367,9 @@ pub mod factories {
 }
 /// Service definitions for `Perform`.
 pub mod perform {
+
     #[derive(Clone, Debug)]
     pub enum FooExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -2493,7 +2449,6 @@ pub mod perform {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -2503,9 +2458,9 @@ pub mod perform {
 }
 /// Service definitions for `InteractWithShared`.
 pub mod interact_with_shared {
+
     #[derive(Clone, Debug)]
     pub enum DoSomeSimilarThingsExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -2585,7 +2540,6 @@ pub mod interact_with_shared {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -2595,9 +2549,9 @@ pub mod interact_with_shared {
 }
 /// Service definitions for `BoxService`.
 pub mod box_service {
+
     #[derive(Clone, Debug)]
     pub enum GetABoxSessionExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -2677,7 +2631,6 @@ pub mod box_service {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();

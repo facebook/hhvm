@@ -52,6 +52,7 @@
 #include "hphp/runtime/vm/jit/prof-data-sb.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
@@ -694,35 +695,6 @@ void read_seen_types(ProfDataDeserializer& ser) {
   }
 }
 
-void write_prof_data(ProfDataSerializer& ser, ProfData* pd) {
-  // Write the profiled metadata to output
-  std::string metaFile = ser.filename() + ".meta";
-  if (auto out = fopen(metaFile.c_str(), "w")) {
-    fprintf(out, "profFuncCnt=%ld\n", pd->profilingFuncs());
-    fprintf(out, "profBCSize=%ld\n", pd->profilingBCSize());
-    fclose(out);
-  }
-
-  write_profiled_funcs(ser, pd);
-
-  write_raw(ser, pd->counterDefault());
-  pd->forEachTransRec(
-    [&] (const ProfTransRec* ptr) {
-      auto const transID = ptr->isProfile() ?
-        ptr->region()->entry()->profTransID() :
-        pd->proflogueTransId(ptr->func(), ptr->prologueArgs());
-      write_raw(ser, transID);
-      write_prof_trans_rec(ser, ptr, pd);
-      // forEachTransRec already grabs a read lock, and we're not
-      // going to add a *new* counter here (so we don't need a write
-      // lock).
-      write_raw(ser, *pd->transCounterAddrNoLock(transID));
-    }
-  );
-  write_raw(ser, kInvalidTransID);
-  write_raw<uint64_t>(ser, pd->baseProfCount());
-}
-
 void maybe_output_prof_trans_rec_trace(
   TransID transId, const ProfTransRec* profTransRec, uint64_t translationWeight) {
   if (profTransRec->kind() != TransKind::Profile) {
@@ -757,23 +729,6 @@ void maybe_output_prof_trans_rec_trace(
     profTransRecProfile["translation_weight"] = translationWeight;
     HPHP::Trace::traceRelease("json:%s\n", folly::toJson(profTransRecProfile).c_str());
   }
-}
-
-void read_prof_data(ProfDataDeserializer& ser, ProfData* pd) {
-  BootStats::Block timer("DES_read_prof_data",
-                         Cfg::Server::Mode);
-  read_profiled_funcs(ser, pd);
-
-  pd->resetCounters(read_raw<int64_t>(ser));
-  while (true) {
-    auto const transID = read_raw<TransID>(ser);
-    if (transID == kInvalidTransID) break;
-    pd->addProfTrans(transID, read_prof_trans_rec(ser));
-    *pd->transCounterAddr(transID) = read_raw<int64_t>(ser);
-    auto const profTransRec = pd->transRec(transID);
-    maybe_output_prof_trans_rec_trace(transID, profTransRec, pd->transCounter(transID));
-  }
-  pd->setBaseProfCount(read_raw<uint64_t>(ser));
 }
 
 template<typename T>
@@ -847,6 +802,13 @@ struct TargetProfileVisitor {
   uint32_t size;
 };
 
+void write_rds_ordering_item(ProfDataSerializer& ser,
+                             const rds::Ordering::Item& item) {
+  write_string(ser, item.key);
+  write_raw(ser, item.size);
+  write_raw(ser, item.alignment);
+}
+
 void write_target_profiles(ProfDataSerializer& ser) {
   rds::visitSymbols(
     [&] (const rds::Symbol& symbol, rds::Handle handle, uint32_t size) {
@@ -857,11 +819,35 @@ void write_target_profiles(ProfDataSerializer& ser) {
   write_raw(ser, uint32_t{});
 }
 
-void write_rds_ordering_item(ProfDataSerializer& ser,
-                             const rds::Ordering::Item& item) {
-  write_string(ser, item.key);
-  write_raw(ser, item.size);
-  write_raw(ser, item.alignment);
+void write_prof_data(ProfDataSerializer& ser, ProfData* pd) {
+  // Write the profiled metadata to output
+  std::string metaFile = ser.filename() + ".meta";
+  if (auto out = fopen(metaFile.c_str(), "w")) {
+    fprintf(out, "profFuncCnt=%ld\n", pd->profilingFuncs());
+    fprintf(out, "profBCSize=%ld\n", pd->profilingBCSize());
+    fclose(out);
+  }
+
+  write_profiled_funcs(ser, pd);
+
+  write_raw(ser, pd->counterDefault());
+  pd->forEachTransRec(
+    [&] (const ProfTransRec* ptr) {
+      auto const transID = ptr->isProfile() ?
+        ptr->region()->entry()->profTransID() :
+        pd->proflogueTransId(ptr->func(), ptr->prologueArgs());
+      write_raw(ser, transID);
+      write_prof_trans_rec(ser, ptr, pd);
+      // forEachTransRec already grabs a read lock, and we're not
+      // going to add a *new* counter here (so we don't need a write
+      // lock).
+      write_raw(ser, *pd->transCounterAddrNoLock(transID));
+    }
+  );
+  write_raw(ser, kInvalidTransID);
+  write_raw<uint64_t>(ser, pd->baseProfCount());
+
+  write_target_profiles(ser);
 }
 
 rds::Ordering::Item read_rds_ordering_item(ProfDataDeserializer& des) {
@@ -918,7 +904,7 @@ void read_maybe_serializable(ProfDataDeserializer& ser, T& out) {
 
 template<typename T>
 void maybe_output_target_profile_trace(
-  const StringData* name, const TargetProfile<T>& prof, const rds::Profile &pt) {
+  const StringData* name, const T& value, const rds::Profile &pt) {
   if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::print_profiles, 1)) {
     auto const pd = profData();
     assertx(pd != nullptr);
@@ -937,7 +923,7 @@ void maybe_output_target_profile_trace(
         folly::dynamic targetProfileInfo = folly::dynamic::object;
         targetProfileInfo["trans_id"] = pt.transId;
         targetProfileInfo["profile_raw_name"] = name->toCppString();
-        targetProfileInfo["profile"] = prof.value().toDynamic();
+        targetProfileInfo["profile"] = value.toDynamic();
         targetProfileInfo["file_path"] = filePath;
         targetProfileInfo["line_number"] = func->getLineNumber(pt.bcOff);
         targetProfileInfo["function_name"] = func->fullName()->data();
@@ -949,18 +935,17 @@ void maybe_output_target_profile_trace(
 }
 
 struct SymbolFixup {
-  SymbolFixup(ProfDataDeserializer& ser, StringData* name, uint32_t size) :
-      ser{ser}, name{name}, size{size} {}
-
+  SymbolFixup(ProfDataDeserializer& ser, StringData* name, uint32_t size, ProfDataTargetProfile* tp) :
+      ser{ser}, name{name}, size{size}, tp{tp} {}
   template<typename T> void operator()(T&) { always_assert(false); }
 
   template<typename T>
   void go(rds::Profile& pt) {
-    auto prof = TargetProfile<T>::deserialize(
-      {pt.transId}, TransKind::Profile, pt.bcOff, name, size - sizeof(T));
-
-    read_maybe_serializable(ser, prof.value());
-    maybe_output_target_profile_trace(name, prof, pt);
+    auto const rdsKey = rds::Profile((T*)nullptr, pt.transId, pt.bcOff, name);
+    auto value = reinterpret_cast<T*>(malloc(size));
+    read_maybe_serializable(ser, *value);
+    tp->add(rdsKey, value);
+    maybe_output_target_profile_trace(name, *value, pt);
   }
 
   void operator()(rds::Profile& pt) {
@@ -979,9 +964,10 @@ struct SymbolFixup {
   StringData* name;
   // The size of the original rds allocation.
   uint32_t size;
+  ProfDataTargetProfile* tp;
 };
 
-void read_target_profiles(ProfDataDeserializer& ser) {
+void read_target_profiles(ProfDataDeserializer& ser, ProfDataTargetProfile* tp) {
   BootStats::Block timer("DES_read_target_profiles",
                          Cfg::Server::Mode);
   while (true) {
@@ -996,9 +982,30 @@ void read_target_profiles(ProfDataDeserializer& ser) {
     profile.bcOff = read_raw<Offset>(ser);
     profile.name = read_string(ser);
     rds::Symbol sym{profile};
-    auto sf = SymbolFixup{ser, name, size};
+    auto sf = SymbolFixup{ser, name, size, tp};
     std::visit(sf, sym);
   }
+}
+
+void read_prof_data(ProfDataDeserializer& ser, ProfData* pd) {
+  BootStats::Block timer("DES_read_prof_data",
+                         Cfg::Server::Mode);
+  read_profiled_funcs(ser, pd);
+
+  pd->resetCounters(read_raw<int64_t>(ser));
+  while (true) {
+    auto const transID = read_raw<TransID>(ser);
+    if (transID == kInvalidTransID) break;
+    pd->addProfTrans(transID, read_prof_trans_rec(ser));
+    *pd->transCounterAddr(transID) = read_raw<int64_t>(ser);
+    auto const profTransRec = pd->transRec(transID);
+    maybe_output_prof_trans_rec_trace(transID, profTransRec, pd->transCounter(transID));
+  }
+  pd->setBaseProfCount(read_raw<uint64_t>(ser));
+
+  auto tp = std::make_unique<ProfDataTargetProfile>();
+  read_target_profiles(ser, tp.get());
+  pd->setTargetProfile(std::move(tp));
 }
 
 void merge_loaded_units(int numWorkers) {
@@ -1739,7 +1746,7 @@ void write_string(ProfDataSerializer& ser, const StringData* str) {
 
 constexpr uint32_t kMaxCppStringLen = 2 << 20;
 
-void write_string(ProfDataSerializer& ser, const std::string& str) {
+void write_string(ProfDataSerializer& ser, const std::string_view& str) {
   ITRACE(2, "cpp string>\n");
   uint64_t size = str.size();
   if (size > kMaxCppStringLen) {
@@ -2222,8 +2229,6 @@ std::string serializeProfData(const std::string& filename) {
     }
     write_container(ser, Class::serializeLazyAPCClasses(), write_class);
 
-    write_target_profiles(ser);
-
     // We've written everything directly referenced by the profile
     // data, but jitted code might still use Classes and TypeAliases
     // that haven't been otherwise mentioned (eg TypeConstraint types,
@@ -2458,8 +2463,6 @@ std::string deserializeProfData(const std::string& filename,
       read_container(ser, [&] { list.push_back(read_class(ser)); });
       Class::deserializeLazyAPCClasses(list);
     }
-
-    read_target_profiles(ser);
 
     read_seen_types(ser);
 

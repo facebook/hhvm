@@ -36,8 +36,18 @@ THRIFT_STRESS_TEST(Echo256b_eb) {
   co_await client->co_echoEb(s);
 }
 
-THRIFT_STRESS_TEST(Echo4096b) {
-  static std::string const s(4096, '?');
+THRIFT_STRESS_TEST(Echo4k) {
+  static std::string const s(1 << 12, '?');
+  co_await client->co_echo(s);
+}
+
+THRIFT_STRESS_TEST(Echo8k) {
+  static std::string const s(1 << 13, '?');
+  co_await client->co_echo(s);
+}
+
+THRIFT_STRESS_TEST(Echo16k) {
+  static std::string const s(1 << 14, '?');
   co_await client->co_echo(s);
 }
 
@@ -46,8 +56,18 @@ THRIFT_STRESS_TEST(Echo32k) {
   co_await client->co_echo(s);
 }
 
+THRIFT_STRESS_TEST(Echo64k) {
+  static std::string const s(1 << 16, '?');
+  co_await client->co_echo(s);
+}
+
 THRIFT_STRESS_TEST(Echo128k) {
   static std::string const s(1 << 17, '?');
+  co_await client->co_echo(s);
+}
+
+THRIFT_STRESS_TEST(Echo256k) {
+  static std::string const s(1 << 18, '?');
   co_await client->co_echo(s);
 }
 
@@ -56,18 +76,83 @@ THRIFT_STRESS_TEST(Echo512k) {
   co_await client->co_echo(s);
 }
 
+THRIFT_STRESS_TEST(Echo1M) {
+  static std::string const s(1 << 20, '?');
+  co_await client->co_echo(s);
+}
+
+THRIFT_STRESS_TEST(Echo2M) {
+  static std::string const s(1 << 21, '?');
+  co_await client->co_echo(s);
+}
+
+THRIFT_STRESS_TEST(Echo4M) {
+  static std::string const s(1 << 22, '?');
+  co_await client->co_echo(s);
+}
+
+THRIFT_STRESS_TEST(Echo8M) {
+  static std::string const s(1 << 23, '?');
+  co_await client->co_echo(s);
+}
+
+THRIFT_STRESS_TEST(Echo4k_eb) {
+  static std::string const s(1 << 12, '?');
+  co_await client->co_echoEb(s);
+}
+
+THRIFT_STRESS_TEST(Echo8k_eb) {
+  static std::string const s(1 << 13, '?');
+  co_await client->co_echoEb(s);
+}
+
+THRIFT_STRESS_TEST(Echo16k_eb) {
+  static std::string const s(1 << 14, '?');
+  co_await client->co_echoEb(s);
+}
+
+THRIFT_STRESS_TEST(Echo32k_eb) {
+  static std::string const s(1 << 15, '?');
+  co_await client->co_echoEb(s);
+}
+
+THRIFT_STRESS_TEST(Echo64k_eb) {
+  static std::string const s(1 << 16, '?');
+  co_await client->co_echoEb(s);
+}
+
+THRIFT_STRESS_TEST(Echo128k_eb) {
+  static std::string const s(1 << 17, '?');
+  co_await client->co_echoEb(s);
+}
+
+THRIFT_STRESS_TEST(Echo256k_eb) {
+  static std::string const s(1 << 18, '?');
+  co_await client->co_echoEb(s);
+}
+
 THRIFT_STRESS_TEST(Echo512k_eb) {
   static std::string const s(1 << 19, '?');
   co_await client->co_echoEb(s);
 }
 
-THRIFT_STRESS_TEST(Echo4M) {
-  static std::string const s(4096000, '?');
-  co_await client->co_echo(s);
+THRIFT_STRESS_TEST(Echo1M_eb) {
+  static std::string const s(1 << 20, '?');
+  co_await client->co_echoEb(s);
+}
+
+THRIFT_STRESS_TEST(Echo2M_eb) {
+  static std::string const s(1 << 21, '?');
+  co_await client->co_echoEb(s);
 }
 
 THRIFT_STRESS_TEST(Echo4M_eb) {
-  static std::string const s(4096000, '?');
+  static std::string const s(1 << 22, '?');
+  co_await client->co_echoEb(s);
+}
+
+THRIFT_STRESS_TEST(Echo8M_eb) {
+  static std::string const s(1 << 23, '?');
   co_await client->co_echoEb(s);
 }
 
@@ -244,4 +329,160 @@ THRIFT_STRESS_TEST(Stream5M_20kChunks) {
   req.processInfo()->chunkSize() = 20 * 1'024;
   req.processInfo()->numChunks() = 250;
   co_await client->co_streamTm(std::move(req));
+}
+
+THRIFT_STRESS_TEST(StorageRead_4k) {
+  StorageReadRequest req;
+  req.responseBytes() = 1 << 12;
+  co_await client->co_storageReadEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageRead_8k) {
+  StorageReadRequest req;
+  req.responseBytes() = 1 << 13;
+  co_await client->co_storageReadEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageRead_16k) {
+  StorageReadRequest req;
+  req.responseBytes() = 1 << 14;
+  co_await client->co_storageReadEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageRead_32k) {
+  StorageReadRequest req;
+  req.responseBytes() = 1 << 15;
+  co_await client->co_storageReadEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageRead_64k) {
+  StorageReadRequest req;
+  req.responseBytes() = 1 << 16;
+  co_await client->co_storageReadEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageRead_128k) {
+  StorageReadRequest req;
+  req.responseBytes() = 1 << 17;
+  co_await client->co_storageReadEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageRead_256k) {
+  StorageReadRequest req;
+  req.responseBytes() = 1 << 18;
+  co_await client->co_storageReadEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageRead_512k) {
+  StorageReadRequest req;
+  req.responseBytes() = 1 << 19;
+  co_await client->co_storageReadEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageRead_1M) {
+  StorageReadRequest req;
+  req.responseBytes() = 1 << 20;
+  co_await client->co_storageReadEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageRead_2M) {
+  StorageReadRequest req;
+  req.responseBytes() = 1 << 21;
+  co_await client->co_storageReadEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageRead_4M) {
+  StorageReadRequest req;
+  req.responseBytes() = 1 << 22;
+  co_await client->co_storageReadEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageRead_8M) {
+  StorageReadRequest req;
+  req.responseBytes() = 1 << 23;
+  co_await client->co_storageReadEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageWrite_4k) {
+  static std::string const s(1 << 12, '?');
+  StorageWriteRequest req;
+  req.payload() = s;
+  co_await client->co_storageWriteEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageWrite_8k) {
+  static std::string const s(1 << 13, '?');
+  StorageWriteRequest req;
+  req.payload() = s;
+  co_await client->co_storageWriteEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageWrite_16k) {
+  static std::string const s(1 << 14, '?');
+  StorageWriteRequest req;
+  req.payload() = s;
+  co_await client->co_storageWriteEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageWrite_32k) {
+  static std::string const s(1 << 15, '?');
+  StorageWriteRequest req;
+  req.payload() = s;
+  co_await client->co_storageWriteEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageWrite_64k) {
+  static std::string const s(1 << 16, '?');
+  StorageWriteRequest req;
+  req.payload() = s;
+  co_await client->co_storageWriteEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageWrite_128k) {
+  static std::string const s(1 << 17, '?');
+  StorageWriteRequest req;
+  req.payload() = s;
+  co_await client->co_storageWriteEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageWrite_256k) {
+  static std::string const s(1 << 18, '?');
+  StorageWriteRequest req;
+  req.payload() = s;
+  co_await client->co_storageWriteEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageWrite_512k) {
+  static std::string const s(1 << 19, '?');
+  StorageWriteRequest req;
+  req.payload() = s;
+  co_await client->co_storageWriteEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageWrite_1M) {
+  static std::string const s(1 << 20, '?');
+  StorageWriteRequest req;
+  req.payload() = s;
+  co_await client->co_storageWriteEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageWrite_2M) {
+  static std::string const s(1 << 21, '?');
+  StorageWriteRequest req;
+  req.payload() = s;
+  co_await client->co_storageWriteEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageWrite_4M) {
+  static std::string const s(1 << 22, '?');
+  StorageWriteRequest req;
+  req.payload() = s;
+  co_await client->co_storageWriteEb(req);
+}
+
+THRIFT_STRESS_TEST(StorageWrite_8M) {
+  static std::string const s(1 << 23, '?');
+  StorageWriteRequest req;
+  req.payload() = s;
+  co_await client->co_storageWriteEb(req);
 }

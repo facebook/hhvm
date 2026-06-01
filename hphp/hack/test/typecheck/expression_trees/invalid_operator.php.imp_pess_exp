@@ -1,3 +1,7 @@
+WARN: File "invalid_operator.php", line 29, characters 38-39:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "invalid_operator.php", line 29, characters 20-26:
+  This expression has type `dynamic`
 ERROR: File "invalid_operator.php", line 13, characters 19-27:
 `new` is not supported in expression trees. (Parsing[1002])
 ERROR: File "invalid_operator.php", line 16, characters 19-26:

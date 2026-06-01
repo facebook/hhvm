@@ -17,8 +17,6 @@ type t = {
   opts: GlobalOptions.t;
   gc_minor_heap_size: int;
   gc_space_overhead: int;
-  hackfmt_version: int;
-  sharedmem_dep_table_pow: int;
   sharedmem_global_size: int;
   sharedmem_hash_table_pow: int;
   sharedmem_heap_size: int;

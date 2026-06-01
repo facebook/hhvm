@@ -238,4 +238,5 @@ public class InteractWithSharedBlockingReactiveWrapper
     public SharedInteraction createSharedInteraction() {
         return new SharedInteractionImpl(_delegate.createSharedInteraction());
     }
+
 }

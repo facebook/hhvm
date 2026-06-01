@@ -69,12 +69,12 @@ type feature_name =
   | ExpressionTreeCoalesceOperator
   | ExpressionTreeNullsafeObjGet
   | NamedParameters
-  | NamedParametersUse
   | XhpTypeConstants
   | CapturePipeVariables
   | AllowExtendedAwaitSyntax
   | AllowConditionalAwaitSyntax
   | ShapeFieldPunning
+  | RepresentableAs
   | TestFeature
 [@@deriving eq, ord, show]
 
@@ -121,12 +121,12 @@ let feature_name_map =
       ("expression_tree_coalesce_operator", ExpressionTreeCoalesceOperator);
       ("expression_tree_nullsafe_obj_get", ExpressionTreeNullsafeObjGet);
       ("named_parameters", NamedParameters);
-      ("named_parameters_use", NamedParametersUse);
       ("xhp_type_constants", XhpTypeConstants);
       ("capture_pipe_variables", CapturePipeVariables);
       ("allow_extended_await_syntax", AllowExtendedAwaitSyntax);
       ("allow_conditional_await_syntax", AllowConditionalAwaitSyntax);
       ("shape_field_punning", ShapeFieldPunning);
+      ("representable_as", RepresentableAs);
       ("test_feature", TestFeature);
     ]
 

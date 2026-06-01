@@ -1,0 +1,2 @@
+ERROR: File "concurrent_non_expr_stmt.php", line 8, characters 5-46:
+`concurrent` block must contain a compound statement of two or more expression statements, IE concurrent `{ <expr>; <expr>; }`. (Parsing[1002])

@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -206,8 +205,6 @@ void HttpRequestHandler::logToAccessLog(Transport* transport) {
 }
 
 void HttpRequestHandler::setupRequest(Transport* transport) {
-  HHProf::Request::Setup(transport);
-
   g_context.getCheck()->setTransport(transport);
 
   GetAccessLog().onNewRequest();
@@ -234,8 +231,6 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
     // INI setting bindings when the thread is initialized.
     hphp_memory_cleanup();
   }
-
-  HHProf::Request::Teardown();
 }
 
 void HttpRequestHandler::handleRequest(Transport *transport) {

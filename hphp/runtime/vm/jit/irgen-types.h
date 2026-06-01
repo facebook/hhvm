@@ -18,6 +18,7 @@
 #include "hphp/runtime/vm/containers.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/hhbc-shared.h"
 
 namespace HPHP {
 
@@ -51,7 +52,7 @@ SSATmp* verifyPropType(IRGS& env,
                        SSATmp* name,
                        bool isSProp);
 
-void verifyRetType(IRGS& env, int32_t id, int32_t ind, bool onlyCheckNullability);
+void verifyRetType(IRGS& env, int32_t id, BCSPRelOffset stackOffset, HPHP::VerifyRetKind kind);
 
 void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
                                 SSATmp* val, Block* fail);

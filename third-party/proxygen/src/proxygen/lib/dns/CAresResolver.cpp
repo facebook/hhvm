@@ -690,6 +690,12 @@ void CAresResolver::init() {
     optmask |= ARES_OPT_UDP_PORT | ARES_OPT_TCP_PORT;
   }
 
+  // c-ares now has a qcache which is default enabled, disable it
+#ifdef ARES_OPT_QUERY_CACHE
+  opts.qcache_max_ttl = 0;
+  optmask |= ARES_OPT_QUERY_CACHE;
+#endif
+
   int err = ares_init_options(&channel_, &opts, optmask);
   if (err != ARES_SUCCESS) {
     LOG(DFATAL) << "ares_init_options() failed: " << ares_strerror(err);

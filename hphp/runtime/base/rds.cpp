@@ -809,6 +809,18 @@ size_t usedPersistentBytes() {
   return s_persistent_usage;
 }
 
+size_t capacityBytes() {
+  return s_local_base;
+}
+
+size_t capacityLocalBytes() {
+  return capacityBytes();
+}
+
+size_t capacityPersistentBytes() {
+  return Cfg::Eval::RDSSize / 4;
+}
+
 namespace {
 
 std::vector<CategoryUsage> usageByCategoryLocked() {
@@ -1095,6 +1107,13 @@ void setPreAssignments(const Ordering& ordering) {
   assertx(Cfg::Repo::Authoritative);
   assertx(Cfg::Eval::ReorderRDS);
   assertx(s_settingPreAssignments);
+
+  // If we got here it means that we will not need to put target profiles
+  // into RDS. Which means we don't need as much RDS space as normally.
+  // There should be no local rds handles allocated before this
+  always_assert(s_local_base == s_local_frontier);
+  s_local_base /= 4;
+  s_local_frontier = s_local_base;
 
   Guard g(s_allocMutex);
 

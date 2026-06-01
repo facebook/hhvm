@@ -30,6 +30,8 @@
 #include <utility>
 #include <vector>
 
+#include <algorithm>
+
 #include <boost/algorithm/string.hpp>
 
 #include <thrift/compiler/ast/t_const_value.h>
@@ -67,6 +69,14 @@ class t_name_generator {
 std::string unescape(std::string s) {
   boost::replace_all(s, "\\\\", "\\");
   return s;
+}
+
+bool has_non_generated_structured_annotations(
+    node_list_view<const t_const> annotations) {
+  return std::any_of(
+      annotations.begin(), annotations.end(), [](const t_const& annotation) {
+        return !annotation.generated();
+      });
 }
 
 class t_result_struct final : public t_structured {
@@ -380,16 +390,39 @@ class t_hack_generator : public t_concat_generator {
       bool is_constructor_shape = false);
   void generate_php_struct_shape_collection_value_lambda(
       std::ostream& out, t_name_generator& namer, const t_type* t);
+  bool type_uses_recursive_shape(
+      const t_type* ttype,
+      const t_structured* root_shape_struct,
+      std::set<const t_type*>* visiting = nullptr);
+  std::string type_to_recursive_shape_typehint(
+      const t_type* ttype, const t_structured* root_shape_struct);
+  std::string recursive_shape_cast(
+      const t_type* ttype, const std::string& expr);
   void generate_hack_array_from_shape_lambda(
-      std::ostream& out, t_name_generator& namer, const t_type* t);
+      std::ostream& out,
+      t_name_generator& namer,
+      const t_type* t,
+      const t_structured* root_shape_struct = nullptr);
   void generate_hack_array_from_shape_lambda(
-      std::ostream& out, t_name_generator& namer, const t_map* t);
+      std::ostream& out,
+      t_name_generator& namer,
+      const t_map* t,
+      const t_structured* root_shape_struct = nullptr);
   void generate_hack_array_from_shape_lambda(
-      std::ostream& out, t_name_generator& namer, const t_list* t);
+      std::ostream& out,
+      t_name_generator& namer,
+      const t_list* t,
+      const t_structured* root_shape_struct = nullptr);
   void generate_hack_array_from_shape_lambda(
-      std::ostream& out, t_name_generator& namer, const t_set* t);
+      std::ostream& out,
+      t_name_generator& namer,
+      const t_set* t,
+      const t_structured* root_shape_struct = nullptr);
   void generate_hack_array_from_shape_lambda(
-      std::ostream& out, t_name_generator& namer, const t_structured* t);
+      std::ostream& out,
+      t_name_generator& namer,
+      const t_structured* t,
+      const t_structured* root_shape_struct = nullptr);
   void generate_shape_from_hack_array_lambda(
       std::ostream& out, t_name_generator& namer, const t_type* t);
   void generate_php_struct_from_shape(
@@ -421,7 +454,8 @@ class t_hack_generator : public t_concat_generator {
       t_name_generator& namer,
       const std::string& val,
       bool is_shape_method,
-      bool uses_thrift_only_methods = false);
+      bool uses_thrift_only_methods = false,
+      const t_structured* root_shape_struct = nullptr);
 
   bool type_has_nested_struct(const t_type* t);
   bool field_is_nullable(const t_structured* tstruct, const t_field* field);
@@ -1315,7 +1349,8 @@ void t_hack_generator::generate_json_struct(
     const std::string& prefix_thrift,
     const std::string& prefix_json) {
   std::string enc = namer("$_tmp");
-  indent(out) << enc << " = " << "\\json_encode(" << prefix_json << ");\n";
+  indent(out) << enc << " = "
+              << "\\fb_json_encode_force_php_arrays(" << prefix_json << ");\n";
   std::string tmp = namer("$_tmp");
   t_field felem(*tstruct, tmp);
   indent(out) << declare_field(&felem, true, true, true).substr(1) << "\n";
@@ -1529,7 +1564,7 @@ void t_hack_generator::generate_json_reader(
                 << union_field_to_enum(tstruct, nullptr, tstruct->name())
                 << ";\n";
   }
-  indent(out) << "$parsed = json_decode($jsonText, true);\n\n";
+  indent(out) << "$parsed = PHP\\json_decode($jsonText, true);\n\n";
 
   indent(out)
       << "if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {\n";
@@ -1676,7 +1711,8 @@ void t_hack_generator::close_generator() {
     annotations_out << indent() << "return dict[\n";
     indent_up();
     for (const t_const* tconst : program_->consts()) {
-      if (tconst->structured_annotations().empty()) {
+      if (!has_non_generated_structured_annotations(
+              tconst->structured_annotations())) {
         continue;
       }
       annotations_out << indent() << "'" << tconst->name() << "' => "
@@ -1845,7 +1881,8 @@ void t_hack_generator::generate_enum(const t_enum* tenum) {
   annotations_out << indent() << "'constants' => dict[\n";
   indent_up();
   for (const t_enum_value& constant : tenum->values()) {
-    if (constant.structured_annotations().empty()) {
+    if (!has_non_generated_structured_annotations(
+            constant.structured_annotations())) {
       continue;
     }
     annotations_out << indent() << "'" << constant.name() << "' => "
@@ -3168,12 +3205,14 @@ void t_hack_generator::generate_php_struct_shape_spec(
     if (const auto field_adapter = find_hack_field_adapter(field)) {
       typehint = *field_adapter + "::THackType";
     } else {
-      typehint = type_to_typehint(
-          t,
-          {{TypeToTypehintVariations::IS_SHAPE, !is_constructor_shape},
-           {TypeToTypehintVariations::IS_ANY_SHAPE, true},
-           {TypeToTypehintVariations::IGNORE_WRAPPER, true},
-           {TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER, true}});
+      typehint = is_constructor_shape
+          ? type_to_typehint(
+                t,
+                {{TypeToTypehintVariations::IS_SHAPE, false},
+                 {TypeToTypehintVariations::IS_ANY_SHAPE, true},
+                 {TypeToTypehintVariations::IGNORE_WRAPPER, true},
+                 {TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER, true}})
+          : type_to_recursive_shape_typehint(t, tstruct);
     }
     bool nullable = nullable_everything_ || field_is_nullable(tstruct, &field);
 
@@ -3259,8 +3298,138 @@ void t_hack_generator::generate_php_struct_shape_collection_value_lambda(
   }
 }
 
+bool t_hack_generator::type_uses_recursive_shape(
+    const t_type* ttype,
+    const t_structured* root_shape_struct,
+    std::set<const t_type*>* visiting) {
+  if (root_shape_struct == nullptr) {
+    return false;
+  }
+
+  if (const auto* ttypedef = ttype->try_as<t_placeholder_typedef>()) {
+    ttype = &ttypedef->type().deref();
+  }
+  if (find_hack_adapter(ttype)) {
+    return false;
+  }
+  if (const auto* ttypedef = ttype->try_as<t_typedef>()) {
+    ttype = &ttypedef->type().deref();
+  }
+  ttype = ttype->get_true_type();
+
+  std::set<const t_type*> local_visiting;
+  auto& visited_types = visiting == nullptr ? local_visiting : *visiting;
+  if (!visited_types.insert(ttype).second) {
+    return false;
+  }
+
+  bool uses_recursive_shape = false;
+  if (const auto* structured = ttype->try_as<t_structured>()) {
+    if (structured == root_shape_struct) {
+      uses_recursive_shape = true;
+    } else {
+      for (const auto& field : structured->fields()) {
+        if (skip_codegen(&field)) {
+          continue;
+        }
+        if (type_uses_recursive_shape(
+                field.type().get_type(), root_shape_struct, &visited_types)) {
+          uses_recursive_shape = true;
+          break;
+        }
+      }
+    }
+  } else if (const auto* map = ttype->try_as<t_map>()) {
+    uses_recursive_shape =
+        type_uses_recursive_shape(
+            map->key_type().get_type(), root_shape_struct, &visited_types) ||
+        type_uses_recursive_shape(
+            map->val_type().get_type(), root_shape_struct, &visited_types);
+  } else if (const auto* list = ttype->try_as<t_list>()) {
+    uses_recursive_shape = type_uses_recursive_shape(
+        list->elem_type().get_type(), root_shape_struct, &visited_types);
+  } else if (const auto* set = ttype->try_as<t_set>()) {
+    uses_recursive_shape = type_uses_recursive_shape(
+        set->elem_type().get_type(), root_shape_struct, &visited_types);
+  }
+
+  visited_types.erase(ttype);
+  return uses_recursive_shape;
+}
+
+std::string t_hack_generator::type_to_recursive_shape_typehint(
+    const t_type* ttype, const t_structured* root_shape_struct) {
+  auto shape_variations = std::map<TypeToTypehintVariations, bool>{
+      {TypeToTypehintVariations::IS_SHAPE, true},
+      {TypeToTypehintVariations::IS_ANY_SHAPE, true},
+      {TypeToTypehintVariations::IGNORE_WRAPPER, true},
+      {TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER, true}};
+
+  if (!type_uses_recursive_shape(ttype, root_shape_struct)) {
+    return type_to_typehint(ttype, shape_variations);
+  }
+
+  if (const auto* ttypedef = ttype->try_as<t_placeholder_typedef>()) {
+    ttype = &ttypedef->type().deref();
+  }
+  if (const auto* ttypedef = ttype->try_as<t_typedef>()) {
+    ttype = &ttypedef->type().deref();
+  }
+
+  ttype = ttype->get_true_type();
+  if (ttype->is<t_structured>()) {
+    return "mixed";
+  } else if (const auto* list = ttype->try_as<t_list>()) {
+    return get_container_keyword(ttype, shape_variations) + "<" +
+        type_to_recursive_shape_typehint(
+               list->elem_type().get_type(), root_shape_struct) +
+        ">";
+  } else if (const auto* map = ttype->try_as<t_map>()) {
+    std::string key_type =
+        type_to_typehint(map->key_type().get_type(), shape_variations);
+    if (shape_arraykeys_ && key_type == "string") {
+      key_type = "arraykey";
+    }
+    return get_container_keyword(ttype, shape_variations) + "<" + key_type +
+        ", " +
+        type_to_recursive_shape_typehint(
+               map->val_type().get_type(), root_shape_struct) +
+        ">";
+  } else if (const auto* set = ttype->try_as<t_set>()) {
+    std::string prefix;
+    std::string suffix = ">";
+    if (!legacy_arrays_ && !hack_collections_) {
+      prefix = "keyset";
+    } else {
+      prefix = "dict";
+      suffix = ", bool>";
+    }
+    return prefix + "<" +
+        type_to_recursive_shape_typehint(
+               set->elem_type().get_type(), root_shape_struct) +
+        suffix;
+  }
+
+  return type_to_typehint(ttype, shape_variations);
+}
+
+std::string t_hack_generator::recursive_shape_cast(
+    const t_type* ttype, const std::string& expr) {
+  return "HH\\FIXME\\UNSAFE_CAST<mixed, " +
+      type_to_typehint(
+             ttype,
+             {{TypeToTypehintVariations::IS_SHAPE, true},
+              {TypeToTypehintVariations::IS_ANY_SHAPE, true},
+              {TypeToTypehintVariations::IGNORE_WRAPPER, true},
+              {TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER, true}}) +
+      ">(" + expr + ", 'recursive thrift shape')";
+}
+
 void t_hack_generator::generate_hack_array_from_shape_lambda(
-    std::ostream& out, t_name_generator& namer, const t_map* t) {
+    std::ostream& out,
+    t_name_generator& namer,
+    const t_map* t,
+    const t_structured* root_shape_struct) {
   bool stringify_map_keys = false;
   if (shape_arraykeys_) {
     const t_type* key_type = t->key_type()->get_true_type();
@@ -3272,7 +3441,8 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
   const t_type* val_type = t->val_type().get_type()->get_true_type();
   indent_up();
   indent_up();
-  generate_hack_array_from_shape_lambda(inner, namer, val_type);
+  generate_hack_array_from_shape_lambda(
+      inner, namer, val_type, root_shape_struct);
   indent_down();
   indent_down();
   auto str = inner.str();
@@ -3305,12 +3475,16 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
 }
 
 void t_hack_generator::generate_hack_array_from_shape_lambda(
-    std::ostream& out, t_name_generator& namer, const t_list* t) {
+    std::ostream& out,
+    t_name_generator& namer,
+    const t_list* t,
+    const t_structured* root_shape_struct) {
   std::stringstream inner;
   const t_type* val_type = t->elem_type().get_type()->get_true_type();
   indent_up();
   indent_up();
-  generate_hack_array_from_shape_lambda(inner, namer, val_type);
+  generate_hack_array_from_shape_lambda(
+      inner, namer, val_type, root_shape_struct);
   indent_down();
   indent_down();
   auto str = inner.str();
@@ -3335,7 +3509,7 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
 }
 
 void t_hack_generator::generate_hack_array_from_shape_lambda(
-    std::ostream& out, t_name_generator&, const t_set*) {
+    std::ostream& out, t_name_generator&, const t_set*, const t_structured*) {
   if (hack_collections_ && !arraysets_) {
     out << "\n";
     indent_up();
@@ -3345,25 +3519,36 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
 }
 
 void t_hack_generator::generate_hack_array_from_shape_lambda(
-    std::ostream& out, t_name_generator&, const t_structured* t) {
+    std::ostream& out,
+    t_name_generator&,
+    const t_structured* t,
+    const t_structured* root_shape_struct) {
   out << "\n";
   indent_up();
   indent(out) << "|> ";
   std::string type = hack_name(t);
-  out << type << "::__fromShape($$)";
+  std::string source = "$$";
+  if (type_uses_recursive_shape(t, root_shape_struct)) {
+    source = recursive_shape_cast(t, source);
+  }
+  out << type << "::__fromShape(" << source << ")";
   indent_down();
 }
 
 void t_hack_generator::generate_hack_array_from_shape_lambda(
-    std::ostream& out, t_name_generator& namer, const t_type* t) {
+    std::ostream& out,
+    t_name_generator& namer,
+    const t_type* t,
+    const t_structured* root_shape_struct) {
   if (const t_map* map = t->try_as<t_map>()) {
-    generate_hack_array_from_shape_lambda(out, namer, map);
+    generate_hack_array_from_shape_lambda(out, namer, map, root_shape_struct);
   } else if (const t_list* list = t->try_as<t_list>()) {
-    generate_hack_array_from_shape_lambda(out, namer, list);
+    generate_hack_array_from_shape_lambda(out, namer, list, root_shape_struct);
   } else if (const t_structured* structured = t->try_as<t_structured>()) {
-    generate_hack_array_from_shape_lambda(out, namer, structured);
+    generate_hack_array_from_shape_lambda(
+        out, namer, structured, root_shape_struct);
   } else if (const t_set* set = t->try_as<t_set>()) {
-    generate_hack_array_from_shape_lambda(out, namer, set);
+    generate_hack_array_from_shape_lambda(out, namer, set, root_shape_struct);
   }
 }
 
@@ -3507,7 +3692,7 @@ void t_hack_generator::generate_php_struct_shape_methods(
     } else if (t->is<t_map>() || t->is<t_list>()) {
       inner << source.str();
       std::stringstream inner_;
-      generate_hack_array_from_shape_lambda(inner_, namer, t);
+      generate_hack_array_from_shape_lambda(inner_, namer, t, tstruct);
       auto str = inner_.str();
       if (!str.empty()) {
         inner << str;
@@ -3516,7 +3701,11 @@ void t_hack_generator::generate_php_struct_shape_methods(
     } else if (t->is<t_struct>() || t->is<t_union>()) {
       is_simple_shape_index = false;
       std::string type = hack_name(t);
-      inner << type << "::__fromShape(" << source.str() << ")";
+      std::string source_str = source.str();
+      if (type_uses_recursive_shape(t, tstruct)) {
+        source_str = recursive_shape_cast(t, source_str);
+      }
+      inner << type << "::__fromShape(" << source_str << ")";
     } else {
       inner << source.str();
     }
@@ -3656,7 +3845,8 @@ bool t_hack_generator::
         t_name_generator& namer,
         const std::string& val,
         bool is_shape_method,
-        bool uses_thrift_only_methods) {
+        bool uses_thrift_only_methods,
+        const t_structured* root_shape_struct) {
   if (const auto* ttypedef = ttype->try_as<t_placeholder_typedef>()) {
     ttype = &ttypedef->type().deref();
   }
@@ -3674,10 +3864,14 @@ bool t_hack_generator::
       } else {
         struct_name = hack_name(tstruct);
       }
+      std::string source = val;
+      if (type_uses_recursive_shape(tstruct, root_shape_struct)) {
+        source = recursive_shape_cast(tstruct, source);
+      }
       if (is_async) {
-        out << "await " << struct_name << "::__genFromShape(" << val << ")";
+        out << "await " << struct_name << "::__genFromShape(" << source << ")";
       } else {
-        out << struct_name << "::__fromShape(" << val << ")";
+        out << struct_name << "::__fromShape(" << source << ")";
       }
       return is_async;
     }
@@ -3737,7 +3931,8 @@ bool t_hack_generator::
             namer,
             inner_val,
             is_shape_method,
-            uses_thrift_only_methods);
+            uses_thrift_only_methods,
+            root_shape_struct);
     indent_down();
     auto inner_str = inner.str();
     if (!wrapper && inner_val == inner_str) {
@@ -4885,8 +5080,10 @@ void t_hack_generator::generate_php_struct_structured_annotations_method(
   indent(annotations_out) << "'fields' => dict[\n";
   indent_up();
   for (auto&& field : tstruct->fields()) {
-    if ((field.structured_annotations().empty() &&
-         field.type()->structured_annotations().empty()) ||
+    if ((!has_non_generated_structured_annotations(
+             field.structured_annotations()) &&
+         !has_non_generated_structured_annotations(
+             field.type()->structured_annotations())) ||
         skip_codegen(&field)) {
       continue;
     }
@@ -5147,10 +5344,13 @@ std::string t_hack_generator::render_structured_annotations(
     t_name_generator& namer) {
   std::ostringstream out;
   out << "dict[";
-  if (!annotations.empty()) {
+  if (has_non_generated_structured_annotations(annotations)) {
     out << "\n";
     indent_up();
     for (const auto& annotation : annotations) {
+      if (annotation.generated()) {
+        continue;
+      }
       indent(out) << "'" << hack_name(annotation.type()) << "' => "
                   << render_const_value_helper(
                          annotation.type(),
@@ -5567,7 +5767,8 @@ void t_hack_generator::
             namer,
             field_ref,
             is_shape,
-            uses_thrift_only_methods);
+            uses_thrift_only_methods,
+            is_shape ? tstruct : nullptr);
     source_str = source.str();
     auto [type_wrapper, struct_name, ns] =
         find_hack_wrapper(field.type().get_type());
@@ -6251,7 +6452,8 @@ void t_hack_generator::generate_service_helpers(
   annotations_out << indent() << "'functions' => dict[\n";
   indent_up();
   for (const auto& function : get_supported_client_functions(tservice)) {
-    if (function->structured_annotations().empty()) {
+    if (!has_non_generated_structured_annotations(
+            function->structured_annotations())) {
       continue;
     }
     annotations_out << indent() << "'" << find_hack_name(function) << "' => "

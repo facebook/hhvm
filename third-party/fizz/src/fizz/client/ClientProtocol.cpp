@@ -508,16 +508,18 @@ static folly::Optional<CachedPsk> validatePsk(
   return psk;
 }
 
-static std::map<NamedGroup, std::unique_ptr<KeyExchange>> getKeyExchangers(
+static Status getKeyExchangers(
+    std::map<NamedGroup, std::unique_ptr<KeyExchange>>& keyExchangers,
+    Error& err,
     const Factory& factory,
     const std::vector<NamedGroup>& groups) {
-  std::map<NamedGroup, std::unique_ptr<KeyExchange>> keyExchangers;
   for (auto group : groups) {
-    auto kex = factory.makeKeyExchange(group, KeyExchangeRole::Client);
+    std::unique_ptr<KeyExchange> kex;
+    TRY(factory.makeKeyExchange(kex, err, group, KeyExchangeRole::Client));
     kex->generateKeyPair();
     keyExchangers.emplace(group, std::move(kex));
   }
-  return keyExchangers;
+  return Status::Success;
 }
 
 static Status getClientHello(
@@ -649,10 +651,11 @@ static Status getClientHello(
   return Status::Success;
 }
 
-static ClientPresharedKey getPskExtension(
+static Status getPskExtension(
+    ClientPresharedKey& ret,
+    Error& err,
     const CachedPsk& psk,
     const Clock& clock) {
-  ClientPresharedKey pskExt;
   PskIdentity ident;
   ident.psk_identity = folly::IOBuf::copyBuffer(psk.psk);
   if (psk.type == PskType::Resumption) {
@@ -664,14 +667,17 @@ static ClientPresharedKey getPskExtension(
   } else {
     ident.obfuscated_ticket_age = 0;
   }
-  pskExt.identities.push_back(std::move(ident));
+  ret.identities.push_back(std::move(ident));
   PskBinder binder;
-  size_t binderSize = getHashSize(getHashFunction(psk.cipher));
+  HashFunction hashFunc;
+  size_t binderSize;
+  TRY(getHashFunction(hashFunc, err, psk.cipher));
+  TRY(getHashSize(binderSize, err, hashFunc));
   binder.binder = folly::IOBuf::create(binderSize);
   memset(binder.binder->writableData(), 0, binderSize);
   binder.binder->append(binderSize);
-  pskExt.binders.push_back(std::move(binder));
-  return pskExt;
+  ret.binders.push_back(std::move(binder));
+  return Status::Success;
 }
 
 /**
@@ -687,14 +693,15 @@ static Status encodeAndAddBinders(
     KeyScheduler& scheduler,
     HandshakeContext& handshakeContext,
     const Clock& clock) {
-  scheduler.deriveEarlySecret(folly::range(psk.secret));
+  TRY(scheduler.deriveEarlySecret(err, folly::range(psk.secret)));
 
   auto binderKey = scheduler.getSecret(
       psk.type == PskType::External ? EarlySecrets::ExternalPskBinder
                                     : EarlySecrets::ResumptionPskBinder,
       handshakeContext.getBlankContext());
 
-  auto pskExt = getPskExtension(psk, clock);
+  ClientPresharedKey pskExt;
+  TRY(getPskExtension(pskExt, err, psk, clock));
   Extension pskExtEnc;
   TRY(encodeExtension(pskExtEnc, err, pskExt));
   chlo.extensions.push_back(std::move(pskExtEnc));
@@ -771,14 +778,16 @@ static Status getNegotiatedECHConfig(
     const std::vector<CipherSuite>& supportedCiphers,
     const std::vector<NamedGroup>& supportedGroups) {
   // Convert vectors to use HPKE types.
-  std::vector<hpke::KEMId> supportedKEMs(supportedGroups.size());
+  std::vector<hpke::KEMId> supportedKEMs;
+  supportedKEMs.reserve(supportedGroups.size());
   for (const auto& group : supportedGroups) {
     const auto kemId = hpke::tryGetKEMId(group);
     if (kemId.has_value()) {
       supportedKEMs.push_back(*kemId);
     }
   }
-  std::vector<hpke::AeadId> supportedAeads(supportedCiphers.size());
+  std::vector<hpke::AeadId> supportedAeads;
+  supportedAeads.reserve(supportedCiphers.size());
   for (const auto& suite : supportedCiphers) {
     const auto aeadId = hpke::tryGetAeadId(suite);
     if (aeadId.has_value()) {
@@ -787,8 +796,9 @@ static Status getNegotiatedECHConfig(
   }
 
   // Get a supported ECH config.
-  folly::Optional<ech::NegotiatedECHConfig> negotiatedECHConfig =
-      negotiateECHConfig(echConfigs, supportedKEMs, supportedAeads);
+  folly::Optional<ech::NegotiatedECHConfig> negotiatedECHConfig;
+  TRY(ech::negotiateECHConfig(
+      negotiatedECHConfig, ctx.err, echConfigs, supportedKEMs, supportedAeads));
   if (!negotiatedECHConfig.hasValue()) {
     return ctx.err.error(
         "ECH requested but we don't support any of the provided configs",
@@ -828,8 +838,9 @@ static Status setupECH(
 
   auto fakeSni = negotiatedECHConfig.config.public_name;
   auto kemId = negotiatedECHConfig.config.key_config.kem_id;
-  auto kex =
-      factory.makeKeyExchange(getKexGroup(kemId), KeyExchangeRole::Client);
+  std::unique_ptr<KeyExchange> kex;
+  TRY(factory.makeKeyExchange(
+      kex, ctx.err, getKexGroup(kemId), KeyExchangeRole::Client));
   auto setupResult =
       constructHpkeSetupResult(factory, std::move(kex), negotiatedECHConfig);
   ret = ECHParams{
@@ -994,7 +1005,9 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
     legacySessionId = folly::IOBuf::create(0);
   }
 
-  auto keyExchangers = getKeyExchangers(*context->getFactory(), selectedShares);
+  std::map<NamedGroup, std::unique_ptr<KeyExchange>> keyExchangers;
+  TRY(getKeyExchangers(
+      keyExchangers, ctx.err, *context->getFactory(), selectedShares));
 
   // If ECH requested, setup ECH primitives.
   // These will also be used later in the construction of the client hello outer
@@ -1391,7 +1404,11 @@ static Status negotiatePsk(
       return ctx.err.error(
           "different version in psk", AlertDescription::handshake_failure);
     }
-    if (getHashFunction(cipher) != getHashFunction(attemptedPsk->cipher)) {
+    HashFunction cipherHash;
+    HashFunction pskHash;
+    TRY(getHashFunction(cipherHash, ctx.err, cipher));
+    TRY(getHashFunction(pskHash, ctx.err, attemptedPsk->cipher));
+    if (cipherHash != pskHash) {
       return ctx.err.error(
           "incompatible cipher in psk", AlertDescription::handshake_failure);
     }
@@ -1425,7 +1442,8 @@ Status sm::EventHandler<
         Param& param) {
   auto shlo = std::move(*param.asServerHello());
 
-  Protocol::checkAllowedExtensions(shlo, *state.requestedExtensions());
+  TRY(Protocol::checkAllowedExtensions(
+      ctx.err, shlo, *state.requestedExtensions()));
 
   ProtocolVersion version;
   CipherSuite cipher;
@@ -1477,7 +1495,8 @@ Status sm::EventHandler<
   auto scheduler = state.context()->getFactory()->makeKeyScheduler(cipher);
 
   if (negotiatedPsk.mode) {
-    scheduler->deriveEarlySecret(folly::range(state.attemptedPsk()->secret));
+    TRY(scheduler->deriveEarlySecret(
+        ctx.err, folly::range(state.attemptedPsk()->secret)));
   }
 
   Optional<NamedGroup> group;
@@ -1537,9 +1556,18 @@ Status sm::EventHandler<
     FIZZ_VLOG(8) << "Checking if ECH was accepted...";
 
     auto echScheduler = state.context()->getFactory()->makeKeyScheduler(cipher);
-    echScheduler->deriveEarlySecret(folly::range(state.echState()->random));
-    bool acceptedECH = ech::checkECHAccepted(
-        shlo, echHandshakeContext->clone(), std::move(echScheduler));
+    TRY(echScheduler->deriveEarlySecret(
+        ctx.err, folly::range(state.echState()->random)));
+    bool acceptedECH = false;
+    Error echErr;
+    FIZZ_THROW_ON_ERROR(
+        ech::checkECHAccepted(
+            acceptedECH,
+            echErr,
+            shlo,
+            echHandshakeContext->clone(),
+            std::move(echScheduler)),
+        echErr);
     if (state.echState()->status != ECHStatus::Requested &&
         acceptedECH != (state.echState()->status == ECHStatus::Accepted)) {
       // ECH acceptance mismatch with hrr
@@ -1725,7 +1753,7 @@ static Status getHrrKeyExchangers(
           "hrr selected already-sent group",
           AlertDescription::illegal_parameter);
     }
-    ret = getKeyExchangers(factory, {*negotiatedGroup});
+    TRY(getKeyExchangers(ret, ctx.err, factory, {*negotiatedGroup}));
   } else {
     ret = std::move(previous);
   }
@@ -1743,7 +1771,8 @@ Status EventHandler<
         Param& param) {
   auto hrr = std::move(*param.asHelloRetryRequest());
 
-  Protocol::checkAllowedExtensions(hrr, *state.requestedExtensions());
+  TRY(Protocol::checkAllowedExtensions(
+      ctx.err, hrr, *state.requestedExtensions()));
 
   if (state.keyExchangeType().has_value()) {
     return ctx.err.error("two HRRs", AlertDescription::unexpected_message);
@@ -1765,9 +1794,14 @@ Status EventHandler<
   TRY(getExtension(cookie, ctx.err, hrr.extensions));
 
   auto attemptedPsk = state.attemptedPsk();
-  if (attemptedPsk &&
-      getHashFunction(attemptedPsk->cipher) != getHashFunction(cipher)) {
-    attemptedPsk = folly::none;
+  if (attemptedPsk) {
+    HashFunction cipherHash;
+    HashFunction pskHash;
+    TRY(getHashFunction(cipherHash, ctx.err, cipher));
+    TRY(getHashFunction(pskHash, ctx.err, attemptedPsk->cipher));
+    if (cipherHash != pskHash) {
+      attemptedPsk = folly::none;
+    }
   }
 
   // We move the current key exchangers in so getHrrKeyExchangers can either
@@ -1866,9 +1900,19 @@ Status EventHandler<
     // Check for acceptance. We'll still generate another ECH per the RFC, but
     // the server will already let us know here.
     auto echScheduler = state.context()->getFactory()->makeKeyScheduler(cipher);
-    echScheduler->deriveEarlySecret(folly::range(state.echState()->random));
-    if (ech::checkECHAccepted(
-            hrr, echHandshakeContext->clone(), std::move(echScheduler))) {
+    TRY(echScheduler->deriveEarlySecret(
+        ctx.err, folly::range(state.echState()->random)));
+    bool echAccepted = false;
+    Error echErr;
+    FIZZ_THROW_ON_ERROR(
+        ech::checkECHAccepted(
+            echAccepted,
+            echErr,
+            hrr,
+            echHandshakeContext->clone(),
+            std::move(echScheduler)),
+        echErr);
+    if (echAccepted) {
       echStatus = ECHStatus::Accepted;
     } else {
       echStatus = ECHStatus::Rejected;
@@ -2041,7 +2085,8 @@ Status EventHandler<
         Param& param) {
   auto ee = std::move(*param.asEncryptedExtensions());
 
-  Protocol::checkAllowedExtensions(ee, *state.requestedExtensions());
+  TRY(Protocol::checkAllowedExtensions(
+      ctx.err, ee, *state.requestedExtensions()));
 
   state.handshakeContext()->appendToTranscript(*ee.originalEncoding);
 
@@ -2386,8 +2431,12 @@ Status EventHandler<
 
   if (state.verifier()) {
     try {
-      if (auto verifiedCert =
-              state.verifier()->verify(state.unverifiedCertChain())) {
+      std::shared_ptr<const Cert> verifiedCert;
+      FIZZ_THROW_ON_ERROR(
+          state.verifier()->verify(
+              verifiedCert, ctx.err, state.unverifiedCertChain()),
+          ctx.err);
+      if (verifiedCert) {
         newCert = verifiedCert;
       } else {
         newCert = std::move(leaf);
@@ -2547,7 +2596,7 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
 
   state.keyScheduler()->deriveAppTrafficSecrets(
       clientFinishedContext->coalesce());
-  state.keyScheduler()->clearMasterSecret();
+  TRY(state.keyScheduler()->clearMasterSecret(ctx.err));
 
   auto writeRecordLayer =
       state.context()->getFactory()->makeEncryptedWriteRecordLayer(
@@ -2603,6 +2652,7 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
         newState.selectedClientCert() = nullptr;
         newState.clientCert() = std::move(clientCert);
         newState.sentCCS() = sentCCS;
+        newState.handshakeContext().reset();
       }),
       MutateState(&Transition<StateEnum::Established>),
       SecretAvailable(std::move(readSecret)),

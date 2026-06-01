@@ -64,8 +64,8 @@ class {{struct:name}}{{#struct:exception?}}(Thrift.TException){{/struct:exceptio
     {{^struct:union?}}
     {{#each struct:fields as |field|}}
     @__property__
-    def {{field.py_name}}(self) -> {{#if field.optional?}}__T.Optional[{{/if}}{{!
-    }}{{#partial common.type_name type=field.type}}{{#if field.optional?}}]{{/if}}: ...
+    def {{field.py_name}}(self) -> {{#if field.optional?}}__T.Optional[{{/if}}
+    {{~ #partial common.type_name type=field.type}}{{#if field.optional?}}]{{/if}}: ...
     @{{field.py_name}}.setter
     def {{field.py_name}}(self, value: {{#partial common.optional_field_type field=field}}) -> None: ...
     {{/each}}

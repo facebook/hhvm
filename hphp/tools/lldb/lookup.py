@@ -104,7 +104,7 @@ def lookup_litstr(
     m_litstrs = utils.get(unit, "m_litstrs")
     count = sizeof.sizeof(m_litstrs)
 
-    if str_id.signed < 0 or str_id.signed >= count:
+    if count is None or str_id.signed < 0 or str_id.signed >= count:
         return None
 
     try:

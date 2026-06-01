@@ -46,11 +46,11 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(MyStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -66,21 +66,21 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
 
         public test.fixtures.enums.MyEnum2 getMe23() { return me23; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="me3_n3", requiredness=Requiredness.NONE)    public Builder setMe3N3(test.fixtures.enums.MyEnum3 me3N3) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="me3_n3", requiredness=Requiredness.NONE)    public Builder setMe3N3(test.fixtures.enums.MyEnum3 me3N3) {
             this.me3N3 = me3N3;
             return this;
         }
 
         public test.fixtures.enums.MyEnum3 getMe3N3() { return me3N3; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="me1_t1", requiredness=Requiredness.NONE)    public Builder setMe1T1(test.fixtures.enums.MyEnum1 me1T1) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="me1_t1", requiredness=Requiredness.NONE)    public Builder setMe1T1(test.fixtures.enums.MyEnum1 me1T1) {
             this.me1T1 = me1T1;
             return this;
         }
 
         public test.fixtures.enums.MyEnum1 getMe1T1() { return me1T1; }
 
-            @com.facebook.swift.codec.ThriftField(value=6, name="me1_t2", requiredness=Requiredness.NONE)    public Builder setMe1T2(test.fixtures.enums.MyEnum1 me1T2) {
+        @com.facebook.swift.codec.ThriftField(value=6, name="me1_t2", requiredness=Requiredness.NONE)    public Builder setMe1T2(test.fixtures.enums.MyEnum1 me1T2) {
             this.me1T2 = me1T2;
             return this;
         }
@@ -106,6 +106,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -114,48 +115,41 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     private final test.fixtures.enums.MyEnum2 me23;
     public static final int _ME2_3 = 1;
     private static final TField ME23_FIELD_DESC = new TField("me2_3", TType.I32, (short)1);
-        private final test.fixtures.enums.MyEnum3 me3N3;
+    private final test.fixtures.enums.MyEnum3 me3N3;
     public static final int _ME3_N3 = 2;
     private static final TField ME3_N3_FIELD_DESC = new TField("me3_n3", TType.I32, (short)2);
-        private final test.fixtures.enums.MyEnum1 me1T1;
+    private final test.fixtures.enums.MyEnum1 me1T1;
     public static final int _ME1_T1 = 4;
     private static final TField ME1_T1_FIELD_DESC = new TField("me1_t1", TType.I32, (short)4);
-        private final test.fixtures.enums.MyEnum1 me1T2;
+    private final test.fixtures.enums.MyEnum1 me1T2;
     public static final int _ME1_T2 = 6;
     private static final TField ME1_T2_FIELD_DESC = new TField("me1_t2", TType.I32, (short)6);
     static {
-      NAMES_TO_IDS.put("me23", 1);
-      THRIFT_NAMES_TO_IDS.put("me2_3", 1);
-      FIELD_METADATA.put(1, ME23_FIELD_DESC);
-      NAMES_TO_IDS.put("me3N3", 2);
-      THRIFT_NAMES_TO_IDS.put("me3_n3", 2);
-      FIELD_METADATA.put(2, ME3_N3_FIELD_DESC);
-      NAMES_TO_IDS.put("me1T1", 4);
-      THRIFT_NAMES_TO_IDS.put("me1_t1", 4);
-      FIELD_METADATA.put(4, ME1_T1_FIELD_DESC);
-      NAMES_TO_IDS.put("me1T2", 6);
-      THRIFT_NAMES_TO_IDS.put("me1_t2", 6);
-      FIELD_METADATA.put(6, ME1_T2_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/enums/MyStruct"),
-        MyStruct.class, MyStruct::read0));
+        NAMES_TO_IDS.put("me23", 1);
+        THRIFT_NAMES_TO_IDS.put("me2_3", 1);
+        FIELD_METADATA.put(1, ME23_FIELD_DESC);
+        NAMES_TO_IDS.put("me3N3", 2);
+        THRIFT_NAMES_TO_IDS.put("me3_n3", 2);
+        FIELD_METADATA.put(2, ME3_N3_FIELD_DESC);
+        NAMES_TO_IDS.put("me1T1", 4);
+        THRIFT_NAMES_TO_IDS.put("me1_t1", 4);
+        FIELD_METADATA.put(4, ME1_T1_FIELD_DESC);
+        NAMES_TO_IDS.put("me1T2", 6);
+        THRIFT_NAMES_TO_IDS.put("me1_t2", 6);
+        FIELD_METADATA.put(6, ME1_T2_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("test.dev/fixtures/enums/MyStruct"),
+            MyStruct.class, MyStruct::read0));
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="me2_3", requiredness=Requiredness.NONE)
     public test.fixtures.enums.MyEnum2 getMe23() { return me23; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="me3_n3", requiredness=Requiredness.NONE)
     public test.fixtures.enums.MyEnum3 getMe3N3() { return me3N3; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="me1_t1", requiredness=Requiredness.NONE)
     public test.fixtures.enums.MyEnum1 getMe1T1() { return me1T1; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="me1_t2", requiredness=Requiredness.NONE)
     public test.fixtures.enums.MyEnum1 getMe1T2() { return me1T2; }
@@ -193,95 +187,98 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(me23);
-            _hashCode = 31 * _hashCode + Objects.hashCode(me3N3);
-            _hashCode = 31 * _hashCode + Objects.hashCode(me1T1);
-            _hashCode = 31 * _hashCode + Objects.hashCode(me1T2);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(me3N3);
+        _hashCode = 31 * _hashCode + Objects.hashCode(me1T1);
+        _hashCode = 31 * _hashCode + Objects.hashCode(me1T2);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyStruct> asReader() {
       return MyStruct::read0;
     }
 
     public static MyStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
-      MyStruct.Builder builder = new MyStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _ME2_3:
-          if (__field.type == TType.I32) {
-            test.fixtures.enums.MyEnum2 me23 = test.fixtures.enums.MyEnum2.fromInteger(oprot.readI32());
-            builder.setMe23(me23);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ME3_N3:
-          if (__field.type == TType.I32) {
-            test.fixtures.enums.MyEnum3 me3N3 = test.fixtures.enums.MyEnum3.fromInteger(oprot.readI32());
-            builder.setMe3N3(me3N3);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ME1_T1:
-          if (__field.type == TType.I32) {
-            test.fixtures.enums.MyEnum1 me1T1 = test.fixtures.enums.MyEnum1.fromInteger(oprot.readI32());
-            builder.setMe1T1(me1T1);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ME1_T2:
-          if (__field.type == TType.I32) {
-            test.fixtures.enums.MyEnum1 me1T2 = test.fixtures.enums.MyEnum1.fromInteger(oprot.readI32());
-            builder.setMe1T2(me1T2);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
+        MyStruct.Builder builder = new MyStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _ME2_3:
+                if (__field.type == TType.I32) {
+                    test.fixtures.enums.MyEnum2 _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.enums.MyEnum2.fromInteger(oprot.readI32());
+                    builder.setMe23(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ME3_N3:
+                if (__field.type == TType.I32) {
+                    test.fixtures.enums.MyEnum3 _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.enums.MyEnum3.fromInteger(oprot.readI32());
+                    builder.setMe3N3(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ME1_T1:
+                if (__field.type == TType.I32) {
+                    test.fixtures.enums.MyEnum1 _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.enums.MyEnum1.fromInteger(oprot.readI32());
+                    builder.setMe1T1(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ME1_T2:
+                if (__field.type == TType.I32) {
+                    test.fixtures.enums.MyEnum1 _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.enums.MyEnum1.fromInteger(oprot.readI32());
+                    builder.setMe1T2(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      test.fixtures.enums.MyEnum2 _iter0 = this.me23;
-      oprot.writeFieldBegin(ME23_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      test.fixtures.enums.MyEnum3 _iter0 = this.me3N3;
-      oprot.writeFieldBegin(ME3_N3_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      test.fixtures.enums.MyEnum1 _iter0 = this.me1T1;
-      oprot.writeFieldBegin(ME1_T1_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      test.fixtures.enums.MyEnum1 _iter0 = this.me1T2;
-      oprot.writeFieldBegin(ME1_T2_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            test.fixtures.enums.MyEnum2 _fbthriftVar0 = this.me23;
+            oprot.writeFieldBegin(ME23_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            test.fixtures.enums.MyEnum3 _fbthriftVar0 = this.me3N3;
+            oprot.writeFieldBegin(ME3_N3_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            test.fixtures.enums.MyEnum1 _fbthriftVar0 = this.me1T1;
+            oprot.writeFieldBegin(ME1_T1_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            test.fixtures.enums.MyEnum1 _fbthriftVar0 = this.me1T2;
+            oprot.writeFieldBegin(ME1_T2_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _MyStructLazy {

@@ -703,7 +703,7 @@ struct OptVisit {
     // lea'd off of other registers.
     if (ptr.seg != Segment::DS) return;
     if_rewritable(env, state, ptr.base, [&] (const DefInfo& def) {
-      if (arch::get() == Arch::ARM) {
+      if (arch::any<arch::ARM>()) {
         // After lowering, only [base, index lsl #scale] and [base, #imm]
         // are allowed where the range of #imm is [-256 .. 255]
         assertx(ptr.base.isValid());
@@ -719,7 +719,7 @@ struct OptVisit {
       ptr.disp += def.disp;
     });
     if_rewritable(env, state, ptr.index, [&] (const DefInfo& def) {
-      if (arch::get() == Arch::ARM) return;
+      if (arch::any<arch::ARM>()) return;
       auto const newDisp =
         static_cast<int64_t>(ptr.disp) + ptr.scale * def.disp;
       if (!deltaFits(newDisp, sz::dword)) return;

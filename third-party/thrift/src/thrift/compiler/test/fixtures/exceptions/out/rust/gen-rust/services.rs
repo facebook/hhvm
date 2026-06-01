@@ -6,9 +6,9 @@
 
 /// Service definitions for `Raiser`.
 pub mod raiser {
+
     #[derive(Clone, Debug)]
     pub enum DoBlandExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -88,7 +88,6 @@ pub mod raiser {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -98,7 +97,9 @@ pub mod raiser {
 
     #[derive(Clone, Debug)]
     pub enum DoRaiseExn {
-        b(crate::types::Banal),        f(crate::types::Fiery),        s(crate::types::Serious),
+        b(crate::types::Banal),
+        f(crate::types::Fiery),
+        s(crate::types::Serious),
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -197,7 +198,8 @@ pub mod raiser {
                     );
                     ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
-                }                ::std::result::Result::Err(Self::f(inner)) => {
+                }
+                ::std::result::Result::Err(Self::f(inner)) => {
                     p.write_field_begin(
                         "f",
                         ::fbthrift::TType::Struct,
@@ -205,7 +207,8 @@ pub mod raiser {
                     );
                     ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
-                }                ::std::result::Result::Err(Self::s(inner)) => {
+                }
+                ::std::result::Result::Err(Self::s(inner)) => {
                     p.write_field_begin(
                         "s",
                         ::fbthrift::TType::Struct,
@@ -223,7 +226,6 @@ pub mod raiser {
 
     #[derive(Clone, Debug)]
     pub enum Get200Exn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -303,7 +305,6 @@ pub mod raiser {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -313,7 +314,9 @@ pub mod raiser {
 
     #[derive(Clone, Debug)]
     pub enum Get500Exn {
-        f(crate::types::Fiery),        b(crate::types::Banal),        s(crate::types::Serious),
+        f(crate::types::Fiery),
+        b(crate::types::Banal),
+        s(crate::types::Serious),
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -412,7 +415,8 @@ pub mod raiser {
                     );
                     ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
-                }                ::std::result::Result::Err(Self::b(inner)) => {
+                }
+                ::std::result::Result::Err(Self::b(inner)) => {
                     p.write_field_begin(
                         "b",
                         ::fbthrift::TType::Struct,
@@ -420,7 +424,8 @@ pub mod raiser {
                     );
                     ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
-                }                ::std::result::Result::Err(Self::s(inner)) => {
+                }
+                ::std::result::Result::Err(Self::s(inner)) => {
                     p.write_field_begin(
                         "s",
                         ::fbthrift::TType::Struct,

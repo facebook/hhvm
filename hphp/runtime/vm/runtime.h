@@ -66,7 +66,8 @@ void checkReadonlyMismatch(const Func* func, uint32_t numArgs,
 [[noreturn]] void throwReadonlyMismatch(const Func* func, int32_t index);
 [[noreturn]] void throwInvalidUnpackArgs();
 [[noreturn]] void throwMissingPositionalArgument(const Func* func, int got);
-[[noreturn]] void throwMissingNamedArgument(const Func* func, int got);
+[[noreturn]] void throwUnexpectedNamedArguments(const Func* func);
+[[noreturn]] void throwMissingNamedParam(const Func* func, const StringData* paramName);
 [[noreturn]] void throwNamedArgumentNameMismatch(const Func* func, const StringData* argName);
 [[noreturn]] void throwOrWarnLocalMustBeValueTypeException(const StringData* locName);
 [[noreturn]] void throwMustBeEnclosedInReadonlyException(const Class* cls,

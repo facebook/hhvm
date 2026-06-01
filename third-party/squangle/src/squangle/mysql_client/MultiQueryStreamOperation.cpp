@@ -29,6 +29,9 @@ MultiQueryStreamOperation::MultiQueryStreamOperation(
     : FetchOperation(std::move(opImpl), std::move(queries)) {}
 
 void MultiQueryStreamOperation::invokeCallback(StreamState reason) {
+  if (!stream_callback_) {
+    return;
+  }
   stream_callback_(*this, reason);
 }
 

@@ -73,7 +73,7 @@ class EomHttpSource : public HTTPSource {
       uint32_t max = std::numeric_limits<uint32_t>::max()) override {
     co_return HTTPBodyEvent{/*body=*/nullptr, /*inEOM=*/true};
   }
-  void stopReading(folly::Optional<const HTTPErrorCode>) override {
+  void stopReading(folly::Optional<const HTTPErrorCode>) noexcept override {
   }
 };
 

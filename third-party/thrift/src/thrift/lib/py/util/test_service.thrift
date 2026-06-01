@@ -43,7 +43,6 @@ service TestService {
   i64 throwUncaughtException(1: string msg);
 }
 
-@thrift.DeprecatedUnvalidatedAnnotations{items = {"priority": "HIGH"}}
 service PriorityService {
   @thrift.Priority{level = thrift.RpcPriority.BEST_EFFORT}
   bool bestEffort();

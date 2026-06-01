@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/SSLContext.h>
 #include <thrift/lib/cpp/transport/THeader.h>
@@ -34,7 +36,7 @@ class ChannelFactory {
       const std::string& host,
       uint16_t port,
       uint32_t connect_timeout,
-      uint32_t channel_timeout,
+      std::optional<uint32_t> channel_timeout,
       CLIENT_TYPE client_t,
       apache::thrift::protocol::PROTOCOL_TYPES proto,
       const std::string& endpoint) = 0;
@@ -43,7 +45,7 @@ class ChannelFactory {
       const std::string& host,
       uint16_t port,
       uint32_t connect_timeout,
-      uint32_t channel_timeout,
+      std::optional<uint32_t> channel_timeout,
       CLIENT_TYPE client_t,
       apache::thrift::protocol::PROTOCOL_TYPES proto,
       const std::string& endpoint);
@@ -55,14 +57,14 @@ class ChannelFactory {
   createThriftChannelUnix(
       const std::string& path,
       uint32_t connect_timeout,
-      uint32_t channel_timeout,
+      std::optional<uint32_t> channel_timeout,
       CLIENT_TYPE client_t,
       apache::thrift::protocol::PROTOCOL_TYPES proto) = 0;
 
   apache::thrift::RequestChannel::Ptr sync_createThriftChannelUnix(
       const std::string& path,
       uint32_t connect_timeout,
-      uint32_t channel_timeout,
+      std::optional<uint32_t> channel_timeout,
       CLIENT_TYPE client_t,
       apache::thrift::protocol::PROTOCOL_TYPES proto);
 
@@ -76,7 +78,7 @@ class ChannelFactory {
       const uint16_t port,
       const uint32_t connect_timeout,
       const uint32_t ssl_timeout,
-      const uint32_t channel_timeout,
+      std::optional<uint32_t> channel_timeout,
       CLIENT_TYPE client_t,
       apache::thrift::protocol::PROTOCOL_TYPES proto,
       const std::string& endpoint) = 0;
@@ -87,7 +89,7 @@ class ChannelFactory {
       const uint16_t port,
       const uint32_t connect_timeout,
       const uint32_t ssl_timeout,
-      const uint32_t channel_timeout,
+      std::optional<uint32_t> channel_timeout,
       CLIENT_TYPE client_t,
       apache::thrift::protocol::PROTOCOL_TYPES proto,
       const std::string& endpoint);
@@ -99,7 +101,7 @@ class DefaultChannelFactory : public ChannelFactory {
       const std::string& host,
       uint16_t port,
       uint32_t connect_timeout,
-      uint32_t channel_timeout,
+      std::optional<uint32_t> channel_timeout,
       CLIENT_TYPE client_t,
       apache::thrift::protocol::PROTOCOL_TYPES proto,
       const std::string& endpoint) override;
@@ -107,7 +109,7 @@ class DefaultChannelFactory : public ChannelFactory {
   folly::Future<apache::thrift::RequestChannel::Ptr> createThriftChannelUnix(
       const std::string& path,
       uint32_t connect_timeout,
-      uint32_t channel_timeout,
+      std::optional<uint32_t> channel_timeout,
       CLIENT_TYPE client_t,
       apache::thrift::protocol::PROTOCOL_TYPES proto) override;
 
@@ -117,7 +119,7 @@ class DefaultChannelFactory : public ChannelFactory {
       const uint16_t port,
       const uint32_t connect_timeout,
       const uint32_t ssl_timeout,
-      const uint32_t channel_timeout,
+      std::optional<uint32_t> channel_timeout,
       CLIENT_TYPE client_t,
       apache::thrift::protocol::PROTOCOL_TYPES proto,
       const std::string& endpoint) override;

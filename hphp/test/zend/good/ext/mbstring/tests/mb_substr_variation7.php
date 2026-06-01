@@ -13,7 +13,7 @@ function main(): void {
 
   mb_internal_encoding('UTF-8');
 
-  $string_ascii = b'+Is an English string'; //21 chars
+  $string_ascii = '+Is an English string'; //21 chars
 
   //Japanese string, 21 characters
   $string_mb = base64_decode(

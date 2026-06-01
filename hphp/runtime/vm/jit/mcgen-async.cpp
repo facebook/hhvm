@@ -628,11 +628,14 @@ AsyncTranslationDispatcher& dispatcher() {
   return *dispatcher;
 }
 void joinAsyncTranslationWorkerThreads() {
-  FTRACE(2, "Waiting for background jit worker threads\n");
+  FTRACE(2, "Waiting for background jit worker threads to finish\n");
   dispatcher().waitEmpty(true);
   enqueuedSKs().destroy();
 }
-
+void waitForAsyncTranslationWorkerThreadsToEmpty() {
+  FTRACE(2, "Waiting for background jit worker threads to empty\n");
+  dispatcher().waitEmpty(false);
+}
 void enqueueAsyncTranslateRequestForJumpstart(RegionContext&& ctx) {
   // Use the SrcKeySet to deduplicate jumpstart requests for the same SrcKey.
   // The serialized SBProf data may contain multiple entries for the same

@@ -25,6 +25,7 @@ struct PrologueTranslator final : Translator {
   // it holds it as a const Func* and won't work for the mutations
   // required for publishing.
   Func* func;
+  // Number of passed positionals.
   uint32_t nPassed;
   PrologueTranslator(Func* func, uint32_t nPassed,
                      TransKind kind = TransKind::Invalid)

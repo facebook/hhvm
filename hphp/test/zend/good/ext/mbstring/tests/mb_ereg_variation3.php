@@ -36,18 +36,18 @@ function main_entry(): void {
 
   mb_regex_encoding('utf-8'); // have to set otherwise won't match $mb properly
   $mb = base64_decode('5pel5pys6Kqe');
-  $character_classes = dict[b'aB1'    => b'[[:alnum:]]+', /*1*/
-                              b'aBcD'   => b'[[:alpha:]]+',
-                              b'ab/='   => b'[[:ascii:]]+',
-                              b" \t"    => b'[[:blank:]]+',
-                              b'234'    => b'[[:digit:]]+', /*5*/
-                              "$mb"    => b'[[:graph:]]+',
-                              b'fjds'   => b'[[:lower:]]+',
-                              b"$mb\t"  => b'[[:print:]]+',
-                              b'.!"*@'  => b'[[:punct:]]+',
-                              b"\t"     => b'[[:space:]]+', /*10*/
-                              b'IDSJV'  => b'[[:upper:]]+',
-                              b'3b5D'   => b'[[:xdigit:]]+']; /*12*/
+  $character_classes = dict['aB1'    => '[[:alnum:]]+', /*1*/
+                              'aBcD'   => '[[:alpha:]]+',
+                              'ab/='   => '[[:ascii:]]+',
+                              " \t"    => '[[:blank:]]+',
+                              '234'    => '[[:digit:]]+', /*5*/
+                              "$mb"    => '[[:graph:]]+',
+                              'fjds'   => '[[:lower:]]+',
+                              "$mb\t"  => '[[:print:]]+',
+                              '.!"*@'  => '[[:punct:]]+',
+                              "\t"     => '[[:space:]]+', /*10*/
+                              'IDSJV'  => '[[:upper:]]+',
+                              '3b5D'   => '[[:xdigit:]]+']; /*12*/
 
   $iterator = 1;
   $regs = null;

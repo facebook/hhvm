@@ -114,9 +114,6 @@ func (p *BadInteractionProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *BadInteractionProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *BadInteractionProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}
@@ -363,9 +360,6 @@ func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *MyServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *MyServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}
@@ -648,9 +642,6 @@ func (p *MyServicePrioParentProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *MyServicePrioParentProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *MyServicePrioParentProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}
@@ -892,9 +883,6 @@ func (p *BadServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *BadServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *BadServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{
@@ -1057,9 +1045,6 @@ func (p *FooBarBazServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *FooBarBazServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *FooBarBazServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}

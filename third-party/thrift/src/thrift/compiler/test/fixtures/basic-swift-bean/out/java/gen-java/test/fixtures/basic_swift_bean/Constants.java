@@ -18,6 +18,6 @@ public final class Constants {
     public static final test.fixtures.basic_swift_bean.MyStruct1 MS = construct_MS();
 
     private static test.fixtures.basic_swift_bean.MyStruct1 construct_MS() {
-      return new test.fixtures.basic_swift_bean.MyStruct1.Builder().setMyIntField(42L).setMyStringField("Meaning_of_life").setMyDataField(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(1).setField2(2).build()).setMajor(32L).build();
+        return new test.fixtures.basic_swift_bean.MyStruct1.Builder().setMyIntField(42L).setMyStringField("Meaning_of_life").setMyDataField(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(1).setField2(2).build()).setMajor(32L).build();
     }
 }

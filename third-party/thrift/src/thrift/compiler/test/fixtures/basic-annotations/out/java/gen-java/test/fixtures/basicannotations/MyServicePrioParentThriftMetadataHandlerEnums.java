@@ -13,8 +13,8 @@ import com.facebook.thrift.metadata.ThriftEnum;
 
 
 class MyServicePrioParentThriftMetadataHandlerEnums {
-  static Map<String, ThriftEnum> getEnums() {
-    Map<String, ThriftEnum> enums = new HashMap<>();
-    return enums;
-  }
+    static Map<String, ThriftEnum> getEnums() {
+        Map<String, ThriftEnum> enums = new HashMap<>();
+        return enums;
+    }
 }

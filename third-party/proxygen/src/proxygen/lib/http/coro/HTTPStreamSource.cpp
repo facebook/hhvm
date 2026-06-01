@@ -288,7 +288,8 @@ folly::coro::Task<HTTPBodyEvent> HTTPStreamSource::readBodyEvent(uint32_t max) {
   co_return res;
 }
 
-void HTTPStreamSource::stopReading(folly::Optional<const HTTPErrorCode> error) {
+void HTTPStreamSource::stopReading(
+    folly::Optional<const HTTPErrorCode> error) noexcept {
   XCHECK(!sourceComplete_) << "Cannot call stopReading twice, or after you "
                               "have finished reading";
 

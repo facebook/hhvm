@@ -1681,16 +1681,6 @@ where
                 self.advance(1);
                 TokenKind::Hash
             }
-            'b' if {
-                let c1 = self.peek_char(1);
-                let c2 = self.peek_char(2);
-                let c3 = self.peek_char(3);
-                c1 == '"' || c1 == '\'' || (c1 == '<' && c2 == '<' && c3 == '<')
-            } =>
-            {
-                self.advance(1);
-                self.scan_token(in_type)
-            }
             // Names
             _ => {
                 if ch0 == INVALID && self.at_end() {

@@ -59,6 +59,8 @@ proxygen_add_library(proxygen_http_webtransport_quicwebtransport
 proxygen_add_library(proxygen_http_webtransport_quic_wt_session
   SRCS
     QuicWtSession.cpp
+  DEPS
+    proxygen_http_codec_hq_codec
   EXPORTED_DEPS
     proxygen_http_webtransport
     proxygen_http_webtransport_wt_stream_manager

@@ -74,7 +74,7 @@ inline bool SrcKey::valid() const {
   auto const funcID = m_s.m_funcID;
   assertx(
     funcID.isInvalid() || funcID.isDummy() ||
-    (prologue() && numEntryArgs() <= func()->numNonVariadicParams() + 1) ||
+    (prologue() && numEntryArgs() <= func()->numPositionalParams() + 1) ||
     (funcEntry() && numEntryArgs() <= func()->numNonVariadicParams()) ||
     (!prologue() && !funcEntry() && offset() < func()->bclen())
   );
@@ -105,7 +105,8 @@ inline Offset SrcKey::offset() const {
 
 inline Offset SrcKey::entryOffset() const {
   assertx(prologue() || funcEntry());
-  return func()->getEntryForNumArgs(numEntryArgs());
+  if (prologue()) return func()->getPrologueEntryForNumPositionals(numEntryArgs());
+  return func()->getFuncEntryForNumArgs(numEntryArgs());
 }
 
 inline uint32_t SrcKey::numEntryArgs() const {

@@ -77,7 +77,7 @@ $inputs = dict[
        // binary data
 /*7*/
 'binary' => vec[
-       b"binary",
+       "binary",
        (string)"binary"],
 
        // object data

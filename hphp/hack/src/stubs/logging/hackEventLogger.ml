@@ -395,13 +395,6 @@ let find_svn_rev_failed _ _ = ()
 let revision_tracker_init_svn_rev_failed _ = ()
 
 (** Watchman Event Watcher client running in the informant *)
-let informant_watcher_not_available _ = ()
-
-let informant_watcher_unknown_state _ = ()
-
-let informant_watcher_mid_update_state _ = ()
-
-let informant_watcher_settled_state _ = ()
 
 let informant_watcher_starting_server_from_settling _ = ()
 
@@ -412,18 +405,9 @@ let send_fd_failure _ = ()
 
 let typechecker_already_running _ = ()
 
-(** Watchman Event Watcher events *)
-let init_watchman_event_watcher _ _ = ()
-
-let init_watchman_failed _ = ()
-
 let restarting_watchman_subscription _ = ()
 
-let watchman_uncaught_exception _ = ()
-
 let monitor_giving_up_exception _ = ()
-
-let processed_clients _ = ()
 
 let server_revision_tracker_forced_reset ~telemetry:_ = ()
 

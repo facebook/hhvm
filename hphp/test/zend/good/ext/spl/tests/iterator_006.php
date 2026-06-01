@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$root = simplexml_load_string(b'<?xml version="1.0"?>
+$root = simplexml_load_string('<?xml version="1.0"?>
 <root>
  <child>Hello</child>
  <child>World</child>

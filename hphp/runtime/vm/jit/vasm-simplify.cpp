@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-info.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -289,7 +290,13 @@ bool simplify(Env&, const Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {
 }
 
 template <typename Inst>
-bool psimplify(Env&, const Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {
+bool psimplify(
+  Env&,
+  const Abi& /*abi*/,
+  const Inst& /*inst*/,
+  Vlabel /*b*/,
+  size_t /*i*/
+) {
   return false;
 }
 
@@ -648,7 +655,7 @@ bool flip_operands_helper(Env& env, const Op& op, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const addq& vadd, Vlabel b, size_t i) {
-  if (arch::any(Arch::ARM)) return false;
+  if (arch::any<arch::ARM>()) return false;
 
   auto stPair = storeq(env, vadd.d, b, i);
   auto const vptrs = stPair.first;
@@ -686,7 +693,7 @@ bool simplify(Env& env, const addq& vadd, Vlabel b, size_t i) {
 // first, try to simplify lea (%r1), %r2 into copy %r1,%r2
 bool simplify(Env& env, const lea& vlea, Vlabel b, size_t i) {
   if (vlea.s.disp == 0 && !vlea.s.index.isValid() &&
-      arch::get() != Arch::ARM && vlea.s.base.isValid()) {
+      !arch::any<arch::ARM>() && vlea.s.base.isValid()) {
     simplify_impl(env, b, i, copy { vlea.s.base, vlea.d });
     return true;
   }
@@ -739,7 +746,7 @@ bool simplify(Env& env, const lea& vlea, Vlabel b, size_t i) {
   // On ARM, we're careful lowering Vptrs upfront, and we need to make sure we
   // don't recreate Vptrs that can't be emitted.  See lowerVptr() for validity
   // conditions.
-  if (arch::get() == Arch::ARM) {
+  if (arch::any<arch::ARM>()) {
     // We can't have both a disp and an index.
     if (newDisp != 0 && vlea.s.index.isValid()) return false;
 
@@ -767,7 +774,7 @@ bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {
   if (simplify_dead_cmp(env, vcmp, b, i)) return true;
   if (flip_operands_helper(env, vcmp, b, i)) return true;
 
-  if (!arch::any(Arch::ARM)) {
+  if (!arch::any<arch::ARM>()) {
     if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
       return simplify_impl(env, b, i, cmpqm { vcmp.s0, *vptr, vcmp.sf });
     }
@@ -795,7 +802,7 @@ bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {
 bool simplify(Env& env, const cmpl& vcmp, Vlabel b, size_t i) {
   if (simplify_dead_cmp(env, vcmp, b, i)) return true;
   if (flip_operands_helper(env, vcmp, b, i)) return true;
-  if (arch::any(Arch::ARM)) return false;
+  if (arch::any<arch::ARM>()) return false;
 
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
@@ -807,7 +814,7 @@ bool simplify(Env& env, const cmpl& vcmp, Vlabel b, size_t i) {
 bool simplify(Env& env, const cmpw& vcmp, Vlabel b, size_t i) {
   if (simplify_dead_cmp(env, vcmp, b, i))  return true;
   if (flip_operands_helper(env, vcmp, b, i)) return true;
-  if (arch::any(Arch::ARM)) return false;
+  if (arch::any<arch::ARM>()) return false;
 
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
@@ -819,7 +826,7 @@ bool simplify(Env& env, const cmpw& vcmp, Vlabel b, size_t i) {
 bool simplify(Env& env, const cmpb& vcmp, Vlabel b, size_t i) {
   if (flip_operands_helper(env, vcmp, b, i)) return true;
   if (simplify_dead_cmp(env, vcmp, b, i)) return true;
-  if (arch::any(Arch::ARM)) return false;
+  if (arch::any<arch::ARM>()) return false;
 
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
@@ -830,7 +837,7 @@ bool simplify(Env& env, const cmpb& vcmp, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const cmpqi& vcmp, Vlabel b, size_t i) {
   if (simplify_dead_cmp(env, vcmp, b, i)) return true;
-  if (arch::any(Arch::ARM)) return false;
+  if (arch::any<arch::ARM>()) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmpqim { vcmp.s0, *vptr, vcmp.sf });
@@ -840,7 +847,7 @@ bool simplify(Env& env, const cmpqi& vcmp, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const cmpli& vcmp, Vlabel b, size_t i) {
   if (simplify_dead_cmp(env, vcmp, b, i)) return true;
-  if (arch::any(Arch::ARM)) return false;
+  if (arch::any<arch::ARM>()) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmplim { vcmp.s0, *vptr, vcmp.sf });
@@ -850,7 +857,7 @@ bool simplify(Env& env, const cmpli& vcmp, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const cmpwi& vcmp, Vlabel b, size_t i) {
   if (simplify_dead_cmp(env, vcmp, b, i)) return true;
-  if (arch::any(Arch::ARM)) return false;
+  if (arch::any<arch::ARM>()) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmpwim { vcmp.s0, *vptr, vcmp.sf });
@@ -860,7 +867,7 @@ bool simplify(Env& env, const cmpwi& vcmp, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const cmpbi& vcmp, Vlabel b, size_t i) {
   if (simplify_dead_cmp(env, vcmp, b, i)) return true;
-  if (arch::any(Arch::ARM)) return false;
+  if (arch::any<arch::ARM>()) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmpbim { vcmp.s0, *vptr, vcmp.sf });
@@ -1095,7 +1102,7 @@ bool simplify_signed_test(Env& env, const In& test, uint32_t val,
 
 template<typename testm, typename test>
 bool simplify_testi(Env& env, const test& vtest, Vlabel b, size_t i) {
-  if (arch::any(Arch::ARM)) return false;
+  if (arch::any<arch::ARM>()) return false;
 
   if (auto const vptr = foldable_load(env, vtest.s1, b, i)) {
     return simplify_impl(env, b, i, testm { vtest.s0, *vptr, vtest.sf });
@@ -1106,7 +1113,7 @@ bool simplify_testi(Env& env, const test& vtest, Vlabel b, size_t i) {
 
 template<typename testm, typename cmpm, typename test>
 bool simplify_test(Env& env, const test& vtest, Vlabel b, size_t i) {
-  if (arch::any(Arch::ARM)) return false;
+  if (arch::any<arch::ARM>()) return false;
   if (vtest.s0 == vtest.s1 && env.use_counts[vtest.s0] == 2) {
     env.use_counts[vtest.s0]--;
     auto const vptr = foldable_load(env, vtest.s0, b, i);
@@ -1497,7 +1504,7 @@ bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
  *  loadzlq{s, tmp}; movtql{tmp, d} -> loadl{s, d}
  */
 bool simplify_load_jmpr(Env& env, const load& load, Vlabel b, size_t i) {
-  if (arch::get() == Arch::ARM) return false;
+  if (arch::any<arch::ARM>()) return false;
   if (env.use_counts[load.d] != 1) return false;
   auto const& code = env.unit.blocks[b].code;
   if (i + 1 >= code.size()) return false;
@@ -1603,6 +1610,162 @@ Width usedWidth(Vreg reg, Vinstr inst) {
   return Width::None;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Post-RA copy fold for physical registers.
+ * Fold:
+ *   <def op>{..., s}
+ *   ...            (no reads of s, no reads/writes of d)
+ *   copy{s, d}
+ * =>
+ *   <def op>{..., d}
+ *   ...
+ *
+ * This runs after register allocation when all registers are physical.
+ * GP defs zero-extend to the full 64-bit register on both x64 and ARM64,
+ * so this is safe for any GP def width.  Restricted to GP registers only.
+ * Safety requires:
+ *  - No instruction between def and copy reads s (since s will no longer be
+ *    written by the def)
+ *  - No instruction between def and copy reads or writes d (since d will now
+ *    be written at the def point)
+ *  - The def instruction itself does not read d
+ *  - s is dead after the copy (not used in the rest of the block)
+ */
+
+/*
+ * Check whether an instruction has any explicit or implicit effect on register
+ * r (uses, defs, or across).  Explicit effects come from the instruction's
+ * operand list; implicit effects come from calling-convention side-effects
+ * (e.g. callr clobbering caller-saved registers).
+ */
+bool inst_touches_reg(
+  const Vunit& unit,
+  const Abi& abi,
+  const Vinstr& inst,
+  PhysReg r
+) {
+  // Explicit operand effects.
+  bool touches = false;
+  visitUses(unit, inst, [&] (Vreg v) {
+    if (v == Vreg{r}) touches = true;
+  });
+  if (touches) return true;
+  visitDefs(unit, inst, [&] (Vreg v) {
+    if (v == Vreg{r}) touches = true;
+  });
+  if (touches) return true;
+
+  // Implicit side-effects (calling conventions, etc.).
+  RegSet implicitUses, implicitAcross, implicitDefs;
+  getEffects(abi, inst, implicitUses, implicitAcross, implicitDefs);
+  return implicitUses.contains(r) ||
+         implicitAcross.contains(r) ||
+         implicitDefs.contains(r);
+}
+
+bool psimplify_copy_fold(
+  Env& env,
+  const Abi& abi,
+  const copy& cp,
+  Vlabel b,
+  size_t i
+) {
+  auto const& code = env.unit.blocks[b].code;
+  if (cp.s == cp.d) return false;
+
+  // The copy must operate on full registers (Vreg, not sub-register types).
+  if (width(code[i].op) != Width::AnyNF) return false;
+
+  // Restrict to GP registers.
+  if (!cp.s.isGP() || !cp.d.isGP()) return false;
+  // On ARM64, SP shares register encoding 31 with XZR and cannot be used as
+  // a destination in many instructions.
+  if (arch::any<arch::ARM>() &&
+      (PhysReg{cp.s} == rsp() || PhysReg{cp.d} == rsp())) return false;
+
+  // Scan backward to find the def of cp.s, checking no intervening instruction
+  // touches cp.s or cp.d (explicit or implicit effects).
+  ssize_t defI = -1;
+  for (ssize_t j = safe_cast<ssize_t>(i) - 1; j >= 0; --j) {
+    // Any touch of cp.d blocks the fold.
+    if (inst_touches_reg(env.unit, abi, code[j], PhysReg{cp.d})) break;
+
+    // If this instruction touches cp.s, it must be the defining instruction
+    // for the fold to proceed.
+    if (inst_touches_reg(env.unit, abi, code[j], PhysReg{cp.s})) {
+      bool definesSrc = false;
+      visitDefs(env.unit, code[j], [&] (Vreg r) {
+        if (r == cp.s) definesSrc = true;
+      });
+      if (definesSrc) defI = j;
+      break;
+    }
+  }
+  if (defI < 0) return false;
+
+  // cp.s must be dead after the copy.  For safety, require either:
+  // (a) cp.s is redefined later in this block (definitely dead), or
+  // (b) cp.s is not used in the rest of the block AND the block has no
+  //     successors (e.g., return blocks, or blocks ending with bindjmp/
+  //     ReqBindJmp like prologues).
+  bool redefInBlock = false;
+  for (auto j = i + 1; j < code.size(); ++j) {
+    RegSet implicitUses, implicitAcross, implicitDefs;
+    getEffects(abi, code[j], implicitUses, implicitAcross, implicitDefs);
+    if (implicitUses.contains(cp.s) || implicitAcross.contains(cp.s)) {
+      return false;
+    }
+
+    bool usesSrc = false;
+    visitUses(env.unit, code[j], [&] (Vreg r) {
+      if (r == cp.s) usesSrc = true;
+    });
+    if (usesSrc) return false;
+
+    bool defsSrc = false;
+    visitDefs(env.unit, code[j], [&] (Vreg r) {
+      if (r == cp.s) defsSrc = true;
+    });
+    if (defsSrc) { redefInBlock = true; break; }
+    if (implicitDefs.contains(cp.s)) { redefInBlock = true; break; }
+  }
+  if (!redefInBlock && !succs(env.unit.blocks[b]).empty()) return false;
+
+  FTRACE(1, "psimplify_copy_fold: folding copy{{{}, {}}} "
+            "into {} at B{}[{}]\n",
+         show(cp.s), show(cp.d),
+         show(env.unit, code[defI]), b, defI);
+
+  return simplify_impl(env, b, defI, [&] (Vout& v) {
+    auto const& blk = env.unit.blocks[b].code;
+    auto folded = blk[defI];
+    visitRegsMutable(
+      env.unit,
+      folded,
+      [] (Vreg r) { return r; },
+      [&] (Vreg r) { return r == cp.s ? cp.d : r; }
+    );
+    v << folded;
+    for (auto ii = defI + 1; ii < i; ++ii) {
+      v << blk[ii];
+    }
+    return i - defI + 1;
+  });
+}
+
+bool psimplify(
+  Env& env,
+  const Abi& abi,
+  const copy& cp,
+  Vlabel b,
+  size_t i
+) {
+  return psimplify_copy_fold(env, abi, cp, b, i);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 // change  loadb into a zero extending load of the dest reg is used as a wide
 // reg.  Do it only if there is a use of the reg is a wider width.
 // When there is an assignment to a byte reg followed by a use of the full reg,
@@ -1617,7 +1780,13 @@ Width usedWidth(Vreg reg, Vinstr inst) {
 // register allocation generates register copies and creates opportunities for
 // this optimization.
 
-bool psimplify(Env& env, const loadb& vldb, Vlabel b, size_t i) {
+bool psimplify(
+  Env& env,
+  const Abi& /*abi*/,
+  const loadb& vldb,
+  Vlabel b,
+  size_t i
+) {
   bool found_wide_use = false;
   bool found_def = false;
   Vreg wide_reg;
@@ -1785,14 +1954,14 @@ bool simplify_arch(Env& env, Vlabel b, size_t i) {
   return ARCH_SWITCH_CALL(simplify, env, b, i);
 }
 
-bool psimplify(Env& env, Vlabel b, size_t i) {
+bool psimplify(Env& env, const Abi& abi, Vlabel b, size_t i) {
   assertx(i <= env.unit.blocks[b].code.size());
   auto& inst = env.unit.blocks[b].code[i];
 
   switch (inst.op) {
 #define O(name, ...)    \
     case Vinstr::name:  \
-      return psimplify(env, inst.name##_, b, i); \
+      return psimplify(env, abi, inst.name##_, b, i); \
 
     VASM_OPCODES
 #undef O
@@ -1803,8 +1972,8 @@ bool psimplify(Env& env, Vlabel b, size_t i) {
 /*
  * Perform architecture-specific peephole simplification.
  */
-bool psimplify_arch(Env& env, Vlabel b, size_t i) {
-  return ARCH_SWITCH_CALL(psimplify, env, b, i);
+bool psimplify_arch(Env& env, const Abi& abi, Vlabel b, size_t i) {
+  return ARCH_SWITCH_CALL(psimplify, env, abi, b, i);
 }
 
 }
@@ -1859,7 +2028,7 @@ void simplify(Vunit& unit) {
  * Peephole simplification pass after register allocation, for opportunities
  * that either require physical regs or are created by register allocator.
  */
-void postRASimplify(Vunit& unit) {
+void postRASimplify(Vunit& unit, const Abi& abi) {
   assertx(check(unit));
   auto& blocks = unit.blocks;
   auto const labels = sortBlocks(unit);
@@ -1870,7 +2039,7 @@ void postRASimplify(Vunit& unit) {
   for (auto const b : labels) {
     for (size_t i = 0; i < blocks[b].code.size(); ++i) {
       // Simplify at this index until no changes are made.
-      while (psimplify(env, b, i) || psimplify_arch(env, b, i)) {
+      while (psimplify(env, abi, b, i) || psimplify_arch(env, abi, b, i)) {
         // Stop if we simplified away the tail of the block.
         if (i >= blocks[b].code.size()) break;
       }

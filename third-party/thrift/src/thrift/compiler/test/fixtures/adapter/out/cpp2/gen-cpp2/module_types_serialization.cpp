@@ -40,7 +40,7 @@ void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Foo>::translat
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::Foo>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
@@ -292,7 +292,7 @@ void TccStructTraits<::facebook::thrift::test::fixtures::adapter::AdaptTemplated
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),

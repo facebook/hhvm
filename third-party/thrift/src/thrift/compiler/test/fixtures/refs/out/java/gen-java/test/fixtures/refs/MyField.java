@@ -61,11 +61,11 @@ public final class MyField implements com.facebook.thrift.payload.ThriftSerializ
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(MyField other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -86,56 +86,56 @@ public final class MyField implements com.facebook.thrift.payload.ThriftSerializ
 
         public Long getOptValue() { return optValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="value", requiredness=Requiredness.NONE)    public Builder setValue(long value) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="value", requiredness=Requiredness.NONE)    public Builder setValue(long value) {
             this.value = value;
             return this;
         }
 
         public long getValue() { return value; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="req_value", requiredness=Requiredness.REQUIRED)    public Builder setReqValue(long reqValue) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="req_value", requiredness=Requiredness.REQUIRED)    public Builder setReqValue(long reqValue) {
             this.reqValue = reqValue;
             return this;
         }
 
         public long getReqValue() { return reqValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="opt_enum_value", requiredness=Requiredness.OPTIONAL)    public Builder setOptEnumValue(test.fixtures.refs.MyEnum optEnumValue) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="opt_enum_value", requiredness=Requiredness.OPTIONAL)    public Builder setOptEnumValue(test.fixtures.refs.MyEnum optEnumValue) {
             this.optEnumValue = optEnumValue;
             return this;
         }
 
         public test.fixtures.refs.MyEnum getOptEnumValue() { return optEnumValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="enum_value", requiredness=Requiredness.NONE)    public Builder setEnumValue(test.fixtures.refs.MyEnum enumValue) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="enum_value", requiredness=Requiredness.NONE)    public Builder setEnumValue(test.fixtures.refs.MyEnum enumValue) {
             this.enumValue = enumValue;
             return this;
         }
 
         public test.fixtures.refs.MyEnum getEnumValue() { return enumValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=6, name="req_enum_value", requiredness=Requiredness.REQUIRED)    public Builder setReqEnumValue(test.fixtures.refs.MyEnum reqEnumValue) {
+        @com.facebook.swift.codec.ThriftField(value=6, name="req_enum_value", requiredness=Requiredness.REQUIRED)    public Builder setReqEnumValue(test.fixtures.refs.MyEnum reqEnumValue) {
             this.reqEnumValue = reqEnumValue;
             return this;
         }
 
         public test.fixtures.refs.MyEnum getReqEnumValue() { return reqEnumValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=7, name="opt_str_value", requiredness=Requiredness.OPTIONAL)    public Builder setOptStrValue(String optStrValue) {
+        @com.facebook.swift.codec.ThriftField(value=7, name="opt_str_value", requiredness=Requiredness.OPTIONAL)    public Builder setOptStrValue(String optStrValue) {
             this.optStrValue = optStrValue;
             return this;
         }
 
         public String getOptStrValue() { return optStrValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=8, name="str_value", requiredness=Requiredness.NONE)    public Builder setStrValue(String strValue) {
+        @com.facebook.swift.codec.ThriftField(value=8, name="str_value", requiredness=Requiredness.NONE)    public Builder setStrValue(String strValue) {
             this.strValue = strValue;
             return this;
         }
 
         public String getStrValue() { return strValue; }
 
-            @com.facebook.swift.codec.ThriftField(value=9, name="req_str_value", requiredness=Requiredness.REQUIRED)    public Builder setReqStrValue(String reqStrValue) {
+        @com.facebook.swift.codec.ThriftField(value=9, name="req_str_value", requiredness=Requiredness.REQUIRED)    public Builder setReqStrValue(String reqStrValue) {
             this.reqStrValue = reqStrValue;
             return this;
         }
@@ -171,6 +171,7 @@ public final class MyField implements com.facebook.thrift.payload.ThriftSerializ
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -179,101 +180,84 @@ public final class MyField implements com.facebook.thrift.payload.ThriftSerializ
     private final Long optValue;
     public static final int _OPT_VALUE = 1;
     private static final TField OPT_VALUE_FIELD_DESC = new TField("opt_value", TType.I64, (short)1);
-        private final long value;
+    private final long value;
     public static final int _VALUE = 2;
     private static final TField VALUE_FIELD_DESC = new TField("value", TType.I64, (short)2);
-        private final long reqValue;
+    private final long reqValue;
     public static final int _REQ_VALUE = 3;
     private static final TField REQ_VALUE_FIELD_DESC = new TField("req_value", TType.I64, (short)3);
-        private final test.fixtures.refs.MyEnum optEnumValue;
+    private final test.fixtures.refs.MyEnum optEnumValue;
     public static final int _OPT_ENUM_VALUE = 4;
     private static final TField OPT_ENUM_VALUE_FIELD_DESC = new TField("opt_enum_value", TType.I32, (short)4);
-        private final test.fixtures.refs.MyEnum enumValue;
+    private final test.fixtures.refs.MyEnum enumValue;
     public static final int _ENUM_VALUE = 5;
     private static final TField ENUM_VALUE_FIELD_DESC = new TField("enum_value", TType.I32, (short)5);
-        private final test.fixtures.refs.MyEnum reqEnumValue;
+    private final test.fixtures.refs.MyEnum reqEnumValue;
     public static final int _REQ_ENUM_VALUE = 6;
     private static final TField REQ_ENUM_VALUE_FIELD_DESC = new TField("req_enum_value", TType.I32, (short)6);
-        private final String optStrValue;
+    private final String optStrValue;
     public static final int _OPT_STR_VALUE = 7;
     private static final TField OPT_STR_VALUE_FIELD_DESC = new TField("opt_str_value", TType.STRING, (short)7);
-        private final String strValue;
+    private final String strValue;
     public static final int _STR_VALUE = 8;
     private static final TField STR_VALUE_FIELD_DESC = new TField("str_value", TType.STRING, (short)8);
-        private final String reqStrValue;
+    private final String reqStrValue;
     public static final int _REQ_STR_VALUE = 9;
     private static final TField REQ_STR_VALUE_FIELD_DESC = new TField("req_str_value", TType.STRING, (short)9);
     static {
-      NAMES_TO_IDS.put("optValue", 1);
-      THRIFT_NAMES_TO_IDS.put("opt_value", 1);
-      FIELD_METADATA.put(1, OPT_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("value", 2);
-      THRIFT_NAMES_TO_IDS.put("value", 2);
-      FIELD_METADATA.put(2, VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("reqValue", 3);
-      THRIFT_NAMES_TO_IDS.put("req_value", 3);
-      FIELD_METADATA.put(3, REQ_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("optEnumValue", 4);
-      THRIFT_NAMES_TO_IDS.put("opt_enum_value", 4);
-      FIELD_METADATA.put(4, OPT_ENUM_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("enumValue", 5);
-      THRIFT_NAMES_TO_IDS.put("enum_value", 5);
-      FIELD_METADATA.put(5, ENUM_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("reqEnumValue", 6);
-      THRIFT_NAMES_TO_IDS.put("req_enum_value", 6);
-      FIELD_METADATA.put(6, REQ_ENUM_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("optStrValue", 7);
-      THRIFT_NAMES_TO_IDS.put("opt_str_value", 7);
-      FIELD_METADATA.put(7, OPT_STR_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("strValue", 8);
-      THRIFT_NAMES_TO_IDS.put("str_value", 8);
-      FIELD_METADATA.put(8, STR_VALUE_FIELD_DESC);
-      NAMES_TO_IDS.put("reqStrValue", 9);
-      THRIFT_NAMES_TO_IDS.put("req_str_value", 9);
-      FIELD_METADATA.put(9, REQ_STR_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("optValue", 1);
+        THRIFT_NAMES_TO_IDS.put("opt_value", 1);
+        FIELD_METADATA.put(1, OPT_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("value", 2);
+        THRIFT_NAMES_TO_IDS.put("value", 2);
+        FIELD_METADATA.put(2, VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("reqValue", 3);
+        THRIFT_NAMES_TO_IDS.put("req_value", 3);
+        FIELD_METADATA.put(3, REQ_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("optEnumValue", 4);
+        THRIFT_NAMES_TO_IDS.put("opt_enum_value", 4);
+        FIELD_METADATA.put(4, OPT_ENUM_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("enumValue", 5);
+        THRIFT_NAMES_TO_IDS.put("enum_value", 5);
+        FIELD_METADATA.put(5, ENUM_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("reqEnumValue", 6);
+        THRIFT_NAMES_TO_IDS.put("req_enum_value", 6);
+        FIELD_METADATA.put(6, REQ_ENUM_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("optStrValue", 7);
+        THRIFT_NAMES_TO_IDS.put("opt_str_value", 7);
+        FIELD_METADATA.put(7, OPT_STR_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("strValue", 8);
+        THRIFT_NAMES_TO_IDS.put("str_value", 8);
+        FIELD_METADATA.put(8, STR_VALUE_FIELD_DESC);
+        NAMES_TO_IDS.put("reqStrValue", 9);
+        THRIFT_NAMES_TO_IDS.put("req_str_value", 9);
+        FIELD_METADATA.put(9, REQ_STR_VALUE_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="opt_value", requiredness=Requiredness.OPTIONAL)
     public Long getOptValue() { return optValue; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=2, name="value", requiredness=Requiredness.NONE)
     public long getValue() { return value; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=3, name="req_value", requiredness=Requiredness.REQUIRED)
     public long getReqValue() { return reqValue; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="opt_enum_value", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.refs.MyEnum getOptEnumValue() { return optEnumValue; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="enum_value", requiredness=Requiredness.NONE)
     public test.fixtures.refs.MyEnum getEnumValue() { return enumValue; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=6, name="req_enum_value", requiredness=Requiredness.REQUIRED)
     public test.fixtures.refs.MyEnum getReqEnumValue() { return reqEnumValue; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="opt_str_value", requiredness=Requiredness.OPTIONAL)
     public String getOptStrValue() { return optStrValue; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="str_value", requiredness=Requiredness.NONE)
     public String getStrValue() { return strValue; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=9, name="req_str_value", requiredness=Requiredness.REQUIRED)
     public String getReqStrValue() { return reqStrValue; }
 
@@ -320,180 +304,188 @@ public final class MyField implements com.facebook.thrift.payload.ThriftSerializ
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(optValue);
-            _hashCode = 31 * _hashCode + Long.hashCode(value);
-            _hashCode = 31 * _hashCode + Long.hashCode(reqValue);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optEnumValue);
-            _hashCode = 31 * _hashCode + Objects.hashCode(enumValue);
-            _hashCode = 31 * _hashCode + Objects.hashCode(reqEnumValue);
-            _hashCode = 31 * _hashCode + Objects.hashCode(optStrValue);
-            _hashCode = 31 * _hashCode + Objects.hashCode(strValue);
-            _hashCode = 31 * _hashCode + Objects.hashCode(reqStrValue);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Long.hashCode(value);
+        _hashCode = 31 * _hashCode + Long.hashCode(reqValue);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optEnumValue);
+        _hashCode = 31 * _hashCode + Objects.hashCode(enumValue);
+        _hashCode = 31 * _hashCode + Objects.hashCode(reqEnumValue);
+        _hashCode = 31 * _hashCode + Objects.hashCode(optStrValue);
+        _hashCode = 31 * _hashCode + Objects.hashCode(strValue);
+        _hashCode = 31 * _hashCode + Objects.hashCode(reqStrValue);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyField> asReader() {
       return MyField::read0;
     }
 
     public static MyField read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(MyField.NAMES_TO_IDS, MyField.THRIFT_NAMES_TO_IDS, MyField.FIELD_METADATA);
-      MyField.Builder builder = new MyField.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _OPT_VALUE:
-          if (__field.type == TType.I64) {
-            Long optValue = oprot.readI64();
-            builder.setOptValue(optValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _VALUE:
-          if (__field.type == TType.I64) {
-            long value = oprot.readI64();
-            builder.setValue(value);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _REQ_VALUE:
-          if (__field.type == TType.I64) {
-            long reqValue = oprot.readI64();
-            builder.setReqValue(reqValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPT_ENUM_VALUE:
-          if (__field.type == TType.I32) {
-            test.fixtures.refs.MyEnum optEnumValue = test.fixtures.refs.MyEnum.fromInteger(oprot.readI32());
-            builder.setOptEnumValue(optEnumValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ENUM_VALUE:
-          if (__field.type == TType.I32) {
-            test.fixtures.refs.MyEnum enumValue = test.fixtures.refs.MyEnum.fromInteger(oprot.readI32());
-            builder.setEnumValue(enumValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _REQ_ENUM_VALUE:
-          if (__field.type == TType.I32) {
-            test.fixtures.refs.MyEnum reqEnumValue = test.fixtures.refs.MyEnum.fromInteger(oprot.readI32());
-            builder.setReqEnumValue(reqEnumValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _OPT_STR_VALUE:
-          if (__field.type == TType.STRING) {
-            String optStrValue = oprot.readString();
-            builder.setOptStrValue(optStrValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _STR_VALUE:
-          if (__field.type == TType.STRING) {
-            String strValue = oprot.readString();
-            builder.setStrValue(strValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _REQ_STR_VALUE:
-          if (__field.type == TType.STRING) {
-            String reqStrValue = oprot.readString();
-            builder.setReqStrValue(reqStrValue);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(MyField.NAMES_TO_IDS, MyField.THRIFT_NAMES_TO_IDS, MyField.FIELD_METADATA);
+        MyField.Builder builder = new MyField.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _OPT_VALUE:
+                if (__field.type == TType.I64) {
+                    Long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setOptValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _VALUE:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _REQ_VALUE:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setReqValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _OPT_ENUM_VALUE:
+                if (__field.type == TType.I32) {
+                    test.fixtures.refs.MyEnum _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.refs.MyEnum.fromInteger(oprot.readI32());
+                    builder.setOptEnumValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ENUM_VALUE:
+                if (__field.type == TType.I32) {
+                    test.fixtures.refs.MyEnum _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.refs.MyEnum.fromInteger(oprot.readI32());
+                    builder.setEnumValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _REQ_ENUM_VALUE:
+                if (__field.type == TType.I32) {
+                    test.fixtures.refs.MyEnum _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.refs.MyEnum.fromInteger(oprot.readI32());
+                    builder.setReqEnumValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _OPT_STR_VALUE:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setOptStrValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _STR_VALUE:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setStrValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _REQ_STR_VALUE:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setReqStrValue(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      Long _iter0 = this.optValue;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPT_VALUE_FIELD_DESC);
-        oprot.writeI64(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      long _iter0 = this.value;
-      oprot.writeFieldBegin(VALUE_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      long _iter0 = this.reqValue;
-      oprot.writeFieldBegin(REQ_VALUE_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      test.fixtures.refs.MyEnum _iter0 = this.optEnumValue;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPT_ENUM_VALUE_FIELD_DESC);
-        oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.refs.MyEnum _iter0 = this.enumValue;
-      oprot.writeFieldBegin(ENUM_VALUE_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      test.fixtures.refs.MyEnum _iter0 = this.reqEnumValue;
-      oprot.writeFieldBegin(REQ_ENUM_VALUE_FIELD_DESC);
-      oprot.writeI32(_iter0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter0));
-      oprot.writeFieldEnd();
-      }
-      {
-      String _iter0 = this.optStrValue;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPT_STR_VALUE_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.strValue;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(STR_VALUE_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      String _iter0 = this.reqStrValue;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(REQ_STR_VALUE_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            Long _fbthriftVar0 = this.optValue;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPT_VALUE_FIELD_DESC);
+                oprot.writeI64(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            long _fbthriftVar0 = this.value;
+            oprot.writeFieldBegin(VALUE_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            long _fbthriftVar0 = this.reqValue;
+            oprot.writeFieldBegin(REQ_VALUE_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            test.fixtures.refs.MyEnum _fbthriftVar0 = this.optEnumValue;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPT_ENUM_VALUE_FIELD_DESC);
+                oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.refs.MyEnum _fbthriftVar0 = this.enumValue;
+            oprot.writeFieldBegin(ENUM_VALUE_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            test.fixtures.refs.MyEnum _fbthriftVar0 = this.reqEnumValue;
+            oprot.writeFieldBegin(REQ_ENUM_VALUE_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar0));
+            oprot.writeFieldEnd();
+        }
+        {
+            String _fbthriftVar0 = this.optStrValue;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPT_STR_VALUE_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.strValue;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(STR_VALUE_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            String _fbthriftVar0 = this.reqStrValue;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(REQ_STR_VALUE_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _MyFieldLazy {

@@ -1,3 +1,7 @@
+WARN: File "function_invalidation_4.bad.php", line 11, characters 5-12:
+Value of type `dynamic` called as a function (Warn[12039])
+  File "function_invalidation_4.bad.php", line 9, characters 26-32:
+  This expression has type `dynamic`
 ERROR: File "function_invalidation_4.bad.php", line 12, characters 15-19:
 Invalid argument (Typing[4110])
   File "function_invalidation_4.bad.php", line 7, characters 20-22:

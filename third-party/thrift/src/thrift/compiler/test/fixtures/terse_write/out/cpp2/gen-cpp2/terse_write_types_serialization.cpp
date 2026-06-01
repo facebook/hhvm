@@ -40,7 +40,7 @@ void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::MyUnion>::
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::MyUnion>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
@@ -82,7 +82,7 @@ void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::StructLeve
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
@@ -103,7 +103,7 @@ void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::FieldLevel
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>;
-  static const st::translate_field_name_table table{
+  static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),

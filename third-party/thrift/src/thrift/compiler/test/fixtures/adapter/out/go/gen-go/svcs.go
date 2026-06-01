@@ -118,9 +118,6 @@ func (p *ServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *ServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *ServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}
@@ -262,9 +259,6 @@ func (p *AdapterServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *AdapterServiceProcessor) PackageName() string {
-    return "module"
-}
 
 func (p *AdapterServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}

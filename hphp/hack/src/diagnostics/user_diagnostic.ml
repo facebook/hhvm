@@ -10,22 +10,25 @@ open Hh_prelude
 (* The order matters here, as it will determine which errors/warnings will
    be output first. *)
 type severity =
-  | Warning
+  | Warning of {
+      is_trusted: bool;
+          [@hash.ignore] [@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)]
+    }
   | Err
 [@@deriving eq, hash, show, ord]
 
 module Severity = struct
   let to_string = function
     | Err -> "error"
-    | Warning -> "warning"
+    | Warning _ -> "warning"
 
   let to_all_caps_string = function
     | Err -> "ERROR"
-    | Warning -> "WARN"
+    | Warning _ -> "WARN"
 
   let tty_color = function
     | Err -> Tty.Red
-    | Warning -> Tty.Yellow
+    | Warning _ -> Tty.Yellow
 end
 
 type ('prim_pos, 'pos) t = {
@@ -87,9 +90,11 @@ let make_err
     reasons
     explanation
 
-let make_warning code ?is_fixmed ?quickfixes ?custom_msgs claim reasons =
+let make_warning
+    ?(is_trusted = true) code ?is_fixmed ?quickfixes ?custom_msgs claim reasons
+    =
   make
-    Warning
+    (Warning { is_trusted })
     code
     ?is_fixmed
     ?quickfixes
@@ -282,6 +287,11 @@ let to_json ~(human_formatter : (_ -> string) option) ~filename_to_string error
   let { severity; code; claim; reasons; custom_msgs; function_pos; _ } =
     error
   in
+  let is_trusted =
+    match severity with
+    | Warning { is_trusted } -> is_trusted
+    | Err -> true
+  in
   let msgl = claim :: reasons in
   let elts =
     List.map msgl ~f:(fun (p, msg) ->
@@ -300,6 +310,7 @@ let to_json ~(human_formatter : (_ -> string) option) ~filename_to_string error
   let human_format = Option.map ~f:(fun f -> f error) human_formatter in
   let obj =
     ("severity", `String (Severity.to_string severity))
+    :: ("is_trusted", `Bool is_trusted)
     :: ("message", `List elts)
     :: ("custom_messages", `List custom_msgs)
     :: List.filter_opt

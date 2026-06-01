@@ -410,10 +410,8 @@ impl<'a> State<'a> {
             }
 
             Instruct::Opcode(
-                ref opcode @ Opcode::FCallClsMethod(..)
-                | ref opcode @ Opcode::FCallClsMethodD(..)
+                ref opcode @ Opcode::FCallClsMethodD(..)
                 | ref opcode @ Opcode::FCallClsMethodM(..)
-                | ref opcode @ Opcode::FCallClsMethodS(..)
                 | ref opcode @ Opcode::FCallClsMethodSD(..)
                 | ref opcode @ Opcode::FCallCtor(..)
                 | ref opcode @ Opcode::FCallFunc(..)
@@ -813,20 +811,13 @@ impl<'a> State<'a> {
         }
 
         let (fca, opcode) = match *opcode {
-            Opcode::FCallClsMethod(ref fca, hint, log) => {
-                (fca, Opcode::FCallClsMethod(sanitize_fca(fca), hint, log))
-            }
             Opcode::FCallClsMethodD(ref fca, class, method) => (
                 fca,
                 Opcode::FCallClsMethodD(sanitize_fca(fca), class, method),
             ),
-            Opcode::FCallClsMethodM(ref fca, hint, log, method) => (
+            Opcode::FCallClsMethodM(ref fca, hint, method) => (
                 fca,
-                Opcode::FCallClsMethodM(sanitize_fca(fca), hint, log, method),
-            ),
-            Opcode::FCallClsMethodS(ref fca, hint, clsref) => (
-                fca,
-                Opcode::FCallClsMethodS(sanitize_fca(fca), hint, clsref),
+                Opcode::FCallClsMethodM(sanitize_fca(fca), hint, method),
             ),
             Opcode::FCallClsMethodSD(ref fca, hint, clsref, method) => (
                 fca,
@@ -1365,10 +1356,8 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::Eq
             | Opcode::Eval
             | Opcode::Exit
-            | Opcode::FCallClsMethod(..)
             | Opcode::FCallClsMethodD(..)
             | Opcode::FCallClsMethodM(..)
-            | Opcode::FCallClsMethodS(..)
             | Opcode::FCallClsMethodSD(..)
             | Opcode::FCallCtor(..)
             | Opcode::FCallFunc(..)
@@ -1716,10 +1705,8 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::AssertRATStk(_, _)
         | Opcode::ClsCnsD(_, _)
         | Opcode::CreateCl(_, _)
-        | Opcode::FCallClsMethod(_, _, _)
         | Opcode::FCallClsMethodD(_, _, _)
-        | Opcode::FCallClsMethodM(_, _, _, _)
-        | Opcode::FCallClsMethodS(_, _, _)
+        | Opcode::FCallClsMethodM(_, _, _)
         | Opcode::FCallClsMethodSD(_, _, _, _)
         | Opcode::FCallCtor(_, _)
         | Opcode::FCallFuncD(_, _)

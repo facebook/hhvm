@@ -15,124 +15,128 @@
   limitations under the License.
 
 }}
-{{#if service:docs?}}
-#[doc = {{service:docs}}]
-{{/if service:docs?}}
-pub trait {{service:rust_name}}: {{!
-    }}{{#service:extends}}{{service:client_package}}::{{service:rust_name}} + {{/service:extends}}{{!
-    }}::std::marker::Send \{{{!
+  {{#if interface.docs?}}
+#[doc = {{interface.docs}}]
+  {{/if interface.docs?}}
+pub trait {{interface.rust_name}}: {{!
+    }}{{#if (object.notnull? service_extends)}}{{service_extends.client_package}}::{{service_extends.rust_name}} + {{/if ~}}
+    ::std::marker::Send {
+  {{#each (array.enumerate interface.functions with_first=true) as |i function first?|}}
+    {{#if (not first?)}}
 
-    }}{{#service:functions}}
-    {{#if function:docs?}}
-    #[doc = {{function:docs}}]
-    {{/if function:docs?}}
-    {{#if (not function:starts_interaction?)}}
-    fn {{function:rust_name}}(
+    {{/if (not first?)}}
+    {{#if function.docs?}}
+    #[doc = {{function.docs}}]
+    {{/if function.docs?}}
+    {{#if function.starts_interaction?}}
+    fn {{function.rust_name}}(
         &self,
-        {{#function:args}}
-        arg_{{field:name}}: {{#partial rpc.arg field=field:self}},
-        {{/function:args}}
-    ) -> {{#partial rpc.client_return_type function=function:self service=service:self}};
-    {{/if (not function:starts_interaction?)}}{{#if function:starts_interaction?}}
-    fn {{function:rust_name}}(
+    ) -> ::std::result::Result<{{program.crate}}::client::{{function.interaction_name}}Client, ::anyhow::Error>;
+    {{#else}}
+    fn {{function.rust_name}}(
         &self,
-    ) -> ::std::result::Result<{{!
-    }}{{program:crate}}::client::{{function:interaction_name}}Client, {{!
-    }}::anyhow::Error>;
-    {{/if function:starts_interaction?}}{{/service:functions}}
+      {{#each function.params.fields as |param|}}
+        arg_{{param.name}}: {{#partial rpc.arg field=param}},
+      {{/each}}
+    ) -> {{#partial rpc.client_return_type function=function service=interface}};
+    {{/if function.starts_interaction?}}
+  {{/each}}
 }
 
-pub trait {{service:rust_name}}Ext<T>: {{service:rust_name}}{{!
-    }}{{#service:extends}} + {{service:client_package}}::{{service:rust_name}}Ext<T>{{/service:extends}}
+pub trait {{interface.rust_name}}Ext<T>: {{interface.rust_name}}
+    {{~ #if (object.notnull? service_extends)}} + {{service_extends.client_package}}::{{service_extends.rust_name}}Ext<T>{{/if}}
 where
     T: ::fbthrift::Transport,
 {
-    {{#service:functions}}
-    {{#if function:docs?}}
-    #[doc = {{function:docs}}]
-    {{/if function:docs?}}
-    {{#if (not function:starts_interaction?)}}
-    fn {{function:rust_name}}_with_rpc_opts(
+  {{#each interface.functions as |function|}}
+    {{#if function.docs?}}
+    #[doc = {{function.docs}}]
+    {{/if function.docs?}}
+    {{#if (not function.starts_interaction?)}}
+    fn {{function.rust_name}}_with_rpc_opts(
         &self,
-        {{#function:args}}
-        arg_{{field:name}}: {{#partial rpc.arg field=field:self}},
-        {{/function:args}}
+      {{#each function.params.fields as |param|}}
+        arg_{{param.name}}: {{#partial rpc.arg field=param}},
+      {{/each}}
         rpc_options: T::RpcOptions,
-    ) -> {{#partial rpc.client_return_type function=function:self service=service:self}};
-    {{/if (not function:starts_interaction?)}}
-    {{/service:functions}}
-    {{#if (array.empty? service:all_parent_services)}}
+    ) -> {{#partial rpc.client_return_type function=function service=interface}};
+    {{/if (not function.starts_interaction?)}}
+  {{/each}}
+  {{#if (or interface.interaction? (array.empty? interface.all_parent_services))}}
 
     fn transport(&self) -> &T;
-    {{/if (array.empty? service:all_parent_services)}}
+  {{/if (or interface.interaction? (array.empty? interface.all_parent_services))}}
 }
 
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
-impl<'a, S> {{service:rust_name}} for S
+impl<'a, S> {{interface.rust_name}} for S
 where
-    S: ::std::convert::AsRef<dyn {{service:rust_name}} + 'a>,
-    {{#each service:all_parent_services as |ancestor|}}
+    S: ::std::convert::AsRef<dyn {{interface.rust_name}} + 'a>,
+  {{#if (not interface.interaction?)}}
+    {{#each interface.all_parent_services as |ancestor|}}
     S: {{ancestor.client_package}}::{{ancestor.rust_name}},
     {{/each}}
+  {{/if (not interface.interaction?)}}
     S: ::std::marker::Send,
 {
-    {{#service:functions}}
-    {{#if (not function:starts_interaction?)}}
-    fn {{function:rust_name}}(
-        &self,{{!
-        }}{{#function:args}}
-        arg_{{field:name}}: {{#partial rpc.arg field=field:self}},{{!
-        }}{{/function:args}}
-    ) -> {{#partial rpc.client_return_type function=function:self service=service:self}} {
-        self.as_ref().{{function:rust_name}}(
-            {{#function:args}}
-            arg_{{field:name}},
-            {{/function:args}}
+  {{#each interface.functions as |function|}}
+    {{#if function.starts_interaction?}}
+    fn {{function.rust_name}}(
+        &self,
+    ) -> ::std::result::Result<{{program.crate}}::client::{{function.interaction_name}}Client, ::anyhow::Error> {
+        self.as_ref().{{function.rust_name}}()
+    }
+    {{#else}}
+    fn {{function.rust_name}}(
+        &self,
+      {{#each function.params.fields as |param|}}
+        arg_{{param.name}}: {{#partial rpc.arg field=param}},
+      {{/each}}
+    ) -> {{#partial rpc.client_return_type function=function service=interface}} {
+        self.as_ref().{{function.rust_name}}(
+      {{#each function.params.fields as |param|}}
+            arg_{{param.name}},
+      {{/each}}
         )
     }
-    {{/if (not function:starts_interaction?)}}{{#if function:starts_interaction?}}
-    fn {{function:rust_name}}(
-        &self,
-    ) -> ::std::result::Result<{{!
-    }}{{program:crate}}::client::{{function:interaction_name}}Client, {{!
-    }}::anyhow::Error> {
-        self.as_ref().{{function:rust_name}}()
-    }
-    {{/if function:starts_interaction?}}{{/service:functions}}
+    {{/if function.starts_interaction?}}
+  {{/each}}
 }
 
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
-impl<'a, S, T> {{service:rust_name}}Ext<T> for S
+impl<'a, S, T> {{interface.rust_name}}Ext<T> for S
 where
-    S: ::std::convert::AsRef<dyn {{service:rust_name}} + 'a> + ::std::convert::AsRef<dyn {{service:rust_name}}Ext<T> + 'a>,
-    {{#each service:all_parent_services as |ancestor|}}
+    S: ::std::convert::AsRef<dyn {{interface.rust_name}} + 'a> + ::std::convert::AsRef<dyn {{interface.rust_name}}Ext<T> + 'a>,
+  {{#if (not interface.interaction?)}}
+    {{#each interface.all_parent_services as |ancestor|}}
     S: {{ancestor.client_package}}::{{ancestor.rust_name}} + {{ancestor.client_package}}::{{ancestor.rust_name}}Ext<T>,
     {{/each}}
+  {{/if (not interface.interaction?)}}
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
-    {{#service:functions}}
-    {{#if (not function:starts_interaction?)}}
-    fn {{function:rust_name}}_with_rpc_opts(
-        &self,{{!
-        }}{{#function:args}}
-        arg_{{field:name}}: {{#partial rpc.arg field=field:self}},{{!
-        }}{{/function:args}}
+  {{#each interface.functions as |function|}}
+    {{#if (not function.starts_interaction?)}}
+    fn {{function.rust_name}}_with_rpc_opts(
+        &self,
+      {{#each function.params.fields as |param|}}
+        arg_{{param.name}}: {{#partial rpc.arg field=param}},
+      {{/each}}
         rpc_options: T::RpcOptions,
-    ) -> {{#partial rpc.client_return_type function=function:self service=service:self}} {
-        <Self as ::std::convert::AsRef<dyn {{service:rust_name}}Ext<T>>>::as_ref(self).{{function:rust_name}}_with_rpc_opts(
-            {{#function:args}}
-            arg_{{field:name}},
-            {{/function:args}}
+    ) -> {{#partial rpc.client_return_type function=function service=interface}} {
+        <Self as ::std::convert::AsRef<dyn {{interface.rust_name}}Ext<T>>>::as_ref(self).{{function.rust_name}}_with_rpc_opts(
+      {{#each function.params.fields as |param|}}
+            arg_{{param.name}},
+      {{/each}}
             rpc_options,
         )
     }
-    {{/if (not function:starts_interaction?)}}
-    {{/service:functions}}
-    {{#if (array.empty? service:all_parent_services)}}
+    {{/if (not function.starts_interaction?)}}
+  {{/each}}
+  {{#if (or interface.interaction? (array.empty? interface.all_parent_services))}}
 
     fn transport(&self) -> &T {
         ::fbthrift::help::GetTransport::transport(self)
     }
-    {{/if (array.empty? service:all_parent_services)}}
+  {{/if (or interface.interaction? (array.empty? interface.all_parent_services))}}
 }

@@ -16,7 +16,7 @@
 <<__EntryPoint>> function main(): void {
 require_once("dom_test.inc");
 $dom = new DOMDocument;
-$dom->loadXML(b'<root xmlns="urn::default"><child>myval</child></root>');
+$dom->loadXML('<root xmlns="urn::default"><child>myval</child></root>');
 
 $xpath = new DOMXPath($dom);
 

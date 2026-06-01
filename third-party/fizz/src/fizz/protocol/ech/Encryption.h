@@ -24,7 +24,9 @@ struct NegotiatedECHConfig {
   HpkeSymmetricCipherSuite cipherSuite;
 };
 
-folly::Optional<NegotiatedECHConfig> negotiateECHConfig(
+Status negotiateECHConfig(
+    folly::Optional<NegotiatedECHConfig>& ret,
+    Error& err,
     const std::vector<ParsedECHConfig>& configs,
     std::vector<hpke::KEMId> supportedKEMs,
     std::vector<hpke::AeadId> supportedAeads);
@@ -52,22 +54,28 @@ ServerHello makeDummyServerHello(const ServerHello& shlo);
 
 HelloRetryRequest makeDummyHRR(const HelloRetryRequest& hrr);
 
-bool checkECHAccepted(
+Status checkECHAccepted(
+    bool& ret,
+    Error& err,
     const ServerHello& shlo,
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler);
 
-bool checkECHAccepted(
+Status checkECHAccepted(
+    bool& ret,
+    Error& err,
     const HelloRetryRequest& shlo,
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler);
 
-void setAcceptConfirmation(
+Status setAcceptConfirmation(
+    Error& err,
     ServerHello& shlo,
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler);
 
-void setAcceptConfirmation(
+Status setAcceptConfirmation(
+    Error& err,
     HelloRetryRequest& hrr,
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler);
@@ -95,7 +103,9 @@ OuterECHClientHello encryptClientHello(
     const folly::Optional<ClientPresharedKey>& greasePsk,
     const std::vector<ExtensionType>& outerExtensionTypes);
 
-ClientHello decryptECHWithContext(
+Status decryptECHWithContext(
+    ClientHello& ret,
+    Error& err,
     const ClientHello& clientHelloOuter,
     const ParsedECHConfig& echConfig,
     HpkeSymmetricCipherSuite& cipherSuite,
@@ -113,7 +123,9 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
     std::unique_ptr<KeyExchange> kex,
     uint64_t seqNum);
 
-std::vector<Extension> substituteOuterExtensions(
+Status substituteOuterExtensions(
+    std::vector<Extension>& ret,
+    Error& err,
     std::vector<Extension>&& innerExt,
     const std::vector<Extension>& outerExt);
 

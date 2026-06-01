@@ -164,7 +164,8 @@ class Logger {
     }
     folly::coro::Task<HTTPHeaderEvent> readHeaderEvent() override;
     folly::coro::Task<HTTPBodyEvent> readBodyEvent(uint32_t max) override;
-    void stopReading(folly::Optional<const HTTPErrorCode> error) override;
+    void stopReading(
+        folly::Optional<const HTTPErrorCode> error) noexcept override;
 
     void describe(std::ostream& os) const;
 

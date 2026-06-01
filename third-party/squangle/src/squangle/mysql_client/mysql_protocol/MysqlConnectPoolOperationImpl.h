@@ -109,8 +109,10 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
 
  private:
   void specializedRunImpl() override {
-    // Initialize all we need from our tevent handler
+    // Initialize EventHandler/AsyncTimeout now that we're in the event base
+    // thread. This only needs to be done on the first attempt.
     if (attempts_made_ == 0) {
+      initializeFromConnection();
       conn().initialize(false);
     }
 

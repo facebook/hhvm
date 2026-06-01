@@ -148,11 +148,11 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(DefaultStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -234,147 +234,147 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
 
         public long getMyLongDFset() { return myLongDFset; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="myLongDF", requiredness=Requiredness.NONE)    public Builder setMyLongDF(long myLongDF) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="myLongDF", requiredness=Requiredness.NONE)    public Builder setMyLongDF(long myLongDF) {
             this.myLongDF = myLongDF;
             return this;
         }
 
         public long getMyLongDF() { return myLongDF; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="portDFset", requiredness=Requiredness.NONE)    public Builder setPortDFset(int portDFset) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="portDFset", requiredness=Requiredness.NONE)    public Builder setPortDFset(int portDFset) {
             this.portDFset = portDFset;
             return this;
         }
 
         public int getPortDFset() { return portDFset; }
 
-            @com.facebook.swift.codec.ThriftField(value=4, name="portNum", requiredness=Requiredness.NONE)    public Builder setPortNum(int portNum) {
+        @com.facebook.swift.codec.ThriftField(value=4, name="portNum", requiredness=Requiredness.NONE)    public Builder setPortNum(int portNum) {
             this.portNum = portNum;
             return this;
         }
 
         public int getPortNum() { return portNum; }
 
-            @com.facebook.swift.codec.ThriftField(value=5, name="myBinaryDFset", requiredness=Requiredness.NONE)    public Builder setMyBinaryDFset(byte[] myBinaryDFset) {
+        @com.facebook.swift.codec.ThriftField(value=5, name="myBinaryDFset", requiredness=Requiredness.NONE)    public Builder setMyBinaryDFset(byte[] myBinaryDFset) {
             this.myBinaryDFset = myBinaryDFset;
             return this;
         }
 
         public byte[] getMyBinaryDFset() { return myBinaryDFset; }
 
-            @com.facebook.swift.codec.ThriftField(value=6, name="myBinary", requiredness=Requiredness.NONE)    public Builder setMyBinary(byte[] myBinary) {
+        @com.facebook.swift.codec.ThriftField(value=6, name="myBinary", requiredness=Requiredness.NONE)    public Builder setMyBinary(byte[] myBinary) {
             this.myBinary = myBinary;
             return this;
         }
 
         public byte[] getMyBinary() { return myBinary; }
 
-            @com.facebook.swift.codec.ThriftField(value=7, name="myByteDFSet", requiredness=Requiredness.NONE)    public Builder setMyByteDFSet(byte myByteDFSet) {
+        @com.facebook.swift.codec.ThriftField(value=7, name="myByteDFSet", requiredness=Requiredness.NONE)    public Builder setMyByteDFSet(byte myByteDFSet) {
             this.myByteDFSet = myByteDFSet;
             return this;
         }
 
         public byte getMyByteDFSet() { return myByteDFSet; }
 
-            @com.facebook.swift.codec.ThriftField(value=8, name="myByte", requiredness=Requiredness.NONE)    public Builder setMyByte(byte myByte) {
+        @com.facebook.swift.codec.ThriftField(value=8, name="myByte", requiredness=Requiredness.NONE)    public Builder setMyByte(byte myByte) {
             this.myByte = myByte;
             return this;
         }
 
         public byte getMyByte() { return myByte; }
 
-            @com.facebook.swift.codec.ThriftField(value=9, name="myDoubleDFset", requiredness=Requiredness.NONE)    public Builder setMyDoubleDFset(double myDoubleDFset) {
+        @com.facebook.swift.codec.ThriftField(value=9, name="myDoubleDFset", requiredness=Requiredness.NONE)    public Builder setMyDoubleDFset(double myDoubleDFset) {
             this.myDoubleDFset = myDoubleDFset;
             return this;
         }
 
         public double getMyDoubleDFset() { return myDoubleDFset; }
 
-            @com.facebook.swift.codec.ThriftField(value=10, name="myDoubleDFZero", requiredness=Requiredness.NONE)    public Builder setMyDoubleDFZero(double myDoubleDFZero) {
+        @com.facebook.swift.codec.ThriftField(value=10, name="myDoubleDFZero", requiredness=Requiredness.NONE)    public Builder setMyDoubleDFZero(double myDoubleDFZero) {
             this.myDoubleDFZero = myDoubleDFZero;
             return this;
         }
 
         public double getMyDoubleDFZero() { return myDoubleDFZero; }
 
-            @com.facebook.swift.codec.ThriftField(value=12, name="myDouble", requiredness=Requiredness.NONE)    public Builder setMyDouble(double myDouble) {
+        @com.facebook.swift.codec.ThriftField(value=12, name="myDouble", requiredness=Requiredness.NONE)    public Builder setMyDouble(double myDouble) {
             this.myDouble = myDouble;
             return this;
         }
 
         public double getMyDouble() { return myDouble; }
 
-            @com.facebook.swift.codec.ThriftField(value=13, name="field3", requiredness=Requiredness.NONE)    public Builder setField3(Map<Integer, String> field3) {
+        @com.facebook.swift.codec.ThriftField(value=13, name="field3", requiredness=Requiredness.NONE)    public Builder setField3(Map<Integer, String> field3) {
             this.field3 = field3;
             return this;
         }
 
         public Map<Integer, String> getField3() { return field3; }
 
-            @com.facebook.swift.codec.ThriftField(value=14, name="myList", requiredness=Requiredness.NONE)    public Builder setMyList(List<test.fixtures.complex_struct.MyEnum> myList) {
+        @com.facebook.swift.codec.ThriftField(value=14, name="myList", requiredness=Requiredness.NONE)    public Builder setMyList(List<test.fixtures.complex_struct.MyEnum> myList) {
             this.myList = myList;
             return this;
         }
 
         public List<test.fixtures.complex_struct.MyEnum> getMyList() { return myList; }
 
-            @com.facebook.swift.codec.ThriftField(value=15, name="mySet", requiredness=Requiredness.NONE)    public Builder setMySet(Set<String> mySet) {
+        @com.facebook.swift.codec.ThriftField(value=15, name="mySet", requiredness=Requiredness.NONE)    public Builder setMySet(Set<String> mySet) {
             this.mySet = mySet;
             return this;
         }
 
         public Set<String> getMySet() { return mySet; }
 
-            @com.facebook.swift.codec.ThriftField(value=16, name="simpleStruct", requiredness=Requiredness.NONE)    public Builder setSimpleStruct(test.fixtures.complex_struct.SimpleStruct simpleStruct) {
+        @com.facebook.swift.codec.ThriftField(value=16, name="simpleStruct", requiredness=Requiredness.NONE)    public Builder setSimpleStruct(test.fixtures.complex_struct.SimpleStruct simpleStruct) {
             this.simpleStruct = simpleStruct;
             return this;
         }
 
         public test.fixtures.complex_struct.SimpleStruct getSimpleStruct() { return simpleStruct; }
 
-            @com.facebook.swift.codec.ThriftField(value=17, name="listStructDFset", requiredness=Requiredness.NONE)    public Builder setListStructDFset(List<test.fixtures.complex_struct.SimpleStruct> listStructDFset) {
+        @com.facebook.swift.codec.ThriftField(value=17, name="listStructDFset", requiredness=Requiredness.NONE)    public Builder setListStructDFset(List<test.fixtures.complex_struct.SimpleStruct> listStructDFset) {
             this.listStructDFset = listStructDFset;
             return this;
         }
 
         public List<test.fixtures.complex_struct.SimpleStruct> getListStructDFset() { return listStructDFset; }
 
-            @com.facebook.swift.codec.ThriftField(value=18, name="myUnion", requiredness=Requiredness.NONE)    public Builder setMyUnion(test.fixtures.complex_struct.MyUnion myUnion) {
+        @com.facebook.swift.codec.ThriftField(value=18, name="myUnion", requiredness=Requiredness.NONE)    public Builder setMyUnion(test.fixtures.complex_struct.MyUnion myUnion) {
             this.myUnion = myUnion;
             return this;
         }
 
         public test.fixtures.complex_struct.MyUnion getMyUnion() { return myUnion; }
 
-            @com.facebook.swift.codec.ThriftField(value=19, name="listUnionDFset", requiredness=Requiredness.NONE)    public Builder setListUnionDFset(List<test.fixtures.complex_struct.MyUnion> listUnionDFset) {
+        @com.facebook.swift.codec.ThriftField(value=19, name="listUnionDFset", requiredness=Requiredness.NONE)    public Builder setListUnionDFset(List<test.fixtures.complex_struct.MyUnion> listUnionDFset) {
             this.listUnionDFset = listUnionDFset;
             return this;
         }
 
         public List<test.fixtures.complex_struct.MyUnion> getListUnionDFset() { return listUnionDFset; }
 
-            @com.facebook.swift.codec.ThriftField(value=20, name="mapNestlistStructDfSet", requiredness=Requiredness.NONE)    public Builder setMapNestlistStructDfSet(Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> mapNestlistStructDfSet) {
+        @com.facebook.swift.codec.ThriftField(value=20, name="mapNestlistStructDfSet", requiredness=Requiredness.NONE)    public Builder setMapNestlistStructDfSet(Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> mapNestlistStructDfSet) {
             this.mapNestlistStructDfSet = mapNestlistStructDfSet;
             return this;
         }
 
         public Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> getMapNestlistStructDfSet() { return mapNestlistStructDfSet; }
 
-            @com.facebook.swift.codec.ThriftField(value=21, name="mapJavaTypeDFset", requiredness=Requiredness.NONE)    public Builder setMapJavaTypeDFset(it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> mapJavaTypeDFset) {
+        @com.facebook.swift.codec.ThriftField(value=21, name="mapJavaTypeDFset", requiredness=Requiredness.NONE)    public Builder setMapJavaTypeDFset(it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> mapJavaTypeDFset) {
             this.mapJavaTypeDFset = mapJavaTypeDFset;
             return this;
         }
 
         public it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> getMapJavaTypeDFset() { return mapJavaTypeDFset; }
 
-            @com.facebook.swift.codec.ThriftField(value=22, name="emptyMap", requiredness=Requiredness.NONE)    public Builder setEmptyMap(Map<Long, Integer> emptyMap) {
+        @com.facebook.swift.codec.ThriftField(value=22, name="emptyMap", requiredness=Requiredness.NONE)    public Builder setEmptyMap(Map<Long, Integer> emptyMap) {
             this.emptyMap = emptyMap;
             return this;
         }
 
         public Map<Long, Integer> getEmptyMap() { return emptyMap; }
 
-            @com.facebook.swift.codec.ThriftField(value=23, name="enumMapDFset", requiredness=Requiredness.NONE)    public Builder setEnumMapDFset(Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> enumMapDFset) {
+        @com.facebook.swift.codec.ThriftField(value=23, name="enumMapDFset", requiredness=Requiredness.NONE)    public Builder setEnumMapDFset(Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> enumMapDFset) {
             this.enumMapDFset = enumMapDFset;
             return this;
         }
@@ -436,6 +436,7 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -444,243 +445,200 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
     private final long myLongDFset;
     public static final int _MYLONGDFSET = 1;
     private static final TField MY_LONG_DFSET_FIELD_DESC = new TField("myLongDFset", TType.I64, (short)1);
-        private final long myLongDF;
+    private final long myLongDF;
     public static final int _MYLONGDF = 2;
     private static final TField MY_LONG_DF_FIELD_DESC = new TField("myLongDF", TType.I64, (short)2);
-        private final int portDFset;
+    private final int portDFset;
     public static final int _PORTDFSET = 3;
     private static final TField PORT_DFSET_FIELD_DESC = new TField("portDFset", TType.I32, (short)3);
-        private final int portNum;
+    private final int portNum;
     public static final int _PORTNUM = 4;
     private static final TField PORT_NUM_FIELD_DESC = new TField("portNum", TType.I32, (short)4);
-        private final byte[] myBinaryDFset;
+    private final byte[] myBinaryDFset;
     public static final int _MYBINARYDFSET = 5;
     private static final TField MY_BINARY_DFSET_FIELD_DESC = new TField("myBinaryDFset", TType.STRING, (short)5);
-        private final byte[] myBinary;
+    private final byte[] myBinary;
     public static final int _MYBINARY = 6;
     private static final TField MY_BINARY_FIELD_DESC = new TField("myBinary", TType.STRING, (short)6);
-        private final byte myByteDFSet;
+    private final byte myByteDFSet;
     public static final int _MYBYTEDFSET = 7;
     private static final TField MY_BYTE_DFSET_FIELD_DESC = new TField("myByteDFSet", TType.BYTE, (short)7);
-        private final byte myByte;
+    private final byte myByte;
     public static final int _MYBYTE = 8;
     private static final TField MY_BYTE_FIELD_DESC = new TField("myByte", TType.BYTE, (short)8);
-        private final double myDoubleDFset;
+    private final double myDoubleDFset;
     public static final int _MYDOUBLEDFSET = 9;
     private static final TField MY_DOUBLE_DFSET_FIELD_DESC = new TField("myDoubleDFset", TType.DOUBLE, (short)9);
-        private final double myDoubleDFZero;
+    private final double myDoubleDFZero;
     public static final int _MYDOUBLEDFZERO = 10;
     private static final TField MY_DOUBLE_DFZERO_FIELD_DESC = new TField("myDoubleDFZero", TType.DOUBLE, (short)10);
-        private final double myDouble;
+    private final double myDouble;
     public static final int _MYDOUBLE = 12;
     private static final TField MY_DOUBLE_FIELD_DESC = new TField("myDouble", TType.DOUBLE, (short)12);
-        private final Map<Integer, String> field3;
+    private final Map<Integer, String> field3;
     public static final int _FIELD3 = 13;
     private static final TField FIELD3_FIELD_DESC = new TField("field3", TType.MAP, (short)13);
-        private final List<test.fixtures.complex_struct.MyEnum> myList;
+    private final List<test.fixtures.complex_struct.MyEnum> myList;
     public static final int _MYLIST = 14;
     private static final TField MY_LIST_FIELD_DESC = new TField("myList", TType.LIST, (short)14);
-        private final Set<String> mySet;
+    private final Set<String> mySet;
     public static final int _MYSET = 15;
     private static final TField MY_SET_FIELD_DESC = new TField("mySet", TType.SET, (short)15);
-        private final test.fixtures.complex_struct.SimpleStruct simpleStruct;
+    private final test.fixtures.complex_struct.SimpleStruct simpleStruct;
     public static final int _SIMPLESTRUCT = 16;
     private static final TField SIMPLE_STRUCT_FIELD_DESC = new TField("simpleStruct", TType.STRUCT, (short)16);
-        private final List<test.fixtures.complex_struct.SimpleStruct> listStructDFset;
+    private final List<test.fixtures.complex_struct.SimpleStruct> listStructDFset;
     public static final int _LISTSTRUCTDFSET = 17;
     private static final TField LIST_STRUCT_DFSET_FIELD_DESC = new TField("listStructDFset", TType.LIST, (short)17);
-        private final test.fixtures.complex_struct.MyUnion myUnion;
+    private final test.fixtures.complex_struct.MyUnion myUnion;
     public static final int _MYUNION = 18;
     private static final TField MY_UNION_FIELD_DESC = new TField("myUnion", TType.STRUCT, (short)18);
-        private final List<test.fixtures.complex_struct.MyUnion> listUnionDFset;
+    private final List<test.fixtures.complex_struct.MyUnion> listUnionDFset;
     public static final int _LISTUNIONDFSET = 19;
     private static final TField LIST_UNION_DFSET_FIELD_DESC = new TField("listUnionDFset", TType.LIST, (short)19);
-        private final Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> mapNestlistStructDfSet;
+    private final Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> mapNestlistStructDfSet;
     public static final int _MAPNESTLISTSTRUCTDFSET = 20;
     private static final TField MAP_NESTLIST_STRUCT_DF_SET_FIELD_DESC = new TField("mapNestlistStructDfSet", TType.MAP, (short)20);
-        private final it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> mapJavaTypeDFset;
+    private final it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> mapJavaTypeDFset;
     public static final int _MAPJAVATYPEDFSET = 21;
     private static final TField MAP_JAVA_TYPE_DFSET_FIELD_DESC = new TField("mapJavaTypeDFset", TType.MAP, (short)21);
-        private final Map<Long, Integer> emptyMap;
+    private final Map<Long, Integer> emptyMap;
     public static final int _EMPTYMAP = 22;
     private static final TField EMPTY_MAP_FIELD_DESC = new TField("emptyMap", TType.MAP, (short)22);
-        private final Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> enumMapDFset;
+    private final Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> enumMapDFset;
     public static final int _ENUMMAPDFSET = 23;
     private static final TField ENUM_MAP_DFSET_FIELD_DESC = new TField("enumMapDFset", TType.MAP, (short)23);
     static {
-      NAMES_TO_IDS.put("myLongDFset", 1);
-      THRIFT_NAMES_TO_IDS.put("myLongDFset", 1);
-      FIELD_METADATA.put(1, MY_LONG_DFSET_FIELD_DESC);
-      NAMES_TO_IDS.put("myLongDF", 2);
-      THRIFT_NAMES_TO_IDS.put("myLongDF", 2);
-      FIELD_METADATA.put(2, MY_LONG_DF_FIELD_DESC);
-      NAMES_TO_IDS.put("portDFset", 3);
-      THRIFT_NAMES_TO_IDS.put("portDFset", 3);
-      FIELD_METADATA.put(3, PORT_DFSET_FIELD_DESC);
-      NAMES_TO_IDS.put("portNum", 4);
-      THRIFT_NAMES_TO_IDS.put("portNum", 4);
-      FIELD_METADATA.put(4, PORT_NUM_FIELD_DESC);
-      NAMES_TO_IDS.put("myBinaryDFset", 5);
-      THRIFT_NAMES_TO_IDS.put("myBinaryDFset", 5);
-      FIELD_METADATA.put(5, MY_BINARY_DFSET_FIELD_DESC);
-      NAMES_TO_IDS.put("myBinary", 6);
-      THRIFT_NAMES_TO_IDS.put("myBinary", 6);
-      FIELD_METADATA.put(6, MY_BINARY_FIELD_DESC);
-      NAMES_TO_IDS.put("myByteDFSet", 7);
-      THRIFT_NAMES_TO_IDS.put("myByteDFSet", 7);
-      FIELD_METADATA.put(7, MY_BYTE_DFSET_FIELD_DESC);
-      NAMES_TO_IDS.put("myByte", 8);
-      THRIFT_NAMES_TO_IDS.put("myByte", 8);
-      FIELD_METADATA.put(8, MY_BYTE_FIELD_DESC);
-      NAMES_TO_IDS.put("myDoubleDFset", 9);
-      THRIFT_NAMES_TO_IDS.put("myDoubleDFset", 9);
-      FIELD_METADATA.put(9, MY_DOUBLE_DFSET_FIELD_DESC);
-      NAMES_TO_IDS.put("myDoubleDFZero", 10);
-      THRIFT_NAMES_TO_IDS.put("myDoubleDFZero", 10);
-      FIELD_METADATA.put(10, MY_DOUBLE_DFZERO_FIELD_DESC);
-      NAMES_TO_IDS.put("myDouble", 12);
-      THRIFT_NAMES_TO_IDS.put("myDouble", 12);
-      FIELD_METADATA.put(12, MY_DOUBLE_FIELD_DESC);
-      NAMES_TO_IDS.put("field3", 13);
-      THRIFT_NAMES_TO_IDS.put("field3", 13);
-      FIELD_METADATA.put(13, FIELD3_FIELD_DESC);
-      NAMES_TO_IDS.put("myList", 14);
-      THRIFT_NAMES_TO_IDS.put("myList", 14);
-      FIELD_METADATA.put(14, MY_LIST_FIELD_DESC);
-      NAMES_TO_IDS.put("mySet", 15);
-      THRIFT_NAMES_TO_IDS.put("mySet", 15);
-      FIELD_METADATA.put(15, MY_SET_FIELD_DESC);
-      NAMES_TO_IDS.put("simpleStruct", 16);
-      THRIFT_NAMES_TO_IDS.put("simpleStruct", 16);
-      FIELD_METADATA.put(16, SIMPLE_STRUCT_FIELD_DESC);
-      NAMES_TO_IDS.put("listStructDFset", 17);
-      THRIFT_NAMES_TO_IDS.put("listStructDFset", 17);
-      FIELD_METADATA.put(17, LIST_STRUCT_DFSET_FIELD_DESC);
-      NAMES_TO_IDS.put("myUnion", 18);
-      THRIFT_NAMES_TO_IDS.put("myUnion", 18);
-      FIELD_METADATA.put(18, MY_UNION_FIELD_DESC);
-      NAMES_TO_IDS.put("listUnionDFset", 19);
-      THRIFT_NAMES_TO_IDS.put("listUnionDFset", 19);
-      FIELD_METADATA.put(19, LIST_UNION_DFSET_FIELD_DESC);
-      NAMES_TO_IDS.put("mapNestlistStructDfSet", 20);
-      THRIFT_NAMES_TO_IDS.put("mapNestlistStructDfSet", 20);
-      FIELD_METADATA.put(20, MAP_NESTLIST_STRUCT_DF_SET_FIELD_DESC);
-      NAMES_TO_IDS.put("mapJavaTypeDFset", 21);
-      THRIFT_NAMES_TO_IDS.put("mapJavaTypeDFset", 21);
-      FIELD_METADATA.put(21, MAP_JAVA_TYPE_DFSET_FIELD_DESC);
-      NAMES_TO_IDS.put("emptyMap", 22);
-      THRIFT_NAMES_TO_IDS.put("emptyMap", 22);
-      FIELD_METADATA.put(22, EMPTY_MAP_FIELD_DESC);
-      NAMES_TO_IDS.put("enumMapDFset", 23);
-      THRIFT_NAMES_TO_IDS.put("enumMapDFset", 23);
-      FIELD_METADATA.put(23, ENUM_MAP_DFSET_FIELD_DESC);
+        NAMES_TO_IDS.put("myLongDFset", 1);
+        THRIFT_NAMES_TO_IDS.put("myLongDFset", 1);
+        FIELD_METADATA.put(1, MY_LONG_DFSET_FIELD_DESC);
+        NAMES_TO_IDS.put("myLongDF", 2);
+        THRIFT_NAMES_TO_IDS.put("myLongDF", 2);
+        FIELD_METADATA.put(2, MY_LONG_DF_FIELD_DESC);
+        NAMES_TO_IDS.put("portDFset", 3);
+        THRIFT_NAMES_TO_IDS.put("portDFset", 3);
+        FIELD_METADATA.put(3, PORT_DFSET_FIELD_DESC);
+        NAMES_TO_IDS.put("portNum", 4);
+        THRIFT_NAMES_TO_IDS.put("portNum", 4);
+        FIELD_METADATA.put(4, PORT_NUM_FIELD_DESC);
+        NAMES_TO_IDS.put("myBinaryDFset", 5);
+        THRIFT_NAMES_TO_IDS.put("myBinaryDFset", 5);
+        FIELD_METADATA.put(5, MY_BINARY_DFSET_FIELD_DESC);
+        NAMES_TO_IDS.put("myBinary", 6);
+        THRIFT_NAMES_TO_IDS.put("myBinary", 6);
+        FIELD_METADATA.put(6, MY_BINARY_FIELD_DESC);
+        NAMES_TO_IDS.put("myByteDFSet", 7);
+        THRIFT_NAMES_TO_IDS.put("myByteDFSet", 7);
+        FIELD_METADATA.put(7, MY_BYTE_DFSET_FIELD_DESC);
+        NAMES_TO_IDS.put("myByte", 8);
+        THRIFT_NAMES_TO_IDS.put("myByte", 8);
+        FIELD_METADATA.put(8, MY_BYTE_FIELD_DESC);
+        NAMES_TO_IDS.put("myDoubleDFset", 9);
+        THRIFT_NAMES_TO_IDS.put("myDoubleDFset", 9);
+        FIELD_METADATA.put(9, MY_DOUBLE_DFSET_FIELD_DESC);
+        NAMES_TO_IDS.put("myDoubleDFZero", 10);
+        THRIFT_NAMES_TO_IDS.put("myDoubleDFZero", 10);
+        FIELD_METADATA.put(10, MY_DOUBLE_DFZERO_FIELD_DESC);
+        NAMES_TO_IDS.put("myDouble", 12);
+        THRIFT_NAMES_TO_IDS.put("myDouble", 12);
+        FIELD_METADATA.put(12, MY_DOUBLE_FIELD_DESC);
+        NAMES_TO_IDS.put("field3", 13);
+        THRIFT_NAMES_TO_IDS.put("field3", 13);
+        FIELD_METADATA.put(13, FIELD3_FIELD_DESC);
+        NAMES_TO_IDS.put("myList", 14);
+        THRIFT_NAMES_TO_IDS.put("myList", 14);
+        FIELD_METADATA.put(14, MY_LIST_FIELD_DESC);
+        NAMES_TO_IDS.put("mySet", 15);
+        THRIFT_NAMES_TO_IDS.put("mySet", 15);
+        FIELD_METADATA.put(15, MY_SET_FIELD_DESC);
+        NAMES_TO_IDS.put("simpleStruct", 16);
+        THRIFT_NAMES_TO_IDS.put("simpleStruct", 16);
+        FIELD_METADATA.put(16, SIMPLE_STRUCT_FIELD_DESC);
+        NAMES_TO_IDS.put("listStructDFset", 17);
+        THRIFT_NAMES_TO_IDS.put("listStructDFset", 17);
+        FIELD_METADATA.put(17, LIST_STRUCT_DFSET_FIELD_DESC);
+        NAMES_TO_IDS.put("myUnion", 18);
+        THRIFT_NAMES_TO_IDS.put("myUnion", 18);
+        FIELD_METADATA.put(18, MY_UNION_FIELD_DESC);
+        NAMES_TO_IDS.put("listUnionDFset", 19);
+        THRIFT_NAMES_TO_IDS.put("listUnionDFset", 19);
+        FIELD_METADATA.put(19, LIST_UNION_DFSET_FIELD_DESC);
+        NAMES_TO_IDS.put("mapNestlistStructDfSet", 20);
+        THRIFT_NAMES_TO_IDS.put("mapNestlistStructDfSet", 20);
+        FIELD_METADATA.put(20, MAP_NESTLIST_STRUCT_DF_SET_FIELD_DESC);
+        NAMES_TO_IDS.put("mapJavaTypeDFset", 21);
+        THRIFT_NAMES_TO_IDS.put("mapJavaTypeDFset", 21);
+        FIELD_METADATA.put(21, MAP_JAVA_TYPE_DFSET_FIELD_DESC);
+        NAMES_TO_IDS.put("emptyMap", 22);
+        THRIFT_NAMES_TO_IDS.put("emptyMap", 22);
+        FIELD_METADATA.put(22, EMPTY_MAP_FIELD_DESC);
+        NAMES_TO_IDS.put("enumMapDFset", 23);
+        THRIFT_NAMES_TO_IDS.put("enumMapDFset", 23);
+        FIELD_METADATA.put(23, ENUM_MAP_DFSET_FIELD_DESC);
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="myLongDFset", requiredness=Requiredness.NONE)
     public long getMyLongDFset() { return myLongDFset; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=2, name="myLongDF", requiredness=Requiredness.NONE)
     public long getMyLongDF() { return myLongDF; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=3, name="portDFset", requiredness=Requiredness.NONE)
     public int getPortDFset() { return portDFset; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=4, name="portNum", requiredness=Requiredness.NONE)
     public int getPortNum() { return portNum; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="myBinaryDFset", requiredness=Requiredness.NONE)
     public byte[] getMyBinaryDFset() { return myBinaryDFset; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="myBinary", requiredness=Requiredness.NONE)
     public byte[] getMyBinary() { return myBinary; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=7, name="myByteDFSet", requiredness=Requiredness.NONE)
     public byte getMyByteDFSet() { return myByteDFSet; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=8, name="myByte", requiredness=Requiredness.NONE)
     public byte getMyByte() { return myByte; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=9, name="myDoubleDFset", requiredness=Requiredness.NONE)
     public double getMyDoubleDFset() { return myDoubleDFset; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=10, name="myDoubleDFZero", requiredness=Requiredness.NONE)
     public double getMyDoubleDFZero() { return myDoubleDFZero; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=12, name="myDouble", requiredness=Requiredness.NONE)
     public double getMyDouble() { return myDouble; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=13, name="field3", requiredness=Requiredness.NONE)
     public Map<Integer, String> getField3() { return field3; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=14, name="myList", requiredness=Requiredness.NONE)
     public List<test.fixtures.complex_struct.MyEnum> getMyList() { return myList; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=15, name="mySet", requiredness=Requiredness.NONE)
     public Set<String> getMySet() { return mySet; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=16, name="simpleStruct", requiredness=Requiredness.NONE)
     public test.fixtures.complex_struct.SimpleStruct getSimpleStruct() { return simpleStruct; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=17, name="listStructDFset", requiredness=Requiredness.NONE)
     public List<test.fixtures.complex_struct.SimpleStruct> getListStructDFset() { return listStructDFset; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=18, name="myUnion", requiredness=Requiredness.NONE)
     public test.fixtures.complex_struct.MyUnion getMyUnion() { return myUnion; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=19, name="listUnionDFset", requiredness=Requiredness.NONE)
     public List<test.fixtures.complex_struct.MyUnion> getListUnionDFset() { return listUnionDFset; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=20, name="mapNestlistStructDfSet", requiredness=Requiredness.NONE)
     public Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> getMapNestlistStructDfSet() { return mapNestlistStructDfSet; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=21, name="mapJavaTypeDFset", requiredness=Requiredness.NONE)
     public it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> getMapJavaTypeDFset() { return mapJavaTypeDFset; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=22, name="emptyMap", requiredness=Requiredness.NONE)
     public Map<Long, Integer> getEmptyMap() { return emptyMap; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=23, name="enumMapDFset", requiredness=Requiredness.NONE)
     public Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> getEnumMapDFset() { return enumMapDFset; }
@@ -754,604 +712,663 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(myLongDFset);
-            _hashCode = 31 * _hashCode + Long.hashCode(myLongDF);
-            _hashCode = 31 * _hashCode + Integer.hashCode(portDFset);
-            _hashCode = 31 * _hashCode + Integer.hashCode(portNum);
-            _hashCode = 31 * _hashCode + Arrays.hashCode(myBinaryDFset);
-            _hashCode = 31 * _hashCode + Arrays.hashCode(myBinary);
-            _hashCode = 31 * _hashCode + Byte.hashCode(myByteDFSet);
-            _hashCode = 31 * _hashCode + Byte.hashCode(myByte);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDoubleDFset);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDoubleDFZero);
-            _hashCode = 31 * _hashCode + Double.hashCode(myDouble);
-            _hashCode = 31 * _hashCode + Objects.hashCode(field3);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myList);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mySet);
-            _hashCode = 31 * _hashCode + Objects.hashCode(simpleStruct);
-            _hashCode = 31 * _hashCode + Objects.hashCode(listStructDFset);
-            _hashCode = 31 * _hashCode + Objects.hashCode(myUnion);
-            _hashCode = 31 * _hashCode + Objects.hashCode(listUnionDFset);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mapNestlistStructDfSet);
-            _hashCode = 31 * _hashCode + Objects.hashCode(mapJavaTypeDFset);
-            _hashCode = 31 * _hashCode + Objects.hashCode(emptyMap);
-            _hashCode = 31 * _hashCode + Objects.hashCode(enumMapDFset);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Long.hashCode(myLongDF);
+        _hashCode = 31 * _hashCode + Integer.hashCode(portDFset);
+        _hashCode = 31 * _hashCode + Integer.hashCode(portNum);
+        _hashCode = 31 * _hashCode + Arrays.hashCode(myBinaryDFset);
+        _hashCode = 31 * _hashCode + Arrays.hashCode(myBinary);
+        _hashCode = 31 * _hashCode + Byte.hashCode(myByteDFSet);
+        _hashCode = 31 * _hashCode + Byte.hashCode(myByte);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDoubleDFset);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDoubleDFZero);
+        _hashCode = 31 * _hashCode + Double.hashCode(myDouble);
+        _hashCode = 31 * _hashCode + Objects.hashCode(field3);
+        _hashCode = 31 * _hashCode + Objects.hashCode(myList);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mySet);
+        _hashCode = 31 * _hashCode + Objects.hashCode(simpleStruct);
+        _hashCode = 31 * _hashCode + Objects.hashCode(listStructDFset);
+        _hashCode = 31 * _hashCode + Objects.hashCode(myUnion);
+        _hashCode = 31 * _hashCode + Objects.hashCode(listUnionDFset);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mapNestlistStructDfSet);
+        _hashCode = 31 * _hashCode + Objects.hashCode(mapJavaTypeDFset);
+        _hashCode = 31 * _hashCode + Objects.hashCode(emptyMap);
+        _hashCode = 31 * _hashCode + Objects.hashCode(enumMapDFset);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<DefaultStruct> asReader() {
       return DefaultStruct::read0;
     }
 
     public static DefaultStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(DefaultStruct.NAMES_TO_IDS, DefaultStruct.THRIFT_NAMES_TO_IDS, DefaultStruct.FIELD_METADATA);
-      DefaultStruct.Builder builder = new DefaultStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _MYLONGDFSET:
-          if (__field.type == TType.I64) {
-            long myLongDFset = oprot.readI64();
-            builder.setMyLongDFset(myLongDFset);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYLONGDF:
-          if (__field.type == TType.I64) {
-            long myLongDF = oprot.readI64();
-            builder.setMyLongDF(myLongDF);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _PORTDFSET:
-          if (__field.type == TType.I32) {
-            int portDFset = oprot.readI32();
-            builder.setPortDFset(portDFset);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _PORTNUM:
-          if (__field.type == TType.I32) {
-            int portNum = oprot.readI32();
-            builder.setPortNum(portNum);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYBINARYDFSET:
-          if (__field.type == TType.STRING) {
-            byte[] myBinaryDFset = oprot.readBinary().array();
-            builder.setMyBinaryDFset(myBinaryDFset);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYBINARY:
-          if (__field.type == TType.STRING) {
-            byte[] myBinary = oprot.readBinary().array();
-            builder.setMyBinary(myBinary);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYBYTEDFSET:
-          if (__field.type == TType.BYTE) {
-            byte myByteDFSet = oprot.readByte();
-            builder.setMyByteDFSet(myByteDFSet);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYBYTE:
-          if (__field.type == TType.BYTE) {
-            byte myByte = oprot.readByte();
-            builder.setMyByte(myByte);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLEDFSET:
-          if (__field.type == TType.DOUBLE) {
-            double myDoubleDFset = oprot.readDouble();
-            builder.setMyDoubleDFset(myDoubleDFset);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLEDFZERO:
-          if (__field.type == TType.DOUBLE) {
-            double myDoubleDFZero = oprot.readDouble();
-            builder.setMyDoubleDFZero(myDoubleDFZero);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYDOUBLE:
-          if (__field.type == TType.DOUBLE) {
-            double myDouble = oprot.readDouble();
-            builder.setMyDouble(myDouble);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _FIELD3:
-          if (__field.type == TType.MAP) {
-            Map<Integer, String> field3;
-                {
-                TMap _map = oprot.readMapBegin();
-                field3 = new HashMap<Integer, String>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    int _key1 = oprot.readI32();
-                    String _value1 = oprot.readString();
-                    field3.put(_key1, _value1);
+        TField __field;
+        oprot.readStructBegin(DefaultStruct.NAMES_TO_IDS, DefaultStruct.THRIFT_NAMES_TO_IDS, DefaultStruct.FIELD_METADATA);
+        DefaultStruct.Builder builder = new DefaultStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _MYLONGDFSET:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMyLongDFset(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
+                break;
+            case _MYLONGDF:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setMyLongDF(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readMapEnd();
-            builder.setField3(field3);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYLIST:
-          if (__field.type == TType.LIST) {
-            List<test.fixtures.complex_struct.MyEnum> myList;
-                {
-                TList _list = oprot.readListBegin();
-                myList = new ArrayList<test.fixtures.complex_struct.MyEnum>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    test.fixtures.complex_struct.MyEnum _value1 = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
-                    myList.add(_value1);
+                break;
+            case _PORTDFSET:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setPortDFset(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _PORTNUM:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setPortNum(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setMyList(myList);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYSET:
-          if (__field.type == TType.SET) {
-            Set<String> mySet;
-                {
-                TSet _set = oprot.readSetBegin();
-                mySet = new HashSet<String>(Math.max(0, _set.size));
-                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                    
-                    String _value1 = oprot.readString();
-                    mySet.add(_value1);
+                break;
+            case _MYBINARYDFSET:
+                if (__field.type == TType.STRING) {
+                    byte[] _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBinary().array();
+                    builder.setMyBinaryDFset(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readSetEnd();
+                break;
+            case _MYBINARY:
+                if (__field.type == TType.STRING) {
+                    byte[] _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readBinary().array();
+                    builder.setMyBinary(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setMySet(mySet);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SIMPLESTRUCT:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.complex_struct.SimpleStruct simpleStruct = test.fixtures.complex_struct.SimpleStruct.read0(oprot);
-            builder.setSimpleStruct(simpleStruct);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LISTSTRUCTDFSET:
-          if (__field.type == TType.LIST) {
-            List<test.fixtures.complex_struct.SimpleStruct> listStructDFset;
-                {
-                TList _list = oprot.readListBegin();
-                listStructDFset = new ArrayList<test.fixtures.complex_struct.SimpleStruct>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    test.fixtures.complex_struct.SimpleStruct _value1 = test.fixtures.complex_struct.SimpleStruct.read0(oprot);
-                    listStructDFset.add(_value1);
+                break;
+            case _MYBYTEDFSET:
+                if (__field.type == TType.BYTE) {
+                    byte _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readByte();
+                    builder.setMyByteDFSet(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _MYBYTE:
+                if (__field.type == TType.BYTE) {
+                    byte _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readByte();
+                    builder.setMyByte(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setListStructDFset(listStructDFset);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MYUNION:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.complex_struct.MyUnion myUnion = test.fixtures.complex_struct.MyUnion.read0(oprot);
-            builder.setMyUnion(myUnion);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _LISTUNIONDFSET:
-          if (__field.type == TType.LIST) {
-            List<test.fixtures.complex_struct.MyUnion> listUnionDFset;
-                {
-                TList _list = oprot.readListBegin();
-                listUnionDFset = new ArrayList<test.fixtures.complex_struct.MyUnion>(Math.max(0, _list.size));
-                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                    
-                    test.fixtures.complex_struct.MyUnion _value1 = test.fixtures.complex_struct.MyUnion.read0(oprot);
-                    listUnionDFset.add(_value1);
+                break;
+            case _MYDOUBLEDFSET:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDoubleDFset(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readListEnd();
+                break;
+            case _MYDOUBLEDFZERO:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDoubleDFZero(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-            builder.setListUnionDFset(listUnionDFset);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAPNESTLISTSTRUCTDFSET:
-          if (__field.type == TType.MAP) {
-            Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> mapNestlistStructDfSet;
-                {
-                TMap _map = oprot.readMapBegin();
-                mapNestlistStructDfSet = new HashMap<Integer, List<test.fixtures.complex_struct.SimpleStruct>>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    int _key1 = oprot.readI32();
-                    List<test.fixtures.complex_struct.SimpleStruct> _value1;
+                break;
+            case _MYDOUBLE:
+                if (__field.type == TType.DOUBLE) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    builder.setMyDouble(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _FIELD3:
+                if (__field.type == TType.MAP) {
+                    Map<Integer, String> _fbthriftVar0;
                     {
-                                TList _list1 = oprot.readListBegin();
-                                _value1 = new ArrayList<test.fixtures.complex_struct.SimpleStruct>(Math.max(0, _list1.size));
-                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                    
-                                    
-                                    test.fixtures.complex_struct.SimpleStruct _value2 = test.fixtures.complex_struct.SimpleStruct.read0(oprot);
-                                    
-                                    
-                                    _value1.add(_value2);
-                                    
-                                }
-                                oprot.readListEnd();
-                                }
-                    mapNestlistStructDfSet.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setMapNestlistStructDfSet(mapNestlistStructDfSet);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _MAPJAVATYPEDFSET:
-          if (__field.type == TType.MAP) {
-            it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> mapJavaTypeDFset;
-                {
-                TMap _map = oprot.readMapBegin();
-                mapJavaTypeDFset = new it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>();
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    long _key1 = oprot.readI64();
-                    String _value1 = oprot.readString();
-                    mapJavaTypeDFset.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setMapJavaTypeDFset(mapJavaTypeDFset);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _EMPTYMAP:
-          if (__field.type == TType.MAP) {
-            Map<Long, Integer> emptyMap;
-                {
-                TMap _map = oprot.readMapBegin();
-                emptyMap = new HashMap<Long, Integer>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    long _key1 = oprot.readI64();
-                    int _value1 = oprot.readI32();
-                    emptyMap.put(_key1, _value1);
-                }
-                }
-                oprot.readMapEnd();
-            builder.setEmptyMap(emptyMap);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _ENUMMAPDFSET:
-          if (__field.type == TType.MAP) {
-            Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> enumMapDFset;
-                {
-                TMap _map = oprot.readMapBegin();
-                enumMapDFset = new HashMap<String, Map<Integer, test.fixtures.complex_struct.MyEnum>>(Math.max(0, _map.size));
-                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                    
-                    String _key1 = oprot.readString();
-                    Map<Integer, test.fixtures.complex_struct.MyEnum> _value1;
-                    {
-                                TMap _map1 = oprot.readMapBegin();
-                                _value1 = new HashMap<Integer, test.fixtures.complex_struct.MyEnum>(Math.max(0, _map1.size));
-                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                    
-                                    
-                                    int _key2 = oprot.readI32();
-                                    
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<Integer, String>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            int _fbthriftKey1;
+                            String _fbthriftValue1;
 
-                                    
-                                    test.fixtures.complex_struct.MyEnum _value2 = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
-                                    
-                                    
-                                    _value1.put(_key2, _value2);
-                                    
-                                }
-                                }
-                                oprot.readMapEnd();
-                    enumMapDFset.put(_key1, _value1);
+                            {
+                                int _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI32();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setField3(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
+                break;
+            case _MYLIST:
+                if (__field.type == TType.LIST) {
+                    List<test.fixtures.complex_struct.MyEnum> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<test.fixtures.complex_struct.MyEnum>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            test.fixtures.complex_struct.MyEnum _fbthriftVar1;
+                            _fbthriftVar1 = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setMyList(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
                 }
-                oprot.readMapEnd();
-            builder.setEnumMapDFset(enumMapDFset);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+                break;
+            case _MYSET:
+                if (__field.type == TType.SET) {
+                    Set<String> _fbthriftVar0;
+                    {
+                        TSet _set0 = oprot.readSetBegin();
+                        _fbthriftVar0 = new HashSet<String>(Math.max(0, _set0.size));
+                        for (int _i0 = 0; (_set0.size < 0) ? oprot.peekSet() : (_i0 < _set0.size); _i0++) {
+                            String _fbthriftVar1;
+                            _fbthriftVar1 = oprot.readString();
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readSetEnd();
+                    }
+                    builder.setMySet(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _SIMPLESTRUCT:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.complex_struct.SimpleStruct _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.complex_struct.SimpleStruct.read0(oprot);
+                    builder.setSimpleStruct(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _LISTSTRUCTDFSET:
+                if (__field.type == TType.LIST) {
+                    List<test.fixtures.complex_struct.SimpleStruct> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<test.fixtures.complex_struct.SimpleStruct>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            test.fixtures.complex_struct.SimpleStruct _fbthriftVar1;
+                            _fbthriftVar1 = test.fixtures.complex_struct.SimpleStruct.read0(oprot);
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setListStructDFset(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MYUNION:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.complex_struct.MyUnion _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.complex_struct.MyUnion.read0(oprot);
+                    builder.setMyUnion(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _LISTUNIONDFSET:
+                if (__field.type == TType.LIST) {
+                    List<test.fixtures.complex_struct.MyUnion> _fbthriftVar0;
+                    {
+                        TList _list0 = oprot.readListBegin();
+                        _fbthriftVar0 = new ArrayList<test.fixtures.complex_struct.MyUnion>(Math.max(0, _list0.size));
+                        for (int _i0 = 0; (_list0.size < 0) ? oprot.peekList() : (_i0 < _list0.size); _i0++) {
+                            test.fixtures.complex_struct.MyUnion _fbthriftVar1;
+                            _fbthriftVar1 = test.fixtures.complex_struct.MyUnion.read0(oprot);
+                            _fbthriftVar0.add(_fbthriftVar1);
+                        }
+                        oprot.readListEnd();
+                    }
+                    builder.setListUnionDFset(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAPNESTLISTSTRUCTDFSET:
+                if (__field.type == TType.MAP) {
+                    Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<Integer, List<test.fixtures.complex_struct.SimpleStruct>>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            int _fbthriftKey1;
+                            List<test.fixtures.complex_struct.SimpleStruct> _fbthriftValue1;
+
+                            {
+                                int _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI32();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                List<test.fixtures.complex_struct.SimpleStruct> _fbthriftVar1;
+                                {
+                                    TList _list1 = oprot.readListBegin();
+                                    _fbthriftVar1 = new ArrayList<test.fixtures.complex_struct.SimpleStruct>(Math.max(0, _list1.size));
+                                    for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                        test.fixtures.complex_struct.SimpleStruct _fbthriftVar2;
+                                        _fbthriftVar2 = test.fixtures.complex_struct.SimpleStruct.read0(oprot);
+                                        _fbthriftVar1.add(_fbthriftVar2);
+                                    }
+                                    oprot.readListEnd();
+                                }
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMapNestlistStructDfSet(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _MAPJAVATYPEDFSET:
+                if (__field.type == TType.MAP) {
+                    it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>();
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            long _fbthriftKey1;
+                            String _fbthriftValue1;
+
+                            {
+                                long _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI64();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setMapJavaTypeDFset(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _EMPTYMAP:
+                if (__field.type == TType.MAP) {
+                    Map<Long, Integer> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<Long, Integer>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            long _fbthriftKey1;
+                            int _fbthriftValue1;
+
+                            {
+                                long _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI64();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                int _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readI32();
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setEmptyMap(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _ENUMMAPDFSET:
+                if (__field.type == TType.MAP) {
+                    Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> _fbthriftVar0;
+                    {
+                        TMap _map0 = oprot.readMapBegin();
+                        _fbthriftVar0 = new HashMap<String, Map<Integer, test.fixtures.complex_struct.MyEnum>>(Math.max(0, _map0.size));
+                        for (int _i0 = 0; (_map0.size < 0) ? oprot.peekMap() : (_i0 < _map0.size); _i0++) {
+                            String _fbthriftKey1;
+                            Map<Integer, test.fixtures.complex_struct.MyEnum> _fbthriftValue1;
+
+                            {
+                                String _fbthriftVar1;
+                                _fbthriftVar1 = oprot.readString();
+                                _fbthriftKey1 = _fbthriftVar1;
+                            }
+                            {
+                                Map<Integer, test.fixtures.complex_struct.MyEnum> _fbthriftVar1;
+                                {
+                                    TMap _map1 = oprot.readMapBegin();
+                                    _fbthriftVar1 = new HashMap<Integer, test.fixtures.complex_struct.MyEnum>(Math.max(0, _map1.size));
+                                    for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                        int _fbthriftKey2;
+                                        test.fixtures.complex_struct.MyEnum _fbthriftValue2;
+
+                                        {
+                                            int _fbthriftVar2;
+                                            _fbthriftVar2 = oprot.readI32();
+                                            _fbthriftKey2 = _fbthriftVar2;
+                                        }
+                                        {
+                                            test.fixtures.complex_struct.MyEnum _fbthriftVar2;
+                                            _fbthriftVar2 = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
+                                            _fbthriftValue2 = _fbthriftVar2;
+                                        }
+                                        _fbthriftVar1.put(_fbthriftKey2, _fbthriftValue2);
+                                    }
+                                    oprot.readMapEnd();
+                                }
+                                _fbthriftValue1 = _fbthriftVar1;
+                            }
+                            _fbthriftVar0.put(_fbthriftKey1, _fbthriftValue1);
+                        }
+                        oprot.readMapEnd();
+                    }
+                    builder.setEnumMapDFset(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.myLongDFset;
-      oprot.writeFieldBegin(MY_LONG_DFSET_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      long _iter0 = this.myLongDF;
-      oprot.writeFieldBegin(MY_LONG_DF_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.portDFset;
-      oprot.writeFieldBegin(PORT_DFSET_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      int _iter0 = this.portNum;
-      oprot.writeFieldBegin(PORT_NUM_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      byte[] _iter0 = this.myBinaryDFset;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_BINARY_DFSET_FIELD_DESC);
-        org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      byte[] _iter0 = this.myBinary;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_BINARY_FIELD_DESC);
-        org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      byte _iter0 = this.myByteDFSet;
-      oprot.writeFieldBegin(MY_BYTE_DFSET_FIELD_DESC);
-      oprot.writeByte(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      byte _iter0 = this.myByte;
-      oprot.writeFieldBegin(MY_BYTE_FIELD_DESC);
-      oprot.writeByte(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDoubleDFset;
-      oprot.writeFieldBegin(MY_DOUBLE_DFSET_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDoubleDFZero;
-      oprot.writeFieldBegin(MY_DOUBLE_DFZERO_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      double _iter0 = this.myDouble;
-      oprot.writeFieldBegin(MY_DOUBLE_FIELD_DESC);
-      oprot.writeDouble(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      Map<Integer, String> _iter0 = this.field3;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(FIELD3_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter0.size()));
-            for (Map.Entry<Integer, String> _iter1 : _iter0.entrySet()) {
-              {
-                Integer _iter2 = _iter1.getKey();
-                oprot.writeI32(_iter2);
-              }
-              {
-                String _iter2 = _iter1.getValue();
-                oprot.writeString(_iter2);
-              }
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.myLongDFset;
+            oprot.writeFieldBegin(MY_LONG_DFSET_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            long _fbthriftVar0 = this.myLongDF;
+            oprot.writeFieldBegin(MY_LONG_DF_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.portDFset;
+            oprot.writeFieldBegin(PORT_DFSET_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            int _fbthriftVar0 = this.portNum;
+            oprot.writeFieldBegin(PORT_NUM_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            byte[] _fbthriftVar0 = this.myBinaryDFset;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_BINARY_DFSET_FIELD_DESC);
+                org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<test.fixtures.complex_struct.MyEnum> _iter0 = this.myList;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_LIST_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
-            for (test.fixtures.complex_struct.MyEnum _iter1 : _iter0) {
-              oprot.writeI32(_iter1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter1));
+        }
+        {
+            byte[] _fbthriftVar0 = this.myBinary;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_BINARY_FIELD_DESC);
+                org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _fbthriftVar0);
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Set<String> _iter0 = this.mySet;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_SET_FIELD_DESC);
-        oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
-            for (String _iter1 : _iter0) {
-              oprot.writeString(_iter1);
+        }
+        {
+            byte _fbthriftVar0 = this.myByteDFSet;
+            oprot.writeFieldBegin(MY_BYTE_DFSET_FIELD_DESC);
+            oprot.writeByte(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            byte _fbthriftVar0 = this.myByte;
+            oprot.writeFieldBegin(MY_BYTE_FIELD_DESC);
+            oprot.writeByte(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDoubleDFset;
+            oprot.writeFieldBegin(MY_DOUBLE_DFSET_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDoubleDFZero;
+            oprot.writeFieldBegin(MY_DOUBLE_DFZERO_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            double _fbthriftVar0 = this.myDouble;
+            oprot.writeFieldBegin(MY_DOUBLE_FIELD_DESC);
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            Map<Integer, String> _fbthriftVar0 = this.field3;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(FIELD3_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _fbthriftVar0.size()));
+                for (Map.Entry<Integer, String> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Integer _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI32(_fbthriftVar2);
+                    }
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeSetEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.complex_struct.SimpleStruct _iter0 = this.simpleStruct;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(SIMPLE_STRUCT_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<test.fixtures.complex_struct.SimpleStruct> _iter0 = this.listStructDFset;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(LIST_STRUCT_DFSET_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.STRUCT, _iter0.size()));
-            for (test.fixtures.complex_struct.SimpleStruct _iter1 : _iter0) {
-              _iter1.write0(oprot);
+        }
+        {
+            List<test.fixtures.complex_struct.MyEnum> _fbthriftVar0 = this.myList;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_LIST_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.I32, _fbthriftVar0.size()));
+                for (test.fixtures.complex_struct.MyEnum _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeI32(_fbthriftVar1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar1));
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.complex_struct.MyUnion _iter0 = this.myUnion;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MY_UNION_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      List<test.fixtures.complex_struct.MyUnion> _iter0 = this.listUnionDFset;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(LIST_UNION_DFSET_FIELD_DESC);
-        oprot.writeListBegin(new TList(TType.STRUCT, _iter0.size()));
-            for (test.fixtures.complex_struct.MyUnion _iter1 : _iter0) {
-              _iter1.write0(oprot);
+        }
+        {
+            Set<String> _fbthriftVar0 = this.mySet;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_SET_FIELD_DESC);
+                oprot.writeSetBegin(new TSet(TType.STRING, _fbthriftVar0.size()));
+                for (String _fbthriftVar1 : _fbthriftVar0) {
+                    oprot.writeString(_fbthriftVar1);
+                }
+                oprot.writeSetEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> _iter0 = this.mapNestlistStructDfSet;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MAP_NESTLIST_STRUCT_DF_SET_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
-            for (Map.Entry<Integer, List<test.fixtures.complex_struct.SimpleStruct>> _iter1 : _iter0.entrySet()) {
-              {
-                Integer _iter2 = _iter1.getKey();
-                oprot.writeI32(_iter2);
-              }
-              {
-                List<test.fixtures.complex_struct.SimpleStruct> _iter2 = _iter1.getValue();
-                oprot.writeListBegin(new TList(TType.STRUCT, _iter2.size()));
-            for (test.fixtures.complex_struct.SimpleStruct _iter3 : _iter2) {
-              _iter3.write0(oprot);
+        }
+        {
+            test.fixtures.complex_struct.SimpleStruct _fbthriftVar0 = this.simpleStruct;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(SIMPLE_STRUCT_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
             }
-            oprot.writeListEnd();
-              }
+        }
+        {
+            List<test.fixtures.complex_struct.SimpleStruct> _fbthriftVar0 = this.listStructDFset;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(LIST_STRUCT_DFSET_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.STRUCT, _fbthriftVar0.size()));
+                for (test.fixtures.complex_struct.SimpleStruct _fbthriftVar1 : _fbthriftVar0) {
+                    _fbthriftVar1.write0(oprot);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> _iter0 = this.mapJavaTypeDFset;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(MAP_JAVA_TYPE_DFSET_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I64, TType.STRING, _iter0.size()));
-            for (Map.Entry<Long, String> _iter1 : _iter0.entrySet()) {
-              {
-                Long _iter2 = _iter1.getKey();
-                oprot.writeI64(_iter2);
-              }
-              {
-                String _iter2 = _iter1.getValue();
-                oprot.writeString(_iter2);
-              }
+        }
+        {
+            test.fixtures.complex_struct.MyUnion _fbthriftVar0 = this.myUnion;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MY_UNION_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<Long, Integer> _iter0 = this.emptyMap;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(EMPTY_MAP_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.I64, TType.I32, _iter0.size()));
-            for (Map.Entry<Long, Integer> _iter1 : _iter0.entrySet()) {
-              {
-                Long _iter2 = _iter1.getKey();
-                oprot.writeI64(_iter2);
-              }
-              {
-                Integer _iter2 = _iter1.getValue();
-                oprot.writeI32(_iter2);
-              }
+        }
+        {
+            List<test.fixtures.complex_struct.MyUnion> _fbthriftVar0 = this.listUnionDFset;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(LIST_UNION_DFSET_FIELD_DESC);
+                oprot.writeListBegin(new TList(TType.STRUCT, _fbthriftVar0.size()));
+                for (test.fixtures.complex_struct.MyUnion _fbthriftVar1 : _fbthriftVar0) {
+                    _fbthriftVar1.write0(oprot);
+                }
+                oprot.writeListEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> _iter0 = this.enumMapDFset;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(ENUM_MAP_DFSET_FIELD_DESC);
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, _iter0.size()));
-            for (Map.Entry<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> _iter1 : _iter0.entrySet()) {
-              {
-                String _iter2 = _iter1.getKey();
-                oprot.writeString(_iter2);
-              }
-              {
-                Map<Integer, test.fixtures.complex_struct.MyEnum> _iter2 = _iter1.getValue();
-                oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter2.size()));
-            for (Map.Entry<Integer, test.fixtures.complex_struct.MyEnum> _iter3 : _iter2.entrySet()) {
-              {
-                Integer _iter4 = _iter3.getKey();
-                oprot.writeI32(_iter4);
-              }
-              {
-                test.fixtures.complex_struct.MyEnum _iter4 = _iter3.getValue();
-                oprot.writeI32(_iter4 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter4));
-              }
+        }
+        {
+            Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> _fbthriftVar0 = this.mapNestlistStructDfSet;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MAP_NESTLIST_STRUCT_DF_SET_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _fbthriftVar0.size()));
+                for (Map.Entry<Integer, List<test.fixtures.complex_struct.SimpleStruct>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Integer _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI32(_fbthriftVar2);
+                    }
+                    {
+                        List<test.fixtures.complex_struct.SimpleStruct> _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeListBegin(new TList(TType.STRUCT, _fbthriftVar2.size()));
+                        for (test.fixtures.complex_struct.SimpleStruct _fbthriftVar3 : _fbthriftVar2) {
+                            _fbthriftVar3.write0(oprot);
+                        }
+                        oprot.writeListEnd();
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-              }
+        }
+        {
+            it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> _fbthriftVar0 = this.mapJavaTypeDFset;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(MAP_JAVA_TYPE_DFSET_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I64, TType.STRING, _fbthriftVar0.size()));
+                for (Map.Entry<Long, String> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Long _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI64(_fbthriftVar2);
+                    }
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
             }
-            oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        }
+        {
+            Map<Long, Integer> _fbthriftVar0 = this.emptyMap;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(EMPTY_MAP_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.I64, TType.I32, _fbthriftVar0.size()));
+                for (Map.Entry<Long, Integer> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        Long _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeI64(_fbthriftVar2);
+                    }
+                    {
+                        Integer _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeI32(_fbthriftVar2);
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> _fbthriftVar0 = this.enumMapDFset;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(ENUM_MAP_DFSET_FIELD_DESC);
+                oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, _fbthriftVar0.size()));
+                for (Map.Entry<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> _fbthriftVar1 : _fbthriftVar0.entrySet()) {
+                    {
+                        String _fbthriftVar2 = _fbthriftVar1.getKey();
+                        oprot.writeString(_fbthriftVar2);
+                    }
+                    {
+                        Map<Integer, test.fixtures.complex_struct.MyEnum> _fbthriftVar2 = _fbthriftVar1.getValue();
+                        oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _fbthriftVar2.size()));
+                        for (Map.Entry<Integer, test.fixtures.complex_struct.MyEnum> _fbthriftVar3 : _fbthriftVar2.entrySet()) {
+                            {
+                                Integer _fbthriftVar4 = _fbthriftVar3.getKey();
+                                oprot.writeI32(_fbthriftVar4);
+                            }
+                            {
+                                test.fixtures.complex_struct.MyEnum _fbthriftVar4 = _fbthriftVar3.getValue();
+                                oprot.writeI32(_fbthriftVar4 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_fbthriftVar4));
+                            }
+                        }
+                        oprot.writeMapEnd();
+                    }
+                }
+                oprot.writeMapEnd();
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _DefaultStructLazy {

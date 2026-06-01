@@ -43,8 +43,8 @@ function main_entry(): void {
   	echo "Could not set regex encoding to utf-8\n";
   }
 
-  $string_ascii = b'This is an English string. 0123456789.';
-  $regex_ascii = b'([A-Z]\w{1,4}is( [aeiou]|h)) ?.*\.\s[0-9]+(5([6-9][79]){2})[[:punct:]]$';
+  $string_ascii = 'This is an English string. 0123456789.';
+  $regex_ascii = '([A-Z]\w{1,4}is( [aeiou]|h)) ?.*\.\s[0-9]+(5([6-9][79]){2})[[:punct:]]$';
   $regs_ascii = null;
   var_dump(mb_ereg($regex_ascii, $string_ascii, inout $regs_ascii));
   base64_encode_var_dump($regs_ascii);

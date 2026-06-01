@@ -1,0 +1,4 @@
+WARN: File "71-dynamic-01.hack", line 6, characters 12-20:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "71-dynamic-01.hack", line 3, characters 12-18:
+  This expression has type `dynamic`

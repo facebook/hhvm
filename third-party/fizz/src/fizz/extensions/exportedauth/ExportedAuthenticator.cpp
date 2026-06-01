@@ -41,9 +41,15 @@ Buf ExportedAuthenticator::getAuthenticator(
     const SelfCert& cert,
     Buf authenticatorRequest) {
   auto cipher = transport.getCipher();
-  auto hashFunction = getHashFunction(*cipher);
-  auto hashLength = getHashSize(hashFunction);
-  auto makeHasher = ::fizz::DefaultFactory().makeHasherFactory(hashFunction);
+  HashFunction hashFunction;
+  size_t hashLength;
+  const HasherFactoryWithMetadata* makeHasher = nullptr;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getHashFunction(hashFunction, err, *cipher), err);
+  FIZZ_THROW_ON_ERROR(getHashSize(hashLength, err, hashFunction), err);
+  FIZZ_THROW_ON_ERROR(
+      ::fizz::DefaultFactory().makeHasherFactory(makeHasher, err, hashFunction),
+      err);
 
   auto supportedSchemes = transport.getSupportedSigSchemes();
   Buf handshakeContext;
@@ -91,9 +97,15 @@ ExportedAuthenticator::validateAuthenticator(
     Buf authenticatorRequest,
     Buf authenticator) {
   auto cipher = transport.getCipher();
-  auto hashFunction = getHashFunction(*cipher);
-  auto hashLength = getHashSize(hashFunction);
-  auto&& makeHasher = ::fizz::DefaultFactory().makeHasherFactory(hashFunction);
+  HashFunction hashFunction;
+  size_t hashLength;
+  const HasherFactoryWithMetadata* makeHasher = nullptr;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getHashFunction(hashFunction, err, *cipher), err);
+  FIZZ_THROW_ON_ERROR(getHashSize(hashLength, err, hashFunction), err);
+  FIZZ_THROW_ON_ERROR(
+      ::fizz::DefaultFactory().makeHasherFactory(makeHasher, err, hashFunction),
+      err);
 
   Buf handshakeContext;
   Buf finishedMacKey;

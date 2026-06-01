@@ -310,14 +310,10 @@ struct VxlsContext {
     : abi(abi)
     , sp(rsp())
   {
-    switch (arch::get()) {
-      case Arch::X64:
-        tmp = reg::xmm15; // reserve xmm15 to break shuffle cycles
-        break;
-      case Arch::ARM:
-        tmp = vixl::d31;
-        break;
-    }
+    tmp = ARCH_MATCH(
+      [](arch::X64) { return reg::xmm15; },
+      [](arch::ARM) { return vixl::d31; }
+    );
     this->abi.simdUnreserved -= tmp;
     this->abi.simdReserved |= tmp;
     assertx(!abi.gpUnreserved.contains(sp));

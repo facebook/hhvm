@@ -165,6 +165,9 @@ let open_shape ~kind r map = shape r kind map
 
 let supportdyn_mixed r = supportdyn r (mixed r)
 
+let representable_as r ty =
+  mk (r, Tnewtype (SN.Classes.cRepresentableAs, [ty], mixed r))
+
 let resource r = prim_type r Nast.Tresource
 
 let tyvar r v = mk (r, Tvar v)

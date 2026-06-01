@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/tc-region.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
@@ -43,6 +44,7 @@
 #include "hphp/runtime/ext/server/ext_server.h"
 
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/configs/codecache.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
@@ -65,7 +67,7 @@ namespace {
 std::thread s_retranslateAllThread;
 std::mutex s_rtaThreadMutex;
 std::atomic<bool> s_retranslateAllScheduled{false};
-std::atomic<bool> s_retranslateAllComplete{false};
+std::atomic<int64_t> s_retranslateAllCompleteTime{0};
 static __thread const CompactVector<Trace::BumpRelease>* s_bumpers;
 
 std::thread s_serializeOptProfThread;
@@ -524,9 +526,13 @@ void retranslateAll(bool skipSerialize) {
       Logger::Info("retranslateAll finished");
     }
   }
+  // Release the current main block and add huge page budget so the next
+  // ensure() allocates a fresh block backed by huge pages for live translations.
+  tc::code().addMainHugePageBudget(Cfg::CodeCache::TCNumHugeLiveMainMB);
+  tc::code().releaseMainBlock();
 
   // This will enable live translations to happen again.
-  s_retranslateAllComplete.store(true, std::memory_order_release);
+  s_retranslateAllCompleteTime.store(time(nullptr), std::memory_order_release);
   tc::reportJitMaturity();
 
   if (serverMode && !transdb::enabled() && !serializeOpt) {
@@ -841,7 +847,7 @@ void checkRetranslateAll(bool force, bool skipSerialize) {
 bool retranslateAllPending() {
   return
     retranslateAllEnabled() &&
-    !s_retranslateAllComplete.load(std::memory_order_acquire);
+    !s_retranslateAllCompleteTime.load(std::memory_order_acquire);
 }
 
 bool retranslateAllScheduled() {
@@ -850,15 +856,24 @@ bool retranslateAllScheduled() {
 
 bool pendingRetranslateAllScheduled() {
   return s_retranslateAllScheduled.load(std::memory_order_acquire) &&
-    !s_retranslateAllComplete.load(std::memory_order_acquire);
+    !s_retranslateAllCompleteTime.load(std::memory_order_acquire);
 }
 
 bool retranslateAllComplete() {
-  return s_retranslateAllComplete.load(std::memory_order_acquire);
+  return s_retranslateAllCompleteTime.load(std::memory_order_acquire) != 0;
+}
+
+bool liveMaxSecondsExpired() {
+  if (!Cfg::Server::Mode || !Cfg::Repo::Authoritative) return false;
+  if (tc::getJitMaturity() < 99) return false;
+  auto const completedAt =
+    s_retranslateAllCompleteTime.load(std::memory_order_acquire);
+  if (completedAt == 0) return false;
+  return time(nullptr) - completedAt > Cfg::Jit::MaxLiveSeconds;
 }
 
 int getActiveWorker() {
-  if (s_retranslateAllComplete.load(std::memory_order_acquire)) {
+  if (s_retranslateAllCompleteTime.load(std::memory_order_acquire)) {
     return 0;
   }
   if (auto disp = s_dispatcher.load(std::memory_order_acquire)) {

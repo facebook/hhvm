@@ -1,0 +1,69 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/rpc" as rpc}}
+
+{{#let export partial fbthrift_serialize |interface parent_service function| captures |rpc|}}
+  {{#let service_cpp_name=(if interface.interaction? parent_service.cpp_name interface.cpp_name)}}
+folly::Expected<
+    apache::thrift::fast_thrift::thrift::ThriftRequestMessage,
+    folly::exception_wrapper>
+{{interface.cpp_name}}FastClientInternal::serialize_{{function.cpp_name}}(
+    uint16_t protocolId,
+    const apache::thrift::RpcOptions& rpcOptions{{#each function.params.fields as |field|}},
+    {{#if field.type.resolves_to_complex_return?}}const {{field.type.cpp_type}}&{{#else}}{{field.type.cpp_type}}{{/if}} p_{{field.cpp_name}}{{/each}}) {
+  return apache::thrift::detail::ac::withProtocolWriter(protocolId, [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    {{service_cpp_name}}_{{function.prefixed_name}}_pargs args;
+{{#each (array.enumerate function.params.fields) as |param_index param|}}
+    args.get<{{param_index}}>().value = {{#if param.type.resolves_to_complex_return?}}const_cast<{{param.type.cpp_type}}*>(&p_{{param.cpp_name}}){{#else}}&p_{{param.cpp_name}}{{/if}};
+{{/each}}
+    return apache::thrift::fast_thrift::thrift::serializeRequest<ProtocolWriter>(
+        rpcOptions,
+        "{{function.name}}",
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+        [&](ProtocolWriter& w) { args.write(&w); },
+        [&](ProtocolWriter& w) -> uint32_t { return args.serializedSizeZC(&w); });
+  });
+}
+{{/let partial}}
+
+{{#let export partial fbthrift_deserialize |interface parent_service function|}}
+  {{#let service_cpp_name=(if interface.interaction? parent_service.cpp_name interface.cpp_name)}}
+{{#if function.return_type.void?}}
+folly::exception_wrapper
+{{interface.cpp_name}}FastClientInternal::deserialize_{{function.cpp_name}}(
+    uint16_t protocolId,
+    const folly::IOBuf* buf) {
+  using result = {{service_cpp_name}}_{{function.prefixed_name}}_presult;
+  return apache::thrift::detail::ac::withProtocolReader(protocolId, [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(&reader, buf);
+  });
+}
+{{#else}}
+folly::exception_wrapper
+{{interface.cpp_name}}FastClientInternal::deserialize_{{function.cpp_name}}(
+    {{function.return_type.cpp_type}}& _return,
+    uint16_t protocolId,
+    const folly::IOBuf* buf) {
+  using result = {{service_cpp_name}}_{{function.prefixed_name}}_presult;
+  return apache::thrift::detail::ac::withProtocolReader(protocolId, [&](auto&& reader) {
+    return apache::thrift::detail::ac::recv_wrapped<result>(&reader, buf, _return);
+  });
+}
+{{/if function.return_type.void?}}
+{{/let partial}}

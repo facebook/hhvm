@@ -1,0 +1,5 @@
+Caught RuntimeException: Call to foo() has no argument matching required named parameter a
+Caught RuntimeException: Call to foo() has no argument matching required named parameter a
+Caught RuntimeException: Call to foo() has no argument matching required named parameter a
+Caught RuntimeException: Call to foo() has no argument matching required named parameter a
+Caught RuntimeException: foo() expects at least 2 positional parameters, 1 given

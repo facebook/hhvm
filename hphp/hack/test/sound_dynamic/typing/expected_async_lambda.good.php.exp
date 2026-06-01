@@ -1,1 +1,77 @@
-No errors
+warning: Warn[12038] Method invoked on a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+expected_async_lambda.good.php:7:7
+     5 |   $d = makeDynamic();
+     6 |   $f = async function($x) { return $x; };
+[1]  7 |   $d->foo($f);
+     8 | }
+     9 | 
+[2] 10 | function makeDynamic():dynamic {
+    11 |   return null;
+    12 | }
+
+warning: Warn[12038] Method invoked on a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+expected_async_lambda.good.php:17:7
+     8 | }
+     9 | 
+[2] 10 | function makeDynamic():dynamic {
+    11 |   return null;
+    12 | }
+       :
+    15 | function test2():void {
+    16 |   $d = makeDynamic();
+[1] 17 |   $d->foo(async function($x) { return $x; });
+    18 |   $d->foo(function($x) { return $x; });
+    19 |   $d->foo(async function($x) { return 3; });
+
+warning: Warn[12038] Method invoked on a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+expected_async_lambda.good.php:18:7
+     8 | }
+     9 | 
+[2] 10 | function makeDynamic():dynamic {
+    11 |   return null;
+    12 | }
+       :
+    16 |   $d = makeDynamic();
+    17 |   $d->foo(async function($x) { return $x; });
+[1] 18 |   $d->foo(function($x) { return $x; });
+    19 |   $d->foo(async function($x) { return 3; });
+    20 |   $d->foo(function($x) { return 3; });
+
+warning: Warn[12038] Method invoked on a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+expected_async_lambda.good.php:19:7
+     8 | }
+     9 | 
+[2] 10 | function makeDynamic():dynamic {
+    11 |   return null;
+    12 | }
+       :
+    17 |   $d->foo(async function($x) { return $x; });
+    18 |   $d->foo(function($x) { return $x; });
+[1] 19 |   $d->foo(async function($x) { return 3; });
+    20 |   $d->foo(function($x) { return 3; });
+    21 | }
+
+warning: Warn[12038] Method invoked on a value of type dynamic [1]
+-> This expression has type dynamic [2]
+
+expected_async_lambda.good.php:20:7
+     8 | }
+     9 | 
+[2] 10 | function makeDynamic():dynamic {
+    11 |   return null;
+    12 | }
+       :
+    18 |   $d->foo(function($x) { return $x; });
+    19 |   $d->foo(async function($x) { return 3; });
+[1] 20 |   $d->foo(function($x) { return 3; });
+    21 | }
+
+5 errors found

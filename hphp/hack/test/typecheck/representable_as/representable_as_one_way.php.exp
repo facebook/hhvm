@@ -1,0 +1,8 @@
+ERROR: File "representable_as_one_way.php", line 9, characters 13-15:
+Invalid argument (Typing[4110])
+  File "representable_as_one_way.php", line 4, characters 20-22:
+  Expected `int`
+  File "representable_as_one_way.php", line 7, characters 49-80:
+  But got `mixed`
+  File "representable_as.hhi", line 7, characters 11-25:
+    by the definition of `HH\Runtime\RepresentableAs` arising from an implicit `as ?nonnull` constraint on this type

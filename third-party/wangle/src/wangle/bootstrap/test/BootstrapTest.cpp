@@ -370,7 +370,11 @@ TEST(Bootstrap, UDPClientServerTest) {
   SocketAddress address;
   server.getSockets()[0]->getAddress(&address);
 
-  SocketAddress localhost("::1", 0);
+  // Use the loopback address matching the server's address family so that
+  // the UDP packet is deliverable regardless of whether the server bound
+  // to an IPv4 or IPv6 socket.
+  SocketAddress localhost(
+      address.getIPAddress().isV6() ? "::1" : "127.0.0.1", 0);
   AsyncUDPSocket client(base);
   client.bind(localhost);
   auto data = IOBuf::create(1);

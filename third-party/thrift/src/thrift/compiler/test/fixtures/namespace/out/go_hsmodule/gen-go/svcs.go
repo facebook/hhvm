@@ -116,9 +116,6 @@ func (p *HsTestServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *HsTestServiceProcessor) PackageName() string {
-    return "test"
-}
 
 func (p *HsTestServiceProcessor) GetInteractionProcessors() []thrift.Processor {
     return []thrift.Processor{}

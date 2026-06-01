@@ -21,9 +21,12 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <thrift/compiler/ast/t_const.h>
+#include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_union.h>
+#include <thrift/compiler/ast/uri.h>
 
 namespace apache::thrift::compiler {
 namespace {
@@ -120,7 +123,15 @@ TEST(TProgram, AddDefinitionUri) {
   }
   { // Explicit annotation override.
     auto node = std::make_unique<t_union>(&program, "Union");
-    node->set_unstructured_annotation("thrift.uri");
+    auto& uri_type = program.add_def(
+        std::make_unique<t_struct>(&program, "ThriftUri"), kUriUri);
+    auto uri_value = t_const_value::make_map();
+    uri_value->add_map(
+        std::make_unique<t_const_value>("value"),
+        std::make_unique<t_const_value>(""));
+    node->add_structured_annotation(
+        std::make_unique<t_const>(
+            &program, uri_type, "", std::move(uri_value)));
     auto& def = program.add_def(std::move(node));
     EXPECT_TRUE(def.explicit_uri());
     EXPECT_EQ(def.uri(), "");

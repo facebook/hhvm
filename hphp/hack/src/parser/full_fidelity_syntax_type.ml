@@ -1169,10 +1169,6 @@ struct
         like_tilde: t;
         like_type: t;
       }
-    | SoftTypeSpecifier of {
-        soft_at: t;
-        soft_type: t;
-      }
     | AttributizedSpecifier of {
         attributized_specifier_attribute_spec: t;
         attributized_specifier_type: t;

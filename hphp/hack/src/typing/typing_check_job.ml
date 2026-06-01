@@ -43,6 +43,26 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
     Diagnostics.exception_occurred pos e;
     None
 
+(** After running TAST checks on the normal TAST, run warning checks on
+    the dynamic TAST (if it exists) and use the intersection to determine
+    which type-dependent warnings are trusted. *)
+let intersect_dynamic_warnings ctx (twd : Tast.def Tast_with_dynamic.t) : unit =
+  (* Determine which def to run warning checks on for trust verification.
+     If there's a dynamic TAST, use it. If not (all params enforceable),
+     re-run on the normal TAST so the keys are scoped to this definition
+     only — using mark_all_warnings_trusted would incorrectly promote
+     untrusted warnings from earlier definitions in the same file. *)
+  let check_def =
+    match twd.Tast_with_dynamic.under_dynamic_assumptions with
+    | Some dyn_def -> dyn_def
+    | None -> twd.Tast_with_dynamic.under_normal_assumptions
+  in
+  let keys =
+    Diagnostics.collect_warning_keys (fun () ->
+        Tast_check.warning_def ctx check_def)
+  in
+  Diagnostics.mark_warnings_trusted keys
+
 let type_fun (ctx : Provider_context.t) ~(full_ast : Nast.fun_def) :
     Tast.def Tast_with_dynamic.t option =
   let f = full_ast.Aast.fd_fun in
@@ -56,6 +76,8 @@ let type_fun (ctx : Provider_context.t) ~(full_ast : Nast.fun_def) :
       (* Only do TAST check on normal TAST *)
       Option.iter def_opt ~f:(fun fs ->
           Tast_check.def ctx fs.Tast_with_dynamic.under_normal_assumptions);
+      (* Intersect warning checks with dynamic TAST to determine trust *)
+      Option.iter def_opt ~f:(intersect_dynamic_warnings ctx);
       def_opt)
 
 let type_class (ctx : Provider_context.t) ~(full_ast : Nast.class_) :
@@ -70,6 +92,8 @@ let type_class (ctx : Provider_context.t) ~(full_ast : Nast.class_) :
       (* Only do TAST check on normal TAST *)
       Option.iter def_opt ~f:(fun c ->
           Tast_check.def ctx c.Tast_with_dynamic.under_normal_assumptions);
+      (* Intersect warning checks with dynamic TAST to determine trust *)
+      Option.iter def_opt ~f:(intersect_dynamic_warnings ctx);
       def_opt)
 
 let check_typedef (ctx : Provider_context.t) ~(full_ast : Nast.typedef) :

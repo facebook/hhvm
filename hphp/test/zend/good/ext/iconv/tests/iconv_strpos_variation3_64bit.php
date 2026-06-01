@@ -19,8 +19,8 @@ class classA
 echo "*** Testing iconv_strpos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$needle = b'a';
-$haystack = b'string_val';
+$needle = 'a';
+$haystack = 'string_val';
 $encoding = 'utf-8';
 
 

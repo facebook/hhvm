@@ -106,13 +106,20 @@ class FDTransport : public Parent {
       return nullptr;
     }
     auto factory = ::fizz::DefaultFactory();
-    return fizz::Exporter::getExportedKeyingMaterial(
-        factory,
-        origCipherSuite_,
-        exportedMasterSecret_->coalesce(),
-        label,
-        std::move(context),
-        length);
+    std::unique_ptr<folly::IOBuf> ret;
+    fizz::Error err;
+    FIZZ_THROW_ON_ERROR(
+        fizz::Exporter::getExportedKeyingMaterial(
+            ret,
+            err,
+            factory,
+            origCipherSuite_,
+            exportedMasterSecret_->coalesce(),
+            label,
+            std::move(context),
+            length),
+        err);
+    return ret;
   }
 
  private:

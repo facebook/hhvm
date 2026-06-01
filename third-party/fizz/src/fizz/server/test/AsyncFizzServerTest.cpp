@@ -642,6 +642,33 @@ TEST_F(AsyncFizzServerTest, TestHandshakeRecordAlignedReads) {
   EXPECT_GE(len, 1460);
 }
 
+TEST_F(AsyncFizzServerTest, TestReleaseHandshakeLogging) {
+  accept();
+  EXPECT_CALL(*machine_, _processSocketData(_, _, _))
+      .WillOnce(InvokeWithoutArgs([]() {
+        return actions(
+            MutateState([](State& newState) {
+              newState.handshakeLogging() =
+                  std::make_unique<HandshakeLogging>();
+            }),
+            ReportHandshakeSuccess(),
+            WaitForData());
+      }));
+  EXPECT_CALL(handshakeCallback_, _fizzHandshakeSuccess());
+  socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ClientHello"));
+
+  EXPECT_NE(server_->getState().handshakeLogging(), nullptr);
+  server_->releaseHandshakeLogging();
+  EXPECT_EQ(server_->getState().handshakeLogging(), nullptr);
+}
+
+TEST_F(AsyncFizzServerTest, TestReleaseHandshakeLoggingWhenNull) {
+  completeHandshake();
+  EXPECT_EQ(server_->getState().handshakeLogging(), nullptr);
+  server_->releaseHandshakeLogging();
+  EXPECT_EQ(server_->getState().handshakeLogging(), nullptr);
+}
+
 } // namespace test
 } // namespace server
 } // namespace fizz

@@ -38,10 +38,11 @@ import {{service:program.pyNamespace}}{{service:name}}
 {{/service:extends}}
 
 
-class Iface{{!
-    }}{{#service:extends}}({{!
-        }}{{service:program.pyNamespace}}{{service:name}}.Iface{{!
-    }}){{/service:extends}}:{{^service:functions}} ...{{/service:functions}}  # {{service:name}}
+class Iface
+    {{~ #service:extends ~}}
+        ({{~ service:program.pyNamespace}}{{service:name}}.Iface)
+    {{~ /service:extends ~}}
+:{{^service:functions}} ...{{/service:functions}}  # {{service:name}}
     {{#if (has_compiler_option? "asyncio")}}
     # These have to be Awaitable because handler methods don't return Futures
     # Clients do return Futures but lsp requires us to say they are both Awaitable
@@ -60,11 +61,11 @@ class Iface{{!
     {{/service:functions}}
 
 class Client(Iface, __T.ContextManager[Client]):  # {{service:name}}
-    {{#if (has_compiler_option? "asyncio")}}{{!
-    }}def __init__(self, oprot: __T.Optional[TProtocolBase], loop: __T.Optional[asyncio.AbstractEventLoop] = None, cpp_transport: __T.Optional[__T.TypeVar("SyncClient")] = None) -> None: ...{{!
-    }}{{#else}}{{!
-    }}def __init__(self, iprot: __T.Optional[TProtocolBase], oprot: __T.Optional[TProtocolBase] = None, cpp_transport: __T.Optional[__T.TypeVar("SyncClient")] = None) -> None: ...{{!
-    }}{{/if (has_compiler_option? "asyncio")}}
+    {{#if (has_compiler_option? "asyncio") ~}}
+    def __init__(self, oprot: __T.Optional[TProtocolBase], loop: __T.Optional[asyncio.AbstractEventLoop] = None, cpp_transport: __T.Optional[__T.TypeVar("SyncClient")] = None) -> None: ...
+    {{~ #else ~}}
+    def __init__(self, iprot: __T.Optional[TProtocolBase], oprot: __T.Optional[TProtocolBase] = None, cpp_transport: __T.Optional[__T.TypeVar("SyncClient")] = None) -> None: ...
+    {{~ /if (has_compiler_option? "asyncio")}}
     def set_persistent_header(self, key: str, value: str) -> None: ...
     def get_persistent_headers(self) -> __T.Mapping[str, str]: ...
     def clear_persistent_headers(self) -> None: ...
@@ -93,19 +94,12 @@ class Processor(Iface, Thrift.TProcessor):  # {{service:name}}
 
     {{#service:functions}}
     {{#function:isSupported?}}
-    def process_{{function:name}}(self, {{!
-      }}seqid: int, {{!
-      }}iprot: TProtocolBase, {{!
-      }}oprot: TProtocolBase, {{!
-      }}server_ctx: __T.Any = ...{{!
-    }}) -> {{#if (has_compiler_option? "asyncio")}}asyncio.Future{{#else}}None{{/if}}: ...
+    def process_{{function:name}}(self, seqid: int, iprot: TProtocolBase, oprot: TProtocolBase, server_ctx: __T.Any = ...) ->
+      {{~ #if (has_compiler_option? "asyncio")}} asyncio.Future{{#else}} None{{/if}}: ...
     {{/function:isSupported?}}
     {{/service:functions}}
-    def process_main(self, {{!
-      }}iprot: TProtocolBase, {{!
-      }}oprot: TProtocolBase, {{!
-      }}server_ctx: __T.Any = ...{{!
-    }}) -> {{#if (has_compiler_option? "asyncio")}}asyncio.Future{{#else}}__T.Optional[bool]{{/if}}: ...
+    def process_main(self, iprot: TProtocolBase, oprot: TProtocolBase, server_ctx: __T.Any = ...) ->
+      {{~ #if (has_compiler_option? "asyncio")}} asyncio.Future{{#else}} __T.Optional[bool]{{/if}}: ...
     def onewayMethods(self) -> __T.Tuple[__T.Callable]: ...
 {{#service:functions}}
 {{#function:isSupported?}}

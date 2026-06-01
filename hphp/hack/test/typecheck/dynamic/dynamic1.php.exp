@@ -58,5 +58,45 @@ File "dynamic1.php", line 67, characters 3-13:
   dynamic
 File "dynamic1.php", line 71, characters 3-13:
   dynamic
+WARN: File "dynamic1.php", line 16, characters 12-19:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "dynamic1.php", line 11, characters 21-27:
+  This expression has type `dynamic`
+WARN: File "dynamic1.php", line 18, characters 12-19:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "dynamic1.php", line 11, characters 21-27:
+  This expression has type `dynamic`
+WARN: File "dynamic1.php", line 32, characters 8-23:
+Value of type `dynamic` called as a function (Warn[12039])
+  File "dynamic1.php", line 11, characters 39-45:
+  This expression has type `dynamic`
+WARN: File "dynamic1.php", line 34, characters 8-22:
+Value of type `dynamic` called as a function (Warn[12039])
+  File "dynamic1.php", line 11, characters 21-27:
+  This expression has type `dynamic`
+WARN: File "dynamic1.php", line 52, characters 3-4:
+Appending to a value of type `dynamic` (Warn[12040])
+  File "dynamic1.php", line 3, characters 36-42:
+  This expression has type `dynamic`
+WARN: File "dynamic1.php", line 53, characters 3-4:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "dynamic1.php", line 3, characters 36-42:
+  This expression has type `dynamic`
+WARN: File "dynamic1.php", line 55, characters 8-9:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "dynamic1.php", line 3, characters 36-42:
+  This expression has type `dynamic`
+WARN: File "dynamic1.php", line 55, characters 8-12:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "dynamic1.php", line 55, characters 8-12:
+  This expression has type `dynamic`
+WARN: File "dynamic1.php", line 55, characters 8-16:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "dynamic1.php", line 55, characters 8-16:
+  This expression has type `dynamic`
+WARN: File "dynamic1.php", line 55, characters 8-21:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "dynamic1.php", line 55, characters 8-21:
+  This expression has type `dynamic`
 ERROR: File "dynamic1.php", line 11, characters 64-65:
 Was expecting a type hint (Typing[4032])

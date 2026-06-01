@@ -24,14 +24,17 @@ namespace VSDEBUG {
 ContinueCommand::ContinueCommand(
   Debugger* debugger,
   folly::dynamic message
-) : VSCommand(debugger, message) {
+) : VSCommand(debugger, message),
+    m_target(CommandTarget::None) {
 }
 
 ContinueCommand::~ContinueCommand() {
 }
 
 ContinueCommand* ContinueCommand::createInstance(Debugger* debugger) {
-  return new ContinueCommand(debugger, folly::dynamic::object);
+  auto* cmd = new ContinueCommand(debugger, folly::dynamic::object);
+  cmd->m_target = CommandTarget::WorkItem;
+  return cmd;
 }
 
 bool ContinueCommand::executeImpl(DebuggerSession* /*session*/,

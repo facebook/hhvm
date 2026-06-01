@@ -1886,15 +1886,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_soft_type_specifier(ctx: &C, at: Self, type_: Self) -> Self {
-        let syntax = SyntaxVariant::SoftTypeSpecifier(ctx.get_arena().alloc(SoftTypeSpecifierChildren {
-            at,
-            type_,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_attributized_specifier(ctx: &C, attribute_spec: Self, type_: Self) -> Self {
         let syntax = SyntaxVariant::AttributizedSpecifier(ctx.get_arena().alloc(AttributizedSpecifierChildren {
             attribute_spec,

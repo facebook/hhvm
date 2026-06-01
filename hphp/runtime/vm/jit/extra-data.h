@@ -1232,6 +1232,7 @@ struct CallData : IRExtraData {
                     uint32_t numArgs,
                     uint32_t numOut,
                     Offset callOffset,
+                    const ArrayData* namedArgNames,
                     uint16_t genericsBitmap,
                     bool hasGenerics,
                     bool hasUnpack,
@@ -1243,6 +1244,7 @@ struct CallData : IRExtraData {
     , numArgs(numArgs)
     , numOut(numOut)
     , callOffset(callOffset)
+    , namedArgNames(namedArgNames)
     , genericsBitmap(genericsBitmap)
     , hasGenerics(hasGenerics)
     , hasUnpack(hasUnpack)
@@ -1255,6 +1257,7 @@ struct CallData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
       spOffset.offset, ',', numArgs, ',', numOut, ',', callOffset,
+      namedArgNames != nullptr ? ",namedArgs" : "",
       hasGenerics
         ? folly::sformat(",hasGenerics({})", genericsBitmap)
         : std::string{},
@@ -1271,10 +1274,21 @@ struct CallData : IRExtraData {
   }
 
   size_t stableHash() const {
+    size_t namedArgNameHash = 0;
+    if (namedArgNames) {
+      for (auto i = 0u; i < namedArgNames->size(); ++i) {
+        auto name = namedArgNames->at(i).val().pstr;
+        namedArgNameHash = folly::hash::hash_combine(
+          namedArgNameHash,
+          name->hashStatic()
+        );
+      }
+    }
     return folly::hash::hash_combine(
       std::hash<int32_t>()(spOffset.offset),
       std::hash<uint32_t>()(numArgs),
       std::hash<uint32_t>()(numOut),
+      namedArgNameHash,
       std::hash<Offset>()(callOffset),
       std::hash<uint16_t>()(genericsBitmap),
       std::hash<uint8_t>()(
@@ -1293,6 +1307,7 @@ struct CallData : IRExtraData {
            numArgs == o.numArgs &&
            numOut == o.numOut &&
            callOffset == o.callOffset &&
+           namedArgNames == o.namedArgNames &&
            genericsBitmap == o.genericsBitmap &&
            hasGenerics == o.hasGenerics &&
            hasUnpack == o.hasUnpack &&
@@ -1310,6 +1325,7 @@ struct CallData : IRExtraData {
   uint32_t numArgs;
   uint32_t numOut;     // number of values returned via stack from the callee
   Offset callOffset;   // offset from func->base()
+  const ArrayData* namedArgNames; // Static ArrayData* containing named arg names.
   uint16_t genericsBitmap;
   bool hasGenerics;
   bool hasUnpack;
@@ -3212,7 +3228,9 @@ X(RaiseCoeffectsFunParamTypeViolation,
                                 ParamData);
 X(RaiseModuleBoundaryViolation, OptClassAndFuncData);
 X(RaiseModulePropertyViolation, ModulePropAccessData);
-X(ThrowMissingNamedArgument,    FuncData);
+X(ThrowMissingNamedParam,       FuncData);
+X(ThrowUnexpectedNamedArguments,
+                                FuncData);
 X(ThrowNamedArgumentNameMismatch,
                                 FuncData);
 X(CallViolatesModuleBoundary,   FuncData);
@@ -3221,6 +3239,8 @@ X(ThrowInOutMismatch,           ParamData);
 X(CheckReadonlyMismatch,        BoolVecArgsData);
 X(ThrowReadonlyMismatch,        ParamData);
 X(IsFunReifiedGenericsMatched,  FuncData);
+X(ConvFuncPrologueFlagsToARFlags,
+                                FuncData);
 X(IsTypeStruct,                 RDSHandleData);
 X(IsTypeStructShallow,          RDSHandleData);
 X(InterpOne,                    InterpOneData);

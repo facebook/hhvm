@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 import asyncio
+import platform
 import unittest
 from typing import Sequence
 
@@ -265,6 +266,8 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 # Send more requests than CPU workers to guarantee some
                 # will sit in the queue and trigger queue timeout.
                 num_workers = server.server.get_cpu_worker_threads()
+                if "arm64" in platform.machine():
+                    num_workers *= 16
                 results = list(
                     await asyncio.gather(
                         *[client_call(sa) for _ in range(num_workers + 5)]

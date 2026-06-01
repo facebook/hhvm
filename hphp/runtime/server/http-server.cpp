@@ -230,7 +230,7 @@ HttpServer::HttpServer() {
     Cfg::Server::RequestTimeoutSeconds);
 
   m_counterCallback.init(
-    [this](std::map<std::string, int64_t>& counters) {
+    [this](ServiceData::CounterMap& counters) {
       counters["ev_connections"] = m_pageServer->getLibEventConnectionCount();
       auto const uptime = HHVM_FN(server_uptime)();
       counters["uptime"] = uptime;
@@ -463,7 +463,7 @@ void HttpServer::runOrExitProcess() {
     if (isJitSerializing() || !Cfg::Repo::Authoritative) {
       replayExtendedWarmupRequests();
     }
-    // continously running until /stop is received on admin server
+    // continuously running until /stop is received on admin server
     while (!m_stopped) {
       wait();
     }

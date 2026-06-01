@@ -26,6 +26,7 @@
 #include <iterator>
 #include <map>
 #include <optional>
+#include <set>
 #include <unordered_set>
 #include <utility>
 #include <variant>
@@ -539,11 +540,115 @@ class standalone_lines_scanner {
     // means going over to the next line. Templates are supposed to eat
     // whitespace.
     while (scan.can_advance()) {
-      if (scan.advance().kind == tok::close) {
+      const auto& current = scan.advance();
+      if (current.kind == tok::close) {
         break;
+      }
+      // Tilde implies that the line is opted out of standalone stripping.
+      // Advancing the scan here is not important, since the behavior for
+      // ineligible lines is to completely drain it.
+      if (current.kind == tok::tilde) {
+        return {standalone_compatible_kind::ineligible, scan};
       }
     }
     return {kind, scan};
+  }
+};
+
+/**
+ * Scans the token stream to mark whitespace/newline tokens for removal due to
+ * tilde-based whitespace stripping.
+ *
+ * Standalone-line stripping (see standalone_lines_scanner) automatically
+ * removes entire lines containing only tags. Tildes provide finer per-tag
+ * control for cases where that is insufficient — inline conditionals,
+ * multi-tag lines, or places where template structure and output structure
+ * intentionally diverge.
+ *
+ *     {{~ expr }}   — left tilde:  strip whitespace BEFORE the tag
+ *     {{ expr ~}}   — right tilde: strip whitespace AFTER the tag
+ *     {{~ expr ~}}  — both: strip on both sides
+ *
+ * Example — given the template "Hello  {{~ name ~}}  World":
+ *
+ *   Left tilde walks BACKWARD from tok::open:
+ *
+ *     [text:Hello] [ws] [open] [tilde] ...
+ *                  ^^^^   │
+ *                  MARK ◄─┘
+ *
+ *   Right tilde walks FORWARD from tok::close:
+ *
+ *     ... [tilde] [close] [ws] [text:World]
+ *                    │    ^^^^
+ *                    └─► MARK
+ *
+ * After skipping marked tokens, and given `name` evaluates to " foo ", the
+ * output is "Hello foo World".
+ *
+ * Adjacent tags (e.g. "{{a ~}}{{~ b}}") may mark the same tokens from both
+ * sides. This is harmless — the result is a set, so duplicates are ignored.
+ *
+ * This scanner and standalone_lines_scanner are independent. A tag with a tilde
+ * is ineligible for standalone stripping, so the two never conflict.
+ */
+class tilde_whitespace_scanner {
+ public:
+  using result = std::set<parser_scan_window::cursor>;
+
+  static result mark(const std::vector<token>& tokens) {
+    using cursor = parser_scan_window::cursor;
+
+    assert(!tokens.empty());
+    if (tokens.back().kind == tok::error) {
+      return {};
+    }
+
+    result marked;
+    const cursor begin = tokens.cbegin();
+    const cursor end = tokens.cend();
+
+    static const auto is_strippable = [](tok kind) {
+      return kind == tok::whitespace || kind == tok::newline;
+    };
+
+    // Walks backward from just before `from`, marking contiguous
+    // whitespace/newline tokens for removal.
+    const auto strip_before = [&](cursor from) {
+      cursor walk = from;
+      while (walk != begin) {
+        --walk;
+        if (is_strippable(walk->kind)) {
+          marked.insert(walk);
+        } else {
+          break;
+        }
+      }
+    };
+
+    // Walks forward from `from`, marking contiguous whitespace/newline tokens
+    // for removal.
+    const auto strip_after = [&](cursor from) {
+      for (cursor walk = from; walk != end && is_strippable(walk->kind);
+           ++walk) {
+        marked.insert(walk);
+      }
+    };
+
+    for (cursor tok = begin; tok != end; ++tok) {
+      if (tok->kind == tok::open) {
+        cursor next_tok = std::next(tok);
+        if (next_tok != end && next_tok->kind == tok::tilde) {
+          strip_before(tok);
+        }
+      } else if (tok->kind == tok::close) {
+        if (tok != begin && std::prev(tok)->kind == tok::tilde) {
+          strip_after(std::next(tok));
+        }
+      }
+    }
+
+    return marked;
   }
 };
 
@@ -581,6 +686,7 @@ class parser {
   std::vector<token> tokens_;
   diagnostics_engine& diags_;
   standalone_lines_scanner::result standalone_markings_;
+  tilde_whitespace_scanner::result tilde_markings_;
   /**
    * Whether the parser has encountered non-fatal errors. This is used to signal
    * that the parsing should eventually fail but the parser has made an attempt
@@ -626,6 +732,11 @@ class parser {
       parser_scan_window::cursor pos) const {
     assert(pos->kind == tok::whitespace || pos->kind == tok::newline);
     return standalone_markings_.find(pos) != standalone_markings_.end();
+  }
+
+  [[nodiscard]] bool is_tilde_stripped(parser_scan_window::cursor pos) const {
+    assert(pos->kind == tok::whitespace || pos->kind == tok::newline);
+    return tilde_markings_.find(pos) != tilde_markings_.end();
   }
 
   std::optional<ast::text::whitespace> standalone_partial_indentation(
@@ -695,33 +806,47 @@ class parser {
 
   // Parses the "{{#else}}" clause which is a separator between two ast::bodies.
   //
-  // else-clause → { "{{" ~ "#" ~ "else" ~ "}}" }
-  parse_result<std::monostate> parse_else_clause(parser_scan_window scan) {
-    if (!try_consume_tokens(
-            &scan, {tok::open, tok::pound, tok::kw_else, tok::close})) {
+  // else-clause → { "{{" ~ "~"? ~ "#" ~ "else" ~ "~"? ~ "}}" }
+  parse_result<ast::strip_whitespace_rule> parse_else_clause(
+      parser_scan_window scan) {
+    if (!try_consume_token(&scan, tok::open)) {
       return no_parse_result();
     }
-    return {{}, scan};
+    ast::strip_whitespace_rule strip;
+    strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
+    if (!try_consume_tokens(&scan, {tok::pound, tok::kw_else})) {
+      return no_parse_result();
+    }
+    strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
+    if (!try_consume_token(&scan, tok::close)) {
+      return no_parse_result();
+    }
+    return {strip, scan};
   }
 
   // Parses the beginning of an "{{#else [if]" clause which is a separator
   // between two ast::bodies.
   //
-  // { "{{" ~ "#" ~ "else" }
+  // { "{{" ~ "~"? ~ "#" ~ "else" }
   bool peek_else_clause(parser_scan_window scan) {
-    return try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_else});
+    if (!try_consume_token(&scan, tok::open)) {
+      return false;
+    }
+    try_consume_token(&scan, tok::tilde); // optional left tilde
+    return try_consume_tokens(&scan, {tok::pound, tok::kw_else});
   }
 
   // Parses the "{{#else}}" block which is a separator between two
   // ast::bodies.
   //
-  // else-block → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
+  // else-block → { "{{" ~ "~"? ~ "#" ~ "else" ~ "~"? ~ "}}" ~ body* }
   parse_result<ast::else_block> parse_else_block(parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
+    ast::strip_whitespace_rule strip;
     if (parse_result e = parse_else_clause(scan)) {
-      std::ignore = std::move(e).consume_and_advance(&scan);
+      strip = std::move(e).consume_and_advance(&scan);
     } else {
       return no_parse_result();
     }
@@ -729,7 +854,7 @@ class parser {
     auto else_bodies = parse_bodies(scan).consume_and_advance(&scan);
     return parse_result{
         ast::else_block{
-            scan.with_start(scan_start).range(), std::move(else_bodies)},
+            scan.with_start(scan_start).range(), strip, std::move(else_bodies)},
         scan};
   }
 
@@ -737,14 +862,19 @@ class parser {
   // ast::bodies.
   //
   // else-if-block →
-  //   { "{{" ~ "#" ~ "else" ~ " " ~ "if" ~ expression ~ "}}" ~ body* }
+  //   { "{{" ~ "~"? ~ "#" ~ "else" ~ " " ~ "if" ~ expression ~
+  //     "~"? ~ "}}" ~ body* }
   parse_result<ast::conditional_block::else_if_block> parse_else_if_block(
       parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!try_consume_tokens(
-            &scan, {tok::open, tok::pound, tok::kw_else, tok::kw_if})) {
+    if (!try_consume_token(&scan, tok::open)) {
+      return no_parse_result();
+    }
+    ast::strip_whitespace_rule strip;
+    strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
+    if (!try_consume_tokens(&scan, {tok::pound, tok::kw_else, tok::kw_if})) {
       return no_parse_result();
     }
     scan = scan.make_fresh();
@@ -754,6 +884,7 @@ class parser {
       report_fatal_expected(scan, "expression in else-if block");
     }
     ast::expression cond = std::move(condition).consume_and_advance(&scan);
+    strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     if (!try_consume_token(&scan, tok::close)) {
       report_fatal_expected(scan, "{} in else-if block", tok::close);
     }
@@ -764,6 +895,7 @@ class parser {
     return parse_result{
         ast::conditional_block::else_if_block{
             scan.with_start(scan_start).range(),
+            strip,
             std::move(cond),
             std::move(bodies)},
         scan};
@@ -881,7 +1013,8 @@ class parser {
       if (t.kind == tok::text) {
         parts.emplace_back(make_non_whitespace_text(t));
       } else if (t.kind == tok::whitespace) {
-        if (!is_standalone_whitespace(scan.head)) {
+        if (!is_standalone_whitespace(scan.head) &&
+            !is_tilde_stripped(scan.head)) {
           parts.emplace_back(make_whitespace_text(t));
         }
       } else {
@@ -914,8 +1047,8 @@ class parser {
       parser_scan_window scan) {
     assert(scan.empty());
     if (scan.peek().kind == tok::newline) {
-      if (is_standalone_whitespace(scan.head)) {
-        // Stripped because of a standalone construct
+      if (is_standalone_whitespace(scan.head) || is_tilde_stripped(scan.head)) {
+        // Stripped because of a standalone construct or tilde
         return {std::nullopt, scan.next()};
       }
       const token& text = scan.advance();
@@ -926,27 +1059,46 @@ class parser {
   }
 
   // comment → { basic-comment | escaped-comment }
-  // basic-comment → { "{{!" ~ <raw text until we see "}}"> ~ "}}" }
-  // escaped-comment → { "{{!--" ~ <raw text until we see "--}}"> ~ "--}}" }
+  // basic-comment →
+  //   { "{{" ~ "!" ~ <raw text until we see "}}"> ~ "}}" }
+  // escaped-comment →
+  //   { "{{" ~ "!--" ~ <raw text until we see "--}}"> ~ "--}}" }
   //
   // NOTE: the difference between basic-comment and escaped-comment is dealt
   // with by the lexer already.
+  //
   parse_result<ast::comment> parse_comment(parser_scan_window scan) {
     assert(scan.empty());
-    if (!try_consume_tokens(&scan, {tok::open, tok::bang})) {
+    if (!try_consume_token(&scan, tok::open)) {
       return no_parse_result();
     }
+    ast::strip_whitespace_rule strip;
+    strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
+    if (!try_consume_token(&scan, tok::bang)) {
+      return no_parse_result();
+    }
+
     if (try_consume_token(&scan, tok::close)) {
       // empty comment
-      return {ast::comment{scan.range(), ""}, scan};
+      return {ast::comment{scan.range(), strip, ""}, scan};
+    }
+    // "{{~ ~}}" — empty comment with right tilde only
+    if (try_consume_token(&scan, tok::tilde)) {
+      if (!try_consume_token(&scan, tok::close)) {
+        report_fatal_expected(scan, "{} to close comment", tok::close);
+      }
+      strip.right = true;
+      return {ast::comment{scan.range(), strip, ""}, scan};
     }
 
     if (const token* text = try_consume_token(&scan, tok::text)) {
+      strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
       if (!try_consume_token(&scan, tok::close)) {
         report_fatal_expected(scan, "{} to close comment", tok::close);
       }
       return {
-          ast::comment{scan.range(), std::string(text->string_value())}, scan};
+          ast::comment{scan.range(), strip, std::string(text->string_value())},
+          scan};
     } else {
       report_fatal_expected(scan, "comment text");
     }
@@ -971,7 +1123,13 @@ class parser {
     if (scan.peek().kind != tok::open) {
       return no_parse_result();
     }
-    switch (scan.next().peek().kind) {
+    // Peek past tok::open and optional tok::tilde to find the discriminating
+    // token.
+    auto peek_scan = scan.next();
+    if (peek_scan.peek().kind == tok::tilde) {
+      peek_scan = peek_scan.next();
+    }
+    switch (peek_scan.peek().kind.value) {
       case tok::bang:
         // this is a comment so don't fail the parse
         [[fallthrough]];
@@ -1014,7 +1172,7 @@ class parser {
     return {std::move(*templ), scan};
   }
 
-  // interpolation → { "{{" ~ expression ~ "}}" }
+  // interpolation → { "{{" ~ "~"? ~ expression ~ "~"? ~ "}}" }
   parse_result<ast::interpolation> parse_interpolation(
       parser_scan_window scan) {
     assert(scan.empty());
@@ -1023,6 +1181,9 @@ class parser {
     if (!try_consume_token(&scan, tok::open)) {
       return no_parse_result();
     }
+    ast::strip_whitespace_rule strip;
+    strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
+
     switch (scan.peek().kind.value) {
       case tok::bang:
         // this is a comment
@@ -1048,12 +1209,13 @@ class parser {
       report_fatal_expected(scan, "expression in interpolation");
     }
     ast::expression lookup = std::move(expression).consume_and_advance(&scan);
+    strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     if (!try_consume_token(&scan, tok::close)) {
       report_fatal_expected(scan, "{} to close interpolation", tok::close);
     }
     return {
         ast::interpolation{
-            scan.with_start(scan_start).range(), std::move(lookup)},
+            scan.with_start(scan_start).range(), strip, std::move(lookup)},
         scan};
   }
 
@@ -1116,8 +1278,10 @@ class parser {
   }
 
   // section-block → { section-block-open ~ body* ~ section-block-close }
-  // section-block-open → { "{{" ~ ("#" | "^") ~ variable-lookup ~ "}}" }
-  // section-block-close → { "{{" ~ "/" ~ variable-lookup ~ "}}" }
+  // section-block-open →
+  //   { "{{" ~ "~"? ~ ("#" | "^") ~ variable-lookup ~ "~"? ~ "}}" }
+  // section-block-close →
+  //   { "{{" ~ "~"? ~ "/" ~ variable-lookup ~ "~"? ~ "}}" }
   //
   // NOTE: the variable-lookups must match between open and close
   parse_result<ast::section_block> parse_section_block(
@@ -1127,6 +1291,9 @@ class parser {
     if (!try_consume_token(&scan, tok::open)) {
       return no_parse_result();
     }
+    ast::strip_whitespace_rule open_strip;
+    open_strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
+
     bool is_inverted = try_consume_token(&scan, tok::caret);
     if (!is_inverted) {
       if (!try_consume_token(&scan, tok::pound)) {
@@ -1141,6 +1308,7 @@ class parser {
     }
     ast::variable_lookup open =
         std::move(lookup_at_open).consume_and_advance(&scan);
+    open_strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     if (!try_consume_token(&scan, tok::close)) {
       report_fatal_expected(scan, "{} to open section-block", tok::close);
     }
@@ -1155,6 +1323,8 @@ class parser {
           tok::open,
           open.chain_string());
     }
+    ast::strip_whitespace_rule close_strip;
+    close_strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
     if (!try_consume_token(&scan, tok::slash)) {
       report_fatal_expected(
           scan,
@@ -1180,6 +1350,7 @@ class parser {
           open.chain_string(),
           close.chain_string());
     }
+    close_strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     if (!try_consume_token(&scan, tok::close)) {
       report_error(
           scan,
@@ -1191,6 +1362,8 @@ class parser {
     return {
         ast::section_block{
             scan.with_start(scan_start).range(),
+            open_strip,
+            close_strip,
             is_inverted,
             std::move(open),
             std::move(bodies),
@@ -1390,13 +1563,19 @@ class parser {
   }
 
   // let-statement →
-  //   { "{{" ~ "#" ~ "let" ~ identifier ~ "=" ~ expression ~ "}}" }
+  //   { "{{" ~ "~"? ~ "#" ~ "let" ~ identifier ~ "=" ~ expression ~
+  //     "~"? ~ "}}" }
   parse_result<ast::let_statement> parse_let_statement(
       parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_let})) {
+    if (!try_consume_token(&scan, tok::open)) {
+      return no_parse_result();
+    }
+    ast::strip_whitespace_rule strip;
+    strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
+    if (!try_consume_tokens(&scan, {tok::pound, tok::kw_let})) {
       return no_parse_result();
     }
     bool exported = try_consume_token(&scan, tok::kw_export) != nullptr;
@@ -1422,6 +1601,7 @@ class parser {
     }
     ast::expression value = std::move(expression).consume_and_advance(&scan);
 
+    strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     if (!try_consume_token(&scan, tok::close)) {
       report_fatal_expected(scan, "{} to close let-statement", tok::close);
     }
@@ -1429,19 +1609,26 @@ class parser {
     return {
         ast::let_statement{
             scan.with_start(scan_start).range(),
+            strip,
             exported,
             make_identifier(*id),
             std::move(value)},
         scan};
   }
 
-  // pragma-statement → { "{{" ~ "#" ~ "pragma" ~ identifier ~ "}}" }
+  // pragma-statement →
+  //   { "{{" ~ "~"? ~ "#" ~ "pragma" ~ identifier ~ "~"? ~ "}}" }
   parse_result<ast::pragma_statement> parse_pragma_statement(
       parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_pragma})) {
+    if (!try_consume_token(&scan, tok::open)) {
+      return no_parse_result();
+    }
+    ast::strip_whitespace_rule strip;
+    strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
+    if (!try_consume_tokens(&scan, {tok::pound, tok::kw_pragma})) {
       return no_parse_result();
     }
 
@@ -1457,18 +1644,27 @@ class parser {
       report_error(scan, "unknown pragma '{}'", id->string_value());
     }
 
+    strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     if (!try_consume_token(&scan, tok::close)) {
       report_fatal_expected(scan, "{} to close pragma-statement", tok::close);
     }
 
     return {
-        ast::pragma_statement{scan.with_start(scan_start).range(), pragma},
+        ast::pragma_statement{
+            scan.with_start(scan_start).range(), strip, pragma},
         scan};
   }
 
   // { "{{" ~ "#" ~ "import" }
   parse_result<std::monostate> peek_import_statement(parser_scan_window scan) {
-    if (try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_import})) {
+    if (!try_consume_token(&scan, tok::open)) {
+      return no_parse_result();
+    }
+    // Import statements do not support tilde stripping. If a tilde is
+    // present, we still need to peek past it to detect the import keyword,
+    // but parse_import_statement will report the error.
+    try_consume_token(&scan, tok::tilde);
+    if (try_consume_tokens(&scan, {tok::pound, tok::kw_import})) {
       return {{}, scan};
     }
     return no_parse_result();
@@ -1477,15 +1673,29 @@ class parser {
   // import-statement →
   //   { "{{" ~ "#" ~ "import" ~ import-path ~ "as" ~ identifier ~ "}}" }
   // import-path → { string-literal }
+  //
+  // Import statements do not support tilde whitespace stripping.
   parse_result<ast::import_statement> parse_import_statement(
       parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (auto open = peek_import_statement(scan)) {
-      std::ignore = std::move(open).consume_and_advance(&scan);
-    } else {
+    if (!try_consume_token(&scan, tok::open)) {
       return no_parse_result();
+    }
+    // Consume optional tilde so we can still detect "{{~ #import" as an
+    // import statement (rather than failing to match and falling through to
+    // another parse method). The error is reported after confirming this is
+    // actually an import.
+    bool has_left_tilde = try_consume_token(&scan, tok::tilde) != nullptr;
+    if (!try_consume_tokens(&scan, {tok::pound, tok::kw_import})) {
+      return no_parse_result();
+    }
+    // Now we know this is an import statement. Report tilde error if present.
+    if (has_left_tilde) {
+      report_fatal_error(
+          scan,
+          "tilde whitespace stripping is not supported on import statements");
     }
 
     const token* import_path = try_consume_token(&scan, tok::string_literal);
@@ -1502,6 +1712,11 @@ class parser {
       report_fatal_expected(scan, "identifier in import-statement");
     }
 
+    if (try_consume_token(&scan, tok::tilde)) {
+      report_fatal_error(
+          scan,
+          "tilde whitespace stripping is not supported on import statements");
+    }
     if (!try_consume_token(&scan, tok::close)) {
       report_fatal_expected(scan, "{} to close import-statement", tok::close);
     }
@@ -1519,11 +1734,12 @@ class parser {
   //   { cond-block-open ~ body* ~ else-if-block* ~ else-block? ~
   //     cond-block-close }
   // cond-block-open →
-  //   { "{{" ~ "#" ~ "if" ~ expression ~ "}}" }
+  //   { "{{" ~ "~"? ~ "#" ~ "if" ~ expression ~ "~"? ~ "}}" }
   // else-if-block →
-  //   { "{{" ~ "#" ~ "else" ~ " " ~ "if" ~ expression ~ "}}" ~ body* }
+  //   { "{{" ~ "~"? ~ "#" ~ "else" ~ " " ~ "if" ~ expression ~
+  //     "~"? ~ "}}" ~ body* }
   // cond-block-close →
-  //   { "{{" ~ "/" ~ "if" ~ expression? ~ "}}" }
+  //   { "{{" ~ "~"? ~ "/" ~ "if" ~ expression? ~ "~"? ~ "}}" }
   //
   // NOTE: the expression must match between open and close
   parse_result<ast::conditional_block> parse_conditional_block(
@@ -1531,7 +1747,12 @@ class parser {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_if})) {
+    if (!try_consume_token(&scan, tok::open)) {
+      return no_parse_result();
+    }
+    ast::strip_whitespace_rule open_strip;
+    open_strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
+    if (!try_consume_tokens(&scan, {tok::pound, tok::kw_if})) {
       return no_parse_result();
     }
     scan = scan.make_fresh();
@@ -1541,6 +1762,7 @@ class parser {
       report_fatal_expected(scan, "expression to open if-block");
     }
     ast::expression open = std::move(condition).consume_and_advance(&scan);
+    open_strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     if (!try_consume_token(&scan, tok::close)) {
       report_fatal_expected(scan, "{} to open if-block", tok::close);
     }
@@ -1569,12 +1791,15 @@ class parser {
     };
 
     expect_on_close(tok::open);
+    ast::strip_whitespace_rule close_strip;
+    close_strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
     expect_on_close(tok::slash);
     expect_on_close(tok::kw_if);
     condition = parse_expression(scan.make_fresh());
     if (!condition.has_value()) {
       // Note that this call moves the scan forward to the end of {{/if}} which
       // affects the line number check below.
+      close_strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
       expect_on_close(tok::close);
       const bool requires_close_condition =
           line_number_of(*scan_start) != line_number_of(scan.peek());
@@ -1591,12 +1816,15 @@ class parser {
             open.to_string(),
             close.to_string());
       }
+      close_strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
       expect_on_close(tok::close);
     }
 
     return {
         ast::conditional_block{
             scan.with_start(scan_start).range(),
+            open_strip,
+            close_strip,
             std::move(open),
             std::move(bodies),
             std::move(else_if_blocks),
@@ -1606,13 +1834,20 @@ class parser {
   }
 
   // with-block       → { with-block-open ~ body* ~ with-block-close }
-  // with-block-open  → { "{{" ~ "#" ~ "with" ~ expression ~ "}}" }
-  // with-block-close → { "{{" ~ "/" ~ "with" ~ "}}" }
+  // with-block-open  →
+  //   { "{{" ~ "~"? ~ "#" ~ "with" ~ expression ~ "~"? ~ "}}" }
+  // with-block-close →
+  //   { "{{" ~ "~"? ~ "/" ~ "with" ~ "~"? ~ "}}" }
   parse_result<ast::with_block> parse_with_block(parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_with})) {
+    if (!try_consume_token(&scan, tok::open)) {
+      return no_parse_result();
+    }
+    ast::strip_whitespace_rule open_strip;
+    open_strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
+    if (!try_consume_tokens(&scan, {tok::pound, tok::kw_with})) {
       return no_parse_result();
     }
     scan = scan.make_fresh();
@@ -1622,6 +1857,7 @@ class parser {
       report_fatal_expected(scan, "expression to open with-block");
     }
     ast::expression expr = std::move(value).consume_and_advance(&scan);
+    open_strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     if (!try_consume_token(&scan, tok::close)) {
       report_fatal_expected(scan, "{} to open with-block", tok::close);
     }
@@ -1637,13 +1873,18 @@ class parser {
     };
 
     expect_on_close(tok::open);
+    ast::strip_whitespace_rule close_strip;
+    close_strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
     expect_on_close(tok::slash);
     expect_on_close(tok::kw_with);
+    close_strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     expect_on_close(tok::close);
 
     return {
         ast::with_block{
             scan.with_start(scan_start).range(),
+            open_strip,
+            close_strip,
             std::move(expr),
             std::move(bodies),
         },
@@ -1653,16 +1894,26 @@ class parser {
   // each-block →
   //   { each-block-open ~ body* ~ else-block ~ each-block-close }
   // each-block-open →
-  //   { "{{" ~ "#" ~ "each" ~ expression ~ each-block-capture? ~ "}}" }
+  //   { "{{" ~ "~"? ~ "#" ~ "each" ~ expression ~
+  //     each-block-capture? ~ separator-clause? ~ "~"? ~ "}}" }
   // each-block-capture →
   //   { "as" ~ "|" ~ identifier+ ~ "|" }
-  // else-block → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
-  // each-block-close → { "{{" ~ "/" ~ "each" ~ "}}"  }
+  // separator-clause →
+  //   { "separator" ~ "=" ~ expression }
+  // else-block →
+  //   { "{{" ~ "~"? ~ "#" ~ "else" ~ "~"? ~ "}}" ~ body* }
+  // each-block-close →
+  //   { "{{" ~ "~"? ~ "/" ~ "each" ~ "~"? ~ "}}" }
   parse_result<ast::each_block> parse_each_block(parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_each})) {
+    if (!try_consume_token(&scan, tok::open)) {
+      return no_parse_result();
+    }
+    ast::strip_whitespace_rule open_strip;
+    open_strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
+    if (!try_consume_tokens(&scan, {tok::pound, tok::kw_each})) {
       return no_parse_result();
     }
     scan = scan.make_fresh();
@@ -1710,6 +1961,47 @@ class parser {
       return captures;
     });
 
+    constexpr std::string_view kSeparatorKeyword = "separator";
+
+    // Parse optional separator=<expression>
+    auto separator = std::invoke([&]() -> std::optional<ast::expression> {
+      const token* maybe_sep = try_consume_token(&scan, tok::identifier);
+      if (maybe_sep == nullptr) {
+        return std::nullopt;
+      }
+      if (maybe_sep->string_value() != kSeparatorKeyword) {
+        report_fatal_error(
+            scan,
+            "unexpected identifier '{}' in each-block opening tag. "
+            "Did you mean 'separator=<expression>'?",
+            maybe_sep->string_value());
+      }
+      if (!try_consume_token(&scan, tok::eq)) {
+        report_fatal_expected(
+            scan, "{} after 'separator' in each-block", tok::eq);
+      }
+      parse_result parsed_sep = parse_expression(scan.make_fresh());
+      if (!parsed_sep.has_value()) {
+        report_fatal_expected(
+            scan, "expression for separator value in each-block");
+      }
+      return std::move(parsed_sep).consume_and_advance(&scan);
+    });
+
+    // Check for duplicate or stray identifiers after separator
+    if (const token* stray = try_consume_token(&scan, tok::identifier)) {
+      if (stray->string_value() == kSeparatorKeyword) {
+        report_fatal_error(scan, "duplicate 'separator' clause in each-block");
+      } else {
+        report_fatal_error(
+            scan,
+            "unexpected identifier '{}' in each-block opening tag. "
+            "Did you mean 'separator=<expression>'?",
+            stray->string_value());
+      }
+    }
+
+    open_strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     if (!try_consume_token(&scan, tok::close)) {
       report_fatal_expected(scan, "{} to open each-block", tok::close);
     }
@@ -1733,15 +2025,21 @@ class parser {
     };
 
     expect_on_close(tok::open);
+    ast::strip_whitespace_rule close_strip;
+    close_strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
     expect_on_close(tok::slash);
     expect_on_close(tok::kw_each);
+    close_strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     expect_on_close(tok::close);
 
     return {
         ast::each_block{
             scan.with_start(scan_start).range(),
+            open_strip,
+            close_strip,
             std::move(iterable),
             std::move(captured),
+            std::move(separator),
             std::move(bodies),
             std::move(else_block),
         },
@@ -1751,20 +2049,25 @@ class parser {
   // partial-block →
   //   { partial-block-open ~ body* ~ partial-block-close }
   // partial-block-open →
-  //   { "{{#" ~ "let" ~ "partial" ~ identifier ~
-  //      partial-block-args? ~ partial-block-captures? ~ "}}" }
+  //   { "{{" ~ "~"? ~ "#" ~ "let" ~ "partial" ~ identifier ~
+  //      partial-block-args? ~ partial-block-captures? ~ "~"? ~ "}}" }
   // partial-block-args →
   //   { "|" ~ identifier+ ~ "|" }
   // partial-block-captures →
   //   { "captures" ~ "|" ~ identifier+ ~ "|" }
   // partial-block-close →
-  //   { "{{/" ~ "let" ~ "partial" ~ "}}" }
+  //   { "{{" ~ "~"? ~ "/" ~ "let" ~ "partial" ~ "~"? ~ "}}" }
   parse_result<ast::partial_block> parse_partial_block(
       parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_let})) {
+    if (!try_consume_token(&scan, tok::open)) {
+      return no_parse_result();
+    }
+    ast::strip_whitespace_rule open_strip;
+    open_strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
+    if (!try_consume_tokens(&scan, {tok::pound, tok::kw_let})) {
       return no_parse_result();
     }
     const bool exported = try_consume_token(&scan, tok::kw_export) != nullptr;
@@ -1864,20 +2167,26 @@ class parser {
       expect_on_open(tok::pipe);
     }
 
+    open_strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     expect_on_open(tok::close);
     scan = scan.make_fresh();
 
     ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
 
     expect_on_close(tok::open);
+    ast::strip_whitespace_rule close_strip;
+    close_strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
     expect_on_close(tok::slash);
     expect_on_close(tok::kw_let);
     expect_on_close(tok::kw_partial);
+    close_strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     expect_on_close(tok::close);
 
     return {
         ast::partial_block{
             scan.with_start(scan_start).range(),
+            open_strip,
+            close_strip,
             exported,
             std::move(id),
             std::move(arguments),
@@ -1888,14 +2197,20 @@ class parser {
   }
 
   // partial-statement →
-  //   { "{{" ~ "#" ~ "partial" ~ expression ~ partial-argument* ~ "}}" }
+  //   { "{{" ~ "~"? ~ "#" ~ "partial" ~ expression ~
+  //     partial-argument* ~ "~"? ~ "}}" }
   // partial-argument → { identifier ~ "=" ~ expression }
   parse_result<ast::partial_statement> parse_partial_statement(
       parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_partial})) {
+    if (!try_consume_token(&scan, tok::open)) {
+      return no_parse_result();
+    }
+    ast::strip_whitespace_rule strip;
+    strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
+    if (!try_consume_tokens(&scan, {tok::pound, tok::kw_partial})) {
       return no_parse_result();
     }
 
@@ -1965,6 +2280,7 @@ class parser {
       }
     }
 
+    strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     if (!try_consume_token(&scan, tok::close)) {
       report_fatal_expected(scan, "{} to close partial-statement", tok::close);
     }
@@ -1972,6 +2288,7 @@ class parser {
     return {
         ast::partial_statement{
             scan.with_start(scan_start).range(),
+            strip,
             std::move(partial),
             std::move(named_arguments),
             standalone_partial_indentation(scan_start),
@@ -1979,12 +2296,17 @@ class parser {
         scan};
   }
 
-  // macro → { "{{" ~ ">" ~ macro-lookup ~ "}}" }
+  // macro → { "{{" ~ "~"? ~ ">" ~ macro-lookup ~ "~"? ~ "}}" }
   parse_result<ast::macro> parse_macro(parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!try_consume_tokens(&scan, {tok::open, tok::gt})) {
+    if (!try_consume_token(&scan, tok::open)) {
+      return no_parse_result();
+    }
+    ast::strip_whitespace_rule strip;
+    strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
+    if (!try_consume_token(&scan, tok::gt)) {
       return no_parse_result();
     }
     scan = scan.make_fresh();
@@ -1996,6 +2318,7 @@ class parser {
     ast::macro_lookup lookup =
         std::move(macro_lookup).consume_and_advance(&scan);
 
+    strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     if (!try_consume_token(&scan, tok::close)) {
       report_fatal_expected(
           scan, "{} to close macro '{}'", tok::close, lookup.as_string());
@@ -2004,6 +2327,7 @@ class parser {
     return {
         ast::macro{
             scan.with_start(scan_start).range(),
+            strip,
             std::move(lookup),
             standalone_partial_indentation(scan_start)},
         scan};
@@ -2039,10 +2363,12 @@ class parser {
   parser(
       std::vector<token> tokens,
       diagnostics_engine& diags,
-      standalone_lines_scanner::result standalone_markings)
+      standalone_lines_scanner::result standalone_markings,
+      tilde_whitespace_scanner::result tilde_markings)
       : tokens_(std::move(tokens)),
         diags_(diags),
-        standalone_markings_(std::move(standalone_markings)) {}
+        standalone_markings_(std::move(standalone_markings)),
+        tilde_markings_(std::move(tilde_markings)) {}
 
   std::optional<ast::root> parse() {
     return parse_root(parser_scan_window(
@@ -2057,7 +2383,12 @@ class parser {
 std::optional<ast::root> parse(source src, diagnostics_engine& diags) {
   auto tokens = lexer(src, diags).tokenize_all();
   auto standalone_scanner_result = standalone_lines_scanner::mark(tokens);
-  return parser(std::move(tokens), diags, std::move(standalone_scanner_result))
+  auto tilde_scanner_result = tilde_whitespace_scanner::mark(tokens);
+  return parser(
+             std::move(tokens),
+             diags,
+             std::move(standalone_scanner_result),
+             std::move(tilde_scanner_result))
       .parse();
 }
 

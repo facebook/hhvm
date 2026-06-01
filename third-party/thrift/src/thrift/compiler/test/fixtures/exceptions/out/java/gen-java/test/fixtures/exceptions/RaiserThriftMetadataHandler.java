@@ -26,146 +26,146 @@ import com.facebook.thrift.metadata.ThriftType;
 
 public class RaiserThriftMetadataHandler implements com.facebook.thrift.server.ThriftMetadataHandler {
 
-  private static void addFunctions_0(List<ThriftFunction> functions) {
-        {
-          List<ThriftField> args = new ArrayList<>();
+    private static void addFunctions_0(List<ThriftFunction> functions) {
+            {
+              List<ThriftField> args = new ArrayList<>();
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("doBland")
-              .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-        {
-          List<ThriftField> args = new ArrayList<>();
+              functions.add(new ThriftFunction.Builder()
+                  .setName("doBland")
+                  .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+            {
+              List<ThriftField> args = new ArrayList<>();
 
-          List<ThriftField> exceptions = new ArrayList<>();
-          exceptions.add(new ThriftField.Builder()
-              .setId(1)
-              .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.exceptions.Banal").build()))
-              .setName("exception_1")
-              .setIsOptional(false)
-              .build());
-          exceptions.add(new ThriftField.Builder()
-              .setId(2)
-              .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.exceptions.Fiery").build()))
-              .setName("exception_2")
-              .setIsOptional(false)
-              .build());
-          exceptions.add(new ThriftField.Builder()
-              .setId(3)
-              .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.exceptions.Serious").build()))
-              .setName("exception_3")
-              .setIsOptional(false)
-              .build());
+              List<ThriftField> exceptions = new ArrayList<>();
+              exceptions.add(new ThriftField.Builder()
+                  .setId(1)
+                  .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.exceptions.Banal").build()))
+                  .setName("exception_1")
+                  .setIsOptional(false)
+                  .build());
+              exceptions.add(new ThriftField.Builder()
+                  .setId(2)
+                  .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.exceptions.Fiery").build()))
+                  .setName("exception_2")
+                  .setIsOptional(false)
+                  .build());
+              exceptions.add(new ThriftField.Builder()
+                  .setId(3)
+                  .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.exceptions.Serious").build()))
+                  .setName("exception_3")
+                  .setIsOptional(false)
+                  .build());
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("doRaise")
-              .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-        {
-          List<ThriftField> args = new ArrayList<>();
+              functions.add(new ThriftFunction.Builder()
+                  .setName("doRaise")
+                  .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+            {
+              List<ThriftField> args = new ArrayList<>();
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("get200")
-              .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-        {
-          List<ThriftField> args = new ArrayList<>();
+              functions.add(new ThriftFunction.Builder()
+                  .setName("get200")
+                  .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+            {
+              List<ThriftField> args = new ArrayList<>();
 
-          List<ThriftField> exceptions = new ArrayList<>();
-          exceptions.add(new ThriftField.Builder()
-              .setId(1)
-              .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.exceptions.Fiery").build()))
-              .setName("exception_1")
-              .setIsOptional(false)
-              .build());
-          exceptions.add(new ThriftField.Builder()
-              .setId(2)
-              .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.exceptions.Banal").build()))
-              .setName("exception_2")
-              .setIsOptional(false)
-              .build());
-          exceptions.add(new ThriftField.Builder()
-              .setId(3)
-              .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.exceptions.Serious").build()))
-              .setName("exception_3")
-              .setIsOptional(false)
-              .build());
+              List<ThriftField> exceptions = new ArrayList<>();
+              exceptions.add(new ThriftField.Builder()
+                  .setId(1)
+                  .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.exceptions.Fiery").build()))
+                  .setName("exception_1")
+                  .setIsOptional(false)
+                  .build());
+              exceptions.add(new ThriftField.Builder()
+                  .setId(2)
+                  .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.exceptions.Banal").build()))
+                  .setName("exception_2")
+                  .setIsOptional(false)
+                  .build());
+              exceptions.add(new ThriftField.Builder()
+                  .setId(3)
+                  .setType(ThriftType.fromTStruct(new ThriftStructType.Builder().setName("test.fixtures.exceptions.Serious").build()))
+                  .setName("exception_3")
+                  .setIsOptional(false)
+                  .build());
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("get500")
-              .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-  }
+              functions.add(new ThriftFunction.Builder()
+                  .setName("get500")
+                  .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+    }
 
-  private static final ThriftService THRIFT_SERVICE;
+    private static final ThriftService THRIFT_SERVICE;
 
 
-  static {
-    List<ThriftFunction> functions = new ArrayList<>();
-    addFunctions_0(functions);
-    THRIFT_SERVICE = new ThriftService.Builder()
-        .setName("test.fixtures.exceptions.Raiser")
-        .setFunctions(functions)
-        .build();
-  }
+    static {
+        List<ThriftFunction> functions = new ArrayList<>();
+        addFunctions_0(functions);
+        THRIFT_SERVICE = new ThriftService.Builder()
+            .setName("test.fixtures.exceptions.Raiser")
+            .setFunctions(functions)
+            .build();
+    }
 
-  @Override
-  public String getName() {
-    return "Raiser";
-  }
+    @Override
+    public String getName() {
+        return "Raiser";
+    }
 
-  @Override
-  public String getFullyQualifiedName() {
-    return "test.fixtures.exceptions.Raiser";
-  }
+    @Override
+    public String getFullyQualifiedName() {
+        return "test.fixtures.exceptions.Raiser";
+    }
 
-  @Override
-  public ThriftService getThriftService() {
-    return THRIFT_SERVICE;
-  }
+    @Override
+    public ThriftService getThriftService() {
+        return THRIFT_SERVICE;
+    }
 
-  @Override
-  public String getParentServiceName() {
-    return null;
-  }
+    @Override
+    public String getParentServiceName() {
+        return null;
+    }
 
-  @Override
-  public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
-    return null;
-  }
+    @Override
+    public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
+        return null;
+    }
 
-  @Override
-  public Map<String, ThriftEnum> getEnums() {
-    return RaiserThriftMetadataHandlerEnums.getEnums();
-  }
+    @Override
+    public Map<String, ThriftEnum> getEnums() {
+        return RaiserThriftMetadataHandlerEnums.getEnums();
+    }
 
-  @Override
-  public Map<String, ThriftStruct> getStructs() {
-    return RaiserThriftMetadataHandlerStructs.getStructs();
-  }
+    @Override
+    public Map<String, ThriftStruct> getStructs() {
+        return RaiserThriftMetadataHandlerStructs.getStructs();
+    }
 
-  @Override
-  public Map<String, ThriftException> getExceptions() {
-    return RaiserThriftMetadataHandlerExceptions.getExceptions();
-  }
+    @Override
+    public Map<String, ThriftException> getExceptions() {
+        return RaiserThriftMetadataHandlerExceptions.getExceptions();
+    }
 }

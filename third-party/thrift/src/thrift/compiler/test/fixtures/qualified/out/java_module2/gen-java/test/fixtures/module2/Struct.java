@@ -40,11 +40,11 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Struct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -58,7 +58,7 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
 
         public test.fixtures.module0.Struct getFirst() { return first; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="second", requiredness=Requiredness.NONE)    public Builder setSecond(test.fixtures.module1.Struct second) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="second", requiredness=Requiredness.NONE)    public Builder setSecond(test.fixtures.module1.Struct second) {
             this.second = second;
             return this;
         }
@@ -80,6 +80,7 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -88,23 +89,20 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
     private final test.fixtures.module0.Struct first;
     public static final int _FIRST = 1;
     private static final TField FIRST_FIELD_DESC = new TField("first", TType.STRUCT, (short)1);
-        private final test.fixtures.module1.Struct second;
+    private final test.fixtures.module1.Struct second;
     public static final int _SECOND = 2;
     private static final TField SECOND_FIELD_DESC = new TField("second", TType.STRUCT, (short)2);
     static {
-      NAMES_TO_IDS.put("first", 1);
-      THRIFT_NAMES_TO_IDS.put("first", 1);
-      FIELD_METADATA.put(1, FIRST_FIELD_DESC);
-      NAMES_TO_IDS.put("second", 2);
-      THRIFT_NAMES_TO_IDS.put("second", 2);
-      FIELD_METADATA.put(2, SECOND_FIELD_DESC);
+        NAMES_TO_IDS.put("first", 1);
+        THRIFT_NAMES_TO_IDS.put("first", 1);
+        FIELD_METADATA.put(1, FIRST_FIELD_DESC);
+        NAMES_TO_IDS.put("second", 2);
+        THRIFT_NAMES_TO_IDS.put("second", 2);
+        FIELD_METADATA.put(2, SECOND_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="first", requiredness=Requiredness.NONE)
     public test.fixtures.module0.Struct getFirst() { return first; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="second", requiredness=Requiredness.NONE)
     public test.fixtures.module1.Struct getSecond() { return second; }
@@ -138,69 +136,70 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(first);
-            _hashCode = 31 * _hashCode + Objects.hashCode(second);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(second);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Struct> asReader() {
       return Struct::read0;
     }
 
     public static Struct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Struct.NAMES_TO_IDS, Struct.THRIFT_NAMES_TO_IDS, Struct.FIELD_METADATA);
-      Struct.Builder builder = new Struct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _FIRST:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.module0.Struct first = test.fixtures.module0.Struct.read0(oprot);
-            builder.setFirst(first);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _SECOND:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.module1.Struct second = test.fixtures.module1.Struct.read0(oprot);
-            builder.setSecond(second);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(Struct.NAMES_TO_IDS, Struct.THRIFT_NAMES_TO_IDS, Struct.FIELD_METADATA);
+        Struct.Builder builder = new Struct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _FIRST:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.module0.Struct _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.module0.Struct.read0(oprot);
+                    builder.setFirst(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _SECOND:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.module1.Struct _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.module1.Struct.read0(oprot);
+                    builder.setSecond(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      test.fixtures.module0.Struct _iter0 = this.first;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(FIRST_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.module1.Struct _iter0 = this.second;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(SECOND_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            test.fixtures.module0.Struct _fbthriftVar0 = this.first;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(FIRST_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.module1.Struct _fbthriftVar0 = this.second;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(SECOND_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _StructLazy {

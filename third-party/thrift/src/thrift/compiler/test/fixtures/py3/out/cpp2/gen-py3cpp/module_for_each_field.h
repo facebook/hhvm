@@ -6,7 +6,7 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_metadata.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
 
 namespace apache {

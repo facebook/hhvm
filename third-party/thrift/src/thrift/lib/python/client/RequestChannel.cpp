@@ -16,6 +16,8 @@
 
 #include <thrift/lib/python/client/RequestChannel.h>
 
+#include <optional>
+
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
@@ -35,7 +37,7 @@ DefaultChannelFactory::createThriftChannelTCP(
     const std::string& host,
     uint16_t port,
     uint32_t connect_timeout,
-    uint32_t channel_timeout,
+    std::optional<uint32_t> channel_timeout,
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto,
     const std::string& endpoint) {
@@ -47,8 +49,8 @@ DefaultChannelFactory::createThriftChannelTCP(
     if (client_t == THRIFT_ROCKET_CLIENT_TYPE) {
       auto chan = RocketClientChannel::newChannel(std::move(socket));
       chan->setProtocolId(proto);
-      if (channel_timeout > 0) {
-        chan->setTimeout(channel_timeout);
+      if (channel_timeout) {
+        chan->setTimeout(*channel_timeout);
       }
       return chan;
     } else if (client_t == THRIFT_HTTP2_CLIENT_TYPE) {
@@ -73,7 +75,7 @@ RequestChannel::Ptr ChannelFactory::sync_createThriftChannelTCP(
     const std::string& host,
     uint16_t port,
     uint32_t connect_timeout,
-    uint32_t channel_timeout,
+    std::optional<uint32_t> channel_timeout,
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto,
     const std::string& endpoint) {
@@ -119,7 +121,7 @@ folly::Future<RequestChannel::Ptr>
 DefaultChannelFactory::createThriftChannelUnix(
     const std::string& path,
     uint32_t connect_timeout,
-    uint32_t channel_timeout,
+    std::optional<uint32_t> channel_timeout,
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto) {
   auto eb = folly::getGlobalIOExecutor()->getEventBase();
@@ -137,8 +139,8 @@ DefaultChannelFactory::createThriftChannelUnix(
               auto chan = apache::thrift::RocketClientChannel::newChannel(
                   std::move(socket));
               chan->setProtocolId(proto);
-              if (channel_timeout > 0) {
-                chan->setTimeout(channel_timeout);
+              if (channel_timeout) {
+                chan->setTimeout(*channel_timeout);
               }
               return chan;
             }
@@ -149,7 +151,7 @@ DefaultChannelFactory::createThriftChannelUnix(
 RequestChannel::Ptr ChannelFactory::sync_createThriftChannelUnix(
     const std::string& path,
     uint32_t connect_timeout,
-    uint32_t channel_timeout,
+    std::optional<uint32_t> channel_timeout,
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto) {
   auto future = createThriftChannelUnix(
@@ -164,7 +166,7 @@ DefaultChannelFactory::createThriftChannelSSL(
     const uint16_t port,
     const uint32_t connect_timeout,
     const uint32_t ssl_timeout,
-    const uint32_t channel_timeout,
+    const std::optional<uint32_t> channel_timeout,
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto,
     const std::string& endpoint) {
@@ -208,7 +210,7 @@ apache::thrift::RequestChannel::Ptr ChannelFactory::sync_createThriftChannelSSL(
     const uint16_t port,
     const uint32_t connect_timeout,
     const uint32_t ssl_timeout,
-    const uint32_t channel_timeout,
+    const std::optional<uint32_t> channel_timeout,
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto,
     const std::string& endpoint) {

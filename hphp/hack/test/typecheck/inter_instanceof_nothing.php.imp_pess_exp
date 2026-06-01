@@ -1,1 +1,4 @@
-No errors
+WARN: File "inter_instanceof_nothing.php", line 21, characters 9-11:
+Method invoked on a value of type `(A & dynamic)` (Warn[12038])
+  File "inter_instanceof_nothing.php", line 19, characters 8-12:
+  This expression has type `dynamic`

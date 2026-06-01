@@ -1,0 +1,139 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/types" as types}}
+{{#import "common/const_value" as const_value}}
+
+{{#let export partial thrift_field_annotation |field| captures |types|}}
+  {{#pragma ignore-newlines}}
+@com.facebook.swift.codec.ThriftField(value={{field.id}}, name="{{field.name}}", {{!
+}}{{#if field.negativeId?}}isLegacyId=true, {{/if}}requiredness={{#partial types.requiredness field=field}}{{!
+}}{{#if field.recursive?}}, isRecursive=Recursiveness.TRUE{{/if}})
+{{/let partial}}
+
+{{#let export partial from_thrift_start |field|}}
+{{#pragma ignore-newlines}}
+{{#if field.hasFieldAdapter?}}_{{field.javaName}}_Adapter.fromThrift({{/if}}
+{{#if field.type.hasAdapter?}}__{{field.type.name}}_Adapter.fromThrift({{/if}}
+{{/let partial}}
+
+{{#let export partial from_thrift_end |field|}}
+{{#pragma ignore-newlines}}
+{{#if field.hasFieldAdapter?}}){{/if}}
+{{#if field.type.hasAdapter?}}){{/if}}
+{{/let partial}}
+
+{{#let export partial to_thrift_start |field|}}
+{{#pragma ignore-newlines}}
+{{#if field.type.hasAdapter?}}__{{field.type.name}}_Adapter.toThrift({{/if}}
+{{#if field.hasFieldAdapter?}}_{{field.javaName}}_Adapter.toThrift({{/if}}
+{{#if field.hasWrapper?}}_{{field.javaName}}_Wrapper.toThrift({{/if}}
+{{/let partial}}
+
+{{#let export partial to_thrift_end |field|}}
+{{#pragma ignore-newlines}}
+{{#if field.type.hasAdapter?}}){{/if}}
+{{#if field.hasFieldAdapter?}}){{/if}}
+{{#if field.hasWrapper?}}){{/if}}
+{{/let partial}}
+
+{{#let export partial intrinsic_default |field| captures |types|}}
+{{#pragma ignore-newlines}}
+{{#if field.type.byte?}}(byte)0
+{{#else if field.type.i16?}}(short)0
+{{#else if field.type.i32?}}0
+{{#else if field.type.i64?}}0L
+{{#else if field.type.bool?}}false
+{{#else if field.type.double?}}0.
+{{#else if field.type.float?}}0.f
+{{#else if (or field.type.binary? field.type.isBinaryString?)}}
+com.facebook.thrift.util.IntrinsicDefaults.{{#if field.hasAdapter?}}defaultByteBuf(){{#else}}defaultByteArray(){{/if field.hasAdapter?}}
+{{#else if field.type.string?}}com.facebook.thrift.util.IntrinsicDefaults.defaultString()
+{{#else if field.type.map?}}com.facebook.thrift.util.IntrinsicDefaults.defaultMap()
+{{#else if field.type.list?}}com.facebook.thrift.util.IntrinsicDefaults.defaultList()
+{{#else if field.type.set?}}com.facebook.thrift.util.IntrinsicDefaults.defaultSet()
+{{#else if field.type.enum?}}{{#partial types.boxed_type type=field.type field_hasAdapter=field.hasAdapter?}}.fromInteger(0)
+{{/if field.type.byte?}}
+{{/let partial}}
+
+{{#let export partial field_value |field struct| captures |types const_value from_thrift_start from_thrift_end intrinsic_default|}}
+{{#pragma ignore-newlines}}
+  {{#if (object.eq? field.default_value null)}}
+    {{#if (and field.terse? field.hasAdapter?)}}
+{{#partial from_thrift_start field=field}}{{#if field.type.structured?}}{{#partial types.thrift_boxed_type type=field.type field_hasAdapter=field.hasAdapter?}}.defaultInstance(){{#else}}{{#partial intrinsic_default field=field}}{{/if field.type.structured?}}{{#partial from_thrift_end field=field}}
+    {{#else if field.terse?}}
+{{#if field.type.structured?}}{{#partial types.field_type field=field}}.defaultInstance(){{#else}}{{#partial intrinsic_default field=field}}{{/if field.type.structured?}}
+    {{#else if (or field.hasAdapter? field.hasWrapper? field.optional?)}}
+null
+    {{#else}}
+{{#partial types.java_default_value type=field.type}}
+    {{/if (and field.terse? field.hasAdapter?)}}
+  {{#else}}
+    {{#if field.hasAdapter?}}
+{{#partial from_thrift_start field=field}}{{#if field.hasInitialValue?}}{{#partial const_value.const_value value=field.default_value root_const=null as_bean=struct.asBean? field_hasAdapter=field.hasAdapter?}}{{#else}}{{#if field.optional?}}null{{#else}}{{#partial types.java_default_value type=field.type}}{{/if field.optional?}}{{/if field.hasInitialValue?}}{{#partial from_thrift_end field=field}}
+    {{#else}}
+{{#if field.hasInitialValue?}}{{#partial const_value.const_value value=field.default_value root_const=null as_bean=struct.asBean? field_hasAdapter=field.hasAdapter?}}{{#else}}{{#if field.optional?}}null{{#else}}{{#partial types.java_default_value type=field.type}}{{/if field.optional?}}{{/if field.hasInitialValue?}}
+    {{/if field.hasAdapter?}}
+  {{/if (object.eq? field.default_value null)}}
+{{/let partial}}
+
+{{#let export partial field_value_no_wrapper |field struct| captures |types const_value from_thrift_start from_thrift_end intrinsic_default|}}
+{{#pragma ignore-newlines}}
+  {{#if (object.eq? field.default_value null)}}
+    {{#if (and field.terse? field.hasAdapter?)}}
+{{#partial from_thrift_start field=field}}{{#if field.type.structured?}}{{#partial types.boxed_type type=field.type field_hasAdapter=field.hasAdapter?}}.defaultInstance(){{#else}}{{#partial intrinsic_default field=field}}{{/if field.type.structured?}}{{#partial from_thrift_end field=field}}
+    {{#else if field.terse?}}
+{{#if field.type.structured?}}{{#partial types.field_type field=field}}.defaultInstance(){{#else}}{{#partial intrinsic_default field=field}}{{/if field.type.structured?}}
+    {{#else if (or field.hasAdapter? field.optional?)}}
+null
+    {{#else}}
+{{#partial types.java_default_value type=field.type}}
+    {{/if (and field.terse? field.hasAdapter?)}}
+  {{#else}}
+    {{#if field.hasAdapter?}}
+{{#partial from_thrift_start field=field}}{{#if field.hasInitialValue?}}{{#partial const_value.const_value value=field.default_value root_const=null as_bean=struct.asBean? field_hasAdapter=field.hasAdapter?}}{{#else}}{{#if field.optional?}}null{{#else}}{{#partial types.java_default_value type=field.type}}{{/if field.optional?}}{{/if field.hasInitialValue?}}{{#partial from_thrift_end field=field}}
+    {{#else}}
+{{#if field.hasInitialValue?}}{{#partial const_value.const_value value=field.default_value root_const=null as_bean=struct.asBean? field_hasAdapter=field.hasAdapter?}}{{#else}}{{#if field.optional?}}null{{#else}}{{#partial types.java_default_value type=field.type}}{{/if field.optional?}}{{/if field.hasInitialValue?}}
+    {{/if field.hasAdapter?}}
+  {{/if (object.eq? field.default_value null)}}
+{{/let partial}}
+
+{{#let export partial field_nullability |field|}}
+  {{#pragma ignore-newlines}}
+{{#if field.optional?}}@Nullable{{!
+}}{{#else if (and (not field.required?) (not field.isNumericOrVoid?))}}@Nullable{{!
+}}{{/if field.optional?}}
+{{/let partial}}
+
+{{#let export partial field_getter |field| captures |field_nullability thrift_field_annotation types|}}
+{{#if field.deprecated?}}
+@Deprecated
+{{/if field.deprecated?}}
+{{#partial field_nullability field=field}}
+
+{{#partial thrift_field_annotation field=field}}
+
+public {{#partial types.field_type field=field}} {{#if field.hasWrapper?}}get{{field.javaCapitalName}}{{#else}}{{#partial types.getter_name field=field}}{{/if field.hasWrapper?}}() { return {{field.javaName}}; }
+{{/let partial}}
+
+{{#let export partial field_setter |field struct| captures |types|}}
+@com.facebook.swift.codec.ThriftField
+public {{struct.javaCapitalName}} set{{field.javaCapitalName}}({{#partial types.field_type field=field}} {{field.javaName}}) {
+    this.{{field.javaName}} = {{field.javaName}};
+    return this;
+}
+{{/let partial}}

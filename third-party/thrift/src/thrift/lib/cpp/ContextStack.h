@@ -130,6 +130,7 @@ class ContextStack {
   void onBiDiSinkNext();
   void onBiDiSinkCredit(uint32_t credits);
   void onBiDiStreamNext();
+  void onBiDiStreamNextSent();
   void onBiDiStreamCredit(uint32_t credits);
   void onBiDiStreamPause(details::StreamPauseReason reason);
   void handleBiDiSinkError(const folly::exception_wrapper& ew);

@@ -509,16 +509,24 @@ TEST_F(BroadcastPoolTest, ThreadLocalPool) {
     EXPECT_FALSE(factory1.broadcastPool()->isBroadcasting(kUrl));
     EXPECT_FALSE(factory2.broadcastPool()->isBroadcasting(kUrl));
 
+    bool threadConnected = false;
     EXPECT_CALL(*pipelineFactory, setRoutingData(_, kUrl))
         .WillOnce(Invoke([&](DefaultPipeline* pipeline, const std::string&) {
           EXPECT_NE(
               pipelineFactory->getBroadcastHandler(pipeline)
                   ->getArbitraryIdentifier(),
               broadcastHandlerId);
+          threadConnected = true;
         }));
     auto pipeline3 = factory1.newPipeline(nullptr, kUrl, nullptr, nullptr);
     pipeline3->transportActive();
-    EventBaseManager::get()->getEventBase()->loopOnce();
+    // Loop until the connection is established. On some platforms (e.g., Mac),
+    // a freshly-created EventBase may need multiple iterations to complete a
+    // loopback TCP connection.
+    auto* threadBase = EventBaseManager::get()->getEventBase();
+    while (!threadConnected) {
+      threadBase->loopOnce();
+    }
     EXPECT_TRUE(factory1.broadcastPool()->isBroadcasting(kUrl));
     EXPECT_FALSE(factory2.broadcastPool()->isBroadcasting(kUrl));
 

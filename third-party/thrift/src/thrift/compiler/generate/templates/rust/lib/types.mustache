@@ -129,15 +129,15 @@
 
 {{#let export partial write |type|}}
 {{#pragma ignore-newlines}}
-  {{! TODO(T261463864): Preserved legacy behavior: explicit prototype qualified
-      `type:nonstandard?` ignores t_typedef's override for property `nonstandard?` }}
-{{#if type.type:nonstandard?}}{{root_program.crate}}::r#impl{{#else}}::fbthrift::Serialize{{/if}}::rs_thrift_write
+  {{! Use non-standard write implementation if the type is non-standard, and isn't a new-type annotated typedef }}
+  {{#let non_standard = (and type.nonstandard? (not (and type.typedef? type.newtype?)))}}
+{{#if non_standard}}{{root_program.crate}}::r#impl{{#else}}::fbthrift::Serialize{{/if}}::rs_thrift_write
 {{/let partial}}
 
 
 {{#let export partial read |type|}}
 {{#pragma ignore-newlines}}
-  {{! TODO(T261463864): Preserved legacy behavior: explicit prototype qualified
-      `type:nonstandard?` ignores t_typedef's override for property `nonstandard?` }}
-{{#if type.type:nonstandard?}}{{root_program.crate}}::r#impl{{#else}}::fbthrift::Deserialize{{/if}}::rs_thrift_read
+  {{! Use non-standard read implementation if the type is non-standard, and isn't a new-type annotated typedef }}
+  {{#let non_standard = (and type.nonstandard? (not (and type.typedef? type.newtype?)))}}
+{{#if non_standard}}{{root_program.crate}}::r#impl{{#else}}::fbthrift::Deserialize{{/if}}::rs_thrift_read
 {{/let partial}}

@@ -363,10 +363,8 @@ bool CodeCoverage::isCoverable(Op op) {
     case Op::FCallFuncD:
     case Op::FCallObjMethod:
     case Op::FCallObjMethodD:
-    case Op::FCallClsMethod:
     case Op::FCallClsMethodM:
     case Op::FCallClsMethodD:
-    case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
     case Op::FCallCtor:
     case Op::Incl:

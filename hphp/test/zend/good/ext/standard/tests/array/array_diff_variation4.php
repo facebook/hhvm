@@ -72,7 +72,7 @@ $values = dict[
 /*8*/
 "binary" => vec[
        // binary data
-       b"binary",
+       "binary",
        (string)"binary"]
 ];
 

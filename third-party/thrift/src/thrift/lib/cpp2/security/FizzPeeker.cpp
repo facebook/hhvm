@@ -100,8 +100,17 @@ void ThriftFizzAcceptorHandshakeHelper::fizzHandshakeSuccess(
 
     if (thriftExtension_->getNegotiatedStopTLSV2()) {
       VLOG(5) << "StopTLSV2 negotiated, setting protocol override";
-      transport->setSecurityProtocolOverride(kSecurityProtocolStopTLSV2);
-      tinfo_.securityType = transport->getSecurityProtocol();
+      tinfo_.securityType = kSecurityProtocolStopTLSV2;
+      // setSecurityProtocolOverride is not available in all fizz versions.
+      // Use a generic lambda so if constexpr properly suppresses the call
+      // when the method is absent (open-source fizz builds).
+      [](auto* t, const std::string& p) {
+        if constexpr (requires {
+                        t->setSecurityProtocolOverride(std::string{});
+                      }) {
+          t->setSecurityProtocolOverride(p);
+        }
+      }(transport, kSecurityProtocolStopTLSV2);
     }
 
     if (thriftExtension_->getNegotiatedStopTLS()) {

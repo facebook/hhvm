@@ -40,29 +40,29 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
     private static final TField U_FIELD_DESC = new TField("u", TType.STRUCT, (short)4);
 
     static {
-      NAMES_TO_IDS.put("i", 1);
-      THRIFT_NAMES_TO_IDS.put("i", 1);
-      FIELD_METADATA.put(1, I_FIELD_DESC);
-      NAMES_TO_IDS.put("d", 2);
-      THRIFT_NAMES_TO_IDS.put("d", 2);
-      FIELD_METADATA.put(2, D_FIELD_DESC);
-      NAMES_TO_IDS.put("s", 3);
-      THRIFT_NAMES_TO_IDS.put("s", 3);
-      FIELD_METADATA.put(3, S_FIELD_DESC);
-      NAMES_TO_IDS.put("u", 4);
-      THRIFT_NAMES_TO_IDS.put("u", 4);
-      FIELD_METADATA.put(4, U_FIELD_DESC);
+        NAMES_TO_IDS.put("i", 1);
+        THRIFT_NAMES_TO_IDS.put("i", 1);
+        FIELD_METADATA.put(1, I_FIELD_DESC);
+        NAMES_TO_IDS.put("d", 2);
+        THRIFT_NAMES_TO_IDS.put("d", 2);
+        FIELD_METADATA.put(2, D_FIELD_DESC);
+        NAMES_TO_IDS.put("s", 3);
+        THRIFT_NAMES_TO_IDS.put("s", 3);
+        FIELD_METADATA.put(3, S_FIELD_DESC);
+        NAMES_TO_IDS.put("u", 4);
+        THRIFT_NAMES_TO_IDS.put("u", 4);
+        FIELD_METADATA.put(4, U_FIELD_DESC);
     }
 
     private java.lang.Object value;
     private short id;
 
     public enum TypeEnum {
-      __FBTHRIFT_EMPTY_UNION__,
-      I,
-      D,
-      S,
-      U,
+        __FBTHRIFT_EMPTY_UNION__,
+        I,
+        D,
+        S,
+        U,
     }
 
     public static Union2 from(int _id, java.lang.Object _field) {
@@ -75,7 +75,7 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
             throw new java.lang.IllegalArgumentException("unknown field " + _id);
         }
 
-        Union2 _u = new  Union2();
+        Union2 _u = new Union2();
 
         try {
             switch(_id) {
@@ -96,7 +96,7 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
                     _u.value = (test.fixtures.constants.Union1) _field;
                     return _u;
                 default:
-                throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
+                    throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
             }
         } catch (java.lang.Exception t) {
             throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
@@ -175,7 +175,6 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
         return res;
     }
 
-    
 
     @com.facebook.swift.codec.ThriftField(value=1, name="i", requiredness=Requiredness.NONE)
     public int getI() {
@@ -231,20 +230,20 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
     }
 
     public TypeEnum getThriftUnionType() {
-      switch(this.id) {
-        case 0:
-          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
-        case 1:
-          return TypeEnum.I;
-        case 2:
-          return TypeEnum.D;
-        case 3:
-          return TypeEnum.S;
-        case 4:
-          return TypeEnum.U;
-        default:
-          throw new IllegalStateException("unreachable");
-      }
+        switch(this.id) {
+            case 0:
+                return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
+            case 1:
+                return TypeEnum.I;
+            case 2:
+                return TypeEnum.D;
+            case 3:
+                return TypeEnum.S;
+            case 4:
+                return TypeEnum.U;
+            default:
+                throw new IllegalStateException("unreachable");
+        }
     }
 
     public String getThriftName() {
@@ -308,7 +307,7 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
 
     public interface Visitor<T> {
         default T visit(Union2 acceptor) {
-        return acceptor.accept(this);
+            return acceptor.accept(this);
         }
 
         T visitI(int i);
@@ -318,109 +317,112 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
     }
 
     public void write0(TProtocol oprot) throws TException {
-      if (this.id != 0 && this.value == null ){
-        if(allowNullFieldValues) {
-          // Warning: this path will generate corrupt serialized data!
-          return;
-        } else {
-          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        if (this.id != 0 && this.value == null ){
+            if(allowNullFieldValues) {
+                // Warning: this path will generate corrupt serialized data!
+                return;
+            } else {
+                throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+            }
         }
-      }
-      oprot.writeStructBegin(STRUCT_DESC);
-      switch (this.id) {
-      case _I: {
-        oprot.writeFieldBegin(I_FIELD_DESC);
-        int _iter0 = (int)this.value;
+        oprot.writeStructBegin(STRUCT_DESC);
+        switch (this.id) {
+        case _I: {
+            oprot.writeFieldBegin(I_FIELD_DESC);
+            int _fbthriftVar0 = (int)this.value;
 
-        oprot.writeI32(_iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _D: {
-        oprot.writeFieldBegin(D_FIELD_DESC);
-        double _iter0 = (double)this.value;
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _D: {
+            oprot.writeFieldBegin(D_FIELD_DESC);
+            double _fbthriftVar0 = (double)this.value;
 
-        oprot.writeDouble(_iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _S: {
-        oprot.writeFieldBegin(S_FIELD_DESC);
-        test.fixtures.constants.Struct1 _iter0 = (test.fixtures.constants.Struct1)this.value;
+            oprot.writeDouble(_fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _S: {
+            oprot.writeFieldBegin(S_FIELD_DESC);
+            test.fixtures.constants.Struct1 _fbthriftVar0 = (test.fixtures.constants.Struct1)this.value;
 
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-        break;
-      }
-      case _U: {
-        oprot.writeFieldBegin(U_FIELD_DESC);
-        test.fixtures.constants.Union1 _iter0 = (test.fixtures.constants.Union1)this.value;
+            _fbthriftVar0.write0(oprot);
+            oprot.writeFieldEnd();
+            break;
+        }
+        case _U: {
+            oprot.writeFieldBegin(U_FIELD_DESC);
+            test.fixtures.constants.Union1 _fbthriftVar0 = (test.fixtures.constants.Union1)this.value;
 
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-        break;
-      }
-      default:
-          // ignore unknown field
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+            _fbthriftVar0.write0(oprot);
+            oprot.writeFieldEnd();
+            break;
+        }
+        default:
+            // ignore unknown field
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Union2> asReader() {
-      return Union2::read0;
+        return Union2::read0;
     }
 
     public static Union2 read0(TProtocol oprot) throws TException {
-      Union2 res = new Union2();
-      res.value = null;
-      res.id = (short) 0;
-      oprot.readStructBegin(Union2.NAMES_TO_IDS, Union2.THRIFT_NAMES_TO_IDS, Union2.FIELD_METADATA);
-      TField __field = oprot.readFieldBegin();
-      if (__field.type != TType.STOP) {
-          switch (__field.id) {
-          case _I:
-            if (__field.type == I_FIELD_DESC.type) {
-              int i = oprot.readI32();
-              res.value = i;
+        Union2 res = new Union2();
+        res.value = null;
+        res.id = (short) 0;
+        oprot.readStructBegin(Union2.NAMES_TO_IDS, Union2.THRIFT_NAMES_TO_IDS, Union2.FIELD_METADATA);
+        TField __field = oprot.readFieldBegin();
+        if (__field.type != TType.STOP) {
+            switch (__field.id) {
+            case _I:
+                if (__field.type == I_FIELD_DESC.type) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _D:
+                if (__field.type == D_FIELD_DESC.type) {
+                    double _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readDouble();
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _S:
+                if (__field.type == S_FIELD_DESC.type) {
+                    test.fixtures.constants.Struct1 _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.constants.Struct1.read0(oprot);
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            case _U:
+                if (__field.type == U_FIELD_DESC.type) {
+                    test.fixtures.constants.Union1 _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.constants.Union1.read0(oprot);
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
             }
-            break;
-          case _D:
-            if (__field.type == D_FIELD_DESC.type) {
-              double d = oprot.readDouble();
-              res.value = d;
+            if (res.value != null) {
+                res.id = __field.id;
             }
-            break;
-          case _S:
-            if (__field.type == S_FIELD_DESC.type) {
-              test.fixtures.constants.Struct1 s = test.fixtures.constants.Struct1.read0(oprot);
-              res.value = s;
+            oprot.readFieldEnd();
+            TField __stopField = oprot.readFieldBegin(); // Consume the STOP byte
+            if (__stopField.type != TType.STOP) {
+                throw new TProtocolException(TProtocolException.INVALID_DATA, "Union 'Union2' is missing a STOP byte");
             }
-            break;
-          case _U:
-            if (__field.type == U_FIELD_DESC.type) {
-              test.fixtures.constants.Union1 u = test.fixtures.constants.Union1.read0(oprot);
-              res.value = u;
-            }
-            break;
-          default:
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-        if (res.value != null) {
-          res.id = __field.id;
         }
-        oprot.readFieldEnd();
-        TField __stopField = oprot.readFieldBegin(); // Consume the STOP byte
-        if (__stopField.type != TType.STOP) {
-          throw new TProtocolException(TProtocolException.INVALID_DATA, "Union 'Union2' is missing a STOP byte");
-        }
-      }
-      oprot.readStructEnd();
-      return res;
+        oprot.readStructEnd();
+        return res;
     }
+
     public static Union2 defaultInstance() {
         return _DEFAULT;
     }
-
 }

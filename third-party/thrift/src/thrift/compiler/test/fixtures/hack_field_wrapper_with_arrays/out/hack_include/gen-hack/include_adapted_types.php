@@ -122,7 +122,7 @@ class StructWithWrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \
     }
 
     public function readFromJson(string $jsonText): void {
-      $parsed = json_decode($jsonText, true);
+      $parsed = PHP\json_decode($jsonText, true);
 
       if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
         throw new \TProtocolException("Cannot parse the given json string.");

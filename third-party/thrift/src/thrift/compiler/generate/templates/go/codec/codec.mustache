@@ -162,11 +162,11 @@ for i := 0; i < size; i++ {
     var key {{#if (not type.key_type.go_comparable?)}}*{{/if (not type.key_type.go_comparable?)}}{{#partial types.go_type type=type.key_type}}
     {
         {{#partial decode type=type.key_type}}
-        key = {{#if (and type.key_type.go_comparable? type.key_type.structured?)}}{{!
-                }}*{{!  <- Dereference if 'result' is a comparable struct.
-              }}{{#else if (not (or type.key_type.go_comparable? type.key_type.structured?))}}{{!
-                }}&{{!  <- Take address if 'result' is non-comparable and not a struct.
-              }}{{/if (and type.key_type.go_comparable? type.key_type.structured?)}}result
+        key = {{#if (and type.key_type.go_comparable? type.key_type.structured?) ~}}
+                *{{! Dereference if 'result' is a comparable struct. ~}}
+              {{~ #else if (not (or type.key_type.go_comparable? type.key_type.structured?)) ~}}
+                &{{! Take address if 'result' is non-comparable and not a struct. ~}}
+              {{~ /if (and type.key_type.go_comparable? type.key_type.structured?)}}result
     }
 
     var value {{#if type.val_type.structured?}}*{{/if type.val_type.structured?}}{{#partial types.go_type type=type.val_type}}
@@ -233,9 +233,9 @@ if err != nil {
 }
 {{/let partial}}
 {{#let partial encode_list |type| captures |ttype encode|}}
-if err := p.WriteListBegin({{!
-  }}{{#partial ttype type=type.elem_type}}, {{!
-  }}len(item)); err != nil {
+if err := p.WriteListBegin(
+    {{~ #partial ttype type=type.elem_type ~}}
+    , len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
 for _, v := range item {
@@ -250,9 +250,9 @@ if err := p.WriteListEnd(); err != nil {
 }
 {{/let partial}}
 {{#let partial encode_set |type| captures |ttype encode|}}
-if err := p.WriteSetBegin({{!
-  }}{{#partial ttype type=type.elem_type}}, {{!
-  }}len(item)); err != nil {
+if err := p.WriteSetBegin(
+    {{~ #partial ttype type=type.elem_type ~}}
+    , len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
 for _, v := range item {
@@ -267,10 +267,10 @@ if err := p.WriteSetEnd(); err != nil {
 }
 {{/let partial}}
 {{#let partial encode_map |type| captures |ttype encode|}}
-if err := p.WriteMapBegin({{!
-  }}{{#partial ttype type=type.key_type}}, {{!
-  }}{{#partial ttype type=type.val_type}}, {{!
-  }}len(item)); err != nil {
+if err := p.WriteMapBegin(
+    {{~ #partial ttype type=type.key_type ~}}
+    , {{#partial ttype type=type.val_type ~}}
+    , len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
 for k, v := range item {

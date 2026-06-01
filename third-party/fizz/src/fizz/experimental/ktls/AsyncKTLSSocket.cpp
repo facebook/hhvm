@@ -285,7 +285,11 @@ folly::AsyncSocket::ReadResult AsyncKTLSSocket::processHandshakeData(
 }
 
 // AsyncKTLSRxSocket
-AsyncKTLSRxSocket::~AsyncKTLSRxSocket() {}
+AsyncKTLSRxSocket::~AsyncKTLSRxSocket() {
+  if (tailWriteRequest_) {
+    tailWriteRequest_->unlinkFromBase();
+  }
+}
 
 AsyncKTLSRxSocket::QueuedWriteRequest::QueuedWriteRequest(
     AsyncKTLSRxSocket* sock,

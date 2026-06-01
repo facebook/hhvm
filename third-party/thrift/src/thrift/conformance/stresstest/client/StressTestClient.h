@@ -46,6 +46,15 @@ class StressTestClient {
   virtual folly::coro::Task<void> co_alignedRequestResponseTm(
       RpcOptions&, AlignedResponse&, const AlignedRequest&) = 0;
 
+  virtual folly::coro::Task<StorageReadResponse> co_storageReadTm(
+      const StorageReadRequest&) = 0;
+  virtual folly::coro::Task<StorageReadResponse> co_storageReadEb(
+      const StorageReadRequest&) = 0;
+  virtual folly::coro::Task<StorageWriteResponse> co_storageWriteTm(
+      const StorageWriteRequest&) = 0;
+  virtual folly::coro::Task<StorageWriteResponse> co_storageWriteEb(
+      const StorageWriteRequest&) = 0;
+
   virtual folly::AsyncTransport* getTransport() = 0;
   virtual bool reattach(std::unordered_map<int, folly::EventBase*>& evbs) = 0;
   bool connectionGood() const { return connectionGood_; }
@@ -89,6 +98,15 @@ class ThriftStressTestClient : public StressTestClient {
 
   folly::coro::Task<void> co_alignedRequestResponseTm(
       RpcOptions&, AlignedResponse&, const AlignedRequest&) override;
+
+  folly::coro::Task<StorageReadResponse> co_storageReadTm(
+      const StorageReadRequest&) override;
+  folly::coro::Task<StorageReadResponse> co_storageReadEb(
+      const StorageReadRequest&) override;
+  folly::coro::Task<StorageWriteResponse> co_storageWriteTm(
+      const StorageWriteRequest&) override;
+  folly::coro::Task<StorageWriteResponse> co_storageWriteEb(
+      const StorageWriteRequest&) override;
 
   folly::AsyncTransport* getTransport() override;
   bool reattach(std::unordered_map<int, folly::EventBase*>& evbs) override;

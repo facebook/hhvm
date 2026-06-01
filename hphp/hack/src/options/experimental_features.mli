@@ -66,18 +66,6 @@ type feature_name =
       (** "named_parameters": can use named parameters in function declarations
     * `function f(int $x, named int $y);
   *)
-  | NamedParametersUse
-      (** "named_parameters_use":
-  * - will cover both named arguments and named parameters in types.
-  * - will not cover named parameters in function declarations. That will
-  * be covered by the "named_parameters" feature. This enables us to
-  * do staged rollout of named parameters in declarations without making
-  * calling such function awkward.
-  * ```
-  * f(x=4);
-  * function take((function(int, named int $b)) $f): void {}
-  * ```
-  *)
   | XhpTypeConstants
       (** "xhp_type_constants": allows type constants in XHP attribute declarations
    * `attribute MyClass::TMyType attr;`
@@ -86,6 +74,7 @@ type feature_name =
   | AllowExtendedAwaitSyntax
   | AllowConditionalAwaitSyntax
   | ShapeFieldPunning
+  | RepresentableAs
   | TestFeature
 [@@deriving eq, ord, show]
 

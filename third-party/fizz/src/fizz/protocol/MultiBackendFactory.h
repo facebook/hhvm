@@ -17,14 +17,18 @@ namespace fizz {
  */
 class MultiBackendFactory : public Factory {
  public:
-  [[nodiscard]] std::unique_ptr<KeyExchange> makeKeyExchange(
+  Status makeKeyExchange(
+      std::unique_ptr<KeyExchange>& ret,
+      Error& err,
       NamedGroup group,
       KeyExchangeRole role) const override;
 
-  [[nodiscard]] std::unique_ptr<Aead> makeAead(
-      CipherSuite cipher) const override;
+  Status makeAead(std::unique_ptr<Aead>& ret, Error& err, CipherSuite cipher)
+      const override;
 
-  const HasherFactoryWithMetadata* makeHasherFactory(
+  Status makeHasherFactory(
+      const HasherFactoryWithMetadata*& ret,
+      Error& err,
       HashFunction digest) const override;
 
   [[nodiscard]] std::unique_ptr<PeerCert> makePeerCert(

@@ -560,7 +560,7 @@ struct StructEncode {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, const T& t) const {
     uint32_t s = 0;
-    s += prot.writeStructBegin(op::get_class_name_v<T>.data());
+    s += prot.writeStructBegin(op::get_class_name<T>().data());
     WriteField<Protocol> writeField{prot, t, s};
     if (getFieldOrder(prot) == FieldOrder::Serialization &&
         !apache::thrift::detail::st::private_access::
@@ -595,7 +595,7 @@ struct StructEncode {
         return;
       }
       s += prot.writeFieldBegin(
-          &*op::get_name_v<T, Id>.begin(),
+          op::get_field_name<T, Id>().data(),
           typeTagToTType<TypeTag>,
           folly::to_underlying(Id::value));
       s += Encode<TypeTag>{}(prot, *field);
@@ -680,20 +680,22 @@ struct SetEncode {
 
     constexpr bool kContainerIsOrdered = folly::
         is_detected_v<::apache::thrift::detail::pm::detect_key_compare, T>;
-    const bool shouldSort = prot.keyOrder() == KeyOrder::StableAscending ||
-        (prot.keyOrder() == KeyOrder::NativeAscending && !kContainerIsOrdered);
+    constexpr KeyOrder kKeyOrder = Protocol::keyOrder();
+    constexpr bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
+        (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
 
-    if (shouldSort) {
+    if constexpr (kShouldSort) {
       std::vector<typename T::const_iterator> iters;
       iters.reserve(set.size());
       for (auto it = set.begin(); it != set.end(); ++it) {
         iters.push_back(it);
       }
-      auto compare = [order = prot.keyOrder()](auto a, auto b) {
-        if (order == KeyOrder::StableAscending) {
+      auto compare = [](auto a, auto b) {
+        if constexpr (kKeyOrder == KeyOrder::StableAscending) {
           return StableLessThan<Tag>{}(*a, *b);
+        } else {
+          return *a < *b;
         }
-        return *a < *b;
       };
       std::sort(iters.begin(), iters.end(), compare);
       for (auto it : iters) {
@@ -731,20 +733,22 @@ struct MapEncode {
 
     constexpr bool kContainerIsOrdered = folly::
         is_detected_v<::apache::thrift::detail::pm::detect_key_compare, T>;
-    const bool shouldSort = prot.keyOrder() == KeyOrder::StableAscending ||
-        (prot.keyOrder() == KeyOrder::NativeAscending && !kContainerIsOrdered);
+    constexpr KeyOrder kKeyOrder = Protocol::keyOrder();
+    constexpr bool kShouldSort = kKeyOrder == KeyOrder::StableAscending ||
+        (kKeyOrder == KeyOrder::NativeAscending && !kContainerIsOrdered);
 
-    if (shouldSort) {
+    if constexpr (kShouldSort) {
       std::vector<typename T::const_iterator> iters;
       iters.reserve(map.size());
       for (auto it = map.begin(); it != map.end(); ++it) {
         iters.push_back(it);
       }
-      auto compare = [order = prot.keyOrder()](auto a, auto b) {
-        if (order == KeyOrder::StableAscending) {
+      auto compare = [](auto a, auto b) {
+        if constexpr (kKeyOrder == KeyOrder::StableAscending) {
           return StableLessThan<Key>{}((*a).first, (*b).first);
+        } else {
+          return (*a).first < (*b).first;
         }
-        return (*a).first < (*b).first;
       };
       std::sort(iters.begin(), iters.end(), compare);
       for (auto it : iters) {

@@ -114,12 +114,14 @@ PhysReg r_svcreq_arg(size_t i);
  * - r_func_prologue_flags: see struct PrologueFlags
  * - r_func_prologue_callee: the func being called
  * - r_func_prologue_ctx: the $this/static:class context (TCtx)
- * - r_func_prologue_num_args: the number of arguments being passed
+ * - r_func_prologue_num_args: the number of positional arguments being passed
+ * - r_func_prologue_named_args: the ArrayData* with named arg names
  */
 inline PhysReg r_func_prologue_flags() { return rarg(0); }
 inline PhysReg r_func_prologue_callee() { return rarg(1); }
 inline PhysReg r_func_prologue_ctx() { return rarg(2); }
 inline PhysReg r_func_prologue_num_args() { return rarg(3); }
+inline PhysReg r_func_prologue_named_args() { return rarg(4); }
 
 /*
  * Func entry input registers.
@@ -161,13 +163,14 @@ inline RegSet cross_trace_regs_resumed()  { return vm_regs_with_sp(); }
 /*
  * Registers that are live when calling a prologue of a VM function.
  */
-inline RegSet func_prologue_regs(bool withCtx) {
+inline RegSet func_prologue_regs(bool withCtx, bool withNamedArgs) {
   auto regs =
     vm_regs_with_sp() |
     r_func_prologue_flags() |
     r_func_prologue_callee() |
     r_func_prologue_num_args();
   if (withCtx) regs |= r_func_prologue_ctx();
+  if (withNamedArgs) regs |= r_func_prologue_named_args();
   return regs;
 }
 

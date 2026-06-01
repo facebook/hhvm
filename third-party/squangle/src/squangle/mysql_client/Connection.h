@@ -29,6 +29,11 @@ class ChangeUserOperation;
 class ResetOperation;
 class MultiQueryStreamHandler;
 
+namespace mysql_protocol {
+class MysqlResetOperation;
+class MysqlChangeUserOperation;
+} // namespace mysql_protocol
+
 using ConnectionDyingCallback =
     std::function<void(std::unique_ptr<ConnectionHolder>)>;
 
@@ -453,6 +458,10 @@ class Connection {
   // Called when a new operation is being started.
   virtual void resetActionable() {}
 
+  // Helper to set up pre/post operation callbacks on a FetchOperation
+  template <typename OpType>
+  void setupOperationCallbacks(OpType& op, Connection& conn);
+
   void setConnectionHolder(std::unique_ptr<ConnectionHolder> conn) {
     CHECK_THROW(mysql_connection_ == nullptr, db::InvalidConnectionException);
     CHECK_THROW(*getKey() == *conn->getKey(), db::InvalidConnectionException);
@@ -502,6 +511,11 @@ class Connection {
   friend class ChangeUserOperation;
   friend class ConnectionHolder;
 
+  // PR3: Unified protocol-specific operation classes need access to
+  // getInternalConnection()
+  friend class mysql_protocol::MysqlResetOperation;
+  friend class mysql_protocol::MysqlChangeUserOperation;
+
   virtual std::unique_ptr<InternalConnection> createInternalConnection() = 0;
 
   [[nodiscard]] ChainedCallback setCallback(
@@ -526,15 +540,6 @@ class Connection {
     DCHECK(isInEventBaseThread());
     return mysql_connection_.get();
   }
-
-  // Helper function that will begin multiqueries or single queries depending
-  // on the specified in the templates. Being used to avoid duplicated code
-  // that both need to do.
-  template <typename QueryType, typename QueryArg>
-  [[nodiscard]] static std::shared_ptr<QueryType> beginAnyQuery(
-      std::unique_ptr<OperationBase::ConnectionProxy> conn_proxy,
-      LoggingFuncsPtr logging_funcs,
-      QueryArg&& query);
 
   void checkOperationInProgress() {
     if (operation_in_progress_) {

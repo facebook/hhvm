@@ -96,8 +96,6 @@ module Hhconfig : sig
 
   val call_coeffects : string
 
-  val check_attribute_locations : string
-
   val check_bool_for_condition : string
 
   val check_redundant_generics : string
@@ -136,19 +134,11 @@ module Hhconfig : sig
 
   val dump_tast_hashes : string
 
-  val enable_abstract_method_optional_parameters : string
-
   val enable_experimental_tc_features : string
-
-  val enable_function_references : string
 
   val enable_no_auto_dynamic : string
 
   val enable_tc_migration_flags : string
-
-  val enforce_sealed_subclasses : string
-
-  val error_php_lambdas : string
 
   val explicit_consistent_constructors : string
 
@@ -222,8 +212,6 @@ module Hhconfig : sig
 
   val strict_consistent_construct : string
 
-  val strict_value_equality : string
-
   val symbol_write_exclude_out : string
 
   val symbol_write_hhi_path : string
@@ -291,8 +279,6 @@ module Hhconfig : sig
   val naming_table_compression_level : string
 
   val naming_table_compression_threads : string
-
-  val override_hhconfig_hash : string
 
   val packages_config_path : string
 
@@ -367,8 +353,6 @@ module Hhconf : sig
 
   val experiments_config_enabled : string
 
-  val hack_warnings : string
-
   val experiments_config_path : string
 
   val experiments_config_source : string
@@ -415,13 +399,9 @@ module Hhconf : sig
 
   val eden_fetch_parallelism : string
 
-  val hackfmt_version : string
-
   val package_config_strict_validation : string
 
   val rollout_group : string
-
-  val sharedmem_dep_table_pow : string
 
   val workload_quantile : string
 

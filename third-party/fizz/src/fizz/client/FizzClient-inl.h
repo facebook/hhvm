@@ -38,13 +38,16 @@ Status FizzClient<ActionMoveVisitor, SM>::getEarlyEkm(
   if (!this->state_.earlyDataParams()) {
     return err.error("early ekm not available");
   }
-  ret = Exporter::getExportedKeyingMaterial(
-      factory,
-      this->state_.earlyDataParams()->cipher,
-      this->state_.earlyDataParams()->earlyExporterSecret->coalesce(),
-      label,
-      context ? context->clone() : nullptr,
-      length);
+  FIZZ_RETURN_ON_ERROR(
+      Exporter::getExportedKeyingMaterial(
+          ret,
+          err,
+          factory,
+          this->state_.earlyDataParams()->cipher,
+          this->state_.earlyDataParams()->earlyExporterSecret->coalesce(),
+          label,
+          context ? context->clone() : nullptr,
+          length));
   return Status::Success;
 }
 

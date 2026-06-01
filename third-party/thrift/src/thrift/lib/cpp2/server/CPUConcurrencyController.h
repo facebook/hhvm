@@ -291,7 +291,7 @@ class CPUConcurrencyController {
   std::atomic<int64_t> stableEstimate_{-1};
 
   // EMA-smoothed CPU load. Negative value means uninitialized (first sample
-  // will seed it directly). Only accessed from the control loop thread.
+  // will seed it at zero). Only accessed from the control loop thread.
   double smoothedLoad_{-1.0};
 
   // Keeps track of total requests seen. We use this to compute

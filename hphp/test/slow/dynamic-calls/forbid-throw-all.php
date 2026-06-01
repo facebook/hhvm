@@ -257,7 +257,7 @@ async function negative_tests() :Awaitable<mixed>{
   try { $x = vec[new Vector, 'fromItems']; $x(vec[]); } catch (Exception $e) { wrap($e); }
   try { $x = 'fromItems'; HH\dynamic_class_meth(Vector::class, $x)(vec[]); } catch (Exception $e) { wrap($e); }
   try { $x = vec[new Vector, 'firstValue']; $x(); } catch (Exception $e) { wrap($e); }
-  try { $x = 'HH\Vector'; $x::fromItems(vec[]); } catch (Exception $e) { wrap($e); }
+  $x = 'HH\Vector'; $x::fromItems(vec[]);
   try { $obj = new Vector; $x = 'firstValue'; $obj->$x(); } catch (Exception $e) { wrap($e); }
 
   try { array_map('HH\Vector::fromItems', vec[vec[]]); } catch (Exception $e) { wrap($e); }
@@ -300,9 +300,9 @@ async function negative_tests() :Awaitable<mixed>{
   try { $x = vec[new A, 'async_func2']; await $x(); } catch (Exception $e) { wrap($e); }
   try { $x = vec[new A, 'static_async_func2']; await $x(); } catch (Exception $e) { wrap($e); }
 
-  try { $x = 'A'; $x::static_func2(); } catch (Exception $e) { wrap($e); }
+  $x = 'A'; $x::static_func2();
 
-  try { $x = 'A'; await $x::static_async_func2(); } catch (Exception $e) { wrap($e); }
+  $x = 'A'; await $x::static_async_func2();
 
 
   try { $x = 'static_func2'; HH\dynamic_class_meth(A::class, $x)(); } catch (Exception $e) { wrap($e); }

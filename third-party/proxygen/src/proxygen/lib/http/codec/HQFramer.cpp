@@ -473,7 +473,7 @@ WriteResult writeGreaseFrame(folly::IOBufQueue& writeBuf) noexcept {
 WriteResult writeWTStreamPreface(folly::IOBufQueue& writeBuf,
                                  WebTransportStreamType streamType,
                                  uint64_t wtSessionId) {
-  static const std::array<uint64_t, 2> streamTypes{
+  static constexpr std::array<uint64_t, 2> streamTypes{
       folly::to_underlying(UnidirectionalStreamType::WEBTRANSPORT),
       folly::to_underlying(BidirectionalStreamType::WEBTRANSPORT)};
   auto idx = folly::to_underlying(streamType);

@@ -20,8 +20,8 @@ class classA
 echo "*** Testing iconv_strrpos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$haystack = b'hello, world';
-$needle = b'world';
+$haystack = 'hello, world';
+$needle = 'world';
 
 
 // heredoc string

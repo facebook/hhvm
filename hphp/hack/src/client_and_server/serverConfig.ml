@@ -452,7 +452,7 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt Config_keys.Hhconfig.code_agnostic_fixme config)
     ?allowed_fixme_codes_strict:
       (prepare_iset config Config_keys.Hhconfig.allowed_fixme_codes_strict)
-    ?tco_experimental_features:(config_experimental_tc_features config)
+    ?tco_legacy_experimental_features:(config_experimental_tc_features config)
     ?tco_migration_flags:(config_tc_migration_flags config)
     ?tco_coeffects:(bool_opt Config_keys.Hhconfig.call_coeffects config)
     ?tco_coeffects_local:(bool_opt Config_keys.Hhconfig.local_coeffects config)
@@ -604,7 +604,10 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?hack_warnings:
       (bool_opt Config_keys.Hhconfig.hack_warnings config
       |> Option.map ~f:(function
-             | true -> GlobalOptions.All_except []
+             | true ->
+               GlobalOptions.All_except
+                 (int_list_opt Config_keys.Hhconfig.disabled_warnings config
+                 |> Option.value ~default:[])
              | false -> GlobalOptions.NNone))
     ?recursive_case_types:
       (bool_opt Config_keys.Hhconfig.recursive_case_types config)

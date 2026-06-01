@@ -295,6 +295,9 @@ and check_type_integrity
              w.target_package_before_override
              w.classptr_reference_warning);
        List.iter errs ~f:(Typing_error_utils.add_typing_error ~env));
+      (* Note: class gating via __GatedByFeatureFlag is not yet supported
+         because folded classes don't carry user attributes. If needed,
+         add a gc_gated_by_feature_flag field to folded class decls. *)
       let tparams = Cls.tparams class_info in
       check_targs_integrity ~in_signature (Cls.pos class_info) argl tparams
     | Decl_entry.Found (Env.TypedefResult typedef) ->
@@ -318,6 +321,11 @@ and check_type_integrity
              w.target_package_before_override
              w.classptr_reference_warning);
        List.iter errs ~f:(Typing_error_utils.add_typing_error ~env));
+      Typing_visibility.check_gated_by_feature_flag
+        env
+        (Pos_or_decl.of_raw_pos use_pos)
+        cid
+        typedef.td_attributes;
       check_targs_integrity ~in_signature typedef.td_pos argl typedef.td_tparams
     | Decl_entry.DoesNotExist
     | Decl_entry.NotYetAvailable ->

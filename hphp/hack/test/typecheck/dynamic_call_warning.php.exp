@@ -1,0 +1,32 @@
+WARN: File "dynamic_call_warning.php", line 4, characters 7-9:
+Method invoked on a value of type `dynamic` (Warn[12038])
+  File "dynamic_call_warning.php", line 3, characters 38-44:
+  This expression has type `dynamic`
+WARN: File "dynamic_call_warning.php", line 8, characters 4-5:
+Value of type `dynamic` called as a function (Warn[12039])
+  File "dynamic_call_warning.php", line 7, characters 40-46:
+  This expression has type `dynamic`
+WARN: File "dynamic_call_warning.php", line 17, characters 9-11:
+Method invoked on a value of type `(dynamic & C)` (Warn[12038])
+  File "dynamic_call_warning.php", line 15, characters 48-54:
+  This expression has type `dynamic`
+WARN: File "dynamic_call_warning.php", line 23, characters 6-7:
+Value of type `(dynamic & C)` called as a function (Warn[12039])
+  File "dynamic_call_warning.php", line 21, characters 50-56:
+  This expression has type `dynamic`
+WARN: File "dynamic_call_warning.php", line 34, characters 8-9:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "dynamic_call_warning.php", line 33, characters 38-44:
+  This expression has type `dynamic`
+WARN: File "dynamic_call_warning.php", line 38, characters 3-4:
+Indexing into a value of type `dynamic` (Warn[12040])
+  File "dynamic_call_warning.php", line 37, characters 39-45:
+  This expression has type `dynamic`
+WARN: File "dynamic_call_warning.php", line 42, characters 3-4:
+Appending to a value of type `dynamic` (Warn[12040])
+  File "dynamic_call_warning.php", line 41, characters 39-45:
+  This expression has type `dynamic`
+WARN: File "dynamic_call_warning.php", line 47, characters 10-11:
+Indexing into a value of type `(dynamic & C)` (Warn[12040])
+  File "dynamic_call_warning.php", line 45, characters 48-54:
+  This expression has type `dynamic`

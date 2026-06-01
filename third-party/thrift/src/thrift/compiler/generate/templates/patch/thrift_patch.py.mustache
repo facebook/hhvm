@@ -77,7 +77,7 @@ class {{structured.py_name}}Patch(
       {{#if (not field.type.contains_patch?)}}
     @property
     def {{field.py_name}}(self) -> {{#partial patch_helpers.field_patch_type field=field parent=structured}}[
-            {{#partial typehints.unadapted_type type=field.type}},
+            {{#if field.is_type_iobuf?}}_fbthrift_iobuf.IOBuf{{#else}}{{#partial typehints.unadapted_type type=field.type}}{{/if}},
             {{#partial patch_helpers.unadapted_pep484_patch_type type=field.type}}]:
 
         {{! e.g., if field is an i32, this function convert DynamicPatch --> I32Patch }}
@@ -88,7 +88,7 @@ class {{structured.py_name}}Patch(
             cast_dynamic_patch_to_typed_field_patch,
             self._patch,
             {{field.id}},
-            {{#partial m_types.typeinfo type=field.type}})
+            {{#if field.is_type_iobuf?}}_fbthrift_python_types.typeinfo_iobuf{{#else}}{{#partial m_types.typeinfo type=field.type}}{{/if}})
       {{/if (not field.type.contains_patch?)}}
     {{/each}}
     {{#if (not program.safe_patch?)}}{{! If the program is already a safe patch, we should not generate to_safe_patch/from_safe_patch, otherwise it becomes a safe patch of safe patch}}

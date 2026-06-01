@@ -88,6 +88,8 @@ module Classes = struct
 
   let cFunctionRef = "\\HH\\FunctionRef"
 
+  let cRepresentableAs = "\\HH\\Runtime\\RepresentableAs"
+
   let cString = "\\HH\\string"
 end
 
@@ -409,6 +411,8 @@ module UserAttributes = struct
   let uaAsioLowPri = "__AsioLowPri"
 
   let uaImplementedBy = "__ImplementedBy"
+
+  let uaGatedByFeatureFlag = "__GatedByFeatureFlag"
 
   type attr_info = {
     contexts: string list;
@@ -887,6 +891,13 @@ module UserAttributes = struct
               doc =
                 "Specifies that this method is implemented by a specific top-level function. Only valid in .hhi files.";
             } );
+          ( uaGatedByFeatureFlag,
+            {
+              contexts = [cls; typealias; fn];
+              autocomplete = false;
+              doc =
+                "Gates this declaration behind an unstable feature flag. Users must enable the feature to reference this declaration.";
+            } );
         ])
 
   (* These are names which are allowed in the systemlib but not in normal programs *)
@@ -1100,6 +1111,8 @@ module StdlibFunctions = struct
 
   let type_structure_classname = "\\HH\\type_structure_classname"
 
+  let type_structure_class = "\\HH\\type_structure_class"
+
   let array_mark_legacy = "\\HH\\array_mark_legacy"
 
   let array_unmark_legacy = "\\HH\\array_unmark_legacy"
@@ -1118,6 +1131,7 @@ module StdlibFunctions = struct
         PseudoFunctions.unset;
         type_structure;
         type_structure_classname;
+        type_structure_class;
         PseudoFunctions.unsafe_cast;
         PseudoFunctions.unsafe_nonnull_cast;
       ]
@@ -1355,6 +1369,8 @@ module UnstableFeatures = struct
   let expression_trees = "expression_trees"
 
   let recursive_case_types = "recursive_case_types"
+
+  let representable_as = "representable_as"
 end
 
 module Coeffects = struct

@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/init-fini-node.h"
@@ -473,20 +472,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
               "                  the next request that runs\n"
               "    file          optional, filesystem path\n"
           );
-#ifdef ENABLE_HHPROF
-          usage.append(
-              "/hhprof/start:    start profiling\n"
-              "    requestType   \"all\" or \"next\"*\n"
-              "    url           profile next matching url for \"next\"\n"
-              "    lgSample      lg sample rate\n"
-              "    profileType   \"current\"* or \"cumulative\"\n"
-              "/hhprof/status:   configuration and current dump status\n"
-              "/hhprof/stop:     stop profiling\n"
-              "/pprof/cmdline:   program command line\n"
-              "/pprof/heap:      heap dump\n"
-              "/pprof/symbol:    symbol lookup\n"
-          );
-#endif // ENABLE_HHPROF
         }
 #endif // USE_JEMALLOC
 
@@ -501,17 +486,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
     bool needs_password = (cmd != "build-id") && (cmd != "compiler-id") &&
                           (cmd != "instance-id") && (cmd != "flush-logs") &&
-                          (cmd != "warmup-status") && (cmd != "config-id")
-#if defined(ENABLE_HHPROF) && defined(USE_JEMALLOC)
-                          && (mallctl == nullptr || (
-                                 (cmd != "hhprof/start")
-                              && (cmd != "hhprof/status")
-                              && (cmd != "hhprof/stop")
-                              && (cmd != "pprof/cmdline")
-                              && (cmd != "pprof/heap")
-                              && (cmd != "pprof/symbol")))
-#endif
-                          ;
+                          (cmd != "warmup-status") && (cmd != "config-id");
+
     // When configured, we allow read-only stats to be read without a password.
     if (needs_password && !Cfg::AdminServer::StatsNeedPassword) {
       if ((strncmp(cmd.c_str(), "memory.", 7) == 0) ||
@@ -1001,32 +977,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       }
       break;
     }
-#ifdef ENABLE_HHPROF
-    if (cmd == "hhprof/start") {
-      HHProf::HandleHHProfStart(transport);
-      break;
-    }
-    if (cmd == "hhprof/status") {
-      HHProf::HandleHHProfStatus(transport);
-      break;
-    }
-    if (cmd == "hhprof/stop") {
-      HHProf::HandleHHProfStop(transport);
-      break;
-    }
-    if (cmd == "pprof/cmdline") {
-      HHProf::HandlePProfCmdline(transport);
-      break;
-    }
-    if (cmd == "pprof/heap") {
-      HHProf::HandlePProfHeap(transport);
-      break;
-    }
-    if (cmd == "pprof/symbol") {
-      HHProf::HandlePProfSymbol(transport);
-      break;
-    }
-#endif // ENABLE_HHPROF
 #endif // USE_JEMALLOC
 
     if (cmd == "rqtrace-stats") {

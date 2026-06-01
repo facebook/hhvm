@@ -37,7 +37,6 @@ public class FB303ServiceReactiveClient
   }
 
   public FB303ServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = reactor.core.publisher.Mono.empty();
@@ -58,7 +57,6 @@ public class FB303ServiceReactiveClient
   }
 
   public FB303ServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = _headersMono;
@@ -75,9 +73,9 @@ public class FB303ServiceReactiveClient
         {
           oprot.writeFieldBegin(_simpleRpc_INT_PARAMETER_FIELD_DESC);
 
-          int _iter0 = intParameter;
+          int _fbthriftVar0 = intParameter;
 
-          oprot.writeI32(_iter0);
+          oprot.writeI32(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 

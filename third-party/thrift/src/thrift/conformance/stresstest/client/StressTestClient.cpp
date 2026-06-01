@@ -211,6 +211,42 @@ folly::coro::Task<void> ThriftStressTestClient::co_alignedRequestResponseTm(
   });
 }
 
+folly::coro::Task<StorageReadResponse> ThriftStressTestClient::co_storageReadTm(
+    const StorageReadRequest& req) {
+  StorageReadResponse ret;
+  co_await timedExecute([&]() -> folly::coro::Task<void> {
+    ret = co_await client_->co_storageReadTm(req);
+  });
+  co_return ret;
+}
+
+folly::coro::Task<StorageReadResponse> ThriftStressTestClient::co_storageReadEb(
+    const StorageReadRequest& req) {
+  StorageReadResponse ret;
+  co_await timedExecute([&]() -> folly::coro::Task<void> {
+    ret = co_await client_->co_storageReadEb(req);
+  });
+  co_return ret;
+}
+
+folly::coro::Task<StorageWriteResponse>
+ThriftStressTestClient::co_storageWriteTm(const StorageWriteRequest& req) {
+  StorageWriteResponse ret;
+  co_await timedExecute([&]() -> folly::coro::Task<void> {
+    ret = co_await client_->co_storageWriteTm(req);
+  });
+  co_return ret;
+}
+
+folly::coro::Task<StorageWriteResponse>
+ThriftStressTestClient::co_storageWriteEb(const StorageWriteRequest& req) {
+  StorageWriteResponse ret;
+  co_await timedExecute([&]() -> folly::coro::Task<void> {
+    ret = co_await client_->co_storageWriteEb(req);
+  });
+  co_return ret;
+}
+
 folly::AsyncTransport* ThriftStressTestClient::getTransport() {
   auto channel =
       dynamic_cast<apache::thrift::RocketClientChannel*>(client_->getChannel());

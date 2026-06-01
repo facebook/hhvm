@@ -43,11 +43,11 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(MyStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -62,14 +62,14 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
 
         public test.fixtures.refs.MyField getOptRef() { return optRef; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="ref", requiredness=Requiredness.NONE)    public Builder setRef(test.fixtures.refs.MyField ref) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="ref", requiredness=Requiredness.NONE)    public Builder setRef(test.fixtures.refs.MyField ref) {
             this.ref = ref;
             return this;
         }
 
         public test.fixtures.refs.MyField getRef() { return ref; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="req_ref", requiredness=Requiredness.REQUIRED)    public Builder setReqRef(test.fixtures.refs.MyField reqRef) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="req_ref", requiredness=Requiredness.REQUIRED)    public Builder setReqRef(test.fixtures.refs.MyField reqRef) {
             this.reqRef = reqRef;
             return this;
         }
@@ -93,6 +93,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -101,35 +102,30 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     private final test.fixtures.refs.MyField optRef;
     public static final int _OPT_REF = 1;
     private static final TField OPT_REF_FIELD_DESC = new TField("opt_ref", TType.STRUCT, (short)1);
-        private final test.fixtures.refs.MyField ref;
+    private final test.fixtures.refs.MyField ref;
     public static final int _REF = 2;
     private static final TField REF_FIELD_DESC = new TField("ref", TType.STRUCT, (short)2);
-        private final test.fixtures.refs.MyField reqRef;
+    private final test.fixtures.refs.MyField reqRef;
     public static final int _REQ_REF = 3;
     private static final TField REQ_REF_FIELD_DESC = new TField("req_ref", TType.STRUCT, (short)3);
     static {
-      NAMES_TO_IDS.put("optRef", 1);
-      THRIFT_NAMES_TO_IDS.put("opt_ref", 1);
-      FIELD_METADATA.put(1, OPT_REF_FIELD_DESC);
-      NAMES_TO_IDS.put("ref", 2);
-      THRIFT_NAMES_TO_IDS.put("ref", 2);
-      FIELD_METADATA.put(2, REF_FIELD_DESC);
-      NAMES_TO_IDS.put("reqRef", 3);
-      THRIFT_NAMES_TO_IDS.put("req_ref", 3);
-      FIELD_METADATA.put(3, REQ_REF_FIELD_DESC);
+        NAMES_TO_IDS.put("optRef", 1);
+        THRIFT_NAMES_TO_IDS.put("opt_ref", 1);
+        FIELD_METADATA.put(1, OPT_REF_FIELD_DESC);
+        NAMES_TO_IDS.put("ref", 2);
+        THRIFT_NAMES_TO_IDS.put("ref", 2);
+        FIELD_METADATA.put(2, REF_FIELD_DESC);
+        NAMES_TO_IDS.put("reqRef", 3);
+        THRIFT_NAMES_TO_IDS.put("req_ref", 3);
+        FIELD_METADATA.put(3, REQ_REF_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="opt_ref", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.refs.MyField getOptRef() { return optRef; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="ref", requiredness=Requiredness.NONE)
     public test.fixtures.refs.MyField getRef() { return ref; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=3, name="req_ref", requiredness=Requiredness.REQUIRED)
     public test.fixtures.refs.MyField getReqRef() { return reqRef; }
 
@@ -164,86 +160,88 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(optRef);
-            _hashCode = 31 * _hashCode + Objects.hashCode(ref);
-            _hashCode = 31 * _hashCode + Objects.hashCode(reqRef);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Objects.hashCode(ref);
+        _hashCode = 31 * _hashCode + Objects.hashCode(reqRef);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<MyStruct> asReader() {
       return MyStruct::read0;
     }
 
     public static MyStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
-      MyStruct.Builder builder = new MyStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _OPT_REF:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.refs.MyField optRef = test.fixtures.refs.MyField.read0(oprot);
-            builder.setOptRef(optRef);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _REF:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.refs.MyField ref = test.fixtures.refs.MyField.read0(oprot);
-            builder.setRef(ref);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _REQ_REF:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.refs.MyField reqRef = test.fixtures.refs.MyField.read0(oprot);
-            builder.setReqRef(reqRef);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(MyStruct.NAMES_TO_IDS, MyStruct.THRIFT_NAMES_TO_IDS, MyStruct.FIELD_METADATA);
+        MyStruct.Builder builder = new MyStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _OPT_REF:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.refs.MyField _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.refs.MyField.read0(oprot);
+                    builder.setOptRef(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _REF:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.refs.MyField _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.refs.MyField.read0(oprot);
+                    builder.setRef(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _REQ_REF:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.refs.MyField _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.refs.MyField.read0(oprot);
+                    builder.setReqRef(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      test.fixtures.refs.MyField _iter0 = this.optRef;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(OPT_REF_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.refs.MyField _iter0 = this.ref;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(REF_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      test.fixtures.refs.MyField _iter0 = this.reqRef;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(REQ_REF_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            test.fixtures.refs.MyField _fbthriftVar0 = this.optRef;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(OPT_REF_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.refs.MyField _fbthriftVar0 = this.ref;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(REF_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            test.fixtures.refs.MyField _fbthriftVar0 = this.reqRef;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(REQ_REF_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _MyStructLazy {

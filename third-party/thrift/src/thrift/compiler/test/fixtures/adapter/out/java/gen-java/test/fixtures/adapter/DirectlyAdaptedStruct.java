@@ -37,11 +37,11 @@ public final class DirectlyAdaptedStruct implements com.facebook.thrift.payload.
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(DirectlyAdaptedStruct other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -67,6 +67,7 @@ public final class DirectlyAdaptedStruct implements com.facebook.thrift.payload.
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -76,15 +77,14 @@ public final class DirectlyAdaptedStruct implements com.facebook.thrift.payload.
     public static final int _DATA = 1;
     private static final TField DATA_FIELD_DESC = new TField("data", TType.I64, (short)1);
     static {
-      NAMES_TO_IDS.put("data", 1);
-      THRIFT_NAMES_TO_IDS.put("data", 1);
-      FIELD_METADATA.put(1, DATA_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/DirectlyAdaptedStruct"),
-        DirectlyAdaptedStruct.class, DirectlyAdaptedStruct::read0));
+        NAMES_TO_IDS.put("data", 1);
+        THRIFT_NAMES_TO_IDS.put("data", 1);
+        FIELD_METADATA.put(1, DATA_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/DirectlyAdaptedStruct"),
+            DirectlyAdaptedStruct.class, DirectlyAdaptedStruct::read0));
     }
     
-
     @com.facebook.swift.codec.ThriftField(value=1, name="data", requiredness=Requiredness.NONE)
     public long getData() { return data; }
 
@@ -115,50 +115,50 @@ public final class DirectlyAdaptedStruct implements com.facebook.thrift.payload.
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Long.hashCode(data);
-            return _hashCode;
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<DirectlyAdaptedStruct> asReader() {
       return DirectlyAdaptedStruct::read0;
     }
 
     public static DirectlyAdaptedStruct read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(DirectlyAdaptedStruct.NAMES_TO_IDS, DirectlyAdaptedStruct.THRIFT_NAMES_TO_IDS, DirectlyAdaptedStruct.FIELD_METADATA);
-      DirectlyAdaptedStruct.Builder builder = new DirectlyAdaptedStruct.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _DATA:
-          if (__field.type == TType.I64) {
-            long data = oprot.readI64();
-            builder.setData(data);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(DirectlyAdaptedStruct.NAMES_TO_IDS, DirectlyAdaptedStruct.THRIFT_NAMES_TO_IDS, DirectlyAdaptedStruct.FIELD_METADATA);
+        DirectlyAdaptedStruct.Builder builder = new DirectlyAdaptedStruct.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _DATA:
+                if (__field.type == TType.I64) {
+                    long _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI64();
+                    builder.setData(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      long _iter0 = this.data;
-      oprot.writeFieldBegin(DATA_FIELD_DESC);
-      oprot.writeI64(_iter0);
-      oprot.writeFieldEnd();
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            long _fbthriftVar0 = this.data;
+            oprot.writeFieldBegin(DATA_FIELD_DESC);
+            oprot.writeI64(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _DirectlyAdaptedStructLazy {

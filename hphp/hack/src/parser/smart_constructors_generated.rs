@@ -206,7 +206,6 @@ pub trait SmartConstructors: Clone {
     fn make_generic_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output;
     fn make_nullable_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output;
     fn make_like_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output;
-    fn make_soft_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output;
     fn make_attributized_specifier(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output;
     fn make_reified_type_argument(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output;
     fn make_type_arguments(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output) -> Self::Output;

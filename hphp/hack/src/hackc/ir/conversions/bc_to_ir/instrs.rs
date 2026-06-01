@@ -195,10 +195,8 @@ fn collect_args(ctx: &mut Context<'_>, num_args: u32) -> Vec<ValueId> {
 
 fn convert_call(ctx: &mut Context<'_>, call: &Opcode) {
     let fcall_args = match call {
-        Opcode::FCallClsMethod(fcall_args, ..)
-        | Opcode::FCallClsMethodD(fcall_args, ..)
+        Opcode::FCallClsMethodD(fcall_args, ..)
         | Opcode::FCallClsMethodM(fcall_args, ..)
-        | Opcode::FCallClsMethodS(fcall_args, ..)
         | Opcode::FCallClsMethodSD(fcall_args, ..)
         | Opcode::FCallCtor(fcall_args, ..)
         | Opcode::FCallFunc(fcall_args)
@@ -226,18 +224,10 @@ fn convert_call(ctx: &mut Context<'_>, call: &Opcode) {
     use instr::CallDetail;
 
     let detail = match *call {
-        Opcode::FCallClsMethod(_, _, log) => {
-            num_args += 2;
-            CallDetail::FCallClsMethod { log }
-        }
         Opcode::FCallClsMethodD(_, clsid, method) => CallDetail::FCallClsMethodD { clsid, method },
-        Opcode::FCallClsMethodM(_, _, log, method) => {
+        Opcode::FCallClsMethodM(_, _, method) => {
             num_args += 1;
-            CallDetail::FCallClsMethodM { method, log }
-        }
-        Opcode::FCallClsMethodS(_, _, clsref) => {
-            num_args += 1;
-            CallDetail::FCallClsMethodS { clsref }
+            CallDetail::FCallClsMethodM { method }
         }
         Opcode::FCallClsMethodSD(_, _, clsref, method) => {
             CallDetail::FCallClsMethodSD { clsref, method }
@@ -261,10 +251,8 @@ fn convert_call(ctx: &mut Context<'_>, call: &Opcode) {
     let mut operands = collect_args(ctx, num_args);
 
     match *call {
-        Opcode::FCallClsMethod(..)
-        | Opcode::FCallClsMethodD(..)
+        Opcode::FCallClsMethodD(..)
         | Opcode::FCallClsMethodM(..)
-        | Opcode::FCallClsMethodS(..)
         | Opcode::FCallClsMethodSD(..)
         | Opcode::FCallFunc(..)
         | Opcode::FCallFuncD(..) => {
@@ -804,10 +792,8 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
             Action::None
         }
 
-        Opcode::FCallClsMethod { .. }
-        | Opcode::FCallClsMethodD { .. }
+        Opcode::FCallClsMethodD { .. }
         | Opcode::FCallClsMethodM { .. }
-        | Opcode::FCallClsMethodS { .. }
         | Opcode::FCallClsMethodSD { .. }
         | Opcode::FCallCtor(..)
         | Opcode::FCallFunc(..)

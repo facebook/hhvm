@@ -6,9 +6,9 @@
 
 /// Service definitions for `MyRoot`.
 pub mod my_root {
+
     #[derive(Clone, Debug)]
     pub enum DoRootExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -88,7 +88,6 @@ pub mod my_root {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -98,9 +97,9 @@ pub mod my_root {
 }
 /// Service definitions for `MyNode`.
 pub mod my_node {
+
     #[derive(Clone, Debug)]
     pub enum DoMidExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -180,7 +179,6 @@ pub mod my_node {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();
@@ -190,9 +188,9 @@ pub mod my_node {
 }
 /// Service definitions for `MyLeaf`.
 pub mod my_leaf {
+
     #[derive(Clone, Debug)]
     pub enum DoLeafExn {
-
         ApplicationException(::fbthrift::ApplicationException),
     }
 
@@ -272,7 +270,6 @@ pub mod my_leaf {
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
                     p.write_field_end();
                 }
-
                 ::std::result::Result::Err(Self::ApplicationException(_aexn)) => unreachable!(),
             }
             p.write_field_stop();

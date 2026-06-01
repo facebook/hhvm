@@ -14,17 +14,17 @@ public class InteractWithSharedReactiveAsyncWrapper
   private InteractWithShared.Reactive _delegate;
 
   public InteractWithSharedReactiveAsyncWrapper(InteractWithShared.Reactive _delegate) {
-    
-    this._delegate = _delegate;
+      
+      this._delegate = _delegate;
   }
 
   public InteractWithSharedReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(new InteractWithSharedReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
+      this(new InteractWithSharedReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
   }
 
   @java.lang.Override
   public void close() {
-    _delegate.dispose();
+      _delegate.dispose();
   }
 
   @java.lang.Override
@@ -41,7 +41,7 @@ public class InteractWithSharedReactiveAsyncWrapper
   @java.lang.Override
   public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<test.fixtures.another_interactions.DoSomethingResult>> doSomeSimilarThingsWrapper(
     com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.doSomeSimilarThingsWrapper( rpcOptions));
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.doSomeSimilarThingsWrapper( rpcOptions));
   }
 
   public class MyInteractionImpl implements MyInteraction {
@@ -59,7 +59,7 @@ public class InteractWithSharedReactiveAsyncWrapper
     @java.lang.Override
     public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Integer>> frobnicateWrapper(
       com.facebook.thrift.client.RpcOptions rpcOptions) {
-      throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
+        throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
     }
 
     @java.lang.Override
@@ -76,7 +76,7 @@ public class InteractWithSharedReactiveAsyncWrapper
     @java.lang.Override
     public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> pingWrapper(
       com.facebook.thrift.client.RpcOptions rpcOptions) {
-      throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
+        throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
     }
 
     @java.lang.Override
@@ -102,7 +102,7 @@ public class InteractWithSharedReactiveAsyncWrapper
     @java.lang.Override
     public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Integer>> initWrapper(
       com.facebook.thrift.client.RpcOptions rpcOptions) {
-      throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
+        throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
     }
 
     @java.lang.Override
@@ -119,7 +119,7 @@ public class InteractWithSharedReactiveAsyncWrapper
     @java.lang.Override
     public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<test.fixtures.another_interactions.DoSomethingResult>> doSomethingWrapper(
       com.facebook.thrift.client.RpcOptions rpcOptions) {
-      throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
+        throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
     }
 
     @java.lang.Override
@@ -136,7 +136,7 @@ public class InteractWithSharedReactiveAsyncWrapper
     @java.lang.Override
     public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Void>> tearDownWrapper(
       com.facebook.thrift.client.RpcOptions rpcOptions) {
-      throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
+        throw new UnsupportedOperationException("Interactions are not yet supported on ReactiveAsyncWrapper Interfaces!");
     }
 
     @java.lang.Override
@@ -146,4 +146,5 @@ public class InteractWithSharedReactiveAsyncWrapper
   public SharedInteraction createSharedInteraction() {
       return new SharedInteractionImpl();
   }
+
 }

@@ -134,7 +134,8 @@ folly::coro::Task<HTTPBodyEvent> Logger::Filter::readBodyEvent(uint32_t max) {
   co_return std::move(*bodyEvent);
 }
 
-void Logger::Filter::stopReading(folly::Optional<const HTTPErrorCode> err) {
+void Logger::Filter::stopReading(
+    folly::Optional<const HTTPErrorCode> err) noexcept {
   endTime = std::chrono::steady_clock::now();
   done.first.setValue();
   HTTPSourceFilter::stopReading(err);

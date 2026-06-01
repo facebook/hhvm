@@ -1,0 +1,3 @@
+Value returned from method Derived::foo() must be of type int, string given
+string(86) "Warning: Value returned from method Derived::bar() must be of type @?int, string given"
+Value returned from method Derived::bar() must be of inherited type int, string given

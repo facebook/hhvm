@@ -28,7 +28,6 @@ use ir_core::Immediate;
 use ir_core::IncDecOp;
 use ir_core::InitPropOp;
 use ir_core::InstrId;
-use ir_core::IsLogAsDynamicCallOp;
 use ir_core::IsTypeOp;
 use ir_core::MOpMode;
 use ir_core::Maybe;
@@ -348,14 +347,6 @@ pub(crate) fn parse_doc_comment(tokenizer: &mut Tokenizer<'_>) -> Result<Option<
         None
     } else {
         Some(tokenizer.expect_any_string()?.unescaped_string()?)
-    })
-}
-
-pub(crate) fn parse_dynamic_call_op(tokenizer: &mut Tokenizer<'_>) -> Result<IsLogAsDynamicCallOp> {
-    Ok(if tokenizer.next_is_identifier("log_as_dc")? {
-        IsLogAsDynamicCallOp::LogAsDynamicCall
-    } else {
-        IsLogAsDynamicCallOp::DontLogAsDynamicCall
     })
 }
 

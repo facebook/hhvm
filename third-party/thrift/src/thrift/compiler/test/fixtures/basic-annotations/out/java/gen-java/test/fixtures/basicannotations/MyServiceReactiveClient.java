@@ -50,7 +50,6 @@ public class MyServiceReactiveClient
   }
 
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = reactor.core.publisher.Mono.empty();
@@ -71,7 +70,6 @@ public class MyServiceReactiveClient
   }
 
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
     this._headersMono = _headersMono;
@@ -184,9 +182,9 @@ public class MyServiceReactiveClient
         {
           oprot.writeFieldBegin(_hasDataById_ID_FIELD_DESC);
 
-          long _iter0 = id;
+          long _fbthriftVar0 = id;
 
-          oprot.writeI64(_iter0);
+          oprot.writeI64(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -241,9 +239,9 @@ public class MyServiceReactiveClient
         {
           oprot.writeFieldBegin(_getDataById_ID_FIELD_DESC);
 
-          long _iter0 = id;
+          long _fbthriftVar0 = id;
 
-          oprot.writeI64(_iter0);
+          oprot.writeI64(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -298,18 +296,18 @@ public class MyServiceReactiveClient
         {
           oprot.writeFieldBegin(_putDataById_ID_FIELD_DESC);
 
-          long _iter0 = id;
+          long _fbthriftVar0 = id;
 
-          oprot.writeI64(_iter0);
+          oprot.writeI64(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
         {
           oprot.writeFieldBegin(_putDataById_DATA_FIELD_DESC);
 
-          String _iter0 = data;
+          String _fbthriftVar0 = data;
 
-          oprot.writeString(_iter0);
+          oprot.writeString(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
@@ -364,18 +362,18 @@ public class MyServiceReactiveClient
         {
           oprot.writeFieldBegin(_lobDataById_ID_FIELD_DESC);
 
-          long _iter0 = id;
+          long _fbthriftVar0 = id;
 
-          oprot.writeI64(_iter0);
+          oprot.writeI64(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 
         {
           oprot.writeFieldBegin(_lobDataById_DATA_FIELD_DESC);
 
-          String _iter0 = data;
+          String _fbthriftVar0 = data;
 
-          oprot.writeString(_iter0);
+          oprot.writeString(_fbthriftVar0);
           oprot.writeFieldEnd();
         }
 

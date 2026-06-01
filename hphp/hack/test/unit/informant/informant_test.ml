@@ -15,8 +15,6 @@ struct
 end
 
 module Report_asserter = Asserter.Make_asserter (Report_comparator)
-module WEWClient = WatchmanEventWatcherClient
-module WEWConfig = WatchmanEventWatcherConfig
 
 module Tools = struct
   include Informant_test_tools

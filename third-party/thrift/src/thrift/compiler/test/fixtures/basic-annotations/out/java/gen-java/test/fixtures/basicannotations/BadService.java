@@ -97,6 +97,7 @@ public interface BadService extends java.io.Closeable, com.facebook.thrift.util.
         }
 
         public BadInteraction createBadInteraction();
+
     }
     @java.lang.Override void close();
 
@@ -158,6 +159,7 @@ public interface BadService extends java.io.Closeable, com.facebook.thrift.util.
         }
 
         public BadInteraction createBadInteraction();
+
     }
     @com.facebook.swift.service.ThriftInteraction("BadInteraction")
     public interface BadInteraction extends java.io.Closeable {
@@ -174,4 +176,5 @@ public interface BadService extends java.io.Closeable, com.facebook.thrift.util.
     }
 
     BadInteraction createBadInteraction();
+
 }

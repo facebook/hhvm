@@ -1,0 +1,11 @@
+<?hh
+
+function foo(): int {
+  $y = 42;
+  return $y;
+}
+
+<<__EntryPoint>> function main(): void {
+  $x = 1;
+  echo $x;
+}

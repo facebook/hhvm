@@ -16,11 +16,13 @@ pub mod errors {
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::my_service::*;
+
     #[doc(inline)]
     pub use ::::services::my_interaction;
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::my_interaction::*;
+
 }
 
 pub(crate) use crate as server;
@@ -100,9 +102,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_My
 
 pub mod my_service {
     use super::*;
-
-    
-
 
     /// Processor for MyInteraction's methods.
     #[derive(Clone, Debug)]
@@ -354,7 +353,6 @@ pub mod my_service {
             self.handle_on_termination().await
         }
     }
-
 
 }
 
@@ -2131,4 +2129,3 @@ where
         }
     }
 }
-

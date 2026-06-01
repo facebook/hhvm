@@ -31,8 +31,8 @@ function entrypoint_mb_strrichr_variation3(): void {
   set_error_handler(test_error_handler<>);
 
   // Initialise function arguments not being substituted (if any)
-  $haystack = b'string_val';
-  $needle = b'_';
+  $haystack = 'string_val';
+  $needle = '_';
   $encoding = 'utf-8';
 
   // add arrays

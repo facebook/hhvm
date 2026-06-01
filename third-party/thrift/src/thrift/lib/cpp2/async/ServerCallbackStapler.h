@@ -18,6 +18,7 @@
 
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
+#include <thrift/lib/cpp2/logging/ThriftBiDiLog.h>
 
 namespace apache::thrift::detail {
 
@@ -46,6 +47,13 @@ class ServerCallbackStapler : public BiDiServerCallback,
   ServerCallbackStapler() : sink_(nullptr), stream_(nullptr) {}
 
   ~ServerCallbackStapler() override {
+    if (biDiLog_) {
+      biDiLog_->log(
+          detail::BiDiFinallyEvent{
+              hasError_              ? detail::BiDiEndReason::ERROR
+                  : hasCancellation_ ? detail::BiDiEndReason::CANCEL
+                                     : detail::BiDiEndReason::COMPLETE});
+    }
     if (contextStack_) {
       if (hasError_) {
         contextStack_->onBiDiFinally(details::BIDI_FINISH_REASON::ERROR);
@@ -63,6 +71,9 @@ class ServerCallbackStapler : public BiDiServerCallback,
   }
   void setContextStack(std::shared_ptr<ContextStack> contextStack) {
     contextStack_ = std::move(contextStack);
+  }
+  void setBiDiLog(std::shared_ptr<ThriftBiDiLog> biDiLog) {
+    biDiLog_ = std::move(biDiLog);
   }
 
   //
@@ -167,6 +178,9 @@ class ServerCallbackStapler : public BiDiServerCallback,
   bool onStreamNext(StreamPayload&& payload) override {
     DeletionGuard guard(this);
     std::ignore = clientCb_->onStreamNext(std::move(payload));
+    if (contextStack_) {
+      contextStack_->onBiDiStreamNextSent();
+    }
     return stream_;
   }
 
@@ -198,6 +212,7 @@ class ServerCallbackStapler : public BiDiServerCallback,
   SinkServerCallback* sink_{nullptr};
   StreamServerCallback* stream_{nullptr};
   std::shared_ptr<ContextStack> contextStack_;
+  std::shared_ptr<ThriftBiDiLog> biDiLog_;
 
   bool hasError_{false};
   bool hasCancellation_{false};

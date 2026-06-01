@@ -26,86 +26,86 @@ import com.facebook.thrift.metadata.ThriftType;
 
 public class ExtendedServiceThriftMetadataHandler implements com.facebook.thrift.server.ThriftMetadataHandler {
 
-  private static void addFunctions_0(List<ThriftFunction> functions) {
-        {
-          List<ThriftField> args = new ArrayList<>();
-          args.add(new ThriftField.Builder()
-              .setId(1)
-              .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
-              .setName("param0")
-              .setIsOptional(false)
-              .build());
-          args.add(new ThriftField.Builder()
-              .setId(2)
-              .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
-              .setName("param1")
-              .setIsOptional(false)
-              .build());
+    private static void addFunctions_0(List<ThriftFunction> functions) {
+            {
+              List<ThriftField> args = new ArrayList<>();
+              args.add(new ThriftField.Builder()
+                  .setId(1)
+                  .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
+                  .setName("param0")
+                  .setIsOptional(false)
+                  .build());
+              args.add(new ThriftField.Builder()
+                  .setId(2)
+                  .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
+                  .setName("param1")
+                  .setIsOptional(false)
+                  .build());
 
-          List<ThriftField> exceptions = new ArrayList<>();
+              List<ThriftField> exceptions = new ArrayList<>();
 
-          functions.add(new ThriftFunction.Builder()
-              .setName("init")
-              .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
-              .setArguments(args)
-              .setExceptions(exceptions)
-              .setIsOneway(false)
-              .build());
-        }
-  }
+              functions.add(new ThriftFunction.Builder()
+                  .setName("init")
+                  .setReturnType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE))
+                  .setArguments(args)
+                  .setExceptions(exceptions)
+                  .setIsOneway(false)
+                  .build());
+            }
+    }
 
-  private static final ThriftService THRIFT_SERVICE;
+    private static final ThriftService THRIFT_SERVICE;
 
-  private static final com.facebook.thrift.server.ThriftMetadataHandler PARENT_HANDLER =
-      new com.facebook.thrift.test.fixtures.service_schema.BaseServiceThriftMetadataHandler();
+    private static final com.facebook.thrift.server.ThriftMetadataHandler PARENT_HANDLER =
+        new com.facebook.thrift.test.fixtures.service_schema.BaseServiceThriftMetadataHandler();
 
-  static {
-    List<ThriftFunction> functions = new ArrayList<>();
-    addFunctions_0(functions);
-    THRIFT_SERVICE = new ThriftService.Builder()
-        .setName("test.fixtures.service_schema.ExtendedService")
-        .setParent("com.facebook.thrift.test.fixtures.service_schema.BaseService")
-        .setFunctions(functions)
-        .build();
-  }
+    static {
+        List<ThriftFunction> functions = new ArrayList<>();
+        addFunctions_0(functions);
+        THRIFT_SERVICE = new ThriftService.Builder()
+            .setName("test.fixtures.service_schema.ExtendedService")
+            .setParent("com.facebook.thrift.test.fixtures.service_schema.BaseService")
+            .setFunctions(functions)
+            .build();
+    }
 
-  @Override
-  public String getName() {
-    return "ExtendedService";
-  }
+    @Override
+    public String getName() {
+        return "ExtendedService";
+    }
 
-  @Override
-  public String getFullyQualifiedName() {
-    return "test.fixtures.service_schema.ExtendedService";
-  }
+    @Override
+    public String getFullyQualifiedName() {
+        return "test.fixtures.service_schema.ExtendedService";
+    }
 
-  @Override
-  public ThriftService getThriftService() {
-    return THRIFT_SERVICE;
-  }
+    @Override
+    public ThriftService getThriftService() {
+        return THRIFT_SERVICE;
+    }
 
-  @Override
-  public String getParentServiceName() {
-    return "com.facebook.thrift.test.fixtures.service_schema.BaseService";
-  }
+    @Override
+    public String getParentServiceName() {
+        return "com.facebook.thrift.test.fixtures.service_schema.BaseService";
+    }
 
-  @Override
-  public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
-    return PARENT_HANDLER;
-  }
+    @Override
+    public com.facebook.thrift.server.ThriftMetadataHandler getParentHandler() {
+        return PARENT_HANDLER;
+    }
 
-  @Override
-  public Map<String, ThriftEnum> getEnums() {
-    return ExtendedServiceThriftMetadataHandlerEnums.getEnums();
-  }
+    @Override
+    public Map<String, ThriftEnum> getEnums() {
+        return ExtendedServiceThriftMetadataHandlerEnums.getEnums();
+    }
 
-  @Override
-  public Map<String, ThriftStruct> getStructs() {
-    return ExtendedServiceThriftMetadataHandlerStructs.getStructs();
-  }
+    @Override
+    public Map<String, ThriftStruct> getStructs() {
+        return ExtendedServiceThriftMetadataHandlerStructs.getStructs();
+    }
 
-  @Override
-  public Map<String, ThriftException> getExceptions() {
-    return ExtendedServiceThriftMetadataHandlerExceptions.getExceptions();
-  }
+    @Override
+    public Map<String, ThriftException> getExceptions() {
+        return ExtendedServiceThriftMetadataHandlerExceptions.getExceptions();
+    }
 }

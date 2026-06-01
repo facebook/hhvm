@@ -40,26 +40,31 @@ pub mod errors {
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::box_service::*;
+
     #[doc(inline)]
     pub use ::::services::my_interaction;
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::my_interaction::*;
+
     #[doc(inline)]
     pub use ::::services::my_interaction_fast;
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::my_interaction_fast::*;
+
     #[doc(inline)]
     pub use ::::services::serial_interaction;
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::serial_interaction::*;
+
     #[doc(inline)]
     pub use ::::services::boxed_interaction;
     #[doc(inline)]
     #[allow(ambiguous_glob_reexports)]
     pub use ::::services::boxed_interaction::*;
+
 }
 
 pub(crate) use crate as server;
@@ -647,9 +652,6 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_Bo
 pub mod my_service {
     use super::*;
 
-    
-
-
     /// Processor for MyInteraction's methods.
     #[derive(Clone, Debug)]
     pub struct MyInteractionProcessor<P, H, R, RS> {
@@ -1206,8 +1208,6 @@ pub mod my_service {
             self.handle_on_termination().await
         }
     }
-
-    
 
 
     /// Processor for MyInteractionFast's methods.
@@ -1767,8 +1767,6 @@ pub mod my_service {
         }
     }
 
-    
-
 
     /// Processor for SerialInteraction's methods.
     #[derive(Clone, Debug)]
@@ -2020,7 +2018,6 @@ pub mod my_service {
             self.handle_on_termination().await
         }
     }
-
 
 }
 
@@ -2952,9 +2949,6 @@ where
 pub mod factories {
     use super::*;
 
-    
-
-
     /// Processor for MyInteraction's methods.
     #[derive(Clone, Debug)]
     pub struct MyInteractionProcessor<P, H, R, RS> {
@@ -3511,8 +3505,6 @@ pub mod factories {
             self.handle_on_termination().await
         }
     }
-
-    
 
 
     /// Processor for MyInteractionFast's methods.
@@ -4072,8 +4064,6 @@ pub mod factories {
         }
     }
 
-    
-
 
     /// Processor for SerialInteraction's methods.
     #[derive(Clone, Debug)]
@@ -4325,7 +4315,6 @@ pub mod factories {
             self.handle_on_termination().await
         }
     }
-
 
 }
 
@@ -5176,9 +5165,6 @@ where
 pub mod perform {
     use super::*;
 
-    
-
-
     /// Processor for MyInteraction's methods.
     #[derive(Clone, Debug)]
     pub struct MyInteractionProcessor<P, H, R, RS> {
@@ -5735,8 +5721,6 @@ pub mod perform {
             self.handle_on_termination().await
         }
     }
-
-    
 
 
     /// Processor for MyInteractionFast's methods.
@@ -6296,8 +6280,6 @@ pub mod perform {
         }
     }
 
-    
-
 
     /// Processor for SerialInteraction's methods.
     #[derive(Clone, Debug)]
@@ -6549,7 +6531,6 @@ pub mod perform {
             self.handle_on_termination().await
         }
     }
-
 
 }
 
@@ -7048,9 +7029,6 @@ where
 
 pub mod interact_with_shared {
     use super::*;
-
-    
-
 
     /// Processor for MyInteraction's methods.
     #[derive(Clone, Debug)]
@@ -7609,8 +7587,6 @@ pub mod interact_with_shared {
         }
     }
 
-    
-
 
     /// Processor for SharedInteraction's methods.
     #[derive(Clone, Debug)]
@@ -7994,7 +7970,6 @@ pub mod interact_with_shared {
             self.handle_on_termination().await
         }
     }
-
 
 }
 
@@ -8453,9 +8428,6 @@ where
 pub mod box_service {
     use super::*;
 
-    
-
-
     /// Processor for BoxedInteraction's methods.
     #[derive(Clone, Debug)]
     pub struct BoxedInteractionProcessor<P, H, R, RS> {
@@ -8706,7 +8678,6 @@ pub mod box_service {
             self.handle_on_termination().await
         }
     }
-
 
 }
 
@@ -9079,4 +9050,3 @@ where
         }
     }
 }
-

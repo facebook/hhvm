@@ -29,12 +29,14 @@
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/named-params.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
+#include <exception>
 #include <folly/Random.h>
 
 namespace HPHP {
@@ -233,17 +235,16 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
 
 inline void initFuncNamedParamDefaults(const Func* callee, uint32_t& numArgsInclUnpack,
                                        const ArrayData* namedArgNames) {
+  auto numNamedParams = callee->numNamedParams();
+  if (numNamedParams == 0) return;
   auto numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
-  assertx(callee->numNamedParams() >= numNamedArgs);
-  if (callee->numNamedParams() == numNamedArgs) {
-    return;
-  }
+  assertx(numNamedParams >= numNamedArgs);
+  if (numNamedParams == numNamedArgs) return;
 
   auto numPositionalArgs = numArgsInclUnpack - numNamedArgs;
   auto numPositionalParams = callee->numNonVariadicParams() - callee->numNamedParams();
   auto const hasVariadics = numPositionalArgs > numPositionalParams ? 1 : 0;
 
-  CoeffectsSaver cs{callee->hasCoeffectsLocal()};
   GenericsSaver gs{callee->hasReifiedGenerics()};
   PackedStringPtr const* namedParamNames = callee->sortedNamedParamNames();
   auto stackPos =
@@ -282,34 +283,10 @@ inline void initFuncNamedParamDefaults(const Func* callee, uint32_t& numArgsIncl
 inline void calleeNamedArgChecks(const Func* callee,
                                  uint32_t& numArgsInclUnpack,
                                  const ArrayData* namedArgNames) {
-  uint32_t namedParamCount = callee->numNamedParams();
-  int namedArgNamesSize = namedArgNames ? namedArgNames->size() : 0;
-  PackedStringPtr const* namedParamNames = callee->sortedNamedParamNames();
-
-  // Iterate and find the number of named arguments that were required
-  auto requiredNamedArgCount = callee->numRequiredNamedParams();
-  auto paramIdx = 0;
-  for (auto argIdx = 0; argIdx < namedArgNamesSize; ++argIdx) {
-    auto argName = namedArgNames->at(argIdx).val().pstr;
-
-    while (paramIdx < namedParamCount && namedParamNames[paramIdx] != argName) {
-      if (!callee->params()[paramIdx].hasDefaultValue()) --requiredNamedArgCount;
-      paramIdx++;
-    }
-    if (paramIdx >= namedParamCount) {
-      throwNamedArgumentNameMismatch(callee, argName);
-    }
-    paramIdx++;
-  }
-
-  while (paramIdx < namedParamCount) {
-    if (!callee->params()[paramIdx].hasDefaultValue()) --requiredNamedArgCount;
-    paramIdx++;
-  }
-  if (callee->numRequiredNamedParams() != requiredNamedArgCount) {
-    throwMissingNamedArgument(callee, requiredNamedArgCount);
-  }
-
+  checkNamedArgMismatch(
+    callee, namedArgNames, throwUnexpectedNamedArguments,
+    throwNamedArgumentNameMismatch, throwMissingNamedParam
+  );
   initFuncNamedParamDefaults(callee, numArgsInclUnpack, namedArgNames);
 }
 

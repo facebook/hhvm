@@ -282,6 +282,40 @@ class AsyncMysqlClient : public MysqlClientBase {
       std::unique_ptr<OperationBase::ConnectionProxy> conn,
       db::OperationType operation_type) const override;
 
+  // Override to return unified MySQL special operation classes
+  std::shared_ptr<SpecialOperation> createResetOperation(
+      std::unique_ptr<Connection> conn) const override;
+  std::shared_ptr<SpecialOperation> createChangeUserOperation(
+      std::unique_ptr<Connection> conn,
+      std::shared_ptr<const ConnectionKey> key) const override;
+
+  // Unified factory methods using MysqlQueryOperation/MysqlMultiQueryOperation
+  // Bring base class overloads with logging_funcs into scope
+  using MysqlClientBase::createMultiQueryOperation;
+  using MysqlClientBase::createQueryOperation;
+  std::shared_ptr<QueryOperation> createQueryOperation(
+      std::unique_ptr<Connection> conn,
+      Query&& query,
+      LoggingFuncsPtr logging_funcs = nullptr) const override;
+  std::shared_ptr<MultiQueryOperation> createMultiQueryOperation(
+      std::unique_ptr<Connection> conn,
+      std::vector<Query>&& queries,
+      LoggingFuncsPtr logging_funcs = nullptr) const override;
+
+  // Overloads for sync operations (with ConnectionProxy)
+  std::shared_ptr<QueryOperation> createQueryOperation(
+      std::unique_ptr<OperationBase::ConnectionProxy> conn_proxy,
+      Query&& query,
+      LoggingFuncsPtr logging_funcs = nullptr) const override;
+  std::shared_ptr<MultiQueryOperation> createMultiQueryOperation(
+      std::unique_ptr<OperationBase::ConnectionProxy> conn_proxy,
+      std::vector<Query>&& queries,
+      LoggingFuncsPtr logging_funcs = nullptr) const override;
+
+  // Unified factory method using MysqlConnectOperation
+  std::shared_ptr<ConnectOperation> createConnectOperation(
+      std::shared_ptr<const ConnectionKey> conn_key) override;
+
   bool isInCorrectThread(bool expectMysqlThread) const override {
     auto eb = getEventBase();
     return expectMysqlThread == (eb == nullptr || eb->isInEventBaseThread());

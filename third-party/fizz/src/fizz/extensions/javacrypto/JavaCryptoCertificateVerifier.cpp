@@ -26,10 +26,12 @@ JavaCryptoCertificateVerifier::createFromCAFile(
       context, std::move(store));
 }
 
-std::shared_ptr<const Cert> JavaCryptoCertificateVerifier::verify(
+Status JavaCryptoCertificateVerifier::verify(
+    std::shared_ptr<const Cert>& ret,
+    Error& err,
     const std::vector<std::shared_ptr<const fizz::PeerCert>>& certs) const {
   if (certs.empty()) {
-    throw std::runtime_error("no certificates to verify");
+    return err.error("no certificates to verify");
   }
 
   auto leafCert = certs.front()->getX509();
@@ -37,7 +39,7 @@ std::shared_ptr<const Cert> JavaCryptoCertificateVerifier::verify(
   auto certChainStack = std::unique_ptr<STACK_OF(X509), STACK_OF_X509_deleter>(
       sk_X509_new_null());
   if (!certChainStack) {
-    throw std::bad_alloc();
+    return err.error("", folly::none, Error::Category::StdBadAlloc);
   }
 
   for (size_t i = 1; i < certs.size(); i++) {
@@ -46,7 +48,7 @@ std::shared_ptr<const Cert> JavaCryptoCertificateVerifier::verify(
 
   auto ctx = folly::ssl::X509StoreCtxUniquePtr(X509_STORE_CTX_new());
   if (!ctx) {
-    throw std::bad_alloc();
+    return err.error("", folly::none, Error::Category::StdBadAlloc);
   }
 
   if (X509_STORE_CTX_init(
@@ -54,38 +56,39 @@ std::shared_ptr<const Cert> JavaCryptoCertificateVerifier::verify(
           x509Store_ ? x509Store_.get() : getDefaultX509Store(),
           leafCert.get(),
           certChainStack.get()) != 1) {
-    throw std::runtime_error("failed to initialize store context");
+    return err.error("failed to initialize store context");
   }
 
   if (X509_STORE_CTX_set_default(
           ctx.get(),
           context_ == VerificationContext::Server ? "ssl_client"
                                                   : "ssl_server") != 1) {
-    throw std::runtime_error("failed to set default verification method");
+    return err.error("failed to set default verification method");
   }
 
   folly::ssl::X509VerifyParam param(X509_VERIFY_PARAM_new());
   if (!param) {
-    throw std::bad_alloc();
+    return err.error("", folly::none, Error::Category::StdBadAlloc);
   }
 
   if (X509_VERIFY_PARAM_set_flags(param.get(), X509_V_FLAG_X509_STRICT) != 1) {
-    throw std::runtime_error("failed to set strict certificate checking");
+    return err.error("failed to set strict certificate checking");
   }
 
   if (X509_VERIFY_PARAM_set1(
           X509_STORE_CTX_get0_param(ctx.get()), param.get()) != 1) {
-    throw std::runtime_error("failed to apply verification parameters");
+    return err.error("failed to apply verification parameters");
   }
 
   if (X509_verify_cert(ctx.get()) != 1) {
     const auto errorInt = X509_STORE_CTX_get_error(ctx.get());
     std::string errorText =
         std::string(X509_verify_cert_error_string(errorInt));
-    throw std::runtime_error("certificate verification failed: " + errorText);
+    return err.error("certificate verification failed: " + errorText);
   }
 
-  return certs.front();
+  ret = certs.front();
+  return Status::Success;
 }
 
 void JavaCryptoCertificateVerifier::createAuthorities() {
@@ -134,13 +137,14 @@ X509_STORE* JavaCryptoCertificateVerifier::getDefaultX509Store() {
   return defaultStore.get();
 }
 
-std::vector<Extension>
-JavaCryptoCertificateVerifier::getCertificateRequestExtensions() const {
+Status JavaCryptoCertificateVerifier::getCertificateRequestExtensions(
+    std::vector<Extension>& ret,
+    Error& err) const {
   std::vector<Extension> exts;
   Extension ext;
-  Error err;
-  FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, authorities_), err);
+  FIZZ_RETURN_ON_ERROR(encodeExtension(ext, err, authorities_));
   exts.push_back(std::move(ext));
-  return exts;
+  ret = std::move(exts);
+  return Status::Success;
 }
 } // namespace fizz

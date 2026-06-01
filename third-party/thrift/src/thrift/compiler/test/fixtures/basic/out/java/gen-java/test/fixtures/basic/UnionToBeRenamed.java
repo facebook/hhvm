@@ -34,20 +34,20 @@ public final class UnionToBeRenamed implements com.facebook.thrift.payload.Thrif
     private static final TField RESERVED_FIELD_FIELD_DESC = new TField("reservedField", TType.I32, (short)1);
 
     static {
-      NAMES_TO_IDS.put("reservedField", 1);
-      THRIFT_NAMES_TO_IDS.put("reserved_field", 1);
-      FIELD_METADATA.put(1, RESERVED_FIELD_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/basic/UnionToBeRenamed"),
-        UnionToBeRenamed.class, UnionToBeRenamed::read0));
+        NAMES_TO_IDS.put("reservedField", 1);
+        THRIFT_NAMES_TO_IDS.put("reserved_field", 1);
+        FIELD_METADATA.put(1, RESERVED_FIELD_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("test.dev/fixtures/basic/UnionToBeRenamed"),
+            UnionToBeRenamed.class, UnionToBeRenamed::read0));
     }
 
     private java.lang.Object value;
     private short id;
 
     public enum TypeEnum {
-      __FBTHRIFT_EMPTY_UNION__,
-      RESERVED_FIELD,
+        __FBTHRIFT_EMPTY_UNION__,
+        RESERVED_FIELD,
     }
 
     public static UnionToBeRenamed from(int _id, java.lang.Object _field) {
@@ -60,7 +60,7 @@ public final class UnionToBeRenamed implements com.facebook.thrift.payload.Thrif
             throw new java.lang.IllegalArgumentException("unknown field " + _id);
         }
 
-        UnionToBeRenamed _u = new  UnionToBeRenamed();
+        UnionToBeRenamed _u = new UnionToBeRenamed();
 
         try {
             switch(_id) {
@@ -69,7 +69,7 @@ public final class UnionToBeRenamed implements com.facebook.thrift.payload.Thrif
                     _u.value = (int) _field;
                     return _u;
                 default:
-                throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
+                    throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
             }
         } catch (java.lang.Exception t) {
             throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
@@ -94,7 +94,6 @@ public final class UnionToBeRenamed implements com.facebook.thrift.payload.Thrif
         return res;
     }
 
-    
 
     @com.facebook.swift.codec.ThriftField(value=1, name="reserved_field", requiredness=Requiredness.NONE)
     public int getReservedField() {
@@ -114,14 +113,14 @@ public final class UnionToBeRenamed implements com.facebook.thrift.payload.Thrif
     }
 
     public TypeEnum getThriftUnionType() {
-      switch(this.id) {
-        case 0:
-          return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
-        case 1:
-          return TypeEnum.RESERVED_FIELD;
-        default:
-          throw new IllegalStateException("unreachable");
-      }
+        switch(this.id) {
+            case 0:
+                return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
+            case 1:
+                return TypeEnum.RESERVED_FIELD;
+            default:
+                throw new IllegalStateException("unreachable");
+        }
     }
 
     public String getThriftName() {
@@ -176,74 +175,74 @@ public final class UnionToBeRenamed implements com.facebook.thrift.payload.Thrif
 
     public interface Visitor<T> {
         default T visit(UnionToBeRenamed acceptor) {
-        return acceptor.accept(this);
+            return acceptor.accept(this);
         }
 
         T visitReservedField(int reservedField);
     }
 
     public void write0(TProtocol oprot) throws TException {
-      if (this.id != 0 && this.value == null ){
-        if(allowNullFieldValues) {
-          // Warning: this path will generate corrupt serialized data!
-          return;
-        } else {
-          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        if (this.id != 0 && this.value == null ){
+            if(allowNullFieldValues) {
+                // Warning: this path will generate corrupt serialized data!
+                return;
+            } else {
+                throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+            }
         }
-      }
-      oprot.writeStructBegin(STRUCT_DESC);
-      switch (this.id) {
-      case _RESERVED_FIELD: {
-        oprot.writeFieldBegin(RESERVED_FIELD_FIELD_DESC);
-        int _iter0 = (int)this.value;
+        oprot.writeStructBegin(STRUCT_DESC);
+        switch (this.id) {
+        case _RESERVED_FIELD: {
+            oprot.writeFieldBegin(RESERVED_FIELD_FIELD_DESC);
+            int _fbthriftVar0 = (int)this.value;
 
-        oprot.writeI32(_iter0);
-        oprot.writeFieldEnd();
-        break;
-      }
-      default:
-          // ignore unknown field
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+            break;
+        }
+        default:
+            // ignore unknown field
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
-    
     public static com.facebook.thrift.payload.Reader<UnionToBeRenamed> asReader() {
-      return UnionToBeRenamed::read0;
+        return UnionToBeRenamed::read0;
     }
 
     public static UnionToBeRenamed read0(TProtocol oprot) throws TException {
-      UnionToBeRenamed res = new UnionToBeRenamed();
-      res.value = null;
-      res.id = (short) 0;
-      oprot.readStructBegin(UnionToBeRenamed.NAMES_TO_IDS, UnionToBeRenamed.THRIFT_NAMES_TO_IDS, UnionToBeRenamed.FIELD_METADATA);
-      TField __field = oprot.readFieldBegin();
-      if (__field.type != TType.STOP) {
-          switch (__field.id) {
-          case _RESERVED_FIELD:
-            if (__field.type == RESERVED_FIELD_FIELD_DESC.type) {
-              int reservedField = oprot.readI32();
-              res.value = reservedField;
+        UnionToBeRenamed res = new UnionToBeRenamed();
+        res.value = null;
+        res.id = (short) 0;
+        oprot.readStructBegin(UnionToBeRenamed.NAMES_TO_IDS, UnionToBeRenamed.THRIFT_NAMES_TO_IDS, UnionToBeRenamed.FIELD_METADATA);
+        TField __field = oprot.readFieldBegin();
+        if (__field.type != TType.STOP) {
+            switch (__field.id) {
+            case _RESERVED_FIELD:
+                if (__field.type == RESERVED_FIELD_FIELD_DESC.type) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    res.value = _fbthriftVar0;
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
             }
-            break;
-          default:
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-        if (res.value != null) {
-          res.id = __field.id;
+            if (res.value != null) {
+                res.id = __field.id;
+            }
+            oprot.readFieldEnd();
+            TField __stopField = oprot.readFieldBegin(); // Consume the STOP byte
+            if (__stopField.type != TType.STOP) {
+                throw new TProtocolException(TProtocolException.INVALID_DATA, "Union 'UnionToBeRenamed' is missing a STOP byte");
+            }
         }
-        oprot.readFieldEnd();
-        TField __stopField = oprot.readFieldBegin(); // Consume the STOP byte
-        if (__stopField.type != TType.STOP) {
-          throw new TProtocolException(TProtocolException.INVALID_DATA, "Union 'UnionToBeRenamed' is missing a STOP byte");
-        }
-      }
-      oprot.readStructEnd();
-      return res;
+        oprot.readStructEnd();
+        return res;
     }
+
     public static UnionToBeRenamed defaultInstance() {
         return _DEFAULT;
     }
-
 }

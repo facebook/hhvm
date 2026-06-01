@@ -37,11 +37,11 @@ public final class Config implements com.facebook.thrift.payload.ThriftSerializa
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Config other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -67,6 +67,7 @@ public final class Config implements com.facebook.thrift.payload.ThriftSerializa
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -76,14 +77,13 @@ public final class Config implements com.facebook.thrift.payload.ThriftSerializa
     public static final int _PATH = 1;
     private static final TField PATH_FIELD_DESC = new TField("path", TType.STRING, (short)1);
     static {
-      NAMES_TO_IDS.put("path", 1);
-      THRIFT_NAMES_TO_IDS.put("path", 1);
-      FIELD_METADATA.put(1, PATH_FIELD_DESC);
-      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/Config"),
-        Config.class, Config::read0));
+        NAMES_TO_IDS.put("path", 1);
+        THRIFT_NAMES_TO_IDS.put("path", 1);
+        FIELD_METADATA.put(1, PATH_FIELD_DESC);
+        com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
+            new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/fixtures/adapter/Config"),
+            Config.class, Config::read0));
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="path", requiredness=Requiredness.NONE)
     public String getPath() { return path; }
@@ -115,52 +115,52 @@ public final class Config implements com.facebook.thrift.payload.ThriftSerializa
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(path);
-            return _hashCode;
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Config> asReader() {
       return Config::read0;
     }
 
     public static Config read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Config.NAMES_TO_IDS, Config.THRIFT_NAMES_TO_IDS, Config.FIELD_METADATA);
-      Config.Builder builder = new Config.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _PATH:
-          if (__field.type == TType.STRING) {
-            String path = oprot.readString();
-            builder.setPath(path);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(Config.NAMES_TO_IDS, Config.THRIFT_NAMES_TO_IDS, Config.FIELD_METADATA);
+        Config.Builder builder = new Config.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _PATH:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setPath(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      String _iter0 = this.path;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(PATH_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            String _fbthriftVar0 = this.path;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(PATH_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _ConfigLazy {

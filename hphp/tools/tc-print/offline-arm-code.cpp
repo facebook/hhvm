@@ -19,13 +19,15 @@
 #include "hphp/tools/tc-print/offline-code.h"
 #include "hphp/tools/tc-print/tc-print.h"
 
-#include "hphp/vixl/hphp-compat.h"
+#include "hphp/vixl/aarch64/macro-assembler-aarch64.h"
+#include "hphp/vixl/aarch64/disasm-aarch64.h"
+#include "hphp/vixl/aarch64/instructions-aarch64.h"
 
 #define MAX_INSTR_ASM_LEN 128
 
 namespace HPHP { namespace jit {
 
-using namespace vixl;
+using namespace vixl::aarch64;
 
 const char* OfflineCode::getArchNameArm() { return "A64"; }
 

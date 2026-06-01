@@ -67,11 +67,13 @@ type extended_reasons_config =
 type t = {
   po: ParserOptions.t;
   tco_saved_state: saved_state;
-  tco_experimental_features: SSet.t;
+  tco_legacy_experimental_features: SSet.t;
       (** Set of typechecker-only experimental features, in lowercase.
           NB, *not* the experimental features that are controlled by the
           file level <<__EnableUnstableFeatures('feature_name')>> attribute.
-          Those are in ParserOptions. *)
+          Those are in ParserOptions and tco_enabled_unstable_features.
+          DO NOT add new features here. Instead, introduce new feature-specific field and add to Config_keys,
+          OR use EnableUnstableFeatures as mentioned above. *)
   tco_migration_flags: SSet.t;
       (** Set of opt-in migration behavior flags, in lowercase. *)
   tco_num_local_workers: int option;
@@ -277,6 +279,8 @@ type t = {
   hh_distc_exponential_backoff_num_retries: int;
       (** Number of retries when uploading/download/executing with hh_distc *)
   recursive_case_types: bool;  (** Enable recursive case types *)
+  tco_enabled_unstable_features: SSet.t;
+      (** Set of unstable features enabled for the current file *)
   class_sub_classname: bool;  (** Whether class<T> <: classname<T> *)
   class_class_type: bool;  (** When true, C::class : class<C> *)
   needs_concrete: bool;
@@ -307,7 +311,7 @@ val set :
   ?po_disallow_toplevel_requires:bool ->
   ?tco_log_large_fanouts_threshold:int ->
   ?tco_log_inference_constraints:bool ->
-  ?tco_experimental_features:SSet.t ->
+  ?tco_legacy_experimental_features:SSet.t ->
   ?tco_migration_flags:SSet.t ->
   ?tco_num_local_workers:int ->
   ?tco_defer_class_declaration_threshold:int ->
@@ -401,6 +405,7 @@ val set :
   ?hh_distc_should_disable_trace_store:bool ->
   ?hh_distc_exponential_backoff_num_retries:int ->
   ?recursive_case_types:bool ->
+  ?tco_enabled_unstable_features:SSet.t ->
   ?class_sub_classname:bool ->
   ?class_class_type:bool ->
   ?needs_concrete:bool ->

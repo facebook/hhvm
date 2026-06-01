@@ -160,14 +160,14 @@ static void PrepareEnv(Array& env, Transport *transport) {
   if (Cfg::Jit::Enabled) {
     env.set(s_HHVM_JIT, 1);
   }
-  switch (arch::get()) {
-  case Arch::X64:
-    env.set(s_HHVM_ARCH, "x64");
-    break;
-  case Arch::ARM:
-    env.set(s_HHVM_ARCH, "arm");
-    break;
-  }
+  ARCH_MATCH(
+    [&](arch::X64) {
+      env.set(s_HHVM_ARCH, "x64");
+    },
+    [&](arch::ARM) {
+      env.set(s_HHVM_ARCH, "arm");
+    }
+  );
 
   if (!is_any_cli_mode()) {
     env.set(s_HPHP_SERVER, 1);

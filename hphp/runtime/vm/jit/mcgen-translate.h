@@ -57,6 +57,8 @@ bool pendingRetranslateAllScheduled();
  */
 bool retranslateAllComplete();
 
+bool liveMaxSecondsExpired();
+
 /*
  * Undo the effects of bumpTraceFunctions() (so that we don't trace
  * all the inlined functions we're because we're tracing the function

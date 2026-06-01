@@ -43,11 +43,11 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
     }
 
     public static Builder builder() {
-      return new Builder();
+        return new Builder();
     }
 
     public static Builder builder(Struct3 other) {
-      return new Builder(other);
+        return new Builder(other);
     }
 
     public static class Builder {
@@ -62,14 +62,14 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
 
         public String getA() { return a; }
 
-            @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.NONE)    public Builder setB(int b) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.NONE)    public Builder setB(int b) {
             this.b = b;
             return this;
         }
 
         public int getB() { return b; }
 
-            @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.NONE)    public Builder setC(test.fixtures.constants.Struct2 c) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.NONE)    public Builder setC(test.fixtures.constants.Struct2 c) {
             this.c = c;
             return this;
         }
@@ -93,6 +93,7 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
             return result;
         }
     }
+
     
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
@@ -101,34 +102,29 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
     private final String a;
     public static final int _A = 1;
     private static final TField A_FIELD_DESC = new TField("a", TType.STRING, (short)1);
-        private final int b;
+    private final int b;
     public static final int _B = 2;
     private static final TField B_FIELD_DESC = new TField("b", TType.I32, (short)2);
-        private final test.fixtures.constants.Struct2 c;
+    private final test.fixtures.constants.Struct2 c;
     public static final int _C = 3;
     private static final TField C_FIELD_DESC = new TField("c", TType.STRUCT, (short)3);
     static {
-      NAMES_TO_IDS.put("a", 1);
-      THRIFT_NAMES_TO_IDS.put("a", 1);
-      FIELD_METADATA.put(1, A_FIELD_DESC);
-      NAMES_TO_IDS.put("b", 2);
-      THRIFT_NAMES_TO_IDS.put("b", 2);
-      FIELD_METADATA.put(2, B_FIELD_DESC);
-      NAMES_TO_IDS.put("c", 3);
-      THRIFT_NAMES_TO_IDS.put("c", 3);
-      FIELD_METADATA.put(3, C_FIELD_DESC);
+        NAMES_TO_IDS.put("a", 1);
+        THRIFT_NAMES_TO_IDS.put("a", 1);
+        FIELD_METADATA.put(1, A_FIELD_DESC);
+        NAMES_TO_IDS.put("b", 2);
+        THRIFT_NAMES_TO_IDS.put("b", 2);
+        FIELD_METADATA.put(2, B_FIELD_DESC);
+        NAMES_TO_IDS.put("c", 3);
+        THRIFT_NAMES_TO_IDS.put("c", 3);
+        FIELD_METADATA.put(3, C_FIELD_DESC);
     }
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)
     public String getA() { return a; }
-
     
-
     @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.NONE)
     public int getB() { return b; }
-
-    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.NONE)
     public test.fixtures.constants.Struct2 getC() { return c; }
@@ -164,84 +160,86 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
     public int hashCode() {
         int _hashCode = 1;
         _hashCode = 31 * _hashCode + Objects.hashCode(a);
-            _hashCode = 31 * _hashCode + Integer.hashCode(b);
-            _hashCode = 31 * _hashCode + Objects.hashCode(c);
-            return _hashCode;
+        _hashCode = 31 * _hashCode + Integer.hashCode(b);
+        _hashCode = 31 * _hashCode + Objects.hashCode(c);
+        return _hashCode;
     }
 
-    
     public static com.facebook.thrift.payload.Reader<Struct3> asReader() {
       return Struct3::read0;
     }
 
     public static Struct3 read0(TProtocol oprot) throws TException {
-      TField __field;
-      oprot.readStructBegin(Struct3.NAMES_TO_IDS, Struct3.THRIFT_NAMES_TO_IDS, Struct3.FIELD_METADATA);
-      Struct3.Builder builder = new Struct3.Builder();
-      while (true) {
-        __field = oprot.readFieldBegin();
-        if (__field.type == TType.STOP) { break; }
-        switch (__field.id) {
-        case _A:
-          if (__field.type == TType.STRING) {
-            String a = oprot.readString();
-            builder.setA(a);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _B:
-          if (__field.type == TType.I32) {
-            int b = oprot.readI32();
-            builder.setB(b);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _C:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.constants.Struct2 c = test.fixtures.constants.Struct2.read0(oprot);
-            builder.setC(c);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        default:
-          TProtocolUtil.skip(oprot, __field.type);
-          break;
+        TField __field;
+        oprot.readStructBegin(Struct3.NAMES_TO_IDS, Struct3.THRIFT_NAMES_TO_IDS, Struct3.FIELD_METADATA);
+        Struct3.Builder builder = new Struct3.Builder();
+        while (true) {
+            __field = oprot.readFieldBegin();
+            if (__field.type == TType.STOP) { break; }
+            switch (__field.id) {
+            case _A:
+                if (__field.type == TType.STRING) {
+                    String _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readString();
+                    builder.setA(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _B:
+                if (__field.type == TType.I32) {
+                    int _fbthriftVar0;
+                    _fbthriftVar0 = oprot.readI32();
+                    builder.setB(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            case _C:
+                if (__field.type == TType.STRUCT) {
+                    test.fixtures.constants.Struct2 _fbthriftVar0;
+                    _fbthriftVar0 = test.fixtures.constants.Struct2.read0(oprot);
+                    builder.setC(_fbthriftVar0);
+                } else {
+                    TProtocolUtil.skip(oprot, __field.type);
+                }
+                break;
+            default:
+                TProtocolUtil.skip(oprot, __field.type);
+                break;
+            }
+            oprot.readFieldEnd();
         }
-        oprot.readFieldEnd();
-      }
-      oprot.readStructEnd();
-      return builder.build();
+        oprot.readStructEnd();
+        return builder.build();
     }
 
     public void write0(TProtocol oprot) throws TException {
-      oprot.writeStructBegin(STRUCT_DESC);
-      {
-      String _iter0 = this.a;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(A_FIELD_DESC);
-        oprot.writeString(_iter0);
-        oprot.writeFieldEnd();
-      }
-      }
-      {
-      int _iter0 = this.b;
-      oprot.writeFieldBegin(B_FIELD_DESC);
-      oprot.writeI32(_iter0);
-      oprot.writeFieldEnd();
-      }
-      {
-      test.fixtures.constants.Struct2 _iter0 = this.c;
-      if (_iter0 != null) {
-        oprot.writeFieldBegin(C_FIELD_DESC);
-        _iter0.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      }
-      oprot.writeFieldStop();
-      oprot.writeStructEnd();
+        oprot.writeStructBegin(STRUCT_DESC);
+        {
+            String _fbthriftVar0 = this.a;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(A_FIELD_DESC);
+                oprot.writeString(_fbthriftVar0);
+                oprot.writeFieldEnd();
+            }
+        }
+        {
+            int _fbthriftVar0 = this.b;
+            oprot.writeFieldBegin(B_FIELD_DESC);
+            oprot.writeI32(_fbthriftVar0);
+            oprot.writeFieldEnd();
+        }
+        {
+            test.fixtures.constants.Struct2 _fbthriftVar0 = this.c;
+            if (_fbthriftVar0 != null) {
+                oprot.writeFieldBegin(C_FIELD_DESC);
+                _fbthriftVar0.write0(oprot);
+                oprot.writeFieldEnd();
+            }
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
     }
 
     private static class _Struct3Lazy {

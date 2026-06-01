@@ -9,6 +9,7 @@
 #pragma once
 
 #include <folly/SocketAddress.h>
+#include <folly/coro/Baton.h>
 #include <folly/coro/Task.h>
 
 #include <proxygen/lib/dns/DNSResolver.h>
@@ -16,6 +17,33 @@
 #include <string>
 
 namespace proxygen::coro {
+
+/**
+ * Stack-allocated callback for bridging callback-based DNSResolver to
+ * coroutine suspension. Stores raw Answer objects so callers can extract
+ * addresses or populate caches as needed.
+ */
+class BatonResolutionCallback : public DNSResolver::ResolutionCallback {
+ public:
+  explicit BatonResolutionCallback(folly::coro::Baton& baton);
+
+  void resolutionSuccess(
+      std::vector<DNSResolver::Answer> ans) noexcept override;
+
+  void resolutionError(const folly::exception_wrapper& exp) noexcept override;
+
+  /**
+   * Extract SocketAddress entries from answers, sorted via RFC 6724
+   * (falling back to unsorted on sort failure). May return empty.
+   */
+  [[nodiscard]] std::vector<folly::SocketAddress> extractAddresses() const;
+
+  std::vector<DNSResolver::Answer> answers;
+  folly::exception_wrapper exception;
+
+ private:
+  folly::coro::Baton& baton_;
+};
 
 /**
  * Asynchronously reoslve a hostname to an IP address.

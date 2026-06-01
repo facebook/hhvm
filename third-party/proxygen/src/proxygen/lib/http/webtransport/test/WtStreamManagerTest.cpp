@@ -63,6 +63,9 @@ TEST(WtStreamManager, BasicSelfBidi) {
   WtStreamManager streamManager{
       detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
 
+  auto ids = streamManager.streamIds();
+  EXPECT_TRUE(ids.empty()); // no streams
+
   // 0x00 is the next expected bidi stream id for client
   EXPECT_TRUE(streamManager.canCreateBidi());
   auto bidiRes = streamManager.getOrCreateBidiHandle(0x00);
@@ -81,6 +84,9 @@ TEST(WtStreamManager, BasicSelfBidi) {
   bidiRes = streamManager.getOrCreateBidiHandle(0x04);
   EXPECT_EQ(bidiRes.readHandle, nullptr);
   EXPECT_EQ(bidiRes.writeHandle, nullptr);
+
+  ids = streamManager.streamIds();
+  EXPECT_EQ(ids.size(), 2); // two streams
 }
 
 TEST(WtStreamManager, BasicSelfUni) {
@@ -254,9 +260,15 @@ TEST(WtStreamManager, EnqueueIngressData) {
     EXPECT_TRUE(streamManager.enqueue(
         *one.readHandle, {folly::IOBuf::fromString(std::string{c}), false}));
   }
+  EXPECT_TRUE(streamManager.enqueue(*one.readHandle, {nullptr, true}));
+
   auto oneFut = one.readHandle->readStreamData();
-  EXPECT_TRUE(oneFut.isReady() && oneFut.value().data);
+  EXPECT_TRUE(oneFut.isReady() && oneFut.value().data && oneFut.value().fin);
   EXPECT_EQ(oneFut.value().data->toString(), kData);
+
+  // enqueue data after fin => err
+  EXPECT_EQ(streamManager.enqueue(*one.readHandle, {nullptr, true}),
+            WtStreamManager::Result::Fail);
 }
 
 TEST(WtStreamManager, EnqueueIngressDataRwnd) {
@@ -274,11 +286,11 @@ TEST(WtStreamManager, EnqueueIngressDataRwnd) {
 
   constexpr auto kBufLen = 65'535;
 
-  EXPECT_EQ(streamManager.bufferedBytes(*one.readHandle), 0);
+  EXPECT_EQ(streamManager.recvBytesAvail(*one.readHandle), kBufLen);
   // both conn & stream recv window exactly full, expect success
   EXPECT_TRUE(
       streamManager.enqueue(*one.readHandle, {makeBuf(kBufLen), false}));
-  EXPECT_EQ(streamManager.bufferedBytes(*one.readHandle), kBufLen);
+  EXPECT_EQ(streamManager.recvBytesAvail(*one.readHandle), 0);
   // enqueuing a additional byte in one will fail (stream recv window full)
   EXPECT_FALSE(
       streamManager.enqueue(*one.readHandle, {makeBuf(kBufLen), false}));
@@ -293,7 +305,7 @@ TEST(WtStreamManager, EnqueueIngressDataRwnd) {
   EXPECT_TRUE(oneFut.isReady()); // enqueue should fulfill promise
   EXPECT_EQ(oneFut.value().data->computeChainDataLength(), kBufLen);
   EXPECT_FALSE(oneFut.value().fin);
-  EXPECT_EQ(streamManager.bufferedBytes(*one.readHandle), 0);
+  EXPECT_EQ(streamManager.recvBytesAvail(*one.readHandle), kBufLen);
 }
 
 TEST(WtStreamManager, WriteEgressHandle) {
@@ -420,9 +432,15 @@ TEST(WtStreamManager, BidiHandleCancellation) {
 
   // StreamManager::onStopSending should request cancellation of egress handle
   auto ct = one.writeHandle->getCancelToken();
-  streamManager.onStopSending({one.writeHandle->getID(), 0x00});
+  // reset stream on cancellation
+  folly::CancellationCallback cancelCb{
+      ct, [eh = one.writeHandle]() {
+        CHECK(eh->exception() && eh->exception()->error == 0xface);
+        eh->resetStream(0); // reset stream
+      }};
+  streamManager.onStopSending({one.writeHandle->getID(), 0xface});
   EXPECT_TRUE(ct.isCancellationRequested());
-  // stream should be removed from queue after cancellation
+  // stream write handle is closed when reset by application
   EXPECT_EQ(streamManager.nextWritable(), nullptr);
   EXPECT_TRUE(priorityQueue->empty());
 
@@ -803,6 +821,8 @@ TEST(WtStreamManager, DrainWtSession) {
 
   // shutdown session
   streamManager.shutdown(CloseSession{});
+  // canCreate(Uni|Bidi) return false after ::shutdown
+  EXPECT_TRUE(!streamManager.canCreateBidi() && !streamManager.canCreateUni());
 
   // no streams can be opened after shutdown
   bidi = streamManager.createBidiHandle();

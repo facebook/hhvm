@@ -37,7 +37,9 @@ class OpenSSLCertificateVerifier : public CertificateVerifier {
   }
 
   // NOLINTNEXTLINE(modernize-use-nodiscard)
-  std::shared_ptr<const Cert> verify(
+  Status verify(
+      std::shared_ptr<const Cert>& ret,
+      Error& err,
       const std::vector<std::shared_ptr<const fizz::PeerCert>>& certs)
       const override;
 
@@ -46,7 +48,9 @@ class OpenSSLCertificateVerifier : public CertificateVerifier {
    * the certificate chain. Additional verification result can be extracted
    * from the returned store context.
    */
-  folly::ssl::X509StoreCtxUniquePtr verifyWithX509StoreCtx(
+  Status verifyWithX509StoreCtx(
+      folly::ssl::X509StoreCtxUniquePtr& ret,
+      Error& err,
       const std::vector<std::shared_ptr<const fizz::PeerCert>>& certs) const;
 
   void setCustomVerifyCallback(X509VerifyCallback cb) {
@@ -58,7 +62,9 @@ class OpenSSLCertificateVerifier : public CertificateVerifier {
     createAuthorities();
   }
 
-  std::vector<Extension> getCertificateRequestExtensions() const override;
+  Status getCertificateRequestExtensions(
+      std::vector<Extension>& ret,
+      Error& err) const override;
 
   static X509_STORE* getDefaultX509Store();
 
@@ -66,9 +72,11 @@ class OpenSSLCertificateVerifier : public CertificateVerifier {
       VerificationContext context,
       const std::string& caFile);
 
-  static std::unique_ptr<OpenSSLCertificateVerifier> createFromCAFiles(
+  static Status createFromCAFiles(
+      std::unique_ptr<OpenSSLCertificateVerifier>& ret,
+      Error& err,
       VerificationContext context,
-      const std::vector<std::string>& caFile);
+      const std::vector<std::string>& caFiles);
 
  private:
   void createAuthorities();

@@ -436,6 +436,28 @@ using get_field_tag = typename std::conditional_t<
 template <typename T, typename Id>
 using get_native_type = type::native_type<get_field_tag<T, Id>>;
 
+/// Gets the thrift field name (SIOF-safe), for example:
+///
+/// * op::get_field_name<MyStruct, field_id<7>>()
+///   // Returns the thrift field name associated with field 7 in MyStruct.
+///
+/// Prefer this over get_name_v to avoid static initialization order issues.
+template <typename T, typename Id>
+std::string_view get_field_name() {
+  return detail::pa::__fbthrift_get_field_name<T, get_ordinal<T, Id>>();
+}
+
+/// Gets the thrift class name (SIOF-safe), for example:
+///
+/// * op::get_class_name<MyStruct>() == "MyStruct"
+///
+/// Prefer this over get_class_name_v to avoid static initialization order
+/// issues.
+template <typename T>
+std::string_view get_class_name() {
+  return detail::pa::__fbthrift_get_class_name<T>();
+}
+
 FOLLY_PUSH_WARNING
 FOLLY_CLANG_DISABLE_WARNING("-Wglobal-constructors")
 
@@ -444,6 +466,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wglobal-constructors")
 /// * op::get_name_v<MyStruct, field_id<7>>
 ///   // Returns the thrift field name associated with field 7 in MyStruct.
 ///
+/// @deprecated Use get_field_name<T, Id>() instead to avoid SIOF.
 template <typename T, typename Id>
 inline const folly::StringPiece get_name_v =
     detail::pa::__fbthrift_get_field_name<T, get_ordinal<T, Id>>();
@@ -452,6 +475,7 @@ inline const folly::StringPiece get_name_v =
 ///
 /// * op::get_class_name_v<MyStruct> == "MyStruct"
 ///
+/// @deprecated Use get_class_name<T>() instead to avoid SIOF.
 template <typename T>
 inline const folly::StringPiece get_class_name_v =
     detail::pa::__fbthrift_get_class_name<T>();

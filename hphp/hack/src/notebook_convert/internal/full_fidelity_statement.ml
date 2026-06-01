@@ -179,7 +179,6 @@ let is_statement =
     | GenericTypeSpecifier _
     | NullableTypeSpecifier _
     | LikeTypeSpecifier _
-    | SoftTypeSpecifier _
     | AttributizedSpecifier _
     | ReifiedTypeArgument _
     | TypeArguments _

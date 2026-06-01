@@ -9,7 +9,7 @@
  */
 namespace HH {
   function asio_get_current_context_depth(): int;
-  function asio_get_running(): \HH\FIXME\MISSING_RETURN_TYPE;
+  function asio_get_running(): ResumableWaitHandle<mixed>;
 }
 namespace HH\Asio {
   function join<T>(Awaitable<T> $awaitable)[]: T;

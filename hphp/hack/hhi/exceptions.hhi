@@ -110,7 +110,7 @@ namespace {
     private function __clone(): void;
 
     final public static function getTraceOptions(
-    )[read_globals]: \HH\FIXME\MISSING_RETURN_TYPE;
+    )[read_globals]: int;
     final public static function setTraceOptions(
       HH\FIXME\MISSING_PARAM_TYPE $opts,
     )[globals]: \HH\FIXME\MISSING_RETURN_TYPE;

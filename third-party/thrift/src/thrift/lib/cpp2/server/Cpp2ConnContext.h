@@ -39,6 +39,7 @@
 #include <thrift/lib/cpp2/logging/ThriftConnectionLog.h>
 #include <thrift/lib/cpp2/server/DecoratorData.h>
 #include <thrift/lib/cpp2/server/DecoratorDataStorage.h>
+#include <thrift/lib/cpp2/server/RequestEncryptionState.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 #include <thrift/lib/cpp2/util/TypeErasedValue.h>
 #include <wangle/ssl/SSLUtil.h>
@@ -911,6 +912,20 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   size_t getWiredRequestBytes() const { return wiredRequestBytes_; }
 
   /**
+   * Set the per-request encryption state. Reflects the current encryption
+   * state for this request, including StopTLSv2-specific states that track
+   * whether plaintext records have been observed on the connection.
+   * Snapshotted at request dispatch time.
+   */
+  void setRequestEncryptionState(RequestEncryptionState state) {
+    requestEncryptionState_ = state;
+  }
+
+  RequestEncryptionState getRequestEncryptionState() const {
+    return requestEncryptionState_;
+  }
+
+  /**
    * Gets the FunctionNode for this request's method from the schema.
    * Returns nullptr if schema information is not available.
    */
@@ -978,6 +993,8 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   DecoratorDataStorage decoratorDataStorage_;
   detail::RequestInternalFieldsT internalFields_;
   size_t wiredRequestBytes_{0};
+  RequestEncryptionState requestEncryptionState_{
+      RequestEncryptionState::Plaintext};
   const syntax_graph::FunctionNode* functionNode_{nullptr};
 
   friend class detail::Cpp2RequestContextUnsafeAPI;

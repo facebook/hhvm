@@ -415,6 +415,7 @@ add_library(
   server/StandardConcurrencyController.cpp
   server/ThreadManagerLoggingWrapper.cpp
   server/RequestDebugLog.cpp
+  server/RequestEncryptionState.cpp
   server/RequestPileBase.cpp
   server/ReactiveToggle.cpp
   server/RequestsRegistry.cpp

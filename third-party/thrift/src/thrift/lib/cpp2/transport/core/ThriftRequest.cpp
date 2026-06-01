@@ -288,6 +288,9 @@ ThriftRequestCore::LogRequestSampleCallback::buildRequestLoggingContext(
     requestLoggingContext.securityProtocol = connContext->getSecurityProtocol();
   }
 
+  requestLoggingContext.requestEncryptionState =
+      reqContext->getRequestEncryptionState();
+
   return requestLoggingContext;
 }
 

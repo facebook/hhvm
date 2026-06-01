@@ -26,6 +26,7 @@
 #include <folly/io/async/AsyncTransport.h>
 #include <thrift/lib/cpp/server/TServerObserver.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
+#include <thrift/lib/cpp2/server/RequestEncryptionState.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift {
@@ -183,6 +184,10 @@ struct RequestLoggingContext {
   bool overloadProtectionCPUCCEnabled{false};
 
   std::string securityProtocol;
+
+  // Per-request encryption state for this request
+  RequestEncryptionState requestEncryptionState{
+      RequestEncryptionState::Plaintext};
 };
 
 class RequestEventHandler : public LoggingEventHandler {

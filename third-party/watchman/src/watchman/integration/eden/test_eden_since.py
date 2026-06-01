@@ -38,6 +38,7 @@ def populate(
     repo.commit("initial commit.")
 
 
+# pyrefly: ignore [invalid-inheritance]
 class TestEdenSince(WatchmanEdenTestCase.WatchmanEdenTestCase):
     def test_eden_lazy_eval(self) -> None:
         root = self.makeEdenMount(populate)

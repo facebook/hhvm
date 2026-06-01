@@ -249,12 +249,15 @@ class WindowsSocketHandle:
         return self.fd
 
     def settimeout(self, timeout: int) -> None:
+        # pyrefly: ignore [bad-assignment]
         timeout = wintypes.DWORD(0 if timeout is None else int(timeout * 1000))
         retcode = WinSetIntSockOpt(
             self.fd,
             SOL_SOCKET,
             SO_RCVTIMEO,
+            # pyrefly: ignore [bad-argument-type]
             ctypes.byref(timeout),
+            # pyrefly: ignore [bad-argument-type]
             ctypes.sizeof(timeout),
         )
         self._checkReturnCode(retcode)
@@ -262,7 +265,9 @@ class WindowsSocketHandle:
             self.fd,
             SOL_SOCKET,
             SO_SNDTIMEO,
+            # pyrefly: ignore [bad-argument-type]
             ctypes.byref(timeout),
+            # pyrefly: ignore [bad-argument-type]
             ctypes.sizeof(timeout),
         )
         self._checkReturnCode(retcode)

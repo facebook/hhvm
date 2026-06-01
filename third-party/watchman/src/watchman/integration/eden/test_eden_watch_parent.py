@@ -12,6 +12,7 @@ from eden.fs.service.eden.thrift_types import GetStatInfoParams, STATS_MOUNTS_ST
 from watchman.integration.lib import WatchmanEdenTestCase
 
 
+# pyrefly: ignore [invalid-inheritance]
 class TestEdenWatchParent(WatchmanEdenTestCase.WatchmanEdenTestCase):
     def test_eden_watch_parent(self) -> None:
         def populate(repo):

@@ -29,6 +29,7 @@ def populate(repo) -> None:
     repo.commit("initial commit.")
 
 
+# pyrefly: ignore [invalid-inheritance]
 class TestEdenPathGenerator(WatchmanEdenTestCase.WatchmanEdenTestCase):
     def test_defer_mtime(self) -> None:
         root = self.makeEdenMount(populate)

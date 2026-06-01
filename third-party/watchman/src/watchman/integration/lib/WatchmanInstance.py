@@ -230,6 +230,7 @@ class _Instance:
                 t, val, tb = sys.exc_info()
                 time.sleep(0.1)
             finally:
+                # pyrefly: ignore [unbound-name]
                 client.close()
 
         if self.pid is None:
@@ -264,22 +265,26 @@ class _Instance:
         return os.environ.get("WATCHMAN_SUSRES", "susres.exe")
 
     def suspend(self) -> None:
+        # pyrefly: ignore [missing-attribute, unsupported-operation]
         if self.proc.poll() or self.pid <= 1:
             raise Exception("watchman process isn't running")
         if os.name == "nt":
             subprocess.check_call([self._susresBinary(), "suspend", str(self.pid)])
         else:
+            # pyrefly: ignore [bad-argument-type]
             os.kill(self.pid, signal.SIGSTOP)
 
         if not self._waitForSuspend(True, 5):
             raise Exception("watchman process didn't stop in 5 seconds")
 
     def resume(self) -> None:
+        # pyrefly: ignore [missing-attribute, unsupported-operation]
         if self.proc.poll() or self.pid <= 1:
             raise Exception("watchman process isn't running")
         if os.name == "nt":
             subprocess.check_call([self._susresBinary(), "resume", str(self.pid)])
         else:
+            # pyrefly: ignore [bad-argument-type]
             os.kill(self.pid, signal.SIGCONT)
 
         if not self._waitForSuspend(False, 5):

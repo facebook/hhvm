@@ -36,6 +36,7 @@ def populate(
     repo.commit("initial commit.")
 
 
+# pyrefly: ignore [invalid-inheritance]
 class TestEdenGlobUpperBound(WatchmanEdenTestCase.WatchmanEdenTestCase):
     def setUp(self):
         super().setUp()

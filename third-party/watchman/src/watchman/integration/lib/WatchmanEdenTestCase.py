@@ -58,6 +58,7 @@ else:
         eden: edenclient.EdenFS
 
         def setUp(self) -> None:
+            # pyrefly: ignore [invalid-argument]
             super(WatchmanEdenTestCase, self).setUp()
 
             # The test EdenFS instance.

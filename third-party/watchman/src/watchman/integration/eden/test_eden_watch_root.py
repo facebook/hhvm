@@ -13,6 +13,7 @@ import pywatchman
 from watchman.integration.lib import WatchmanEdenTestCase
 
 
+# pyrefly: ignore [invalid-inheritance]
 class TestEdenWatchRoot(WatchmanEdenTestCase.WatchmanEdenTestCase):
     def test_eden_watch_root(self) -> None:
         def populate(repo):

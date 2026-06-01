@@ -13,6 +13,7 @@ import os
 from watchman.integration.lib import WatchmanEdenTestCase
 
 
+# pyrefly: ignore [invalid-inheritance]
 class TestEdenSha1(WatchmanEdenTestCase.WatchmanEdenTestCase):
     def write_file_and_hash(self, filename, content) -> str:
         content = content.encode("utf-8")

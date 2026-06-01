@@ -17,6 +17,7 @@ def populate(repo):
     repo.commit("initial commit.")
 
 
+# pyrefly: ignore [invalid-inheritance]
 class TestEdenUnmount(WatchmanEdenTestCase.WatchmanEdenTestCase):
     def test_eden_unmount(self) -> None:
         root = self.makeEdenMount(populate)

@@ -135,6 +135,7 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
 
         # and again, but this time passing metadata
         self.watchmanCommand("state-enter", root, {"name": "foo", "metadata": "meta!"})
+        # pyrefly: ignore [unsupported-operation]
         begin = self.waitForSub("defer", root)[0]
         self.assertEqual("foo", begin["state-enter"])
         self.assertEqual("meta!", begin["metadata"])
@@ -149,7 +150,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
             {"synced": ["defer"], "no_sync_needed": [], "dropped": []}, flush
         )
         sub_data = self.getSubscription("defer", root)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(1, len(sub_data))
+        # pyrefly: ignore [unsupported-operation]
         self.assertFileListsEqual(["in-foo-2"], sub_data[0]["files"])
 
         self.touchRelative(root, "in-foo-3")
@@ -161,6 +164,7 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
             "state-leave", root, {"name": "foo", "metadata": "leavemeta"}
         )
 
+        # pyrefly: ignore [unsupported-operation]
         end = self.waitForSub(
             "defer",
             root,
@@ -187,6 +191,7 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         self.watchmanCommand("state-enter", root, "foo")
         subResult = self.waitForSub("drop", root)
         print(subResult)
+        # pyrefly: ignore [unsupported-operation]
         begin = subResult[0]
         self.assertEqual("foo", begin["state-enter"])
 
@@ -247,6 +252,7 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
             },
         )
 
+        # pyrefly: ignore [unsupported-operation]
         dat = self.waitForSub("defer", root)[0]
         self.assertEqual(True, dat["is_fresh_instance"])
         self.assertEqual([{"name": "foo", "exists": True}], dat["files"])
@@ -262,9 +268,13 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
             {"synced": ["defer"], "no_sync_needed": [], "dropped": []}, flush
         )
         sub_data = self.getSubscription("defer", root)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(1, len(sub_data))
         self.assertFileListsEqual(
-            [".hg/wlock"], [d["name"] for d in sub_data[0]["files"]]
+            # pyrefly: ignore [unsupported-operation]
+            [".hg/wlock"],
+            # pyrefly: ignore [unsupported-operation]
+            [d["name"] for d in sub_data[0]["files"]],
         )
 
         self.touchRelative(root, "in-foo")
@@ -296,6 +306,7 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
             {"fields": ["name", "exists"], "defer_vcs": False},
         )
 
+        # pyrefly: ignore [unsupported-operation]
         dat = self.waitForSub("nodefer", root)[0]
         self.assertEqual(True, dat["is_fresh_instance"])
         self.assertEqual([{"name": ".hg", "exists": True}], dat["files"])
@@ -329,7 +340,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
             self.watchmanCommand("subscribe", root, sub_name, {"fields": ["name"]})
             # Drain the initial messages
             dat = self.waitForSub(sub_name, root, remove=True)
+            # pyrefly: ignore [bad-argument-type]
             self.assertEqual(len(dat), 1)
+            # pyrefly: ignore [unsupported-operation]
             dat = dat[0]
             self.assertFileListsEqual(dat["files"], ["lemon"])
 
@@ -338,7 +351,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         for n in range(32):
             # If the cancellation notice doesn't come through this will timeout.
             dat = self.waitForSub("sub%d" % n, root)
+            # pyrefly: ignore [bad-argument-type]
             self.assertEqual(len(dat), 1)
+            # pyrefly: ignore [unsupported-operation]
             dat = dat[0]
             self.assertTrue(dat["canceled"])
             self.assertTrue(dat["unilateral"])
@@ -360,11 +375,13 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         )
 
         # prove initial results come through
+        # pyrefly: ignore [unsupported-operation]
         dat = self.waitForSub("myname", root=root)[0]
         self.assertEqual(True, dat["is_fresh_instance"])
         self.assertFileListsEqual(dat["files"], ["a", "a/lemon", "b"])
 
         # and that relative_root adapts the path name
+        # pyrefly: ignore [unsupported-operation]
         dat = self.waitForSub("relative", root=root)[0]
         self.assertEqual(True, dat["is_fresh_instance"])
         self.assertFileListsEqual(dat["files"], ["lemon"])
@@ -377,6 +394,7 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
             accept=lambda x: self.findSubscriptionContainingFile(x, "a/lemon"),
         )
         self.assertNotEqual(None, dat)
+        # pyrefly: ignore [unsupported-operation]
         self.assertEqual(False, dat[0]["is_fresh_instance"])
 
         dat = self.waitForSub(
@@ -385,6 +403,7 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
             accept=lambda x: self.findSubscriptionContainingFile(x, "lemon"),
         )
         self.assertNotEqual(None, dat)
+        # pyrefly: ignore [unsupported-operation]
         self.assertEqual(False, dat[0]["is_fresh_instance"])
 
         # Trigger a recrawl and ensure that the subscription isn't lost
@@ -403,10 +422,12 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
 
         # Ensure that we observed the recrawl warning
         warn = None
+        # pyrefly: ignore [not-iterable]
         for item in dat:
             if "warning" in item:
                 warn = item["warning"]
                 break
+        # pyrefly: ignore [bad-specialization]
         self.assertRegex(warn, r"Recrawled this watch")
 
     # TODO: this test is very flaky on Windows
@@ -528,7 +549,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         sub2_data = self.getSubscription("sub2", root)
 
         for sub_name, sub_data in [("sub1", sub1_data), ("sub2", sub2_data)]:
+            # pyrefly: ignore [bad-argument-type]
             self.assertEqual(1, len(sub_data))
+            # pyrefly: ignore [unsupported-operation]
             data = sub_data[0].copy()
             # we'll verify these below
             del data["files"]
@@ -547,7 +570,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
                 data,
             )
 
+        # pyrefly: ignore [unsupported-operation]
         self.assertFileListsEqual(["a/d.txt", "a/e.dat", "c"], sub1_data[0]["files"])
+        # pyrefly: ignore [unsupported-operation]
         self.assertFileListsEqual(["a/d.txt"], sub2_data[0]["files"])
 
         # touch another file, make sure the updates come through again
@@ -567,17 +592,23 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         sub2_data2 = self.getSubscription("sub2", root)
         sub3_data2 = self.getSubscription("sub3", root)
 
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(1, len(sub1_data2))
         # no updates to sub2, so we expect nothing
         self.assertIs(None, sub2_data2)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(1, len(sub3_data2))
 
         self.assertEqual(
+            # pyrefly: ignore [unsupported-operation]
             sub1_data[0]["clock"],
+            # pyrefly: ignore [unsupported-operation]
             sub1_data2[0]["since"],
             'for sub1, previous "clock" should be current "since"',
         )
+        # pyrefly: ignore [unsupported-operation]
         self.assertFileListsEqual(["a/f.dat"], sub1_data2[0]["files"])
+        # pyrefly: ignore [unsupported-operation]
         self.assertFileListsEqual(["a/e.dat", "a/f.dat"], sub3_data2[0]["files"])
 
         # now resume the subscriptions and make sure future updates (and only
@@ -588,9 +619,12 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         )
 
         self.touchRelative(root, "newfile.txt")
+        # pyrefly: ignore [unsupported-operation]
         new_sub1 = self.waitForSub("sub1", root=root)[0]
+        # pyrefly: ignore [unsupported-operation]
         new_sub2 = self.waitForSub("sub2", root=root)[0]
 
+        # pyrefly: ignore [unsupported-operation]
         self.assertEqual(sub1_data2[0]["clock"], new_sub1["since"])
         # for sub2 the clock is different because we've actually forced an
         # evaluation in between in the second flush-subscriptions call, so we
@@ -695,6 +729,7 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         )
 
         # prove initial results come through
+        # pyrefly: ignore [unsupported-operation]
         dat = self.waitForSub("myname", root=root)[0]
         self.assertEqual(True, dat["is_fresh_instance"])
         self.assertFileListsEqual(dat["files"], ["a", "a/lemon", "b", unicode_filename])
@@ -717,10 +752,12 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
 
         # Ensure that we observed the recrawl warning
         warn = None
+        # pyrefly: ignore [not-iterable]
         for item in dat:
             if "warning" in item:
                 warn = item["warning"]
                 break
+        # pyrefly: ignore [bad-specialization]
         self.assertRegex(warn, r"Recrawled this watch")
 
     def test_unique_name_error(self) -> None:
@@ -735,7 +772,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         self.watchmanCommand("subscribe", root, "my_sub", {"fields": ["name"]})
         # Drain the initial messages
         dat = self.waitForSub("my_sub", root, remove=True)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(dat), 1)
+        # pyrefly: ignore [unsupported-operation]
         dat = dat[0]
         self.assertFileListsEqual(dat["files"], ["lemon", ".watchmanconfig"])
 
@@ -752,7 +791,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         # Ensure the initial subscription is in force
         self.touchRelative(root, "banana")
         dat = self.waitForSub("my_sub", root, remove=True)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(dat), 1)
+        # pyrefly: ignore [unsupported-operation]
         dat = dat[0]
         self.assertFileListsEqual(dat["files"], ["banana"])
 
@@ -774,7 +815,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         )
         # Drain the initial messages
         dat = self.waitForSub("my_sub", root, remove=True)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(dat), 1)
+        # pyrefly: ignore [unsupported-operation]
         dat = dat[0]
         self.assertFileListsEqual(dat["files"], ["lemon"])
         # Unsubscribe
@@ -789,7 +832,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         )
         # Ensure the later subscription is in force
         dat = self.waitForSub("my_sub", root, remove=True)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(dat), 1)
+        # pyrefly: ignore [unsupported-operation]
         dat = dat[0]
         self.assertFileListsEqual(dat["files"], ["banana"])
 
@@ -811,7 +856,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         )
         # Drain the initial messages
         dat = self.waitForSub("my_sub", root, remove=True)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(dat), 1)
+        # pyrefly: ignore [unsupported-operation]
         dat = dat[0]
         self.assertFileListsEqual(dat["files"], ["lemon"])
         # Unsubscribe
@@ -829,7 +876,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
 
         # Ensure the later subscription is in force
         dat = self.waitForSub("my_sub", root, remove=True)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(dat), 1)
+        # pyrefly: ignore [unsupported-operation]
         dat = dat[0]
         self.assertFileListsEqual(dat["files"], ["banana"])
 
@@ -853,7 +902,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
             {"fields": ["name"], "expression": ["name", "lemon"]},
         )
         dat = self.waitForSub("my_sub", root, remove=True, client=client1)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(dat), 1)
+        # pyrefly: ignore [unsupported-operation]
         dat = dat[0]
         self.assertFileListsEqual(dat["files"], ["lemon"])
 
@@ -866,7 +917,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
             {"fields": ["name"], "expression": ["name", "banana"]},
         )
         dat = self.waitForSub("my_sub", root, remove=True, client=client2)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(dat), 1)
+        # pyrefly: ignore [unsupported-operation]
         dat = dat[0]
         self.assertFileListsEqual(dat["files"], ["banana"])
 
@@ -875,12 +928,16 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         self.touchRelative(root, "banana")
 
         dat = self.waitForSub("my_sub", root, remove=True, client=client1)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(dat), 1)
+        # pyrefly: ignore [unsupported-operation]
         dat = dat[0]
         self.assertFileListsEqual(dat["files"], ["lemon"])
 
         dat = self.waitForSub("my_sub", root, remove=True, client=client2)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(dat), 1)
+        # pyrefly: ignore [unsupported-operation]
         dat = dat[0]
         self.assertFileListsEqual(dat["files"], ["banana"])
 
@@ -892,7 +949,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         self.touchRelative(root, "banana")
 
         dat = self.waitForSub("my_sub", root, remove=True, client=client2)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(dat), 1)
+        # pyrefly: ignore [unsupported-operation]
         dat = dat[0]
         self.assertFileListsEqual(dat["files"], ["banana"])
 
@@ -910,7 +969,9 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
         self.watchmanCommand("subscribe", root, "my_sub", {"fields": ["name"]})
         # Drain the initial messages
         dat = self.waitForSub("my_sub", root, remove=True)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(dat), 1)
+        # pyrefly: ignore [unsupported-operation]
         dat = dat[0]
         self.assertFileListsEqual(dat["files"], ["lemon", ".watchmanconfig"])
 

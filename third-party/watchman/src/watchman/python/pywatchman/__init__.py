@@ -21,6 +21,7 @@ from . import capabilities, encoding
 # Sometimes it's really hard to get Python extensions to compile,
 # so fall back to a pure Python implementation.
 try:
+    # pyrefly: ignore [missing-module-attribute]
     from . import bser
 
     # Demandimport causes modules to be loaded lazily. Force the load now
@@ -308,6 +309,7 @@ class SocketTransport(Transport):
         except socket.timeout:
             raise SocketTimeout("timed out waiting for response")
 
+    # pyrefly: ignore [bad-override-param-name]
     def write(self, data):
         try:
             log("write %r", data)
@@ -561,6 +563,7 @@ class WindowsNamedPipeTransport(Transport):
         self._iobuf = buf[returned_size:]
         return buf[:returned_size]
 
+    # pyrefly: ignore [bad-override-param-name]
     def write(self, data):
         olap = OVERLAPPED()
         olap.hEvent = self._waitable
@@ -670,6 +673,7 @@ class CLIProcessTransport(Transport):
             raise WatchmanError("EOF on CLI process transport")
         return res
 
+    # pyrefly: ignore [bad-override-param-name]
     def write(self, data):
         if self.closed:
             self.close()

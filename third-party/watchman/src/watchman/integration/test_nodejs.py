@@ -78,9 +78,11 @@ class NodeTestCase(WatchmanTestCase.TempDirPerTestMixin, unittest.TestCase):
         env["WATCHMAN_SOCK"] = (
             WatchmanInstance.getSharedInstance().getSockPath().legacy_sockpath()
         )
+        # pyrefly: ignore [unsupported-operation]
         env["TMPDIR"] = self.tempdir
 
         # build the node module with yarn
+        # pyrefly: ignore [no-matching-overload]
         node_dir = os.path.join(env["TMPDIR"], "fb-watchman")
         shutil.copytree(os.path.join(WATCHMAN_SRC_DIR, "node"), node_dir)
 
@@ -89,9 +91,12 @@ class NodeTestCase(WatchmanTestCase.TempDirPerTestMixin, unittest.TestCase):
             install_args.append("--offline")
 
         bser_dir = os.path.join(node_dir, "bser")
+        # pyrefly: ignore [bad-argument-type]
         subprocess.check_call(install_args, cwd=bser_dir, env=env)
 
+        # pyrefly: ignore [unsupported-operation]
         env["TMP"] = env["TMPDIR"]
+        # pyrefly: ignore [unsupported-operation]
         env["TEMP"] = env["TMPDIR"]
         env["IN_PYTHON_HARNESS"] = "1"
         env["NODE_PATH"] = "%s:%s" % (node_dir, env["TMPDIR"])
@@ -116,6 +121,7 @@ class NodeTestCase(WatchmanTestCase.TempDirPerTestMixin, unittest.TestCase):
                 % (status, stdout.decode("utf-8"), stderr.decode("utf-8"))
             )
             return
+        # pyrefly: ignore [missing-attribute]
         self.assertTrue(True, self.getCommandArgs())
 
     def _getTempDirName(self):

@@ -16,6 +16,7 @@ def possible_cookie(name):
     return ".watchman-cookie-" in name
 
 
+# pyrefly: ignore [invalid-inheritance]
 class TestEdenSubscribe(WatchmanEdenTestCase.WatchmanEdenTestCase):
     def requiresPersistentSession(self) -> bool:
         return True

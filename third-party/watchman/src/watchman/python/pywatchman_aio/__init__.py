@@ -103,6 +103,7 @@ class AsyncUnixSocketTransport(AsyncTransport):
         self.reader = reader
         self.writer = writer
 
+    # pyrefly: ignore [bad-override-param-name]
     async def write(self, data):
         self.writer.write(data)
         await self.writer.drain()

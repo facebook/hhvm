@@ -13,6 +13,7 @@ from os import fsencode, path
 from watchman.integration.lib import WatchmanEdenTestCase
 
 
+# pyrefly: ignore [invalid-inheritance]
 class TestEdenJournal(WatchmanEdenTestCase.WatchmanEdenTestCase):
     def test_eden_journal(self) -> None:
         def populate(repo):

@@ -9,6 +9,7 @@ from eden.integration.lib import hgrepo
 from watchman.integration.lib import WatchmanEdenTestCase, WatchmanInstance
 
 
+# pyrefly: ignore [invalid-inheritance]
 class TestEdenShutdown(WatchmanEdenTestCase.WatchmanEdenTestCase):
     def test_shutdown_and_restart(self) -> None:
         def populate(repo: hgrepo.HgRepository) -> None:

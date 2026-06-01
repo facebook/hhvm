@@ -179,6 +179,7 @@ class WatchmanTestCase(TempDirPerTestMixin, unittest.TestCase):
         parallel = "sp"[int(self.parallelCrawl)]
         return "%s.%s.%s.%s" % (self.id(), self.transport, self.encoding, parallel)
 
+    # pyrefly: ignore [bad-override]
     def run(self, result):
         if result is None:
             raise Exception("MUST be a runtests.py:Result instance")

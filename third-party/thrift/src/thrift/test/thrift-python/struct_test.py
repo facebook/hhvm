@@ -37,7 +37,6 @@ from thrift.python.mutable_types import (
     to_thrift_set,
 )
 from thrift.python.types import (
-    isset_DEPRECATED as immutable_isset,
     Struct as ImmutableStruct,
     StructMeta as ImmutableStructMeta,
     StructOrUnion as ImmutableStructOrUnion,
@@ -418,12 +417,6 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         self.assertEqual(typing.get_type_hints(TestStructImmutable), {})
 
     def test_serialization_round_trip(self) -> None:
-        s = TestStructAllThriftPrimitiveTypesImmutable()
-
-        # Default initialized fields set their isset flags to `False`
-        for field, _ in TestStructAllThriftPrimitiveTypesImmutable:
-            self.assertFalse(immutable_isset(s)[field])
-
         s = TestStructAllThriftPrimitiveTypesImmutable(
             unqualified_string="Hello world!",
             optional_string="Hello optional!",
@@ -442,11 +435,6 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
             unqualified_float=2.0,
             optional_float=1.0,
         )
-
-        # All the fields are initialized above, so all isset flags should be
-        # set to `True`.
-        for field, _ in TestStructAllThriftPrimitiveTypesImmutable:
-            self.assertTrue(immutable_isset(s)[field])
 
         _assert_thrift_serialization_round_trip(self, immutable_serializer, s)
         _pickle_round_trip(self, s)

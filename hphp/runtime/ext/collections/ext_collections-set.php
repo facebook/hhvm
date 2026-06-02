@@ -837,6 +837,13 @@ final class ImmSet<T as arraykey> implements \ConstSet<T> {
   <<__Native>>
   public static function fromKeysOf(mixed $container)[]: ImmSet<T>;
 
+  /** Returns a ImmSet built from the values from the specified array.
+   * @param mixed $arr
+   * @return object
+   */
+  <<__Native>>
+  public static function fromArray(mixed $arr): ImmSet<arraykey>;
+
   /** Returns a ImmSet built from the values from the specified arrays.
    * @return object
    */

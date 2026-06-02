@@ -2674,9 +2674,6 @@ struct StringExtension final : Extension {
     HHVM_FE(similar_text);
     HHVM_FE(soundex);
     HHVM_FE(metaphone);
-    HHVM_FE(HH_str_number_coercible);
-    HHVM_FE(HH_str_to_numeric);
-    HHVM_FE(HH_str_bitwise_xor);
 
     HHVM_RC_INT(ENT_COMPAT, k_ENT_HTML_QUOTE_DOUBLE);
     HHVM_RC_INT(ENT_NOQUOTES, k_ENT_HTML_QUOTE_NONE);

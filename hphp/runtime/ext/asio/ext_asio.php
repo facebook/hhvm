@@ -210,7 +210,6 @@ final class PriorityBridgeWaitHandle<T> extends WaitableWaitHandle<T> {
   <<__Native("NoRecording")>>
   public static function create(Awaitable<T> $child)[]: \HH\PriorityBridgeWaitHandle<T>;
 
-
   /** Bring the child into the context of the PBWH, and then maintain the
    * monotonicity between the PBWH and the child (i.e. child priority >= PBWH).
    */

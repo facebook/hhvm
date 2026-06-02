@@ -30,11 +30,6 @@ namespace {
 StaticString s_priorityBridge("<priority_bridge>");
 }
 
-void HHVM_STATIC_METHOD(PriorityBridgeWaitHandle, setOnCreateCallback,
-                        const Variant &callback) {
-  AsioSession::Get()->setOnPriorityBridgeCreate(callback);
-}
-
 Object HHVM_STATIC_METHOD(PriorityBridgeWaitHandle, create,
                           const Object& childObj) {
   if (!childObj->instanceof(c_Awaitable::classof())) {
@@ -121,8 +116,6 @@ void HHVM_METHOD(PriorityBridgeWaitHandle, prioritize) {
 void AsioExtension::registerNativePriorityBridgeWaitHandle() {
   HHVM_STATIC_MALIAS(HH\\PriorityBridgeWaitHandle, create,
                      PriorityBridgeWaitHandle, create);
-  HHVM_STATIC_MALIAS(HH\\PriorityBridgeWaitHandle, setOnCreateCallback,
-                     PriorityBridgeWaitHandle, setOnCreateCallback);
   HHVM_MALIAS(HH\\PriorityBridgeWaitHandle, prioritize,
               PriorityBridgeWaitHandle, prioritize);
 

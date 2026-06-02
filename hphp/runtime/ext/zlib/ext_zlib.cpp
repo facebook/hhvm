@@ -270,12 +270,6 @@ Variant HHVM_FUNCTION(gzdecode, const String& data, int64_t limit) {
   return hhvm_zlib_decode(data, limit, k_ZLIB_ENCODING_GZIP);
 }
 
-/////////////////////////////////////////////////////////////////////////////
-
-String HHVM_FUNCTION(zlib_get_coding_type) {
-  throw_not_supported(__func__, "no use");
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // stream functions
 
@@ -625,7 +619,6 @@ struct ZlibExtension final : Extension {
 
     HHVM_FE(readgzfile);
     HHVM_FE(gzfile);
-    HHVM_FE(zlib_get_coding_type);
     HHVM_FE(gzopen);
     HHVM_FE(gzclose);
     HHVM_FE(gzread);

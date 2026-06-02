@@ -362,15 +362,6 @@ int64_t HHVM_FUNCTION(lmdb_mdb_reader_check, const Array& env) {
   return dead;
 }
 
-// int mdb_stat(MDB_txn *txn, MDB_dbi dbi, MDB_stat *stat);
-Array HHVM_FUNCTION(lmdb_mdb_stat, const Array& txn, const Array& dbi) {
-  auto* txn_ptr = getTransaction(txn);
-
-  MDB_stat stat;
-  THROW_ON_ERROR(mdb_stat(txn_ptr, getDbi(dbi), &stat));
-  return mdbStatToArray(stat);
-}
-
 namespace {
 // The string used by the return value must
 // outlive the return value.
@@ -644,7 +635,6 @@ struct LmdbExtension final : HPHP::Extension {
     HHVM_NAMED_FE(HH\\lmdb\\mdb_txn_abort, HHVM_FN(lmdb_mdb_txn_abort));
     HHVM_NAMED_FE(HH\\lmdb\\mdb_dbi_open, HHVM_FN(lmdb_mdb_dbi_open));
     HHVM_NAMED_FE(HH\\lmdb\\mdb_reader_check, HHVM_FN(lmdb_mdb_reader_check));
-    HHVM_NAMED_FE(HH\\lmdb\\mdb_stat, HHVM_FN(lmdb_mdb_stat));
     HHVM_NAMED_FE(HH\\lmdb\\mdb_get, HHVM_FN(lmdb_mdb_get));
     HHVM_NAMED_FE(HH\\lmdb\\mdb_get_raw, HHVM_FN(lmdb_mdb_get_raw));
     HHVM_NAMED_FE(HH\\lmdb\\mdb_put, HHVM_FN(lmdb_mdb_put));

@@ -1235,27 +1235,20 @@ void HHVM_FUNCTION(clearstatcache, bool /*clear_realpath_cache*/ /* = false */,
   // we are not having a cache for file stats, so do nothing here
 }
 
-Variant HHVM_FUNCTION(readlink_internal,
-                      const String& path,
-                      bool warning_compliance) {
+Variant HHVM_FUNCTION(readlink,
+                      const String& path) {
+  CHECK_PATH(path, 1);
+
   char buff[PATH_MAX];
   int ret = readlink(File::TranslatePath(path).data(), buff, PATH_MAX-1);
   if (ret < 0) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
                     folly::errnoStr(errno).c_str());
-    if (warning_compliance) {
-      raise_warning("readlink(): No such file or directory %s",path.c_str());
-    }
+    raise_warning("readlink(): No such file or directory %s",path.c_str());
     return false;
   }
   buff[ret] = '\0';
   return String(buff, ret, CopyString);
-}
-
-Variant HHVM_FUNCTION(readlink,
-                      const String& path) {
-  CHECK_PATH(path, 1);
-  return HHVM_FN(readlink_internal)(path, true);
 }
 
 Variant HHVM_FUNCTION(realpath,
@@ -2238,7 +2231,6 @@ void StandardExtension::registerNativeFile() {
   HHVM_FE(stat);
   HHVM_FE(lstat);
   HHVM_FE(clearstatcache);
-  HHVM_FE(readlink_internal);
   HHVM_FE(readlink);
   HHVM_FE(realpath);
   HHVM_FE(pathinfo);

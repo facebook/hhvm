@@ -102,5 +102,3 @@ function zlib_decode(
 )[]: mixed; // string or false
 <<__PHPStdLib>>
 function zlib_encode(string $data, int $encoding, int $level = -1)[]: mixed;
-<<__PHPStdLib>>
-function zlib_get_coding_type(): string;

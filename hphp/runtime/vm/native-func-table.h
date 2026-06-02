@@ -26,6 +26,14 @@ struct FuncTable {
   NativeFunctionInfo get(const StringData* name) const;
   void dump() const;
   bool empty() const { return m_infos.empty(); }
+
+  template<typename F>
+  void forEachEntry(F&& f) const {
+    for (auto const& e : m_infos) {
+      f(e.first, e.second);
+    }
+  }
+
  private:
   // This is intentionally case sensitive despite classes and
   // functions being case insensitive. Binding native impls to HNI

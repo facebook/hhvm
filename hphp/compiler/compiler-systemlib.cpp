@@ -25,6 +25,8 @@
 
 #include "hphp/runtime/ext/extension-registry.h"
 
+#include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
@@ -45,6 +47,8 @@
 
 #include <filesystem>
 #include <iostream>
+#include <set>
+#include <string>
 
 using namespace boost::program_options;
 
@@ -152,7 +156,27 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   return 0;
 }
 
-bool compile_systemlib(const std::filesystem::path& path, std::string output_dir, const Extension* extension) {
+void collectNativeFuncNames(const UnitEmitter& ue,
+                            std::set<std::string>& seen) {
+  for (auto const& func : ue.fevec()) {
+    if (!func->isNative) continue;
+    seen.insert(func->name->toCppString());
+  }
+  for (auto const pce : ue.preclasses()) {
+    for (auto const method : pce->methods()) {
+      if (!method->isNative) continue;
+      auto key = pce->name()->toCppString() +
+                 (method->attrs & AttrStatic ? "::" : "->") +
+                 method->name->toCppString();
+      seen.insert(std::move(key));
+    }
+  }
+}
+
+bool compile_systemlib(const std::filesystem::path& path,
+                       std::string output_dir,
+                       const Extension* extension,
+                       std::set<std::string>& seenNativeFuncs) {
   std::string content;
   boost::filesystem::load_string_file(path.string(), content);
 
@@ -173,6 +197,8 @@ bool compile_systemlib(const std::filesystem::path& path, std::string output_dir
                   fname.c_str(), ue->m_fatalMsg.data());
     return false;
   }
+
+  collectNativeFuncNames(*ue, seenNativeFuncs);
 
   UnitEmitterSerdeWrapper uew = std::move(ue);
 
@@ -229,6 +255,7 @@ bool process(CompilerOptions &po) {
   }
 
   for (auto extension : ExtensionRegistry::getExtensions()) {
+    std::set<std::string> seenNativeFuncs;
     for (const auto& file : extension->hackFiles()) {
       auto ext_file = "ext_" + file;
       if (!files.contains(ext_file)) {
@@ -236,10 +263,25 @@ bool process(CompilerOptions &po) {
           "Error while compiling stdlib: %s not found in input files - did you add an extension without any hack files? If so, override hackFiles to return an empty vector.", ext_file.c_str());
       }
       auto path = files.at(ext_file);
-      if (!compile_systemlib(path.string(), po.outputDir, extension)) {
+      if (!compile_systemlib(path.string(), po.outputDir, extension,
+                             seenNativeFuncs)) {
         return false;
       }
     }
+
+    bool ok = true;
+    extension->nativeFuncs().forEachEntry(
+      [&](const StringData* name, const Native::NativeFunctionInfo&) {
+        if (!seenNativeFuncs.contains(name->toCppString())) {
+          Logger::Error(
+            "Native function %s in extension %s has no corresponding "
+            "<<__Native>> declaration in any systemlib file",
+            name->data(), extension->getName());
+          ok = false;
+        }
+      }
+    );
+    if (!ok) return false;
   }
 
   return true;

@@ -1077,4 +1077,7 @@ PyObject* unionTupleFromValue(int64_t type_key, PyObject* value);
 
 void logGetLocallySetFieldsCalledOnDeserializedStruct(const char* structName);
 
+void logUnionFromValueTypeMismatch(
+    const char* valueRepr, const char* valueType, const char* unionName);
+
 } // namespace apache::thrift::python

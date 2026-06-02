@@ -2116,4 +2116,12 @@ void logGetLocallySetFieldsCalledOnDeserializedStruct(const char* structName) {
          "fields.";
 }
 
+void logUnionFromValueTypeMismatch(
+    const char* valueRepr, const char* valueType, const char* unionName) {
+  LOG(ERROR) << "Value " << valueRepr << " of type " << valueType
+             << " does not match any field of union " << unionName
+             << ". This will become a TypeError in the future."
+                " Please address this ASAP.";
+}
+
 } // namespace apache::thrift::python

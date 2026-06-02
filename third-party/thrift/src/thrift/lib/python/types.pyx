@@ -1839,6 +1839,11 @@ cdef class Union(StructOrUnion):
                 break
         else:
             val_type = type(value)
+            logUnionFromValueTypeMismatch(
+                repr(value).encode("utf-8"),
+                f"{val_type.__module__}.{val_type.__qualname__}".encode("utf-8"),
+                cls.__name__.encode("utf-8"),
+            )
             warnings.warn(
                 f"Value {value!r} of type {val_type.__module__}.{val_type.__qualname__} "
                 f"does not match any field of union {cls.__name__}. "

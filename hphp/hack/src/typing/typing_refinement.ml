@@ -759,7 +759,7 @@ and split_ty_by_shape
       if has_extra_required_field then
         (env, TyPartition.mk_right ~env ~predicate ty)
       else
-        (* For fields in predicate but not in ty: must be optional else RIGHT *)
+        (* Does the predicate require a field not in the type? *)
         let missing_required_field =
           TShapeMap.exists
             (fun key { sfp_optional; _ } ->
@@ -767,7 +767,8 @@ and split_ty_by_shape
             sp_fields
         in
 
-        if missing_required_field then
+        if missing_required_field && Typing_defs.is_nothing s_unknown_value then
+          (* Missing a required field and the type is closed -> RIGHT *)
           (env, TyPartition.mk_right ~env ~predicate ty)
         else
           (* Split each field that exists in both ty and predicate *)
@@ -810,6 +811,14 @@ and split_ty_by_shape
 
           if has_incompatible_field then
             (env, TyPartition.mk_right ~env ~predicate ty)
+          else if
+            TShapeMap.exists
+              (fun key _ -> not (TShapeMap.mem key s_fields))
+              sp_fields
+            && not (Typing_defs.is_nothing s_unknown_value)
+          then
+            (* predicate specifies a field not in the type and the type is open *)
+            (env, TyPartition.mk_span ~env ~predicate ty)
           else
             (* Check if all fields are fully left *)
             let all_fields_fully_left =
@@ -821,12 +830,28 @@ and split_ty_by_shape
                   List.is_empty field_span && List.is_empty field_right)
             in
 
-            (* For left, we also need to check openness constraints *)
+            (* For left, the predicate must be open or the type must be closed *)
             let openness_satisfies_left =
               sp_allows_unknown_fields || Typing_defs.is_nothing s_unknown_value
             in
 
-            if all_fields_fully_left && openness_satisfies_left then
+            (* For left, for every shared field: predicate's must be optional or the ty's must be required *)
+            let optionality_satisfied_left =
+              TShapeMap.for_all
+                (fun key { sfp_optional; _ } ->
+                  sfp_optional
+                  ||
+                  match TShapeMap.find_opt key s_fields with
+                  | Some { sft_optional; _ } -> not sft_optional
+                  | None -> true)
+                sp_fields
+            in
+
+            if
+              optionality_satisfied_left
+              && all_fields_fully_left
+              && openness_satisfies_left
+            then
               (env, TyPartition.mk_left ~env ~predicate ty)
             else
               (* Cannot conclude fully left or fully right, fall back to span *)

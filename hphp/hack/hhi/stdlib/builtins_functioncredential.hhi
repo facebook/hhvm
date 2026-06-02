@@ -22,6 +22,8 @@ final class FunctionCredential {
 
   public readonly function getFilename()[]: string;
 
+  public readonly function getMethodOrFunctionName()[]: string;
+
   /**
    * Packs this FunctionCredential into a signed string representation.
    * Intention is to pass FunctionCredential to another thread in the same

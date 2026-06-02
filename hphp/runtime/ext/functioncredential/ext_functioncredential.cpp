@@ -133,6 +133,17 @@ static StringRet HHVM_METHOD(FunctionCredential, getFilename) {
   return String{makeStaticString(data->func()->filename())};
 }
 
+static StringRet HHVM_METHOD(FunctionCredential, getMethodOrFunctionName) {
+  auto data = FunctionCredential::fromObject(this_);
+  auto func = data->func();
+  auto cls = func->cls();
+  if (cls) {
+    return String(
+        fmt::format("{}::{}", cls->name()->data(), func->name()->data()));
+  }
+  return String{makeStaticString(func->name())};
+}
+
 static StringRet HHVM_METHOD(FunctionCredential, pack) {
   auto data = FunctionCredential::fromObject(this_);
   auto func = data->func();
@@ -362,6 +373,7 @@ struct FunctionCredentialExtension final : Extension {
     HHVM_ME(FunctionCredential, getClassName);
     HHVM_ME(FunctionCredential, getFunctionName);
     HHVM_ME(FunctionCredential, getFilename);
+    HHVM_ME(FunctionCredential, getMethodOrFunctionName);
     HHVM_ME(FunctionCredential, pack);
     HHVM_STATIC_ME(FunctionCredential, unpack);
 

@@ -19,6 +19,9 @@ final class FunctionCredential {
   public final readonly function getFilename()[]: string;
 
   <<__Native>>
+  public final readonly function getMethodOrFunctionName()[]: string;
+
+  <<__Native>>
   public final readonly function pack()[]: string;
 
   <<__Native>>

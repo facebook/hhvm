@@ -1,0 +1,6 @@
+PASS: top-level function = 'top_level_func'
+PASS: memoized top-level includes $memoize_impl = 'memoized_func$memoize_impl'
+PASS: instance method = 'TestClass::instance_method'
+PASS: static method = 'TestClass::static_method'
+PASS: memoized instance method includes $memoize_impl = 'TestClass::memoized_method$memoize_impl'
+PASS: memoized static method includes $memoize_impl = 'TestClass::memoized_static_method$memoize_impl'

@@ -167,13 +167,13 @@ namespace HH {
   abstract class Awaitable<+T> {
     public static function setOnIOWaitEnterCallback(
       ?(function(): void) $callback,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
     public static function setOnIOWaitExitCallback(
       ?(function(?WaitableWaitHandle<mixed>): void) $callback,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
     public static function setOnJoinCallback(
       ?(function(WaitableWaitHandle<mixed>): void) $callback,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
   }
 
   <<
@@ -187,19 +187,19 @@ namespace HH {
         AsyncFunctionWaitHandle<mixed>,
         ?WaitableWaitHandle<mixed>,
       ): void) $callback,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
     public static function setOnAwaitCallback(
       ?(function(
         AsyncFunctionWaitHandle<mixed>,
         WaitableWaitHandle<mixed>,
       ): void) $callback,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
     public static function setOnSuccessCallback(
       ?(function(AsyncFunctionWaitHandle<mixed>, mixed): void) $callback,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
     public static function setOnFailCallback(
       ?(function(AsyncFunctionWaitHandle<mixed>, \Exception): void) $callback,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
   }
 
   <<__SupportDynamicType>>
@@ -234,7 +234,7 @@ namespace HH {
         ConditionWaitHandle<T>,
         WaitableWaitHandle<void>,
       ): void) $callback,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
     public function succeed(T $result): void {}
     public function fail(\Exception $exception): void {}
   }
@@ -262,10 +262,10 @@ namespace HH {
     public static function create(int $usecs): SleepWaitHandle {}
     public static function setOnCreateCallback(
       ?(function(SleepWaitHandle): void) $callback,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
     public static function setOnSuccessCallback(
       ?(function(SleepWaitHandle): void) $callback,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
   }
 
   <<__SupportDynamicType>>
@@ -273,16 +273,16 @@ namespace HH {
     extends WaitableWaitHandle<T> {
     public static function setOnCreateCallback(
       ?(function(ExternalThreadEventWaitHandle<mixed>): void) $callback,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
     public static function setOnSuccessCallback(
       ?(function(ExternalThreadEventWaitHandle<mixed>, mixed): void) $callback,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
     public static function setOnFailCallback(
       ?(function(
         ExternalThreadEventWaitHandle<mixed>,
         \Exception,
       ): void) $callback,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
   }
 
   function is_class(mixed $arg)[]: bool;

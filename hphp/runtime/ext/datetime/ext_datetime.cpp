@@ -1012,7 +1012,7 @@ static struct DateTimeExtension final : Extension {
   }
 
   std::vector<std::string> hackFiles() const override {
-    return {"datetime.php"};
+    return {"ext_datetime.php"};
   }
 
   void threadInit() override {

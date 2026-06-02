@@ -27,19 +27,19 @@ struct StandardExtension final : Extension {
 
   std::vector<std::string> hackFiles() const override {
     return {
-      "std_classobj.php",
-      "std_errorfunc.php",
-      "std_file.php",
-      "std_function.php",
-      "std_gc.php",
-      "std_math.php",
-      "std_misc.php",
-      "std_network.php",
-      "std_options.php",
-      "std_output.php",
-      "std_process.php",
-      "std_string.php",
-      "std_variable.php",
+      "ext_std_classobj.php",
+      "ext_std_errorfunc.php",
+      "ext_std_file.php",
+      "ext_std_function.php",
+      "ext_std_gc.php",
+      "ext_std_math.php",
+      "ext_std_misc.php",
+      "ext_std_network.php",
+      "ext_std_options.php",
+      "ext_std_output.php",
+      "ext_std_process.php",
+      "ext_std_string.php",
+      "ext_std_variable.php",
     };
   }
 

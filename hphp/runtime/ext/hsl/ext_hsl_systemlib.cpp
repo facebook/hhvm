@@ -30,7 +30,7 @@ namespace {
 
     std::vector<std::string> hackFiles() const override {
       if (s_enabled) {
-        return {"hsl_systemlib.hack"};
+        return {"ext_hsl_systemlib.hack"};
       }
       return {};
     }

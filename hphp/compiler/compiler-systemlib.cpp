@@ -257,12 +257,11 @@ bool process(CompilerOptions &po) {
   for (auto extension : ExtensionRegistry::getExtensions()) {
     std::set<std::string> seenNativeFuncs;
     for (const auto& file : extension->hackFiles()) {
-      auto ext_file = "ext_" + file;
-      if (!files.contains(ext_file)) {
+      if (!files.contains(file)) {
         Logger::Error(
-          "Error while compiling stdlib: %s not found in input files - did you add an extension without any hack files? If so, override hackFiles to return an empty vector.", ext_file.c_str());
+          "Error while compiling stdlib: %s not found in input files - did you add an extension without any hack files? If so, override hackFiles to return an empty vector.", file.c_str());
       }
-      auto path = files.at(ext_file);
+      auto path = files.at(file);
       if (!compile_systemlib(path.string(), po.outputDir, extension,
                              seenNativeFuncs)) {
         return false;

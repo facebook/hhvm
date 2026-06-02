@@ -80,7 +80,7 @@ static char** build_envp(const Array& envs, req::vector<String> &senvs) {
 static struct ProcessExtension final : Extension {
   ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
   std::vector<std::string> hackFiles() const override {
-    return {"process.php"};
+    return {"ext_process.php"};
   }
   void moduleRegisterNative() override;
 } s_process_extension;

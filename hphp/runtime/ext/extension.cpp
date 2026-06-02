@@ -52,7 +52,7 @@ bool Extension::IsSystemlibPath(const std::string& name) {
  * If {name} is not passed, then {m_name} is assumed.
  */
 void Extension::loadSystemlib(const std::string& name) {
-  auto const moduleName = std::string("/:ext_"+name);
+  auto const moduleName = std::string("/:"+name);
   auto const unit = get_systemlib(moduleName, this);
   always_assert_flog(unit, "No unit created for systemlib `{}'", moduleName);
   if (auto const info = unit->getFatalInfo()) {
@@ -118,7 +118,7 @@ const std::vector<StringData*>& Extension::getExtensionFunctions() const {
 }
 
 std::vector<std::string> Extension::hackFiles() const {
-  return {toLower(std::string(m_name) + ".php")};
+  return {"ext_" + toLower(std::string(m_name) + ".php")};
 }
 
 void Extension::loadEmitters() {
@@ -135,7 +135,7 @@ void Extension::loadDecls() {
 }
 
 void Extension::loadDeclsFrom(const std::string& name) {
-  auto serialized_decls = get_embedded_section("/:ext_" + name + ".decls");
+  auto serialized_decls = get_embedded_section("/:" + name + ".decls");
   always_assert(serialized_decls.size() > 0);
   Native::registerBuiltinSymbols(serialized_decls);
 }

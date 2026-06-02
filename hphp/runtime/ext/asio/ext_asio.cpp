@@ -172,7 +172,7 @@ void AsioExtension::moduleRegisterNative() {
 }
 
 std::vector<std::string> AsioExtension::hackFiles() const {
-  return {"async-generator.php", "asio.php"};
+  return {"ext_async-generator.php", "ext_asio.php"};
 }
 
 void AsioExtension::requestInit() { requestInitSingletons(); }

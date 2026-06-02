@@ -78,10 +78,10 @@ struct CollectionsExtension : Extension {
 
   std::vector<std::string> hackFiles() const override {
     return {
-      "collections-pair.php",
-      "collections-vector.php",
-      "collections-map.php",
-      "collections-set.php",
+      "ext_collections-pair.php",
+      "ext_collections-vector.php",
+      "ext_collections-map.php",
+      "ext_collections-set.php",
     };
   }
 

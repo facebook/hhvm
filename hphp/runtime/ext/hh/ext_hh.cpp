@@ -1726,7 +1726,7 @@ static struct HHExtension final : Extension {
   }
 
   std::vector<std::string> hackFiles() const override {
-    return {"hh.php", "hh_functions.php"}; // ext_hh.php ext_hh_functions.php
+    return {"ext_hh.php", "ext_hh_functions.php"};
   }
 } s_hh_extension;
 

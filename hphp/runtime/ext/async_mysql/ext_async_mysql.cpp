@@ -2409,9 +2409,9 @@ static struct AsyncMysqlExtension final : Extension {
 
   std::vector<std::string> hackFiles() const override {
     return {
-      "mysqlrow.php",
-      "async_mysql_exceptions.php",
-      "async_mysql.php",
+      "ext_mysqlrow.php",
+      "ext_async_mysql_exceptions.php",
+      "ext_async_mysql.php",
     };
   }
 

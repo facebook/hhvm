@@ -41,7 +41,7 @@ class RecursiveIteratorIterator<Tv> implements OuterIterator<Tv> {
   public function callHasChildren(): HH\FIXME\MISSING_RETURN_TYPE;
   public function endChildren(): HH\FIXME\MISSING_RETURN_TYPE;
   public function endIteration(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getDepth(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getDepth(): int;
   public function getMaxDepth(): HH\FIXME\MISSING_RETURN_TYPE;
   public function getSubIterator(
     HH\FIXME\MISSING_PARAM_TYPE $level = null,

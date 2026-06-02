@@ -20,10 +20,6 @@ import module.thrift_types
 MyEnum = module.thrift_types.MyEnum
 
 class MyStructNestedAnnotation(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        name: bool
-        pass
-
     name: _typing.Final[str] = ...
 
     def __init__(
@@ -50,11 +46,6 @@ class MyStructNestedAnnotation(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructNestedAnnotation": ...   # type: ignore
 
 class SecretStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        id: bool
-        password: bool
-        pass
-
     id: _typing.Final[int] = ...
     password: _typing.Final[str] = ...
 

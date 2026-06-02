@@ -19,13 +19,6 @@ import module.thrift_types
 
 
 class Foo(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        myInteger: bool
-        myString: bool
-        myBools: bool
-        myNumbers: bool
-        pass
-
     myInteger: _typing.Final[int] = ...
     myString: _typing.Final[_typing.Optional[str]] = ...
     myBools: _typing.Final[_typing.Sequence[bool]] = ...

@@ -19,10 +19,6 @@ import module.thrift_types
 
 
 class Fiery(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        message: bool
-        pass
-
     message: _typing.Final[str] = ...
 
     def __init__(
@@ -43,10 +39,6 @@ class Fiery(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Fiery": ...   # type: ignore
 
 class Serious(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        not_sonnet: bool
-        pass
-
     not_sonnet: _typing.Final[_typing.Optional[str]] = ...
 
     def __init__(
@@ -67,11 +59,6 @@ class Serious(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Serious": ...   # type: ignore
 
 class ComplexFieldNames(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        error_message: bool
-        internal_error_message: bool
-        pass
-
     error_message: _typing.Final[str] = ...
     internal_error_message: _typing.Final[str] = ...
 
@@ -94,11 +81,6 @@ class ComplexFieldNames(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.ComplexFieldNames": ...   # type: ignore
 
 class CustomFieldNames(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        error_message: bool
-        internal_error_message: bool
-        pass
-
     error_message: _typing.Final[str] = ...
     internal_error_message: _typing.Final[str] = ...
 
@@ -121,11 +103,6 @@ class CustomFieldNames(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.CustomFieldNames": ...   # type: ignore
 
 class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        message: bool
-        error_code: bool
-        pass
-
     message: _typing.Final[str] = ...
     error_code: _typing.Final[int] = ...
 
@@ -148,11 +125,6 @@ class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError, _typing.
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithPrimitiveField": ...   # type: ignore
 
 class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        message_field: bool
-        error_code: bool
-        pass
-
     message_field: _typing.Final[str] = ...
     error_code: _typing.Final[int] = ...
 
@@ -175,9 +147,6 @@ class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedError, _t
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithStructuredAnnotation": ...   # type: ignore
 
 class Banal(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 

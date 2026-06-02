@@ -20,10 +20,6 @@ import module.thrift_types
 
 
 class Fields(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        injected_field: bool
-        pass
-
     injected_field: _typing.Final[str] = ...
 
     def __init__(
@@ -50,10 +46,6 @@ class Fields(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Fields": ...   # type: ignore
 
 class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        injected_field: bool
-        pass
-
     injected_field: _typing.Final[str] = ...
 
     def __init__(
@@ -80,11 +72,6 @@ class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToEmptyStruct": ...   # type: ignore
 
 class FieldsInjectedToStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        string_field: bool
-        injected_field: bool
-        pass
-
     string_field: _typing.Final[str] = ...
     injected_field: _typing.Final[str] = ...
 
@@ -114,13 +101,6 @@ class FieldsInjectedToStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToStruct": ...   # type: ignore
 
 class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        string_field: bool
-        injected_field: bool
-        injected_structured_annotation_field: bool
-        injected_unstructured_annotation_field: bool
-        pass
-
     string_field: _typing.Final[str] = ...
     injected_field: _typing.Final[str] = ...
     injected_structured_annotation_field: _typing.Final[_typing.Optional[str]] = ...
@@ -156,11 +136,6 @@ class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct, _typing.Hashable
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedWithIncludedStruct": ...   # type: ignore
 
 class FieldsInjectedWithFieldsWithIncludedStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        string_field: bool
-        injected_field: bool
-        pass
-
     string_field: _typing.Final[str] = ...
     injected_field: _typing.Final[_injected_field_types.InjectedField] = ...
 

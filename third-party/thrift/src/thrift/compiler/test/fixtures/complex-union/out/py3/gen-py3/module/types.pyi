@@ -21,14 +21,6 @@ import module.thrift_types
 _ComplexUnionValueType = _typing.Union[None, int, str, _typing.Sequence[int], _typing.Sequence[str], _typing.Mapping[int, str], str]
 
 class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        intValue: bool
-        stringValue: bool
-        intListValue: bool
-        stringListValue: bool
-        typedefValue: bool
-        pass
-
     intValue: _typing.Final[int] = ...
     stringValue: _typing.Final[str] = ...
     intListValue: _typing.Final[_typing.Sequence[int]] = ...
@@ -76,11 +68,6 @@ class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):
 _ListUnionValueType = _typing.Union[None, _typing.Sequence[int], _typing.Sequence[str]]
 
 class ListUnion(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        intListValue: bool
-        stringListValue: bool
-        pass
-
     intListValue: _typing.Final[_typing.Sequence[int]] = ...
     stringListValue: _typing.Final[_typing.Sequence[str]] = ...
 
@@ -116,11 +103,6 @@ class ListUnion(thrift.py3.types.Union, _typing.Hashable):
 _DataUnionValueType = _typing.Union[None, bytes, str]
 
 class DataUnion(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        binaryData: bool
-        stringData: bool
-        pass
-
     binaryData: _typing.Final[bytes] = ...
     stringData: _typing.Final[str] = ...
 
@@ -154,12 +136,6 @@ class DataUnion(thrift.py3.types.Union, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.DataUnion": ...   # type: ignore
 
 class Val(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        strVal: bool
-        intVal: bool
-        typedefValue: bool
-        pass
-
     strVal: _typing.Final[str] = ...
     intVal: _typing.Final[int] = ...
     typedefValue: _typing.Final[_typing.Mapping[int, str]] = ...
@@ -194,11 +170,6 @@ class Val(thrift.py3.types.Struct, _typing.Hashable):
 _ValUnionValueType = _typing.Union[None, Val, Val]
 
 class ValUnion(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        v1: bool
-        v2: bool
-        pass
-
     v1: _typing.Final[Val] = ...
     v2: _typing.Final[Val] = ...
 
@@ -234,11 +205,6 @@ class ValUnion(thrift.py3.types.Union, _typing.Hashable):
 _VirtualComplexUnionValueType = _typing.Union[None, str, str]
 
 class VirtualComplexUnion(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        thingOne: bool
-        thingTwo: bool
-        pass
-
     thingOne: _typing.Final[str] = ...
     thingTwo: _typing.Final[str] = ...
 
@@ -272,10 +238,6 @@ class VirtualComplexUnion(thrift.py3.types.Union, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.VirtualComplexUnion": ...   # type: ignore
 
 class NonCopyableStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        num: bool
-        pass
-
     num: _typing.Final[int] = ...
 
     def __init__(
@@ -304,10 +266,6 @@ class NonCopyableStruct(thrift.py3.types.Struct, _typing.Hashable):
 _NonCopyableUnionValueType = _typing.Union[None, NonCopyableStruct]
 
 class NonCopyableUnion(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        s: bool
-        pass
-
     s: _typing.Final[NonCopyableStruct] = ...
 
     def __init__(

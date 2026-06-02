@@ -19,10 +19,6 @@ import test.namespace_from_package.module.thrift_types
 
 
 class Foo(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        MyInt: bool
-        pass
-
     MyInt: _typing.Final[int] = ...
 
     def __init__(

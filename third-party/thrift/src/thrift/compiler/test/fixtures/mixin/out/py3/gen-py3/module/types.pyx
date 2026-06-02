@@ -15,7 +15,6 @@ from libcpp.utility cimport move as cmove
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
-from thrift.py3.types import _IsSet as _fbthrift_IsSet
 from thrift.py3.types cimport make_unique
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
@@ -85,9 +84,9 @@ cdef class Mixin1(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("Mixin1", {
+        return {
           "field1": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field1_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMixin1] cpp_obj):
@@ -198,10 +197,10 @@ cdef class Mixin2(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("Mixin2", {
+        return {
           "m1": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).m1_ref().has_value(),
           "field2": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field2_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMixin2] cpp_obj):
@@ -323,9 +322,9 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("Mixin3Base", {
+        return {
           "field3": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field3_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMixin3Base] cpp_obj):
@@ -436,11 +435,11 @@ cdef class Foo(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("Foo", {
+        return {
           "field4": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field4_ref().has_value(),
           "m2": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).m2_ref().has_value(),
           "m3": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).m3_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFoo] cpp_obj):

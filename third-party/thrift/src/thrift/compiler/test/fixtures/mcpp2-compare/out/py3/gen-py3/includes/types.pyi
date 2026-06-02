@@ -20,10 +20,6 @@ import includes.thrift_types
 AnEnum = includes.thrift_types.AnEnum
 
 class AStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        FieldA: bool
-        pass
-
     FieldA: _typing.Final[int] = ...
 
     def __init__(
@@ -50,9 +46,6 @@ class AStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "includes.ttypes.AStruct": ...   # type: ignore
 
 class AStructB(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     FieldA: _typing.Final[_typing.Optional[AStruct]] = ...
 
     def __init__(

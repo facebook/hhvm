@@ -19,10 +19,6 @@ import module.thrift_types
 
 
 class Mixin1(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field1: bool
-        pass
-
     field1: _typing.Final[str] = ...
 
     def __init__(
@@ -49,11 +45,6 @@ class Mixin1(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Mixin1": ...   # type: ignore
 
 class Mixin2(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        m1: bool
-        field2: bool
-        pass
-
     m1: _typing.Final[Mixin1] = ...
     field2: _typing.Final[_typing.Optional[str]] = ...
 
@@ -83,10 +74,6 @@ class Mixin2(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Mixin2": ...   # type: ignore
 
 class Mixin3Base(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field3: bool
-        pass
-
     field3: _typing.Final[str] = ...
 
     def __init__(
@@ -113,12 +100,6 @@ class Mixin3Base(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Mixin3Base": ...   # type: ignore
 
 class Foo(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field4: bool
-        m2: bool
-        m3: bool
-        pass
-
     field4: _typing.Final[str] = ...
     m2: _typing.Final[Mixin2] = ...
     m3: _typing.Final[Mixin3Base] = ...

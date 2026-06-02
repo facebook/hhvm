@@ -15,7 +15,6 @@ from libcpp.utility cimport move as cmove
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
-from thrift.py3.types import _IsSet as _fbthrift_IsSet
 from thrift.py3.types cimport make_unique
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
@@ -661,11 +660,11 @@ cdef class Val(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("Val", {
+        return {
           "strVal": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).strVal_ref().has_value(),
           "intVal": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).intVal_ref().has_value(),
           "typedefValue": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).typedefValue_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cVal] cpp_obj):
@@ -1104,9 +1103,9 @@ cdef class NonCopyableStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("NonCopyableStruct", {
+        return {
           "num": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).num_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cNonCopyableStruct] cpp_obj):

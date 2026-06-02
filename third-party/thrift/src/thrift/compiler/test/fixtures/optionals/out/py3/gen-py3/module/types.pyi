@@ -20,13 +20,6 @@ import module.thrift_types
 Animal = module.thrift_types.Animal
 
 class Color(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        red: bool
-        green: bool
-        blue: bool
-        alpha: bool
-        pass
-
     red: _typing.Final[float] = ...
     green: _typing.Final[float] = ...
     blue: _typing.Final[float] = ...
@@ -62,14 +55,6 @@ class Color(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Color": ...   # type: ignore
 
 class Vehicle(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        color: bool
-        licensePlate: bool
-        description: bool
-        name: bool
-        hasAC: bool
-        pass
-
     color: _typing.Final[Color] = ...
     licensePlate: _typing.Final[_typing.Optional[str]] = ...
     description: _typing.Final[_typing.Optional[str]] = ...
@@ -108,19 +93,6 @@ class Vehicle(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Vehicle": ...   # type: ignore
 
 class Person(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        id: bool
-        name: bool
-        age: bool
-        address: bool
-        favoriteColor: bool
-        friends: bool
-        bestFriend: bool
-        petNames: bool
-        afraidOfAnimal: bool
-        vehicles: bool
-        pass
-
     id: _typing.Final[int] = ...
     name: _typing.Final[str] = ...
     age: _typing.Final[_typing.Optional[int]] = ...

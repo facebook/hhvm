@@ -22,10 +22,6 @@ AnEnumRenamed = module.thrift_types.AnEnumRenamed
 Flags = module.thrift_types.Flags
 
 class SimpleException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        err_code: bool
-        pass
-
     err_code: _typing.Final[int] = ...
 
     def __init__(
@@ -46,10 +42,6 @@ class SimpleException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.SimpleException": ...   # type: ignore
 
 class OptionalRefStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        optional_blob: bool
-        pass
-
     optional_blob: _typing.Final[_typing.Optional[_fbthrift_iobuf.IOBuf]] = ...
 
     def __init__(
@@ -76,20 +68,6 @@ class OptionalRefStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.OptionalRefStruct": ...   # type: ignore
 
 class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        is_on: bool
-        tiny_int: bool
-        small_int: bool
-        nice_sized_int: bool
-        big_int: bool
-        real: bool
-        smaller_real: bool
-        something: bool
-        opt_default_int: bool
-        opt_default_str: bool
-        opt_default_enum: bool
-        pass
-
     is_on: _typing.Final[bool] = ...
     tiny_int: _typing.Final[int] = ...
     small_int: _typing.Final[int] = ...
@@ -142,13 +120,6 @@ class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...   # type: ignore
 
 class Float32Struct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        float32: bool
-        float64: bool
-        float_list: bool
-        float_map: bool
-        pass
-
     float32: _typing.Final[float] = ...
     float64: _typing.Final[float] = ...
     float_list: _typing.Final[_typing.Sequence[float]] = ...
@@ -184,12 +155,6 @@ class Float32Struct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Float32Struct": ...   # type: ignore
 
 class IssetInspectionStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        int_field: bool
-        opt_str_field: bool
-        bool_field: bool
-        pass
-
     int_field: _typing.Final[int] = ...
     opt_str_field: _typing.Final[_typing.Optional[str]] = ...
     bool_field: _typing.Final[bool] = ...
@@ -222,9 +187,6 @@ class IssetInspectionStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.IssetInspectionStruct": ...   # type: ignore
 
 class HiddenTypeFieldsStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 
@@ -244,18 +206,6 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.HiddenTypeFieldsStruct": ...   # type: ignore
 
 class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        structOne: bool
-        structTwo: bool
-        an_integer: bool
-        name: bool
-        an_enum: bool
-        some_bytes: bool
-        sender: bool
-        cdef_: bool
-        bytes_with_cpp_type: bool
-        pass
-
     structOne: _typing.Final[SimpleStruct] = ...
     structTwo: _typing.Final[SimpleStruct] = ...
     an_integer: _typing.Final[int] = ...
@@ -304,10 +254,6 @@ class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable):
 _BinaryUnionValueType = _typing.Union[None, _fbthrift_iobuf.IOBuf]
 
 class BinaryUnion(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        iobuf_val: bool
-        pass
-
     iobuf_val: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
 
     def __init__(
@@ -338,10 +284,6 @@ class BinaryUnion(thrift.py3.types.Union, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnion": ...   # type: ignore
 
 class BinaryUnionStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        u: bool
-        pass
-
     u: _typing.Final[BinaryUnion] = ...
 
     def __init__(
@@ -368,18 +310,6 @@ class BinaryUnionStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnionStruct": ...   # type: ignore
 
 class CustomFields(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        bool_field: bool
-        integer_field: bool
-        double_field: bool
-        string_field: bool
-        binary_field: bool
-        list_field: bool
-        set_field: bool
-        map_field: bool
-        struct_field: bool
-        pass
-
     bool_field: _typing.Final[bool] = ...
     integer_field: _typing.Final[int] = ...
     double_field: _typing.Final[float] = ...
@@ -426,18 +356,6 @@ class CustomFields(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.CustomFields": ...   # type: ignore
 
 class CustomTypedefFields(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        bool_field: bool
-        integer_field: bool
-        double_field: bool
-        string_field: bool
-        binary_field: bool
-        list_field: bool
-        set_field: bool
-        map_field: bool
-        struct_field: bool
-        pass
-
     bool_field: _typing.Final[bool] = ...
     integer_field: _typing.Final[int] = ...
     double_field: _typing.Final[float] = ...
@@ -484,18 +402,6 @@ class CustomTypedefFields(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.CustomTypedefFields": ...   # type: ignore
 
 class AdaptedTypedefFields(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        bool_field: bool
-        integer_field: bool
-        double_field: bool
-        string_field: bool
-        binary_field: bool
-        list_field: bool
-        set_field: bool
-        map_field: bool
-        struct_field: bool
-        pass
-
     bool_field: _typing.Final[bool] = ...
     integer_field: _typing.Final[int] = ...
     double_field: _typing.Final[float] = ...

@@ -23,9 +23,6 @@ is_unscoped = apache.thrift.fixtures.types.module.thrift_types.is_unscoped
 MyForwardRefEnum = apache.thrift.fixtures.types.module.thrift_types.MyForwardRefEnum
 
 class empty_struct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 
@@ -49,10 +46,6 @@ class empty_struct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.empty_struct": ...   # type: ignore
 
 class decorated_struct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field: bool
-        pass
-
     field: _typing.Final[str] = ...
 
     def __init__(
@@ -79,17 +72,6 @@ class decorated_struct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.decorated_struct": ...   # type: ignore
 
 class ContainerStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        fieldA: bool
-        fieldB: bool
-        fieldC: bool
-        fieldD: bool
-        fieldE: bool
-        fieldF: bool
-        fieldG: bool
-        fieldH: bool
-        pass
-
     fieldA: _typing.Final[_typing.Sequence[int]] = ...
     fieldB: _typing.Final[_typing.Sequence[int]] = ...
     fieldC: _typing.Final[_typing.Sequence[int]] = ...
@@ -137,10 +119,6 @@ class ContainerStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.ContainerStruct": ...   # type: ignore
 
 class CppTypeStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        fieldA: bool
-        pass
-
     fieldA: _typing.Final[_typing.Sequence[int]] = ...
 
     def __init__(
@@ -167,10 +145,6 @@ class CppTypeStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.CppTypeStruct": ...   # type: ignore
 
 class VirtualStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        MyIntField: bool
-        pass
-
     MyIntField: _typing.Final[int] = ...
 
     def __init__(
@@ -197,11 +171,6 @@ class VirtualStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.VirtualStruct": ...   # type: ignore
 
 class MyStructWithForwardRefEnum(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        a: bool
-        b: bool
-        pass
-
     a: _typing.Final[MyForwardRefEnum] = ...
     b: _typing.Final[MyForwardRefEnum] = ...
 
@@ -231,11 +200,6 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructWithForwardRefEnum": ...   # type: ignore
 
 class TrivialNumeric(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        a: bool
-        b: bool
-        pass
-
     a: _typing.Final[int] = ...
     b: _typing.Final[bool] = ...
 
@@ -265,11 +229,6 @@ class TrivialNumeric(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.TrivialNumeric": ...   # type: ignore
 
 class TrivialNestedWithDefault(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        z: bool
-        n: bool
-        pass
-
     z: _typing.Final[int] = ...
     n: _typing.Final[TrivialNumeric] = ...
 
@@ -299,11 +258,6 @@ class TrivialNestedWithDefault(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.TrivialNestedWithDefault": ...   # type: ignore
 
 class ComplexString(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        a: bool
-        b: bool
-        pass
-
     a: _typing.Final[str] = ...
     b: _typing.Final[_typing.Mapping[str, int]] = ...
 
@@ -333,11 +287,6 @@ class ComplexString(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.ComplexString": ...   # type: ignore
 
 class ComplexNestedWithDefault(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        z: bool
-        n: bool
-        pass
-
     z: _typing.Final[str] = ...
     n: _typing.Final[ComplexString] = ...
 
@@ -367,14 +316,6 @@ class ComplexNestedWithDefault(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.ComplexNestedWithDefault": ...   # type: ignore
 
 class MinPadding(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        small: bool
-        big: bool
-        medium: bool
-        biggish: bool
-        tiny: bool
-        pass
-
     small: _typing.Final[int] = ...
     big: _typing.Final[int] = ...
     medium: _typing.Final[int] = ...
@@ -413,9 +354,6 @@ class MinPadding(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.MinPadding": ...   # type: ignore
 
 class MinPaddingWithCustomType(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     small: _typing.Final[int] = ...
     biggish: _typing.Final[int] = ...
     medium: _typing.Final[int] = ...
@@ -454,13 +392,6 @@ class MinPaddingWithCustomType(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.MinPaddingWithCustomType": ...   # type: ignore
 
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        MyIntField: bool
-        MyStringField: bool
-        majorVer: bool
-        data: bool
-        pass
-
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
     majorVer: _typing.Final[int] = ...
@@ -496,9 +427,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...   # type: ignore
 
 class MyDataItem(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 
@@ -522,10 +450,6 @@ class MyDataItem(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...   # type: ignore
 
 class Renaming(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        foo: bool
-        pass
-
     foo: _typing.Final[int] = ...
 
     def __init__(
@@ -552,11 +476,6 @@ class Renaming(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Renaming": ...   # type: ignore
 
 class AnnotatedTypes(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        binary_field: bool
-        list_field: bool
-        pass
-
     binary_field: _typing.Final[bytes] = ...
     list_field: _typing.Final[_typing.Sequence[_typing.Mapping[int, str]]] = ...
 
@@ -586,10 +505,6 @@ class AnnotatedTypes(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.AnnotatedTypes": ...   # type: ignore
 
 class ForwardUsageRoot(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        ForwardUsageStruct: bool
-        pass
-
     ForwardUsageStruct: _typing.Final[_typing.Optional[ForwardUsageStruct]] = ...
     ForwardUsageByRef: _typing.Final[_typing.Optional[ForwardUsageByRef]] = ...
 
@@ -619,9 +534,6 @@ class ForwardUsageRoot(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.ForwardUsageRoot": ...   # type: ignore
 
 class ForwardUsageStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     foo: _typing.Final[_typing.Optional[ForwardUsageRoot]] = ...
 
     def __init__(
@@ -648,9 +560,6 @@ class ForwardUsageStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.ForwardUsageStruct": ...   # type: ignore
 
 class ForwardUsageByRef(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     foo: _typing.Final[_typing.Optional[ForwardUsageRoot]] = ...
 
     def __init__(
@@ -677,10 +586,6 @@ class ForwardUsageByRef(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.ForwardUsageByRef": ...   # type: ignore
 
 class IncompleteMap(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field: bool
-        pass
-
     field: _typing.Final[_typing.Optional[_typing.Mapping[int, IncompleteMapDep]]] = ...
 
     def __init__(
@@ -707,9 +612,6 @@ class IncompleteMap(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteMap": ...   # type: ignore
 
 class IncompleteMapDep(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 
@@ -733,10 +635,6 @@ class IncompleteMapDep(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteMapDep": ...   # type: ignore
 
 class CompleteMap(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field: bool
-        pass
-
     field: _typing.Final[_typing.Optional[_typing.Mapping[int, CompleteMapDep]]] = ...
 
     def __init__(
@@ -763,9 +661,6 @@ class CompleteMap(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.CompleteMap": ...   # type: ignore
 
 class CompleteMapDep(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 
@@ -789,10 +684,6 @@ class CompleteMapDep(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.CompleteMapDep": ...   # type: ignore
 
 class IncompleteList(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field: bool
-        pass
-
     field: _typing.Final[_typing.Optional[_typing.Sequence[IncompleteListDep]]] = ...
 
     def __init__(
@@ -819,9 +710,6 @@ class IncompleteList(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteList": ...   # type: ignore
 
 class IncompleteListDep(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 
@@ -845,10 +733,6 @@ class IncompleteListDep(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteListDep": ...   # type: ignore
 
 class CompleteList(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field: bool
-        pass
-
     field: _typing.Final[_typing.Optional[_typing.Sequence[CompleteListDep]]] = ...
 
     def __init__(
@@ -875,9 +759,6 @@ class CompleteList(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.CompleteList": ...   # type: ignore
 
 class CompleteListDep(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 
@@ -901,10 +782,6 @@ class CompleteListDep(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.CompleteListDep": ...   # type: ignore
 
 class AdaptedList(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field: bool
-        pass
-
     field: _typing.Final[_typing.Optional[_typing.Sequence[AdaptedListDep]]] = ...
 
     def __init__(
@@ -931,10 +808,6 @@ class AdaptedList(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedList": ...   # type: ignore
 
 class DependentAdaptedList(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field: bool
-        pass
-
     field: _typing.Final[_typing.Optional[_typing.Sequence[DependentAdaptedListDep]]] = ...
 
     def __init__(
@@ -961,14 +834,6 @@ class DependentAdaptedList(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.DependentAdaptedList": ...   # type: ignore
 
 class AllocatorAware(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        aa_list: bool
-        aa_set: bool
-        aa_map: bool
-        aa_string: bool
-        not_a_container: bool
-        pass
-
     aa_list: _typing.Final[_typing.Sequence[int]] = ...
     aa_set: _typing.Final[_typing.AbstractSet[int]] = ...
     aa_map: _typing.Final[_typing.Mapping[int, int]] = ...
@@ -1013,11 +878,6 @@ class AllocatorAware(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.AllocatorAware": ...   # type: ignore
 
 class AllocatorAware2(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        not_a_container: bool
-        box_field: bool
-        pass
-
     not_a_container: _typing.Final[int] = ...
     box_field: _typing.Final[_typing.Optional[int]] = ...
 
@@ -1047,12 +907,6 @@ class AllocatorAware2(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.AllocatorAware2": ...   # type: ignore
 
 class TypedefStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        i32_field: bool
-        IntTypedef_field: bool
-        UintTypedef_field: bool
-        pass
-
     i32_field: _typing.Final[int] = ...
     IntTypedef_field: _typing.Final[int] = ...
     UintTypedef_field: _typing.Final[int] = ...
@@ -1085,10 +939,6 @@ class TypedefStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.TypedefStruct": ...   # type: ignore
 
 class StructWithDoubleUnderscores(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        __field: bool
-        pass
-
     __field: _typing.Final[int] = ...
 
     def __init__(

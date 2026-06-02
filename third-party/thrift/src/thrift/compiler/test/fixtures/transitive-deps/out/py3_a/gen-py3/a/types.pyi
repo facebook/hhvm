@@ -21,11 +21,6 @@ import a.thrift_types
 
 
 class A(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        b: bool
-        other: bool
-        pass
-
     b: _typing.Final[_typing.Sequence[_typing.Sequence[_c_types.C]]] = ...
     other: _typing.Final[_typing.Sequence[_c_types.C]] = ...
 

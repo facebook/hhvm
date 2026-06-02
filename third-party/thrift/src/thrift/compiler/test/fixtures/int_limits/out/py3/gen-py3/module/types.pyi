@@ -19,17 +19,6 @@ import module.thrift_types
 
 
 class Limits(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        max_i64_field: bool
-        min_i64_field: bool
-        max_i32_field: bool
-        min_i32_field: bool
-        max_i16_field: bool
-        min_i16_field: bool
-        max_byte_field: bool
-        min_byte_field: bool
-        pass
-
     max_i64_field: _typing.Final[int] = ...
     min_i64_field: _typing.Final[int] = ...
     max_i32_field: _typing.Final[int] = ...

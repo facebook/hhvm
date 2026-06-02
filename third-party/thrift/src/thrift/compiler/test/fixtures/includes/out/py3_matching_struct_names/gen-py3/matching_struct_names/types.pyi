@@ -20,10 +20,6 @@ import matching_struct_names.thrift_types
 
 
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field: bool
-        pass
-
     field: _typing.Final[str] = ...
 
     def __init__(
@@ -50,13 +46,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "matching_struct_names.ttypes.MyStruct": ...   # type: ignore
 
 class Combo(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        listOfOurMyStructLists: bool
-        theirMyStructList: bool
-        ourMyStructList: bool
-        listOfTheirMyStructList: bool
-        pass
-
     listOfOurMyStructLists: _typing.Final[_typing.Sequence[_typing.Sequence[MyStruct]]] = ...
     theirMyStructList: _typing.Final[_typing.Sequence[_module_types.MyStruct]] = ...
     ourMyStructList: _typing.Final[_typing.Sequence[MyStruct]] = ...

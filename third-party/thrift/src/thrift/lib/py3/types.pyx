@@ -171,14 +171,6 @@ cdef Struct _fbthrift_struct_update_nested_field(Struct obj, list path_and_vals)
     return obj(**updatedict)
 
 
-class _IsSet:
-    __slots__ = ['__dict__', '__name__']
-
-    def __init__(self, n, d):
-        self.__name__ = n
-        self.__dict__ = d
-
-
 cdef class Struct:
     """
     Base class for all thrift structs
@@ -291,9 +283,9 @@ def get_locally_set_fields(struct):
         if hasattr(struct.__class__, "_FBTHRIFT__PYTHON_CLASS"):
             isset_dict = struct._fbthrift__isset()
         elif isinstance(struct, Struct):
-            isset_dict = vars((<Struct>struct)._fbthrift_isset())
+            isset_dict = (<Struct>struct)._fbthrift_isset()
         else:
-            isset_dict = vars((<GeneratedError>struct)._fbthrift_isset())
+            isset_dict = (<GeneratedError>struct)._fbthrift_isset()
         return frozenset(
             name for name, is_set in isset_dict.items() if is_set
         )

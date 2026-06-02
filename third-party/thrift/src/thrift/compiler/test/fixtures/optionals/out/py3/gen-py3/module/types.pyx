@@ -15,7 +15,6 @@ from libcpp.utility cimport move as cmove
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
-from thrift.py3.types import _IsSet as _fbthrift_IsSet
 from thrift.py3.types cimport make_unique
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
@@ -93,12 +92,12 @@ cdef class Color(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("Color", {
+        return {
           "red": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).red_ref().has_value(),
           "green": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).green_ref().has_value(),
           "blue": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).blue_ref().has_value(),
           "alpha": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).alpha_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cColor] cpp_obj):
@@ -230,13 +229,13 @@ cdef class Vehicle(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("Vehicle", {
+        return {
           "color": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).color_ref().has_value(),
           "licensePlate": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).licensePlate_ref().has_value(),
           "description": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).description_ref().has_value(),
           "name": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).name_ref().has_value(),
           "hasAC": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).hasAC_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cVehicle] cpp_obj):
@@ -383,7 +382,7 @@ cdef class Person(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("Person", {
+        return {
           "id": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).id_ref().has_value(),
           "name": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).name_ref().has_value(),
           "age": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).age_ref().has_value(),
@@ -394,7 +393,7 @@ cdef class Person(thrift.py3.types.Struct):
           "petNames": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).petNames_ref().has_value(),
           "afraidOfAnimal": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).afraidOfAnimal_ref().has_value(),
           "vehicles": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).vehicles_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cPerson] cpp_obj):

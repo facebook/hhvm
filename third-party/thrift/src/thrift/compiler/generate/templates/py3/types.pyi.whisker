@@ -56,14 +56,6 @@ _{{struct.name}}ValueType = _typing.Union[None, {{#each (array.enumerate struct.
 
   {{/if struct.union?}}
 class {{struct.name}}({{#partial types.python_struct_class struct=struct}}, _typing.Hashable):
-    class __fbthrift_IsSet:
-      {{#each struct.py3_fields as |field|}}
-        {{#if (and field.has_ref_accessor? (not field.terse?))}}
-        {{field.py_name}}: bool
-        {{/if (and field.has_ref_accessor? (not field.terse?))}}
-      {{/each}}
-        pass
-
     {{#each struct.py3_fields as |field|}}
     {{field.py_name}}: _typing.Final[{{#partial pep484.field_type field=field}}] = ...
     {{/each}}

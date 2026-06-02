@@ -20,9 +20,6 @@ import module.thrift_types
 
 
 class FooStreamEx(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 
@@ -41,9 +38,6 @@ class FooStreamEx(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.FooStreamEx": ...   # type: ignore
 
 class FooEx(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 
@@ -62,9 +56,6 @@ class FooEx(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.FooEx": ...   # type: ignore
 
 class FooEx2(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 

@@ -23,9 +23,6 @@ TypedEnum = module.thrift_types.TypedEnum
 _MyUnionValueType = _typing.Union[None, int, str]
 
 class MyUnion(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     anInteger: _typing.Final[_typing.Optional[int]] = ...
     aString: _typing.Final[_typing.Optional[str]] = ...
 
@@ -61,9 +58,6 @@ class MyUnion(thrift.py3.types.Union, _typing.Hashable):
 _NonTriviallyDestructibleUnionValueType = _typing.Union[None, int]
 
 class NonTriviallyDestructibleUnion(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     int_field: _typing.Final[_typing.Optional[int]] = ...
 
     def __init__(
@@ -94,9 +88,6 @@ class NonTriviallyDestructibleUnion(thrift.py3.types.Union, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.NonTriviallyDestructibleUnion": ...   # type: ignore
 
 class MyField(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     opt_value: _typing.Final[_typing.Optional[int]] = ...
     value: _typing.Final[_typing.Optional[int]] = ...
     req_value: _typing.Final[_typing.Optional[int]] = ...
@@ -147,9 +138,6 @@ class MyField(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.MyField": ...   # type: ignore
 
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     opt_ref: _typing.Final[_typing.Optional[MyField]] = ...
     ref: _typing.Final[_typing.Optional[MyField]] = ...
     req_ref: _typing.Final[_typing.Optional[MyField]] = ...
@@ -182,10 +170,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...   # type: ignore
 
 class StructWithUnion(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        f: bool
-        pass
-
     u: _typing.Final[_typing.Optional[MyUnion]] = ...
     aDouble: _typing.Final[_typing.Optional[float]] = ...
     f: _typing.Final[MyField] = ...
@@ -218,10 +202,6 @@ class StructWithUnion(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.StructWithUnion": ...   # type: ignore
 
 class RecursiveStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        mes: bool
-        pass
-
     mes: _typing.Final[_typing.Optional[_typing.Sequence[RecursiveStruct]]] = ...
 
     def __init__(
@@ -248,9 +228,6 @@ class RecursiveStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.RecursiveStruct": ...   # type: ignore
 
 class StructWithContainers(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     list_ref: _typing.Final[_typing.Optional[_typing.Sequence[int]]] = ...
     set_ref: _typing.Final[_typing.Optional[_typing.AbstractSet[int]]] = ...
     map_ref: _typing.Final[_typing.Optional[_typing.Mapping[int, int]]] = ...
@@ -292,9 +269,6 @@ class StructWithContainers(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.StructWithContainers": ...   # type: ignore
 
 class StructWithSharedConst(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     opt_shared_const: _typing.Final[_typing.Optional[MyField]] = ...
     shared_const: _typing.Final[_typing.Optional[MyField]] = ...
     req_shared_const: _typing.Final[_typing.Optional[MyField]] = ...
@@ -327,9 +301,6 @@ class StructWithSharedConst(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.StructWithSharedConst": ...   # type: ignore
 
 class Empty(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 
@@ -353,9 +324,6 @@ class Empty(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Empty": ...   # type: ignore
 
 class StructWithRef(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     def_field: _typing.Final[_typing.Optional[Empty]] = ...
     opt_field: _typing.Final[_typing.Optional[Empty]] = ...
     req_field: _typing.Final[_typing.Optional[Empty]] = ...
@@ -388,12 +356,6 @@ class StructWithRef(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.StructWithRef": ...   # type: ignore
 
 class StructWithBox(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        a: bool
-        b: bool
-        c: bool
-        pass
-
     a: _typing.Final[_typing.Optional[str]] = ...
     b: _typing.Final[_typing.Optional[_typing.Sequence[int]]] = ...
     c: _typing.Final[_typing.Optional[StructWithRef]] = ...
@@ -426,11 +388,6 @@ class StructWithBox(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.StructWithBox": ...   # type: ignore
 
 class StructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field1: bool
-        field2: bool
-        pass
-
     field1: _typing.Final[Empty] = ...
     field2: _typing.Final[MyField] = ...
 
@@ -460,9 +417,6 @@ class StructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.StructWithInternBox": ...   # type: ignore
 
 class StructWithTerseInternBox(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     field1: _typing.Final[Empty] = ...
     field2: _typing.Final[MyField] = ...
 
@@ -492,11 +446,6 @@ class StructWithTerseInternBox(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.StructWithTerseInternBox": ...   # type: ignore
 
 class AdaptedStructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field1: bool
-        field2: bool
-        pass
-
     field1: _typing.Final[Empty] = ...
     field2: _typing.Final[MyField] = ...
 
@@ -526,9 +475,6 @@ class AdaptedStructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedStructWithInternBox": ...   # type: ignore
 
 class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     field1: _typing.Final[Empty] = ...
     field2: _typing.Final[MyField] = ...
 
@@ -558,9 +504,6 @@ class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct, _typing.Hashable)
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedStructWithTerseInternBox": ...   # type: ignore
 
 class StructWithRefTypeUnique(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     def_field: _typing.Final[_typing.Optional[Empty]] = ...
     opt_field: _typing.Final[_typing.Optional[Empty]] = ...
     req_field: _typing.Final[_typing.Optional[Empty]] = ...
@@ -593,9 +536,6 @@ class StructWithRefTypeUnique(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.StructWithRefTypeUnique": ...   # type: ignore
 
 class StructWithRefTypeShared(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     def_field: _typing.Final[_typing.Optional[Empty]] = ...
     opt_field: _typing.Final[_typing.Optional[Empty]] = ...
     req_field: _typing.Final[_typing.Optional[Empty]] = ...
@@ -628,9 +568,6 @@ class StructWithRefTypeShared(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.StructWithRefTypeShared": ...   # type: ignore
 
 class StructWithRefTypeSharedConst(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     def_field: _typing.Final[_typing.Optional[Empty]] = ...
     opt_field: _typing.Final[_typing.Optional[Empty]] = ...
     req_field: _typing.Final[_typing.Optional[Empty]] = ...
@@ -663,9 +600,6 @@ class StructWithRefTypeSharedConst(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.StructWithRefTypeSharedConst": ...   # type: ignore
 
 class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     def_field: _typing.Final[_typing.Optional[Empty]] = ...
 
     def __init__(
@@ -692,9 +626,6 @@ class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct, _typing.
     def _to_py_deprecated(self) -> "module.ttypes.StructWithRefAndAnnotCppNoexceptMoveCtor": ...   # type: ignore
 
 class StructWithString(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
     def_unique_string_ref: _typing.Final[_typing.Optional[str]] = ...
     def_shared_string_ref: _typing.Final[_typing.Optional[str]] = ...
     def_shared_string_const_ref: _typing.Final[_typing.Optional[str]] = ...

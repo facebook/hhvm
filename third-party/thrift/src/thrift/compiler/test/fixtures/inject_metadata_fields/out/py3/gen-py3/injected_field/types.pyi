@@ -19,9 +19,6 @@ import injected_field.thrift_types
 
 
 class InjectedField(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 

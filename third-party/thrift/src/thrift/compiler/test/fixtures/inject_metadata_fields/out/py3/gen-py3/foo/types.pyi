@@ -20,12 +20,6 @@ import foo.thrift_types
 
 
 class Fields(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        injected_field: bool
-        injected_structured_annotation_field: bool
-        injected_unstructured_annotation_field: bool
-        pass
-
     injected_field: _typing.Final[str] = ...
     injected_structured_annotation_field: _typing.Final[_typing.Optional[str]] = ...
     injected_unstructured_annotation_field: _typing.Final[_typing.Optional[str]] = ...
@@ -58,10 +52,6 @@ class Fields(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "foo.ttypes.Fields": ...   # type: ignore
 
 class FieldsWithIncludedStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        injected_field: bool
-        pass
-
     injected_field: _typing.Final[_injected_field_types.InjectedField] = ...
 
     def __init__(

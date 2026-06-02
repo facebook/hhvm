@@ -19,12 +19,6 @@ import module.thrift_types
 
 
 class Foo(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field1: bool
-        field2: bool
-        field3: bool
-        pass
-
     field1: _typing.Final[int] = ...
     field2: _typing.Final[int] = ...
     field3: _typing.Final[int] = ...
@@ -57,12 +51,6 @@ class Foo(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Foo": ...   # type: ignore
 
 class Foo2(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        field1: bool
-        field2: bool
-        field3: bool
-        pass
-
     field1: _typing.Final[int] = ...
     field2: _typing.Final[int] = ...
     field3: _typing.Final[int] = ...

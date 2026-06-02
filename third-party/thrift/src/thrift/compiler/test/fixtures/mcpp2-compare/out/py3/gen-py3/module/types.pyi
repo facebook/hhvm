@@ -24,9 +24,6 @@ AnnotatedEnum2 = module.thrift_types.AnnotatedEnum2
 MyEnumB = module.thrift_types.MyEnumB
 
 class Empty(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 
@@ -50,10 +47,6 @@ class Empty(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Empty": ...   # type: ignore
 
 class ASimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        boolField: bool
-        pass
-
     boolField: _typing.Final[int] = ...
 
     def __init__(
@@ -76,10 +69,6 @@ class ASimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.ASimpleStruct": ...   # type: ignore
 
 class ASimpleStructNoexcept(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        boolField: bool
-        pass
-
     boolField: _typing.Final[int] = ...
 
     def __init__(
@@ -106,20 +95,6 @@ class ASimpleStructNoexcept(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.ASimpleStructNoexcept": ...   # type: ignore
 
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        MyBoolField: bool
-        MyIntField: bool
-        MyStringField: bool
-        MyStringField2: bool
-        MyBinaryField: bool
-        MyBinaryField2: bool
-        MyBinaryField3: bool
-        MyBinaryListField4: bool
-        MyMapEnumAndInt: bool
-        MyCustomField: bool
-        MyOptCustomField: bool
-        pass
-
     MyBoolField: _typing.Final[bool] = ...
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
@@ -178,11 +153,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
 _SimpleUnionValueType = _typing.Union[None, int, str]
 
 class SimpleUnion(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        intValue: bool
-        stringValue: bool
-        pass
-
     intValue: _typing.Final[int] = ...
     stringValue: _typing.Final[str] = ...
 
@@ -218,35 +188,6 @@ class SimpleUnion(thrift.py3.types.Union, _typing.Hashable):
 _ComplexUnionValueType = _typing.Union[None, int, int, str, str, int, int, float, bool, _typing.Sequence[int], _typing.AbstractSet[int], _typing.Mapping[str, int], _typing.Mapping[str, int], MyEnumA, _typing.Sequence[MyEnumA], MyStruct, _typing.AbstractSet[MyStruct], SimpleUnion, SimpleUnion, _typing.Sequence[SimpleUnion], _typing.AbstractSet[SimpleUnion], _typing.Sequence[_typing.AbstractSet[SimpleUnion]], bytes, bytes, _typing.Sequence[bytes], MyStruct, MyStruct, AnException, _fbthrift_iobuf.IOBuf]
 
 class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        intValue: bool
-        opt_intValue: bool
-        stringValue: bool
-        opt_stringValue: bool
-        intValue2: bool
-        intValue3: bool
-        doubelValue: bool
-        boolValue: bool
-        union_list: bool
-        union_set: bool
-        union_map: bool
-        opt_union_map: bool
-        enum_field: bool
-        enum_container: bool
-        a_struct: bool
-        a_set_struct: bool
-        a_union: bool
-        opt_a_union: bool
-        a_union_list: bool
-        a_union_typedef: bool
-        a_union_typedef_list: bool
-        MyBinaryField: bool
-        MyBinaryField2: bool
-        MyBinaryListField4: bool
-        excp_field: bool
-        MyCustomField: bool
-        pass
-
     intValue: _typing.Final[int] = ...
     opt_intValue: _typing.Final[int] = ...
     stringValue: _typing.Final[str] = ...
@@ -358,26 +299,6 @@ class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.ComplexUnion": ...   # type: ignore
 
 class AnException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        code: bool
-        req_code: bool
-        message2: bool
-        req_message: bool
-        exception_list: bool
-        exception_set: bool
-        exception_map: bool
-        req_exception_map: bool
-        enum_field: bool
-        enum_container: bool
-        a_struct: bool
-        a_set_struct: bool
-        a_union_list: bool
-        union_typedef: bool
-        a_union_typedef_list: bool
-        MyCustomField: bool
-        MyOptCustomField: bool
-        pass
-
     code: _typing.Final[int] = ...
     req_code: _typing.Final[int] = ...
     message2: _typing.Final[str] = ...
@@ -430,12 +351,6 @@ class AnException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.AnException": ...   # type: ignore
 
 class AnotherException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        code: bool
-        req_code: bool
-        message: bool
-        pass
-
     code: _typing.Final[int] = ...
     req_code: _typing.Final[int] = ...
     message: _typing.Final[str] = ...
@@ -460,53 +375,6 @@ class AnotherException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.AnotherException": ...   # type: ignore
 
 class ContainerStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        fieldA: bool
-        req_fieldA: bool
-        opt_fieldA: bool
-        fieldB: bool
-        req_fieldB: bool
-        opt_fieldB: bool
-        fieldC: bool
-        req_fieldC: bool
-        opt_fieldC: bool
-        fieldD: bool
-        fieldE: bool
-        req_fieldE: bool
-        opt_fieldE: bool
-        fieldF: bool
-        fieldG: bool
-        fieldH: bool
-        fieldI: bool
-        fieldJ: bool
-        fieldK: bool
-        fieldL: bool
-        fieldM: bool
-        fieldN: bool
-        fieldO: bool
-        fieldP: bool
-        fieldQ: bool
-        fieldR: bool
-        req_fieldR: bool
-        opt_fieldR: bool
-        fieldS: bool
-        fieldT: bool
-        fieldU: bool
-        fieldV: bool
-        req_fieldV: bool
-        opt_fieldV: bool
-        fieldW: bool
-        fieldX: bool
-        req_fieldX: bool
-        opt_fieldX: bool
-        fieldY: bool
-        fieldZ: bool
-        fieldAA: bool
-        fieldAC: bool
-        fieldAD: bool
-        fieldAE: bool
-        pass
-
     fieldA: _typing.Final[bool] = ...
     req_fieldA: _typing.Final[bool] = ...
     opt_fieldA: _typing.Final[_typing.Optional[bool]] = ...
@@ -662,12 +530,6 @@ class ContainerStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.ContainerStruct": ...   # type: ignore
 
 class MyIncludedStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        MyIncludedInt: bool
-        MyIncludedStruct: bool
-        ARequiredField: bool
-        pass
-
     MyIncludedInt: _typing.Final[int] = ...
     MyIncludedStruct: _typing.Final[_includes_types.AStruct] = ...
     ARefField: _typing.Final[_typing.Optional[_includes_types.AStruct]] = ...
@@ -703,28 +565,6 @@ class MyIncludedStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.MyIncludedStruct": ...   # type: ignore
 
 class AnnotatedStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        no_annotation: bool
-        base_type: bool
-        list_type: bool
-        set_type: bool
-        map_type: bool
-        map_struct_type: bool
-        iobuf_type: bool
-        iobuf_ptr: bool
-        list_i32_template: bool
-        list_string_template: bool
-        set_template: bool
-        map_template: bool
-        typedef_list_template: bool
-        typedef_deque_template: bool
-        typedef_set_template: bool
-        typedef_map_template: bool
-        iobuf_type_val: bool
-        iobuf_ptr_val: bool
-        struct_struct: bool
-        pass
-
     no_annotation: _typing.Final[ContainerStruct] = ...
     cpp_unique_ref: _typing.Final[_typing.Optional[ContainerStruct]] = ...
     cpp2_unique_ref: _typing.Final[_typing.Optional[ContainerStruct]] = ...
@@ -855,11 +695,6 @@ class AnnotatedStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.AnnotatedStruct": ...   # type: ignore
 
 class ComplexContainerStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        map_of_iobufs: bool
-        map_of_iobuf_ptrs: bool
-        pass
-
     map_of_iobufs: _typing.Final[_typing.Mapping[str, _fbthrift_iobuf.IOBuf]] = ...
     map_of_iobuf_ptrs: _typing.Final[_typing.Mapping[str, _fbthrift_iobuf.IOBuf]] = ...
 
@@ -889,11 +724,6 @@ class ComplexContainerStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.ComplexContainerStruct": ...   # type: ignore
 
 class FloatStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        floatField: bool
-        doubleField: bool
-        pass
-
     floatField: _typing.Final[float] = ...
     doubleField: _typing.Final[float] = ...
 
@@ -925,11 +755,6 @@ class FloatStruct(thrift.py3.types.Struct, _typing.Hashable):
 _FloatUnionValueType = _typing.Union[None, float, float]
 
 class FloatUnion(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        floatSide: bool
-        doubleSide: bool
-        pass
-
     floatSide: _typing.Final[float] = ...
     doubleSide: _typing.Final[float] = ...
 
@@ -963,10 +788,6 @@ class FloatUnion(thrift.py3.types.Union, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.FloatUnion": ...   # type: ignore
 
 class AllRequiredNoExceptMoveCtrStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        intField: bool
-        pass
-
     intField: _typing.Final[int] = ...
 
     def __init__(

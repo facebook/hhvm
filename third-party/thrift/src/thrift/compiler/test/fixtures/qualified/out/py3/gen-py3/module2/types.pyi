@@ -21,11 +21,6 @@ import module2.thrift_types
 
 
 class Struct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        first: bool
-        second: bool
-        pass
-
     first: _typing.Final[_module0_types.Struct] = ...
     second: _typing.Final[_module1_types.Struct] = ...
 
@@ -55,11 +50,6 @@ class Struct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module2.ttypes.Struct": ...   # type: ignore
 
 class BigStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        s: bool
-        id: bool
-        pass
-
     s: _typing.Final[Struct] = ...
     id: _typing.Final[int] = ...
 

@@ -20,12 +20,6 @@ import module.thrift_types
 
 
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        MyIncludedField: bool
-        MyOtherIncludedField: bool
-        MyIncludedInt: bool
-        pass
-
     MyIncludedField: _typing.Final[_includes_types.Included] = ...
     MyOtherIncludedField: _typing.Final[_includes_types.Included] = ...
     MyIncludedInt: _typing.Final[int] = ...

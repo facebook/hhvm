@@ -19,10 +19,6 @@ import c.thrift_types
 
 
 class C(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        i: bool
-        pass
-
     i: _typing.Final[int] = ...
 
     def __init__(
@@ -49,9 +45,6 @@ class C(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "c.ttypes.C": ...   # type: ignore
 
 class E(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 

@@ -15,7 +15,6 @@ from libcpp.utility cimport move as cmove
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
-from thrift.py3.types import _IsSet as _fbthrift_IsSet
 from thrift.py3.types cimport make_unique
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
@@ -99,12 +98,12 @@ cdef class SomeStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("SomeStruct", {
+        return {
           "reasonable": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reasonable_ref().has_value(),
           "fine": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fine_ref().has_value(),
           "questionable": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).questionable_ref().has_value(),
           "tags": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).tags_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_enums_module_cbindings.cSomeStruct] cpp_obj):
@@ -244,12 +243,12 @@ cdef class MyStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("MyStruct", {
+        return {
           "me2_3": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me2_3_ref().has_value(),
           "me3_n3": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me3_n3_ref().has_value(),
           "me1_t1": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me1_t1_ref().has_value(),
           "me1_t2": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).me1_t2_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_enums_module_cbindings.cMyStruct] cpp_obj):

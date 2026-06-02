@@ -19,11 +19,6 @@ import test.fixtures.another_interactions.shared.thrift_types
 
 
 class DoSomethingResult(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        s_res: bool
-        i_res: bool
-        pass
-
     s_res: _typing.Final[str] = ...
     i_res: _typing.Final[int] = ...
 

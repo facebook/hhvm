@@ -20,11 +20,6 @@ import includes.thrift_types
 
 
 class Included(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        MyIntField: bool
-        MyTransitiveField: bool
-        pass
-
     MyIntField: _typing.Final[int] = ...
     MyTransitiveField: _typing.Final[_transitive_types.Foo] = ...
 

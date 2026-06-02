@@ -20,10 +20,6 @@ import module.thrift_types
 
 
 class Foo(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        value: bool
-        pass
-
     value: _typing.Final[_typing.Optional[int]] = ...
 
     def __init__(

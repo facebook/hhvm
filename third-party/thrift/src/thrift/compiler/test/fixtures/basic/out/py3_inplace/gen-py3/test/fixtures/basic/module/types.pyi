@@ -21,18 +21,6 @@ MyEnum = test.fixtures.basic.module.thrift_types.MyEnum
 HackEnum = test.fixtures.basic.module.thrift_types.HackEnum
 
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        MyIntField: bool
-        MyStringField: bool
-        MyDataField: bool
-        myEnum: bool
-        oneway: bool
-        readonly: bool
-        idempotent: bool
-        floatSet: bool
-        no_hack_codegen_field: bool
-        pass
-
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
     MyDataField: _typing.Final[MyDataItem] = ...
@@ -83,12 +71,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...   # type: ignore
 
 class Containers(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        I32List: bool
-        StringSet: bool
-        StringToI64Map: bool
-        pass
-
     I32List: _typing.Final[_typing.Sequence[int]] = ...
     StringSet: _typing.Final[_typing.AbstractSet[str]] = ...
     StringToI64Map: _typing.Final[_typing.Mapping[str, int]] = ...
@@ -121,9 +103,6 @@ class Containers(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Containers": ...   # type: ignore
 
 class MyDataItem(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        pass
-
 
     def __init__(
         self, 
@@ -149,13 +128,6 @@ class MyDataItem(thrift.py3.types.Struct, _typing.Hashable):
 _MyUnionValueType = _typing.Union[None, MyEnum, MyStruct, MyDataItem, _typing.AbstractSet[float]]
 
 class MyUnion(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        myEnum: bool
-        myStruct: bool
-        myDataItem: bool
-        floatSet: bool
-        pass
-
     myEnum: _typing.Final[MyEnum] = ...
     myStruct: _typing.Final[MyStruct] = ...
     myDataItem: _typing.Final[MyDataItem] = ...
@@ -195,13 +167,6 @@ class MyUnion(thrift.py3.types.Union, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...   # type: ignore
 
 class MyException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        MyIntField: bool
-        MyStringField: bool
-        myStruct: bool
-        myUnion: bool
-        pass
-
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
     myStruct: _typing.Final[MyStruct] = ...
@@ -228,13 +193,6 @@ class MyException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.MyException": ...   # type: ignore
 
 class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        MyIntField: bool
-        MyStringField: bool
-        myStruct: bool
-        myUnion: bool
-        pass
-
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
     myStruct: _typing.Final[MyStruct] = ...
@@ -261,10 +219,6 @@ class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError, _typing.Hasha
     def _to_py_deprecated(self) -> "module.ttypes.MyExceptionWithMessage": ...   # type: ignore
 
 class ReservedKeyword(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        reserved_field: bool
-        pass
-
     reserved_field: _typing.Final[int] = ...
 
     def __init__(
@@ -293,10 +247,6 @@ class ReservedKeyword(thrift.py3.types.Struct, _typing.Hashable):
 _UnionToBeRenamedValueType = _typing.Union[None, int]
 
 class UnionToBeRenamed(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        reserved_field: bool
-        pass
-
     reserved_field: _typing.Final[int] = ...
 
     def __init__(

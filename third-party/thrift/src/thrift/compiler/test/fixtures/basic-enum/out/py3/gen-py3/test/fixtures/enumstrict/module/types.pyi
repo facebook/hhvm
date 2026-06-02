@@ -23,11 +23,6 @@ MyUseIntrinsicDefaultEnum = test.fixtures.enumstrict.module.thrift_types.MyUseIn
 MyBigEnum = test.fixtures.enumstrict.module.thrift_types.MyBigEnum
 
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        myEnum: bool
-        myBigEnum: bool
-        pass
-
     myEnum: _typing.Final[MyEnum] = ...
     myBigEnum: _typing.Final[MyBigEnum] = ...
 

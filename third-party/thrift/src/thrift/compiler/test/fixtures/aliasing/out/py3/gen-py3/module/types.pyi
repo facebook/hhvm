@@ -19,10 +19,6 @@ import module.thrift_types
 
 
 class Foo(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        bar: bool
-        pass
-
     bar: _typing.Final[str] = ...
 
     def __init__(

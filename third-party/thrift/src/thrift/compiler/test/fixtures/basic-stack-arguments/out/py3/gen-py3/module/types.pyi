@@ -20,11 +20,6 @@ import module.thrift_types
 MyEnum = module.thrift_types.MyEnum
 
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        MyIntField: bool
-        MyStringField: bool
-        pass
-
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
 

@@ -19,10 +19,6 @@ import my.namespacing.test.hsmodule.thrift_types
 
 
 class HsFoo(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        MyInt: bool
-        pass
-
     MyInt: _typing.Final[int] = ...
 
     def __init__(

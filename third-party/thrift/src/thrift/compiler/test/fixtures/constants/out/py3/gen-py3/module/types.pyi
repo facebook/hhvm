@@ -22,14 +22,6 @@ City = module.thrift_types.City
 Company = module.thrift_types.Company
 
 class Internship(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        weeks: bool
-        title: bool
-        employer: bool
-        compensation: bool
-        school: bool
-        pass
-
     weeks: _typing.Final[int] = ...
     title: _typing.Final[str] = ...
     employer: _typing.Final[_typing.Optional[Company]] = ...
@@ -68,11 +60,6 @@ class Internship(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Internship": ...   # type: ignore
 
 class Range(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        min: bool
-        max: bool
-        pass
-
     min: _typing.Final[int] = ...
     max: _typing.Final[int] = ...
 
@@ -102,11 +89,6 @@ class Range(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.Range": ...   # type: ignore
 
 class struct1(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        a: bool
-        b: bool
-        pass
-
     a: _typing.Final[int] = ...
     b: _typing.Final[str] = ...
 
@@ -136,13 +118,6 @@ class struct1(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.struct1": ...   # type: ignore
 
 class struct2(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        a: bool
-        b: bool
-        c: bool
-        d: bool
-        pass
-
     a: _typing.Final[int] = ...
     b: _typing.Final[str] = ...
     c: _typing.Final[struct1] = ...
@@ -178,12 +153,6 @@ class struct2(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.struct2": ...   # type: ignore
 
 class struct3(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        a: bool
-        b: bool
-        c: bool
-        pass
-
     a: _typing.Final[str] = ...
     b: _typing.Final[int] = ...
     c: _typing.Final[struct2] = ...
@@ -216,12 +185,6 @@ class struct3(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.struct3": ...   # type: ignore
 
 class struct4(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        a: bool
-        b: bool
-        c: bool
-        pass
-
     a: _typing.Final[int] = ...
     b: _typing.Final[_typing.Optional[float]] = ...
     c: _typing.Final[_typing.Optional[int]] = ...
@@ -256,11 +219,6 @@ class struct4(thrift.py3.types.Struct, _typing.Hashable):
 _union1ValueType = _typing.Union[None, int, float]
 
 class union1(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        i: bool
-        d: bool
-        pass
-
     i: _typing.Final[int] = ...
     d: _typing.Final[float] = ...
 
@@ -296,13 +254,6 @@ class union1(thrift.py3.types.Union, _typing.Hashable):
 _union2ValueType = _typing.Union[None, int, float, struct1, union1]
 
 class union2(thrift.py3.types.Union, _typing.Hashable):
-    class __fbthrift_IsSet:
-        i: bool
-        d: bool
-        s: bool
-        u: bool
-        pass
-
     i: _typing.Final[int] = ...
     d: _typing.Final[float] = ...
     s: _typing.Final[struct1] = ...

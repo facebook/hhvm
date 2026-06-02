@@ -15,7 +15,6 @@ from libcpp.utility cimport move as cmove
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
-from thrift.py3.types import _IsSet as _fbthrift_IsSet
 from thrift.py3.types cimport make_unique
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
@@ -75,9 +74,9 @@ cdef class Fiery(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("Fiery", {
+        return {
           "message": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).message_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFiery] cpp_obj):
@@ -182,9 +181,9 @@ cdef class Serious(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("Serious", {
+        return {
           "not_sonnet": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).not_sonnet_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSerious] cpp_obj):
@@ -291,10 +290,10 @@ cdef class ComplexFieldNames(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("ComplexFieldNames", {
+        return {
           "error_message": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).error_message_ref().has_value(),
           "internal_error_message": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).internal_error_message_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cComplexFieldNames] cpp_obj):
@@ -406,10 +405,10 @@ cdef class CustomFieldNames(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("CustomFieldNames", {
+        return {
           "error_message": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).error_message_ref().has_value(),
           "internal_error_message": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).internal_error_message_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cCustomFieldNames] cpp_obj):
@@ -521,10 +520,10 @@ cdef class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("ExceptionWithPrimitiveField", {
+        return {
           "message": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).message_ref().has_value(),
           "error_code": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).error_code_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cExceptionWithPrimitiveField] cpp_obj):
@@ -636,10 +635,10 @@ cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedErro
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("ExceptionWithStructuredAnnotation", {
+        return {
           "message_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).message_field_ref().has_value(),
           "error_code": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).error_code_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cExceptionWithStructuredAnnotation] cpp_obj):
@@ -751,8 +750,8 @@ cdef class Banal(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("Banal", {
-        })
+        return {
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cBanal] cpp_obj):

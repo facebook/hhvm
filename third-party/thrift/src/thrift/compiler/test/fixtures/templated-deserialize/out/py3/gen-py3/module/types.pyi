@@ -20,11 +20,6 @@ import module.thrift_types
 MyEnumA = module.thrift_types.MyEnumA
 
 class SmallStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        small_A: bool
-        small_B: bool
-        pass
-
     small_A: _typing.Final[bool] = ...
     small_B: _typing.Final[int] = ...
 
@@ -54,23 +49,6 @@ class SmallStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.SmallStruct": ...   # type: ignore
 
 class containerStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        fieldA: bool
-        fieldB: bool
-        fieldC: bool
-        fieldD: bool
-        fieldE: bool
-        fieldF: bool
-        fieldG: bool
-        fieldH: bool
-        fieldI: bool
-        fieldJ: bool
-        fieldK: bool
-        fieldL: bool
-        fieldM: bool
-        fieldQ: bool
-        pass
-
     fieldA: _typing.Final[bool] = ...
     fieldB: _typing.Final[_typing.Mapping[str, bool]] = ...
     fieldC: _typing.Final[_typing.AbstractSet[int]] = ...

@@ -21,10 +21,6 @@ import test.fixtures.interactions.module.thrift_types
 
 
 class CustomException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        message: bool
-        pass
-
     message: _typing.Final[str] = ...
 
     def __init__(
@@ -45,10 +41,6 @@ class CustomException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py_deprecated(self) -> "test.fixtures.interactions.ttypes.CustomException": ...   # type: ignore
 
 class ShouldBeBoxed(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        sessionId: bool
-        pass
-
     sessionId: _typing.Final[str] = ...
 
     def __init__(

@@ -15,7 +15,6 @@ from libcpp.utility cimport move as cmove
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
-from thrift.py3.types import _IsSet as _fbthrift_IsSet
 from thrift.py3.types cimport make_unique
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
@@ -79,9 +78,9 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("CustomException", {
+        return {
           "message": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).message_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_interactions_module_cbindings.cCustomException] cpp_obj):
@@ -193,9 +192,9 @@ cdef class ShouldBeBoxed(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("ShouldBeBoxed", {
+        return {
           "sessionId": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).sessionId_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed] cpp_obj):

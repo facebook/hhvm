@@ -19,10 +19,6 @@ import module.thrift_types
 
 
 class InitialResponse(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        content: bool
-        pass
-
     content: _typing.Final[str] = ...
 
     def __init__(
@@ -49,10 +45,6 @@ class InitialResponse(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.InitialResponse": ...   # type: ignore
 
 class FinalResponse(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        content: bool
-        pass
-
     content: _typing.Final[str] = ...
 
     def __init__(
@@ -79,10 +71,6 @@ class FinalResponse(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.FinalResponse": ...   # type: ignore
 
 class SinkPayload(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        content: bool
-        pass
-
     content: _typing.Final[str] = ...
 
     def __init__(
@@ -109,10 +97,6 @@ class SinkPayload(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.SinkPayload": ...   # type: ignore
 
 class CompatibleWithKeywordSink(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        sink: bool
-        pass
-
     sink: _typing.Final[str] = ...
 
     def __init__(
@@ -139,10 +123,6 @@ class CompatibleWithKeywordSink(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.CompatibleWithKeywordSink": ...   # type: ignore
 
 class InitialException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        reason: bool
-        pass
-
     reason: _typing.Final[str] = ...
 
     def __init__(
@@ -163,10 +143,6 @@ class InitialException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.InitialException": ...   # type: ignore
 
 class SinkException1(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        reason: bool
-        pass
-
     reason: _typing.Final[str] = ...
 
     def __init__(
@@ -187,10 +163,6 @@ class SinkException1(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.SinkException1": ...   # type: ignore
 
 class SinkException2(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
-    class __fbthrift_IsSet:
-        reason: bool
-        pass
-
     reason: _typing.Final[int] = ...
 
     def __init__(

@@ -27,13 +27,6 @@ MyBitmaskEnum1 = test.fixtures.enums.module.thrift_types.MyBitmaskEnum1
 MyBitmaskEnum2 = test.fixtures.enums.module.thrift_types.MyBitmaskEnum2
 
 class SomeStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        reasonable: bool
-        fine: bool
-        questionable: bool
-        tags: bool
-        pass
-
     reasonable: _typing.Final[Metasyntactic] = ...
     fine: _typing.Final[Metasyntactic] = ...
     questionable: _typing.Final[Metasyntactic] = ...
@@ -69,13 +62,6 @@ class SomeStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.SomeStruct": ...   # type: ignore
 
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        me2_3: bool
-        me3_n3: bool
-        me1_t1: bool
-        me1_t2: bool
-        pass
-
     me2_3: _typing.Final[MyEnum2] = ...
     me3_n3: _typing.Final[MyEnum3] = ...
     me1_t1: _typing.Final[MyEnum1] = ...

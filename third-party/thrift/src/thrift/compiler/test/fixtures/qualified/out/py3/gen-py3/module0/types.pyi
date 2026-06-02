@@ -20,11 +20,6 @@ import module0.thrift_types
 Enum = module0.thrift_types.Enum
 
 class Struct(thrift.py3.types.Struct, _typing.Hashable):
-    class __fbthrift_IsSet:
-        first: bool
-        second: bool
-        pass
-
     first: _typing.Final[int] = ...
     second: _typing.Final[str] = ...
 

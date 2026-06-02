@@ -15,7 +15,6 @@ from libcpp.utility cimport move as cmove
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
-from thrift.py3.types import _IsSet as _fbthrift_IsSet
 from thrift.py3.types cimport make_unique
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
@@ -85,9 +84,9 @@ cdef class InitialResponse(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("InitialResponse", {
+        return {
           "content": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).content_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cInitialResponse] cpp_obj):
@@ -198,9 +197,9 @@ cdef class FinalResponse(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("FinalResponse", {
+        return {
           "content": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).content_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFinalResponse] cpp_obj):
@@ -311,9 +310,9 @@ cdef class SinkPayload(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("SinkPayload", {
+        return {
           "content": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).content_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSinkPayload] cpp_obj):
@@ -424,9 +423,9 @@ cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("CompatibleWithKeywordSink", {
+        return {
           "sink": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).sink_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cCompatibleWithKeywordSink] cpp_obj):
@@ -527,9 +526,9 @@ cdef class InitialException(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("InitialException", {
+        return {
           "reason": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reason_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cInitialException] cpp_obj):
@@ -631,9 +630,9 @@ cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("SinkException1", {
+        return {
           "reason": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reason_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSinkException1] cpp_obj):
@@ -735,9 +734,9 @@ cdef class SinkException2(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("SinkException2", {
+        return {
           "reason": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reason_ref().has_value(),
-        })
+        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSinkException2] cpp_obj):

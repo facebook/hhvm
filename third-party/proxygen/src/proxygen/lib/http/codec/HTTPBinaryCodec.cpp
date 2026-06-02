@@ -712,7 +712,7 @@ size_t HTTPBinaryCodec::generateChunkHeader(folly::IOBufQueue& writeBuf,
 }
 
 size_t HTTPBinaryCodec::generateChunkTerminator(
-    folly::IOBufQueue& writeBuf, HTTPBinaryCodec::StreamID stream) {
+    folly::IOBufQueue& /*writeBuf*/, HTTPBinaryCodec::StreamID /*stream*/) {
   // TODO(T118289674) - Implement HTTPBinaryCodec
   return 0;
 }

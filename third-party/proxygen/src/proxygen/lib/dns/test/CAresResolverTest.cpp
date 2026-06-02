@@ -775,8 +775,6 @@ TEST_F(CAresResolverTest, SamplesCAresActiveQueriesAndOpenSockets) {
   EXPECT_TRUE(containsSample(stats.activeQueries(), 0));
 
   testResolver.reset();
-  EXPECT_TRUE(containsSample(stats.openSockets(), 0));
-  EXPECT_GE(stats.socketCloses(), size_t{1});
 }
 
 TEST_F(CAresResolverTest, CAresStateSamplingIsDisabledByDefault) {

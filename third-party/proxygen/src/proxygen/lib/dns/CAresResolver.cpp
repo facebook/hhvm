@@ -625,6 +625,9 @@ CAresResolver::CAresResolver()
 }
 
 CAresResolver::~CAresResolver() {
+  // statsCollector_ may already be dangling during EventBase teardown.
+  statsCollector_ = &nullStatsCollector;
+
   if (channel_) {
     ares_destroy(channel_);
   }

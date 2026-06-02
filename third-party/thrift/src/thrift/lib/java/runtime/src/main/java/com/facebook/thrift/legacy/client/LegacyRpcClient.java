@@ -39,7 +39,7 @@ import org.apache.thrift.protocol.TMessage;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.protocol.TStruct;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 
 final class LegacyRpcClient implements RpcClient {
@@ -49,7 +49,8 @@ final class LegacyRpcClient implements RpcClient {
   private final AtomicInteger sequenceId;
   private final Channel channel;
   private final ThriftClientConfig nettyConfig;
-  private final MonoProcessor<Void> onClose;
+  private final Sinks.Empty<Void> onClose;
+  private volatile boolean closed;
   private final Scheduler scheduler;
   private final boolean forceExecutionOffEventLoop;
   private final Mono<?> emitExceptionOnClose;
@@ -62,18 +63,29 @@ final class LegacyRpcClient implements RpcClient {
     this.sequenceId = new AtomicInteger(0);
     this.channel = channel;
     this.nettyConfig = nettyConfig;
-    this.onClose = MonoProcessor.create();
+    this.onClose = Sinks.empty();
     this.alloc = RpcResources.getByteBufAllocator();
     this.scheduler = scheduler;
     this.forceExecutionOffEventLoop = forceExecutionOffEventLoop;
-    this.emitExceptionOnClose = onClose.then(Mono.error(ChannelNotActiveException.INSTANCE));
+    this.emitExceptionOnClose =
+        onClose.asMono().then(Mono.error(ChannelNotActiveException.INSTANCE));
 
-    NettyUtil.toMono(channel.closeFuture()).subscribe(onClose);
+    NettyUtil.toMono(channel.closeFuture())
+        .subscribe(
+            ignored -> {},
+            cause -> {
+              closed = true;
+              onClose.emitError(cause, Sinks.EmitFailureHandler.FAIL_FAST);
+            },
+            () -> {
+              closed = true;
+              onClose.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST);
+            });
   }
 
   @Override
   public Mono<Void> onClose() {
-    return onClose;
+    return onClose.asMono();
   }
 
   @Override
@@ -83,7 +95,7 @@ final class LegacyRpcClient implements RpcClient {
 
   @Override
   public boolean isDisposed() {
-    return onClose.isDisposed();
+    return closed;
   }
 
   private <T> Mono<T> forceExecutionOffLoopIfNecessary(Mono<T> mono) {
@@ -108,7 +120,7 @@ final class LegacyRpcClient implements RpcClient {
     // subscription).
     return Mono.defer(
         () -> {
-          final MonoProcessor<ClientResponsePayload<T>> processor = MonoProcessor.create();
+          final Sinks.One<ClientResponsePayload<T>> processor = Sinks.one();
           final int sequenceId = this.sequenceId.getAndIncrement();
           ByteBuf encodedRequest = null;
 
@@ -128,7 +140,7 @@ final class LegacyRpcClient implements RpcClient {
             // release it when the write completes (success or failure). Cancellation after
             // this point is handled by Netty's write completion listener.
             Mono<ClientResponsePayload<T>> response =
-                NettyUtil.toMono(channel.writeAndFlush(context)).then(processor);
+                NettyUtil.toMono(channel.writeAndFlush(context)).then(processor.asMono());
 
             response = emitExceptionOnClose(response);
 
@@ -149,7 +161,7 @@ final class LegacyRpcClient implements RpcClient {
     // subscription).
     return Mono.defer(
         () -> {
-          final MonoProcessor<Void> processor = MonoProcessor.create();
+          final Sinks.One<Void> processor = Sinks.one();
           ByteBuf encodedRequest = null;
 
           try {

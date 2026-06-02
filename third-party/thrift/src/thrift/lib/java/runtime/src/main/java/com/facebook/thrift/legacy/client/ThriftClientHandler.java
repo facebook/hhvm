@@ -53,7 +53,7 @@ import org.apache.thrift.protocol.TMessage;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.protocol.TProtocolUtil;
 import org.apache.thrift.transport.TTransportException;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 @SuppressWarnings("rawtypes")
 public final class ThriftClientHandler extends ChannelDuplexHandler {
@@ -82,14 +82,16 @@ public final class ThriftClientHandler extends ChannelDuplexHandler {
           p = promise instanceof VoidChannelPromise ? ctx.newPromise() : promise;
 
           p.addListener(
-              __ -> {
+              result -> {
                 final RequestContext remove = requestContexts.remove(sequenceId);
 
                 if (remove != null) {
-                  if (__.cause() != null) {
-                    remove.getProcessor().onError(__.cause());
+                  if (result.cause() != null) {
+                    remove
+                        .getProcessor()
+                        .emitError(result.cause(), Sinks.EmitFailureHandler.FAIL_FAST);
                   } else {
-                    remove.getProcessor().onComplete();
+                    remove.getProcessor().emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST);
                   }
                 }
               });
@@ -101,7 +103,7 @@ public final class ThriftClientHandler extends ChannelDuplexHandler {
         ctx.writeAndFlush(frame, p);
       } catch (Throwable t) {
         ReferenceCountUtil.safeRelease(frame);
-        requestContext.getProcessor().onError(t);
+        requestContext.getProcessor().emitError(t, Sinks.EmitFailureHandler.FAIL_FAST);
       }
     } else {
       ctx.writeAndFlush(msg, promise);
@@ -139,9 +141,10 @@ public final class ThriftClientHandler extends ChannelDuplexHandler {
         return;
       }
       final ClientRequestPayload payload = requestContext.getPayload();
-      final MonoProcessor processor = requestContext.getProcessor();
+      final Sinks.One processor = requestContext.getProcessor();
 
       processor
+          .asMono()
           .doFinally(
               __ -> {
                 ctx.fireChannelReadComplete();
@@ -157,9 +160,9 @@ public final class ThriftClientHandler extends ChannelDuplexHandler {
                 payload.getResponseReader(),
                 payload.getExceptionReaders(),
                 sequenceId);
-        processor.onNext(responsePayload);
+        processor.emitValue(responsePayload, Sinks.EmitFailureHandler.FAIL_FAST);
       } catch (Throwable t) {
-        processor.onError(t);
+        processor.emitError(t, Sinks.EmitFailureHandler.FAIL_FAST);
       }
     } else {
       ctx.fireChannelRead(msg);
@@ -281,7 +284,9 @@ public final class ThriftClientHandler extends ChannelDuplexHandler {
       final int sequenceId = frameInfo.get().getSequenceId();
       RequestContext requestContext = requestContexts.remove(sequenceId);
       if (requestContext != null) {
-        requestContext.getProcessor().onError(thriftException);
+        requestContext
+            .getProcessor()
+            .emitError(thriftException, Sinks.EmitFailureHandler.FAIL_FAST);
         return;
       }
     }
@@ -308,9 +313,9 @@ public final class ThriftClientHandler extends ChannelDuplexHandler {
   private void clearWithException(Throwable t) {
     try {
       for (RequestContext requestContext : requestContexts.values()) {
-        final MonoProcessor processor = requestContext.getProcessor();
+        final Sinks.One processor = requestContext.getProcessor();
         if (processor != null) {
-          processor.onError(t);
+          processor.emitError(t, Sinks.EmitFailureHandler.FAIL_FAST);
         }
       }
     } finally {

@@ -19,10 +19,10 @@ package com.facebook.thrift.legacy.client;
 import com.facebook.thrift.client.RpcOptions;
 import com.facebook.thrift.payload.ClientRequestPayload;
 import io.netty.buffer.ByteBuf;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 public class RequestContext<T, R> {
-  private final MonoProcessor<R> future;
+  private final Sinks.One<R> future;
   private final ClientRequestPayload<T> payload;
   private final ByteBuf encodedRequest;
   private final RpcOptions options;
@@ -30,7 +30,7 @@ public class RequestContext<T, R> {
   private final int sequenceId;
 
   public RequestContext(
-      final MonoProcessor<R> future,
+      final Sinks.One<R> future,
       final ClientRequestPayload<T> payload,
       final ByteBuf encodedRequest,
       final RpcOptions options,
@@ -44,7 +44,7 @@ public class RequestContext<T, R> {
     this.sequenceId = sequenceId;
   }
 
-  public MonoProcessor<R> getProcessor() {
+  public Sinks.One<R> getProcessor() {
     return future;
   }
 

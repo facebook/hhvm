@@ -1207,6 +1207,8 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       fetch_remote_old_decls = options.fetch_remote_old_decls;
       only_fetch_remote_old_decl_during_init =
         options.only_fetch_remote_old_decl_during_init;
+      disable_rust_provider_shallow_decl_invalidation =
+        options.disable_rust_provider_shallow_decl_invalidation;
       specify_manifold_api_key = options.specify_manifold_api_key;
       populate_member_heaps = options.populate_member_heaps;
       shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;

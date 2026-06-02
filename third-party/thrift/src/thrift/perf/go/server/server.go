@@ -18,6 +18,8 @@ package main
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net"
 	"time"
 
@@ -25,7 +27,6 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
 
 	"github.com/golang/glog"
-	"github.com/pkg/errors"
 )
 
 // Handler encapsulates parameters for your service processor
@@ -38,7 +39,7 @@ func Serve(addr string) error {
 	srv, err := newServer(proc, addr)
 
 	if err != nil {
-		return errors.Wrap(err, "failed to create thrift server")
+		return fmt.Errorf("failed to create thrift server: %w", err)
 	}
 
 	glog.Infof("starting thrift server on '%s'", addr)

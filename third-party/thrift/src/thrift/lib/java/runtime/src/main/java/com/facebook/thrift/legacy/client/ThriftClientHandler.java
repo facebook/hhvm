@@ -130,6 +130,14 @@ public final class ThriftClientHandler extends ChannelDuplexHandler {
       final ThriftFrame frame = (ThriftFrame) msg;
       final int sequenceId = frame.getSequenceId();
       final RequestContext<?, ?> requestContext = requestContexts.remove(sequenceId);
+      if (requestContext == null) {
+        // No in-flight request matches this sequenceId (a duplicate, late, or otherwise
+        // unexpected response). Release the decoded frame so its ByteBuf is not leaked,
+        // then stop processing this message.
+        frame.release();
+        ctx.fireChannelReadComplete();
+        return;
+      }
       final ClientRequestPayload payload = requestContext.getPayload();
       final MonoProcessor processor = requestContext.getProcessor();
 

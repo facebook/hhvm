@@ -258,17 +258,16 @@ struct ConstrainedFloat32 {
   3: ConstraintLevel not_a_number;
 }
 
-/// Enables the deprecated `isset` API for a struct.
+/// Enables `get_locally_set_fields()` for a struct.
 /// DO NOT ADD ANY NEW USAGE!
-/// The `isset` API is easy to use incorrectly and gives inconsistent
-/// results for `unqualified` fields depending on whether the struct
-/// was initialized from Python or deserialized. There are additional
-/// complexities arising from schema evolution.
+/// `get_locally_set_fields()` only works for structs constructed in the
+/// same process as the `get_locally_set_fields()` call. Usage with
+/// deserialized struct instances will LOG(ERROR) and return a set of
+/// the field names having non-`None` values.
 ///
-/// In all cases, there are better, cleaner alternatives to using this API.
-/// For example, consider using `optional` to signify nullable fields.
+/// An unqualified field's set-ness is discarded on serialization.
+/// A better alternative is to use `optional` for nullable fields.
 /// Alternatively, use a custom default (unqualified fields only) to provide
-/// a semantically meaningful default value that signifies the field is not set.
+/// a semantically meaningful default value that signifies the field is unset.
 @scope.Struct
-@scope.Exception
 struct EnableUnsafeIssetInspection {}

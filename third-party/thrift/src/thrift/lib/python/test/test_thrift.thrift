@@ -812,9 +812,3 @@ struct StructWithIssetInspection {
   3: bool bool_field;
   4: optional list<i32> opt_list_field;
 }
-
-@python.EnableUnsafeIssetInspection
-exception ErrorWithIssetInspection {
-  1: string message;
-  2: optional i32 code;
-}

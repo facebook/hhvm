@@ -24,7 +24,6 @@ import unittest
 from test_thrift.types import (
     Color,
     easy,
-    ErrorWithIssetInspection,
     FANCY_CONST,
     File,
     hard,
@@ -694,26 +693,7 @@ class GetLocallySetFieldsTests(unittest.TestCase):
         ):
             get_locally_set_fields(s)
 
-    def test_generated_error(self) -> None:
-        e = ErrorWithIssetInspection(message="oops", code=42)
-        if is_auto_migrated():
-            # thrift-python codegen does not propagate
-            # @python.EnableUnsafeIssetInspection to exceptions
-            with self.assertRaisesRegex(
-                AttributeError, "does not support locally set field inspection"
-            ):
-                get_locally_set_fields(e)
-        else:
-            result = get_locally_set_fields(e)
-            self.assertIn("message", result)
-            self.assertIn("code", result)
-
-            e2 = ErrorWithIssetInspection(message="oops")
-            result2 = get_locally_set_fields(e2)
-            self.assertIn("message", result2)
-            self.assertNotIn("code", result2)
-
-    def test_generated_error_not_annotated_raises(self) -> None:
+    def test_generated_error_raises(self) -> None:
         e = UnusedError(message="ACK")
         with self.assertRaisesRegex(
             AttributeError, "does not support locally set field inspection"

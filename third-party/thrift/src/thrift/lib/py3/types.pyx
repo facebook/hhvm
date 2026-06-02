@@ -44,7 +44,6 @@ from thrift.python.types import (
     Struct as _fbthrift_python_Struct,
     StructOrUnion as _fbthrift_python_StructOrUnion,
     get_locally_set_fields as _fbthrift_python_get_locally_set_fields,
-    isset as _fbthrift_python_isset,
     Union as _fbthrift_python_Union,
 )
 
@@ -98,26 +97,6 @@ class StructMeta(type):
             )
 
         return type.__new__(cls, name, bases, classdict)
-
-    # We set helper functions here since they can't possibly confict with field names
-    @staticmethod
-    def isset_DEPRECATED(struct):
-        if isinstance(struct, (_fbthrift_python_Struct, _fbthrift_python_GeneratedError, _fbthrift_python_Union)):
-            return _IsSet(type(struct).__name__, _fbthrift_python_isset(struct))
-        if hasattr(struct.__class__, "_FBTHRIFT__PYTHON_CLASS"):
-            return _IsSet(type(struct).__name__, struct._fbthrift__isset())
-        elif isinstance(struct, Struct):
-            return (<Struct>struct)._fbthrift_isset()
-        elif isinstance(struct, GeneratedError):
-            return (<GeneratedError>struct)._fbthrift_isset()
-
-    @staticmethod
-    def isset(struct):
-        warnings.warn(
-            "isset is deprecated, check whether field equal to non-default value instead",
-            DeprecationWarning,
-        )
-        return StructMeta.isset_DEPRECATED(struct)
 
     @staticmethod
     def update_nested_field(obj, path_to_values):
@@ -199,9 +178,6 @@ class _IsSet:
         self.__name__ = n
         self.__dict__ = d
 
-    def __repr__(self):
-        args = ''.join(f', {name}={value}' for name, value in self.__dict__.items())
-        return f'Struct.isset(<{self.__name__}>{args})'
 
 cdef class Struct:
     """
@@ -312,9 +288,14 @@ def get_locally_set_fields(struct):
                 f"{type(struct).__name__} does not support locally set field inspection. "
                 "Add @python.EnableUnsafeIssetInspection to the struct definition."
             )
-        isset_result = StructMeta.isset_DEPRECATED(struct)
+        if hasattr(struct.__class__, "_FBTHRIFT__PYTHON_CLASS"):
+            isset_dict = struct._fbthrift__isset()
+        elif isinstance(struct, Struct):
+            isset_dict = vars((<Struct>struct)._fbthrift_isset())
+        else:
+            isset_dict = vars((<GeneratedError>struct)._fbthrift_isset())
         return frozenset(
-            name for name, is_set in vars(isset_result).items() if is_set
+            name for name, is_set in isset_dict.items() if is_set
         )
     raise TypeError(
         f"{type(struct).__name__} is not a thrift struct"

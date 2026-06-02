@@ -23,17 +23,8 @@ import convertible.thrift_types as python_types
 import convertible.ttypes as py_deprecated_types
 import convertible.types as py3_types
 from thrift.py3.converter import to_py3_struct
-from thrift.py3.types import BadEnum, Enum, Struct
+from thrift.py3.types import BadEnum, Enum
 from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
-
-
-# Reimplementing brokenInAutoMigrate using convertible because including testing.thrift and
-# convertible.thrift in the same binary creates linker errors
-def brokenInAutoMigrate():  # pyre-ignore[3] unittest isn't very well typed
-    # kinda janky way of testing if we're in auto migrate mode or not
-    if py3_types.Simple == python_types.Simple:
-        return unittest.expectedFailure
-    return lambda func: func
 
 
 class PyDeprecatedToPy3ConverterTest(unittest.TestCase):
@@ -134,15 +125,10 @@ class PyDeprecatedToPy3ConverterTest(unittest.TestCase):
         self.assertEqual(complex_union.type, py3_types.Union.Type.simple_)
         self.assertEqual(complex_union.simple_.intField, 42)
 
-    @brokenInAutoMigrate()
     def test_optional_defaults(self) -> None:
         converted = py_deprecated_types.OptionalDefaultsStruct()._to_py3()
-        # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.py3_types._T]]` for 1st
-        #  param but got `OptionalDefaultsStruct`.
-        self.assertFalse(Struct.isset_DEPRECATED(converted).sillyString)
-        # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.py3_types._T]]` for 1st
-        #  param but got `OptionalDefaultsStruct`.
-        self.assertFalse(Struct.isset_DEPRECATED(converted).sillyColor)
+        self.assertEqual(converted.sillyString, "default string")
+        self.assertEqual(converted.sillyColor, py3_types.Color.RED)
 
     def test_struct_with_mismatching_field(self) -> None:
         tomayto = py_deprecated_types.Tomayto(
@@ -433,12 +419,10 @@ class PythonToPy3ConverterTest(unittest.TestCase):
 
     def test_optional_defaults(self) -> None:
         converted = python_types.OptionalDefaultsStruct()._to_py3()
-        # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.py3_types._T]]` for 1st
-        #  param but got `OptionalDefaultsStruct`.
-        self.assertFalse(Struct.isset_DEPRECATED(converted).sillyString)
-        # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.py3_types._T]]` for 1st
-        #  param but got `OptionalDefaultsStruct`.
-        self.assertFalse(Struct.isset_DEPRECATED(converted).sillyColor)
+        # In auto-migrate mode, unset optional fields are None;
+        # in py3 mode, they show their default values
+        self.assertIn(converted.sillyString, (None, "default string"))
+        self.assertIn(converted.sillyColor, (None, py3_types.Color.RED))
 
     def test_struct_with_mismatching_field(self) -> None:
         tomayto = python_types.Tomayto(

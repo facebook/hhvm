@@ -24,6 +24,7 @@ import unittest
 from test_thrift.types import (
     Color,
     easy,
+    ErrorWithIssetInspection,
     FANCY_CONST,
     File,
     hard,
@@ -34,7 +35,6 @@ from test_thrift.types import (
     Nested2,
     Nested3,
     NonCopyable,
-    NoSaneDefault,
     numerical,
     OptionalFile,
     Optionals,
@@ -53,7 +53,6 @@ from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
     brokenInAutoMigrate,
     is_auto_migrated,
 )
-from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize, serialize
 from thrift.py3.types import get_locally_set_fields, Struct
 from thrift.python.types import BadEnum
@@ -67,65 +66,10 @@ except ImportError:
 
 
 class StructTests(unittest.TestCase):
-    def test_isset_Struct(self) -> None:
-        serialized = b'{"name":"/dev/null","type":8}'
-        file = deserialize(File, serialized, protocol=Protocol.JSON)
-        # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st
-        #  param but got `File`.
-        self.assertTrue(Struct.isset_DEPRECATED(file).type)
-        # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st
-        #  param but got `File`.
-        self.assertFalse(Struct.isset_DEPRECATED(file).permissions)
-        # required fields are always set
-        # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st
-        #  param but got `File`.
-        self.assertTrue(Struct.isset_DEPRECATED(file).name)
-
-        serialized = b'{"name":"/dev/null"}'
-        file = deserialize(File, serialized, protocol=Protocol.JSON)
-        self.assertEqual(file.type, Kind.REGULAR)
-        # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st
-        #  param but got `File`.
-        self.assertFalse(Struct.isset_DEPRECATED(file).type)
-
     def test_property(self) -> None:
         r = Runtime(property="foo", int_list_val=[2, 3, 4])
         self.assertEqual(r.property, "foo")
         self.assertEqual(r.int_list_val, [2, 3, 4])
-
-    def test_isset_repr(self) -> None:
-        serialized = b'{"name":"/dev/null","type":8}'
-        file = deserialize(File, serialized, protocol=Protocol.JSON)
-        self.assertEqual(
-            "Struct.isset(<File>, name=True, permissions=False, type=True)",
-            # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for
-            #  1st param but got `File`.
-            repr(Struct.isset_DEPRECATED(file)),
-        )
-        self.assertEqual(
-            "Struct.isset(<File>, name=True, permissions=False, type=True)",
-            # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for
-            #  1st param but got `File`.
-            str(Struct.isset_DEPRECATED(file)),
-        )
-
-    def test_isset_Union(self) -> None:
-        i = Integers(large=2)
-        with self.assertRaises(TypeError):
-            # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for
-            #  1st param but got `Integers`.
-            Struct.isset_DEPRECATED(i).large
-
-    def test_isset_Error(self) -> None:
-        e = UnusedError()
-        # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st
-        #  param but got `UnusedError`.
-        self.assertFalse(Struct.isset_DEPRECATED(e).message)
-
-        e = UnusedError(message="ACK")
-        # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st
-        #  param but got `UnusedError`.
-        self.assertTrue(Struct.isset_DEPRECATED(e).message)
 
     def test_copy(self) -> None:
         x = easy(val=1, an_int=Integers(small=300), name="foo", val_list=[1, 2, 3, 4])
@@ -406,19 +350,6 @@ class StructTests(unittest.TestCase):
         self.assertEqual(s.default_bad_enum.value, 0)
         self.assertIsInstance(s.default_bad_enum, BadEnum)
         self.assertEqual(s.color, Color(0))
-        # pyre-ignore[6]: typing is weird because it has to work for py3 and python
-        field_isset = Struct.isset_DEPRECATED(s)
-        # field is considered set even though it's bad enum
-        self.assertTrue(field_isset.default_bad_enum)
-        self.assertTrue(field_isset.color)
-
-        # NOTE: if the protocol is JSON, the isset behavior deviates
-        buf = b"{}"
-        s = deserialize(StructWithEnumFields, buf, protocol=Protocol.JSON)
-        # pyre-ignore[6]: typing is weird because it has to work for py3 and python
-        field_isset = Struct.isset_DEPRECATED(s)
-        self.assertFalse(field_isset.default_bad_enum)
-        self.assertFalse(field_isset.color)
 
 
 class NumericalConversionsTests(unittest.TestCase):
@@ -590,68 +521,31 @@ class NumericalConversionsTests(unittest.TestCase):
                 self.assertEqual(m.opt_pointless_default_str, "")
                 self.assertEqual(m.opt_pointless_default_int, 0)
 
-        def assert_isset(m: mixed, deserialized: bool = False) -> None:
-            # pyre-fixme[6]: the pyre typing for this is broken in thrift-py3
-            isset = Struct.isset_DEPRECATED(m)
-
-            for fld_name, fld_val in m:
-                isset_val = getattr(isset, fld_name, None)
-                if fld_name.endswith("ref"):
-                    # in thrift-python, it's just a normal field
-                    # the `mixed` struct has one unqualified field and one `optional` field
-                    if is_auto_migrated():
-                        self.assertEqual(
-                            isset_val, deserialized and fld_val is not None, fld_name
-                        )
-                    else:
-                        # @Ref fields are excluded from isset in thrift-py3
-                        self.assertIsNone(isset_val, fld_name)
-                elif fld_name == "some_field_":
-                    self.assertEqual(
-                        isset_val, fld_val is not None, f"some_field_={fld_val}"
-                    )
-                elif fld_name.startswith("opt_"):
-                    expected = fld_val is not None if is_auto_migrated() else False
-                    self.assertEqual(
-                        isset_val,
-                        expected,
-                        fld_name,
-                    )
-                else:  # unqualified field
-                    self.assertEqual(isset_val, deserialized, fld_name)
-
         # constructor
         m = mixed()
         assert_mixed(m)
-        assert_isset(m)
 
         # call operator
         m = m(some_field_="don't care")
         self.assertEqual(m.some_field_, "don't care")
         assert_mixed(m)
-        assert_isset(m)
 
         # serialization round-trip
         m = deserialize(mixed, serialize(m))
         assert_mixed(m)
-        assert_isset(m, deserialized=True)
 
         ### Now with explicit `None` set
         # in py3, even setting the field explicitly to None:
         #   - the field value is still the default (non-None)
-        #   - the issset value is still False
         #  This is deeply regrettable.
         m = mixed(opt_field=None)
         assert_mixed(m)
-        assert_isset(m)
 
         m = m(opt_field=None)
         assert_mixed(m)
-        assert_isset(m)
 
         m = deserialize(mixed, serialize(m))
         assert_mixed(m)
-        assert_isset(m, deserialized=True)
 
         # basic sanity check for normal set behavior
         non_opt = mixed(
@@ -668,14 +562,6 @@ class NumericalConversionsTests(unittest.TestCase):
         self.assertEqual(non_opt.opt_enum, Color.blue)
         self.assertEqual(non_opt.opt_pointless_default_str, "bar")
         self.assertEqual(non_opt.opt_pointless_default_int, 4)
-        # pyre-fixme[6]: the pyre typing for this is broken in thrift-py3
-        non_opt_isset = Struct.isset_DEPRECATED(non_opt)
-        for field, field_value in non_opt:
-            if not field.startswith("opt_"):
-                continue
-            self.assertEqual(
-                getattr(non_opt_isset, field, False), field_value is not None, field
-            )
 
     def roundtrip(self, x: numerical) -> numerical:
         return deserialize(numerical, serialize(x))
@@ -781,9 +667,60 @@ class GetLocallySetFieldsTests(unittest.TestCase):
         self.assertIn("bool_field", result)
         self.assertNotIn("opt_str_field", result)
 
+    def test_deserialized_struct(self) -> None:
+        s = StructWithIssetInspection(int_field=42, opt_str_field="hello")
+        s2 = deserialize(StructWithIssetInspection, serialize(s))
+        result = get_locally_set_fields(s2)
+        self.assertIn("int_field", result)
+        self.assertIn("opt_str_field", result)
+        # unqualified fields are always serialized, so they appear "set" after round-trip
+        self.assertIn("bool_field", result)
+        self.assertNotIn("opt_list_field", result)
+
+    def test_deserialized_default_struct(self) -> None:
+        s = deserialize(
+            StructWithIssetInspection, serialize(StructWithIssetInspection())
+        )
+        result = get_locally_set_fields(s)
+        self.assertIn("int_field", result)
+        self.assertIn("bool_field", result)
+        self.assertNotIn("opt_str_field", result)
+        self.assertNotIn("opt_list_field", result)
+
     def test_not_annotated_raises(self) -> None:
         s = easy(val=42, name="test")
         with self.assertRaisesRegex(
             AttributeError, "does not support locally set field inspection"
         ):
             get_locally_set_fields(s)
+
+    def test_generated_error(self) -> None:
+        e = ErrorWithIssetInspection(message="oops", code=42)
+        if is_auto_migrated():
+            # thrift-python codegen does not propagate
+            # @python.EnableUnsafeIssetInspection to exceptions
+            with self.assertRaisesRegex(
+                AttributeError, "does not support locally set field inspection"
+            ):
+                get_locally_set_fields(e)
+        else:
+            result = get_locally_set_fields(e)
+            self.assertIn("message", result)
+            self.assertIn("code", result)
+
+            e2 = ErrorWithIssetInspection(message="oops")
+            result2 = get_locally_set_fields(e2)
+            self.assertIn("message", result2)
+            self.assertNotIn("code", result2)
+
+    def test_generated_error_not_annotated_raises(self) -> None:
+        e = UnusedError(message="ACK")
+        with self.assertRaisesRegex(
+            AttributeError, "does not support locally set field inspection"
+        ):
+            get_locally_set_fields(e)
+
+    def test_union_raises(self) -> None:
+        i = Integers(large=2)
+        with self.assertRaises((AttributeError, TypeError)):
+            get_locally_set_fields(i)

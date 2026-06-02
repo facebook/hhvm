@@ -20,11 +20,10 @@ from typing import (
     Iterable,
     Iterator,
     Mapping,
-    Protocol,
     Sequence,
     Tuple,
-    Type,
     TypeVar,
+    Union as TypingUnion,
 )
 
 import thrift.python.types
@@ -43,17 +42,13 @@ class __NotSet:
 
 NOTSET = __NotSet()
 
-# pyre-fixme[52]: Protocol `HasIsSet` has private property `__fbthrift_IsSet`.
-class HasIsSet(Protocol[_T]):
-    __fbthrift_IsSet: Type[_T]
-
 class StructMeta(type, Iterable[Tuple[str, Any]]):
-    @staticmethod
-    def isset_DEPRECATED(struct: HasIsSet[_T]) -> _T: ...
     @staticmethod
     def update_nested_field(obj: _T, path_to_values: Mapping[str, Any]) -> _T: ...
 
-def get_locally_set_fields(struct: Struct) -> frozenset[str]: ...
+def get_locally_set_fields(
+    struct: TypingUnion[Struct, GeneratedError],
+) -> frozenset[str]: ...
 
 class Struct(Iterable[Tuple[str, Any]], metaclass=StructMeta):
     def __copy__(self: _T) -> _T: ...

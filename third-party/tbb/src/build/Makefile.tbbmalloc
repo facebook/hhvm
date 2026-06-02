@@ -26,7 +26,7 @@ TESTFILE=tbbmalloc
 include $(tbb_root)/build/common.inc
 DEBUG_SUFFIX=$(findstring _debug,$(call cross_cfg,_$(cfg)))
 
-MALLOC.STATIC = $(LIB_OUTPUT_KEY)libtbbmalloc$(CPF_SUFFIX)$(DEBUG_SUFFIX).a
+MALLOC.STATIC = libtbbmalloc$(CPF_SUFFIX)$(DEBUG_SUFFIX).a
 
 MALLOC_ROOT ?= $(tbb_root)/src/tbbmalloc
 MALLOC_SOURCE_ROOT ?= $(MALLOC_ROOT)

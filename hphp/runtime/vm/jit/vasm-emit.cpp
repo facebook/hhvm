@@ -200,6 +200,15 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
   }
   auto ai = optAI.get_pointer();
 
+  if (arch::any<arch::ARM>()) {
+    // Local buffers are relocated before publication. Keep the ADRP
+    // literal-load form available there so relocation can shrink it when the
+    // final literal is close enough.
+    if (do_relocate || code.isLocal() || Cfg::Jit::ArmForceFarLiteral) {
+      vunit.enableFarLiteral();
+    }
+  }
+
   Vtext vtext{main, cold, *frozen, code.data()};
   bindDataPtrs(vunit, vtext.data());
   emit(vunit, vtext, meta, ai);

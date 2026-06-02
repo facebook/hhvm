@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
@@ -22,6 +24,15 @@
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+
+#ifdef __aarch64__
+#include "hphp/runtime/vm/jit/vasm-util-arm.h"
+#endif
+
+#include "hphp/util/arch.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/data-block.h"
+#include "hphp/vixl/hphp-compat.h"
 
 #if defined(__x86_64__)
 #include <xmmintrin.h>
@@ -32,25 +43,30 @@
 namespace HPHP { namespace jit {
 
 namespace {
-template<typename T, typename Lcodegen, typename Ltest>
-void test_function(Lcodegen lcodegen, Ltest ltest) {
-  auto blockSize = 4096;
+constexpr size_t kDefaultBlockSize = 4096;
+constexpr size_t kDataSize = 100;
+
+template<typename Lcodegen, typename Ltest>
+void test_vasm(size_t blockSize,
+               Lcodegen lcodegen,
+               Ltest ltest,
+               bool forceFarLiteral = false) {
   auto code = static_cast<uint8_t*>(mmap(nullptr, blockSize,
                                          PROT_READ | PROT_WRITE | PROT_EXEC,
                                          MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
   SCOPE_EXIT { munmap(code, blockSize); };
 
-  auto const dataSize = 100;
-  auto const codeSize = blockSize - dataSize;
+  auto const codeSize = blockSize - kDataSize;
   // None of these tests should use much data.
   auto data_buffer = code + codeSize;
 
   CodeBlock main;
   main.init(code, codeSize, "test");
   DataBlock data;
-  data.init(data_buffer, dataSize, "data");
+  data.init(data_buffer, kDataSize, "data");
 
   Vunit unit;
+  if (forceFarLiteral) unit.enableFarLiteral();
   Vasm vasm{unit};
   Vtext text { main, data };
 
@@ -62,7 +78,28 @@ void test_function(Lcodegen lcodegen, Ltest ltest) {
   CGMeta meta;
   emit(unit, text, meta, nullptr);
 
-  ltest((T)code);
+  ltest(code, main, meta);
+}
+
+template<typename T, typename Lcodegen, typename Ltest>
+void test_function(Lcodegen lcodegen, Ltest ltest) {
+  test_vasm(kDefaultBlockSize, lcodegen, [&] (uint8_t* code,
+                                              CodeBlock&,
+                                              const CGMeta&) {
+    ltest((T)code);
+  });
+}
+
+template<typename Lcodegen, typename Ltest>
+void test_emission(size_t blockSize,
+                   Lcodegen lcodegen,
+                   Ltest ltest,
+                   bool forceFarLiteral = false) {
+  test_vasm(blockSize, lcodegen, [&] (uint8_t*,
+                                      CodeBlock& main,
+                                      const CGMeta& meta) {
+    ltest(main, meta);
+  }, forceFarLiteral);
 }
 }
 
@@ -117,5 +154,63 @@ TEST(Vasm, PrintVptr) {
   p.base = Vreg{};
   EXPECT_EQ("[%fs - 0x10]", show(p));
 }
+
+#ifdef __aarch64__
+
+TEST(Vasm, ArmNearLiteralLoadStaysLiteralLdr) {
+  test_emission(4096, [] (Vout& v) {
+    v << leap{reg::rip[(intptr_t)0x12340000], rarg(0)};
+    v << ret{RegSet{}};
+  }, [] (CodeBlock& main, const CGMeta&) {
+    auto const start = vixl::Instruction::Cast(main.base());
+    auto const load = jit::arm::LoadLiteral::at(start);
+
+    ASSERT_TRUE(load);
+    EXPECT_FALSE(load.isFar());
+
+    EXPECT_EQ(start->Mask(vixl::LoadLiteralMask), vixl::LDR_w_lit);
+  });
+}
+
+TEST(Vasm, ArmFarLiteralLoadPatchesToAdrpLdr) {
+  constexpr size_t kBlockSize = 2 * 1024 * 1024;
+  constexpr size_t kFillerNops = (1024 * 1024) / vixl::kInstructionSize + 1024;
+
+  test_emission(kBlockSize, [] (Vout& v) {
+    v << leap{reg::rip[(intptr_t)0x12340000], rarg(0)};
+    for (size_t i = 0; i < kFillerNops; ++i) {
+      v << nop{};
+    }
+    v << ret{RegSet{}};
+  }, [] (CodeBlock& main, const CGMeta&) {
+    auto const start = vixl::Instruction::Cast(main.base());
+    auto const load = jit::arm::LoadLiteral::at(start);
+
+    ASSERT_TRUE(load && load.isFar());
+    auto const ldr = load.ldr();
+    EXPECT_EQ(ldr->Mask(vixl::LoadStoreUnsignedOffsetMask), vixl::LDR_w_unsigned);
+    EXPECT_EQ(start->Rd(), ldr->Rn());
+    EXPECT_EQ(start->Rd(), ldr->Rt());
+  },
+  // Direct code emission no longer retries on far literals. Force the
+  // ADRP form explicitly so this test still exercises the far-literal rewrite.
+  true);
+}
+
+TEST(Vasm, ArmMcprepSeedsTaggedMovqLiteral) {
+  test_emission(4096, [] (Vout& v) {
+    v << mcprep{rarg(0)};
+    v << ret{RegSet{}};
+  }, [] (CodeBlock& main, const CGMeta&) {
+    auto const start = vixl::Instruction::Cast(main.base());
+    auto const load = jit::arm::LoadLiteral::at(start);
+    ASSERT_TRUE(load);
+    auto const literal =
+      *reinterpret_cast<uint64_t*>(load.literalAddress());
+    EXPECT_EQ(literal, (reinterpret_cast<uint64_t>(main.base()) << 1) | 1);
+  });
+}
+
+#endif
 
 } }

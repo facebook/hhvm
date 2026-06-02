@@ -188,6 +188,7 @@ struct Vauto {
   {
     m_unit.entry = Vlabel(this->main());
     m_unit.name = name;
+    if (m_relocate) m_unit.enableFarLiteral();
   }
 
   Vunit& unit() { return m_unit; }

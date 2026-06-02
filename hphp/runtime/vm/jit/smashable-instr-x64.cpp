@@ -48,8 +48,9 @@ namespace HPHP::jit::x64 {
     return theStart;                    \
   }())
 
+// Far-literal encodings are ARM-only; x64 movq embeds its immediate directly.
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
-                      PhysReg d) {
+                      PhysReg d, bool /*emitFarLiteral*/) {
   auto const start =
     EMIT_BODY(cb, movq, Movq, 0xdeadbeeffeedface, d);
 

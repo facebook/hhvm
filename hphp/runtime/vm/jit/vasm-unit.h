@@ -283,6 +283,12 @@ struct Vunit {
   bool padding{false};
   bool profiling{false};
   Optional<TransContext> context;
+
+  // Arm64 only: when set, pooled literal loads are emitted as adrp+ldr so
+  // relocation can later shrink them when the final literal is in range.
+  bool farLiteralEnabled() const { return m_farLiteralEnabled; }
+  void enableFarLiteral() { m_farLiteralEnabled = true; }
+  bool m_farLiteralEnabled{false};
   StructuredLogEntry* log_entry{nullptr};
   Annotations annotations;
   const char* name{nullptr}; // used for unique stubs

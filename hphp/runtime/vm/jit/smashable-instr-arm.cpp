@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/align-arm.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/vasm-util-arm.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
@@ -40,21 +41,50 @@ namespace HPHP::jit::arm {
  * does, however, entail an indirect jump.
  */
 
+void emitPooledLiteralLoad(vixl::MacroAssembler& a,
+                           CodeBlock& cb,
+                           CGMeta& meta,
+                           uint64_t val,
+                           vixl::Register dst,
+                           uint8_t width,
+                           bool smashable,
+                           bool emitFarLiteral) {
+  auto const loadStart = cb.frontier();
+
+  if (emitFarLiteral) {
+    auto const base = vixl::Register(dst.GetCode(), 64);
+    a.adrp(base, int64_t{0});
+    a.Ldr(dst, vixl::MemOperand(base, 0));
+  } else {
+    vixl::Label data;
+    a.bind(&data);
+    a.Ldr(dst, &data);
+  }
+
+  poolLiteral(
+    cb,
+    meta,
+    val,
+    width,
+    smashable,
+    loadStart,
+    emitFarLiteral
+  );
+}
+
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& meta, uint64_t imm,
-                      PhysReg d) {
+                      PhysReg d, bool emitFarLiteral) {
   align(cb, &meta, Alignment::SmashMovq, AlignContext::Live);
 
   vixl::MacroAssembler a { cb };
-  vixl::Label imm_data;
 
+  auto const sync_start = cb.frontier();
   auto const the_start = cb.frontier();
   meta.smashableLocations.insert(the_start);
 
-  poolLiteral(cb, meta, (uint64_t)imm, 64, true);
-  a.bind(&imm_data);
-  a.Ldr(x2a(d), &imm_data);
+  emitPooledLiteralLoad(a, cb, meta, imm, x2a(d), 64, true, emitFarLiteral);
 
-  cb.sync(the_start);
+  cb.sync(sync_start);
   return the_start;
 }
 
@@ -132,25 +162,40 @@ bool targetsInst(const vixl::Instruction* target,
   }
   return target == inst;
 }
+
+arm::LoadLiteral smashableMovqLoad(const vixl::Instruction* start) {
+  auto const load =
+    arm::LoadLiteral::at(const_cast<vixl::Instruction*>(start));
+  if (!load || load.width() != 64) return {};
+  return load;
+}
+
+arm::LoadLiteral smashableVeneerLoad(const vixl::Instruction* start) {
+  using namespace vixl;
+
+  auto const load =
+    arm::LoadLiteral::at(const_cast<vixl::Instruction*>(start));
+  if (!load || load.width() != 32) return {};
+
+  auto const br = load.ldr()->GetNextInstruction();
+  if (br->Mask(UnconditionalBranchToRegisterMask) != BR ||
+      br->Rn() != load.destReg()) {
+    return {};
+  }
+
+  return load;
+}
+
 }
 
 bool possiblySmashableMovq(TCA inst) {
   using namespace vixl;
-  auto ldr = Instruction::CastConst(inst);
-  return (ldr->IsLoadLiteral() &&
-          ldr->Mask(LoadLiteralMask) == LDR_x_lit);
+  auto const start = Instruction::CastConst(inst);
+  return bool(smashableMovqLoad(start));
 }
 
-bool isSmashableVeneer(const vixl::Instruction* ldr) {
-  using namespace vixl;
-
-  auto const br = ldr->GetNextInstruction();
-  auto const rd = ldr->Rd();
-
-  return (ldr->IsLoadLiteral() &&
-          ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
-          br->Mask(UnconditionalBranchToRegisterMask) == BR &&
-          br->Rn() == rd);
+bool isSmashableVeneer(const vixl::Instruction* start) {
+  return bool(smashableVeneerLoad(start));
 }
 
 bool possiblySmashableCall(TCA inst) {
@@ -185,8 +230,12 @@ void smashMovq(TCA inst, uint64_t target) {
   using namespace vixl;
   assertx(possiblySmashableMovq(inst));
 
-  Instruction* ldr = Instruction::Cast(inst);
-  patchTarget64(ldr->GetLiteralAddress<uint8_t*>(), reinterpret_cast<TCA>(target));
+  auto const load = smashableMovqLoad(Instruction::Cast(inst));
+  assertx(load);
+  patchTarget64(
+    reinterpret_cast<TCA>(load.literalAddress()),
+    reinterpret_cast<TCA>(target)
+  );
 }
 
 void smashCmpq(TCA /*inst*/, uint32_t /*target*/) {
@@ -205,8 +254,8 @@ void smashCall(TCA inst, TCA target) {
   }
 
   auto const bl = Instruction::Cast(inst);
-  auto const ldr = bl->ImmPCOffsetTarget();
-  patchTarget32(ldr->GetLiteralAddress<uint8_t*>(), target);
+  auto const veneer = bl->ImmPCOffsetTarget();
+  patchTarget32(smashableVeneerLoad(veneer).literalAddress(veneer), target);
 
   // If the target can be reached through a direct call, then patch the original
   // call.  Notice that this optimization prevents a debugger guard from being
@@ -246,8 +295,8 @@ void smashJmp(TCA inst, TCA target) {
   }
 
   auto const b = Instruction::Cast(inst);
-  auto const ldr = b->ImmPCOffsetTarget();
-  patchTarget32(ldr->GetLiteralAddress<uint8_t*>(), target);
+  auto const veneer = b->ImmPCOffsetTarget();
+  patchTarget32(smashableVeneerLoad(veneer).literalAddress(veneer), target);
 
   // If the target can be reached through a direct jump, then patch the original
   // jump.  Notice that this optimization prevents a debugger guard from being
@@ -285,8 +334,8 @@ void smashJcc(TCA inst, TCA target) {
   }
 
   auto const b = Instruction::Cast(inst);
-  auto const ldr = b->ImmPCOffsetTarget();
-  patchTarget32(ldr->GetLiteralAddress<uint8_t*>(), target);
+  auto const veneer = b->ImmPCOffsetTarget();
+  patchTarget32(smashableVeneerLoad(veneer).literalAddress(veneer), target);
 
   // If the target can be reached through a direct branch, then patch the
   // original branch.  Notice that this optimization prevents a debugger guard
@@ -323,8 +372,9 @@ uint64_t smashableMovqImm(TCA inst) {
   using namespace vixl;
 
   assertx(possiblySmashableMovq(inst));
-  Instruction* ldr = Instruction::Cast(inst);
-  return *reinterpret_cast<uint64_t*>(ldr->GetLiteralAddress<uint8_t*>());
+  auto const load = smashableMovqLoad(Instruction::Cast(inst));
+  assertx(load);
+  return *reinterpret_cast<uint64_t*>(load.literalAddress());
 }
 
 uint32_t smashableCmpqImm(TCA /*inst*/) {
@@ -339,9 +389,12 @@ static TCA smashableTarget(TCA inst) {
   using namespace vixl;
 
   auto const b = Instruction::Cast(inst);
-  auto const ldr = b->ImmPCOffsetTarget();
-  assertx(isSmashableVeneer(ldr));
-  auto const target32 = *reinterpret_cast<uint32_t*>(ldr->GetLiteralAddress<uint8_t*>());
+  auto const veneer = b->ImmPCOffsetTarget();
+  assertx(isSmashableVeneer(veneer));
+  auto const target32 =
+    *reinterpret_cast<uint32_t*>(
+      smashableVeneerLoad(veneer).literalAddress(veneer)
+    );
   assertx((target32 & 3) == 0);
   return reinterpret_cast<TCA>(target32);
 }
@@ -393,16 +446,25 @@ bool optimizeSmashedJcc(TCA inst) {
   auto offset = (intptr_t)target - (intptr_t)b;
   assertx(!is_int21(offset)); // otherwise smashJcc would have optimized it
 
-  auto const ldr = b->ImmPCOffsetTarget();
-  assertx(ldr->IsLoadLiteral() && ldr->Mask(LoadLiteralMask) == LDR_w_lit);
-  offset = (intptr_t)target - (intptr_t)ldr;
+  auto const veneer = b->ImmPCOffsetTarget();
+  auto const load = smashableVeneerLoad(veneer);
+  assertx(load);
+
+  offset = (intptr_t)target - (intptr_t)veneer;
 
   if (is_int28(offset)) {
+    auto const veneerInstrs = load.instrCount() + 1; // load + BR
     CodeBlock tmpBlock;
-    tmpBlock.init((TCA)ldr, 2 * kInstructionSize, "optimizeSmashedJcc");
+    tmpBlock.init(
+      (TCA)veneer,
+      veneerInstrs * kInstructionSize,
+      "optimizeSmashedJcc"
+    );
     MacroAssembler a{tmpBlock};
-    a.b(offset >> kInstructionSizeLog2); // replace the ldr
-    a.nop(); // replace the br
+    a.b(offset >> kInstructionSizeLog2);
+    for (auto i = size_t{1}; i < veneerInstrs; ++i) {
+      a.nop();
+    }
     return true;
   }
 

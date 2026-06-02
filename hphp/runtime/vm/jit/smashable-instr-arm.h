@@ -23,6 +23,8 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
+#include "hphp/vixl/hphp-compat.h"
+
 namespace HPHP::jit {
 
 struct CGMeta;
@@ -36,17 +38,27 @@ namespace arm {
  */
 
 /*
- * Number of bytes in the instruction sequence.
+ * Maximum number of bytes in the instruction sequence. Smashable movq emits a
+ * direct LDR normally and ADRP+LDR when far literals are enabled.
  */
-constexpr size_t smashableMovqLen() { return 4; }
+constexpr size_t smashableMovqLen() { return 8; } // ADRP + LDR for far literals
 constexpr size_t smashableCmpqLen() { return 0; }
 constexpr size_t smashableCallLen() { return 4; } // not including veneer
 constexpr size_t smashableJmpLen()  { return 4; } // not including veneer
 constexpr size_t smashableJccLen()  { return 4; } // not including veneer
 constexpr size_t smashableInterceptLen() { return 4; } // not including veneer
 
+void emitPooledLiteralLoad(vixl::MacroAssembler& a,
+                           CodeBlock& cb,
+                           CGMeta& meta,
+                           uint64_t val,
+                           vixl::Register dst,
+                           uint8_t width,
+                           bool smashable,
+                           bool emitFarLiteral);
+
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& meta, uint64_t imm,
-                      PhysReg d);
+                      PhysReg d, bool emitFarLiteral = false);
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& meta, TCA target);
 TCA emitSmashableJmp(CodeBlock& cb, CGMeta& meta, TCA target);
 TCA emitSmashableJcc(CodeBlock& cb, CGMeta& meta, TCA target,

@@ -84,9 +84,10 @@ struct CGMeta {
    */
   struct PoolLiteralMeta {
     uint64_t value;
-    CodeAddress patchAddress;
+    CodeAddress patchAddress; // sequence start: ldr or adrp+ldr
     bool smashable;
     uint8_t width;
+    bool far; // true when patchAddress starts an ADRP/LDR pair
   };
   std::vector<PoolLiteralMeta> literalsToPool;
 
@@ -226,7 +227,8 @@ Reason* getTrapReason(CTCA addr);
  * Pool up literal to be emitted at patch time.
  */
 void poolLiteral(CodeBlock& cb, CGMeta& meta, uint64_t val, uint8_t width,
-                 bool smashable);
+                 bool smashable, CodeAddress patchAddress = nullptr,
+                 bool far = false);
 
 void addSmashableVeneer(CGMeta& meta, TCA source, TCA target);
 void addNonSmashableVeneer(CGMeta& meta, TCA source, TCA target);

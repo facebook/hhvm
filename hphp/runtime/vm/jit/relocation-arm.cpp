@@ -22,6 +22,9 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
+#include "hphp/runtime/vm/jit/vasm-util-arm.h"
+
+#include "hphp/util/configs/jit.h"
 
 #include "hphp/vixl/hphp-compat.h"
 
@@ -85,6 +88,7 @@ struct Env {
     , destBlock(destBlock)
     , start(start)
     , end(end)
+    , srcEndActual(Instruction::Cast(srcBlock.toDestAddress(end)))
     , meta(meta)
     , exitAddr(exitAddr)
     , updateInternalRefs(false)
@@ -97,6 +101,7 @@ struct Env {
   CodeBlock& srcBlock;
   CodeBlock& destBlock;
   const TCA start, end;
+  Instruction* const srcEndActual;
   CGMeta& meta;
   TCA* exitAddr;
   bool updateInternalRefs;
@@ -228,6 +233,136 @@ bool isPCRelative(Instruction* instr) {
          instr->IsTestBranch();
 }
 
+}  // namespace
+
+namespace {
+
+uintptr_t taggedAddressImmediate(TCA addr) {
+  return (reinterpret_cast<uintptr_t>(addr) << 1) | 1;
+}
+
+void adjustLiteralLoadImmediate(RelocationInfo& rel,
+                                const LoadLiteral& load,
+                                TCA logicalStart,
+                                TCA adjustedStart,
+                                bool isAddressImmediate,
+                                bool isTaggedAddressImmediate) {
+  always_assert(!(isAddressImmediate && isTaggedAddressImmediate));
+
+  auto const targetAddr = load.literalAddress();
+
+  if (load.width() == 32) {
+    auto const target = *reinterpret_cast<uint32_t*>(targetAddr);
+    auto const adjusted = rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
+    if (!adjusted) return;
+
+    if (isAddressImmediate) {
+      patchTarget32(reinterpret_cast<TCA>(targetAddr), adjusted);
+    } else {
+      FTRACE(3,
+             "relocate: instruction at {} has immediate 0x{} "
+             "which looks like an address that needs relocating\n",
+             logicalStart, target);
+    }
+    return;
+  }
+
+  auto const target = *reinterpret_cast<uintptr_t*>(targetAddr);
+  uintptr_t adjusted = 0;
+  if (isTaggedAddressImmediate) {
+    if (target & 1) {
+      always_assert(target == taggedAddressImmediate(logicalStart));
+      adjusted = taggedAddressImmediate(adjustedStart);
+    }
+  } else {
+    auto const ret = reinterpret_cast<uintptr_t>(
+      rel.adjustedAddressAfter(reinterpret_cast<TCA>(target))
+    );
+    if (ret && isAddressImmediate) {
+      adjusted = ret;
+    } else if (ret) {
+      FTRACE(3,
+             "relocate: instruction at {} has immediate 0x{} "
+             "which looks like an address that needs relocating\n",
+             logicalStart, target);
+    }
+  }
+
+  if (adjusted) {
+    patchTarget64(
+      reinterpret_cast<TCA>(targetAddr),
+      reinterpret_cast<TCA>(adjusted)
+    );
+  }
+}
+
+bool optimizeAdrpLiteralLoad(Env& env,
+                             TCA srcAddr,
+                             TCA destAddr,
+                             size_t& srcCount,
+                             size_t& destCount) {
+  if (Cfg::Jit::ArmDisableAdrpLdrShortening) return false;
+
+  auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
+  auto const src = Instruction::Cast(srcAddrActual);
+
+  if (env.far.contains(src)) return false;
+  auto const srcLoad = LoadLiteral::at(src, env.srcEndActual);
+  if (!srcLoad || !srcLoad.isFar()) return false;
+
+  auto const srcFrom = Instruction::Cast(srcAddr);
+  auto const srcLdr = srcLoad.ldr();
+  auto const literalAddr =
+    reinterpret_cast<TCA>(srcLoad.literalAddress(srcFrom));
+  auto const internalLiteral = env.start <= literalAddr &&
+                               literalAddr < env.end;
+
+  alignas(kInstructionSize) uint32_t scratch = srcLdr->GetInstructionBits();
+  auto const scratchLdr =
+    Instruction::Cast(reinterpret_cast<TCA>(&scratch));
+  auto const destFrom = Instruction::Cast(destAddr);
+
+  if (internalLiteral) {
+    // The final literal address might not be known until after the range is
+    // relocated. Emit a valid placeholder and patch it below once relocation
+    // has recorded the final address.
+    auto const setTarget = LoadLiteral::nearAt(scratchLdr).setTarget(
+      destFrom,
+      destFrom
+    );
+    always_assert(setTarget);
+    env.rewriteAdjust.emplace_back(Patch{destAddr, literalAddr, src});
+  } else {
+    auto adjusted = env.rel.adjustedAddressAfter(literalAddr);
+    if (!adjusted) adjusted = literalAddr;
+    if (!LoadLiteral::nearAt(scratchLdr).setTarget(
+          Instruction::Cast(adjusted), destFrom)) {
+      return false;
+    }
+  }
+
+  env.destBlock.setFrontier(destAddr);
+  env.destBlock.dword(scratchLdr->GetInstructionBits());
+
+  srcCount = 2;
+  destCount = 1;
+  env.rewrites.insert(src);
+  env.rewrites.insert(srcLdr);
+  env.updateInternalRefs = true;
+  return true;
+}
+
+bool pcRelAddressingOutOfRange(const Instruction* instr,
+                               const Instruction* target,
+                               const Instruction* from) {
+  assertx(instr->IsPCRelAddressing());
+  if (instr->IsAdrp()) {
+    return !LoadLiteral::reachableByFarLiteral(target, from);
+  }
+  auto const imm = static_cast<int64_t>(target - from);
+  return !is_int21(imm);
+}
+
 /*
  * Write a PC relative instruction's, `instr`'s, offset to `target` - `from`.
  * If the new offset is not possible to encode in the instruction, this returns
@@ -238,9 +373,10 @@ bool writePCRelative(Instruction* instr, Instruction* target,
   assertx(isPCRelative(instr));
 
   auto const imm = static_cast<int64_t>(Instruction::Cast(target) - from);
-  if ((instr->IsPCRelAddressing() && !is_int21(imm)) ||
+  if ((instr->IsPCRelAddressing() &&
+       pcRelAddressingOutOfRange(instr, target, from)) ||
       (instr->IsLoadLiteral() &&
-       !is_int19(imm >> kInstructionSizeLog2)) ||
+       !LoadLiteral::reachableByNearLiteral(target, from)) ||
       (instr->IsCondBranchImm() &&
        !is_int19(imm >> kInstructionSizeLog2)) ||
       (instr->IsUncondBranchImm() &&
@@ -261,11 +397,34 @@ bool writePCRelative(Instruction* instr, Instruction* target,
 /*
  * Identifies all of the instruction words in a range which are embedded
  * literals. This set of literals is used during relocation and adjusting to
- * indicate that they should not be analyzed as instructions.
+ * indicate that they should not be analyzed as instructions.  When logicalStart
+ * is provided, PC-relative addresses are decoded against the logical code range
+ * and mapped back into the actual source buffer.
  */
-InstrSet findLiterals(Instruction* start, Instruction* end) {
+InstrSet findLiterals(Instruction* start, Instruction* end,
+                      TCA logicalStart = nullptr) {
+  auto const actualStart = reinterpret_cast<TCA>(start);
+  auto const actualToLogical = [&] (const Instruction* instr)
+      -> const Instruction* {
+    if (!logicalStart) return instr;
+    auto const offset =
+      reinterpret_cast<ConstCodeAddress>(instr) -
+      reinterpret_cast<ConstCodeAddress>(start);
+    return Instruction::Cast(logicalStart + offset);
+  };
+  auto const logicalToActual = [&] (const Instruction* instr)
+      -> const Instruction* {
+    if (!logicalStart) return instr;
+    auto const offset =
+      reinterpret_cast<ConstCodeAddress>(instr) -
+      reinterpret_cast<ConstCodeAddress>(logicalStart);
+    return Instruction::Cast(actualStart + offset);
+  };
+
   InstrSet literals;
-  for (const Instruction* instr = start; instr < end; instr = instr->GetNextInstruction()) {
+  for (const Instruction* instr = start;
+       instr < end;
+       instr = instr->GetNextInstruction()) {
     if (literals.contains(instr)) continue;
 
     auto addLiteral = [&] (const Instruction* lit) {
@@ -274,10 +433,14 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
       }
     };
 
-    if (instr->IsLoadLiteral()) {
-      auto const la = Instruction::Cast(instr->GetLiteralAddress<uint8_t*>());
+    if (auto const load =
+          LoadLiteral::at(const_cast<Instruction*>(instr), end)) {
+      auto const la =
+        logicalToActual(
+          Instruction::Cast(load.literalAddress(actualToLogical(instr)))
+        );
       addLiteral(la);
-      if (instr->Mask(LoadLiteralMask) == LDR_x_lit) {
+      if (load.width() == 64) {
         addLiteral(la->GetNextInstruction());
       }
     }
@@ -286,37 +449,65 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
   return literals;
 }
 
+bool isFarJmp(const Instruction* adrp, const Instruction* end) {
+  if (adrp >= end) return false;
+  auto const load = LoadLiteral::at(const_cast<Instruction*>(adrp), end);
+  if (!load || !load.isFar()) return false;
+  if (load.width() != 32) return false;
+
+  auto const br = load.ldr()->GetNextInstruction();
+  if (br >= end) return false;
+  if (br->Mask(UnconditionalBranchToRegisterMask) != BR) return false;
+  return br->Rn() == load.destReg();
+}
+
+TCA farJmpLiteralAddress(const Instruction* adrp,
+                         const Instruction* logicalAdrp) {
+  auto const load = LoadLiteral::at(const_cast<Instruction*>(adrp));
+  assertx(load && load.isFar());
+  return reinterpret_cast<TCA>(load.literalAddress(logicalAdrp));
+}
+
+TCA farJmpTarget32(Env& env, TCA literalAddr) {
+  auto const literalAddrActual = env.srcBlock.toDestAddress(literalAddr);
+  auto const target32 =
+    *reinterpret_cast<const uint32_t*>(literalAddrActual);
+  assertx((target32 & 3) == 0);
+  return reinterpret_cast<TCA>(target32);
+}
+
+// Instruction counts of the far JMP (ADRP + LDR + BR) and far JCC
+// (B.!cc + ADRP + LDR + BR) sequences. Used by optimizeFarJmp/optimizeFarJcc to
+// reason about the rewritten source range.
+constexpr size_t kFarJmpInstrs = 3;
+constexpr size_t kFarJccInstrs = kFarJmpInstrs + 1;
+
 /*
- * A far JCC pattern is:
- *     B.cc NEXT
- *     LDR Rx, LITERAL_ADDR
- *     BR Rx
- *  NEXT:
+ * A far JCC represents an original conditional branch to a target which could
+ * not be reached directly when it was emitted. The generated sequence branches
+ * over a far jump on the opposite condition:
  *
- * Note that the condition code is the inverse of the condition code that is
- * emitted if the JCC is not far (i.e., it's a single direct branch
- * instruction).
+ *     B.!cc after
+ *     ADRP Xtmp, literal_page
+ *     LDR  Wtmp, [Xtmp, literal_off]
+ *     BR   Xtmp
+ *   after:
+ *
+ * The literal holds a 32-bit target address.
  */
-constexpr auto kFarJccLen = 3 * kInstructionSize;
+bool isFarJcc(const Instruction* b, const Instruction* end) {
+  if (!b->IsCondBranchImm()) return false;
 
-TCA farJccTarget(TCA inst) {
-  auto const b = Instruction::Cast(inst);
-  auto const ldr = b->GetNextInstruction();
-  auto const br = ldr->GetNextInstruction();
-  auto const next = br->GetNextInstruction();
+  auto const loadStart = b->GetNextInstruction();
+  if (loadStart >= end) return false;
 
-  if (b->IsCondBranchImm() &&
-      b->ImmPCOffsetTarget() == next &&
-      ldr->IsLoadLiteral() &&
-      ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
-      br->Mask(UnconditionalBranchToRegisterMask) == BR &&
-      br->Rn() == ldr->Rd()) {
-    auto const target32 = *reinterpret_cast<uint32_t*>(ldr->GetLiteralAddress<uint8_t*>());
-    assertx((target32 & 3) == 0);
-    return reinterpret_cast<TCA>(target32);
-  }
+  if (!isFarJmp(loadStart, end)) return false;
 
-  return nullptr;
+  auto const next = loadStart->GetNextInstruction()
+                     ->GetNextInstruction()
+                     ->GetNextInstruction();
+  if (next > end) return false;
+  return b->ImmPCOffsetTarget() == next;
 }
 
 /*
@@ -331,23 +522,29 @@ ConditionCode farJccCond(TCA inst) {
 
 
 /*
- * This function attempts to optimize a "far jcc" pattern, i.e.:
- *   B.<cc> (after)
- *   LDR Reg (literal A)
- *   BR Reg
- *   (after)
+ * Try to shrink a far JCC after relocation has made its target close enough
+ * for PC-relative branches.
  *
- * If the "literal A" target is within +-1MB, the condition is inverted and a
- * single JCC is emitted:
- *   B.<neg(cc)> (literal A)
+ * If the target is within the conditional-branch range (+-1MB), replace the
+ * whole sequence with the original direct branch:
  *
- * Otherwise, if the "literal A" target is within +-128MB, the code will be
- * optimized to:
- *   B.<cc> (after)
- *   B (literal A)
- *   (after)
+ *     B.cc target
  *
- * This function returns whether or not the code was optimized.
+ * Otherwise, if the target is within the unconditional-branch range (+-128MB),
+ * replace the far jump with a direct branch:
+ *
+ *     B.!cc after
+ *     B    target
+ *   after:
+ *
+ * The optimizer only relies on targets in the same source block; other code
+ * blocks may relocate far enough away to invalidate the shortened branch. When
+ * the target points forward in the current relocation range, the final address
+ * is not known yet, so this records a rewrite adjustment for the final pass.
+ *
+ * On success, srcCount covers the full far-JCC sequence, destCount reflects the
+ * shortened output, rewritten source instructions are marked, and the pooled
+ * literal is scheduled for removal.
  */
 bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
                     size_t& srcCount, size_t& destCount) {
@@ -357,9 +554,15 @@ bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
 
   if (env.meta.smashableLocations.contains(srcAddr)) return false;
   if (env.far.contains(src)) return false;
-  if (env.end < srcAddr + kFarJccLen) return false;
 
-  auto const target = farJccTarget(srcAddrActual);
+  if (!isFarJcc(src, env.srcEndActual)) return false;
+
+  auto const litAddr =
+    farJmpLiteralAddress(src->GetNextInstruction(),
+                         srcFrom->GetNextInstruction());
+  if (litAddr < env.start || litAddr >= env.end) return false;
+
+  auto const target = farJmpTarget32(env, litAddr);
   if (!target) return false;
 
   // We can only rely on the target address to shrink the code sequence if it's
@@ -387,12 +590,7 @@ bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
     });
   }
 
-  auto const litAddr =
-    src->GetNextInstruction()->GetImmPCOffsetTarget(srcFrom->GetNextInstruction());
-
-  if (TCA(litAddr) < env.start || TCA(litAddr) >= env.end) return false;
-
-  env.literalsToRemove.insert(litAddr);
+  env.literalsToRemove.insert(Instruction::Cast(litAddr));
 
   vixl::MacroAssembler a { env.destBlock };
   env.destBlock.setFrontier(destAddr);
@@ -412,7 +610,7 @@ bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
     destCount++;
   }
 
-  srcCount = kFarJccLen >> kInstructionSizeLog2;
+  srcCount = kFarJccInstrs;
 
   for (const Instruction* i = src;
        i < src + (srcCount << kInstructionSizeLog2);
@@ -428,36 +626,13 @@ bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
 }
 
 /*
- * A far JMP pattern is:
- *    LDR x, LITERAL_ADDR
- *    BR  x
- */
-constexpr auto kFarJmpLen = 2 * kInstructionSize;
-
-TCA farJmpTarget(TCA inst) {
-  auto const ldr = Instruction::Cast(inst);
-  auto const br = ldr->GetNextInstruction();
-
-  if (ldr->IsLoadLiteral() &&
-      ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
-      br->Mask(UnconditionalBranchToRegisterMask) == BR &&
-      br->Rn() == ldr->Rd()) {
-    auto const target32 = *reinterpret_cast<uint32_t*>(ldr->GetLiteralAddress<uint8_t*>());
-    assertx((target32 & 3) == 0);
-    return reinterpret_cast<TCA>(target32);
-  }
-
-  return nullptr;
-}
-
-/*
- * This attempts to shrink Ldr, Br sequences to PC relative branches.
- * This returns true if it was able to shrink the the sequence, otherwise it
+ * This attempts to shrink an ADRP/LDR far jump to a PC-relative branch.
+ * This returns true if it was able to shrink the sequence, otherwise it
  * returns false.
  *
  * destCount, srcCount and rewrites are updated to reflect when an
  * instruction(s) is rewritten to a different instruction sequence.
- * env.literalsToRemove is updated to include any literals that are no long
+ * env.literalsToRemove is updated to include any literals that are no longer
  * used.
  */
 bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
@@ -469,10 +644,18 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
   if (env.meta.smashableLocations.contains(srcAddr)) return false;
   if (env.meta.veneerAddrs.contains(srcAddr)) return false;
   if (env.far.contains(src)) return false;
-  if (env.end < srcAddr + kFarJmpLen) return false;
 
-  auto target = farJmpTarget(srcAddrActual);
+  if (!isFarJmp(src, env.srcEndActual)) return false;
 
+  auto const litAddr = farJmpLiteralAddress(src, srcFrom);
+
+  // If the apparent literal address is outside of the current code block, then
+  // this cannot be a far jmp. The pooled literal is emitted in the same block
+  // as the literal-load+br sequence (cf. Vgen::emit(const jmpi&) in
+  // vasm-arm.cpp).
+  if (litAddr < env.start || litAddr >= env.end) return false;
+
+  auto target = farJmpTarget32(env, litAddr);
   if (!target) return false;
 
   // We can only rely on the target address to shrink the code sequence if it's
@@ -481,16 +664,7 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
   if (!env.srcBlock.contains(target)) return false;
 
   assertx(((uint64_t)target & 3) == 0);
-  assertx(src->Mask(LoadLiteralMask) == LDR_w_lit);
-
-  auto const litAddr = src->GetImmPCOffsetTarget(srcFrom);
-
-  // If the apparent literal address is outside of the current code block, then
-  // this cannot be a far jmp (the literal is emitted in the same block as the
-  // ldr+br sequence, cf. Vgen::emit(const jmpi&) in vasm-arm.cpp).
-  if (TCA(litAddr) < env.start || TCA(litAddr) >= env.end) return false;
-
-  env.literalsToRemove.insert(litAddr);
+  env.literalsToRemove.insert(Instruction::Cast(litAddr));
 
   // If adjusted is not found, the target may point forward in the range, and
   // not have a known destination address yet.  We will make the jmp point back
@@ -530,7 +704,7 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
     destCount += (env.destBlock.frontier() - destAddr) >> kInstructionSizeLog2;
   }
 
-  srcCount = kFarJmpLen >> kInstructionSizeLog2;
+  srcCount = kFarJmpInstrs;
   for (const Instruction* i = src;
        i < src + (srcCount << kInstructionSizeLog2);
        i = i->GetNextInstruction()) {
@@ -545,12 +719,14 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
 }
 
 /*
- * Returns true if the source is a PC relative instruction. Relocates the
- * that instruction, adjusting the offsets in the instruction. If the new
- * offset cannot be encoded, then the instruction is changed into a multi-
- * instruction sequence, overwritting the original PC relative instruction
- * that was initially copied. The following are the PC relative instructions:
+ * Returns true if the source is a PC relative instruction or ADRP/LDR literal
+ * load. Relocates that instruction or pair, adjusting the offsets in the
+ * output. If the new offset cannot be encoded, then the instruction is changed
+ * into a multi-instruction sequence, overwriting the original PC relative
+ * instruction that was initially copied. The following are the PC relative
+ * instructions:
  *   ADR/ADRP
+ *   ADRP/LDR literal load
  *   LDR (literal)
  *   B.<cc> (immediate)
  *   B (immediate)
@@ -559,8 +735,11 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
  * destCount, srcCount and rewrites are updated to reflect when an
  * instruction(s) is rewritten to a different instruction sequence.
  */
-bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
-                        size_t& /*srcCount*/, size_t& destCount) {
+bool relocatePCRelative(Env& env,
+                        TCA srcAddr,
+                        TCA destAddr,
+                        size_t& srcCount,
+                        size_t& destCount) {
 
   auto const srcFrom = Instruction::Cast(srcAddr);
   auto const destFrom = Instruction::Cast(destAddr);
@@ -571,8 +750,61 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
   auto const dest = Instruction::Cast(destAddrActual);
 
   if (!isPCRelative(src)) return false;
+  if (auto const srcLoad = LoadLiteral::at(src, env.srcEndActual)) {
+    always_assert_flog(
+      srcLoad.isFar(),
+      "relocatePCRelative(): found near LDR-literal at {}. "
+      "Far literal emission must be enabled before relocation.\n",
+      srcFrom
+    );
+    if (optimizeAdrpLiteralLoad(env, srcAddr, destAddr, srcCount, destCount)) {
+      return true;
+    }
 
-  auto target = reinterpret_cast<TCA>(src->GetImmPCOffsetTarget(srcFrom));
+    auto const target =
+      reinterpret_cast<TCA>(srcLoad.literalAddress(srcFrom));
+
+    srcCount = 2;
+    destCount = 2;
+
+    env.destBlock.setFrontier(destAddr);
+    env.destBlock.bytes(2 * kInstructionSize, srcAddrActual);
+
+    auto destLoad = LoadLiteral::at(
+      Instruction::Cast(env.destBlock.toDestAddress(destAddr))
+    );
+    assertx(destLoad && destLoad.isFar());
+
+    auto adjusted = env.rel.adjustedAddressAfter(target);
+    if (!adjusted) adjusted = target;
+
+    auto const internalTarget = env.start <= target && target < env.end;
+    if (internalTarget && adjusted == target) {
+      env.updateInternalRefs = true;
+    } else {
+      auto const setTarget =
+        destLoad.setTarget(Instruction::Cast(adjusted), destFrom);
+      always_assert_flog(
+        setTarget,
+        "relocatePCRelative(): {}target {} too far from relocated load {}\n",
+        internalTarget ? "internal " : "",
+        adjusted,
+        destFrom
+      );
+    }
+
+    // The LDR is the instruction tracked by address-immediate metadata.
+    env.rel.recordAddress(
+      srcAddr + kInstructionSize,
+      destAddr + kInstructionSize,
+      0
+    );
+
+    return true;
+  }
+
+  auto const targetInstr = Instruction::Cast(src->GetImmPCOffsetTarget(srcFrom));
+  auto const target = reinterpret_cast<TCA>(targetInstr);
 
   // If the target is outside of the range of this relocation,
   // then update it.
@@ -586,43 +818,34 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
      *       scope is just a single macroassembler directive, whereas
      *       the scope of rAsm is an entire vasm instruction.
      */
-    auto imm = static_cast<int64_t>(src->GetImmPCOffsetTarget(srcFrom) - destFrom);
+    auto const byteOffset = static_cast<int64_t>(targetInstr - destFrom);
+    auto const instructionOffset = byteOffset >> kInstructionSizeLog2;
     bool isRelative = true;
     if (src->IsPCRelAddressing()) {
-      if (!is_int21(imm) || env.far.count(src)) {
+      if (pcRelAddressingOutOfRange(src, targetInstr, destFrom) ||
+          env.far.count(src)) {
         env.destBlock.setFrontier(destAddr);
         destCount--;
 
         vixl::MacroAssembler a { env.destBlock };
         auto const dst = vixl::Register(src->Rd(), 64);
-        a.Mov(dst, reinterpret_cast<uint64_t>(src->GetImmPCOffsetTarget(srcFrom)));
+        a.Mov(dst, reinterpret_cast<uint64_t>(target));
 
         destCount += (env.destBlock.frontier() - destAddr)
                      >> kInstructionSizeLog2;
         isRelative = false;
       }
     } else if (src->IsLoadLiteral()) {
-      imm >>= kInstructionSizeLog2;
-      if (!is_int19(imm) || env.far.count(src)) {
-        env.destBlock.setFrontier(destAddr);
-        destCount--;
-
-        vixl::MacroAssembler a { env.destBlock };
-        a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
-        auto const dst = vixl::Register(src->Rd(), 64);
-        auto const tmp = dst.Is(rVixlScratch0)
-          ? rVixlScratch1 : rVixlScratch0;
-        a.Mov(tmp, reinterpret_cast<uint64_t>(src->GetImmPCOffsetTarget(srcFrom)));
-        a.Ldr(dst, vixl::MemOperand(tmp));
-        a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
-
-        destCount += (env.destBlock.frontier() - destAddr)
-                     >> kInstructionSizeLog2;
-        isRelative = false;
-      }
+      always_assert_flog(
+        LoadLiteral::reachableByNearLiteral(targetInstr, destFrom) &&
+          !env.far.count(src),
+        "relocatePCRelative(): near LDR-literal at {} cannot reach target {} "
+        "after relocation. Far literal emission must be enabled before "
+        "relocation.\n",
+        srcFrom, targetInstr
+      );
     } else if (src->IsCondBranchImm()) {
-      imm >>= kInstructionSizeLog2;
-      if (!is_int19(imm) || env.far.count(src)) {
+      if (!is_int19(instructionOffset) || env.far.count(src)) {
         env.destBlock.setFrontier(destAddr);
         destCount--;
 
@@ -643,8 +866,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
       }
     } else if (src->IsUncondBranchImm()) {
       // Handle both B and BL forms of UncondBranchImm.
-      imm >>= kInstructionSizeLog2;
-      if (!is_int26(imm) || env.far.count(src)) {
+      if (!is_int26(instructionOffset) || env.far.count(src)) {
         env.destBlock.setFrontier(destAddr);
         destCount--;
 
@@ -663,8 +885,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         isRelative = false;
       }
     } else if (src->IsCompareBranch()) {
-      imm >>= kInstructionSizeLog2;
-      if (!is_int19(imm) || env.far.count(src)) {
+      if (!is_int19(instructionOffset) || env.far.count(src)) {
         env.destBlock.setFrontier(destAddr);
         destCount--;
 
@@ -688,8 +909,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         isRelative = false;
       }
     } else if (src->IsTestBranch()) {
-      imm >>= kInstructionSizeLog2;
-      if (!is_int14(imm) || env.far.count(src)) {
+      if (!is_int14(instructionOffset) || env.far.count(src)) {
         env.destBlock.setFrontier(destAddr);
         destCount--;
 
@@ -717,7 +937,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
 
     // Update offset if it was NOT converted from relative to absolute
     if (isRelative) {
-      dest->SetImmPCOffsetTarget(src->GetImmPCOffsetTarget(srcFrom), destFrom);
+      dest->SetImmPCOffsetTarget(targetInstr, destFrom);
     } else {
       // Otherwise it was rewritten to absolute, and this
       // internal reference must be updated later.
@@ -753,10 +973,8 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
                        size_t& srcCount, size_t& destCount) {
 
   auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
-  auto const endAddrActual = env.srcBlock.toDestAddress(env.end);
   auto const destAddrActual = env.destBlock.toDestAddress(destAddr);
   auto const src = Instruction::Cast(srcAddrActual);
-  auto const end = Instruction::Cast(endAddrActual);
   auto const dest = Instruction::Cast(destAddrActual);
 
   // Don't turn non address immediates into PC relative instructions.  PC
@@ -772,7 +990,8 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
   uint64_t target;
   uint32_t rd;
   uint32_t regSize;
-  auto const length = decodePossibleMovSequence(src, end, target, rd, regSize);
+  auto const length =
+    decodePossibleMovSequence(src, env.srcEndActual, target, rd, regSize);
   if (!length) return false;
   auto next = src + length * kInstructionSize;
 
@@ -928,7 +1147,8 @@ size_t relocateImpl(Env& env) {
     // Find the literals embedded within the range
     InstrSet literals =
       findLiterals(Instruction::Cast(env.srcBlock.toDestAddress(env.start)),
-                   Instruction::Cast(env.srcBlock.toDestAddress(env.end)));
+                   env.srcEndActual,
+                   env.start);
 
     // Relocate each instruction to the destination.
     size_t srcCount, destCount, alignCount;
@@ -944,13 +1164,23 @@ size_t relocateImpl(Env& env) {
       alignCount = 0;
       auto destAddr = env.destBlock.frontier();
 
-      // Align the frontier to follow any potential aligment constraints.
+      // Align the frontier to follow any potential alignment constraints.
       auto af = env.meta.alignments.equal_range(srcAddr);
       while (af.first != af.second) {
         auto const alignPair = af.first->second;
         auto const alignInfo = alignment_info(alignPair.first);
+        if (alignInfo.align == 0) {
+          // ARM records no-op smashable alignments. They do not protect an
+          // instruction range, and treating them as constraints would block
+          // shrinkable ADRP/LDR rewrites. For example, SmashJmp has
+          // align == 0 on ARM but still has a non-zero instruction length;
+          // preserving that range would keep a shrinkable ADRP/LDR far jump
+          // in its larger form even though no padding needs to be preserved.
+          ++af.first;
+          continue;
+        }
 
-        // We want to prevent resizing of intstruction that are protected by
+        // We want to prevent resizing of instructions that are protected by
         // this alignment constraint.  Save the range of bytes that should
         // be protected.
         auto const low = srcAddr + alignInfo.offset;
@@ -978,24 +1208,33 @@ size_t relocateImpl(Env& env) {
       auto const preserveAlignment = protectedStart <= srcAddr &&
                                      srcAddr < protectedEnd;
 
-      // Initially copy the instruction word
+      // Initially copy the instruction word. Relocation helpers can reset the
+      // frontier and replace it with a different instruction sequence.
       env.destBlock.bytes(kInstructionSize,
                           env.srcBlock.toDestAddress(srcAddr));
 
-      // If it's not a literal, and we don't need to satisfy an aligment
-      // constraint, then attempt any special relocations.
+      // If it's not embedded literal data, and we don't need to satisfy an
+      // alignment constraint, then attempt any special relocations.
       if (!literals.count(src) && !preserveAlignment) {
+        // Relocate functions are needed for correctness, while optimize
+        // functions will attempt to improve instruction sequences.
+        auto const relocated =
+          optimizeFarJcc(env, srcAddr, destAddr, srcCount, destCount) ||
+          optimizeFarJmp(env, srcAddr, destAddr, srcCount, destCount) ||
+          relocatePCRelative(
+            env,
+            srcAddr,
+            destAddr,
+            srcCount,
+            destCount
+          ) ||
+          relocateImmediate(env, srcAddr, destAddr, srcCount, destCount);
+
         // Remove nops that are not necessary for alignment constraints.
-        if (src->IsNop()) {
+        if (!relocated && src->IsNop() && !env.far.contains(src)) {
           destCount = 0;
           env.updateInternalRefs = true;
         }
-        // Relocate functions are needed for correctness, while optimize
-        // functions will attempt to improve instruction sequences.
-        optimizeFarJcc(env, srcAddr, destAddr, srcCount, destCount) ||
-        optimizeFarJmp(env, srcAddr, destAddr, srcCount, destCount) ||
-        relocatePCRelative(env, srcAddr, destAddr, srcCount, destCount) ||
-        relocateImmediate(env, srcAddr, destAddr, srcCount, destCount);
       }
 
       if (env.literalsToRemove.erase(srcFrom)) {
@@ -1003,29 +1242,35 @@ size_t relocateImpl(Env& env) {
         env.updateInternalRefs = true;
       }
 
-      // If we just copied the Ldr of a mcprep instruction.  Flag internal refs
-      // to get updated so its immediate can reflect its new location.
-      if (env.meta.addressImmediates.contains(reinterpret_cast<TCA>(
-              ~reinterpret_cast<uintptr_t>(srcAddr)))) {
+      auto const srcLoad = LoadLiteral::at(src, env.srcEndActual);
+      // Smashable movq stores a tagged self-reference in its pooled literal
+      // and records the bitwise-negated load start in addressImmediates. If
+      // relocation moves or shrinks the literal load, the final internal-ref
+      // adjustment pass must update that tagged payload.
+      if (srcLoad &&
+          env.meta.addressImmediates.contains(reinterpret_cast<TCA>(
+            ~reinterpret_cast<uintptr_t>(srcAddr)))) {
         assertx(possiblySmashableMovq(srcPtr));
         env.updateInternalRefs = true;
       }
-      // Address immediates may be internal references that need updating.
+
+      auto updateInternalRefsCheck = [&](uintptr_t addr) {
+        if (env.start <= reinterpret_cast<TCA>(addr) &&
+            reinterpret_cast<TCA>(addr) < env.end) {
+          env.updateInternalRefs = true;
+        }
+      };
+
       if (env.meta.addressImmediates.contains(srcAddr)) {
-        auto updateInternalRefsCheck = [&](uintptr_t addr) {
-          if (env.start <= reinterpret_cast<TCA>(addr) &&
-              reinterpret_cast<TCA>(addr) < env.end) {
-            env.updateInternalRefs = true;
-          }
-        };
-        if (src->IsLoadLiteral()) {
-          auto const addr = src->GetLiteralAddress<uint8_t*>();
-          assertx(env.srcBlock.toDestAddress(env.start) <= addr &&
-                  addr < env.srcBlock.toDestAddress(env.end));
-          if (src->Mask(LoadLiteralMask) == LDR_w_lit) {
-            updateInternalRefsCheck(*reinterpret_cast<uint32_t*>(addr));
-          } else {
-            updateInternalRefsCheck(*reinterpret_cast<uintptr_t*>(addr));
+        if (srcLoad) {
+          auto const addr = srcLoad.literalAddress(srcFrom);
+          if (env.srcBlock.toDestAddress(env.start) <= addr &&
+              addr < env.srcBlock.toDestAddress(env.end)) {
+            if (srcLoad.width() == 32) {
+              updateInternalRefsCheck(*reinterpret_cast<uint32_t*>(addr));
+            } else {
+              updateInternalRefsCheck(*reinterpret_cast<uintptr_t*>(addr));
+            }
           }
         } else {
           uint32_t rd;
@@ -1110,29 +1355,40 @@ size_t relocateImpl(Env& env) {
         Instruction::Cast(env.destBlock.toDestAddress(pl.destAddr));
       auto const src = pl.src;
 
+      // rewriteAdjust entries are created only for internal targets whose
+      // final addresses were unknown when the rewritten instruction was
+      // emitted above. recordRange() should have mapped them by now.
       auto const adjusted = env.rel.adjustedAddressAfter(pl.srcTargetAddr);
-      if (adjusted) {
-        if (isPCRelative(dest)) {
-          if (!writePCRelative(dest, Instruction::Cast(adjusted), destFrom)) {
-            FTRACE(3,
-                   "relocate: PC relative instruction at {} has",
-                   "internal reference 0x{:08x} which can't be adjusted.",
-                   "Will try again and far.\n",
-                   (uint64_t)dest, adjusted);
-            env.far.insert(src);
-            ok = false;
-          }
+      always_assert_flog(
+        adjusted,
+        "relocate: rewritten instruction at {} expected internal target {} "
+        "to be relocated within [{}, {})\n",
+        pl.destAddr,
+        pl.srcTargetAddr,
+        env.start,
+        env.end
+      );
+      if (isPCRelative(dest)) {
+        if (!writePCRelative(dest, Instruction::Cast(adjusted), destFrom)) {
+          FTRACE(3,
+                 "relocate: PC relative instruction at {} has",
+                 "internal reference 0x{:08x} which can't be adjusted.",
+                 "Will try again and far.\n",
+                 (uint64_t)dest, adjusted);
+          env.far.insert(src);
+          ok = false;
         }
-        uint64_t target;
-        uint32_t rd;
-        uint32_t regSize;
-        auto const destEnd = Instruction::Cast(env.destBlock.frontier());
-        if (int length = decodePossibleMovSequence(dest, destEnd, target, rd, regSize)) {
-          if (!writeMovSequence(env.destBlock, pl.destAddr, length, adjusted,
-                                rd, regSize)) {
-            env.far.insert(src);
-            ok = false;
-          }
+      }
+      uint64_t target;
+      uint32_t rd;
+      uint32_t regSize;
+      auto const destEnd = Instruction::Cast(env.destBlock.frontier());
+      if (int length =
+            decodePossibleMovSequence(dest, destEnd, target, rd, regSize)) {
+        if (!writeMovSequence(env.destBlock, pl.destAddr, length, adjusted,
+                              rd, regSize)) {
+          env.far.insert(src);
+          ok = false;
         }
       }
     }
@@ -1143,19 +1399,22 @@ size_t relocateImpl(Env& env) {
      * may be off.
      */
     if (env.updateInternalRefs) {
-      for (auto srcAddr = env.start;
-           srcAddr < env.end;
-           srcAddr += kInstructionSize) {
+      for (auto srcAddr = env.start; srcAddr < env.end; ) {
         auto const srcFrom = Instruction::Cast(srcAddr);
         auto const src = Instruction::Cast(env.srcBlock.toDestAddress(srcAddr));
+        auto const srcLoad = LoadLiteral::at(src, env.srcEndActual);
+        auto const farLoad = srcLoad && srcLoad.isFar();
+        auto const isAddressImmediate =
+          env.meta.addressImmediates.contains(srcAddr);
+        auto const isTaggedAddressImmediate =
+          env.meta.addressImmediates.contains(reinterpret_cast<TCA>(
+            ~reinterpret_cast<uintptr_t>(srcAddr)));
 
         // Adjust this instruction if A) it wasn't written from a pc relative
         // instruction to an absolute (or vice-versa) and B) it isn't a literal.
         if (!env.rewrites.count(src) && !literals.count(src)) {
           auto const destAddr = env.rel.adjustedAddressAfter(srcAddr);
           auto const destFrom = Instruction::Cast(destAddr);
-          auto const dest =
-            Instruction::Cast(env.destBlock.toDestAddress(destAddr));
           /*
            * PC Relative
            *   ADR/ADRP
@@ -1165,7 +1424,30 @@ size_t relocateImpl(Env& env) {
            *   CB[N]Z
            *   TB[N]Z
            */
-          if (isPCRelative(src)) {
+          if (farLoad) {
+            auto const old_target =
+              reinterpret_cast<TCA>(srcLoad.literalAddress(srcFrom));
+            auto const adjusted_target =
+              env.rel.adjustedAddressAfter(old_target);
+            auto const new_target =
+              Instruction::Cast(adjusted_target ? adjusted_target : old_target);
+
+            auto destLoad = LoadLiteral::at(
+              Instruction::Cast(env.destBlock.toDestAddress(destAddr))
+            );
+            assertx(destLoad && destLoad.isFar());
+            if (!destLoad.setTarget(new_target, destFrom)) {
+              FTRACE(3,
+                     "relocate: ADRP/LDR at {} has internal reference "
+                     "0x{:08x} which can't be adjusted. Will try again and "
+                     "far.\n",
+                     reinterpret_cast<TCA>(src), new_target);
+              env.far.insert(src);
+              ok = false;
+            }
+          } else if (isPCRelative(src)) {
+            auto const dest =
+              Instruction::Cast(env.destBlock.toDestAddress(destAddr));
             auto const old_target =
               reinterpret_cast<TCA>(src->GetImmPCOffsetTarget(srcFrom));
             auto const adjusted_target =
@@ -1191,66 +1473,6 @@ size_t relocateImpl(Env& env) {
             }
           }
 
-          /*
-           * Immediates
-           *   LDR (literal)
-           *   MOV/MOVK
-           */
-          if (src->IsLoadLiteral()) {
-            assertx(dest->IsLoadLiteral());
-            auto const addr = dest->GetLiteralAddress<uint8_t*>();
-            if (src->Mask(LoadLiteralMask) == LDR_w_lit) {
-              auto target = *reinterpret_cast<uint32_t*>(addr);
-              auto adjusted =
-                env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
-              if (adjusted) {
-                if (env.meta.addressImmediates.contains(srcAddr)) {
-                  patchTarget32(addr, adjusted);
-                } else {
-                  FTRACE(3,
-                         "relocate: instruction at {} has immediate 0x{} "
-                         "which looks like an address that needs relocating\n",
-                         srcAddr, target);
-                }
-              }
-            } else {
-              auto const target = *reinterpret_cast<uintptr_t*>(addr);
-              auto const adjusted = [&] () -> uintptr_t {
-                if (env.meta.addressImmediates.contains(
-                      reinterpret_cast<TCA>(
-                        ~reinterpret_cast<uintptr_t>(srcAddr)))) {
-                  auto munge = [] (TCA addr) {
-                    return (reinterpret_cast<uintptr_t>(addr) << 1) | 1;
-                  };
-                  // An mcprep smashableMovq.  During live relocation,
-                  // the target will probably have been smashed before
-                  // we get here. In that case, its no longer encoding a
-                  // tc address, and we don't need to do anything.
-                  if (target & 1) {
-                    always_assert(target == munge(srcAddr));
-                    return munge(destAddr);
-                  }
-                } else {
-                  auto const ret = reinterpret_cast<uintptr_t>(
-                    env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(target))
-                  );
-                  if (ret && env.meta.addressImmediates.count(srcAddr)) {
-                    return ret;
-                  } else if (ret) {
-                    FTRACE(3,
-                           "relocate: instruction at {} has immediate 0x{} "
-                           "which looks like an address that needs "
-                           "relocating\n",
-                           srcAddr, target);
-                  }
-                }
-                return 0;
-              }();
-              if (adjusted) {
-                *reinterpret_cast<uintptr_t*>(addr) = adjusted;
-              }
-            }
-          }
           uint64_t target;
           uint32_t rd;
           uint32_t regSize;
@@ -1275,6 +1497,38 @@ size_t relocateImpl(Env& env) {
             }
           }
         }
+
+        /*
+         * Immediates
+         *   LDR (literal)
+         *   ADRP + LDR
+         *   MOV/MOVK
+         *
+         * Literal loads still need immediate adjustment when rewritten, for
+         * example when an ADRP/LDR smashable movq shrinks to a single LDR.
+         */
+        if (!literals.count(src) && srcLoad) {
+          auto const destAddr = env.rel.adjustedAddressAfter(srcAddr);
+          if (!destAddr || !env.destBlock.contains(destAddr)) {
+            srcAddr += srcLoad.instrCount() * kInstructionSize;
+            continue;
+          }
+          auto const destLoad = LoadLiteral::at(
+            Instruction::Cast(env.destBlock.toDestAddress(destAddr))
+          );
+          if (destLoad) {
+            adjustLiteralLoadImmediate(
+              env.rel,
+              destLoad,
+              srcAddr,
+              destAddr,
+              isAddressImmediate,
+              isTaggedAddressImmediate
+            );
+          }
+        }
+
+        srcAddr += (srcLoad ? srcLoad.instrCount() : 1) * kInstructionSize;
       }
     }
     if (!ok) {
@@ -1299,6 +1553,47 @@ size_t relocateImpl(Env& env) {
 
 void adjustInstruction(RelocationInfo& rel, Instruction* instr,
                        Instruction* end, bool live) {
+  auto const load = LoadLiteral::at(instr, end);
+  auto const isAddressImmediate =
+    rel.isAddressImmediate(reinterpret_cast<TCA>(instr));
+  auto const isTaggedAddressImmediate =
+    rel.isAddressImmediate(reinterpret_cast<TCA>(
+      ~reinterpret_cast<uintptr_t>(instr)));
+
+  if (load && load.isFar()) {
+    auto const target = reinterpret_cast<TCA>(load.literalAddress(instr));
+    if (auto const adjusted = rel.adjustedAddressAfter(target)) {
+      // setTarget() may rewrite both instructions in the pair.
+      // DataBlock::syncDirect() makes the writes visible but does not make the
+      // two-instruction update atomic for concurrently executing code.
+      always_assert_flog(
+        !live,
+        "Can't adjust ADRP/LDR literal load for a live region.\n"
+      );
+      auto const setTarget = load.setTarget(Instruction::Cast(adjusted), instr);
+      always_assert_flog(
+        setTarget,
+        "Can't adjust ADRP/LDR literal load. The offset is too large.\n"
+        "  adrp = {}  ldr = {}  target = {}  adjusted = {}\n",
+        load.adrp(),
+        load.ldr(),
+        target,
+        adjusted
+      );
+      auto const begin = reinterpret_cast<TCA>(instr);
+      DataBlock::syncDirect(begin, begin + 2 * kInstructionSize);
+    }
+    adjustLiteralLoadImmediate(
+      rel,
+      load,
+      reinterpret_cast<TCA>(instr),
+      reinterpret_cast<TCA>(instr),
+      isAddressImmediate,
+      isTaggedAddressImmediate
+    );
+    return;
+  }
+
   /*
    * PC Relative
    *   ADR/ADRP
@@ -1334,41 +1629,21 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
   /*
    * Immediates
    *   LDR (literal)
+   *   ADRP + LDR
    *   MOV/MOVK
    *
-   * Note: We can't atomically rewrite multiple instructions, so we
-   *       assert when attempting to adjust MOV/MOVK when live.
+   * Note: We can't atomically rewrite multiple instructions, so multi-word
+   *       ADRP/LDR and MOV/MOVK adjustments assert when live.
    */
-  if (instr->IsLoadLiteral()) {
-    if (instr->Mask(LoadLiteralMask) == LDR_w_lit) {
-      auto addr = reinterpret_cast<uint32_t*>(instr->GetLiteralAddress<uint8_t*>());
-      auto target = *addr;
-      auto adjusted = rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
-      if (adjusted) {
-        if (rel.isAddressImmediate(reinterpret_cast<TCA>(instr))) {
-          patchTarget32(reinterpret_cast<TCA>(addr), adjusted);
-        } else {
-          FTRACE(3,
-                 "relocate: instruction at {} has immediate 0x{} "
-                 "which looks like an address that needs relocating\n",
-                 reinterpret_cast<TCA>(instr), target);
-        }
-      }
-    } else {
-      auto addr = reinterpret_cast<TCA*>(instr->GetLiteralAddress<uint8_t*>());
-      auto target = *addr;
-      auto adjusted = rel.adjustedAddressAfter(target);
-      if (adjusted) {
-        if (rel.isAddressImmediate(reinterpret_cast<TCA>(instr))) {
-          patchTarget64(reinterpret_cast<TCA>(addr), adjusted);
-        } else {
-          FTRACE(3,
-                 "relocate: instruction at {} has immediate 0x{} "
-                 "which looks like an address that needs relocating\n",
-                 reinterpret_cast<TCA>(instr), target);
-        }
-      }
-    }
+  if (load && !load.isFar()) {
+    adjustLiteralLoadImmediate(
+      rel,
+      load,
+      reinterpret_cast<TCA>(instr),
+      reinterpret_cast<TCA>(instr),
+      isAddressImmediate,
+      isTaggedAddressImmediate
+    );
   }
   uint64_t target;
   uint32_t rd;
@@ -1424,8 +1699,14 @@ void adjustInstructions(RelocationInfo& rel,
 
   // Adjust the instructions
   for (auto instr = start; instr < end; instr = instr->GetNextInstruction()) {
-    if (!literals.contains(instr)) {
-      adjustInstruction(rel, instr, end, live);
+    if (literals.contains(instr)) {
+      continue;
+    }
+
+    auto const load = LoadLiteral::at(instr, end);
+    adjustInstruction(rel, instr, end, live);
+    if (load && load.isFar()) {
+      instr = instr->GetNextInstruction();
     }
   }
 }
@@ -1495,6 +1776,9 @@ size_t relocate(RelocationInfo& rel,
       Env env(rel, srcBlock, destBlock, start, end, meta, exitAddr, far);
       return relocateImpl(env);
     } catch (JmpOutOfRange&) {
+      FTRACE(1, "relocate: JmpOutOfRange caught for [{},{}); retrying with "
+                "far_size={}\n",
+             start, end, far.size());
     }
   }
 }

@@ -223,7 +223,14 @@ bool emit(Venv& env, const bindaddr& i) {
 }
 
 bool emit(Venv& env, const ldbindaddr& i) {
-  auto const mov_addr = emitSmashableMovq(*env.cb, env.meta, 0, r64(i.d));
+  auto const mov_addr =
+    emitSmashableMovq(
+      *env.cb,
+      env.meta,
+      0,
+      r64(i.d),
+      env.unit.farLiteralEnabled()
+    );
   setJmpTransID(env, mov_addr);
   env.meta.smashableBinds.push_back({
     IncomingBranch::ldaddr(mov_addr), i.target, i.spOff,

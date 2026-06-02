@@ -122,6 +122,12 @@ void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& meta);
 void adjustMetaDataForRelocation(RelocationInfo& rel,
                                  AsmInfo* asmInfo,
                                  CGMeta& meta);
+/*
+ * ARM relocation expects Vasm-emitted literal loads to use the far ADRP/LDR
+ * form before relocation. Relocation may shorten that form to a near LDR
+ * literal when the final literal address is in range, but it does not expand
+ * near LDR literals that become out of range.
+ */
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,

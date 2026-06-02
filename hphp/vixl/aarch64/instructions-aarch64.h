@@ -502,6 +502,10 @@ class Instruction {
 
 #ifdef HPHP_VIXL
   // HPHP compat: classification methods used by relocation-arm.cpp.
+  bool IsAdrp() const {
+    return IsPCRelAddressing() && (Mask(PCRelAddressingMask) == ADRP);
+  }
+
   bool IsMovz() const {
     return (Mask(MoveWideImmediateMask) == MOVZ_x) ||
            (Mask(MoveWideImmediateMask) == MOVZ_w);

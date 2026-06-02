@@ -73,9 +73,11 @@
 
 #include <algorithm>
 
+#include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/relocation-arm.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -89,6 +91,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
+#include "hphp/runtime/vm/jit/vasm-util-arm.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/util/configs/eval.h"
@@ -596,6 +599,25 @@ static CodeBlock* getBlock(Venv& env, CodeAddress a) {
   return nullptr;
 }
 
+void patchFarLiteralLoad(Instruction* adrpActual,
+                         CodeAddress adrpLogical,
+                         CodeAddress literalAddress) {
+  auto const load = arm::LoadLiteral::at(adrpActual);
+  assertx(load && load.isFar());
+  auto const setTarget =
+    load.setTarget(Instruction::Cast(literalAddress),
+                   Instruction::Cast(adrpLogical));
+  always_assert_flog(
+    setTarget,
+    "patchFarLiteralLoad(): cannot encode ADRP/LDR at {} for literal {}\n",
+    adrpLogical, literalAddress
+  );
+  auto const start = reinterpret_cast<CodeAddress>(adrpActual);
+  DataBlock::syncDirect(
+    start, start + 2 * kInstructionSize
+  );
+}
+
 void Vgen::emitVeneers(Venv& env) {
   auto& meta = env.meta;
   decltype(env.meta.veneers) notEmitted;
@@ -627,14 +649,23 @@ void Vgen::emitVeneers(Venv& env) {
 
     int64_t veneerSize;
     if (veneer.smashable) {
-      // Emit the veneer code: LDR + BR.
-      // Use LDR from literal pool so the target can be atomically patched.
-      vixl::Label target_data;
-      poolLiteral(*cb, meta, (uint64_t)makeTarget32(veneer.target), 32, true);
-      av.bind(&target_data);
-      av.Ldr(rAsm_w, &target_data);
+      // Emit the veneer code: LDR + BR normally, or ADRP + LDR + BR when far
+      // literals are enabled for local TC emission.
+      // Keep the target in the literal pool so runtime smashing can patch the
+      // loaded value, regardless of whether the load is direct or ADRP + LDR.
+      auto const emitFarLiteral = env.unit.farLiteralEnabled();
+      emitPooledLiteralLoad(
+        av,
+        *cb,
+        meta,
+        (uint64_t)makeTarget32(veneer.target),
+        rAsm_w,
+        32,
+        true,
+        emitFarLiteral
+      );
       av.Br(rAsm);
-      veneerSize = 2 * kInstructionSize;
+      veneerSize = (emitFarLiteral ? 3 : 2) * kInstructionSize;
     } else {
       // Emit the veneer code: MOVZ/MOVK + BR.
       // Always emit exactly 2 mov instructions so the relocator has a
@@ -747,20 +778,31 @@ void Vgen::handleLiterals(Venv& env) {
       not_reached();
     }
 
-    // Patch the LDR.
-    auto const patchAddressActual =
+    // Patch the literal load.
+    auto const patchStartActual =
       Instruction::Cast(env.text.toDestAddress(pl.patchAddress));
-    assertx(patchAddressActual->IsLoadLiteral());
 
-    // Assert that the PC-relative offset fits in LDR's imm19 immediate.
-    auto const imm = static_cast<int64_t>(literalAddress - pl.patchAddress);
-    always_assert_flog(is_int21(imm),
-                       "handleLiterals(): literalAddress ({}) is too far from LDR ({})\n",
-                       literalAddress, pl.patchAddress);
+    if (!pl.far) {
+      always_assert_flog(
+        patchStartActual->IsLoadLiteral(),
+        "handleLiterals(): expected a direct literal load at {}\n",
+        pl.patchAddress
+      );
+      auto const imm = static_cast<int64_t>(literalAddress - pl.patchAddress);
+      always_assert_flog(
+        is_int21(imm),
+        "handleLiterals(): literalAddress ({}) is too far from LDR ({})\n",
+        literalAddress, pl.patchAddress
+      );
+      patchStartActual->SetImmPCOffsetTarget(
+        Instruction::Cast(literalAddress),
+        Instruction::Cast(pl.patchAddress)
+      );
+      continue;
+    }
 
-    patchAddressActual->SetImmPCOffsetTarget(
-      Instruction::Cast(literalAddress),
-      Instruction::Cast(pl.patchAddress));
+    patchFarLiteralLoad(patchStartActual, pl.patchAddress, literalAddress);
+    continue;
   }
 
   if (env.meta.fallthru) {
@@ -796,57 +838,64 @@ void Vgen::processVveneers(Venv& env) {
 
 void Vgen::patch(Venv& env) {
   // Patch the 32 bit target of the LDR
-  auto patch = [&env](TCA instr, TCA target) {
-    // The LDR loading the address to branch to.
-    auto ldr = Instruction::Cast(instr);
-    auto const DEBUG_ONLY br = ldr->GetNextInstruction();
-    assertx(ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
-            br->Mask(UnconditionalBranchToRegisterMask) == BR &&
-            ldr->Rd() == br->Rn());
-    // The address the LDR loads.
-    auto targetAddr = ldr->GetLiteralAddress<uint8_t*>();
+  auto patch = [&env](TCA instr, TCA logicalLoadStart, TCA target) {
+    auto const start = Instruction::Cast(instr);
+    auto const logicalStart = Instruction::Cast(logicalLoadStart);
+    auto const load = arm::LoadLiteral::at(start);
+    always_assert_flog(
+      load && load.width() == 32,
+      "Vgen::patch(): expected 32-bit literal load at {} (logical = {})\n",
+      instr,
+      logicalLoadStart
+    );
+    DEBUG_ONLY auto const br = load.ldr()->GetNextInstruction();
+    assertx(br->Mask(UnconditionalBranchToRegisterMask) == BR &&
+            load.destReg() == br->Rn());
+    auto const targetAddr =
+      env.text.toDestAddress(load.literalAddress(logicalStart));
     // Patch the 32 bit target following the LDR and BR
     patchTarget32(targetAddr, target);
   };
 
   for (auto const& p : env.jmps) {
     auto addr = env.text.toDestAddress(p.instr);
+    auto logicalLoadStart = p.instr;
     auto const target = env.addrs[p.target];
     assertx(target);
     if (env.meta.smashableLocations.contains(p.instr)) {
       assertx(possiblySmashableJmp(addr));
+      auto const source = addr;
       // Update `addr' to point to the veneer.
       addr = TCA(vixl::Instruction::Cast(addr)->ImmPCOffsetTarget());
+      // Keep the logical address at the same byte offset into the veneer.
+      logicalLoadStart += addr - source;
     }
     // Patch the address we are jumping to.
-    patch(addr, target);
+    patch(addr, logicalLoadStart, target);
   }
   for (auto const& p : env.jccs) {
     auto addr = env.text.toDestAddress(p.instr);
+    auto logicalLoadStart = p.instr;
     auto const target = env.addrs[p.target];
     assertx(target);
     if (env.meta.smashableLocations.contains(p.instr)) {
       assertx(possiblySmashableJcc(addr));
+      auto const source = addr;
       // Update `addr' to point to the veneer.
       addr = TCA(vixl::Instruction::Cast(addr)->ImmPCOffsetTarget());
-    } else {
-      assertx(Instruction::Cast(addr)->IsCondBranchImm());
-      // If the jcc starts with a conditional jump, patch the next instruction
-      // (which should start with a LDR).
-      addr += kInstructionSize;
+      // Keep the logical address at the same byte offset into the veneer.
+      logicalLoadStart += addr - source;
     }
-    patch(addr, target);
+    patch(addr, logicalLoadStart, target);
   }
   for (auto const& p : env.leas) {
     auto addr = env.text.toDestAddress(p.instr);
     auto const target = env.vaddrs[p.target];
 
-    // Get the address the LDR loads.
-    auto const ldr = Instruction::Cast(addr);
-    assertx(ldr->Mask(LoadLiteralMask) == LDR_w_lit);
-    auto literalAddr = ldr->GetLiteralAddress<uint8_t*>();
-
-    // Patch it to target
+    auto const load = arm::LoadLiteral::at(Instruction::Cast(addr));
+    auto const literalAddr = env.text.toDestAddress(
+      load.literalAddress(Instruction::Cast(p.instr))
+    );
     patchTarget32(literalAddr, target);
   }
 }
@@ -1121,11 +1170,28 @@ void Vgen::emit(const mcprep& i) {
    * MethodCache::handleStaticCall can tell it's not been smashed yet
    */
 
+  auto const emitFarLiteral = env.unit.farLiteralEnabled();
   align(*env.cb, &env.meta, Alignment::SmashMovq, AlignContext::Live);
-  auto const imm = reinterpret_cast<uint64_t>(a->frontier());
-  emitSmashableMovq(*env.cb, env.meta, (imm << 1) | 1, r64(i.d));
+  auto const movAddr =
+    ::HPHP::jit::emitSmashableMovq(
+      *env.cb,
+      env.meta,
+      0,
+      r64(i.d),
+      emitFarLiteral
+    );
+  auto const movAddrInt = reinterpret_cast<uint64_t>(movAddr);
+  // emitSmashableMovq() immediately pools a placeholder literal. The mcprep
+  // initial value depends on the movq address, so patch the entry it just
+  // appended instead of threading a self-reference through the emitter.
+  auto& literal = env.meta.literalsToPool.back();
+  assertx(literal.patchAddress == movAddr);
+  assertx(literal.far == emitFarLiteral);
+  literal.value = (movAddrInt << 1) | 1;
 
-  env.meta.addressImmediates.insert(reinterpret_cast<TCA>(~imm));
+  env.meta.addressImmediates.insert(
+    reinterpret_cast<TCA>(~reinterpret_cast<uintptr_t>(movAddr))
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1336,18 +1402,25 @@ void Vgen::emit(const jcc& i) {
       a->bind(&veneer_addr);
       a->b(&veneer_addr, arm::convertCC(i.cc)); // NB: this will be patched later.
     } else {
-      jccs.push_back({a->frontier(), taken});
-      vixl::Label skip, data;
+      vixl::Label skip;
 
       // Emit a "far JCC" sequence for easy patching later.  Static relocation
       // might be able to simplify this later (see optimizeFarJcc()).
       recordAddressImmediate();
       a->B(&skip, vixl::InvertCondition(C(i.cc)));
-      recordAddressImmediate();
-      poolLiteral(*env.cb, env.meta, (uint64_t)makeTarget32(a->frontier()),
-                  32, false);
-      a->bind(&data);  // This will be remmaped during the handleLiterals phase.
-      a->Ldr(rAsm_w, &data);
+      auto const loadStart = a->frontier();
+      jccs.push_back({loadStart, taken});
+      recordAddressImmediate(env, loadStart);
+      emitPooledLiteralLoad(
+        *a,
+        *env.cb,
+        env.meta,
+        makeTarget32(loadStart),
+        rAsm_w,
+        32,
+        false,
+        env.unit.farLiteralEnabled()
+      );
       a->Br(rAsm);
       a->bind(&skip);
     }
@@ -1366,27 +1439,40 @@ void Vgen::emit(const jcci& i) {
 
 void Vgen::emit(const jmp& i) {
   if (next == i.target) return;
-  jmps.push_back({a->frontier(), i.target});
-  vixl::Label data;
+  auto const loadStart = a->frontier();
+  jmps.push_back({loadStart, i.target});
 
   // Emit a "far JMP" sequence for easy patching later.  Static relocation
   // might be able to simplify this (see optimizeFarJmp()).
-  recordAddressImmediate();
-  poolLiteral(*env.cb, env.meta, (uint64_t)a->frontier(), 32, false);
-  a->bind(&data); // This will be remapped during the handleLiterals phase.
-  a->Ldr(rAsm_w, &data);
+  recordAddressImmediate(env, loadStart);
+  emitPooledLiteralLoad(
+    *a,
+    *env.cb,
+    env.meta,
+    makeTarget32(loadStart),
+    rAsm_w,
+    32,
+    false,
+    env.unit.farLiteralEnabled()
+  );
   a->Br(rAsm);
 }
 
 void Vgen::emit(const jmpi& i) {
-  vixl::Label data;
-
   // Cannot use simple a->Mov() since such a sequence cannot be
   // adjusted while live following a relocation.
-  recordAddressImmediate();
-  poolLiteral(*env.cb, env.meta, (uint64_t)i.target, 32, false);
-  a->bind(&data); // This will be remapped during the handleLiterals phase.
-  a->Ldr(rAsm_w, &data);
+  auto const loadStart = a->frontier();
+  recordAddressImmediate(env, loadStart);
+  emitPooledLiteralLoad(
+    *a,
+    *env.cb,
+    env.meta,
+    makeTarget32(i.target),
+    rAsm_w,
+    32,
+    false,
+    env.unit.farLiteralEnabled()
+  );
   a->Br(rAsm);
 }
 
@@ -1416,15 +1502,20 @@ void Vgen::emit(const lea& i) {
 }
 
 void Vgen::emit(const leap& i) {
-  vixl::Label imm_data;
-
   // Cannot use simple a->Mov() since such a sequence cannot be
   // adjusted while live following a relocation.
-  recordAddressImmediate();
-  poolLiteral(*env.cb, env.meta, (uint64_t)makeTarget32(i.s.r.disp),
-              32, false);
-  a->bind(&imm_data);  // This will be remapped during the handleLiterals phase.
-  a->Ldr(W(i.d), &imm_data);
+  auto const loadStart = a->frontier();
+  recordAddressImmediate(env, loadStart);
+  emitPooledLiteralLoad(
+    *a,
+    *env.cb,
+    env.meta,
+    makeTarget32(i.s.r.disp),
+    W(i.d),
+    32,
+    false,
+    env.unit.farLiteralEnabled()
+  );
 }
 
 void Vgen::emit(const lead& i) {
@@ -2558,7 +2649,7 @@ void optimize(Vunit& unit, const Abi& abi, bool regalloc) {
 }
 
 void emit(Vunit& unit, Vtext& text, CGMeta& fixups,
-             AsmInfo* asmInfo) {
+          AsmInfo* asmInfo) {
   vasm_emit<Vgen>(unit, text, fixups, asmInfo);
 }
 

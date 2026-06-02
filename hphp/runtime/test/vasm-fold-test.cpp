@@ -31,6 +31,7 @@ namespace arm { struct ImmFolder; }
 
 #ifdef __x86_64__
 namespace x64 { struct ImmFolder; }
+#endif
 
 namespace {
 
@@ -69,6 +70,7 @@ std::string stripWhitespace(std::string str) {
 //
 // The return value is a string representation of the code.
 //
+#ifndef __aarch64__
 template <typename Ins, typename Arg>
 std::string genTestCode(int argPos, Arg constArg) {
   Vunit unit;
@@ -96,9 +98,9 @@ std::string genTestCode(int argPos, Arg constArg) {
 
   return stripWhitespace(show(unit));
 }
+#endif
 
 } // namespace
-#endif
 
 TEST(Vasm, FoldImms) {
 #ifndef __x86_64__

@@ -53,12 +53,13 @@ struct CGMeta;
  *      - interceptjmp:  A jmp instruction that can be smashed into a
  *                       jcc instruction to the same target.
  *
- * Smashable instructions must have a statically known length (though they may
- * require nop-gap realignment when they are emitted).
+ * Smashable instructions must have a statically known maximum length (though
+ * they may require nop-gap realignment when they are emitted, and some
+ * architectures may emit a shorter variant).
  */
 
 /*
- * Size of the smashable machine code sequence.
+ * Maximum size of the smashable machine code sequence.
  */
 size_t smashableMovqLen();
 size_t smashableCmpqLen();
@@ -73,7 +74,7 @@ size_t smashableInterceptLen();
  * For jcc_and_jmp, return a pair of (jcc_addr, jmp_addr).
  */
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
-                      PhysReg d);
+                      PhysReg d, bool emitFarLiteral = false);
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target);
 TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target);
 TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,

@@ -48,8 +48,13 @@ size_t smashableJccLen() {
 }
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
-                      PhysReg d) {
-  return ARCH_SWITCH_CALL(emitSmashableMovq, cb, fixups, imm, d);
+                      PhysReg d, bool emitFarLiteral) {
+  return ARCH_SWITCH_CALL(emitSmashableMovq,
+                          cb,
+                          fixups,
+                          imm,
+                          d,
+                          emitFarLiteral);
 }
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target) {
   always_assert(target);

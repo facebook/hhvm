@@ -2238,6 +2238,20 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t Jit.SerializeOptProfRequests = 0, UNKNOWN
 - bool Jit.SerializeOptProfRestart = true, UNKNOWN
 - bool Jit.ArmLse, UNKNOWN
+- bool Jit.ArmForceFarLiteral = false, UNKNOWN
+
+  Relocatable ARM code always emits ADRP/LDR far literal loads and relies on
+  relocation to convert them to direct LDR literal loads when possible.
+  Non-relocatable ARM code emits near literal loads by default; this option
+  forces it to emit far literal loads when a non-relocatable path needs the
+  wider reach because relocation will not adjust the literal form later.
+
+- bool Jit.ArmDisableAdrpLdrShortening = false, UNKNOWN
+
+  When true, ARM relocation keeps ADRP/LDR literal-load pairs instead of
+  shortening them to a direct LDR literal load when the final literal is in
+  range. This is useful for stress-testing ADRP/LDR far literal support.
+
 - std::string Jit.LogAllInlineRegions = "", UNKNOWN
 
   Log the sizes and metadata for all translations in the TC broken

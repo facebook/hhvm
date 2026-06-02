@@ -43,7 +43,7 @@ constexpr size_t smashableJccLen()  { return 6; }
 constexpr size_t smashableInterceptLen () { return 2; }
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
-                      PhysReg d);
+                      PhysReg d, bool emitFarLiteral = false);
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target);
 TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target);
 TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,

@@ -165,13 +165,17 @@ Reason* getTrapReason(CTCA addr) {
 }
 
 void poolLiteral(CodeBlock& cb, CGMeta& meta, uint64_t val, uint8_t width,
-                  bool smashable) {
+                 bool smashable, CodeAddress patchAddress,
+                 bool far) {
+  assertx(!far || patchAddress);
+  if (!patchAddress) patchAddress = cb.frontier();
   meta.literalsToPool.emplace_back(
     CGMeta::PoolLiteralMeta {
       val,
-      cb.frontier(),
+      patchAddress,
       smashable,
-      width
+      width,
+      far
     }
   );
 }

@@ -139,7 +139,6 @@ HttpRequestHandler::HttpRequestHandler(int timeout)
 void HttpRequestHandler::sendStaticContent(Transport *transport,
                                            const char *data, int len,
                                            time_t mtime,
-                                           bool compressed,
                                            const std::string &cmd,
                                            const char *ext) {
   assertx(ext);
@@ -193,9 +192,11 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
 
   // misnomer, it means we have made decision on compression, transport
   // should not attempt to compress it.
-  transport->disableCompression();
+  if (!Cfg::Server::AllowStaticAssetsCompression) {
+    transport->disableCompression();
+  }
 
-  transport->sendRaw(data, len, 200, compressed);
+  transport->sendRaw(data, len, 200, false);
   transport->onSendEnd();
 }
 
@@ -332,7 +333,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
         // local cache file is not valuable, maybe misleading. This way
         // the Last-Modified header will not show in response.
         // stat(Cfg::Server::FileCache.c_str(), &st);
-        sendStaticContent(transport, content->buffer, content->size, 0, false,
+        sendStaticContent(transport, content->buffer, content->size, 0,
                           path, ext);
         ServerStats::LogPage(path, 200);
         return;
@@ -634,7 +635,7 @@ bool HttpRequestHandler::handleFileRequest(Transport* transport,
       ::close(fd);
       buffer[len] = 0;
       sendStaticContent(transport, buffer, len, stat_buf.st_mtime,
-                        false, path, ext);
+                        path, ext);
       ServerStats::LogPage(path, 200);
       return true;
     }

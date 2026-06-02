@@ -108,6 +108,14 @@ public final class RpcResources {
     return INSTANCE.doGet().isForceClientExecutionOffEventLoop();
   }
 
+  /**
+   * Rollout flag for eager request-frame release on the header transports. See {@link
+   * ResourceConfiguration#releaseHeaderFrameAfterDecode}.
+   */
+  public static boolean isReleaseHeaderFrameAfterDecode() {
+    return ResourceConfiguration.releaseHeaderFrameAfterDecode;
+  }
+
   public static ThriftMeterRegistry getThriftMeterRegistry() {
     return ThriftMeterRegistry.getInstance();
   }

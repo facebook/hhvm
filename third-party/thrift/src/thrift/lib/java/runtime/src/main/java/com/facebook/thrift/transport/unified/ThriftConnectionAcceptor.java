@@ -138,14 +138,19 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
       NiftyConnectionContext connectionContext,
       ByteBuf byteBuf) {
     ThriftFrame requestFrame = null;
+    // Rollout flag: when enabled, the payload owns the frame and the generated handler releases it
+    // eagerly right after the read; when disabled, the frame is released at response completion
+    // below
+    // (historical behavior).
+    boolean releaseFrameAfterDecode = RpcResources.isReleaseHeaderFrameAfterDecode();
     try {
       // Decode ByteBuf to ThriftFrame
       requestFrame = ReactiveHeaderCodec.decodeFrame(out.alloc(), byteBuf);
 
-      // Parse the request
       NettyNiftyRequestContext requestContext =
           new NettyNiftyRequestContext(requestFrame.getHeaders(), connectionContext);
-      ServerRequestPayload serverRequestPayload = decodeMessage(requestFrame, requestContext);
+      ServerRequestPayload serverRequestPayload =
+          decodeMessage(requestFrame, requestContext, releaseFrameAfterDecode);
       RequestRpcMetadata metadata = serverRequestPayload.getRequestRpcMetadata();
 
       // Dispatch based on request type
@@ -177,13 +182,27 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
       }
 
       return result
-          .doFinally(__ -> ReferenceCountUtil.safeRelease(finalRequestFrame))
+          .doFinally(
+              __ -> {
+                if (releaseFrameAfterDecode) {
+                  // Eager path: the generated handler released the frame right after the read. This
+                  // is the idempotent backstop for paths where it never runs (unsupported RpcKind
+                  // above, or the off-loop scheduler rejecting the request).
+                  serverRequestPayload.releaseRequestData();
+                } else if (finalRequestFrame.refCnt() > 0) {
+                  // Flag disabled: release the frame at response completion (historical behavior).
+                  finalRequestFrame.release();
+                }
+              })
           .onErrorResume(
               t -> {
                 log.error("Exception processing request", t);
                 return Mono.empty();
               });
     } catch (Throwable t) {
+      // Decode failed before the payload took ownership; release the frame (or the raw buffer if
+      // the
+      // frame was never built).
       if (requestFrame != null) {
         ReferenceCountUtil.safeRelease(requestFrame);
       } else {
@@ -440,7 +459,8 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
    * @param requestContext the request context
    * @return the decoded ServerRequestPayload
    */
-  private ServerRequestPayload decodeMessage(ThriftFrame frame, RequestContext requestContext) {
+  private ServerRequestPayload decodeMessage(
+      ThriftFrame frame, RequestContext requestContext, boolean releaseFrameAfterDecode) {
     try {
       TProtocolType protocol = frame.getProtocol();
       TProtocol byteBufTProtocol = protocol.apply(frame.getMessage());
@@ -450,6 +470,10 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
       RpcKind kind =
           message.seqid == -1 ? SINGLE_REQUEST_NO_RESPONSE : SINGLE_REQUEST_SINGLE_RESPONSE;
 
+      // When eager release is enabled, hand the frame to the payload so the generated handler can
+      // release it (via releaseRequestData()) right after reading the request args. Otherwise the
+      // transport keeps ownership and releases the frame at response completion (historical
+      // behavior).
       return ServerRequestPayload.create(
           createReaderFunction(byteBufTProtocol),
           new RequestRpcMetadata.Builder()
@@ -458,7 +482,8 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
               .setName(message.name)
               .build(),
           requestContext,
-          message.seqid);
+          message.seqid,
+          releaseFrameAfterDecode ? frame : null);
     } catch (Throwable t) {
       throw new RuntimeException("Failed to decode message", t);
     }
@@ -558,5 +583,4 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
         TimeUnit.MILLISECONDS,
         fallback);
   }
-
 }

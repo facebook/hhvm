@@ -27,6 +27,7 @@ import com.facebook.thrift.util.SerializationProtocolUtil;
 import com.facebook.thrift.util.SerializerUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -78,7 +79,12 @@ public class ThriftAnyDeserializer {
     } else if (name.isSetStringType()) {
       return protocol.readString();
     } else if (name.isSetBinaryType()) {
-      return TProtocolUtil.readBinaryAsByteBuf(protocol);
+      // Copy into an independent, unpooled buffer. The returned ByteBuf becomes the materialized
+      // value of the Any and outlives the request decode pass; the request frame may be released
+      // immediately after decoding (see ThriftServerHandler / ThriftConnectionAcceptor eager
+      // release). readBinaryAsByteBuf may return a slice that shares the request buffer's lifetime,
+      // so we copy to a GC-managed heap buffer with no caller-release obligation.
+      return Unpooled.copiedBuffer(TProtocolUtil.readBinaryAsByteBuf(protocol));
     } else if (name.isSetEnumType()) {
       return readObject(typeStruct);
     } else if (name.isSetExceptionType()) {

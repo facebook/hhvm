@@ -108,7 +108,17 @@ public class MyServiceRpcServerHandler
     java.util.List<com.facebook.thrift.payload.Reader> _readers,
     com.facebook.swift.service.ContextChain _chain) {
           _chain.preRead();
-          java.util.List<java.lang.Object>_data = _payload.getData(_readers);
+          java.util.List<java.lang.Object> _data;
+          try {
+            _data = _payload.getData(_readers);
+          } finally {
+            // getData has fully read the request bytes; release the request buffer now. This lives in
+            // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
+            // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super
+            // without reading, so releasing there would free the buffer before the parent reads it.
+            // No-op when the transport owns the buffer (e.g. RSocket).
+            _payload.releaseRequestData();
+          }
           java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
 
 
@@ -195,7 +205,17 @@ public class MyServiceRpcServerHandler
     java.util.List<com.facebook.thrift.payload.Reader> _readers,
     com.facebook.swift.service.ContextChain _chain) {
           _chain.preRead();
-          java.util.List<java.lang.Object>_data = _payload.getData(_readers);
+          java.util.List<java.lang.Object> _data;
+          try {
+            _data = _payload.getData(_readers);
+          } finally {
+            // getData has fully read the request bytes; release the request buffer now. This lives in
+            // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
+            // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super
+            // without reading, so releasing there would free the buffer before the parent reads it.
+            // No-op when the transport owns the buffer (e.g. RSocket).
+            _payload.releaseRequestData();
+          }
           java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
 
 
@@ -278,7 +298,17 @@ public class MyServiceRpcServerHandler
     java.util.List<com.facebook.thrift.payload.Reader> _readers,
     com.facebook.swift.service.ContextChain _chain) {
           _chain.preRead();
-          java.util.List<java.lang.Object>_data = _payload.getData(_readers);
+          java.util.List<java.lang.Object> _data;
+          try {
+            _data = _payload.getData(_readers);
+          } finally {
+            // getData has fully read the request bytes; release the request buffer now. This lives in
+            // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
+            // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super
+            // without reading, so releasing there would free the buffer before the parent reads it.
+            // No-op when the transport owns the buffer (e.g. RSocket).
+            _payload.releaseRequestData();
+          }
           java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
 
           long sink = (long) _iterator.next();
@@ -364,7 +394,17 @@ public class MyServiceRpcServerHandler
     java.util.List<com.facebook.thrift.payload.Reader> _readers,
     com.facebook.swift.service.ContextChain _chain) {
           _chain.preRead();
-          java.util.List<java.lang.Object>_data = _payload.getData(_readers);
+          java.util.List<java.lang.Object> _data;
+          try {
+            _data = _payload.getData(_readers);
+          } finally {
+            // getData has fully read the request bytes; release the request buffer now. This lives in
+            // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
+            // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super
+            // without reading, so releasing there would free the buffer before the parent reads it.
+            // No-op when the transport owns the buffer (e.g. RSocket).
+            _payload.releaseRequestData();
+          }
           java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
 
           long id = (long) _iterator.next();
@@ -454,7 +494,17 @@ public class MyServiceRpcServerHandler
     java.util.List<com.facebook.thrift.payload.Reader> _readers,
     com.facebook.swift.service.ContextChain _chain) {
           _chain.preRead();
-          java.util.List<java.lang.Object>_data = _payload.getData(_readers);
+          java.util.List<java.lang.Object> _data;
+          try {
+            _data = _payload.getData(_readers);
+          } finally {
+            // getData has fully read the request bytes; release the request buffer now. This lives in
+            // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
+            // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super
+            // without reading, so releasing there would free the buffer before the parent reads it.
+            // No-op when the transport owns the buffer (e.g. RSocket).
+            _payload.releaseRequestData();
+          }
           java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
 
           long id = (long) _iterator.next();
@@ -542,7 +592,17 @@ public class MyServiceRpcServerHandler
     java.util.List<com.facebook.thrift.payload.Reader> _readers,
     com.facebook.swift.service.ContextChain _chain) {
           _chain.preRead();
-          java.util.List<java.lang.Object>_data = _payload.getData(_readers);
+          java.util.List<java.lang.Object> _data;
+          try {
+            _data = _payload.getData(_readers);
+          } finally {
+            // getData has fully read the request bytes; release the request buffer now. This lives in
+            // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
+            // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super
+            // without reading, so releasing there would free the buffer before the parent reads it.
+            // No-op when the transport owns the buffer (e.g. RSocket).
+            _payload.releaseRequestData();
+          }
           java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
 
           long id = (long) _iterator.next();
@@ -626,7 +686,17 @@ public class MyServiceRpcServerHandler
     java.util.List<com.facebook.thrift.payload.Reader> _readers,
     com.facebook.swift.service.ContextChain _chain) {
           _chain.preRead();
-          java.util.List<java.lang.Object>_data = _payload.getData(_readers);
+          java.util.List<java.lang.Object> _data;
+          try {
+            _data = _payload.getData(_readers);
+          } finally {
+            // getData has fully read the request bytes; release the request buffer now. This lives in
+            // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
+            // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super
+            // without reading, so releasing there would free the buffer before the parent reads it.
+            // No-op when the transport owns the buffer (e.g. RSocket).
+            _payload.releaseRequestData();
+          }
           java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
 
           long id = (long) _iterator.next();
@@ -718,7 +788,17 @@ public class MyServiceRpcServerHandler
     java.util.List<com.facebook.thrift.payload.Reader> _readers,
     com.facebook.swift.service.ContextChain _chain) {
           _chain.preRead();
-          java.util.List<java.lang.Object>_data = _payload.getData(_readers);
+          java.util.List<java.lang.Object> _data;
+          try {
+            _data = _payload.getData(_readers);
+          } finally {
+            // getData has fully read the request bytes; release the request buffer now. This lives in
+            // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
+            // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super
+            // without reading, so releasing there would free the buffer before the parent reads it.
+            // No-op when the transport owns the buffer (e.g. RSocket).
+            _payload.releaseRequestData();
+          }
           java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
 
 
@@ -800,7 +880,17 @@ public class MyServiceRpcServerHandler
     java.util.List<com.facebook.thrift.payload.Reader> _readers,
     com.facebook.swift.service.ContextChain _chain) {
           _chain.preRead();
-          java.util.List<java.lang.Object>_data = _payload.getData(_readers);
+          java.util.List<java.lang.Object> _data;
+          try {
+            _data = _payload.getData(_readers);
+          } finally {
+            // getData has fully read the request bytes; release the request buffer now. This lives in
+            // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
+            // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super
+            // without reading, so releasing there would free the buffer before the parent reads it.
+            // No-op when the transport owns the buffer (e.g. RSocket).
+            _payload.releaseRequestData();
+          }
           java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
 
 
@@ -865,7 +955,17 @@ public class MyServiceRpcServerHandler
     java.util.List<com.facebook.thrift.payload.Reader> _readers,
     com.facebook.swift.service.ContextChain _chain) {
     _chain.preRead();
-    java.util.List<java.lang.Object>_data = _payload.getData(_readers);
+    java.util.List<java.lang.Object> _data;
+    try {
+      _data = _payload.getData(_readers);
+    } finally {
+      // getData has fully read the request bytes; release the request buffer now. This lives in
+      // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
+      // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super without
+      // reading, so releasing there would free the buffer before the parent reads it. No-op when the
+      // transport owns the buffer (e.g. RSocket).
+      _payload.releaseRequestData();
+    }
     java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
 
     long id = (long) _iterator.next();

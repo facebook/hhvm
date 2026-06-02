@@ -129,51 +129,65 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
     RequestContext currentContext = RequestContexts.getCurrentContext();
     RequestContexts.setCurrentContext(nettyNiftyRequestContext);
 
-    ServerRequestPayload serverRequestPayload = decodeMessage(frame, nettyNiftyRequestContext);
+    ServerRequestPayload serverRequestPayload;
+    RequestRpcMetadata metadata;
     Mono<Void> response;
-    RequestRpcMetadata metadata = serverRequestPayload.getRequestRpcMetadata();
-    if (serverRequestPayload.getRequestRpcMetadata().getKind()
-        == RpcKind.SINGLE_REQUEST_NO_RESPONSE) {
-      response =
-          handleRequestNoResponse(
-              context,
-              frame,
-              serverRequestPayload,
-              metadata,
-              nettyNiftyRequestContext.getResponseHeaders());
-    } else {
-      response =
-          handleRequestResponse(
-              context,
-              frame,
-              serverRequestPayload,
-              metadata,
-              nettyNiftyRequestContext.getResponseHeaders());
-    }
+    try {
+      serverRequestPayload = decodeMessage(frame, nettyNiftyRequestContext);
+      metadata = serverRequestPayload.getRequestRpcMetadata();
+      if (metadata.getKind() == RpcKind.SINGLE_REQUEST_NO_RESPONSE) {
+        response =
+            handleRequestNoResponse(
+                context,
+                frame,
+                serverRequestPayload,
+                metadata,
+                nettyNiftyRequestContext.getResponseHeaders());
+      } else {
+        response =
+            handleRequestResponse(
+                context,
+                frame,
+                serverRequestPayload,
+                metadata,
+                nettyNiftyRequestContext.getResponseHeaders());
+      }
 
-    response
-        .onErrorResume(
-            throwable ->
-                handleException(
-                    context,
-                    throwable,
-                    metadata,
-                    frame,
-                    nettyNiftyRequestContext.getResponseHeaders()))
-        .onErrorResume(
-            throwable -> {
-              log.error("Exception processing request", throwable);
-              context.disconnect();
-              return Mono.empty();
-            })
-        .doFinally(
-            __ -> {
-              RequestContexts.setCurrentContext(currentContext);
-              if (frame.refCnt() > 0) {
-                frame.release();
-              }
-            })
-        .subscribe();
+      response
+          .onErrorResume(
+              throwable ->
+                  handleException(
+                      context,
+                      throwable,
+                      metadata,
+                      frame,
+                      nettyNiftyRequestContext.getResponseHeaders()))
+          .onErrorResume(
+              throwable -> {
+                log.error("Exception processing request", throwable);
+                context.disconnect();
+                return Mono.empty();
+              })
+          .doFinally(
+              __ -> {
+                RequestContexts.setCurrentContext(currentContext);
+                if (frame.refCnt() > 0) {
+                  frame.release();
+                }
+              })
+          .subscribe();
+
+    } catch (Throwable t) {
+      // Synchronous failure decoding the message or assembling the response pipeline. The reactive
+      // doFinally below never runs on this path, so release the frame here (idempotent with
+      // decodeMessage's own release) to avoid leaking the underlying direct buffer, restore the
+      // request context, then surface the error as before.
+      if (frame.refCnt() > 0) {
+        frame.release();
+      }
+      RequestContexts.setCurrentContext(currentContext);
+      throw Exceptions.propagate(t);
+    }
   }
 
   private Mono<Void> handleRequestNoResponse(

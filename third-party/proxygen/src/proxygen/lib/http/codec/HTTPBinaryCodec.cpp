@@ -689,9 +689,9 @@ size_t HTTPBinaryCodec::generateTrailers(folly::IOBufQueue& writeBuf,
   return trailersLengthWritten;
 }
 
-size_t HTTPBinaryCodec::generatePadding(folly::IOBufQueue& writeBuf,
-                                        StreamID stream,
-                                        uint16_t bytes) {
+size_t HTTPBinaryCodec::generatePadding(folly::IOBufQueue& /*writeBuf*/,
+                                        StreamID /*stream*/,
+                                        uint16_t /*bytes*/) {
   return 0;
 }
 

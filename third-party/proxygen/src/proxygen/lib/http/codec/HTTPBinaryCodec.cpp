@@ -717,9 +717,9 @@ size_t HTTPBinaryCodec::generateChunkTerminator(
   return 0;
 }
 
-size_t HTTPBinaryCodec::generateRstStream(folly::IOBufQueue& writeBuf,
-                                          HTTPBinaryCodec::StreamID stream,
-                                          ErrorCode statusCode) {
+size_t HTTPBinaryCodec::generateRstStream(folly::IOBufQueue& /*writeBuf*/,
+                                          HTTPBinaryCodec::StreamID /*stream*/,
+                                          ErrorCode /*statusCode*/) {
   // TODO(T118289674) - Implement HTTPBinaryCodec
   return 0;
 }

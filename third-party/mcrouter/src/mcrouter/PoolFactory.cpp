@@ -71,7 +71,9 @@ PoolFactory::PoolJson PoolFactory::parseNamedPool(folly::StringPiece name) {
   if (auto jInherit = json.get_ptr("inherit")) {
     checkLogic(jInherit->isString(), "Pool {}: inherit is not a string", name);
     auto& newJson = parseNamedPool(jInherit->stringPiece()).json;
-    json.update_missing(newJson);
+    for (const auto& [key, value] : newJson.items()) {
+      json.try_emplace(key, value);
+    }
     json.erase("inherit");
   }
   state = PoolState::PARSED;

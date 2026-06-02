@@ -54,12 +54,36 @@ impl ConfigFile {
     }
 
     pub fn from_slice(bytes: &[u8]) -> Self {
-        let map = (bytes.lines())
-            .filter_map(|line| match line.first() {
-                Some(b'#') => None,
-                _ => Self::parse_line(line),
-            })
-            .collect();
+        let mut map = BTreeMap::new();
+        let mut current: Option<(String, String)> = None;
+        let flush = |current: &mut Option<(String, String)>, map: &mut BTreeMap<String, String>| {
+            if let Some((k, v)) = current.take() {
+                map.insert(k, v);
+            }
+        };
+
+        for line in bytes.lines() {
+            let trimmed = line.trim();
+
+            if trimmed.is_empty() || line.first() == Some(&b'#') {
+                flush(&mut current, &mut map);
+                continue;
+            }
+
+            if matches!(line.first(), Some(b' ' | b'\t'))
+                && let Some((_, ref mut val)) = current
+            {
+                if trimmed.first() != Some(&b'#') {
+                    val.push_str(&String::from_utf8_lossy(trimmed));
+                }
+                continue;
+            }
+
+            flush(&mut current, &mut map);
+            current = Self::parse_line(line);
+        }
+
+        flush(&mut current, &mut map);
         Self { map }
     }
 
@@ -253,6 +277,108 @@ fn parse_int(input: &str) -> Result<isize, std::num::ParseIntError> {
         isize::from_str_radix(input.trim_start_matches("0x"), 16)
     } else {
         input.parse()
+    }
+}
+
+#[cfg(test)]
+mod test_from_slice {
+    use super::ConfigFile;
+
+    #[test]
+    fn single_line() {
+        let cf = ConfigFile::from_slice(b"key = value");
+        assert_eq!(cf.get_str("key"), Some("value"));
+    }
+
+    #[test]
+    fn multiple_keys() {
+        let cf = ConfigFile::from_slice(b"k1 = v1\nk2 = v2\nk3 = v3");
+        assert_eq!(cf.get_str("k1"), Some("v1"));
+        assert_eq!(cf.get_str("k2"), Some("v2"));
+        assert_eq!(cf.get_str("k3"), Some("v3"));
+    }
+
+    #[test]
+    fn comments_and_blanks() {
+        let cf = ConfigFile::from_slice(b"# comment\nk1 = v1\n\nk2 = v2\n# end");
+        assert_eq!(cf.get_str("k1"), Some("v1"));
+        assert_eq!(cf.get_str("k2"), Some("v2"));
+    }
+
+    #[test]
+    fn continuation_spaces() {
+        let cf = ConfigFile::from_slice(b"key = {\n  \"a\": 1\n  }");
+        assert_eq!(cf.get_str("key"), Some("{\"a\": 1}"));
+    }
+
+    #[test]
+    fn continuation_tabs() {
+        let cf = ConfigFile::from_slice(b"key = {\n\t\"a\": 1\n\t}");
+        assert_eq!(cf.get_str("key"), Some("{\"a\": 1}"));
+    }
+
+    #[test]
+    fn multiline_json() {
+        let input = b"features = {\n  \"foo\": \"Unstable\",\n  \"bar\": \"Preview\"\n  }";
+        let cf = ConfigFile::from_slice(input);
+        let val = cf.get_str("features").unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(val).unwrap();
+        assert_eq!(parsed["foo"], "Unstable");
+        assert_eq!(parsed["bar"], "Preview");
+    }
+
+    #[test]
+    fn continuation_then_key() {
+        let cf = ConfigFile::from_slice(b"k1 = {\n  \"a\": 1\n  }\nk2 = val");
+        assert_eq!(cf.get_str("k1"), Some("{\"a\": 1}"));
+        assert_eq!(cf.get_str("k2"), Some("val"));
+    }
+
+    #[test]
+    fn continuation_at_eof() {
+        let cf = ConfigFile::from_slice(b"key = {\n  \"a\": 1");
+        assert_eq!(cf.get_str("key"), Some("{\"a\": 1"));
+    }
+
+    #[test]
+    fn blank_breaks_continuation() {
+        let cf = ConfigFile::from_slice(b"k1 = {\n\n  \"a\": 1\nk2 = v2");
+        assert_eq!(cf.get_str("k1"), Some("{"));
+        assert_eq!(cf.get_str("k2"), Some("v2"));
+    }
+
+    #[test]
+    fn comment_breaks_continuation() {
+        let cf = ConfigFile::from_slice(b"k1 = {\n# comment\n  \"a\": 1\nk2 = v2");
+        assert_eq!(cf.get_str("k1"), Some("{"));
+        assert_eq!(cf.get_str("k2"), Some("v2"));
+    }
+
+    #[test]
+    fn indented_comment_in_continuation() {
+        let cf = ConfigFile::from_slice(b"key = {\n  \"a\": 1,\n  # comment\n  \"b\": 2\n  }");
+        assert_eq!(cf.get_str("key"), Some("{\"a\": 1,\"b\": 2}"));
+    }
+
+    #[test]
+    fn orphan_continuation() {
+        let cf = ConfigFile::from_slice(b"  orphan line\nkey = val");
+        assert_eq!(cf.get_str("key"), Some("val"));
+    }
+
+    #[test]
+    fn whitespace_only_line_breaks_continuation() {
+        let cf = ConfigFile::from_slice(b"key = {\n   \n  \"a\": 1");
+        assert_eq!(cf.get_str("key"), Some("{"));
+    }
+
+    #[test]
+    fn existing_single_line_json() {
+        let cf = ConfigFile::from_slice(b"features = {\"like_type_hints\": \"Unstable\"}");
+        assert_eq!(
+            cf.get_str("features"),
+            Some("{\"like_type_hints\": \"Unstable\"}")
+        );
     }
 }
 

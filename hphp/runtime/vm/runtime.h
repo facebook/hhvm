@@ -92,7 +92,8 @@ void raiseModuleBoundaryViolation(const Class* ctx,
                                   const Func* callee,
                                   const StringData* callerModule);
 void raiseModuleBoundaryViolation(const Class* cls,
-                                  const StringData* callerModule);
+                                  const StringData* callerModule,
+                                  const Class* callerCls);
 
 void raiseModulePropertyViolation(const Class* cls,
                                   const StringData* prop,

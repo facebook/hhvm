@@ -1,0 +1,1 @@
+Fatal error: Cannot access private property BestObject::$priv_prop in %s on line %d

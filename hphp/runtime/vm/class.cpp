@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 #include "hphp/runtime/vm/property-profile.h"
+#include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -1276,6 +1277,13 @@ Class::PropSlotLookup Class::getDeclPropSlot(
 
       // If ctx == baseClass, we have the right property and we can stop here.
       if (ctx == baseClass) return PropSlotLookup { propSlot, true, false, readonly, internal };
+
+      // <<__TestsBypassVisibility>> check for property access from a test.
+      if (canTestsBypassVisibility(
+            m_declProperties[propSlot].preProp->userAttributes(), ctx)) {
+        return PropSlotLookup { propSlot, true, false, readonly, internal };
+      }
+
       // The anonymous context cannot access protected or private properties, so
       // we can fail fast here.
       if (ctx == nullptr) return PropSlotLookup { propSlot, false, false, readonly, internal };
@@ -1380,6 +1388,11 @@ Class::PropSlotLookup Class::findSProp(
   }
   // Property access within this Class's context.
   if (ctx == baseCls) return PropSlotLookup { sPropInd, true, sPropConst, sPropReadOnly, sPropInternal };
+
+  // <<__TestsBypassVisibility>> check for static property access from a test.
+  if (canTestsBypassVisibility(sProp.preProp->userAttributes(), ctx)) {
+    return PropSlotLookup { sPropInd, true, sPropConst, sPropReadOnly, sPropInternal };
+  }
 
   auto const accessible = [&] {
     switch (sPropAttrs & (AttrPublic | AttrProtected | AttrPrivate)) {
@@ -5383,7 +5396,7 @@ namespace {
 void handleModuleBoundaryViolation(const Class* cls, const Func* caller) {
   if (!Cfg::Eval::EnforceModules || !cls || !caller) return;
   if (will_symbol_raise_module_boundary_violation(cls, caller)) {
-    raiseModuleBoundaryViolation(cls, caller->moduleName());
+    raiseModuleBoundaryViolation(cls, caller->moduleName(), caller->cls());
   }
 }
 } // namespace

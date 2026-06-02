@@ -141,4 +141,14 @@ LookupResult lookupCtorMethod(const Func*& f,
  */
 const Func* lookupImmutableCtor(const Class* cls,
                                 const MemberLookupContext& callCtx);
+
+/* Check whether a <<__TestsBypassVisibility>> member can be accessed from ctx.
+ * Returns true when all of the below hold:
+ *  - We are not in repo-authoritative mode
+ *  - The member has the <<__TestsBypassVisibility>> user attribute
+ *  - ctx (or one of its ancestors) appears in
+ *    Hack.Lang.TestsBypassVisibilityClasses.
+ */
+bool canTestsBypassVisibility(const UserAttributeMap& attrs, const Class* ctx);
+
 }

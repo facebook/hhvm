@@ -395,6 +395,8 @@ bool checkMethCallerTarget(const Func* meth, const Class* ctx, bool error) {
     }
   }
 
+  if (canTestsBypassVisibility(meth->userAttributes(), ctx)) return true;
+
   if (error) {
     SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
       "meth_caller(): method {} cannot be called from this context",

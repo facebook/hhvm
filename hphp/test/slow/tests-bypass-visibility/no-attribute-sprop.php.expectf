@@ -1,0 +1,1 @@
+Fatal error: Invalid static property access: BestObject::secret in %s on line %d

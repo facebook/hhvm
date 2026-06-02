@@ -1767,6 +1767,12 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 # Hack.Lang
 
+- std::vector<std::string> Hack.Lang.TestsBypassVisibilityClasses = {}, UNKNOWN
+
+  List of classes that are allowed to bypass visibility checks
+  when not in repo authoritative mode. The methods need to have the
+  <<__TestsBypassVisibility>> attribute also to bypass.
+
 - bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
 - bool Hack.Lang.ConstDefaultFuncArgs = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
 - bool Hack.Lang.ConstStaticProps = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)

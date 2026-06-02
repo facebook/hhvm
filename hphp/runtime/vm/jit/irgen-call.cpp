@@ -1412,6 +1412,10 @@ void emitModuleBoundaryCheckKnownImpl(IRGS& env, const T* symbol) {
   if (symbol->moduleName() == caller->moduleName()) return;
 
   if (symbol->isInternal()) {
+    if constexpr (std::is_same_v<T, Class>) {
+      if (canTestsBypassVisibility(symbol->preClass()->userAttributes(),
+                                   curClass(env))) return;
+    }
     gen(env,
         RaiseModuleBoundaryViolation,
         OptClassAndFuncData { curClass(env), caller },

@@ -1,0 +1,1 @@
+Fatal error: Call to private method BestObject::foo() from context 'FooTest' in %s on line %d

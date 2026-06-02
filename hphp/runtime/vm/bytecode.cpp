@@ -957,7 +957,7 @@ void checkModuleBoundaryViolation(const Class* ctx, const Func& callee) {
 void checkModuleBoundaryViolation(const Class& cls) {
   auto const caller = vmfp()->func();
   if (will_symbol_raise_module_boundary_violation(&cls, caller)) {
-    raiseModuleBoundaryViolation(&cls, caller->moduleName());
+    raiseModuleBoundaryViolation(&cls, caller->moduleName(), caller->cls());
   }
 }
 

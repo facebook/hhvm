@@ -20,6 +20,9 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/system/systemlib.h"
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-data.h"
@@ -27,9 +30,27 @@
 #include "hphp/runtime/base/object-data.h"
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/hacklang.h"
+#include "hphp/util/configs/repo.h"
 
 namespace HPHP {
+
+const StaticString s_TestsBypassVisibility("__TestsBypassVisibility");
+
+bool canTestsBypassVisibility(const UserAttributeMap& attrs, const Class* ctx) {
+  if (Cfg::Repo::Authoritative) return false;
+  if (!attrs.count(s_TestsBypassVisibility.get())) return false;
+  auto curr = ctx;
+  auto& classes = Cfg::HackLang::TestsBypassVisibilityClasses;
+  while (curr) {
+    if (std::find(classes.begin(), classes.end(),
+                  curr->name()->toCppString()) != classes.end()) {
+      return true;
+    }
+    curr = curr->parent();
+  }
+  return false;
+}
 
 namespace {
 
@@ -112,6 +133,24 @@ const Func* lookupMethodCtx(const Class* cls,
   assertx(method);
   bool accessible = true;
 
+  auto const checkPrivateMethod = [&]() -> const Func* {
+    // If this is an ObjMethod call ("$obj->foo()") AND there is an ancestor
+    // of cls that declares a private method with this name AND ctx is an
+    // ancestor of cls, we need to check if ctx declares a private method with
+    // this name.
+    if (method->hasPrivateAncestor() && callType == CallType::ObjMethod &&
+        ctx && cls->classof(ctx)) {
+      const Func* ctxMethod = ctx->lookupMethod(methodName);
+      if (ctxMethod && ctxMethod->cls() == ctx &&
+          (ctxMethod->attrs() & AttrPrivate)) {
+        // For ObjMethod calls, a private method declared by ctx trumps
+        // any other method we may have found.
+        return ctxMethod;
+      }
+    }
+    return nullptr;
+  };
+
   // Check module boundary
   if (Cfg::Eval::EnforceModules &&
       raise != MethodLookupErrorOptions::NoErrorOnModule &&
@@ -130,6 +169,23 @@ const Func* lookupMethodCtx(const Class* cls,
     // have the right method and we can stop here.
     if (ctx == baseClass) {
       return method;
+    }
+
+    if (canTestsBypassVisibility(method->userAttributes(), ctx)) {
+      if (auto const f = checkPrivateMethod()) return f;
+      return method;
+    }
+    // meth_caller() dispatches through MethCallerHelper, so ctx is the helper
+    // class rather than the actual test class.  Walk one frame back to find the
+    // real caller and check whether *its* class qualifies for the bypass.
+    if (!Cfg::Repo::Authoritative && ctx == SystemLib::getMethCallerHelperClass()) {
+      VMRegAnchor _;
+      auto const prev = g_context->getPrevVMState(vmfp());
+      if (prev &&
+          canTestsBypassVisibility(method->userAttributes(),
+                                   prev->func()->cls())) {
+        return method;
+      }
     }
     // The invalid context cannot access protected or private methods,
     // so we can fail fast here.
@@ -176,20 +232,8 @@ const Func* lookupMethodCtx(const Class* cls,
       assertx(accessible && baseClass->classof(ctx));
     }
   }
-  // If this is an ObjMethod call ("$obj->foo()") AND there is an ancestor
-  // of cls that declares a private method with this name AND ctx is an
-  // ancestor of cls, we need to check if ctx declares a private method with
-  // this name.
-  if (method->hasPrivateAncestor() && callType == CallType::ObjMethod &&
-      ctx && cls->classof(ctx)) {
-    const Func* ctxMethod = ctx->lookupMethod(methodName);
-    if (ctxMethod && ctxMethod->cls() == ctx &&
-        (ctxMethod->attrs() & AttrPrivate)) {
-      // For ObjMethod calls, a private method declared by ctx trumps
-      // any other method we may have found.
-      return ctxMethod;
-    }
-  }
+  if (auto const f = checkPrivateMethod()) return f;
+
   // If we found an accessible method in cls's method table, return it.
   if (accessible) {
     return method;

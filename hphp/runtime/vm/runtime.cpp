@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/coeffects-config.h"
@@ -527,11 +528,14 @@ void raiseModuleBoundaryViolation(const Class* ctx,
 }
 
 void raiseModuleBoundaryViolation(const Class* cls,
-                                  const StringData* callerModule) {
+                                  const StringData* callerModule,
+                                  const Class* callerCls) {
   if (!Cfg::Eval::EnforceModules) return;
 
   assertx(cls);
   assertx(cls->isInternal());
+  if (canTestsBypassVisibility(cls->preClass()->userAttributes(),
+                               callerCls)) return;
   auto const symbolType =
     isEnum(cls) ? "enum" : (isEnumClass(cls) ? "enum class" : "class");
   return moduleBoundaryViolationImpl(

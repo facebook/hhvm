@@ -247,10 +247,10 @@ void cgRaiseModuleBoundaryViolation(IRLS& env, const IRInstruction* inst) {
       };
     };
     assertx(inst->src(0)->isA(TCls));
-    using Fn = void(*)(const Class*, const StringData*);
+    using Fn = void(*)(const Class*, const StringData*, const Class*);
     return {
       CallSpec::direct(static_cast<Fn>(raiseModuleBoundaryViolation)),
-      argGroup(env, inst).ssa(0).imm(data->func->moduleName())
+      argGroup(env, inst).ssa(0).imm(data->func->moduleName()).imm(data->cls)
     };
   }();
   cgCallHelper(vmain(env), env, target, kVoidDest, SyncOptions::Sync, args);

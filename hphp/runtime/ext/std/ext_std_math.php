@@ -299,7 +299,7 @@ function base_convert(mixed $number, int $frombase, int $tobase)[]: mixed;
  *
  */
 <<__IsFoldable, __Native>>
-function pow(num $base, num $exp)[]: mixed;
+function pow(num $base, num $exp)[]: num;
 
 /**
  * Returns e raised to the power of arg.  'e' is the base of the natural

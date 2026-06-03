@@ -268,17 +268,6 @@ ErrorCode HTTP2Codec::handleEndStream() {
   // another callback (onHeadersComplete/onBody)?
   pendingEndStreamHandling_ |= (curHeader_.flags & http2::END_STREAM);
 
-  // with a websocket upgrade, we need to send message complete cb to
-  // mirror h1x codec's behavior. when the stream closes, we need to
-  // send another callback to clean up the stream's resources.
-  if (ingressWebsocketUpgrade_) {
-    ingressWebsocketUpgrade_ = false;
-    deliverCallbackIfAllowed(&HTTPCodec::Callback::onMessageComplete,
-                             "onMessageComplete",
-                             curHeader_.stream,
-                             true);
-  }
-
   if (pendingEndStreamHandling_ && expectedContinuationStream_ == 0) {
     pendingEndStreamHandling_ = false;
     deliverCallbackIfAllowed(&HTTPCodec::Callback::onMessageComplete,
@@ -689,7 +678,6 @@ void HTTP2Codec::onHeadersComplete(HTTPHeaderSize decodedSize,
       (*msg->getUpgradeProtocol() == headers::kWebsocketString) &&
       msg->getMethod() == HTTPMethod::CONNECT) {
     msg->setIngressWebsocketUpgrade();
-    ingressWebsocketUpgrade_ = true;
   } else if (!upgradedStreams_.empty()) {
     auto it = upgradedStreams_.find(curHeader_.stream);
     if (it != upgradedStreams_.end()) {
@@ -1336,7 +1324,6 @@ size_t HTTP2Codec::generateRstStream(folly::IOBufQueue& writeBuf,
   if (stream == curHeader_.stream) {
     curHeader_.flags &= ~http2::END_STREAM;
     pendingEndStreamHandling_ = false;
-    ingressWebsocketUpgrade_ = false;
   }
   upgradedStreams_.erase(stream);
 

@@ -278,7 +278,6 @@ class HTTP2Codec
   folly::Optional<StreamID> promisedStream_;
   bool parsingReq_{false};
   bool pendingEndStreamHandling_{false};
-  bool ingressWebsocketUpgrade_{false};
 
   std::unordered_set<StreamID> upgradedStreams_;
 

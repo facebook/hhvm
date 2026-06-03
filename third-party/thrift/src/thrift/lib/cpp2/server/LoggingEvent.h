@@ -188,6 +188,10 @@ struct RequestLoggingContext {
   // Per-request encryption state for this request
   RequestEncryptionState requestEncryptionState{
       RequestEncryptionState::Plaintext};
+
+  // Encryption state of the outbound response for this request
+  RequestEncryptionState writeEncryptionState{
+      RequestEncryptionState::Plaintext};
 };
 
 class RequestEventHandler : public LoggingEventHandler {

@@ -22,6 +22,17 @@
 #include <thrift/lib/cpp2/transport/rocket/ChecksumGenerator.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionAlgorithmSelector.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
+#if __has_include(<thrift/lib/cpp2/transport/rocket/server/detail/RequestEncryptionStateDispatch.h>)
+#if __has_include(<thrift/lib/cpp2/transport/rocket/server/detail/RequestEncryptionStateDispatch.h>)
+#include <thrift/lib/cpp2/transport/rocket/server/detail/RequestEncryptionStateDispatch.h>
+#define THRIFT_HAS_WRITE_ENCRYPTION_STATE_DISPATCH 1
+#else
+#define THRIFT_HAS_WRITE_ENCRYPTION_STATE_DISPATCH 0
+#endif
+#define THRIFT_HAS_WRITE_ENCRYPTION_STATE_DISPATCH 1
+#else
+#define THRIFT_HAS_WRITE_ENCRYPTION_STATE_DISPATCH 0
+#endif
 
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
 
@@ -169,7 +180,16 @@ ThriftRequestCore::LogRequestSampleCallback::LogRequestSampleCallback(
     : serverConfigs_(thriftRequest.serverConfigs_),
       requestLoggingContext_(buildRequestLoggingContext(
           metadata, responseRpcError, timestamps, thriftRequest)),
-      chainedCallback_(chainedCallback) {}
+      chainedCallback_(chainedCallback),
+      // const_cast is safe here: LogRequestSampleCallback's lifetime is
+      // strictly bounded by ThriftRequestCore. The callback is deleted in
+      // messageSent() or messageSendError() (via SCOPE_EXIT) before the
+      // request is destroyed, so reqCtx_ can never outlive the
+      // Cpp2RequestContext. We need mutable access to call
+      // setWriteEncryptionState() in the destructor after the response is
+      // sent, but getRequestContext() returns const.
+      reqCtx_(
+          const_cast<Cpp2RequestContext*>(thriftRequest.getRequestContext())) {}
 
 void ThriftRequestCore::LogRequestSampleCallback::sendQueued() {
   requestLoggingContext_.timestamps.writeBegin =
@@ -201,6 +221,16 @@ void ThriftRequestCore::LogRequestSampleCallback::messageSendError(
 }
 
 ThriftRequestCore::LogRequestSampleCallback::~LogRequestSampleCallback() {
+#if THRIFT_HAS_WRITE_ENCRYPTION_STATE_DISPATCH
+#if THRIFT_HAS_WRITE_ENCRYPTION_STATE_DISPATCH
+  // Populate write encryption state now that the response has been sent.
+  // This must happen before logging requestLoggingContext_.
+  apache::thrift::rocket::context_utils::checkWriteEncryptionState(*reqCtx_);
+  requestLoggingContext_.writeEncryptionState =
+      reqCtx_->getWriteEncryptionState();
+#endif
+#endif
+
   const auto& samplingStatus =
       requestLoggingContext_.timestamps.getSamplingStatus();
 

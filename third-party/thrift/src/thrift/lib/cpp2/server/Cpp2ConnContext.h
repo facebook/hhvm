@@ -926,6 +926,19 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   }
 
   /**
+   * Set the write encryption state. Reflects the encryption state of the
+   * outbound response for this request. Snapshotted at response write time
+   * (after the response has been sent).
+   */
+  void setWriteEncryptionState(RequestEncryptionState state) {
+    writeEncryptionState_ = state;
+  }
+
+  RequestEncryptionState getWriteEncryptionState() const {
+    return writeEncryptionState_;
+  }
+
+  /**
    * Gets the FunctionNode for this request's method from the schema.
    * Returns nullptr if schema information is not available.
    */
@@ -994,6 +1007,8 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   detail::RequestInternalFieldsT internalFields_;
   size_t wiredRequestBytes_{0};
   RequestEncryptionState requestEncryptionState_{
+      RequestEncryptionState::Plaintext};
+  RequestEncryptionState writeEncryptionState_{
       RequestEncryptionState::Plaintext};
   const syntax_graph::FunctionNode* functionNode_{nullptr};
 

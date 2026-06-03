@@ -87,4 +87,54 @@ void checkRequestEncryptionState(Cpp2RequestContext& reqContext) {
                                       : RequestEncryptionState::Plaintext);
 }
 
+void checkWriteEncryptionState(Cpp2RequestContext& reqContext) {
+  if (!THRIFT_FLAG(server_request_encryption_tracking_enabled)) {
+    return;
+  }
+  auto* connCtx = reqContext.getConnectionContext();
+  if (connCtx == nullptr) {
+    return;
+  }
+
+  // StopTLSv2 case: encryption is per-record, check the write record layer's
+  // sticky latch. If we can reach the record layer, set StoptlsEncrypted vs
+  // StoptlsSkipped based on hasObservedPlaintext(). If the record layer is
+  // unreachable for any reason, fail safe to StoptlsSkipped.
+  //
+  // In OSS builds, the Meta-internal CompositeWriteRecordLayer header is not
+  // available, so we fall through to the fail-safe path.
+  if (connCtx->getSecurityProtocol() == kSecurityProtocolStopTLSV2) {
+#if THRIFT_HAS_STOPTLSV2_RECORD_LAYER
+    // getUnderlyingTransport<T>() const overload returns const T*
+    const auto* transport = connCtx->getTransport();
+    if (transport != nullptr) {
+      const auto* fizz =
+          transport->getUnderlyingTransport<fizz::server::AsyncFizzServer>();
+      if (fizz != nullptr) {
+        const auto* layer = fizz->getState().writeRecordLayer();
+        const auto* composite =
+            dynamic_cast<const facebook::services::CompositeWriteRecordLayer*>(
+                layer);
+        if (composite != nullptr && composite->isStopTLSNegotiated()) {
+          reqContext.setWriteEncryptionState(
+              composite->hasObservedPlaintext()
+                  ? RequestEncryptionState::StoptlsSkipped
+                  : RequestEncryptionState::StoptlsEncrypted);
+          return;
+        }
+      }
+    }
+#endif
+    // OSS or record layer unreachable — fail safe to StoptlsSkipped
+    reqContext.setWriteEncryptionState(RequestEncryptionState::StoptlsSkipped);
+    return;
+  }
+
+  // All other connection types: encryption is per-connection. Use the
+  // isTransportEncrypted() helper from D101058862.
+  reqContext.setWriteEncryptionState(
+      connCtx->isTransportEncrypted() ? RequestEncryptionState::Encrypted
+                                      : RequestEncryptionState::Plaintext);
+}
+
 } // namespace apache::thrift::rocket::context_utils

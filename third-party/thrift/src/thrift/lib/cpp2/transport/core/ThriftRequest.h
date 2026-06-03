@@ -160,6 +160,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
     const server::ServerConfigs& serverConfigs_;
     RequestLoggingContext requestLoggingContext_;
     MessageChannel::SendCallback* chainedCallback_;
+    Cpp2RequestContext* reqCtx_;
   };
 
   void sendReply(

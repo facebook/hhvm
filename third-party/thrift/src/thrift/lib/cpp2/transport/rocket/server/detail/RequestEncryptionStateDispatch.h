@@ -45,4 +45,24 @@ namespace apache::thrift::rocket::context_utils {
  */
 void checkRequestEncryptionState(Cpp2RequestContext& reqContext);
 
+/**
+ * Inspects the response's connection state and sets
+ * Cpp2RequestContext::setWriteEncryptionState() to one of:
+ *   - RequestEncryptionState::Plaintext
+ *   - RequestEncryptionState::Encrypted
+ *   - RequestEncryptionState::StoptlsEncrypted
+ *   - RequestEncryptionState::StoptlsSkipped
+ *
+ * Symmetric to checkRequestEncryptionState() but reads the write record layer
+ * instead of the read record layer. Captures the encryption state of the
+ * outbound response.
+ *
+ * Gated by THRIFT_FLAG(server_request_encryption_tracking_enabled). When
+ * disabled, this is a no-op (the field stays at its default Plaintext).
+ *
+ * Must be called after the response has been sent (e.g., from
+ * LogRequestSampleCallback destructor), before buildRequestLoggingContext().
+ */
+void checkWriteEncryptionState(Cpp2RequestContext& reqContext);
+
 } // namespace apache::thrift::rocket::context_utils

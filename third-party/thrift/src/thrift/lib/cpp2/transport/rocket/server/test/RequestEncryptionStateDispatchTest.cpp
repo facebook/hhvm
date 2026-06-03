@@ -176,3 +176,132 @@ TEST(RequestEncryptionStateDispatchTest, StopTLSv2Connection_NoTransport) {
 // canary validation covers this in the meantime via Scuba query for
 // REQUEST_ENCRYPTION_STATE={StoptlsEncrypted,StoptlsSkipped} on known
 // connections.
+
+// ---------------------------------------------------------------------------
+// checkWriteEncryptionState tests (symmetric to checkRequestEncryptionState)
+// ---------------------------------------------------------------------------
+
+TEST(WriteEncryptionStateDispatchTest, FlagOffNoOp) {
+  THRIFT_FLAG_SET_MOCK(server_request_encryption_tracking_enabled, false);
+
+  Cpp2ConnContext connCtx;
+  detail::Cpp2ConnContextInternalAPI(connCtx).setSecurityProtocol("TLS");
+  Cpp2RequestContext reqCtx(&connCtx);
+
+  checkWriteEncryptionState(reqCtx);
+
+  // flag off, so state stays at default Plaintext (unchanged)
+  EXPECT_EQ(
+      reqCtx.getWriteEncryptionState(), RequestEncryptionState::Plaintext);
+}
+
+TEST(WriteEncryptionStateDispatchTest, NullConnectionContext) {
+  THRIFT_FLAG_SET_MOCK(server_request_encryption_tracking_enabled, true);
+
+  Cpp2RequestContext reqCtx(nullptr);
+
+  checkWriteEncryptionState(reqCtx);
+
+  // null connCtx → no crash, state stays Plaintext
+  EXPECT_EQ(
+      reqCtx.getWriteEncryptionState(), RequestEncryptionState::Plaintext);
+}
+
+TEST(WriteEncryptionStateDispatchTest, PlaintextConnection) {
+  THRIFT_FLAG_SET_MOCK(server_request_encryption_tracking_enabled, true);
+
+  Cpp2ConnContext connCtx;
+  // default Cpp2ConnContext has empty securityProtocol (plaintext)
+  Cpp2RequestContext reqCtx(&connCtx);
+
+  checkWriteEncryptionState(reqCtx);
+
+  EXPECT_EQ(
+      reqCtx.getWriteEncryptionState(), RequestEncryptionState::Plaintext);
+}
+
+TEST(WriteEncryptionStateDispatchTest, TlsConnection) {
+  THRIFT_FLAG_SET_MOCK(server_request_encryption_tracking_enabled, true);
+
+  Cpp2ConnContext connCtx;
+  detail::Cpp2ConnContextInternalAPI(connCtx).setSecurityProtocol("TLS");
+  Cpp2RequestContext reqCtx(&connCtx);
+
+  checkWriteEncryptionState(reqCtx);
+
+  EXPECT_EQ(
+      reqCtx.getWriteEncryptionState(), RequestEncryptionState::Encrypted);
+}
+
+TEST(WriteEncryptionStateDispatchTest, FizzConnection) {
+  THRIFT_FLAG_SET_MOCK(server_request_encryption_tracking_enabled, true);
+
+  Cpp2ConnContext connCtx;
+  detail::Cpp2ConnContextInternalAPI(connCtx).setSecurityProtocol("Fizz");
+  Cpp2RequestContext reqCtx(&connCtx);
+
+  checkWriteEncryptionState(reqCtx);
+
+  EXPECT_EQ(
+      reqCtx.getWriteEncryptionState(), RequestEncryptionState::Encrypted);
+}
+
+TEST(WriteEncryptionStateDispatchTest, PspConnection) {
+  THRIFT_FLAG_SET_MOCK(server_request_encryption_tracking_enabled, true);
+
+  Cpp2ConnContext connCtx;
+  detail::Cpp2ConnContextInternalAPI(connCtx).setSecurityProtocol(
+      "thriftPSPV0");
+  Cpp2RequestContext reqCtx(&connCtx);
+
+  checkWriteEncryptionState(reqCtx);
+
+  EXPECT_EQ(
+      reqCtx.getWriteEncryptionState(), RequestEncryptionState::Encrypted);
+}
+
+TEST(WriteEncryptionStateDispatchTest, FizzKtlsConnection) {
+  THRIFT_FLAG_SET_MOCK(server_request_encryption_tracking_enabled, true);
+
+  Cpp2ConnContext connCtx;
+  detail::Cpp2ConnContextInternalAPI(connCtx).setSecurityProtocol("Fizz/KTLS");
+  Cpp2RequestContext reqCtx(&connCtx);
+
+  checkWriteEncryptionState(reqCtx);
+
+  EXPECT_EQ(
+      reqCtx.getWriteEncryptionState(), RequestEncryptionState::Encrypted);
+}
+
+TEST(WriteEncryptionStateDispatchTest, StopTlsConnection_Plaintext) {
+  THRIFT_FLAG_SET_MOCK(server_request_encryption_tracking_enabled, true);
+
+  Cpp2ConnContext connCtx;
+  detail::Cpp2ConnContextInternalAPI(connCtx).setSecurityProtocol("stopTLS");
+  Cpp2RequestContext reqCtx(&connCtx);
+
+  checkWriteEncryptionState(reqCtx);
+
+  EXPECT_EQ(
+      reqCtx.getWriteEncryptionState(), RequestEncryptionState::Plaintext);
+}
+
+TEST(WriteEncryptionStateDispatchTest, StopTLSv2Connection_NoTransport) {
+  THRIFT_FLAG_SET_MOCK(server_request_encryption_tracking_enabled, true);
+
+  Cpp2ConnContext connCtx;
+  detail::Cpp2ConnContextInternalAPI(connCtx).setSecurityProtocol(
+      kSecurityProtocolStopTLSV2);
+  Cpp2RequestContext reqCtx(&connCtx);
+
+  checkWriteEncryptionState(reqCtx);
+
+  // StopTLSv2 but no transport → fail safe to StoptlsSkipped
+  EXPECT_EQ(
+      reqCtx.getWriteEncryptionState(), RequestEncryptionState::StoptlsSkipped);
+}
+
+// TODO(fiqi): add positive-case integration test for
+// checkWriteEncryptionState() with real CompositeWriteRecordLayer + StopTLSv2
+// negotiation + plaintext write. Same heavyweight setup requirement as the
+// read-side TODO above.

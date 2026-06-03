@@ -376,15 +376,19 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
   }
 }
 
-void trashFullTV(Vout& v, Vptr ptr, char byte) {
+void trashBytes(Vout& v, Vptr ptr, size_t bytes, char byte) {
   int32_t trash32;
   memset(&trash32, byte, sizeof(trash32));
-  static_assert(sizeof(TypedValue) % sizeof(trash32) == 0, "");
+  assertx(bytes % sizeof(trash32) == 0);
 
-  for (int offset = 0; offset < sizeof(TypedValue);
+  for (size_t offset = 0; offset < bytes;
        offset += sizeof(trash32)) {
-    v << storeli{trash32, ptr + offset};
+    v << storeli{trash32, ptr + safe_cast<int32_t>(offset)};
   }
+}
+
+void trashFullTV(Vout& v, Vptr ptr, char byte) {
+  trashBytes(v, ptr, sizeof(TypedValue), byte);
 }
 
 void trashTV(Vout& v, Vptr typePtr, Vptr valPtr, char byte) {

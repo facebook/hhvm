@@ -118,14 +118,10 @@ void cgStIterEnd(IRLS& env, const IRInstruction* inst) {
 void cgKillIter(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   v << killeffects{};
-  if (!debug) return;
+  if (!emitDebugCode()) return;
 
-  int32_t trash;
-  memset(&trash, kIterTrashFill, sizeof(trash));
   auto const iter = iteratorPtr(env, inst, inst->extra<KillIter>());
-  for (auto i = 0; i < sizeof(Iter); i += sizeof(trash)) {
-    v << storeli{trash, iter + i};
-  }
+  trashBytes(v, iter, sizeof(Iter), kIterTrashFill);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

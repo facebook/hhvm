@@ -131,6 +131,11 @@ void emitTypeCheck(Vout& v, IRLS& env, Type type,
 void emitCheckSurpriseFlags(Vout& v, Vreg fp, Vlabel handleSurprise);
 
 /*
+ * Whether JIT lowering should emit debug-only code.
+ */
+bool emitDebugCode();
+
+/*
  * Emits vasm instructions to get crc32 hash of the given arr
  */
 Vreg emitHashInt64(IRLS& env, const IRInstruction* inst, Vreg arr);

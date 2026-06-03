@@ -2140,6 +2140,12 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   at every call site, not just where the compiler determines it is
   necessary. Useful for debugging VM register state issues.
 
+- bool Jit.EmitDebugCode, UNKNOWN
+
+  When true, the JIT emits extra debug-only code. Defaults to true in
+  debug builds and false otherwise. Disable this in dbgo builds to avoid
+  emitting debug instrumentation when it is not needed.
+
 - bool Jit.StressEagerVMRegSync = false, UNKNOWN
 
   Sync VM reg state for all native calls.

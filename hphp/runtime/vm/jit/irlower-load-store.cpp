@@ -47,28 +47,20 @@ TRACE_SET_MOD(irlower)
 void cgKillActRec(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   v << killeffects{};
-  if (!debug) return;
+  if (!emitDebugCode()) return;
 
-  int32_t trash;
-  memset(&trash, kActRecTrashFill, sizeof(trash));
   auto const fp = srcLoc(env, inst, 0).reg();
-  for (auto i = 0; i < sizeof(ActRec); i += sizeof(trash)) {
-    v << storeli{trash, fp[i]};
-  }
+  trashBytes(v, fp[0], sizeof(ActRec), kActRecTrashFill);
 }
 
 void cgKillLoc(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   v << killeffects{};
-  if (!debug) return;
+  if (!emitDebugCode()) return;
 
-  int32_t trash;
-  memset(&trash, kLocalTrashFill, sizeof(trash));
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const offset = localOffset(inst->extra<KillLoc>()->locId);
-  for (auto i = 0; i < sizeof(TypedValue); i += sizeof(trash)) {
-    v << storeli{trash, fp[offset + i]};
-  }
+  trashBytes(v, fp[offset], sizeof(TypedValue), kLocalTrashFill);
 }
 
 void cgLdLoc(IRLS& env, const IRInstruction* inst) {

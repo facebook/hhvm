@@ -48,6 +48,10 @@ bool JitLoader::TimerDefault() {
 #endif
 }
 
+bool JitLoader::EmitDebugCodeDefault() {
+  return debug;
+}
+
 int JitLoader::WorkerThreadsDefault() {
   return std::max(1, Process::GetCPUCount() / 2);
 }

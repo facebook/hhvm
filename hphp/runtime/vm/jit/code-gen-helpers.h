@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -172,6 +174,11 @@ void loadTV(Vout& v, Type type, Vloc dstLoc, Vptr typePtr, Vptr valPtr,
  */
 void copyTV(Vout& v, Vreg data, Vreg type, Vloc srcLoc, const SSATmp* src);
 void copyTV(Vout& v, Vloc src, Vloc dst, Type dstType);
+
+/*
+ * Fill `bytes' bytes at `ptr' with trash.
+ */
+void trashBytes(Vout& v, Vptr ptr, size_t bytes, char byte);
 
 /*
  * Fill all the bytes of a TypedValue with trash.

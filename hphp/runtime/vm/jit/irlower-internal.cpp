@@ -29,8 +29,8 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/configs/jit.h"
-#include "hphp/util/match.h"
 #include "hphp/util/immed.h"
+#include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
@@ -260,6 +260,10 @@ void cgCallNative(Vout& v, IRLS& env, const IRInstruction* inst) {
   }();
 
   cgCallHelper(v, env, info.func.call, dest, info.sync, args);
+}
+
+bool emitDebugCode() {
+  return Cfg::Jit::EmitDebugCode;
 }
 
 Vreg emitHashInt64(IRLS& env, const IRInstruction* inst, Vreg arr) {

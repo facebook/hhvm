@@ -10,6 +10,7 @@
 
 #include <folly/Conv.h>
 #include <folly/io/async/EventHandler.h>
+#include <folly/io/async/HHWheelTimer.h>
 #include <folly/portability/Sockets.h>
 #include <glog/logging.h>
 #include <proxygen/lib/utils/Time.h>
@@ -585,12 +586,8 @@ class CAresResolver::SocketHandler : public folly::EventHandler {
  public:
   SocketHandler(CAresResolver* resolver,
                 folly::EventBase* base,
-                folly::NetworkSocket sock,
-                ares_channel channel)
-      : EventHandler(base, sock),
-        resolver_(resolver),
-        sock_(sock),
-        channel_(channel) {
+                folly::NetworkSocket sock)
+      : EventHandler(base, sock), resolver_(resolver), sock_(sock) {
   }
   ~SocketHandler() override = default;
 
@@ -601,23 +598,43 @@ class CAresResolver::SocketHandler : public folly::EventHandler {
         (events & EventHandler::WRITE) ? sock_.data : ARES_SOCKET_BAD;
     auto* resolver = resolver_;
 
-    DelayedDestruction::DestructorGuard dg(resolver);
-    ares_process_fd(channel_, rsock, wsock);
-    // `ares_process_fd()` can close the current socket and destroy `this`.
-    // Use the guarded resolver pointer captured above after it returns.
-    resolver->sampleActiveQueries();
+    resolver->processAresEvents(rsock, wsock);
   }
 
  private:
   CAresResolver* resolver_;
   folly::NetworkSocket sock_;
-  ares_channel channel_;
+};
+
+class CAresResolver::AresTimeoutHandler : public folly::HHWheelTimer::Callback {
+ public:
+  AresTimeoutHandler(CAresResolver& resolver, folly::EventBase& base)
+      : resolver_(resolver), base_(base) {
+  }
+
+  ~AresTimeoutHandler() override = default;
+
+  void schedule(std::chrono::milliseconds timeout) {
+    base_.timer().scheduleTimeout(this, timeout);
+  }
+
+  void cancel() {
+    cancelTimeout();
+  }
+
+ private:
+  void timeoutExpired() noexcept override {
+    resolver_.processAresEvents(ARES_SOCKET_BAD, ARES_SOCKET_BAD);
+  }
+
+  CAresResolver& resolver_;
+  folly::EventBase& base_;
 };
 
 CAresResolver::CAresResolver()
     : base_(nullptr),
       channel_(),
-      channelRefcnt_(0),
+      aresTimeoutHandler_(),
       socketHandlers_(),
       servers_(),
       port_(0),
@@ -625,6 +642,8 @@ CAresResolver::CAresResolver()
 }
 
 CAresResolver::~CAresResolver() {
+  aresTimeoutHandler_.reset();
+
   // statsCollector_ may already be dangling during EventBase teardown.
   statsCollector_ = &nullStatsCollector;
 
@@ -643,6 +662,7 @@ void CAresResolver::attachEventBase(EventBase* base) {
       << "Overwriting existing non-nullptr EventBase";
 
   base_ = base;
+  aresTimeoutHandler_ = std::make_unique<AresTimeoutHandler>(*this, *base_);
 }
 
 const folly::EventBase* CAresResolver::getEventBase() {
@@ -712,6 +732,48 @@ void CAresResolver::recordSocketClosed() {
     return;
   }
   getStatsCollector()->recordCAresSocketClose();
+}
+
+void CAresResolver::processAresEvents(ares_socket_t readSock,
+                                      ares_socket_t writeSock) {
+  if (!channel_) {
+    return;
+  }
+
+  // `ares_process_fd()` can close the current socket and destroy the calling
+  // `SocketHandler`. Callers must not touch per-socket state after this
+  // returns.
+  DelayedDestruction::DestructorGuard dg(this);
+  ares_process_fd(channel_, readSock, writeSock);
+  sampleActiveQueries();
+  updateAresTimeout();
+}
+
+void CAresResolver::updateAresTimeout() {
+  if (!aresTimeoutHandler_) {
+    return;
+  }
+
+  if (!channel_ || caresActiveQueries_ == 0) {
+    aresTimeoutHandler_->cancel();
+    return;
+  }
+
+  timeval tv{};
+  auto* timeout = ares_timeout(channel_, nullptr, &tv);
+  if (timeout == nullptr) {
+    aresTimeoutHandler_->cancel();
+    return;
+  }
+
+  auto timeoutDelay = std::chrono::seconds(timeout->tv_sec) +
+                      std::chrono::microseconds(timeout->tv_usec);
+  auto timeoutMs =
+      std::chrono::duration_cast<std::chrono::milliseconds>(timeoutDelay);
+  if (timeout->tv_usec % 1000 != 0) {
+    timeoutMs += std::chrono::milliseconds(1);
+  }
+  aresTimeoutHandler_->schedule(timeoutMs);
 }
 void CAresResolver::init() {
   CHECK(base_ != nullptr);
@@ -1051,6 +1113,7 @@ void CAresResolver::query(const std::string& name,
              static_cast<int>(type),
              cb,
              cb_data);
+  updateAresTimeout();
 }
 
 void CAresResolver::queryFinished() {
@@ -1090,8 +1153,7 @@ void CAresResolver::dnsSocketReady(void* data,
   SocketHandler* shp = nullptr;
   bool inserted = false;
   if (it == self->socketHandlers_.end()) {
-    shp = new SocketHandler(
-        self, self->base_, folly::NetworkSocket(sock), self->channel_);
+    shp = new SocketHandler(self, self->base_, folly::NetworkSocket(sock));
     self->socketHandlers_[sock].reset(shp);
     inserted = true;
   } else {

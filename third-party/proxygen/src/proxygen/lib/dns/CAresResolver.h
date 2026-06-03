@@ -227,17 +227,20 @@ class CAresResolver : public DNSResolver {
     return &timeUtil_;
   }
 
- protected:
  private:
+  class AresTimeoutHandler;
   class SocketHandler;
   class MultiQuery;
 
   void setSerializedServers();
+  void processAresEvents(ares_socket_t readSock, ares_socket_t writeSock);
+  void updateAresTimeout();
 
   folly::EventBase* base_;
   ares_channel channel_;
-  uint16_t channelRefcnt_;
+  uint16_t channelRefcnt_{0};
   size_t caresActiveQueries_{0};
+  std::unique_ptr<AresTimeoutHandler> aresTimeoutHandler_;
   std::map<int, std::unique_ptr<SocketHandler>> socketHandlers_;
   std::list<folly::SocketAddress> servers_;
   std::string serializedResolvers_;

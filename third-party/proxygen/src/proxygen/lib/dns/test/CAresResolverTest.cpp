@@ -419,6 +419,24 @@ class LoopTerminatingCallback : public CAresResolver::ResolutionCallback {
   folly::EventBase& evb_;
 };
 
+class RecordingResolutionCallback : public CAresResolver::ResolutionCallback {
+ public:
+  void resolutionSuccess(
+      std::vector<DNSResolver::Answer> /*answers*/) noexcept override {
+    done_ = true;
+    success_ = true;
+  }
+
+  void resolutionError(
+      const folly::exception_wrapper& /*ew*/) noexcept override {
+    done_ = true;
+    success_ = false;
+  }
+
+  bool done_{false};
+  bool success_{false};
+};
+
 class RecordingStatsCollector : public DNSResolver::StatsCollector {
  public:
   void recordSuccess(const std::vector<DNSResolver::Answer>&,
@@ -618,6 +636,13 @@ bool containsSampleAtLeast(const std::vector<size_t>& samples, size_t value) {
   return std::any_of(samples.begin(), samples.end(), [&](size_t sample) {
     return sample >= value;
   });
+}
+
+CAresResolver::UniquePtr makeFastTimeoutResolver() {
+  auto resolver = CAresResolver::newResolver();
+  resolver->setChannelInitOptions(
+      {.timeout = std::chrono::milliseconds(50), .tries = 1});
+  return resolver;
 }
 
 // Verify that the c-ares query cache (qcache) is disabled. The qcache (enabled
@@ -830,6 +855,39 @@ TEST_F(CAresResolverTest, TimeoutStillSamplesActiveCAresQuery) {
   EXPECT_FALSE(cb.success_);
   ASSERT_FALSE(stats.activeQueries().empty());
   EXPECT_GE(stats.activeQueries().back(), size_t{1});
+
+  server.stopAndJoin();
+  testResolver.reset();
+}
+
+TEST_F(CAresResolverTest, AresTimeoutDrainsBlackholedQueryAfterAppTimeout) {
+  DelayedDnsServer server;
+
+  folly::EventBase evb;
+  auto testResolver = makeFastTimeoutResolver();
+  RecordingStatsCollector stats;
+  testResolver->attachEventBase(&evb);
+  testResolver->enableCAresStateSampling();
+  testResolver->setServers({folly::SocketAddress("127.0.0.1", server.port())});
+  testResolver->setPort(server.port());
+  testResolver->setStatsCollector(&stats);
+  testResolver->init();
+
+  RecordingResolutionCallback cb;
+  testResolver->resolveHostname(
+      &cb, "blackhole.example.com", std::chrono::milliseconds(20), AF_INET);
+
+  ASSERT_TRUE(server.waitForQuery(std::chrono::seconds(1)));
+
+  // The application gives up quickly, but c-ares should continue running its
+  // own timeout machinery and eventually retire the abandoned query.
+  evb.runAfterDelay([&evb] { evb.terminateLoopSoon(); }, 500);
+  evb.loopForever();
+
+  EXPECT_TRUE(cb.done_);
+  EXPECT_FALSE(cb.success_);
+  EXPECT_TRUE(containsSampleAtLeast(stats.activeQueries(), 1));
+  EXPECT_TRUE(containsSample(stats.activeQueries(), 0));
 
   server.stopAndJoin();
   testResolver.reset();

@@ -15,28 +15,34 @@
 #include <barrier>
 
 namespace proxygen {
+namespace {
 
-// public constructor
-SyncDNSResolver::SyncDNSResolver()
-    : SyncDNSResolver(DNSModule::get()->provideDNSResolver(&evb_)) {
-}
-SyncDNSResolver::SyncDNSResolver(DNSResolver::UniquePtr resolver) {
-  // Start a thread running event loop
+void startEventBaseThread(std::thread& thread, folly::EventBase& evb) {
   auto barrier = std::make_shared<std::barrier<>>(2);
-  thread_ = std::thread([this, barrier]() mutable {
-    evb_.runInLoop([=]() mutable {
+  thread = std::thread([&evb, barrier]() mutable {
+    evb.runInLoop([=]() mutable {
       barrier->arrive_and_wait();
       barrier.reset();
     });
 
-    evb_.loopForever();
-    evb_.loop();
+    evb.loopForever();
+    evb.loop();
   });
 
-  // Wait for event loop to start
   barrier->arrive_and_wait();
+}
 
-  // Create the underlying DNS resolver we are doing to use
+} // namespace
+
+// public constructor
+SyncDNSResolver::SyncDNSResolver() {
+  startEventBaseThread(thread_, evb_);
+  resolver_ = DNSModule::get()->provideDNSResolver(&evb_);
+}
+
+SyncDNSResolver::SyncDNSResolver(DNSResolver::UniquePtr resolver) {
+  // Start a thread running event loop before wiring up the resolver.
+  startEventBaseThread(thread_, evb_);
   resolver_ = std::move(resolver);
 }
 

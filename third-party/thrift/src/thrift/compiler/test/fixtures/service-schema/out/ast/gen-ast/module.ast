@@ -197,6 +197,13 @@ Schema {
                   },
                   4: attrs (struct) = DefinitionAttrs {
                     1: name (string) = "param0",
+                    7: sourceRange (struct) = SourceRange {
+                      1: programId (i64) = 986987743245182930,
+                      2: beginLine (i32) = 36,
+                      3: beginColumn (i32) = 12,
+                      4: endLine (i32) = 36,
+                      5: endColumn (i32) = 26,
+                    },
                   },
                 },
                 [1] = Field {
@@ -210,6 +217,13 @@ Schema {
                   },
                   4: attrs (struct) = DefinitionAttrs {
                     1: name (string) = "param1",
+                    7: sourceRange (struct) = SourceRange {
+                      1: programId (i64) = 986987743245182930,
+                      2: beginLine (i32) = 36,
+                      3: beginColumn (i32) = 27,
+                      4: endLine (i32) = 36,
+                      5: endColumn (i32) = 40,
+                    },
                   },
                 },
               },
@@ -247,6 +261,13 @@ Schema {
                 },
                 4: attrs (struct) = DefinitionAttrs {
                   1: name (string) = "e",
+                  7: sourceRange (struct) = SourceRange {
+                    1: programId (i64) = 986987743245182930,
+                    2: beginLine (i32) = 37,
+                    3: beginColumn (i32) = 39,
+                    4: endLine (i32) = 37,
+                    5: endColumn (i32) = 59,
+                  },
                 },
               },
             },
@@ -284,6 +305,13 @@ Schema {
                   },
                   4: attrs (struct) = DefinitionAttrs {
                     1: name (string) = "id",
+                    7: sourceRange (struct) = SourceRange {
+                      1: programId (i64) = 986987743245182930,
+                      2: beginLine (i32) = 38,
+                      3: beginColumn (i32) = 27,
+                      4: endLine (i32) = 38,
+                      5: endColumn (i32) = 37,
+                    },
                   },
                 },
                 [1] = Field {
@@ -299,6 +327,13 @@ Schema {
                   },
                   4: attrs (struct) = DefinitionAttrs {
                     1: name (string) = "i",
+                    7: sourceRange (struct) = SourceRange {
+                      1: programId (i64) = 986987743245182930,
+                      2: beginLine (i32) = 38,
+                      3: beginColumn (i32) = 38,
+                      4: endLine (i32) = 38,
+                      5: endColumn (i32) = 52,
+                    },
                   },
                 },
               },
@@ -351,6 +386,13 @@ Schema {
                   },
                   4: attrs (struct) = DefinitionAttrs {
                     1: name (string) = "param0",
+                    7: sourceRange (struct) = SourceRange {
+                      1: programId (i64) = 986987743245182930,
+                      2: beginLine (i32) = 42,
+                      3: beginColumn (i32) = 12,
+                      4: endLine (i32) = 42,
+                      5: endColumn (i32) = 26,
+                    },
                   },
                 },
                 [1] = Field {
@@ -364,6 +406,13 @@ Schema {
                   },
                   4: attrs (struct) = DefinitionAttrs {
                     1: name (string) = "param1",
+                    7: sourceRange (struct) = SourceRange {
+                      1: programId (i64) = 986987743245182930,
+                      2: beginLine (i32) = 42,
+                      3: beginColumn (i32) = 27,
+                      4: endLine (i32) = 42,
+                      5: endColumn (i32) = 40,
+                    },
                   },
                 },
               },

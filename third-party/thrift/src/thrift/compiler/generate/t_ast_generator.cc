@@ -233,6 +233,21 @@ type::Schema t_ast_generator::gen_schema(
         auto& def = parent_def.functions()[i++];
         assert(def.name() == function.name());
         set_source_range(function, *def.attrs(), node.program());
+
+        for (size_t p = 0; p < function.params().fields().size(); p++) {
+          const auto& param = function.params().fields()[p];
+          auto& param_def = def.paramlist()->fields()[p];
+          assert(param_def.name() == param.name());
+          set_source_range(param, *param_def.attrs(), node.program());
+        }
+        if (function.exceptions() != nullptr) {
+          for (size_t e = 0; e < function.exceptions()->fields().size(); e++) {
+            const auto& exception = function.exceptions()->fields()[e];
+            auto& exception_def = def.exceptions()[e];
+            assert(exception_def.name() == exception.name());
+            set_source_range(exception, *exception_def.attrs(), node.program());
+          }
+        }
       }
     }
   };

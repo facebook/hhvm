@@ -62,6 +62,9 @@ static constexpr size_t kRecSize =
 
 namespace proxygen {
 
+static_assert(sizeof(HTTPHeaderCode) == sizeof(uint8_t),
+              "code must occupy 1 byte");
+
 const string empty_string;
 
 bitset<256>& HTTPHeaders::perHopHeaderCodes() {

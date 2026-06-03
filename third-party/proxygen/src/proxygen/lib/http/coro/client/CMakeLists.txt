@@ -30,6 +30,7 @@ proxygen_add_library(proxygen_http_coro_client_http_connector
     proxygen_http_coro_transport_coro_ssl_transport
     proxygen_http_coro_transport_http_connect_transport
     proxygen_http_coro_util_Transport
+    proxygen_http_coro_util_cancellable_baton
     mvfst::mvfst_api_transport
     mvfst::mvfst_client
     mvfst::mvfst_common_events_folly_eventbase

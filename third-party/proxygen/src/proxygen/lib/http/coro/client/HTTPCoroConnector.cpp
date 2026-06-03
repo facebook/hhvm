@@ -14,6 +14,7 @@
 #include "proxygen/lib/http/coro/transport/HTTPConnectAsyncTransport.h"
 #include "proxygen/lib/http/coro/transport/HTTPConnectStream.h"
 #include "proxygen/lib/http/coro/transport/HTTPConnectTransport.h"
+#include "proxygen/lib/http/coro/util/CancellableBaton.h"
 #include "proxygen/lib/http/coro/util/Transport.h"
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/client/AsyncFizzClient.h>
@@ -66,15 +67,15 @@ class ConnectCB
   explicit ConnectCB(
       folly::EventBase* evb = nullptr,
       std::chrono::milliseconds timeout = std::chrono::milliseconds(0))
-      : baton(evb, timeout) {
+      : event(evb, timeout) {
   }
 
   void connectSuccess() noexcept override {
-    baton.signal();
+    event.baton.signal();
   }
   void connectErr(const folly::AsyncSocketException& ex) noexcept override {
     exception = ex;
-    baton.signal();
+    event.baton.signal();
   }
 
   void fizzHandshakeSuccess(AsyncFizzClient* /*transport*/) noexcept override {
@@ -91,11 +92,11 @@ class ConnectCB
           folly::to<std::string>("Fizz handshake error: ", ex.what()));
     }
 
-    baton.signal();
+    event.baton.signal();
   }
 
   std::optional<folly::AsyncSocketException> exception;
-  TimedBaton baton;
+  proxygen::coro::detail::TimedCancellableBaton event;
 };
 
 folly::coro::Task<std::unique_ptr<CoroTransportIf>> connectTCP(
@@ -110,7 +111,7 @@ folly::coro::Task<std::unique_ptr<CoroTransportIf>> connectTCP(
                        timeoutMs.count(),
                        connParams.socketOptions,
                        connParams.bindAddr);
-  co_await cb.baton.wait();
+  co_await cb.event.wait();
   co_await folly::coro::co_safe_point;
   if (cb.exception) {
     co_yield co_error(*cb.exception);
@@ -269,7 +270,7 @@ folly::coro::Task<std::unique_ptr<CoroTransportIf>> connectFizz(
                         connParams.bindAddr);
   }
 
-  co_await cb.baton.wait();
+  co_await cb.event.wait();
   co_await folly::coro::co_safe_point;
   if (cb.exception) {
     co_yield co_error(*cb.exception);
@@ -327,7 +328,7 @@ folly::coro::Task<std::unique_ptr<CoroTransportIf>> connectTLS(
                      timeoutMs.count(),
                      connParams.socketOptions,
                      connParams.bindAddr);
-    co_await cb.baton.wait();
+    co_await cb.event.wait();
     co_await folly::coro::co_safe_point;
     if (cb.exception) {
       co_yield co_error(*cb.exception);
@@ -367,7 +368,7 @@ class QuicConnectCB
  private:
   void quicConnectErr(folly::exception_wrapper ex) noexcept {
     quicException = std::move(ex);
-    baton.signal();
+    event.baton.signal();
   }
   void onConnectionSetupError(quic::QuicError error) noexcept override {
     switch (error.code.type()) {
@@ -481,7 +482,7 @@ folly::coro::Task<HTTPCoroSession*> connectQuic(
                    std::move(cancellationToken),
                    std::move(earlyDataHandler));
   quicClient->start(&cb, nullptr);
-  auto res = co_await cb.baton.wait();
+  auto res = co_await cb.event.wait();
   quicClient->setConnectionSetupCallback(nullptr);
   if (res != TimedBaton::Status::signalled) {
     auto err = HTTP3::ErrorCode::HTTP_NO_ERROR;

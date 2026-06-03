@@ -22,7 +22,8 @@
 #include <thrift/lib/cpp2/server/RequestEncryptionState.h>
 // RocketContextUtils.h is included to pull in the THRIFT_FLAG_DEFINE for
 // server_request_encryption_tracking_enabled (defined in
-// RocketContextUtils.cpp).
+// RequestEncryptionStateDispatch.cpp, linked via
+// :RequestEncryptionStateDispatch).
 #include <thrift/lib/cpp2/transport/rocket/server/detail/RocketContextUtils.h>
 
 THRIFT_FLAG_DECLARE_bool(server_request_encryption_tracking_enabled);

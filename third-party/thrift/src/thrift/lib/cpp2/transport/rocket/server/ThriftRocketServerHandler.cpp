@@ -52,6 +52,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketThriftRequests.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/RequestEncryptionStateDispatch.h>
 #include <thrift/lib/cpp2/util/Checksum.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_constants.h>
 
@@ -64,7 +65,6 @@ THRIFT_FLAG_DEFINE_bool(rocket_server_legacy_protocol_key, true);
 THRIFT_FLAG_DEFINE_int64(rocket_server_max_version, kRocketServerMaxVersion);
 THRIFT_FLAG_DEFINE_bool(client_authwall_server_enabled, false);
 THRIFT_FLAG_DEFINE_bool(client_authwall_server_enabled_logging, false);
-THRIFT_FLAG_DECLARE_bool(server_request_encryption_tracking_enabled);
 
 namespace apache::thrift::rocket {
 
@@ -907,6 +907,8 @@ void ThriftRocketServerHandler::handleRequestCommon(
   }
 
   cpp2ReqCtx->setWiredRequestBytes(wiredPayloadSize);
+
+  context_utils::checkRequestEncryptionState(*cpp2ReqCtx);
 
   auto serializedCompressedRequest = SerializedCompressedRequest(
       std::move(data),

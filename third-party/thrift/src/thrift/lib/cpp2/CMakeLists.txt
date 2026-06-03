@@ -486,6 +486,7 @@ add_library(
   transport/rocket/server/RocketThriftRequests.cpp
   transport/rocket/server/RocketServerConnectionFactory.cpp
   transport/rocket/server/ThriftRocketServerHandler.cpp
+  transport/rocket/server/detail/RequestEncryptionStateDispatch.cpp
   transport/rocket/server/detail/RocketContextUtils.cpp
   transport/rocket/server/detail/RocketErrorHandler.cpp
   transport/rocket/server/detail/RocketRequestHandler.cpp

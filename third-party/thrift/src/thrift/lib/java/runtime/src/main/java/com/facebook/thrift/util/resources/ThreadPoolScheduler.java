@@ -23,6 +23,7 @@ import io.netty.util.internal.PlatformDependent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -109,15 +110,26 @@ final class ThreadPoolScheduler extends AtomicBoolean implements ThriftScheduler
         TimeUnit.MILLISECONDS,
         new ThreadPoolSchedulerQueue(minPendingTasksBeforeNewThread),
         threadFactory,
+        // Reject by throwing RejectedExecutionException instead of silently dropping the task.
+        // Silent drops mean the submitted Mono never gets subscribed AND its doFinally never fires
+        // -- so the request buffer sits pinned until the request-level MonoTimeoutTransformer fires
+        // (typically seconds), instead of being freed at the moment of shed. Throwing lets the
+        // transport's existing RejectedExecutionException handler ({@code
+        // ThriftConnectionAcceptor.handleException}) translate to
+        // TApplicationException.LOADSHEDDING
+        // immediately and the doFinally fires to release the frame. This matches the behavior of
+        // {@link ForkJoinPoolScheduler}, which already propagates the rejection.
         (r, executor) -> {
-          try {
-            if (executor.getQueue().size() < maxPendingTasks) {
+          if (executor.getQueue().size() < maxPendingTasks) {
+            try {
               executor.getQueue().put(r);
-            } else {
-              LOGGER.error("rejecting task because max pending tasks of " + maxPendingTasks);
+            } catch (InterruptedException e) {
+              Thread.currentThread().interrupt();
+              throw new RejectedExecutionException("thrift offloop scheduler put interrupted", e);
             }
-          } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+          } else {
+            throw new RejectedExecutionException(
+                "thrift offloop scheduler full: max " + maxPendingTasks + " pending tasks");
           }
         });
   }

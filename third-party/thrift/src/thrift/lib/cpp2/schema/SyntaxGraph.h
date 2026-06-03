@@ -479,6 +479,29 @@ class WithDocBlock {
   std::optional<std::string_view> docBlock_;
 };
 
+/**
+ * Base class for all graph nodes that have an associated source range — the
+ * span in the originating IDL file where the node is defined.
+ *
+ * The source range is only available when the schema was produced with
+ * source-range information (e.g. the schematizer's `include_source_ranges`
+ * option). When it is absent, `sourceRange()` returns nullptr.
+ */
+class WithSourceRange {
+ protected:
+  const apache::thrift::type::SourceRange* FOLLY_NULLABLE
+  sourceRange() const noexcept {
+    return sourceRange_.has_value() ? &sourceRange_.value() : nullptr;
+  }
+
+  explicit WithSourceRange(
+      std::optional<apache::thrift::type::SourceRange> sourceRange)
+      : sourceRange_(std::move(sourceRange)) {}
+
+ private:
+  std::optional<apache::thrift::type::SourceRange> sourceRange_;
+};
+
 // Helper to get the index of a type in a variant at compile-time
 template <typename Variant, typename T>
 struct IndexOfImpl;
@@ -586,6 +609,7 @@ class FieldNode final : folly::MoveOnly,
                         detail::WithName,
                         detail::WithAnnotations,
                         detail::WithDocBlock,
+                        detail::WithSourceRange,
                         public detail::WithDebugPrinting<FieldNode> {
  public:
   /**
@@ -602,9 +626,16 @@ class FieldNode final : folly::MoveOnly,
   using detail::WithAnnotations::annotations;
   using detail::WithDocBlock::docBlock;
   using detail::WithName::name;
+  using detail::WithSourceRange::sourceRange;
   FieldId id() const { return id_; }
   TypeRef type() const;
   PresenceQualifier presence() const { return presence_; }
+  /**
+   * The raw field qualifier (unqualified/optional/required/terse/...) from the
+   * runtime schema. Unlike `presence()`, this preserves the exact qualifier,
+   * including `required`.
+   */
+  apache::thrift::type::FieldQualifier qualifier() const { return qualifier_; }
   const apache::thrift::protocol::Value* FOLLY_NULLABLE customDefault() const;
   /**
    * A reference to the user-defined type that contains this field.
@@ -620,16 +651,20 @@ class FieldNode final : folly::MoveOnly,
       std::string_view name,
       std::optional<std::string_view> docBlock,
       folly::not_null_unique_ptr<TypeRef> type,
-      std::optional<apache::thrift::type::ValueId> customDefaultId)
+      std::optional<apache::thrift::type::ValueId> customDefaultId,
+      apache::thrift::type::FieldQualifier qualifier,
+      std::optional<apache::thrift::type::SourceRange> sourceRange)
       : detail::WithResolver(resolver),
         detail::WithName(name),
         detail::WithAnnotations(std::move(annotations)),
         detail::WithDocBlock(docBlock),
+        detail::WithSourceRange(std::move(sourceRange)),
         parent_(parent),
         id_(id),
         presence_(presence),
         type_(std::move(type)),
-        customDefaultId_(std::move(customDefaultId)) {}
+        customDefaultId_(customDefaultId),
+        qualifier_(qualifier) {}
   ~FieldNode() noexcept;
 
   FieldNode(FieldNode&&) noexcept;
@@ -644,6 +679,7 @@ class FieldNode final : folly::MoveOnly,
   PresenceQualifier presence_;
   folly::not_null_unique_ptr<TypeRef> type_;
   std::optional<apache::thrift::type::ValueId> customDefaultId_;
+  apache::thrift::type::FieldQualifier qualifier_;
 };
 
 class StructuredNode : detail::WithDefinition, detail::WithUri {
@@ -797,18 +833,23 @@ class EnumNode final : folly::MoveOnly,
   /**
    * A mapping of enum name to its i32 value.
    */
-  class Value : detail::WithName, detail::WithAnnotations {
+  class Value : detail::WithName,
+                detail::WithAnnotations,
+                detail::WithSourceRange {
    public:
     Value(
         std::string_view name,
         std::int32_t i32,
-        std::vector<Annotation>&& annotations)
+        std::vector<Annotation>&& annotations,
+        std::optional<apache::thrift::type::SourceRange> sourceRange)
         : detail::WithName(name),
           detail::WithAnnotations(std::move(annotations)),
+          detail::WithSourceRange(std::move(sourceRange)),
           i32_(i32) {}
 
     using detail::WithAnnotations::annotations;
     using detail::WithName::name;
+    using detail::WithSourceRange::sourceRange;
     /**
      * All enums values in Thrift have underlying type of i32
      */
@@ -978,10 +1019,12 @@ class FunctionException final
       detail::WithResolver,
       detail::WithName,
       detail::WithAnnotations,
+      detail::WithSourceRange,
       public detail::WithDebugPrinting<FunctionException> {
  public:
   using detail::WithAnnotations::annotations;
   using detail::WithName::name;
+  using detail::WithSourceRange::sourceRange;
   FieldId id() const { return id_; }
   TypeRef type() const;
 
@@ -990,10 +1033,12 @@ class FunctionException final
       FieldId id,
       std::string_view name,
       folly::not_null_unique_ptr<TypeRef> type,
-      std::vector<Annotation>&& annotations)
+      std::vector<Annotation>&& annotations,
+      std::optional<apache::thrift::type::SourceRange> sourceRange)
       : detail::WithResolver(resolver),
         detail::WithName(name),
         detail::WithAnnotations(std::move(annotations)),
+        detail::WithSourceRange(std::move(sourceRange)),
         id_(id),
         type_(std::move(type)) {}
 
@@ -1331,10 +1376,12 @@ class FunctionParam final : folly::MoveOnly,
                             detail::WithResolver,
                             detail::WithName,
                             detail::WithAnnotations,
+                            detail::WithSourceRange,
                             public detail::WithDebugPrinting<FunctionParam> {
  public:
   using detail::WithAnnotations::annotations;
   using detail::WithName::name;
+  using detail::WithSourceRange::sourceRange;
   FieldId id() const { return id_; }
   TypeRef type() const;
 
@@ -1343,10 +1390,12 @@ class FunctionParam final : folly::MoveOnly,
       FieldId id,
       std::string_view name,
       folly::not_null_unique_ptr<TypeRef> type,
-      std::vector<Annotation>&& annotations)
+      std::vector<Annotation>&& annotations,
+      std::optional<apache::thrift::type::SourceRange> sourceRange)
       : detail::WithResolver(resolver),
         detail::WithName(name),
         detail::WithAnnotations(std::move(annotations)),
+        detail::WithSourceRange(std::move(sourceRange)),
         id_(id),
         type_(std::move(type)) {}
 
@@ -1363,11 +1412,13 @@ class FunctionNode final : folly::MoveOnly,
                            detail::WithName,
                            detail::WithAnnotations,
                            detail::WithDocBlock,
+                           detail::WithSourceRange,
                            public detail::WithDebugPrinting<FunctionNode> {
  public:
   using detail::WithAnnotations::annotations;
   using detail::WithDocBlock::docBlock;
   using detail::WithName::name;
+  using detail::WithSourceRange::sourceRange;
   /**
    * A reference to the service or interaction that contains this function.
    */
@@ -1401,7 +1452,8 @@ class FunctionNode final : folly::MoveOnly,
       std::vector<Param>&& params,
       std::vector<Exception>&& exceptions,
       type::FunctionQualifier qualifier,
-      bool isPerforms);
+      bool isPerforms,
+      std::optional<apache::thrift::type::SourceRange> sourceRange);
 
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
@@ -1493,6 +1545,7 @@ class DefinitionNode final : folly::MoveOnly,
                              detail::WithName,
                              detail::WithAnnotations,
                              detail::WithDocBlock,
+                             detail::WithSourceRange,
                              public detail::WithDebugPrinting<DefinitionNode> {
  public:
   using Alternative = std::variant<
@@ -1510,6 +1563,7 @@ class DefinitionNode final : folly::MoveOnly,
   using detail::WithAnnotations::annotations;
   using detail::WithDocBlock::docBlock;
   using detail::WithName::name;
+  using detail::WithSourceRange::sourceRange;
 
   enum class Kind {
     STRUCT = detail::IndexOf<Alternative, StructNode>,
@@ -1681,7 +1735,8 @@ class DefinitionNode final : folly::MoveOnly,
       std::vector<Annotation>&& annotations,
       std::string_view name,
       std::optional<std::string_view> docBlock,
-      Alternative&& definition);
+      Alternative&& definition,
+      std::optional<apache::thrift::type::SourceRange> sourceRange);
 
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;

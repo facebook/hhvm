@@ -340,6 +340,17 @@ FieldNode::PresenceQualifier presenceOf(const type::FieldQualifier& qualifier) {
   }
 }
 
+// Extracts the source range from raw definition attributes, returning nullopt
+// when the schema was produced without source-range information (signaled by a
+// zero begin line, e.g. the schematizer's `include_source_ranges` was off).
+std::optional<type::SourceRange> extractSourceRange(
+    const type::SourceRange& sourceRange) {
+  if (*sourceRange.beginLine() == 0) {
+    return std::nullopt;
+  }
+  return sourceRange;
+}
+
 std::optional<type::ValueId> valueIdOf(const type::ValueId& valueIdField) {
   // schema.thrift leaves behind a value of 0 for fields without custom
   // defaults.
@@ -702,7 +713,8 @@ DefinitionNode SchemaIndex::createDefinition(
       createAnnotations(*attrs.annotationsByKey(), schema),
       *attrs.name(),
       docBlock,
-      std::move(alternative));
+      std::move(alternative),
+      extractSourceRange(*attrs.sourceRange()));
 }
 
 StructNode SchemaIndex::createStruct(
@@ -758,7 +770,9 @@ FieldNode SchemaIndex::createField(
       *field.name(),
       docBlock,
       folly::copy_to_unique_ptr(typeOf(*field.type())),
-      valueIdOf(*field.customDefault()));
+      valueIdOf(*field.customDefault()),
+      *field.qualifier(),
+      extractSourceRange(*field.sourceRange()));
 }
 
 EnumNode SchemaIndex::createEnum(
@@ -770,7 +784,8 @@ EnumNode SchemaIndex::createEnum(
     values.emplace_back(
         *enumValue.name(),
         *enumValue.value(),
-        createAnnotations(*enumValue.annotationsByKey(), schema));
+        createAnnotations(*enumValue.annotationsByKey(), schema),
+        extractSourceRange(*enumValue.sourceRange()));
   }
   return EnumNode(resolver_, definitionKey, *enumDef.uri(), std::move(values));
 }
@@ -848,7 +863,8 @@ FunctionNode SchemaIndex::createFunction(
               *ex.id(),
               *ex.name(),
               folly::copy_to_unique_ptr(typeOf(*ex.type())),
-              createAnnotations(*ex.annotationsByKey(), schema));
+              createAnnotations(*ex.annotationsByKey(), schema),
+              extractSourceRange(*ex.sourceRange()));
         }
         return result;
       };
@@ -883,7 +899,8 @@ FunctionNode SchemaIndex::createFunction(
         *param.id(),
         *param.name(),
         folly::copy_to_unique_ptr(typeOf(*param.type())),
-        createAnnotations(*param.annotationsByKey(), schema));
+        createAnnotations(*param.annotationsByKey(), schema),
+        extractSourceRange(*param.sourceRange()));
   }
 
   return FunctionNode(
@@ -899,7 +916,8 @@ FunctionNode SchemaIndex::createFunction(
       std::move(params),
       collectExceptions(*function.exceptions()),
       *function.qualifier(),
-      *function.isPerforms());
+      *function.isPerforms(),
+      extractSourceRange(*function.sourceRange()));
 }
 
 std::vector<Annotation> SchemaIndex::createAnnotations(

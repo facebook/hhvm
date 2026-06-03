@@ -300,11 +300,13 @@ FunctionNode::FunctionNode(
     std::vector<Param>&& params,
     std::vector<Exception>&& exceptions,
     type::FunctionQualifier qualifier,
-    bool isPerforms)
+    bool isPerforms,
+    std::optional<apache::thrift::type::SourceRange> sourceRange)
     : detail::WithResolver(resolver),
       detail::WithName(name),
       detail::WithAnnotations(std::move(annotations)),
       detail::WithDocBlock(docBlock),
+      detail::WithSourceRange(std::move(sourceRange)),
       parent_(parent),
       response_(std::move(response)),
       params_(std::move(params)),
@@ -340,11 +342,13 @@ DefinitionNode::DefinitionNode(
     std::vector<Annotation>&& annotations,
     std::string_view name,
     std::optional<std::string_view> docBlock,
-    Alternative&& definition)
+    Alternative&& definition,
+    std::optional<apache::thrift::type::SourceRange> sourceRange)
     : detail::WithResolver(resolver),
       detail::WithName(name),
       detail::WithAnnotations(std::move(annotations)),
       detail::WithDocBlock(docBlock),
+      detail::WithSourceRange(std::move(sourceRange)),
       programId_(programId),
       definition_(std::move(definition)) {}
 

@@ -1384,4 +1384,23 @@ TEST(SyntaxGraphTest, SerializableTypeSystemBuilder) {
   }
 }
 
+TEST_F(ServiceSchemaTest, FieldQualifier) {
+  type::Schema schema = schemaFor<test::TestService>();
+
+  const SyntaxGraph syntaxGraph = SyntaxGraph::fromSchema(std::move(schema));
+  const ProgramNode& program = syntaxGraph.findProgramByName("syntax_graph");
+
+  const StructNode& s =
+      program.definitionsByName().at("TestStruct")->asStruct();
+
+  // `qualifier()` preserves the exact qualifier, unlike `presence()` which
+  // collapses unqualified/terse/required (`Fill`) into UNQUALIFIED.
+  const FieldNode& field1 = s.at("field1");
+  EXPECT_EQ(field1.presence(), FieldNode::PresenceQualifier::UNQUALIFIED);
+  EXPECT_EQ(field1.qualifier(), type::FieldQualifier::Default);
+
+  const FieldNode& field2 = s.at("field2");
+  EXPECT_EQ(field2.qualifier(), type::FieldQualifier::Optional);
+}
+
 } // namespace apache::thrift::syntax_graph

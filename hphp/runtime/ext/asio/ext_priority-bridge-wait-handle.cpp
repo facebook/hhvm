@@ -75,7 +75,7 @@ void c_PriorityBridgeWaitHandle::initialize(c_WaitableWaitHandle* child) {
   }
 }
 
-void c_PriorityBridgeWaitHandle::onUnblocked() {
+void c_PriorityBridgeWaitHandle::onUnblocked(std::vector<AsioBlockableChain>& worklist) {
   auto parentChain = getParentChain();
 
   // Propagate the child's result.
@@ -85,7 +85,7 @@ void c_PriorityBridgeWaitHandle::onUnblocked() {
   decRefObj(m_child);
   m_child = nullptr;
 
-  parentChain.unblock();
+  worklist.emplace_back(std::move(parentChain));
   decRefObj(this);
 }
 

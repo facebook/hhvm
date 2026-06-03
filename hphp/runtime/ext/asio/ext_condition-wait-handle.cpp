@@ -126,7 +126,7 @@ void c_ConditionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   }
 }
 
-void c_ConditionWaitHandle::onUnblocked() {
+void c_ConditionWaitHandle::onUnblocked(std::vector<AsioBlockableChain>& worklist) {
   decRefObj(m_child);
   m_child = nullptr;
 
@@ -142,7 +142,7 @@ void c_ConditionWaitHandle::onUnblocked() {
     make_tv<KindOfObject>(getNotNotifiedException().detach()),
     m_resultOrException
   );
-  parentChain.unblock();
+  worklist.emplace_back(std::move(parentChain));
   decRefObj(this);
 }
 

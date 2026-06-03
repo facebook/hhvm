@@ -47,7 +47,6 @@ from test_thrift.thrift_types import (
     DefaultedFields,
     easy,
     EmptyStruct,
-    ErrorWithIssetInspection,
     File,
     Integers,
     IOBufListStruct,
@@ -655,9 +654,8 @@ class GetLocallySetFieldsImmutableTests(unittest.TestCase):
         )
 
     def test_generated_error_not_supported(self) -> None:
-        # thrift-python codegen does not propagate
-        # @python.EnableUnsafeIssetInspection to exceptions
-        e = ErrorWithIssetInspection(message="oops", code=42)
+        # exceptions do not support @python.EnableUnsafeIssetInspection
+        e = UnusedError(message="oops")
         with self.assertRaisesRegex(
             AttributeError, "does not support locally set field inspection"
         ):

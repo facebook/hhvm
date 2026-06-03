@@ -65,4 +65,17 @@ struct DetachableCancellableBaton : public CancellableBaton {
   using CancellableBaton::getTimerCb;
 };
 
+struct TimedCancellableBaton {
+  folly::EventBase* evb;
+  std::chrono::milliseconds timeout;
+  TimedCancellableBaton(folly::EventBase* evb,
+                        std::chrono::milliseconds timeout) noexcept
+      : evb(evb), timeout(timeout) {
+  }
+  DetachableCancellableBaton baton;
+  auto wait() noexcept {
+    return baton.timedWait(evb, timeout);
+  }
+};
+
 } // namespace proxygen::coro::detail

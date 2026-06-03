@@ -10,7 +10,7 @@
 
 #include "proxygen/lib/http/coro/HTTPError.h"
 #include "proxygen/lib/http/coro/HTTPSource.h"
-#include "proxygen/lib/http/coro/util/TimedBaton.h"
+#include "proxygen/lib/http/coro/util/CancellableBaton.h"
 #include "proxygen/lib/http/coro/util/WindowContainer.h"
 #include <proxygen/lib/http/codec/HTTPCodec.h>
 #include <proxygen/lib/http/session/HTTPTransactionIngressSM.h>
@@ -91,8 +91,7 @@ class HTTPStreamSource : public HTTPSource {
 
   ~HTTPStreamSource() override {
     // must be destructed in evb thread
-    auto* evb = event_.getEventBase();
-    XCHECK(evb->isInEventBaseThread());
+    XCHECK(event_.evb->isInEventBaseThread());
   }
   HTTPStreamSource(const HTTPStreamSource&) = delete;
   HTTPStreamSource& operator=(const HTTPStreamSource&) = delete;
@@ -135,12 +134,10 @@ class HTTPStreamSource : public HTTPSource {
     return id_;
   }
 
-  void setReadTimeout(std::chrono::milliseconds timeout) noexcept override {
-    event_.setTimeout(timeout);
-  }
+  void setReadTimeout(std::chrono::milliseconds timeout) noexcept override;
 
   std::chrono::milliseconds getReadTimeout() const {
-    return event_.getTimeout();
+    return event_.timeout;
   }
 
   bool isUnprocessed() const {
@@ -318,7 +315,7 @@ class HTTPStreamSource : public HTTPSource {
   std::list<HTTPHeaderEvent> headerQueue_;
   std::list<HTTPBodyEvent> bodyQueue_;
   WindowContainer recvWindow_;
-  TimedBaton event_;
+  detail::TimedCancellableBaton event_;
   uint64_t expectedIngressContentLength_{0};
   uint64_t expectedIngressContentLengthRemaining_{0};
   uint32_t bufferedDatagramSize_{0};

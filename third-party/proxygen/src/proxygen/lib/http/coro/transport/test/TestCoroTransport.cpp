@@ -135,8 +135,13 @@ folly::coro::Task<folly::Unit> TestCoroTransport::write(
                    state_->writeOffset);
   }
   while (writesPaused_) {
-    writeEvent_.reset();
-    auto status = co_await writeEvent_.timedWait(evb_, timeout);
+    // TODO(@damlaj): fix CoroSslTransport as it should't have multiple inflight
+    // ::writes
+    detail::CancellableBaton writeEvent;
+    pendingWriteEvents_.push_back(&writeEvent);
+    auto status = co_await writeEvent.timedWait(evb_, timeout);
+    pendingWriteEvents_.remove(&writeEvent);
+
     if (status == TimedBaton::Status::timedout) {
       co_yield folly::coro::co_error(folly::AsyncSocketException(
           TransportErrorCode::TIMED_OUT, "Timed out waiting for data"));
@@ -222,7 +227,10 @@ void TestCoroTransport::pauseWrites() {
 void TestCoroTransport::resumeWrites() {
   XLOG(DBG8) << __func__;
   writesPaused_ = false;
-  writeEvent_.signal();
+  auto pendingWriteEvs = std::move(pendingWriteEvents_);
+  for (auto *ev : pendingWriteEvs) {
+    ev->signal();
+  }
 }
 
 void TestCoroTransport::addReadError(TransportErrorCode err) {

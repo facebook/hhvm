@@ -134,7 +134,7 @@ class TestCoroTransport : public folly::coro::TransportIf {
   bool writesPaused_{false};
   folly::EventBase *evb_;
   detail::CancellableBaton readEvent_;
-  detail::CancellableBaton writeEvent_;
+  std::list<detail::CancellableBaton *> pendingWriteEvents_;
   State *state_;
   uint16_t localPort_;
   uint16_t peerPort_;

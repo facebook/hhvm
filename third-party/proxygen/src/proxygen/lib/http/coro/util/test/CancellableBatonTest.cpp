@@ -89,7 +89,10 @@ TEST(CancellableBatonTest, TimeoutDetach) {
   auto fut = co_withExecutor(
                  &evb, baton.timedWait(&evb, std::chrono::milliseconds(10)))
                  .startInlineUnsafe();
+  EXPECT_TRUE(baton.getTimerCb()->isScheduled());
+
   baton.detach();
+  EXPECT_FALSE(baton.getTimerCb()->isScheduled());
 
   folly::EventBaseThreadTimekeeper tk{evb};
   folly::coro::blockingWait(folly::coro::sleep(std::chrono::milliseconds(20)));
@@ -105,13 +108,21 @@ TEST(CancellableBatonTest, TimeoutDetach) {
 
 TEST(CancellableBatonTest, PostBeforeTimeoutExpires) {
   folly::EventBase evb;
-  detail::CancellableBaton baton;
+  detail::DetachableCancellableBaton baton;
 
-  // post before 250ms timeout
-  evb.runAfterDelay([&]() { baton.signal(); },
-                    /*milliseconds=*/25);
+  // post after 25ms timeout
+  evb.runAfterDelay(
+      [&]() {
+        baton.signal();
+        // After a ::signal, the timerCb should still be set (it is unset after
+        // the awaiting coroutine is resumed, i.e. one evb loop later). This is
+        // important as we may need to detach in between a ::signal and when the
+        // awaiting coroutine is resumed
+        EXPECT_NE(baton.getTimerCb(), nullptr);
+      },
+      /*milliseconds=*/25);
 
-  // timeeout baton after 250ms
+  // timeout baton after 250ms
   auto res = folly::coro::blockingWait(
       baton.timedWait(&evb, std::chrono::milliseconds(250)), &evb);
 

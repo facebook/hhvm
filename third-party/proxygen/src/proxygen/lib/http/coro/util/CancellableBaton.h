@@ -14,69 +14,55 @@ namespace proxygen::coro::detail {
 
 /**
  * A simple single waiter single poster wrapper around folly::coro::Baton that
- * supports both cancellation and timeout
+ * supports both cancellation and timeout. This class is not thread-safe and is
+ * designed to be used within a single EventBase.
  */
 class CancellableBaton {
  public:
-  CancellableBaton() = default;
+  CancellableBaton() noexcept = default;
   CancellableBaton(const CancellableBaton&) = delete;
   CancellableBaton& operator=(const CancellableBaton&) = delete;
   CancellableBaton(CancellableBaton&&) = delete;
   CancellableBaton& operator=(CancellableBaton&&) = delete;
-  ~CancellableBaton() {
-    XCHECK_EQ(status_, nullptr);
+  ~CancellableBaton() noexcept {
+    XCHECK_EQ(awaiterCtx_, nullptr);
   }
 
   // wait indefinitely until ::signal is called or cancellation requested
-  folly::coro::Task<TimedBaton::Status> wait() noexcept;
+  folly::coro::Task<TimedBaton::Status> wait() noexcept {
+    return timedWait(/*evb=*/nullptr, std::chrono::milliseconds::zero());
+  }
 
   // wait for timeout (indefinite if 0ms), ::signal or cancellation requested
   folly::coro::Task<TimedBaton::Status> timedWait(
-      folly::EventBase* evb, std::chrono::milliseconds timeout) noexcept {
-    // zero ms timeout considered indefinite timeout
-    return timeout.count() == 0 ? wait() : timedWaitImpl(evb, timeout);
-  }
+      folly::EventBase* evb, std::chrono::milliseconds timeout) noexcept;
 
-  void reset() {
-    XLOG(DBG8) << __func__;
-    status_ = nullptr;
-    baton_.reset();
-  }
+  void reset() noexcept;
 
-  void signal() {
+  void signal() noexcept {
     signal(TimedBaton::Status::signalled);
   }
 
-  bool ready() const {
+  bool ready() const noexcept {
     return baton_.ready();
   }
 
  protected:
-  folly::HHWheelTimer::Callback& getTimerCb() {
-    return timerCb_;
-  }
+  folly::HHWheelTimer::Callback* getTimerCb() noexcept;
 
  private:
-  folly::coro::Task<TimedBaton::Status> timedWaitImpl(
-      folly::EventBase* evb, std::chrono::milliseconds timeout);
-
   void signal(TimedBaton::Status status) noexcept;
 
-  struct TimerCallback : public folly::HHWheelTimer::Callback {
-    explicit TimerCallback(CancellableBaton& self) : self_(self) {
-    }
-    void timeoutExpired() noexcept override {
-      self_.signal(TimedBaton::Status::timedout);
-    }
-    CancellableBaton& self_;
-  } timerCb_{*this};
+  // A suspending coroutine will allocate an AwaiterCtx on the stack.
+  struct AwaiterCtx;
+  AwaiterCtx* awaiterCtx_{nullptr};
 
-  TimedBaton::Status* status_{nullptr};
   folly::coro::Baton baton_;
 };
 
 struct DetachableCancellableBaton : public CancellableBaton {
   void detach() noexcept;
+  using CancellableBaton::getTimerCb;
 };
 
 } // namespace proxygen::coro::detail

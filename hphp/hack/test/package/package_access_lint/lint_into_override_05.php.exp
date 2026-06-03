@@ -18,7 +18,7 @@ lint_into_override_05.php--bar.php:5:34
     7 | class TestClass {
 
 
-warning: Lint[5655] This is a cross-boundary edge. Although the callee is already in the caller package pkg1 via __PackageOverride('pkg1'), cross-boundary edges contribute to the bloating of pkg1 and SHOULD BE REMOVED. Either move the callee into the caller's package via hg mv, use __RequirePackage (if the whole function should only be invoked from pkg2) or gate this reference via a package check (if this portion of the function is meant to be gated by an environment check). [1]
+warning: Lint[5655] This is a cross-boundary edge. Although the callee is accessible to the caller's package pkg1 via __PackageOverride('pkg1'), that package override is load-bearing here: without it the callee stays in package pkg2, which pkg1 cannot reach, so this edge would be an error. This edge prevents removal of the __PackageOverride and SHOULD BE REMOVED. Either move the callee into the caller's package via hg mv, use __RequirePackage (if the whole function should only be invoked from pkg2) or gate this reference via a package check (if this portion of the function is meant to be gated by an environment check). [1]
 
 lint_into_override_05.php--bar.php:9:22
     7 | class TestClass {
@@ -28,7 +28,7 @@ lint_into_override_05.php--bar.php:9:22
    11 |   }
 
 
-warning: Lint[5655] This is a cross-boundary edge. Although the callee is already in the caller package pkg1 via __PackageOverride('pkg1'), cross-boundary edges contribute to the bloating of pkg1 and SHOULD BE REMOVED. Either move the callee into the caller's package via hg mv, use __RequirePackage (if the whole function should only be invoked from pkg2) or gate this reference via a package check (if this portion of the function is meant to be gated by an environment check). [1]
+warning: Lint[5655] This is a cross-boundary edge. Although the callee is accessible to the caller's package pkg1 via __PackageOverride('pkg1'), that package override is load-bearing here: without it the callee stays in package pkg2, which pkg1 cannot reach, so this edge would be an error. This edge prevents removal of the __PackageOverride and SHOULD BE REMOVED. Either move the callee into the caller's package via hg mv, use __RequirePackage (if the whole function should only be invoked from pkg2) or gate this reference via a package check (if this portion of the function is meant to be gated by an environment check). [1]
 
 lint_into_override_05.php--bar.php:9:40
     7 | class TestClass {
@@ -38,7 +38,7 @@ lint_into_override_05.php--bar.php:9:40
    11 |   }
 
 
-warning: Lint[5655] This is a cross-boundary edge. Although the callee is already in the caller package pkg1 via __PackageOverride('pkg1'), cross-boundary edges contribute to the bloating of pkg1 and SHOULD BE REMOVED. Either move the callee into the caller's package via hg mv, use __RequirePackage (if the whole function should only be invoked from pkg2) or gate this reference via a package check (if this portion of the function is meant to be gated by an environment check). [1]
+warning: Lint[5655] This is a cross-boundary edge. Although the callee is accessible to the caller's package pkg1 via __PackageOverride('pkg1'), that package override is load-bearing here: without it the callee stays in package pkg2, which pkg1 cannot reach, so this edge would be an error. This edge prevents removal of the __PackageOverride and SHOULD BE REMOVED. Either move the callee into the caller's package via hg mv, use __RequirePackage (if the whole function should only be invoked from pkg2) or gate this reference via a package check (if this portion of the function is meant to be gated by an environment check). [1]
 
 lint_into_override_05.php--bar.php:10:29
      8 |   public function bar(): void {
@@ -48,7 +48,7 @@ lint_into_override_05.php--bar.php:10:29
     12 | }
 
 
-warning: Lint[5655] This is a cross-boundary edge. Although the callee is already in the caller package pkg1 via __PackageOverride('pkg1'), cross-boundary edges contribute to the bloating of pkg1 and SHOULD BE REMOVED. Either move the callee into the caller's package via hg mv, use __RequirePackage (if the whole function should only be invoked from pkg2) or gate this reference via a package check (if this portion of the function is meant to be gated by an environment check). [1]
+warning: Lint[5655] This is a cross-boundary edge. Although the callee is accessible to the caller's package pkg1 via __PackageOverride('pkg1'), that package override is load-bearing here: without it the callee stays in package pkg2, which pkg1 cannot reach, so this edge would be an error. This edge prevents removal of the __PackageOverride and SHOULD BE REMOVED. Either move the callee into the caller's package via hg mv, use __RequirePackage (if the whole function should only be invoked from pkg2) or gate this reference via a package check (if this portion of the function is meant to be gated by an environment check). [1]
 
 lint_into_override_05.php--bar.php:10:51
      8 |   public function bar(): void {

@@ -308,13 +308,15 @@ let package_into_override
     Codes.package_into_override
     Lint_error
     pos
-    ("This is a cross-boundary edge. Although the callee is already in the caller package "
+    ("This is a cross-boundary edge. Although the callee is accessible to the caller's package "
     ^ current_package_name
-    ^ " via __PackageOverride('"
+    ^ " via `__PackageOverride('"
     ^ target_package_name
-    ^ "'), cross-boundary edges contribute to the bloating of "
-    ^ target_package_name
-    ^ " and SHOULD BE REMOVED. "
+    ^ "')`, that package override is load-bearing here: without it the callee stays in package "
+    ^ target_package_before_override_name
+    ^ ", which "
+    ^ current_package_name
+    ^ " cannot reach, so this edge would be an error. This edge prevents removal of the `__PackageOverride` and SHOULD BE REMOVED. "
     ^ "Either move the callee into the caller's package via hg mv, "
     ^ "use `__RequirePackage` (if the whole function should only be invoked from "
     ^ target_package_before_override_name

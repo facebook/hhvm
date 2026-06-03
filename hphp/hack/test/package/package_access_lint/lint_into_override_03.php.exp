@@ -1,1 +1,10 @@
-No lint errors
+warning: Lint[5655] This is a cross-boundary edge. Although the callee is accessible to the caller's package pkg2 via __PackageOverride('pkg1'), that package override is load-bearing here: without it the callee stays in package pkg3, which pkg2 cannot reach, so this edge would be an error. This edge prevents removal of the __PackageOverride and SHOULD BE REMOVED. Either move the callee into the caller's package via hg mv, use __RequirePackage (if the whole function should only be invoked from pkg3) or gate this reference via a package check (if this portion of the function is meant to be gated by an environment check). [1]
+
+lint_into_override_03.php--warning_03b.php:8:10
+    6 | class D3 {
+    7 |   public function bar(): void {
+[1] 8 |     (new C3())->foo(); // should raise a lint error
+    9 |   }
+   10 | }
+
+

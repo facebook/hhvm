@@ -823,7 +823,7 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
       DPRINTF(("Wrapped around %p < %p\n", q, p));
       goto out;
     }
-    if (q > e) {
+    if (q + sizeof(uint32_t) > e) {
       DPRINTF(("Ran of the end %p > %p\n", q, e));
       goto out;
     }

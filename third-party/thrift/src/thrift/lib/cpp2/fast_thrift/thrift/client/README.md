@@ -26,32 +26,16 @@ fast_thrift channel pipeline.
                     └───────────────┬───────────────┘
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                  ThriftClientRequestResponseHandler                          │
-│  - Builds ClientReceiveState from ThriftResponseMessage                      │
-│  - Populates THeader from ResponseRpcMetadata                                │
-│  - Pass-through for outbound messages                                        │
+│                  ThriftClientTransportAdapter (HeadEndpointHandler)          │
+│  - Bridges thrift pipeline to rocket pipeline (two-pipeline architecture)   │
+│  - Converts ThriftRequestMessage → RocketRequestMessage (outbound)          │
+│  - Converts RocketResponseMessage → ThriftResponseMessage (inbound)         │
 └─────────────────────────────────────────────────────────────────────────────┘
                                     │
-                    ┌───────────────┴───────────────┐
-                    │ ThriftClientRequest           │
-                    │ ThriftResponseMessage         │
-                    └───────────────┬───────────────┘
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    ThriftClientMetadataHandler                               │
-│  - Serializes RequestRpcMetadata (outbound)                                  │
-│  - Deserializes ResponseRpcMetadata (inbound)                                │
-│  - Passes requestHandle through to Rocket layer                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                    ┌───────────────┴───────────────┐
-                    │ RocketRequestMessage          │
-                    │ RocketResponseMessage         │
-                    └───────────────┬───────────────┘
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           Rocket Layer                                       │
-│                    (../rocket/client/...)                                    │
+│                     Rocket Pipeline (separate)                               │
+│          RocketClientAppAdapter → [handlers] → TransportHandler             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -85,10 +69,10 @@ The main entry point implementing `apache::thrift::RequestChannel`.
 auto channel = ThriftClientChannel::newChannel(std::move(socket));
 
 // Build pipeline using channel's transport handler
-auto pipeline = PipelineBuilder<ThriftClientChannel, TransportHandler, Allocator>()
+auto pipeline = PipelineBuilder<TransportHandler, ThriftClientChannel, Allocator>()
     .setEventBase(channel->getEventBase())
-    .setHead(channel.get())
-    .setTail(channel->transportHandler())
+    .setHead(channel->transportHandler())
+    .setTail(channel.get())
     .setAllocator(&allocator)
     // ... add handlers ...
     .build();

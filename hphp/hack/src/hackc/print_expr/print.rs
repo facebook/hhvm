@@ -252,6 +252,7 @@ fn print_expr(
             Some(name) => fmt_class_name(is_class_constant, name.into()).into_owned(),
             None => match cid {
                 ast::ClassId_::CIself => classes::SELF.to_string(),
+                ast::ClassId_::CIparent => classes::PARENT.to_string(),
                 _ => panic!("resolve_class_id_for_print: unhandled class_id variant"),
             },
         }
@@ -447,10 +448,13 @@ fn print_expr(
             let (cid, _, es, unpacked_element, _) = &**x;
             match &cid.2 {
                 // TODO(T259578698) invert and fix named parameter clash below
-                ast::ClassId_::CIself | ast::ClassId_::CIexpr(_) | ast::ClassId_::CIreified(_) => {
+                ast::ClassId_::CIself
+                | ast::ClassId_::CIparent
+                | ast::ClassId_::CIexpr(_)
+                | ast::ClassId_::CIreified(_) => {
                     w.write_all(b"new ")?;
                     match &cid.2 {
-                        ast::ClassId_::CIself => {
+                        ast::ClassId_::CIself | ast::ClassId_::CIparent => {
                             let s = resolve_class_id_for_print(ctx, env, false, &cid.2);
                             w.write_all(s.as_bytes())?
                         }
@@ -522,7 +526,7 @@ fn print_expr(
                     )?,
                     _ => print_expr(ctx, w, env, e)?,
                 },
-                ast::ClassId_::CIself => {
+                ast::ClassId_::CIself | ast::ClassId_::CIparent => {
                     let s = resolve_class_id_for_print(ctx, env, false, &(cg.0).2);
                     w.write_all(s.as_bytes())?
                 }
@@ -547,7 +551,7 @@ fn print_expr(
                     }
                     _ => Err(Error::fail("TODO: expected Id in Nameof CIexpr").into()),
                 },
-                ast::ClassId_::CIself => {
+                ast::ClassId_::CIself | ast::ClassId_::CIparent => {
                     let s = resolve_class_id_for_print(ctx, env, false, &cid.2);
                     w.write_all(s.as_bytes())
                 }
@@ -556,7 +560,7 @@ fn print_expr(
             }
         }
         Expr_::ClassConst(cc) => match &(cc.0).2 {
-            ast::ClassId_::CIself => {
+            ast::ClassId_::CIself | ast::ClassId_::CIparent => {
                 let s1 = resolve_class_id_for_print(ctx, env, true, &(cc.0).2);
                 let s2 = &(cc.1).1;
                 write::concat_str_by(w, "::", [&s1.into(), s2])
@@ -695,7 +699,7 @@ fn print_expr(
                 }
                 ast::FunctionPtrId::FPClassConst(ast::ClassId(_, _, class_id), (_, meth_name)) => {
                     match class_id {
-                        ast::ClassId_::CIself => {
+                        ast::ClassId_::CIself | ast::ClassId_::CIparent => {
                             let s = resolve_class_id_for_print(ctx, env, false, class_id);
                             w.write_all(s.as_bytes())?
                         }

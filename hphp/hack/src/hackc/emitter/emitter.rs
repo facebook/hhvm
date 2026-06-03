@@ -247,18 +247,12 @@ impl Emitter {
 }
 
 impl print_expr::SpecialClassResolver for Emitter {
-    fn resolve<'a>(&self, scope_opt: Option<&'a Scope<'_>>, id: &'a str) -> Cow<'a, str> {
-        let class_expr = ClassExpr::expr_to_class_expr(
-            self,
-            scope_opt.unwrap_or(&ast_scope::Scope::default()),
-            true,
-            true,
-            ast::Expr(
-                (),
-                Pos::NONE,
-                ast::Expr_::mk_id(ast_defs::Id(Pos::NONE, id.into())),
-            ),
-        );
+    fn resolve<'a>(&self, _scope_opt: Option<&'a Scope<'_>>, id: &'a str) -> Cow<'a, str> {
+        let class_expr = ClassExpr::expr_to_class_expr(ast::Expr(
+            (),
+            Pos::NONE,
+            ast::Expr_::mk_id(ast_defs::Id(Pos::NONE, id.into())),
+        ));
         match class_expr {
             ClassExpr::Id(ast_defs::Id(_, name)) => Cow::Owned(name),
             _ => Cow::Borrowed(id),
@@ -272,6 +266,12 @@ impl print_expr::SpecialClassResolver for Emitter {
     ) -> Option<String> {
         match cid {
             ast::ClassId_::CIself => ClassExpr::get_original_class_name(
+                self,
+                scope_opt.unwrap_or(&ast_scope::Scope::default()),
+                true,
+                true,
+            ),
+            ast::ClassId_::CIparent => ClassExpr::get_original_parent_class_name(
                 self,
                 scope_opt.unwrap_or(&ast_scope::Scope::default()),
                 true,

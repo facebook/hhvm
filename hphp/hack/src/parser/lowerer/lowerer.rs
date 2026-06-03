@@ -1445,6 +1445,9 @@ fn expr_to_class_id<'a>(env: &mut Env<'a>, pos: Pos, e: ast::Expr) -> Result<ast
             None if string_utils::is_self(&name.1) => {
                 Ok(ast::ClassId((), epos, ast::ClassId_::CIself))
             }
+            None if string_utils::is_parent(&name.1) => {
+                Ok(ast::ClassId((), epos, ast::ClassId_::CIparent))
+            }
             None => Ok(ast::ClassId(
                 (),
                 pos,
@@ -2206,6 +2209,7 @@ fn p_function_pointer_expr<'a>(
         Expr_::ClassConst(c) => match &(c.0).2 {
             aast::ClassId_::CIexpr(Expr(_, _, Expr_::Id(_)))
             | aast::ClassId_::CIself
+            | aast::ClassId_::CIparent
             | aast::ClassId_::CIreified(_) => Ok(Expr_::mk_function_pointer(
                 aast::FunctionPtrId::FPClassConst(c.0.to_owned(), c.1.to_owned()),
                 targs,
@@ -3075,6 +3079,12 @@ fn p_nameof<'a>(
                             (),
                             target.1.clone(),
                             ast::ClassId_::CIself,
+                        )))
+                    } else if string_utils::is_parent(id.name()) {
+                        Ok(Expr_::mk_nameof(ast::ClassId(
+                            (),
+                            target.1.clone(),
+                            ast::ClassId_::CIparent,
                         )))
                     } else {
                         Ok(Expr_::mk_nameof(ast::ClassId(

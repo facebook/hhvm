@@ -57,7 +57,7 @@ impl ClassExpr {
         None
     }
 
-    fn get_original_parent_class_name(
+    pub fn get_original_parent_class_name(
         emitter: &Emitter,
         scope: &Scope<'_>,
         check_traits: bool,
@@ -83,28 +83,12 @@ impl ClassExpr {
         None
     }
 
-    pub fn expr_to_class_expr(
-        emitter: &Emitter,
-        scope: &Scope<'_>,
-        check_traits: bool,
-        resolve_self: bool,
-        expr: ast::Expr,
-    ) -> Self {
+    pub fn expr_to_class_expr(expr: ast::Expr) -> Self {
         match expr.2 {
             Expr_::Id(x) => {
                 let ast_defs::Id(pos, id) = *x;
                 if string_utils::is_static(&id) {
                     Self::Special(SpecialClsRef::LateBoundCls)
-                } else if string_utils::is_parent(&id) {
-                    match Self::get_original_parent_class_name(
-                        emitter,
-                        scope,
-                        check_traits,
-                        resolve_self,
-                    ) {
-                        Some(name) => Self::Id(ast_defs::Id(pos, name)),
-                        None => Self::Special(SpecialClsRef::ParentCls),
-                    }
                 } else {
                     Self::Id(ast_defs::Id(pos, id))
                 }
@@ -125,7 +109,17 @@ impl ClassExpr {
             ClassId_::CIexpr(e) => e.clone(),
             ClassId_::CI(sid) => Expr((), annot.clone(), Expr_::mk_id(sid.clone())),
             ClassId_::CIreified(sid) => return Self::Reified(sid.clone()),
-            ClassId_::CIparent => return Self::Special(SpecialClsRef::ParentCls),
+            ClassId_::CIparent => {
+                return match Self::get_original_parent_class_name(
+                    emitter,
+                    scope,
+                    check_traits,
+                    resolve_self,
+                ) {
+                    Some(name) => Self::Id(ast_defs::Id(annot.clone(), name)),
+                    None => Self::Special(SpecialClsRef::ParentCls),
+                };
+            }
             ClassId_::CIstatic => return Self::Special(SpecialClsRef::LateBoundCls),
             ClassId_::CIself => {
                 return match Self::get_original_class_name(
@@ -139,6 +133,6 @@ impl ClassExpr {
                 };
             }
         };
-        Self::expr_to_class_expr(emitter, scope, check_traits, resolve_self, expr)
+        Self::expr_to_class_expr(expr)
     }
 }

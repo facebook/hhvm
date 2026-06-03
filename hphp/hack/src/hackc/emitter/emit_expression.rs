@@ -3824,9 +3824,8 @@ fn emit_new<'a>(
             .get_class_tparams()
             .iter()
             .all(|tp| tp.reified.is_erased()),
-        ast::ClassId_::CIexpr(ci_expr) => match ci_expr.as_id() {
-            Some(ast_defs::Id(_, n)) if string_utils::is_parent(n) => env
-                .scope
+        ast::ClassId_::CIparent => {
+            env.scope
                 .get_class()
                 .is_none_or(|cls| match cls.get_extends() {
                     [h, ..] => {
@@ -3834,9 +3833,8 @@ fn emit_new<'a>(
                             .is_none_or(|(_, l)| !has_non_tparam_generics(env, l))
                     }
                     _ => true,
-                }),
-            _ => true,
-        },
+                })
+        }
         _ => true,
     };
     let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, resolve_self, cid);

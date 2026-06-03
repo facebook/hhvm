@@ -2,7 +2,6 @@ use std::collections::BTreeMap;
 
 use bstr::BString;
 use itertools::Itertools;
-use naming_special_names_rust::classes;
 use naming_special_names_rust::expression_trees as et;
 use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
@@ -1223,13 +1222,9 @@ impl RewriteState {
                     // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitStaticMethod(new ExprPos(...), $0smXX, vec[])
                     ClassConst(box (cid, s)) => {
                         let is_supported = match &cid {
-                            ClassId(_, _, ClassId_::CIself) => false,
-                            ClassId(
-                                _,
-                                _,
-                                ClassId_::CIexpr(Expr(_, _, Id(box ast_defs::Id(_, name)))),
-                            ) => name != classes::PARENT,
+                            ClassId(_, _, ClassId_::CIself | ClassId_::CIparent) => false,
                             ClassId(_, _, ClassId_::CIreified(_)) => true,
+                            ClassId(_, _, ClassId_::CIexpr(Expr(_, _, Id(_)))) => true,
                             _ => false,
                         };
 
@@ -1696,11 +1691,9 @@ impl RewriteState {
             // Desugared: $0v->visitClassConstant(new ExprPos(...), nameof MyClass, 'FOO', MyClass::FOO)
             ClassConst(box (cid, s)) => {
                 let is_supported = match &cid {
-                    ClassId(_, _, ClassId_::CIself) => false,
-                    ClassId(_, _, ClassId_::CIexpr(Expr(_, _, Id(box ast_defs::Id(_, name))))) => {
-                        name != classes::PARENT
-                    }
+                    ClassId(_, _, ClassId_::CIself | ClassId_::CIparent) => false,
                     ClassId(_, _, ClassId_::CIreified(_)) => true,
+                    ClassId(_, _, ClassId_::CIexpr(Expr(_, _, Id(_)))) => true,
                     _ => false,
                 };
 

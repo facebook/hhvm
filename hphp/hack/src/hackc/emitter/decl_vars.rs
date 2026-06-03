@@ -57,8 +57,8 @@ impl<'a> DeclvarVisitor<'a> {
     fn on_class_get(&mut self, cid: &ClassId) -> Result<(), String> {
         use aast::ClassId_;
         match &cid.2 {
-            ClassId_::CIself => Ok(()),
-            ClassId_::CIparent | ClassId_::CIstatic | ClassId_::CI(_) => {
+            ClassId_::CIself | ClassId_::CIparent => Ok(()),
+            ClassId_::CIstatic | ClassId_::CI(_) => {
                 Err("Expects CIexpr as class_id on aast where expr was on ast".into())
             }
             ClassId_::CIreified(_) => Ok(()),

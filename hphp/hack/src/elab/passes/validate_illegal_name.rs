@@ -96,11 +96,11 @@ impl Pass for ValidateIllegalNamePass {
                 env.emit_error(NamingError::IllegalTRAIT(id.pos().clone()))
             }
 
-            // TODO[mjt] Check if this will have already been elaborated to `CIparent`
-            Expr_::ClassConst(box (
-                ClassId(_, _, ClassId_::CIexpr(Expr(_, _, Expr_::Id(box id)))),
-                (_, meth_name),
-            )) if id.name() == sn::classes::PARENT && self.is_current_func(meth_name) => (),
+            Expr_::ClassConst(box (ClassId(_, _, ClassId_::CIparent), (_, meth_name)))
+                if self.is_current_func(meth_name) =>
+            {
+                ()
+            }
 
             Expr_::ClassConst(box (_, (pos, meth_name)))
                 if is_magic(meth_name) && !self.is_current_func(meth_name) =>

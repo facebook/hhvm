@@ -50,6 +50,13 @@ impl Pass for ElabClassIdPass {
                     sn::classes::UNKNOWN.to_string(),
                 ));
             }
+            ClassId_::CIparent if !self.in_class => {
+                env.emit_error(NamingError::ParentOutsideClass(pos.clone()));
+                *class_id_ = ClassId_::CI(Id(
+                    std::mem::replace(pos, Pos::NONE),
+                    sn::classes::UNKNOWN.to_string(),
+                ));
+            }
             ClassId_::CIexpr(Expr(_, expr_pos, expr_)) => {
                 // [mjt] For some reason the legacy code modifies the position of
                 // the surrounding [ClassId]. This seems wrong and causes a clone
@@ -59,17 +66,7 @@ impl Pass for ElabClassIdPass {
                         // If the id is a special ref to a class, it is only
                         // valid if we are in a class
                         let Id(id_pos, cname) = sid as &mut Sid;
-                        if cname == sn::classes::PARENT {
-                            if !self.in_class {
-                                let err_pos = std::mem::replace(id_pos, Pos::NONE);
-                                env.emit_error(NamingError::ParentOutsideClass(err_pos));
-                                let ci_pos = std::mem::replace(expr_pos, Pos::NONE);
-                                *class_id_ =
-                                    ClassId_::CI(Id(ci_pos, sn::classes::UNKNOWN.to_string()))
-                            } else {
-                                *class_id_ = ClassId_::CIparent
-                            }
-                        } else if cname == sn::classes::STATIC {
+                        if cname == sn::classes::STATIC {
                             if !self.in_class {
                                 let err_pos = std::mem::replace(id_pos, Pos::NONE);
                                 env.emit_error(NamingError::StaticOutsideClass(err_pos));
@@ -132,10 +129,7 @@ mod tests {
 
         let mut pass = ElabClassIdPass::default();
 
-        let cases = vec![
-            (sn::classes::PARENT, ClassId_::CIparent),
-            (sn::classes::STATIC, ClassId_::CIstatic),
-        ];
+        let cases = vec![(sn::classes::STATIC, ClassId_::CIstatic)];
         for (cname, repr) in cases {
             let mut elem_outside = ClassId(
                 (),

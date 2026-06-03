@@ -46,16 +46,13 @@ let on_class_id on_error class_id ~ctx =
     | (annot, pos, Aast.CIself) when not in_class ->
       ( (annot, pos, Aast.CI (pos, SN.Classes.cUnknown)),
         Some (Err.naming @@ Naming_error.Self_outside_class pos) )
+    | (annot, pos, Aast.CIparent) when not in_class ->
+      ( (annot, pos, Aast.CI (pos, SN.Classes.cUnknown)),
+        Some (Err.naming @@ Naming_error.Parent_outside_class pos) )
     | (_, _, Aast.(CIparent | CIself | CIstatic | CI _ | CIreified _)) ->
       (class_id, None)
     | (annot, _, Aast.(CIexpr (_, expr_pos, Id (id_pos, cname)))) ->
-      if String.equal cname SN.Classes.cParent then
-        if not in_class then
-          ( (annot, expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
-            Some (Err.naming @@ Naming_error.Parent_outside_class id_pos) )
-        else
-          ((annot, expr_pos, Aast.CIparent), None)
-      else if String.equal cname SN.Classes.cStatic then
+      if String.equal cname SN.Classes.cStatic then
         if not in_class then
           ( (annot, expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
             Some (Err.naming @@ Naming_error.Static_outside_class id_pos) )

@@ -926,18 +926,7 @@ mod tests {
                             (),
                             __hygienic_pos.clone(),
                             Expr_::ClassConst(Box::new((
-                                ClassId(
-                                    (),
-                                    __hygienic_pos.clone(),
-                                    ClassId_::CIexpr(Expr(
-                                        (),
-                                        __hygienic_pos.clone(),
-                                        Expr_::Id(Box::new(Id(
-                                            __hygienic_pos.clone(),
-                                            "parent".to_owned(),
-                                        ))),
-                                    )),
-                                ),
+                                ClassId((), __hygienic_pos.clone(), ClassId_::CIparent),
                                 (
                                     __hygienic_pos.clone(),
                                     "__xhpAttributeDeclaration".to_owned(),

@@ -73,7 +73,7 @@ let handler =
             (Naming_error_utils.to_user_diagnostic
                (Naming_error.Illegal_TRAIT pos)
                custom_err_config)
-      | Class_const ((_, _, CIexpr (_, _, Id (_, "parent"))), (_, m_name))
+      | Class_const ((_, _, CIparent), (_, m_name))
         when Option.equal String.equal func_name (Some m_name) ->
         ()
       | Class_const (_, ((pos, meth_name) as mid))

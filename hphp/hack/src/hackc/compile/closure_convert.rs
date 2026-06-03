@@ -1490,16 +1490,15 @@ fn is_meth_caller(x: &CallExpr) -> bool {
 
 fn is_parent_call(x: &CallExpr) -> bool {
     match &x.func.2 {
-        Expr_::ClassGet(box (ci, _, _)) | Expr_::ClassConst(box (ci, _)) => match &ci.2 {
-            ClassId_::CIexpr(Expr(_, _, Expr_::Id(id))) => string_utils::is_parent(&id.1),
-            _ => false,
-        },
+        Expr_::ClassGet(box (ci, _, _)) | Expr_::ClassConst(box (ci, _)) => {
+            matches!(&ci.2, ClassId_::CIparent)
+        }
         _ => false,
     }
 }
 
 fn is_selflike_keyword(id: &Id) -> bool {
-    string_utils::is_parent(id) || string_utils::is_static(id)
+    string_utils::is_static(id)
 }
 
 fn hoist_toplevel_functions(defs: &mut Vec<Def>) {

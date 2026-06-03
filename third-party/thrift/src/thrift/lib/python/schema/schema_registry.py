@@ -23,16 +23,23 @@ type or by Thrift URI.
 
 from __future__ import annotations
 
+import functools
 import importlib
 import sys
 import types
 from collections.abc import Callable
+from importlib import resources
 from typing import Any
 
 import zstandard  # @manual=fbsource//third-party/pypi/zstandard:zstandard
 from apache.thrift.type.schema import thrift_types as _schema_types
 from thrift.lib.python.schema.syntax_graph import Definition, SyntaxGraph
 from thrift.python.serializer import deserialize, Protocol
+
+
+def _has_bundled_schema(module: types.ModuleType) -> bool:
+    """Whether a module carries a bundled ``_fbthrift_schema_*`` blob."""
+    return any(k.startswith("_fbthrift_schema_") for k in vars(module))
 
 
 def _extract_schema_bytes(module: types.ModuleType) -> bytes:
@@ -55,6 +62,32 @@ def _extract_schema_bytes(module: types.ModuleType) -> bytes:
             f"Invalid or empty bundled schema in module {module.__name__}."
         )
     return data
+
+
+_OMNIBUS_SCHEMA_RESOURCE = "omnibus_schema.zst"
+
+
+@functools.cache
+def _load_omnibus_schema() -> _schema_types.Schema | None:
+    """Load the bundled omnibus schema of the well-known/core thrift types.
+
+    Core types (``any``, ``patch``, ``type_system``, ...) live in modules that
+    are intentionally built without ``with_schema`` (a thrift2ast bootstrap
+    constraint), so their generated modules carry no ``_fbthrift_schema_`` blob.
+    Seeding this omnibus into the registry lets fields typed with them resolve.
+
+    Returns ``None`` when the resource isn't bundled; the registry then degrades
+    to its prior behavior (such types remain unresolvable)."""
+    try:
+        data = (resources.files(__package__) / _OMNIBUS_SCHEMA_RESOURCE).read_bytes()
+    except (OSError, ModuleNotFoundError):
+        return None
+    schema = SchemaRegistry._deserialize_schema(data)
+    # Drop the program list: the omnibus combines many root files and can carry
+    # duplicate program names, which the SyntaxGraph's name-unique program
+    # index rejects. Only the definitions are needed here to resolve fields that
+    # reference these core types.
+    return schema(programs=[])
 
 
 def _get_uri(thrift_type: type[Any]) -> str:
@@ -121,6 +154,7 @@ class SchemaRegistry:
         self._builder: IncrementalGraphBuilder = IncrementalGraphBuilder()
         self._module_resolver: Callable[[str], types.ModuleType | None] | None = None
         self._uri_module_map: dict[str, str] | None = None
+        self._omnibus_seeded: bool = False
 
     @property
     def syntax_graph(self) -> SyntaxGraph:
@@ -253,7 +287,7 @@ class SchemaRegistry:
         for module in sys.modules.values():
             if module is None:
                 continue
-            if not any(k.startswith("_fbthrift_schema_") for k in vars(module)):
+            if not _has_bundled_schema(module):
                 continue
             if module.__name__ in self._registered_modules:
                 continue
@@ -290,11 +324,23 @@ class SchemaRegistry:
 
         return None
 
+    def _seed_omnibus_if_needed(self) -> None:
+        """Merge the bundled omnibus schema into the builder once, so user
+        modules that reference core types (``any``, etc.) resolve. The build
+        itself happens in the caller's ``build_pending``."""
+        if self._omnibus_seeded:
+            return
+        self._omnibus_seeded = True
+        schema = _load_omnibus_schema()
+        if schema is not None:
+            self._builder.merge_schema(schema)
+
     def _register_module(self, module: types.ModuleType) -> None:
         """Register a thrift module and its transitive dependencies."""
         if module.__name__ in self._registered_modules:
             return
 
+        self._seed_omnibus_if_needed()
         self._collect_transitive_schemas(module)
         self._builder.build_pending()
 
@@ -327,7 +373,14 @@ class SchemaRegistry:
         module_name = f"{ns}.{name}.thrift_types"
         if module_name in self._registered_modules:
             return None
-        return sys.modules.get(module_name)
+        module = sys.modules.get(module_name)
+        # Skip dependency modules without a bundled schema (e.g. core thrift
+        # libraries built without `with_schema`, such as `any`/`any_rep`). Their
+        # definitions arrive via the seeded omnibus schema, not by recursing into
+        # the module.
+        if module is None or not _has_bundled_schema(module):
+            return None
+        return module
 
     @staticmethod
     def _deserialize_schema(data: bytes) -> _schema_types.Schema:

@@ -15,6 +15,7 @@
 import sys
 import unittest
 
+import thrift.lib.python.schema.tests.schema_registry_any.thrift_types as AnyModule
 import thrift.lib.python.schema.tests.schema_registry_dep.thrift_types as DepModule
 import thrift.lib.python.schema.tests.schema_registry_legacy_uri.thrift_clients as LegacyClients
 import thrift.lib.python.schema.tests.schema_registry_legacy_uri.thrift_services as LegacyServices
@@ -454,3 +455,30 @@ class SchemaRegistryTest(unittest.TestCase):
         resolved = dep_field.type.node
         self.assertIsInstance(resolved, StructNode)
         self.assertEqual(resolved.name, "DepStruct")
+
+    # -- Omnibus schema seeding for core/well-known types -----------
+
+    _ANY_URI = "facebook.com/thrift/type/Any"
+
+    def test_core_type_resolvable_after_seeding(self) -> None:
+        # Registering any user module seeds the omnibus, so a core type like
+        # `Any` (whose `any` module ships no bundled schema) becomes resolvable
+        # by URI even though TestModule never references it.
+        registry = SchemaRegistry()
+        registry.get_node(TestModule.MyStruct)
+        defn = registry.get_definition_by_uri(self._ANY_URI)
+        self.assertIsInstance(defn, StructNode)
+        self.assertEqual(defn.name, "AnyStruct")
+
+    def test_any_field_resolves_to_omnibus_struct(self) -> None:
+        # A field typed with `any.Any` resolves through the typedef
+        # to AnyStruct, whose definition comes from the seeded omnibus.
+        registry = SchemaRegistry()
+        struct_defn = registry.get_node(AnyModule.StructWithAny)
+        assert isinstance(struct_defn, StructNode)
+        payload_field = struct_defn.fields[1]
+        self.assertEqual(payload_field.name, "payload")
+        resolved = payload_field.type.true_type
+        assert isinstance(resolved, StructTypeRef)
+        self.assertEqual(resolved.node.name, "AnyStruct")
+        self.assertEqual(resolved.node.uri, self._ANY_URI)

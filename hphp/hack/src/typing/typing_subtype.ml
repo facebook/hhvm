@@ -11421,7 +11421,12 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
       env
       ty1
       MakeType.(dict r (arraykey r) (mixed r))
-  | (Ttuple { t_required = tyl1; _ }, Ttuple { t_required = tyl2; _ }) ->
+  | ( Ttuple
+        { t_required = tyl1; t_optional = []; t_extra = Tvariadic t_variadic1 },
+      Ttuple
+        { t_required = tyl2; t_optional = []; t_extra = Tvariadic t_variadic2 }
+    )
+    when is_nothing t_variadic1 && is_nothing t_variadic2 ->
     (match List.exists2 ~f:(is_type_disjoint_help visited env) tyl1 tyl2 with
     | List.Or_unequal_lengths.Ok res -> res
     | List.Or_unequal_lengths.Unequal_lengths -> true)

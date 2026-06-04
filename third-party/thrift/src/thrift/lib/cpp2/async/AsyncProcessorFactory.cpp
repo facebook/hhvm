@@ -112,10 +112,13 @@ std::string AsyncProcessorFactory::describe(
 
 std::string AsyncProcessorFactory::describe(
     const WildcardMethodMetadataMap& metadataMap) {
+  const std::string wildcardMetadataStr = metadataMap.wildcardMetadata
+      ? metadataMap.wildcardMetadata->describe()
+      : std::string();
   return fmt::format(
       "WildcardMethodMetadataMap(wildcardMetadata={} knownMethods={})",
-      metadataMap.wildcardMetadata ? metadataMap.wildcardMetadata->describe()
-                                   : kNONE,
+      metadataMap.wildcardMetadata ? std::string_view(wildcardMetadataStr)
+                                   : std::string_view(kNONE),
       describe(metadataMap.knownMethods));
 }
 

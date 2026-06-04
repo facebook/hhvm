@@ -224,96 +224,96 @@ function xmlwriter_output_memory(
 
 class XMLWriter {
   public function __construct();
-  public function openMemory(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function openURI(string $uri): HH\FIXME\MISSING_RETURN_TYPE;
+  public function openMemory(): bool;
+  public function openURI(string $uri): bool;
   public function setIndentString(
     string $indentstring,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setIndent(bool $indent): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function setIndent(bool $indent): bool;
   public function startDocument(
     HH\FIXME\MISSING_PARAM_TYPE $version = "1.0",
     HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
     HH\FIXME\MISSING_PARAM_TYPE $standalone = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function startElement(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function startElement(string $name): bool;
   public function startElementNS(
     HH\FIXME\MISSING_PARAM_TYPE $prefix,
     string $name,
     HH\FIXME\MISSING_PARAM_TYPE $uri,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function writeElementNS(
     HH\FIXME\MISSING_PARAM_TYPE $prefix,
     string $name,
     HH\FIXME\MISSING_PARAM_TYPE $uri,
     HH\FIXME\MISSING_PARAM_TYPE $content = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function writeElement(
     string $name,
     HH\FIXME\MISSING_PARAM_TYPE $content = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function endElement(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function fullEndElement(): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function endElement(): bool;
+  public function fullEndElement(): bool;
   public function startAttributeNS(
     string $prefix,
     string $name,
     string $uri,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function startAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function startAttribute(string $name): bool;
   public function writeAttributeNS(
     string $prefix,
     string $name,
     string $uri,
     string $content,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function writeAttribute(
     string $name,
     string $value,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function endAttribute(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function startCData(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function writeCData(string $content): HH\FIXME\MISSING_RETURN_TYPE;
-  public function endCData(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function startComment(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function writeComment(string $content): HH\FIXME\MISSING_RETURN_TYPE;
-  public function endComment(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function endDocument(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function startPI(string $target): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function endAttribute(): bool;
+  public function startCData(): bool;
+  public function writeCData(string $content): bool;
+  public function endCData(): bool;
+  public function startComment(): bool;
+  public function writeComment(string $content): bool;
+  public function endComment(): bool;
+  public function endDocument(): bool;
+  public function startPI(string $target): bool;
   public function writePI(
     string $target,
     string $content,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function endPI(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function text(string $content): HH\FIXME\MISSING_RETURN_TYPE;
-  public function writeRaw(string $content): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function endPI(): bool;
+  public function text(string $content): bool;
+  public function writeRaw(string $content): bool;
   public function startDTD(
     string $qualifiedname,
     HH\FIXME\MISSING_PARAM_TYPE $publicid = null,
     HH\FIXME\MISSING_PARAM_TYPE $systemid = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function writeDTD(
     string $name,
     HH\FIXME\MISSING_PARAM_TYPE $publicid = null,
     HH\FIXME\MISSING_PARAM_TYPE $systemid = null,
     HH\FIXME\MISSING_PARAM_TYPE $subset = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function startDTDElement(
     string $qualifiedname,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function writeDTDElement(
     string $name,
     string $content,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function endDTDElement(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function startDTDAttlist(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function endDTDElement(): bool;
+  public function startDTDAttlist(string $name): bool;
   public function writeDTDAttlist(
     string $name,
     string $content,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function endDTDAttlist(): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function endDTDAttlist(): bool;
   public function startDTDEntity(
     string $name,
     bool $isparam,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function writeDTDEntity(
     string $name,
     string $content,
@@ -321,13 +321,13 @@ class XMLWriter {
     string $publicid = "",
     string $systemid = "",
     string $ndataid = "",
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function endDTDEntity(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function endDTD(): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function endDTDEntity(): bool;
+  public function endDTD(): bool;
   public function flush(
     HH\FIXME\MISSING_PARAM_TYPE $empty = true,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function outputMemory(
     HH\FIXME\MISSING_PARAM_TYPE $flush = true,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): string;
 }

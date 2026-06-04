@@ -147,38 +147,38 @@ class Memcache {
     int $port = 0,
     int $timeout = 0,
     int $timeoutms = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function pconnect(
     HH\FIXME\MISSING_PARAM_TYPE $host,
     HH\FIXME\MISSING_PARAM_TYPE $port = 0,
     HH\FIXME\MISSING_PARAM_TYPE $timeout = 0,
     HH\FIXME\MISSING_PARAM_TYPE $timeoutms = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function add(
     string $key,
     HH\FIXME\MISSING_PARAM_TYPE $var,
     int $flag = 0,
     int $expire = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function set(
     string $key,
     HH\FIXME\MISSING_PARAM_TYPE $var,
     int $flag = 0,
     int $expire = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function replace(
     string $key,
     HH\FIXME\MISSING_PARAM_TYPE $var,
     int $flag = 0,
     int $expire = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function get(
     HH\FIXME\MISSING_PARAM_TYPE $key,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function delete(
     string $key,
     int $expire = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function increment(
     string $key,
     int $offset = 1,
@@ -188,19 +188,19 @@ class Memcache {
     int $offset = 1,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getversion(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function flush(int $expire = 0): HH\FIXME\MISSING_RETURN_TYPE;
+  public function flush(int $expire = 0): bool;
   public function setoptimeout(
     HH\FIXME\MISSING_PARAM_TYPE $timeoutms,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function close(): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function close(): bool;
   public function getserverstatus(
     string $host,
     int $port = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): int;
   public function setcompressthreshold(
     int $threshold,
     float $min_savings = 0.2,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function getstats(
     string $type = "",
     int $slabid = 0,
@@ -218,7 +218,7 @@ class Memcache {
     int $retry_interval = 0,
     bool $status = true,
     HH\FIXME\MISSING_PARAM_TYPE $failure_callback = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function addserver(
     string $host,
     int $port = 11211,
@@ -229,5 +229,5 @@ class Memcache {
     bool $status = true,
     HH\FIXME\MISSING_PARAM_TYPE $failure_callback = null,
     int $timeoutms = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
 }

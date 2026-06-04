@@ -83,7 +83,7 @@ class SimpleXMLElement {
   );
   public function offsetExists(
     HH\FIXME\MISSING_PARAM_TYPE $index,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function offsetGet(
     HH\FIXME\MISSING_PARAM_TYPE $index,
   ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -95,13 +95,13 @@ class SimpleXMLElement {
     HH\FIXME\MISSING_PARAM_TYPE $index,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getIterator(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function count(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function count(): int;
   public function isTruthy()[]: bool;
   public function xpath(string $path): HH\FIXME\MISSING_RETURN_TYPE;
   public function registerXPathNamespace(
     string $prefix,
     string $ns,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function asXML(string $filename = ""): HH\FIXME\MISSING_RETURN_TYPE;
   public function getNamespaces(
     bool $recursive = false,
@@ -113,7 +113,7 @@ class SimpleXMLElement {
     string $ns = "",
     bool $is_prefix = false,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getName(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getName(): string;
   public function attributes(
     string $ns = "",
     bool $is_prefix = false,

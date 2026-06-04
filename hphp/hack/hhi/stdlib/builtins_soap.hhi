@@ -167,7 +167,7 @@ class SoapClient {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function __setsoapheaders(
     HH\FIXME\MISSING_PARAM_TYPE $headers = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
 }
 
 class SoapVar {

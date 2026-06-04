@@ -70,7 +70,7 @@ class DOMXPath {
   public function registerNamespace(
     string $prefix,
     string $uri,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function registerPHPFunctions(
     HH\FIXME\MISSING_PARAM_TYPE $funcs = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -230,30 +230,30 @@ class DOMDocument extends DOMNode {
   public function load(
     HH\FIXME\MISSING_PARAM_TYPE $filename,
     HH\FIXME\MISSING_PARAM_TYPE $options = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function loadHTML(
     HH\FIXME\MISSING_PARAM_TYPE $source,
     HH\FIXME\MISSING_PARAM_TYPE $options = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function loadHTMLFile(
     HH\FIXME\MISSING_PARAM_TYPE $filename,
     HH\FIXME\MISSING_PARAM_TYPE $options = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function loadXML(
     HH\FIXME\MISSING_PARAM_TYPE $source,
     HH\FIXME\MISSING_PARAM_TYPE $options = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function normalizeDocument(): HH\FIXME\MISSING_RETURN_TYPE;
   public function registerNodeClass(
     string $baseclass,
     string $extendedclass,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function relaxNGValidate(
     string $filename,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function relaxNGValidateSource(
     string $source,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function save(
     string $file,
     int $options = 0,
@@ -268,11 +268,11 @@ class DOMDocument extends DOMNode {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function schemaValidate(
     string $filename,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function schemaValidateSource(
     string $source,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function validate(): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function validate(): bool;
   public function xinclude(int $options = 0): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
@@ -300,18 +300,18 @@ class DOMElement extends DOMNode {
   public function getAttributeNS(
     string $namespaceuri,
     string $localname,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): string;
   public function getElementsByTagName(string $name): DOMNodeList<DOMElement>;
   public function getElementsByTagNameNS(
     string $namespaceuri,
     string $localname,
   ): DOMNodeList<DOMElement>;
-  public function hasAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  public function hasAttribute(string $name): bool;
   public function hasAttributeNS(
     string $namespaceuri,
     string $localname,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function removeAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function removeAttribute(string $name): bool;
   public function removeAttributeNode(
     HH\FIXME\MISSING_PARAM_TYPE $oldattr,
   ): HH\FIXME\MISSING_RETURN_TYPE;

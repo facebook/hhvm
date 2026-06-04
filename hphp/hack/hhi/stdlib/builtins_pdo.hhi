@@ -109,14 +109,14 @@ class PDO {
     string $statement,
     HH\FIXME\MISSING_PARAM_TYPE $options = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function beginTransaction(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function inTransaction(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function commit(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function rollBack(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function beginTransaction(): bool;
+  public function inTransaction(): bool;
+  public function commit(): bool;
+  public function rollBack(): bool;
   public function setAttribute(
     int $attribute,
     HH\FIXME\MISSING_PARAM_TYPE $value,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function getAttribute(int $attribute): HH\FIXME\MISSING_RETURN_TYPE;
   public function exec(string $query): HH\FIXME\MISSING_RETURN_TYPE;
   public function lastInsertId(
@@ -159,8 +159,8 @@ class PDOStatement /* implements Iterator<mixed> */ {
     HH\FIXME\MISSING_PARAM_TYPE $paramno,
     HH\FIXME\MISSING_PARAM_TYPE $param,
     int $type = PDO::PARAM_STR,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function rowCount(): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function rowCount(): int;
   public function errorCode(): HH\FIXME\MISSING_RETURN_TYPE;
   public function errorInfo(): HH\FIXME\MISSING_RETURN_TYPE;
   public function setAttribute(
@@ -168,14 +168,14 @@ class PDOStatement /* implements Iterator<mixed> */ {
     HH\FIXME\MISSING_PARAM_TYPE $value,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getAttribute(int $attribute): HH\FIXME\MISSING_RETURN_TYPE;
-  public function columnCount(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function columnCount(): int;
   public function getColumnMeta(int $column): HH\FIXME\MISSING_RETURN_TYPE;
   public function setFetchMode(
     int $mode,
     HH\FIXME\MISSING_PARAM_TYPE ...$args
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function nextRowset(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function closeCursor(): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function nextRowset(): bool;
+  public function closeCursor(): bool;
   public function debugDumpParams(): HH\FIXME\MISSING_RETURN_TYPE;
   public function current(): HH\FIXME\MISSING_RETURN_TYPE;
   public function key(): HH\FIXME\MISSING_RETURN_TYPE;

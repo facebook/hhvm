@@ -314,7 +314,7 @@ class ReflectionParameter implements Reflector {
    */
   public function getTypeText()[]: string;
   public function getDefaultValueText()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function isVariadic()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function isVariadic()[]: bool;
   public function hasType()[]: bool;
   public function getType()[]: ?ReflectionType;
   final public function hasAttribute(string $name)[]: bool;

@@ -205,6 +205,9 @@ namespace {
 const uint32_t CLI_SERVER_API_BASE_VERSION = 6;
 std::atomic<uint64_t> s_cliServerComputedVersion(0);
 
+constexpr std::array<char, 8> kMagicStr{'H','H','V','M',' ','C','L','I'};
+constexpr uint64_t kMagic = std::bit_cast<uint64_t>(kMagicStr);
+
 // When running with Eval.UnixServerRunPSPInBackground this pipe allows us to
 // send an exit code to the foreground process prior to PSP completing.
 int s_foreground_pipe = -1;
@@ -1817,8 +1820,8 @@ Optional<int> run_client(const char* sock_path,
   FTRACE(2, "run_command_on_cli_server(): fd = {}\n", fd);
 
   try {
+    cli_write(fd, kMagic);
     cli_write_ucred(fd);
-    cli_write(fd, "hello_server");
 
     char cwd[PATH_MAX];
     getcwd(cwd, PATH_MAX);
@@ -1984,18 +1987,19 @@ CLIContext CLIContext::initFromClient(int client) {
   auto guard = folly::makeGuard(fail);
 
   data.client = client;
+
+  uint64_t magic;
+  cli_read(client, magic);
+  FTRACE(2, "{}({}): magic = {}\n", __func__, client, magic);
+  if (magic != kMagic) {
+    throw Exception("Got bad magic from client: %lu", magic);
+  }
+
   shared.user = cli_read_ucred(client);
   shared.uuid = boost::uuids::to_string(boost::uuids::random_generator()());
 
   // Throw if the client is not authorized to access the CLI server
   check_cli_server_access(shared.user);
-
-  std::string magic;
-  cli_read(client, magic);
-  FTRACE(2, "{}({}): magic = {}\n", __func__, client, magic);
-  if (magic != "hello_server") {
-    throw Exception("Got bad magic from client: %s", magic.c_str());
-  }
 
   std::string iniSettings;
   cli_read(client, shared.cwd, iniSettings);

@@ -780,7 +780,8 @@ ErrorCode HTTP2Codec::handleSettings(const std::deque<SettingPair>& settings) {
       case SettingsId::MAX_CONCURRENT_STREAMS:
         break;
       case SettingsId::INITIAL_WINDOW_SIZE:
-        if (setting.second > http2::kMaxWindowUpdateSize) {
+        if (setting.second == 0 ||
+            setting.second > http2::kMaxWindowUpdateSize) {
           goawayErrorMessage_ = folly::to<string>(
               "GOAWAY error: INITIAL_WINDOW_SIZE invalid size=",
               setting.second,

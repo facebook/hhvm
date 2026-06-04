@@ -2605,7 +2605,7 @@ TEST_P(H2DownstreamSessionTest, EgressStreamFlowControl) {
   EXPECT_CALL(sessionStats, _recordTransactionStalled()).Times(2);
   auto id = sendRequest("/", nullptr, false, false);
   setTestCodecSetting(
-      clientCodec_->getEgressSettings(), SettingsId::INITIAL_WINDOW_SIZE, 0);
+      clientCodec_->getEgressSettings(), SettingsId::INITIAL_WINDOW_SIZE, 10);
   clientCodec_->generateSettings(writeBuf_);
   transport_->addReadEvent(writeBuf_.move(), false);
   clientCodec_->generateEOM(writeBuf_, id);

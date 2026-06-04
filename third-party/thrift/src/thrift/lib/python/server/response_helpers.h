@@ -106,11 +106,13 @@ static void throw_wrapped(
           // by python, add kHeaderExMeta header support when it is
           header->setHeader(
               std::string(apache::thrift::detail::kHeaderUex), e.type());
+          std::string_view reasonView = e.reason();
+          if (reasonView.size() > kMaxUexwSize) {
+            reasonView = reasonView.substr(0, kMaxUexwSize);
+          }
           header->setHeader(
               std::string(apache::thrift::detail::kHeaderUexw),
-              e.reason().size() > kMaxUexwSize
-                  ? e.reason().substr(0, kMaxUexwSize)
-                  : e.reason());
+              std::string(reasonView));
 
           ProtocolOut_ prot;
           auto response =

@@ -427,6 +427,21 @@ Vreg emitDecRef(Vout& v, Vreg base, Reason reason) {
   return sf;
 }
 
+Vreg emitDecRef(Vout& v, Vreg base, Vreg preloadedCount, Reason reason) {
+  if (Cfg::HHIR::GenerateAsserts) {
+    auto const actual = v.makeReg();
+    auto const cmpSf = v.makeReg();
+    v << loadl{base[FAST_REFCOUNT_OFFSET], actual};
+    v << cmpl{actual, preloadedCount, cmpSf};
+    ifThen(v, CC_NE, cmpSf, [&](Vout& v) {
+      v << trap{reason, Fixup::none()};
+    });
+  }
+  auto const sf = emitDecRefCount(v, base, preloadedCount);
+  assertSFNonNegative(v, sf, reason);
+  return sf;
+}
+
 void emitIncRefWork(Vout& v, Vreg data, Vreg type, Reason reason) {
   auto const sf = v.makeReg();
   auto const cc = emitIsTVTypeRefCounted(v, sf, type);

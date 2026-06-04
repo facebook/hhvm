@@ -199,6 +199,11 @@ void trashTV(Vout& v, Vptr typePtr, Vptr valPtr, char byte);
 Vreg materializeConstVal(Vout& v, Type ty);
 
 /*
+ * Load an object's reference count into a register.
+ */
+Vreg emitLoadRefCount(Vout& v, Vreg base);
+
+/*
  * Compare an object's reference count with an immediate value, return the
  * status flags used for the comparison.
  */
@@ -215,6 +220,7 @@ void emitStoreRefCount(Vout& v, Immed s0, Vptr m);
  * flags from the decrement instruction.
  */
 Vreg emitDecRefCount(Vout& v, Vreg s0);
+Vreg emitDecRefCount(Vout& v, Vreg base, Vreg preloadedCount);
 
 /*
  * Incref or decref `data', and perform some asserts.
@@ -228,6 +234,7 @@ Vreg emitDecRefCount(Vout& v, Vreg s0);
  */
 void emitIncRef(Vout& v, Vreg data, Reason reason);
 Vreg emitDecRef(Vout& v, Vreg data, Reason reason);
+Vreg emitDecRef(Vout& v, Vreg data, Vreg preloadedCount, Reason reason);
 
 /*
  * emitIncRefWork performs type check and calls incRef if appropriate.

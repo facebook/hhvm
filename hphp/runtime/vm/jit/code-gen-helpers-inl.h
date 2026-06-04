@@ -100,6 +100,12 @@ inline ConditionCode emitIsTVTypeRefCounted(Vout& v, Vreg sf, TLoc s1) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+inline Vreg emitLoadRefCount(Vout& v, Vreg base) {
+  auto const count = v.makeReg();
+  v << loadl{base[FAST_REFCOUNT_OFFSET], count};
+  return count;
+}
+
 inline Vreg emitCmpRefCount(Vout& v, Immed s0, Vreg s1) {
   auto const sf = v.makeReg();
   v << cmplim{s0, s1[FAST_REFCOUNT_OFFSET], sf};
@@ -123,6 +129,14 @@ inline void emitStoreRefCount(Vout& v, Immed s0, Vptr m) {
 inline Vreg emitDecRefCount(Vout& v, Vreg s0) {
   auto const sf = v.makeReg();
   v << declm{s0[FAST_REFCOUNT_OFFSET], sf};
+  return sf;
+}
+
+inline Vreg emitDecRefCount(Vout& v, Vreg base, Vreg preloadedCount) {
+  auto const sf = v.makeReg();
+  auto const decremented = v.makeReg();
+  v << decl{preloadedCount, decremented, sf};
+  v << storel{decremented, base[FAST_REFCOUNT_OFFSET]};
   return sf;
 }
 

@@ -47,6 +47,7 @@
 
 #include "hphp/runtime/ext/core/ext_core_closure.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/configs/jit.h"
@@ -63,6 +64,34 @@ TRACE_SET_MOD(irlower)
 namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
+
+// On ARM, preload the refcount into a register and compare with cmpli to avoid
+// a redundant memory load — ARM has no compare-to-memory or RMW decrement
+// instructions, so cmplim/declm get lowered to load/op/store sequences anyway.
+// On x86, cmplim and declm are single CISC instructions that micro-fuse, so
+// keep the memory-operand forms.
+struct RefCountCmp {
+  Vreg count;
+  Vreg sf;
+};
+
+RefCountCmp emitCmpRefCountArch(Vout& v, Vreg base) {
+  if (arch::any<arch::ARM>()) {
+    auto const count = emitLoadRefCount(v, base);
+    auto const sf = v.makeReg();
+    v << cmpli{OneReference, count, sf};
+    return {count, sf};
+  }
+  return {Vreg{}, emitCmpRefCount(v, OneReference, base)};
+}
+
+void emitDecRefArch(Vout& v, Vreg base, Vreg preloadedCount, Reason reason) {
+  if (arch::any<arch::ARM>()) {
+    emitDecRef(v, base, preloadedCount, reason);
+  } else {
+    emitDecRef(v, base, reason);
+  }
+}
 
 template<class Then>
 void ifNonPersistent(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
@@ -285,15 +314,15 @@ template<class Destroy>
 void emitDecRefOptDestroy(Vout& v, Vout& vcold, Vreg data,
                           Destroy destroy, bool unlikelyPersist,
                           bool unlikelySurvive) {
-  auto const sf = emitCmpRefCount(v, OneReference, data);
+  auto const [count, sf] = emitCmpRefCountArch(v, data);
 
   ifThenElse(
     v, vcold, CC_NE, sf,
     [&] (Vout& v) {
       // If it's not static, actually reduce the reference count.  This does
-      // another branch using the same status flags from the cmplim above.
+      // another branch using the same status flags from the compare above.
       ifThen(v, vcold, CC_NL, sf,
-             [&] (Vout& v) { emitDecRef(v, data, TRAP_REASON); },
+             [&] (Vout& v) { emitDecRefArch(v, data, count, TRAP_REASON); },
              unlikelySurvive, tag_from_string("decref-is-static")
       );
     },
@@ -311,18 +340,18 @@ template<class Destroy>
 void emitDecRefOptSurvive(Vout& v, Vout& vcold, Vreg data,
                           Destroy destroy, bool unlikelyDestroy,
                           bool unlikelyPersist) {
-  auto const sf = emitCmpRefCount(v, OneReference, data);
+  auto const [count, sf] = emitCmpRefCountArch(v, data);
 
   ifThenElse(
     v, vcold, CC_LE, sf,
     [&] (Vout& v) {
       // If it's not static, call the release method.  This does another branch
-      // using the same status flags from the cmplim above.
+      // using the same status flags from the compare above.
       ifThen(v, vcold, CC_E, sf, destroy, unlikelyDestroy,
              tag_from_string("decref-is-static"));
     },
     [&] (Vout& v) {
-      emitDecRef(v, data, TRAP_REASON);
+      emitDecRefArch(v, data, count, TRAP_REASON);
     },
     unlikelyDestroy && unlikelyPersist,
     tag_from_string("decref-is-one")
@@ -337,18 +366,18 @@ template<class Destroy>
 void emitDecRefOptPersist(Vout& v, Vout& vcold, Vreg data,
                           Destroy destroy, bool unlikelyDestroy,
                           bool unlikelySurvive) {
-  auto const sf = emitCmpRefCount(v, OneReference, data);
+  auto const [count, sf] = emitCmpRefCountArch(v, data);
 
   ifThen(
     v, vcold, CC_GE, sf,
     [&] (Vout& v) {
       // If it's not one, call the release method; otherwise dec-ref the count.
-      // This does another branch using the same status flags from the cmplim
+      // This does another branch using the same status flags from the compare
       // above.
       ifThenElse(v, vcold, CC_E, sf,
                  destroy,
                  [&] (Vout& v) {
-                   emitDecRef(v, data, TRAP_REASON);
+                   emitDecRefArch(v, data, count, TRAP_REASON);
                  },
                  unlikelyDestroy,
                  tag_from_string("decref-is-one"));
@@ -632,13 +661,13 @@ void cgDecReleaseCheck(IRLS& env, const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
 
   auto const refcountedTypeImpl = [&](Vout& v) {
-    auto const sf = emitCmpRefCount(v, OneReference, base);
+    auto const [count, sf] = emitCmpRefCountArch(v, base);
     ifThenElse(
       vmain(env), vcold(env), CC_NE, sf,
       [&](Vout& v) {
         ifThenElse(v,v, CC_NL, sf,
             [&](Vout& v) {
-              emitDecRef(v, base, TRAP_REASON);
+              emitDecRefArch(v, base, count, TRAP_REASON);
               v << jmp{label(env, inst->taken())};
             },
             [&](Vout& v) {

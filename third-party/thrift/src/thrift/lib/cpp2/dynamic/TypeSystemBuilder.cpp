@@ -98,7 +98,7 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
   }
 
   auto typeSystem = std::make_unique<TypeSystemImpl>(std::move(base));
-  typeSystem->insertDefinitions(definitions_);
+  typeSystem->insertDefinitions(std::move(definitions_));
   return typeSystem;
 }
 

@@ -334,6 +334,10 @@ class TypeSystemImpl final : public TypeSystem {
    * Materializes a batch of serializable definitions into runtime nodes and
    * inserts them into this instance.
    *
+   * Consumes `defs` (taken by rvalue reference): definition contents and
+   * source-info strings are moved out of its entries, which are left in a valid
+   * but unspecified state on return.
+   *
    * Uses a two-phase stub-then-fill approach so that definitions within the
    * batch may reference each other (including cyclically). New definitions may
    * also reference types that already exist in this instance (from a previous
@@ -355,24 +359,23 @@ class TypeSystemImpl final : public TypeSystem {
    *   - InvalidTypeError if a referenced TypeId cannot be resolved, or if a
    *     source identifier collides with an existing one.
    */
-  void insertDefinitions(folly::F14FastMap<Uri, DefinitionEntry>& defs) {
+  void insertDefinitions(folly::F14FastMap<Uri, DefinitionEntry>&& defs) {
     // Phase 1: insert uninitialized stub nodes for every URI in the batch so
     // that (possibly cyclic) references can be resolved in phase 2.
     for (auto& [uri, entry] : defs) {
-      SerializableTypeDefinition& def = entry.definition;
-      std::string defName = entry.sourceInfo.has_value()
-          ? std::string(*entry.sourceInfo->name())
-          : std::string{};
+      // A stub of the correct alternative only; its fields (including the debug
+      // name) are overwritten in phase 2, so no strings are copied into it
+      // here.
       auto uninitDef = std::invoke([&]() -> TSDefinition {
-        switch (def.getType()) {
+        switch (entry.definition.getType()) {
           case SerializableTypeDefinition::Type::structDef:
-            return StructNode{uri, {}, {}, {}, defName};
+            return StructNode{uri, {}, {}, {}, {}};
           case SerializableTypeDefinition::Type::unionDef:
-            return UnionNode{uri, {}, {}, {}, defName};
+            return UnionNode{uri, {}, {}, {}, {}};
           case SerializableTypeDefinition::Type::enumDef:
-            return EnumNode{uri, {}, {}, defName};
+            return EnumNode{uri, {}, {}, {}};
           case SerializableTypeDefinition::Type::opaqueAliasDef:
-            return OpaqueAliasNode{uri, TypeRef{TypeRef::Bool{}}, {}, defName};
+            return OpaqueAliasNode{uri, TypeRef{TypeRef::Bool{}}, {}, {}};
           case SerializableTypeDefinition::Type::__EMPTY__:
             break;
         }
@@ -447,10 +450,12 @@ class TypeSystemImpl final : public TypeSystem {
               makeFields(std::move(*structDef.fields())),
               *structDef.isSealed(),
               makeAnnots(std::move(*structDef.annotations())),
-              defName);
+              std::move(defName));
           if (sourceInfo.has_value()) {
             tryAddToSourceIndex(
-                SourceIdentifier{*sourceInfo->locator(), *sourceInfo->name()},
+                SourceIdentifier{
+                    std::move(*sourceInfo->locator()),
+                    std::move(*sourceInfo->name())},
                 DefinitionRef(&structNode));
           }
         } break;
@@ -462,10 +467,12 @@ class TypeSystemImpl final : public TypeSystem {
               makeFields(std::move(*unionDef.fields())),
               *unionDef.isSealed(),
               makeAnnots(std::move(*unionDef.annotations())),
-              defName);
+              std::move(defName));
           if (sourceInfo.has_value()) {
             tryAddToSourceIndex(
-                SourceIdentifier{*sourceInfo->locator(), *sourceInfo->name()},
+                SourceIdentifier{
+                    std::move(*sourceInfo->locator()),
+                    std::move(*sourceInfo->name())},
                 DefinitionRef(&unionNode));
           }
         } break;
@@ -485,10 +492,12 @@ class TypeSystemImpl final : public TypeSystem {
               uri,
               std::move(values),
               makeAnnots(std::move(*enumDef.annotations())),
-              defName);
+              std::move(defName));
           if (sourceInfo.has_value()) {
             tryAddToSourceIndex(
-                SourceIdentifier{*sourceInfo->locator(), *sourceInfo->name()},
+                SourceIdentifier{
+                    std::move(*sourceInfo->locator()),
+                    std::move(*sourceInfo->name())},
                 DefinitionRef(&enumNode));
           }
         } break;
@@ -501,10 +510,12 @@ class TypeSystemImpl final : public TypeSystem {
               uri,
               typeOf(*opaqueAliasDef.targetType()),
               makeAnnots(std::move(*opaqueAliasDef.annotations())),
-              defName);
+              std::move(defName));
           if (sourceInfo.has_value()) {
             tryAddToSourceIndex(
-                SourceIdentifier{*sourceInfo->locator(), *sourceInfo->name()},
+                SourceIdentifier{
+                    std::move(*sourceInfo->locator()),
+                    std::move(*sourceInfo->name())},
                 DefinitionRef(&opaqueAliasNode));
           }
         } break;

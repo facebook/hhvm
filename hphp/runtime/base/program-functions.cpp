@@ -1575,6 +1575,8 @@ static int execute_program_impl(int argc, char** argv) {
     ("help", "display this message")
     ("version", "display version number")
     ("modules", "display modules")
+    ("list-extensions",
+     "display loaded extensions as JSON (name, version, oncall)")
     ("info", "PHP information")
     ("php", "emulate the standard php command line")
     ("compiler-id", "display the git hash for the compiler")
@@ -1781,6 +1783,19 @@ static int execute_program_impl(int argc, char** argv) {
     for (ArrayIter iter(exts); iter; ++iter) {
       cout << iter.second().toString().toCppString() << "\n";
     }
+    return 0;
+  }
+  if (vm.contains("list-extensions")) {
+    auto exts = ExtensionRegistry::getExtensions();
+    folly::dynamic arr = folly::dynamic::array;
+    for (auto const* ext : exts) {
+      folly::dynamic obj = folly::dynamic::object
+        ("name", ext->getName())
+        ("version", ext->getVersion())
+        ("oncall", ext->getOncall());
+      arr.push_back(std::move(obj));
+    }
+    cout << folly::toPrettyJson(arr) << "\n";
     return 0;
   }
   if (vm.contains("compiler-id")) {

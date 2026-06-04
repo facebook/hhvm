@@ -51,18 +51,6 @@ HTTPStreamSource::HTTPStreamSource(folly::EventBase* evb,
                        false) {
 }
 
-void HTTPStreamSource::setReadTimeout(
-    std::chrono::milliseconds timeout) noexcept {
-  event_.timeout = timeout;
-  // reschedule timeout if pending
-  if (auto* timerCb = event_.baton.getTimerCb()) {
-    timerCb->cancelTimeout();
-    if (timeout.count() > 0) {
-      event_.evb->timer().scheduleTimeout(timerCb, timeout);
-    }
-  }
-}
-
 void HTTPStreamSource::headers(std::unique_ptr<HTTPMessage> msg, bool eom) {
   if (!validateHeaders(*msg, eom)) {
     return;
@@ -70,7 +58,7 @@ void HTTPStreamSource::headers(std::unique_ptr<HTTPMessage> msg, bool eom) {
 
   if (!sinkMode_) {
     headerQueue_.emplace_back(std::move(msg), eom);
-    event_.baton.signal();
+    event_.signal();
   }
 }
 
@@ -100,7 +88,7 @@ auto HTTPStreamSource::body(BufQueue body, uint16_t padding, bool eom)
     } else {
       bodyQueue_.emplace_back(std::move(body), eom);
     }
-    event_.baton.signal();
+    event_.signal();
   }
 
   return recvWindow_.getSize() > 0 ? FlowControlState::OPEN
@@ -122,7 +110,7 @@ void HTTPStreamSource::datagram(std::unique_ptr<folly::IOBuf> datagram) {
   if (!sinkMode_) {
     bufferedDatagramSize_ += length;
     bodyQueue_.emplace_back(HTTPBodyEvent::Datagram(), std::move(datagram));
-    event_.baton.signal();
+    event_.signal();
   }
 }
 
@@ -138,7 +126,7 @@ void HTTPStreamSource::pushPromise(std::unique_ptr<HTTPMessage> promise,
   }
   if (!sinkMode_) {
     bodyQueue_.emplace_back(std::move(promise), pushSource, eom);
-    event_.baton.signal();
+    event_.signal();
   } else {
     pushSource->stopReading();
   }
@@ -155,7 +143,7 @@ void HTTPStreamSource::trailers(std::unique_ptr<HTTPHeaders> trailers) {
   validateContentLength(/*eom=*/true);
   if (!sinkMode_) {
     bodyQueue_.emplace_back(std::move(trailers));
-    event_.baton.signal();
+    event_.signal();
   }
 }
 
@@ -166,7 +154,7 @@ void HTTPStreamSource::padding(uint16_t bytes) {
   }
   if (!sinkMode_) {
     bodyQueue_.emplace_back(HTTPBodyEvent::Padding(), bytes);
-    event_.baton.signal();
+    event_.signal();
   }
 }
 
@@ -180,7 +168,7 @@ void HTTPStreamSource::eom() {
       if (headerQueue_.empty()) {
         // both queues are empty, put eom in body queue
         bodyQueue_.emplace_back(nullptr, true);
-        event_.baton.signal();
+        event_.signal();
         XLOG(DBG6) << "placing eom in bodyQueue_ id=" << id_;
       } else {
         // body queue is empty but header queue is not empty, put eom in
@@ -215,7 +203,8 @@ void HTTPStreamSource::abort(HTTPErrorCode error, std::string_view details) {
 }
 
 folly::coro::Task<HTTPHeaderEvent> HTTPStreamSource::readHeaderEvent() {
-  XCHECK(event_.evb->isInEventBaseThread());
+  XCHECK(event_.getEventBase()->isInEventBaseThread());
+
   bool eomReturn = false;
   auto guard =
       folly::makeGuard([this, &eomReturn] { checkForCompletion(eomReturn); });
@@ -244,7 +233,7 @@ folly::coro::Task<HTTPHeaderEvent> HTTPStreamSource::readHeaderEvent() {
 
 folly::coro::Task<HTTPBodyEvent> HTTPStreamSource::readBodyEvent(uint32_t max) {
   XCHECK_GT(max, 0UL);
-  XCHECK(event_.evb->isInEventBaseThread());
+  XCHECK(event_.getEventBase()->isInEventBaseThread());
   bool eomReturn = false;
   auto guard =
       folly::makeGuard([this, &eomReturn] { checkForCompletion(eomReturn); });
@@ -253,7 +242,7 @@ folly::coro::Task<HTTPBodyEvent> HTTPStreamSource::readBodyEvent(uint32_t max) {
              "readBodyEvent called before final headers read");
   }
   if (!hasBodyEvents()) {
-    event_.baton.reset();
+    event_.reset();
     if (canSuspend_) {
       canSuspend_ = false;
       auto t = folly::coro::co_invoke(
@@ -365,7 +354,7 @@ void HTTPStreamSource::setErrorImpl(HTTPErrorCode error,
   }
   // no need to queue any more events
   enableSinkMode();
-  event_.baton.signal();
+  event_.signal();
 }
 
 void HTTPStreamSource::enableSinkMode() {
@@ -383,16 +372,16 @@ void HTTPStreamSource::enableSinkMode() {
 }
 
 folly::coro::Task<void> HTTPStreamSource::waitForEvent() noexcept {
-  event_.baton.reset();
+  event_.reset();
   // Really not sure why it can be > 1
   XCHECK_LT(waiters_, std::numeric_limits<uint8_t>::max());
   waiters_++;
   auto status = co_await event_.wait();
   waiters_--;
   if (status == TimedBaton::Status::timedout) {
-    setError(
-        HTTPErrorCode::READ_TIMEOUT,
-        folly::to<std::string>("Read timeout after ", event_.timeout.count()));
+    setError(HTTPErrorCode::READ_TIMEOUT,
+             folly::to<std::string>("Read timeout after ",
+                                    event_.getTimeout().count()));
   } else if (status == TimedBaton::Status::cancelled) {
     setError(HTTPErrorCode::CORO_CANCELLED, "Read cancelled");
   }

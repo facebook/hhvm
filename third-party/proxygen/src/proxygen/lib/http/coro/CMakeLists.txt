@@ -68,7 +68,7 @@ proxygen_add_library(proxygen_http_coro_coro_stream_source
   EXPORTED_DEPS
     proxygen_coro_source
     proxygen_http_codec_codec_common
-    proxygen_http_coro_util_cancellable_baton
+    proxygen_http_coro_util_timed_baton
     proxygen_http_coro_util_window_contiainer
     proxygen_http_session_http_state_machine_lib
 )

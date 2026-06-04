@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/dynamic/PruneOptions.h>
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
+#include <thrift/lib/cpp2/dynamic/detail/TypeSystemImpl.h>
 #include <thrift/lib/thrift/gen-cpp2/type_system_types.h>
 
 #include <folly/container/F14Map.h>
@@ -279,13 +280,9 @@ class TypeSystemBuilder {
   };
 
  private:
-  struct DefinitionEntry {
-    SerializableTypeDefinition definition;
-    std::optional<SerializableThriftSourceInfo> sourceInfo;
-  };
-  folly::F14FastMap<Uri, DefinitionEntry> definitions_;
+  folly::F14FastMap<Uri, detail::DefinitionEntry> definitions_;
 
-  void tryEmplace(Uri, DefinitionEntry&&);
+  void tryEmplace(Uri, detail::DefinitionEntry&&);
 };
 
 /**

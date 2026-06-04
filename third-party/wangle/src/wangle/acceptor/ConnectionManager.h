@@ -237,7 +237,7 @@ class ConnectionManager : public folly::DelayedDestruction,
   size_t dropIdleConnections(size_t num);
 
   /**
-   * Drop conections based on idle timeout.
+   * Drop connections based on idle timeout.
    *
    * @param targetIdleTimeMS The target idle timeout for all connections.
    * @param droppedConnectionsCB Callback will be called at the end of the
@@ -377,8 +377,8 @@ class ConnectionManager : public folly::DelayedDestruction,
 
   /**
    * All the managed connections. Connections begin in the idle state and move
-   * to busy via 'onActivated'.  The move back to idle via 'onDeactivated'.
-   * idleIterator_ seperates them into two parts:
+   * to busy via 'onActivated'.  They move back to idle via 'onDeactivated'.
+   * idleIterator_ separates them into two parts:
    * idle and busy ones.  [conns_.begin(), idleIterator_) are the busy ones,
    * while [idleIterator_, conns_.end()) are the idle one. Moreover, the idle
    * ones are organized in the decreasing idle time order. Busy connections are
@@ -416,7 +416,7 @@ class ConnectionManager : public folly::DelayedDestruction,
 
   /**
    * The idle connections can be closed earlier that their idle timeout when any
-   * system resource limit is reached.  This feature can be considerred as a pre
+   * system resource limit is reached.  This feature can be considered as a pre
    * load shedding stage for the system, and can be easily disabled by setting
    * idleConnEarlyDropThreshold_ to defaultIdleTimeout_. Also,
    * idleConnEarlyDropThreshold_ can be used to bottom the idle timeout. That

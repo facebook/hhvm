@@ -17,6 +17,8 @@
 #include <gtest/gtest.h>
 #include <folly/coro/GtestHelpers.h>
 
+#include <thrift/lib/cpp/TApplicationException.h>
+#include <thrift/lib/cpp2/TrustedServerException.h>
 #include <thrift/lib/cpp2/async/AsyncClient.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
@@ -27,6 +29,23 @@ class TestHandler
     : public apache::thrift::ServiceHandler<apache::thrift::test::Test> {
   folly::coro::Task<void> co_func() override { co_return; }
 };
+
+namespace {
+constexpr auto kLoadsheddingMessage = "shedding load";
+
+// Handler whose method raises a TrustedServerException, the sanctioned way for
+// a handler to propagate a non-UNKNOWN TApplicationException type to the
+// client. appOverloadError maps to TApplicationException::LOADSHEDDING. (A
+// plain handler-thrown TApplicationException would have its type discarded and
+// arrive as UNKNOWN.)
+class ThrowingTestHandler
+    : public apache::thrift::ServiceHandler<apache::thrift::test::Test> {
+  folly::coro::Task<void> co_func() override {
+    throw apache::thrift::TrustedServerException::appOverloadError(
+        kLoadsheddingMessage);
+  }
+};
+} // namespace
 
 CO_TEST(AsyncClientTest, ZeroDependency) {
   class TestEventHandler : public apache::thrift::TProcessorEventHandler {
@@ -64,4 +83,24 @@ CO_TEST(AsyncClientTest, ZeroDependency) {
   co_await client->co_func();
   EXPECT_EQ(eventHandler->preReadCallCount, 1);
   EXPECT_EQ(eventHandler->postWriteCallCount, 1);
+}
+
+// When a handler raises a TrustedServerException, the client observes a
+// TApplicationException with the corresponding type. The error code is mapped
+// to a ResponseRpcErrorCode on the server and back to a
+// TApplicationExceptionType on the client, so appOverloadError surfaces as
+// TApplicationException::LOADSHEDDING.
+CO_TEST(AsyncClientTest, ApplicationExceptionTypeIsPreserved) {
+  using ClientType = apache::thrift::Client<apache::thrift::test::Test>;
+  std::unique_ptr<ClientType> client =
+      apache::thrift::makeTestClient(std::make_shared<ThrowingTestHandler>());
+
+  try {
+    co_await client->co_func();
+    ADD_FAILURE() << "expected TApplicationException to be thrown";
+  } catch (const apache::thrift::TApplicationException& ex) {
+    EXPECT_EQ(
+        ex.getType(), apache::thrift::TApplicationException::LOADSHEDDING);
+    EXPECT_EQ(ex.getMessage(), kLoadsheddingMessage);
+  }
 }

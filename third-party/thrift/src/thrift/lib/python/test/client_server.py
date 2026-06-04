@@ -36,7 +36,7 @@ from thrift.lib.python.test.test_server import TestServer
 from thrift.py3.server import get_context, ReadHeaders, RequestContext, WriteHeaders
 from thrift.python.client import get_client
 from thrift.python.common import Priority, RpcOptions
-from thrift.python.exceptions import ApplicationError
+from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.server import ServiceInterface
 from thrift.python.test.flag_helpers import mock_prompt_request_context_invalidation
 
@@ -276,6 +276,39 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                     ex.exception.message,
                     f"Exception('{errMessage}')",
                 )
+
+    async def test_application_error_type_is_preserved(self) -> None:
+        """
+        When a handler raises an ApplicationError with an explicit type, the
+        client should receive an ApplicationError with that same .type.
+
+        This currently does NOT hold: although the server-side handler bridge
+        passes the original type through (python_async_processor.pyx, via
+        `ex.type.value`), the type the client observes is coerced to UNKNOWN
+        somewhere on the C++ response path. This test asserts the current
+        (buggy) behavior to lock it in and make a future fix visible.
+        """
+        errMessage: str = "shedding load"
+
+        class ErrorHandler(TestingServiceInterface):
+            async def getName(self) -> str:
+                raise ApplicationError(ApplicationErrorType.LOADSHEDDING, errMessage)
+
+        async with local_server(handler=ErrorHandler()) as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(TestingService, host=ip, port=port) as client:
+                with self.assertRaises(ApplicationError) as ex:
+                    await client.getName()
+                # #BAD: the client should see ApplicationErrorType.LOADSHEDDING
+                # (the type the handler raised), but the type is currently
+                # coerced to UNKNOWN. Update this to LOADSHEDDING once the
+                # type-preservation bug is fixed.
+                self.assertEqual(
+                    ex.exception.type,
+                    ApplicationErrorType.UNKNOWN,
+                )
+                self.assertEqual(ex.exception.message, errMessage)
 
     async def test_request_with_default_rpc_options(self) -> None:
         async with local_server() as sa:

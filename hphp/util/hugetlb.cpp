@@ -59,7 +59,7 @@ constexpr size_t maxErrorMsgLen = 512;
 static char s_errorMsg[maxErrorMsgLen];
 
 static unsigned s_num1GPages;
-constexpr unsigned kMaxNum1GPages = 16;
+constexpr unsigned kMaxNum1GPages = 64;
 static void* s_1GPages[kMaxNum1GPages];
 
 static unsigned s_num2MPages;

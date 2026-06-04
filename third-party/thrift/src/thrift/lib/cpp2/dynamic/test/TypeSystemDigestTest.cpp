@@ -1307,3 +1307,44 @@ TEST(TypeSystemDigestTest, SerializableFieldWithVsWithoutDefaultDiffer) {
 
   assertDigestNeq(structOptionalWithDefault, structOptionalWithoutDefault);
 }
+
+// --- DigestMode::Structural --- //
+
+TEST(TypeSystemDigestTest, StructuralModeIgnoresAnnotationsAndDefaults) {
+  // Two structs with identical wire structure but differing annotations
+  // (struct- and field-level) and a custom default.
+  AnnotationsMap structAnn{{"meta.com/SAnn", SerializableRecord::FieldSet({})}};
+  AnnotationsMap fieldAnn{{"meta.com/FAnn", SerializableRecord::FieldSet({})}};
+
+  auto annotated = def::Struct(
+      {def::Field(
+          def::Identity(1, "f"),
+          def::AlwaysPresent,
+          TypeId::I32(),
+          SerializableRecord::Int32{42},
+          fieldAnn)},
+      /*isSealed=*/false,
+      structAnn);
+  auto bare = def::Struct(
+      {def::Field(def::Identity(1, "f"), def::AlwaysPresent, TypeId::I32())});
+
+  TypeSystemHasher full;
+  TypeSystemHasher structural{DigestMode::Structural};
+
+  // The full digest reflects annotations and custom defaults...
+  EXPECT_NE(full(annotated), full(bare));
+  // ...while the structural digest ignores them.
+  EXPECT_EQ(structural(annotated), structural(bare));
+}
+
+TEST(TypeSystemDigestTest, StructuralModeStillDistinguishesStructure) {
+  // Structural must still distinguish genuine wire differences (here, the
+  // field type).
+  auto i32 = def::Struct(
+      {def::Field(def::Identity(1, "f"), def::AlwaysPresent, TypeId::I32())});
+  auto i64 = def::Struct(
+      {def::Field(def::Identity(1, "f"), def::AlwaysPresent, TypeId::I64())});
+
+  TypeSystemHasher structural{DigestMode::Structural};
+  EXPECT_NE(structural(i32), structural(i64));
+}

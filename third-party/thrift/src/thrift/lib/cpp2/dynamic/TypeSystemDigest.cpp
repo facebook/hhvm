@@ -52,9 +52,23 @@ void forEachSortedByKey(Range&& range, KeyFn&& keyFn, Fn&& fn) {
   }
 }
 
+// Carries digest configuration through the recursive hashing routines. Held by
+// the Hasher and propagated to any nested element-hashers it spawns.
+struct DigestContext {
+  DigestMode mode = DigestMode::Full;
+
+  // Whether annotations and custom default values participate in the digest.
+  // They are excluded for DigestMode::Structural (structure-only digest).
+  bool includeAnnotationsAndDefaults() const {
+    return mode == DigestMode::Full;
+  }
+};
+
 class Hasher {
  public:
-  Hasher() { digest_.hash_init(EVP_sha256()); }
+  explicit Hasher(DigestContext ctx = {}) : ctx_(ctx) {
+    digest_.hash_init(EVP_sha256());
+  }
 
   // Hash bool as a single byte (0 or 1)
   void hash(bool v) {
@@ -158,7 +172,7 @@ class Hasher {
     digests.reserve(std::distance(std::begin(range), std::end(range)));
 
     for (const auto& elem : range) {
-      Hasher h;
+      Hasher h(ctx_);
       hashFn(h, elem);
       digests.push_back(h.finalize());
     }
@@ -183,7 +197,7 @@ class Hasher {
     sortedEntries.reserve(std::distance(std::begin(range), std::end(range)));
 
     for (const auto& entry : range) {
-      Hasher h;
+      Hasher h(ctx_);
       keyHashFn(h, entry);
       sortedEntries.emplace_back(h.finalize(), &entry);
     }
@@ -219,6 +233,7 @@ class Hasher {
 
  private:
   folly::ssl::OpenSSLHash::Digest digest_;
+  DigestContext ctx_;
 };
 
 void Hasher::hash(const TypeId& typeId) {
@@ -376,6 +391,9 @@ void Hasher::hash(const OpaqueAliasNode& node) {
 }
 
 void Hasher::hash(const AnnotationsMap& annotations) {
+  if (!ctx_.includeAnnotationsAndDefaults()) {
+    return;
+  }
   hashUnorderedByDigest(annotations, [](Hasher& h, const auto& entry) {
     h.hash(std::string_view{entry.first});
     h.hash(entry.second);
@@ -388,8 +406,10 @@ void Hasher::hash(const FieldDefinition& field) {
   hash(static_cast<std::int32_t>(field.presence()));
   hash(field.type().id());
 
-  if (auto def = field.customDefault()) {
-    hash(*def);
+  if (ctx_.includeAnnotationsAndDefaults()) {
+    if (auto def = field.customDefault()) {
+      hash(*def);
+    }
   }
   hash(field.annotations());
 }
@@ -457,8 +477,10 @@ void Hasher::hash(const SerializableFieldDefinition& field) {
   hash(static_cast<std::int32_t>(*field.presence()));
   hash(*field.type());
 
-  if (auto def = field.customDefaultPartialRecord()) {
-    hash(*def);
+  if (ctx_.includeAnnotationsAndDefaults()) {
+    if (auto def = field.customDefaultPartialRecord()) {
+      hash(*def);
+    }
   }
   hash(*field.annotations());
 }
@@ -466,6 +488,9 @@ void Hasher::hash(const SerializableFieldDefinition& field) {
 void Hasher::hash(
     const folly::F14FastMap<std::string, SerializableRecordUnion>&
         annotations) {
+  if (!ctx_.includeAnnotationsAndDefaults()) {
+    return;
+  }
   hashUnorderedByDigest(annotations, [](Hasher& h, const auto& entry) {
     h.hash(std::string_view{entry.first});
     h.hash(entry.second);
@@ -562,7 +587,7 @@ void Hasher::hash(const SerializableRecord& record) {
 
 TypeSystemDigest TypeSystemHasher::operator()(
     const SerializableTypeSystem& typeSystem) const {
-  Hasher h;
+  Hasher h(DigestContext{mode});
 
   h.hash(kTypeSystemDigestVersion);
 
@@ -580,7 +605,7 @@ TypeSystemDigest TypeSystemHasher::operator()(
 
 TypeSystemDigest TypeSystemHasher::operator()(
     const TypeSystem& typeSystem) const {
-  Hasher h;
+  Hasher h(DigestContext{mode});
 
   h.hash(kTypeSystemDigestVersion);
 
@@ -604,21 +629,21 @@ TypeSystemDigest TypeSystemHasher::operator()(
 }
 
 TypeSystemDigest TypeSystemHasher::operator()(const TypeRef& typeRef) const {
-  Hasher h;
+  Hasher h(DigestContext{mode});
   h.hash(typeRef);
   return h.finalize();
 }
 
 TypeSystemDigest TypeSystemHasher::operator()(
     const SerializableTypeDefinition& def) const {
-  Hasher h;
+  Hasher h(DigestContext{mode});
   h.hash(def);
   return h.finalize();
 }
 
 TypeSystemDigest TypeSystemHasher::operator()(
     const SerializableStructDefinition& def) const {
-  Hasher h;
+  Hasher h(DigestContext{mode});
   h.hash(
       static_cast<std::int32_t>(SerializableTypeDefinition::Type::structDef));
   h.hash(def);
@@ -627,7 +652,7 @@ TypeSystemDigest TypeSystemHasher::operator()(
 
 TypeSystemDigest TypeSystemHasher::operator()(
     const SerializableUnionDefinition& def) const {
-  Hasher h;
+  Hasher h(DigestContext{mode});
   h.hash(static_cast<std::int32_t>(SerializableTypeDefinition::Type::unionDef));
   h.hash(def);
   return h.finalize();
@@ -635,7 +660,7 @@ TypeSystemDigest TypeSystemHasher::operator()(
 
 TypeSystemDigest TypeSystemHasher::operator()(
     const SerializableEnumDefinition& def) const {
-  Hasher h;
+  Hasher h(DigestContext{mode});
   h.hash(static_cast<std::int32_t>(SerializableTypeDefinition::Type::enumDef));
   h.hash(def);
   return h.finalize();
@@ -643,7 +668,7 @@ TypeSystemDigest TypeSystemHasher::operator()(
 
 TypeSystemDigest TypeSystemHasher::operator()(
     const SerializableOpaqueAliasDefinition& def) const {
-  Hasher h;
+  Hasher h(DigestContext{mode});
   h.hash(
       static_cast<std::int32_t>(
           SerializableTypeDefinition::Type::opaqueAliasDef));
@@ -652,13 +677,13 @@ TypeSystemDigest TypeSystemHasher::operator()(
 }
 
 TypeSystemDigest TypeSystemHasher::operator()(const TypeId& typeId) const {
-  Hasher h;
+  Hasher h(DigestContext{mode});
   h.hash(typeId);
   return h.finalize();
 }
 
 TypeSystemDigest TypeSystemHasher::operator()(const TypeIdUnion& typeId) const {
-  Hasher h;
+  Hasher h(DigestContext{mode});
   h.hash(typeId);
   return h.finalize();
 }

@@ -32,6 +32,20 @@ using TypeSystemDigest = std::array<std::byte, 32>;
 inline constexpr uint8_t kTypeSystemDigestVersion = 2;
 
 /**
+ * Selects what a digest covers.
+ */
+enum class DigestMode {
+  // Hash the complete definition, including annotations and custom default
+  // values.
+  Full, // [default]
+
+  // Hash only the wire-compatible structure (fields, ids, types, enum values),
+  // ignoring annotations and custom default values. Two definitions with the
+  // same structure but differing annotations/defaults produce the same digest.
+  Structural,
+};
+
+/**
  * Compute a canonical & deterministic SHA-256 digest of a `TypeSystem`.
  *
  * Properties:
@@ -45,6 +59,10 @@ inline constexpr uint8_t kTypeSystemDigestVersion = 2;
  * determinism.
  */
 struct TypeSystemHasher {
+  // Selects what the digest covers; see DigestMode. Structural is an opt-in for
+  // callers that treat annotation/custom-default differences as equivalent.
+  DigestMode mode = DigestMode::Full;
+
   /**
    * Compute the digest for all types in the type system.
    */

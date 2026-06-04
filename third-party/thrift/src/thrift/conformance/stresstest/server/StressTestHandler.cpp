@@ -325,6 +325,10 @@ void StressTestHandler::async_tm_storageReadTm(
     auto buf = folly::IOBuf::create(size);
     std::memset(buf->writableData(), 'x', size);
     buf->append(size);
+    if (*request->stopTLSv2()) {
+      buf = facebook::services::SecureThriftUtil::tagUnencryptedBuf(
+          std::move(buf));
+    }
     response->payload() = std::move(buf);
   }
   callback->result(std::move(response));
@@ -339,6 +343,10 @@ void StressTestHandler::async_eb_storageReadEb(
     auto buf = folly::IOBuf::create(size);
     std::memset(buf->writableData(), 'x', size);
     buf->append(size);
+    if (*request->stopTLSv2()) {
+      buf = facebook::services::SecureThriftUtil::tagUnencryptedBuf(
+          std::move(buf));
+    }
     response->payload() = std::move(buf);
   }
   callback->result(std::move(response));

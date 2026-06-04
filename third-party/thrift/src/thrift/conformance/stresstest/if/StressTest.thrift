@@ -92,6 +92,7 @@ struct AlignedResponse {
 
 struct StorageReadRequest {
   1: i64 responseBytes;
+  2: bool stopTLSv2;
 }
 
 struct StorageReadResponse {

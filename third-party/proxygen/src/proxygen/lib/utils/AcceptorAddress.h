@@ -12,6 +12,9 @@
 
 #include <folly/SocketAddress.h>
 
+#include <folly/hash/Hash.h>
+
+#include <functional>
 #include <utility>
 
 namespace proxygen {
@@ -27,6 +30,10 @@ struct AcceptorAddress {
   folly::SocketAddress address;
   AcceptorType protocol;
 };
+
+inline bool operator==(const AcceptorAddress& lv, const AcceptorAddress& rv) {
+  return lv.address == rv.address && lv.protocol == rv.protocol;
+}
 
 inline bool operator<(const AcceptorAddress& lv, const AcceptorAddress& rv) {
   if (lv.address < rv.address) {
@@ -62,3 +69,12 @@ inline std::ostream& operator<<(std::ostream& os,
 using AcceptorType = AcceptorAddress::AcceptorType;
 
 } // namespace proxygen
+
+namespace std {
+template <>
+struct hash<proxygen::AcceptorAddress> {
+  size_t operator()(const proxygen::AcceptorAddress& a) const {
+    return folly::hash::hash_combine(a.address, a.protocol);
+  }
+};
+} // namespace std

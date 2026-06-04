@@ -40,6 +40,7 @@ proxygen_add_library(proxygen_services
     wangle::wangle_acceptor_acceptor_core
     Folly::folly_io_async_async_base
     Folly::folly_io_async_server_socket
+    glog::glog
 )
 
 proxygen_add_library(proxygen_services_worker

@@ -9,6 +9,7 @@
 #pragma once
 
 #include <folly/io/async/AsyncServerSocket.h>
+#include <glog/logging.h>
 #include <list>
 #include <memory>
 #include <proxygen/lib/utils/AcceptorAddress.h>
@@ -71,12 +72,42 @@ class ServiceWorker {
   void drainServiceAcceptor(const AcceptorAddress& accAddress) {
     // Move the old acceptor to drainingAcceptors_ if present
     const auto& it = acceptors_.find(accAddress);
-    if (it != acceptors_.end()) {
-      auto name = it->second->getName();
-      addAcceptor(accAddress, std::move(it->second), drainingAcceptors_);
-      acceptors_.erase(it);
-      namedAddress_.erase(name);
+    if (it == acceptors_.end()) {
+      LOG(INFO) << "drainServiceAcceptor: no active acceptor for "
+                << accAddress;
+      return;
     }
+    auto name = it->second->getName();
+    LOG(INFO) << "drainServiceAcceptor: draining acceptor " << name << " for "
+              << accAddress
+              << " (drainingAcceptors_.size=" << drainingAcceptors_.size()
+              << ")";
+    // Evict any previous draining acceptor still occupying this address.
+    auto drainingIt = drainingAcceptors_.find(accAddress);
+    if (drainingIt != drainingAcceptors_.end()) {
+      LOG(INFO)
+          << "drainServiceAcceptor: evicting previously-draining acceptor "
+          << drainingIt->second->getName() << " for " << accAddress
+          << " via forceStop";
+      drainingIt->second->forceStop();
+      drainingAcceptors_.erase(drainingIt);
+    }
+
+    addAcceptor(accAddress, std::move(it->second), drainingAcceptors_);
+    acceptors_.erase(it);
+    namedAddress_.erase(name);
+  }
+
+  // Release a draining acceptor, the caller now owns its lifetime.
+  [[nodiscard]] wangle::Acceptor* releaseDrainingAcceptor(
+      const AcceptorAddress& accAddress) {
+    auto it = drainingAcceptors_.find(accAddress);
+    if (it != drainingAcceptors_.end()) {
+      auto acceptor = it->second.release();
+      drainingAcceptors_.erase(it);
+      return acceptor;
+    }
+    return nullptr;
   }
 
   [[nodiscard]] RequestWorkerThread* getRequestWorkerThread() const {

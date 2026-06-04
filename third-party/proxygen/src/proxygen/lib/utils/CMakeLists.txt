@@ -243,6 +243,7 @@ proxygen_add_library(proxygen_utils_null_trace_event_observer
 
 proxygen_add_library(proxygen_utils_acceptor_address
   EXPORTED_DEPS
+    Folly::folly_hash_hash
     Folly::folly_network_address
     glog::glog
 )

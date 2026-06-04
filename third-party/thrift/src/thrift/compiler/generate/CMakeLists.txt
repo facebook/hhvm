@@ -40,6 +40,7 @@ add_custom_command(
 file(GLOB GENERATOR_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cc)
 list(REMOVE_ITEM GENERATOR_FILES build_templates.cc)
 list(REMOVE_ITEM GENERATOR_FILES t_ast_generator.cc)
+list(REMOVE_ITEM GENERATOR_FILES schema_populator.cc)
 list(APPEND GENERATOR_FILES ${CMAKE_CURRENT_SOURCE_DIR}/cpp/orderable_type_utils.cc)
 
 add_library(compiler_generators STATIC ${GENERATOR_FILES}

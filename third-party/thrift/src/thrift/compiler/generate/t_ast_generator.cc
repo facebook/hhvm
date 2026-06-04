@@ -26,6 +26,7 @@
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/detail/pluggable_functions.h>
 #include <thrift/compiler/generate/const_util.h>
+#include <thrift/compiler/generate/schema_populator.h>
 #include <thrift/compiler/generate/t_generator.h>
 #include <thrift/compiler/sema/schematizer.h>
 
@@ -38,6 +39,7 @@
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types_custom_protocol.h>
 
+using apache::thrift::compiler::detail::schema_populator;
 using apache::thrift::compiler::detail::schematizer;
 
 namespace apache::thrift::compiler {
@@ -261,6 +263,7 @@ type::Schema t_ast_generator::gen_schema(
   schema_opts.intern_value = intern_value;
   schematizer schema_source(
       *root_program.global_scope(), source_mgr, schema_opts);
+  schema_populator schema_defs{schema_source, *root_program.global_scope()};
   const_ast_visitor visitor;
   bool is_root_program = true;
   visitor.add_program_visitor([&](const t_program& program) {
@@ -274,7 +277,7 @@ type::Schema t_ast_generator::gen_schema(
         : positionToId<apache::thrift::type::ProgramId>(pos);
     program_index[&program] = program_id;
     program_pos_index[program_id] = pos;
-    hydrate_const(programs.emplace_back(), *schema_source.gen_schema(program));
+    hydrate_const(programs.emplace_back(), *schema_defs.gen_schema(program));
     programs.back().id() = program_id;
     if (program.has_doc() && schema_opts.include_docs &&
         schema_opts.include_source_ranges) {
@@ -334,7 +337,7 @@ type::Schema t_ast_generator::gen_schema(
     definition_index[&node] =
         positionToId<apache::thrift::type::DefinitionId>(pos);
     auto& def = kind_ref_fn(definitions.emplace_back()).ensure();
-    hydrate_const(def, *schema_source.gen_schema(node));
+    hydrate_const(def, *schema_defs.gen_schema(node));
     if (schema_opts.include_source_ranges) {
       set_source_range(node, *def.attrs());
       set_child_source_ranges(node, def);

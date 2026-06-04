@@ -21,12 +21,14 @@
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_set.h>
 #include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/generate/schema_populator.h>
 #include <thrift/compiler/sema/schematizer.h>
 
 #include <gtest/gtest.h>
 
 using namespace apache::thrift::compiler;
 using apache::thrift::compiler::detail::protocol_value_builder;
+using apache::thrift::compiler::detail::schema_populator;
 using apache::thrift::compiler::detail::schematizer;
 
 template <typename... Args>
@@ -377,7 +379,8 @@ void with_schematizer(schematizer::options opts, F&& f) {
   }
 
   schematizer schematizer{scope, sm, std::move(opts)};
-  f(*program.get(), schematizer);
+  schema_populator schema_populator{schematizer, scope};
+  f(*program.get(), schematizer, schema_populator);
 }
 
 template <typename F, typename G, typename H>
@@ -461,71 +464,81 @@ TEST(SchematizerTest, use_hash_for_structured_annotations) {
       return static_cast<schematizer::value_id>(id++);
     };
 
-    with_schematizer(opts, [&](t_program& program, schematizer& schematizer) {
-      with_foo_bar_plus_structured_annotations(
-          program,
-          [&](const auto& foo_bar_with_annotations_ty, const auto& foo_bar_ty) {
-            // Generate a schema.thrift representation of
-            // `FooBarWithStructuredAnnotations`
-            const std::unique_ptr<t_const_value> struct_schema =
-                schematizer.gen_schema(foo_bar_with_annotations_ty);
+    with_schematizer(
+        opts,
+        [&](t_program& program,
+            schematizer& schematizer,
+            schema_populator& schema_populator) {
+          with_foo_bar_plus_structured_annotations(
+              program,
+              [&](const auto& foo_bar_with_annotations_ty,
+                  const auto& foo_bar_ty) {
+                // Generate a schema.thrift representation of
+                // `FooBarWithStructuredAnnotations`
+                const std::unique_ptr<t_const_value> struct_schema =
+                    schema_populator.gen_schema(foo_bar_with_annotations_ty);
 
-            const auto on_annotation = [&](size_t annotation_idx,
-                                           const std::string& annotation_name) {
-              ASSERT_EQ(annotation_idx, 0); // There's only one annotation
-              EXPECT_EQ(
-                  annotation_name, "my_prog.FooBar"); // This is never hashed
-            };
+                const auto on_annotation =
+                    [&](size_t annotation_idx,
+                        const std::string& annotation_name) {
+                      ASSERT_EQ(
+                          annotation_idx, 0); // There's only one annotation
+                      EXPECT_EQ(
+                          annotation_name,
+                          "my_prog.FooBar"); // This is never hashed
+                    };
 
-            const auto on_structured_annotation = [&](size_t annotation_idx,
-                                                      size_t id) {
-              ASSERT_EQ(
-                  annotation_idx,
-                  0); // There's only one structured annotation
+                const auto on_structured_annotation = [&](size_t annotation_idx,
+                                                          size_t id) {
+                  ASSERT_EQ(
+                      annotation_idx,
+                      0); // There's only one structured annotation
 
-              const auto& interned_annotation =
-                  interned_values.at(id)->get_map();
-              const auto [type_key, type_uri] = interned_annotation.at(1);
-              ASSERT_EQ(type_key->get_string(), "type");
+                  const auto& interned_annotation =
+                      interned_values.at(id)->get_map();
+                  const auto [type_key, type_uri] = interned_annotation.at(1);
+                  ASSERT_EQ(type_key->get_string(), "type");
 
-              // TypeUri should be a union, so check for the appropriate
-              // field
-              const auto [type_uri_key, type_uri_value] =
-                  type_uri->get_map().at(0);
-              if (use_hash) {
-                EXPECT_EQ(type_uri_key->get_string(), "definitionKey");
-                EXPECT_EQ(
-                    type_uri_value->get_string(),
-                    schematizer.identify_definition(foo_bar_ty));
-              } else {
-                EXPECT_EQ(type_uri_key->get_string(), "scopedName");
-                EXPECT_EQ(
-                    type_uri_value->get_string(),
-                    "my_prog.FooBar"); // This should not be hashed
-              }
-            };
-
-            const auto on_annotation_by_key =
-                [&](size_t annotation_idx, const std::string& definition_key) {
-                  ASSERT_EQ(annotation_idx,
-                            0); // There's only one annotation
-
-                  // This is always hashed
-                  EXPECT_TRUE(
-                      definition_key.find("FooBar") == std::string::npos);
-                  EXPECT_EQ(
-                      definition_key,
-                      schematizer.identify_definition(foo_bar_ty));
+                  // TypeUri should be a union, so check for the appropriate
+                  // field
+                  const auto [type_uri_key, type_uri_value] =
+                      type_uri->get_map().at(0);
+                  if (use_hash) {
+                    EXPECT_EQ(type_uri_key->get_string(), "definitionKey");
+                    EXPECT_EQ(
+                        type_uri_value->get_string(),
+                        schematizer.identify_definition(foo_bar_ty));
+                  } else {
+                    EXPECT_EQ(type_uri_key->get_string(), "scopedName");
+                    EXPECT_EQ(
+                        type_uri_value->get_string(),
+                        "my_prog.FooBar"); // This should not be hashed
+                  }
                 };
-            // Verify that the URIs of the structured annotations are
-            // hashed
-            with_structured_annotation_uris(
-                *struct_schema,
-                "FooBarWithStructuredAnnotations",
-                on_annotation,
-                on_structured_annotation,
-                on_annotation_by_key);
-          });
-    });
+
+                const auto on_annotation_by_key =
+                    [&](size_t annotation_idx,
+                        const std::string& definition_key) {
+                      ASSERT_EQ(
+                          annotation_idx,
+                          0); // There's only one annotation
+
+                      // This is always hashed
+                      EXPECT_TRUE(
+                          definition_key.find("FooBar") == std::string::npos);
+                      EXPECT_EQ(
+                          definition_key,
+                          schematizer.identify_definition(foo_bar_ty));
+                    };
+                // Verify that the URIs of the structured annotations are
+                // hashed
+                with_structured_annotation_uris(
+                    *struct_schema,
+                    "FooBarWithStructuredAnnotations",
+                    on_annotation,
+                    on_structured_annotation,
+                    on_annotation_by_key);
+              });
+        });
   }
 }

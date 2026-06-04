@@ -720,8 +720,16 @@ int fizzClientCommand(const std::vector<std::string>& args) {
       -> std::unique_ptr<StoreCertificateChain> {
     std::unique_ptr<CertificateVerifier> verifier;
     if (storePtr) {
-      verifier = DefaultCertificateVerifier::create(
-          VerificationContext::Client, std::move(storePtr));
+      std::unique_ptr<DefaultCertificateVerifier> defaultVerifier;
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          DefaultCertificateVerifier::create(
+              defaultVerifier,
+              err,
+              VerificationContext::Client,
+              std::move(storePtr)),
+          err);
+      verifier = std::move(defaultVerifier);
     } else {
       verifier = std::make_unique<InsecureAcceptAnyCertificate>();
     }

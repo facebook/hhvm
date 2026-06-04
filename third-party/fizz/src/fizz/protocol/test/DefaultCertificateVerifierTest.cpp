@@ -25,8 +25,13 @@ class DefaultCertificateVerifierTest : public testing::Test {
     leafCertAndKey_ =
         createCert("leaf", false, &rootCertAndKey_, KeyType::P256);
     ASSERT_EQ(X509_STORE_add_cert(store.get(), rootCertAndKey_.cert.get()), 1);
-    verifier_ = DefaultCertificateVerifier::create(
-        VerificationContext::Client, std::move(store));
+    Error err;
+    std::unique_ptr<DefaultCertificateVerifier> verifier;
+    ASSERT_EQ(
+        DefaultCertificateVerifier::create(
+            verifier, err, VerificationContext::Client, std::move(store)),
+        Status::Success);
+    verifier_ = std::move(verifier);
   }
 
   void TearDown() override {}

@@ -53,9 +53,15 @@ void AsyncFizzClientT<SM>::connect(
     folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs,
     std::chrono::milliseconds timeout) {
   auto pskIdentity = hostname;
+  std::unique_ptr<DefaultCertificateVerifier> verifier;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      DefaultCertificateVerifier::create(
+          verifier, err, VerificationContext::Client),
+      err);
   connect(
       callback,
-      DefaultCertificateVerifier::create(VerificationContext::Client),
+      std::move(verifier),
       std::move(hostname),
       std::move(pskIdentity),
       std::move(echConfigs),

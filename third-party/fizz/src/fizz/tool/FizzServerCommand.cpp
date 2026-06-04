@@ -790,8 +790,16 @@ int fizzServerCommand(const std::vector<std::string>& args) {
       }
     }
 
-    verifier = DefaultCertificateVerifier::create(
-        VerificationContext::Server, std::move(storePtr));
+    std::unique_ptr<DefaultCertificateVerifier> defaultVerifier;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        DefaultCertificateVerifier::create(
+            defaultVerifier,
+            err,
+            VerificationContext::Server,
+            std::move(storePtr)),
+        err);
+    verifier = std::move(defaultVerifier);
   }
 
   auto serverContext = std::make_shared<FizzServerContext>();

@@ -132,13 +132,23 @@ std::shared_ptr<fizz::CertificateVerifier> getFizzVerifier(
   if (customFizzVerifierFn) {
     return customFizzVerifierFn();
   }
+  std::unique_ptr<fizz::DefaultCertificateVerifier> verifier;
+  fizz::Error err;
   if (!cfg.trustedCertsPath.empty()) {
-    return fizz::DefaultCertificateVerifier::createFromCAFile(
-        fizz::VerificationContext::Client, cfg.trustedCertsPath);
+    FIZZ_THROW_ON_ERROR(
+        fizz::DefaultCertificateVerifier::createFromCAFile(
+            verifier,
+            err,
+            fizz::VerificationContext::Client,
+            cfg.trustedCertsPath),
+        err);
   } else {
-    return fizz::DefaultCertificateVerifier::create(
-        fizz::VerificationContext::Client);
+    FIZZ_THROW_ON_ERROR(
+        fizz::DefaultCertificateVerifier::create(
+            verifier, err, fizz::VerificationContext::Client),
+        err);
   }
+  return verifier;
 }
 
 folly::AsyncTransport::UniquePtr createSocketWithEPoll(

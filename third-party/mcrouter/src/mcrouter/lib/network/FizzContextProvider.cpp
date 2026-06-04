@@ -56,8 +56,16 @@ FizzContextAndVerifier createClientFizzContextAndVerifier(
   }
   std::shared_ptr<fizz::DefaultCertificateVerifier> verifier;
   if (!pemCaPath.empty()) {
-    verifier = fizz::DefaultCertificateVerifier::createFromCAFile(
-        fizz::VerificationContext::Client, pemCaPath.str());
+    std::unique_ptr<fizz::DefaultCertificateVerifier> verifierUniq;
+    fizz::Error err;
+    FIZZ_THROW_ON_ERROR(
+        fizz::DefaultCertificateVerifier::createFromCAFile(
+            verifierUniq,
+            err,
+            fizz::VerificationContext::Client,
+            pemCaPath.str()),
+        err);
+    verifier = std::move(verifierUniq);
   }
 
   if (preferOcbCipher) {
@@ -110,8 +118,12 @@ std::shared_ptr<fizz::server::FizzServerContext> createFizzServerContext(
   ctx->setVersionFallbackEnabled(true);
   ctx->setCertManager(certMgr);
   if (!pemCaPath.empty()) {
-    auto verifier = fizz::DefaultCertificateVerifier::createFromCAFile(
-        fizz::VerificationContext::Server, pemCaPath.str());
+    std::unique_ptr<fizz::DefaultCertificateVerifier> verifier;
+    fizz::Error err;
+    FIZZ_THROW_ON_ERROR(
+        fizz::DefaultCertificateVerifier::createFromCAFile(
+            verifier, err, fizz::VerificationContext::Server, pemCaPath.str()),
+        err);
     ctx->setClientCertVerifier(std::move(verifier));
     ctx->setClientAuthMode(fizz::server::ClientAuthMode::Optional);
   }

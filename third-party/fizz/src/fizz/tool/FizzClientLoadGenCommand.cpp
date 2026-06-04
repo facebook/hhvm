@@ -255,8 +255,16 @@ int fizzClientLoadGenCommand(const std::vector<std::string>& args) {
       FIZZ_VLOG(1) << "Failed to load CA certificates";
       return 1;
     }
-    verifier = DefaultCertificateVerifier::create(
-        VerificationContext::Client, std::move(storePtr));
+    std::unique_ptr<DefaultCertificateVerifier> defaultVerifier;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        DefaultCertificateVerifier::create(
+            defaultVerifier,
+            err,
+            VerificationContext::Client,
+            std::move(storePtr)),
+        err);
+    verifier = std::move(defaultVerifier);
   }
 
   // Start creating clients and connecting

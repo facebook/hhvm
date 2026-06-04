@@ -59,9 +59,13 @@ class TerminatingCertificateVerifier : public CertificateVerifier {
  public:
   explicit TerminatingCertificateVerifier(VerificationContext) {}
 
-  static std::unique_ptr<TerminatingCertificateVerifier> create(
+  // NOLINTNEXTLINE(modernize-use-nodiscard)
+  static Status create(
+      std::unique_ptr<TerminatingCertificateVerifier>& ret,
+      Error& /* err */,
       VerificationContext context) {
-    return std::make_unique<TerminatingCertificateVerifier>(context);
+    ret = std::make_unique<TerminatingCertificateVerifier>(context);
+    return Status::Success;
   }
 
   Status verify(
@@ -92,9 +96,13 @@ class InsecureCertificateVerifier : public CertificateVerifier {
  public:
   explicit InsecureCertificateVerifier(VerificationContext) {}
 
-  static std::unique_ptr<InsecureCertificateVerifier> create(
+  // NOLINTNEXTLINE(modernize-use-nodiscard)
+  static Status create(
+      std::unique_ptr<InsecureCertificateVerifier>& ret,
+      Error& /* err */,
       VerificationContext context) {
-    return std::make_unique<InsecureCertificateVerifier>(context);
+    ret = std::make_unique<InsecureCertificateVerifier>(context);
+    return Status::Success;
   }
   Status verify(
       std::shared_ptr<const Cert>& ret,

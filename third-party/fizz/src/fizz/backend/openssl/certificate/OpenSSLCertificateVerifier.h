@@ -37,7 +37,8 @@ class OpenSSLCertificateVerifier : public CertificateVerifier {
         x509Store_(std::move(store)),
         authorities_(std::move(authorities)) {}
 
-  static CertificateAuthorities createAuthorities(X509_STORE* store);
+  static Status
+  createAuthorities(CertificateAuthorities& ret, Error& err, X509_STORE* store);
 
  public:
   using X509VerifyCallback = int (*)(int, X509_STORE_CTX*);
@@ -63,23 +64,32 @@ class OpenSSLCertificateVerifier : public CertificateVerifier {
     customVerifyCallback_ = cb;
   }
 
-  void setX509Store(folly::ssl::X509StoreUniquePtr&& store) {
+  Status setX509Store(Error& err, folly::ssl::X509StoreUniquePtr&& store) {
     x509Store_ = std::move(store);
-    authorities_ = createAuthorities(
-        x509Store_ ? x509Store_.get() : getDefaultX509Store());
+    X509_STORE* storePtr = nullptr;
+    if (x509Store_) {
+      storePtr = x509Store_.get();
+    } else {
+      FIZZ_RETURN_ON_ERROR(getDefaultX509Store(storePtr, err));
+    }
+    return createAuthorities(authorities_, err, storePtr);
   }
 
   Status getCertificateRequestExtensions(
       std::vector<Extension>& ret,
       Error& err) const override;
 
-  static X509_STORE* getDefaultX509Store();
+  static Status getDefaultX509Store(X509_STORE*& ret, Error& err);
 
-  static std::unique_ptr<OpenSSLCertificateVerifier> create(
+  static Status create(
+      std::unique_ptr<OpenSSLCertificateVerifier>& ret,
+      Error& err,
       VerificationContext context,
       folly::ssl::X509StoreUniquePtr&& store = nullptr);
 
-  static std::unique_ptr<OpenSSLCertificateVerifier> createFromCAFile(
+  static Status createFromCAFile(
+      std::unique_ptr<OpenSSLCertificateVerifier>& ret,
+      Error& err,
       VerificationContext context,
       const std::string& caFile);
 

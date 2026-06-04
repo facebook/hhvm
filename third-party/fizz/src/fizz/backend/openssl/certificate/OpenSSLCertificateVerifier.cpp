@@ -9,6 +9,7 @@
 #include <fizz/backend/openssl/certificate/OpenSSLCertificateVerifier.h>
 #include <folly/FileUtil.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
+#include <folly/synchronization/CallOnce.h>
 
 namespace fizz {
 namespace openssl {
@@ -46,23 +47,32 @@ static AlertDescription toTLSAlert(int opensslVerifyErr) {
   }
 }
 
-/* static */ std::unique_ptr<OpenSSLCertificateVerifier>
-OpenSSLCertificateVerifier::create(
+/* static */ Status OpenSSLCertificateVerifier::create(
+    std::unique_ptr<OpenSSLCertificateVerifier>& ret,
+    Error& err,
     VerificationContext context,
     folly::ssl::X509StoreUniquePtr&& store) {
-  CertificateAuthorities authorities =
-      createAuthorities(store ? store.get() : getDefaultX509Store());
-  return std::unique_ptr<OpenSSLCertificateVerifier>(
+  X509_STORE* storePtr = nullptr;
+  if (store) {
+    storePtr = store.get();
+  } else {
+    FIZZ_RETURN_ON_ERROR(getDefaultX509Store(storePtr, err));
+  }
+  CertificateAuthorities authorities;
+  FIZZ_RETURN_ON_ERROR(createAuthorities(authorities, err, storePtr));
+  ret = std::unique_ptr<OpenSSLCertificateVerifier>(
       new OpenSSLCertificateVerifier(
           context, std::move(store), std::move(authorities)));
+  return Status::Success;
 }
 
-/* static */ std::unique_ptr<OpenSSLCertificateVerifier>
-OpenSSLCertificateVerifier::createFromCAFile(
+/* static */ Status OpenSSLCertificateVerifier::createFromCAFile(
+    std::unique_ptr<OpenSSLCertificateVerifier>& ret,
+    Error& err,
     VerificationContext context,
     const std::string& caFile) {
   auto store = folly::ssl::OpenSSLCertUtils::readStoreFromFile(caFile);
-  return create(context, std::move(store));
+  return create(ret, err, context, std::move(store));
 }
 
 /* static */ Status OpenSSLCertificateVerifier::createFromCAFiles(
@@ -79,11 +89,12 @@ OpenSSLCertificateVerifier::createFromCAFile(
     }
     folly::toAppend(readBuffer, &certBuffer);
   }
-  ret = create(
+  return create(
+      ret,
+      err,
       context,
       folly::ssl::OpenSSLCertUtils::readStoreFromBuffer(
           folly::StringPiece(certBuffer)));
-  return Status::Success;
 }
 
 Status OpenSSLCertificateVerifier::verify(
@@ -122,11 +133,14 @@ Status OpenSSLCertificateVerifier::verifyWithX509StoreCtx(
     return err.error("", folly::none, Error::Category::StdBadAlloc);
   }
 
+  X509_STORE* storePtr = nullptr;
+  if (x509Store_) {
+    storePtr = x509Store_.get();
+  } else {
+    FIZZ_RETURN_ON_ERROR(getDefaultX509Store(storePtr, err));
+  }
   if (X509_STORE_CTX_init(
-          ctx.get(),
-          x509Store_ ? x509Store_.get() : getDefaultX509Store(),
-          leafCert.get(),
-          certChainStack.get()) != 1) {
+          ctx.get(), storePtr, leafCert.get(), certChainStack.get()) != 1) {
     return err.error("failed to initialize store context");
   }
 
@@ -177,8 +191,10 @@ Status OpenSSLCertificateVerifier::verifyWithX509StoreCtx(
   return Status::Success;
 }
 
-/* static */ CertificateAuthorities
-OpenSSLCertificateVerifier::createAuthorities(X509_STORE* store) {
+/* static */ Status OpenSSLCertificateVerifier::createAuthorities(
+    CertificateAuthorities& ret,
+    Error& err,
+    X509_STORE* store) {
   // X509_STORE stores CA certs as objects in this stack.
   STACK_OF(X509_OBJECT)* entries = X509_STORE_get0_objects(store);
   CertificateAuthorities auth;
@@ -188,38 +204,47 @@ OpenSSLCertificateVerifier::createAuthorities(X509_STORE* store) {
       auto certIssuer = X509_get_subject_name(X509_OBJECT_get0_X509(obj));
       int dnLength = i2d_X509_NAME(certIssuer, nullptr);
       if (dnLength < 0) {
-        throw std::runtime_error("Error computing DN length");
+        return err.error("Error computing DN length");
       }
       DistinguishedName dn;
       dn.encoded_name = folly::IOBuf::create(dnLength);
       auto dnData = dn.encoded_name->writableData();
       dnLength = i2d_X509_NAME(certIssuer, &dnData);
       if (dnLength < 0) {
-        throw std::runtime_error("Error encoding DN in DER format");
+        return err.error("Error encoding DN in DER format");
       }
       dn.encoded_name->append(dnLength);
       auth.authorities.push_back(std::move(dn));
     }
   }
-  return auth;
+  ret = std::move(auth);
+  return Status::Success;
 }
 
-X509_STORE* OpenSSLCertificateVerifier::getDefaultX509Store() {
-  static folly::ssl::X509StoreUniquePtr defaultStore([]() {
-    X509_STORE* store = X509_STORE_new();
+Status OpenSSLCertificateVerifier::getDefaultX509Store(
+    X509_STORE*& ret,
+    Error& err) {
+  static folly::once_flag flag;
+  static folly::ssl::X509StoreUniquePtr defaultStore;
 
+  Status status = Status::Success;
+  bool initialized = folly::try_call_once(flag, [&]() noexcept {
+    folly::ssl::X509StoreUniquePtr store(X509_STORE_new());
     if (!store) {
-      throw std::bad_alloc();
+      status = err.error("", folly::none, Error::Category::StdBadAlloc);
+      return false;
     }
-
-    if (X509_STORE_set_default_paths(store) != 1) {
-      throw std::runtime_error("failed to set default paths");
+    if (X509_STORE_set_default_paths(store.get()) != 1) {
+      status = err.error("failed to set default paths");
+      return false;
     }
-
-    return store;
-  }());
-
-  return defaultStore.get();
+    defaultStore = std::move(store);
+    return true;
+  });
+  if (initialized) {
+    ret = defaultStore.get();
+  }
+  return status;
 }
 
 Status OpenSSLCertificateVerifier::getCertificateRequestExtensions(

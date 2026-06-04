@@ -59,6 +59,11 @@ class TerminatingCertificateVerifier : public CertificateVerifier {
  public:
   explicit TerminatingCertificateVerifier(VerificationContext) {}
 
+  static std::unique_ptr<TerminatingCertificateVerifier> create(
+      VerificationContext context) {
+    return std::make_unique<TerminatingCertificateVerifier>(context);
+  }
+
   Status verify(
       std::shared_ptr<const Cert>& /* ret */,
       Error& /* err */,
@@ -87,6 +92,10 @@ class InsecureCertificateVerifier : public CertificateVerifier {
  public:
   explicit InsecureCertificateVerifier(VerificationContext) {}
 
+  static std::unique_ptr<InsecureCertificateVerifier> create(
+      VerificationContext context) {
+    return std::make_unique<InsecureCertificateVerifier>(context);
+  }
   Status verify(
       std::shared_ptr<const Cert>& ret,
       Error& /* err */,

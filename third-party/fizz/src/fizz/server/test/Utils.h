@@ -135,7 +135,7 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
       }
     }
 
-    auto verifier = std::make_shared<DefaultCertificateVerifier>(
+    auto verifier = DefaultCertificateVerifier::create(
         VerificationContext::Server, std::move(store));
     ctx_->setClientCertVerifier(std::move(verifier));
   }

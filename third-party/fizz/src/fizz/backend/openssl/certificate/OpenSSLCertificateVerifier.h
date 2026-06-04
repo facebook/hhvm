@@ -21,20 +21,26 @@ namespace openssl {
  * This does not perform any identity or hostname verification.
  */
 class OpenSSLCertificateVerifier : public CertificateVerifier {
- public:
-  using X509VerifyCallback = int (*)(int, X509_STORE_CTX*);
-
-  explicit OpenSSLCertificateVerifier(VerificationContext context)
-      : context_(context), x509Store_(nullptr) {
-    createAuthorities();
-  }
+ protected:
+  explicit OpenSSLCertificateVerifier(
+      VerificationContext context,
+      CertificateAuthorities&& authorities)
+      : context_(std::move(context)),
+        x509Store_(nullptr),
+        authorities_(std::move(authorities)) {}
 
   explicit OpenSSLCertificateVerifier(
       VerificationContext context,
-      folly::ssl::X509StoreUniquePtr&& store)
-      : context_(context), x509Store_(std::move(store)) {
-    createAuthorities();
-  }
+      folly::ssl::X509StoreUniquePtr&& store,
+      CertificateAuthorities&& authorities)
+      : context_(std::move(context)),
+        x509Store_(std::move(store)),
+        authorities_(std::move(authorities)) {}
+
+  static CertificateAuthorities createAuthorities(X509_STORE* store);
+
+ public:
+  using X509VerifyCallback = int (*)(int, X509_STORE_CTX*);
 
   // NOLINTNEXTLINE(modernize-use-nodiscard)
   Status verify(
@@ -59,7 +65,8 @@ class OpenSSLCertificateVerifier : public CertificateVerifier {
 
   void setX509Store(folly::ssl::X509StoreUniquePtr&& store) {
     x509Store_ = std::move(store);
-    createAuthorities();
+    authorities_ = createAuthorities(
+        x509Store_ ? x509Store_.get() : getDefaultX509Store());
   }
 
   Status getCertificateRequestExtensions(
@@ -67,6 +74,10 @@ class OpenSSLCertificateVerifier : public CertificateVerifier {
       Error& err) const override;
 
   static X509_STORE* getDefaultX509Store();
+
+  static std::unique_ptr<OpenSSLCertificateVerifier> create(
+      VerificationContext context,
+      folly::ssl::X509StoreUniquePtr&& store = nullptr);
 
   static std::unique_ptr<OpenSSLCertificateVerifier> createFromCAFile(
       VerificationContext context,
@@ -79,11 +90,9 @@ class OpenSSLCertificateVerifier : public CertificateVerifier {
       const std::vector<std::string>& caFiles);
 
  private:
-  void createAuthorities();
-
-  CertificateAuthorities authorities_;
   VerificationContext context_;
   folly::ssl::X509StoreUniquePtr x509Store_;
+  CertificateAuthorities authorities_;
   X509VerifyCallback customVerifyCallback_{nullptr};
 };
 

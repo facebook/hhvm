@@ -55,7 +55,7 @@ void AsyncFizzClientT<SM>::connect(
   auto pskIdentity = hostname;
   connect(
       callback,
-      std::make_shared<DefaultCertificateVerifier>(VerificationContext::Client),
+      DefaultCertificateVerifier::create(VerificationContext::Client),
       std::move(hostname),
       std::move(pskIdentity),
       std::move(echConfigs),

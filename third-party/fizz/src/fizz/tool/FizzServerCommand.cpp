@@ -790,7 +790,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
       }
     }
 
-    verifier = std::make_shared<const DefaultCertificateVerifier>(
+    verifier = DefaultCertificateVerifier::create(
         VerificationContext::Server, std::move(storePtr));
   }
 

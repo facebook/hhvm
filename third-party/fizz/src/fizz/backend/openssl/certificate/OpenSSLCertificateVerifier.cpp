@@ -47,12 +47,22 @@ static AlertDescription toTLSAlert(int opensslVerifyErr) {
 }
 
 /* static */ std::unique_ptr<OpenSSLCertificateVerifier>
+OpenSSLCertificateVerifier::create(
+    VerificationContext context,
+    folly::ssl::X509StoreUniquePtr&& store) {
+  CertificateAuthorities authorities =
+      createAuthorities(store ? store.get() : getDefaultX509Store());
+  return std::unique_ptr<OpenSSLCertificateVerifier>(
+      new OpenSSLCertificateVerifier(
+          context, std::move(store), std::move(authorities)));
+}
+
+/* static */ std::unique_ptr<OpenSSLCertificateVerifier>
 OpenSSLCertificateVerifier::createFromCAFile(
     VerificationContext context,
     const std::string& caFile) {
   auto store = folly::ssl::OpenSSLCertUtils::readStoreFromFile(caFile);
-  return std::make_unique<OpenSSLCertificateVerifier>(
-      context, std::move(store));
+  return create(context, std::move(store));
 }
 
 /* static */ Status OpenSSLCertificateVerifier::createFromCAFiles(
@@ -69,7 +79,7 @@ OpenSSLCertificateVerifier::createFromCAFile(
     }
     folly::toAppend(readBuffer, &certBuffer);
   }
-  ret = std::make_unique<OpenSSLCertificateVerifier>(
+  ret = create(
       context,
       folly::ssl::OpenSSLCertUtils::readStoreFromBuffer(
           folly::StringPiece(certBuffer)));
@@ -167,12 +177,11 @@ Status OpenSSLCertificateVerifier::verifyWithX509StoreCtx(
   return Status::Success;
 }
 
-void OpenSSLCertificateVerifier::createAuthorities() {
-  CertificateAuthorities auth;
-  X509_STORE* store = x509Store_ ? x509Store_.get() : getDefaultX509Store();
+/* static */ CertificateAuthorities
+OpenSSLCertificateVerifier::createAuthorities(X509_STORE* store) {
   // X509_STORE stores CA certs as objects in this stack.
   STACK_OF(X509_OBJECT)* entries = X509_STORE_get0_objects(store);
-
+  CertificateAuthorities auth;
   for (int i = 0; i < sk_X509_OBJECT_num(entries); i++) {
     X509_OBJECT* obj = sk_X509_OBJECT_value(entries, i);
     if (X509_OBJECT_get_type(obj) == X509_LU_X509) {
@@ -192,7 +201,7 @@ void OpenSSLCertificateVerifier::createAuthorities() {
       auth.authorities.push_back(std::move(dn));
     }
   }
-  authorities_ = std::move(auth);
+  return auth;
 }
 
 X509_STORE* OpenSSLCertificateVerifier::getDefaultX509Store() {

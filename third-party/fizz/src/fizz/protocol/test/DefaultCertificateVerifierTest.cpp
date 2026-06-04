@@ -25,7 +25,7 @@ class DefaultCertificateVerifierTest : public testing::Test {
     leafCertAndKey_ =
         createCert("leaf", false, &rootCertAndKey_, KeyType::P256);
     ASSERT_EQ(X509_STORE_add_cert(store.get(), rootCertAndKey_.cert.get()), 1);
-    verifier_ = std::make_unique<DefaultCertificateVerifier>(
+    verifier_ = DefaultCertificateVerifier::create(
         VerificationContext::Client, std::move(store));
   }
 

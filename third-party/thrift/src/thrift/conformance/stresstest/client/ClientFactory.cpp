@@ -136,7 +136,7 @@ std::shared_ptr<fizz::CertificateVerifier> getFizzVerifier(
     return fizz::DefaultCertificateVerifier::createFromCAFile(
         fizz::VerificationContext::Client, cfg.trustedCertsPath);
   } else {
-    return std::make_shared<fizz::DefaultCertificateVerifier>(
+    return fizz::DefaultCertificateVerifier::create(
         fizz::VerificationContext::Client);
   }
 }

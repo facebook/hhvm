@@ -214,9 +214,9 @@ class HandshakeTest : public Test {
     auto clientKey = getPrivateKey(kClientAuthClientKey);
     folly::ssl::X509StoreUniquePtr store(X509_STORE_new());
     ASSERT_EQ(X509_STORE_add_cert(store.get(), caCert.get()), 1);
-    auto verifier = std::make_shared<const DefaultCertificateVerifier>(
+    auto verifier = DefaultCertificateVerifier::create(
         VerificationContext::Server, std::move(store));
-    serverContext_->setClientCertVerifier(verifier);
+    serverContext_->setClientCertVerifier(std::move(verifier));
     std::vector<folly::ssl::X509UniquePtr> certVec;
     certVec.emplace_back(std::move(clientCert));
     std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>

@@ -91,10 +91,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_matching_struct_names_cbindings.cMyStruct] cpp_obj):
@@ -204,13 +200,6 @@ cdef class Combo(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "listOfOurMyStructLists": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).listOfOurMyStructLists_ref().has_value(),
-          "theirMyStructList": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).theirMyStructList_ref().has_value(),
-          "ourMyStructList": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).ourMyStructList_ref().has_value(),
-          "listOfTheirMyStructList": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).listOfTheirMyStructList_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_matching_struct_names_cbindings.cCombo] cpp_obj):

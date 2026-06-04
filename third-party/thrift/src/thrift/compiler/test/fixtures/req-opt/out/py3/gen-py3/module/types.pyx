@@ -87,13 +87,6 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "myInteger": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myInteger_ref().has_value(),
-          "myString": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myString_ref().has_value(),
-          "myBools": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myBools_ref().has_value(),
-          "myNumbers": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myNumbers_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFoo] cpp_obj):

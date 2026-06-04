@@ -107,11 +107,6 @@ cdef class SmallStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "small_A": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).small_A_ref().has_value(),
-          "small_B": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).small_B_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSmallStruct] cpp_obj):
@@ -228,23 +223,6 @@ cdef class containerStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "fieldA": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldA_ref().has_value(),
-          "fieldB": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldB_ref().has_value(),
-          "fieldC": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldC_ref().has_value(),
-          "fieldD": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldD_ref().has_value(),
-          "fieldE": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldE_ref().has_value(),
-          "fieldF": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldF_ref().has_value(),
-          "fieldG": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldG_ref().has_value(),
-          "fieldH": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldH_ref().has_value(),
-          "fieldI": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldI_ref().has_value(),
-          "fieldJ": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldJ_ref().has_value(),
-          "fieldK": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldK_ref().has_value(),
-          "fieldL": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldL_ref().has_value(),
-          "fieldM": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldM_ref().has_value(),
-          "fieldQ": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldQ_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.ccontainerStruct] cpp_obj):

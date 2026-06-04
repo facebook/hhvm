@@ -76,9 +76,6 @@ cdef class InjectedField(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_injected_field_cbindings.cInjectedField] cpp_obj):

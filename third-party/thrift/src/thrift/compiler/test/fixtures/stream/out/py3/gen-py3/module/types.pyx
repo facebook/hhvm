@@ -75,9 +75,6 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFooStreamEx] cpp_obj):
@@ -171,9 +168,6 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFooEx] cpp_obj):
@@ -267,9 +261,6 @@ cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFooEx2] cpp_obj):

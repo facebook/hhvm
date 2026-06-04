@@ -85,10 +85,6 @@ cdef class Fields(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "injected_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFields] cpp_obj):
@@ -198,10 +194,6 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "injected_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFieldsInjectedToEmptyStruct] cpp_obj):
@@ -311,11 +303,6 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "string_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().has_value(),
-          "injected_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFieldsInjectedToStruct] cpp_obj):
@@ -432,13 +419,6 @@ cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "string_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().has_value(),
-          "injected_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().has_value(),
-          "injected_structured_annotation_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_structured_annotation_field_ref().has_value(),
-          "injected_unstructured_annotation_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_unstructured_annotation_field_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFieldsInjectedWithIncludedStruct] cpp_obj):
@@ -573,11 +553,6 @@ cdef class FieldsInjectedWithFieldsWithIncludedStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "string_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().has_value(),
-          "injected_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct] cpp_obj):

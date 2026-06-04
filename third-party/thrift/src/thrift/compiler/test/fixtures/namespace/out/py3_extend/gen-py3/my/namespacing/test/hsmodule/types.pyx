@@ -83,10 +83,6 @@ cdef class HsFoo(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "MyInt": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyInt_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_my_namespacing_test_hsmodule_cbindings.cHsFoo] cpp_obj):

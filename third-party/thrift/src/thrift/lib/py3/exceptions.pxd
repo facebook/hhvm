@@ -64,6 +64,5 @@ cdef class GeneratedError(BaseError):
     cdef object _fbthrift_hash
     cdef IOBuf _fbthrift_serialize(self, Protocol proto)
     cdef uint32_t _fbthrift_deserialize(self, const cIOBuf* buf, Protocol proto) except? 0
-    cdef object _fbthrift_isset(self)
     cdef object _fbthrift_cmp_sametype(self, other, int op)
     cdef void _fbthrift_set_field(self, str name, object value) except *

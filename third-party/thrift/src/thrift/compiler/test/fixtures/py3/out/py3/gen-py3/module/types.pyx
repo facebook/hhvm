@@ -116,10 +116,6 @@ cdef class SimpleException(thrift.py3.exceptions.GeneratedError):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "err_code": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).err_code_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSimpleException] cpp_obj):
@@ -230,10 +226,6 @@ cdef class OptionalRefStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "optional_blob": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).optional_blob_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cOptionalRefStruct] cpp_obj):
@@ -349,20 +341,6 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "is_on": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).is_on_ref().has_value(),
-          "tiny_int": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).tiny_int_ref().has_value(),
-          "small_int": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).small_int_ref().has_value(),
-          "nice_sized_int": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).nice_sized_int_ref().has_value(),
-          "big_int": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).big_int_ref().has_value(),
-          "real": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).real_ref().has_value(),
-          "smaller_real": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).smaller_real_ref().has_value(),
-          "something": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).something_ref().has_value(),
-          "opt_default_int": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_default_int_ref().has_value(),
-          "opt_default_str": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_default_str_ref().has_value(),
-          "opt_default_enum": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_default_enum_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSimpleStruct] cpp_obj):
@@ -562,13 +540,6 @@ cdef class Float32Struct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "float32": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).float32_ref().has_value(),
-          "float64": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).float64_ref().has_value(),
-          "float_list": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).float_list_ref().has_value(),
-          "float_map": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).float_map_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFloat32Struct] cpp_obj):
@@ -828,9 +799,6 @@ cdef class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cHiddenTypeFieldsStruct] cpp_obj):
@@ -938,18 +906,6 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "structOne": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).structOne_ref().has_value(),
-          "structTwo": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).structTwo_ref().has_value(),
-          "an_integer": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).an_integer_ref().has_value(),
-          "name": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).name_ref().has_value(),
-          "an_enum": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).an_enum_ref().has_value(),
-          "some_bytes": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).some_bytes_ref().has_value(),
-          "sender": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).sender_ref().has_value(),
-          "cdef_": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).cdef__ref().has_value(),
-          "bytes_with_cpp_type": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bytes_with_cpp_type_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cComplexStruct] cpp_obj):
@@ -1259,10 +1215,6 @@ cdef class BinaryUnionStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "u": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).u_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cBinaryUnionStruct] cpp_obj):
@@ -1369,18 +1321,6 @@ cdef class CustomFields(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "bool_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bool_field_ref().has_value(),
-          "integer_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).integer_field_ref().has_value(),
-          "double_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).double_field_ref().has_value(),
-          "string_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().has_value(),
-          "binary_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).binary_field_ref().has_value(),
-          "list_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_field_ref().has_value(),
-          "set_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).set_field_ref().has_value(),
-          "map_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).map_field_ref().has_value(),
-          "struct_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).struct_field_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cCustomFields] cpp_obj):
@@ -1556,18 +1496,6 @@ cdef class CustomTypedefFields(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "bool_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bool_field_ref().has_value(),
-          "integer_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).integer_field_ref().has_value(),
-          "double_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).double_field_ref().has_value(),
-          "string_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().has_value(),
-          "binary_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).binary_field_ref().has_value(),
-          "list_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_field_ref().has_value(),
-          "set_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).set_field_ref().has_value(),
-          "map_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).map_field_ref().has_value(),
-          "struct_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).struct_field_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cCustomTypedefFields] cpp_obj):
@@ -1743,18 +1671,6 @@ cdef class AdaptedTypedefFields(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "bool_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bool_field_ref().has_value(),
-          "integer_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).integer_field_ref().has_value(),
-          "double_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).double_field_ref().has_value(),
-          "string_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().has_value(),
-          "binary_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).binary_field_ref().has_value(),
-          "list_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_field_ref().has_value(),
-          "set_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).set_field_ref().has_value(),
-          "map_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).map_field_ref().has_value(),
-          "struct_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).struct_field_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cAdaptedTypedefFields] cpp_obj):

@@ -282,10 +282,8 @@ def get_locally_set_fields(struct):
             )
         if hasattr(struct.__class__, "_FBTHRIFT__PYTHON_CLASS"):
             isset_dict = struct._fbthrift__isset()
-        elif isinstance(struct, Struct):
-            isset_dict = (<Struct>struct)._fbthrift_isset()
         else:
-            isset_dict = (<GeneratedError>struct)._fbthrift_isset()
+            isset_dict = (<Struct?>struct)._fbthrift_isset()
         return frozenset(
             name for name, is_set in isset_dict.items() if is_set
         )

@@ -92,11 +92,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "myEnum": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myEnum_ref().has_value(),
-          "myBigEnum": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myBigEnum_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_enumstrict_module_cbindings.cMyStruct] cpp_obj):

@@ -98,18 +98,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "MyIntField": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyIntField_ref().has_value(),
-          "MyStringField": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyStringField_ref().has_value(),
-          "MyDataField": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyDataField_ref().has_value(),
-          "myEnum": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myEnum_ref().has_value(),
-          "oneway": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).oneway_ref().has_value(),
-          "readonly": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).readonly_ref().has_value(),
-          "idempotent": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).idempotent_ref().has_value(),
-          "floatSet": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).floatSet_ref().has_value(),
-          "no_hack_codegen_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).no_hack_codegen_field_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyStruct] cpp_obj):
@@ -281,12 +269,6 @@ cdef class Containers(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "I32List": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).I32List_ref().has_value(),
-          "StringSet": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).StringSet_ref().has_value(),
-          "StringToI64Map": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).StringToI64Map_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cContainers] cpp_obj):
@@ -409,9 +391,6 @@ cdef class MyDataItem(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyDataItem] cpp_obj):
@@ -703,13 +682,6 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "MyIntField": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyIntField_ref().has_value(),
-          "MyStringField": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyStringField_ref().has_value(),
-          "myStruct": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myStruct_ref().has_value(),
-          "myUnion": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myUnion_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyException] cpp_obj):
@@ -835,13 +807,6 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "MyIntField": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyIntField_ref().has_value(),
-          "MyStringField": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).MyStringField_ref().has_value(),
-          "myStruct": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myStruct_ref().has_value(),
-          "myUnion": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).myUnion_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage] cpp_obj):
@@ -980,10 +945,6 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "reserved_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reserved_field_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cReservedKeyword] cpp_obj):

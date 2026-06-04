@@ -83,10 +83,6 @@ cdef class InitialResponse(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "content": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).content_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cInitialResponse] cpp_obj):
@@ -196,10 +192,6 @@ cdef class FinalResponse(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "content": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).content_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFinalResponse] cpp_obj):
@@ -309,10 +301,6 @@ cdef class SinkPayload(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "content": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).content_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSinkPayload] cpp_obj):
@@ -422,10 +410,6 @@ cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "sink": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).sink_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cCompatibleWithKeywordSink] cpp_obj):
@@ -525,10 +509,6 @@ cdef class InitialException(thrift.py3.exceptions.GeneratedError):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "reason": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reason_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cInitialException] cpp_obj):
@@ -629,10 +609,6 @@ cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "reason": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reason_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSinkException1] cpp_obj):
@@ -733,10 +709,6 @@ cdef class SinkException2(thrift.py3.exceptions.GeneratedError):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "reason": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).reason_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSinkException2] cpp_obj):

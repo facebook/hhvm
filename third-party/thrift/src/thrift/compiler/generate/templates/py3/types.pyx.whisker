@@ -170,9 +170,9 @@ cdef object get_types_reflection():
         {{/if (not struct.allow_inheritance?)}}
 cdef class {{struct.name}}({{#partial types.python_struct_class struct=struct}}):
     __module__ = _fbthrift__module_name__
-    {{#if struct.enable_unsafe_isset_inspection?}}
+    {{#if (and struct.enable_unsafe_isset_inspection? (not struct.exception?))}}
     _fbthrift_enable_unsafe_isset_inspection = True
-    {{/if struct.enable_unsafe_isset_inspection?}}
+    {{/if (and struct.enable_unsafe_isset_inspection? (not struct.exception?))}}
 
     def __init__({{struct.name}} self,{{#if struct.exception?}} *args,{{/if}} **kwargs):
         self.{{#partial types.cpp_obj}} = make_shared[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}]()
@@ -198,6 +198,7 @@ cdef class {{struct.name}}({{#partial types.python_struct_class struct=struct}})
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
+    {{#if (and struct.enable_unsafe_isset_inspection? (not struct.exception?))}}
     cdef object _fbthrift_isset(self):
         return {
         {{#each struct.py3_fields as |field|}}
@@ -206,6 +207,7 @@ cdef class {{struct.name}}({{#partial types.python_struct_class struct=struct}})
           {{/if (and field.has_ref_accessor? (not field.terse?))}}
         {{/each}}
         }
+    {{/if (and struct.enable_unsafe_isset_inspection? (not struct.exception?))}}
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}] cpp_obj):

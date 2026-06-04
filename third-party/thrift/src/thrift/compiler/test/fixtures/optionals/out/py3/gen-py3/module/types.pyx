@@ -91,13 +91,6 @@ cdef class Color(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "red": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).red_ref().has_value(),
-          "green": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).green_ref().has_value(),
-          "blue": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).blue_ref().has_value(),
-          "alpha": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).alpha_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cColor] cpp_obj):
@@ -228,14 +221,6 @@ cdef class Vehicle(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "color": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).color_ref().has_value(),
-          "licensePlate": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).licensePlate_ref().has_value(),
-          "description": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).description_ref().has_value(),
-          "name": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).name_ref().has_value(),
-          "hasAC": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).hasAC_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cVehicle] cpp_obj):
@@ -381,19 +366,6 @@ cdef class Person(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "id": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).id_ref().has_value(),
-          "name": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).name_ref().has_value(),
-          "age": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).age_ref().has_value(),
-          "address": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).address_ref().has_value(),
-          "favoriteColor": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).favoriteColor_ref().has_value(),
-          "friends": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).friends_ref().has_value(),
-          "bestFriend": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bestFriend_ref().has_value(),
-          "petNames": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).petNames_ref().has_value(),
-          "afraidOfAnimal": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).afraidOfAnimal_ref().has_value(),
-          "vehicles": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).vehicles_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cPerson] cpp_obj):

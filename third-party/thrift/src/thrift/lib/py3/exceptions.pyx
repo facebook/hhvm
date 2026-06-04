@@ -81,9 +81,6 @@ cdef class GeneratedError(BaseError):
     cdef uint32_t _fbthrift_deserialize(self, const cIOBuf* buf, Protocol proto) except? 0:
         return 0
 
-    cdef object _fbthrift_isset(self):
-        raise TypeError(f"{type(self)} does not have concept of isset")
-
     cdef object _fbthrift_cmp_sametype(self, other, int op):
         if not isinstance(other, type(self)):
             if op == Py_EQ:  # different types are never equal

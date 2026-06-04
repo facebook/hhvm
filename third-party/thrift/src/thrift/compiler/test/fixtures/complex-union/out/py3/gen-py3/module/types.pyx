@@ -659,12 +659,6 @@ cdef class Val(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "strVal": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).strVal_ref().has_value(),
-          "intVal": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).intVal_ref().has_value(),
-          "typedefValue": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).typedefValue_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cVal] cpp_obj):
@@ -1102,10 +1096,6 @@ cdef class NonCopyableStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-    cdef object _fbthrift_isset(self):
-        return {
-          "num": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).num_ref().has_value(),
-        }
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cNonCopyableStruct] cpp_obj):

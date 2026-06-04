@@ -32,7 +32,7 @@ class FooServiceInterface(
     def service_name() -> bytes:
         return b"FooService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"simple_rpc": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_simple_rpc),
         }
@@ -80,7 +80,7 @@ class FB303ServiceInterface(
     def service_name() -> bytes:
         return b"FB303Service"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"simple_rpc": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_simple_rpc),
         }
@@ -129,7 +129,7 @@ class MyServiceInterface(
     def service_name() -> bytes:
         return b"MyService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"ping": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_ping),
             b"getRandomData": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getRandomData),
@@ -300,7 +300,7 @@ class DbMixedStackArgumentsInterface(
     def service_name() -> bytes:
         return b"DbMixedStackArguments"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"getDataByKey0": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getDataByKey0),
             b"getDataByKey1": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getDataByKey1),

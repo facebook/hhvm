@@ -32,7 +32,7 @@ class TestServiceInterface(
     def service_name() -> bytes:
         return b"TestService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"init": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_init),
         }

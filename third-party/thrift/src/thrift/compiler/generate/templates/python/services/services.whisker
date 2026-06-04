@@ -76,7 +76,7 @@ class {{service.name}}Interface(
     def service_name() -> bytes:
         return b"{{service.name}}"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
         {{#each service.supported_functions as |function|}}
             b"{{function.name}}": ({{#function}}{{> services/function_kind }}{{/function}}, self._fbthrift__handler_{{function.name}}),

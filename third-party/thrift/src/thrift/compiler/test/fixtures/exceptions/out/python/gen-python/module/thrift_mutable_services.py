@@ -32,7 +32,7 @@ class RaiserInterface(
     def service_name() -> bytes:
         return b"Raiser"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"doBland": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_doBland),
             b"doRaise": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_doRaise),

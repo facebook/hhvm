@@ -33,7 +33,7 @@ class MyServiceInterface(
     def service_name() -> bytes:
         return b"MyService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"foo": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
             b"interact": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact),
@@ -133,7 +133,7 @@ class FactoriesInterface(
     def service_name() -> bytes:
         return b"Factories"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"foo": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
             b"interact": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact),
@@ -233,7 +233,7 @@ class PerformInterface(
     def service_name() -> bytes:
         return b"Perform"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"foo": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
         }
@@ -281,7 +281,7 @@ class InteractWithSharedInterface(
     def service_name() -> bytes:
         return b"InteractWithShared"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"do_some_similar_things": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_do_some_similar_things),
         }
@@ -329,7 +329,7 @@ class BoxServiceInterface(
     def service_name() -> bytes:
         return b"BoxService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"getABoxSession": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getABoxSession),
         }

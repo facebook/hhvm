@@ -32,7 +32,7 @@ class NullServiceInterface(
     def service_name() -> bytes:
         return b"NullService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
         }
         return {**super().getFunctionTable(), **functionTable}

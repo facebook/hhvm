@@ -31,7 +31,7 @@ class BiDiServiceInterface(
     def service_name() -> bytes:
         return b"BiDiService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"simple": (RpcKind.BIDIRECTIONAL_STREAM, self._fbthrift__handler_simple),
             b"response": (RpcKind.BIDIRECTIONAL_STREAM, self._fbthrift__handler_response),

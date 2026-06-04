@@ -40,7 +40,7 @@ class MyServiceInterface(
     def service_name() -> bytes:
         return b"MyService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"adapted_return": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_adapted_return),
             b"adapted_param": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_adapted_param),

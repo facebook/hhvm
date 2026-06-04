@@ -32,7 +32,7 @@ class SinkServiceInterface(
     def service_name() -> bytes:
         return b"SinkService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"method": (RpcKind.SINK, self._fbthrift__handler_method),
             b"methodAndReponse": (RpcKind.SINK, self._fbthrift__handler_methodAndReponse),

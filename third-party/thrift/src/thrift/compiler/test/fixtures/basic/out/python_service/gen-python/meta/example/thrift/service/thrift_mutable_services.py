@@ -34,7 +34,7 @@ class EchoServiceInterface(
     def service_name() -> bytes:
         return b"EchoService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"echo": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_echo),
         }
@@ -89,7 +89,7 @@ EchoServiceInterface,
     def service_name() -> bytes:
         return b"ExtendedEchoService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"echo_2": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_echo_2),
         }
@@ -144,7 +144,7 @@ class ExtendedMyServiceInterface(
     def service_name() -> bytes:
         return b"ExtendedMyService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"putDataById_2": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_putDataById_2),
         }

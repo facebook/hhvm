@@ -17,7 +17,7 @@
 from __future__ import annotations
 
 from abc import ABC, ABCMeta
-from typing import Generic, Type, TypeVar
+from typing import ClassVar, Generic, Type, TypeVar
 
 from thrift.python.client.async_client import AsyncClient
 from thrift.python.client.sync_client import SyncClient
@@ -37,8 +37,8 @@ class ImmutableClassAnnotations(ABCMeta):
 class Client(
     Generic[TAsyncClient, TSyncClient], ABC, metaclass=ImmutableClassAnnotations
 ):
-    Async: Type[TAsyncClient]
-    Sync: Type[TSyncClient]
+    Async: ClassVar[Type[TAsyncClient]]
+    Sync: ClassVar[Type[TSyncClient]]
 
 
 """

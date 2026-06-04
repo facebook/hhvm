@@ -14,7 +14,10 @@
 
 # pyre-strict
 
-class MutableStructTypeInfo: ...
+import typing
+
+class MutableStructTypeInfo:
+    def __init__(self, klass: typing.Type[typing.Any]) -> None: ...
 
 class MutableListTypeInfo:
     def __init__(self, val_info: object) -> None: ...

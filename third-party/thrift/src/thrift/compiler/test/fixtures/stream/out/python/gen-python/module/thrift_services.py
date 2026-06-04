@@ -31,7 +31,7 @@ class PubSubStreamingServiceInterface(
     def service_name() -> bytes:
         return b"PubSubStreamingService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"returnstream": (RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_returnstream),
             b"streamthrows": (RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_streamthrows),

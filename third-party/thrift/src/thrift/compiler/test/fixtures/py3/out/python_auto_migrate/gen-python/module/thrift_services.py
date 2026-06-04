@@ -31,7 +31,7 @@ class SimpleServiceInterface(
     def service_name() -> bytes:
         return b"SimpleService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"get_five": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_five),
             b"add_five": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_add_five),
@@ -658,7 +658,7 @@ SimpleServiceInterface,
     def service_name() -> bytes:
         return b"DerivedService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"get_six": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_six),
         }
@@ -706,7 +706,7 @@ DerivedServiceInterface,
     def service_name() -> bytes:
         return b"RederivedService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"get_seven": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_seven),
         }

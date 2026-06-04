@@ -33,7 +33,7 @@ class SomeServiceInterface(
     def service_name() -> bytes:
         return b"SomeService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
         functionTable = {
             b"bounce_map": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_bounce_map),
             b"binary_keyed_map": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_binary_keyed_map),

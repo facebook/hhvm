@@ -14,6 +14,9 @@
 #include "mcrouter/lib/network/CarbonMessageDispatcher.h"
 #include "mcrouter/lib/network/CaretHeader.h"
 #include "mcrouter/lib/network/FBTrace.h"
+#ifndef LIBMC_FBTRACE_DISABLE
+#include "mcrouter/lib/network/McServerRequestContext.h"
+#endif
 
 namespace facebook {
 namespace memcache {
@@ -109,6 +112,8 @@ class CarbonRequestHandler : public facebook::memcache::CarbonMessageDispatcher<
     if (tracingData != nullptr) {
       // Mark the context as being traced by Artillery
       markContextAsTraced(ctx);
+      facebook::mcrouter::extractAndSetCallerIdentities(
+          *tracingData, ctx.getThriftRequestContext());
       tracingData->startCounters();
     }
 #endif

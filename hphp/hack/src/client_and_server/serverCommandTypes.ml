@@ -229,6 +229,8 @@ module Find_my_tests = struct
     max_test_files: int option; [@default None]
     root_provenance: bool; [@default false]
     time_limit_secs: int option; [@default None]
+    test_count_checkpoint_secs: int list; [@default [20; 30; 40]]
+        (** Elapsed-time checkpoints (in seconds) at which to record the number of selected test files. *)
     max_method_parent_steps: int option; [@default None]
     max_class_parent_steps: int option; [@default None]
     parent_max_fanout_files: int option; [@default None]
@@ -249,6 +251,7 @@ module Find_my_tests = struct
       max_test_files = None;
       root_provenance = false;
       time_limit_secs = None;
+      test_count_checkpoint_secs = [20; 30; 40];
       max_method_parent_steps = None;
       max_class_parent_steps = None;
       parent_max_fanout_files = None;

@@ -245,7 +245,7 @@ folly::dynamic makeDynamic(const HPHP::TypedValue& data) {
     default:
       SystemLib::throwInvalidOperationExceptionObject(fmt::format(
         "HPHP::Variant to folly::dynamic conversion failed! Got an "
-        "unconvertible Variant of type {}...", data.type()));
+        "unconvertible Variant of type {}...", fmt::underlying(data.type())));
   }
   not_reached();
 }

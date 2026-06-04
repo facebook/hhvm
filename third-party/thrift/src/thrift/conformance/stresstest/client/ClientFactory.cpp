@@ -345,9 +345,7 @@ folly::AsyncTransport::UniquePtr createFizzSocket(
                           typename std::remove_pointer_t<
                               decltype(t)>::ShouldSliceFn{});
                     }) {
-        t->setShouldSlicePredicate([](const folly::IOBuf& buf) {
-          return !facebook::services::SecureThriftUtil::isUnencrypted(buf);
-        });
+        t->setShouldSlicePredicate([](const folly::IOBuf&) { return false; });
       }
     }(fizzClient.get());
   }
@@ -455,9 +453,7 @@ folly::AsyncTransport::UniquePtr createIOUringFizz(
                           typename std::remove_pointer_t<
                               decltype(t)>::ShouldSliceFn{});
                     }) {
-        t->setShouldSlicePredicate([](const folly::IOBuf& buf) {
-          return !facebook::services::SecureThriftUtil::isUnencrypted(buf);
-        });
+        t->setShouldSlicePredicate([](const folly::IOBuf&) { return false; });
       }
     }(fizzClient.get());
   }

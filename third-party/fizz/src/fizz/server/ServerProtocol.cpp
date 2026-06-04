@@ -159,18 +159,17 @@ AsyncActions ServerStateMachine::processSocketData(
     const State& state,
     folly::IOBufQueue& buf,
     Aead::AeadOptions options) {
-  auto toReportFizzError = [](const State& state,
-                              std::exception_ptr execption,
-                              AlertDescription alert) {
-    return ReportError(
-        folly::make_exception_wrapper<FizzException>(
-            folly::to<std::string>(
-                "error decoding record in state ",
-                toString(state.state()),
-                ": ",
-                folly::exceptionStr(execption)),
-            alert));
-  };
+  auto toReportFizzError =
+      [&state](std::exception_ptr execption, AlertDescription alert) {
+        return ReportError(
+            folly::make_exception_wrapper<FizzException>(
+                folly::to<std::string>(
+                    "error decoding record in state ",
+                    toString(state.state()),
+                    ": ",
+                    folly::exceptionStr(execption)),
+                alert));
+      };
   try {
     if (!state.readRecordLayer()) {
       return detail::handleError(
@@ -190,7 +189,6 @@ AsyncActions ServerStateMachine::processSocketData(
       return detail::handleError(
           state,
           toReportFizzError(
-              state,
               err.toException().exception_ptr(),
               AlertDescription::decode_error),
           AlertDescription::decode_error);
@@ -209,7 +207,7 @@ AsyncActions ServerStateMachine::processSocketData(
     return detail::handleError(
         state,
         toReportFizzError(
-            state, std::current_exception(), AlertDescription::decode_error),
+            std::current_exception(), AlertDescription::decode_error),
         AlertDescription::decode_error);
   }
 }

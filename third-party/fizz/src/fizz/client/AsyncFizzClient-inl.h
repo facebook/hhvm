@@ -417,7 +417,7 @@ void AsyncFizzClientT<SM>::deliverAllErrors(
     replaySafetyCallback_ = nullptr;
   }
 
-  auto invokeWriteError = [](auto& ex, void* callback) {
+  auto invokeWriteError = [&ex](void* callback) {
     FIZZ_DCHECK(callback);
     static_cast<folly::AsyncTransportWrapper::WriteCallback*>(callback)
         ->writeErr(0, ex);
@@ -428,7 +428,7 @@ void AsyncFizzClientT<SM>::deliverAllErrors(
     auto w = std::move(pendingHandshakeAppWrites_.front());
     pendingHandshakeAppWrites_.pop_front();
     if (w.token) {
-      invokeWriteError(ex, w.token);
+      invokeWriteError(w.token);
     }
   }
 
@@ -436,13 +436,12 @@ void AsyncFizzClientT<SM>::deliverAllErrors(
     auto w = std::move(earlyDataState_->pendingAppWrites.front());
     earlyDataState_->pendingAppWrites.pop_front();
     if (w.token) {
-      invokeWriteError(ex, w.token);
+      invokeWriteError(w.token);
     }
   }
 
-  fizzClient_.moveToErrorState([&](void* writeCallbackToken) {
-    invokeWriteError(ex, writeCallbackToken);
-  });
+  fizzClient_.moveToErrorState(
+      [&](void* writeCallbackToken) { invokeWriteError(writeCallbackToken); });
 
   deliverError(ex, closeTransport);
 }

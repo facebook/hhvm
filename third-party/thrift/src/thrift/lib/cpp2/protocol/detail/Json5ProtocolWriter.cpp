@@ -94,6 +94,7 @@ std::uint32_t Json5ProtocolWriter::beginWriteValue() {
       //             before                                 after
       return writer_.writeObjectName("value");
   }
+  folly::assume_unreachable();
 }
 
 std::uint32_t Json5ProtocolWriter::endWriteValue() {

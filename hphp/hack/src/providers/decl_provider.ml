@@ -172,30 +172,6 @@ let get_class
   end)
   |> Decl_entry.map ~f:(Tuple3.map_snd ~f:Folded_class.make)
 
-let prefetch_decls (ctx : Provider_context.t) (class_names : string list) : unit
-    =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Rust_provider_backend backend ->
-    (* Pass None for ctx_proxy: prefetch runs on rayon threads which
-       cannot safely call back into the OCaml runtime. With None, the
-       Rust file provider reads from disk/shmem only, skipping IDE
-       buffer lookups. *)
-    let opts =
-      Provider_context.get_popt ctx |> Decl_parser_options.from_parser_options
-    in
-    let t = Unix.gettimeofday () in
-    Rust_provider_backend.Decl.prefetch_folded_classes
-      backend
-      None
-      ~opts
-      class_names;
-    let elapsed = Unix.gettimeofday () -. t in
-    Hh_logger.log
-      "[prefetch] %d classes, %.1fs"
-      (List.length class_names)
-      elapsed
-  | _ -> ()
-
 let remove_classes_from_decl_heap (names : SSet.t) ~old_members ~new_members =
   Decl_class_elements.remove_old_all old_members;
   Decl_class_elements.remove_all new_members;

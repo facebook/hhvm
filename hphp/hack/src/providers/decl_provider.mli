@@ -162,12 +162,6 @@ val local_changes_push_sharedmem_stack : unit -> unit
 
 val local_changes_pop_sharedmem_stack : unit -> unit
 
-(** Prefetch folded class declarations in parallel using rayon threads.
-    For the Rust_provider_backend, resolves all given class names concurrently
-    to warm the shared memory cache before sequential type-checking begins.
-    No-op for other backends. Best-effort: errors are silently ignored. *)
-val prefetch_decls : Provider_context.t -> string list -> unit
-
 val remove_classes :
   Provider_context.t ->
   SSet.t ->

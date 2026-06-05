@@ -123,11 +123,7 @@ folly::IoUringBackend::Options getIoUringOptions() {
   }
 
   if (FLAGS_set_iouring_defer_taskrun) {
-    if (folly::IoUringBackend::kernelSupportsDeferTaskrun()) {
-      options.setDeferTaskRun(FLAGS_set_iouring_defer_taskrun);
-    } else {
-      LOG(ERROR) << "not setting DeferTaskRun as not supported on this kernel";
-    }
+    options.setDeferTaskRun(FLAGS_set_iouring_defer_taskrun);
   }
 
   if (FLAGS_task_run_coop) {

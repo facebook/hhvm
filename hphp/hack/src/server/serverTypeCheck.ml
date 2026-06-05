@@ -851,10 +851,6 @@ let type_check_core
     |> Telemetry.int_
          ~key:"typecheck_lazy_check_later_count"
          ~value:(Relative_path.Set.cardinal lazy_check_later)
-    |> Telemetry.int_opt
-         ~key:"typecheck_defer_decl_threshold"
-         ~value:
-           genv.local_config.ServerLocalConfig.defer_class_declaration_threshold
     |> Telemetry.bool_
          ~key:"enable_type_check_filter_files"
          ~value:

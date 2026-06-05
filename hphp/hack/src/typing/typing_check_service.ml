@@ -293,10 +293,14 @@ let neutral : unit -> typing_result = Typing_service_types.make_typing_result
 let should_enable_deferring (file : check_file_workitem) =
   not file.was_already_deferred
 
+(** A [deferment] is a file together with a class decl that we need to fetch
+    before we continue with our scheduled typechecking work. *)
+type deferment = Relative_path.t * string
+
 type process_file_results = {
   file_diagnostics: Diagnostics.t;
   file_map_reduce_data: Map_reduce.t;
-  deferred_decls: Deferred_decl.deferment list;
+  deferred_decls: deferment list;
 }
 
 let scrape_class_names (ast : Nast.program) : SSet.t =

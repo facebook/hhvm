@@ -80,9 +80,6 @@ type t = {
       (** If set to 0, only the type check delegate's logic will be used.
         If the delegate fails to type check, the typing check service as a whole
         will fail. *)
-  tco_defer_class_declaration_threshold: int option;
-      (** If set, defers class declarations after N lazy declarations; if not set,
-        always lazily declares classes not already in cache. *)
   tco_locl_cache_capacity: int;
       (** The capacity of the localization cache for large types *)
   tco_locl_cache_node_threshold: int;
@@ -313,7 +310,6 @@ val set :
   ?tco_legacy_experimental_features:SSet.t ->
   ?tco_migration_flags:SSet.t ->
   ?tco_num_local_workers:int ->
-  ?tco_defer_class_declaration_threshold:int ->
   ?tco_locl_cache_capacity:int ->
   ?tco_locl_cache_node_threshold:int ->
   ?so_naming_sqlite_path:string ->

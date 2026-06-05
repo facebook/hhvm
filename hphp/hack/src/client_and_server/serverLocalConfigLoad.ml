@@ -74,7 +74,6 @@ let default =
     skip_tast_checks = false;
     silence_errors_under_dynamic = false;
     num_local_workers = None;
-    defer_class_declaration_threshold = None;
     heartbeat_interval = None;
     prefetch_decls_enabled = false;
     prefetch_decls_threshold = 0;
@@ -624,9 +623,6 @@ let load_
       config
   in
   let num_local_workers = int_opt Config_keys.Hhconf.num_local_workers config in
-  let defer_class_declaration_threshold =
-    int_opt Config_keys.Hhconf.defer_class_declaration_threshold config
-  in
   let heartbeat_interval =
     int_opt Config_keys.Hhconf.heartbeat_interval config
   in
@@ -1108,7 +1104,6 @@ let load_
     skip_tast_checks;
     silence_errors_under_dynamic;
     num_local_workers;
-    defer_class_declaration_threshold;
     heartbeat_interval;
     prefetch_decls_enabled;
     prefetch_decls_threshold;

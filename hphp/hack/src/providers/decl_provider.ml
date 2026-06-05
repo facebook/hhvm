@@ -101,7 +101,6 @@ let get_class_from_decl_store ctx class_name =
     | None -> None
     | Some Naming_types.TTypedef -> None
     | Some Naming_types.TClass ->
-      Deferred_decl.raise_if_should_defer ();
       let (decl, _) = declare_folded_class ctx class_name in
       Some (Typing_class_types.make_class_t decl)
   end

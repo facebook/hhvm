@@ -30,7 +30,6 @@
   decl
   decl_counters
   default_injector_config
-  deferred_decl
   provider_utils
   server_monitor
   telemetry_test_utils

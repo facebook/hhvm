@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<321516aa042746cf8d8640a249067bd8>>
+// @generated SignedSource<<c0c95fc8f2f106045015899744ce6116>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -175,9 +175,6 @@ pub struct GlobalOptions {
     /// If the delegate fails to type check, the typing check service as a whole
     /// will fail.
     pub tco_num_local_workers: Option<isize>,
-    /// If set, defers class declarations after N lazy declarations; if not set,
-    /// always lazily declares classes not already in cache.
-    pub tco_defer_class_declaration_threshold: Option<isize>,
     /// The capacity of the localization cache for large types
     pub tco_locl_cache_capacity: isize,
     /// The number of nodes a type has to exceed to enter the localization cache

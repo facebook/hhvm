@@ -511,9 +511,6 @@ module Hhconf = struct
 
   let cpu_priority = hhconf_key "cpu_priority"
 
-  let defer_class_declaration_threshold =
-    hhconf_key "defer_class_declaration_threshold"
-
   let enable_fuzzy_search = hhconf_key "enable_fuzzy_search"
 
   let enable_global_access_check = hhconf_key "enable_global_access_check"

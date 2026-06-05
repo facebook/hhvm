@@ -10,9 +10,6 @@
 
 open Hh_prelude
 
-let tcopt_with_defer =
-  GlobalOptions.{ default with tco_defer_class_declaration_threshold = Some 1 }
-
 let test_process_data =
   ServerProcess.
     {
@@ -37,49 +34,12 @@ let test_dmesg_parser () =
     "hh_server"
     input
 
-let ensure_threshold ~(threshold : int) ~(decl_count : int) : unit =
-  let result =
-    Deferred_decl.with_deferred_decls
-      ~enable:true
-      ~declaration_threshold_opt:(Some threshold)
-      ~memory_mb_threshold_opt:None
-    @@ fun () ->
-    for _i = 1 to decl_count do
-      Deferred_decl.raise_if_should_defer ()
-    done
-  in
-  match result with
-  | Ok () ->
-    Asserter.Bool_asserter.assert_equals
-      (threshold > decl_count)
-      true
-      (Printf.sprintf
-         "We've fetched %d decls, we should have reached the threshold %d"
-         decl_count
-         threshold)
-  | Error () ->
-    Asserter.Bool_asserter.assert_equals
-      (threshold <= decl_count)
-      true
-      (Printf.sprintf
-         "We've fetched %d decls, we should not have reached the threshold %d"
-         decl_count
-         threshold)
-
-let test_deferred_decl_should_defer () =
-  ensure_threshold ~threshold:0 ~decl_count:1;
-  ensure_threshold ~threshold:1 ~decl_count:2;
-  ensure_threshold ~threshold:2 ~decl_count:1;
-  ensure_threshold ~threshold:1 ~decl_count:5;
-
-  true
-
 (* In this test, we wish to establish that we enable deferring type checking
    for files that have undeclared dependencies, UNLESS we've already deferred
    those files a certain number of times. *)
 let test_process_file_deferring () =
   let { Common_setup.ctx; foo_path; _ } =
-    Common_setup.setup ~sqlite:false tcopt_with_defer ~xhp_as:`Namespaces
+    Common_setup.setup ~sqlite:false GlobalOptions.default ~xhp_as:`Namespaces
   in
   let file =
     Typing_service_types.{ path = foo_path; was_already_deferred = false }
@@ -137,7 +97,7 @@ let expected_decling_count = 75
    ProviderUtils.compute_tast_and_errors_unquarantined. *)
 let test_compute_tast_counting () =
   let { Common_setup.ctx; foo_path; foo_contents; _ } =
-    Common_setup.setup ~sqlite:false tcopt_with_defer ~xhp_as:`Namespaces
+    Common_setup.setup ~sqlite:false GlobalOptions.default ~xhp_as:`Namespaces
   in
 
   let (ctx, entry) =
@@ -179,7 +139,10 @@ let test_compute_tast_counting_local_mem () =
       Provider_backend.set_shared_memory_backend ())
     ~do_:(fun () ->
       let { Common_setup.ctx; foo_path; foo_contents; _ } =
-        Common_setup.setup ~sqlite:false tcopt_with_defer ~xhp_as:`Namespaces
+        Common_setup.setup
+          ~sqlite:false
+          GlobalOptions.default
+          ~xhp_as:`Namespaces
       in
       let (ctx, entry) =
         Provider_context.add_or_overwrite_entry_contents
@@ -241,7 +204,7 @@ let test_should_enable_deferring () =
 let test_quarantine () =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let { Common_setup.ctx; foo_path; foo_contents; nonexistent_path; _ } =
-    Common_setup.setup ~sqlite:false tcopt_with_defer ~xhp_as:`Namespaces
+    Common_setup.setup ~sqlite:false GlobalOptions.default ~xhp_as:`Namespaces
   in
   let ctx_orig = ctx in
 
@@ -314,7 +277,6 @@ let test_quarantine () =
 
 let tests =
   [
-    ("test_deferred_decl_should_defer", test_deferred_decl_should_defer);
     ("test_process_file_deferring", test_process_file_deferring);
     ("test_compute_tast_counting", test_compute_tast_counting);
     ( "test_compute_tast_counting_local_mem",

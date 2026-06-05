@@ -465,8 +465,6 @@ module Hhconf : sig
 
   val cpu_priority : string
 
-  val defer_class_declaration_threshold : string
-
   val enable_fuzzy_search : string
 
   val enable_global_access_check : string

@@ -13,9 +13,6 @@ type t = GlobalOptions.t [@@deriving eq, show]
 
 let num_local_workers t = t.GlobalOptions.tco_num_local_workers
 
-let defer_class_declaration_threshold t =
-  t.GlobalOptions.tco_defer_class_declaration_threshold
-
 let language_feature_logging t = t.GlobalOptions.tco_language_feature_logging
 
 let legacy_experimental_feature_enabled t feature =

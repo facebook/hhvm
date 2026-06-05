@@ -29,10 +29,14 @@ type distc_config = distc_config_options option
 
 type seconds_since_epoch = float
 
+(** A [deferment] is a file together with a class decl that we need to fetch
+    before we continue with our scheduled typechecking work. *)
+type deferment = Relative_path.t * string
+
 type process_file_results = {
   file_diagnostics: Diagnostics.t;
   file_map_reduce_data: Map_reduce.t;
-  deferred_decls: Deferred_decl.deferment list;
+  deferred_decls: deferment list;
 }
 
 val should_enable_deferring : Typing_service_types.check_file_workitem -> bool

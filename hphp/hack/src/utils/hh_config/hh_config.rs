@@ -369,7 +369,6 @@ impl HhConfig {
             ),
             tco_migration_flags: default.tco_migration_flags,
             tco_num_local_workers: default.tco_num_local_workers,
-            tco_defer_class_declaration_threshold: default.tco_defer_class_declaration_threshold,
             tco_locl_cache_capacity: hhconfig
                 .get_int_or("locl_cache_capacity", default.tco_locl_cache_capacity)?,
             tco_locl_cache_node_threshold: hhconfig.get_int_or(

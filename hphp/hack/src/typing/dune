@@ -118,14 +118,6 @@
   (pps ppx_deriving.std ppx_hash)))
 
 (library
- (name deferred_decl)
- (wrapped false)
- (modules deferred_decl)
- (libraries relative_path utils_core)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name typing_class_types)
  (wrapped false)
  (modules
@@ -524,7 +516,6 @@
   typing_check_job)
  (libraries
   core_kernel
-  deferred_decl
   errors
   typing_error
   file_info
@@ -549,7 +540,6 @@
   depgraph_decompress_ffi
   server_env
   server_env_build
-  deferred_decl
   errors
   typing_error
   typing_service_types

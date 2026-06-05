@@ -95,7 +95,6 @@ type t = {
   tco_legacy_experimental_features: SSet.t;
   tco_migration_flags: SSet.t;
   tco_num_local_workers: int option;
-  tco_defer_class_declaration_threshold: int option;
   tco_locl_cache_capacity: int;
   tco_locl_cache_node_threshold: int;
   so_naming_sqlite_path: string option;
@@ -210,7 +209,6 @@ let default =
     tco_legacy_experimental_features = SSet.empty;
     tco_migration_flags = SSet.empty;
     tco_num_local_workers = None;
-    tco_defer_class_declaration_threshold = None;
     tco_locl_cache_capacity = 30;
     tco_locl_cache_node_threshold = 10_000;
     so_naming_sqlite_path = None;
@@ -327,7 +325,6 @@ let set
     ?tco_legacy_experimental_features
     ?tco_migration_flags
     ?tco_num_local_workers
-    ?tco_defer_class_declaration_threshold
     ?tco_locl_cache_capacity
     ?tco_locl_cache_node_threshold
     ?so_naming_sqlite_path
@@ -451,10 +448,6 @@ let set
       setting tco_migration_flags options.tco_migration_flags;
     tco_num_local_workers =
       setting_opt tco_num_local_workers options.tco_num_local_workers;
-    tco_defer_class_declaration_threshold =
-      setting_opt
-        tco_defer_class_declaration_threshold
-        options.tco_defer_class_declaration_threshold;
     tco_locl_cache_capacity =
       setting tco_locl_cache_capacity options.tco_locl_cache_capacity;
     tco_locl_cache_node_threshold =

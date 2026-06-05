@@ -298,9 +298,6 @@ type t = {
       (** If None, only the type check delegate's logic will be used.
       If the delegate fails to type check, the typing check service as a whole
       will fail. *)
-  defer_class_declaration_threshold: int option;
-      (** If set, defers class declarations after N lazy declarations; if not set,
-      always lazily declares classes not already in cache. *)
   heartbeat_interval: int option;
       (** If set, periodically log which file is being type-checked, every this many seconds *)
   prefetch_decls_enabled: bool;

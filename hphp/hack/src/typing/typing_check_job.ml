@@ -29,10 +29,6 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
     (* Cancellation request must be re-raised *)
     let e = Exception.wrap exn in
     Exception.reraise e
-  | exn when Deferred_decl.is_defer_exn exn ->
-    (* Defer exception must be re-raised *)
-    let e = Exception.wrap exn in
-    Exception.reraise e
   | File_provider.File_provider_stale as exn ->
     (* File-provider-stale must be re-raised so the recheck loop
        can restart a full init cycle. *)

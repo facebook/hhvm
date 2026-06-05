@@ -42,6 +42,7 @@
 #include "mcrouter/routes/OriginalClientHashRoute.h"
 #include "mcrouter/routes/RandomRouteFactory.h"
 #include "mcrouter/routes/RoutingGroupRoute.h"
+#include "mcrouter/routes/SetDistributionTargetRoute.h"
 #include "mcrouter/routes/StagingRoute.h"
 
 namespace folly {
@@ -297,6 +298,11 @@ McRouteHandleProvider<MemcacheRouterInfo>::buildRouteMap() {
          return makeRateLimitRoute(factory, json);
        }},
       {"RoutingGroupRoute", &makeRoutingGroupRoute<MemcacheRouterInfo>},
+      {"SetDistributionTargetRoute",
+       [](McRouteHandleFactory& factory, const folly::dynamic& json) {
+         return makeSetDistributionTargetRoute<MemcacheRouterInfo>(
+             factory, json);
+       }},
       {"StagingRoute", &makeStagingRoute},
       {"WarmUpRoute", &makeWarmUpRoute},
   };

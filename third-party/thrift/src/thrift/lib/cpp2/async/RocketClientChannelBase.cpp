@@ -282,7 +282,7 @@ template <class Handler>
                 (*otherMetadataRef)
                     [isProxiedResponse ? detail::kHeaderProxiedUexw
                                        : detail::kHeaderUexw] =
-                        *exceptionWhatRef;
+                        detail::clampExceptionWhatForHeader(*exceptionWhatRef);
               }
               if (auto dExClass = exceptionMetadataRef->declaredException()
                                       ->errorClassification()) {
@@ -368,7 +368,7 @@ template <class Handler>
                 (*otherMetadataRef)
                     [isProxiedResponse ? detail::kHeaderProxiedUexw
                                        : detail::kHeaderUexw] =
-                        *exceptionWhatRef;
+                        detail::clampExceptionWhatForHeader(*exceptionWhatRef);
               }
               payload = handler.handleException(
                   TApplicationException(exceptionWhatRef.value_or("")));

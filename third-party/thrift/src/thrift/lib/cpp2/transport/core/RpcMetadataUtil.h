@@ -17,6 +17,9 @@
 #pragma once
 
 #include <chrono>
+#include <cstddef>
+#include <string>
+#include <string_view>
 
 #include <folly/dynamic.h>
 #include <thrift/lib/cpp/transport/THeader.h>
@@ -35,6 +38,32 @@ inline constexpr std::string_view kHeaderProxiedUex = "puex";
 // User exception message
 inline constexpr std::string_view kHeaderUexw = "uexw";
 inline constexpr std::string_view kHeaderProxiedUexw = "puexw";
+
+// THeader serializes its info-header block with a 16-bit length field (counted
+// in 4-byte words), so all headers combined must fit well under ~256KB, and the
+// legacy THeader client buffers that block in ~64KB. When a Rocket response is
+// translated back to THeader (e.g. by SR proxy) the user-exception message is
+// copied verbatim out of the (size-unbounded) Rocket payload into the
+// uexw/puexw string header above; an oversized message overflows the length
+// field and yields a frame the peer cannot decode (and leaks the response
+// buffer on the legacy THeader client). Clamp it to a size that always fits.
+// See S669483.
+inline constexpr size_t kMaxExceptionWhatHeaderSize = 32 * 1024;
+
+inline std::string clampExceptionWhatForHeader(
+    const std::string& exceptionWhat) {
+  if (exceptionWhat.size() <= kMaxExceptionWhatHeaderSize) {
+    return exceptionWhat;
+  }
+  constexpr std::string_view kTruncationMarker =
+      "...[truncated: exception message too large for THeader]";
+  std::string clamped;
+  clamped.reserve(kMaxExceptionWhatHeaderSize);
+  clamped.append(
+      exceptionWhat, 0, kMaxExceptionWhatHeaderSize - kTruncationMarker.size());
+  clamped.append(kTruncationMarker);
+  return clamped;
+}
 // Server exception (code defined in ResponseChannel.h)
 inline constexpr std::string_view kHeaderEx = "ex";
 inline constexpr std::string_view kHeaderProxiedEx = "pex";

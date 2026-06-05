@@ -231,3 +231,29 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
         requestRpcMetadata.compression().value(), CompressionAlgorithm::ZSTD);
   }
 }
+
+// A normal-sized exception message is copied through unchanged.
+TEST(RpcMetadataUtil, ClampExceptionWhatSmallMessageUnchanged) {
+  const std::string what = "boom: something went wrong";
+  EXPECT_EQ(clampExceptionWhatForHeader(what), what);
+}
+
+// A message exactly at the limit still fits, so it is left unchanged.
+TEST(RpcMetadataUtil, ClampExceptionWhatAtLimitUnchanged) {
+  const std::string what(kMaxExceptionWhatHeaderSize, 'x');
+  EXPECT_EQ(clampExceptionWhatForHeader(what), what);
+}
+
+// An oversized message (e.g. an ~8MB proxied exception) is clamped so it can
+// never overflow the THeader 16-bit header-length field. See S669483.
+TEST(RpcMetadataUtil, ClampExceptionWhatTruncatesOversizedMessage) {
+  const std::string what(kMaxExceptionWhatHeaderSize + 4096, 'x');
+  const std::string clamped = clampExceptionWhatForHeader(what);
+
+  // Result fits exactly within the budget...
+  EXPECT_EQ(clamped.size(), kMaxExceptionWhatHeaderSize);
+  // ...keeps the original prefix...
+  EXPECT_EQ(clamped.substr(0, 32), std::string(32, 'x'));
+  // ...and is marked as truncated rather than silently cut.
+  EXPECT_NE(clamped.find("truncated"), std::string::npos);
+}

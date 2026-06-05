@@ -24,7 +24,7 @@
 
 THRIFT_FLAG_DEFINE_bool(server_fizz_prealloc_from_record_hint, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_aligned_record_reads, false);
-THRIFT_FLAG_DEFINE_bool(server_fizz_skip_slice_partial_writes, false);
+THRIFT_FLAG_DEFINE_bool(server_fizz_disable_partial_writes, false);
 
 namespace apache::thrift {
 
@@ -36,11 +36,6 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     void, setSockOptTLSInfo, fizz::server::AsyncFizzServer*) {
-  return;
-}
-
-THRIFT_PLUGGABLE_FUNC_REGISTER(
-    void, setFizzShouldSlicePredicate, fizz::server::AsyncFizzServer*) {
   return;
 }
 } // namespace detail
@@ -138,8 +133,12 @@ void ThriftFizzAcceptorHandshakeHelper::fizzHandshakeSuccess(
           }
         }(transport);
       }
-      if (**THRIFT_FLAG_OBSERVE(server_fizz_skip_slice_partial_writes)) {
-        detail::setFizzShouldSlicePredicate(transport);
+      if (**THRIFT_FLAG_OBSERVE(server_fizz_disable_partial_writes)) {
+        [](auto* t) {
+          if constexpr (requires { t->setDisablePartialWrites(true); }) {
+            t->setDisablePartialWrites(true);
+          }
+        }(transport);
       }
     }
 

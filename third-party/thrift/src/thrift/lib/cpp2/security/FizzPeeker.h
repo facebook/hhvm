@@ -32,9 +32,6 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     void, setSockOptTLSInfo, fizz::server::AsyncFizzServer*);
-
-THRIFT_PLUGGABLE_FUNC_DECLARE(
-    void, setFizzShouldSlicePredicate, fizz::server::AsyncFizzServer*);
 } // namespace detail
 
 class ThriftParametersContext;

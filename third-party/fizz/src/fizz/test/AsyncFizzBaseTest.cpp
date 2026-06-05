@@ -857,15 +857,15 @@ TEST_F(AsyncFizzBaseTest, TestNoWriteBufferingReplayUnsafe) {
   this->writeChain(nullptr, buf->clone());
 }
 
-TEST_F(AsyncFizzBaseTest, TestNoWriteBufferingPredicateFalse) {
-  this->setShouldSlicePredicate([](const folly::IOBuf&) { return false; });
+TEST_F(AsyncFizzBaseTest, TestNoWriteBufferingDisablePartialWrites) {
+  this->setDisablePartialWrites(true);
   this->expectWrite('a', kPartialWriteThreshold * 10);
   auto buf = getBuf('a', kPartialWriteThreshold * 10);
   this->writeChain(nullptr, buf->clone());
 }
 
-TEST_F(AsyncFizzBaseTest, TestNoWriteBufferingPredicateFalseChain) {
-  this->setShouldSlicePredicate([](const folly::IOBuf&) { return false; });
+TEST_F(AsyncFizzBaseTest, TestNoWriteBufferingDisablePartialWritesChain) {
+  this->setDisablePartialWrites(true);
   this->expectWrite('a', kPartialWriteThreshold * 10);
   auto chain = getBuf('a', kPartialWriteThreshold * 5);
   chain->appendToChain(getBuf('a', kPartialWriteThreshold * 5));

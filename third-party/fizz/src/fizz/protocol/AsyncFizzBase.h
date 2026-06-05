@@ -346,18 +346,13 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   }
 
   /**
-   * Predicate consulted on every writeChain to decide whether large/shared
-   * writes should be sliced into kPartialWriteThreshold-sized chunks before
-   * being handed to the record layer.
-   *
-   * Callers that need different policy can install a custom predicate; for
-   * example, a buffer that should be passed through to the record layer in a
-   * single piece can be exempted by returning false here.
+   * Disables slicing of large/shared writes into kPartialWriteThreshold-sized
+   * chunks before they are handed to the record layer. Disabling this can
+   * increase memory usage if allocations are required for large encrypted
+   * buffers.
    */
-  using ShouldSliceFn = folly::Function<bool(const folly::IOBuf& buf) const>;
-
-  void setShouldSlicePredicate(ShouldSliceFn fn) {
-    shouldSliceFn_ = std::move(fn);
+  void setDisablePartialWrites(bool disable) {
+    disablePartialWrites_ = disable;
   }
 
   /**
@@ -628,8 +623,6 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   void
   getReadBuffer(folly::IOBufQueue& buf, void** bufReturn, size_t* lenReturn);
 
-  bool shouldSlice(const folly::IOBuf& buf);
-
   ReadCallback* readCallback_{nullptr};
   std::unique_ptr<folly::IOBuf> appDataBuf_;
   folly::Optional<folly::AsyncSocketException> pendingReadEx_;
@@ -641,8 +634,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   bool handshakeAligned_{false};
   bool preallocFromRecordHint_{false};
   bool alignedRecordReads_{false};
-
-  ShouldSliceFn shouldSliceFn_;
+  bool disablePartialWrites_{false};
 
   QueuedWriteRequest* tailWriteRequest_{nullptr};
   QueuedWriteRequest* immediatelyPendingWriteRequest_{nullptr};

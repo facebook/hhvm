@@ -340,12 +340,8 @@ folly::AsyncTransport::UniquePtr createFizzSocket(
       }
     }(fizzClient.get());
     [](auto* t) {
-      if constexpr (requires {
-                      t->setShouldSlicePredicate(
-                          typename std::remove_pointer_t<
-                              decltype(t)>::ShouldSliceFn{});
-                    }) {
-        t->setShouldSlicePredicate([](const folly::IOBuf&) { return false; });
+      if constexpr (requires { t->setDisablePartialWrites(true); }) {
+        t->setDisablePartialWrites(true);
       }
     }(fizzClient.get());
   }
@@ -448,12 +444,8 @@ folly::AsyncTransport::UniquePtr createIOUringFizz(
       }
     }(fizzClient.get());
     [](auto* t) {
-      if constexpr (requires {
-                      t->setShouldSlicePredicate(
-                          typename std::remove_pointer_t<
-                              decltype(t)>::ShouldSliceFn{});
-                    }) {
-        t->setShouldSlicePredicate([](const folly::IOBuf&) { return false; });
+      if constexpr (requires { t->setDisablePartialWrites(true); }) {
+        t->setDisablePartialWrites(true);
       }
     }(fizzClient.get());
   }

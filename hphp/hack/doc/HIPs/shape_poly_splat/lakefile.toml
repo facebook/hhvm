@@ -1,0 +1,10 @@
+name = "shapes"
+version = "0.1.0"
+defaultTargets = ["shapes"]
+
+[[lean_lib]]
+name = "Shapes"
+
+[[lean_exe]]
+name = "shapes"
+root = "Main"

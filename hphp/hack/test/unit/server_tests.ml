@@ -92,8 +92,7 @@ let test_process_file_deferring () =
     Typing_check_service.process_file
       ctx
       file
-      ~decl_cap_mb:None
-      ~prefetch_decls_enabled:false
+      ~prefetch_decls_enabled:true
       ~prefetch_decls_threshold:0
   in
   Counters.restore_state prev_counter_state;

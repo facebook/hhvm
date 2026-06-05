@@ -315,7 +315,6 @@ let scrape_class_names (ast : Nast.program) : SSet.t =
 let process_file
     (ctx : Provider_context.t)
     (file : check_file_workitem)
-    ~(decl_cap_mb : int option)
     ~(prefetch_decls_enabled : bool)
     ~(prefetch_decls_threshold : int) : process_file_results =
   let fn = file.path in
@@ -327,61 +326,64 @@ let process_file
       file_map_reduce_data = Map_reduce.empty;
     }
   else begin
-    (* Decl prefetching: implemented for Rust provider backend only *)
-    (if prefetch_decls_enabled then
-      match Provider_context.get_backend ctx with
-      | Provider_backend.Rust_provider_backend _ ->
-        let nast = Diagnostics.ignore_ (fun () -> Naming.program ctx ast) in
-        let class_names = scrape_class_names nast in
-        if SSet.cardinal class_names > prefetch_decls_threshold then
-          Decl_provider.prefetch_decls ctx (SSet.elements class_names)
-      | _ -> ());
     let opts = Provider_context.get_tcopt ctx in
     let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
-    try
-      let (result : (_, unit) result) =
-        Deferred_decl.with_deferred_decls
-          ~enable:(should_enable_deferring file)
-          ~declaration_threshold_opt:
-            (TypecheckerOptions.defer_class_declaration_threshold opts)
-          ~memory_mb_threshold_opt:decl_cap_mb
-          (fun () ->
-            Typing_check_job.calc_errors_and_tast
-              ctx
-              fn
-              ~drop_fixmed:false
-              ~full_ast:ast)
-      in
-      match result with
-      | Ok (file_errors, tasts) ->
+    (* For decl-heavy files, hand the file's referenced class decls to the
+       master as [Declare] workitems rather than folding them all inline in this
+       single worker. The master schedules them across worker processes,
+       then re-checks this file against the now-warm cache. *)
+    let deferred_decls =
+      if prefetch_decls_enabled && should_enable_deferring file then begin
+        let class_names =
+          Diagnostics.ignore_ (fun () -> Naming.program ctx ast)
+          |> scrape_class_names
+        in
+        let num_refs = SSet.cardinal class_names in
+        if num_refs > prefetch_decls_threshold then begin
+          Hh_logger.log
+            "[defer decls] %s: deferring %d decls to prefetch before type checking"
+            (Relative_path.suffix fn)
+            num_refs;
+          SSet.elements class_names
+          |> List.filter_map ~f:(fun class_name ->
+                 Naming_provider.get_class_path ctx class_name >>| fun fn ->
+                 (fn, class_name))
+        end else
+          []
+      end else
+        []
+    in
+    match deferred_decls with
+    | _ :: _ ->
+      {
+        file_diagnostics = Diagnostics.empty;
+        deferred_decls;
+        file_map_reduce_data = Map_reduce.empty;
+      }
+    | [] -> begin
+      try
+        let (file_errors, tasts) =
+          Typing_check_job.calc_errors_and_tast
+            ctx
+            fn
+            ~drop_fixmed:false
+            ~full_ast:ast
+        in
         {
           file_diagnostics = file_errors;
           deferred_decls = [];
           file_map_reduce_data = Map_reduce.map ctx fn tasts file_errors;
         }
-      | Error () ->
-        let deferred_decls =
-          Diagnostics.ignore_ (fun () -> Naming.program ctx ast)
-          |> scrape_class_names
-          |> SSet.elements
-          |> List.filter_map ~f:(fun class_name ->
-                 Naming_provider.get_class_path ctx class_name >>| fun fn ->
-                 (fn, class_name))
-        in
-        {
-          file_diagnostics = Diagnostics.empty;
-          deferred_decls;
-          file_map_reduce_data = Map_reduce.empty;
-        }
-    with
-    | WorkerCancel.Worker_should_exit as exn ->
-      (* Cancellation requests must be re-raised *)
-      let e = Exception.wrap exn in
-      Exception.reraise e
-    | exn ->
-      let e = Exception.wrap exn in
-      prerr_endline ("Exception on file " ^ Relative_path.S.to_string fn);
-      Exception.reraise e
+      with
+      | WorkerCancel.Worker_should_exit as exn ->
+        (* Cancellation requests must be re-raised *)
+        let e = Exception.wrap exn in
+        Exception.reraise e
+      | exn ->
+        let e = Exception.wrap exn in
+        prerr_endline ("Exception on file " ^ Relative_path.S.to_string fn);
+        Exception.reraise e
+    end
   end
 
 module ProcessFilesTally = struct
@@ -465,7 +467,6 @@ let process_one_workitem
     ({ diagnostics; map_reduce_data; tally; stats } : workitem_accumulator) :
     TypingProgress.progress_outcome * workitem_accumulator =
   let heartbeat_interval = check_info.heartbeat_interval in
-  let decl_cap_mb = None in
   let workitem_cap_mb = Option.value memory_cap ~default:Int.max_value in
   let type_check_twice =
     check_info.per_file_profiling
@@ -486,7 +487,6 @@ let process_one_workitem
         process_file
           ctx
           file
-          ~decl_cap_mb
           ~prefetch_decls_enabled:check_info.prefetch_decls_enabled
           ~prefetch_decls_threshold:check_info.prefetch_decls_threshold
       in
@@ -505,7 +505,6 @@ let process_one_workitem
             process_file
               ctx
               file
-              ~decl_cap_mb
               ~prefetch_decls_enabled:false
               ~prefetch_decls_threshold:0
           in

@@ -16,6 +16,7 @@
 
 #include <thrift/lib/cpp2/protocol/JSONProtocolCommon.h>
 
+#include <string_view>
 #include <type_traits>
 
 #include <iterator>
@@ -43,6 +44,8 @@ class WrappedIOBufQueueAppender {
     out_.push(reinterpret_cast<const uint8_t*>(CHECK_NOTNULL(s)), n);
     length_ += n;
   }
+
+  void append(std::string_view sv) { append(sv.data(), sv.size()); }
 
   void push_back(const char c) { append(&c, 1); }
 

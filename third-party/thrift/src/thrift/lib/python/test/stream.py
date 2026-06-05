@@ -27,7 +27,11 @@ from thrift.py3.test.stream.thrift_services import StreamTestServiceInterface
 from thrift.py3.test.stream.thrift_types import FuncEx, StreamEx
 from thrift.python.client import ClientType, get_client
 from thrift.python.common import RpcOptions
-from thrift.python.exceptions import ApplicationError, ApplicationErrorType
+from thrift.python.exceptions import (
+    ApplicationError,
+    ApplicationErrorType,
+    ApplicationOverloadError,
+)
 
 
 class _TestStreamError(Exception):
@@ -147,6 +151,42 @@ class StreamClientTest(unittest.IsolatedAsyncioTestCase):
                 with self.assertRaises(StreamEx):
                     async for _ in stream:  # noqa: F841 current flake8 version too old to support "async for _ in"
                         pass
+
+    async def test_stream_application_overload_error(self) -> None:
+        """
+        ApplicationOverloadError raised from within a stream generator reaches
+        the client as ApplicationError, but the type is NOT preserved -- it is
+        coerced to UNKNOWN.
+
+        This is a known limitation: unlike the unary handler path, stream/sink
+        element errors do not round-trip the TApplicationException type over the
+        stream protocol, so the trusted overload error code is lost. (Raising it
+        is still handled cleanly server-side, i.e. not logged as an unexpected
+        error.)
+        """
+
+        class OverloadStreamHandler(Handler):
+            async def returnstream(
+                self, i32_from: int, i32_to: int
+            ) -> AsyncIterator[int]:
+                yield i32_from
+                raise ApplicationOverloadError("shedding load")
+
+        async with TestServer(handler=OverloadStreamHandler(), ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                StreamTestService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                stream = await client.returnstream(0, 10)
+                self.assertEqual(await stream.__anext__(), 0)
+                with self.assertRaises(ApplicationError) as ex:
+                    async for _ in stream:  # noqa: F841
+                        pass
+                self.assertEqual(ex.exception.type, ApplicationErrorType.UNKNOWN)
 
     async def test_stream_cancel(self) -> None:
         async with local_server() as sa:

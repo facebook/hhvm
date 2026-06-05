@@ -21,6 +21,7 @@ from folly cimport cFollyPromise
 
 from thrift.python.exceptions cimport (
     ApplicationError,
+    ApplicationOverloadError,
     cTApplicationException,
     cTApplicationExceptionType__UNKNOWN,
 )
@@ -81,6 +82,13 @@ async def invokeBidiTransformCallback(
     try:
         output_gen = await bidi_callback(input_gen)
         promise.complete(output_gen)
+    except ApplicationOverloadError as ex:
+        # The overload type can't be carried on a bidi stream element (client
+        # sees UNKNOWN); handle it cleanly so it isn't logged as an unexpected
+        # error.
+        promise.error_ta(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, ex.message.encode('UTF-8')
+        ))
     except ApplicationError as ex:
         promise.error_ta(
             cTApplicationException(ex.type.value, ex.message.encode('UTF-8'))

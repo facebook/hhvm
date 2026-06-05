@@ -117,6 +117,10 @@ cdef class ApplicationError(Error):
 cdef ApplicationError create_ApplicationError(const cTApplicationException* ex)
 
 
+cdef class ApplicationOverloadError(Error):
+    pass
+
+
 cdef class TransportError(LibraryError):
     pass
 

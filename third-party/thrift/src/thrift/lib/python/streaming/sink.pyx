@@ -36,6 +36,7 @@ from thrift.python.mutable_serializer import (
 from folly.iobuf cimport IOBuf, from_unique_ptr as iobuf_from_unique_ptr
 from thrift.python.exceptions cimport (
     ApplicationError,
+    ApplicationOverloadError,
     cTApplicationException,
     cTApplicationExceptionType__UNKNOWN,
     create_py_exception,
@@ -193,6 +194,13 @@ async def invokeCallbackWithGenerator(
         promise.complete(final_resp_iobuf)
     except PythonUserException as pyex:
         promise.error_py(cmove(dereference((<PythonUserException>pyex)._cpp_obj.release())))
+    except ApplicationOverloadError as ex:
+        # The overload type can't be carried on a sink final response (client
+        # sees UNKNOWN); handle it cleanly so it isn't logged as an unexpected
+        # error.
+        promise.error_ta(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, ex.message.encode('UTF-8')
+        ))
     except ApplicationError as ex:
         promise.error_ta(
             cTApplicationException(ex.type.value, ex.message.encode('UTF-8'))

@@ -87,6 +87,32 @@ cdef ApplicationError create_ApplicationError(const cTApplicationException* ex):
         message,
     )
 
+cdef class ApplicationOverloadError(Error):
+    """
+    Raise from a thrift-python handler to shed load: the client observes an
+    ``ApplicationError`` with type ``ApplicationErrorType.LOADSHEDDING``.
+
+    Exceptions raised by handler code are "untrusted" by default: a plain
+    ``ApplicationError`` has its type discarded and is observed by the client as
+    ``ApplicationErrorType.UNKNOWN`` (a rogue handler must not be able to forge
+    the error codes a client relies on).
+
+    The ``LOADSHEDDING`` type is only preserved when raised from a unary handler
+    (or ``lifecycle_coro``). When raised from a stream, sink, or bidirectional
+    stream generator, the type cannot be carried on a stream/sink element and the
+    client observes ``ApplicationErrorType.UNKNOWN`` instead.
+    """
+
+    def __init__(self, str message):
+        if not message:
+            raise ValueError("message is empty")
+        super().__init__(message)
+
+    @property
+    def message(self):
+        return self.args[0]
+
+
 cdef class LibraryError(Error):
     """Equivalent of a C++ TLibraryException"""
     def __init__(self, *args):

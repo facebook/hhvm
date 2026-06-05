@@ -30,14 +30,21 @@ from libcpp.unordered_set cimport unordered_set
 from libcpp.utility cimport move as cmove
 from libcpp.vector cimport vector as cvector
 
-from folly cimport cFollyPromise, cFollyUnit, c_unit
+from folly cimport cFollyPromise, cFollyUnit, c_unit, cFollyExceptionWrapper
 from folly.executor cimport get_executor
 from folly.iobuf cimport IOBuf, from_unique_ptr
+from libcpp.string cimport string
 from thrift.python.exceptions cimport (
     ApplicationError,
+    ApplicationOverloadError,
     cTApplicationException,
     cTApplicationExceptionType__UNKNOWN,
 )
+
+cdef extern from "thrift/lib/python/server/TrustedServerExceptionUtil.h" namespace "apache::thrift::python":
+    cdef cFollyExceptionWrapper makeAppOverloadExceptionWrapper(
+        const string& message
+    ) except +
 from thrift.python.server_impl.request_context cimport (
     Cpp2RequestContext,
     handleAddressCallback,
@@ -126,6 +133,9 @@ cdef class Promise_Sink(Promise_Py):
     cdef error_ta(Promise_Sink self, cTApplicationException err):
         self._cPromise.setException(err)
 
+    cdef error_tse(Promise_Sink self, cFollyExceptionWrapper err):
+        self._cPromise.setException(cmove(err))
+
     cdef error_py(Promise_Sink self, cPythonUserException err):
         self._cPromise.setException(cmove(err))
 
@@ -152,6 +162,9 @@ cdef class Promise_Stream(Promise_Py):
     cdef error_ta(Promise_Stream self, cTApplicationException err):
         self.cPromise.setException(err)
 
+    cdef error_tse(Promise_Stream self, cFollyExceptionWrapper err):
+        self.cPromise.setException(cmove(err))
+
     cdef error_py(Promise_Stream self, cPythonUserException err):
         self.cPromise.setException(cmove(err))
 
@@ -176,6 +189,9 @@ cdef class Promise_cFollyUnit(Promise_Py):
 
     cdef error_ta(Promise_cFollyUnit self, cTApplicationException err):
         self.cPromise.setException(err)
+
+    cdef error_tse(Promise_cFollyUnit self, cFollyExceptionWrapper err):
+        self.cPromise.setException(cmove(err))
 
     cdef error_py(Promise_cFollyUnit self, cPythonUserException err):
         self.cPromise.setException(cmove(err))
@@ -253,6 +269,9 @@ cdef class Promise_BiDi(Promise_Py):
     cdef error_ta(Promise_BiDi self, cTApplicationException err):
         self._cPromise.setException(err)
 
+    cdef error_tse(Promise_BiDi self, cFollyExceptionWrapper err):
+        self._cPromise.setException(cmove(err))
+
     cdef error_py(Promise_BiDi self, cPythonUserException err):
         self._cPromise.setException(cmove(err))
 
@@ -266,6 +285,15 @@ cdef class Promise_BiDi(Promise_Py):
         cdef Promise_BiDi inst = Promise_BiDi.__new__(Promise_BiDi)
         inst._cPromise[0] = cmove(promise)
         return inst
+
+cdef void _fail_with_app_overload(Promise_Py promise, ApplicationOverloadError ex):
+    # Build the C++ TrustedServerException (wrapped in an exception_wrapper that
+    # retains its concrete type) so the overload error code -- and therefore the
+    # ApplicationErrorType (LOADSHEDDING) -- is preserved to the client, unlike a
+    # plain TApplicationException whose type is discarded.
+    cdef string message = <string>ex.message.encode('UTF-8')
+    promise.error_tse(makeAppOverloadExceptionWrapper(message))
+
 
 cdef void _move_python_user_exception(Promise_Py promise, PythonUserException pyex):
     cdef unique_ptr[cPythonUserException] owned = cmove(pyex._cpp_obj)
@@ -289,6 +317,9 @@ async def serverCallback_coro(object callFunc, str funcName, Promise_Py promise,
             val = await callFunc(buf, prot)
     except PythonUserException as pyex:
         _move_python_user_exception(promise, <PythonUserException>pyex)
+    except ApplicationOverloadError as ex:
+        # Preserves ApplicationErrorType.LOADSHEDDING to the client.
+        _fail_with_app_overload(promise, ex)
     except ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.error_ta(cTApplicationException(
@@ -321,6 +352,9 @@ async def lifecycle_coro(object func, str funcName, Promise_Py promise):
         await func()
     except PythonUserException as pyex:
         _move_python_user_exception(promise, <PythonUserException>pyex)
+    except ApplicationOverloadError as ex:
+        # Preserves ApplicationErrorType.LOADSHEDDING to the client.
+        _fail_with_app_overload(promise, ex)
     except ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.error_ta(cTApplicationException(

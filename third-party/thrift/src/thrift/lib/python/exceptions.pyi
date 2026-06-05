@@ -44,6 +44,10 @@ class ApplicationError(Error):
     type: ApplicationErrorType
     message: str
 
+class ApplicationOverloadError(Error):
+    def __init__(self, message: str) -> None: ...
+    message: str
+
 class LibraryError(Error):
     def __init__(self, *args: object) -> None: ...
 

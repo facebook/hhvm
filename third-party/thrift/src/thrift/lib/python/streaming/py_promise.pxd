@@ -16,7 +16,7 @@ from libcpp.memory cimport unique_ptr
 from libcpp.optional cimport optional
 from cpython.ref cimport PyObject
 
-from folly cimport cFollyPromise
+from folly cimport cFollyPromise, cFollyExceptionWrapper
 from folly.iobuf cimport cIOBuf, IOBuf
 from thrift.python.exceptions cimport cTApplicationException
 from thrift.python.streaming.python_user_exception cimport cPythonUserException
@@ -27,6 +27,7 @@ ctypedef PyObject* PyObjPtr
 
 cdef class Promise_Py:
     cdef error_ta(Promise_Py self, cTApplicationException err)
+    cdef error_tse(Promise_Py self, cFollyExceptionWrapper err)
     cdef error_py(Promise_Py self, cPythonUserException err)
     cdef complete(Promise_Py self, object pyobj)
 
@@ -34,6 +35,7 @@ cdef class Promise_Optional_IOBuf(Promise_Py):
     cdef cFollyPromise[optional[unique_ptr[cIOBuf]]]* cPromise
 
     cdef error_ta(Promise_Optional_IOBuf self, cTApplicationException err)
+    cdef error_tse(Promise_Optional_IOBuf self, cFollyExceptionWrapper err)
     cdef error_py(Promise_Optional_IOBuf self, cPythonUserException err)
     cdef complete(Promise_Optional_IOBuf self, object pyobj)
 
@@ -44,6 +46,7 @@ cdef class Promise_IOBuf(Promise_Py):
     cdef cFollyPromise[unique_ptr[cIOBuf]]* cPromise
 
     cdef error_ta(Promise_IOBuf self, cTApplicationException err)
+    cdef error_tse(Promise_IOBuf self, cFollyExceptionWrapper err)
     cdef error_py(Promise_IOBuf self, cPythonUserException err)
     cdef complete(Promise_IOBuf self, object pyobj)
 
@@ -54,6 +57,7 @@ cdef class Promise_PyObject(Promise_Py):
     cdef cFollyPromise[PyObjPtr]* cPromise
 
     cdef error_ta(Promise_PyObject self, cTApplicationException err)
+    cdef error_tse(Promise_PyObject self, cFollyExceptionWrapper err)
     cdef error_py(Promise_PyObject self, cPythonUserException err)
     cdef error_py_object(Promise_PyObject self, object ex)
     cdef complete(Promise_PyObject self, object pyobj)

@@ -24,6 +24,7 @@ import sys
 from folly.iobuf cimport IOBuf
 from thrift.python.exceptions cimport (
     ApplicationError,
+    ApplicationOverloadError,
     GeneratedError,
     cTApplicationExceptionType__UNKNOWN,
 )
@@ -33,6 +34,9 @@ from thrift.python.streaming.python_user_exception cimport PythonUserException
 
 cdef class Promise_Py:
     cdef error_ta(Promise_Py self, cTApplicationException err):
+        pass
+
+    cdef error_tse(Promise_Py self, cFollyExceptionWrapper err):
         pass
 
     cdef error_py(Promise_Py self, cPythonUserException err):
@@ -52,6 +56,9 @@ cdef class Promise_IOBuf(Promise_Py):
 
     cdef error_ta(Promise_IOBuf self, cTApplicationException err):
         self.cPromise.setException(err)
+
+    cdef error_tse(Promise_IOBuf self, cFollyExceptionWrapper err):
+        self.cPromise.setException(cmove(err))
 
     cdef error_py(Promise_IOBuf self, cPythonUserException err):
         self.cPromise.setException(cmove(err))
@@ -80,6 +87,9 @@ cdef class Promise_Optional_IOBuf(Promise_Py):
     cdef error_ta(Promise_Optional_IOBuf self, cTApplicationException err):
         self.cPromise.setException(err)
 
+    cdef error_tse(Promise_Optional_IOBuf self, cFollyExceptionWrapper err):
+        self.cPromise.setException(cmove(err))
+
     cdef error_py(Promise_Optional_IOBuf self, cPythonUserException err):
         self.cPromise.setException(cmove(err))
 
@@ -104,6 +114,9 @@ cdef class Promise_PyObject(Promise_Py):
 
     cdef error_ta(Promise_PyObject self, cTApplicationException err):
         self.cPromise.setException(err)
+
+    cdef error_tse(Promise_PyObject self, cFollyExceptionWrapper err):
+        self.cPromise.setException(cmove(err))
 
     cdef error_py(Promise_PyObject self, cPythonUserException err):
         self.cPromise.setException(cmove(err))
@@ -143,6 +156,13 @@ async def runGenerator(
         promise.cPromise.setValue(optional[unique_ptr[cIOBuf]]())
     except PythonUserException as pyex:
         promise.error_py(cmove(dereference((<PythonUserException>pyex)._cpp_obj.release())))
+    except ApplicationOverloadError as ex:
+        # The overload type can't be carried on a stream/sink element (client
+        # sees UNKNOWN); handle it cleanly so it isn't logged as an unexpected
+        # error.
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, ex.message.encode('UTF-8')
+        ))
     except ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(

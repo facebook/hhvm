@@ -42,8 +42,9 @@ void ContextImpl::deactivate() noexcept {
   pipeline_->deactivateFromIndex(handlerIndex_);
 }
 
-void ContextImpl::fireEvent(TypeErasedBox&& evt) noexcept {
-  pipeline_->fireEvent(std::move(evt));
+void ContextImpl::fireEvent(
+    std::uint32_t ev, TypeErasedBox&& eventMessage) noexcept {
+  pipeline_->fireEvent(ev, std::move(eventMessage));
 }
 BytesPtr ContextImpl::allocate(size_t size) noexcept {
   return pipeline_->allocate(size);

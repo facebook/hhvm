@@ -64,7 +64,8 @@ namespace apache::thrift::fast_thrift::channel_pipeline {
 template <
     typename HeadHandler,
     typename TailHandler,
-    typename Allocator = SimpleBufferAllocator>
+    typename Allocator = SimpleBufferAllocator,
+    typename EventEnumT = NoEvent>
 class PipelineBuilder {
   static_assert(
       ValidEndpointPair<HeadHandler, TailHandler>,
@@ -73,6 +74,10 @@ class PipelineBuilder {
   static_assert(
       BufferAllocator<Allocator>,
       "Allocator must satisfy BufferAllocator concept");
+  static_assert(
+      EventEnum<EventEnumT>,
+      "EventEnum must be NoEvent (events disabled) or a uint32_t-backed enum "
+      "class exposing a Count sentinel as its last value");
 
  public:
   PipelineBuilder() = default;
@@ -236,7 +241,8 @@ class PipelineBuilder {
         std::move(handlers_),
         static_cast<void*>(headHandler_),
         static_cast<void*>(tailHandler_),
-        static_cast<void*>(allocator_)));
+        static_cast<void*>(allocator_),
+        kEventCount<EventEnumT>));
 
     wireHeadHandler(pipeline.get());
     wireTailHandler(pipeline.get());
@@ -244,6 +250,12 @@ class PipelineBuilder {
     pipeline->allocateFn_ = [](void* alloc, size_t size) noexcept -> BytesPtr {
       return static_cast<Allocator*>(alloc)->allocate(size);
     };
+
+    // Link per-event subscriber lists now that endpoints are wired (endpoints
+    // subscribe too). No-op when events are disabled.
+    if constexpr (kEventsEnabled<EventEnumT>) {
+      pipeline->linkEventLists();
+    }
 
     pipeline->callHandlerAdded();
     return pipeline;
@@ -274,16 +286,22 @@ class PipelineBuilder {
       static_cast<HeadHandler*>(h)->onReadReady();
     };
 
-    // User-event broadcast: head endpoint opts in by implementing
-    // `onEvent(const TypeErasedBox&)`; otherwise it's skipped during
-    // fireEvent iteration.
-    if constexpr (requires(HeadHandler& h, const TypeErasedBox& evt) {
-                    { h.onEvent(evt) } noexcept;
-                  }) {
+    // User-event subscription: the head endpoint opts in by declaring
+    // kSubscribedEvents and implementing `onEvent(E, const TypeErasedBox&)`.
+    // linkEventLists() then links one hook per subscribed event.
+    if constexpr (
+        kEventsEnabled<EventEnumT> &&
+        EndpointEventSubscriber<HeadHandler, EventEnumT>) {
       pipeline->headOnEventFn_ = [](void* h,
+                                    detail::ContextImpl* /*ctx*/,
+                                    std::uint32_t ev,
                                     const TypeErasedBox& evt) noexcept {
-        static_cast<HeadHandler*>(h)->onEvent(evt);
+        static_cast<HeadHandler*>(h)->onEvent(static_cast<EventEnumT>(ev), evt);
       };
+      pipeline->headSubscribedEvents_ =
+          detail::kSubscribedEventIds<HeadHandler, EventEnumT>.data();
+      pipeline->headSubscribedEventCount_ =
+          detail::kSubscribedEventIds<HeadHandler, EventEnumT>.size();
     }
 
     // Lifecycle methods
@@ -314,16 +332,22 @@ class PipelineBuilder {
       static_cast<TailHandler*>(t)->onWriteReady();
     };
 
-    // User-event broadcast: tail endpoint opts in by implementing
-    // `onEvent(const TypeErasedBox&)`; otherwise it's skipped during
-    // fireEvent iteration.
-    if constexpr (requires(TailHandler& t, const TypeErasedBox& evt) {
-                    { t.onEvent(evt) } noexcept;
-                  }) {
+    // User-event subscription: the tail endpoint opts in by declaring
+    // kSubscribedEvents and implementing `onEvent(E, const TypeErasedBox&)`.
+    // linkEventLists() then links one hook per subscribed event.
+    if constexpr (
+        kEventsEnabled<EventEnumT> &&
+        EndpointEventSubscriber<TailHandler, EventEnumT>) {
       pipeline->tailOnEventFn_ = [](void* t,
+                                    detail::ContextImpl* /*ctx*/,
+                                    std::uint32_t ev,
                                     const TypeErasedBox& evt) noexcept {
-        static_cast<TailHandler*>(t)->onEvent(evt);
+        static_cast<TailHandler*>(t)->onEvent(static_cast<EventEnumT>(ev), evt);
       };
+      pipeline->tailSubscribedEvents_ =
+          detail::kSubscribedEventIds<TailHandler, EventEnumT>.data();
+      pipeline->tailSubscribedEventCount_ =
+          detail::kSubscribedEventIds<TailHandler, EventEnumT>.size();
     }
 
     // Lifecycle methods
@@ -344,13 +368,15 @@ class PipelineBuilder {
   template <typename H, typename... Args>
   PipelineBuilder& addHandler(HandlerId id, Args&&... args) {
     auto handler = std::make_unique<H>(std::forward<Args>(args)...);
-    handlers_.push_back(detail::makeHandlerNode<H>(id, std::move(handler)));
+    handlers_.push_back(
+        detail::makeHandlerNode<H, EventEnumT>(id, std::move(handler)));
     return *this;
   }
 
   template <typename H>
   PipelineBuilder& addHandler(HandlerId id, std::unique_ptr<H> handler) {
-    handlers_.push_back(detail::makeHandlerNode<H>(id, std::move(handler)));
+    handlers_.push_back(
+        detail::makeHandlerNode<H, EventEnumT>(id, std::move(handler)));
     return *this;
   }
 

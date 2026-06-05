@@ -16,8 +16,11 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include <folly/ExceptionWrapper.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Event.h>
 
 namespace apache::thrift::fast_thrift::channel_pipeline {
 
@@ -108,5 +111,37 @@ concept OutboundHandler = HandlerLifecycle<H, Ctx> &&
  */
 template <typename H, typename Ctx>
 concept DuplexHandler = InboundHandler<H, Ctx> && OutboundHandler<H, Ctx>;
+
+/**
+ * EventSubscriber concept - an internal handler that registers for specific
+ * user-event types.
+ *
+ * The handler declares which event types it cares about via a static
+ * `kSubscribedEvents` (an array-like constexpr range of `E` values) and
+ * implements `onEvent(ctx, E, const TypeErasedBox&)`. The framework links one
+ * hook per subscribed event, so the handler is invoked only for those events.
+ */
+template <typename H, typename E, typename Ctx>
+concept EventSubscriber =
+    requires(H h, Ctx& ctx, E ev, const TypeErasedBox& evt) {
+      { H::kSubscribedEvents.data() } -> std::convertible_to<const E*>;
+      { H::kSubscribedEvents.size() } -> std::convertible_to<std::size_t>;
+      { h.onEvent(ctx, ev, evt) } noexcept -> std::same_as<void>;
+    };
+
+/**
+ * EndpointEventSubscriber concept - a head/tail endpoint that registers for
+ * specific user-event types.
+ *
+ * Identical to EventSubscriber except endpoints receive no Context: they
+ * implement `onEvent(E, const TypeErasedBox&)`.
+ */
+template <typename H, typename E>
+concept EndpointEventSubscriber =
+    requires(H h, E ev, const TypeErasedBox& evt) {
+      { H::kSubscribedEvents.data() } -> std::convertible_to<const E*>;
+      { H::kSubscribedEvents.size() } -> std::convertible_to<std::size_t>;
+      { h.onEvent(ev, evt) } noexcept -> std::same_as<void>;
+    };
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline

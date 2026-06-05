@@ -383,6 +383,7 @@ The container that owns all handlers and contexts.
 | `fireWrite(msg)` | Fire outbound from tail |
 | `sendRead(id, msg)` | Fire to specific handler |
 | `sendWrite(id, msg)` | Fire to specific handler |
+| `fireEvent(ev, msg)` | Deliver a user event to its subscribers (see User Events) |
 | `context(id)` | Get context by ID (nullptr if not found) |
 | `close()` | Shutdown pipeline |
 
@@ -399,6 +400,7 @@ A handler's view into the pipeline.
 | `fireRead(msg)` | Fire to next inbound handler |
 | `fireWrite(msg)` | Fire to next outbound handler |
 | `fireException(e)` | Propagate exception as message |
+| `fireEvent(ev, msg)` | Deliver a user event to its subscribers (see User Events) |
 | `pipeline()` | Access owning pipeline |
 | `handlerId()` | This handler's ID |
 | `allocate(size)` | Allocate buffer using pipeline's allocator |
@@ -865,6 +867,67 @@ The O(1) operations are achieved through:
 | **O(1) operations** | Hash table lookups, intrusive list link/unlink |
 | **Compile-time detection** | Hooks detected via `requires` expressions |
 | **Handler autonomy** | Each handler decides: drop, error, or buffer |
+
+---
+
+## User Events
+
+Beyond the inbound/outbound data path, the pipeline supports **out-of-band user
+events**: typed, control-plane signals (e.g. "begin connection close",
+"connection settled") that are delivered to interested handlers regardless of
+data-flow direction. Events are a separate channel from `fireRead`/`fireWrite`
+— they carry no notion of inbound vs outbound.
+
+### Per-Event Subscription
+
+Events are identified by a **pipeline-specific event enum**, supplied as the
+last `PipelineBuilder` template parameter and constrained by the `EventEnum`
+concept (a `uint32_t`-backed `enum class` whose last value is a `Count`
+sentinel). The default is `NoEvent`, which disables the event subsystem
+entirely — a pipeline that does not use events pays nothing for them.
+
+A handler or endpoint **subscribes** to the specific event types it cares about
+by declaring a static `kSubscribedEvents` and implementing `onEvent`:
+
+```cpp
+enum class MyEvent : std::uint32_t { Drain, Settled, Count };
+
+class DrainHandler {
+ public:
+  // Subscribe to exactly the events this handler reacts to.
+  static constexpr std::array<MyEvent, 1> kSubscribedEvents{MyEvent::Drain};
+
+  void onEvent(Context& ctx, MyEvent ev, const TypeErasedBox& msg) noexcept {
+    // Only subscribed events arrive here; switch on `ev` if subscribed to many.
+  }
+  // ... data-path handler methods ...
+};
+```
+
+Endpoints subscribe the same way but their `onEvent` takes no context:
+`onEvent(MyEvent ev, const TypeErasedBox&)`.
+
+The pipeline keeps **one intrusive list per event type**. A subscriber is linked
+into the list for each event it subscribes to, so firing an event walks only its
+subscribers — there is no broadcast and no per-handler filtering. A handler may
+subscribe to several event types; it is reached through a separate list for each.
+A firer receives its own event back only if it also subscribed to that type.
+
+### Firing Events
+
+```cpp
+ctx.fireEvent(MyEvent::Drain, erase_and_box(payload));  // from a handler
+pipeline->fireEvent(MyEvent::Drain, TypeErasedBox{});   // from an endpoint/owner
+```
+
+Within an event's list, subscribers are invoked in the order
+tail endpoint → internal handlers (tail→head) → head endpoint. The event box is
+delivered as `const&`; payload-less events fire an empty box.
+
+| Operation | Complexity |
+|-----------|------------|
+| `fireEvent(ev, msg)` | O(s) where s = subscribers of `ev` |
+| Subscription wiring | One-time, at pipeline build |
 
 ---
 

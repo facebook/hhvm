@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <array>
 #include <functional>
 #include <memory>
 #include <string>
@@ -31,6 +32,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/ServerAppAdapter.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -107,20 +109,27 @@ class ThriftServerCompositeAppAdapter final : public folly::DelayedDestruction {
   void handlerRemoved() noexcept;
   void onPipelineActive() noexcept;
   void onPipelineInactive() noexcept;
-  // Broadcast pipeline event. Acts on ThriftServerEventType::ConnectionClosed
-  // from the pipeline's ThriftServerConnectionCloseHandler — the edge that
-  // guarantees in-flight handler callbacks have settled. Fires the user
-  // closeCallback. Every other event type (including our own emitted
-  // CloseConnection, delivered back via self-broadcast) is ignored. The
-  // pipeline's onPipelineInactive is no longer the close trigger — see the cpp.
-  void onEvent(const channel_pipeline::TypeErasedBox& evt) noexcept;
+  // The single pipeline event this endpoint subscribes to: the inbound
+  // ConnectionClosed emitted by ThriftServerConnectionCloseHandler.
+  static constexpr std::array<ThriftServerEventType, 1> kSubscribedEvents{
+      ThriftServerEventType::ConnectionClosed};
+
+  // Handles the ConnectionClosed event from the pipeline's
+  // ThriftServerConnectionCloseHandler — the edge that guarantees in-flight
+  // handler callbacks have settled. Fires the user closeCallback. The
+  // subscription means only ConnectionClosed reaches us; our own emitted
+  // CloseConnection is never self-delivered. The pipeline's
+  // onPipelineInactive is no longer the close trigger — see the cpp.
+  void onEvent(
+      ThriftServerEventType ev,
+      const channel_pipeline::TypeErasedBox& evt) noexcept;
   void onWriteReady() noexcept;
 
-  // Initiate connection close. Internally broadcasts a
-  // ThriftServerEvent::CloseConnection pipeline event; the pipeline-resident
-  // ThriftServerConnectionCloseHandler picks it up and runs the terminal
-  // state machine. The user closeCallback fires when the connection has
-  // fully settled. No-op if the pipeline is not wired.
+  // Initiate connection close. Internally fires a
+  // ThriftServerEventType::CloseConnection pipeline event; the
+  // pipeline-resident ThriftServerConnectionCloseHandler picks it up and runs
+  // the terminal state machine. The user closeCallback fires when the
+  // connection has fully settled. No-op if the pipeline is not wired.
   void close() noexcept;
 
  protected:

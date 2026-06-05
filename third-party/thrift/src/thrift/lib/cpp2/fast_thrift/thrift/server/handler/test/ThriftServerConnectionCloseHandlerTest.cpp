@@ -70,8 +70,8 @@ class FakeContext {
     exceptions.push_back(std::move(e));
   }
 
-  void fireEvent(TypeErasedBox&& evt) noexcept {
-    events.push_back(std::move(evt));
+  void fireEvent(ThriftServerEventType ev, TypeErasedBox&& /*evt*/) noexcept {
+    events.push_back(ev);
   }
 
   folly::EventBase* eventBase() noexcept { return &evb_; }
@@ -83,7 +83,7 @@ class FakeContext {
   std::vector<TypeErasedBox> reads;
   std::vector<TypeErasedBox> writes;
   std::vector<folly::exception_wrapper> exceptions;
-  std::vector<TypeErasedBox> events;
+  std::vector<ThriftServerEventType> events;
 };
 
 // Test fixture: ctx is declared first so it outlives handler (the
@@ -103,9 +103,8 @@ struct Fixture {
   }
 };
 
-void expectConnectionClosedEvent(const TypeErasedBox& box) {
-  const auto& evt = box.get<ThriftServerEvent>();
-  EXPECT_EQ(evt.type, ThriftServerEventType::ConnectionClosed);
+void expectConnectionClosedEvent(ThriftServerEventType ev) {
+  EXPECT_EQ(ev, ThriftServerEventType::ConnectionClosed);
 }
 
 ThriftServerRequestMessage makeRequest(uint32_t streamId = 1) {
@@ -121,11 +120,6 @@ ThriftServerResponseMessage makeResponse(uint32_t streamId) {
           .metadata = nullptr,
           .streamId = streamId,
       }};
-}
-
-TypeErasedBox closeConnectionEvent() {
-  return erase_and_box(
-      ThriftServerEvent{ThriftServerEventType::CloseConnection});
 }
 
 // Verifies a captured outbound box holds the stream-0 CONNECTION_CLOSE
@@ -165,7 +159,8 @@ TEST(
 
   ASSERT_EQ(
       f.handler.onRead(f.ctx, erase_and_box(makeRequest(1))), Result::Success);
-  f.handler.onEvent(f.ctx, closeConnectionEvent());
+  f.handler.onEvent(
+      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
   ASSERT_TRUE(f.handler.isDraining());
 
   EXPECT_EQ(
@@ -216,7 +211,8 @@ TEST(
     CloseConnectionEventFiresConnectionCloseAndDeactivatesIfIdle) {
   Fixture f;
 
-  f.handler.onEvent(f.ctx, closeConnectionEvent());
+  f.handler.onEvent(
+      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
 
   ASSERT_EQ(f.ctx.writes.size(), 1u);
   expectConnectionCloseFrame(f.ctx.writes.front());
@@ -237,7 +233,8 @@ TEST(
       f.handler.onRead(f.ctx, erase_and_box(makeRequest(2))), Result::Success);
   ASSERT_EQ(f.handler.inFlight(), 2u);
 
-  f.handler.onEvent(f.ctx, closeConnectionEvent());
+  f.handler.onEvent(
+      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
 
   ASSERT_EQ(f.ctx.writes.size(), 1u);
   expectConnectionCloseFrame(f.ctx.writes.front());
@@ -264,11 +261,13 @@ TEST(
 TEST(ThriftServerConnectionCloseHandlerTest, CloseConnectionEventIsIdempotent) {
   Fixture f;
 
-  f.handler.onEvent(f.ctx, closeConnectionEvent());
+  f.handler.onEvent(
+      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
   EXPECT_EQ(f.ctx.writes.size(), 1u);
   EXPECT_EQ(f.ctx.pipeline_.deactivateCount, 1);
 
-  f.handler.onEvent(f.ctx, closeConnectionEvent());
+  f.handler.onEvent(
+      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
   EXPECT_EQ(f.ctx.writes.size(), 1u);
   EXPECT_EQ(f.ctx.pipeline_.deactivateCount, 1);
 }
@@ -289,7 +288,8 @@ TEST(
 
   ASSERT_EQ(
       f.handler.onRead(f.ctx, erase_and_box(makeRequest(1))), Result::Success);
-  f.handler.onEvent(f.ctx, closeConnectionEvent());
+  f.handler.onEvent(
+      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
   ASSERT_TRUE(f.handler.isDraining());
 
   // Drive the EventBase past the drain deadline. Reap timer is long
@@ -322,7 +322,8 @@ TEST(
 
   ASSERT_EQ(
       f.handler.onRead(f.ctx, erase_and_box(makeRequest(1))), Result::Success);
-  f.handler.onEvent(f.ctx, closeConnectionEvent());
+  f.handler.onEvent(
+      f.ctx, ThriftServerEventType::CloseConnection, TypeErasedBox{});
   ASSERT_TRUE(f.handler.isDraining());
 
   // Drive past both drain and reap deadlines. Drain → reap → force-close.

@@ -23,11 +23,15 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/EndpointAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/HandlerNode.h>
 
 #include <folly/sorted_vector_types.h>
 
+#include <cstddef>
+#include <cstdint>
+#include <memory>
 #include <vector>
 
 namespace apache::thrift::fast_thrift::channel_pipeline {
@@ -86,7 +90,8 @@ class PipelineImpl : public folly::DelayedDestruction {
       std::vector<detail::HandlerNode> handlers,
       void* headHandler,
       void* tailHandler,
-      void* allocator) noexcept;
+      void* allocator,
+      std::uint32_t eventCount) noexcept;
 
   // Non-copyable
   PipelineImpl(const PipelineImpl&) = delete;
@@ -128,18 +133,24 @@ class PipelineImpl : public folly::DelayedDestruction {
   void fireException(folly::exception_wrapper&& e) noexcept;
 
   /**
-   * Broadcast a user event to every registered handler in the pipeline.
-   * Iteration order is tail endpoint → internal handlers (tail→head,
-   * descending index, via the sparse `eventList_`) → head endpoint.
-   * Handlers opt in by implementing `onEvent(ctx, const TypeErasedBox&)`;
-   * non-implementors are not iterated.
+   * Fire a user event of type `ev` carrying `eventMessage` to the handlers and
+   * endpoints subscribed to that event type — and only those. Walks the single
+   * per-event list `eventLists_[ev]`; within it the order is tail endpoint →
+   * internal handlers (tail→head, descending index) → head endpoint.
    *
-   * Direction is not part of the event identity — consumers react
-   * based on the event-type payload. Firers receive their own event
-   * back; they're expected to filter by type if they handle events
-   * they also emit.
+   * Subscribers register the event types they care about (see
+   * EventSubscriber); a handler subscribed to several types is reached through
+   * a separate list for each. The firer is itself invoked only if it
+   * subscribed to `ev`. Out-of-range / disabled (no such event type) is a
+   * no-op. Direction is not part of the event identity.
+   *
+   * Type-safe entry point: callers pass the pipeline's event enum; the
+   * non-templated dispatch core (private) does the work.
    */
-  void fireEvent(TypeErasedBox&& evt) noexcept;
+  template <EventEnum E>
+  void fireEvent(E ev, TypeErasedBox&& eventMessage) noexcept {
+    fireEvent(static_cast<std::uint32_t>(ev), std::move(eventMessage));
+  }
 
   // === Fire to specific handler ===
 
@@ -308,12 +319,20 @@ class PipelineImpl : public folly::DelayedDestruction {
     // Call handlerRemoved directly without DestructorGuard to avoid recursion
     if (state_ != State::Closed) {
       state_ = State::Closed;
+      clearEventLists();
       callHandlerRemovedImpl();
     }
     delete this;
   }
 
  private:
+  // Non-templated, out-of-line dispatch core for fireEvent. The public typed
+  // overload casts the event enum to its id and forwards here. Private so
+  // callers go through the type-safe enum API; defined once in the .cpp so the
+  // per-event dispatch is not instantiated per event-enum. Reached via the
+  // friend ContextImpl forward.
+  void fireEvent(std::uint32_t ev, TypeErasedBox&& eventMessage) noexcept;
+
   // O(log N) handler lookup using sorted_vector_map - cache-friendly for small
   // N
   size_t lookupHandler(HandlerId handlerId) const noexcept;
@@ -322,6 +341,16 @@ class PipelineImpl : public folly::DelayedDestruction {
 
   // Initialize contexts after construction
   void initializeContexts() noexcept;
+  // Allocate the per-event lists and link one hook per subscribed event for
+  // every subscriber: tail endpoint first, then internal handlers tail→head,
+  // then head endpoint last (preserving event iteration order within each
+  // list). Called by the builder after endpoints are wired. No-op when events
+  // are disabled (eventListCount_ == 0).
+  void linkEventLists() noexcept;
+  // Unlink all per-event hooks. Must run before the contexts / endpoint hook
+  // arrays that own those hooks are destroyed, else auto-unlink touches a dead
+  // list sentinel. Idempotent.
+  void clearEventLists() noexcept;
   // Call handlerAdded for all handlers
   void callHandlerAdded() noexcept;
   // Call handlerRemoved for all handlers (reverse order)
@@ -344,7 +373,14 @@ class PipelineImpl : public folly::DelayedDestruction {
   void (*tailOnExceptionFn_)(void*, folly::exception_wrapper&&) noexcept {
       nullptr};
   void (*tailOnWriteReadyFn_)(void*) noexcept {nullptr};
-  void (*tailOnEventFn_)(void*, const TypeErasedBox&) noexcept {nullptr};
+  // User-event subscription for the tail endpoint (see
+  // EndpointEventSubscriber). The dispatch thunk ignores the (null) context
+  // arg. Set by the builder; linkEventLists allocates tailEventHooks_ and
+  // links one hook per subscribed event into the per-event lists.
+  EventHook::DispatchFn tailOnEventFn_{nullptr};
+  const std::uint32_t* tailSubscribedEvents_{nullptr};
+  std::size_t tailSubscribedEventCount_{0};
+  std::unique_ptr<EventHook[]> tailEventHooks_;
   // Tail handler lifecycle callbacks
   void (*tailOnPipelineActiveFn_)(void*) noexcept {nullptr};
   void (*tailOnPipelineInactiveFn_)(void*) noexcept {nullptr};
@@ -354,7 +390,12 @@ class PipelineImpl : public folly::DelayedDestruction {
   // Head handler callbacks
   Result (*headOnWriteFn_)(void*, TypeErasedBox&&) noexcept {nullptr};
   void (*headOnReadReadyFn_)(void*) noexcept {nullptr};
-  void (*headOnEventFn_)(void*, const TypeErasedBox&) noexcept {nullptr};
+  // User-event subscription for the head endpoint (see
+  // EndpointEventSubscriber).
+  EventHook::DispatchFn headOnEventFn_{nullptr};
+  const std::uint32_t* headSubscribedEvents_{nullptr};
+  std::size_t headSubscribedEventCount_{0};
+  std::unique_ptr<EventHook[]> headEventHooks_;
   // Head handler lifecycle callbacks
   void (*headOnPipelineActiveFn_)(void*) noexcept {nullptr};
   void (*headOnPipelineInactiveFn_)(void*) noexcept {nullptr};
@@ -383,14 +424,20 @@ class PipelineImpl : public folly::DelayedDestruction {
   WriteReadyList writeReadyList_;
   ReadReadyList readReadyList_;
 
-  // Intrusive list of handlers that implement onEvent. Linked once by
-  // initializeContexts based on whether the handler opted in; stays
-  // linked for the pipeline's lifetime. Walked by fireEvent — sparse,
-  // only the registered handlers iterated.
-  EventList eventList_;
+  // One intrusive list of subscribers per event type, indexed by event id.
+  // Sized to the event enum's Count at construction; the array stays null and
+  // the count zero when the pipeline's EventEnum is NoEvent. fireEvent(ev)
+  // walks only eventLists_[ev]. Hooks are owned by the subscribers' contexts
+  // (internal handlers) or by head/tailEventHooks_ (endpoints).
+  std::unique_ptr<EventList[]> eventLists_;
+  std::uint32_t eventListCount_{0};
 
   // PipelineBuilder needs access to set up the pipeline
-  template <typename HeadHandler, typename TailHandler, typename Allocator>
+  template <
+      typename HeadHandler,
+      typename TailHandler,
+      typename Allocator,
+      typename EventEnumT>
   friend class PipelineBuilder;
 
   // ContextImpl needs access to ready lists for registration

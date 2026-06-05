@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <cstdint>
+#include <memory>
+
 #include <folly/CPortability.h>
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
@@ -125,16 +128,22 @@ class ContextImpl {
   }
 
   /**
-   * Broadcast a user event to every registered handler in the pipeline
-   * (tail → head iteration order). Handlers opt in by implementing
-   * `onEvent(ctx, const TypeErasedBox&)`; non-implementors are not
-   * iterated. The firer receives its own event back — filter by
-   * event-type payload to ignore self-emitted events.
+   * Fire a user event of type `ev` carrying `eventMessage` to every handler
+   * and endpoint subscribed to that event type — and only those. Subscribers
+   * register the event types they care about (see EventSubscriber); a handler
+   * subscribed to several types receives each via its own list. The firer is
+   * itself invoked only if it subscribed to `ev`.
    *
-   * The event box is consumed; handlers receive it as const ref and
-   * inspect via `get<T>()`. Direction is not part of the event identity.
+   * The event box is passed to subscribers as a const ref; they inspect it via
+   * `get<T>()`. Direction is not part of the event identity.
+   *
+   * Type-safe entry point: handlers pass the pipeline's event enum; the
+   * non-templated forward (private) hands off to the owning pipeline.
    */
-  void fireEvent(TypeErasedBox&& evt) noexcept;
+  template <EventEnum E>
+  void fireEvent(E ev, TypeErasedBox&& eventMessage) noexcept {
+    fireEvent(static_cast<std::uint32_t>(ev), std::move(eventMessage));
+  }
 
   /**
    * Propagate pipeline deactivation to the next outbound handler.
@@ -235,6 +244,13 @@ class ContextImpl {
   size_t handlerIndex() const noexcept { return handlerIndex_; }
 
  private:
+  // Non-templated, out-of-line forward for fireEvent: the public typed overload
+  // casts the event enum to its id and calls this, which hands off to the
+  // owning pipeline. Out-of-line (defined in the .cpp) so this header need not
+  // see PipelineImpl's definition — breaks the ContextImpl/PipelineImpl include
+  // cycle. Private so callers use the type-safe enum API.
+  void fireEvent(std::uint32_t ev, TypeErasedBox&& eventMessage) noexcept;
+
   PipelineImpl* pipeline_;
   folly::EventBase* eventBase_;
   void* allocator_; // Type-erased BufferAllocator
@@ -260,10 +276,13 @@ class ContextImpl {
   void* prevHandler_{nullptr};
   ContextImpl* prevCtx_{nullptr};
 
-  // Event broadcast list membership. Linked by PipelineImpl during
-  // initializeContexts iff the corresponding handler implements
-  // `onEvent`. Stays linked for the pipeline's lifetime.
-  EventHook eventHook_;
+  // Per-event subscription hooks — one per event type this handler subscribed
+  // to, each linked into the matching per-event list in PipelineImpl. Kept
+  // out-of-line (heap array) so the hot read/write dispatch fields above stay
+  // compact; touched only on the cold event path. Empty when the handler
+  // subscribes to nothing. Allocated and linked by PipelineImpl during build.
+  std::unique_ptr<EventHook[]> eventHooks_;
+  std::uint32_t eventHookCount_{0};
 
   friend class ::apache::thrift::fast_thrift::channel_pipeline::PipelineImpl;
 };

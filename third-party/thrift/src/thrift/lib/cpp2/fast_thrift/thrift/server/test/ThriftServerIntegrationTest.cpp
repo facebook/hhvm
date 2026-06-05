@@ -1187,8 +1187,9 @@ TEST_F(
   // from the same thread may not propagate before the non-blocking dispatch
   // returns, deferring the cb into TearDown after closeCalled has been
   // destroyed on the stack.
-  adapter_->onEvent(erase_and_box(
-      ThriftServerEvent{ThriftServerEventType::ConnectionClosed}));
+  adapter_->onEvent(
+      ThriftServerEventType::ConnectionClosed,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox{});
   evb_.loopOnce();
 
   EXPECT_TRUE(closeCalled);

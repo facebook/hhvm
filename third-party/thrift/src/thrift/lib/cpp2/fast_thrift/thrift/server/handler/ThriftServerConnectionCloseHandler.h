@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <memory>
@@ -212,15 +213,19 @@ class ThriftServerConnectionCloseHandler {
     ctx.fireException(std::move(e));
   }
 
-  // Broadcast pipeline event. We act only on CloseConnection — every
-  // other event type (including our own emitted ConnectionClosed,
-  // delivered back via self-broadcast) is ignored.
+  // The single pipeline event this handler subscribes to: the outbound
+  // CloseConnection emitted by the tail adapter's close().
+  static constexpr std::array<ThriftServerEventType, 1> kSubscribedEvents{
+      ThriftServerEventType::CloseConnection};
+
+  // Handles CloseConnection — kicks off the terminal drain/reap state
+  // machine. The subscription means only CloseConnection reaches us; our own
+  // emitted ConnectionClosed is never self-delivered.
   void onEvent(
-      Context& ctx, const channel_pipeline::TypeErasedBox& evt) noexcept {
-    const auto& event = evt.template get<ThriftServerEvent>();
-    if (event.type != ThriftServerEventType::CloseConnection) {
-      return;
-    }
+      Context& ctx,
+      ThriftServerEventType ev,
+      const channel_pipeline::TypeErasedBox& /*evt*/) noexcept {
+    DCHECK(ev == ThriftServerEventType::CloseConnection);
     handleCloseConnectionEvent(ctx);
   }
 
@@ -275,8 +280,8 @@ class ThriftServerConnectionCloseHandler {
     drainTimer_->cancelTimeout();
     reapTimer_->cancelTimeout();
     ctx.fireEvent(
-        channel_pipeline::erase_and_box(
-            ThriftServerEvent{ThriftServerEventType::ConnectionClosed}));
+        ThriftServerEventType::ConnectionClosed,
+        channel_pipeline::TypeErasedBox{});
   }
 
   uint32_t inFlight_{0};

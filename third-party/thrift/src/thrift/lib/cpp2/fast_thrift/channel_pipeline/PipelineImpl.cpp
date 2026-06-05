@@ -16,6 +16,8 @@
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 
+#include <memory>
+
 #include <folly/CppAttributes.h>
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -72,12 +74,14 @@ PipelineImpl::PipelineImpl(
     std::vector<detail::HandlerNode> handlers,
     void* headHandler,
     void* tailHandler,
-    void* allocator) noexcept
+    void* allocator,
+    std::uint32_t eventCount) noexcept
     : eventBase_(eventBase),
       handlers_(std::move(handlers)),
       headHandler_(headHandler),
       tailHandler_(tailHandler),
-      allocator_(allocator) {
+      allocator_(allocator),
+      eventListCount_(eventCount) {
   initializeContexts();
 }
 
@@ -145,15 +149,82 @@ void PipelineImpl::initializeContexts() noexcept {
     lastCtx_ = &contexts_[N - 1];
   }
 
-  // Third pass: link the event hooks for handlers that opted into
-  // onEvent. Walked in tail→head order (descending index) so the
-  // intrusive list iteration matches the broadcast order.
-  for (size_t i = N; i > 0; --i) {
-    const auto idx = i - 1;
-    if (handlers_[idx].onEventFn) {
-      contexts_[idx].eventHook_.handlerIndex = idx;
-      eventList_.push_back(contexts_[idx].eventHook_);
+  // Per-event hooks are linked later by linkEventLists(), after the builder has
+  // wired the endpoints (endpoints subscribe too). See build().
+}
+
+void PipelineImpl::linkEventLists() noexcept {
+  if (eventListCount_ == 0) {
+    return;
+  }
+  eventLists_ = std::make_unique<EventList[]>(eventListCount_);
+
+  // Links one hook per subscribed event for an endpoint. Endpoints take no
+  // context, so the hook's ctx is null and the dispatch thunk ignores it.
+  auto linkEndpoint = [this](
+                          void* target,
+                          EventHook::DispatchFn fn,
+                          const std::uint32_t* events,
+                          std::size_t count,
+                          std::unique_ptr<EventHook[]>& hooks) noexcept {
+    if (!fn || count == 0) {
+      return;
     }
+    hooks = std::make_unique<EventHook[]>(count);
+    for (std::size_t j = 0; j < count; ++j) {
+      const std::uint32_t ev = events[j];
+      DCHECK_LT(ev, eventListCount_);
+      auto& hook = hooks[j];
+      hook.fn = fn;
+      hook.target = target;
+      hook.ctx = nullptr;
+      eventLists_[ev].push_back(hook);
+    }
+  };
+
+  // Link order within each per-event list: tail endpoint first, then internal
+  // handlers tail→head (descending index), then head endpoint last.
+  linkEndpoint(
+      tailHandler_,
+      tailOnEventFn_,
+      tailSubscribedEvents_,
+      tailSubscribedEventCount_,
+      tailEventHooks_);
+
+  for (size_t i = handlers_.size(); i > 0; --i) {
+    const size_t idx = i - 1;
+    auto& node = handlers_[idx];
+    if (!node.onEventFn || node.subscribedEventCount == 0) {
+      continue;
+    }
+    auto& ctx = contexts_[idx];
+    ctx.eventHooks_ = std::make_unique<EventHook[]>(node.subscribedEventCount);
+    ctx.eventHookCount_ = static_cast<std::uint32_t>(node.subscribedEventCount);
+    for (std::size_t j = 0; j < node.subscribedEventCount; ++j) {
+      const std::uint32_t ev = node.subscribedEvents[j];
+      DCHECK_LT(ev, eventListCount_);
+      auto& hook = ctx.eventHooks_[j];
+      hook.fn = node.onEventFn;
+      hook.target = node.handlerPtr;
+      hook.ctx = &ctx;
+      eventLists_[ev].push_back(hook);
+    }
+  }
+
+  linkEndpoint(
+      headHandler_,
+      headOnEventFn_,
+      headSubscribedEvents_,
+      headSubscribedEventCount_,
+      headEventHooks_);
+}
+
+void PipelineImpl::clearEventLists() noexcept {
+  if (!eventLists_) {
+    return;
+  }
+  for (std::uint32_t ev = 0; ev < eventListCount_; ++ev) {
+    eventLists_[ev].clear();
   }
 }
 
@@ -249,23 +320,21 @@ PIPELINE_HOT_PATH void PipelineImpl::fireException(
   firstExceptionFn_(firstHandler_, *firstCtx_, std::move(e));
 }
 
-void PipelineImpl::fireEvent(TypeErasedBox&& evt) noexcept {
+void PipelineImpl::fireEvent(
+    std::uint32_t ev, TypeErasedBox&& eventMessage) noexcept {
   RETURN_IF_CLOSED();
   DestructorGuard dg(this);
-  // Iteration order: tail endpoint → internal handlers that registered
-  // for events (sparse via eventList_, tail→head per push order in
-  // initializeContexts) → head endpoint. Firers receive their own
-  // event back; handlers filter by event-type payload if they handle
-  // events they also emit.
-  if (tailOnEventFn_) {
-    tailOnEventFn_(tailHandler_, evt);
+  // Out-of-range covers the events-disabled (NoEvent) case too: no lists, so
+  // any fire is a clean no-op.
+  if (FOLLY_UNLIKELY(ev >= eventListCount_)) {
+    return;
   }
-  for (auto& hook : eventList_) {
-    auto& h = handlers_[hook.handlerIndex];
-    h.onEventFn(h.handlerPtr, contexts_[hook.handlerIndex], evt);
-  }
-  if (headOnEventFn_) {
-    headOnEventFn_(headHandler_, evt);
+  // Walk only the subscribers of this event type. Within the list the order is
+  // tail endpoint → internal handlers tail→head → head endpoint (see
+  // linkEventLists). The hook is self-contained, so handlers and endpoints
+  // dispatch uniformly; ctx is null for endpoints.
+  for (auto& hook : eventLists_[ev]) {
+    hook.fn(hook.target, hook.ctx, ev, eventMessage);
   }
 }
 
@@ -318,9 +387,10 @@ void PipelineImpl::close() noexcept {
   // Clear ready lists - handlers should not receive callbacks after close
   writeReadyList_.clear();
   readReadyList_.clear();
-  // Unlink event hooks before contexts_ (and the hooks they own) are
-  // destroyed; otherwise auto-unlink would touch a dead list sentinel.
-  eventList_.clear();
+  // Unlink per-event hooks before contexts_ / endpoint hook arrays (which own
+  // the hooks) are destroyed; otherwise auto-unlink would touch a dead list
+  // sentinel.
+  clearEventLists();
 
   callHandlerRemoved();
 }

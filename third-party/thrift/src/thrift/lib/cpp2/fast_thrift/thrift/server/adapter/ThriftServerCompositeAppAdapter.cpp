@@ -134,11 +134,10 @@ void ThriftServerCompositeAppAdapter::onPipelineInactive() noexcept {
 }
 
 void ThriftServerCompositeAppAdapter::onEvent(
-    const channel_pipeline::TypeErasedBox& evt) noexcept {
-  const auto& event = evt.get<ThriftServerEvent>();
-  if (event.type != ThriftServerEventType::ConnectionClosed) {
-    return;
-  }
+    ThriftServerEventType ev,
+    const channel_pipeline::TypeErasedBox& /*evt*/) noexcept {
+  // We subscribe only to ConnectionClosed, so that's the only event delivered.
+  DCHECK(ev == ThriftServerEventType::ConnectionClosed);
   // Deferred onto the EventBase because the callback's typical action
   // is to destroy *us*, and we're called from inside a pipeline
   // event-dispatch walk. Skip the move-out when pipeline_ is null so
@@ -189,8 +188,8 @@ void ThriftServerCompositeAppAdapter::close() noexcept {
     return;
   }
   pipeline_->fireEvent(
-      channel_pipeline::erase_and_box(
-          ThriftServerEvent{ThriftServerEventType::CloseConnection}));
+      ThriftServerEventType::CloseConnection,
+      channel_pipeline::TypeErasedBox{});
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

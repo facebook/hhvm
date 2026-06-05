@@ -34,6 +34,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/MetadataAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionCloseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionContextHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestContextHandler.h>
@@ -225,7 +226,8 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
   PipelineBuilder<
       ThriftServerTransportAdapter,
       TailAdapter,
-      SimpleBufferAllocator>
+      SimpleBufferAllocator,
+      ThriftServerEventType>
       thriftPipelineBuilder;
   thriftPipelineBuilder.setEventBase(evb)
       .setHead(transportAdapterPtr)
@@ -240,9 +242,9 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
             std::move(connContext));
   }
   // Connection-close handler sits immediately upstream of the tail.
-  // ThriftServerConnection::close() broadcasts
-  // ThriftServerEvent::CloseConnection through the pipeline; the handler picks
-  // it up via onEvent and drives the terminal state machine.
+  // ThriftServerConnection::close() fires
+  // ThriftServerEventType::CloseConnection through the pipeline; the handler
+  // picks it up via onEvent and drives the terminal state machine.
   thriftPipelineBuilder.template addNextDuplex<CloseHandler>(
       thrift_server_connection_close_handler_tag,
       config_.drainTimeout,

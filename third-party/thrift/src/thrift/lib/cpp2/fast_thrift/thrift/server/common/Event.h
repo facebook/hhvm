@@ -21,11 +21,18 @@
 namespace apache::thrift::fast_thrift::thrift {
 
 /**
- * ThriftServerEventType — discriminator for thrift-server pipeline user
- * events. Each value names a distinct event a pipeline handler may
- * choose to handle.
+ * ThriftServerEventType — the event enum for thrift-server pipelines.
+ *
+ * Used as the channel pipeline's EventEnum template parameter: each value
+ * names a distinct user event that a pipeline handler or endpoint may
+ * subscribe to via `kSubscribedEvents`. `fireEvent(type, ...)` reaches only
+ * the subscribers of `type`. These events are payload-less — the type is the
+ * whole signal — so emitters fire an empty `TypeErasedBox`.
+ *
+ * The trailing `Count` sentinel gives the pipeline the number of event types
+ * at compile time and must remain the last enumerator.
  */
-enum class ThriftServerEventType : uint8_t {
+enum class ThriftServerEventType : std::uint32_t {
   // Owning connection initiating connection close. The
   // pipeline-resident ThriftServerConnectionCloseHandler picks this up
   // and runs the terminal state machine (drain → reap → LOG(FATAL) on
@@ -38,18 +45,8 @@ enum class ThriftServerEventType : uint8_t {
   // before this is emitted, so consumers can assume in-flight == 0).
   // Tail adapter fires its user closeCallback in response.
   ConnectionClosed,
-};
-
-/**
- * ThriftServerEvent — single concrete user-event type broadcast through
- * the thrift pipeline via PipelineImpl::fireEvent / ContextImpl::fireEvent
- * (wrapped in TypeErasedBox). Handlers that care implement
- * `onEvent(ctx, const TypeErasedBox&)` (internal) or
- * `onEvent(const TypeErasedBox&)` (endpoints), peek the payload via
- * `get<ThriftServerEvent>()`, and react based on `type`.
- */
-struct ThriftServerEvent {
-  ThriftServerEventType type;
+  // Sentinel: number of event types. Keep last.
+  Count,
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

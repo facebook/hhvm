@@ -25,7 +25,7 @@ fn main() {
         .files(files.iter().filter(is_cpp))
         .include(fbcode)
         .cpp(true)
-        .flag("-std=c++17")
+        .flag("-std=c++20")
         .compile("hhvm_types_ffi");
 
     files.iter().for_each(rerun_if_changed);

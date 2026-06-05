@@ -28,7 +28,7 @@ fn main() {
         .define("NO_HHVM", "1")
         .warnings(false)
         .cpp(true)
-        .flag("-std=c++17")
+        .flag("-std=c++20")
         .compile("ffi_bridge");
 
     files.iter().for_each(rerun_if_changed);

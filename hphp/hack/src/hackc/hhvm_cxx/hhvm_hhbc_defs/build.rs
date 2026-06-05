@@ -22,7 +22,7 @@ fn main() {
         .files(files.iter().filter(is_cpp))
         .include(fbcode)
         .cpp(true)
-        .flag("-std=c++17")
+        .flag("-std=c++20")
         .compile("hhvm_hhbc_defs");
 
     files.iter().for_each(rerun_if_changed);

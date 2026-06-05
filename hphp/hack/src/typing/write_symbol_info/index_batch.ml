@@ -49,12 +49,23 @@ let process_source_text ctx fa File_info.{ path; root_path; source_text; _ } =
       |> snd
     | _ -> fa
   in
-  let (package, has_package_override) =
-    Package_utils.get_package ctx (strip_root_if_possible path root_path) text
+  let (package_opt, has_package_override) =
+    Package_info.get_package_with_override_for_file_no_env
+      ~support_multifile_tests:
+        (Provider_context.get_tcopt ctx
+        |> TypecheckerOptions.package_support_multifile_tests)
+      (Provider_context.get_package_info ctx)
+      ~path:(strip_root_if_possible path root_path)
+      ~content:text
+  in
+  let package_name =
+    match package_opt with
+    | Some pkg -> snd pkg.Package.name
+    | None -> ""
   in
   Add_fact.file_package
     ~path
-    (Hack.Package_.Key package)
+    (Hack.Package_.Key package_name)
     has_package_override
     fa
   |> snd

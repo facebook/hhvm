@@ -322,7 +322,7 @@ let fun_def_of_stmts ctx stmts : Nast.fun_def option =
         ~support_multifile_tests:
           popt.ParserOptions.package_support_multifile_tests
         popt.ParserOptions.package_info
-        pos_suffix
+        ~path:pos_suffix
       |> Option.map ~f:(fun pkg ->
              Aast.PackageConfigAssignment (snd pkg.Package.name))
     in

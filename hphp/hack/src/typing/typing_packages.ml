@@ -110,7 +110,7 @@ let can_access_ignoring_package_override
          ~support_multifile_tests:
            (TypecheckerOptions.package_support_multifile_tests tcopt)
          (TypecheckerOptions.package_info tcopt)
-         (Relative_path.suffix target_file))
+         ~path:(Relative_path.suffix target_file))
       ~f:Package.get_package_name
   in
   let is_target_package_before_override_included =

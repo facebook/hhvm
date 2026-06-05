@@ -148,11 +148,10 @@ let go genv env file candidate_files =
       ~neutral:Relative_path.Set.empty
       ~next:(MultiWorker.next genv.ServerEnv.workers candidate_paths)
   in
-  (* --- Package filtering ---
-     Resolve the target file's "natural" package: the package assigned
-     purely by path in PACKAGES.toml, ignoring any __PackageOverride.
-     Keep only candidates whose package cannot access that natural
-     package — those are the ones that truly need the override. *)
+  (* Target uses its natural (path-based) package because the question is
+     "what if the override on the target were removed?". Dependents use
+     their *effective* package (override-honored) — they're not part of
+     that hypothetical. *)
   let tcopt = Provider_context.get_tcopt ctx in
   let pkg_info = TypecheckerOptions.package_info tcopt in
   let support_multifile_tests =
@@ -163,8 +162,9 @@ let go genv env file candidate_files =
     Package_info.get_package_for_file
       ~support_multifile_tests
       pkg_info
-      target_suffix
+      ~path:target_suffix
   in
+
   match natural_pkg with
   | None ->
     (* Target file has no natural package (not covered by PACKAGES.toml).
@@ -173,30 +173,42 @@ let go genv env file candidate_files =
   | Some natural_pkg ->
     let filtered =
       Relative_path.Set.filter ref_files ~f:(fun dep_path ->
-          let dep_suffix = Relative_path.suffix dep_path in
-          let dep_pkg =
-            Package_info.get_package_for_file
-              ~support_multifile_tests
-              pkg_info
-              dep_suffix
-          in
-          match dep_pkg with
-          | None ->
-            (* Dep has no package — conservatively assume it needs
-               the override (we can't prove it doesn't). *)
-            true
-          | Some dep_pkg ->
-            (* Check whether dep_pkg can access natural_pkg:
-               - Equal:         same package, always has access
-               - Includes:      dep_pkg hard-includes natural_pkg
-               - Soft_includes: not enforced, would break
-               - Unrelated:     no include path, would break *)
-            (match Package.relationship dep_pkg natural_pkg with
-            | Package.Equal
-            | Package.Includes ->
-              false
-            | Package.Soft_includes
-            | Package.Unrelated ->
-              true))
+          (* Same-file access is always allowed; matches
+             [Typing_packages.can_access_by_package_rules]. *)
+          if Relative_path.equal dep_path path then
+            false
+          else
+            let dep_pkg =
+              match File_provider.get_contents dep_path with
+              | None -> None
+              | Some text ->
+                let (pkg, _has_override) =
+                  Package_info.get_package_with_override_for_file_no_env
+                    ~support_multifile_tests
+                    pkg_info
+                    ~path:(Relative_path.suffix dep_path)
+                    ~content:text
+                in
+                pkg
+            in
+
+            match dep_pkg with
+            | None ->
+              (* Dep has no package — conservatively assume it needs
+                 the override (we can't prove it doesn't). *)
+              true
+            | Some dep_pkg ->
+              (* Check whether dep_pkg can access natural_pkg:
+                 - Equal:         same package, always has access
+                 - Includes:      dep_pkg hard-includes natural_pkg
+                 - Soft_includes: not enforced, would break
+                 - Unrelated:     no include path, would break *)
+              (match Package.relationship dep_pkg natural_pkg with
+              | Package.Equal
+              | Package.Includes ->
+                false
+              | Package.Soft_includes
+              | Package.Unrelated ->
+                true))
     in
     (env, filtered)

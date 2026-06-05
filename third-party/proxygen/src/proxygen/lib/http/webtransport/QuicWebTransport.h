@@ -41,6 +41,10 @@ class QuicWebTransport
     handler_ = handler;
   }
 
+  [[nodiscard]] std::shared_ptr<const quic::QuicSocket> getQuicSocket() const {
+    return quicSocket_;
+  }
+
   [[nodiscard]] quic::TransportInfo getTransportInfo() const override {
     XCHECK(quicSocket_);
     return quicSocket_->getTransportInfo();

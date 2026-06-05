@@ -2400,19 +2400,20 @@ let refine_for_equality pos env te ty =
   let (env, locl) =
     make_a_local_of ~include_this:true env (Tast.to_nast_expr te)
   in
+  let var_type = fst3 te in
   match locl with
-  | Some locl_ivar ->
+  | Some locl_ivar when not (is_dynamic var_type) ->
     let (env, refined_ty) =
       refine_and_simplify_intersection
         env
         pos
         (Reason.equal pos)
         (fst locl_ivar)
-        (fst3 te)
+        var_type
         ty
     in
     set_local env locl_ivar refined_ty
-  | None -> env
+  | _ -> env
 
 let key_exists env tparamet pos shape field =
   let field = Tast.to_nast_expr field in
@@ -8432,21 +8433,6 @@ end = struct
                   } =
               partition
             in
-            (* See Type_switch.simplify_ for why we update span and right for the false side  *)
-            let (span_for_false, dyn) =
-              List.fold_left
-                ~init:([], None)
-                ~f:(fun (tyll, dyn_opt) tyl ->
-                  match tyl with
-                  | [ty] when Typing_defs.is_dynamic ty -> (tyll, Some ty)
-                  | _ -> (tyl :: tyll, dyn_opt))
-                span
-            in
-            let right =
-              match dyn with
-              | Some dyn -> [dyn] :: right
-              | _ -> right
-            in
             let ty_trues predicate_ty env =
               union_inter_list env left span ~refine:predicate_ty
             in
@@ -8454,7 +8440,7 @@ end = struct
               union_inter_list
                 env
                 right
-                span_for_false
+                span
                 ~refine:(MakeType.neg reason predicate)
             in
             (env, { ty_trues; ty_falses; true_assumptions; false_assumptions }))

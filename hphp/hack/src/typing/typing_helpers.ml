@@ -211,9 +211,17 @@ let refine_and_simplify_intersection
     else
       (env, MakeType.locl_like reason intersection_ty)
   in
-  match Typing_dynamic_utils.try_strip_dynamic env ty with
-  | (env, Some ty) -> like_type_simplify env ty hint_ty ~is_class
-  | (env, _) -> intersect ~is_class env reason ty hint_ty
+  (* If we are refining a variable of type dynamic, and can fully enforce the result,
+   * just drop the dynamic, or convert it into a supportdyn if the type isn't already *)
+  if is_dynamic ty && is_enforced hint_ty then
+    if Utils.is_supportdyn env hint_ty then
+      (env, hint_ty)
+    else
+      Utils.make_supportdyn reason env hint_ty
+  else
+    match Typing_dynamic_utils.try_strip_dynamic env ty with
+    | (env, Some ty) -> like_type_simplify env ty hint_ty ~is_class
+    | (env, _) -> intersect ~is_class env reason ty hint_ty
 
 let make_simplify_typed_expr env p ty te =
   let (env, ty) = Typing_dynamic_utils.recompose_like_type env ty in

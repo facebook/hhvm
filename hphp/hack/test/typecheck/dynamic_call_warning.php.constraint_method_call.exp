@@ -10,14 +10,6 @@ WARN: File "dynamic_call_warning.php", line 12, characters 12-14:
 Property accessed on a value of type `dynamic` (Warn[12042])
   File "dynamic_call_warning.php", line 11, characters 42-48:
   This expression has type `dynamic`
-WARN: File "dynamic_call_warning.php", line 17, characters 9-11:
-Method invoked on a value of type `(dynamic & C)` (Warn[12038])
-  File "dynamic_call_warning.php", line 15, characters 48-54:
-  This expression has type `dynamic`
-WARN: File "dynamic_call_warning.php", line 23, characters 6-7:
-Value of type `(dynamic & C)` called as a function (Warn[12039])
-  File "dynamic_call_warning.php", line 21, characters 50-56:
-  This expression has type `dynamic`
 WARN: File "dynamic_call_warning.php", line 34, characters 8-9:
 Indexing into a value of type `dynamic` (Warn[12040])
   File "dynamic_call_warning.php", line 33, characters 38-44:
@@ -30,17 +22,25 @@ WARN: File "dynamic_call_warning.php", line 42, characters 3-4:
 Appending to a value of type `dynamic` (Warn[12040])
   File "dynamic_call_warning.php", line 41, characters 39-45:
   This expression has type `dynamic`
-WARN: File "dynamic_call_warning.php", line 47, characters 10-11:
-Indexing into a value of type `(dynamic & C)` (Warn[12040])
-  File "dynamic_call_warning.php", line 45, characters 48-54:
-  This expression has type `dynamic`
-WARN: File "dynamic_call_warning.php", line 53, characters 14-16:
-Property accessed on a value of type `(dynamic & C)` (Warn[12042])
-  File "dynamic_call_warning.php", line 51, characters 52-58:
-  This expression has type `dynamic`
-ERROR: File "dynamic_call_warning.php", line 17, characters 5-13:
+ERROR: File "dynamic_call_warning.php", line 17, characters 9-11:
+No instance method `bar` in `C` (Typing[4053])
+  File "dynamic_call_warning.php", line 16, characters 13-13:
+  This is why I think it is an object of type C from this `is` expression test
+  File "dynamic_call_warning.php", line 27, characters 7-7:
+  Declaration of `C` is here
+ERROR: File "dynamic_call_warning.php", line 23, characters 5-10:
+This call is invalid, this is not a function, it is an object of type C (Typing[4009])
+ERROR: File "dynamic_call_warning.php", line 47, characters 10-14:
 Typing error (Typing[4110])
-  File "dynamic_call_warning.php", line 17, characters 5-13:
-  Expected `(function(): _)`
-  File "dynamic_call_warning.php", line 17, characters 9-11:
-  But got `dynamic`, the result of accessing a property of a `dynamic` type
+  File "dynamic_call_warning.php", line 47, characters 10-14:
+  Expected an array that can be indexed
+  File "dynamic_call_warning.php", line 46, characters 13-13:
+  But got `C` from this `is` expression test
+ERROR: File "dynamic_call_warning.php", line 53, characters 10-11:
+Typing error (Typing[4053])
+  File "dynamic_call_warning.php", line 53, characters 14-16:
+  No property `bar` in `C`
+  File "dynamic_call_warning.php", line 52, characters 13-13:
+  This is why I think it is an object of type C from this `is` expression test
+  File "dynamic_call_warning.php", line 27, characters 7-7:
+  Declaration of `C` is here

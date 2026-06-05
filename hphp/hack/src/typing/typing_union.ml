@@ -217,6 +217,12 @@ let exact_least_upper_bound e1 e2 =
   | (Exact, Exact) -> Exact
   | (_, _) -> nonexact
 
+let try_strip_dynamic_intersect ty =
+  match get_node ty with
+  | Tintersection [ty1; ty2] when Typing_defs.is_dynamic ty1 -> Some ty2
+  | Tintersection [ty1; ty2] when Typing_defs.is_dynamic ty2 -> Some ty1
+  | _ -> None
+
 let rec union env ?reason ?(approx_cancel_neg = false) ty1 ty2 =
   if Log.should_log env ~level:1 then
     Log.log_union env ty1 ty2 @@ fun () ->
@@ -279,8 +285,17 @@ and union_ env ?reason ~approx_cancel_neg ty1 ty2 =
           in
           if Utils.is_sub_type_for_union env non_ty1 ty2 then
             (env, MakeType.mixed r)
-          else
-            union_lists ~approx_cancel_neg env [ty1] [ty2] r
+          else begin
+            (* Simplify t | (dynamic & not t) to dynamic, if t <:D dynamic *)
+            match
+              (try_strip_dynamic_intersect ty1, try_strip_dynamic_intersect ty2)
+            with
+            | (Some ty1a, _) when ty_equal ty1a non_ty2 ->
+              (env, MakeType.dynamic (get_reason ty2))
+            | (_, Some ty2a) when ty_equal ty2a non_ty1 ->
+              (env, MakeType.dynamic (get_reason ty1))
+            | _ -> union_lists ~approx_cancel_neg env [ty1] [ty2] r
+          end
 
 and simplify_union ~approx_cancel_neg env ty1 ty2 r =
   if Log.should_log env ~level:2 then

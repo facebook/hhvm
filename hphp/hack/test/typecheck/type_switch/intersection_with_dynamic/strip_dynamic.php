@@ -2,12 +2,9 @@
 
 <<file: __EnableUnstableFeatures('union_intersection_type_hints')>>
 
-/**
- * Here we want to make sure a bare dynamic is intersected w/
- */
 function foo(dynamic $x): int {
   if ($x is int) {
-    hh_expect_equivalent<(int & dynamic)>($x);
+    hh_expect_equivalent<int>($x);
     return $x;
   }
   throw new Exception();
@@ -29,6 +26,6 @@ function bar(~?vec<int> $dyn_opt_vec): ~vec<int> {
   if ($dyn_opt_vec is null) {
     throw new Exception();
   }
-  hh_expect_equivalent<~vec<int>>($dyn_opt_vec);
+  hh_expect<~vec<int>>($dyn_opt_vec);
   return $dyn_opt_vec;
 }

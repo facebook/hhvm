@@ -1,11 +1,3 @@
-WARN: File "wrap_classname.bad.php", line 17, characters 10-18:
-Indexing into a value of type `(dynamic & vec<int>)` (Warn[12040])
-  File "wrap_classname.bad.php", line 17, characters 10-18:
-  This expression has type `dynamic`, the result of calling a `dynamic` type as a function
-WARN: File "wrap_classname.bad.php", line 17, characters 14-16:
-Method invoked on a value of type `(dynamic & Wrap)` (Warn[12038])
-  File "wrap_classname.bad.php", line 15, characters 12-13:
-  This expression has type `dynamic`, the result of constructing an object with a `dynamic` type
 ERROR: File "wrap_classname.bad.php", line 6, characters 48-50:
 Method  `__construct` in class `Wrap` is not dynamically callable. (Typing[4426])
   File "wrap_classname.bad.php", line 6, characters 48-50:

@@ -59,6 +59,10 @@ DEFINE_bool(
     false,
     "Enable IORING_RECVSEND_BUNDLE on IoUringBackend multishot recv operations "
     "(requires kernel support for IORING_FEAT_RECVSEND_BUNDLE). Off by default.");
+DEFINE_bool(
+    io_prov_buffs_use_incremental,
+    false,
+    "Enable the use of incremental buffers usage for recv operations. false by default.");
 #if FOLLY_HAS_LIBURING
 
 namespace apache::thrift::stress {
@@ -174,6 +178,10 @@ folly::IoUringBackend::Options getIoUringOptions() {
 
   if (FLAGS_io_prov_buffs_use_bundles) {
     options.setProvidedBufUseBundles(true);
+  }
+
+  if (FLAGS_io_prov_buffs_use_incremental) {
+    options.setEnableIncrementalBuffers(true);
   }
 
   return options;

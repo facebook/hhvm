@@ -24,17 +24,23 @@
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/sema/schematizer.h>
+#include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
+#include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 
 namespace apache::thrift::compiler {
 
 class t_const;
 class t_enum;
+class t_exception;
 class t_global_scope;
+class t_interaction;
 class t_interface;
 class t_program;
 class t_service;
+class t_struct;
 class t_structured;
 class t_typedef;
+class t_union;
 
 namespace detail {
 
@@ -43,49 +49,48 @@ class schema_populator {
   schema_populator(schematizer& schema_utils, const t_global_scope& scope)
       : schema_utils_(schema_utils), global_scope_(scope) {}
 
-  // Creates a constant of type schema.Struct describing the argument.
+  // Creates a generated schema struct describing the argument.
   // https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift
-  std::unique_ptr<t_const_value> gen_schema(const t_structured& node);
-  std::unique_ptr<t_const_value> gen_schema(const t_interface& node);
-  std::unique_ptr<t_const_value> gen_schema(const t_service& node);
-  std::unique_ptr<t_const_value> gen_schema(const t_const& node);
-  std::unique_ptr<t_const_value> gen_schema(const t_enum& node);
-  std::unique_ptr<t_const_value> gen_schema(const t_program& node);
-  std::unique_ptr<t_const_value> gen_schema(const t_typedef& node);
+  type::Struct gen_schema(const t_struct& node);
+  type::Union gen_schema(const t_union& node);
+  type::Exception gen_schema(const t_exception& node);
+  type::Interaction gen_schema(const t_interaction& node);
+  type::Service gen_schema(const t_service& node);
+  type::Const gen_schema(const t_const& node);
+  type::Enum gen_schema(const t_enum& node);
+  type::Program gen_schema(const t_program& node);
+  type::Typedef gen_schema(const t_typedef& node);
 
-  // Creates a constant of type schema.Schema describing the argument and all
+  // Creates a schema.Schema describing the argument and all
   // types recursively referenced by it. Calls gen_schema internally.
-  std::unique_ptr<t_const_value> gen_full_schema(const t_service& node);
+  type::Schema gen_full_schema(const t_service& node);
 
  private:
-  t_type_ref std_type(std::string_view uri);
-  std::unique_ptr<t_const_value> type_uri(const t_type& type);
+  type::TypeUri type_uri(const t_type& type);
 
-  void add_definition(
-      t_const_value& schema,
+  type::DefinitionAttrs gen_attrs(
       const t_named& node,
       const t_program* program,
       const schematizer::intern_func& intern_value);
 
-  std::unique_ptr<t_const_value> gen_type(
+  type::Type gen_type(
       schema_populator* generator,
       const t_program* program,
-      t_const_value* defns_schema,
+      type::DefinitionList* defns_schema,
       const t_type& type);
 
-  std::unique_ptr<t_const_value> gen_type(
-      const t_type& type, const t_program* program) {
+  type::Type gen_type(const t_type& type, const t_program* program) {
     return gen_type(nullptr, program, nullptr, type);
   }
 
-  void add_fields(
+  type::Fields gen_fields(
       schema_populator* generator,
       const t_program* program,
-      t_const_value* defns_schema,
-      t_const_value& schema,
-      const std::string& fields_name,
+      type::DefinitionList* defns_schema,
       node_list_view<const t_field> fields,
       const schematizer::intern_func& intern_value);
+
+  type::Functions gen_functions(const t_interface& node);
 
   const schematizer::options& opts() const { return schema_utils_.opts(); }
 
@@ -107,8 +112,7 @@ class protocol_value_builder {
   // - For `t_map` this resolves to type of the value
   [[nodiscard]] protocol_value_builder property(const t_const_value& key) const;
 
-  std::unique_ptr<t_const_value> wrap(
-      const t_const_value& val, t_type_ref ttype) const;
+  protocol::Value wrap(const t_const_value& val) const;
 
  private:
   explicit protocol_value_builder();
@@ -121,11 +125,7 @@ class protocol_value_builder {
   [[nodiscard]] protocol_value_builder container_element(
       const t_const_value& val) const;
 
-  // Generates a self-describing value pair for a given `t_const_value`, e.g.
-  // String("i64Value") => I64(42)
-  // String("stringValue") => String("hello")
-  std::pair<std::unique_ptr<t_const_value>, std::unique_ptr<t_const_value>>
-  to_labeled_value(const t_const_value& value) const;
+  protocol::Value to_labeled_value(const t_const_value& value) const;
 
  private:
   const t_type* ty_;

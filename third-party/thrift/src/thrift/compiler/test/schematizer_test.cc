@@ -30,6 +30,8 @@ using namespace apache::thrift::compiler;
 using apache::thrift::compiler::detail::protocol_value_builder;
 using apache::thrift::compiler::detail::schema_populator;
 using apache::thrift::compiler::detail::schematizer;
+namespace protocol = apache::thrift::protocol;
+namespace type = apache::thrift::type;
 
 template <typename... Args>
 std::unique_ptr<t_const_value> val(Args&&... args) {
@@ -54,39 +56,59 @@ std::unique_ptr<t_const_value> val(Enm val) {
 
 TEST(SchematizerTest, wrap_with_protocol_value) {
   t_const_value str("foo");
-  auto value = protocol_value_builder::as_value_type().wrap(str, {});
-  auto map = value->get_map();
-  EXPECT_EQ(map.at(0).first->get_string(), "stringValue");
-  EXPECT_EQ(map.at(0).second->get_string(), "foo");
+  auto value = protocol_value_builder::as_value_type().wrap(str);
+  EXPECT_TRUE(value.is_string());
+  EXPECT_EQ(value.as_string(), "foo");
 }
 
 enum class MyEnum : std::uint16_t { Foo = 1, Bar = 2 };
 
+const protocol::Value& mapAtString(
+    const protocol::Value& value, std::string_view key) {
+  for (const auto& [map_key, map_value] : value.as_map()) {
+    if (map_key.is_string() && map_key.as_string() == key) {
+      return map_value;
+    }
+  }
+  throw std::out_of_range(std::string{key});
+}
+
+const protocol::Value& mapAtInt(const protocol::Value& value, int64_t key) {
+  for (const auto& [map_key, map_value] : value.as_map()) {
+    if ((map_key.is_i16() && map_key.as_i16() == key) ||
+        (map_key.is_i32() && map_key.as_i32() == key) ||
+        (map_key.is_i64() && map_key.as_i64() == key)) {
+      return map_value;
+    }
+  }
+  throw std::out_of_range(std::to_string(key));
+}
+
 template <typename T>
 void expectWrappedValue(
-    const t_const_value& wrappedValue,
-    const t_const_value::t_const_value_kind kind,
+    const protocol::Value& wrappedValue,
     std::string_view label,
     T literalValue) {
-  const auto& [key, val] = wrappedValue.get_map().at(0);
-  EXPECT_TRUE(key->kind() == t_const_value::CV_STRING);
-  EXPECT_EQ(key->get_string(), label);
-  EXPECT_TRUE(val->kind() == kind);
-  switch (kind) {
-    case t_const_value::CV_INTEGER:
-      EXPECT_EQ(literalValue, val->get_integer());
-      break;
-    case t_const_value::CV_DOUBLE:
-      EXPECT_EQ(literalValue, val->get_double());
-      break;
-    case t_const_value::CV_BOOL:
-      EXPECT_EQ(literalValue, val->get_bool());
-      break;
-    case t_const_value::CV_STRING:
-    case t_const_value::CV_MAP:
-    case t_const_value::CV_LIST:
-    case t_const_value::CV_IDENTIFIER:
-      throw std::runtime_error("Unimplemented comparison");
+  if (label == "i16Value") {
+    EXPECT_TRUE(wrappedValue.is_i16());
+    EXPECT_EQ(literalValue, wrappedValue.as_i16());
+  } else if (label == "i32Value") {
+    EXPECT_TRUE(wrappedValue.is_i32());
+    EXPECT_EQ(literalValue, wrappedValue.as_i32());
+  } else if (label == "i64Value") {
+    EXPECT_TRUE(wrappedValue.is_i64());
+    EXPECT_EQ(literalValue, wrappedValue.as_i64());
+  } else if (label == "floatValue") {
+    EXPECT_TRUE(wrappedValue.is_float());
+    EXPECT_FLOAT_EQ(literalValue, wrappedValue.as_float());
+  } else if (label == "doubleValue") {
+    EXPECT_TRUE(wrappedValue.is_double());
+    EXPECT_EQ(literalValue, wrappedValue.as_double());
+  } else if (label == "boolValue") {
+    EXPECT_TRUE(wrappedValue.is_bool());
+    EXPECT_EQ(literalValue, wrappedValue.as_bool());
+  } else {
+    throw std::runtime_error("Unimplemented comparison");
   }
 }
 
@@ -99,17 +121,13 @@ TEST(SchematizerTest, wrap_with_protocol_passthrough) {
 
   // Without type mapping, integers will be mapped to i64.
   auto value_no_type_mapping =
-      protocol_value_builder::as_value_type().wrap(*strct, {});
-  const auto& value_map =
-      value_no_type_mapping->get_map().at(0).second->get_map();
-  auto [foo, foo_val] = value_map.at(0);
-  auto [bar, bar_val] = value_map.at(1);
-  auto [baz, baz_val] = value_map.at(2);
-  auto [qux, qux_val] = value_map.at(3);
-  expectWrappedValue(*foo_val, t_const_value::CV_INTEGER, "i64Value", 1);
-  expectWrappedValue(*bar_val, t_const_value::CV_INTEGER, "i64Value", 2);
-  expectWrappedValue(*baz_val, t_const_value::CV_DOUBLE, "doubleValue", 3.14);
-  expectWrappedValue(*qux_val, t_const_value::CV_DOUBLE, "doubleValue", 4.2);
+      protocol_value_builder::as_value_type().wrap(*strct);
+  expectWrappedValue(mapAtString(value_no_type_mapping, "foo"), "i64Value", 1);
+  expectWrappedValue(mapAtString(value_no_type_mapping, "bar"), "i64Value", 2);
+  expectWrappedValue(
+      mapAtString(value_no_type_mapping, "baz"), "doubleValue", 3.14);
+  expectWrappedValue(
+      mapAtString(value_no_type_mapping, "qux"), "doubleValue", 4.2);
 }
 
 std::unique_ptr<t_struct> make_foo_bar(const t_program* program) {
@@ -142,17 +160,13 @@ TEST(SchematizerTest, wrap_with_protocol_with_struct_ty) {
   auto program = std::make_unique<t_program>("./", "./");
   auto foo_bar_ty = make_foo_bar(program.get());
   auto value_no_type_mapping =
-      protocol_value_builder{*foo_bar_ty.get()}.wrap(*strct, {});
-  const auto& value_map =
-      value_no_type_mapping->get_map().at(0).second->get_map();
-  auto [foo, foo_val] = value_map.at(0);
-  auto [bar, bar_val] = value_map.at(1);
-  auto [baz, baz_val] = value_map.at(2);
-  auto [qux, qux_val] = value_map.at(3);
-  expectWrappedValue(*foo_val, t_const_value::CV_INTEGER, "i32Value", 1);
-  expectWrappedValue(*bar_val, t_const_value::CV_INTEGER, "i16Value", 2);
-  expectWrappedValue(*baz_val, t_const_value::CV_DOUBLE, "floatValue", 3.14);
-  expectWrappedValue(*qux_val, t_const_value::CV_DOUBLE, "doubleValue", 4.2);
+      protocol_value_builder{*foo_bar_ty.get()}.wrap(*strct);
+  expectWrappedValue(mapAtString(value_no_type_mapping, "foo"), "i32Value", 1);
+  expectWrappedValue(mapAtString(value_no_type_mapping, "bar"), "i16Value", 2);
+  expectWrappedValue(
+      mapAtString(value_no_type_mapping, "baz"), "floatValue", 3.14);
+  expectWrappedValue(
+      mapAtString(value_no_type_mapping, "qux"), "doubleValue", 4.2);
 }
 
 std::unique_ptr<t_struct> make_foo_enum(
@@ -173,11 +187,8 @@ TEST(SchematizerTest, wrap_with_protocol_with_enum_ty) {
   my_enum->append_value(std::make_unique<t_enum_value>("Bar"));
   auto foo_enum_ty = make_foo_enum(program.get(), my_enum.get());
   auto value_no_type_mapping =
-      protocol_value_builder{*foo_enum_ty.get()}.wrap(*strct, {});
-  const auto& value_map =
-      value_no_type_mapping->get_map().at(0).second->get_map();
-  auto [foo, foo_val] = value_map.at(0);
-  expectWrappedValue(*foo_val, t_const_value::CV_INTEGER, "i32Value", 1);
+      protocol_value_builder{*foo_enum_ty.get()}.wrap(*strct);
+  expectWrappedValue(mapAtString(value_no_type_mapping, "foo"), "i32Value", 1);
 }
 
 std::unique_ptr<t_list> make_foo_bar_list(const t_struct* element) {
@@ -204,27 +215,21 @@ TEST(SchematizerTest, wrap_with_protocol_list) {
   foos->add_map(val("foos"), std::move(my_list));
 
   auto value_no_type_mapping =
-      protocol_value_builder{*struct_with_list_ty}.wrap(*foos, {});
-  const auto& value_map =
-      value_no_type_mapping->get_map().at(0).second->get_map();
-  auto [foos_elem, foos_val] = value_map.at(0);
-  EXPECT_EQ(foos_val->get_map().at(0).first->get_string(), "listValue");
-  const auto& foos_list = foos_val->get_map().at(0).second->get_list();
+      protocol_value_builder{*struct_with_list_ty}.wrap(*foos);
+  const auto& foos_val = mapAtString(value_no_type_mapping, "foos");
+  EXPECT_TRUE(foos_val.is_list());
+  const auto& foos_list = foos_val.as_list();
   EXPECT_EQ(foos_list.size(), 2);
 
   {
-    const auto& [li_key, li_val] = foos_list.at(0)->get_map().at(0);
-    auto [foo, foo_val] = li_val->get_map().at(0);
-    auto [bar, bar_val] = li_val->get_map().at(1);
-    expectWrappedValue(*foo_val, t_const_value::CV_INTEGER, "i32Value", 1);
-    expectWrappedValue(*bar_val, t_const_value::CV_INTEGER, "i16Value", 2);
+    const auto& li_val = foos_list.at(0);
+    expectWrappedValue(mapAtString(li_val, "foo"), "i32Value", 1);
+    expectWrappedValue(mapAtString(li_val, "bar"), "i16Value", 2);
   }
   {
-    const auto& [li_key, li_val] = foos_list.at(0)->get_map().at(0);
-    auto [foo, foo_val] = li_val->get_map().at(0);
-    auto [bar, bar_val] = li_val->get_map().at(1);
-    expectWrappedValue(*foo_val, t_const_value::CV_INTEGER, "i32Value", 1);
-    expectWrappedValue(*bar_val, t_const_value::CV_INTEGER, "i16Value", 2);
+    const auto& li_val = foos_list.at(1);
+    expectWrappedValue(mapAtString(li_val, "foo"), "i32Value", 1);
+    expectWrappedValue(mapAtString(li_val, "bar"), "i16Value", 2);
   }
 }
 
@@ -251,27 +256,24 @@ TEST(SchematizerTest, wrap_with_protocol_set) {
   foos->add_map(val("foos"), std::move(my_set));
 
   auto value_no_type_mapping =
-      protocol_value_builder{*struct_with_set_ty}.wrap(*foos, {});
-  const auto& value_map =
-      value_no_type_mapping->get_map().at(0).second->get_map();
-  auto [foos_elem, foos_val] = value_map.at(0);
-  EXPECT_EQ(foos_val->get_map().at(0).first->get_string(), "setValue");
-  const auto& foos_set = foos_val->get_map().at(0).second->get_list();
+      protocol_value_builder{*struct_with_set_ty}.wrap(*foos);
+  const auto& foos_val = mapAtString(value_no_type_mapping, "foos");
+  EXPECT_TRUE(foos_val.is_set());
+  const auto& foos_set = foos_val.as_set();
   EXPECT_EQ(foos_set.size(), 2);
-  {
-    const auto& [set_key, set_val] = foos_set.at(0)->get_map().at(0);
-    auto [foo, foo_val] = set_val->get_map().at(0);
-    auto [bar, bar_val] = set_val->get_map().at(1);
-    expectWrappedValue(*foo_val, t_const_value::CV_INTEGER, "i32Value", 1);
-    expectWrappedValue(*bar_val, t_const_value::CV_INTEGER, "i16Value", 2);
+  bool saw_first = false;
+  bool saw_second = false;
+  for (const auto& set_val : foos_set) {
+    if (mapAtString(set_val, "foo").as_i32() == 1) {
+      expectWrappedValue(mapAtString(set_val, "bar"), "i16Value", 2);
+      saw_first = true;
+    } else if (mapAtString(set_val, "foo").as_i32() == 4) {
+      expectWrappedValue(mapAtString(set_val, "bar"), "i16Value", 5);
+      saw_second = true;
+    }
   }
-  {
-    const auto& [set_key, set_val] = foos_set.at(1)->get_map().at(0);
-    auto [foo, foo_val] = set_val->get_map().at(0);
-    auto [bar, bar_val] = set_val->get_map().at(1);
-    expectWrappedValue(*foo_val, t_const_value::CV_INTEGER, "i32Value", 4);
-    expectWrappedValue(*bar_val, t_const_value::CV_INTEGER, "i16Value", 5);
-  }
+  EXPECT_TRUE(saw_first);
+  EXPECT_TRUE(saw_second);
 }
 
 TEST(SchematizerTest, wrap_with_protocol_typedef) {
@@ -287,13 +289,9 @@ TEST(SchematizerTest, wrap_with_protocol_typedef) {
   strct->add_map(val("bar"), val(2));
 
   auto value_no_type_mapping =
-      protocol_value_builder{*foo_bar_typedef}.wrap(*strct, {});
-  const auto& value_map =
-      value_no_type_mapping->get_map().at(0).second->get_map();
-  auto [foo, foo_val] = value_map.at(0);
-  auto [bar, bar_val] = value_map.at(1);
-  expectWrappedValue(*foo_val, t_const_value::CV_INTEGER, "i32Value", 1);
-  expectWrappedValue(*bar_val, t_const_value::CV_INTEGER, "i16Value", 2);
+      protocol_value_builder{*foo_bar_typedef}.wrap(*strct);
+  expectWrappedValue(mapAtString(value_no_type_mapping, "foo"), "i32Value", 1);
+  expectWrappedValue(mapAtString(value_no_type_mapping, "bar"), "i16Value", 2);
 }
 
 std::unique_ptr<t_struct> make_foo_map(
@@ -329,25 +327,12 @@ TEST(SchematizerTest, wrap_with_protocol_map) {
   submap->add_map(val(777), val(888));
   strct->add_map(val("foo_map"), std::move(submap));
 
-  auto value_no_type_mapping =
-      protocol_value_builder{*foo_map_ty}.wrap(*strct, {});
-  const auto& value_map =
-      value_no_type_mapping->get_map().at(0).second->get_map();
-  auto [foo, foo_val] = value_map.at(0);
-  auto [foo_map, foo_map_val] = value_map.at(1);
-  expectWrappedValue(*foo_val, t_const_value::CV_INTEGER, "i32Value", 1);
+  auto value_no_type_mapping = protocol_value_builder{*foo_map_ty}.wrap(*strct);
+  expectWrappedValue(mapAtString(value_no_type_mapping, "foo"), "i32Value", 1);
 
-  const auto& foo_inner_map = foo_map_val->get_map().at(0).second->get_map();
-  auto [inner_map_key, inner_map_val] = foo_inner_map.at(0);
-  auto [inner_map_key2, inner_map_val2] = foo_inner_map.at(1);
-  expectWrappedValue(
-      *inner_map_key, t_const_value::CV_INTEGER, "i16Value", 444);
-  expectWrappedValue(
-      *inner_map_val, t_const_value::CV_INTEGER, "i32Value", 555);
-  expectWrappedValue(
-      *inner_map_key2, t_const_value::CV_INTEGER, "i16Value", 777);
-  expectWrappedValue(
-      *inner_map_val2, t_const_value::CV_INTEGER, "i32Value", 888);
+  const auto& foo_map_val = mapAtString(value_no_type_mapping, "foo_map");
+  expectWrappedValue(mapAtInt(foo_map_val, 444), "i32Value", 555);
+  expectWrappedValue(mapAtInt(foo_map_val, 777), "i32Value", 888);
 }
 
 constexpr auto UTILITY_CLASSES = {
@@ -385,55 +370,44 @@ void with_schematizer(schematizer::options opts, F&& f) {
 
 template <typename F, typename G, typename H>
 void with_structured_annotation_uris(
-    const t_const_value& struct_schema,
+    const type::Struct& struct_schema,
     const std::string_view struct_name,
     F&& on_annotation,
     G&& on_structured_annotation,
     H&& on_annotation_by_key) {
-  const auto [attrs_key, attrs] = struct_schema.get_map().at(0);
-  EXPECT_EQ(attrs_key->get_string(), "attrs");
-  const auto& definition_attrs = attrs->get_map();
-
-  const auto [name_key, name] = definition_attrs.at(0);
-  EXPECT_EQ(name_key->get_string(), "name");
-  EXPECT_EQ(name->get_string(), struct_name);
+  const auto& attrs = *struct_schema.attrs();
+  EXPECT_EQ(*attrs.name(), struct_name);
 
   // Visit `structuredAnnotations`
   {
-    const auto [structured_annotations_key, structured_annotation_ids_set] =
-        definition_attrs.at(1);
-    EXPECT_EQ(
-        structured_annotations_key->get_string(), "structuredAnnotations");
-    const auto& structured_annotations =
-        structured_annotation_ids_set->get_list();
+    const auto& structured_annotations = *attrs.structuredAnnotations();
 
-    for (size_t i = 0; i < structured_annotations.size(); ++i) {
-      const auto annotation_id = structured_annotations.at(i)->get_integer();
-      on_structured_annotation(i, annotation_id);
+    size_t i = 0;
+    for (const auto annotation_id : structured_annotations) {
+      on_structured_annotation(i, static_cast<size_t>(annotation_id));
+      ++i;
     }
   }
 
   // Visit `annotations`
   {
-    const auto [annotations_key, annotations_map] = definition_attrs.at(2);
-    EXPECT_EQ(annotations_key->get_string(), "annotations");
-    const auto& annotations = annotations_map->get_map();
+    const auto& annotations = *attrs.annotations();
 
-    for (size_t i = 0; i < annotations.size(); ++i) {
-      const auto [annotation_name, _] = annotations.at(i);
-      on_annotation(i, annotation_name->get_string());
+    size_t i = 0;
+    for (const auto& [annotation_name, _] : annotations) {
+      on_annotation(i, annotation_name);
+      ++i;
     }
   }
 
   // Visit `annotionsByKey`
   {
-    const auto [annotations_key, annotations_map] = definition_attrs.at(3);
-    EXPECT_EQ(annotations_key->get_string(), "annotationsByKey");
-    const auto& annotations = annotations_map->get_map();
+    const auto& annotations = *attrs.annotationsByKey();
 
-    for (size_t i = 0; i < annotations.size(); ++i) {
-      const auto [annotation_def_key, _] = annotations.at(i);
-      on_annotation_by_key(i, annotation_def_key->get_string());
+    size_t i = 0;
+    for (const auto& [annotation_def_key, _] : annotations) {
+      on_annotation_by_key(i, std::string{annotation_def_key});
+      ++i;
     }
   }
 }
@@ -475,7 +449,7 @@ TEST(SchematizerTest, use_hash_for_structured_annotations) {
                   const auto& foo_bar_ty) {
                 // Generate a schema.thrift representation of
                 // `FooBarWithStructuredAnnotations`
-                const std::unique_ptr<t_const_value> struct_schema =
+                const type::Struct struct_schema =
                     schema_populator.gen_schema(foo_bar_with_annotations_ty);
 
                 const auto on_annotation =
@@ -496,8 +470,13 @@ TEST(SchematizerTest, use_hash_for_structured_annotations) {
 
                   const auto& interned_annotation =
                       interned_values.at(id)->get_map();
-                  const auto [type_key, type_uri] = interned_annotation.at(1);
-                  ASSERT_EQ(type_key->get_string(), "type");
+                  const t_const_value* type_uri = nullptr;
+                  for (const auto& [key, value] : interned_annotation) {
+                    if (key->get_string() == "type") {
+                      type_uri = value;
+                    }
+                  }
+                  ASSERT_NE(type_uri, nullptr);
 
                   // TypeUri should be a union, so check for the appropriate
                   // field
@@ -533,7 +512,7 @@ TEST(SchematizerTest, use_hash_for_structured_annotations) {
                 // Verify that the URIs of the structured annotations are
                 // hashed
                 with_structured_annotation_uris(
-                    *struct_schema,
+                    struct_schema,
                     "FooBarWithStructuredAnnotations",
                     on_annotation,
                     on_structured_annotation,

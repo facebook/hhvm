@@ -277,7 +277,7 @@ type::Schema t_ast_generator::gen_schema(
         : positionToId<apache::thrift::type::ProgramId>(pos);
     program_index[&program] = program_id;
     program_pos_index[program_id] = pos;
-    hydrate_const(programs.emplace_back(), *schema_defs.gen_schema(program));
+    programs.emplace_back(schema_defs.gen_schema(program));
     programs.back().id() = program_id;
     if (program.has_doc() && schema_opts.include_docs &&
         schema_opts.include_source_ranges) {
@@ -337,7 +337,7 @@ type::Schema t_ast_generator::gen_schema(
     definition_index[&node] =
         positionToId<apache::thrift::type::DefinitionId>(pos);
     auto& def = kind_ref_fn(definitions.emplace_back()).ensure();
-    hydrate_const(def, *schema_defs.gen_schema(node));
+    def = schema_defs.gen_schema(node);
     if (schema_opts.include_source_ranges) {
       set_source_range(node, *def.attrs());
       set_child_source_ranges(node, def);

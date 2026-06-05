@@ -850,6 +850,6 @@ void t_json_generator::print_source_range(const source_range& range) {
 THRIFT_REGISTER_GENERATOR(
     json,
     "JSON",
-    "    annotate:        Generate annotations in json representation\n");
+    "annotate:        Generate annotations in json representation");
 
 } // namespace apache::thrift::compiler

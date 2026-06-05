@@ -23,6 +23,26 @@
 
 namespace apache::thrift::compiler {
 
+namespace {
+/**
+ * Add consistent indentation and line breaks to the generator documentation
+ * passed to `THRIFT_REGISTER_GENERATOR`.
+ */
+std::string normalize_documentation(std::string_view doc) {
+  static constexpr auto kIndent = "    ";
+  std::ostringstream out;
+  while (!doc.empty()) {
+    std::string_view line = doc.substr(0, doc.find_first_of('\n'));
+    doc.remove_prefix(std::min(doc.size(), line.size() + 1));
+    if (!line.empty()) {
+      out << kIndent << line;
+    }
+    out << '\n';
+  }
+  return out.str();
+}
+} // namespace
+
 void t_generator::process_options(
     const std::map<std::string, std::string>& options,
     std::string out_path,
@@ -37,10 +57,10 @@ void t_generator::process_options(
 }
 
 generator_factory::generator_factory(
-    std::string name, std::string long_name, std::string documentation)
+    std::string name, std::string long_name, std::string_view documentation)
     : name_(std::move(name)),
       long_name_(std::move(long_name)),
-      documentation_(std::move(documentation)) {
+      documentation_(normalize_documentation(documentation)) {
   generator_registry::register_generator(name_, this);
 }
 

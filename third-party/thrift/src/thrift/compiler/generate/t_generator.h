@@ -20,6 +20,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 
 #include <thrift/compiler/sema/ast_validator.h>
@@ -121,7 +122,7 @@ class t_generator {
 class generator_factory {
  public:
   generator_factory(
-      std::string name, std::string long_name, std::string documentation);
+      std::string name, std::string long_name, std::string_view documentation);
 
   virtual ~generator_factory() = default;
 

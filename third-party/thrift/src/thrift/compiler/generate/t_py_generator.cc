@@ -3943,14 +3943,12 @@ int32_t t_py_generator::get_thrift_spec_key(
 THRIFT_REGISTER_GENERATOR(
     py,
     "Python",
-    "    json:            Generate function to parse entity from json\n"
-    "    slots:           Generate code using slots for instance members.\n"
-    "    sort_keys:       Serialize maps sorted by key and sets by value.\n"
-    "    thrift_port=NNN: Default port to use in remote client (default "
-    "9090).\n"
-    "    asyncio:         Generate asyncio-friendly RPC services.\n"
-    "    utf8strings:     Encode/decode strings using utf8 in the generated "
-    "code.\n");
+    R"(json:            Generate function to parse entity from json
+slots:           Generate code using slots for instance members.
+sort_keys:       Serialize maps sorted by key and sets by value.
+thrift_port=NNN: Default port to use in remote client (default 9090).
+asyncio:         Generate asyncio-friendly RPC services.
+utf8strings:     Encode/decode strings using utf8 in the generated code.)");
 
 } // namespace
 

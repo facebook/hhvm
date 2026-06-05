@@ -2105,18 +2105,18 @@ void t_mstch_rust_generator::fill_validator_visitors(
 THRIFT_REGISTER_GENERATOR(
     mstch_rust,
     "Rust",
-    "    serde:           Derive serde Serialize/Deserialize traits for types\n"
-    "    valuable:        Derive valuable Valuable trait for types\n"
-    "    any:             Generate \"any registry\" initialization functions\n"
-    "    deprecated_default_enum_min_i32:\n"
-    "                     Default enum value is i32::MIN. Deprecated, to be removed in future versions\n"
-    "    deprecated_optional_with_default_is_some:\n"
-    "                     Optionals with defaults initialized to `Some`. Deprecated, to be removed in future versions\n"
-    "    include_prefix=: Set program:include_prefix.\n"
-    "    types_include_srcs=, clients_include_srcs=, services_include_srcs=:\n"
-    "                     Additional Rust source files to include in each crate, `:` separated\n"
-    "    include_docs=:   Markdown to include in front of crate-level documentation.\n"
-    "    cratemap=map:    Mapping file from services to crate names\n"
-    "    types_crate=:    Name that the main crate uses to refer to its dependency on the types crate\n"
-    "    types_split_count=:    Number of compilation units to split the independent types into\n");
+    R"(serde:           Derive serde Serialize/Deserialize traits for types
+valuable:        Derive valuable Valuable trait for types
+any:             Generate "any registry" initialization functions
+deprecated_default_enum_min_i32:
+                 Default enum value is i32::MIN. Deprecated, to be removed in future versions
+deprecated_optional_with_default_is_some:
+                 Optionals with defaults initialized to `Some`. Deprecated, to be removed in future versions
+include_prefix=: Set program:include_prefix.
+types_include_srcs=, clients_include_srcs=, services_include_srcs=:
+                 Additional Rust source files to include in each crate, `:` separated
+include_docs=:   Markdown to include in front of crate-level documentation.
+cratemap=map:    Mapping file from services to crate names
+types_crate=:    Name that the main crate uses to refer to its dependency on the types crate
+types_split_count=:    Number of compilation units to split the independent types into)");
 } // namespace apache::thrift::compiler::rust

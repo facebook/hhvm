@@ -361,6 +361,6 @@ std::filesystem::path t_mstch_pyi_generator::get_root_path() const {
 } // namespace
 
 THRIFT_REGISTER_GENERATOR(
-    mstch_pyi, "Legacy Python type information", "    no arguments\n");
+    mstch_pyi, "Legacy Python type information", "no arguments");
 
 } // namespace apache::thrift::compiler

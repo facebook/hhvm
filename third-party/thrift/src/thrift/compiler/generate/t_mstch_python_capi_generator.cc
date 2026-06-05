@@ -602,6 +602,6 @@ class t_mstch_python_capi_generator : public t_whisker_generator {
 THRIFT_REGISTER_GENERATOR(
     mstch_python_capi,
     "Python Capi",
-    "    include_prefix:  Use full include paths in generated files.\n");
+    "include_prefix:  Use full include paths in generated files.");
 
 } // namespace apache::thrift::compiler

@@ -1420,15 +1420,15 @@ class t_python_patch_generator : public t_mstch_python_prototypes_generator {
 THRIFT_REGISTER_GENERATOR(
     mstch_python,
     "Python",
-    "    include_prefix:  Use full include paths in generated files.\n"
-    "    does_not_have_py_deprecated:\n"
-    "      Specify that the generated code does not have thrift-py-deprecated.\n"
-    "    does_not_have_py_deprecated_asyncio:\n"
-    "      Specify that the generated code does not have thrift-py-deprecated-asyncio.\n");
+    R"(include_prefix:  Use full include paths in generated files.
+does_not_have_py_deprecated:
+  Specify that the generated code does not have thrift-py-deprecated.
+does_not_have_py_deprecated_asyncio:
+  Specify that the generated code does not have thrift-py-deprecated-asyncio.)");
 
 namespace patch {
 THRIFT_REGISTER_GENERATOR(
-    python_patch, "Python patch", "Python patch generator\n");
+    python_patch, "Python patch", "Python patch generator");
 }
 
 } // namespace apache::thrift::compiler

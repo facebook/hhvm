@@ -8635,39 +8635,31 @@ std::string t_hack_generator::type_to_enum(const t_type* type) {
 THRIFT_REGISTER_GENERATOR(
     hack,
     "HACK",
-    "    server:          Generate Hack server stubs.\n"
-    "    rest:            Generate Hack REST processors.\n"
-    "    json:            Generate functions to parse JSON into thrift "
-    "struct.\n"
-    "    mangledsvcs      Generate services with namespace mangling.\n"
-    "    stricttypes      Use Collection classes everywhere rather than "
-    "KeyedContainer.\n"
-    "    arraysets        Use legacy arrays for sets rather than objects.\n"
-    "                     Either legacy_arrays or hack_collections must be present.\n"
-    "    nonullables      Instantiate struct fields within structs, rather "
-    "than nullable\n"
-    "    structtrait      Add 'use [StructName]Trait;' to generated classes\n"
-    "    shapes           Generate Shape definitions for structs\n"
-    "    protected_unions Generate protected members for thrift unions\n"
-    "    strict_unions    Only allow single set field for thrift unions\n"
-    "    legacy_default_values use legacy behavior for default values in nested structs\n"
-    "    legacy_union_json_serialization Preserve existing json serialization \n"
-    "                                       for thrift unions\n"
-    "    shape_arraykeys  When generating Shape definition for structs:\n"
-    "                        replace array<string, TValue> with "
-    "array<arraykey, TValue>\n"
-    "    shapes_allow_unknown_fields Allow unknown fields and implicit "
-    "subtyping for shapes \n"
-    "    frommap_construct Generate fromMap_DEPRECATED method.\n"
-    "    hack_collections Generate hack collections instead of hack arrays.\n"
-    "    const_collections Use ConstCollection objects rather than their "
-    "mutable counterparts.\n"
-    "    typedef          Generate type aliases for all the types defined\n"
-    "    enum_transparenttype Use transparent typing for Hack enums: 'enum "
-    "FooBar: int as int'.\n"
-    "    server_stream Generate service code for streaming methods'.\n"
-    "    split_types   Generate each type in its own file instead of one "
-    "_types.php.\n");
+    R"(server:          Generate Hack server stubs.
+rest:            Generate Hack REST processors.
+json:            Generate functions to parse JSON into thrift struct.
+mangledsvcs      Generate services with namespace mangling.
+stricttypes      Use Collection classes everywhere rather than KeyedContainer.
+arraysets        Use legacy arrays for sets rather than objects.
+                 Either legacy_arrays or hack_collections must be present.
+nonullables      Instantiate struct fields within structs, rather than nullable
+structtrait      Add 'use [StructName]Trait;' to generated classes
+shapes           Generate Shape definitions for structs
+protected_unions Generate protected members for thrift unions
+strict_unions    Only allow single set field for thrift unions
+legacy_default_values use legacy behavior for default values in nested structs
+legacy_union_json_serialization Preserve existing json serialization
+                                   for thrift unions
+shape_arraykeys  When generating Shape definition for structs:
+                    replace array<string, TValue> with array<arraykey, TValue>
+shapes_allow_unknown_fields Allow unknown fields and implicit subtyping for shapes
+frommap_construct Generate fromMap_DEPRECATED method.
+hack_collections Generate hack collections instead of hack arrays.
+const_collections Use ConstCollection objects rather than their mutable counterparts.
+typedef          Generate type aliases for all the types defined
+enum_transparenttype Use transparent typing for Hack enums: 'enum FooBar: int as int'.
+server_stream Generate service code for streaming methods'.
+split_types   Generate each type in its own file instead of one _types.php.)");
 
 } // namespace
 } // namespace apache::thrift::compiler

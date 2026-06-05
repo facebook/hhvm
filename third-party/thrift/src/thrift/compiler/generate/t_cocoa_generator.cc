@@ -3026,13 +3026,10 @@ std::string t_cocoa_generator::get_cocoa_property_name(const t_field* tfield) {
 THRIFT_REGISTER_GENERATOR(
     cocoa,
     "Cocoa",
-    "    import_path=XYZ: Override thrift package import path\n"
-    "    log_unexpected:  Log every time an unexpected field ID or type is "
-    "encountered.\n"
-    "    nullability:     Use annotations to ensure required fields are "
-    "present.\n"
-    "    validate_required:\n"
-    "                     Throws exception if any required field is not "
-    "set.\n");
+    R"(import_path=XYZ: Override thrift package import path
+log_unexpected:  Log every time an unexpected field ID or type is encountered.
+nullability:     Use annotations to ensure required fields are present.
+validate_required:
+                 Throws exception if any required field is not set.)");
 
 } // namespace apache::thrift::compiler

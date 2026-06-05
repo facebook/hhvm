@@ -1609,6 +1609,6 @@ void t_mstch_py3_generator::generate_services() {
 THRIFT_REGISTER_GENERATOR(
     mstch_py3,
     "Python 3",
-    "    include_prefix:  Use full include paths in generated files.\n");
+    "include_prefix:  Use full include paths in generated files.");
 
 } // namespace apache::thrift::compiler

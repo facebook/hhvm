@@ -547,14 +547,13 @@ void t_ast_generator::generate_program() {
 THRIFT_REGISTER_GENERATOR(
     ast,
     "AST",
-    "    protocol:          Which of [json|debug|compact] protocols to use for serialization.\n"
-    "    include_generated: Enables schematization of generated (patch) types.\n"
-    "    source_ranges:     Enables population of the identifier source range map.\n"
-    "    no_backcompat:     Disables double writes (breaking changes possible!).\n"
-    "    use_hash:          Uses definitionKey in typeUri and instead of extern ids.\n"
-    "                       (Required for use with the SyntaxGraph API)\n"
-    "    root_program_only: Only schematize the root program.\n"
-    "");
+    R"(protocol:          Which of [json|debug|compact] protocols to use for serialization.
+include_generated: Enables schematization of generated (patch) types.
+source_ranges:     Enables population of the identifier source range map.
+no_backcompat:     Disables double writes (breaking changes possible!).
+use_hash:          Uses definitionKey in typeUri and instead of extern ids.
+                   (Required for use with the SyntaxGraph API)
+root_program_only: Only schematize the root program.)");
 
 namespace {
 std::string gen_schema(

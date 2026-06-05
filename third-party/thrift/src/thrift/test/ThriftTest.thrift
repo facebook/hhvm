@@ -69,6 +69,9 @@ struct Xtruct3 {
   11: i64 i64_thing;
 }
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"no_default_comparators": "1"},
+}
 struct Insanity {
   1: map<Numberz, UserId> userMap;
   2: list<Xtruct> xtructs;

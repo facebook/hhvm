@@ -21,6 +21,7 @@
 #include <thrift/lib/thrift/gen-cpp2/type_system_types.h>
 
 #include <folly/Overload.h>
+#include <folly/ScopeGuard.h>
 #include <folly/Utility.h>
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
@@ -357,9 +358,38 @@ class TypeSystemImpl final : public TypeSystem {
    *
    * Throws:
    *   - InvalidTypeError if a referenced TypeId cannot be resolved, or if a
-   *     source identifier collides with an existing one.
+   *     source identifier collides with an existing one. In that case every
+   *     node and source-index entry this call added is rolled back, leaving the
+   *     instance unchanged (strong exception safety).
    */
   void insertDefinitions(folly::F14FastMap<Uri, DefinitionEntry>&& defs) {
+    // If materialization fails partway through (phase 2 throws on an
+    // unresolvable reference or a duplicate source identifier), roll back
+    // everything this call added so the instance is left unchanged.
+    auto rollback = folly::makeGuard([&] {
+      for (const auto& [uri, _] : defs) {
+        auto it = definitions_.find(uri);
+        if (it == definitions_.end()) {
+          continue;
+        }
+        DefinitionRef ref = folly::variant_match(
+            it->second, [](auto& d) { return DefinitionRef(&d); });
+        if (auto sidIt = definitionToSourceIdentifier.find(ref);
+            sidIt != definitionToSourceIdentifier.end()) {
+          const SourceIdentifier sid = sidIt->second;
+          definitionToSourceIdentifier.erase(sidIt);
+          if (auto locIt = sourceIndexedDefinitions.find(sid.location);
+              locIt != sourceIndexedDefinitions.end()) {
+            locIt->second.erase(sid.name);
+            if (locIt->second.empty()) {
+              sourceIndexedDefinitions.erase(locIt);
+            }
+          }
+        }
+        definitions_.erase(it);
+      }
+    });
+
     // Phase 1: insert uninitialized stub nodes for every URI in the batch so
     // that (possibly cyclic) references can be resolved in phase 2.
     for (auto& [uri, entry] : defs) {
@@ -523,6 +553,8 @@ class TypeSystemImpl final : public TypeSystem {
           break;
       }
     }
+
+    rollback.dismiss();
   }
 
   using DefinitionsMap = folly::

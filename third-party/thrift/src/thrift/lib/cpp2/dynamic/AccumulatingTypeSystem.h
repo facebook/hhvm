@@ -133,11 +133,11 @@ class AccumulatingTypeSystem final : public TypeSystem {
    * valid. See the class documentation for deduplication, conflict, and
    * reference-stability semantics.
    *
-   * Exception safety: if a conflict (MergeResolution::Error) or an invalid
-   * definition is detected, this instance is left unchanged (the batch is fully
-   * validated before any definition is materialized). If a definition
-   * references an unresolvable type, the batch is only partially applied (basic
-   * guarantee); well-formed package closures never hit this case.
+   * Exception safety: strong. If anything in the batch fails — a conflict
+   * (MergeResolution::Error), a structurally invalid definition, an
+   * unresolvable type reference, or a duplicate source identifier — this
+   * instance is left unchanged: the batch is validated and deduplicated before
+   * materialization, and materialization itself rolls back on failure.
    *
    * Throws:
    *   - MergeConflictError on a MergeResolution::Error conflict.

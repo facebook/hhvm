@@ -112,6 +112,63 @@ TEST(AccumulatingTypeSystemTest, IdenticalDefinitionsAreDeduplicated) {
   EXPECT_TRUE(ts.getUserDefinedType("test.thrift/Foo").has_value());
 }
 
+TEST(AccumulatingTypeSystemTest, UnresolvableReferenceLeavesInstanceUnchanged) {
+  AccumulatingTypeSystem ts;
+  // Foo references a URI that exists nowhere. Structural validation passes, so
+  // the failure surfaces only during materialization in insertDefinitions,
+  // after Foo's stub has been inserted.
+  EXPECT_THROW(
+      ts.addTypes(
+          makeStructReferencing("test.thrift/Foo", "f", "test.thrift/Missing")),
+      InvalidTypeError);
+
+  // The half-built stub must be rolled back: the instance is unchanged.
+  EXPECT_EQ(ts.size(), 0);
+  EXPECT_TRUE(ts.empty());
+  EXPECT_FALSE(ts.getUserDefinedType("test.thrift/Foo").has_value());
+
+  // Re-adding once the dependency exists works (no leaked-stub corruption).
+  ts.addTypes(makeTs("test.thrift/Missing", {{1, "x"}}));
+  ts.addTypes(
+      makeStructReferencing("test.thrift/Foo", "f", "test.thrift/Missing"));
+  EXPECT_EQ(ts.size(), 2);
+  EXPECT_TRUE(ts.getUserDefinedType("test.thrift/Foo").has_value());
+}
+
+TEST(
+    AccumulatingTypeSystemTest,
+    DuplicateSourceIdentifierLeavesInstanceUnchanged) {
+  // Two distinct URIs sharing one source identifier: insertDefinitions stubs
+  // both, indexes the first, then throws while indexing the second.
+  SerializableTypeSystem batch;
+  for (const std::string uri : {"test.thrift/A", "test.thrift/B"}) {
+    SerializableTypeDefinitionEntry entry;
+    SerializableTypeDefinition typeDef;
+    typeDef.structDef_ref() = def::Struct(
+        {def::Field(def::Identity(1, "a"), def::AlwaysPresent, TypeIds::I32)});
+    entry.definition() = std::move(typeDef);
+    SerializableThriftSourceInfo sourceInfo;
+    sourceInfo.locator() = "loc.thrift";
+    sourceInfo.name() = "Dup";
+    entry.sourceInfo() = std::move(sourceInfo);
+    batch.types()[uri] = std::move(entry);
+  }
+
+  AccumulatingTypeSystem ts;
+  EXPECT_THROW(ts.addTypes(batch), InvalidTypeError);
+
+  // Both stubs AND the first definition's source-index entry are rolled back.
+  EXPECT_EQ(ts.size(), 0);
+  EXPECT_FALSE(ts.getUserDefinedType("test.thrift/A").has_value());
+  EXPECT_FALSE(ts.getUserDefinedType("test.thrift/B").has_value());
+  EXPECT_TRUE(ts.getUserDefinedTypesAtLocation("loc.thrift").empty());
+
+  // A subsequent valid add still works (no source-index or precondition
+  // corruption).
+  ts.addTypes(makeTs("test.thrift/A", {{1, "a"}}));
+  EXPECT_EQ(ts.size(), 1);
+}
+
 // The central guarantee: a DefinitionRef obtained before further additions is
 // still valid (same node address) afterwards. A rebuild-on-add implementation
 // would fail this.

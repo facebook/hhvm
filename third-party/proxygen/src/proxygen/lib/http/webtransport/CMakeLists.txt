@@ -53,6 +53,7 @@ proxygen_add_library(proxygen_http_webtransport_quicwebtransport
   EXPORTED_DEPS
     proxygen_http_webtransport_webtransportimpl
     mvfst::mvfst_api_transport
+    mvfst::mvfst_common_address_quic_socket_address_bridge
     Folly::folly_logging_logging
 )
 
@@ -66,6 +67,7 @@ proxygen_add_library(proxygen_http_webtransport_quic_wt_session
     proxygen_http_webtransport_wt_stream_manager
     proxygen_http_webtransport_wt_util
     mvfst::mvfst_api_transport
+    mvfst::mvfst_common_address_quic_socket_address_bridge
     mvfst::mvfst_priority_http_priority_queue
     Folly::folly_logging_logging
 )

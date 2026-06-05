@@ -12,6 +12,7 @@
 #include <quic/common/events/FollyQuicEventBase.h>
 #include <quic/congestion_control/ServerCongestionControllerFactory.h>
 #include <quic/logging/FileQLogger.h>
+#include <quic/mvfst-config.h>
 #include <quic/server/QuicSharedUDPSocketFactory.h>
 
 #include <folly/fibers/BatchSemaphore.h>
@@ -31,7 +32,7 @@ class QuicAcceptorTransportFactory : public quic::QuicServerTransportFactory {
   quic::QuicServerTransport::Ptr make(
       folly::EventBase* evb,
       std::unique_ptr<quic::FollyAsyncUDPSocketAlias> socket,
-      const folly::SocketAddress& /* peerAddr */,
+      const quic::SocketAddress& /* peerAddr */,
       quic::QuicVersion,
       std::shared_ptr<const fizz::server::FizzServerContext> ctx) noexcept
       override {

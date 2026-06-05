@@ -13,6 +13,7 @@
 #include <proxygen/lib/http/webtransport/WtStreamManager.h>
 #include <proxygen/lib/http/webtransport/WtUtils.h>
 #include <quic/api/QuicSocket.h>
+#include <quic/common/address/QuicSocketAddressBridge.h>
 #include <quic/priority/HTTPPriorityQueue.h>
 
 namespace proxygen {
@@ -58,11 +59,13 @@ class QuicWtSessionBase
       IoBufPtr datagram) noexcept override;
 
   [[nodiscard]] const folly::SocketAddress& getLocalAddress() const override {
-    return quicSocket_->getLocalAddress();
+    return quic::toFollySocketAddressRef(quicSocket_->getLocalAddress(),
+                                         cachedLocalAddr_);
   }
 
   [[nodiscard]] const folly::SocketAddress& getPeerAddress() const override {
-    return quicSocket_->getPeerAddress();
+    return quic::toFollySocketAddressRef(quicSocket_->getPeerAddress(),
+                                         cachedPeerAddr_);
   }
 
   folly::Expected<folly::Unit, ErrorCode> closeSession(
@@ -133,6 +136,8 @@ class QuicWtSessionBase
   bool hasEgressBidiCredit() const noexcept;
 
   std::shared_ptr<quic::QuicSocket> quicSocket_{nullptr};
+  mutable folly::SocketAddress cachedLocalAddr_;
+  mutable folly::SocketAddress cachedPeerAddr_;
   WtHandlerPtr wtHandler_;
   std::unique_ptr<quic::HTTPPriorityQueue> priorityQueue_;
   detail::WtStreamManager sm_;

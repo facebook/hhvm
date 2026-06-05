@@ -11,6 +11,7 @@
 #include <folly/logging/xlog.h>
 #include <proxygen/lib/http/webtransport/WebTransportImpl.h>
 #include <quic/api/QuicSocket.h>
+#include <quic/common/address/QuicSocketAddressBridge.h>
 
 namespace proxygen {
 
@@ -150,11 +151,13 @@ class QuicWebTransport
       std::unique_ptr<folly::IOBuf> /*datagram*/) override;
 
   const folly::SocketAddress& getLocalAddress() const override {
-    return quicSocket_->getLocalAddress();
+    return quic::toFollySocketAddressRef(quicSocket_->getLocalAddress(),
+                                         cachedLocalAddr_);
   }
 
   const folly::SocketAddress& getPeerAddress() const override {
-    return quicSocket_->getPeerAddress();
+    return quic::toFollySocketAddressRef(quicSocket_->getPeerAddress(),
+                                         cachedPeerAddr_);
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTMaxData(
@@ -199,6 +202,8 @@ class QuicWebTransport
   }
 
   std::shared_ptr<quic::QuicSocket> quicSocket_;
+  mutable folly::SocketAddress cachedLocalAddr_;
+  mutable folly::SocketAddress cachedPeerAddr_;
   WebTransportHandler* handler_{nullptr};
   folly::Optional<folly::Promise<folly::Unit>> waitingForUniStreams_;
   folly::Optional<folly::Promise<folly::Unit>> waitingForBidiStreams_;

@@ -1,4 +1,0 @@
-disable-liblzma.patch
-folly-cmake-fixup.patch
-disable-libsnappy.patch
-bad_implicit_cast.patch

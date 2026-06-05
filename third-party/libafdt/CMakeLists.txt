@@ -7,7 +7,6 @@ if(LibAfdt_FOUND)
   return()
 endif()
 
-cmake_minimum_required(VERSION 2.6)
 project(libafdt CXX C)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})

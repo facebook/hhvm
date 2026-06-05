@@ -69,7 +69,6 @@ SET(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party")
 SET(TP_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/third-party")
 
 include(Options)
-include(HPHPCompiler)
 include(HPHPFindLibs)
 
 ADD_SUBDIRECTORY(third-party EXCLUDE_FROM_ALL)

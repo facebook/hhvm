@@ -67,7 +67,6 @@ endif()
 embed_all_systemlibs(
   hhvm "${CMAKE_CURRENT_BINARY_DIR}/.." "${CMAKE_CURRENT_BINARY_DIR}/hhvm"
 )
-add_dependencies(hhvm systemlib)
 
 if (CMAKE_HOST_UNIX)
   add_custom_command(TARGET hhvm POST_BUILD

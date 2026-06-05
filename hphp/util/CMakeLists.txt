@@ -38,7 +38,7 @@ add_custom_command(
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate-ptr-def.sh
 )
 
-if(USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
+if(USE_JEMALLOC)
   set(JEMALLOC_DEF_ARG "--jemalloc")
 else()
   set(JEMALLOC_DEF_ARG "")
@@ -61,9 +61,6 @@ if (LIBNUMA_INCLUDE_DIRS)
   include_directories(${LIBNUMA_INCLUDE_DIRS})
 endif()
 
-get_target_property(CARGO_EXE cargo LOCATION)
-get_target_property(RUSTC_EXE rustc LOCATION)
-
 add_library(hphp_util STATIC ${CXX_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES})
 
 include(HHVMRenderConfigSpecification)
@@ -77,7 +74,7 @@ HHVM_RENDER_CONFIG_SPECIFICATION(
 auto_source_group("hphp_util" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${ASM_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES})
 
-target_link_libraries(hphp_util brotli folly zstd magic_enum)
+target_link_libraries(hphp_util brotli Folly::folly zstd magic_enum::magic_enum tbb)
 if (LIBNUMA_LIBRARIES)
   target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})
 endif()

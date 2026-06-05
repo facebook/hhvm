@@ -1,8 +1,6 @@
 #set(CMAKE_BUILD_TYPE Debug)
 
 option(ALWAYS_ASSERT "Enabled asserts in a release build" OFF)
-option(ENABLE_HARDENING "Set hardening flags and definitions, e.g. stack-smashing protection" OFF)
-option(ENABLE_PIE "Produce position-independent executables" OFF)
 option(STATIC_CXX_LIB "Statically link libstd++ and libgcc." OFF)
 option(ENABLE_AARCH64_CRC "Enable the use of CRC instructions" OFF)
 option(ENABLE_FASTCGI "Enable the FastCGI interface." ON)
@@ -10,17 +8,12 @@ option(ENABLE_FASTCGI "Enable the FastCGI interface." ON)
 option(EXECUTION_PROFILER "Enable the execution profiler" OFF)
 
 option(USE_JEMALLOC "Use jemalloc" ON)
-option(FORCE_TP_JEMALLOC "Always build and statically link jemalloc instead of using system version" OFF)
-
-option(CLANG_FORCE_LIBCPP "Force using libc++ as the C++ standard library" OFF)
-
-option(USE_TCMALLOC "Use tcmalloc (if jemalloc is not used)" ON)
-option(USE_GOOGLE_HEAP_PROFILER "Use Google heap profiler" OFF)
-option(USE_GOOGLE_CPU_PROFILER "Use Google cpu profiler" OFF)
 
 option(DISABLE_HARDWARE_COUNTERS "Disable hardware counters (for XenU systems)" OFF)
 
 option(ENABLE_TRACE "Enable tracing in release build" OFF)
+
+option(GETDEPS_INSTALL_DIR "Path to a directory containing getdeps-installed artifacts" OFF)
 
 include(CheckCXXSymbolExists)
 
@@ -53,14 +46,4 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
   set(HHVM_REQUIRE_XED ON)
 endif()
 
-if(HHVM_REQUIRE_XED)
-  option(ENABLE_XED
-         "Use the XED library for HHVM. Required for x86_64 OSS builds."
-         ON)
-  if(NOT ENABLE_XED)
-    message(FATAL_ERROR "ENABLE_XED=OFF is not supported for x86_64 OSS builds.")
-  endif()
-else()
-  option(ENABLE_XED "Use the XED library for HHVM. If ON, tc-print will be built for X86." OFF)
-endif()
 option(ENABLE_SYSTEM_LOCALE_ARCHIVE "Use system locale archive as the default LOCALE_ARCHIVE for nix patched glibc." OFF)

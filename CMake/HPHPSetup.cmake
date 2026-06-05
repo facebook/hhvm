@@ -45,7 +45,6 @@ set(HHVM_LINK_LIBRARIES
   vixl neo)
 
 if(ENABLE_FASTCGI)
-  LIST(APPEND HHVM_LINK_LIBRARIES thrift proxygen mvfst)
   include(CheckCXXSourceCompiles)
   CHECK_CXX_SOURCE_COMPILES("#include <pthread.h>
   int main() {
@@ -82,9 +81,7 @@ if(APPLE)
   endif()
 endif()
 
-include(HPHPCompiler)
 include(HPHPFunctions)
-include(HPHPFindLibs)
 
 if (HHVM_VERSION_OVERRIDE)
   parse_version("HHVM_VERSION_" ${HHVM_VERSION_OVERRIDE})

@@ -663,7 +663,12 @@ void RecursiveStruct::__fbthrift_clear() {
 }
 
 bool RecursiveStruct::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  for (std::size_t i = 0; i < 1; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool RecursiveStruct::operator==([[maybe_unused]] const RecursiveStruct& rhs) const {
@@ -1080,9 +1085,16 @@ void StructWithBox::__fbthrift_clear() {
 }
 
 bool StructWithBox::__fbthrift_is_empty() const {
-  return !(this->__fbthrift_field_a) &&
- !(this->__fbthrift_field_b) &&
- !(this->__fbthrift_field_c);
+  if (this->__fbthrift_field_a) {
+    return false;
+  }
+  if (this->__fbthrift_field_b) {
+    return false;
+  }
+  if (this->__fbthrift_field_c) {
+    return false;
+  }
+  return true;
 }
 
 bool StructWithBox::operator==([[maybe_unused]] const StructWithBox& rhs) const {
@@ -1237,8 +1249,13 @@ void StructWithTerseInternBox::__fbthrift_clear() {
 }
 
 bool StructWithTerseInternBox::__fbthrift_is_empty() const {
-  return (this->__fbthrift_field_field1.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::cpp2::Empty>>(*this->__fbthrift_field_field1)) &&
- (this->__fbthrift_field_field2.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::cpp2::MyField>>(*this->__fbthrift_field_field2));
+  if (!((this->__fbthrift_field_field1.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::cpp2::Empty>>(*this->__fbthrift_field_field1)))) {
+    return false;
+  }
+  if (!((this->__fbthrift_field_field2.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::cpp2::MyField>>(*this->__fbthrift_field_field2)))) {
+    return false;
+  }
+  return true;
 }
 
 bool StructWithTerseInternBox::operator==([[maybe_unused]] const StructWithTerseInternBox& rhs) const {
@@ -1431,8 +1448,13 @@ void AdaptedStructWithTerseInternBox::__fbthrift_clear() {
 }
 
 bool AdaptedStructWithTerseInternBox::__fbthrift_is_empty() const {
-  return (this->__fbthrift_field_field1.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>(*this->__fbthrift_field_field1)) &&
- (this->__fbthrift_field_field2.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>(*this->__fbthrift_field_field2));
+  if (!((this->__fbthrift_field_field1.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>(*this->__fbthrift_field_field1)))) {
+    return false;
+  }
+  if (!((this->__fbthrift_field_field2.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>(*this->__fbthrift_field_field2)))) {
+    return false;
+  }
+  return true;
 }
 
 bool AdaptedStructWithTerseInternBox::operator==([[maybe_unused]] const AdaptedStructWithTerseInternBox& rhs) const {

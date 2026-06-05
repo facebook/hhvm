@@ -56,7 +56,12 @@ void A::__fbthrift_clear() {
 }
 
 bool A::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  for (std::size_t i = 0; i < 1; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool A::operator==([[maybe_unused]] const A& rhs) const {
@@ -111,7 +116,12 @@ void B::__fbthrift_clear() {
 }
 
 bool B::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  for (std::size_t i = 0; i < 1; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool B::operator==([[maybe_unused]] const B& rhs) const {

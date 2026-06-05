@@ -2350,8 +2350,12 @@ void optXcep::__fbthrift_clear() {
 }
 
 bool optXcep::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0)) &&
- !(this->__isset.get(1));
+  for (std::size_t i = 0; i < 2; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool optXcep::operator==([[maybe_unused]] const optXcep& rhs) const {

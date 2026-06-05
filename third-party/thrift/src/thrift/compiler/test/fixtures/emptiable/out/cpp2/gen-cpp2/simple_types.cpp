@@ -195,20 +195,12 @@ void EmptiableStruct::__fbthrift_clear() {
 }
 
 bool EmptiableStruct::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0)) &&
- !(this->__isset.get(1)) &&
- !(this->__isset.get(2)) &&
- !(this->__isset.get(3)) &&
- !(this->__isset.get(4)) &&
- !(this->__isset.get(5)) &&
- !(this->__isset.get(6)) &&
- !(this->__isset.get(7)) &&
- !(this->__isset.get(8)) &&
- !(this->__isset.get(9)) &&
- !(this->__isset.get(10)) &&
- !(this->__isset.get(11)) &&
- !(this->__isset.get(12)) &&
- !(this->__isset.get(13));
+  for (std::size_t i = 0; i < 14; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool EmptiableStruct::operator==([[maybe_unused]] const EmptiableStruct& rhs) const {
@@ -498,20 +490,49 @@ void EmptiableTerseStruct::__fbthrift_clear() {
 }
 
 bool EmptiableTerseStruct::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_bool_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_byte_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::i16_t>(this->__fbthrift_field_short_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_int_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_long_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::float_t>(this->__fbthrift_field_float_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::double_t>(this->__fbthrift_field_double_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::apache::thrift::test::MyEnum>>(this->__fbthrift_field_enum_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::apache::thrift::test::MyStruct>>(this->__fbthrift_field_struct_field);
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_bool_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_byte_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i16_t>(this->__fbthrift_field_short_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_int_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_long_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::float_t>(this->__fbthrift_field_float_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::double_t>(this->__fbthrift_field_double_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::apache::thrift::test::MyEnum>>(this->__fbthrift_field_enum_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::apache::thrift::test::MyStruct>>(this->__fbthrift_field_struct_field))) {
+    return false;
+  }
+  return true;
 }
 
 bool EmptiableTerseStruct::operator==([[maybe_unused]] const EmptiableTerseStruct& rhs) const {

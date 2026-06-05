@@ -1442,6 +1442,14 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
                 field.qualifier() != t_field_qualifier::terse;
           });
         });
+    def.property("is_empty_uses_only_isset?", [](const t_structured& strct) {
+      const auto& fields = strct.fields();
+      return !fields.empty() &&
+          std::all_of(fields.begin(), fields.end(), [](auto& field) {
+            return field.qualifier() == t_field_qualifier::optional &&
+                !cpp2::is_ref(&field);
+          });
+    });
     def.property(
         "fields_with_runtime_annotation?", [](const t_structured& strct) {
           const auto& fields = strct.fields();

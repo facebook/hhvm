@@ -228,7 +228,10 @@ void OptionalRefStruct::__fbthrift_clear() {
 }
 
 bool OptionalRefStruct::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  if (this->__isset.get(0)) {
+    return false;
+  }
+  return true;
 }
 
 bool OptionalRefStruct::operator==([[maybe_unused]] const OptionalRefStruct& rhs) const {

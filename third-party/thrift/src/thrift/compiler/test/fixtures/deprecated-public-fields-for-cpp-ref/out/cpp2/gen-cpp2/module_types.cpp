@@ -67,8 +67,13 @@ void Foo::__fbthrift_clear() {
 }
 
 bool Foo::__fbthrift_is_empty() const {
-  return !(this->__fbthrift_field_foo) &&
- !(this->__fbthrift_field_bar);
+  if (this->__fbthrift_field_foo) {
+    return false;
+  }
+  if (this->__fbthrift_field_bar) {
+    return false;
+  }
+  return true;
 }
 
 bool Foo::operator==([[maybe_unused]] const Foo& rhs) const {

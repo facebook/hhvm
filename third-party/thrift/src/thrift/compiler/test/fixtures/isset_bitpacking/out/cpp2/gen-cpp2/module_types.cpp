@@ -74,10 +74,12 @@ void Default::__fbthrift_clear() {
 }
 
 bool Default::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0)) &&
- !(this->__isset.get(1)) &&
- !(this->__isset.get(2)) &&
- !(this->__isset.get(3));
+  for (std::size_t i = 0; i < 4; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool Default::operator==([[maybe_unused]] const Default& rhs) const {
@@ -209,10 +211,12 @@ void NonAtomic::__fbthrift_clear() {
 }
 
 bool NonAtomic::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0)) &&
- !(this->__isset.get(1)) &&
- !(this->__isset.get(2)) &&
- !(this->__isset.get(3));
+  for (std::size_t i = 0; i < 4; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool NonAtomic::operator==([[maybe_unused]] const NonAtomic& rhs) const {
@@ -344,10 +348,12 @@ void Atomic::__fbthrift_clear() {
 }
 
 bool Atomic::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0)) &&
- !(this->__isset.get(1)) &&
- !(this->__isset.get(2)) &&
- !(this->__isset.get(3));
+  for (std::size_t i = 0; i < 4; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool Atomic::operator==([[maybe_unused]] const Atomic& rhs) const {
@@ -479,10 +485,12 @@ void AtomicFoo::__fbthrift_clear() {
 }
 
 bool AtomicFoo::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0)) &&
- !(this->__isset.get(1)) &&
- !(this->__isset.get(2)) &&
- !(this->__isset.get(3));
+  for (std::size_t i = 0; i < 4; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool AtomicFoo::operator==([[maybe_unused]] const AtomicFoo& rhs) const {

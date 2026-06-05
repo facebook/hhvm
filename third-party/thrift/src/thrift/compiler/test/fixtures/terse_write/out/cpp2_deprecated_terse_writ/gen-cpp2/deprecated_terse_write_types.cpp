@@ -265,21 +265,52 @@ void StructLevelTerseStruct::__fbthrift_clear() {
 }
 
 bool StructLevelTerseStruct::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_bool_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_byte_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::i16_t>(this->__fbthrift_field_short_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_int_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_long_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::float_t>(this->__fbthrift_field_float_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::double_t>(this->__fbthrift_field_double_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_enum_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_struct_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>>(this->__fbthrift_field_union_field);
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_bool_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_byte_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i16_t>(this->__fbthrift_field_short_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_int_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_long_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::float_t>(this->__fbthrift_field_float_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::double_t>(this->__fbthrift_field_double_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum>>(this->__fbthrift_field_enum_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_struct_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion>>(this->__fbthrift_field_union_field))) {
+    return false;
+  }
+  return true;
 }
 
 bool StructLevelTerseStruct::operator==([[maybe_unused]] const StructLevelTerseStruct& rhs) const {
@@ -758,8 +789,13 @@ void CppRefStructFields::__fbthrift_clear() {
 }
 
 bool CppRefStructFields::__fbthrift_is_empty() const {
-  return !(this->__fbthrift_field_primitive_ref_field) &&
- !(this->__fbthrift_field_struct_ref_field);
+  if (this->__fbthrift_field_primitive_ref_field) {
+    return false;
+  }
+  if (this->__fbthrift_field_struct_ref_field) {
+    return false;
+  }
+  return true;
 }
 
 bool CppRefStructFields::operator==([[maybe_unused]] const CppRefStructFields& rhs) const {
@@ -902,19 +938,46 @@ void DeprecatedTerseWriteWithCustomDefault::__fbthrift_clear() {
 }
 
 bool DeprecatedTerseWriteWithCustomDefault::__fbthrift_is_empty() const {
-  return !(this->__fbthrift_field_bool_field != true) &&
- !(this->__fbthrift_field_byte_field != static_cast<::std::int8_t>(42)) &&
- !(this->__fbthrift_field_short_field != static_cast<::std::int16_t>(42)) &&
- !(this->__fbthrift_field_int_field != static_cast<::std::int32_t>(42)) &&
- !(this->__fbthrift_field_long_field != static_cast<::std::int64_t>(42)) &&
- !(this->__fbthrift_field_float_field != static_cast<float>(42)) &&
- !(this->__fbthrift_field_double_field != static_cast<double>(42)) &&
- !(!::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field)) &&
- !(!::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field)) &&
- !(this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum::ME1) &&
- !(!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field)) &&
- !(!::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field)) &&
- !(!::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field));
+  if (this->__fbthrift_field_bool_field != true) {
+    return false;
+  }
+  if (this->__fbthrift_field_byte_field != static_cast<::std::int8_t>(42)) {
+    return false;
+  }
+  if (this->__fbthrift_field_short_field != static_cast<::std::int16_t>(42)) {
+    return false;
+  }
+  if (this->__fbthrift_field_int_field != static_cast<::std::int32_t>(42)) {
+    return false;
+  }
+  if (this->__fbthrift_field_long_field != static_cast<::std::int64_t>(42)) {
+    return false;
+  }
+  if (this->__fbthrift_field_float_field != static_cast<float>(42)) {
+    return false;
+  }
+  if (this->__fbthrift_field_double_field != static_cast<double>(42)) {
+    return false;
+  }
+  if (!::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field)) {
+    return false;
+  }
+  if (!::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field)) {
+    return false;
+  }
+  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum::ME1) {
+    return false;
+  }
+  if (!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field)) {
+    return false;
+  }
+  if (!::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field)) {
+    return false;
+  }
+  if (!::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field)) {
+    return false;
+  }
+  return true;
 }
 
 bool DeprecatedTerseWriteWithCustomDefault::operator==([[maybe_unused]] const DeprecatedTerseWriteWithCustomDefault& rhs) const {
@@ -1156,19 +1219,46 @@ void DeprecatedTerseWriteWithRedundantCustomDefault::__fbthrift_clear() {
 }
 
 bool DeprecatedTerseWriteWithRedundantCustomDefault::__fbthrift_is_empty() const {
-  return !(this->__fbthrift_field_bool_field != false) &&
- !(this->__fbthrift_field_byte_field != static_cast<::std::int8_t>(0)) &&
- !(this->__fbthrift_field_short_field != static_cast<::std::int16_t>(0)) &&
- !(this->__fbthrift_field_int_field != static_cast<::std::int32_t>(0)) &&
- !(this->__fbthrift_field_long_field != static_cast<::std::int64_t>(0)) &&
- !(this->__fbthrift_field_float_field != static_cast<float>(0)) &&
- !(this->__fbthrift_field_double_field != static_cast<double>(0)) &&
- !(!::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field)) &&
- !(!::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field)) &&
- !(this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum::ME0) &&
- !(!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field)) &&
- !(!::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field)) &&
- !(!::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field));
+  if (this->__fbthrift_field_bool_field != false) {
+    return false;
+  }
+  if (this->__fbthrift_field_byte_field != static_cast<::std::int8_t>(0)) {
+    return false;
+  }
+  if (this->__fbthrift_field_short_field != static_cast<::std::int16_t>(0)) {
+    return false;
+  }
+  if (this->__fbthrift_field_int_field != static_cast<::std::int32_t>(0)) {
+    return false;
+  }
+  if (this->__fbthrift_field_long_field != static_cast<::std::int64_t>(0)) {
+    return false;
+  }
+  if (this->__fbthrift_field_float_field != static_cast<float>(0)) {
+    return false;
+  }
+  if (this->__fbthrift_field_double_field != static_cast<double>(0)) {
+    return false;
+  }
+  if (!::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field)) {
+    return false;
+  }
+  if (!::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field)) {
+    return false;
+  }
+  if (this->__fbthrift_field_enum_field !=  ::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum::ME0) {
+    return false;
+  }
+  if (!::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field)) {
+    return false;
+  }
+  if (!::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field)) {
+    return false;
+  }
+  if (!::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field)) {
+    return false;
+  }
+  return true;
 }
 
 bool DeprecatedTerseWriteWithRedundantCustomDefault::operator==([[maybe_unused]] const DeprecatedTerseWriteWithRedundantCustomDefault& rhs) const {

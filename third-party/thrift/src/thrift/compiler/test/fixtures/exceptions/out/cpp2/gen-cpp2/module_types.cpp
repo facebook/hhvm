@@ -123,7 +123,12 @@ void Serious::__fbthrift_clear() {
 }
 
 bool Serious::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  for (std::size_t i = 0; i < 1; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool Serious::operator==([[maybe_unused]] const Serious& rhs) const {

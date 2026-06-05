@@ -1031,9 +1031,16 @@ void TerseAdaptedFields::__fbthrift_clear() {
 }
 
 bool TerseAdaptedFields::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<TerseAdaptedFields, ::apache::thrift::field_id<1>>>(this->__fbthrift_field_int_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<TerseAdaptedFields, ::apache::thrift::field_id<2>>>(this->__fbthrift_field_string_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<TerseAdaptedFields, ::apache::thrift::field_id<3>>>(this->__fbthrift_field_set_field);
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<TerseAdaptedFields, ::apache::thrift::field_id<1>>>(this->__fbthrift_field_int_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<TerseAdaptedFields, ::apache::thrift::field_id<2>>>(this->__fbthrift_field_string_field))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<TerseAdaptedFields, ::apache::thrift::field_id<3>>>(this->__fbthrift_field_set_field))) {
+    return false;
+  }
+  return true;
 }
 
 bool TerseAdaptedFields::operator==([[maybe_unused]] const TerseAdaptedFields& rhs) const {
@@ -2369,7 +2376,10 @@ void CircularStruct::__fbthrift_clear() {
 }
 
 bool CircularStruct::__fbthrift_is_empty() const {
-  return !(this->__fbthrift_field_field);
+  if (this->__fbthrift_field_field) {
+    return false;
+  }
+  return true;
 }
 
 bool CircularStruct::operator==([[maybe_unused]] const CircularStruct& rhs) const {
@@ -2942,9 +2952,12 @@ void CountingStruct::__fbthrift_clear() {
 }
 
 bool CountingStruct::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0)) &&
- !(this->__isset.get(1)) &&
- !(this->__isset.get(2));
+  for (std::size_t i = 0; i < 3; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool CountingStruct::operator==([[maybe_unused]] const CountingStruct& rhs) const {

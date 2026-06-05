@@ -1064,11 +1064,22 @@ void MinPaddingWithCustomType::__fbthrift_clear() {
 }
 
 bool MinPaddingWithCustomType::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_small) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_biggish) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<MinPaddingWithCustomType, ::apache::thrift::field_id<3>>>(this->__fbthrift_field_medium) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_big) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_tiny);
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_small))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_biggish))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<MinPaddingWithCustomType, ::apache::thrift::field_id<3>>>(this->__fbthrift_field_medium))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_big))) {
+    return false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_tiny))) {
+    return false;
+  }
+  return true;
 }
 
 bool MinPaddingWithCustomType::operator==([[maybe_unused]] const MinPaddingWithCustomType& rhs) const {
@@ -1424,8 +1435,13 @@ void ForwardUsageRoot::__fbthrift_clear() {
 }
 
 bool ForwardUsageRoot::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0)) &&
- !(this->__fbthrift_field_ForwardUsageByRef);
+  if (this->__isset.get(0)) {
+    return false;
+  }
+  if (this->__fbthrift_field_ForwardUsageByRef) {
+    return false;
+  }
+  return true;
 }
 
 bool ForwardUsageRoot::operator==([[maybe_unused]] const ForwardUsageRoot& rhs) const {
@@ -1516,7 +1532,10 @@ void ForwardUsageStruct::__fbthrift_clear() {
 }
 
 bool ForwardUsageStruct::__fbthrift_is_empty() const {
-  return !(this->__fbthrift_field_foo);
+  if (this->__fbthrift_field_foo) {
+    return false;
+  }
+  return true;
 }
 
 bool ForwardUsageStruct::operator==([[maybe_unused]] const ForwardUsageStruct& rhs) const {
@@ -1591,7 +1610,10 @@ void ForwardUsageByRef::__fbthrift_clear() {
 }
 
 bool ForwardUsageByRef::__fbthrift_is_empty() const {
-  return !(this->__fbthrift_field_foo);
+  if (this->__fbthrift_field_foo) {
+    return false;
+  }
+  return true;
 }
 
 bool ForwardUsageByRef::operator==([[maybe_unused]] const ForwardUsageByRef& rhs) const {
@@ -1660,7 +1682,12 @@ void IncompleteMap::__fbthrift_clear() {
 }
 
 bool IncompleteMap::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  for (std::size_t i = 0; i < 1; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool IncompleteMap::operator==([[maybe_unused]] const IncompleteMap& rhs) const {
@@ -1776,7 +1803,12 @@ void CompleteMap::__fbthrift_clear() {
 }
 
 bool CompleteMap::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  for (std::size_t i = 0; i < 1; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool CompleteMap::operator==([[maybe_unused]] const CompleteMap& rhs) const {
@@ -1892,7 +1924,12 @@ void IncompleteList::__fbthrift_clear() {
 }
 
 bool IncompleteList::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  for (std::size_t i = 0; i < 1; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool IncompleteList::operator==([[maybe_unused]] const IncompleteList& rhs) const {
@@ -2008,7 +2045,12 @@ void CompleteList::__fbthrift_clear() {
 }
 
 bool CompleteList::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  for (std::size_t i = 0; i < 1; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool CompleteList::operator==([[maybe_unused]] const CompleteList& rhs) const {
@@ -2124,7 +2166,12 @@ void AdaptedList::__fbthrift_clear() {
 }
 
 bool AdaptedList::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  for (std::size_t i = 0; i < 1; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool AdaptedList::operator==([[maybe_unused]] const AdaptedList& rhs) const {
@@ -2276,7 +2323,12 @@ void DependentAdaptedList::__fbthrift_clear() {
 }
 
 bool DependentAdaptedList::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  for (std::size_t i = 0; i < 1; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool DependentAdaptedList::operator==([[maybe_unused]] const DependentAdaptedList& rhs) const {
@@ -2351,7 +2403,10 @@ void DependentAdaptedListDep::__fbthrift_clear() {
 }
 
 bool DependentAdaptedListDep::__fbthrift_is_empty() const {
-  return !(this->__fbthrift_field_field);
+  if (this->__fbthrift_field_field) {
+    return false;
+  }
+  return true;
 }
 
 bool DependentAdaptedListDep::operator==([[maybe_unused]] const DependentAdaptedListDep& rhs) const {

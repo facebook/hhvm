@@ -345,10 +345,12 @@ void OptionalFoo::__fbthrift_clear() {
 }
 
 bool OptionalFoo::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0)) &&
- !(this->__isset.get(1)) &&
- !(this->__isset.get(2)) &&
- !(this->__isset.get(3));
+  for (std::size_t i = 0; i < 4; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool OptionalFoo::operator==([[maybe_unused]] const OptionalFoo& rhs) const {
@@ -517,10 +519,12 @@ void OptionalLazyFoo::__fbthrift_clear() {
 }
 
 bool OptionalLazyFoo::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0)) &&
- !(this->__isset.get(1)) &&
- !(this->__isset.get(2)) &&
- !(this->__isset.get(3));
+  for (std::size_t i = 0; i < 4; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool OptionalLazyFoo::operator==([[maybe_unused]] const OptionalLazyFoo& rhs) const {
@@ -670,12 +674,21 @@ void OptionalBoxedLazyFoo::__fbthrift_clear() {
 }
 
 bool OptionalBoxedLazyFoo::__fbthrift_is_empty() const {
-  return !(this->__fbthrift_field_field1) &&
- !(this->__fbthrift_field_field2) &&
- !(!(__fbthrift_isDeserialized_.field3 & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) ||
-    this->__fbthrift_field_field3) &&
- !(!(__fbthrift_isDeserialized_.field4 & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) ||
-    this->__fbthrift_field_field4);
+  if (this->__fbthrift_field_field1) {
+    return false;
+  }
+  if (this->__fbthrift_field_field2) {
+    return false;
+  }
+  if (!(__fbthrift_isDeserialized_.field3 & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) ||
+    this->__fbthrift_field_field3) {
+    return false;
+  }
+  if (!(__fbthrift_isDeserialized_.field4 & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) ||
+    this->__fbthrift_field_field4) {
+    return false;
+  }
+  return true;
 }
 
 bool OptionalBoxedLazyFoo::operator==([[maybe_unused]] const OptionalBoxedLazyFoo& rhs) const {

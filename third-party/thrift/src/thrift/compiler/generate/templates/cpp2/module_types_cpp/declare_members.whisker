@@ -83,13 +83,30 @@ void {{struct.cpp_underlying_name}}::__fbthrift_clear() {
 bool {{struct.cpp_underlying_name}}::__fbthrift_is_empty() const {
     {{#if struct.has_non_optional_and_non_terse_field?}}
   return false;
+    {{#else if struct.is_empty_uses_only_isset?}}
+  for (std::size_t i = 0; i < {{(array.len struct.fields)}}; ++i) {
+    if (this->__isset.get(i)) {
+      return false;
+    }
+  }
+  return true;
     {{#else if struct.fields?}}
-  return{{#each (array.enumerate struct.fields with_last=true) as |i field last?|}}{{!
-  }}{{#if field.optional?}} !({{#partial fields.optional_has_value field=field struct=struct}}){{#if (not last?)}} &&{{/if}}{{!
-  }}{{#else if field.deprecated_terse_writes?}} !({{#partial fields.deprecated_terse_has_value field=field struct=struct}}){{#if (not last?)}} &&{{/if}}{{!
-  }}{{#else if field.terse?}} {{#partial fields.terse_has_no_value field=field struct=struct}}{{#if (not last?)}} &&{{/if}}{{/if field.optional?}}{{!
-  }}{{#if last?}};{{/if last?}}
+      {{#each struct.fields as |field|}}
+        {{#if field.optional?}}
+  if ({{#partial fields.optional_has_value field=field struct=struct}}) {
+    return false;
+  }
+        {{#else if field.deprecated_terse_writes?}}
+  if ({{#partial fields.deprecated_terse_has_value field=field struct=struct}}) {
+    return false;
+  }
+        {{#else if field.terse?}}
+  if (!({{#partial fields.terse_has_no_value field=field struct=struct}})) {
+    return false;
+  }
+        {{/if field.optional?}}
 {{/each}}
+  return true;
     {{#else}}
   return true;
     {{/if struct.has_non_optional_and_non_terse_field?}}

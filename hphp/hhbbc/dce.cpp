@@ -110,10 +110,11 @@ TRACE_SET_MOD(hhbbc_dce)
  *
  *   It essentially is the liveness analysis algorithm described at
  *   http://dl.acm.org/citation.cfm?id=316171, except that we don't
- *   need to track kill sets for each PEI because we don't have a
- *   means of determining which exceptional edges may be traversed by any
- *   given PEI.  (Maybe that may be more usual to have in the context
- *   of a language with declared exception clauses...)
+ *   need to track kill sets for each PEI (Potential Exception-throwing
+ *   Instruction) because we don't have a means of determining which
+ *   exceptional edges may be traversed by any given PEI. (Maybe that
+ *   may be more usual to have in the context of a language with 
+ *   declared exception clauses...)
  *
  *   Since we only deal with the most pessimistic exception case, this
  *   means for each block we just determine a gen and kill set, along

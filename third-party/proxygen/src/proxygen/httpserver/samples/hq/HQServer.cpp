@@ -175,7 +175,11 @@ QuicServerTransport::Ptr HQServerTransportFactory::make(
     std::shared_ptr<const FizzServerContext> ctx) noexcept {
   auto transport = quic::QuicHandshakeSocketHolder::makeServerTransport(
       evb, std::move(socket), std::move(ctx), this);
-  if (!params_.qLoggerPath.empty()) {
+  if (qloggerFactory_) {
+    if (auto logger = qloggerFactory_(quic::VantagePoint::Server)) {
+      transport->setQLogger(std::move(logger));
+    }
+  } else if (!params_.qLoggerPath.empty()) {
     transport->setQLogger(std::make_shared<HQLoggerHelper>(
         params_.qLoggerPath, params_.prettyJson, quic::VantagePoint::Server));
   }

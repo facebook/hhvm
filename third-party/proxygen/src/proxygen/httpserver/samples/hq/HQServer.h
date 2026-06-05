@@ -148,11 +148,18 @@ class HQServerTransportFactory
     , public quic::EarlyDataAppParamsHandler
     , private quic::QuicHandshakeSocketHolder::Callback {
  public:
+  using QLoggerFactory =
+      std::function<std::shared_ptr<quic::QLogger>(quic::VantagePoint)>;
+
   explicit HQServerTransportFactory(
       const HQServerParams& params,
       HTTPTransactionHandlerProvider httpTransactionHandlerProvider,
       std::function<void(proxygen::HQSession*)> onTransportReadyFn_);
   ~HQServerTransportFactory() override = default;
+
+  void setQLoggerFactory(QLoggerFactory fn) {
+    qloggerFactory_ = std::move(fn);
+  }
 
   // Creates new quic server transport
   quic::QuicServerTransport::Ptr make(
@@ -206,6 +213,7 @@ class HQServerTransportFactory
   std::map<std::string, AlpnEntry> alpnHandlers_;
   proxygen::H3EarlyDataHandler h3EarlyDataHandler_;
   quic::EarlyDataAppParamsHandler* defaultEarlyDataHandler_{nullptr};
+  QLoggerFactory qloggerFactory_;
 };
 
 } // namespace quic::samples

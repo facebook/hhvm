@@ -319,6 +319,8 @@ module UserAttributes = struct
 
   let uaMockClass = "__MockClass"
 
+  let uaTestsBypassVisibility = "__TestsBypassVisibility"
+
   let uaProvenanceSkipFrame = "__ProvenanceSkipFrame"
 
   let uaDynamicallyCallable = "__DynamicallyCallable"
@@ -606,6 +608,14 @@ module UserAttributes = struct
                 "Allows subclasses of final classes and overriding of final methods."
                 ^ " This is useful for writing mock classes."
                 ^ "\n\nYou cannot use this to subclass `vec`, `keyset`, `dict`, `Vector`, `Map` or `Set`.";
+            } );
+          ( uaTestsBypassVisibility,
+            {
+              contexts = [cls; mthd; instProperty; staticProperty];
+              autocomplete = true;
+              doc =
+                "Allows this member to be accessed as public from test contexts."
+                ^ " When applied to an internal class, the class becomes visible from test contexts.";
             } );
           ( uaProvenanceSkipFrame,
             {

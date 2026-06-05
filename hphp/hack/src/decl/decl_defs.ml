@@ -161,6 +161,7 @@ type decl_class_type = {
   dc_allow_multiple_instantiations: bool;
       (** Wether this interface has attribute __UNSAFE_AllowMultipleInstantiations. *)
   dc_package: Aast_defs.package_membership option;
+  dc_tests_bypass_visibility: bool;
 }
 [@@deriving show]
 

@@ -631,6 +631,10 @@ impl HhConfig {
             )?,
             tco_poly_function_pointers: hhconfig
                 .get_bool_or("poly_function_pointers", default.tco_poly_function_pointers)?,
+            tco_permits_bypassing_visibility: hhconfig
+                .get_str_list("permits_bypassing_visibility")
+                .map(|classes| classes.map(|s| format!("\\{}", s)).collect())
+                .unwrap_or_default(),
             tco_repo_stdlib_path: hhconfig.get_str("repo_stdlib_path").map(|p| p.to_string()),
         };
         let mut c = Self {

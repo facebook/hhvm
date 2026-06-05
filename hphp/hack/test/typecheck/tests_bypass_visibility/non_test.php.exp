@@ -1,0 +1,8 @@
+ERROR: File "non_test.php", line 15, characters 9-12:
+You cannot access this member (Typing[4112])
+  File "non_test.php", line 7, characters 20-23:
+  This member is private
+ERROR: File "non_test.php", line 16, characters 9-12:
+Cannot access this protected member, you don't extend Foo2 (Typing[4112])
+  File "non_test.php", line 10, characters 22-25:
+  This member is protected

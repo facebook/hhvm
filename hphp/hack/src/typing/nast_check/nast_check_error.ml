@@ -294,7 +294,7 @@ let call_before_init pos cv =
       Utils.sl
         ([
            "Until the initialization of `$this` is over,";
-           " you can only call private methods\n";
+           " you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`\n";
            "The initialization is not over because ";
          ]
         @

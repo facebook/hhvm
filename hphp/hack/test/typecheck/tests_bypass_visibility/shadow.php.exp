@@ -1,0 +1,4 @@
+ERROR: File "shadow.php", line 11, characters 20-23:
+Cannot override or shadow `priv` (Typing[4514])
+  File "shadow.php", line 7, characters 20-23:
+  This concrete private member is in the same hierarchy as a member marked with `<<__TestsBypassVisibility>>`

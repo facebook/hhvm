@@ -228,6 +228,12 @@ module Env = struct
   and method_ acc m =
     if not (Aast.equal_visibility m.m_visibility Private) then
       acc
+    else if
+      Naming_attributes.mem
+        SN.UserAttributes.uaTestsBypassVisibility
+        m.m_user_attributes
+    then
+      acc
     else
       let name = snd m.m_name in
       let acc = SMap.add name (ref (Todo m.m_body)) acc in

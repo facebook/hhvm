@@ -1,0 +1,12 @@
+ERROR: File "internal.php--non_test.php", line 5, characters 9-18:
+You cannot access internal members outside of a module (Typing[4112])
+  File "internal.php--foo.php", line 7, characters 21-30:
+  This member is internal
+ERROR: File "internal.php--non_test.php", line 6, characters 18-27:
+You cannot access internal members outside of a module (Typing[4112])
+  File "internal.php--foo.php", line 10, characters 28-37:
+  This member is internal
+ERROR: File "internal.php--test.php", line 9, characters 9-15:
+You cannot access internal members outside of a module (Typing[4112])
+  File "internal.php--foo.php", line 12, characters 21-27:
+  This member is internal. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member

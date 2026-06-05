@@ -334,6 +334,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             || name == "__NoAutoLikes"
             || name == "__Overlapping"
             || name == "__Sealed"
+            || name == "__TestsBypassVisibility"
     }
 
     fn fold_string_concat(&self, expr: &nast::Expr, acc: &mut BString) -> bool {
@@ -1190,6 +1191,7 @@ struct Attributes {
     safe_global_variable: bool,
     dynamically_referenced: bool,
     needs_concrete: bool,
+    tests_bypass_visibility: bool,
     require_package: Option<PackageRequirement>,
     gated_by_feature_flag: Option<String>,
 }
@@ -1615,6 +1617,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             safe_global_variable: false,
             dynamically_referenced: false,
             needs_concrete: false,
+            tests_bypass_visibility: false,
             require_package: None,
             gated_by_feature_flag: None,
         };
@@ -1690,6 +1693,9 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                     }
                     "__NeedsConcrete" => {
                         attributes.needs_concrete = true;
+                    }
+                    "__TestsBypassVisibility" => {
+                        attributes.tests_bypass_visibility = true;
                     }
                     "__RequirePackage" => {
                         attributes.require_package =
@@ -2020,6 +2026,10 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                                 flags.set(
                                     PropFlags::NO_AUTO_LIKES,
                                     attributes.no_auto_likes || no_auto_likes,
+                                );
+                                flags.set(
+                                    PropFlags::TESTS_BYPASS_VISIBILITY,
+                                    attributes.tests_bypass_visibility,
                                 );
                                 properties.push(ShallowProp {
                                     xhp_attr: None,
@@ -4750,6 +4760,10 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                         attributes.safe_global_variable,
                     );
                     flags.set(PropFlags::NO_AUTO_LIKES, attributes.no_auto_likes);
+                    flags.set(
+                        PropFlags::TESTS_BYPASS_VISIBILITY,
+                        attributes.tests_bypass_visibility,
+                    );
                     Some(ShallowProp {
                         xhp_attr: None,
                         name: (pos, name.into()),
@@ -4986,6 +5000,10 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         );
         flags.set(MethodFlags::NO_AUTO_LIKES, attributes.no_auto_likes);
         flags.set(MethodFlags::NEEDS_CONCRETE, attributes.needs_concrete);
+        flags.set(
+            MethodFlags::TESTS_BYPASS_VISIBILITY,
+            attributes.tests_bypass_visibility,
+        );
 
         // Parse the user attributes
         // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic/__NoAutoLikes is

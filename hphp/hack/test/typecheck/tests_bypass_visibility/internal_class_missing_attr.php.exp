@@ -1,0 +1,4 @@
+ERROR: File "internal_class_missing_attr.php--bar.php", line 7, characters 21-26:
+`secret` has `<<__TestsBypassVisibility>>` but its containing `internal` class `BadClass` does not (Typing[4515])
+ERROR: File "internal_class_missing_attr.php--bar.php", line 10, characters 28-31:
+`stat` has `<<__TestsBypassVisibility>>` but its containing `internal` class `BadClass` does not (Typing[4515])

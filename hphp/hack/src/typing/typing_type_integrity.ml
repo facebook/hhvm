@@ -340,6 +340,8 @@ and check_type_integrity
            ~in_signature
            ~use_pos
            ~def_pos:(Cls.pos class_info)
+           ~tests_bypass_visibility:(Cls.tests_bypass_visibility class_info)
+           ~target_supports_tests_bypass_visibility:true
            env
            (Cls.internal class_info)
            (Cls.get_module class_info)
@@ -376,6 +378,8 @@ and check_type_integrity
            ~in_signature
            ~use_pos
            ~def_pos:typedef.td_pos
+           ~tests_bypass_visibility:false
+           ~target_supports_tests_bypass_visibility:false
            env
            typedef.td_internal
            (Option.map typedef.td_module ~f:snd)

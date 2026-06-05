@@ -17,6 +17,7 @@ use ty::decl::Abstraction;
 use ty::decl::CeVisibility;
 use ty::decl::ClassConst;
 use ty::decl::ClassConstKind;
+use ty::decl::ClassEltFlags;
 use ty::decl::ClassishKind;
 use ty::decl::FoldedClass;
 use ty::decl::FoldedElement;
@@ -354,7 +355,9 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
         fn is_not_private<N>((_, elt): &(&N, &FoldedElement)) -> bool {
             match elt.visibility {
                 CeVisibility::Private(_) if elt.is_lsb() => true,
-                CeVisibility::Private(_) => false,
+                CeVisibility::Private(_) => {
+                    elt.flags.contains(ClassEltFlags::TESTS_BYPASS_VISIBILITY)
+                }
                 _ => true,
             }
         }

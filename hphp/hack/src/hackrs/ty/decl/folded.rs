@@ -200,6 +200,7 @@ pub struct FoldedClass<R: Reason> {
     pub is_const: bool,
     /// Whether internal to a module, i.e. declared as e.g. `internal class C {}`
     pub is_internal: bool,
+    pub tests_bypass_visibility: bool,
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     pub support_dynamic_type: bool,

@@ -23,6 +23,7 @@ module PropFlags : sig
   val get_readonly    : t -> bool
   val get_safe_global_variable: t -> bool
   val get_no_auto_likes : t -> bool
+  val get_tests_bypass_visibility : t -> bool
 
   val set_abstract    : bool -> t -> t
   val set_const       : bool -> t -> t
@@ -33,6 +34,7 @@ module PropFlags : sig
   val set_readonly    : bool -> t -> t
   val set_safe_global_variable: bool -> t -> t
   val set_no_auto_likes : bool -> t -> t
+  val set_tests_bypass_visibility : bool -> t -> t
 
   val make :
     abstract:bool ->
@@ -44,6 +46,7 @@ module PropFlags : sig
     readonly: bool ->
     safe_global_variable: bool ->
     no_auto_likes: bool ->
+    tests_bypass_visibility: bool ->
     t
 end
 [@@ocamlformat "disable"]
@@ -61,6 +64,7 @@ module MethodFlags : sig
   val get_support_dynamic_type : t -> bool
   val get_no_auto_likes          : t -> bool
   val get_needs_concrete : t -> bool
+  val get_tests_bypass_visibility : t -> bool
 
   val set_abstract               : bool -> t -> t
   val set_final                  : bool -> t -> t
@@ -70,6 +74,7 @@ module MethodFlags : sig
   val set_support_dynamic_type : bool -> t -> t
   val set_no_auto_likes          : bool -> t -> t
   val set_needs_concrete         : bool -> t -> t
+  val set_tests_bypass_visibility : bool -> t -> t
 
   val make :
     abstract:bool ->
@@ -80,6 +85,7 @@ module MethodFlags : sig
     support_dynamic_type:bool ->
     no_auto_likes:bool ->
     needs_concrete:bool ->
+    tests_bypass_visibility:bool ->
     t
 end
 [@@ocamlformat "disable"]
@@ -197,6 +203,10 @@ val sm_support_dynamic_type : shallow_method -> bool
 val sm_no_auto_likes : shallow_method -> bool
 
 val sm_needs_concrete : shallow_method -> bool
+
+val sm_tests_bypass_visibility : shallow_method -> bool
+
+val sp_tests_bypass_visibility : shallow_prop -> bool
 
 type fun_decl = fun_elt [@@deriving show]
 

@@ -1,0 +1,8 @@
+ERROR: File "static.php", line 22, characters 16-20:
+You cannot access this member (Typing[4112])
+  File "static.php", line 7, characters 27-31:
+  This member is private
+ERROR: File "static.php", line 23, characters 16-20:
+Cannot access this protected member, you don't extend StaticFoo (Typing[4112])
+  File "static.php", line 10, characters 29-33:
+  This member is protected

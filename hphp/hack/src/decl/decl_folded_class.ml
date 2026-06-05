@@ -393,7 +393,8 @@ let build_constructor
           ~support_dynamic_type:(sm_support_dynamic_type method_)
           ~needs_init:false
           ~no_auto_likes:(sm_no_auto_likes method_)
-          ~safe_global_variable:false;
+          ~safe_global_variable:false
+          ~tests_bypass_visibility:(sm_tests_bypass_visibility method_);
       elt_visibility = vis;
       elt_origin = class_name;
       elt_deprecated = method_.sm_deprecated;
@@ -528,7 +529,8 @@ let prop_decl_eager
           ~support_dynamic_type:false
           ~needs_init:(sp_needs_init sp)
           ~safe_global_variable:false
-          ~no_auto_likes:false;
+          ~no_auto_likes:false
+          ~tests_bypass_visibility:(sp_tests_bypass_visibility sp);
       elt_visibility = vis;
       elt_origin;
       elt_deprecated = None;
@@ -568,7 +570,8 @@ let static_prop_decl_eager
           ~support_dynamic_type:false
           ~needs_init:false
           ~no_auto_likes:false
-          ~safe_global_variable:(sp_safe_global_variable sp);
+          ~safe_global_variable:(sp_safe_global_variable sp)
+          ~tests_bypass_visibility:(sp_tests_bypass_visibility sp);
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = None;
@@ -745,7 +748,8 @@ let method_decl_eager
           ~support_dynamic_type
           ~needs_init:false
           ~no_auto_likes
-          ~safe_global_variable:false;
+          ~safe_global_variable:false
+          ~tests_bypass_visibility:(sm_tests_bypass_visibility m);
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = m.sm_deprecated;
@@ -1015,6 +1019,10 @@ and class_decl
       dc_final = c.sc_final;
       dc_const = const;
       dc_internal = internal;
+      dc_tests_bypass_visibility =
+        Attributes.mem
+          SN.UserAttributes.uaTestsBypassVisibility
+          c.sc_user_attributes;
       dc_abstract = is_abstract;
       dc_need_init = has_concrete_cstr;
       dc_deferred_init_members = deferred_members;

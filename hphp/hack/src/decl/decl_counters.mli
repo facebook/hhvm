@@ -40,6 +40,7 @@ type subdecl_kind =
   | Name
   | Module
   | Internal
+  | TestsBypassVisibility
   | IsModuleLevelTrait
   | Pos
   | Tparams

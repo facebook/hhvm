@@ -184,6 +184,8 @@ module Hhconfig : sig
 
   val package_exclude_patterns : string
 
+  val permits_bypassing_visibility : string
+
   val pessimise_builtins : string
 
   val poly_function_pointers : string

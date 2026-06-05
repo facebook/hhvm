@@ -1,0 +1,5 @@
+ERROR: File "protected_internal.php--non_test.php", line 5, characters 11-18:
+Cannot access this protected member, you don't extend ProtIntTarget
+You cannot access internal members outside of a module (Typing[4112])
+  File "protected_internal.php--target.php", line 7, characters 31-38:
+  This member is protected internal

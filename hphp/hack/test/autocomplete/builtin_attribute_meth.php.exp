@@ -56,3 +56,7 @@ __StrictSwitch
   INSERT __StrictSwitch
   built-in attribute
   Enables strict switch checking for all switches in function or method.
+__TestsBypassVisibility
+  INSERT __TestsBypassVisibility
+  built-in attribute
+  Allows this member to be accessed as public from test contexts. When applied to an internal class, the class becomes visible from test contexts.

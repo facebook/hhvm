@@ -803,6 +803,9 @@ module Typing = struct
     | DestructureMissingRequiredField [@value 4511]
     | DestructureUnknownField [@value 4512]
     | DestructureTupleArityMismatch [@value 4513]
+    | TestsBypassVisibilityOverride [@value 4514]
+    | TestsBypassVisibilityOnMemberWithoutClass [@value 4515]
+    | TestsBypassVisibilityAbstractMissingAttr [@value 4516]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

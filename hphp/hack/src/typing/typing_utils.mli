@@ -421,6 +421,8 @@ val has_ancestor_including_req_refl :
 val has_ancestor_including_req :
   Typing_env_types.env -> Folded_class.t -> string -> bool
 
+val is_tests_bypass_visibility_context : Typing_env_types.env -> bool
+
 (* Wrap supportdyn<_> around a type. Push through intersections
  * and unions, and leave type alone if it is a subtype of dynamic.
  *)

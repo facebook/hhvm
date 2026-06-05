@@ -78,7 +78,8 @@
           { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
             override = false; dynamicallycallable = false;
             php_std_lib = false; support_dynamic_type = false;
-            no_auto_likes = false; needs_concrete = false };
+            no_auto_likes = false; needs_concrete = false;
+            tests_bypass_visibility = false };
           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal };
          { Shallow_decl_defs.sm_name = ([9:28-30], "f1");
            sm_type =
@@ -109,7 +110,8 @@
            { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
-             no_auto_likes = false; needs_concrete = false };
+             no_auto_likes = false; needs_concrete = false;
+             tests_bypass_visibility = false };
            sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
            };
          { Shallow_decl_defs.sm_name = ([10:28-30], "f2");
@@ -145,7 +147,8 @@
            { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
-             no_auto_likes = false; needs_concrete = false };
+             no_auto_likes = false; needs_concrete = false;
+             tests_bypass_visibility = false };
            sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
            }
          ];

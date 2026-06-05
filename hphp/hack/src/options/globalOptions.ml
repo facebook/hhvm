@@ -199,6 +199,7 @@ type t = {
   class_pointer_ban_classname_class_const: int;
   class_pointer_ban_class_array_key: bool;
   tco_poly_function_pointers: bool;
+  tco_permits_bypassing_visibility: string list;
 }
 [@@deriving eq, show]
 
@@ -314,6 +315,7 @@ let default =
     class_pointer_ban_classname_class_const = 0;
     class_pointer_ban_class_array_key = false;
     tco_poly_function_pointers = true;
+    tco_permits_bypassing_visibility = [];
   }
 
 let set
@@ -426,6 +428,7 @@ let set
     ?class_pointer_ban_classname_class_const
     ?class_pointer_ban_class_array_key
     ?tco_poly_function_pointers
+    ?tco_permits_bypassing_visibility
     options =
   let setting setting option =
     match setting with
@@ -734,6 +737,10 @@ let set
         options.class_pointer_ban_class_array_key;
     tco_poly_function_pointers =
       setting tco_poly_function_pointers options.tco_poly_function_pointers;
+    tco_permits_bypassing_visibility =
+      setting
+        tco_permits_bypassing_visibility
+        options.tco_permits_bypassing_visibility;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

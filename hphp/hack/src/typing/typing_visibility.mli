@@ -20,6 +20,7 @@ val check_class_access :
   is_method:bool ->
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
+  tests_bypass_visibility:bool ->
   env ->
   ce_visibility * bool ->
   Nast.class_id_ ->
@@ -28,6 +29,7 @@ val check_class_access :
 
 val check_internal_access :
   in_signature:bool ->
+  tests_bypass_visibility_context:bool ->
   Typing_env_types.env ->
   string option ->
   Pos.t ->
@@ -39,6 +41,7 @@ val check_obj_access :
   is_receiver_interface:bool ->
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
+  tests_bypass_visibility:bool ->
   env ->
   ce_visibility ->
   Typing_error.t option
@@ -58,6 +61,8 @@ val check_top_level_access :
   in_signature:bool ->
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
+  tests_bypass_visibility:bool ->
+  target_supports_tests_bypass_visibility:bool ->
   env ->
   bool ->
   string option ->
@@ -68,6 +73,8 @@ val check_top_level_access :
 val check_meth_caller_access :
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
+  tests_bypass_visibility:bool ->
+  env ->
   ce_visibility ->
   Typing_error.t option
 

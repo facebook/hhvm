@@ -1,0 +1,30 @@
+ERROR: File "generics_variance.php", line 12, characters 32-32:
+Illegal usage of a covariant type parameter (Typing[4120])
+  File "generics_variance.php", line 6, characters 18-18:
+  This is where the parameter was declared as covariant `+`
+  File "generics_variance.php", line 12, characters 32-32:
+  Function parameters are contravariant
+ERROR: File "generics_variance.php", line 15, characters 27-27:
+Illegal usage of a covariant type parameter (Typing[4120])
+  File "generics_variance.php", line 6, characters 18-18:
+  This is where the parameter was declared as covariant `+`
+  File "generics_variance.php", line 15, characters 27-27:
+  Function parameters are contravariant
+ERROR: File "generics_variance.php", line 27, characters 35-35:
+Illegal usage of a contravariant type parameter (Typing[4121])
+  File "generics_variance.php", line 19, characters 21-21:
+  This is where the parameter was declared as contravariant `-`
+  File "generics_variance.php", line 27, characters 35-35:
+  Function return types are covariant
+ERROR: File "generics_variance.php", line 39, characters 11-12:
+Illegal usage of a covariant type parameter (Typing[4120])
+  File "generics_variance.php", line 33, characters 16-16:
+  This is where the parameter was declared as covariant `+`
+  File "generics_variance.php", line 39, characters 11-12:
+  A non private class property is always invariant
+ERROR: File "generics_variance.php", line 42, characters 13-14:
+Illegal usage of a covariant type parameter (Typing[4120])
+  File "generics_variance.php", line 33, characters 16-16:
+  This is where the parameter was declared as covariant `+`
+  File "generics_variance.php", line 42, characters 13-14:
+  A non private class property is always invariant

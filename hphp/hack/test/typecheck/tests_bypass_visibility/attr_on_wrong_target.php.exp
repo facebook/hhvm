@@ -1,0 +1,6 @@
+ERROR: File "attr_on_wrong_target.php", line 6, characters 3-25:
+The `__TestsBypassVisibility` attribute cannot be used on a function. (Typing[4231])
+ERROR: File "attr_on_wrong_target.php", line 10, characters 3-25:
+The `__TestsBypassVisibility` attribute cannot be used on an enum. (Typing[4231])
+ERROR: File "attr_on_wrong_target.php", line 14, characters 3-25:
+The `__TestsBypassVisibility` attribute cannot be used on a typealias. (Typing[4231])

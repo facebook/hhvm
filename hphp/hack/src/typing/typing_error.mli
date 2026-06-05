@@ -315,6 +315,7 @@ module Primary : sig
           current_module_opt: string option;
           decl_pos: Pos_or_decl.t;
           target_module: string;
+          tests_bypass_visibility_context: bool;
         }
       | Module_unsafe_trait_access of {
           access_pos: Pos.t;
@@ -517,6 +518,11 @@ module Primary : sig
         pos: Pos.t;
         name: string;
         feature: string;
+      }
+    | Tests_bypass_visibility_on_member_without_class of {
+        pos: Pos.t;
+        member_name: string;
+        class_name: string;
       }
     | Unsatisfied_req of {
         pos: Pos.t;
@@ -1642,6 +1648,16 @@ and Secondary : sig
       }
     | Override_final of {
         pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
+    | Override_tests_bypass_visibility of {
+        pos: Pos_or_decl.t;
+        member_name: string;
+        parent_pos: Pos_or_decl.t;
+      }
+    | Abstract_tests_bypass_visibility_missing_attr of {
+        pos: Pos_or_decl.t;
+        member_name: string;
         parent_pos: Pos_or_decl.t;
       }
     | Override_async of {

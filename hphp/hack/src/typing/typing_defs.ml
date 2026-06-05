@@ -670,6 +670,9 @@ let get_ce_safe_global_variable ce =
 
 let get_ce_no_auto_likes ce = ClassElt.is_no_auto_likes ce.ce_flags
 
+let get_ce_tests_bypass_visibility ce =
+  ClassElt.is_tests_bypass_visibility ce.ce_flags
+
 let make_ce_flags = Typing_defs_flags.ClassElt.make
 
 (** Return true if the element is private and not marked with the __LSB
@@ -685,7 +688,8 @@ let make_ce_flags = Typing_defs_flags.ClassElt.make
   them as non-private here. *)
 let class_elt_is_private_not_lsb (elt : class_elt) : bool =
   match elt.ce_visibility with
-  | Vprivate _ -> not (get_ce_lsb elt)
+  | Vprivate _ ->
+    (not (get_ce_lsb elt)) && not (get_ce_tests_bypass_visibility elt)
   | Vprotected _
   | Vpublic
   | Vinternal _

@@ -200,7 +200,7 @@
  (wrapped false)
  (modules
   typing_modules)
- (libraries typing_env typing_env_types decl_provider))
+ (libraries typing_env typing_env_types typing_utils decl_provider))
 
 (library
  (name typing_packages)

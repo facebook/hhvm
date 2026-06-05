@@ -44,6 +44,8 @@ let is_class_visible (env : Typing_env_types.env) (cls : Cls.t) =
         ~target:(Cls.get_module cls)
     with
     | `Yes -> true
-    | _ -> false
+    | _ ->
+      Cls.tests_bypass_visibility cls
+      && Typing_utils.is_tests_bypass_visibility_context env
   else
     true

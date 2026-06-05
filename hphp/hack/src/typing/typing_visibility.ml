@@ -126,7 +126,8 @@ let is_internal_visible env target =
   | `OutsideViaTrait _ ->
     Some "You cannot access internal members inside a public trait"
 
-let check_internal_access ~in_signature env target pos decl_pos =
+let check_internal_access
+    ~in_signature ~tests_bypass_visibility_context env target pos decl_pos =
   let module_err_opt =
     match
       Typing_modules.can_access_internal
@@ -145,11 +146,18 @@ let check_internal_access ~in_signature env target pos decl_pos =
              decl_pos;
              current_module_opt = Some current;
              target_module = target;
+             tests_bypass_visibility_context;
            })
     | `Outside target ->
       Some
         (Module_mismatch
-           { pos; decl_pos; current_module_opt = None; target_module = target })
+           {
+             pos;
+             decl_pos;
+             current_module_opt = None;
+             target_module = target;
+             tests_bypass_visibility_context;
+           })
     | `OutsideViaTrait trait_pos ->
       Some (Module_unsafe_trait_access { access_pos = pos; trait_pos })
   in
@@ -399,33 +407,73 @@ let is_visible ~is_method env (vis, lsb) cid class_ =
   in
   Option.is_none msg_opt
 
-let visibility_error p msg (p_vis, vis) =
+let visibility_error ~tests_bypass_visibility_context p msg (p_vis, vis) =
   let s = Typing_defs.string_of_visibility vis in
-  let msg_vis = "This member is " ^ s in
+  let msg_vis =
+    "This member is "
+    ^ s
+    ^
+    if tests_bypass_visibility_context then
+      ". To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member"
+    else
+      ""
+  in
   Typing_error.(
     primary
     @@ Primary.Visibility
          { pos = p; msg; decl_pos = p_vis; reason_msg = msg_vis })
 
-let check_obj_access ~is_method ~is_receiver_interface ~use_pos ~def_pos env vis
-    =
-  Option.map
-    (is_visible_for_obj ~is_method ~is_receiver_interface env vis)
-    ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
+let check_obj_access
+    ~is_method
+    ~is_receiver_interface
+    ~use_pos
+    ~def_pos
+    ~tests_bypass_visibility
+    env
+    vis =
+  if tests_bypass_visibility && TUtils.is_tests_bypass_visibility_context env
+  then
+    None
+  else
+    Option.map
+      (is_visible_for_obj ~is_method ~is_receiver_interface env vis)
+      ~f:(fun msg ->
+        let tests_bypass_visibility_context =
+          TUtils.is_tests_bypass_visibility_context env
+        in
+        visibility_error
+          ~tests_bypass_visibility_context
+          use_pos
+          msg
+          (def_pos, vis))
 
 let check_top_level_access
     ~should_check_package_boundary
     ~in_signature
     ~use_pos
     ~def_pos
+    ~tests_bypass_visibility
+    ~target_supports_tests_bypass_visibility
     env
     is_internal
     target_module
     target_package
     target_id =
+  let in_test_context = TUtils.is_tests_bypass_visibility_context env in
   let module_error =
-    if is_internal then
-      check_internal_access ~in_signature env target_module use_pos def_pos
+    if is_internal && not (tests_bypass_visibility && in_test_context) then
+      let tests_bypass_visibility_context =
+        target_supports_tests_bypass_visibility
+        && (not tests_bypass_visibility)
+        && in_test_context
+      in
+      check_internal_access
+        ~in_signature
+        ~tests_bypass_visibility_context
+        env
+        target_module
+        use_pos
+        def_pos
     else
       None
   in
@@ -459,32 +507,57 @@ let check_expression_tree_vis ~use_pos ~def_pos env vis =
   else
     None
 
-let check_meth_caller_access ~use_pos ~def_pos vis =
-  let open Typing_error in
-  match vis with
-  | Vprivate _ ->
-    Some
-      (primary
-      @@ Primary.Private_meth_caller { decl_pos = def_pos; pos = use_pos })
-  | Vprotected _ ->
-    Some
-      (primary
-      @@ Primary.Protected_meth_caller { decl_pos = def_pos; pos = use_pos })
-  | Vinternal _ ->
-    Some
-      (primary
-      @@ Primary.Internal_meth_caller { decl_pos = def_pos; pos = use_pos })
-  | Vprotected_internal _ ->
-    Some
-      (primary
-      @@ Primary.Protected_internal_meth_caller
-           { decl_pos = def_pos; pos = use_pos })
-  | _ -> None
+let check_meth_caller_access ~use_pos ~def_pos ~tests_bypass_visibility env vis
+    =
+  if tests_bypass_visibility && TUtils.is_tests_bypass_visibility_context env
+  then
+    None
+  else
+    let open Typing_error in
+    match vis with
+    | Vprivate _ ->
+      Some
+        (primary
+        @@ Primary.Private_meth_caller { decl_pos = def_pos; pos = use_pos })
+    | Vprotected _ ->
+      Some
+        (primary
+        @@ Primary.Protected_meth_caller { decl_pos = def_pos; pos = use_pos })
+    | Vinternal _ ->
+      Some
+        (primary
+        @@ Primary.Internal_meth_caller { decl_pos = def_pos; pos = use_pos })
+    | Vprotected_internal _ ->
+      Some
+        (primary
+        @@ Primary.Protected_internal_meth_caller
+             { decl_pos = def_pos; pos = use_pos })
+    | _ -> None
 
-let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
-  Option.map
-    (is_visible_for_class ~is_method env (vis, lsb) cid class_)
-    ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
+let check_class_access
+    ~is_method
+    ~use_pos
+    ~def_pos
+    ~tests_bypass_visibility
+    env
+    (vis, lsb)
+    cid
+    class_ =
+  if tests_bypass_visibility && TUtils.is_tests_bypass_visibility_context env
+  then
+    None
+  else
+    Option.map
+      (is_visible_for_class ~is_method env (vis, lsb) cid class_)
+      ~f:(fun msg ->
+        let tests_bypass_visibility_context =
+          TUtils.is_tests_bypass_visibility_context env
+        in
+        visibility_error
+          ~tests_bypass_visibility_context
+          use_pos
+          msg
+          (def_pos, vis))
 
 let check_cross_package ~use_pos ~def_pos:_ env package_requirement =
   let current_pkg = Env.get_current_package env in

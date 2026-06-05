@@ -312,3 +312,6 @@ let is_unstable_feature_enabled t name =
   match SMap.find_opt name t.GlobalOptions.po.experimental_features with
   | Some OngoingRelease -> true
   | _ -> false
+
+let permits_bypassing_visibility t =
+  t.GlobalOptions.tco_permits_bypassing_visibility

@@ -1,0 +1,4 @@
+ERROR: File "override.php", line 19, characters 22-25:
+`prot` must also have `<<__TestsBypassVisibility>>` because it overrides a method with the attribute (Typing[4516])
+  File "override.php", line 7, characters 22-25:
+  The parent method was declared with `<<__TestsBypassVisibility>>` here

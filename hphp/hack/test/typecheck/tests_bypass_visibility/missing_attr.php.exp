@@ -1,0 +1,12 @@
+ERROR: File "missing_attr.php", line 15, characters 14-17:
+You cannot access this member (Typing[4112])
+  File "missing_attr.php", line 6, characters 20-23:
+  This member is private. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member
+ERROR: File "missing_attr.php", line 16, characters 14-17:
+Cannot access this protected member, you don't extend MissingAttrTarget (Typing[4112])
+  File "missing_attr.php", line 8, characters 22-25:
+  This member is protected. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member
+ERROR: File "missing_attr.php", line 17, characters 24-28:
+You cannot access this member (Typing[4112])
+  File "missing_attr.php", line 10, characters 27-31:
+  This member is private. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member

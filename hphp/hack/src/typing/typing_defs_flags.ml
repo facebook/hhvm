@@ -267,6 +267,7 @@ module ClassElt = struct
       | NeedsInit
       | SafeGlobalVariable
       | NoAutoLikes
+      | TestsBypassVisibility
     (* NB: Keep these flags in sync with typing_defs_flags.rs. *)
     [@@deriving enum, show { with_path = false }]
 
@@ -393,6 +394,8 @@ module ClassElt = struct
 
   let is_no_auto_likes = is_set Field.NoAutoLikes
 
+  let is_tests_bypass_visibility = is_set Field.TestsBypassVisibility
+
   let get_xhp_attr (flags : t) : Xhp_attribute.t option =
     Field.xhp_attr_fields
     |> List.filter ~f:(fun field -> is_set field flags)
@@ -430,7 +433,8 @@ module ClassElt = struct
       ~support_dynamic_type
       ~needs_init
       ~safe_global_variable
-      ~no_auto_likes =
+      ~no_auto_likes
+      ~tests_bypass_visibility =
     let flags = 0 in
     let flags = set Field.Abstract abstract flags in
     let flags = set Field.Final final flags in
@@ -451,6 +455,7 @@ module ClassElt = struct
     let flags = set Field.NeedsInit needs_init flags in
     let flags = set Field.SafeGlobalVariable safe_global_variable flags in
     let flags = set Field.NoAutoLikes no_auto_likes flags in
+    let flags = set Field.TestsBypassVisibility tests_bypass_visibility flags in
     flags
 
   let set_synthesized = set Field.Synthesized true

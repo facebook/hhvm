@@ -1,0 +1,4 @@
+ERROR: File "trait_internal.php--non_test.php", line 5, characters 11-18:
+You cannot access internal members outside of a module (Typing[4112])
+  File "trait_internal.php--trait.php", line 8, characters 21-28:
+  This member is internal

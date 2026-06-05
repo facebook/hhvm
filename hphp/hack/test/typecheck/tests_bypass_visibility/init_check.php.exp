@@ -1,0 +1,7 @@
+ERROR: File "init_check.php", line 22, characters 19-29:
+Class `BypassPrivInit` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
+  File "init_check.php", line 20, characters 15-16:
+  `$this->x` is not initialized.
+ERROR: File "init_check.php", line 27, characters 5-16:
+Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
+The initialization is not over because `$this->x` can still potentially be null (NastCheck[3004])

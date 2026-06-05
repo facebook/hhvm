@@ -44,9 +44,9 @@ bitflags! {
 }
 
 #[derive(EqModuloPos, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Clone, Copy)]
-pub struct ClassEltFlags(u16);
+pub struct ClassEltFlags(u32);
 bitflags! {
-    impl ClassEltFlags: u16 {
+    impl ClassEltFlags: u32 {
         const ABSTRACT                 = 1 << 0;
         const FINAL                    = 1 << 1;
         const SUPERFLUOUS_OVERRIDE     = 1 << 2;
@@ -71,6 +71,7 @@ bitflags! {
         const NEEDS_INIT               = 1 << 13;
         const SAFE_GLOBAL_VARIABLE     = 1 << 14;
         const NO_AUTO_LIKES            = 1 << 15;
+        const TESTS_BYPASS_VISIBILITY  = 1 << 16;
 
         const XA_FLAGS_MASK = Self::XA_HAS_DEFAULT.bits() | Self::XA_TAG_REQUIRED.bits() | Self::XA_TAG_LATEINIT.bits();
     }
@@ -96,6 +97,7 @@ pub struct ClassEltFlagsArgs {
     pub needs_init: bool,
     pub safe_global_variable: bool,
     pub no_auto_likes: bool,
+    pub is_tests_bypass_visibility: bool,
 }
 
 impl From<xhp_attribute::Tag> for ClassEltFlags {
@@ -142,6 +144,7 @@ impl ClassEltFlags {
             needs_init,
             safe_global_variable,
             no_auto_likes,
+            is_tests_bypass_visibility,
         } = args;
         let mut flags = Self::empty();
         flags.set(Self::ABSTRACT, is_abstract);
@@ -161,6 +164,7 @@ impl ClassEltFlags {
         flags.set(Self::NEEDS_INIT, needs_init);
         flags.set(Self::SAFE_GLOBAL_VARIABLE, safe_global_variable);
         flags.set(Self::NO_AUTO_LIKES, no_auto_likes);
+        flags.set(Self::TESTS_BYPASS_VISIBILITY, is_tests_bypass_visibility);
         flags
     }
 
@@ -215,8 +219,8 @@ impl ocamlrep::ToOcamlRep for ClassEltFlags {
 
 impl ocamlrep::FromOcamlRep for ClassEltFlags {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        let int_value = ocamlrep::from::expect_int(value)?;
-        Ok(Self::from_bits_truncate(int_value.try_into()?))
+        let int_value: isize = ocamlrep::from::expect_int(value)?;
+        Ok(Self::from_bits_truncate(int_value as u32))
     }
 }
 
@@ -238,7 +242,7 @@ impl no_pos_hash::NoPosHash for ClassEltFlags {
 
 impl serde::Serialize for ClassEltFlags {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_u16(self.bits())
+        serializer.serialize_u32(self.bits())
     }
 }
 
@@ -249,19 +253,19 @@ impl<'de> serde::Deserialize<'de> for ClassEltFlags {
             type Value = ClassEltFlags;
 
             fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-                write!(formatter, "a u16 for ClassEltFlags")
+                write!(formatter, "a u32 for ClassEltFlags")
             }
-            fn visit_u16<E: serde::de::Error>(self, value: u16) -> Result<Self::Value, E> {
+            fn visit_u32<E: serde::de::Error>(self, value: u32) -> Result<Self::Value, E> {
                 Ok(Self::Value::from_bits_truncate(value))
             }
 
             fn visit_u64<E: serde::de::Error>(self, value: u64) -> Result<Self::Value, E> {
                 Ok(Self::Value::from_bits_truncate(
-                    u16::try_from(value).expect("expect an u16, but got u64"),
+                    u32::try_from(value).expect("expect a u32, but got u64"),
                 ))
             }
         }
-        deserializer.deserialize_u16(Visitor)
+        deserializer.deserialize_u32(Visitor)
     }
 }
 

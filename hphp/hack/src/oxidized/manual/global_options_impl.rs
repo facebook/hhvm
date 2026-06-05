@@ -151,6 +151,7 @@ impl Default for GlobalOptions {
             class_pointer_ban_classname_class_const: 0,
             class_pointer_ban_class_array_key: false,
             tco_poly_function_pointers: true,
+            tco_permits_bypassing_visibility: Default::default(),
             tco_repo_stdlib_path: None,
         }
     }

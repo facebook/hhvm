@@ -1,0 +1,4 @@
+ERROR: File "nested_test_class.php", line 27, characters 9-14:
+You cannot access this member (Typing[4112])
+  File "nested_test_class.php", line 7, characters 20-25:
+  This member is private

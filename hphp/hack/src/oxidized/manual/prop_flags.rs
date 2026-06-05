@@ -21,6 +21,7 @@ bitflags! {
         const READONLY    = 1 << 6;
         const SAFE_GLOBAL_VARIABLE = 1 << 7;
         const NO_AUTO_LIKES = 1 << 8;
+        const TESTS_BYPASS_VISIBILITY = 1 << 9;
     }
 }
 
@@ -51,6 +52,9 @@ impl PropFlags {
     }
     pub fn no_auto_likes(&self) -> bool {
         self.contains(Self::NO_AUTO_LIKES)
+    }
+    pub fn tests_bypass_visibility(&self) -> bool {
+        self.contains(Self::TESTS_BYPASS_VISIBILITY)
     }
 }
 

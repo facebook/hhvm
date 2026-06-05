@@ -811,6 +811,13 @@ let has_ancestor_including_req = has_ancestor_including_req ~visited:SSet.empty
 let has_ancestor_including_req_refl =
   has_ancestor_including_req_refl ~visited:SSet.empty
 
+let is_tests_bypass_visibility_context env =
+  match Env.get_self_id env with
+  | None -> false
+  | Some self_id ->
+    TypecheckerOptions.permits_bypassing_visibility (Env.get_tcopt env)
+    |> List.exists ~f:(has_ancestor_including_req_refl env self_id)
+
 (* Return true if the type is known to support dynamic (i.e. is a subtype of supportdyn<mixed>)
  * Note that we look at bounds on type variables, so vec<#0> produces true if #0 has a
  * bound that supports dynamic

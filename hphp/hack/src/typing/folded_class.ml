@@ -100,6 +100,12 @@ module ApiShallow = struct
     let (c, _) = t in
     c.Decl_defs.dc_internal
 
+  let tests_bypass_visibility (decl, t, _ctx) =
+    Decl_counters.count_subdecl decl Decl_counters.TestsBypassVisibility
+    @@ fun () ->
+    let (c, _) = t in
+    c.Decl_defs.dc_tests_bypass_visibility
+
   let is_module_level_trait (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.IsModuleLevelTrait
     @@ fun () ->

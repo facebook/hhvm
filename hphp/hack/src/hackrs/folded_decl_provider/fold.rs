@@ -311,6 +311,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             needs_init: prop_flags.needs_init(),
             safe_global_variable: false,
             no_auto_likes: false,
+            is_tests_bypass_visibility: prop_flags.tests_bypass_visibility(),
         };
         let elt = FoldedElement {
             origin: self.child.name.id(),
@@ -352,6 +353,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             no_auto_likes: false,
             needs_init: false,
             safe_global_variable: prop_flags.is_safe_global_variable(),
+            is_tests_bypass_visibility: prop_flags.tests_bypass_visibility(),
         };
         let elt = FoldedElement {
             origin: self.child.name.id(),
@@ -418,6 +420,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             no_auto_likes,
             needs_init: false,
             safe_global_variable: false,
+            is_tests_bypass_visibility: meth_flags.tests_bypass_visibility(),
         };
         let elt = FoldedElement {
             origin: cls,
@@ -467,6 +470,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 needs_init: false,
                 safe_global_variable: false,
                 no_auto_likes: false,
+                is_tests_bypass_visibility: meth_flags.tests_bypass_visibility(),
             };
             FoldedElement {
                 origin: self.child.name.id(),
@@ -1005,6 +1009,8 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             is_const,
             // Support both attribute and keyword for now, until typechecker changes are made
             is_internal: self.child.is_internal,
+            tests_bypass_visibility: self
+                .has_user_attribute(*sn::user_attributes::uaTestsBypassVisibility),
             is_xhp: self.child.is_xhp,
             support_dynamic_type: self.opts.implicit_inherit_sdt && support_dynamic_type
                 || self.child.support_dynamic_type

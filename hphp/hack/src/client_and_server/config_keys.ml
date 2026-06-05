@@ -203,6 +203,8 @@ module Hhconfig = struct
 
   let package_exclude_patterns = key "package_exclude_patterns"
 
+  let permits_bypassing_visibility = key "permits_bypassing_visibility"
+
   let pessimise_builtins = key "pessimise_builtins"
 
   let poly_function_pointers = key "poly_function_pointers"

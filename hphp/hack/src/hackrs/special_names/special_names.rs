@@ -259,6 +259,8 @@ pub mod user_attributes {
     pub static uaConsistentConstruct: Lazy<TypeName> =
         lazy!(sn::user_attributes::CONSISTENT_CONSTRUCT);
     pub static uaConst: Lazy<TypeName> = lazy!(sn::user_attributes::CONST);
+    pub static uaTestsBypassVisibility: Lazy<TypeName> =
+        lazy!(sn::user_attributes::TESTS_BYPASS_VISIBILITY);
     pub static uaDeprecated: Lazy<TypeName> = lazy!(sn::user_attributes::DEPRECATED);
     pub static uaEntryPoint: Lazy<TypeName> = lazy!(sn::user_attributes::ENTRY_POINT);
     pub static uaMemoize: Lazy<TypeName> = lazy!(sn::user_attributes::MEMOIZE);
@@ -320,6 +322,7 @@ pub mod user_attributes {
             *uaOverride,
             *uaConsistentConstruct,
             *uaConst,
+            *uaTestsBypassVisibility,
             *uaDeprecated,
             *uaEntryPoint,
             *uaMemoize,

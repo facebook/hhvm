@@ -30,7 +30,8 @@
           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
             override = false; dynamicallycallable = false;
             php_std_lib = false; support_dynamic_type = false;
-            no_auto_likes = false; needs_concrete = false };
+            no_auto_likes = false; needs_concrete = false;
+            tests_bypass_visibility = false };
           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal };
          { Shallow_decl_defs.sm_name = ([5:19-29], "closeDoors");
            sm_type =
@@ -52,7 +53,8 @@
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
-             no_auto_likes = false; needs_concrete = false };
+             no_auto_likes = false; needs_concrete = false;
+             tests_bypass_visibility = false };
            sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
            }
          ];
@@ -91,7 +93,8 @@
            { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
-             no_auto_likes = false; needs_concrete = false };
+             no_auto_likes = false; needs_concrete = false;
+             tests_bypass_visibility = false };
            sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
            }
           ];
@@ -134,7 +137,8 @@
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
-             no_auto_likes = false; needs_concrete = false };
+             no_auto_likes = false; needs_concrete = false;
+             tests_bypass_visibility = false };
            sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
            }
           ];
@@ -173,7 +177,8 @@
            { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
-             no_auto_likes = false; needs_concrete = false };
+             no_auto_likes = false; needs_concrete = false;
+             tests_bypass_visibility = false };
            sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
            }
           ];
@@ -216,7 +221,8 @@
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
-             no_auto_likes = false; needs_concrete = false };
+             no_auto_likes = false; needs_concrete = false;
+             tests_bypass_visibility = false };
            sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
            }
           ];
@@ -263,7 +269,8 @@
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
-             no_auto_likes = false; needs_concrete = false };
+             no_auto_likes = false; needs_concrete = false;
+             tests_bypass_visibility = false };
            sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
            };
           { Shallow_decl_defs.sm_name = ([45:19-30], "startEngine");
@@ -286,7 +293,8 @@
             { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
               override = false; dynamicallycallable = false;
               php_std_lib = false; support_dynamic_type = false;
-              no_auto_likes = false; needs_concrete = false };
+              no_auto_likes = false; needs_concrete = false;
+              tests_bypass_visibility = false };
             sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
             }
           ];

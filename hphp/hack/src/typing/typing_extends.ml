@@ -1212,6 +1212,46 @@ let check_override
     | _ -> ()
   end;
 
+  if get_ce_tests_bypass_visibility parent_class_elt then begin
+    let is_private_parent =
+      match parent_class_elt.ce_visibility with
+      | Vprivate _ -> true
+      | _ -> false
+    in
+    (* Private members marked `<<__TestsBypassVisibility>>` are kept during
+       inheritance, so they reach normal override checking. A concrete private
+       member with the attribute must remain unique in its hierarchy; otherwise
+       a test-context access through a subclass would be ambiguous between the
+       inherited private member and the subclass member.
+
+       We do not reject the opposite direction, where the ancestor has an
+       ordinary concrete private member and the child introduces a member with
+       `<<__TestsBypassVisibility>>`. The ordinary ancestor private member is
+       still inaccessible from test contexts, so upcasting cannot expose it. *)
+    if is_private_parent && not (get_ce_abstract parent_class_elt) then begin
+      let (lazy pos) = class_elt.ce_pos in
+      let (lazy parent_pos) = parent_class_elt.ce_pos in
+      Typing_error_utils.add_typing_error
+        ~env
+        Typing_error.(
+          apply_reasons ~on_error
+          @@ Secondary.Override_tests_bypass_visibility
+               { pos; member_name; parent_pos })
+    end else if not (get_ce_tests_bypass_visibility class_elt) then begin
+      (* Abstract private methods may be implemented in subclasses, but the
+         implementation must opt in as well so the inherited test-only access
+         contract is preserved. *)
+      let (lazy pos) = class_elt.ce_pos in
+      let (lazy parent_pos) = parent_class_elt.ce_pos in
+      Typing_error_utils.add_typing_error
+        ~env
+        Typing_error.(
+          apply_reasons ~on_error
+          @@ Secondary.Abstract_tests_bypass_visibility_missing_attr
+               { pos; member_name; parent_pos })
+    end
+  end;
+
   if MemberKind.is_method member_kind then begin
     (* We first verify that we aren't overriding a final method.  We only check
      * for final overrides on methods, not properties. Constructors have their
@@ -1965,7 +2005,8 @@ let default_constructor_ce class_ =
         ~support_dynamic_type:false
         ~needs_init:false
         ~safe_global_variable:false
-        ~no_auto_likes:false;
+        ~no_auto_likes:false
+        ~tests_bypass_visibility:false;
   }
 
 (* When an interface defines a constructor, we check that they are compatible *)

@@ -465,6 +465,7 @@ impl<R: Reason> ToOxidized for folded::FoldedClass<R> {
             is_final,
             is_const,
             is_internal,
+            tests_bypass_visibility,
             is_xhp,
             has_xhp_keyword,
             support_dynamic_type,
@@ -536,6 +537,7 @@ impl<R: Reason> ToOxidized for folded::FoldedClass<R> {
             docs_url,
             allow_multiple_instantiations,
             package,
+            tests_bypass_visibility,
         }
     }
 }

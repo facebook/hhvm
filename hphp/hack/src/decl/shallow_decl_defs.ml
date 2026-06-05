@@ -33,6 +33,7 @@ module PropFlags = struct
     readonly: bool;
     safe_global_variable: bool;
     no_auto_likes: bool;
+    tests_bypass_visibility: bool;
   }
   [@@deriving show]
 
@@ -47,6 +48,7 @@ module PropFlags = struct
   let readonly_bit    = 1 lsl 6
   let safe_global_variable_bit = 1 lsl 7
   let no_auto_likes_bit = 1 lsl 8
+  let tests_bypass_visibility_bit = 1 lsl 9
 
   let get_abstract    = is_set abstract_bit
   let get_const       = is_set const_bit
@@ -57,6 +59,7 @@ module PropFlags = struct
   let get_readonly = is_set readonly_bit
   let get_safe_global_variable = is_set safe_global_variable_bit
   let get_no_auto_likes = is_set no_auto_likes_bit
+  let get_tests_bypass_visibility = is_set tests_bypass_visibility_bit
 
   let set_abstract    = set_bit abstract_bit
   let set_const       = set_bit const_bit
@@ -67,6 +70,7 @@ module PropFlags = struct
   let set_readonly    = set_bit readonly_bit
   let set_safe_global_variable = set_bit safe_global_variable_bit
   let set_no_auto_likes = set_bit no_auto_likes_bit
+  let set_tests_bypass_visibility = set_bit tests_bypass_visibility_bit
 
   let to_record flags : record =
     {
@@ -79,6 +83,7 @@ module PropFlags = struct
       readonly = get_readonly flags;
       safe_global_variable = get_safe_global_variable flags;
       no_auto_likes = get_no_auto_likes flags;
+      tests_bypass_visibility = get_tests_bypass_visibility flags;
     }
 
   let make
@@ -91,6 +96,7 @@ module PropFlags = struct
       ~readonly
       ~safe_global_variable
       ~no_auto_likes
+      ~tests_bypass_visibility
       =
     empty
     |> set_abstract abstract
@@ -102,6 +108,7 @@ module PropFlags = struct
     |> set_readonly readonly
     |> set_safe_global_variable safe_global_variable
     |> set_no_auto_likes no_auto_likes
+    |> set_tests_bypass_visibility tests_bypass_visibility
 
   let pp fmt t =
     pp_record fmt (to_record t)
@@ -122,6 +129,7 @@ module MethodFlags = struct
     support_dynamic_type: bool;
     no_auto_likes: bool;
     needs_concrete: bool;
+    tests_bypass_visibility: bool;
   }
   [@@deriving show]
 
@@ -135,6 +143,7 @@ module MethodFlags = struct
   let support_dynamic_type_bit   = 1 lsl 5
   let no_auto_likes_bit          = 1 lsl 6
   let needs_concrete_bit = 1 lsl 7
+  let tests_bypass_visibility_bit = 1 lsl 8
 
   let get_abstract               = is_set abstract_bit
   let get_final                  = is_set final_bit
@@ -144,6 +153,7 @@ module MethodFlags = struct
   let get_support_dynamic_type   = is_set support_dynamic_type_bit
   let get_no_auto_likes          = is_set no_auto_likes_bit
   let get_needs_concrete = is_set needs_concrete_bit
+  let get_tests_bypass_visibility = is_set tests_bypass_visibility_bit
 
   let set_abstract               = set_bit abstract_bit
   let set_final                  = set_bit final_bit
@@ -153,6 +163,7 @@ module MethodFlags = struct
   let set_support_dynamic_type   = set_bit support_dynamic_type_bit
   let set_no_auto_likes          = set_bit no_auto_likes_bit
   let set_needs_concrete          = set_bit needs_concrete_bit
+  let set_tests_bypass_visibility = set_bit tests_bypass_visibility_bit
 
   let to_record t : record =
   {
@@ -164,6 +175,7 @@ module MethodFlags = struct
     support_dynamic_type     = get_support_dynamic_type t;
     no_auto_likes = get_no_auto_likes t;
     needs_concrete = get_needs_concrete t;
+    tests_bypass_visibility = get_tests_bypass_visibility t;
   }
 
   let make
@@ -175,6 +187,7 @@ module MethodFlags = struct
       ~support_dynamic_type
       ~no_auto_likes
       ~needs_concrete
+      ~tests_bypass_visibility
       =
     empty
     |> set_abstract abstract
@@ -185,6 +198,7 @@ module MethodFlags = struct
     |> set_support_dynamic_type support_dynamic_type
     |> set_no_auto_likes no_auto_likes
     |> set_needs_concrete needs_concrete
+    |> set_tests_bypass_visibility tests_bypass_visibility
 
   let pp fmt t =
     pp_record fmt (to_record t)
@@ -320,6 +334,12 @@ let sm_support_dynamic_type sm =
 let sm_no_auto_likes sm = MethodFlags.get_no_auto_likes sm.sm_flags
 
 let sm_needs_concrete sm = MethodFlags.get_needs_concrete sm.sm_flags
+
+let sm_tests_bypass_visibility sm =
+  MethodFlags.get_tests_bypass_visibility sm.sm_flags
+
+let sp_tests_bypass_visibility sp =
+  PropFlags.get_tests_bypass_visibility sp.sp_flags
 
 type fun_decl = fun_elt [@@deriving show]
 

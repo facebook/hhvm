@@ -636,6 +636,9 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt Config_keys.Hhconfig.class_pointer_ban_class_array_key config)
     ?tco_poly_function_pointers:
       (bool_opt Config_keys.Hhconfig.poly_function_pointers config)
+    ?tco_permits_bypassing_visibility:
+      (string_list_opt Config_keys.Hhconfig.permits_bypassing_visibility config
+      |> Option.map ~f:(List.map ~f:Utils.add_ns))
     options
 
 let warn_on_did_you_mean

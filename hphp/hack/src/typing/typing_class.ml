@@ -1917,9 +1917,38 @@ let check_hint_wellformedness_in_class env c parents =
   @@ Typing_type_wellformedness.class_ env c;
   env
 
+(** Internal classes can carry `<<__TestsBypassVisibility>>` to become visible
+  from configured test ancestors. If an internal member has the attribute, the
+  containing internal class must also have it so the class symbol itself can be
+  resolved from those tests. *)
+let check_tests_bypass_visibility_on_internal_class env c =
+  let class_is_internal = c.c_internal in
+  let class_has_attr =
+    Naming_attributes.mem
+      SN.UserAttributes.uaTestsBypassVisibility
+      c.c_user_attributes
+  in
+  if class_is_internal && not class_has_attr then begin
+    let check_member attrs member_pos member_name =
+      if Naming_attributes.mem SN.UserAttributes.uaTestsBypassVisibility attrs
+      then
+        Typing_error_utils.add_typing_error
+          ~env
+          (Typing_error.primary
+             (Typing_error.Primary
+              .Tests_bypass_visibility_on_member_without_class
+                { pos = member_pos; member_name; class_name = snd c.c_name }))
+    in
+    List.iter c.c_methods ~f:(fun m ->
+        check_member m.m_user_attributes (fst m.m_name) (snd m.m_name));
+    List.iter c.c_vars ~f:(fun cv ->
+        check_member cv.cv_user_attributes (fst cv.cv_id) (snd cv.cv_id))
+  end
+
 (** Perform all class wellformedness checks which don't involve the hierarchy:
   - attributes
   - property initialization checks
+  - tests-bypass-visibility wellformedness
   - type parameter checks
   - type hint wellformedness
   - generic static properties *)
@@ -1934,6 +1963,7 @@ let class_wellformedness_checks env c tc (parents : class_parents) =
     Env.run_with_no_self env (check_class_attributes ~cls:c)
   in
   NastInitCheck.class_ env c;
+  check_tests_bypass_visibility_on_internal_class env c;
   let env = check_class_type_parameters_add_constraints env c tc in
   let env = check_hint_wellformedness_in_class env c parents in
   check_no_generic_static_property env tc;

@@ -1,0 +1,12 @@
+ERROR: File "function_pointer.php", line 27, characters 21-31:
+You cannot access this member (Typing[4112])
+  File "function_pointer.php", line 7, characters 27-37:
+  This member is private
+ERROR: File "function_pointer.php", line 30, characters 40-50:
+You cannot access this member (Typing[4112])
+  File "function_pointer.php", line 10, characters 20-28:
+  This member is private
+ERROR: File "function_pointer.php", line 30, characters 40-50:
+You cannot access this method with `meth_caller` (even from the same class hierarchy) (Typing[4431])
+  File "function_pointer.php", line 10, characters 20-28:
+  It is declared as `private` here

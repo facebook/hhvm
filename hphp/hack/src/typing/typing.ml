@@ -1320,6 +1320,8 @@ end = struct
         ~in_signature:false
         ~use_pos
         ~def_pos
+        ~tests_bypass_visibility:false
+        ~target_supports_tests_bypass_visibility:false
         env
         fe_internal
         (Option.map fe_module ~f:snd)
@@ -6818,6 +6820,8 @@ end = struct
            ~is_receiver_interface:false
            ~use_pos:p
            ~def_pos
+           ~tests_bypass_visibility:
+             (Typing_defs_flags.ClassElt.is_tests_bypass_visibility ce_flags)
            env
            vis);
       Option.iter
@@ -8984,6 +8988,7 @@ end = struct
          ~is_method:true
          ~use_pos
          ~def_pos:class_pos
+         ~tests_bypass_visibility:(get_ce_tests_bypass_visibility class_elt)
          env
          (ce_visibility, get_ce_lsb class_elt)
          class_id_
@@ -9356,6 +9361,7 @@ end = struct
            ~is_receiver_interface:(Ast_defs.is_c_interface classish_kind)
            ~use_pos
            ~def_pos:class_pos
+           ~tests_bypass_visibility:(get_ce_tests_bypass_visibility class_elt)
            env
            ce_visibility)
     in
@@ -9370,6 +9376,8 @@ end = struct
           (Typing_visibility.check_meth_caller_access
              ~use_pos
              ~def_pos:class_pos
+             ~tests_bypass_visibility:(get_ce_tests_bypass_visibility class_elt)
+             env
              ce_visibility)
       else
         ()
@@ -11929,6 +11937,8 @@ end = struct
               ~should_check_package_boundary
               ~use_pos:p
               ~def_pos:(Cls.pos class_)
+              ~tests_bypass_visibility:(Cls.tests_bypass_visibility class_)
+              ~target_supports_tests_bypass_visibility:true
               env
               (Cls.internal class_)
               (Cls.get_module class_)
@@ -13799,6 +13809,7 @@ end = struct
                    ~is_method
                    ~use_pos:p
                    ~def_pos
+                   ~tests_bypass_visibility:(get_ce_tests_bypass_visibility ce)
                    env
                    (vis, get_ce_lsb ce)
                    cid_

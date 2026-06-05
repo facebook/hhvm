@@ -9,9 +9,9 @@ use eq_modulo_pos::EqModuloPos;
 // NB: Keep the values of these flags in sync with shallow_decl_defs.ml.
 
 #[derive(EqModuloPos, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
-pub struct MethodFlags(u8);
+pub struct MethodFlags(u16);
 bitflags! {
-    impl MethodFlags: u8 {
+    impl MethodFlags: u16 {
         const ABSTRACT            = 1 << 0;
         const FINAL               = 1 << 1;
         const OVERRIDE            = 1 << 2;
@@ -20,6 +20,7 @@ bitflags! {
         const SUPPORT_DYNAMIC_TYPE = 1 << 5;
         const NO_AUTO_LIKES       = 1 << 6;
         const NEEDS_CONCRETE       = 1 << 7;
+        const TESTS_BYPASS_VISIBILITY = 1 << 8;
     }
 }
 
@@ -47,6 +48,9 @@ impl MethodFlags {
     }
     pub fn is_needs_concrete(&self) -> bool {
         self.contains(Self::NEEDS_CONCRETE)
+    }
+    pub fn tests_bypass_visibility(&self) -> bool {
+        self.contains(Self::TESTS_BYPASS_VISIBILITY)
     }
 }
 
@@ -81,7 +85,7 @@ impl no_pos_hash::NoPosHash for MethodFlags {
 
 impl serde::Serialize for MethodFlags {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_u8(self.bits())
+        serializer.serialize_u16(self.bits())
     }
 }
 
@@ -92,19 +96,19 @@ impl<'de> serde::Deserialize<'de> for MethodFlags {
             type Value = MethodFlags;
 
             fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-                write!(formatter, "a u8 for MethodFlags")
+                write!(formatter, "a u16 for MethodFlags")
             }
 
-            fn visit_u8<E: serde::de::Error>(self, value: u8) -> Result<Self::Value, E> {
+            fn visit_u16<E: serde::de::Error>(self, value: u16) -> Result<Self::Value, E> {
                 Ok(Self::Value::from_bits_truncate(value))
             }
 
             fn visit_u64<E: serde::de::Error>(self, value: u64) -> Result<Self::Value, E> {
                 Ok(Self::Value::from_bits_truncate(
-                    u8::try_from(value).expect("expect an u8, but got u64"),
+                    u16::try_from(value).expect("expect a u16, but got u64"),
                 ))
             }
         }
-        deserializer.deserialize_u8(Visitor)
+        deserializer.deserialize_u16(Visitor)
     }
 }

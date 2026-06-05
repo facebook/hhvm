@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bcf0b61ca0e8980c104496e500203bce>>
+// @generated SignedSource<<5f3c643279693c8f18637004ec2a823f>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -575,6 +575,9 @@ pub enum Typing {
     DestructureMissingRequiredField = 4511,
     DestructureUnknownField = 4512,
     DestructureTupleArityMismatch = 4513,
+    TestsBypassVisibilityOverride = 4514,
+    TestsBypassVisibilityOnMemberWithoutClass = 4515,
+    TestsBypassVisibilityAbstractMissingAttr = 4516,
 }
 impl TrivialDrop for Typing {}
 arena_deserializer::impl_deserialize_in_arena!(Typing);

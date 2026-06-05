@@ -1,0 +1,8 @@
+ERROR: File "trait_override.php", line 25, characters 22-25:
+`prot` must also have `<<__TestsBypassVisibility>>` because it overrides a method with the attribute (Typing[4516])
+  File "trait_override.php", line 7, characters 22-25:
+  The parent method was declared with `<<__TestsBypassVisibility>>` here
+ERROR: File "trait_override.php", line 32, characters 20-23:
+Cannot override or shadow `priv` (Typing[4514])
+  File "trait_override.php", line 10, characters 20-23:
+  This concrete private member is in the same hierarchy as a member marked with `<<__TestsBypassVisibility>>`

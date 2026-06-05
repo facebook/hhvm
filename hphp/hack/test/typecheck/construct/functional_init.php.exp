@@ -3,5 +3,5 @@ Class `A` has properties that cannot be null and aren't always set in `__constru
   File "functional_init.php", line 15, characters 18-19:
   `$this->x` is not initialized.
 ERROR: File "functional_init.php", line 18, characters 5-15:
-Until the initialization of `$this` is over, you can only call private methods
+Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
 The initialization is not over because `$this->x` can still potentially be null (NastCheck[3004])

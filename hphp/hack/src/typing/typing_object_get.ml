@@ -698,6 +698,7 @@ and obj_get_concrete_class_with_member_info
         ~is_receiver_interface:(Ast_defs.is_c_interface (Cls.kind class_info))
         ~use_pos:id_pos
         ~def_pos:mem_pos
+        ~tests_bypass_visibility:(get_ce_tests_bypass_visibility member_info)
         env
         vis;
       TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos env ce_deprecated;
@@ -720,7 +721,12 @@ and obj_get_concrete_class_with_member_info
        && TypecheckerOptions.meth_caller_only_public_visibility
             (Env.get_tcopt env)
       then
-        TVis.check_meth_caller_access ~use_pos:id_pos ~def_pos:mem_pos vis
+        TVis.check_meth_caller_access
+          ~use_pos:id_pos
+          ~def_pos:mem_pos
+          ~tests_bypass_visibility:(get_ce_tests_bypass_visibility member_info)
+          env
+          vis
       else
         None);
     ]

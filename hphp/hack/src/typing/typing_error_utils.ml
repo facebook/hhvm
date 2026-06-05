@@ -1304,7 +1304,12 @@ end = struct
       and reasons = lazy [(decl_pos, "It is declared as `internal` here")] in
       create ~code:Error_code.ModuleHintError ~claim ~reasons ()
 
-    let module_mismatch pos current_module_opt decl_pos target_module =
+    let module_mismatch
+        pos
+        current_module_opt
+        decl_pos
+        target_module
+        tests_bypass_visibility_context =
       let claim =
         lazy
           ( pos,
@@ -1316,7 +1321,16 @@ end = struct
               | None -> "in the default module") )
       and reasons =
         lazy
-          [(decl_pos, Printf.sprintf "This is from module `%s`" target_module)]
+          [
+            ( decl_pos,
+              Printf.sprintf
+                "This is from module `%s`%s"
+                target_module
+                (if tests_bypass_visibility_context then
+                  ". To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this class"
+                else
+                  "") );
+          ]
       in
       create ~code:Error_code.ModuleError ~claim ~reasons ()
 
@@ -1340,8 +1354,20 @@ end = struct
       let open Typing_error.Primary.Modules in
       match t with
       | Module_hint { pos; decl_pos } -> module_hint pos decl_pos
-      | Module_mismatch { pos; current_module_opt; decl_pos; target_module } ->
-        module_mismatch pos current_module_opt decl_pos target_module
+      | Module_mismatch
+          {
+            pos;
+            current_module_opt;
+            decl_pos;
+            target_module;
+            tests_bypass_visibility_context;
+          } ->
+        module_mismatch
+          pos
+          current_module_opt
+          decl_pos
+          target_module
+          tests_bypass_visibility_context
       | Module_unsafe_trait_access { access_pos; trait_pos } ->
         module_unsafe_trait_access access_pos trait_pos
   end
@@ -4881,6 +4907,20 @@ end = struct
               feature )
       in
       create ~code:Error_code.GatedByFeatureFlag ~claim ()
+    | Tests_bypass_visibility_on_member_without_class
+        { pos; member_name; class_name } ->
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "`%s` has `<<__TestsBypassVisibility>>` but its containing `internal` class `%s` does not"
+              member_name
+              (Utils.strip_ns class_name) )
+      in
+      create
+        ~code:Error_code.TestsBypassVisibilityOnMemberWithoutClass
+        ~claim
+        ()
     | Unsatisfied_req { pos; trait_pos; req_name; req_pos } ->
       unsatisfied_req pos trait_pos req_name req_pos
     | Unsatisfied_req_class { pos; trait_pos; req_name; req_pos } ->
@@ -6261,6 +6301,33 @@ end = struct
     in
     create ~code:Error_code.OverrideFinal ~reasons ()
 
+  let override_tests_bypass_visibility pos member_name parent_pos =
+    let reasons =
+      lazy
+        [
+          (pos, Printf.sprintf "Cannot override or shadow `%s`" member_name);
+          ( parent_pos,
+            "This concrete private member is in the same hierarchy as a member marked with `<<__TestsBypassVisibility>>`"
+          );
+        ]
+    in
+    create ~code:Error_code.TestsBypassVisibilityOverride ~reasons ()
+
+  let abstract_tests_bypass_visibility_missing_attr pos member_name parent_pos =
+    let reasons =
+      lazy
+        [
+          ( pos,
+            Printf.sprintf
+              "`%s` must also have `<<__TestsBypassVisibility>>` because it overrides a method with the attribute"
+              member_name );
+          ( parent_pos,
+            "The parent method was declared with `<<__TestsBypassVisibility>>` here"
+          );
+        ]
+    in
+    create ~code:Error_code.TestsBypassVisibilityAbstractMissingAttr ~reasons ()
+
   let override_async pos parent_pos =
     let reasons =
       lazy
@@ -6856,6 +6923,16 @@ end = struct
            pos_super)
     | Override_final { pos; parent_pos } ->
       Eval_result.single (override_final pos parent_pos)
+    | Override_tests_bypass_visibility { pos; member_name; parent_pos } ->
+      Eval_result.single
+        (override_tests_bypass_visibility pos member_name parent_pos)
+    | Abstract_tests_bypass_visibility_missing_attr
+        { pos; member_name; parent_pos } ->
+      Eval_result.single
+        (abstract_tests_bypass_visibility_missing_attr
+           pos
+           member_name
+           parent_pos)
     | Override_async { pos; parent_pos } ->
       Eval_result.single (override_async pos parent_pos)
     | Override_lsb { pos; member_name; parent_pos } ->

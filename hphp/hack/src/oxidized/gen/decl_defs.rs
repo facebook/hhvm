@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<88a038b8f8905c9e3ddfdf7a67fc57de>>
+// @generated SignedSource<<b43c0b27a186e9f840797912168af392>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -243,6 +243,7 @@ pub struct DeclClassType {
     /// Wether this interface has attribute __UNSAFE_AllowMultipleInstantiations.
     pub allow_multiple_instantiations: bool,
     pub package: Option<aast_defs::PackageMembership>,
+    pub tests_bypass_visibility: bool,
 }
 
 #[derive(

@@ -1,0 +1,4 @@
+ERROR: File "constructor.php", line 19, characters 16-26:
+You cannot access this member (Typing[4112])
+  File "constructor.php", line 7, characters 20-30:
+  This member is private

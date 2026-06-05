@@ -1,0 +1,8 @@
+ERROR: File "abstract_method.php", line 25, characters 22-29:
+`abs_prot` must also have `<<__TestsBypassVisibility>>` because it overrides a method with the attribute (Typing[4516])
+  File "abstract_method.php", line 7, characters 31-38:
+  The parent method was declared with `<<__TestsBypassVisibility>>` here
+ERROR: File "abstract_method.php", line 30, characters 16-23:
+Cannot access this protected member, you don't extend AbstractParent (Typing[4112])
+  File "abstract_method.php", line 25, characters 22-29:
+  This member is protected. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member

@@ -58,6 +58,8 @@ val get_package : t -> Aast_defs.package_membership option
 
 val internal : t -> bool
 
+val tests_bypass_visibility : t -> bool
+
 val is_module_level_trait : t -> bool
 
 val pos : t -> Pos_or_decl.t

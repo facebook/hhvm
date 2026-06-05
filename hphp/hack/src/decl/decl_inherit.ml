@@ -391,13 +391,16 @@ let is_private
     false
 
 let filter_privates class_type =
-  let is_not_private _ elt = not @@ is_private (module Decl_defs_element) elt in
+  let should_keep _ elt =
+    (not @@ is_private (module Decl_defs_element) elt)
+    || Typing_defs_flags.ClassElt.is_tests_bypass_visibility elt.elt_flags
+  in
   {
     class_type with
-    dc_props = SMap.filter is_not_private class_type.dc_props;
-    dc_sprops = SMap.filter is_not_private class_type.dc_sprops;
-    dc_methods = SMap.filter is_not_private class_type.dc_methods;
-    dc_smethods = SMap.filter is_not_private class_type.dc_smethods;
+    dc_props = SMap.filter should_keep class_type.dc_props;
+    dc_sprops = SMap.filter should_keep class_type.dc_sprops;
+    dc_methods = SMap.filter should_keep class_type.dc_methods;
+    dc_smethods = SMap.filter should_keep class_type.dc_smethods;
   }
 
 let chown_private_and_protected owner class_type =

@@ -8,3 +8,7 @@ __Soft
   A runtime type mismatch on this parameter/property will not throw a TypeError/Error. This is useful for migrating partial code where you're unsure about the type.
   
   The type checker will ignore this attribute, so your code will still get type checked. If the type is wrong at runtime, a warning will be logged and code execution will continue.
+__TestsBypassVisibility
+  INSERT __TestsBypassVisibility
+  built-in attribute
+  Allows this member to be accessed as public from test contexts. When applied to an internal class, the class becomes visible from test contexts.

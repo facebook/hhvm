@@ -905,7 +905,13 @@ let class_property : Env.t -> Nast.class_var -> unit =
         ()
       else
         match prop.Aast.cv_visibility with
-        | Aast.Private -> ()
+        | Aast.Private
+          when not
+                 (Naming_attributes.mem
+                    SN.UserAttributes.uaTestsBypassVisibility
+                    prop.Aast.cv_user_attributes) ->
+          ()
+        | Aast.Private
         | Aast.Public
         | Aast.Protected
         | Aast.Internal
@@ -934,7 +940,7 @@ let class_method : Env.t -> Nast.class_ -> Nast.method_ -> unit =
     m_abstract = _;
     m_body = _;
     m_fun_kind = _;
-    m_user_attributes = _;
+    m_user_attributes;
     m_readonly_ret = _;
     m_external = _;
     m_hidden = _;
@@ -946,10 +952,13 @@ let class_method : Env.t -> Nast.class_ -> Nast.method_ -> unit =
     ()
   else
     match m_visibility with
-    | Aast.Private ->
-      (* Final methods can't be overridden, so it's ok to use covariant
-         and contravariant type parameters in any position in the type *)
+    | Aast.Private
+      when not
+             (Naming_attributes.mem
+                SN.UserAttributes.uaTestsBypassVisibility
+                m_user_attributes) ->
       ()
+    | Aast.Private
     | Aast.Public
     | Aast.Protected
     | Aast.Internal

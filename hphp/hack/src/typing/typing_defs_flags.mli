@@ -163,6 +163,7 @@ module ClassElt : sig
     needs_init:bool ->
     safe_global_variable:bool ->
     no_auto_likes:bool ->
+    tests_bypass_visibility:bool ->
     t
 
   val is_abstract : t -> bool
@@ -191,6 +192,8 @@ module ClassElt : sig
   val is_safe_global_variable : t -> bool
 
   val is_no_auto_likes : t -> bool
+
+  val is_tests_bypass_visibility : t -> bool
 
   val get_xhp_attr : t -> Xhp_attribute.t option
 

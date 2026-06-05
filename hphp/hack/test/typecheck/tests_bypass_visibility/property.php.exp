@@ -1,0 +1,12 @@
+ERROR: File "property.php", line 27, characters 10-13:
+Typing error (Typing[4112])
+  File "property.php", line 27, characters 16-24:
+  You cannot access this member
+  File "property.php", line 7, characters 11-13:
+  This member is private
+ERROR: File "property.php", line 28, characters 10-13:
+Typing error (Typing[4112])
+  File "property.php", line 28, characters 16-24:
+  Cannot access this protected member, you don't extend WithProps
+  File "property.php", line 10, characters 13-18:
+  This member is protected

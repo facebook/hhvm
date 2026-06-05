@@ -766,6 +766,7 @@ impl<R: Reason> From<o::decl_defs::DeclClassType> for folded::FoldedClass<R> {
             docs_url,
             allow_multiple_instantiations,
             package,
+            tests_bypass_visibility,
         } = cls;
         Self {
             name: name.into(),
@@ -774,6 +775,7 @@ impl<R: Reason> From<o::decl_defs::DeclClassType> for folded::FoldedClass<R> {
             is_final: final_,
             is_const: const_,
             is_internal: internal,
+            tests_bypass_visibility,
             is_xhp,
             has_xhp_keyword,
             support_dynamic_type,

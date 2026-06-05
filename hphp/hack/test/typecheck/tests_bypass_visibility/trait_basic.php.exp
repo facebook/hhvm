@@ -1,0 +1,8 @@
+ERROR: File "trait_basic.php", line 26, characters 11-20:
+You cannot access this member (Typing[4112])
+  File "trait_basic.php", line 7, characters 20-29:
+  This member is private
+ERROR: File "trait_basic.php", line 27, characters 11-20:
+Cannot access this protected member, you don't extend UsesTraitClass (Typing[4112])
+  File "trait_basic.php", line 10, characters 22-31:
+  This member is protected

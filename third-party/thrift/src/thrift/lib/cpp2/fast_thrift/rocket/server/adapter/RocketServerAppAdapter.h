@@ -77,10 +77,9 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   // the owner using rocket-domain terminology (connect/disconnect map to
   // the underlying onPipelineActive/onPipelineInactive). Distinct from
   // OnError: lifecycle events carry no exception, they just signal "the
-  // connection became connected / disconnected / was closed".
+  // connection became connected / disconnected".
   using OnConnectFn = folly::Function<void() noexcept>;
   using OnDisconnectFn = folly::Function<void() noexcept>;
-  using OnCloseFn = folly::Function<void() noexcept>;
 
   // Cross-pipeline write-ready relay: invoked when the rocket pipeline's
   // tail receives onWriteReady() from the transport. An upper pipeline
@@ -129,12 +128,9 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   }
 
   void setLifecycleHandlers(
-      OnConnectFn connectHandler,
-      OnDisconnectFn disconnectHandler,
-      OnCloseFn closeHandler) noexcept {
+      OnConnectFn connectHandler, OnDisconnectFn disconnectHandler) noexcept {
     onConnect_ = std::move(connectHandler);
     onDisconnect_ = std::move(disconnectHandler);
-    onClose_ = std::move(closeHandler);
   }
 
   void setOnWriteReady(OnWriteReadyFn fn) noexcept {
@@ -198,9 +194,6 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
     // Contract: the pipeline must deactivate before it closes, so by the
     // time we are removed the owner has already observed onDisconnect.
     DCHECK(disconnected_) << "pipeline closed without prior deactivate";
-    if (onClose_) {
-      onClose_();
-    }
     // Drop callbacks so any post-detach use-after-detach (e.g. a queued
     // EventBase callback that still holds a stale captured `this`) sees
     // empty Functions and no-ops rather than firing into stale state.
@@ -208,7 +201,6 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
     onError_ = {};
     onConnect_ = {};
     onDisconnect_ = {};
-    onClose_ = {};
     onWriteReady_ = {};
   }
 
@@ -252,7 +244,6 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   OnErrorFn onError_;
   OnConnectFn onConnect_;
   OnDisconnectFn onDisconnect_;
-  OnCloseFn onClose_;
   OnWriteReadyFn onWriteReady_;
   bool disconnected_{true};
 };

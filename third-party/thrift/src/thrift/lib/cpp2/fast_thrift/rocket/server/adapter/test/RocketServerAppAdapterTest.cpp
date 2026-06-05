@@ -112,7 +112,7 @@ TEST(RocketServerAppAdapterTest, OnPipelineActiveFiresOnConnectCallback) {
   int connectCount = 0;
 
   adapter->setLifecycleHandlers(
-      [&]() noexcept { connectCount++; }, []() noexcept {}, []() noexcept {});
+      [&]() noexcept { connectCount++; }, []() noexcept {});
 
   adapter->onPipelineActive();
   EXPECT_EQ(connectCount, 1);
@@ -123,46 +123,29 @@ TEST(RocketServerAppAdapterTest, OnPipelineInactiveFiresOnDisconnectCallback) {
   int disconnectCount = 0;
 
   adapter->setLifecycleHandlers(
-      []() noexcept {},
-      [&]() noexcept { disconnectCount++; },
-      []() noexcept {});
+      []() noexcept {}, [&]() noexcept { disconnectCount++; });
 
   adapter->onPipelineActive();
   adapter->onPipelineInactive();
   EXPECT_EQ(disconnectCount, 1);
-}
-
-TEST(RocketServerAppAdapterTest, HandlerRemovedFiresOnCloseCallback) {
-  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
-  int closeCount = 0;
-
-  adapter->setLifecycleHandlers(
-      []() noexcept {}, []() noexcept {}, [&]() noexcept { closeCount++; });
-
-  adapter->handlerRemoved();
-  EXPECT_EQ(closeCount, 1);
 }
 
 TEST(
-    RocketServerAppAdapterTest, HandlerRemovedAfterDeactivateFiresOnlyOnClose) {
+    RocketServerAppAdapterTest,
+    HandlerRemovedAfterDeactivateDoesNotRefireDisconnect) {
   RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
   int disconnectCount = 0;
-  int closeCount = 0;
 
   adapter->setLifecycleHandlers(
-      []() noexcept {},
-      [&]() noexcept { disconnectCount++; },
-      [&]() noexcept { closeCount++; });
+      []() noexcept {}, [&]() noexcept { disconnectCount++; });
 
   adapter->onPipelineActive();
   adapter->onPipelineInactive();
   EXPECT_EQ(disconnectCount, 1);
 
   adapter->handlerRemoved();
-  // handlerRemoved is a close signal — it must not synthesize a second
-  // disconnect.
+  // handlerRemoved must not synthesize a second disconnect.
   EXPECT_EQ(disconnectCount, 1);
-  EXPECT_EQ(closeCount, 1);
 }
 
 TEST(RocketServerAppAdapterTest, LifecycleCallbacksNoOpWhenUnset) {
@@ -183,7 +166,7 @@ TEST(RocketServerAppAdapterTest, LifecycleAndErrorChannelsAreIndependent) {
       [](TypeErasedBox&&) noexcept -> Result { return Result::Success; },
       [&](folly::exception_wrapper&&) noexcept { errorCount++; });
   adapter->setLifecycleHandlers(
-      []() noexcept {}, [&]() noexcept { inactiveCount++; }, []() noexcept {});
+      []() noexcept {}, [&]() noexcept { inactiveCount++; });
 
   // Lifecycle event must NOT route through the error callback.
   adapter->onPipelineActive();

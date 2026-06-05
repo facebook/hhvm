@@ -151,30 +151,21 @@ TEST(RocketServerConnectionTest, DestroyIsIdempotent) {
   EXPECT_EQ(f.conn.transportHandler, nullptr);
 }
 
-TEST(
-    RocketServerConnectionTest,
-    DestroyResetsAppAdapterPipelineBeforeClosingPipeline) {
-  // Regression test: a prior version of destroy() called pipeline->close()
-  // before appAdapter->resetPipeline(). The pipeline's handlerRemoved
-  // fan-out then reached the adapter with its pipeline_ pointer still
-  // live. The onClose callback below probes the adapter's hasPipeline()
-  // state at the moment of fan-out — it must already be false.
+TEST(RocketServerConnectionTest, DestroyDeactivatesPipelineBeforeClose) {
+  // Regression test: destroy() must deactivate the pipeline before closing
+  // it. The app adapter's handlerRemoved (fired by pipeline->close()) asserts
+  // disconnected_ — it must already have observed onPipelineInactive.
+  // Owner-initiated teardown that bypasses the socket lifecycle would
+  // otherwise reach close() with the adapter still flagged connected,
+  // tripping that contract. Activating without a socket-driven close
+  // exercises exactly that path.
   ConnectionFixture f;
-  bool adapterDetachedAtClose = false;
-  // Raw pointer because the adapter unique_ptr is reset during destroy()
-  // before this scope ends; a captured Ptr would dangle.
-  auto* adapterRaw = f.conn.appAdapter.get();
-  f.conn.appAdapter->setLifecycleHandlers(
-      []() noexcept {},
-      []() noexcept {},
-      [&]() noexcept {
-        adapterDetachedAtClose = (adapterRaw->getPipeline() == nullptr);
-      });
-
   f.conn.pipeline->activate();
+
   f.conn.destroy();
 
-  EXPECT_TRUE(adapterDetachedAtClose);
+  EXPECT_EQ(f.conn.appAdapter, nullptr);
+  EXPECT_EQ(f.conn.pipeline, nullptr);
 }
 
 TEST(RocketServerConnectionTest, LegacyCloseComposesDisconnectAndDestroy) {

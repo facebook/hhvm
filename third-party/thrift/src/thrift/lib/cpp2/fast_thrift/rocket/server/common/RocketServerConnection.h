@@ -79,7 +79,7 @@ struct RocketServerConnection {
   void setLifecycleHandlers(
       OnConnectFn onConnect, OnDisconnectFn onDisconnect) noexcept {
     appAdapter->setLifecycleHandlers(
-        std::move(onConnect), std::move(onDisconnect), {});
+        std::move(onConnect), std::move(onDisconnect));
   }
 
   /**

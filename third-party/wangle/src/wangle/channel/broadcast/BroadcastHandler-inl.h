@@ -35,8 +35,8 @@ template <typename T, typename R>
 void BroadcastHandler<T, R>::readException(
     Context*,
     folly::exception_wrapper ex) {
-  LOG(ERROR) << "Error while reading from upstream for broadcast: "
-             << exceptionStr(ex);
+  WANGLE_LOG(ERROR) << "Error while reading from upstream for broadcast: "
+                    << exceptionStr(ex);
 
   forEachSubscriber([&](Subscriber<T, R>* s) { s->onError(ex); });
   subscribers_.clear();

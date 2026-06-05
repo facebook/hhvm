@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <glog/logging.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -25,7 +25,7 @@ Pipeline<R, W>::Pipeline() : isStatic_(false) {}
 
 template <class R, class W>
 Pipeline<R, W>::Pipeline(bool isStatic) : isStatic_(isStatic) {
-  CHECK(isStatic_);
+  WANGLE_CHECK(isStatic_);
 }
 
 template <class R, class W>
@@ -116,7 +116,7 @@ H* PipelineBase::getHandler() {
 template <class H>
 typename ContextType<H>::type* PipelineBase::getContext(size_t i) {
   auto ctx = dynamic_cast<typename ContextType<H>::type*>(ctxs_[i].get());
-  CHECK(ctx);
+  WANGLE_CHECK(ctx);
   return ctx;
 }
 
@@ -168,7 +168,7 @@ namespace detail {
 
 template <class T>
 inline void logWarningIfNotUnit(const std::string& warning) {
-  LOG(WARNING) << warning;
+  WANGLE_LOG(WARNING) << warning;
 }
 
 template <>
@@ -321,7 +321,7 @@ void Pipeline<R, W>::finalize() {
 template <class R, class W>
 void Pipeline<R, W>::fillRequestContextGuard(
     OptionalReqCtxScopeGuard& optGuard) {
-  CHECK(!optGuard.has_value());
+  WANGLE_CHECK(!optGuard.has_value());
   if (requestContext_) {
     optGuard.emplace(requestContext_);
   }

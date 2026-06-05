@@ -24,6 +24,7 @@
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/HHWheelTimer.h>
+#include <wangle/util/Logging.h>
 #include <chrono>
 #include <iterator>
 
@@ -225,8 +226,8 @@ class ConnectionManager : public folly::DelayedDestruction,
   }
 
   void setLoweredIdleTimeout(std::chrono::milliseconds timeout) {
-    CHECK(timeout >= std::chrono::milliseconds(0));
-    CHECK(timeout <= idleTimeout_);
+    WANGLE_CHECK(timeout >= std::chrono::milliseconds(0));
+    WANGLE_CHECK(timeout <= idleTimeout_);
     idleConnEarlyDropThreshold_ = timeout;
   }
 
@@ -308,12 +309,12 @@ class ConnectionManager : public folly::DelayedDestruction,
     void startDrainAll(std::chrono::milliseconds idleGrace);
 
     void runLoopCallback() noexcept override {
-      VLOG(3) << "Draining more conns from loop callback";
+      WANGLE_VLOG(3) << "Draining more conns from loop callback";
       drainConnections();
     }
 
     void timeoutExpired() noexcept override {
-      VLOG(3) << "Idle grace expired";
+      WANGLE_VLOG(3) << "Idle grace expired";
       idleGracefulTimeoutExpired();
     }
 

@@ -16,6 +16,7 @@
 
 #include <wangle/acceptor/Acceptor.h>
 #include <wangle/acceptor/AcceptorHandshakeManager.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -99,7 +100,7 @@ std::chrono::milliseconds AcceptorHandshakeManager::timeSinceAcceptMs() const {
 
 void AcceptorHandshakeManager::startHandshakeTimeout() {
   auto handshake_timeout = acceptor_->getSSLHandshakeTimeout();
-  auto connMgr = CHECK_NOTNULL(acceptor_->getConnectionManager());
+  auto connMgr = WANGLE_CHECK_NOTNULL(acceptor_->getConnectionManager());
   connMgr->scheduleTimeout(this, handshake_timeout);
 }
 
@@ -110,7 +111,7 @@ void AcceptorHandshakeManager::timeoutExpired() noexcept {
 void AcceptorHandshakeManager::handshakeAborted(SSLErrorEnum reason) {
   // If we are aborting the handshake for any reason, we should still be
   // in the middle of awaiting the result of the handshake.
-  VLOG(10) << "Dropping in progress handshake for " << clientAddr_;
+  WANGLE_VLOG(10) << "Dropping in progress handshake for " << clientAddr_;
 
   // The helper guarantees that it will synchronously fire a `connectionReady`
   // or `connectionError` callback, which will destroy us
@@ -129,7 +130,7 @@ void AcceptorHandshakeManager::handshakeAborted(SSLErrorEnum reason) {
   // you are using did not properly fulfill its contract. The helper needs
   // to synchronously invoke `connectionError` or `connectionSuccess` when it
   // is told to `dropConnection()`.
-  DCHECK(getDestroyPending())
+  WANGLE_DCHECK(getDestroyPending())
       << "Handshake helper implementation did not fulfill its cancellation contract";
 }
 

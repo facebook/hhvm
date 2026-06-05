@@ -16,6 +16,7 @@
 
 #include <folly/synchronization/Latch.h>
 
+#include <wangle/util/Logging.h>
 #include "Mocks.h"
 
 using namespace folly;
@@ -78,7 +79,7 @@ class AcceptRoutingHandlerTest : public Test {
         std::make_shared<MockAcceptPipelineFactory>(acceptPipeline_);
     server_->pipeline(acceptPipelineFactory_)->group(ioGroup, ioGroup)->bind(0);
     server_->getSockets()[0]->getAddress(&address_);
-    VLOG(4) << "Start server at " << address_;
+    WANGLE_VLOG(4) << "Start server at " << address_;
   }
 
   EventBase* getEventBase() {
@@ -98,7 +99,7 @@ class AcceptRoutingHandlerTest : public Test {
 
     getEventBase()->runInEventBaseThread([=, this]() {
       clientConnect().thenValue([=](DefaultPipeline* clientPipeline) {
-        VLOG(4) << "Client connected. Send data.";
+        WANGLE_VLOG(4) << "Client connected. Send data.";
         auto data = IOBuf::create(1);
         data->append(1);
         *(data->writableData()) = 'a';
@@ -117,7 +118,7 @@ class AcceptRoutingHandlerTest : public Test {
 
     getEventBase()->runInEventBaseThread([=, this]() {
       clientConnectAndWrite().thenValue([=](DefaultPipeline* clientPipeline) {
-        VLOG(4) << "Client close";
+        WANGLE_VLOG(4) << "Client close";
         clientPipeline->close().thenValue(
             [=](auto&&) { clientPipelinePromise->setValue(clientPipeline); });
       });
@@ -177,7 +178,7 @@ TEST_F(AcceptRoutingHandlerTest, ParseRoutingDataSuccess) {
       .WillOnce(
           Invoke([&](folly::IOBufQueue& /*bufQueue*/,
                      MockRoutingDataHandler::RoutingData& /*routingData*/) {
-            VLOG(4) << "Parsed routing data";
+            WANGLE_VLOG(4) << "Parsed routing data";
             return true;
           }));
 
@@ -187,11 +188,11 @@ TEST_F(AcceptRoutingHandlerTest, ParseRoutingDataSuccess) {
   EXPECT_CALL(*downstreamHandler_, read(_, _))
       .WillOnce(Invoke([&](MockBytesToBytesHandler::Context* /*ctx*/,
                            IOBufQueue& /*bufQueue*/) {
-        VLOG(4) << "Downstream received a read";
+        WANGLE_VLOG(4) << "Downstream received a read";
       }));
   EXPECT_CALL(*downstreamHandler_, readEOF(_))
       .WillOnce(Invoke([&](MockBytesToBytesHandler::Context* ctx) {
-        VLOG(4) << "Downstream EOF";
+        WANGLE_VLOG(4) << "Downstream EOF";
         ctx->fireClose();
         barrier.arrive_and_wait();
       }));
@@ -214,7 +215,7 @@ TEST_F(AcceptRoutingHandlerTest, SocketErrorInRoutingPipeline) {
       .WillOnce(
           Invoke([&](folly::IOBufQueue& /*bufQueue*/,
                      MockRoutingDataHandler::RoutingData& /*routingData*/) {
-            VLOG(4) << "Need more data to be parse.";
+            WANGLE_VLOG(4) << "Need more data to be parse.";
             barrierConnect.arrive_and_wait();
             return false;
           }));
@@ -237,7 +238,7 @@ TEST_F(AcceptRoutingHandlerTest, SocketErrorInRoutingPipeline) {
   EXPECT_CALL(*routingDataHandler_, readException(_, _))
       .WillOnce(Invoke([&](MockBytesToBytesHandler::Context* /*ctx*/,
                            folly::exception_wrapper ex) {
-        VLOG(4) << "Routing data handler Exception";
+        WANGLE_VLOG(4) << "Routing data handler Exception";
         acceptRoutingHandler_->onError(kConnId0, ex);
         barrierException.arrive_and_wait();
       }));

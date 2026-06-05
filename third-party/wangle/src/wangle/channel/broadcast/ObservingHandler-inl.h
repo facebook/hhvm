@@ -22,7 +22,8 @@ template <typename T, typename R, typename P>
 ObservingHandler<T, R, P>::ObservingHandler(
     const R& routingData,
     BroadcastPool<T, R, P>* broadcastPool)
-    : routingData_(routingData), broadcastPool_(CHECK_NOTNULL(broadcastPool)) {}
+    : routingData_(routingData),
+      broadcastPool_(WANGLE_CHECK_NOTNULL(broadcastPool)) {}
 
 template <typename T, typename R, typename P>
 ObservingHandler<T, R, P>::~ObservingHandler() {
@@ -47,7 +48,7 @@ void ObservingHandler<T, R, P>::transportActive(Context* ctx) {
   // Pause ingress until the remote connection is established and
   // broadcast handler is ready
   auto pipeline = dynamic_cast<ObservingPipeline<T>*>(ctx->getPipeline());
-  CHECK(pipeline);
+  WANGLE_CHECK(pipeline);
   pipeline->transportInactive();
 
   auto deleted = deleted_;
@@ -60,7 +61,7 @@ void ObservingHandler<T, R, P>::transportActive(Context* ctx) {
 
             broadcastHandler_ = broadcastHandler;
             subscriptionId_ = broadcastHandler_->subscribe(this);
-            VLOG(10) << "Subscribed to a broadcast";
+            WANGLE_VLOG(10) << "Subscribed to a broadcast";
 
             // Resume ingress
             pipeline->transportActive();
@@ -72,7 +73,8 @@ void ObservingHandler<T, R, P>::transportActive(Context* ctx) {
               return;
             }
 
-            LOG(ERROR) << "Error subscribing to a broadcast: " << ex.what();
+            WANGLE_LOG(ERROR)
+                << "Error subscribing to a broadcast: " << ex.what();
             this->close(ctx);
           });
 }
@@ -86,7 +88,7 @@ template <typename T, typename R, typename P>
 void ObservingHandler<T, R, P>::readException(
     Context* ctx,
     folly::exception_wrapper ex) {
-  LOG(ERROR) << "Error on read: " << exceptionStr(ex);
+  WANGLE_LOG(ERROR) << "Error on read: " << exceptionStr(ex);
   this->close(ctx);
 }
 
@@ -101,14 +103,14 @@ void ObservingHandler<T, R, P>::onNext(const T& data) {
           return;
         }
 
-        LOG(ERROR) << "Error on write: " << ex.what();
+        WANGLE_LOG(ERROR) << "Error on write: " << ex.what();
         this->close(ctx);
       });
 }
 
 template <typename T, typename R, typename P>
 void ObservingHandler<T, R, P>::onError(folly::exception_wrapper ex) {
-  LOG(ERROR) << "Error observing a broadcast: " << exceptionStr(ex);
+  WANGLE_LOG(ERROR) << "Error observing a broadcast: " << exceptionStr(ex);
 
   // broadcastHandler_ will clear its subscribers and delete itself
   broadcastHandler_ = nullptr;

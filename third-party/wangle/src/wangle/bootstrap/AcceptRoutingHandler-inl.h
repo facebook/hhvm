@@ -48,7 +48,7 @@ void AcceptRoutingHandler<Pipeline, R>::read(
     socket->getLocalAddress(&localAddr);
     socket->getPeerAddress(&peerAddr);
   } catch (...) {
-    VLOG(2) << "Socket is no longer valid.";
+    WANGLE_VLOG(2) << "Socket is no longer valid.";
     return;
   }
   transportInfo->localAddr = std::make_shared<folly::SocketAddress>(localAddr);
@@ -78,8 +78,8 @@ void AcceptRoutingHandler<Pipeline, R>::onRoutingData(
   // Get the routing pipeline corresponding to this connection
   auto routingPipelineIter = routingPipelines_.find(connId);
   if (routingPipelineIter == routingPipelines_.end()) {
-    VLOG(2) << "Connection has already been closed, "
-               "or routed to a worker thread.";
+    WANGLE_VLOG(2) << "Connection has already been closed, "
+                      "or routed to a worker thread.";
     return;
   }
   auto routingPipeline = std::move(routingPipelineIter->second);
@@ -89,7 +89,7 @@ void AcceptRoutingHandler<Pipeline, R>::onRoutingData(
   // socket
   auto socket = std::dynamic_pointer_cast<folly::AsyncTransport>(
       routingPipeline->getTransport());
-  CHECK(socket);
+  WANGLE_CHECK(socket);
   routingPipeline->transportInactive();
   auto originalEvb = socket->getEventBase();
   socket->detachEventBase();
@@ -107,7 +107,7 @@ void AcceptRoutingHandler<Pipeline, R>::onRoutingData(
 
               auto routingHandler =
                   routingPipeline->template getHandler<RoutingDataHandler<R>>();
-              DCHECK(routingHandler);
+              WANGLE_DCHECK(routingHandler);
               auto transportInfo = routingPipeline->getTransportInfo();
               auto pipeline = childPipelineFactory_->newPipeline(
                   socket,
@@ -132,12 +132,12 @@ template <typename Pipeline, typename R>
 void AcceptRoutingHandler<Pipeline, R>::onError(
     uint64_t connId,
     folly::exception_wrapper ex) {
-  VLOG(4) << "Exception while parsing routing data: " << ex.what();
+  WANGLE_VLOG(4) << "Exception while parsing routing data: " << ex.what();
 
   // Notify all handlers of the exception
   auto ctx = getContext();
   auto pipeline =
-      CHECK_NOTNULL(dynamic_cast<AcceptPipeline*>(ctx->getPipeline()));
+      WANGLE_CHECK_NOTNULL(dynamic_cast<AcceptPipeline*>(ctx->getPipeline()));
   pipeline->readException(ex);
 
   // Delete the routing pipeline. This will close and delete the socket as well.
@@ -149,7 +149,7 @@ void AcceptRoutingHandler<Pipeline, R>::populateAcceptors() {
   if (!acceptors_.empty()) {
     return;
   }
-  CHECK(server_);
+  WANGLE_CHECK(server_);
   server_->forEachWorker(
       [&](Acceptor* acceptor) { acceptors_.push_back(acceptor); });
 }

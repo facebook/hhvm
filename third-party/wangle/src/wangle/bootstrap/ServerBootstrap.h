@@ -21,6 +21,7 @@
 #include <folly/system/HardwareConcurrency.h>
 #include <wangle/bootstrap/ServerBootstrap-inl.h>
 #include <wangle/channel/Pipeline.h>
+#include <wangle/util/Logging.h>
 #include <iostream>
 #include <thread>
 
@@ -147,8 +148,8 @@ class ServerBootstrap {
     }
 
     // TODO better config checking
-    // CHECK(acceptorFactory_ || childPipelineFactory_);
-    CHECK(!(acceptorFactory_ && childPipelineFactory_));
+    // WANGLE_CHECK(acceptorFactory_ || childPipelineFactory_);
+    WANGLE_CHECK(!(acceptorFactory_ && childPipelineFactory_));
 
     if (acceptorFactory_) {
       workerFactory_ = std::make_shared<ServerWorkerPool>(
@@ -185,7 +186,7 @@ class ServerBootstrap {
 
     // Since only a single socket is given,
     // we can only accept on a single thread
-    CHECK(acceptor_group_->numThreads() == 1);
+    WANGLE_CHECK(acceptor_group_->numThreads() == 1);
 
     std::shared_ptr<folly::AsyncServerSocket> socket(
         s.release(), AsyncServerSocketFactory::ThreadSafeDestructor());
@@ -223,8 +224,8 @@ class ServerBootstrap {
    * @param port Port to listen on
    */
   void bind(int port) {
-    CHECK(port >= 0);
-    CHECK(port <= 65535);
+    WANGLE_CHECK(port >= 0);
+    WANGLE_CHECK(port <= 65535);
     folly::SocketAddress address;
     address.setFromLocalPort(static_cast<uint16_t>(port));
     bindImpl(address);
@@ -325,7 +326,7 @@ class ServerBootstrap {
       stopBaton_->wait();
       stopBaton_.reset();
     }
-    CHECK(stopped_);
+    WANGLE_CHECK(stopped_);
   }
 
   /*

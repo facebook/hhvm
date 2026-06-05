@@ -21,6 +21,7 @@
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <folly/String.h>
+#include <wangle/util/Logging.h>
 
 using fizz::DefaultCertificateVerifier;
 using fizz::FizzUtil;
@@ -80,7 +81,7 @@ bool FizzConfigUtil::addCertsToManager(
         if (strictSSL) {
           throw std::runtime_error(ex.what() + msg);
         } else {
-          LOG(ERROR) << msg << ex.what();
+          WANGLE_LOG(ERROR) << msg << ex.what();
         }
       }
     }
@@ -172,7 +173,7 @@ FizzConfigUtil::createFizzContext(
       if (strictSSL) {
         throw std::runtime_error(ex.what() + msg);
       } else {
-        LOG(ERROR) << msg << ex.what();
+        WANGLE_LOG(ERROR) << msg << ex.what();
         return nullptr;
       }
     }

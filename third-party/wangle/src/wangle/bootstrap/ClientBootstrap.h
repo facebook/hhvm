@@ -23,6 +23,7 @@
 #include <folly/io/async/EventBaseManager.h>
 #include <wangle/bootstrap/BaseClientBootstrap.h>
 #include <wangle/channel/Pipeline.h>
+#include <wangle/util/Logging.h>
 
 using folly::AsyncSSLSocket;
 
@@ -120,7 +121,7 @@ class ClientBootstrap : public BaseClientBootstrap<Pipeline>,
       }
       folly::Promise<Pipeline*> promise;
       retval = promise.getFuture();
-      DCHECK_LE(timeout.count(), std::numeric_limits<int>::max());
+      WANGLE_DCHECK_LE(timeout.count(), std::numeric_limits<int>::max());
       socket->connect(
           new ConnectCallback(
               std::move(promise),

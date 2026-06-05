@@ -18,8 +18,8 @@
 
 #include <folly/ConstexprMath.h>
 #include <folly/io/async/EventBase.h>
-#include <glog/logging.h>
 #include <wangle/acceptor/ManagedConnection.h>
+#include <wangle/util/Logging.h>
 #include <chrono>
 
 using std::chrono::milliseconds;
@@ -59,7 +59,7 @@ void ConnectionManager::addConnection(
     ManagedConnection* connection,
     bool idleTimeout,
     bool connectionAgeTimeout) {
-  CHECK_NOTNULL(connection);
+  WANGLE_CHECK_NOTNULL(connection);
   connection->setActivationState(ManagedConnection::ActivationState::ACTIVE);
   ConnectionManager* oldMgr = connection->getConnectionManager();
   if (oldMgr != this) {
@@ -103,7 +103,7 @@ void ConnectionManager::addConnection(
                            connDg = DestructorGuard(connection)] {
       if (connection->listHook_.is_linked()) {
         auto it = conns_.iterator_to(*connection);
-        DCHECK(it != conns_.end());
+        WANGLE_DCHECK(it != conns_.end());
         connection->fireCloseWhenIdle(!notifyPendingShutdown_);
       }
     });
@@ -145,7 +145,7 @@ void ConnectionManager::removeConnection(ManagedConnection* connection) {
 
   if (connection->getActivationState() ==
       ManagedConnection::ActivationState::IDLE) {
-    CHECK_GT(idleConnections_, 0);
+    WANGLE_CHECK_GT(idleConnections_, 0);
     --idleConnections_;
   }
 
@@ -178,7 +178,7 @@ void ConnectionManager::removeConnection(ManagedConnection* connection) {
 size_t ConnectionManager::getNumActiveConnections() const {
   auto totalConnections = getNumConnections();
   auto idleConnections = getNumIdleConnections();
-  CHECK_GE(totalConnections, idleConnections);
+  WANGLE_CHECK_GE(totalConnections, idleConnections);
   return totalConnections - idleConnections;
 }
 
@@ -192,9 +192,10 @@ size_t ConnectionManager::getNumConnections() const {
 
 void ConnectionManager::initiateGracefulShutdown(
     std::chrono::milliseconds idleGrace) {
-  VLOG(3) << this << " initiateGracefulShutdown with nconns=" << conns_.size();
+  WANGLE_VLOG(3) << this
+                 << " initiateGracefulShutdown with nconns=" << conns_.size();
   if (drainHelper_.getShutdownState() != ShutdownState::NONE) {
-    VLOG(3) << "Ignoring redundant call to initiateGracefulShutdown";
+    WANGLE_VLOG(3) << "Ignoring redundant call to initiateGracefulShutdown";
     return;
   }
   drainHelper_.startDrainAll(idleGrace);
@@ -204,7 +205,7 @@ void ConnectionManager::drainConnections(
     double pct,
     std::chrono::milliseconds idleGrace) {
   if (drainHelper_.getShutdownState() != ShutdownState::NONE) {
-    VLOG(3) << "Ignoring partial drain with full drain in progress";
+    WANGLE_VLOG(3) << "Ignoring partial drain with full drain in progress";
     return;
   }
   drainHelper_.startDrainPartial(pct, idleGrace);
@@ -234,11 +235,12 @@ void ConnectionManager::DrainHelper::startDrain(
   if (idleGrace.count() > 0) {
     shutdownState_ = ShutdownState::NOTIFY_PENDING_SHUTDOWN;
     scheduleTimeout(idleGrace);
-    VLOG(3) << "Scheduling idle grace period of " << idleGrace.count() << "ms";
+    WANGLE_VLOG(3) << "Scheduling idle grace period of " << idleGrace.count()
+                   << "ms";
   } else {
     manager_.notifyPendingShutdown_ = false;
     shutdownState_ = ShutdownState::CLOSE_WHEN_IDLE;
-    VLOG(3) << "proceeding directly to closing idle connections";
+    WANGLE_VLOG(3) << "proceeding directly to closing idle connections";
   }
   manager_.drainIterator_ = drainStartIterator();
   drainConnections();
@@ -251,7 +253,7 @@ void ConnectionManager::DrainHelper::drainConnections() {
 
   auto it = manager_.drainIterator_;
 
-  CHECK(
+  WANGLE_CHECK(
       shutdownState_ == ShutdownState::NOTIFY_PENDING_SHUTDOWN ||
       shutdownState_ == ShutdownState::CLOSE_WHEN_IDLE ||
       shutdownState_ == ShutdownState::CLOSE_WHEN_IDLE_COMPLETE);
@@ -273,17 +275,17 @@ void ConnectionManager::DrainHelper::drainConnections() {
   }
 
   if (shutdownState_ == ShutdownState::CLOSE_WHEN_IDLE) {
-    VLOG(2) << "Idle connections cleared: " << numCleared
-            << ", busy conns kept: " << numKept;
+    WANGLE_VLOG(2) << "Idle connections cleared: " << numCleared
+                   << ", busy conns kept: " << numKept;
   } else {
-    VLOG(3) << this << " notified n=" << numKept;
+    WANGLE_VLOG(3) << this << " notified n=" << numKept;
   }
   manager_.drainIterator_ = it;
   if (it != manager_.conns_.end()) {
     manager_.eventBase_->runInLoop(this);
   } else {
     if (shutdownState_ == ShutdownState::NOTIFY_PENDING_SHUTDOWN) {
-      VLOG(3) << this << " finished notify_pending_shutdown";
+      WANGLE_VLOG(3) << this << " finished notify_pending_shutdown";
       shutdownState_ = ShutdownState::NOTIFY_PENDING_SHUTDOWN_COMPLETE;
       if (!isScheduled()) {
         // The idle grace timer already fired, start over immediately
@@ -298,15 +300,15 @@ void ConnectionManager::DrainHelper::drainConnections() {
 }
 
 void ConnectionManager::DrainHelper::idleGracefulTimeoutExpired() {
-  VLOG(2) << this << " idleGracefulTimeoutExpired";
+  WANGLE_VLOG(2) << this << " idleGracefulTimeoutExpired";
   if (shutdownState_ == ShutdownState::NOTIFY_PENDING_SHUTDOWN_COMPLETE) {
     shutdownState_ = ShutdownState::CLOSE_WHEN_IDLE;
     manager_.drainIterator_ = drainStartIterator();
     drainConnections();
   } else {
-    VLOG(4) << this
-            << " idleGracefulTimeoutExpired during "
-               "NOTIFY_PENDING_SHUTDOWN, ignoring";
+    WANGLE_VLOG(4) << this
+                   << " idleGracefulTimeoutExpired during "
+                      "NOTIFY_PENDING_SHUTDOWN, ignoring";
   }
 }
 
@@ -323,8 +325,9 @@ void ConnectionManager::dropAllConnections() {
   stopDrainingForShutdown();
 
   // Iterate through our connection list, and drop each connection.
-  VLOG_IF(4, conns_.empty()) << "no connections to drop";
-  VLOG_IF(2, !conns_.empty()) << "connections to drop: " << conns_.size();
+  WANGLE_VLOG_IF(4, conns_.empty()) << "no connections to drop";
+  WANGLE_VLOG_IF(2, !conns_.empty())
+      << "connections to drop: " << conns_.size();
 
   unsigned i = 0;
   while (!conns_.empty()) {
@@ -468,7 +471,7 @@ void ConnectionManager::dropEstablishedConnections(
   bool last{false};
   while (!conns_.empty() && droppedConns < numToDrop) {
     // We are traversing linked list from middle to the left towards front
-    // we want to know when we reach the begining of the list.
+    // we want to know when we reach the beginning of the list.
     last = it == front;
 
     ManagedConnection& conn = *(it--);
@@ -491,7 +494,7 @@ void ConnectionManager::reportActivity(ManagedConnection& conn) {
 void ConnectionManager::onActivated(ManagedConnection& conn) {
   // We want to keep track case when an idle connections becomes active again
   if (conn.getActivationState() == ManagedConnection::ActivationState::IDLE) {
-    CHECK_GT(idleConnections_, 0);
+    WANGLE_CHECK_GT(idleConnections_, 0);
     --idleConnections_;
   }
 
@@ -505,7 +508,7 @@ void ConnectionManager::onActivated(ManagedConnection& conn) {
 }
 
 void ConnectionManager::onDeactivated(ManagedConnection& conn) {
-  CHECK_EQ(
+  WANGLE_CHECK_EQ(
       conn.getActivationState(), ManagedConnection::ActivationState::ACTIVE);
   ++idleConnections_;
   conn.setActivationState(ManagedConnection::ActivationState::IDLE);
@@ -530,7 +533,7 @@ void ConnectionManager::onDeactivated(ManagedConnection& conn) {
  * Note that the idle ones are organized in the decreasing idle time order
  */
 size_t ConnectionManager::dropIdleConnections(size_t num) {
-  VLOG(4) << "attempt to drop " << num << " idle connections";
+  WANGLE_VLOG(4) << "attempt to drop " << num << " idle connections";
   if (idleConnEarlyDropThreshold_ >= idleTimeout_) {
     return 0;
   }
@@ -541,10 +544,10 @@ size_t ConnectionManager::dropIdleConnections(size_t num) {
     auto idleTimeMs = it->getIdleTime();
     if (idleTimeMs == std::chrono::milliseconds(0) ||
         idleTimeMs <= idleConnEarlyDropThreshold_) {
-      VLOG(4) << "conn's idletime: " << idleTimeMs.count()
-              << ", in-activity threshold: "
-              << idleConnEarlyDropThreshold_.count() << ", dropped " << count
-              << "/" << num;
+      WANGLE_VLOG(4) << "conn's idletime: " << idleTimeMs.count()
+                     << ", in-activity threshold: "
+                     << idleConnEarlyDropThreshold_.count() << ", dropped "
+                     << count << "/" << num;
       return count;
     }
     ManagedConnection& conn = *it;
@@ -559,7 +562,7 @@ size_t ConnectionManager::dropIdleConnections(size_t num) {
 size_t ConnectionManager::dropIdleConnectionsBasedOnTimeout(
     std::chrono::milliseconds targetIdleTimeMs,
     const std::function<void(size_t)>& droppedConnectionsCB) {
-  VLOG(4)
+  WANGLE_VLOG(4)
       << "attempt to drop all the connections for which idle time is greater or equal to "
       << targetIdleTimeMs.count();
 
@@ -568,9 +571,9 @@ size_t ConnectionManager::dropIdleConnectionsBasedOnTimeout(
   while (idleIterator_ != conns_.end()) {
     auto idleTimeMs = idleIterator_->getIdleTime();
     if (idleTimeMs <= targetIdleTimeMs) {
-      VLOG(4) << "conn's idletime: " << idleTimeMs.count()
-              << ", in-activity threshold: " << targetIdleTimeMs.count()
-              << ", dropped " << count << "/" << count;
+      WANGLE_VLOG(4) << "conn's idletime: " << idleTimeMs.count()
+                     << ", in-activity threshold: " << targetIdleTimeMs.count()
+                     << ", dropped " << count << "/" << count;
       break;
     }
     ManagedConnection& conn = *idleIterator_;

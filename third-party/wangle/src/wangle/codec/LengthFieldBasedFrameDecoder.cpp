@@ -15,6 +15,7 @@
  */
 
 #include <wangle/codec/LengthFieldBasedFrameDecoder.h>
+#include <wangle/util/Logging.h>
 
 using folly::IOBuf;
 using folly::IOBufQueue;
@@ -35,8 +36,8 @@ LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(
       initialBytesToStrip_(initialBytesToStrip),
       networkByteOrder_(networkByteOrder),
       lengthFieldEndOffset_(lengthFieldOffset + lengthFieldLength) {
-  CHECK(maxFrameLength > 0);
-  CHECK(lengthFieldOffset <= maxFrameLength - lengthFieldLength);
+  WANGLE_CHECK(maxFrameLength > 0);
+  WANGLE_CHECK(lengthFieldOffset <= maxFrameLength - lengthFieldLength);
 }
 
 bool LengthFieldBasedFrameDecoder::decode(

@@ -19,6 +19,7 @@
 #include <folly/String.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/portability/Sockets.h>
+#include <wangle/util/Logging.h>
 
 using std::chrono::microseconds;
 
@@ -91,7 +92,7 @@ bool TransportInfo::readTcpCongestionControl(const folly::AsyncSocket* sock) {
           TCP_CONGESTION,
           tcpCongestion.data(),
           &optlen) < 0) {
-    VLOG(4) << "Error calling getsockopt(): " << folly::errnoStr(errno);
+    WANGLE_VLOG(4) << "Error calling getsockopt(): " << folly::errnoStr(errno);
     return false;
   }
 
@@ -114,7 +115,7 @@ bool TransportInfo::readMaxPacingRate(const folly::AsyncSocket* sock) {
           SO_MAX_PACING_RATE,
           &maxPacingRate,
           &optlen) < 0) {
-    VLOG(4) << "Error calling getsockopt(): " << folly::errnoStr(errno);
+    WANGLE_VLOG(4) << "Error calling getsockopt(): " << folly::errnoStr(errno);
     return false;
   }
   return true;
@@ -159,7 +160,7 @@ bool TransportInfo::readTcpInfo(
           TCP_INFO,
           (void*)tcpinfo,
           &len) < 0) {
-    VLOG(4) << "Error calling getsockopt(): " << folly::errnoStr(errno);
+    WANGLE_VLOG(4) << "Error calling getsockopt(): " << folly::errnoStr(errno);
     return false;
   }
   return true;

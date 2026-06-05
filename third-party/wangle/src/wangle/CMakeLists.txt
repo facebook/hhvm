@@ -78,8 +78,27 @@ if (NOT DEFINED fizz_SOURCE_DIR)
 endif()
 find_package(fmt CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
-find_package(Glog REQUIRED)
-add_compile_definitions(GLOG_USE_GLOG_EXPORT)
+
+# Logging backend selection. Default is glog (preserves historical behavior);
+# downstream builds can opt in to folly::xlog or fully disable logging.
+# Interpolated into wangle-config.h.in as
+# `#define WANGLE_LOGGING_@WANGLE_LOGGING_BACKEND@ 1` and consumed from
+# wangle/util/Logging.h.
+set(WANGLE_LOGGING_BACKEND "GLOG" CACHE STRING
+  "Logging backend. Valid choices: GLOG, XLOG, DISABLED")
+set_property(CACHE WANGLE_LOGGING_BACKEND PROPERTY STRINGS GLOG XLOG DISABLED)
+if(NOT WANGLE_LOGGING_BACKEND MATCHES "^(GLOG|XLOG|DISABLED)$")
+  message(FATAL_ERROR
+    "WANGLE_LOGGING_BACKEND must be one of: GLOG, XLOG, DISABLED "
+    "(got '${WANGLE_LOGGING_BACKEND}')")
+endif()
+
+# Glog is only required in the default GLOG backend; XLOG routes through
+# folly::xlog and DISABLED strips logging entirely.
+if(WANGLE_LOGGING_BACKEND STREQUAL "GLOG")
+  find_package(Glog REQUIRED)
+  add_compile_definitions(GLOG_USE_GLOG_EXPORT)
+endif()
 find_package(gflags CONFIG QUIET)
 if (gflags_FOUND)
   message(STATUS "Found gflags from package config")
@@ -113,8 +132,40 @@ check_library_exists(
   ssl SSL_SESSION_dup "${OPENSSL_SSL_LIBRARY}" WANGLE_HAVE_SSL_SESSION_DUP
 )
 
+# Generate <wangle/wangle-config.h> for this build. The template interpolates
+# WANGLE_LOGGING_BACKEND into a `#define WANGLE_LOGGING_<BACKEND> 1`, which
+# wangle/util/Logging.h consumes to pick the macro implementations.
+configure_file(
+  wangle-config.h.in
+  ${CMAKE_CURRENT_BINARY_DIR}/generated/wangle/wangle-config.h)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/wangle/wangle-config.h
+  DESTINATION ${INCLUDE_INSTALL_DIR}/wangle/)
+
+# Header-only INTERFACE target carrying the generated <wangle/wangle-config.h>
+# include dir. wangle/util/CMakeLists.txt lists this as an EXPORTED_DEP of
+# wangle_util_logging so consumers transitively pick up the include path.
+# Must be defined before add_subdirectory(util) since util/ references it.
+add_library(wangle_config INTERFACE)
+target_include_directories(wangle_config INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
+  $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>)
+install(TARGETS wangle_config EXPORT wangle-exports)
+
 # Add subdirectories with granular targets (order matters for dependencies)
 add_subdirectory(util)
+
+# The generated util/CMakeLists.txt lists both Folly::folly_glog and
+# Folly::folly_logging_logging as unconditional INTERFACE deps. Narrow that to
+# match the selected backend so downstream code doesn't pull in libraries it
+# isn't actually using.
+if(WANGLE_LOGGING_BACKEND STREQUAL "XLOG")
+  set_target_properties(wangle_util_logging PROPERTIES
+    INTERFACE_LINK_LIBRARIES "wangle_config;Folly::folly_logging_logging")
+elseif(WANGLE_LOGGING_BACKEND STREQUAL "DISABLED")
+  set_target_properties(wangle_util_logging PROPERTIES
+    INTERFACE_LINK_LIBRARIES "wangle_config")
+endif()
+
 add_subdirectory(ssl)
 add_subdirectory(acceptor)
 add_subdirectory(channel)

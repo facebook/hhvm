@@ -20,6 +20,7 @@
 #include <folly/io/async/AsyncIoUringSocketFactory.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -67,7 +68,7 @@ class TransportPeeker : public folly::AsyncTransport::ReadCallback,
   }
 
   void getReadBuffer(void** bufReturn, size_t* lenReturn) override {
-    CHECK_LT(read_, peekBytes_.size());
+    WANGLE_CHECK_LT(read_, peekBytes_.size());
     *bufReturn = reinterpret_cast<void*>(peekBytes_.data() + read_);
     *lenReturn = peekBytes_.size() - read_;
   }
@@ -93,7 +94,7 @@ class TransportPeeker : public folly::AsyncTransport::ReadCallback,
     folly::DelayedDestruction::DestructorGuard dg(this);
 
     read_ += len;
-    CHECK_LE(read_, peekBytes_.size());
+    WANGLE_CHECK_LE(read_, peekBytes_.size());
 
     if (read_ == peekBytes_.size()) {
       transport_->setReadCB(nullptr);
@@ -123,7 +124,7 @@ class TransportPeeker : public folly::AsyncTransport::ReadCallback,
     folly::io::Cursor cursor(buf.get());
     cursor.pull(peekBytes_.data() + read_, len);
     read_ += len;
-    CHECK_LE(read_, peekBytes_.size());
+    WANGLE_CHECK_LE(read_, peekBytes_.size());
 
     if (readData_) {
       readData_->appendToChain(std::move(buf));

@@ -25,6 +25,7 @@
 #include <wangle/ssl/ClientHelloExtStats.h>
 #include <wangle/ssl/FizzFallbackState.h>
 #include <wangle/ssl/SSLContextManager.h>
+#include <wangle/util/Logging.h>
 
 using namespace fizz::extensions;
 using namespace fizz::server;
@@ -98,7 +99,7 @@ AsyncFizzServer::UniquePtr FizzAcceptorHandshakeHelper::createFizzServer(
 
 void FizzAcceptorHandshakeHelper::fizzHandshakeSuccess(
     AsyncFizzServer* transport) noexcept {
-  VLOG(3) << "Fizz handshake success";
+  WANGLE_VLOG(3) << "Fizz handshake success";
 
   tinfo_.acceptTime = acceptTime_;
   tinfo_.secure = true;
@@ -162,10 +163,11 @@ void FizzAcceptorHandshakeHelper::fizzHandshakeError(
 
   auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now() - acceptTime_);
-  VLOG(3) << "Fizz handshake error with " << describeAddresses(transport)
-          << " after " << elapsedTime.count() << " ms; "
-          << transport->getRawBytesReceived() << " bytes received & "
-          << transport->getRawBytesWritten() << " bytes sent: " << ex.what();
+  WANGLE_VLOG(3) << "Fizz handshake error with " << describeAddresses(transport)
+                 << " after " << elapsedTime.count() << " ms; "
+                 << transport->getRawBytesReceived() << " bytes received & "
+                 << transport->getRawBytesWritten()
+                 << " bytes sent: " << ex.what();
 
   auto handshakeException =
       folly::make_exception_wrapper<FizzHandshakeException>(
@@ -225,7 +227,7 @@ std::shared_ptr<folly::SSLContext> FizzAcceptorHandshakeHelper::selectSSLCtx(
 
 void FizzAcceptorHandshakeHelper::fizzHandshakeAttemptFallback(
     AttemptVersionFallback fallback) {
-  VLOG(3) << "Fallback to OpenSSL";
+  WANGLE_VLOG(3) << "Fallback to OpenSSL";
   if (loggingCallback_) {
     loggingCallback_->logFizzHandshakeFallback(*transport_, tinfo_);
   }
@@ -241,7 +243,7 @@ void FizzAcceptorHandshakeHelper::fizzHandshakeAttemptFallback(
 
   auto context = selectSSLCtx(fallback_.sni);
   sslSocket_ = folly::AsyncSSLSocket::UniquePtr(
-      new folly::AsyncSSLSocket(context, CHECK_NOTNULL(socket)));
+      new folly::AsyncSSLSocket(context, WANGLE_CHECK_NOTNULL(socket)));
   transport_.reset();
 
   sslSocket_->setPreReceivedData(std::move(fallback_.clientHello));
@@ -263,9 +265,9 @@ void FizzAcceptorHandshakeHelper::handshakeSuc(
     folly::AsyncSSLSocket* sock) noexcept {
   auto appProto = sock->getApplicationProtocol();
   if (!appProto.empty()) {
-    VLOG(3) << "Client selected next protocol " << appProto;
+    WANGLE_VLOG(3) << "Client selected next protocol " << appProto;
   } else {
-    VLOG(3) << "Client did not select a next protocol";
+    WANGLE_VLOG(3) << "Client did not select a next protocol";
   }
 
   // fill in SSL-related fields from TransportInfo
@@ -298,10 +300,10 @@ void FizzAcceptorHandshakeHelper::handshakeErr(
 
   auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now() - acceptTime_);
-  VLOG(3) << "SSL handshake error with " << describeAddresses(sock) << " after "
-          << elapsedTime.count() << " ms; " << sock->getRawBytesReceived()
-          << " bytes received & " << sock->getRawBytesWritten()
-          << " bytes sent: " << ex.what();
+  WANGLE_VLOG(3) << "SSL handshake error with " << describeAddresses(sock)
+                 << " after " << elapsedTime.count() << " ms; "
+                 << sock->getRawBytesReceived() << " bytes received & "
+                 << sock->getRawBytesWritten() << " bytes sent: " << ex.what();
 
   auto sslEx = folly::make_exception_wrapper<SSLException>(
       sslError_, elapsedTime, sock->getRawBytesReceived());

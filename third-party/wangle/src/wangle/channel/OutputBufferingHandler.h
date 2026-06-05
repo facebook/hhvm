@@ -22,6 +22,7 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <wangle/channel/Handler.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -37,18 +38,18 @@ class OutputBufferingHandler : public OutboundBytesToBytesHandler,
   folly::Future<folly::Unit> write(
       Context* ctx,
       std::unique_ptr<folly::IOBuf> buf) override {
-    CHECK(buf);
+    WANGLE_CHECK(buf);
     if (!queueSends_) {
       return ctx->fireWrite(std::move(buf));
     } else {
       // Delay sends to optimize for fewer syscalls
       if (!sends_) {
-        DCHECK(!isLoopCallbackScheduled());
+        WANGLE_DCHECK(!isLoopCallbackScheduled());
         // Buffer all the sends, and call writev once per event loop.
         sends_ = std::move(buf);
         ctx->getTransport()->getEventBase()->runInLoop(this);
       } else {
-        DCHECK(isLoopCallbackScheduled());
+        WANGLE_DCHECK(isLoopCallbackScheduled());
         sends_->prependChain(std::move(buf));
       }
       return sharedPromise_.getFuture();

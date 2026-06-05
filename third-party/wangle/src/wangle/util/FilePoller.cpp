@@ -21,6 +21,7 @@
 #include <folly/Conv.h>
 #include <folly/Singleton.h>
 #include <sys/stat.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -120,7 +121,7 @@ void FilePoller::addFileToTrack(
     return;
   }
   if (ThreadProtector::inPollerThread()) {
-    LOG(ERROR) << "Adding files from a callback is disallowed";
+    WANGLE_LOG(ERROR) << "Adding files from a callback is disallowed";
     return;
   }
   std::lock_guard<std::mutex> lg(filesMutex_);
@@ -134,7 +135,7 @@ void FilePoller::removeFileToTrack(const std::string& fileName) {
     return;
   }
   if (ThreadProtector::inPollerThread()) {
-    LOG(ERROR) << "Adding files from a callback is disallowed";
+    WANGLE_LOG(ERROR) << "Adding files from a callback is disallowed";
     return;
   }
   std::lock_guard<std::mutex> lg(filesMutex_);

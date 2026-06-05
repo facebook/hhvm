@@ -18,6 +18,7 @@
 
 #include <folly/FileUtil.h>
 #include <folly/String.h>
+#include <wangle/util/Logging.h>
 #include <algorithm>
 
 using namespace folly;
@@ -49,7 +50,8 @@ MultiFilePoller::CallbackId MultiFilePoller::registerFile(
 MultiFilePoller::CallbackId MultiFilePoller::registerFiles(
     const std::vector<std::string>& paths,
     Callback cb) {
-  VLOG(4) << "registerFiles({" << join(", ", paths) << "}, cb=" << &cb << ")";
+  WANGLE_VLOG(4) << "registerFiles({" << join(", ", paths) << "}, cb=" << &cb
+                 << ")";
   if (paths.empty()) {
     throw std::invalid_argument("Argument paths must be non-empty.");
   }
@@ -112,7 +114,7 @@ void MultiFilePoller::cancelCallback(const CallbackId& cbId) {
 }
 
 void MultiFilePoller::onFileUpdated(const std::string& triggeredPath) {
-  VLOG(4) << "onFileUpdated(" << triggeredPath << ").";
+  WANGLE_VLOG(4) << "onFileUpdated(" << triggeredPath << ").";
 
   // A temporary read cache. Not worth it making it permanent because
   // files do not change frequently.
@@ -133,7 +135,7 @@ void MultiFilePoller::onFileUpdated(const std::string& triggeredPath) {
         if (readFile(path.get().c_str(), data)) {
           filePathsToFileContents.emplace(path, std::move(data));
         } else {
-          VLOG(4) << "Failed to read file " << path.get();
+          WANGLE_VLOG(4) << "Failed to read file " << path.get();
         }
       }
     }

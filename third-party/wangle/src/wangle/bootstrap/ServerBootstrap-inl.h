@@ -29,6 +29,7 @@
 #include <wangle/channel/Handler.h>
 #include <wangle/channel/Pipeline.h>
 #include <wangle/ssl/SSLStats.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -129,7 +130,7 @@ class ServerAcceptor : public Acceptor,
     void dumpConnectionState(uint8_t /* loglevel */) override {}
 
     void deletePipeline(wangle::PipelineBase* p) override {
-      CHECK(p == pipeline_.get());
+      WANGLE_CHECK(p == pipeline_.get());
       destroy();
     }
 
@@ -438,7 +439,7 @@ void ServerWorkerPool::forEachWorker(F&& f) const {
 template <typename F>
 void ServerWorkerPool::forRandomWorker(F&& f) const {
   std::shared_lock holder(workersMutex_);
-  DCHECK(workers_->size());
+  WANGLE_DCHECK(workers_->size());
   f((*workers_).at(folly::Random::rand32(workers_->size())).second.get());
 }
 

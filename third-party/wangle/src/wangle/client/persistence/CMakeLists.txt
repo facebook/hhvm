@@ -19,6 +19,7 @@ wangle_add_library(wangle_client_persistence
     FilePersistenceLayer.cpp
     PersistentCacheCommon.cpp
   EXPORTED_DEPS
+    wangle_util_logging
     Folly::folly_container_evicting_cache_map
     Folly::folly_executor
     Folly::folly_file_util
@@ -32,7 +33,6 @@ wangle_add_library(wangle_client_persistence
     Folly::folly_synchronization_lock
     Folly::folly_synchronization_saturating_semaphore
     Folly::folly_system_thread_name
-    ${GLOG_LIBRARIES}
 )
 
 wangle_add_library(wangle_client_persistence_file

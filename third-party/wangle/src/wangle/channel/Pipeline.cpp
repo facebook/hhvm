@@ -15,6 +15,7 @@
  */
 
 #include <wangle/channel/Pipeline.h>
+#include <wangle/util/Logging.h>
 
 using folly::WriteFlags;
 
@@ -53,13 +54,13 @@ typename PipelineBase::ContextIterator PipelineBase::removeAt(
   const auto dir = (*it)->getDirection();
   if (dir == HandlerDir::BOTH || dir == HandlerDir::IN) {
     auto it2 = std::find(inCtxs_.begin(), inCtxs_.end(), it->get());
-    CHECK(it2 != inCtxs_.end());
+    WANGLE_CHECK(it2 != inCtxs_.end());
     inCtxs_.erase(it2);
   }
 
   if (dir == HandlerDir::BOTH || dir == HandlerDir::OUT) {
     auto it2 = std::find(outCtxs_.begin(), outCtxs_.end(), it->get());
-    CHECK(it2 != outCtxs_.end());
+    WANGLE_CHECK(it2 != outCtxs_.end());
     outCtxs_.erase(it2);
   }
 

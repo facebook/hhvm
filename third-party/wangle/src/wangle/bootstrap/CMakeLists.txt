@@ -17,6 +17,7 @@
 wangle_add_library(wangle_bootstrap_client_bootstrap
   EXPORTED_DEPS
     wangle_channel
+    wangle_util_logging
     Folly::folly_executors_io_thread_pool_executor
     Folly::folly_futures_core
     Folly::folly_io_async_async_socket
@@ -35,10 +36,11 @@ wangle_add_library(wangle_bootstrap_server_bootstrap
     Folly::folly_executors_thread_factory_named_thread_factory
   EXPORTED_DEPS
     wangle_acceptor
-    wangle_acceptor_acceptor_core
+    wangle_acceptor_managed
     wangle_bootstrap_client_bootstrap
     wangle_channel
     wangle_ssl_ssl_config
+    wangle_util_logging
     Folly::folly_exception_wrapper
     Folly::folly_executors_io_thread_pool_executor
     Folly::folly_io_async_async_transport
@@ -48,6 +50,7 @@ wangle_add_library(wangle_bootstrap_server_bootstrap
     Folly::folly_io_async_server_socket
     Folly::folly_shared_mutex
     Folly::folly_synchronization_baton
+    Folly::folly_synchronized
     Folly::folly_system_hardware_concurrency
 )
 

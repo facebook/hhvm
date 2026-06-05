@@ -18,6 +18,7 @@
 
 #include <wangle/channel/Handler.h>
 #include <wangle/service/Service.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -72,14 +73,14 @@ class SerialClientDispatcher
   using Context = typename HandlerAdapter<Resp, Req>::Context;
 
   void read(Context*, Resp in) override {
-    DCHECK(p_);
+    WANGLE_DCHECK(p_);
     p_->setValue(std::move(in));
     p_ = folly::none;
   }
 
   folly::Future<Resp> operator()(Req arg) override {
-    CHECK(!p_);
-    DCHECK(this->pipeline_);
+    WANGLE_CHECK(!p_);
+    WANGLE_DCHECK(this->pipeline_);
 
     p_ = folly::Promise<Resp>();
     auto f = p_->getFuture();
@@ -103,14 +104,14 @@ class PipelinedClientDispatcher
   using Context = typename HandlerAdapter<Resp, Req>::Context;
 
   void read(Context*, Resp in) override {
-    DCHECK(p_.size() >= 1);
+    WANGLE_DCHECK(p_.size() >= 1);
     auto p = std::move(p_.front());
     p_.pop_front();
     p.setValue(std::move(in));
   }
 
   folly::Future<Resp> operator()(Req arg) override {
-    DCHECK(this->pipeline_);
+    WANGLE_DCHECK(this->pipeline_);
 
     folly::Promise<Resp> p;
     auto f = p.getFuture();

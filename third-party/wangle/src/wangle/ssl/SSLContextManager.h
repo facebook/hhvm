@@ -20,13 +20,13 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/SSLContext.h>
 
-#include <glog/logging.h>
 #include <wangle/acceptor/SSLContextSelectionMisc.h>
 #include <wangle/ssl/PasswordInFileFactory.h>
 #include <wangle/ssl/SNIConfig.h>
 #include <wangle/ssl/SSLContextConfig.h>
 #include <wangle/ssl/SSLSessionCacheManager.h>
 #include <wangle/ssl/TLSTicketKeySeeds.h>
+#include <wangle/util/Logging.h>
 #include <list>
 #include <memory>
 #include <vector>
@@ -282,7 +282,7 @@ class SSLContextManager {
       const std::shared_ptr<folly::SSLContext>&,
       const SSLContextConfig&,
       std::string& /* commonName */) const {
-    LOG(FATAL) << "Unsupported in base SSLContextManager";
+    WANGLE_LOG(FATAL) << "Unsupported in base SSLContextManager";
     // unreachable
     return false;
   }

@@ -20,6 +20,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <wangle/channel/Pipeline.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -35,7 +36,7 @@ class HandlerBase {
     if (attachCount_ != 1) {
       return nullptr;
     }
-    CHECK(ctx_);
+    WANGLE_CHECK(ctx_);
     return ctx_;
   }
 

@@ -18,6 +18,7 @@
 
 #include <wangle/acceptor/AcceptorHandshakeManager.h>
 #include <wangle/acceptor/SocketPeeker.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -71,7 +72,7 @@ class PeekingAcceptorHandshakeHelper : public AcceptorHandshakeHelper,
       AcceptorHandshakeHelper::Callback* callback) noexcept override {
     socket_ = std::move(sock);
     callback_ = callback;
-    CHECK_EQ(
+    WANGLE_CHECK_EQ(
         socket_->getSSLState(),
         folly::AsyncSSLSocket::SSLStateEnum::STATE_UNENCRYPTED);
     peeker_.reset(new SocketPeeker(*socket_, this, numBytes_));
@@ -79,7 +80,7 @@ class PeekingAcceptorHandshakeHelper : public AcceptorHandshakeHelper,
   }
 
   void dropConnection(SSLErrorEnum reason = SSLErrorEnum::NO_ERROR) override {
-    CHECK_NE(socket_.get() == nullptr, helper_.get() == nullptr);
+    WANGLE_CHECK_NE(socket_.get() == nullptr, helper_.get() == nullptr);
     if (socket_) {
       socket_->closeNow();
     } else if (helper_) {
@@ -110,7 +111,7 @@ class PeekingAcceptorHandshakeHelper : public AcceptorHandshakeHelper,
     auto callback = callback_;
     callback_ = nullptr;
     helper_->start(std::move(socket_), callback);
-    CHECK(!socket_);
+    WANGLE_CHECK(!socket_);
   }
 
   void peekError(const folly::AsyncSocketException& ex) noexcept override {

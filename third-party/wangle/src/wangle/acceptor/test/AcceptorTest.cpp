@@ -25,9 +25,9 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <folly/testing/TestUtil.h>
-#include <glog/logging.h>
 #include <wangle/acceptor/AcceptObserver.h>
 #include <wangle/acceptor/Acceptor.h>
+#include <wangle/util/Logging.h>
 
 using namespace folly;
 using namespace wangle;
@@ -187,8 +187,8 @@ TEST_P(AcceptorTest, Basic) {
 
   evb_.loopForever();
 
-  CHECK_EQ(acceptor->getNumConnections(), 1);
-  CHECK(acceptor->getState() == Acceptor::State::kRunning);
+  WANGLE_CHECK_EQ(acceptor->getNumConnections(), 1);
+  WANGLE_CHECK(acceptor->getState() == Acceptor::State::kRunning);
   acceptor->forceStop();
   serverSocket->stopAccepting();
   evb_.loop();
@@ -270,8 +270,8 @@ TEST_P(AcceptorTest, AcceptObserver) {
   }
   evb_.loopForever();
   Mock::VerifyAndClearExpectations(cb.get());
-  CHECK_EQ(acceptor->getNumConnections(), 1);
-  CHECK(acceptor->getState() == Acceptor::State::kRunning);
+  WANGLE_CHECK_EQ(acceptor->getNumConnections(), 1);
+  WANGLE_CHECK(acceptor->getState() == Acceptor::State::kRunning);
 
   // add second connection, expect callbacks
   auto clientSocket2 = connectClientSocket(serverAddress);
@@ -282,8 +282,8 @@ TEST_P(AcceptorTest, AcceptObserver) {
   }
   evb_.loopForever();
   Mock::VerifyAndClearExpectations(cb.get());
-  CHECK_EQ(acceptor->getNumConnections(), 2);
-  CHECK(acceptor->getState() == Acceptor::State::kRunning);
+  WANGLE_CHECK_EQ(acceptor->getNumConnections(), 2);
+  WANGLE_CHECK(acceptor->getState() == Acceptor::State::kRunning);
 
   // remove AcceptObserver
   EXPECT_CALL(*cb, observerDetach(acceptor.get()));
@@ -294,8 +294,8 @@ TEST_P(AcceptorTest, AcceptObserver) {
   auto clientSocket3 = connectClientSocket(serverAddress);
   evb_.loopForever();
   Mock::VerifyAndClearExpectations(cb.get());
-  CHECK_EQ(acceptor->getNumConnections(), 3);
-  CHECK(acceptor->getState() == Acceptor::State::kRunning);
+  WANGLE_CHECK_EQ(acceptor->getNumConnections(), 3);
+  WANGLE_CHECK(acceptor->getState() == Acceptor::State::kRunning);
 
   // stop the acceptor
   acceptor->forceStop();
@@ -646,8 +646,8 @@ TEST_P(
   Mock::VerifyAndClearExpectations(onAcceptCb.get());
   Mock::VerifyAndClearExpectations(fizzLoggingCb.get());
   Mock::VerifyAndClearExpectations(lifecycleCb.get());
-  CHECK_EQ(acceptor->getNumConnections(), 1);
-  CHECK(acceptor->getState() == Acceptor::State::kRunning);
+  WANGLE_CHECK_EQ(acceptor->getNumConnections(), 1);
+  WANGLE_CHECK(acceptor->getState() == Acceptor::State::kRunning);
 
   acceptor->forceStop();
   serverSocket->stopAccepting();

@@ -16,8 +16,8 @@
 
 #include <folly/Random.h>
 #include <folly/portability/GTest.h>
-#include <glog/logging.h>
 #include <wangle/ssl/SSLSessionCacheManager.h>
+#include <wangle/util/Logging.h>
 
 using namespace folly;
 using namespace wangle;

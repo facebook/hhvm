@@ -25,6 +25,7 @@
 #include <folly/portability/GTest.h>
 #include <folly/synchronization/Baton.h>
 #include <wangle/client/persistence/LRUPersistentCache.h>
+#include <wangle/util/Logging.h>
 
 using namespace folly;
 using namespace std;
@@ -75,7 +76,7 @@ createCacheWithExecutor(
 class MockPersistenceLayer : public TestPersistenceLayer {
  public:
   ~MockPersistenceLayer() override {
-    LOG(ERROR) << "ok.";
+    WANGLE_LOG(ERROR) << "ok.";
   }
   bool persist(const dynamic& obj) noexcept override {
     return persist_(obj);

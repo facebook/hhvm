@@ -21,6 +21,7 @@
 #include <wangle/bootstrap/RoutingDataHandler.h>
 #include <wangle/bootstrap/ServerBootstrap.h>
 #include <wangle/channel/AsyncSocketHandler.h>
+#include <wangle/util/Logging.h>
 
 using namespace folly;
 using namespace wangle;
@@ -93,9 +94,9 @@ class ServerPipelineFactory
 
     pipeline->setTransportInfo(transportInfo);
 
-    LOG(INFO) << "Created new server pipeline. Local address = "
-              << *(transportInfo->localAddr)
-              << ", remote address = " << *(transportInfo->remoteAddr);
+    WANGLE_LOG(INFO) << "Created new server pipeline. Local address = "
+                     << *(transportInfo->localAddr)
+                     << ", remote address = " << *(transportInfo->remoteAddr);
 
     return pipeline;
   }

@@ -20,7 +20,7 @@ namespace wangle {
 
 template <typename R>
 RoutingDataHandler<R>::RoutingDataHandler(uint64_t connId, Callback* cob)
-    : connId_(connId), cob_(CHECK_NOTNULL(cob)) {}
+    : connId_(connId), cob_(WANGLE_CHECK_NOTNULL(cob)) {}
 
 template <typename R>
 void RoutingDataHandler<R>::read(Context*, folly::IOBufQueue& q) {

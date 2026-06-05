@@ -23,6 +23,7 @@
 #include <folly/portability/SysTime.h>
 #include <folly/synchronization/Lock.h>
 #include <folly/system/ThreadName.h>
+#include <wangle/util/Logging.h>
 #include <atomic>
 #include <cerrno>
 #include <functional>
@@ -202,7 +203,7 @@ bool LRUPersistentCache<K, V, MutexT>::syncNow(CachePersistence& persistence) {
   // serialize the current contents of cache under lock
   auto serializedCacheAndVersion = cache_.convertToKeyValuePairs();
   if (!serializedCacheAndVersion) {
-    LOG(ERROR) << "Failed to convert cache for serialization.";
+    WANGLE_LOG(ERROR) << "Failed to convert cache for serialization.";
     return false;
   }
 

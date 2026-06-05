@@ -23,6 +23,7 @@
 #include <wangle/bootstrap/ServerBootstrap.h>
 #include <wangle/channel/AsyncSocketHandler.h>
 #include <wangle/channel/Pipeline.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -142,7 +143,7 @@ class FactoryToService : public Service<Req, Resp> {
   ~FactoryToService() override = default;
 
   folly::Future<Resp> operator()(Req request) override {
-    DCHECK(factory_);
+    WANGLE_DCHECK(factory_);
     return ((*factory_)(nullptr))
         .thenValue([=, this](std::shared_ptr<Service<Req, Resp>> service) {
           return (*service)(std::move(request)).ensure([this]() {

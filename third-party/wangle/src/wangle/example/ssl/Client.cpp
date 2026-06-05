@@ -28,6 +28,7 @@
 #include <wangle/client/ssl/SSLSessionPersistentCache.h>
 #include <wangle/codec/LineBasedFrameDecoder.h>
 #include <wangle/codec/StringCodec.h>
+#include <wangle/util/Logging.h>
 
 using namespace wangle;
 using namespace folly;
@@ -148,18 +149,18 @@ int main(int argc, char** argv) {
   }
 
   SocketAddress addr(FLAGS_ip.c_str(), FLAGS_port);
-  VLOG(0) << "Connecting";
+  WANGLE_VLOG(0) << "Connecting";
   auto pipeline = client.connect(addr).get();
-  VLOG(0) << "Connected";
+  WANGLE_VLOG(0) << "Connected";
   try {
     while (true) {
       std::string line;
       std::getline(std::cin, line);
       if (line == "") {
-        VLOG(0) << "End";
+        WANGLE_VLOG(0) << "End";
         break;
       }
-      VLOG(0) << "Sending " << line;
+      WANGLE_VLOG(0) << "Sending " << line;
       pipeline->write(line + "\r\n").get();
       if (line == "bye") {
         pipeline->close();

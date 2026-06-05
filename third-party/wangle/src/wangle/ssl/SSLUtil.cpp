@@ -24,6 +24,7 @@
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/portability/OpenSSL.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -76,7 +77,7 @@ std::unique_ptr<std::list<std::string>> SSLUtil::getSubjectAltName(
   if (names) {
     auto guard = folly::makeGuard([names] { GENERAL_NAMES_free(names); });
     size_t count = sk_GENERAL_NAME_num(names);
-    CHECK(count < std::numeric_limits<int>::max());
+    WANGLE_CHECK(count < std::numeric_limits<int>::max());
     for (int i = 0; i < (int)count; ++i) {
       GENERAL_NAME* generalName = sk_GENERAL_NAME_value(names, i);
       if (generalName->type == GEN_DNS) {
@@ -85,7 +86,7 @@ std::unique_ptr<std::list<std::string>> SSLUtil::getSubjectAltName(
         // I can't find any docs on what a negative return value here
         // would mean, so I'm going to ignore it.
         auto len = ASN1_STRING_length(s);
-        DCHECK(len >= 0);
+        WANGLE_DCHECK(len >= 0);
         if (size_t(len) != strlen(name)) {
           // Null byte(s) in the name; return an error rather than depending on
           // the caller to safely handle this case.
@@ -102,7 +103,7 @@ folly::ssl::X509UniquePtr SSLUtil::getX509FromCertificate(
     const std::string& certificateData) {
   // BIO_new_mem_buf creates a bio pointing to a read-only buffer. However,
   // older versions of OpenSSL fail to mark the first argument `const`.
-  DCHECK_LE(certificateData.length(), std::numeric_limits<int>::max());
+  WANGLE_DCHECK_LE(certificateData.length(), std::numeric_limits<int>::max());
   folly::ssl::BioUniquePtr bio(BIO_new_mem_buf(
       (void*)certificateData.data(),
       folly::to_narrow(folly::to_signed(certificateData.length()))));
@@ -139,7 +140,7 @@ std::string SSLUtil::decrypt(
 
   /* Provide the message to be decrypted, and obtain the plaintext output.
    * EVP_DecryptUpdate can be called multiple times if necessary. */
-  DCHECK_LE(ciphertext.size(), std::numeric_limits<int>::max());
+  WANGLE_DCHECK_LE(ciphertext.size(), std::numeric_limits<int>::max());
   if (EVP_DecryptUpdate(
           ctx.get(),
           plaintext.get(),
@@ -172,25 +173,25 @@ folly::Optional<std::string> SSLUtil::decryptOpenSSLEncFilePassString(
   // Read encrypted file into string
   std::string fileData;
   if (!folly::readFile(filename.c_str(), fileData)) {
-    LOG(ERROR) << "Error reading file: " << filename;
+    WANGLE_LOG(ERROR) << "Error reading file: " << filename;
     return folly::none;
   }
   if (fileData.size() < magic.size() + PKCS5_SALT_LEN) {
-    LOG(ERROR) << "Not a valid encrypted file.";
+    WANGLE_LOG(ERROR) << "Not a valid encrypted file.";
     return folly::none;
   }
 
   // Parse file contents into magic number, salt, and encrypted content
   auto fileMagic = fileData.substr(0, magic.size());
   if (fileMagic.compare(magic) != 0) {
-    LOG(ERROR) << "Incorrect magic number in file.";
+    WANGLE_LOG(ERROR) << "Incorrect magic number in file.";
     return folly::none;
   }
   auto salt = fileData.substr(magic.size(), PKCS5_SALT_LEN);
   auto ciphertext = fileData.substr(magic.size() + PKCS5_SALT_LEN);
 
   // Construct key and iv from password
-  DCHECK_LE(password.size(), std::numeric_limits<int>::max());
+  WANGLE_DCHECK_LE(password.size(), std::numeric_limits<int>::max());
   EVP_BytesToKey(
       cipher,
       digest,
@@ -218,8 +219,8 @@ folly::Optional<std::string> SSLUtil::decryptOpenSSLEncFilePassFile(
   std::string password;
   pwdCollector.getPassword(password, 0);
   if (password.empty()) {
-    LOG(ERROR) << "Error getting encryption password from collector "
-               << pwdCollector;
+    WANGLE_LOG(ERROR) << "Error getting encryption password from collector "
+                      << pwdCollector;
     return folly::none;
   }
   return decryptOpenSSLEncFilePassString(filename, password, cipher, digest);

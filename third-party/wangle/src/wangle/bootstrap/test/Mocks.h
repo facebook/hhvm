@@ -25,6 +25,7 @@
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -92,7 +93,7 @@ class MockRoutingDataHandlerFactory : public RoutingDataHandlerFactory<char> {
   std::shared_ptr<RoutingDataHandler<char>> newHandler(
       uint64_t /*connId*/,
       RoutingDataHandler<char>::Callback* /*cob*/) override {
-    VLOG(4) << "New pipeline with a test routing handler";
+    WANGLE_VLOG(4) << "New pipeline with a test routing handler";
     return std::shared_ptr<RoutingDataHandler<char>>(routingDataHandler_);
   }
   void setRoutingDataHandler(MockRoutingDataHandler* routingDataHandler) {

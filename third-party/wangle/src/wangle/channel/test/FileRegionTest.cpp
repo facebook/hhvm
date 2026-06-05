@@ -17,6 +17,7 @@
 #include <folly/io/async/test/AsyncSocketTest.h>
 #include <folly/portability/GTest.h>
 #include <wangle/channel/FileRegion.h>
+#include <wangle/util/Logging.h>
 
 #ifdef SPLICE_F_NONBLOCK
 using namespace folly;
@@ -66,7 +67,7 @@ TEST_F(FileRegionTest, Basic) {
   try {
     std::move(f).getVia(&evb);
   } catch (std::exception& e) {
-    LOG(FATAL) << exceptionStr(e);
+    WANGLE_LOG(FATAL) << exceptionStr(e);
   }
 
   // Let the reads run to completion

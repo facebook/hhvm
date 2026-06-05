@@ -35,7 +35,7 @@ class BroadcastHandler
       typename HandlerAdapter<T, std::unique_ptr<folly::IOBuf>>::Context;
 
   ~BroadcastHandler() override {
-    CHECK(subscribers_.empty());
+    WANGLE_CHECK(subscribers_.empty());
   }
 
   // BytesToBytesHandler implementation
@@ -119,3 +119,4 @@ class BroadcastPipelineFactory : public PipelineFactory<DefaultPipeline> {
 } // namespace wangle
 
 #include <wangle/channel/broadcast/BroadcastHandler-inl.h>
+#include <wangle/util/Logging.h>

@@ -24,6 +24,7 @@
 #include <wangle/ssl/SSLStats.h>
 #include <wangle/ssl/SSLUtil.h>
 #include <wangle/ssl/TLSTicketKeySeeds.h>
+#include <wangle/util/Logging.h>
 
 namespace {
 
@@ -46,7 +47,7 @@ void saltKey(
 }
 
 void populateRandom(unsigned char* field, uint32_t len) {
-  CHECK_EQ(RAND_bytes(field, len), 1);
+  WANGLE_CHECK_EQ(RAND_bytes(field, len), 1);
 }
 
 std::string generateRandomTicketSeed() {
@@ -92,7 +93,7 @@ const std::string TLSTicketKeyManager::TLSTicketKey::computeName() const {
 
 std::unique_ptr<TLSTicketKeyManager> TLSTicketKeyManager::fromSeeds(
     const TLSTicketKeySeeds* seeds) {
-  DCHECK(seeds->isNotEmpty());
+  WANGLE_DCHECK(seeds->isNotEmpty());
   auto mgr = std::make_unique<TLSTicketKeyManager>();
   mgr->setTLSTicketKeySeeds(
       seeds->oldSeeds, seeds->currentSeeds, seeds->newSeeds);
@@ -149,7 +150,7 @@ int TLSTicketKeyManager::encryptCallback(
   auto key = findEncryptionKey();
   if (key == nullptr) {
     // no keys available to encrypt
-    FB_LOG_EVERY_MS(WARNING, 1000)
+    WANGLE_LOG_EVERY_MS(WARNING, 1000)
         << "No TLS ticket key available for encryption. Either set a ticket "
         << "key or uninstall TLSTicketKeyManager from this SSLContext. "
         << "Returning un-resumable fallback ticket.";
@@ -161,8 +162,8 @@ int TLSTicketKeyManager::encryptCallback(
     // parse and session won't be resumed.
     key = &fallbackTicketKey_;
   }
-  VLOG(4) << "Encrypting new ticket with key name="
-          << SSLUtil::hexlify(encryptionKeyName_);
+  WANGLE_VLOG(4) << "Encrypting new ticket with key name="
+                 << SSLUtil::hexlify(encryptionKeyName_);
   memcpy(keyName, encryptionKeyName_.data(), kTLSTicketKeyNameLen);
 
   uint8_t* salt = keyName + kTLSTicketKeyNameLen;
@@ -193,11 +194,12 @@ int TLSTicketKeyManager::decryptCallback(
   auto key = findDecryptionKey(name);
   if (key == nullptr) {
     // no ticket found for decryption - will issue a new ticket
-    VLOG(4) << "Can't find ticket key with name=" << SSLUtil::hexlify(name)
-            << ", will generate new ticket";
+    WANGLE_VLOG(4) << "Can't find ticket key with name="
+                   << SSLUtil::hexlify(name) << ", will generate new ticket";
     return 0;
   }
-  VLOG(4) << "Decrypting ticket with key name=" << SSLUtil::hexlify(name);
+  WANGLE_VLOG(4) << "Decrypting ticket with key name="
+                 << SSLUtil::hexlify(name);
 
   // Reconstruct the unique key via the salt
   uint8_t* saltptr = keyName + kTLSTicketKeyNameLen;
@@ -220,7 +222,7 @@ bool TLSTicketKeyManager::insertSeed(
   std::string seedOutput;
 
   if (!folly::unhexlify<std::string, std::string>(seedInput, seedOutput)) {
-    LOG(WARNING) << "Failed to decode seed type= " << (uint32_t)type;
+    WANGLE_LOG(WARNING) << "Failed to decode seed type= " << (uint32_t)type;
     return false;
   }
 
@@ -254,11 +256,11 @@ bool TLSTicketKeyManager::setTLSTicketKeySeeds(
   }
 
   if (!success) {
-    VLOG(2) << "One or more seeds failed to decode";
+    WANGLE_VLOG(2) << "One or more seeds failed to decode";
   }
 
   if (encryptionKeyName_.empty() || ticketKeyMap_.empty()) {
-    VLOG(1) << "No keys configured, session ticket resumption disabled";
+    WANGLE_VLOG(1) << "No keys configured, session ticket resumption disabled";
     return false;
   }
 

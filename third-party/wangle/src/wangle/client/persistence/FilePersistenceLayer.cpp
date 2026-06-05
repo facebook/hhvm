@@ -21,6 +21,7 @@
 #include <folly/FileUtil.h>
 #include <folly/json/json.h>
 #include <folly/portability/Unistd.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -31,8 +32,8 @@ bool FilePersistenceLayer::persist(const folly::dynamic& dynObj) noexcept {
     opts.allow_non_string_keys = true;
     serializedCache = folly::json::serialize(dynObj, opts);
   } catch (...) {
-    LOG(ERROR) << "Serializing to JSON failed with error: "
-               << folly::exceptionStr(folly::current_exception());
+    WANGLE_LOG(ERROR) << "Serializing to JSON failed with error: "
+                      << folly::exceptionStr(folly::current_exception());
     return false;
   }
   bool persisted = false;
@@ -46,17 +47,17 @@ bool FilePersistenceLayer::persist(const folly::dynamic& dynObj) noexcept {
   persisted = nWritten >= 0 &&
       (static_cast<size_t>(nWritten) == serializedCache.size());
   if (!persisted) {
-    LOG(ERROR) << "Failed to write to " << file_ << ":";
+    WANGLE_LOG(ERROR) << "Failed to write to " << file_ << ":";
     if (nWritten == -1) {
-      LOG(ERROR) << "write failed with errno " << errno;
+      WANGLE_LOG(ERROR) << "write failed with errno " << errno;
     }
   }
   if (folly::fdatasyncNoInt(fd) != 0) {
-    LOG(ERROR) << "Failed to sync " << file_ << ": errno " << errno;
+    WANGLE_LOG(ERROR) << "Failed to sync " << file_ << ": errno " << errno;
     persisted = false;
   }
   if (folly::closeNoInt(fd) != 0) {
-    LOG(ERROR) << "Failed to close " << file_ << ": errno " << errno;
+    WANGLE_LOG(ERROR) << "Failed to close " << file_ << ": errno " << errno;
     persisted = false;
   }
   return persisted;
@@ -76,8 +77,8 @@ folly::Optional<folly::dynamic> FilePersistenceLayer::load() noexcept {
     opts.allow_non_string_keys = true;
     return folly::parseJson(serializedCache, opts);
   } catch (...) {
-    LOG(ERROR) << "Deserialization of cache file " << file_
-               << "failed: " << folly::exceptionStr(folly::current_exception());
+    WANGLE_LOG(ERROR) << "Deserialization of cache file " << file_ << "failed: "
+                      << folly::exceptionStr(folly::current_exception());
     return folly::none;
   }
 }

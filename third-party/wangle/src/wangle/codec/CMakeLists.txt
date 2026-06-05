@@ -19,6 +19,8 @@ wangle_add_library(wangle_codec
     LengthFieldBasedFrameDecoder.cpp
     LengthFieldPrepender.cpp
     LineBasedFrameDecoder.cpp
+  DEPS
+    wangle_util_logging
   EXPORTED_DEPS
     wangle_channel
     Folly::folly_io_iobuf

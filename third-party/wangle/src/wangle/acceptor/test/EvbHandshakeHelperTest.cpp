@@ -27,6 +27,7 @@
 #include <folly/synchronization/Baton.h>
 
 #include <wangle/acceptor/test/AcceptorHelperMocks.h>
+#include <wangle/util/Logging.h>
 
 using namespace std::chrono_literals;
 using namespace folly;
@@ -151,7 +152,7 @@ TEST_F(EvbHandshakeHelperTest, TestDropConnection) {
 
   EXPECT_CALL(*mockHelper_, dropConnection(_)).WillOnce(Invoke([&](auto) {
     EXPECT_EQ(alternateThreadId_, std::this_thread::get_id());
-    CHECK(alternate_.getEventBase()->isInEventBaseThread());
+    WANGLE_CHECK(alternate_.getEventBase()->isInEventBaseThread());
     evbHelper_->connectionError(sslSock_, {}, {});
     barrier.post();
   }));

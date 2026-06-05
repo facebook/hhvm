@@ -19,6 +19,7 @@
 #include <type_traits>
 
 #include <wangle/channel/Pipeline.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -106,7 +107,7 @@ class StaticPipeline<R, W, Handler, Handlers...>
   }
 
   void initialize() {
-    CHECK(handlerPtr_);
+    WANGLE_CHECK(handlerPtr_);
     ctx_.initialize(Pipeline<R, W>::shared_from_this(), handlerPtr_);
     StaticPipeline<R, W, Handlers...>::initialize();
   }

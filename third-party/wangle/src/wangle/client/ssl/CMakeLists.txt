@@ -20,9 +20,11 @@ wangle_add_library(wangle_client_ssl
     SSLSessionCacheUtils.cpp
     SSLSessionCallbacks.cpp
     ThreadSafeSSLSessionCache.cpp
+  DEPS
+    wangle_util_logging
   EXPORTED_DEPS
     wangle_client_persistence
-    wangle_ssl_ssl_config
+    wangle_ssl_ssl_util
     Folly::folly_executor
     Folly::folly_fbstring
     Folly::folly_io_async_async_ssl_socket

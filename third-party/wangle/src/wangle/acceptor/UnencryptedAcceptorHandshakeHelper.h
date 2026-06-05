@@ -19,6 +19,7 @@
 #include <wangle/acceptor/AcceptorHandshakeManager.h>
 
 #include <folly/io/async/AsyncSSLSocket.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -40,7 +41,7 @@ class UnencryptedAcceptorHandshakeHelper : public AcceptorHandshakeHelper {
 
   void dropConnection(
       SSLErrorEnum /* reason */ = SSLErrorEnum::NO_ERROR) override {
-    CHECK(false) << "Nothing to drop";
+    WANGLE_CHECK(false) << "Nothing to drop";
   }
 };
 

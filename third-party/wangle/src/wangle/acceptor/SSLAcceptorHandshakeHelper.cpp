@@ -18,6 +18,7 @@
 
 #include <wangle/acceptor/Acceptor.h>
 #include <wangle/acceptor/SecureTransportType.h>
+#include <wangle/util/Logging.h>
 #include <string>
 
 namespace wangle {
@@ -79,10 +80,10 @@ void SSLAcceptorHandshakeHelper::handshakeSuc(AsyncSSLSocket* sock) noexcept {
   sock->getSelectedNextProtocolNoThrow(&nextProto, &nextProtoLength);
   if (VLOG_IS_ON(3)) {
     if (nextProto) {
-      VLOG(3) << "Client selected next protocol "
-              << std::string((const char*)nextProto, nextProtoLength);
+      WANGLE_VLOG(3) << "Client selected next protocol "
+                     << std::string((const char*)nextProto, nextProtoLength);
     } else {
-      VLOG(3) << "Client did not select a next protocol";
+      WANGLE_VLOG(3) << "Client did not select a next protocol";
     }
   }
 
@@ -110,10 +111,10 @@ void SSLAcceptorHandshakeHelper::handshakeErr(
     const AsyncSocketException& ex) noexcept {
   auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now() - acceptTime_);
-  VLOG(3) << "SSL handshake error with " << describeAddresses(sock) << " after "
-          << elapsedTime.count() << " ms; " << sock->getRawBytesReceived()
-          << " bytes received & " << sock->getRawBytesWritten()
-          << " bytes sent: " << ex.what();
+  WANGLE_VLOG(3) << "SSL handshake error with " << describeAddresses(sock)
+                 << " after " << elapsedTime.count() << " ms; "
+                 << sock->getRawBytesReceived() << " bytes received & "
+                 << sock->getRawBytesWritten() << " bytes sent: " << ex.what();
 
   auto sslEx = folly::make_exception_wrapper<SSLException>(
       sslError_, elapsedTime, sock->getRawBytesReceived());

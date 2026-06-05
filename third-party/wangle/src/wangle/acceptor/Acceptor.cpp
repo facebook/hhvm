@@ -33,6 +33,7 @@
 #include <wangle/acceptor/ManagedConnection.h>
 #include <wangle/acceptor/SecurityProtocolContextManager.h>
 #include <wangle/ssl/SSLContextManager.h>
+#include <wangle/util/Logging.h>
 
 using folly::AsyncServerSocket;
 using folly::AsyncSocket;
@@ -114,15 +115,16 @@ void Acceptor::init(
               cacheProvider_);
         }
       }
-      CHECK(sslCtxManager_->getDefaultSSLCtx());
+      WANGLE_CHECK(sslCtxManager_->getDefaultSSLCtx());
     } catch (const std::runtime_error& ex) {
       if (accConfig_->strictSSL) {
         throw;
       } else {
         sslCtxManager_->clear();
         // This is not a Not a fatal error, but useful to know.
-        LOG(INFO) << "Failed to configure TLS. This is not a fatal error. "
-                  << ex.what();
+        WANGLE_LOG(INFO)
+            << "Failed to configure TLS. This is not a fatal error. "
+            << ex.what();
       }
     }
   }
@@ -143,7 +145,7 @@ void Acceptor::init(
 }
 
 void Acceptor::initDownstreamConnectionManager(EventBase* eventBase) {
-  CHECK(nullptr == this->base_ || eventBase == this->base_);
+  WANGLE_CHECK(nullptr == this->base_ || eventBase == this->base_);
   base_ = eventBase;
   state_ = State::kRunning;
   downstreamConnectionManager_ = ConnectionManager::makeUnique(
@@ -243,8 +245,8 @@ void Acceptor::resetSSLContextConfigs(
     }
     getFizzPeeker()->setSSLContextManager(sslCtxManager_);
   } catch (const std::runtime_error& ex) {
-    LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
-               << "will keep old config";
+    WANGLE_LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
+                      << "will keep old config";
   }
 }
 
@@ -280,7 +282,7 @@ void Acceptor::resetSSLContextConfigs(
     if (sslCtxManager_) {
       // The API only updates sslContextConfigs, this API should be only called
       // for acceptors that hos no SNI configs
-      DCHECK(accConfig_->sniConfigs.empty());
+      WANGLE_DCHECK(accConfig_->sniConfigs.empty());
       sslCtxManager_->resetSSLContextConfigs(
           sslContextConfigs,
           accConfig_->sniConfigs,
@@ -291,8 +293,8 @@ void Acceptor::resetSSLContextConfigs(
     }
     resetSSLContextConfigs(certManager, sslCtxManager_, fizzContext);
   } catch (const std::runtime_error& ex) {
-    LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
-               << "will keep old config";
+    WANGLE_LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
+                      << "will keep old config";
   }
 }
 
@@ -386,7 +388,7 @@ void Acceptor::processEstablishedConnection(
     folly::AsyncSocket::LegacyLifecycleObserver* observer) noexcept {
   bool shouldDoSSL = false;
   if (accConfig_->isSSL()) {
-    CHECK(sslCtxManager_);
+    WANGLE_CHECK(sslCtxManager_);
     shouldDoSSL = sslCtxManager_->getDefaultSSLCtx() != nullptr;
   }
   if (shouldDoSSL) {
@@ -397,8 +399,8 @@ void Acceptor::processEstablishedConnection(
     }
     ++numPendingSSLConns_;
     if (numPendingSSLConns_ > accConfig_->maxConcurrentSSLHandshakes) {
-      VLOG(2) << "dropped SSL handshake on " << accConfig_->name
-              << " too many handshakes in progress";
+      WANGLE_VLOG(2) << "dropped SSL handshake on " << accConfig_->name
+                     << " too many handshakes in progress";
       auto error = SSLErrorEnum::DROPPED;
       auto latency = std::chrono::milliseconds(0);
       auto ex = folly::make_exception_wrapper<SSLException>(
@@ -478,19 +480,19 @@ AsyncTransport::UniquePtr Acceptor::transformTransport(
         auto fizzSocket =
             sock->getUnderlyingTransport<fizz::server::AsyncFizzServer>();
         if (!fizzSocket) {
-          VLOG(5)
+          WANGLE_VLOG(5)
               << "Acceptor configured to prefer kTLS Rx, but peer is not fizz. "
               << sockLogContext;
           return sock;
         }
         auto ktlsRxSockResult = fizz::tryConvertKTLSRx(*fizzSocket, rxPad);
         if (ktlsRxSockResult.hasValue()) {
-          VLOG(5) << "Upgraded socket to kTLS Rx. " << sockLogContext;
+          WANGLE_VLOG(5) << "Upgraded socket to kTLS Rx. " << sockLogContext;
           return std::move(ktlsRxSockResult).value();
         } else {
-          VLOG(5) << "Failed to upgrade to kTLS Rx. ex="
-                  << folly::exceptionStr(ktlsRxSockResult.error()) << " "
-                  << sockLogContext;
+          WANGLE_VLOG(5) << "Failed to upgrade to kTLS Rx. ex="
+                         << folly::exceptionStr(ktlsRxSockResult.error()) << " "
+                         << sockLogContext;
           return sock;
         }
       } else {
@@ -502,19 +504,19 @@ AsyncTransport::UniquePtr Acceptor::transformTransport(
         auto fizzSocket =
             sock->getUnderlyingTransport<fizz::server::AsyncFizzServer>();
         if (!fizzSocket) {
-          VLOG(5)
+          WANGLE_VLOG(5)
               << "Acceptor configured to prefer kTLS, but peer is not fizz. "
               << sockLogContext;
           return sock;
         }
         auto ktlsSockResult = fizz::tryConvertKTLS(*fizzSocket, rxPad);
         if (ktlsSockResult.hasValue()) {
-          VLOG(5) << "Upgraded socket to kTLS. " << sockLogContext;
+          WANGLE_VLOG(5) << "Upgraded socket to kTLS. " << sockLogContext;
           return std::move(ktlsSockResult).value();
         } else {
-          VLOG(5) << "Failed to upgrade to kTLS. ex="
-                  << folly::exceptionStr(ktlsSockResult.error()) << " "
-                  << sockLogContext;
+          WANGLE_VLOG(5) << "Failed to upgrade to kTLS. ex="
+                         << folly::exceptionStr(ktlsSockResult.error()) << " "
+                         << sockLogContext;
           return sock;
         }
       }
@@ -572,7 +574,7 @@ void Acceptor::sslConnectionReady(
     const string& nextProtocol,
     SecureTransportType secureTransportType,
     TransportInfo& tinfo) {
-  CHECK(numPendingSSLConns_ > 0);
+  WANGLE_CHECK(numPendingSSLConns_ > 0);
   --numPendingSSLConns_;
   connectionReady(
       std::move(sock), clientAddr, nextProtocol, secureTransportType, tinfo);
@@ -582,7 +584,7 @@ void Acceptor::sslConnectionReady(
 }
 
 void Acceptor::sslConnectionError(const folly::exception_wrapper&) {
-  CHECK(numPendingSSLConns_ > 0);
+  WANGLE_CHECK(numPendingSSLConns_ > 0);
   --numPendingSSLConns_;
   if (state_ == State::kDraining) {
     checkIfDrained();
@@ -594,12 +596,12 @@ void Acceptor::acceptError(const std::exception& ex) noexcept {
   // The most likely error is out of FDs.  AsyncServerSocket will back off
   // briefly if we are out of FDs, then continue accepting later.
   // Just log a message here.
-  FB_LOG_EVERY_MS(ERROR, 1000)
+  WANGLE_LOG_EVERY_MS(ERROR, 1000)
       << "error accepting on acceptor socket: " << ex.what();
 }
 
 void Acceptor::acceptStopped() noexcept {
-  VLOG(3) << "Acceptor " << this << " acceptStopped()";
+  WANGLE_VLOG(3) << "Acceptor " << this << " acceptStopped()";
   // Drain the open client connections
   startDrainingAllConnections();
 
@@ -615,14 +617,14 @@ void Acceptor::acceptStopped() noexcept {
 }
 
 void Acceptor::onEmpty(const ConnectionManager&) {
-  VLOG(3) << "Acceptor=" << this << " onEmpty()";
+  WANGLE_VLOG(3) << "Acceptor=" << this << " onEmpty()";
   if (state_ == State::kDraining) {
     checkIfDrained();
   }
 }
 
 void Acceptor::checkIfDrained() {
-  CHECK(state_ == State::kDraining);
+  WANGLE_CHECK(state_ == State::kDraining);
   if (forceShutdownInProgress_ ||
       (downstreamConnectionManager_ &&
        downstreamConnectionManager_->getNumConnections() != 0) ||
@@ -631,8 +633,8 @@ void Acceptor::checkIfDrained() {
     return;
   }
 
-  VLOG(3) << "All connections drained from Acceptor=" << this << " in thread "
-          << base_;
+  WANGLE_VLOG(3) << "All connections drained from Acceptor=" << this
+                 << " in thread " << base_;
 
   downstreamConnectionManager_.reset();
   transitionToDrained();
@@ -640,8 +642,10 @@ void Acceptor::checkIfDrained() {
 
 void Acceptor::drainConnections(double pctToDrain) {
   if (downstreamConnectionManager_) {
-    VLOG(3) << "Draining " << pctToDrain * 100 << "% of " << getNumConnections()
-            << " connections from Acceptor=" << this << " in thread " << base_;
+    WANGLE_VLOG(3) << "Draining " << pctToDrain * 100 << "% of "
+                   << getNumConnections()
+                   << " connections from Acceptor=" << this << " in thread "
+                   << base_;
     assert(base_->isInEventBaseThread());
     downstreamConnectionManager_->drainConnections(
         pctToDrain, gracefulShutdownTimeout_);
@@ -664,15 +668,15 @@ void Acceptor::forceStop() {
 
 void Acceptor::dropAllConnections() {
   if (downstreamConnectionManager_) {
-    VLOG(3) << "Dropping all connections from Acceptor=" << this
-            << " in thread " << base_;
+    WANGLE_VLOG(3) << "Dropping all connections from Acceptor=" << this
+                   << " in thread " << base_;
     assert(base_->isInEventBaseThread());
     forceShutdownInProgress_ = true;
     downstreamConnectionManager_->dropAllConnections();
-    CHECK(downstreamConnectionManager_->getNumConnections() == 0);
+    WANGLE_CHECK(downstreamConnectionManager_->getNumConnections() == 0);
     downstreamConnectionManager_.reset();
   }
-  CHECK(numPendingSSLConns_ == 0);
+  WANGLE_CHECK(numPendingSSLConns_ == 0);
 
   transitionToDrained();
 }
@@ -680,9 +684,10 @@ void Acceptor::dropAllConnections() {
 void Acceptor::dropConnections(double pctToDrop) {
   base_->runInEventBaseThread([&, pctToDrop] {
     if (downstreamConnectionManager_) {
-      VLOG(3) << "Dropping " << pctToDrop * 100 << "% of "
-              << getNumConnections() << " connections from Acceptor=" << this
-              << " in thread " << base_;
+      WANGLE_VLOG(3) << "Dropping " << pctToDrop * 100 << "% of "
+                     << getNumConnections()
+                     << " connections from Acceptor=" << this << " in thread "
+                     << base_;
       assert(base_->isInEventBaseThread());
       forceShutdownInProgress_ = true;
 
@@ -697,9 +702,10 @@ void Acceptor::dropConnections(
     std::chrono::milliseconds roundInterval) {
   base_->runInEventBaseThread([&, pctToDrop, dropDuration, roundInterval] {
     if (downstreamConnectionManager_) {
-      VLOG(3) << "Dropping " << pctToDrop * 100 << "% of "
-              << getNumConnections() << " connections from Acceptor=" << this
-              << " in thread " << base_;
+      WANGLE_VLOG(3) << "Dropping " << pctToDrop * 100 << "% of "
+                     << getNumConnections()
+                     << " connections from Acceptor=" << this << " in thread "
+                     << base_;
       assert(base_->isInEventBaseThread());
       forceShutdownInProgress_ = true;
 
@@ -714,10 +720,10 @@ void Acceptor::dropEstablishedConnections(
     const std::function<bool(ManagedConnection*)>& filter) {
   base_->runInEventBaseThread([this, pctToDrop, filter] {
     if (downstreamConnectionManager_) {
-      VLOG(3) << "Dropping " << pctToDrop * 100 << "% of "
-              << getNumConnections()
-              << " established connections from Acceptor=" << this
-              << " in thread " << base_;
+      WANGLE_VLOG(3) << "Dropping " << pctToDrop * 100 << "% of "
+                     << getNumConnections()
+                     << " established connections from Acceptor=" << this
+                     << " in thread " << base_;
       assert(base_->isInEventBaseThread());
 
       downstreamConnectionManager_->dropEstablishedConnections(
@@ -731,9 +737,9 @@ void Acceptor::dropIdleConnectionsBasedOnTimeout(
     const std::function<void(size_t)>& droppedConnectionsCB) {
   base_->runInEventBaseThread([this, targetIdleTimeMs, droppedConnectionsCB] {
     if (downstreamConnectionManager_) {
-      VLOG(3) << "Dropping connections based on idle timeout "
-              << targetIdleTimeMs.count() << " from acceptor=" << this
-              << " in thread " << base_;
+      WANGLE_VLOG(3) << "Dropping connections based on idle timeout "
+                     << targetIdleTimeMs.count() << " from acceptor=" << this
+                     << " in thread " << base_;
       assert(base_->isInEventBaseThread());
 
       downstreamConnectionManager_->dropIdleConnectionsBasedOnTimeout(
@@ -753,7 +759,7 @@ Acceptor::AcceptObserverList::~AcceptObserverList() {
 
 void Acceptor::AcceptObserverList::add(AcceptObserver* observer) {
   // adding the same observer multiple times is not allowed
-  CHECK(
+  WANGLE_CHECK(
       std::find(observers_.begin(), observers_.end(), observer) ==
       observers_.end());
 

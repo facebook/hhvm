@@ -19,6 +19,7 @@
 #include <wangle/bootstrap/RoutingDataHandler.h>
 #include <wangle/bootstrap/ServerBootstrap.h>
 #include <wangle/channel/Pipeline.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -48,7 +49,7 @@ class AcceptRoutingHandler : public wangle::InboundHandler<AcceptPipelineType>,
       std::shared_ptr<RoutingDataHandlerFactory<R>> routingHandlerFactory,
       std::shared_ptr<RoutingDataPipelineFactory<Pipeline, R>>
           childPipelineFactory)
-      : server_(CHECK_NOTNULL(server)),
+      : server_(WANGLE_CHECK_NOTNULL(server)),
         routingHandlerFactory_(routingHandlerFactory),
         childPipelineFactory_(childPipelineFactory) {}
 
@@ -91,7 +92,7 @@ class AcceptRoutingPipelineFactory : public AcceptPipelineFactory {
       std::shared_ptr<RoutingDataHandlerFactory<R>> routingHandlerFactory,
       std::shared_ptr<RoutingDataPipelineFactory<Pipeline, R>>
           childPipelineFactory)
-      : server_(CHECK_NOTNULL(server)),
+      : server_(WANGLE_CHECK_NOTNULL(server)),
         routingHandlerFactory_(routingHandlerFactory),
         childPipelineFactory_(childPipelineFactory) {}
 
@@ -127,3 +128,4 @@ class RoutingDataPipelineFactory {
 } // namespace wangle
 
 #include <wangle/bootstrap/AcceptRoutingHandler-inl.h>
+#include <wangle/util/Logging.h>

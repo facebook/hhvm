@@ -15,6 +15,7 @@
  */
 
 #include <wangle/codec/LengthFieldPrepender.h>
+#include <wangle/util/Logging.h>
 
 using folly::Future;
 using folly::IOBuf;
@@ -31,7 +32,7 @@ LengthFieldPrepender::LengthFieldPrepender(
       lengthAdjustment_(lengthAdjustment),
       lengthIncludesLengthField_(lengthIncludesLengthField),
       networkByteOrder_(networkByteOrder) {
-  CHECK(
+  WANGLE_CHECK(
       lengthFieldLength == 1 || lengthFieldLength == 2 ||
       lengthFieldLength == 4 || lengthFieldLength == 8);
 }

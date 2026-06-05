@@ -20,6 +20,7 @@
 #include <folly/io/async/AsyncUDPServerSocket.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <wangle/acceptor/Acceptor.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -83,7 +84,7 @@ class AsyncServerSocketFactory : public ServerSocketFactory {
       Acceptor* callback,
       folly::EventBase* base) override {
     auto socket = std::dynamic_pointer_cast<folly::AsyncServerSocket>(s);
-    CHECK(socket);
+    WANGLE_CHECK(socket);
     socket->removeAcceptCallback(callback, base);
   }
 
@@ -92,7 +93,7 @@ class AsyncServerSocketFactory : public ServerSocketFactory {
       Acceptor* callback,
       folly::EventBase* base) override {
     auto socket = std::dynamic_pointer_cast<folly::AsyncServerSocket>(s);
-    CHECK(socket);
+    WANGLE_CHECK(socket);
     socket->addAcceptCallback(callback, base);
   }
 
@@ -138,7 +139,7 @@ class AsyncUDPServerSocketFactory : public ServerSocketFactory {
       Acceptor* callback,
       folly::EventBase* base) override {
     auto socket = std::dynamic_pointer_cast<folly::AsyncUDPServerSocket>(s);
-    DCHECK(socket);
+    WANGLE_DCHECK(socket);
     socket->addListener(base, callback);
   }
 

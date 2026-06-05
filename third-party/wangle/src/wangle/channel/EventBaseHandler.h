@@ -18,6 +18,7 @@
 
 #include <folly/futures/Future.h>
 #include <wangle/channel/Handler.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -27,8 +28,8 @@ class EventBaseHandler : public OutboundBytesToBytesHandler {
       Context* ctx,
       std::unique_ptr<folly::IOBuf> buf) override {
     folly::Future<folly::Unit> retval;
-    DCHECK(ctx->getTransport());
-    DCHECK(ctx->getTransport()->getEventBase());
+    WANGLE_DCHECK(ctx->getTransport());
+    WANGLE_DCHECK(ctx->getTransport()->getEventBase());
     ctx->getTransport()
         ->getEventBase()
         ->runImmediatelyOrRunInEventBaseThreadAndWait(
@@ -37,8 +38,8 @@ class EventBaseHandler : public OutboundBytesToBytesHandler {
   }
 
   folly::Future<folly::Unit> close(Context* ctx) override {
-    DCHECK(ctx->getTransport());
-    DCHECK(ctx->getTransport()->getEventBase());
+    WANGLE_DCHECK(ctx->getTransport());
+    WANGLE_DCHECK(ctx->getTransport()->getEventBase());
     folly::Future<folly::Unit> retval;
     ctx->getTransport()
         ->getEventBase()

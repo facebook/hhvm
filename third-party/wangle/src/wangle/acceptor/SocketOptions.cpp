@@ -18,6 +18,7 @@
 
 #include <folly/io/SocketOptionMap.h>
 #include <folly/portability/Sockets.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -41,7 +42,8 @@ folly::SocketOptionMap filterIPSocketOptions(
         continue;
       }
     } else {
-      LOG(FATAL) << "Address family " << addrFamily << " was not IPv4 or IPv6";
+      WANGLE_LOG(FATAL) << "Address family " << addrFamily
+                        << " was not IPv4 or IPv6";
     }
 
     // Include all other options

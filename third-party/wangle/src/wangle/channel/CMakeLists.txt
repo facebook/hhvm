@@ -22,6 +22,7 @@ wangle_add_library(wangle_channel
     Folly::folly_system_hardware_concurrency
   EXPORTED_DEPS
     wangle_acceptor_acceptor_core
+    wangle_util_logging
     Folly::folly_exception_wrapper
     Folly::folly_executors_io_thread_pool_executor
     Folly::folly_format
@@ -39,7 +40,6 @@ wangle_add_library(wangle_channel
     Folly::folly_optional
     Folly::folly_singleton
     Folly::folly_unit
-    ${GLOG_LIBRARIES}
     fmt::fmt
 )
 

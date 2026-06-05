@@ -21,6 +21,7 @@
 #include <folly/json/dynamic.h>
 #include <folly/json/json.h>
 #include <wangle/ssl/SSLUtil.h>
+#include <wangle/util/Logging.h>
 
 using namespace folly;
 
@@ -133,9 +134,9 @@ void TLSCredProcessor::certFileUpdated() noexcept {
       if (wrappedData.has_value()) {
         jsonData = wrappedData.value();
       } else {
-        LOG(WARNING) << "Failed to read " << fileName
-                     << " using supplied password "
-                     << "; Ticket seeds are unavailable.";
+        WANGLE_LOG(WARNING)
+            << "Failed to read " << fileName << " using supplied password "
+            << "; Ticket seeds are unavailable.";
         return folly::none;
       }
     } else {
@@ -146,7 +147,7 @@ void TLSCredProcessor::certFileUpdated() noexcept {
 
     folly::dynamic conf = folly::parseJson(jsonData);
     if (conf.type() != dynamic::Type::OBJECT) {
-      LOG(WARNING) << "Error parsing " << fileName << " expected object";
+      WANGLE_LOG(WARNING) << "Error parsing " << fileName << " expected object";
       return folly::none;
     }
     TLSTicketKeySeeds seedData;
@@ -162,7 +163,7 @@ void TLSCredProcessor::certFileUpdated() noexcept {
     return seedData;
   } catch (const std::exception&) {
     // Don't log ex.what() since it may contain contents of the key file.
-    LOG(WARNING) << "Parsing " << fileName << " failed.";
+    WANGLE_LOG(WARNING) << "Parsing " << fileName << " failed.";
     return folly::none;
   }
 }

@@ -19,6 +19,7 @@ wangle_add_library(wangle_service
     wangle_bootstrap_client_bootstrap
     wangle_bootstrap_server_bootstrap
     wangle_channel
+    wangle_util_logging
     Folly::folly_futures_core
     Folly::folly_memory
 )

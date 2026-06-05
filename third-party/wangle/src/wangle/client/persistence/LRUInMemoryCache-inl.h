@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <glog/logging.h>
+#include <wangle/util/Logging.h>
 
 #include <folly/Likely.h>
 #include <folly/json/DynamicConverter.h>
@@ -86,11 +86,11 @@ CacheDataVersion LRUInMemoryCache<K, V, M>::loadData(
       updated = true;
     }
   } catch (const folly::TypeError& err) {
-    LOG(ERROR) << "Load cache failed with type error: " << err.what();
+    WANGLE_LOG(ERROR) << "Load cache failed with type error: " << err.what();
   } catch (const std::out_of_range& err) {
-    LOG(ERROR) << "Load cache failed with key error: " << err.what();
+    WANGLE_LOG(ERROR) << "Load cache failed with key error: " << err.what();
   } catch (const std::exception& err) {
-    LOG(ERROR) << "Load cache failed with error: " << err.what();
+    WANGLE_LOG(ERROR) << "Load cache failed with error: " << err.what();
   }
   if (updated) {
     // we still need to increment the version
@@ -110,8 +110,9 @@ LRUInMemoryCache<K, V, M>::convertToKeyValuePairs() noexcept {
     }
     return std::make_pair(std::move(dynObj), version_);
   } catch (const std::exception& err) {
-    LOG(ERROR) << "Converting cache to folly::dynamic failed with error: "
-               << err.what();
+    WANGLE_LOG(ERROR)
+        << "Converting cache to folly::dynamic failed with error: "
+        << err.what();
   }
   return folly::none;
 }

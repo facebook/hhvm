@@ -23,6 +23,7 @@
 #include <wangle/codec/LineBasedFrameDecoder.h>
 #include <wangle/codec/StringCodec.h>
 #include <wangle/ssl/TLSCredProcessor.h>
+#include <wangle/util/Logging.h>
 
 DEFINE_string(cert_path, "", "Path to cert pem");
 DEFINE_string(key_path, "", "Path to cert key");
@@ -142,7 +143,7 @@ int main(int argc, char** argv) {
   }
 
   if (!FLAGS_cert_path.empty() && !FLAGS_key_path.empty()) {
-    VLOG(0) << "Configuring SSL";
+    WANGLE_VLOG(0) << "Configuring SSL";
     SSLContextConfig sslCfg;
     sslCfg.addCertificate(FLAGS_cert_path, FLAGS_key_path, "");
     sslCfg.clientCAFiles = std::vector<std::string>{FLAGS_ca_path};

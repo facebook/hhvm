@@ -15,6 +15,7 @@
  */
 
 #include <wangle/client/ssl/test/TestUtil.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -378,16 +379,16 @@ std::vector<std::pair<SSL_SESSION*, size_t>> getSessions() {
   for (size_t i = 0; i < kNumSessions; ++i) {
     const unsigned char* p = kSessionData[i];
     auto s = d2i_SSL_SESSION(nullptr, &p, kSessionDataLen);
-    CHECK(s) << "Invalid session " << i;
+    WANGLE_CHECK(s) << "Invalid session " << i;
     sessions.emplace_back(s, kSessionDataLen);
 
     // Make sure the same session compares same to itself.
-    CHECK(isSameSession(sessions.at(i), sessions.at(i)));
+    WANGLE_CHECK(isSameSession(sessions.at(i), sessions.at(i)));
   }
   // Make sure all sessions are different from each other
-  CHECK(!isSameSession(sessions[0], sessions[1]));
-  CHECK(!isSameSession(sessions[1], sessions[2]));
-  CHECK(!isSameSession(sessions[2], sessions[0]));
+  WANGLE_CHECK(!isSameSession(sessions[0], sessions[1]));
+  WANGLE_CHECK(!isSameSession(sessions[1], sessions[2]));
+  WANGLE_CHECK(!isSameSession(sessions[2], sessions[0]));
 
   return sessions;
 }
@@ -396,7 +397,7 @@ std::pair<SSL_SESSION*, size_t> getSessionWithTicket() {
   const unsigned char* p = kSessionDataWithTicket;
   size_t sessionDataWithTicketLen = sizeof(kSessionDataWithTicket);
   auto s = d2i_SSL_SESSION(nullptr, &p, sessionDataWithTicketLen);
-  CHECK(isSameSession(
+  WANGLE_CHECK(isSameSession(
       std::make_pair(s, sessionDataWithTicketLen),
       std::make_pair(s, sessionDataWithTicketLen)));
   return std::make_pair(s, sessionDataWithTicketLen);
@@ -416,7 +417,7 @@ std::string getSessionData(SSL_SESSION* s, size_t expectedLength) {
       new unsigned char[expectedLength]);
   auto p = sessionData.get();
   auto len = (size_t)i2d_SSL_SESSION(s, &p);
-  CHECK(expectedLength == len);
+  WANGLE_CHECK(expectedLength == len);
   return std::string(reinterpret_cast<const char*>(sessionData.get()), len);
 }
 

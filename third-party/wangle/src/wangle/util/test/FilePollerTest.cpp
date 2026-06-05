@@ -25,8 +25,8 @@
 #include <folly/portability/SysStat.h>
 #include <folly/synchronization/Baton.h>
 #include <folly/testing/TestUtil.h>
-#include <glog/logging.h>
 #include <wangle/util/FilePoller.h>
+#include <wangle/util/Logging.h>
 
 #if !defined(_WIN32)
 
@@ -136,7 +136,7 @@ TEST_F(FilePollerTest, TestCreateFile) {
   Baton<> baton;
   bool updated = false;
   createFile();
-  PCHECK(remove(tmpFile.c_str()) == 0);
+  WANGLE_PCHECK(remove(tmpFile.c_str()) == 0);
   FilePoller poller(milliseconds(1));
   poller.addFileToTrack(tmpFile, [&]() {
     updated = true;
@@ -156,7 +156,7 @@ TEST_F(FilePollerTest, TestDeleteFile) {
     updated = true;
     baton.post();
   });
-  PCHECK(remove(tmpFile.c_str()) == 0);
+  WANGLE_PCHECK(remove(tmpFile.c_str()) == 0);
   ASSERT_FALSE(baton.try_wait_for(seconds(1)));
   ASSERT_FALSE(updated);
 }

@@ -20,6 +20,7 @@
 
 #include <folly/io/IOBuf.h>
 #include <wangle/ssl/SSLUtil.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -76,7 +77,8 @@ static folly::Optional<folly::fbstring> sessionToFbString(
         return folly::Optional<folly::fbstring>(sessionData->moveToFbString());
       }
     } catch (const std::bad_alloc& ex) {
-      LOG(ERROR) << "Failed to allocate memory for sessionData: " << ex.what();
+      WANGLE_LOG(ERROR) << "Failed to allocate memory for sessionData: "
+                        << ex.what();
     }
   }
 

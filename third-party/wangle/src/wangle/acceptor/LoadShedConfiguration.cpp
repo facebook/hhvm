@@ -18,6 +18,7 @@
 
 #include <folly/Conv.h>
 #include <folly/portability/OpenSSL.h>
+#include <wangle/util/Logging.h>
 
 using folly::SocketAddress;
 using std::string;
@@ -54,57 +55,58 @@ void LoadShedConfiguration::checkIsSane(const SysParams& sysParams) const {
     // Cpu soft/hard limit ratios must have values in the range of [0-1],
     // inclusive, where the hard limit must be greater than or equal to the
     // soft limit.
-    CHECK_GE(cpuHardLimitRatio_, 0.0);
-    CHECK_LE(cpuHardLimitRatio_, 1.0);
-    CHECK_GE(cpuSoftLimitRatio_, 0.0);
-    CHECK_LE(cpuSoftLimitRatio_, cpuHardLimitRatio_);
+    WANGLE_CHECK_GE(cpuHardLimitRatio_, 0.0);
+    WANGLE_CHECK_LE(cpuHardLimitRatio_, 1.0);
+    WANGLE_CHECK_GE(cpuSoftLimitRatio_, 0.0);
+    WANGLE_CHECK_LE(cpuSoftLimitRatio_, cpuHardLimitRatio_);
 
     // CPU exceed window must be of size at least equal to 1.
-    CHECK_GE(cpuUsageExceedWindowSize_, 1);
+    WANGLE_CHECK_GE(cpuUsageExceedWindowSize_, 1);
 
     // Cpu irq soft/hard limit ratios must have values in the range of [0-1],
     // inclusive, where the hard limit must be greater than or equal to the
     // soft limit.
-    CHECK_GE(softIrqLogicalCpuCoreQuorum_, 0);
-    CHECK_LE(softIrqLogicalCpuCoreQuorum_, sysParams.numLogicalCpuCores);
-    CHECK_GE(softIrqCpuHardLimitRatio_, 0.0);
-    CHECK_LE(softIrqCpuHardLimitRatio_, 1.0);
-    CHECK_GE(softIrqCpuSoftLimitRatio_, 0.0);
-    CHECK_LE(softIrqCpuSoftLimitRatio_, softIrqCpuHardLimitRatio_);
+    WANGLE_CHECK_GE(softIrqLogicalCpuCoreQuorum_, 0);
+    WANGLE_CHECK_LE(softIrqLogicalCpuCoreQuorum_, sysParams.numLogicalCpuCores);
+    WANGLE_CHECK_GE(softIrqCpuHardLimitRatio_, 0.0);
+    WANGLE_CHECK_LE(softIrqCpuHardLimitRatio_, 1.0);
+    WANGLE_CHECK_GE(softIrqCpuSoftLimitRatio_, 0.0);
+    WANGLE_CHECK_LE(softIrqCpuSoftLimitRatio_, softIrqCpuHardLimitRatio_);
 
     // Mem soft/hard limit ratios must have values in the range of [0-1],
     // inclusive, where the hard limit must be greater than or equal to the
     // soft limit.  We allow the mem kill limit ratio to be any valid value
     // in the same inclusive range of [0-1].
-    CHECK_GE(memHardLimitRatio_, 0.0);
-    CHECK_LE(memHardLimitRatio_, 1.0);
-    CHECK_GE(memSoftLimitRatio_, 0.0);
-    CHECK_LE(memSoftLimitRatio_, memHardLimitRatio_);
-    CHECK_GE(memKillLimitRatio_, memHardLimitRatio_);
-    CHECK_LE(memKillLimitRatio_, 1.0);
+    WANGLE_CHECK_GE(memHardLimitRatio_, 0.0);
+    WANGLE_CHECK_LE(memHardLimitRatio_, 1.0);
+    WANGLE_CHECK_GE(memSoftLimitRatio_, 0.0);
+    WANGLE_CHECK_LE(memSoftLimitRatio_, memHardLimitRatio_);
+    WANGLE_CHECK_GE(memKillLimitRatio_, memHardLimitRatio_);
+    WANGLE_CHECK_LE(memKillLimitRatio_, 1.0);
 
     // TCP/UDP mem soft/hard limit ratios must have values in the range of
     // [0-1], inclusive, where the hard limit must be greater than or equal
     // to the soft limit.
-    CHECK_GE(tcpMemHardLimitRatio_, 0.0);
-    CHECK_LE(tcpMemHardLimitRatio_, 1.0);
-    CHECK_GE(tcpMemSoftLimitRatio_, 0.0);
-    CHECK_LE(tcpMemSoftLimitRatio_, tcpMemHardLimitRatio_);
-    CHECK_GE(udpMemHardLimitRatio_, 0.0);
-    CHECK_LE(udpMemHardLimitRatio_, 1.0);
-    CHECK_GE(udpMemSoftLimitRatio_, 0.0);
-    CHECK_LE(udpMemSoftLimitRatio_, udpMemHardLimitRatio_);
+    WANGLE_CHECK_GE(tcpMemHardLimitRatio_, 0.0);
+    WANGLE_CHECK_LE(tcpMemHardLimitRatio_, 1.0);
+    WANGLE_CHECK_GE(tcpMemSoftLimitRatio_, 0.0);
+    WANGLE_CHECK_LE(tcpMemSoftLimitRatio_, tcpMemHardLimitRatio_);
+    WANGLE_CHECK_GE(udpMemHardLimitRatio_, 0.0);
+    WANGLE_CHECK_LE(udpMemHardLimitRatio_, 1.0);
+    WANGLE_CHECK_GE(udpMemSoftLimitRatio_, 0.0);
+    WANGLE_CHECK_LE(udpMemSoftLimitRatio_, udpMemHardLimitRatio_);
 
     // PSI full memory pressure soft/hard limit ratios must have values in
     // the range of [0-1], inclusive, where the hard limit must be greater
     // than or equal to the soft limit.
-    CHECK_GE(memPressureFullHardLimitRatio_, 0.0);
-    CHECK_LE(memPressureFullHardLimitRatio_, 1.0);
-    CHECK_GE(memPressureFullSoftLimitRatio_, 0.0);
-    CHECK_LE(memPressureFullSoftLimitRatio_, memPressureFullHardLimitRatio_);
+    WANGLE_CHECK_GE(memPressureFullHardLimitRatio_, 0.0);
+    WANGLE_CHECK_LE(memPressureFullHardLimitRatio_, 1.0);
+    WANGLE_CHECK_GE(memPressureFullSoftLimitRatio_, 0.0);
+    WANGLE_CHECK_LE(
+        memPressureFullSoftLimitRatio_, memPressureFullHardLimitRatio_);
 
     // Period must be greater than or equal to 0.
-    CHECK_GE(period_.count(), std::chrono::milliseconds(0).count());
+    WANGLE_CHECK_GE(period_.count(), std::chrono::milliseconds(0).count());
   }
 }
 

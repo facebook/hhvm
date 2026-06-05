@@ -121,3 +121,4 @@ class ObservingPipelineFactory
 } // namespace wangle
 
 #include <wangle/channel/broadcast/ObservingHandler-inl.h>
+#include <wangle/util/Logging.h>

@@ -61,7 +61,7 @@ BroadcastPool<T, R, P>::BroadcastManager::getHandler() {
         }
 
         auto handler = pipelineFactory->getBroadcastHandler(pipeline);
-        CHECK(handler);
+        WANGLE_CHECK(handler);
         sharedPromise_.setValue(handler);
 
         // If all the observers go away before connect returns, then the
@@ -80,7 +80,7 @@ BroadcastPool<T, R, P>::BroadcastManager::getHandler() {
 template <typename T, typename R, typename P>
 void BroadcastPool<T, R, P>::BroadcastManager::deletePipeline(
     PipelineBase* pipeline) {
-  CHECK(client_->getPipeline() == pipeline);
+  WANGLE_CHECK(client_->getPipeline() == pipeline);
   deletingBroadcast_ = true;
   broadcastPool_->deleteBroadcast(routingData_);
 }
@@ -88,7 +88,7 @@ void BroadcastPool<T, R, P>::BroadcastManager::deletePipeline(
 template <typename T, typename R, typename P>
 void BroadcastPool<T, R, P>::BroadcastManager::handleConnectError(
     const std::exception& ex) noexcept {
-  LOG(ERROR) << "Error connecting to upstream: " << ex.what();
+  WANGLE_LOG(ERROR) << "Error connecting to upstream: " << ex.what();
 
   auto sharedPromise = std::move(sharedPromise_);
   broadcastPool_->deleteBroadcast(routingData_);

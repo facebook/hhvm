@@ -17,6 +17,7 @@
 #pragma once
 
 #include <folly/Format.h>
+#include <wangle/util/Logging.h>
 #include <typeinfo>
 
 namespace wangle {
@@ -194,7 +195,7 @@ class ContextImpl : public HandlerContext<typename H::rout, typename H::wout>,
     if (this->nextIn_) {
       this->nextIn_->read(std::forward<Rout>(msg));
     } else {
-      LOG(WARNING) << "read reached end of pipeline";
+      WANGLE_LOG(WARNING) << "read reached end of pipeline";
     }
   }
 
@@ -203,7 +204,7 @@ class ContextImpl : public HandlerContext<typename H::rout, typename H::wout>,
     if (this->nextIn_) {
       this->nextIn_->readEOF();
     } else {
-      LOG(WARNING) << "readEOF reached end of pipeline";
+      WANGLE_LOG(WARNING) << "readEOF reached end of pipeline";
     }
   }
 
@@ -212,7 +213,7 @@ class ContextImpl : public HandlerContext<typename H::rout, typename H::wout>,
     if (this->nextIn_) {
       this->nextIn_->readException(std::move(e));
     } else {
-      LOG(WARNING) << "readException reached end of pipeline";
+      WANGLE_LOG(WARNING) << "readException reached end of pipeline";
     }
   }
 
@@ -235,7 +236,7 @@ class ContextImpl : public HandlerContext<typename H::rout, typename H::wout>,
     if (this->nextOut_) {
       return this->nextOut_->write(std::forward<Wout>(msg));
     } else {
-      LOG(WARNING) << "write reached end of pipeline";
+      WANGLE_LOG(WARNING) << "write reached end of pipeline";
       return folly::makeFuture();
     }
   }
@@ -246,7 +247,7 @@ class ContextImpl : public HandlerContext<typename H::rout, typename H::wout>,
     if (this->nextOut_) {
       return this->nextOut_->writeException(std::move(e));
     } else {
-      LOG(WARNING) << "close reached end of pipeline";
+      WANGLE_LOG(WARNING) << "close reached end of pipeline";
       return folly::makeFuture();
     }
   }
@@ -256,7 +257,7 @@ class ContextImpl : public HandlerContext<typename H::rout, typename H::wout>,
     if (this->nextOut_) {
       return this->nextOut_->close();
     } else {
-      LOG(WARNING) << "close reached end of pipeline";
+      WANGLE_LOG(WARNING) << "close reached end of pipeline";
       return folly::makeFuture();
     }
   }
@@ -368,7 +369,7 @@ class InboundContextImpl
     if (this->nextIn_) {
       this->nextIn_->read(std::forward<Rout>(msg));
     } else {
-      LOG(WARNING) << "read reached end of pipeline";
+      WANGLE_LOG(WARNING) << "read reached end of pipeline";
     }
   }
 
@@ -377,7 +378,7 @@ class InboundContextImpl
     if (this->nextIn_) {
       this->nextIn_->readEOF();
     } else {
-      LOG(WARNING) << "readEOF reached end of pipeline";
+      WANGLE_LOG(WARNING) << "readEOF reached end of pipeline";
     }
   }
 
@@ -386,7 +387,7 @@ class InboundContextImpl
     if (this->nextIn_) {
       this->nextIn_->readException(std::move(e));
     } else {
-      LOG(WARNING) << "readException reached end of pipeline";
+      WANGLE_LOG(WARNING) << "readException reached end of pipeline";
     }
   }
 
@@ -471,7 +472,7 @@ class OutboundContextImpl
     if (this->nextOut_) {
       return this->nextOut_->write(std::forward<Wout>(msg));
     } else {
-      LOG(WARNING) << "write reached end of pipeline";
+      WANGLE_LOG(WARNING) << "write reached end of pipeline";
       return folly::makeFuture();
     }
   }
@@ -482,7 +483,7 @@ class OutboundContextImpl
     if (this->nextOut_) {
       return this->nextOut_->writeException(std::move(e));
     } else {
-      LOG(WARNING) << "close reached end of pipeline";
+      WANGLE_LOG(WARNING) << "close reached end of pipeline";
       return folly::makeFuture();
     }
   }
@@ -492,7 +493,7 @@ class OutboundContextImpl
     if (this->nextOut_) {
       return this->nextOut_->close();
     } else {
-      LOG(WARNING) << "close reached end of pipeline";
+      WANGLE_LOG(WARNING) << "close reached end of pipeline";
       return folly::makeFuture();
     }
   }

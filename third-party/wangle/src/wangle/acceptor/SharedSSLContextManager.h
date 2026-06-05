@@ -26,6 +26,7 @@
 #include <wangle/acceptor/ServerSocketConfig.h>
 #include <wangle/ssl/SSLContextManager.h>
 #include <wangle/ssl/TLSTicketKeySeeds.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -88,7 +89,7 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
       : SharedSSLContextManager(std::move(config)) {
     try {
       createContextManagers(config_->sslContextConfigs, config_->sniConfigs);
-      LOG(INFO) << "Initialized SSL context configs";
+      WANGLE_LOG(INFO) << "Initialized SSL context configs";
     } catch (const std::runtime_error& ex) {
       if (config_->strictSSL) {
         throw;
@@ -96,7 +97,8 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
         if (ctxManager_) {
           ctxManager_->clear();
         }
-        LOG(ERROR) << "Failed to initialize SSL context configs: " << ex.what();
+        WANGLE_LOG(ERROR) << "Failed to initialize SSL context configs: "
+                          << ex.what();
       }
     }
   }
@@ -109,11 +111,11 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
       seeds_ = seeds;
       createContextManagers(config_->sslContextConfigs, config_->sniConfigs);
       updateAcceptors();
-      LOG(INFO) << "Updated TLS ticket keys";
+      WANGLE_LOG(INFO) << "Updated TLS ticket keys";
 
     } catch (const std::runtime_error& ex) {
-      LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
-                 << "will keep old config";
+      WANGLE_LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
+                        << "will keep old config";
     }
   }
 
@@ -131,10 +133,10 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
       // in the contexts this API is used.
       createContextManagers({std::move(ssl)}, {});
       updateAcceptors();
-      LOG(INFO) << "Updated Fizz and SSL context configs";
+      WANGLE_LOG(INFO) << "Updated Fizz and SSL context configs";
     } catch (const std::runtime_error& ex) {
-      LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
-                 << "will keep old config";
+      WANGLE_LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
+                        << "will keep old config";
     }
   }
 
@@ -145,10 +147,10 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
     try {
       createContextManagers(config_->sslContextConfigs, config_->sniConfigs);
       updateAcceptors();
-      LOG(INFO) << "Reloaded Fizz and SSL context configs";
+      WANGLE_LOG(INFO) << "Reloaded Fizz and SSL context configs";
     } catch (const std::runtime_error& ex) {
-      LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
-                 << "will keep old config";
+      WANGLE_LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
+                        << "will keep old config";
     }
   }
 

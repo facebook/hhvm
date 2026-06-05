@@ -23,7 +23,7 @@
 #include <folly/portability/GTest.h>
 #include <folly/synchronization/Latch.h>
 #include <folly/testing/TestUtil.h>
-#include <glog/logging.h>
+#include <wangle/util/Logging.h>
 
 using namespace wangle;
 using namespace folly;
@@ -197,7 +197,7 @@ TEST(Bootstrap, ServerAcceptGroup2Test) {
     serverSocket->setReusePortEnabled(true);
     serverSocket->stopAccepting();
   } catch (...) {
-    LOG(INFO) << "Reuse port probably not supported";
+    WANGLE_LOG(INFO) << "Reuse port probably not supported";
     return;
   }
 
@@ -234,7 +234,7 @@ TEST(Bootstrap, SharedThreadPool) {
     serverSocket->setReusePortEnabled(true);
     serverSocket->stopAccepting();
   } catch (...) {
-    LOG(INFO) << "Reuse port probably not supported";
+    WANGLE_LOG(INFO) << "Reuse port probably not supported";
     return;
   }
 

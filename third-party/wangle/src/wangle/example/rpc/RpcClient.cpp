@@ -27,6 +27,7 @@
 #include <wangle/service/Service.h>
 
 #include <wangle/example/rpc/ClientSerializeHandler.h>
+#include <wangle/util/Logging.h>
 
 using namespace folly;
 using namespace wangle;
@@ -62,7 +63,7 @@ class BonkMultiplexClientDispatcher
  public:
   void read(Context*, Xtruct in) override {
     auto search = requests_.find(*in.i32_thing());
-    CHECK(search != requests_.end());
+    WANGLE_CHECK(search != requests_.end());
     auto p = std::move(search->second);
     requests_.erase(*in.i32_thing());
     p.setValue(in);
@@ -128,7 +129,7 @@ int main(int argc, char** argv) {
       std::cin >> *request.message();
       std::cin >> *request.type();
       service(request).thenValue([request](Xtruct response) {
-        CHECK(*request.type() == *response.i32_thing());
+        WANGLE_CHECK(*request.type() == *response.i32_thing());
         std::cout << *response.string_thing() << std::endl;
       });
     }

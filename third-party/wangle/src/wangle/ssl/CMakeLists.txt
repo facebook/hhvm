@@ -18,12 +18,13 @@ wangle_add_library(wangle_ssl_ssl_util
   SRCS
     SSLUtil.cpp
   DEPS
+    wangle_util_logging
+    Folly::folly_conv
     Folly::folly_file_util
     Folly::folly_format
     Folly::folly_io_async_async_ssl_socket
     Folly::folly_memory
     Folly::folly_portability_openssl
-    fmt::fmt
   EXPORTED_DEPS
     Folly::folly_ssl_openssl_ptr_types
     Folly::folly_ssl_password_collector
@@ -34,12 +35,8 @@ wangle_add_library(wangle_ssl_ssl_config
   EXPORTED_DEPS
     wangle_acceptor_acceptor_core
     wangle_ssl_ssl_context_config
-    wangle_ssl_ssl_util
     Folly::folly_futures_core
     Folly::folly_io_async_async_ssl_socket
-    Folly::folly_io_async_ssl_context
-    Folly::folly_io_async_ssl_options
-    Folly::folly_optional
 )
 
 wangle_add_library(wangle_ssl
@@ -53,6 +50,7 @@ wangle_add_library(wangle_ssl
     TLSInMemoryTicketProcessor.cpp
     TLSTicketKeyManager.cpp
   DEPS
+    wangle_ssl_ssl_util
     Folly::folly_conv
     Folly::folly_fibers_core_manager
     Folly::folly_file_util
@@ -69,7 +67,9 @@ wangle_add_library(wangle_ssl
   EXPORTED_DEPS
     wangle_acceptor_acceptor_core
     wangle_ssl_ssl_config
+    wangle_ssl_ssl_context_config
     wangle_util
+    wangle_util_logging
     fizz::fizz
     Folly::folly_container_evicting_cache_map
     Folly::folly_executors_function_scheduler
@@ -82,7 +82,6 @@ wangle_add_library(wangle_ssl
     Folly::folly_shared_mutex
     Folly::folly_ssl_openssl_ticket_handler
     Folly::folly_synchronized
-    ${GLOG_LIBRARIES}
 )
 
 wangle_add_library(wangle_ssl_client_hello_ext_stats

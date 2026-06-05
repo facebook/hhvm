@@ -23,6 +23,7 @@
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/NotificationQueue.h>
+#include <wangle/util/Logging.h>
 
 #ifdef SPLICE_F_NONBLOCK
 namespace wangle {
@@ -35,7 +36,7 @@ class FileRegion {
   folly::Future<folly::Unit> transferTo(
       std::shared_ptr<folly::AsyncTransport> transport) {
     auto socket = std::dynamic_pointer_cast<folly::AsyncSocket>(transport);
-    CHECK(socket);
+    WANGLE_CHECK(socket);
     auto cb = new WriteCallback();
     auto f = cb->promise_.getFuture();
     auto req = new FileWriteRequest(socket.get(), cb, fd_, offset_, count_);

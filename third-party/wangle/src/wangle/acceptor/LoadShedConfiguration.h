@@ -18,8 +18,8 @@
 
 #include <folly/Range.h>
 #include <folly/SocketAddress.h>
-#include <glog/logging.h>
 #include <wangle/acceptor/NetworkAddress.h>
+#include <wangle/util/Logging.h>
 #include <chrono>
 #include <set>
 
@@ -75,8 +75,8 @@ class LoadShedConfiguration {
    * Various shedding protections should engage when above this limit.
    */
   void setCpuSoftLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     cpuSoftLimitRatio_ = limit;
   }
   double getCpuSoftLimitRatio() const {
@@ -88,8 +88,8 @@ class LoadShedConfiguration {
    * More extreme shedding protections should engage when above this limit.
    */
   void setCpuHardLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     cpuHardLimitRatio_ = limit;
   }
   double getCpuHardLimitRatio() const {
@@ -127,8 +127,8 @@ class LoadShedConfiguration {
    * Various shedding protections should engage when above this limit.
    */
   void setSoftIrqCpuSoftLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     softIrqCpuSoftLimitRatio_ = limit;
   }
   double getSoftIrqCpuSoftLimitRatio() const {
@@ -140,8 +140,8 @@ class LoadShedConfiguration {
    * More extreme shedding protections should engage when above this limit.
    */
   void setSoftIrqCpuHardLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     softIrqCpuHardLimitRatio_ = limit;
   }
   double getSoftIrqCpuHardLimitRatio() const {
@@ -153,8 +153,8 @@ class LoadShedConfiguration {
    * Various shedding protections should engage when above this limit.
    */
   void setMemSoftLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     memSoftLimitRatio_ = limit;
   }
   double getMemSoftLimitRatio() const {
@@ -166,8 +166,8 @@ class LoadShedConfiguration {
    * More extreme shedding protections should engage when above this limit.
    */
   void setMemHardLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     memHardLimitRatio_ = limit;
   }
   double getMemHardLimitRatio() const {
@@ -180,8 +180,8 @@ class LoadShedConfiguration {
    * to protect the underlying host.
    */
   void setMemKillLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     memKillLimitRatio_ = limit;
   }
   double getMemKillLimitRatio() const {
@@ -193,8 +193,8 @@ class LoadShedConfiguration {
    * Various shedding protections should engage when above this limit.
    */
   void setTcpMemSoftLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     tcpMemSoftLimitRatio_ = limit;
   }
   double getTcpMemSoftLimitRatio() const {
@@ -206,8 +206,8 @@ class LoadShedConfiguration {
    * More extreme shedding protections should engage when above this limit.
    */
   void setTcpMemHardLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     tcpMemHardLimitRatio_ = limit;
   }
   double getTcpMemHardLimitRatio() const {
@@ -219,8 +219,8 @@ class LoadShedConfiguration {
    * Various shedding protections should engage when above this limit.
    */
   void setUdpMemSoftLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     udpMemSoftLimitRatio_ = limit;
   }
   double getUdpMemSoftLimitRatio() const {
@@ -232,8 +232,8 @@ class LoadShedConfiguration {
    * More extreme shedding protections should engage when above this limit.
    */
   void setUdpMemHardLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     udpMemHardLimitRatio_ = limit;
   }
   double getUdpMemHardLimitRatio() const {
@@ -245,8 +245,8 @@ class LoadShedConfiguration {
    * Various shedding protections should engage when above this limit.
    */
   void setNicSoftLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     nicSoftLimitRatio_ = limit;
   }
   double getNicSoftLimitRatio() const {
@@ -258,8 +258,8 @@ class LoadShedConfiguration {
    * More extreme shedding protections should engage when above this limit.
    */
   void setNicHardLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     nicHardLimitRatio_ = limit;
   }
   double getNicHardLimitRatio() const {
@@ -271,8 +271,8 @@ class LoadShedConfiguration {
    * Various shedding protections should engage when above this limit.
    */
   void setMemPressureFullSoftLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     memPressureFullSoftLimitRatio_ = limit;
   }
   double getMemPressureFullSoftLimitRatio() const {
@@ -284,8 +284,8 @@ class LoadShedConfiguration {
    * More extreme shedding protections should engage when above this limit.
    */
   void setMemPressureFullHardLimitRatio(double limit) {
-    CHECK_GE(limit, 0.0);
-    CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_GE(limit, 0.0);
+    WANGLE_CHECK_LE(limit, 1.0);
     memPressureFullHardLimitRatio_ = limit;
   }
   double getMemPressureFullHardLimitRatio() const {

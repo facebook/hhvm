@@ -14,25 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * <wangle/wangle-config.h> holds compile time configuration options for Wangle.
+ */
 #pragma once
 
-#include <folly/ssl/OpenSSLPtrTypes.h>
-#include <wangle/util/Logging.h>
-#include <string>
-
-namespace wangle {
-
-std::vector<std::pair<SSL_SESSION*, size_t>> getSessions();
-
-std::pair<SSL_SESSION*, size_t> getSessionWithTicket();
-
-folly::ssl::SSLSessionUniquePtr createPersistentTestSession(
-    std::pair<SSL_SESSION*, size_t> session);
-
-std::string getSessionData(SSL_SESSION* s, size_t expectedLength);
-
-bool isSameSession(
-    std::pair<SSL_SESSION*, size_t> lhs,
-    std::pair<SSL_SESSION*, size_t> rhs);
-
-} // namespace wangle
+// Logging backend. WANGLE_LOGGING_BACKEND is one of GLOG, XLOG, DISABLED.
+#define WANGLE_LOGGING_@WANGLE_LOGGING_BACKEND@ 1

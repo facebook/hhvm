@@ -26,6 +26,7 @@
 #include <wangle/channel/broadcast/ObservingHandler.h>
 #include <wangle/codec/ByteToMessageDecoder.h>
 #include <wangle/codec/MessageToByteEncoder.h>
+#include <wangle/util/Logging.h>
 
 using namespace folly;
 using namespace wangle;
@@ -105,8 +106,8 @@ class ClientIPRoutingDataHandler : public RoutingDataHandler<std::string> {
       override {
     auto transportInfo = getContext()->getPipeline()->getTransportInfo();
     const auto& clientIP = transportInfo->remoteAddr->getAddressStr();
-    LOG(INFO) << "Using client IP " << clientIP
-              << " as routing data to hash to a worker thread";
+    WANGLE_LOG(INFO) << "Using client IP " << clientIP
+                     << " as routing data to hash to a worker thread";
 
     routingData.routingData = clientIP;
     routingData.bufQueue.append(bufQueue);
@@ -136,8 +137,8 @@ class SimpleServerPool : public ServerPool<std::string> {
     SocketAddress address;
     address.setFromLocalPort(FLAGS_upstream_port);
 
-    LOG(INFO) << "Connecting to upstream server " << address
-              << " for subscribing to broadcast";
+    WANGLE_LOG(INFO) << "Connecting to upstream server " << address
+                     << " for subscribing to broadcast";
     return client->connect(address);
   }
 };
@@ -151,7 +152,7 @@ class SimpleBroadcastPipelineFactory
  public:
   DefaultPipeline::Ptr newPipeline(
       std::shared_ptr<AsyncTransport> socket) override {
-    LOG(INFO) << "Creating a new BroadcastPipeline for upstream server";
+    WANGLE_LOG(INFO) << "Creating a new BroadcastPipeline for upstream server";
 
     auto pipeline = DefaultPipeline::create();
     pipeline->addBack(AsyncSocketHandler(socket));
@@ -194,8 +195,8 @@ class SimpleObservingPipelineFactory
       const std::string& routingData,
       RoutingDataHandler<std::string>*,
       std::shared_ptr<TransportInfo> transportInfo) override {
-    LOG(INFO) << "Creating a new ObservingPipeline for client "
-              << *(transportInfo->remoteAddr);
+    WANGLE_LOG(INFO) << "Creating a new ObservingPipeline for client "
+                     << *(transportInfo->remoteAddr);
 
     auto pipeline = SimpleObservingPipeline::create();
     pipeline->addBack(AsyncSocketHandler(socket));

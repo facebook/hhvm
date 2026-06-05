@@ -20,6 +20,7 @@
 #include <wangle/bootstrap/ClientBootstrap.h>
 #include <wangle/bootstrap/ServerBootstrap.h>
 #include <wangle/channel/AsyncSocketHandler.h>
+#include <wangle/util/Logging.h>
 
 using namespace folly;
 using namespace wangle;
@@ -38,12 +39,12 @@ class ProxyBackendHandler : public InboundBytesToBytesHandler {
   }
 
   void readEOF(Context*) override {
-    LOG(INFO) << "Connection closed by remote host";
+    WANGLE_LOG(INFO) << "Connection closed by remote host";
     frontendPipeline_->close();
   }
 
   void readException(Context*, exception_wrapper e) override {
-    LOG(ERROR) << "Remote error: " << exceptionStr(e);
+    WANGLE_LOG(ERROR) << "Remote error: " << exceptionStr(e);
     frontendPipeline_->close();
   }
 
@@ -85,7 +86,7 @@ class ProxyFrontendHandler : public BytesToBytesHandler {
   }
 
   void readEOF(Context* ctx) override {
-    LOG(INFO) << "Connection closed by local host";
+    WANGLE_LOG(INFO) << "Connection closed by local host";
     if (!backendPipeline_) {
       return;
     }
@@ -94,7 +95,7 @@ class ProxyFrontendHandler : public BytesToBytesHandler {
   }
 
   void readException(Context* ctx, exception_wrapper e) override {
-    LOG(ERROR) << "Local error: " << exceptionStr(e);
+    WANGLE_LOG(ERROR) << "Local error: " << exceptionStr(e);
     if (!backendPipeline_) {
       return;
     }
@@ -123,7 +124,7 @@ class ProxyFrontendHandler : public BytesToBytesHandler {
         .thenError(
             folly::tag_t<std::exception>{},
             [this, ctx](const std::exception& e) {
-              LOG(ERROR) << "Connect error: " << exceptionStr(e);
+              WANGLE_LOG(ERROR) << "Connect error: " << exceptionStr(e);
               this->close(ctx);
             });
   }

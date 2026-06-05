@@ -16,6 +16,7 @@
 
 #include <folly/system/HardwareConcurrency.h>
 #include <wangle/channel/FileRegion.h>
+#include <wangle/util/Logging.h>
 
 #ifdef SPLICE_F_NONBLOCK
 using namespace folly;
@@ -148,7 +149,7 @@ void FileRegion::FileWriteRequest::start() {
 }
 
 FileRegion::FileWriteRequest::~FileWriteRequest() {
-  CHECK(readBase_->isInEventBaseThread());
+  WANGLE_CHECK(readBase_->isInEventBaseThread());
   socket_->getEventBase()->runInEventBaseThreadAndWait([&] {
     stopConsuming();
     if (pipe_out_ > -1) {
@@ -169,7 +170,7 @@ FileRegion::FileWriteRequest::FileReadHandler::FileReadHandler(
     int pipe_in,
     size_t bytesToRead)
     : req_(req), pipe_in_(pipe_in), bytesToRead_(bytesToRead) {
-  CHECK(req_->readBase_->isInEventBaseThread());
+  WANGLE_CHECK(req_->readBase_->isInEventBaseThread());
   initHandler(req_->readBase_, folly::NetworkSocket::fromFd(pipe_in));
   if (!registerHandler(EventFlags::WRITE | EventFlags::PERSIST)) {
     req_->fail(
@@ -180,14 +181,14 @@ FileRegion::FileWriteRequest::FileReadHandler::FileReadHandler(
 }
 
 FileRegion::FileWriteRequest::FileReadHandler::~FileReadHandler() {
-  CHECK(req_->readBase_->isInEventBaseThread());
+  WANGLE_CHECK(req_->readBase_->isInEventBaseThread());
   unregisterHandler();
   ::close(pipe_in_);
 }
 
 void FileRegion::FileWriteRequest::FileReadHandler::handlerReady(
     uint16_t events) noexcept {
-  CHECK(events & EventHandler::WRITE);
+  WANGLE_CHECK(events & EventHandler::WRITE);
   if (bytesToRead_ == 0) {
     unregisterHandler();
     return;

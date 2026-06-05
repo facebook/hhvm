@@ -15,12 +15,13 @@
  */
 
 #include <wangle/acceptor/TLSPlaintextPeekingCallback.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
 bool TLSPlaintextPeekingCallback::looksLikeTLS(
     const std::vector<uint8_t>& bytes) {
-  CHECK_GE(bytes.size(), kPeekCount);
+  WANGLE_CHECK_GE(bytes.size(), kPeekCount);
   // TLS starts with
   // 0: 0x16 - handshake magic
   // 1: 0x03 - SSL major version

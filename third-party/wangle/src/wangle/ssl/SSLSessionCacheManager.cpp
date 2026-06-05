@@ -23,6 +23,7 @@
 #include <folly/fibers/FiberManager.h>
 #include <folly/portability/GFlags.h>
 #include <folly/portability/OpenSSL.h>
+#include <wangle/util/Logging.h>
 
 using folly::AsyncSSLSocket;
 using folly::SSLContext;
@@ -65,8 +66,8 @@ LocalSSLSessionCache::LocalSSLSessionCache(
 void LocalSSLSessionCache::pruneSessionCallback(
     const string& sessionId,
     SSL_SESSION* session) {
-  VLOG(4) << "Free SSL session from local cache; id="
-          << SSLUtil::hexlify(sessionId);
+  WANGLE_VLOG(4) << "Free SSL session from local cache; id="
+                 << SSLUtil::hexlify(sessionId);
   SSL_SESSION_free(session);
   ++removedSessions_;
 }
@@ -76,7 +77,7 @@ ShardedLocalSSLSessionCache::ShardedLocalSSLSessionCache(
     uint32_t n_buckets,
     uint32_t maxCacheSize,
     uint32_t cacheCullSize) {
-  CHECK(n_buckets > 0);
+  WANGLE_CHECK(n_buckets > 0);
   maxCacheSize = (uint32_t)(((double)maxCacheSize) / n_buckets);
   cacheCullSize = (uint32_t)(((double)cacheCullSize) / n_buckets);
   if (maxCacheSize == 0) {
@@ -140,7 +141,7 @@ void ShardedLocalSSLSessionCache::removeSession(const std::string& sessionId) {
 
   auto itr = caches_.at(bucket)->sessionCache.find(sessionId);
   if (itr == caches_.at(bucket)->sessionCache.end()) {
-    VLOG(4) << "session ID " << sessionId << " not in cache";
+    WANGLE_VLOG(4) << "session ID " << sessionId << " not in cache";
     return;
   }
 
@@ -203,7 +204,7 @@ void SSLSessionCacheManager::newSession(SSL*, SSL_SESSION* session) {
   unsigned int sessIdLen = 0;
   const unsigned char* sessId = SSL_SESSION_get_id(session, &sessIdLen);
   string sessionId((char*)sessId, sessIdLen);
-  VLOG(4) << "New SSL session; id=" << SSLUtil::hexlify(sessionId);
+  WANGLE_VLOG(4) << "New SSL session; id=" << SSLUtil::hexlify(sessionId);
 
   if (stats_) {
     stats_->recordSSLSession(true /* new session */, false, false);
@@ -212,8 +213,8 @@ void SSLSessionCacheManager::newSession(SSL*, SSL_SESSION* session) {
   localCache_->storeSession(sessionId, session, stats_);
 
   if (externalCache_) {
-    VLOG(4) << "New SSL session: send session to external cache; id="
-            << SSLUtil::hexlify(sessionId);
+    WANGLE_VLOG(4) << "New SSL session: send session to external cache; id="
+                   << SSLUtil::hexlify(sessionId);
     storeCacheRecord(sessionId, session);
   }
 }
@@ -225,7 +226,7 @@ void SSLSessionCacheManager::removeSessionCallback(
   manager = (SSLSessionCacheManager*)SSL_CTX_get_ex_data(ctx, sExDataIndex_);
 
   if (manager == nullptr) {
-    LOG(FATAL) << "Null SSLSessionCacheManager in callback";
+    WANGLE_LOG(FATAL) << "Null SSLSessionCacheManager in callback";
   }
   return manager->removeSession(ctx, session);
 }
@@ -238,7 +239,7 @@ void SSLSessionCacheManager::removeSession(SSL_CTX*, SSL_SESSION* session) {
   // This hook is only called from SSL when the internal session cache needs to
   // flush sessions.  Since we run with the internal cache disabled, this should
   // never be called
-  VLOG(3) << "Remove SSL session; id=" << SSLUtil::hexlify(sessionId);
+  WANGLE_VLOG(3) << "Remove SSL session; id=" << SSLUtil::hexlify(sessionId);
 
   localCache_->removeSession(sessionId);
 
@@ -257,7 +258,7 @@ SSL_SESSION* SSLSessionCacheManager::getSessionCallback(
   manager = (SSLSessionCacheManager*)SSL_CTX_get_ex_data(ctx, sExDataIndex_);
 
   if (manager == nullptr) {
-    LOG(FATAL) << "Null SSLSessionCacheManager in callback";
+    WANGLE_LOG(FATAL) << "Null SSLSessionCacheManager in callback";
   }
   return manager->getSession(ssl, (unsigned char*)sess_id, id_len, copyflag);
 }
@@ -267,7 +268,7 @@ SSL_SESSION* SSLSessionCacheManager::getSession(
     unsigned char* session_id,
     int id_len,
     int* copyflag) {
-  VLOG(7) << "SSL get session callback";
+  WANGLE_VLOG(7) << "SSL get session callback";
   folly::ssl::SSLSessionUniquePtr session;
   bool foreign = false;
   std::string missReason;
@@ -287,7 +288,7 @@ SSL_SESSION* SSLSessionCacheManager::getSession(
   session.reset(localCache_->lookupSession(sessionId));
   if (session == nullptr && externalCache_) {
     foreign = true;
-    DCHECK(folly::fibers::onFiber());
+    WANGLE_DCHECK(folly::fibers::onFiber());
     if (folly::fibers::onFiber()) {
       try {
         session = externalCache_->getFuture(sessionId).get();
@@ -312,10 +313,10 @@ SSL_SESSION* SSLSessionCacheManager::getSession(
     sslSocket->setSessionIDResumed(true);
   }
 
-  VLOG(4) << "Get SSL session [" << ((hit) ? "Hit" : "Miss")
-          << "]: " << ((foreign) ? "external" : "local") << " cache; "
-          << missReason << "fd=" << sslSocket->getNetworkSocket().toFd()
-          << " id=" << SSLUtil::hexlify(sessionId);
+  WANGLE_VLOG(4) << "Get SSL session [" << ((hit) ? "Hit" : "Miss")
+                 << "]: " << ((foreign) ? "external" : "local") << " cache; "
+                 << missReason << "fd=" << sslSocket->getNetworkSocket().toFd()
+                 << " id=" << SSLUtil::hexlify(sessionId);
 
   // We already bumped the refcount
   *copyflag = 0;
@@ -343,7 +344,7 @@ void SSLSessionCacheManager::ContextSessionCallbacks::onNewSession(
   SSL_CTX* ctx = SSL_get_SSL_CTX(ssl);
   manager = (SSLSessionCacheManager*)SSL_CTX_get_ex_data(ctx, sExDataIndex_);
 
-  CHECK(manager) << "Null SSLSessionCacheManager in callback";
+  WANGLE_CHECK(manager) << "Null SSLSessionCacheManager in callback";
   manager->newSession(ssl, sessionPtr.release());
 }
 

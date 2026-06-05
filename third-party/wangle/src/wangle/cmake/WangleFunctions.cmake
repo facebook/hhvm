@@ -147,6 +147,12 @@ function(wangle_add_library _target_name)
     target_link_libraries(${_obj_target} PUBLIC Folly::folly fizz::fizz)
   endif()
 
+  # wangle_config is an INTERFACE target carrying only the generated
+  # <wangle/wangle-config.h> include dir (no libraries, no cycle risk), so
+  # link it to every OBJECT target — wangle/util/Logging.h is pulled in
+  # transitively all over the codebase and needs that header at compile time.
+  target_link_libraries(${_obj_target} PUBLIC wangle_config)
+
   # Defer internal wangle dependencies until all targets are created
   # Only for static builds - in shared builds, wangle internal deps are INTERFACE
   # libraries linking to monolithic wangle, which would create cycles
@@ -293,6 +299,7 @@ function(wangle_create_monolithic_library)
       fizz::fizz
       ${OPENSSL_LIBRARIES}
       Threads::Threads
+      wangle_util_logging
     PRIVATE
       ${GLOG_LIBRARIES}
       ${GFLAGS_LIBRARIES}

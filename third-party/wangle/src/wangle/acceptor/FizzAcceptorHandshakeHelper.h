@@ -22,6 +22,7 @@
 #include <folly/io/async/AsyncIoUringSocket.h>
 #include <wangle/acceptor/AcceptorHandshakeManager.h>
 #include <wangle/acceptor/PeekingAcceptorHandshakeHelper.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -252,8 +253,8 @@ class FizzAcceptorHandshakeHelper
         preferIoUringSocket_(options.preferIoUringSocket_),
         extendedFallbackStatePolicy_(std::move(extendedFallbackStatePolicy)),
         transportOptions_(transportOptions) {
-    DCHECK(context_);
-    DCHECK(sslContextManager_);
+    WANGLE_DCHECK(context_);
+    WANGLE_DCHECK(sslContextManager_);
   }
 
   void start(

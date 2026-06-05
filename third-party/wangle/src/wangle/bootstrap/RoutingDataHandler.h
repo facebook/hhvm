@@ -17,6 +17,7 @@
 #pragma once
 
 #include <wangle/channel/AsyncSocketHandler.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 

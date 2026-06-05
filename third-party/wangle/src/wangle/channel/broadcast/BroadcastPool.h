@@ -146,3 +146,4 @@ class BroadcastPool {
 } // namespace wangle
 
 #include <wangle/channel/broadcast/BroadcastPool-inl.h>
+#include <wangle/util/Logging.h>

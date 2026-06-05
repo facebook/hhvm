@@ -34,6 +34,7 @@
 #include <folly/ssl/OpenSSLCertUtils.h>
 #include <functional>
 
+#include <wangle/util/Logging.h>
 #include <string>
 
 using folly::SSLContext;
@@ -91,11 +92,11 @@ void set_key_from_curve(SSL_CTX* ctx, const std::string& curveName) {
 
   nid = OBJ_sn2nid(curveName.c_str());
   if (nid == 0) {
-    LOG(FATAL) << "Unknown curve name:" << curveName.c_str();
+    WANGLE_LOG(FATAL) << "Unknown curve name:" << curveName.c_str();
   }
   ecdh = EC_KEY_new_by_curve_name(nid);
   if (ecdh == nullptr) {
-    LOG(FATAL) << "Unable to create curve:" << curveName.c_str();
+    WANGLE_LOG(FATAL) << "Unable to create curve:" << curveName.c_str();
   }
 
   SSL_CTX_set_tmp_ecdh(ctx, ecdh);
@@ -290,7 +291,7 @@ static std::vector<std::shared_ptr<fizz::SelfCert>> getCertsToInstall(
     } else if (certMatch->type == fizz::MatchType::Default) {
       defaultMatches.push_back(std::move(certMatch->cert));
     } else {
-      LOG(FATAL) << "Unexpected match type.";
+      WANGLE_LOG(FATAL) << "Unexpected match type.";
     }
   };
   partitionByMatchType(maybeRsa);
@@ -621,7 +622,7 @@ void SSLContextManager::SslContexts::removeSSLContextConfig(
         "Cert for the default domain ",
         key.dnString.c_str(),
         " can not be removed");
-    LOG(ERROR) << msg;
+    WANGLE_LOG(ERROR) << msg;
     throw std::invalid_argument(msg);
   }
 
@@ -643,7 +644,7 @@ static void loadCAFiles(
           caFilePath,
           ": ",
           folly::exceptionStr(ex));
-      LOG(ERROR) << msg;
+      WANGLE_LOG(ERROR) << msg;
       throw std::runtime_error(msg);
     }
   }
@@ -669,7 +670,7 @@ static void setSupportedClientCANames(
           caFilePath,
           ": ",
           folly::exceptionStr(ex));
-      LOG(ERROR) << msg;
+      WANGLE_LOG(ERROR) << msg;
       throw std::runtime_error(msg);
     }
   }
@@ -683,7 +684,7 @@ static void setSupportedClientCANames(
     std::string msg = folly::to<std::string>(
         "error setting supported client certificate authority names: ",
         folly::exceptionStr(ex));
-    LOG(ERROR) << msg;
+    WANGLE_LOG(ERROR) << msg;
     throw std::runtime_error(msg);
   }
 }
@@ -719,7 +720,7 @@ void SSLContextManager::SslContexts::addSSLContextConfig(
   } catch (const std::exception& ex) {
     string msg = folly::to<string>(
         "Error adding certificate : ", folly::exceptionStr(ex));
-    LOG(ERROR) << msg;
+    WANGLE_LOG(ERROR) << msg;
     throw std::runtime_error(msg);
   }
 }
@@ -750,8 +751,8 @@ SSLContextManager::SslContexts::buildServerSSLContext(
 
   if (!loaded) {
     // No compatible contexts were loaded.
-    VLOG(3) << "Context with CN=" << commonName
-            << " loaded no certs, skipping...";
+    WANGLE_VLOG(3) << "Context with CN=" << commonName
+                   << " loaded no certs, skipping...";
     return nullptr;
   }
 
@@ -794,7 +795,7 @@ SSLContextManager::SslContexts::buildServerSSLContext(
   if ((ctxConfig.clientCAFile.empty() && ctxConfig.clientCAFiles.empty()) &&
       ctxConfig.clientVerification !=
           SSLContext::VerifyClientCertificate::DO_NOT_REQUEST) {
-    LOG(FATAL) << "You can't verify certs without the client ca file";
+    WANGLE_LOG(FATAL) << "You can't verify certs without the client ca file";
   }
 
   sslCtx->setVerificationOption(ctxConfig.clientVerification);
@@ -827,15 +828,16 @@ SSLContextManager::SslContexts::buildServerSSLContext(
   if (ctxConfig.sessionContext && !ctxConfig.sessionContext->empty()) {
     sessionIdContext = *ctxConfig.sessionContext;
   }
-  VLOG(3) << "For vip " << mgr->vipName_ << ", setting sid_ctx "
-          << sessionIdContext;
+  WANGLE_VLOG(3) << "For vip " << mgr->vipName_ << ", setting sid_ctx "
+                 << sessionIdContext;
   sslCtx->setSessionCacheContext(sessionIdContext);
 
   sslCtx->setupSessionCache(
       ctxConfig, cacheOptions, externalCache, sessionIdContext, mgr->stats_);
   configureTicketResumption(sslCtx, ticketSeeds, ctxConfig, mgr->stats_);
 
-  VLOG(3) << "On VipID=" << vipAddress.describe() << " context=" << sslCtx;
+  WANGLE_VLOG(3) << "On VipID=" << vipAddress.describe()
+                 << " context=" << sslCtx;
 
   // finalize sslCtx setup by the individual features supported by openssl
   ctxSetupByOpensslFeature(
@@ -903,7 +905,7 @@ void SSLContextManager::loadCertsFromFiles(
         cert.certPath,
         ": ",
         folly::exceptionStr(ex));
-    LOG(ERROR) << msg;
+    WANGLE_LOG(ERROR) << msg;
     throw std::runtime_error(msg);
   }
 }
@@ -928,12 +930,13 @@ void SSLContextManager::verifyCertNames(
         folly::to<string>("Cannot get identity for X509 ", description));
   }
   auto altName = SSLUtil::getSubjectAltName(x509);
-  VLOG(3) << "cert " << description << " Identity: " << *identity;
+  WANGLE_VLOG(3) << "cert " << description << " Identity: " << *identity;
   if (altName) {
     altName->sort();
-    VLOG(3) << "cert " << description << " SAN: " << flattenList(*altName);
+    WANGLE_VLOG(3) << "cert " << description
+                   << " SAN: " << flattenList(*altName);
   } else {
-    VLOG(3) << "cert " << description << " SAN: " << "{none}";
+    WANGLE_VLOG(3) << "cert " << description << " SAN: " << "{none}";
   }
   if (firstCert) {
     groupIdentity = *identity;
@@ -979,7 +982,7 @@ SSLContextManager::SslContexts::serverNameCallback(
   const char* sn = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
   bool reqHasServerName = true;
   if (!sn) {
-    VLOG(6)
+    WANGLE_VLOG(6)
         << "Server Name (tlsext_hostname) is missing, using default/no SNI context";
     if (stats) {
       stats->recordAbsentHostname();
@@ -989,11 +992,11 @@ SSLContextManager::SslContexts::serverNameCallback(
     sn = contexts->getDefaultCtxDomainName().c_str();
   }
   size_t snLen = strlen(sn);
-  VLOG(6) << "Server Name (SNI TLS extension): '" << sn << "' ";
+  WANGLE_VLOG(6) << "Server Name (SNI TLS extension): '" << sn << "' ";
 
   // FIXME: This code breaks the abstraction. Suggestion?
   folly::AsyncSSLSocket* sslSocket = folly::AsyncSSLSocket::getFromSSL(ssl);
-  CHECK(sslSocket);
+  WANGLE_CHECK(sslSocket);
 
   DNString dnstr(sn, snLen);
   SSLContextKey key(dnstr);
@@ -1015,7 +1018,7 @@ SSLContextManager::SslContexts::serverNameCallback(
     return SSLContext::SERVER_NAME_FOUND;
   }
 
-  VLOG(6) << folly::stringPrintf("Cannot find a SSL_CTX for \"%s\"", sn);
+  WANGLE_VLOG(6) << folly::stringPrintf("Cannot find a SSL_CTX for \"%s\"", sn);
 
   if (stats && reqHasServerName) {
     stats->recordNotMatch();
@@ -1165,7 +1168,7 @@ void SSLContextManager::SslContexts::insertSSLCtxByDomainName(
     if (strict_) {
       throw ex;
     } else {
-      LOG(ERROR) << ex.what() << " DN=" << dn;
+      WANGLE_LOG(ERROR) << ex.what() << " DN=" << dn;
     }
   }
 }
@@ -1177,7 +1180,7 @@ void SSLContextManager::SslContexts::insertSSLCtxByDomainNameImpl(
   const char* dn_ptr = dn.c_str();
   size_t len = dn.length();
 
-  VLOG(4) << folly::stringPrintf(
+  WANGLE_VLOG(4) << folly::stringPrintf(
       "Adding CN/Subject-alternative-name \"%s\" for "
       "SNI search",
       dn_ptr);
@@ -1234,28 +1237,28 @@ void SSLContextManager::SslContexts::insertIntoDnMap(
   const auto v2 =
       std::find(defaultCtxKeys_.begin(), defaultCtxKeys_.end(), key);
   if (v1 == dnMap_.end() && v2 == defaultCtxKeys_.end()) {
-    VLOG(6) << "Inserting SSLContext into map.";
+    WANGLE_VLOG(6) << "Inserting SSLContext into map.";
     dnMap_.emplace(key, sslCtx);
   } else if (v1 != dnMap_.end()) {
-    DCHECK(v2 == defaultCtxKeys_.end());
+    WANGLE_DCHECK(v2 == defaultCtxKeys_.end());
     if (v1->second == sslCtx) {
-      VLOG(6)
+      WANGLE_VLOG(6)
           << "Duplicate CN or subject alternative name found in the same X509."
              "  Ignore the later name.";
     } else if (overwrite) {
-      VLOG(6) << "Overwriting SSLContext.";
+      WANGLE_VLOG(6) << "Overwriting SSLContext.";
       v1->second = sslCtx;
     } else {
-      VLOG(6) << "Leaving existing SSLContext in map.";
+      WANGLE_VLOG(6) << "Leaving existing SSLContext in map.";
     }
   } else {
-    DCHECK(v2 != defaultCtxKeys_.end());
+    WANGLE_DCHECK(v2 != defaultCtxKeys_.end());
     if (overwrite) {
-      VLOG(6) << "Overwriting SSLContext, removing from defaults.";
+      WANGLE_VLOG(6) << "Overwriting SSLContext, removing from defaults.";
       defaultCtxKeys_.erase(v2);
       dnMap_.emplace(key, sslCtx);
     } else {
-      VLOG(6) << "Leaving existing SSLContextKey in vector.";
+      WANGLE_VLOG(6) << "Leaving existing SSLContextKey in vector.";
     }
   }
 }
@@ -1267,20 +1270,20 @@ void SSLContextManager::SslContexts::insertIntoDefaultKeys(
   const auto v2 =
       std::find(defaultCtxKeys_.begin(), defaultCtxKeys_.end(), key);
   if (v1 == dnMap_.end() && v2 == defaultCtxKeys_.end()) {
-    VLOG(6) << "Inserting SSLContextKey into vector.";
+    WANGLE_VLOG(6) << "Inserting SSLContextKey into vector.";
     defaultCtxKeys_.emplace_back(key);
   } else if (v1 != dnMap_.end()) {
-    DCHECK(v2 == defaultCtxKeys_.end());
+    WANGLE_DCHECK(v2 == defaultCtxKeys_.end());
     if (overwrite) {
-      VLOG(6) << "SSLContextKey reassigned to default";
+      WANGLE_VLOG(6) << "SSLContextKey reassigned to default";
       dnMap_.erase(v1);
       defaultCtxKeys_.emplace_back(key);
     } else {
-      VLOG(6) << "Leaving existing SSLContext in map.";
+      WANGLE_VLOG(6) << "Leaving existing SSLContext in map.";
     }
   } else {
-    DCHECK(v2 != defaultCtxKeys_.end());
-    VLOG(6)
+    WANGLE_DCHECK(v2 != defaultCtxKeys_.end());
+    WANGLE_VLOG(6)
         << "Duplicate CN or subject alternative name found in the same X509."
            "  Ignore the later name.";
   }
@@ -1299,7 +1302,7 @@ bool SSLContextManager::SslContexts::isDefaultCtxExact(
     const SSLContextKey& key) const {
   if (std::find(defaultCtxKeys_.begin(), defaultCtxKeys_.end(), key) !=
       defaultCtxKeys_.end()) {
-    VLOG(6) << folly::stringPrintf(
+    WANGLE_VLOG(6) << folly::stringPrintf(
         "\"%s\" is a direct match to default", key.dnString.c_str());
     return true;
   }
@@ -1334,7 +1337,7 @@ shared_ptr<SSLContext> SSLContextManager::SslContexts::getSSLCtxBySuffix(
     SSLContextKey suffixKey(DNString(key.dnString, dot));
     const auto v = dnMap_.find(suffixKey);
     if (v != dnMap_.end()) {
-      VLOG(6) << folly::stringPrintf(
+      WANGLE_VLOG(6) << folly::stringPrintf(
           "\"%s\" is a willcard match to \"%s\"",
           key.dnString.c_str(),
           suffixKey.dnString.c_str());
@@ -1342,7 +1345,7 @@ shared_ptr<SSLContext> SSLContextManager::SslContexts::getSSLCtxBySuffix(
     }
   }
 
-  VLOG(6) << folly::stringPrintf(
+  WANGLE_VLOG(6) << folly::stringPrintf(
       "\"%s\" is not a wildcard match", key.dnString.c_str());
   return shared_ptr<SSLContext>();
 }
@@ -1351,11 +1354,11 @@ shared_ptr<SSLContext> SSLContextManager::SslContexts::getSSLCtxByExactDomain(
     const SSLContextKey& key) const {
   const auto v = dnMap_.find(key);
   if (v == dnMap_.end()) {
-    VLOG(6) << folly::stringPrintf(
+    WANGLE_VLOG(6) << folly::stringPrintf(
         "\"%s\" is not an exact match", key.dnString.c_str());
     return shared_ptr<SSLContext>();
   } else {
-    VLOG(6) << folly::stringPrintf(
+    WANGLE_VLOG(6) << folly::stringPrintf(
         "\"%s\" is an exact match", key.dnString.c_str());
     return v->second;
   }

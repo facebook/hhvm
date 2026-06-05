@@ -15,6 +15,7 @@
  */
 
 #include <wangle/acceptor/EvbHandshakeHelper.h>
+#include <wangle/util/Logging.h>
 
 namespace wangle {
 
@@ -24,13 +25,13 @@ void EvbHandshakeHelper::start(
   auto transition =
       tryTransition(HandshakeState::Invalid, HandshakeState::Started);
   if (!transition.first) {
-    VLOG(5) << "Ignoring call to start(), since state is currently "
-            << static_cast<unsigned>(transition.second);
+    WANGLE_VLOG(5) << "Ignoring call to start(), since state is currently "
+                   << static_cast<unsigned>(transition.second);
   }
 
   callback_ = callback;
   originalEvb_ = sock->getEventBase();
-  CHECK(originalEvb_);
+  WANGLE_CHECK(originalEvb_);
 
   sock->detachEventBase();
   originalEvb_->runInLoop(
@@ -45,7 +46,7 @@ void EvbHandshakeHelper::start(
 }
 
 void EvbHandshakeHelper::dropConnection(SSLErrorEnum reason) {
-  CHECK(originalEvb_);
+  WANGLE_CHECK(originalEvb_);
   originalEvb_->dcheckIsInEventBaseThread();
 
   auto transition =
@@ -67,8 +68,8 @@ void EvbHandshakeHelper::dropConnection(SSLErrorEnum reason) {
     // and we are also the one responsible for clearing the dropConnectionGuard_
     // that we set earlier.
     handshakeEvb_->runInEventBaseThread([this, reason] {
-      VLOG(5) << "callback has not been received. dropConnection "
-              << "calling underlying helper";
+      WANGLE_VLOG(5) << "callback has not been received. dropConnection "
+                     << "calling underlying helper";
 
       helper_->dropConnection(reason);
 
@@ -88,15 +89,15 @@ void EvbHandshakeHelper::connectionReady(
     std::string nextProtocol,
     SecureTransportType secureTransportType,
     folly::Optional<SSLErrorEnum> sslErr) noexcept {
-  DCHECK_EQ(transport->getEventBase(), handshakeEvb_);
+  WANGLE_DCHECK_EQ(transport->getEventBase(), handshakeEvb_);
 
   auto transition =
       tryTransition(HandshakeState::Started, HandshakeState::Callback);
   if (!transition.first) {
-    VLOG(5) << "Ignoring call to connectionReady(), expected state to be "
-            << static_cast<unsigned>(HandshakeState::Started)
-            << " but actual state was "
-            << static_cast<unsigned>(transition.second);
+    WANGLE_VLOG(5)
+        << "Ignoring call to connectionReady(), expected state to be "
+        << static_cast<unsigned>(HandshakeState::Started)
+        << " but actual state was " << static_cast<unsigned>(transition.second);
     return;
   }
 
@@ -114,8 +115,8 @@ void EvbHandshakeHelper::connectionReady(
              sslErr,
              transport = std::move(transport),
              nextProtocol = std::move(nextProtocol)]() mutable {
-              DCHECK(callback_);
-              VLOG(5) << "calling underlying callback connectionReady";
+              WANGLE_DCHECK(callback_);
+              WANGLE_VLOG(5) << "calling underlying callback connectionReady";
               transport->attachEventBase(originalEvb_);
 
               // If a dropConnection call occurred by the time this lambda runs,
@@ -139,23 +140,23 @@ void EvbHandshakeHelper::connectionError(
     folly::AsyncTransport* transport,
     folly::exception_wrapper ex,
     folly::Optional<SSLErrorEnum> sslErr) noexcept {
-  DCHECK(transport->getEventBase() == handshakeEvb_);
+  WANGLE_DCHECK(transport->getEventBase() == handshakeEvb_);
 
   auto transition =
       tryTransition(HandshakeState::Started, HandshakeState::Callback);
   if (!transition.first) {
-    VLOG(5) << "Ignoring call to connectionError(), expected state to be "
-            << static_cast<unsigned>(HandshakeState::Started)
-            << " but actual state was "
-            << static_cast<unsigned>(transition.second);
+    WANGLE_VLOG(5)
+        << "Ignoring call to connectionError(), expected state to be "
+        << static_cast<unsigned>(HandshakeState::Started)
+        << " but actual state was " << static_cast<unsigned>(transition.second);
     return;
   }
 
   helper_.reset();
   originalEvb_->runInEventBaseThread(
       [this, sslErr, ex = std::move(ex)]() mutable {
-        DCHECK(callback_);
-        VLOG(5) << "calling underlying callback connectionError";
+        WANGLE_DCHECK(callback_);
+        WANGLE_VLOG(5) << "calling underlying callback connectionError";
 
         // If a dropConnection call occurred by the time this lambda runs, we
         // don't want to fire the callback. (See Case 2)
@@ -176,6 +177,6 @@ EvbHandshakeHelper::tryTransition(
 }
 
 EvbHandshakeHelper::~EvbHandshakeHelper() {
-  VLOG(5) << "evbhandshakehelper is destroyed";
+  WANGLE_VLOG(5) << "evbhandshakehelper is destroyed";
 }
 } // namespace wangle

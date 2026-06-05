@@ -29,12 +29,12 @@ final class DefaultServerRequestPayload implements ServerRequestPayload {
   private final int messageSeqId;
   private final RequestContext requestContext;
 
-  // The framework's owning reference to the request buffer (the THeader ThriftFrame, or null when
-  // the transport manages the buffer itself, e.g. RSocket). Released exactly once via
-  // releaseRequestData(): the generated handler releases it eagerly right after the read, and the
-  // transport calls it again as a backstop for paths where the generated handler never runs (e.g.
-  // off-loop scheduler rejection under load shedding). getAndSet(null) makes the release atomic and
-  // idempotent so exactly one caller frees the buffer.
+  // The framework's owning reference to the request buffer (e.g. the THeader ThriftFrame, or the
+  // RSocket decoded request data buffer), or null when the transport manages the buffer lifetime
+  // itself. Released exactly once via releaseRequestData(): the generated handler releases it
+  // eagerly right after the read, and the transport calls it again as a backstop for paths where
+  // the generated handler never runs (e.g. off-loop scheduler rejection under load shedding).
+  // getAndSet(null) makes the release atomic and idempotent so exactly one caller frees the buffer.
   private final AtomicReference<ReferenceCounted> requestData;
 
   DefaultServerRequestPayload(

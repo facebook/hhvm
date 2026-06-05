@@ -97,7 +97,7 @@ public class DbMixedStackArgumentsRpcServerHandler
             // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
             // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super
             // without reading, so releasing there would free the buffer before the parent reads it.
-            // No-op when the transport owns the buffer (e.g. RSocket).
+            // Idempotent; no-op for payloads constructed without an owned buffer.
             _payload.releaseRequestData();
           }
           java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
@@ -192,7 +192,7 @@ public class DbMixedStackArgumentsRpcServerHandler
             // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
             // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super
             // without reading, so releasing there would free the buffer before the parent reads it.
-            // No-op when the transport owns the buffer (e.g. RSocket).
+            // Idempotent; no-op for payloads constructed without an owned buffer.
             _payload.releaseRequestData();
           }
           java.util.Iterator<java.lang.Object> _iterator = _data.iterator();

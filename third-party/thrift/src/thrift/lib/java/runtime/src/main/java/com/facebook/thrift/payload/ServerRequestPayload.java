@@ -48,8 +48,8 @@ public interface ServerRequestPayload {
    * instead of holding it until the response completes.
    *
    * <p>Idempotent: the reference is dropped on the first call and the method is a no-op thereafter.
-   * Payloads whose buffer lifetime is owned by the transport (e.g. RSocket) carry no buffer here
-   * and this is a no-op for them.
+   * Payloads created without an owned buffer (the no-buffer {@code create} overloads, e.g. for
+   * custom or test implementations) carry no buffer here and this is a no-op for them.
    *
    * <p>Defaults to a no-op so custom/test {@link ServerRequestPayload} implementations need not
    * implement it; {@link DefaultServerRequestPayload} overrides it to release the owned buffer.
@@ -82,6 +82,23 @@ public interface ServerRequestPayload {
       ReferenceCounted requestData) {
     return new DefaultServerRequestPayload(
         readerTransformer, requestRpcMetadata, requestContext, messageSeqId, requestData);
+  }
+
+  /**
+   * Creates a payload that owns {@code requestData} — the framework's reference to the request
+   * buffer — using the default message seq id. Mirrors the no-seq-id {@link #create(Function,
+   * RequestRpcMetadata, RequestContext)} overload but lets the transport hand over a buffer to be
+   * released via {@link #releaseRequestData()} after the generated handler reads the arguments
+   * (e.g. the RSocket transport's decoded request data buffer). Pass {@code null} to keep buffer
+   * ownership in the transport.
+   */
+  static ServerRequestPayload create(
+      Function<List<Reader>, List<Object>> readerTransformer,
+      RequestRpcMetadata requestRpcMetadata,
+      RequestContext requestContext,
+      ReferenceCounted requestData) {
+    return new DefaultServerRequestPayload(
+        readerTransformer, requestRpcMetadata, requestContext, 1, requestData);
   }
 
   static ServerRequestPayload create(

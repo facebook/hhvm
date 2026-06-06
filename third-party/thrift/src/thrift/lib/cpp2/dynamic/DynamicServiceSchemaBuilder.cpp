@@ -86,7 +86,24 @@ DynamicServiceSchemaBuilder::FunctionBuilder::setSink(
     type_system::TypeRef payloadType, type_system::TypeRef finalResponseType) {
   sink_ = DynamicServiceSchema::Sink{
       .payloadType = payloadType,
-      .finalResponseType = finalResponseType,
+      .finalResponseType = std::make_optional(finalResponseType),
+      .clientExceptions = {},
+      .serverExceptions = {},
+  };
+  return *this;
+}
+
+DynamicServiceSchemaBuilder::FunctionBuilder&
+DynamicServiceSchemaBuilder::FunctionBuilder::setBidirectionalStream(
+    type_system::TypeRef streamPayloadType,
+    type_system::TypeRef sinkPayloadType) {
+  stream_ = DynamicServiceSchema::Stream{
+      .payloadType = streamPayloadType,
+      .exceptions = {},
+  };
+  sink_ = DynamicServiceSchema::Sink{
+      .payloadType = sinkPayloadType,
+      .finalResponseType = std::nullopt,
       .clientExceptions = {},
       .serverExceptions = {},
   };

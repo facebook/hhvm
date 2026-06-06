@@ -411,27 +411,65 @@ metadata::ThriftService genServiceMetadata(
       continue;
     }
     ret.functions()->emplace_back().name() = func.name();
-    if (auto stream = func.response().stream()) {
-      ret.functions()->back().return_type()->t_stream().emplace();
-      ret.functions()->back().return_type()->t_stream()->elemType() =
-          std::make_unique<ThriftType>(genType(md, stream->payloadType()));
+    auto emitExceptionField =
+        [&](metadata::ThriftField& i,
+            const syntax_graph::FunctionException& exception) {
+          i.id() = static_cast<std::int16_t>(exception.id());
+          i.name() = exception.name();
+          i.is_optional() = false;
+          i.structured_annotations() =
+              genStructuredAnnotations(exception.annotations());
+          i.type() = genType(md, exception.type());
+          if (exception.type().trueType().isStructured()) {
+            genStructuredInMetadataMap(
+                md,
+                *md.exceptions(),
+                exception.type().trueType().asStructured());
+          }
+        };
+    if (auto const* bidi = func.response().bidirectionalStream()) {
+      auto& bt = ret.functions()->back().return_type()->t_bidi().emplace();
+      bt.streamElemType() =
+          std::make_unique<ThriftType>(genType(md, bidi->streamPayloadType()));
+      bt.sinkElemType() =
+          std::make_unique<ThriftType>(genType(md, bidi->sinkPayloadType()));
       if (auto retType = func.response().type()) {
-        ret.functions()
-            ->back()
-            .return_type()
-            ->t_stream()
-            ->initialResponseType() =
+        bt.initialResponseType() =
             std::make_unique<ThriftType>(genType(md, *retType));
       }
-    } else if (auto sink = func.response().sink()) {
-      ret.functions()->back().return_type()->t_sink().emplace();
-      ret.functions()->back().return_type()->t_sink()->elemType() =
+      for (const auto& exception : bidi->streamExceptions()) {
+        emitExceptionField(bt.streamExceptions()->emplace_back(), exception);
+      }
+      for (const auto& exception : bidi->sinkExceptions()) {
+        emitExceptionField(bt.sinkExceptions()->emplace_back(), exception);
+      }
+    } else if (auto const* stream = func.response().stream()) {
+      auto& st = ret.functions()->back().return_type()->t_stream().emplace();
+      st.elemType() =
+          std::make_unique<ThriftType>(genType(md, stream->payloadType()));
+      if (auto retType = func.response().type()) {
+        st.initialResponseType() =
+            std::make_unique<ThriftType>(genType(md, *retType));
+      }
+      for (const auto& exception : stream->exceptions()) {
+        emitExceptionField(st.exceptions()->emplace_back(), exception);
+      }
+    } else if (auto const* sink = func.response().sink()) {
+      auto& sk = ret.functions()->back().return_type()->t_sink().emplace();
+      sk.elemType() =
           std::make_unique<ThriftType>(genType(md, sink->payloadType()));
-      ret.functions()->back().return_type()->t_sink()->finalResponseType() =
+      sk.finalResponseType() =
           std::make_unique<ThriftType>(genType(md, sink->finalResponseType()));
       if (auto retType = func.response().type()) {
-        ret.functions()->back().return_type()->t_sink()->initialResponseType() =
+        sk.initialResponseType() =
             std::make_unique<ThriftType>(genType(md, *retType));
+      }
+      for (const auto& exception : sink->clientExceptions()) {
+        emitExceptionField(sk.sinkExceptions()->emplace_back(), exception);
+      }
+      for (const auto& exception : sink->serverExceptions()) {
+        emitExceptionField(
+            sk.finalResponseExceptions()->emplace_back(), exception);
       }
     } else if (auto retType = func.response().type()) {
       ret.functions()->back().return_type() = genType(md, *retType);
@@ -451,20 +489,8 @@ metadata::ThriftService genServiceMetadata(
       i.type() = genType(md, param.type());
     }
     for (const auto& exception : func.exceptions()) {
-      auto& i = ret.functions()->back().exceptions()->emplace_back();
-      i.id() = static_cast<std::int16_t>(exception.id());
-      i.name() = exception.name();
-      i.is_optional() = false;
-      i.structured_annotations() =
-          genStructuredAnnotations(exception.annotations());
-      i.type() = genType(md, exception.type());
-      if (exception.type().trueType().isStructured()) {
-        // Mimicking the existing logic: we add all types in throw clause
-        // into `exceptions` field as long as it's structured.
-        // https://github.com/facebook/fbthrift/blob/v2025.11.03.00/thrift/compiler/generate/templates/cpp2/module_metadata.cpp.mustache#L153-L157
-        genStructuredInMetadataMap(
-            md, *md.exceptions(), exception.type().trueType().asStructured());
-      }
+      emitExceptionField(
+          ret.functions()->back().exceptions()->emplace_back(), exception);
     }
     ret.functions()->back().structured_annotations() =
         genStructuredAnnotations(func.annotations());

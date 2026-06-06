@@ -870,6 +870,16 @@ FunctionNode SchemaIndex::createFunction(
       };
 
   auto sinkOrStream = [&]() -> FunctionNode::Response::SinkOrStream {
+    if (const auto& bidiRef = function.streamOrSink()->bidirectionalStream();
+        bidiRef.has_value()) {
+      // Args are stream-first; schema.thrift BidirectionalStream fields are
+      // sink-first.
+      return FunctionNode::BidirectionalStream(
+          typeOf(*bidiRef->streamPayload()),
+          typeOf(*bidiRef->sinkPayload()),
+          collectExceptions(*bidiRef->streamExceptions()),
+          collectExceptions(*bidiRef->sinkExceptions()));
+    }
     if (const auto& streamRef = function.streamOrSink()->streamType();
         streamRef.has_value()) {
       return FunctionNode::Stream(

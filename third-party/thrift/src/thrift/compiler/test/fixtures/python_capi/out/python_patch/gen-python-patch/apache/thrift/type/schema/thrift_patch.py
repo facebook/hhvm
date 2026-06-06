@@ -1032,6 +1032,79 @@ class SinkPatch(
         self._patch.merge(other._patch)
 
 
+class BidirectionalStreamPatch(
+    BaseStructPatch[_fbthrift__apache__thrift__type__schema__thrift_types.BidirectionalStream]
+):
+    pass
+    @property
+    def sinkPayload(self) -> UnqualifiedFieldPatch[
+            _fbthrift__apache__thrift__type__type_rep__thrift_types.TypeStruct,
+            apache.thrift.type.type_rep.thrift_patch.TypeStructPatch]:
+
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> apache.thrift.type.type_rep.thrift_patch.TypeStructPatch:
+            return apache.thrift.type.type_rep.thrift_patch.TypeStructPatch(patch)
+
+        return UnqualifiedFieldPatch(
+            cast_dynamic_patch_to_typed_field_patch,
+            self._patch,
+            1,
+            _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__type_rep__thrift_types.TypeStruct))
+    @property
+    def sinkExceptions(self) -> UnqualifiedFieldPatch[
+            _typing.Sequence[_fbthrift__apache__thrift__type__schema__thrift_types.Field],
+            ListPatch[_fbthrift__apache__thrift__type__schema__thrift_types.Field]]:
+
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[_fbthrift__apache__thrift__type__schema__thrift_types.Field]:
+            return ListPatch(patch.as_list_patch(), type_info)
+
+        return UnqualifiedFieldPatch(
+            cast_dynamic_patch_to_typed_field_patch,
+            self._patch,
+            2,
+            _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__schema__thrift_types.Field)))
+    @property
+    def streamPayload(self) -> UnqualifiedFieldPatch[
+            _fbthrift__apache__thrift__type__type_rep__thrift_types.TypeStruct,
+            apache.thrift.type.type_rep.thrift_patch.TypeStructPatch]:
+
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> apache.thrift.type.type_rep.thrift_patch.TypeStructPatch:
+            return apache.thrift.type.type_rep.thrift_patch.TypeStructPatch(patch)
+
+        return UnqualifiedFieldPatch(
+            cast_dynamic_patch_to_typed_field_patch,
+            self._patch,
+            3,
+            _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__type_rep__thrift_types.TypeStruct))
+    @property
+    def streamExceptions(self) -> UnqualifiedFieldPatch[
+            _typing.Sequence[_fbthrift__apache__thrift__type__schema__thrift_types.Field],
+            ListPatch[_fbthrift__apache__thrift__type__schema__thrift_types.Field]]:
+
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> ListPatch[_fbthrift__apache__thrift__type__schema__thrift_types.Field]:
+            return ListPatch(patch.as_list_patch(), type_info)
+
+        return UnqualifiedFieldPatch(
+            cast_dynamic_patch_to_typed_field_patch,
+            self._patch,
+            4,
+            _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__schema__thrift_types.Field)))
+
+    def to_safe_patch(self) -> _fbthrift_safe_patch_types.BidirectionalStreamSafePatch:
+        return _fbthrift_safe_patch_types.BidirectionalStreamSafePatch(
+            version=1, data=self._patch.serialize_to_compact_protocol()
+        )
+
+    @staticmethod
+    def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.BidirectionalStreamSafePatch) -> BidirectionalStreamPatch:
+        patch = BidirectionalStreamPatch()
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
+        return patch
+
+    def merge(self, other: BidirectionalStreamPatch) -> None:
+        self._patch.merge(other._patch)
+
+
 class InteractionPatch(
     BaseStructPatch[_fbthrift__apache__thrift__type__schema__thrift_types.Interaction]
 ):
@@ -1135,6 +1208,19 @@ class ReturnTypePatch(
             self._patch,
             4,
             _fbthrift_python_types.typeinfo_i64)
+    @property
+    def bidirectionalStream(self) -> OptionalFieldPatch[
+            _fbthrift__apache__thrift__type__schema__thrift_types.BidirectionalStream,
+            BidirectionalStreamPatch]:
+
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> BidirectionalStreamPatch:
+            return BidirectionalStreamPatch(patch)
+
+        return OptionalFieldPatch(
+            cast_dynamic_patch_to_typed_field_patch,
+            self._patch,
+            5,
+            _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__schema__thrift_types.BidirectionalStream))
 
     def to_safe_patch(self) -> _fbthrift_safe_patch_types.ReturnTypeSafePatch:
         return _fbthrift_safe_patch_types.ReturnTypeSafePatch(

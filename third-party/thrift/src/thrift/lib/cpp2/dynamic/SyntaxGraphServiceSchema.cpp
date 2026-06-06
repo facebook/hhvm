@@ -58,7 +58,27 @@ DynamicServiceSchema::Function makeFunction(
     function.exceptions.push_back(makeException(ex, syntaxGraph));
   }
 
-  if (const auto* stream = fn.response().stream()) {
+  if (const auto* bidi = fn.response().bidirectionalStream()) {
+    DynamicServiceSchema::Stream s{
+        .payloadType =
+            syntaxGraph.asTypeSystemTypeRef(bidi->streamPayloadType()),
+        .exceptions = {},
+    };
+    for (const auto& ex : bidi->streamExceptions()) {
+      s.exceptions.push_back(makeException(ex, syntaxGraph));
+    }
+    function.stream = std::move(s);
+    DynamicServiceSchema::Sink sk{
+        .payloadType = syntaxGraph.asTypeSystemTypeRef(bidi->sinkPayloadType()),
+        .finalResponseType = std::nullopt,
+        .clientExceptions = {},
+        .serverExceptions = {},
+    };
+    for (const auto& ex : bidi->sinkExceptions()) {
+      sk.clientExceptions.push_back(makeException(ex, syntaxGraph));
+    }
+    function.sink = std::move(sk);
+  } else if (const auto* stream = fn.response().stream()) {
     DynamicServiceSchema::Stream s{
         .payloadType = syntaxGraph.asTypeSystemTypeRef(stream->payloadType()),
         .exceptions = {},
@@ -70,8 +90,8 @@ DynamicServiceSchema::Function makeFunction(
   } else if (const auto* sink = fn.response().sink()) {
     DynamicServiceSchema::Sink sk{
         .payloadType = syntaxGraph.asTypeSystemTypeRef(sink->payloadType()),
-        .finalResponseType =
-            syntaxGraph.asTypeSystemTypeRef(sink->finalResponseType()),
+        .finalResponseType = std::make_optional(
+            syntaxGraph.asTypeSystemTypeRef(sink->finalResponseType())),
         .clientExceptions = {},
         .serverExceptions = {},
     };

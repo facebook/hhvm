@@ -480,6 +480,24 @@ struct Sink {
 }
 
 /**
+ * A Thrift bidirectional streaming type.
+ *
+ *     sink<{sinkPayload} throws (... sinkExceptions ...)>,
+ *     stream<{streamPayload} throws (... streamExceptions ...)>
+ */
+@python.Py3Hidden
+struct BidirectionalStream {
+  /** The payload sent by the client (sink direction). */
+  1: type.Type sinkPayload;
+  /** The exceptions from the client (sink throws). */
+  2: Exceptions sinkExceptions;
+  /** The payload sent by the server (stream direction). */
+  3: type.Type streamPayload;
+  /** The exceptions from the server stream. */
+  4: Exceptions streamExceptions;
+}
+
+/**
  * A Thrift interaction.
  *
  *     interaction {attrs.name} { ... functions ... }
@@ -510,6 +528,8 @@ union ReturnType {
   3: Sink sinkType;
   /** DEPRECATED: The interaction return type. */
   4: id.DefinitionId interactionType;
+  /** The bidirectional stream return type. */
+  5: BidirectionalStream bidirectionalStream;
 }
 
 /** A container of Thrift function return type. */

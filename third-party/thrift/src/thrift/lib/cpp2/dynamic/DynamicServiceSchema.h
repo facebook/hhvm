@@ -55,7 +55,7 @@ class DynamicServiceSchema {
 
   struct Sink {
     type_system::TypeRef payloadType;
-    type_system::TypeRef finalResponseType;
+    std::optional<type_system::TypeRef> finalResponseType;
     std::vector<Exception> clientExceptions;
     std::vector<Exception> serverExceptions;
   };
@@ -65,10 +65,7 @@ class DynamicServiceSchema {
     std::vector<Param> params;
     std::optional<type_system::TypeRef> responseType;
     std::vector<Exception> exceptions;
-    // Thrift IDL supports bidirectional streaming (both stream and sink on
-    // a single function), but SyntaxGraph currently exposes them as mutually
-    // exclusive. Both fields are optional here so that bidi can be represented
-    // once SyntaxGraph adds support.
+    // Both stream and sink are set for bidirectional-streaming methods.
     std::optional<Stream> stream;
     std::optional<Sink> sink;
   };

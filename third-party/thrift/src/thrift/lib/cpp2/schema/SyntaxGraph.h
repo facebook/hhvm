@@ -208,6 +208,10 @@ class FunctionSink;
  */
 class FunctionStream;
 /**
+ * Bidirectional streaming: client sends via sink, server sends via stream.
+ */
+class FunctionBidirectionalStream;
+/**
  * A function response, which includes:
  *   - a data type, void, or an interaction
  *   - a stream or sink (optional)
@@ -1315,6 +1319,32 @@ class FunctionSink final : folly::MoveOnly,
   std::vector<FunctionException> serverExceptions_;
 };
 
+// Bidirectional streaming has no final-response or server-exception channel.
+class FunctionBidirectionalStream final
+    : folly::MoveOnly,
+      public detail::WithDebugPrinting<FunctionBidirectionalStream> {
+ public:
+  const TypeRef& streamPayloadType() const { return *streamPayloadType_; }
+  const TypeRef& sinkPayloadType() const { return *sinkPayloadType_; }
+  folly::span<const FunctionException> streamExceptions() const;
+  folly::span<const FunctionException> sinkExceptions() const;
+
+  FunctionBidirectionalStream(
+      TypeRef&& streamPayloadType,
+      TypeRef&& sinkPayloadType,
+      std::vector<FunctionException>&& streamExceptions,
+      std::vector<FunctionException>&& sinkExceptions);
+
+  void printTo(
+      tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
+ private:
+  folly::not_null_unique_ptr<TypeRef> streamPayloadType_;
+  folly::not_null_unique_ptr<TypeRef> sinkPayloadType_;
+  std::vector<FunctionException> streamExceptions_;
+  std::vector<FunctionException> sinkExceptions_;
+};
+
 class FunctionResponse final
     : folly::MoveOnly,
       public detail::WithDebugPrinting<FunctionResponse> {
@@ -1339,22 +1369,35 @@ class FunctionResponse final
   /**
    * Returns the sink opened by the RPC, or nullptr if there is no sink.
    *
-   * This is mutually exclusive with streams.
+   * This is mutually exclusive with streams and bidirectional streams.
    */
   const FunctionSink* FOLLY_NULLABLE sink() const {
     return std::get_if<FunctionSink>(&sinkOrStream_);
   }
   /**
-   * Returns the sink opened by the RPC, or nullptr if there is no sink.
+   * Returns the stream opened by the RPC, or nullptr if there is no stream.
    *
-   * This is mutually exclusive with sinks.
+   * This is mutually exclusive with sinks and bidirectional streams.
    */
   const FunctionStream* FOLLY_NULLABLE stream() const {
     return std::get_if<FunctionStream>(&sinkOrStream_);
   }
+  /**
+   * Returns the bidirectional stream info, or nullptr if this is not a
+   * bidirectional streaming RPC.
+   *
+   * This is mutually exclusive with sinks and streams.
+   */
+  const FunctionBidirectionalStream* FOLLY_NULLABLE
+  bidirectionalStream() const {
+    return std::get_if<FunctionBidirectionalStream>(&sinkOrStream_);
+  }
 
-  using SinkOrStream =
-      std::variant<std::monostate, FunctionSink, FunctionStream>;
+  using SinkOrStream = std::variant<
+      std::monostate,
+      FunctionSink,
+      FunctionStream,
+      FunctionBidirectionalStream>;
   FunctionResponse(
       std::unique_ptr<TypeRef>&& type,
       std::optional<detail::Lazy<InteractionNode>>&& interaction,
@@ -1426,6 +1469,7 @@ class FunctionNode final : folly::MoveOnly,
 
   using Sink = FunctionSink;
   using Stream = FunctionStream;
+  using BidirectionalStream = FunctionBidirectionalStream;
   using Response = FunctionResponse;
   using Param = FunctionParam;
   using Exception = FunctionException;

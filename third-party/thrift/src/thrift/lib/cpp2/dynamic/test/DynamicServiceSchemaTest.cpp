@@ -100,7 +100,17 @@ TEST_F(SyntaxGraphServiceSchemaTest, SinkFunction) {
   const auto& fn = schema_->getFunction("collectStrings");
   ASSERT_TRUE(fn.sink.has_value());
   EXPECT_TRUE(fn.sink->payloadType.isString());
-  EXPECT_TRUE(fn.sink->finalResponseType.isI32());
+  EXPECT_TRUE(
+      fn.sink->finalResponseType && fn.sink->finalResponseType->isI32());
+}
+
+TEST_F(SyntaxGraphServiceSchemaTest, BidiFunction) {
+  const auto& fn = schema_->getFunction("bidiEcho");
+  ASSERT_TRUE(fn.stream.has_value());
+  ASSERT_TRUE(fn.sink.has_value());
+  EXPECT_TRUE(fn.stream->payloadType.isI32());
+  EXPECT_TRUE(fn.sink->payloadType.isString());
+  EXPECT_FALSE(fn.sink->finalResponseType.has_value());
 }
 
 TEST_F(SyntaxGraphServiceSchemaTest, FunctionNotFound) {
@@ -116,7 +126,7 @@ TEST_F(SyntaxGraphServiceSchemaTest, GetTypeSystem) {
 }
 
 TEST_F(SyntaxGraphServiceSchemaTest, FunctionsCount) {
-  EXPECT_EQ(schema_->functions().size(), 5);
+  EXPECT_EQ(schema_->functions().size(), 6);
 }
 
 class DynamicServiceSchemaBuilderTest : public ::testing::Test {
@@ -176,7 +186,24 @@ TEST_F(DynamicServiceSchemaBuilderTest, BuildWithStreamAndSink) {
   const auto& sinkFn = schema->getFunction("collectStrings");
   ASSERT_TRUE(sinkFn.sink.has_value());
   EXPECT_TRUE(sinkFn.sink->payloadType.isString());
-  EXPECT_TRUE(sinkFn.sink->finalResponseType.isI32());
+  EXPECT_TRUE(
+      sinkFn.sink->finalResponseType &&
+      sinkFn.sink->finalResponseType->isI32());
+}
+
+TEST_F(DynamicServiceSchemaBuilderTest, BuildWithBidi) {
+  DynamicServiceSchemaBuilder builder(typeSystem_, "BidiService");
+  builder.addFunction("bidiEcho")
+      .setBidirectionalStream(
+          type_system::TypeSystem::I32(), type_system::TypeSystem::String());
+
+  auto schema = builder.build();
+  const auto& fn = schema->getFunction("bidiEcho");
+  ASSERT_TRUE(fn.stream.has_value());
+  ASSERT_TRUE(fn.sink.has_value());
+  EXPECT_TRUE(fn.stream->payloadType.isI32());
+  EXPECT_TRUE(fn.sink->payloadType.isString());
+  EXPECT_FALSE(fn.sink->finalResponseType.has_value());
 }
 
 TEST_F(DynamicServiceSchemaBuilderTest, GetTypeSystem) {

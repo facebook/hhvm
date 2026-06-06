@@ -48,6 +48,9 @@ class DynamicServiceSchemaBuilder {
     FunctionBuilder& setSink(
         type_system::TypeRef payloadType,
         type_system::TypeRef finalResponseType);
+    FunctionBuilder& setBidirectionalStream(
+        type_system::TypeRef streamPayloadType,
+        type_system::TypeRef sinkPayloadType);
 
    private:
     friend class DynamicServiceSchemaBuilder;

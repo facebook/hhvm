@@ -130,6 +130,7 @@ struct ThriftStreamType {
   @rust.Box
   @cpp.Ref{type = cpp.RefType.Unique}
   2: optional ThriftType initialResponseType;
+  3: list<ThriftField> exceptions;
 }
 
 struct ThriftSinkType {
@@ -145,6 +146,8 @@ struct ThriftSinkType {
   @rust.Box
   @cpp.Ref{type = cpp.RefType.Unique}
   3: optional ThriftType initialResponseType;
+  4: list<ThriftField> sinkExceptions;
+  5: list<ThriftField> finalResponseExceptions;
 }
 
 struct ThriftBidiType {
@@ -160,6 +163,8 @@ struct ThriftBidiType {
   @rust.Box
   @cpp.Ref{type = cpp.RefType.Unique}
   3: optional ThriftType sinkElemType;
+  4: list<ThriftField> streamExceptions;
+  5: list<ThriftField> sinkExceptions;
 }
 
 @hack.MigrationBlockingLegacyJSONSerialization

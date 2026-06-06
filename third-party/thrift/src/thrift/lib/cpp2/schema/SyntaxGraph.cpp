@@ -282,6 +282,49 @@ folly::span<const FunctionNode::Exception> FunctionSink::serverExceptions()
   return serverExceptions_;
 }
 
+FunctionBidirectionalStream::FunctionBidirectionalStream(
+    TypeRef&& streamPayloadType,
+    TypeRef&& sinkPayloadType,
+    std::vector<FunctionNode::Exception>&& streamExceptions,
+    std::vector<FunctionNode::Exception>&& sinkExceptions)
+    : streamPayloadType_(
+          folly::copy_to_unique_ptr(std::move(streamPayloadType))),
+      sinkPayloadType_(folly::copy_to_unique_ptr(std::move(sinkPayloadType))),
+      streamExceptions_(std::move(streamExceptions)),
+      sinkExceptions_(std::move(sinkExceptions)) {}
+
+folly::span<const FunctionNode::Exception>
+FunctionBidirectionalStream::streamExceptions() const {
+  return streamExceptions_;
+}
+
+folly::span<const FunctionNode::Exception>
+FunctionBidirectionalStream::sinkExceptions() const {
+  return sinkExceptions_;
+}
+
+void FunctionNode::BidirectionalStream::printTo(
+    tree_printer::scope& scope, detail::VisitationTracker& visited) const {
+  scope.print("FunctionNode::BidirectionalStream");
+  streamPayloadType().printTo(
+      scope.make_child("streamPayloadType = "), visited);
+  if (folly::span<const FunctionNode::Exception> excepts = streamExceptions();
+      !excepts.empty()) {
+    tree_printer::scope& s = scope.make_child("streamExceptions");
+    for (const FunctionNode::Exception& e : excepts) {
+      e.printTo(s.make_child(), visited);
+    }
+  }
+  sinkPayloadType().printTo(scope.make_child("sinkPayloadType = "), visited);
+  if (folly::span<const FunctionNode::Exception> excepts = sinkExceptions();
+      !excepts.empty()) {
+    tree_printer::scope& s = scope.make_child("sinkExceptions");
+    for (const FunctionNode::Exception& e : excepts) {
+      e.printTo(s.make_child(), visited);
+    }
+  }
+}
+
 TypeRef FunctionParam::type() const {
   return *type_;
 }
@@ -692,7 +735,10 @@ void FunctionNode::Response::printTo(
     returnedInteraction->printTo(scope.make_child(), visited);
   }
 
-  if (const FunctionNode::Sink* sinkNode = sink()) {
+  if (const FunctionNode::BidirectionalStream* bidiNode =
+          bidirectionalStream()) {
+    bidiNode->printTo(scope.make_child(), visited);
+  } else if (const FunctionNode::Sink* sinkNode = sink()) {
     sinkNode->printTo(scope.make_child(), visited);
   } else if (const FunctionNode::Stream* streamNode = stream()) {
     streamNode->printTo(scope.make_child(), visited);

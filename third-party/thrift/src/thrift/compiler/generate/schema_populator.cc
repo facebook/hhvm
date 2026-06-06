@@ -623,7 +623,33 @@ type::Functions schema_populator::gen_functions(const t_interface& node) {
       }
     }
 
-    if (auto stream = func.stream()) {
+    if (func.is_bidirectional_stream()) {
+      type::BidirectionalStream bidi_schema;
+      auto bidi_stream = func.stream();
+      auto bidi_sink = func.sink();
+      bidi_schema.streamPayload() =
+          gen_type(*bidi_stream->elem_type(), node.program());
+      bidi_schema.sinkPayload() =
+          gen_type(*bidi_sink->elem_type(), node.program());
+      if (auto throws = bidi_stream->exceptions()) {
+        bidi_schema.streamExceptions() = gen_fields(
+            this,
+            node.program(),
+            nullptr,
+            throws->fields(),
+            opts().intern_value);
+      }
+      if (auto throws = bidi_sink->sink_exceptions()) {
+        bidi_schema.sinkExceptions() = gen_fields(
+            this,
+            node.program(),
+            nullptr,
+            throws->fields(),
+            opts().intern_value);
+      }
+      func_schema.streamOrSink()->bidirectionalStream_ref() =
+          std::move(bidi_schema);
+    } else if (auto stream = func.stream()) {
       type::Stream stream_schema;
       stream_schema.payload() = gen_type(*stream->elem_type(), node.program());
       if (auto throws = stream->exceptions()) {

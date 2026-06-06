@@ -26,4 +26,5 @@ service DynamicServiceSchemaTestService {
   string greet(1: string name) throws (1: TestException e);
   i32, stream<string> streamNames(1: i32 count);
   sink<string, i32> collectStrings();
+  sink<string>, stream<i32> bidiEcho();
 }

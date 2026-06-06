@@ -26,11 +26,9 @@ from __future__ import annotations
 from typing import Any, Generic, TypeVar
 
 from apache.thrift.protocol.detail.protocol_detail.thrift_types import Value
-from apache.thrift.syntax_graph.syntax_graph.thrift_types import (  # noqa: F401 -- re-export
-    FieldPresenceQualifier,
-    Primitive,
-)
+from apache.thrift.syntax_graph.syntax_graph.thrift_types import Primitive
 from apache.thrift.type.schema import thrift_types as _schema_types
+from apache.thrift.type.schema.thrift_types import FieldQualifier
 from thrift.python.serializer import deserialize, Protocol
 
 
@@ -440,7 +438,7 @@ class FieldNode:
         "_id",
         "_name",
         "_type",
-        "_presence",
+        "_qualifier",
         "_doc_block",
         "_annotations",
         "_default_value",
@@ -449,7 +447,7 @@ class FieldNode:
     _id: int
     _name: str
     _type: TypeRef
-    _presence: FieldPresenceQualifier
+    _qualifier: FieldQualifier
     _doc_block: str | None
     _annotations: list[Annotation]
     _default_value: Value | None
@@ -461,7 +459,7 @@ class FieldNode:
         id: int,
         name: str,
         type: TypeRef,
-        presence: FieldPresenceQualifier,
+        qualifier: FieldQualifier,
         doc_block: str | None,
         annotations: list[Annotation],
         default_value: Value | None = None,
@@ -469,7 +467,7 @@ class FieldNode:
         self._id = id
         self._name = name
         self._type = type
-        self._presence = presence
+        self._qualifier = qualifier
         self._doc_block = doc_block
         self._annotations = annotations
         self._default_value = default_value
@@ -488,8 +486,8 @@ class FieldNode:
         return self._type
 
     @property
-    def presence(self) -> FieldPresenceQualifier:
-        return self._presence
+    def qualifier(self) -> FieldQualifier:
+        return self._qualifier
 
     @property
     def doc_block(self) -> str | None:

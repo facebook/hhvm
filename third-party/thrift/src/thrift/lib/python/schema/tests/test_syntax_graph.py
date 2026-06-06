@@ -26,7 +26,7 @@ from thrift.lib.python.schema.syntax_graph import (
     ExceptionNode,
     ExceptionTypeRef,
     FieldNode,
-    FieldPresenceQualifier,
+    FieldQualifier,
     FunctionNode,
     InteractionNode,
     ListTypeRef,
@@ -104,11 +104,11 @@ class SyntaxGraphTest(unittest.TestCase):
         self.assertEqual(fields[0].name, "field1")
         self.assertIsInstance(fields[0].type, PrimitiveTypeRef)
         self.assertEqual(fields[0].type.primitive, Primitive.I32)
-        self.assertEqual(fields[0].presence, FieldPresenceQualifier.UNQUALIFIED)
+        self.assertEqual(fields[0].qualifier, FieldQualifier.Default)
 
         self.assertEqual(fields[1].id, 2)
         self.assertEqual(fields[1].name, "field2")
-        self.assertEqual(fields[1].presence, FieldPresenceQualifier.OPTIONAL)
+        self.assertEqual(fields[1].qualifier, FieldQualifier.Optional)
 
     def test_enum_basic(self) -> None:
         prog = self.graph.get_program_by_name("syntax_graph")

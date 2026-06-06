@@ -24,10 +24,7 @@ import dataclasses
 import functools
 from typing import Any
 
-from apache.thrift.syntax_graph.syntax_graph.thrift_types import (
-    FieldPresenceQualifier,
-    Primitive,
-)
+from apache.thrift.syntax_graph.syntax_graph.thrift_types import Primitive
 from apache.thrift.type.schema import thrift_types as _schema_types
 from apache.thrift.type.standard import thrift_types as _standard_types
 from apache.thrift.type.type_rep import thrift_types as _type_rep_types
@@ -348,13 +345,6 @@ class _GraphBuilder:
 
     # -- Field conversion --------------------------------------------------
 
-    def _presence_of(
-        self, qualifier: _schema_types.FieldQualifier
-    ) -> FieldPresenceQualifier:
-        if qualifier == _schema_types.FieldQualifier.Optional:
-            return FieldPresenceQualifier.OPTIONAL
-        return FieldPresenceQualifier.UNQUALIFIED
-
     def _doc_block_of(self, attrs: _schema_types.DefinitionAttrs) -> str | None:
         if attrs.docs and attrs.docs.contents:
             return attrs.docs.contents
@@ -373,7 +363,7 @@ class _GraphBuilder:
             id=field.id,
             name=field.attrs.name,
             type=self._type_of(field.type),
-            presence=self._presence_of(field.qualifier),
+            qualifier=field.qualifier,
             doc_block=self._doc_block_of(field.attrs),
             annotations=self._create_annotations(field.attrs),
             default_value=self._resolve_value(field.customDefault),

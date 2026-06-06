@@ -34,6 +34,8 @@ from typing import Any
 import zstandard  # @manual=fbsource//third-party/pypi/zstandard:zstandard
 from apache.thrift.type.schema import thrift_types as _schema_types
 from thrift.lib.python.schema.syntax_graph import Definition, SyntaxGraph
+from thrift.lib.python.schema.type_system import DefinitionNode, TypeSystem
+from thrift.lib.python.schema.type_system_bridge import SyntaxGraphBridge
 from thrift.python.serializer import deserialize, Protocol
 
 
@@ -126,8 +128,13 @@ def _get_definition_key(thrift_type: type[Any]) -> bytes | None:
     return key
 
 
-class SchemaRegistry:
-    """Pure Python registry for looking up SyntaxGraph Definitions by type or URI."""
+class SchemaRegistry(TypeSystem):
+    """Pure Python registry for looking up SyntaxGraph Definitions by type or URI.
+
+    The registry is also the unbounded ``TypeSystem`` view: it bridges SyntaxGraph
+    definitions into runtime ``DefinitionNode``s on demand, memoized.
+    ``get_known_uris()`` returns ``None`` because the registry is
+    lazy/module-discovery based and cannot enumerate all URIs up front."""
 
     _instance: SchemaRegistry | None = None
 
@@ -154,6 +161,7 @@ class SchemaRegistry:
         self._builder: IncrementalGraphBuilder = IncrementalGraphBuilder()
         self._module_resolver: Callable[[str], types.ModuleType | None] | None = None
         self._uri_module_map: dict[str, str] | None = None
+        self._ts_bridge: SyntaxGraphBridge = SyntaxGraphBridge(self)
         self._omnibus_seeded: bool = False
 
     @property
@@ -240,6 +248,29 @@ class SchemaRegistry:
                 return defn
 
         raise KeyError(f"Definition not found for URI {uri!r}")
+
+    # -- TypeSystem interface (bridged from SyntaxGraph) --------------------
+
+    def definition_by_uri(self, uri: str) -> Definition | None:
+        """SyntaxResolver hook: AST Definition for ``uri`` (``None`` if unknown).
+
+        Wraps ``get_definition_by_uri`` -- triggering the same lazy module
+        discovery -- but returns ``None`` instead of raising on a miss."""
+        try:
+            return self.get_definition_by_uri(uri)
+        except KeyError:
+            return None
+
+    def get_user_defined_type(self, uri: str) -> DefinitionNode | None:
+        """Resolve a URI to a TypeSystem ``DefinitionNode`` (bridged from the
+        SyntaxGraph, memoized). ``None`` if unknown or not a user-defined type
+        (typedefs/constants/services/interactions are excluded)."""
+        return self._ts_bridge.get_user_defined_type(uri)
+
+    def get_known_uris(self) -> None:
+        """``None`` -- the registry is lazy/module-discovery based and cannot
+        enumerate all URIs up front."""
+        return None
 
     def _resolve_module_for_uri(self, uri: str) -> types.ModuleType | None:
         """Find the module that defines the given URI."""

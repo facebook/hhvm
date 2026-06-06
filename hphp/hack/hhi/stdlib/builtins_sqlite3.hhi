@@ -37,14 +37,14 @@ class SQLite3 {
   public static function version(): HH\FIXME\MISSING_RETURN_TYPE;
   public function lastinsertrowid(): int;
   public function lasterrorcode(): int;
-  public function lasterrormsg(): string;
+  public function lasterrormsg(): HH\FIXME\MISSING_RETURN_TYPE;
   public function loadExtension(
     string $extension,
   ): bool;
   public function changes(): int;
   public static function escapestring(
     string $sql,
-  ): string;
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function prepare(string $sql): HH\FIXME\MISSING_RETURN_TYPE;
   public function query(string $sql): HH\FIXME\MISSING_RETURN_TYPE;
   public function querysingle(
@@ -90,7 +90,7 @@ class SQLite3Stmt {
 class SQLite3Result {
   public function __construct();
   public function numcolumns(): int;
-  public function columnname(int $column): string;
+  public function columnname(int $column): HH\FIXME\MISSING_RETURN_TYPE;
   public function columntype(int $column): int;
   public function fetcharray(
     int $mode = SQLITE3_BOTH,

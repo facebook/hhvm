@@ -300,7 +300,7 @@ class DOMElement extends DOMNode {
   public function getAttributeNS(
     string $namespaceuri,
     string $localname,
-  ): string;
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getElementsByTagName(string $name): DOMNodeList<DOMElement>;
   public function getElementsByTagNameNS(
     string $namespaceuri,

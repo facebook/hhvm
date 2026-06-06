@@ -113,7 +113,7 @@ class SimpleXMLElement {
     string $ns = "",
     bool $is_prefix = false,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getName(): string;
+  public function getName(): HH\FIXME\MISSING_RETURN_TYPE;
   public function attributes(
     string $ns = "",
     bool $is_prefix = false,

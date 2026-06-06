@@ -329,5 +329,5 @@ class XMLWriter {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function outputMemory(
     HH\FIXME\MISSING_PARAM_TYPE $flush = true,
-  ): string;
+  ): HH\FIXME\MISSING_RETURN_TYPE;
 }

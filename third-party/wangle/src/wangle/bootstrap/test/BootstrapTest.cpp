@@ -20,7 +20,10 @@
 #include "wangle/bootstrap/ServerBootstrap.h"
 #include "wangle/channel/Handler.h"
 
+#include <folly/io/SocketOptionMap.h>
+#include <folly/io/async/AsyncServerSocket.h>
 #include <folly/portability/GTest.h>
+#include <folly/portability/Sockets.h>
 #include <folly/synchronization/Latch.h>
 #include <folly/testing/TestUtil.h>
 #include <wangle/util/Logging.h>
@@ -84,6 +87,40 @@ class TestAcceptorFactory : public AcceptorFactory {
     return std::make_shared<TestAcceptor>();
   }
 };
+
+namespace {
+
+int getReceiveLowWatermark(const AsyncServerSocket& serverSocket) {
+  int value = 0;
+  socklen_t valueLength = sizeof(value);
+  EXPECT_EQ(
+      netops::getsockopt(
+          serverSocket.getNetworkSocket(),
+          SOL_SOCKET,
+          SO_RCVLOWAT,
+          &value,
+          &valueLength),
+      0);
+  return value;
+}
+
+} // namespace
+
+TEST(Bootstrap, AsyncServerSocketFactoryAppliesPreBindSocketOptions) {
+  ServerSocketConfig config;
+  config.bindAddress = SocketAddress("127.0.0.1", 0);
+  SocketOptionMap options;
+  options[{SOL_SOCKET, SO_RCVLOWAT, SocketOptionKey::ApplyPos::PRE_BIND}] = 2;
+  config.setSocketOptions(options);
+
+  AsyncServerSocketFactory factory;
+  auto socketBase = factory.newSocket(
+      config.bindAddress, config.acceptBacklog, false, config, nullptr);
+  auto socket = std::dynamic_pointer_cast<AsyncServerSocket>(socketBase);
+  ASSERT_NE(socket, nullptr);
+
+  EXPECT_EQ(getReceiveLowWatermark(*socket), 2);
+}
 
 TEST(Bootstrap, Basic) {
   TestServer server;
@@ -408,7 +445,7 @@ TEST(Bootstrap, UnixServer) {
   server.stop();
   server.join();
 
-  EXPECT_TRUE(std::move(pipelineFuture).get() != nullptr);
+  EXPECT_NE(std::move(pipelineFuture).get(), nullptr);
   EXPECT_EQ(factory->pipelines, 1);
 }
 

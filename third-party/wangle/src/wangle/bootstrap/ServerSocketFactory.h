@@ -71,7 +71,7 @@ class AsyncServerSocketFactory : public ServerSocketFactory {
     if (config.enableTCPFastOpen) {
       socket->setTFOEnabled(true, config.fastOpenQueueSize);
     }
-    socket->bind(address);
+    socket->bind(address, config.getSocketOptions());
 
     socket->listen(config.acceptBacklog);
     socket->startAccepting();

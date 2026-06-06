@@ -24,10 +24,16 @@
 
 namespace proxygen::coro {
 
+namespace test {
+class HTTPServerTests;
+} // namespace test
+
 using folly::IOThreadPoolExecutor;
 using folly::ThreadPoolExecutor;
 
 class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
+  friend class test::HTTPServerTests;
+
  public:
   struct QuicConfig {
     std::vector<quic::QuicVersion> quicVersions;

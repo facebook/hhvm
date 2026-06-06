@@ -7,6 +7,7 @@
 proxygen_add_test(TARGET HTTPServerTests
   SOURCES
     HTTPServerTest.cpp
+    HTTPServerTestUtils.cpp
     RequestHandlerAdaptorTest.cpp
   DEPENDS
     codectestutils

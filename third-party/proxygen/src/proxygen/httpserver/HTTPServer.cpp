@@ -167,8 +167,17 @@ folly::Expected<folly::Unit, std::exception_ptr> HTTPServer::startTcpServer(
         bootstrap_[i].setReusePort(true);
       }
       if (options_->preboundSockets_.size() > i) {
+        // Intentionally not copying socket options map on prebound sockets
+        // branch because 1) the caller has freedom to apply them, and 2) wangle
+        // does not pass it to AsyncServerSocket, and AsyncServerSocket doesn't
+        // consume it on pre-bound path anyway.
         bootstrap_[i].bind(std::move(options_->preboundSockets_[i]));
       } else {
+        // Copy socket options to ServerBootstrap so that wangle can pass them
+        // to AsyncServerSocket when calling bind(). This way the pre-bind
+        // options can be applied properly pre-bind.
+        bootstrap_[i].socketConfig.getSocketOptions() =
+            accConfig->getSocketOptions();
         bootstrap_[i].bind(addresses_[i].address);
       }
     }

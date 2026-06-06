@@ -11,12 +11,14 @@
 
 #include <folly/FileUtil.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
+#include <folly/io/SocketOptionMap.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncServerSocket.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/logging/xlog.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <folly/portability/Sockets.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
 #include <folly/system/HardwareConcurrency.h>
@@ -25,6 +27,7 @@
 #include <proxygen/httpserver/HTTPServer.h>
 #include <proxygen/httpserver/ResponseBuilder.h>
 #include <proxygen/httpserver/ScopedHTTPServer.h>
+#include <proxygen/httpserver/tests/HTTPServerTestUtils.h>
 #include <proxygen/lib/http/HTTPConnector.h>
 #include <proxygen/lib/utils/TestUtils.h>
 #include <wangle/acceptor/Acceptor.h>
@@ -39,8 +42,7 @@ using namespace CurlService;
 namespace {
 
 const std::string kTestDir = getContainingDirectory(XLOG_FILENAME).str();
-
-}
+} // namespace
 
 class ServerThread {
  private:
@@ -811,6 +813,33 @@ TEST(GetListenSocket, TestBootstrapWithBinding) {
 
   auto socketFd = server->getListenSocket();
   ASSERT_NE(-1, socketFd);
+}
+
+TEST(SocketOptions, AcceptorSocketOptionsApplyTcpMaxSegmentBeforeListen) {
+  const auto tcpMaxSegment = proxygen::test::getDifferentTcpMaxSegment(
+      proxygen::test::getDefaultLoopbackTcpMaxSegment());
+  HTTPServer::IPConfig cfg{folly::SocketAddress("127.0.0.1", 0),
+                           HTTPServer::Protocol::HTTP};
+  cfg.acceptorSocketOptions = folly::SocketOptionMap{
+      {{.level = IPPROTO_TCP,
+        .optname = TCP_MAXSEG,
+        .applyPos_ = folly::SocketOptionKey::ApplyPos::PRE_BIND},
+       tcpMaxSegment},
+  };
+
+  HTTPServerOptions options;
+  options.handlerFactories =
+      RequestHandlerChain().addThen<TestHandlerFactory>().build();
+
+  auto server = std::make_unique<HTTPServer>(std::move(options));
+  server->bind({cfg});
+
+  auto st = std::make_unique<ServerThread>(server.get());
+  EXPECT_TRUE(st->start());
+
+  EXPECT_EQ(proxygen::test::getTcpMaxSegment(
+                folly::NetworkSocket::fromFd(server->getListenSocket())),
+            tcpMaxSegment);
 }
 
 TEST(UseExistingSocket, TestWithExistingAsyncServerSocket) {

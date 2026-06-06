@@ -218,7 +218,8 @@ void HTTPServer::startTcp(const KeepAliveEventBaseVec& keepAliveEvbs) {
         serverSocket->useExistingSocket(
             folly::NetworkSocket::fromFd(config_.preboundSocket.value()));
       } else {
-        serverSocket->bind(config_.socketConfig.bindAddress);
+        serverSocket->bind(config_.socketConfig.bindAddress,
+                           config_.socketConfig.getSocketOptions());
       }
       serverSocket->listen(config_.socketConfig.acceptBacklog);
       serverSocket->startAccepting();

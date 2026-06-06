@@ -8,6 +8,7 @@
 
 #include <folly/logging/xlog.h>
 #include <folly/system/HardwareConcurrency.h>
+#include <proxygen/httpserver/tests/HTTPServerTestUtils.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
 #include <proxygen/lib/http/coro/HTTPCoroSession.h>
 #include <proxygen/lib/http/coro/HTTPFixedSource.h>
@@ -22,6 +23,7 @@
 
 #include <chrono>
 #include <folly/coro/GtestHelpers.h>
+#include <folly/io/SocketOptionMap.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
@@ -44,6 +46,8 @@ std::string_view getTestDir() {
       getContainingDirectory(XLOG_FILENAME).str();
   return kTestDir;
 }
+
+constexpr int kTestTcpMaxSegment = 1200;
 
 struct StatsFactory : public ServerFilterFactory {
   std::pair<HTTPSourceFilter*, HTTPSourceFilter*> makeFilters() override {
@@ -206,6 +210,11 @@ class HTTPServerTests : public TestWithParam<TransportType> {
         std::make_shared<InsecureVerifierDangerousDoNotUseInProduction>());
   }
 
+  const std::vector<folly::AsyncServerSocket::UniquePtr>& getServerSockets() {
+    CHECK(server_);
+    return server_->getServer().serverSockets_;
+  }
+
   std::string listenAddress_{"127.0.0.1"};
   uint16_t listenPort_{0};
   std::shared_ptr<HTTPHandler> handler_{std::make_shared<TestHandler>()};
@@ -263,6 +272,29 @@ TEST_P(HTTPServerTests, TestExistingSocket) {
       &evb);
   EXPECT_NE(response.headers.get(), nullptr);
   EXPECT_EQ(response.headers->getStatusCode(), 200);
+  stopServer();
+}
+
+TEST_F(HTTPServerTests, SocketConfigAppliesTcpMaxSegmentBeforeListen) {
+  const auto tcpMaxSegment = proxygen::test::getDifferentTcpMaxSegment(
+      proxygen::test::getDefaultLoopbackTcpMaxSegment());
+  serverConfig_.socketConfig.bindAddress.setFromIpPort(listenAddress_,
+                                                       listenPort_);
+  serverConfig_.socketConfig.setSocketOptions(folly::SocketOptionMap{
+      {{.level = IPPROTO_TCP,
+        .optname = TCP_MAXSEG,
+        .applyPos_ = folly::SocketOptionKey::ApplyPos::PRE_BIND},
+       tcpMaxSegment},
+  });
+  server_ =
+      ScopedHTTPServer::start(std::move(serverConfig_), handler_, nullptr);
+
+  auto& serverSockets = getServerSockets();
+  ASSERT_EQ(serverSockets.size(), 1);
+  EXPECT_EQ(proxygen::test::getTcpMaxSegment(
+                serverSockets.front()->getNetworkSocket()),
+            tcpMaxSegment);
+
   stopServer();
 }
 

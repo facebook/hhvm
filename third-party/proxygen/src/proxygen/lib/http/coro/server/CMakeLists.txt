@@ -13,7 +13,6 @@ proxygen_add_library(proxygen_http_coro_server_coro_acceptor
     proxygen_coro
     proxygen_http_session_http_session_codec_factory
     mvfst::mvfst_api_transport
-    mvfst::mvfst_common_address_quic_socket_address_bridge
     mvfst::mvfst_common_events_folly_eventbase
     Folly::folly_logging_logging
   EXPORTED_DEPS
@@ -30,7 +29,6 @@ proxygen_add_library(proxygen_http_coro_server_coro_httpserver
     proxygen_http_coro_filter_factory_handler
     proxygen_utils_time_util
     mvfst::mvfst_common_events_folly_eventbase
-    mvfst::mvfst_config
     mvfst::mvfst_congestion_control_server_congestion_controller_factory
     mvfst::mvfst_logging_file_qlogger
     Folly::folly_fibers_batch_semaphore

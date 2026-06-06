@@ -247,7 +247,6 @@ proxygen_add_library(proxygen_http_session_hq_session
     proxygen_utils_conditional_gate
     mvfst::mvfst_api_transport
     mvfst::mvfst_codec_types
-    mvfst::mvfst_common_address_quic_socket_address_bridge
     mvfst::mvfst_common_buf_util
     mvfst::mvfst_common_events_folly_eventbase
     mvfst::mvfst_constants

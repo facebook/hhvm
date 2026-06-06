@@ -318,8 +318,8 @@ bool HQSession::maybeRejectRequestAfterGoaway(quic::StreamId id) {
 }
 
 bool HQSession::onTransportReadyCommon() noexcept {
-  localAddr_ = quic::toFollySocketAddress(sock_->getLocalAddress());
-  peerAddr_ = quic::toFollySocketAddress(sock_->getPeerAddress());
+  localAddr_ = sock_->getLocalAddress();
+  peerAddr_ = sock_->getPeerAddress();
   initQuicProtocolInfo(*quicInfo_, *sock_);
   // NOTE: this can drop the connection if the next protocol is not supported
   if (!getAndCheckApplicationProtocol()) {
@@ -2388,8 +2388,8 @@ void HQSession::startNow() {
   // Initialize the local and peer address.
   // These will be updated in onTransportReadyCommon() in case they change (e.g.
   // happy eyeballs)
-  localAddr_ = quic::toFollySocketAddress(sock_->getLocalAddress());
-  peerAddr_ = quic::toFollySocketAddress(sock_->getPeerAddress());
+  localAddr_ = sock_->getLocalAddress();
+  peerAddr_ = sock_->getPeerAddress();
   // TODO: invoke socket.start() here
   resetTimeout();
   detail::setEgressWtH3Settings(egressSettings_);

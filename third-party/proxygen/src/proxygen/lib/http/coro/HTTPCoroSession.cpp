@@ -17,7 +17,6 @@
 #include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
 
 #include <folly/logging/xlog.h>
-#include <quic/common/address/QuicSocketAddressBridge.h>
 #include <quic/priority/HTTPPriorityQueue.h>
 #include <quic/state/QuicStreamUtilities.h>
 #include <wangle/acceptor/ConnectionManager.h>
@@ -488,8 +487,8 @@ HTTPQuicCoroSession::HTTPQuicCoroSession(
     : HTTPCoroSession(sock->getEventBase()
                           ->getTypedEventBase<quic::FollyQuicEventBase>()
                           ->getBackingEventBase(),
-                      quic::toFollySocketAddress(sock->getLocalAddress()),
-                      quic::toFollySocketAddress(sock->getPeerAddress()),
+                      sock->getLocalAddress(),
+                      sock->getPeerAddress(),
                       std::move(codec),
                       std::move(tinfo),
                       std::move(handler)),

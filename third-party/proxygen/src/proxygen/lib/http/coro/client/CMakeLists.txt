@@ -33,7 +33,6 @@ proxygen_add_library(proxygen_http_coro_client_http_connector
     proxygen_http_coro_util_cancellable_baton
     mvfst::mvfst_api_transport
     mvfst::mvfst_client
-    mvfst::mvfst_common_address_quic_socket_address_bridge
     mvfst::mvfst_common_events_folly_eventbase
     mvfst::mvfst_common_udpsocket_folly_async_udp_socket
     mvfst::mvfst_exception

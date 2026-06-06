@@ -13,7 +13,6 @@
 #include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
 #include <proxygen/lib/http/session/HQSession.h>
 #include <quic/api/QuicSocket.h>
-#include <quic/common/address/QuicSocketAddressBridge.h>
 #include <quic/common/events/FollyQuicEventBase.h>
 #include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <quic/congestion_control/CongestionControllerFactory.h>
@@ -91,11 +90,9 @@ void HQConnector::connect(
           .build(),
       useConnectionEndWithErrorCallback_);
   quicClient->setHostname(sni.value_or(connectAddr.getAddressStr()));
-  quicClient->addNewPeerAddress(
-      quic::fromFollySocketAddress<quic::SocketAddress>(connectAddr));
+  quicClient->addNewPeerAddress(connectAddr);
   if (localAddr.hasValue()) {
-    quicClient->setLocalAddress(
-        quic::fromFollySocketAddress<quic::SocketAddress>(*localAddr));
+    quicClient->setLocalAddress(*localAddr);
   }
   quicClient->setCongestionControllerFactory(
       std::make_shared<quic::DefaultCongestionControllerFactory>());

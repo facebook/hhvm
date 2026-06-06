@@ -85,7 +85,6 @@ proxygen_add_library(proxygen_coro
     proxygen_http_priority_functions
     proxygen_http_session_stats
     proxygen_http_webtransport_httpwebtransport
-    mvfst::mvfst_common_address_quic_socket_address_bridge
     mvfst::mvfst_state_quic_stream_utilities
     Folly::folly_conv
   EXPORTED_DEPS

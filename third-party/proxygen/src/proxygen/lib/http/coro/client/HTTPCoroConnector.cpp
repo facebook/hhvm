@@ -30,7 +30,6 @@
 #include <quic/QuicException.h>
 #include <quic/api/QuicSocket.h>
 #include <quic/client/QuicClientTransport.h>
-#include <quic/common/address/QuicSocketAddressBridge.h>
 #include <quic/common/events/FollyQuicEventBase.h>
 #include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
@@ -446,11 +445,9 @@ folly::coro::Task<HTTPCoroSession*> connectQuic(
   auto hostname = connParams.serverName.empty() ? connectAddr.getAddressStr()
                                                 : connParams.serverName;
   quicClient->setHostname(std::move(hostname));
-  quicClient->addNewPeerAddress(
-      quic::fromFollySocketAddress<quic::SocketAddress>(connectAddr));
+  quicClient->addNewPeerAddress(connectAddr);
   if (connParams.bindAddr != folly::AsyncSocket::anyAddress()) {
-    quicClient->setLocalAddress(
-        quic::fromFollySocketAddress<quic::SocketAddress>(connParams.bindAddr));
+    quicClient->setLocalAddress(connParams.bindAddr);
   }
   if (connParams.ccFactory) {
     quicClient->setCongestionControllerFactory(connParams.ccFactory);

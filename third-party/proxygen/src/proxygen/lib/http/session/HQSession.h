@@ -37,7 +37,6 @@
 #include <quic/QuicConstants.h>
 #include <quic/api/QuicSocket.h>
 #include <quic/common/BufUtil.h>
-#include <quic/common/address/QuicSocketAddressBridge.h>
 #include <quic/common/events/FollyQuicEventBase.h>
 #include <quic/priority/HTTPPriorityQueue.h>
 #include <quic/priority/PriorityQueue.h>
@@ -490,19 +489,11 @@ class HQSession
 
   // Override HTTPSessionBase address getter functions
   const folly::SocketAddress& getLocalAddress() const noexcept override {
-    if (!sock_ || !sock_->good()) {
-      return localAddr_;
-    }
-    return quic::toFollySocketAddressRef(sock_->getLocalAddress(),
-                                         cachedLocalAddr_);
+    return sock_ && sock_->good() ? sock_->getLocalAddress() : localAddr_;
   }
 
   const folly::SocketAddress& getPeerAddress() const noexcept override {
-    if (!sock_ || !sock_->good()) {
-      return peerAddr_;
-    }
-    return quic::toFollySocketAddressRef(sock_->getPeerAddress(),
-                                         cachedPeerAddr_);
+    return sock_ && sock_->good() ? sock_->getPeerAddress() : peerAddr_;
   }
 
   void enablePingProbes(std::chrono::seconds /*interval*/,
@@ -773,12 +764,6 @@ class HQSession
   // setEarlyDataAppParamsHandler) and may dereference it during teardown.
   std::unique_ptr<H3EarlyDataHandler> earlyDataHandler_;
   std::shared_ptr<quic::QuicSocket> sock_;
-
-  // Cached folly::SocketAddress for bridge conversion from quic::SocketAddress.
-  // On server builds (quic::SocketAddress == folly::SocketAddress) these are
-  // unused; toFollySocketAddressRef returns the original reference directly.
-  mutable folly::SocketAddress cachedLocalAddr_;
-  mutable folly::SocketAddress cachedPeerAddr_;
 
   // Callback pointer used for correctness testing. Not used
   // for session logic.

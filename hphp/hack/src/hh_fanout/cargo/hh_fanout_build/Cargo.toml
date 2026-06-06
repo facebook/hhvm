@@ -14,7 +14,7 @@ doctest = false
 
 [dependencies]
 bytemuck = { version = "1.25", features = ["const_zeroed", "derive", "min_const_generics", "must_cast", "nightly_portable_simd", "nightly_stdsimd"] }
-dashmap = { version = "6.1.0", features = ["rayon", "serde"] }
+dashmap = { version = "6.2.1", features = ["rayon", "serde"] }
 dep_graph_delta = { version = "0.0.0", path = "../../../deps" }
 depgraph_compress = { version = "0.0.0", path = "../../../depgraph/depgraph_compress/cargo/depgraph_compress" }
 depgraph_reader = { version = "0.0.0", path = "../../../depgraph/cargo/depgraph_reader" }

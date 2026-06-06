@@ -100,6 +100,15 @@ class TProcessorBase : public EventHandlerBase {
   static void removeProcessorEventHandler(
       std::shared_ptr<TProcessorEventHandler> handler);
 
+  /// Clears all handlers registered via addProcessorEventHandler_deprecated().
+  static void clearGlobalEventHandlers();
+
+  /// Removes every globally-registered handler except those in `keep`. Used to
+  /// retain a small allowlist of handlers while sweeping all others (e.g. when
+  /// disabling Thrift extension points but exempting a specific module).
+  static void removeGlobalEventHandlersExcept(
+      const std::vector<std::shared_ptr<TProcessorEventHandler>>& keep);
+
   static std::vector<folly::not_null_shared_ptr<TProcessorEventHandler>>&
   getHandlers();
 

@@ -2341,6 +2341,25 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         ModulesSpecification::Info{std::move(module), std::move(name)});
   }
 
+  /// Clears all ServerModules previously added via addModule().
+  void clearServerModules() { clearServerModulesExcept({}); }
+
+  /// Clears all ServerModules previously added via addModule() except those
+  /// whose name is in `keep`. Note this only affects modules already present in
+  /// the unprocessed specification; modules added later during server setup
+  /// (e.g. by ThriftServiceInstallers during go()) are unaffected.
+  void clearServerModulesExcept(const std::unordered_set<std::string>& keep) {
+    CHECK(configMutable());
+    ModulesSpecification kept;
+    for (auto& info : unprocessedModulesSpecification_.infos) {
+      if (keep.contains(info.name)) {
+        kept.names.insert(info.name);
+        kept.infos.push_back(std::move(info));
+      }
+    }
+    unprocessedModulesSpecification_ = std::move(kept);
+  }
+
   bool hasModule(const std::string_view name) const noexcept {
     CHECK(processedServiceDescription_)
         << "Server must be set up before calling this method";

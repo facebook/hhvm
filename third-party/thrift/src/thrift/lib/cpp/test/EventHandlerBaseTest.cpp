@@ -162,6 +162,65 @@ TEST_F(TProcessorEventHandlerTest, registrationActivity) {
   EXPECT_EQ(count(), 0);
 }
 
+TEST_F(TProcessorEventHandlerTest, ClearGlobalEventHandlers) {
+  auto h1 = std::make_shared<EventHandler>();
+  auto h2 = std::make_shared<EventHandler>();
+  TProcessorBase::addProcessorEventHandler_deprecated(h1);
+  TProcessorBase::addProcessorEventHandler_deprecated(h2);
+  EXPECT_EQ(TProcessorBase::getHandlers().size(), 2);
+
+  TProcessorBase::clearGlobalEventHandlers();
+  EXPECT_TRUE(TProcessorBase::getHandlers().empty());
+}
+
+TEST_F(TProcessorEventHandlerTest, ClearGlobalEventHandlersWhenEmpty) {
+  TProcessorBase::clearGlobalEventHandlers();
+  EXPECT_TRUE(TProcessorBase::getHandlers().empty());
+}
+
+TEST_F(TProcessorEventHandlerTest, AddAfterClearGlobalEventHandlers) {
+  auto h1 = std::make_shared<EventHandler>();
+  auto h2 = std::make_shared<EventHandler>();
+  TProcessorBase::addProcessorEventHandler_deprecated(h1);
+  TProcessorBase::clearGlobalEventHandlers();
+
+  TProcessorBase::addProcessorEventHandler_deprecated(h2);
+  EXPECT_EQ(TProcessorBase::getHandlers().size(), 1);
+  EXPECT_EQ(TProcessorBase::getHandlers()[0], h2);
+
+  TProcessorBase::clearGlobalEventHandlers();
+}
+
+TEST_F(
+    TProcessorEventHandlerTest, RemoveGlobalEventHandlersExceptKeepsAllowlist) {
+  auto keep = std::make_shared<EventHandler>();
+  auto drop1 = std::make_shared<EventHandler>();
+  auto drop2 = std::make_shared<EventHandler>();
+  TProcessorBase::addProcessorEventHandler_deprecated(drop1);
+  TProcessorBase::addProcessorEventHandler_deprecated(keep);
+  TProcessorBase::addProcessorEventHandler_deprecated(drop2);
+
+  TProcessorBase::removeGlobalEventHandlersExcept({keep});
+
+  ASSERT_EQ(TProcessorBase::getHandlers().size(), 1);
+  EXPECT_EQ(TProcessorBase::getHandlers()[0], keep);
+
+  TProcessorBase::clearGlobalEventHandlers();
+}
+
+TEST_F(
+    TProcessorEventHandlerTest,
+    RemoveGlobalEventHandlersExceptEmptyKeepClearsAll) {
+  TProcessorBase::addProcessorEventHandler_deprecated(
+      std::make_shared<EventHandler>());
+  TProcessorBase::addProcessorEventHandler_deprecated(
+      std::make_shared<EventHandler>());
+
+  TProcessorBase::removeGlobalEventHandlersExcept({});
+
+  EXPECT_TRUE(TProcessorBase::getHandlers().empty());
+}
+
 TEST_F(TProcessorEventHandlerTest, RuntimeInitClientHandlers) {
   auto h1 = std::make_shared<EventHandler>();
   auto h2 = std::make_shared<EventHandler>();

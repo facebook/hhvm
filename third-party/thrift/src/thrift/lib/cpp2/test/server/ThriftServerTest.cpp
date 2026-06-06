@@ -3890,6 +3890,46 @@ TEST(ThriftServer, GetInstalledServerModulesNames) {
   }
 }
 
+TEST(ThriftServer, ClearServerModulesExcept) {
+  ScopedServerInterfaceThread runner(
+      std::make_shared<apache::thrift::ServiceHandler<TestService>>(),
+      "::1",
+      0,
+      [](auto& ts) {
+        class KeepModule : public apache::thrift::ServerModule {
+         public:
+          std::string getName() const override { return "KeepModule"; }
+        };
+        class DropModule : public apache::thrift::ServerModule {
+         public:
+          std::string getName() const override { return "DropModule"; }
+        };
+        ts.addModule(std::make_unique<KeepModule>());
+        ts.addModule(std::make_unique<DropModule>());
+        ts.clearServerModulesExcept({"KeepModule"});
+      });
+
+  EXPECT_TRUE(runner.getThriftServer().hasModule("KeepModule"));
+  EXPECT_FALSE(runner.getThriftServer().hasModule("DropModule"));
+}
+
+TEST(ThriftServer, ClearServerModulesRemovesAll) {
+  ScopedServerInterfaceThread runner(
+      std::make_shared<apache::thrift::ServiceHandler<TestService>>(),
+      "::1",
+      0,
+      [](auto& ts) {
+        class TestModule : public apache::thrift::ServerModule {
+         public:
+          std::string getName() const override { return "TestModule"; }
+        };
+        ts.addModule(std::make_unique<TestModule>());
+        ts.clearServerModules();
+      });
+
+  EXPECT_FALSE(runner.getThriftServer().hasModule("TestModule"));
+}
+
 TEST(ThriftServer, GetSetMaxRequests) {
   auto getExecutionLimitRequests = [](const ThriftServer& server) {
     return server.resourcePoolSet()

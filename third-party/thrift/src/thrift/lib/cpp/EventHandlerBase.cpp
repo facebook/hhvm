@@ -124,6 +124,25 @@ void TProcessorBase::removeProcessorEventHandler(
       getHandlers().end());
 }
 
+void TProcessorBase::clearGlobalEventHandlers() {
+  std::unique_lock lock{getRWMutex()};
+  getHandlers().clear();
+}
+
+void TProcessorBase::removeGlobalEventHandlersExcept(
+    const std::vector<std::shared_ptr<TProcessorEventHandler>>& keep) {
+  std::unique_lock lock{getRWMutex()};
+  auto& handlers = getHandlers();
+  handlers.erase(
+      std::remove_if(
+          handlers.begin(),
+          handlers.end(),
+          [&keep](const auto& handler) {
+            return std::find(keep.begin(), keep.end(), handler) == keep.end();
+          }),
+      handlers.end());
+}
+
 folly::SharedMutex& TProcessorBase::getRWMutex() {
   static auto* mutex = new folly::SharedMutex{};
   return *mutex;

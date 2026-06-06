@@ -17,6 +17,7 @@ trait RequireExtendsTestContext {
 }
 
 trait RequireThisAsTestContext {
+  /* HH_IGNORE[12043] require-this-as constraint; class does not use trait */
   require this as WWWTest;
 
   public function test_require_this_as(Target $obj): void {

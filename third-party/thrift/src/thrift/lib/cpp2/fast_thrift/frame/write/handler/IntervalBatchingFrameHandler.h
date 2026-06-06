@@ -46,32 +46,34 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/IntervalBatchingHandlerConfig.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/WriteCompletionTracker.h>
 
 #include <functional>
 #include <stdexcept>
 
 namespace apache::thrift::fast_thrift::frame::write::handler {
 
-class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
-                                     private folly::HHWheelTimer::Callback {
+template <WriteCompletionTracker Tracker = NoOpWriteCompletionTracker>
+class IntervalBatchingFrameHandlerT : private folly::EventBase::LoopCallback,
+                                      private folly::HHWheelTimer::Callback {
  public:
   // Detected by makeHandlerNode; pipeline drives onWriteReady through this.
   channel_pipeline::WriteReadyHook writeReadyHook_;
 
-  explicit IntervalBatchingFrameHandler(
+  explicit IntervalBatchingFrameHandlerT(
       IntervalBatchingHandlerConfig config = {}) noexcept
       : config_(std::move(config)) {}
 
-  ~IntervalBatchingFrameHandler() override {
+  ~IntervalBatchingFrameHandlerT() override {
     cancelLoopCallbackIfScheduled();
     cancelTimeout();
   }
 
-  IntervalBatchingFrameHandler(const IntervalBatchingFrameHandler&) = delete;
-  IntervalBatchingFrameHandler& operator=(const IntervalBatchingFrameHandler&) =
-      delete;
-  IntervalBatchingFrameHandler(IntervalBatchingFrameHandler&&) = delete;
-  IntervalBatchingFrameHandler& operator=(IntervalBatchingFrameHandler&&) =
+  IntervalBatchingFrameHandlerT(const IntervalBatchingFrameHandlerT&) = delete;
+  IntervalBatchingFrameHandlerT& operator=(
+      const IntervalBatchingFrameHandlerT&) = delete;
+  IntervalBatchingFrameHandlerT(IntervalBatchingFrameHandlerT&&) = delete;
+  IntervalBatchingFrameHandlerT& operator=(IntervalBatchingFrameHandlerT&&) =
       delete;
 
   // ===========================================================================
@@ -111,6 +113,7 @@ class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
 
     totalBytesBuffered_ += frameSize;
     ++bufferedWritesCount_;
+    tracker_.onWrite();
 
     // While downstream is backpressured we still buffer, but don't schedule
     // any flush — onWriteReady will drain when downstream is ready.
@@ -141,6 +144,16 @@ class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
     flushAndPropagateErrors(ctx);
   }
 
+  // Receives the per-pipeline event fired by TransportHandlerT. The tracker
+  // (which owns the per-pipeline event type via its EventFactory) drives
+  // per-batch attribution. With NoOpWriteCompletionTracker the dispatch is
+  // inline no-op.
+  template <typename Context>
+  void onEvent(
+      Context& ctx, const channel_pipeline::TypeErasedBox& box) noexcept {
+    tracker_.onEvent(ctx, box);
+  }
+
   /**
    * Synchronously flush all pending writes.
    * Cancels any scheduled callbacks and flushes immediately.
@@ -162,6 +175,7 @@ class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
   size_t pendingFrames() const noexcept { return bufferedWritesCount_; }
   bool empty() const noexcept { return bufferedWritesQueue_.empty(); }
   bool isBackpressured() const noexcept { return backpressured_; }
+  Tracker& tracker() noexcept { return tracker_; }
 
  private:
   // ===========================================================================
@@ -231,6 +245,7 @@ class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
     bufferedWritesCount_ = 0;
     totalBytesBuffered_ = 0;
     earlyFlushRequested_ = false;
+    tracker_.onFlush();
 
     auto result =
         ctx.fireWrite(channel_pipeline::TypeErasedBox(std::move(batchToSend)));
@@ -269,7 +284,15 @@ class IntervalBatchingFrameHandler : private folly::EventBase::LoopCallback,
   bool backpressured_{false};
 
   std::function<void()> flushFn_;
+
+  // Per-write tracker mixin; NoOp by default.
+  [[no_unique_address]] Tracker tracker_{};
 };
+
+// Default specialization preserves the existing class name for callers that
+// don't opt into per-write tracking.
+using IntervalBatchingFrameHandler =
+    IntervalBatchingFrameHandlerT<NoOpWriteCompletionTracker>;
 
 static_assert(
     apache::thrift::fast_thrift::channel_pipeline::OutboundHandler<

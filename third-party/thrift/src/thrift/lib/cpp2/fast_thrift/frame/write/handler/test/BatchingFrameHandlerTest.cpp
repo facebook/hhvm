@@ -662,4 +662,83 @@ TEST_F(BatchingFrameHandlerPipelineTest, TransportErrorPropagatesToTail) {
   EXPECT_EQ(app_.exceptionCount(), 1);
 }
 
+// ============================================================================
+// Tracker mixin: verify the hooks (onWrite, onFlush, onWriteComplete) fire
+// when the batcher is instantiated with a non-NoOp tracker.
+// ============================================================================
+
+namespace {
+
+// Tracker that captures hook invocations. Its onEvent records the raw
+// TypeErasedBox arrival count — the batcher just delegates onEvent through
+// without unpacking the type.
+struct CapturingTracker {
+  size_t onWriteCount{0};
+  size_t onFlushCount{0};
+  size_t onEventCount{0};
+
+  void onWrite() noexcept { ++onWriteCount; }
+  void onFlush() noexcept { ++onFlushCount; }
+
+  template <typename Context>
+  void onEvent(
+      Context& /*ctx*/,
+      const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
+      /*box*/) noexcept {
+    ++onEventCount;
+  }
+};
+
+static_assert(WriteCompletionTracker<CapturingTracker>);
+
+class BatchingFrameHandlerTrackerTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    evb_ = std::make_unique<folly::EventBase>();
+    ctx_ = std::make_unique<MockContext>(evb_.get());
+  }
+
+  std::unique_ptr<folly::EventBase> evb_;
+  std::unique_ptr<MockContext> ctx_;
+};
+
+} // namespace
+
+TEST_F(BatchingFrameHandlerTrackerTest, TrackerHooksFireOnWriteAndFlush) {
+  BatchingFrameHandlerT<CapturingTracker> handler({
+      .maxPendingBytes = 64 * 1024,
+      .maxPendingFrames = 3,
+  });
+  handler.handlerAdded(*ctx_);
+
+  // Three writes — third one triggers a flush at the frame threshold.
+  ASSERT_EQ(
+      handler.onWrite(*ctx_, wrapFrame(makePayload(64))),
+      apache::thrift::fast_thrift::channel_pipeline::Result::Success);
+  ASSERT_EQ(
+      handler.onWrite(*ctx_, wrapFrame(makePayload(64))),
+      apache::thrift::fast_thrift::channel_pipeline::Result::Success);
+  ASSERT_EQ(
+      handler.onWrite(*ctx_, wrapFrame(makePayload(64))),
+      apache::thrift::fast_thrift::channel_pipeline::Result::Success);
+
+  EXPECT_EQ(handler.tracker().onWriteCount, 3u);
+  EXPECT_EQ(handler.tracker().onFlushCount, 1u);
+}
+
+TEST_F(BatchingFrameHandlerTrackerTest, OnEventDelegatesToTracker) {
+  BatchingFrameHandlerT<CapturingTracker> handler;
+  handler.handlerAdded(*ctx_);
+
+  // The batcher's onEvent should pass the box through to the tracker
+  // unchanged. The tracker owns the per-pipeline event type discrimination.
+  // We pass a dummy int box twice and confirm the tracker received both.
+  handler.onEvent(
+      *ctx_, apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(0));
+  handler.onEvent(
+      *ctx_, apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(0));
+
+  EXPECT_EQ(handler.tracker().onEventCount, 2u);
+}
+
 } // namespace apache::thrift::fast_thrift::frame::write::handler

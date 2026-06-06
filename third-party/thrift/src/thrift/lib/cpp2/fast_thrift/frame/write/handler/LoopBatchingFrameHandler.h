@@ -37,22 +37,25 @@
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/WriteCompletionTracker.h>
 
 #include <functional>
 #include <stdexcept>
 
 namespace apache::thrift::fast_thrift::frame::write::handler {
 
-class LoopBatchingFrameHandler : public folly::EventBase::LoopCallback {
+template <WriteCompletionTracker Tracker = NoOpWriteCompletionTracker>
+class LoopBatchingFrameHandlerT : public folly::EventBase::LoopCallback {
  public:
-  LoopBatchingFrameHandler() noexcept = default;
+  LoopBatchingFrameHandlerT() noexcept = default;
 
-  ~LoopBatchingFrameHandler() override { cancelLoopCallbackIfScheduled(); }
+  ~LoopBatchingFrameHandlerT() override { cancelLoopCallbackIfScheduled(); }
 
-  LoopBatchingFrameHandler(const LoopBatchingFrameHandler&) = delete;
-  LoopBatchingFrameHandler& operator=(const LoopBatchingFrameHandler&) = delete;
-  LoopBatchingFrameHandler(LoopBatchingFrameHandler&&) = delete;
-  LoopBatchingFrameHandler& operator=(LoopBatchingFrameHandler&&) = delete;
+  LoopBatchingFrameHandlerT(const LoopBatchingFrameHandlerT&) = delete;
+  LoopBatchingFrameHandlerT& operator=(const LoopBatchingFrameHandlerT&) =
+      delete;
+  LoopBatchingFrameHandlerT(LoopBatchingFrameHandlerT&&) = delete;
+  LoopBatchingFrameHandlerT& operator=(LoopBatchingFrameHandlerT&&) = delete;
 
   // ===========================================================================
   // HandlerLifecycle
@@ -85,6 +88,7 @@ class LoopBatchingFrameHandler : public folly::EventBase::LoopCallback {
     }
 
     bufferedWritesQueue_.append(std::move(frame));
+    tracker_.onWrite();
     scheduleFlushIfNeeded();
     return channel_pipeline::Result::Success;
   }
@@ -96,6 +100,16 @@ class LoopBatchingFrameHandler : public folly::EventBase::LoopCallback {
 
   template <typename Context>
   void onWriteReady(Context& /*ctx*/) noexcept {}
+
+  // Receives the per-pipeline event fired by TransportHandlerT. The tracker
+  // (which owns the per-pipeline event type via its EventFactory) drives
+  // per-batch attribution. With NoOpWriteCompletionTracker the dispatch is
+  // inline no-op.
+  template <typename Context>
+  void onEvent(
+      Context& ctx, const channel_pipeline::TypeErasedBox& box) noexcept {
+    tracker_.onEvent(ctx, box);
+  }
 
   /**
    * Synchronously flush all pending writes.
@@ -130,6 +144,7 @@ class LoopBatchingFrameHandler : public folly::EventBase::LoopCallback {
 
   bool isScheduled() const noexcept { return scheduled_; }
   bool empty() const noexcept { return bufferedWritesQueue_.empty(); }
+  Tracker& tracker() noexcept { return tracker_; }
 
  private:
   void scheduleFlushIfNeeded() noexcept {
@@ -168,6 +183,7 @@ class LoopBatchingFrameHandler : public folly::EventBase::LoopCallback {
       return channel_pipeline::Result::Success;
     }
 
+    tracker_.onFlush();
     return ctx.fireWrite(
         channel_pipeline::TypeErasedBox(std::move(batchToSend)));
   }
@@ -186,6 +202,14 @@ class LoopBatchingFrameHandler : public folly::EventBase::LoopCallback {
   folly::IOBufQueue bufferedWritesQueue_{folly::IOBufQueue::cacheChainLength()};
 
   std::function<void()> flushFn_;
+
+  // Per-write tracker mixin; NoOp by default.
+  [[no_unique_address]] Tracker tracker_{};
 };
+
+// Default specialization preserves the existing class name for callers that
+// don't opt into per-write tracking.
+using LoopBatchingFrameHandler =
+    LoopBatchingFrameHandlerT<NoOpWriteCompletionTracker>;
 
 } // namespace apache::thrift::fast_thrift::frame::write::handler

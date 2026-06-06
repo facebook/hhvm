@@ -1063,4 +1063,176 @@ TEST_F(TransportHandlerTest, DrainTimeoutForcesClose) {
   pipeline.reset();
 }
 
+// =========================================================================
+// Templated event-factory path: verify writeSuccess / writeErr invoke a
+// non-NoOp factory with the expected (status, bytes) arguments. The default
+// NoOp path is already covered by every other test in this file via the
+// `TransportHandler` alias.
+// =========================================================================
+
+namespace {
+
+struct CapturingFactoryState {
+  static inline std::vector<std::pair<WriteCompletionStatus, size_t>> calls;
+};
+
+enum class TestEvent : std::uint32_t { WriteComplete, Count };
+
+struct CapturingWriteCompleteEventFactory {
+  static std::pair<TestEvent, TypeErasedBox> make(
+      WriteCompletionStatus status, size_t bytes) noexcept {
+    CapturingFactoryState::calls.emplace_back(status, bytes);
+    return std::pair<TestEvent, TypeErasedBox>(
+        TestEvent::WriteComplete, TypeErasedBox{});
+  }
+};
+
+static_assert(
+    WriteCompleteEventFactory<CapturingWriteCompleteEventFactory>,
+    "test factory must satisfy WriteCompleteEventFactory");
+
+} // namespace
+
+class TransportHandlerEventTest : public ::testing::Test {
+ protected:
+  using HandlerT = TransportHandlerT<CapturingWriteCompleteEventFactory>;
+
+  void SetUp() override {
+    CapturingFactoryState::calls.clear();
+    appHandler_.reset();
+  }
+
+  std::pair<HandlerT::Ptr, PipelineImpl::Ptr> createHandlerAndPipeline() {
+    auto socket = folly::AsyncTransport::UniquePtr(
+        new NiceMock<folly::test::MockAsyncTransport>());
+    mockSocket_ = static_cast<folly::test::MockAsyncTransport*>(socket.get());
+    ON_CALL(*mockSocket_, good()).WillByDefault(Return(true));
+    ON_CALL(*mockSocket_, getEventBase()).WillByDefault(Return(&evb_));
+
+    auto handler = HandlerT::create(std::move(socket), 256, 4096);
+    auto pipeline =
+        PipelineBuilder<HandlerT, MockAppHandler, SimpleBufferAllocator>()
+            .setEventBase(&evb_)
+            .setHead(handler.get())
+            .setTail(&appHandler_)
+            .setAllocator(&allocator_)
+            .build();
+    handler->setPipeline(pipeline.get());
+    return {std::move(handler), std::move(pipeline)};
+  }
+
+  folly::EventBase evb_;
+  folly::test::MockAsyncTransport* mockSocket_{nullptr};
+  MockAppHandler appHandler_;
+  SimpleBufferAllocator allocator_;
+};
+
+TEST_F(TransportHandlerEventTest, WriteSuccessInvokesFactoryWithSuccessStatus) {
+  auto [handler, pipeline] = createHandlerAndPipeline();
+  handler->onConnect();
+
+  folly::AsyncTransport::WriteCallback* capturedCallback = nullptr;
+  EXPECT_CALL(*mockSocket_, writeChain(_, _, _))
+      .WillOnce(SaveArg<0>(&capturedCallback));
+
+  Result result =
+      handler->onWrite(TypeErasedBox(folly::IOBuf::copyBuffer("payload")));
+  EXPECT_EQ(result, Result::Backpressure);
+  ASSERT_NE(capturedCallback, nullptr);
+
+  capturedCallback->writeSuccess();
+
+  const std::vector<std::pair<WriteCompletionStatus, size_t>> expected = {
+      {WriteCompletionStatus::Success, 0}};
+  EXPECT_EQ(CapturingFactoryState::calls, expected);
+}
+
+TEST_F(
+    TransportHandlerEventTest, WriteErrInvokesFactoryWithErrorStatusAndBytes) {
+  auto [handler, pipeline] = createHandlerAndPipeline();
+  handler->onConnect();
+
+  folly::AsyncTransport::WriteCallback* capturedCallback = nullptr;
+  EXPECT_CALL(*mockSocket_, writeChain(_, _, _))
+      .WillOnce(SaveArg<0>(&capturedCallback));
+
+  Result result =
+      handler->onWrite(TypeErasedBox(folly::IOBuf::copyBuffer("payload")));
+  EXPECT_EQ(result, Result::Backpressure);
+  ASSERT_NE(capturedCallback, nullptr);
+
+  constexpr size_t kBytesWritten = 42;
+  folly::AsyncSocketException ex(
+      folly::AsyncSocketException::NETWORK_ERROR, "test write failure");
+  capturedCallback->writeErr(kBytesWritten, ex);
+
+  const std::vector<std::pair<WriteCompletionStatus, size_t>> expected = {
+      {WriteCompletionStatus::Error, kBytesWritten}};
+  EXPECT_EQ(CapturingFactoryState::calls, expected);
+}
+
+// Completion events fire only while Open. A write that lands during the
+// graceful drain (Closing) must not produce a success event.
+TEST_F(TransportHandlerEventTest, WriteSuccessDuringDrainSuppressesEvent) {
+  auto [handler, pipeline] = createHandlerAndPipeline();
+  handler->onConnect();
+
+  folly::AsyncTransport::WriteCallback* cb = nullptr;
+  EXPECT_CALL(*mockSocket_, writeChain(_, _, _)).WillOnce(SaveArg<0>(&cb));
+  (void)handler->onWrite(TypeErasedBox(folly::IOBuf::copyBuffer("payload")));
+  ASSERT_NE(cb, nullptr);
+
+  // Begin a graceful close while the write is still pending: state -> Closing.
+  handler->close(folly::exception_wrapper{});
+  ASSERT_EQ(handler->state(), HandlerT::State::Closing);
+
+  // The pending write lands during the drain; no completion event fires.
+  cb->writeSuccess();
+
+  EXPECT_EQ(handler->state(), HandlerT::State::Closed);
+  EXPECT_TRUE(CapturingFactoryState::calls.empty());
+
+  handler->resetPipeline();
+  pipeline.reset();
+}
+
+// In a write-error cascade only the error that lands while Open (and thus
+// initiates the close) fires a completion event; errors that cascade during
+// the drain are suppressed symmetrically with success.
+TEST_F(TransportHandlerEventTest, WriteErrCascadeFiresOnlyInitiatingError) {
+  auto [handler, pipeline] = createHandlerAndPipeline();
+  handler->onConnect();
+
+  std::vector<folly::AsyncTransport::WriteCallback*> cbs;
+  EXPECT_CALL(*mockSocket_, writeChain(_, _, _))
+      .Times(3)
+      .WillRepeatedly([&](folly::AsyncTransport::WriteCallback* cb,
+                          std::shared_ptr<folly::IOBuf>,
+                          folly::WriteFlags) { cbs.push_back(cb); });
+
+  for (int i = 0; i < 3; ++i) {
+    (void)handler->onWrite(TypeErasedBox(folly::IOBuf::copyBuffer("x")));
+  }
+
+  constexpr size_t kBytesWritten = 7;
+  folly::AsyncSocketException ex(
+      folly::AsyncSocketException::NETWORK_ERROR, "broken pipe");
+
+  // First error lands while Open: fires one completion event, begins close.
+  cbs[0]->writeErr(kBytesWritten, ex);
+  ASSERT_EQ(handler->state(), HandlerT::State::Closing);
+
+  // Remaining errors cascade during the drain: suppressed.
+  cbs[1]->writeErr(0, ex);
+  cbs[2]->writeErr(0, ex);
+  ASSERT_EQ(handler->state(), HandlerT::State::Closed);
+
+  const std::vector<std::pair<WriteCompletionStatus, size_t>> expected = {
+      {WriteCompletionStatus::Error, kBytesWritten}};
+  EXPECT_EQ(CapturingFactoryState::calls, expected);
+
+  handler->resetPipeline();
+  pipeline.reset();
+}
+
 } // namespace apache::thrift::fast_thrift::transport

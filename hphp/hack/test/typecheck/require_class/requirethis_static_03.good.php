@@ -12,6 +12,7 @@ class D extends C {
 }
 
 trait T {
+    /* HH_IGNORE[12043] require-this-as constraint; class does not use trait */
     require this as C;
 
     public function foo(): void {

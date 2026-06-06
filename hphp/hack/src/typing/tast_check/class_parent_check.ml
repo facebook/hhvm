@@ -155,6 +155,32 @@ let duplicated_used_traits env c =
                  }))
     traits
 
+let check_redundant_require_this_as env c req_this_as =
+  (* Only check for traits *)
+  if not (Ast_defs.is_c_trait c.c_kind) then
+    ()
+  else
+    let (_, trait_name) = c.c_name in
+    List.iter req_this_as ~f:(fun (p, h) ->
+        match h with
+        | Aast.Happly ((_, class_name), _) -> begin
+          match Env.get_class env class_name with
+          | Decl_entry.Found cls ->
+            (* Check if the class uses this trait (directly or transitively) *)
+            if not (Cls.has_ancestor cls trait_name) then
+              (* Class does not use the trait, emit warning *)
+              Env.add_warning
+                env
+                ( p,
+                  Typing_warning.Redundant_require_this_as,
+                  {
+                    Typing_warning.Redundant_require_this_as.trait_name;
+                    class_name;
+                  } )
+          | _ -> ()
+        end
+        | _ -> ())
+
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -180,5 +206,7 @@ let handler =
         ~f:(check_is_class env ~require_constraint_check:(Some RequireClass));
       List.iter
         req_this_as
-        ~f:(check_is_class env ~require_constraint_check:(Some RequireThisAs))
+        ~f:(check_is_class env ~require_constraint_check:(Some RequireThisAs));
+      (* Check for redundant require this as *)
+      check_redundant_require_this_as env c req_this_as
   end

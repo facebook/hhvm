@@ -1027,6 +1027,33 @@ module Sealed_not_override = struct
   let quickfixes _ = []
 end
 
+module Redundant_require_this_as = struct
+  type t = Typing_warning.Redundant_require_this_as.t
+
+  let code = Codes.RedundantRequireThisAs
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim { Typing_warning.Redundant_require_this_as.trait_name; class_name }
+      =
+    let trait_name = Utils.strip_ns trait_name in
+    let class_name = Utils.strip_ns class_name in
+    "Trait "
+    ^ Markdown_lite.md_codify trait_name
+    ^ " has `require this as "
+    ^ Markdown_lite.md_codify class_name
+    ^ "` constraint but class "
+    ^ Markdown_lite.md_codify class_name
+    ^ " does not use this trait. "
+    ^ "Replace `require this as` with `require extends`"
+
+  let reasons _ = []
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -1062,6 +1089,8 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Consistent_construct_abstract_final)
   | Typing_warning.Dynamic_call -> (module Dynamic_call_warning)
   | Typing_warning.Sealed_not_override -> (module Sealed_not_override)
+  | Typing_warning.Redundant_require_this_as ->
+    (module Redundant_require_this_as)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :
@@ -1093,6 +1122,7 @@ let is_type_dependent (type a x) (kind : (x, a) Typing_warning.kind) : bool =
   | Typing_warning.Sealed_not_subtype -> false
   | Typing_warning.Sealed_not_override -> false
   | Typing_warning.Consistent_construct_abstract_final -> false
+  | Typing_warning.Redundant_require_this_as -> false
   (* Type-dependent: rely on type precision that could differ under dynamic *)
   | Typing_warning.Is_as_always -> true
   | Typing_warning.Non_disjoint_check -> true

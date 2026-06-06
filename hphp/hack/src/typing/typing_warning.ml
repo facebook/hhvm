@@ -291,6 +291,13 @@ module Sealed_not_override = struct
   }
 end
 
+module Redundant_require_this_as = struct
+  type t = {
+    trait_name: string;
+    class_name: string;
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
   | Is_as_always : (Is_as_always.t, migrated) kind
@@ -321,5 +328,6 @@ type (_, _) kind =
       : (Consistent_construct_abstract_final.t, warn) kind
   | Dynamic_call : (Dynamic_call.t, warn) kind
   | Sealed_not_override : (Sealed_not_override.t, warn) kind
+  | Redundant_require_this_as : (Redundant_require_this_as.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

@@ -852,6 +852,7 @@ module Warning = struct
     | DynamicArrayAccess [@value 12040]
     | SealedNotOverride [@value 12041]
     | DynamicPropertyAccess [@value 12042]
+    | RedundantRequireThisAs [@value 12043]
       (* Add new Warning codes here! Comment out when deprecating. *)
   [@@deriving enum, ord, show { with_path = false }]
 end

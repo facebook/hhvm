@@ -1,0 +1,4 @@
+WARN: File "redundant_require_this_as.php", line 12, characters 19-39:
+Trait `RRTAViolationTrait` has `require this as `RRTAClassWithoutTrait`` constraint but class `RRTAClassWithoutTrait` does not use this trait. Replace `require this as` with `require extends` (Warn[12043])
+WARN: File "redundant_require_this_as.php", line 54, characters 19-40:
+Trait `RRTATransitiveTrait` has `require this as `RRTAClassTransitiveBad`` constraint but class `RRTAClassTransitiveBad` does not use this trait. Replace `require this as` with `require extends` (Warn[12043])

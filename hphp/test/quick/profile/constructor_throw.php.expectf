@@ -1,0 +1,7 @@
+
+Fatal error: Uncaught exception escaping setprofile callback: exception 'Exception' with message '' in %s/constructor_throw.php:10
+Stack trace:
+#0 %s/constructor_throw.php(6): handler()
+#1 %s/constructor_throw.php(16): X->__construct()
+#2 (): test()
+#3 %s/constructor_throw.php on line 6

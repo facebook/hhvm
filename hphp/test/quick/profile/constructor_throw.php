@@ -15,6 +15,6 @@ function handler($kind, $name) :mixed{
   try {
     new X;
   } catch (Exception $e) {
-    echo "ok\n";
+    echo "not ok\n";
   }
 }

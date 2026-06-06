@@ -1,0 +1,8 @@
+
+Fatal error: Uncaught exception escaping setprofile callback: exception 'Exception' with message 'x' in %s/yield-suspend-hook.php:8
+Stack trace:
+#0 %s/yield-suspend-hook.php(15): doh()
+#1 (): hey()
+#2 %s/yield-suspend-hook.php(24): Generator->rewind()
+#3 (): main_yield_suspend_hook()
+#4 {main} in %s/yield-suspend-hook.php on line 15

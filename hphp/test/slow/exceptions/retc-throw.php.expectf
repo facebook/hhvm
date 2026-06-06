@@ -1,0 +1,7 @@
+
+Fatal error: Uncaught exception escaping setprofile callback: exception 'Exception' with message 'Surprise' in %s/retc-throw.php:10
+Stack trace:
+#0 %s/retc-throw.php(14): prof()
+#1 %s/retc-throw.php(20): main()
+#2 (): entrypoint_retcthrow()
+#3 {main} in %s/retc-throw.php on line 14

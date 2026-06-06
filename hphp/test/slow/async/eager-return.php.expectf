@@ -1,0 +1,21 @@
+int(42)
+int(42)
+int(42)
+int(42)
+int(42)
+int(42)
+int(42)
+int(42)
+int(42)
+
+Fatal error: Uncaught exception escaping setprofile callback: exception 'Exception' with message '' in %s/eager-return.php:46
+Stack trace:
+#0 %s/eager-return.php(14): Closure$main_eager_return()
+#1 %s/eager-return.php(22): baz()
+#2 %s/eager-return.php(29): bar()
+#3 %s/eager-return.php(49): run()
+#4 (): main_eager_return()
+#5 (): Closure$__SystemLib\enter_async_entry_point()
+#6 (): HH\Asio\join()
+#7 (): __SystemLib\enter_async_entry_point()
+#8 {main} in %s/eager-return.php on line 14

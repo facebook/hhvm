@@ -1,0 +1,11 @@
+a woke up
+throwing
+
+Fatal error: Uncaught exception escaping setprofile callback: exception 'Exception' with message 'x' in %s/suspend_hook_throw.php:7
+Stack trace:
+#0 %s/suspend_hook_throw.php(15): throw_one_time()
+#1 %s/suspend_hook_throw.php(21): a()
+#2 (): d()
+#3 %s/suspend_hook_throw.php(42): HH\Asio\join()
+#4 (): main_suspend_hook_throw()
+#5 {main} in %s/suspend_hook_throw.php on line 15

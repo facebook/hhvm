@@ -339,9 +339,14 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
     frameinfo
   );
 
-  // TODO(named_params) thread named arg names to profiling
-  g_context->invokeFunc(func, params, nullptr /* namedArgNames */, ctx.this_,
-                        ctx.cls, RuntimeCoeffects::defaults(), ctx.dynamic);
+  try {
+    // TODO(named_params) thread named arg names to profiling
+    g_context->invokeFunc(func, params, nullptr /* namedArgNames */, ctx.this_,
+                          ctx.cls, RuntimeCoeffects::defaults(), ctx.dynamic);
+  } catch (Object& ex) {
+    raise_error("Uncaught exception escaping setprofile callback: %s",
+                throwable_to_string(ex.get()).data());
+  }
 }
 
 void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
@@ -374,10 +379,15 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
     frameinfo
   );
 
-  // TODO(named_params) add user profiler support for calls with named args.
-  const ArrayData* namedArgNames = nullptr;
-  g_context->invokeFunc(func, params, namedArgNames, ctx.this_, ctx.cls,
-                        RuntimeCoeffects::defaults(), ctx.dynamic);
+  try {
+    // TODO(named_params) add user profiler support for calls with named args.
+    const ArrayData* namedArgNames = nullptr;
+    g_context->invokeFunc(func, params, namedArgNames, ctx.this_, ctx.cls,
+                          RuntimeCoeffects::defaults(), ctx.dynamic);
+  } catch (Object& ex) {
+    raise_error("Uncaught exception escaping setprofile callback: %s",
+                throwable_to_string(ex.get()).data());
+  }
 }
 
 static Variant call_intercept_handler(

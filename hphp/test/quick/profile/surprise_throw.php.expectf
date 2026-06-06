@@ -1,0 +1,10 @@
+hi exit fb_setprofile
+hi enter foo
+yep
+
+Fatal error: Uncaught exception escaping setprofile callback: exception 'Exception' with message 'yo' in %s/surprise_throw.php:7
+Stack trace:
+#0 %s/surprise_throw.php(16): asd()
+#1 %s/surprise_throw.php(23): foo()
+#2 (): entrypoint_surprise_throw()
+#3 {main} in %s/surprise_throw.php on line 16

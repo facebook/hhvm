@@ -1,0 +1,9 @@
+Throwing from X::foo
+
+Fatal error: Uncaught exception escaping setprofile callback: exception 'Exception' with message 'Surprise!' in %s/setprofile-throw.php:35
+Stack trace:
+#0 %s/setprofile-throw.php(8): Closure$main_setprofile_throw()
+#1 %s/setprofile-throw.php(23): X::foo()
+#2 %s/setprofile-throw.php(39): main()
+#3 (): main_setprofile_throw()
+#4 {main} in %s/setprofile-throw.php on line 8

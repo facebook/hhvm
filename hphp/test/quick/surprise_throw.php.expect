@@ -1,7 +1,0 @@
-hi exit fb_setprofile
-hi enter foo
-yep
-hi enter Exception::getMessage
-hi exit Exception::getMessage
-yo
-hi exit entrypoint_surprise_throw

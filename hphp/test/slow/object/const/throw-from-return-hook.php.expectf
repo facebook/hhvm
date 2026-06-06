@@ -1,0 +1,16 @@
+-- at constructor entry --
+object(C) (2) {
+  ["i"]=>
+  int(0)
+  ["v"]=>
+  vec(1) {
+    int(1)
+  }
+}
+
+Fatal error: Uncaught exception escaping setprofile callback: exception 'Exception' with message 'sneaky' in %s/throw-from-return-hook.php:26
+Stack trace:
+#0 %s/throw-from-return-hook.php(19): Closure$test()
+#1 %s/throw-from-return-hook.php(31): C->__construct()
+#2 (): test()
+#3 {main} in %s/throw-from-return-hook.php on line 19

@@ -1,0 +1,10 @@
+thing1
+enter foo
+
+Fatal error: Uncaught exception escaping setprofile callback: exception 'Exception' with message '' in %s/suspend_hook_throw2.php:5
+Stack trace:
+#0 %s/suspend_hook_throw2.php(11): thrower()
+#1 %s/suspend_hook_throw2.php(25): foo()
+#2 %s/suspend_hook_throw2.php(37): get()
+#3 (): main_suspend_hook_throw2()
+#4 {main} in %s/suspend_hook_throw2.php on line 11

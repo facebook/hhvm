@@ -20,7 +20,6 @@ class C {
 
 abstract final class ProfilerStatics {
   public static $indent = 2;
-  public static $threw = false;
 }
 
 function profiler($event, $name, $info) :mixed{
@@ -30,30 +29,11 @@ function profiler($event, $name, $info) :mixed{
   printf("\n%s%s %s: %s\n", str_repeat('  ', ProfilerStatics::$indent), $event,
          $name, serialize($info));
   if ($event == 'enter') ++ProfilerStatics::$indent;
-  if ($event == 'exit' &&
-      ((!ProfilerStatics::$threw && strncmp('C::', $name, 3) == 0) ||
-       $name === 'C::method')) {
-    ProfilerStatics::$threw = true;
-    throw new Exception($name);
-  }
 }
 
-function main() :mixed{
-  try {
-    new C();
-  } catch (Exception $e) {
-    echo "\nCaught ".$e->getMessage()."\n";
-  }
-
-  try {
-    (new C())->method();
-  } catch (Exception $e) {
-    echo "\nCaught ".$e->getMessage()."\n";
-  }
-}
 <<__EntryPoint>>
-function entrypoint_setprofilethis(): void {
-
+function setprofile_this(): void {
   fb_setprofile(profiler<>);
-  main();
+  new C();
+  (new C())->method();
 }

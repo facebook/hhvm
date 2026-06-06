@@ -7,7 +7,7 @@ class C {
   public vec $v = vec[1];
 
   public static ?C $c = null;
-
+  <<__NEVER_INLINE>>
   public function __construct() {
     echo "-- at constructor entry --\n";
     var_dump($this);

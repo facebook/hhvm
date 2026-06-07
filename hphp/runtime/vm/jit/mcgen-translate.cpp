@@ -542,10 +542,13 @@ void retranslateAll(bool skipSerialize) {
       Logger::Info("retranslateAll finished");
     }
   }
-  // Release the current main block and add huge page budget so the next
-  // ensure() allocates a fresh block backed by huge pages for live translations.
-  tc::code().addMainHugePageBudget(Cfg::CodeCache::TCNumHugeLiveMainMB);
-  tc::code().releaseMainBlock();
+  {
+    auto codeLock = tc::lockCode();
+    // Replace the current main block so the next ensure() allocates a fresh
+    // huge-page-backed block for live translations.
+    tc::code().addMainHugePageBudget(Cfg::CodeCache::TCNumHugeLiveMainMB);
+    tc::code().releaseMainBlock();
+  }
 
   // This will enable live translations to happen again.
   s_retranslateAllCompleteTime.store(time(nullptr), std::memory_order_release);

@@ -99,7 +99,8 @@ namespace {
 class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
  public:
   explicit ConnectCallback(
-      transport::TransportHandler* transportHandler,
+      rocket::client::RocketClientConnection::TransportHandler*
+          transportHandler,
       folly::Baton<>& baton,
       bool& connected)
       : transportHandler_(transportHandler),
@@ -119,7 +120,7 @@ class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
   }
 
  private:
-  transport::TransportHandler* transportHandler_;
+  rocket::client::RocketClientConnection::TransportHandler* transportHandler_;
   folly::Baton<>& baton_;
   bool& connected_;
 };
@@ -240,7 +241,8 @@ FastThriftClientState createFastThriftClient(const folly::SocketAddress& addr) {
         std::make_unique<rocket::client::RocketClientConnection>();
 
     connection->transportHandler =
-        transport::TransportHandler::create(std::move(socket));
+        rocket::client::RocketClientConnection::TransportHandler::create(
+            std::move(socket));
 
     // Save raw pointer for ConnectCallback (before ownership transfer)
     auto* transportHandlerPtr = connection->transportHandler.get();
@@ -251,7 +253,7 @@ FastThriftClientState createFastThriftClient(const folly::SocketAddress& addr) {
 
     connection->pipeline =
         channel_pipeline::PipelineBuilder<
-            transport::TransportHandler,
+            rocket::client::RocketClientConnection::TransportHandler,
             rocket::client::RocketClientAppAdapter,
             channel_pipeline::SimpleBufferAllocator>()
             .setEventBase(evb)

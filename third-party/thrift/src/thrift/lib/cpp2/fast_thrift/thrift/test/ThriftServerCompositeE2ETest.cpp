@@ -183,7 +183,7 @@ class SecondaryHandler
 class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
  public:
   ConnectCallback(
-      transport::TransportHandler* handler,
+      rocket::client::RocketClientConnection::TransportHandler* handler,
       folly::Baton<>& baton,
       bool& connected)
       : handler_(handler), baton_(baton), connected_(connected) {}
@@ -200,7 +200,7 @@ class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
   }
 
  private:
-  transport::TransportHandler* handler_;
+  rocket::client::RocketClientConnection::TransportHandler* handler_;
   folly::Baton<>& baton_;
   bool& connected_;
 };
@@ -483,7 +483,8 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
           std::make_unique<rocket::client::RocketClientConnection>();
 
       connection->transportHandler =
-          transport::TransportHandler::create(std::move(socket));
+          rocket::client::RocketClientConnection::TransportHandler::create(
+              std::move(socket));
 
       auto* transportHandlerPtr = connection->transportHandler.get();
 
@@ -518,7 +519,7 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
 
       connection->pipeline =
           PipelineBuilder<
-              transport::TransportHandler,
+              rocket::client::RocketClientConnection::TransportHandler,
               rocket::client::RocketClientAppAdapter,
               SimpleBufferAllocator>()
               .setEventBase(evb)

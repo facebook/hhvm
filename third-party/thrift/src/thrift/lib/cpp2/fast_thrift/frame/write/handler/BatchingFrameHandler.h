@@ -143,17 +143,23 @@ class BatchingFrameHandlerT : public folly::EventBase::LoopCallback {
     flushAndPropagateErrors(ctx);
   }
 
+  // Event subscription is sourced from the tracker, which owns the per-pipeline
+  // event type via its templated EventFactory. With NoOpWriteCompletionTracker
+  // EventId is NoEvent and kSubscribedEvents is empty, so nothing is wired and
+  // the event path compiles out.
+  using EventId = typename Tracker::EventId;
+  static constexpr auto kSubscribedEvents = Tracker::kSubscribedEvents;
+
   // Receives the per-pipeline event fired by TransportHandlerT on each
-  // socket-level write completion. The tracker — which owns the per-pipeline
-  // event type via its templated EventFactory — discriminates on the event's
+  // socket-level write completion. The tracker discriminates on the event's
   // kind and drives per-batch attribution (see WriteCompletionTracker.h).
-  // With NoOpWriteCompletionTracker the dispatch is inline no-op and elided.
   template <typename Context>
   void onEvent(
       Context& ctx,
+      EventId ev,
       const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
           box) noexcept {
-    tracker_.onEvent(ctx, box);
+    tracker_.onEvent(ctx, ev, box);
   }
 
   // ===========================================================================

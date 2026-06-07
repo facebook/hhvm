@@ -21,8 +21,10 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 namespace apache::thrift::fast_thrift::frame::write::handler {
@@ -42,31 +44,43 @@ struct TestEvent {
   size_t bytes;
 };
 
+// Single-value event enum mirroring a rocket pipeline's EventId.
+enum class TestEventId : std::uint32_t {
+  WriteComplete,
+  Count,
+};
+
 struct TestEventFactory {
   using EventType = TestEvent;
+  using EventId = TestEventId;
 
-  static channel_pipeline::TypeErasedBox make(
+  static std::pair<EventId, channel_pipeline::TypeErasedBox> make(
       transport::WriteCompletionStatus status, size_t bytes) noexcept {
-    return channel_pipeline::TypeErasedBox(
-        TestEvent{
-            .kind = TestEvent::Kind::BatchWriteComplete,
-            .status = status,
-            .frameCount = 0,
-            .bytes = bytes,
-        });
+    return {
+        EventId::WriteComplete,
+        channel_pipeline::TypeErasedBox(
+            TestEvent{
+                .kind = TestEvent::Kind::BatchWriteComplete,
+                .status = status,
+                .frameCount = 0,
+                .bytes = bytes,
+            })};
   }
 
-  static channel_pipeline::TypeErasedBox makeRocketWriteComplete(
+  static std::pair<EventId, channel_pipeline::TypeErasedBox>
+  makeRocketWriteComplete(
       transport::WriteCompletionStatus status,
       size_t frameCount,
       size_t bytes) noexcept {
-    return channel_pipeline::TypeErasedBox(
-        TestEvent{
-            .kind = TestEvent::Kind::RocketWriteComplete,
-            .status = status,
-            .frameCount = frameCount,
-            .bytes = bytes,
-        });
+    return {
+        EventId::WriteComplete,
+        channel_pipeline::TypeErasedBox(
+            TestEvent{
+                .kind = TestEvent::Kind::RocketWriteComplete,
+                .status = status,
+                .frameCount = frameCount,
+                .bytes = bytes,
+            })};
   }
 };
 
@@ -74,7 +88,8 @@ struct TestEventFactory {
 // the tracker fired upstream.
 class CapturingContext {
  public:
-  void fireEvent(channel_pipeline::TypeErasedBox box) noexcept {
+  void fireEvent(
+      TestEventId /*ev*/, channel_pipeline::TypeErasedBox box) noexcept {
     events_.push_back(std::move(box).take<TestEvent>());
   }
 
@@ -87,7 +102,7 @@ class CapturingContext {
 // Helper: build a BatchWriteComplete box (what transport would fire).
 channel_pipeline::TypeErasedBox batchWriteComplete(
     transport::WriteCompletionStatus status, size_t bytes) noexcept {
-  return TestEventFactory::make(status, bytes);
+  return TestEventFactory::make(status, bytes).second;
 }
 
 } // namespace
@@ -101,7 +116,9 @@ TEST(WriteCompletionTrackerTest, SingleBatchFiresOneEnrichedEvent) {
   tracker.onWrite();
   tracker.onFlush();
   tracker.onEvent(
-      ctx, batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
+      ctx,
+      TestEventId::WriteComplete,
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
 
   ASSERT_EQ(ctx.events().size(), 1u);
   EXPECT_EQ(ctx.events()[0].kind, TestEvent::Kind::RocketWriteComplete);
@@ -131,11 +148,17 @@ TEST(WriteCompletionTrackerTest, MultipleInFlightBatchesPreserveFifoOrder) {
 
   // writeSuccess events arrive in FIFO order (AsyncSocket guarantee).
   tracker.onEvent(
-      ctx, batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
+      ctx,
+      TestEventId::WriteComplete,
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
   tracker.onEvent(
-      ctx, batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
+      ctx,
+      TestEventId::WriteComplete,
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
   tracker.onEvent(
-      ctx, batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
+      ctx,
+      TestEventId::WriteComplete,
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
 
   ASSERT_EQ(ctx.events().size(), 3u);
   EXPECT_EQ(ctx.events()[0].frameCount, 2u);
@@ -151,7 +174,9 @@ TEST(WriteCompletionTrackerTest, ErrorStatusAndBytesPropagateToEvent) {
   tracker.onWrite();
   tracker.onFlush();
   tracker.onEvent(
-      ctx, batchWriteComplete(transport::WriteCompletionStatus::Error, 137));
+      ctx,
+      TestEventId::WriteComplete,
+      batchWriteComplete(transport::WriteCompletionStatus::Error, 137));
 
   ASSERT_EQ(ctx.events().size(), 1u);
   EXPECT_EQ(ctx.events()[0].kind, TestEvent::Kind::RocketWriteComplete);
@@ -172,7 +197,9 @@ TEST(WriteCompletionTrackerTest, EmptyBatchOnFlushIsIgnored) {
   tracker.onWrite();
   tracker.onFlush();
   tracker.onEvent(
-      ctx, batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
+      ctx,
+      TestEventId::WriteComplete,
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
 
   ASSERT_EQ(ctx.events().size(), 1u);
   EXPECT_EQ(ctx.events()[0].frameCount, 1u);
@@ -185,7 +212,9 @@ TEST(WriteCompletionTrackerTest, WriteCompleteWithEmptyFifoIsNoop) {
   // Defensive: writeSuccess arriving without a corresponding flush (shouldn't
   // happen in practice) is dropped rather than UB.
   tracker.onEvent(
-      ctx, batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
+      ctx,
+      TestEventId::WriteComplete,
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
 
   EXPECT_TRUE(ctx.events().empty());
 }
@@ -202,13 +231,17 @@ TEST(WriteCompletionTrackerTest, RocketWriteCompleteReFireIgnored) {
   // pipeline would cascade or pop the wrong batch.
   tracker.onEvent(
       ctx,
+      TestEventId::WriteComplete,
       TestEventFactory::makeRocketWriteComplete(
-          transport::WriteCompletionStatus::Success, 999, 0));
+          transport::WriteCompletionStatus::Success, 999, 0)
+          .second);
   EXPECT_TRUE(ctx.events().empty());
 
   // The real BatchWriteComplete still drains the FIFO correctly.
   tracker.onEvent(
-      ctx, batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
+      ctx,
+      TestEventId::WriteComplete,
+      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
   ASSERT_EQ(ctx.events().size(), 1u);
   EXPECT_EQ(ctx.events()[0].frameCount, 1u);
 }

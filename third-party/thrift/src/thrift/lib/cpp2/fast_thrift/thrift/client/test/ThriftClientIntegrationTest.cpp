@@ -180,15 +180,15 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
     auto connection =
         std::make_unique<rocket::client::RocketClientConnection>();
 
-    connection->transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(transport));
+    connection->transportHandler = apache::thrift::fast_thrift::rocket::client::
+        RocketClientConnection::TransportHandler::create(std::move(transport));
 
     auto* transportHandlerPtr = connection->transportHandler.get();
 
     connection->pipeline =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::rocket::client::
+                RocketClientConnection::TransportHandler,
             apache::thrift::fast_thrift::rocket::client::RocketClientAppAdapter,
             apache::thrift::fast_thrift::channel_pipeline::
                 SimpleBufferAllocator>()
@@ -1278,16 +1278,16 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
     auto connection =
         std::make_unique<rocket::client::RocketClientConnection>();
 
-    connection->transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(transport));
+    connection->transportHandler = apache::thrift::fast_thrift::rocket::client::
+        RocketClientConnection::TransportHandler::create(std::move(transport));
 
     // Save raw pointer for onConnect() (called after ownership transfer)
     auto* transportHandlerPtr = connection->transportHandler.get();
 
     connection->pipeline =
         PipelineBuilder<
-            apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::rocket::client::
+                RocketClientConnection::TransportHandler,
             apache::thrift::fast_thrift::rocket::client::RocketClientAppAdapter,
             apache::thrift::fast_thrift::channel_pipeline::
                 SimpleBufferAllocator>()

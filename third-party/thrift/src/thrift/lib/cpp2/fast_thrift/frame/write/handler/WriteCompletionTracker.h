@@ -16,10 +16,13 @@
 
 #pragma once
 
+#include <array>
 #include <concepts>
 #include <cstddef>
 #include <deque>
+#include <utility>
 
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
 
@@ -54,12 +57,19 @@ concept WriteCompletionTracker = requires(T tracker) {
  * removes the calls.
  */
 struct NoOpWriteCompletionTracker {
+  // Events disabled: NoEvent + an empty subscription list. The batcher forwards
+  // these uniformly, so with this tracker it subscribes to nothing and the
+  // whole event path compiles out.
+  using EventId = apache::thrift::fast_thrift::channel_pipeline::NoEvent;
+  static constexpr std::array<EventId, 0> kSubscribedEvents{};
+
   void onWrite() noexcept {}
   void onFlush() noexcept {}
 
   template <typename Context>
   void onEvent(
       Context& /*ctx*/,
+      EventId /*ev*/,
       const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
       /*box*/) noexcept {}
 };
@@ -88,6 +98,12 @@ static_assert(
 template <typename EventFactory>
 class WriteCompletionTrackerT {
  public:
+  // The pipeline event the tracker subscribes to and re-fires on. Sourced from
+  // the factory so the tracker stays agnostic of the concrete protocol enum.
+  using EventId = typename EventFactory::EventId;
+  static constexpr std::array<EventId, 1> kSubscribedEvents{
+      EventId::WriteComplete};
+
   void onWrite() noexcept { ++framesInCurrentBatch_; }
 
   void onFlush() noexcept {
@@ -101,6 +117,7 @@ class WriteCompletionTrackerT {
   template <typename Context>
   void onEvent(
       Context& ctx,
+      EventId /*ev*/,
       const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
           box) noexcept {
     using Event = typename EventFactory::EventType;
@@ -115,8 +132,9 @@ class WriteCompletionTrackerT {
     }
     auto count = batchFrameCounts_.front();
     batchFrameCounts_.pop_front();
-    ctx.fireEvent(
-        EventFactory::makeRocketWriteComplete(evt.status, count, evt.bytes));
+    auto [eventId, eventMsg] =
+        EventFactory::makeRocketWriteComplete(evt.status, count, evt.bytes);
+    ctx.fireEvent(eventId, std::move(eventMsg));
   }
 
  private:

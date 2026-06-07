@@ -101,14 +101,21 @@ class LoopBatchingFrameHandlerT : public folly::EventBase::LoopCallback {
   template <typename Context>
   void onWriteReady(Context& /*ctx*/) noexcept {}
 
-  // Receives the per-pipeline event fired by TransportHandlerT. The tracker
-  // (which owns the per-pipeline event type via its EventFactory) drives
-  // per-batch attribution. With NoOpWriteCompletionTracker the dispatch is
-  // inline no-op.
+  // Event subscription is sourced from the tracker, which owns the per-pipeline
+  // event type via its EventFactory. With NoOpWriteCompletionTracker EventId is
+  // NoEvent and kSubscribedEvents is empty, so nothing is wired and the event
+  // path compiles out.
+  using EventId = typename Tracker::EventId;
+  static constexpr auto kSubscribedEvents = Tracker::kSubscribedEvents;
+
+  // Receives the per-pipeline event fired by TransportHandlerT and delegates to
+  // the tracker for per-batch attribution.
   template <typename Context>
   void onEvent(
-      Context& ctx, const channel_pipeline::TypeErasedBox& box) noexcept {
-    tracker_.onEvent(ctx, box);
+      Context& ctx,
+      EventId ev,
+      const channel_pipeline::TypeErasedBox& box) noexcept {
+    tracker_.onEvent(ctx, ev, box);
   }
 
   /**

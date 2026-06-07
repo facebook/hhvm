@@ -19,19 +19,26 @@
 #include <folly/Function.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/RocketClientEventFactory.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 
 namespace apache::thrift::fast_thrift::rocket::client {
 
 /**
- * RocketClientConnection — owns the rocket pipeline and its
+ * RocketClientConnectionT — owns the rocket pipeline and its
  * resources for a single client connection.
  *
  * Groups the rocket-layer objects that together form the transport
  * underneath a thrift client pipeline:
  *
  *   RocketClientAppAdapter → [rocket handlers] → TransportHandler
+ *
+ * Templated on the transport's write-completion event factory (see
+ * WriteCompletion.h). The default NoOp factory means no per-write event is
+ * fired — zero cost. Connections that want write tracking instantiate with
+ * RocketClientEventFactory (see the RocketClientTrackingConnection alias) and
+ * build the pipeline with RocketClientEventId plus a subscriber.
  *
  * Lifecycle is split between disconnect() and destroy():
  *   - disconnect(ew) deactivates the pipeline and closes the underlying
@@ -42,11 +49,20 @@ namespace apache::thrift::fast_thrift::rocket::client {
  *   - destroy() closes the pipeline (handlers see handlerRemoved) and
  *     releases the transport handler.
  */
-struct RocketClientConnection {
+template <
+    transport::WriteCompleteEventFactory Factory =
+        transport::NoOpWriteCompleteEventFactory>
+struct RocketClientConnectionT {
   using OnConnectFn = folly::Function<void() noexcept>;
   using OnDisconnectFn = folly::Function<void() noexcept>;
+  using TransportHandler = transport::TransportHandlerT<Factory>;
 
-  ~RocketClientConnection() { destroy(); }
+  RocketClientConnectionT() = default;
+  RocketClientConnectionT(const RocketClientConnectionT&) = delete;
+  RocketClientConnectionT& operator=(const RocketClientConnectionT&) = delete;
+  RocketClientConnectionT(RocketClientConnectionT&&) = delete;
+  RocketClientConnectionT& operator=(RocketClientConnectionT&&) = delete;
+  ~RocketClientConnectionT() { destroy(); }
 
   // Member destruction runs in reverse declaration order. Allocator is
   // referenced by raw pointer from the pipeline, so it must outlive the
@@ -54,7 +70,7 @@ struct RocketClientConnection {
   // must outlive it as well. Declared accordingly.
   channel_pipeline::SimpleBufferAllocator allocator;
   channel_pipeline::PipelineImpl::Ptr pipeline;
-  transport::TransportHandler::Ptr transportHandler;
+  typename TransportHandler::Ptr transportHandler;
   rocket::client::RocketClientAppAdapter::Ptr appAdapter{
       new rocket::client::RocketClientAppAdapter()};
 
@@ -131,5 +147,16 @@ struct RocketClientConnection {
  private:
   bool disconnected_{false};
 };
+
+// Default: write-completion events disabled (NoOp factory) — zero per-write
+// cost. Use RocketClientConnection::TransportHandler when building the
+// pipeline.
+using RocketClientConnection = RocketClientConnectionT<>;
+
+// Opt-in: fires a RocketClientEvent on each socket write completion for write
+// tracking. The pipeline must be built with RocketClientEventId and a
+// subscriber for the events to be delivered.
+using RocketClientTrackingConnection =
+    RocketClientConnectionT<RocketClientEventFactory>;
 
 } // namespace apache::thrift::fast_thrift::rocket::client

@@ -25,8 +25,12 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
 
+#include <array>
+#include <cstdint>
 #include <cstring>
 #include <vector>
+
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Event.h>
 
 namespace apache::thrift::fast_thrift::frame::write::handler {
 namespace {
@@ -669,10 +673,20 @@ TEST_F(BatchingFrameHandlerPipelineTest, TransportErrorPropagatesToTail) {
 
 namespace {
 
+// Single-value event enum mirroring a tracker's EventId.
+enum class CapturingEventId : std::uint32_t {
+  WriteComplete,
+  Count,
+};
+
 // Tracker that captures hook invocations. Its onEvent records the raw
 // TypeErasedBox arrival count — the batcher just delegates onEvent through
 // without unpacking the type.
 struct CapturingTracker {
+  using EventId = CapturingEventId;
+  static constexpr std::array<EventId, 1> kSubscribedEvents{
+      EventId::WriteComplete};
+
   size_t onWriteCount{0};
   size_t onFlushCount{0};
   size_t onEventCount{0};
@@ -683,6 +697,7 @@ struct CapturingTracker {
   template <typename Context>
   void onEvent(
       Context& /*ctx*/,
+      EventId /*ev*/,
       const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
       /*box*/) noexcept {
     ++onEventCount;
@@ -734,9 +749,13 @@ TEST_F(BatchingFrameHandlerTrackerTest, OnEventDelegatesToTracker) {
   // unchanged. The tracker owns the per-pipeline event type discrimination.
   // We pass a dummy int box twice and confirm the tracker received both.
   handler.onEvent(
-      *ctx_, apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(0));
+      *ctx_,
+      CapturingEventId::WriteComplete,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(0));
   handler.onEvent(
-      *ctx_, apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(0));
+      *ctx_,
+      CapturingEventId::WriteComplete,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(0));
 
   EXPECT_EQ(handler.tracker().onEventCount, 2u);
 }

@@ -93,8 +93,8 @@ HANDLER_TAG(thrift_client_checksum_handler);
 class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
  public:
   explicit ConnectCallback(
-      apache::thrift::fast_thrift::transport::TransportHandler*
-          transportHandler,
+      apache::thrift::fast_thrift::rocket::client::RocketClientConnection::
+          TransportHandler* transportHandler,
       folly::Baton<>& baton,
       bool& connected)
       : transportHandler_(transportHandler),
@@ -113,7 +113,8 @@ class ConnectCallback : public folly::AsyncSocket::ConnectCallback {
   }
 
  private:
-  apache::thrift::fast_thrift::transport::TransportHandler* transportHandler_;
+  apache::thrift::fast_thrift::rocket::client::RocketClientConnection::
+      TransportHandler* transportHandler_;
   folly::Baton<>& baton_;
   bool& connected_;
 };
@@ -267,8 +268,8 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
                                              client::RocketClientConnection>();
 
       connection->transportHandler =
-          apache::thrift::fast_thrift::transport::TransportHandler::create(
-              std::move(socket));
+          apache::thrift::fast_thrift::rocket::client::RocketClientConnection::
+              TransportHandler::create(std::move(socket));
 
       auto* transportHandlerPtr = connection->transportHandler.get();
       auto setupFactory = []() {
@@ -299,7 +300,8 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
 
       connection->pipeline =
           PipelineBuilder<
-              apache::thrift::fast_thrift::transport::TransportHandler,
+              apache::thrift::fast_thrift::rocket::client::
+                  RocketClientConnection::TransportHandler,
               apache::thrift::fast_thrift::rocket::client::
                   RocketClientAppAdapter,
               SimpleBufferAllocator>()
@@ -725,7 +727,8 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
           std::make_unique<rocket::client::RocketClientConnection>();
 
       connection->transportHandler =
-          transport::TransportHandler::create(std::move(socket));
+          rocket::client::RocketClientConnection::TransportHandler::create(
+              std::move(socket));
 
       auto* transportHandlerPtr = connection->transportHandler.get();
 
@@ -757,7 +760,7 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
 
       connection->pipeline =
           PipelineBuilder<
-              transport::TransportHandler,
+              rocket::client::RocketClientConnection::TransportHandler,
               rocket::client::RocketClientAppAdapter,
               SimpleBufferAllocator>()
               .setEventBase(evb)

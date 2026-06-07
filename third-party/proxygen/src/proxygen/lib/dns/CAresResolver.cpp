@@ -15,6 +15,8 @@
 #include <glog/logging.h>
 #include <proxygen/lib/utils/Time.h>
 
+#include <utility>
+
 using namespace proxygen;
 
 using folly::AsyncTimeout;
@@ -475,7 +477,7 @@ class CAresResolver::MultiQuery
     , private DNSResolver::ResolutionCallback {
  public:
   MultiQuery(CAresResolver* resolver, std::string name)
-      : resolver_(resolver), name_(name) {
+      : resolver_(resolver), name_(std::move(name)) {
   }
 
   ~MultiQuery() override = default;

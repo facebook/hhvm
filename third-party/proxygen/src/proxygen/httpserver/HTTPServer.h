@@ -16,6 +16,7 @@
 #include <proxygen/lib/http/session/HTTPSession.h>
 #include <proxygen/lib/services/AcceptorConfiguration.h>
 #include <thread>
+#include <utility>
 #include <wangle/bootstrap/ServerBootstrap.h>
 #include <wangle/ssl/SSLContextConfig.h>
 
@@ -46,7 +47,7 @@ class HTTPServer final {
     IPConfig(folly::SocketAddress a,
              Protocol p,
              std::shared_ptr<HTTPCodecFactory> c = nullptr)
-        : address(a), protocol(p), codecFactory(c) {
+        : address(std::move(a)), protocol(p), codecFactory(std::move(c)) {
     }
 
     folly::SocketAddress address;

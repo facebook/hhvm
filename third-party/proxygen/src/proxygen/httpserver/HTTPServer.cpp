@@ -17,6 +17,8 @@
 #include <proxygen/httpserver/filters/RejectConnectFilter.h>
 #include <wangle/ssl/SSLContextManager.h>
 
+#include <utility>
+
 using folly::EventBaseManager;
 using folly::IOThreadPoolExecutor;
 using folly::IOThreadPoolExecutorBase;
@@ -30,8 +32,8 @@ class AcceptorFactory : public wangle::AcceptorFactory {
                   std::shared_ptr<HTTPCodecFactory> codecFactory,
                   std::shared_ptr<const AcceptorConfiguration> config,
                   HTTPSession::InfoCallback* sessionInfoCb)
-      : options_(options),
-        codecFactory_(codecFactory),
+      : options_(std::move(options)),
+        codecFactory_(std::move(codecFactory)),
         config_(std::move(config)),
         sessionInfoCb_(sessionInfoCb) {
   }
@@ -102,7 +104,7 @@ void HTTPServer::bind(std::vector<IPConfig> const& addrs) {
 class HandlerCallbacks : public IOThreadPoolExecutorBase::IOObserver {
  public:
   explicit HandlerCallbacks(std::shared_ptr<HTTPServerOptions> options)
-      : options_(options) {
+      : options_(std::move(options)) {
   }
 
   void registerEventBase(folly::EventBase& evb) noexcept override {

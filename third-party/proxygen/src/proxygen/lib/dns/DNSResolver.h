@@ -14,6 +14,7 @@
 #include <memory>
 #include <set>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 #include <folly/ExceptionWrapper.h>
@@ -153,17 +154,17 @@ class DNSResolver : public folly::DelayedDestruction {
         type(AT_ADDRESS), address(), name() {
       address.setFromSockaddr(sa);
     }
-    Answer(std::chrono::seconds cs, const folly::SocketAddress& ta) :
+    Answer(std::chrono::seconds cs, folly::SocketAddress  ta) :
         ttl(cs), creationTime(secondsSinceEpoch()),
-        type(AT_ADDRESS), address(ta), name() {
+        type(AT_ADDRESS), address(std::move(ta)), name() {
     }
-    Answer(std::chrono::seconds cs, const std::string& n,
+    Answer(std::chrono::seconds cs, std::string  n,
            enum AnswerType t = AT_NAME) :
-      ttl(cs), creationTime(secondsSinceEpoch()), type(t), address(), name(n) {
+      ttl(cs), creationTime(secondsSinceEpoch()), type(t), address(), name(std::move(n)) {
     }
-    Answer(std::chrono::seconds cs, const std::string& n,
+    Answer(std::chrono::seconds cs, std::string  n,
            uint16_t p, enum AnswerType t = AT_NAME) :
-      ttl(cs), creationTime(secondsSinceEpoch()), type(t), address(), name(n), port(p) {
+      ttl(cs), creationTime(secondsSinceEpoch()), type(t), address(), name(std::move(n)), port(p) {
     }
     Answer(std::chrono::seconds cs, uint16_t pri, std::string  n) :
       ttl(cs), creationTime(secondsSinceEpoch()), type(AT_MX), address(), name(std::move(n)), priority(pri) {
@@ -175,17 +176,17 @@ class DNSResolver : public folly::DelayedDestruction {
           creationTime(secondsSinceEpoch()),
           type(t),
           address(),
-          rawData(rData) {}
+          rawData(std::move(rData)) {}
 
     // Constructors for recreating answers
     Answer(std::chrono::seconds cs, std::chrono::seconds creation,
-           const folly::SocketAddress& ta) :
-      ttl(cs), creationTime(creation), type(AT_ADDRESS), address(ta), name() {
+           folly::SocketAddress  ta) :
+      ttl(cs), creationTime(creation), type(AT_ADDRESS), address(std::move(ta)), name() {
     }
     Answer(std::chrono::seconds cs, std::chrono::seconds creation,
-           const std::string& n,
+           std::string  n,
            enum AnswerType t = AT_NAME) :
-      ttl(cs), creationTime(creation), type(t), address(), name(n) {
+      ttl(cs), creationTime(creation), type(t), address(), name(std::move(n)) {
     }
 
     //default ctor

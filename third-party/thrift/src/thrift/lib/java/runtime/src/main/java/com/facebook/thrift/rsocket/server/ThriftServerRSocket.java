@@ -22,7 +22,6 @@ import com.facebook.nifty.core.ConnectionContext;
 import com.facebook.nifty.core.NiftyConnectionContext;
 import com.facebook.nifty.core.RequestContext;
 import com.facebook.thrift.compression.CompressionManager;
-import com.facebook.thrift.compression.ThriftCompressor;
 import com.facebook.thrift.payload.Reader;
 import com.facebook.thrift.payload.ServerRequestPayload;
 import com.facebook.thrift.payload.ServerResponsePayload;
@@ -35,7 +34,6 @@ import com.facebook.thrift.util.NettyNiftyRequestContext;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.util.ReferenceCountUtil;
-import io.netty.util.ReferenceCounted;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import java.util.ArrayList;
@@ -67,36 +65,33 @@ public class ThriftServerRSocket implements RSocket {
   @Override
   public Mono<Payload> requestResponse(Payload payload) {
     ByteBuf data = null;
-    ServerRequestPayload requestPayload = null;
     try {
       RequestRpcMetadata requestRpcMetadata = decodeRequestRpcMetadata(payload);
 
       RequestContext requestContext = createRequestContext(requestRpcMetadata.getOtherMetadata());
 
       data = maybeDecompressRequestData(requestRpcMetadata, payload);
-      // The decoded request data is now owned independently of the RSocket Payload (retained slice
-      // in the uncompressed case, freshly allocated in the compressed case). Release the Payload
-      // immediately; the request buffer alone goes on the wire as the ServerRequestPayload's owned
-      // buffer.
-      ReferenceCountUtil.safeRelease(payload);
-      payload = null;
 
-      requestPayload = deserializeRequest(data, requestRpcMetadata, requestContext, data);
-      data = null; // ownership transferred to ServerRequestPayload
+      ServerRequestPayload requestPayload =
+          deserializeRequest(data, requestRpcMetadata, requestContext);
 
       assert requestPayload.getRequestRpcMetadata().getKind()
           == RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE;
 
-      final ServerRequestPayload finalRequestPayload = requestPayload;
+      final ByteBuf requestData = data;
       return rpcServerHandler
           .singleRequestSingleResponse(requestPayload)
-          .map(responsePayload -> handleResponse(alloc, finalRequestPayload, responsePayload))
-          // The generated handler releases the request buffer right after it reads the args; this
-          // is the idempotent backstop for paths where no method body runs (unsupported RpcKind,
-          // unknown method, scheduler rejection, or cancellation before the read).
-          .doFinally(__ -> finalRequestPayload.releaseRequestData());
+          .map(responsePayload -> handleResponse(alloc, requestPayload, responsePayload))
+          .doFinally(
+              __ -> {
+                requestData.release();
+                if (payload.refCnt() > 0) {
+                  payload.release();
+                }
+              });
     } catch (Throwable t) {
-      releaseOnError(requestPayload, data, payload);
+      ReferenceCountUtil.safeRelease(data);
+      payload.release();
       return Mono.error(t);
     }
   }
@@ -104,32 +99,33 @@ public class ThriftServerRSocket implements RSocket {
   @Override
   public Flux<Payload> requestStream(Payload payload) {
     ByteBuf data = null;
-    ServerRequestPayload requestPayload = null;
     try {
       RequestRpcMetadata requestRpcMetadata = decodeRequestRpcMetadata(payload);
 
       RequestContext requestContext = createRequestContext(requestRpcMetadata.getOtherMetadata());
 
       data = maybeDecompressRequestData(requestRpcMetadata, payload);
-      ReferenceCountUtil.safeRelease(payload);
-      payload = null;
 
-      requestPayload = deserializeRequest(data, requestRpcMetadata, requestContext, data);
-      data = null; // ownership transferred to ServerRequestPayload
+      ServerRequestPayload requestPayload =
+          deserializeRequest(data, requestRpcMetadata, requestContext);
 
       assert requestPayload.getRequestRpcMetadata().getKind()
           == RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE;
 
-      final ServerRequestPayload finalRequestPayload = requestPayload;
+      final ByteBuf requestData = data;
       return rpcServerHandler
           .singleRequestStreamingResponse(requestPayload)
-          .map(responsePayload -> handleStreamResponse(alloc, finalRequestPayload, responsePayload))
-          // The stream handler reads the args once when the stream is subscribed and releases the
-          // request buffer then, so it is freed up front instead of being pinned for the whole
-          // stream; this is the idempotent backstop for paths where no method body runs.
-          .doFinally(__ -> finalRequestPayload.releaseRequestData());
+          .map(responsePayload -> handleStreamResponse(alloc, requestPayload, responsePayload))
+          .doFinally(
+              __ -> {
+                requestData.release();
+                if (payload.refCnt() > 0) {
+                  payload.release();
+                }
+              });
     } catch (Throwable t) {
-      releaseOnError(requestPayload, data, payload);
+      ReferenceCountUtil.safeRelease(data);
+      payload.release();
       return Flux.error(t);
     }
   }
@@ -168,12 +164,7 @@ public class ThriftServerRSocket implements RSocket {
 
   /**
    * Returns the request data, decompressing if the metadata specifies compression. The returned
-   * buffer is always independently owned — the caller must release it. Always retains {@code
-   * payload.sliceData()} first; in the uncompressed case that retained slice is returned, in the
-   * compressed case the compressor takes ownership of it (releasing it in its own finally
-   * regardless of success or failure) and returns a freshly allocated uncompressed buffer. Looking
-   * up the compressor is the only pre-ownership-transfer step; if it throws (e.g. unknown
-   * algorithm), the retained slice is released here.
+   * buffer is always independently owned — the caller must release it.
    */
   private ByteBuf maybeDecompressRequestData(RequestRpcMetadata metadata, Payload payload) {
     ByteBuf data = payload.sliceData();
@@ -182,52 +173,16 @@ public class ThriftServerRSocket implements RSocket {
     if (compression == null || compression == CompressionAlgorithm.NONE) {
       return data;
     }
-    ThriftCompressor compressor;
-    try {
-      compressor = CompressionManager.getCompressor(compression);
-    } catch (Throwable t) {
-      ReferenceCountUtil.safeRelease(data);
-      throw t;
-    }
-    return compressor.decompress(alloc, data); // ownership of `data` transferred to the compressor
+    return CompressionManager.decompress(compression, alloc, data);
   }
 
   @SuppressWarnings("rawtypes")
   private static ServerRequestPayload deserializeRequest(
-      ByteBuf data,
-      RequestRpcMetadata requestRpcMetadata,
-      RequestContext requestContext,
-      ReferenceCounted requestData) {
+      ByteBuf data, RequestRpcMetadata requestRpcMetadata, RequestContext requestContext) {
     ByteBufTProtocol out =
         TProtocolType.fromProtocolId(requestRpcMetadata.getProtocol()).apply(data);
     Function<List<Reader>, List<Object>> readerTransformer = createReaderFunction(out);
-    // The payload owns the decoded request data buffer so the generated handler can release it (via
-    // releaseRequestData()) right after reading the request args, instead of holding it until the
-    // response completes.
-    return ServerRequestPayload.create(
-        readerTransformer, requestRpcMetadata, requestContext, requestData);
-  }
-
-  /**
-   * Releases what is still owned by this method on a synchronous failure before the reactive
-   * pipeline is returned. The success path nulls out {@code payload} (already released after
-   * decode) and {@code data} (ownership transferred to {@code requestPayload}); this method
-   * therefore safely no-ops on whichever has already been handed off.
-   *
-   * <p>If {@code requestPayload} exists, route the buffer release through its idempotent {@link
-   * ServerRequestPayload#releaseRequestData()} so the catch and success paths free it exactly once;
-   * otherwise the local {@code data} buffer is released directly. The original {@code payload} is
-   * always {@link ReferenceCountUtil#safeRelease(Object) safeRelease}d in case the failure happened
-   * before the post-decode release.
-   */
-  private static void releaseOnError(
-      ServerRequestPayload requestPayload, ByteBuf data, Payload payload) {
-    if (requestPayload != null) {
-      requestPayload.releaseRequestData();
-    } else {
-      ReferenceCountUtil.safeRelease(data);
-    }
-    ReferenceCountUtil.safeRelease(payload);
+    return ServerRequestPayload.create(readerTransformer, requestRpcMetadata, requestContext);
   }
 
   private static RequestRpcMetadata decodeRequestRpcMetadata(Payload payload) {
@@ -292,29 +247,31 @@ public class ThriftServerRSocket implements RSocket {
   @Override
   public Mono<Void> fireAndForget(Payload payload) {
     ByteBuf data = null;
-    ServerRequestPayload requestPayload = null;
     try {
       RequestRpcMetadata requestRpcMetadata = decodeRequestRpcMetadata(payload);
 
       RequestContext requestContext = createRequestContext(requestRpcMetadata.getOtherMetadata());
 
       data = maybeDecompressRequestData(requestRpcMetadata, payload);
-      ReferenceCountUtil.safeRelease(payload);
-      payload = null;
 
-      requestPayload = deserializeRequest(data, requestRpcMetadata, requestContext, data);
-      data = null; // ownership transferred to ServerRequestPayload
+      ServerRequestPayload requestPayload =
+          deserializeRequest(data, requestRpcMetadata, requestContext);
 
       assert requestPayload.getRequestRpcMetadata().getKind() == RpcKind.SINGLE_REQUEST_NO_RESPONSE;
 
-      final ServerRequestPayload finalRequestPayload = requestPayload;
+      final ByteBuf requestData = data;
       return rpcServerHandler
           .singleRequestNoResponse(requestPayload)
-          // The generated handler releases the request buffer right after it reads the args; this
-          // is the idempotent backstop for paths where no method body runs.
-          .doFinally(__ -> finalRequestPayload.releaseRequestData());
+          .doFinally(
+              __ -> {
+                requestData.release();
+                if (payload.refCnt() > 0) {
+                  payload.release();
+                }
+              });
     } catch (Throwable t) {
-      releaseOnError(requestPayload, data, payload);
+      ReferenceCountUtil.safeRelease(data);
+      payload.release();
       return Mono.error(t);
     }
   }

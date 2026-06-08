@@ -96,7 +96,7 @@ public class ServiceRpcServerHandler
             // _do<method> (where the read actually happens) rather than in the dispatcher so it stays
             // correct for inherited methods -- a child dispatcher forwards a deferred Mono to super
             // without reading, so releasing there would free the buffer before the parent reads it.
-            // Idempotent; no-op for payloads constructed without an owned buffer.
+            // No-op when the transport owns the buffer (e.g. RSocket).
             _payload.releaseRequestData();
           }
           java.util.Iterator<java.lang.Object> _iterator = _data.iterator();

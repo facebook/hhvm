@@ -90,16 +90,7 @@ abstract class StreamResponseHandlerTemplate<T> {
     final StreamHandler<T> handler = getStreamResponseHandler(requestPayload, chain);
     try {
       chain.preRead();
-      List<Object> data;
-      try {
-        data = requestPayload.getData(readers);
-      } finally {
-        // getData has fully read the request bytes; release the request buffer now. This is the
-        // streaming analog of the eager release the generated request-response/oneway handlers do
-        // right after their read -- it keeps the request buffer from being pinned for the entire
-        // stream lifetime. Idempotent, and a no-op for payloads that carry no owned buffer.
-        requestPayload.releaseRequestData();
-      }
+      List<Object> data = requestPayload.getData(readers);
       chain.postRead(data);
 
       Flux<T> stream = delegate.apply(data);

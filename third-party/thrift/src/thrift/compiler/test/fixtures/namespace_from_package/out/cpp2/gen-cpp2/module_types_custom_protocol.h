@@ -17,23 +17,6 @@
 #include "thrift/compiler/test/fixtures/namespace_from_package/gen-cpp2/module_types.tcc"
 
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::test::namespace_from_package::module::Foo> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace test::namespace_from_package::module {
 
 template <class Protocol_>

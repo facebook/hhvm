@@ -9,8 +9,28 @@
 #include "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
+#include <thrift/lib/cpp2/gen/tcc_struct_traits_impl.h>
 
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
+
+namespace apache::thrift::detail {
+template void TccStructTraits<::cpp2::ComplexUnion>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::cpp2::ListUnion>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::cpp2::DataUnion>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::cpp2::Val>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::cpp2::ValUnion>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::cpp2::VirtualComplexUnion>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::cpp2::NonCopyableStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::cpp2::NonCopyableUnion>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+} // namespace apache::thrift::detail
 
 
 

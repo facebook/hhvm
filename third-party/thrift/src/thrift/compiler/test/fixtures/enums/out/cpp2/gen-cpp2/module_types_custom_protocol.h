@@ -18,30 +18,6 @@
 
 #include "thrift/compiler/test/fixtures/enums/gen-cpp2/included_enum_types_custom_protocol.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::test::fixtures::enums::SomeStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::test::fixtures::enums::MyStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace test::fixtures::enums {
 
 template <class Protocol_>

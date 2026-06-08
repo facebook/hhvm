@@ -9,8 +9,14 @@
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
+#include <thrift/lib/cpp2/gen/tcc_struct_traits_impl.h>
 
 [[maybe_unused]] static constexpr std::string_view kModuleName = "include2";
+
+namespace apache::thrift::detail {
+template void TccStructTraits<::some::ns::IncludedB>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+} // namespace apache::thrift::detail
 
 
 

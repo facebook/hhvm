@@ -9,8 +9,18 @@
 #include "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
+#include <thrift/lib/cpp2/gen/tcc_struct_traits_impl.h>
 
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
+
+namespace apache::thrift::detail {
+template void TccStructTraits<::cpp2::Color>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::cpp2::Vehicle>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::cpp2::Person>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+} // namespace apache::thrift::detail
 
 
 namespace apache { namespace thrift {

@@ -17,23 +17,6 @@
 #include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_types.tcc"
 
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::test::fixtures::enumstrict::MyStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace test::fixtures::enumstrict {
 
 template <class Protocol_>

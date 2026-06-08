@@ -9,8 +9,30 @@
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
+#include <thrift/lib/cpp2/gen/tcc_struct_traits_impl.h>
 
 [[maybe_unused]] static constexpr std::string_view kModuleName = "simple";
+
+namespace apache::thrift::detail {
+template void TccStructTraits<::apache::thrift::test::Foo>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::apache::thrift::test::LazyFoo>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::apache::thrift::test::OptionalFoo>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::apache::thrift::test::OptionalLazyFoo>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::apache::thrift::test::OptionalBoxedLazyFoo>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::apache::thrift::test::LazyCppRef>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::apache::thrift::test::IndexedFoo>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::apache::thrift::test::OptionalIndexedFoo>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::apache::thrift::test::Empty>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+} // namespace apache::thrift::detail
 
 
 

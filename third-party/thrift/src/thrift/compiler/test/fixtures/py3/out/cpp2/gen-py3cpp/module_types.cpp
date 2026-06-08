@@ -9,8 +9,40 @@
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
+#include <thrift/lib/cpp2/gen/tcc_struct_traits_impl.h>
 
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
+
+namespace apache::thrift::detail {
+template void TccStructTraits<::py3::simple::SimpleException>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::py3::simple::OptionalRefStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::py3::simple::SimpleStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::py3::simple::Float32Struct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::py3::simple::IssetInspectionStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::py3::simple::HiddenTypeFieldsStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::py3::simple::detail::AdaptedUnion>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::py3::simple::HiddenException>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::py3::simple::ComplexStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::py3::simple::BinaryUnion>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::py3::simple::BinaryUnionStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::py3::simple::CustomFields>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::py3::simple::CustomTypedefFields>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::py3::simple::AdaptedTypedefFields>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+} // namespace apache::thrift::detail
 
 
 namespace apache { namespace thrift {

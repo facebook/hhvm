@@ -9,8 +9,26 @@
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
+#include <thrift/lib/cpp2/gen/tcc_struct_traits_impl.h>
 
 [[maybe_unused]] static constexpr std::string_view kModuleName = "containers";
+
+namespace apache::thrift::detail {
+template void TccStructTraits<::test::fixtures::python_capi::TemplateLists>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::test::fixtures::python_capi::TemplateSets>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::test::fixtures::python_capi::TemplateMaps>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::test::fixtures::python_capi::TWrapped>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::test::fixtures::python_capi::IndirectionA>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::test::fixtures::python_capi::IndirectionB>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::test::fixtures::python_capi::IndirectionC>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+} // namespace apache::thrift::detail
 
 
 

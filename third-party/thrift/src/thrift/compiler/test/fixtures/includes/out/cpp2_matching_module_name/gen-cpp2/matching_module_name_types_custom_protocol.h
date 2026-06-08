@@ -18,23 +18,6 @@
 
 #include "other/gen-cpp2/matching_module_name_types_custom_protocol.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::matching_module_name::MyStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace matching_module_name {
 
 template <class Protocol_>

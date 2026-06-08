@@ -17,23 +17,6 @@
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_types.tcc"
 
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::facebook::ns::qwerty::SomeStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace facebook::ns::qwerty {
 
 template <class Protocol_>

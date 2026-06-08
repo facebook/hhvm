@@ -17,65 +17,6 @@
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_types.tcc"
 
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::MyStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::MyUnion> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::AdaptedFields> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::TerseException> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace facebook::thrift::test::fixtures::terse_write {
 
 template <class Protocol_>

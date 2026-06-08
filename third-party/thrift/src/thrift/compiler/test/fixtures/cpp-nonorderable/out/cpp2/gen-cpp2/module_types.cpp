@@ -9,8 +9,20 @@
 #include "thrift/compiler/test/fixtures/cpp-nonorderable/gen-cpp2/module_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
+#include <thrift/lib/cpp2/gen/tcc_struct_traits_impl.h>
 
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
+
+namespace apache::thrift::detail {
+template void TccStructTraits<::cpp2::NonOrderableStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::cpp2::NonOrderableUnion>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::cpp2::OrderableStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::cpp2::OrderableUnion>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+} // namespace apache::thrift::detail
 
 
 

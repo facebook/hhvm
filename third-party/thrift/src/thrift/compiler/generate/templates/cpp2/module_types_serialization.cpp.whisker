@@ -62,11 +62,6 @@ void __fbthrift_static_init_{{struct.cpp_underlying_name}}() {
   {{/each}}
 } // namespace {{program.cpp_qualified_namespace}}
 {{/if (has_compiler_option? "any")}}
-  {{#each program.current_split_structured_definitions as |struct|}}
-    {{#if (not (has_compiler_option? "tablebased"))}}
-{{> module_types_cpp/struct_traits}}
-    {{/if (not (has_compiler_option? "tablebased"))}}
-  {{/each}}
 
 namespace {{program.cpp_qualified_namespace}} {
   {{#each program.current_split_structured_definitions as |struct|}}

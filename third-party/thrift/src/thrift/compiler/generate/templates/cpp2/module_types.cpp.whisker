@@ -24,8 +24,18 @@
 #include "{{program.include_prefix}}{{program.name}}_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
+#include <thrift/lib/cpp2/gen/tcc_struct_traits_impl.h>
 
 [[maybe_unused]] static constexpr std::string_view kModuleName = "{{program.name}}";
+
+  {{#if (not (has_compiler_option? "tablebased"))}}
+namespace apache::thrift::detail {
+    {{#each program.current_split_structured_definitions as |struct|}}
+template void TccStructTraits<{{struct.cpp_fullname}}>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+    {{/each}}
+} // namespace apache::thrift::detail
+  {{/if (not (has_compiler_option? "tablebased"))}}
 
 {{> module_types_cpp/declare_enums}}
   {{#if (has_compiler_option? "tablebased")}}

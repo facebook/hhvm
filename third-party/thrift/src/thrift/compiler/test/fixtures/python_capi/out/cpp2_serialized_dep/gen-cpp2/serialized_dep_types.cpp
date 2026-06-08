@@ -9,8 +9,24 @@
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
+#include <thrift/lib/cpp2/gen/tcc_struct_traits_impl.h>
 
 [[maybe_unused]] static constexpr std::string_view kModuleName = "serialized_dep";
+
+namespace apache::thrift::detail {
+template void TccStructTraits<::test::fixtures::python_capi::SerializedStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::test::fixtures::python_capi::SerializedUnion>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::test::fixtures::python_capi::SerializedError>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::test::fixtures::python_capi::MarshalStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::test::fixtures::python_capi::MarshalUnion>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::test::fixtures::python_capi::MarshalError>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+} // namespace apache::thrift::detail
 
 
 

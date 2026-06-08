@@ -25,6 +25,7 @@
 
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/BoxedValuePtr.h>
+#include <thrift/lib/cpp2/gen/tcc_struct_traits.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/op/Get.h>
@@ -46,9 +47,6 @@ class SimpleJSONProtocolReader;
 class SimpleJSONProtocolWriter;
 
 namespace detail {
-
-template <typename T>
-struct TccStructTraits;
 
 template <typename..., class T>
 auto make_mutable_smart_ptr(folly::tag_t<std::unique_ptr<T>>) {

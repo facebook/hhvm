@@ -17,44 +17,6 @@
 #include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_types.tcc"
 
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::apache::thrift::test::MyStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::apache::thrift::test::EmptiableStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::apache::thrift::test::EmptiableTerseStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::apache::thrift::test::NotEmptiableStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace apache::thrift::test {
 
 template <class Protocol_>

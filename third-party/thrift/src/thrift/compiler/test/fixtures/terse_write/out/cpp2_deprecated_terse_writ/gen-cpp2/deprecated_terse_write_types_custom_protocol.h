@@ -17,65 +17,6 @@
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_types.tcc"
 
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::StructLevelTerseStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::FieldLevelTerseStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::CppRefStructFields> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace facebook::thrift::test::fixtures::terse_write::deprecated {
 
 template <class Protocol_>

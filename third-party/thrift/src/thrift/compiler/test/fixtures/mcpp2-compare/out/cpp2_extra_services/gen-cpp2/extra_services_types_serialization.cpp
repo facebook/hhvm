@@ -10,27 +10,6 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::extra::svc::containerStruct2>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) {
-  using data = apache::thrift::TStructDataStorage<::extra::svc::containerStruct2>;
-  static const st::translate_field_name_hash_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name_or_id(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace extra::svc {
 
 

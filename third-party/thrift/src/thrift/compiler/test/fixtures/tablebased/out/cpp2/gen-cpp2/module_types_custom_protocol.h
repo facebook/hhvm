@@ -17,7 +17,6 @@
 #include "thrift/compiler/test/fixtures/tablebased/gen-cpp2/module_types.tcc"
 
 
-
 namespace test::fixtures::tablebased {
 
 template <class Protocol_>

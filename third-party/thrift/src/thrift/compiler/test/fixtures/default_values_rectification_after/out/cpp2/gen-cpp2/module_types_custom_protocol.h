@@ -17,30 +17,6 @@
 #include "thrift/compiler/test/fixtures/default_values_rectification_after/gen-cpp2/module_types.tcc"
 
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::TestStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_after {
 
 template <class Protocol_>

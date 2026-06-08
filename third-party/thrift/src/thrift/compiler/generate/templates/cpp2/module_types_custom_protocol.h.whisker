@@ -36,10 +36,6 @@
 #include "{{include.program.include_prefix}}{{include.program.name}}_types_custom_protocol.h"
   {{/each}}
 
-  {{#if (not (has_compiler_option? "tablebased"))}}
-{{> module_types_custom_protocol_h/struct_traits}}
-  {{/if (not (has_compiler_option? "tablebased"))}}
-
 namespace {{program.cpp_qualified_namespace}} {
   {{#each program.structured_definitions as |struct|}}
     {{#if (object.notnull? struct.extra_namespace)}}

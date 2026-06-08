@@ -9,8 +9,14 @@
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
+#include <thrift/lib/cpp2/gen/tcc_struct_traits_impl.h>
 
 [[maybe_unused]] static constexpr std::string_view kModuleName = "shared";
+
+namespace apache::thrift::detail {
+template void TccStructTraits<::thrift::shared_interactions::DoSomethingResult>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+} // namespace apache::thrift::detail
 
 
 

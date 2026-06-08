@@ -19,23 +19,6 @@
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/extend_types_custom_protocol.h"
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/include_types_custom_protocol.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::service_schema::CustomException> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace facebook::thrift::test::fixtures::service_schema {
 
 template <class Protocol_>

@@ -19,44 +19,6 @@
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_types_custom_protocol.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_types_custom_protocol.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::some::ns::ModuleA> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::some::ns::ModuleB> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::some::ns::detail::DirectlyAdapted> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::some::ns::CppRef> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace some::ns {
 
 template <class Protocol_>

@@ -17,23 +17,6 @@
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_types.tcc"
 
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::some::ns::IncludedA> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace some::ns {
 
 template <class Protocol_>

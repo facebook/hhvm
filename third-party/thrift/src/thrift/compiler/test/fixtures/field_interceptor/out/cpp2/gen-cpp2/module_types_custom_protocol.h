@@ -17,23 +17,6 @@
 #include "thrift/compiler/test/fixtures/field_interceptor/gen-cpp2/module_types.tcc"
 
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace facebook::thrift::test::fixtures::field_interceptor {
 
 template <class Protocol_>

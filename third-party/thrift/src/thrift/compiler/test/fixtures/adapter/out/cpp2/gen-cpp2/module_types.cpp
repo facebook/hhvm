@@ -9,8 +9,80 @@
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
+#include <thrift/lib/cpp2/gen/tcc_struct_traits_impl.h>
 
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
+
+namespace apache::thrift::detail {
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::MyAnnotation>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Foo>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Baz>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Bar>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::B>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::A>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Config>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::MyStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::CircularAdaptee>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::CircularStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::ReorderedStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::MoveOnly>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::ApplyAdapter>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::CountingStruct>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Person>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Person2>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+template void TccStructTraits<::facebook::thrift::test::fixtures::adapter::Renamed>::translateFieldName(
+    std::string_view, int16_t&, apache::thrift::protocol::TType&);
+} // namespace apache::thrift::detail
 
 
 namespace apache { namespace thrift {

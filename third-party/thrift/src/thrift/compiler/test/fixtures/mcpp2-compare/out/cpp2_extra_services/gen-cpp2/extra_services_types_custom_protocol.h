@@ -18,23 +18,6 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types_custom_protocol.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::extra::svc::containerStruct2> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace extra::svc {
 
 template <class Protocol_>

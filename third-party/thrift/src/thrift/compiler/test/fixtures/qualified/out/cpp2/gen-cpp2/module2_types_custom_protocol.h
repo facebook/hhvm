@@ -19,30 +19,6 @@
 #include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module0_types_custom_protocol.h"
 #include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_types_custom_protocol.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-template <>
-struct TccStructTraits<::module2::Struct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-template <>
-struct TccStructTraits<::module2::BigStruct> {
-  static void translateFieldName(
-      std::string_view _fname,
-      int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
-};
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
 namespace module2 {
 
 template <class Protocol_>

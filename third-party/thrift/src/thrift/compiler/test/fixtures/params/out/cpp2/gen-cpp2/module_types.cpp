@@ -9,8 +9,12 @@
 #include "thrift/compiler/test/fixtures/params/gen-cpp2/module_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
+#include <thrift/lib/cpp2/gen/tcc_struct_traits_impl.h>
 
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
+
+namespace apache::thrift::detail {
+} // namespace apache::thrift::detail
 
 
 namespace cpp2 { namespace {

@@ -48,7 +48,6 @@ type feature_name =
   | ClassType
   | FunctionReferences
   | FunctionTypeOptionalParams
-  | SealedMethods
   | AwaitInSplice
   | OpenTuples
   | TypeSplat

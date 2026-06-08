@@ -1,7 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('sealed_methods')>>
-
 // subclasses can introduce new `__Sealed` restrictions
 
 class C {

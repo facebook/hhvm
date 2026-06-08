@@ -13,8 +13,6 @@ new module b {}
 
 module a;
 
-<<file: __EnableUnstableFeatures('sealed_methods')>>
-
 // TODO: it should be an error to use Sealed with a hidden class name
 <<__Sealed(D::class)>>
 class C {

@@ -1,7 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('sealed_methods')>>
-
 class C {
   <<__Sealed(C_Async::class)>>
   public function foo(): void {}

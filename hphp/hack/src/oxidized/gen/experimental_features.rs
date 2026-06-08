@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ce584ce730ffa5f5f2df06e4ed7922bb>>
+// @generated SignedSource<<4b1dddaa61285b2f80fe977fef20ca33>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -109,7 +109,6 @@ pub enum FeatureName {
     ClassType,
     FunctionReferences,
     FunctionTypeOptionalParams,
-    SealedMethods,
     AwaitInSplice,
     OpenTuples,
     TypeSplat,

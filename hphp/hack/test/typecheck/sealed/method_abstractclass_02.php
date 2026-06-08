@@ -1,7 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('sealed_methods')>>
-
 abstract class C {
   <<__Sealed(D::class)>>
   abstract public function foo(): void;

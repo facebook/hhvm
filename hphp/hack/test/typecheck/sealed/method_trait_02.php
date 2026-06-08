@@ -1,7 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('sealed_methods')>>
-
 trait T1 {
   <<__Sealed(C::class, T2::class)>>
   public function foo(): void {

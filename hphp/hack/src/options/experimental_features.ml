@@ -54,7 +54,6 @@ type feature_name =
   | ClassType
   | FunctionReferences
   | FunctionTypeOptionalParams
-  | SealedMethods
   | AwaitInSplice
   | OpenTuples
   | TypeSplat
@@ -109,7 +108,6 @@ let feature_name_map =
       ("class_type", ClassType);
       ("function_references", FunctionReferences);
       ("function_type_optional_params", FunctionTypeOptionalParams);
-      ("sealed_methods", SealedMethods);
       ("await_in_splice", AwaitInSplice);
       ("open_tuples", OpenTuples);
       ("type_splat", TypeSplat);

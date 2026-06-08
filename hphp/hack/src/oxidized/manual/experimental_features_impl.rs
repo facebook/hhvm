@@ -39,7 +39,6 @@ impl FeatureName {
             ClassType => OngoingRelease,
             FunctionReferences => Unstable,
             FunctionTypeOptionalParams => OngoingRelease,
-            SealedMethods => OngoingRelease,
             AwaitInSplice => OngoingRelease,
             OpenTuples => OngoingRelease,
             TypeSplat => OngoingRelease,

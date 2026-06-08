@@ -29,6 +29,9 @@ namespace apache::thrift::type_system {
 
 namespace {
 
+using MergeConflictError = AccumulatingTypeSystem::MergeConflictError;
+using MergeResolution = AccumulatingTypeSystem::MergeResolution;
+
 // Resolves a conflict between an incoming definition and an existing one,
 // according to the `MergeResolution` policy.
 void resolveConflict(MergeResolution resolution, UriView uri) {
@@ -54,6 +57,9 @@ struct AccumulatingTypeSystem::Impl {
   // deduplicate/detect conflicts on subsequent additions.
   folly::F14FastMap<Uri, TypeSystemDigest> digests;
 };
+
+AccumulatingTypeSystem::AccumulatingTypeSystem()
+    : AccumulatingTypeSystem(MergePolicy{}) {}
 
 AccumulatingTypeSystem::AccumulatingTypeSystem(
     MergePolicy policy, std::shared_ptr<const TypeSystem> base)

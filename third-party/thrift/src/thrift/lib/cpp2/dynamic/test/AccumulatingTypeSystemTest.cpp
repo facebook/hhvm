@@ -28,6 +28,8 @@ namespace apache::thrift::type_system {
 namespace {
 
 using def = TypeSystemBuilder::DefinitionHelper;
+using MergeConflictError = AccumulatingTypeSystem::MergeConflictError;
+using MergeResolution = AccumulatingTypeSystem::MergeResolution;
 
 // Builds a single-struct SerializableTypeSystem with i32 fields.
 SerializableTypeSystem makeTs(

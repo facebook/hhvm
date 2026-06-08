@@ -32,46 +32,6 @@
 namespace apache::thrift::type_system {
 
 /**
- * Thrown when an incoming definition conflicts with an existing one (same URI,
- * unequal under the policy's digest mode) while MergeResolution::Error is in
- * effect.
- */
-class MergeConflictError : public std::runtime_error {
- public:
-  explicit MergeConflictError(Uri uri)
-      : std::runtime_error(
-            fmt::format(
-                "Conflicting definitions for URI '{}' during TypeSystem merge",
-                uri)),
-        uri_(std::move(uri)) {}
-
-  /** The URI of the definition that conflicted. */
-  const Uri& uri() const { return uri_; }
-
- private:
-  Uri uri_;
-};
-
-/**
- * What to do when two definitions that share a URI are NOT equal (per the
- * MergePolicy's digest mode).
- */
-enum class MergeResolution {
-  /** Throw MergeConflictError on conflict. */
-  Error,
-  /** Keep whichever definition was added first; ignore the conflicting one. */
-  TakeFirst,
-};
-
-struct MergePolicy {
-  // How two definitions sharing a URI are compared for equality.
-  // `DigestMode::Full` requires them to be fully identical.
-  // `DigestMode::Structural` ignores annotations and custom defaults.
-  DigestMode digestMode = DigestMode::Full;
-  MergeResolution resolution = MergeResolution::Error;
-};
-
-/**
  * A TypeSystem implementation that is built up incrementally by folding in
  * Types/TypeSystems over time.
  *
@@ -110,6 +70,50 @@ struct MergePolicy {
 class AccumulatingTypeSystem final : public TypeSystem {
  public:
   /**
+   * Thrown when an incoming definition conflicts with an existing one (same
+   * URI, unequal under the policy's digest mode) while MergeResolution::Error
+   * is in effect.
+   */
+  class MergeConflictError : public std::runtime_error {
+   public:
+    explicit MergeConflictError(Uri uri)
+        : std::runtime_error(
+              fmt::format(
+                  "Conflicting definitions for URI '{}' during TypeSystem merge",
+                  uri)),
+          uri_(std::move(uri)) {}
+
+    /** The URI of the definition that conflicted. */
+    const Uri& uri() const { return uri_; }
+
+   private:
+    Uri uri_;
+  };
+
+  /**
+   * What to do when two definitions that share a URI are NOT equal (per the
+   * MergePolicy's digest mode).
+   */
+  enum class MergeResolution {
+    /** Throw MergeConflictError on conflict. */
+    Error,
+    /** Keep whichever definition was added first; ignore the conflicting one.
+     */
+    TakeFirst,
+  };
+
+  struct MergePolicy {
+    // How two definitions sharing a URI are compared for equality.
+    // `DigestMode::Full` requires them to be fully identical.
+    // `DigestMode::Structural` ignores annotations and custom defaults.
+    DigestMode digestMode = DigestMode::Full;
+    MergeResolution resolution = MergeResolution::Error;
+  };
+
+  /** Constructs an empty instance with the default merge policy and no base. */
+  AccumulatingTypeSystem();
+
+  /**
    * Constructs an instance, optionally layered on a base TypeSystem. Types in
    * the base are treated as already defined: an incoming type sharing a URI
    * with a base type is deduplicated (or conflicts per MergePolicy) and is
@@ -117,8 +121,7 @@ class AccumulatingTypeSystem final : public TypeSystem {
    * types. The base is fixed for the lifetime of the instance.
    */
   explicit AccumulatingTypeSystem(
-      MergePolicy policy = {},
-      std::shared_ptr<const TypeSystem> base = nullptr);
+      MergePolicy policy, std::shared_ptr<const TypeSystem> base = nullptr);
   ~AccumulatingTypeSystem() override;
 
   AccumulatingTypeSystem(const AccumulatingTypeSystem&) = delete;

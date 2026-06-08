@@ -21,50 +21,18 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.thrift.TException;
 
-/**
- * Per-request fan-out helper that invokes each {@link ThriftEventHandler} at the matching lifecycle
- * point with the per-handler {@code context} returned by {@link ThriftEventHandler#getContext}.
- * First handler that throws short-circuits the rest.
- */
 public class ContextChain {
   private final List<ThriftEventHandler> handlers;
   private final String methodName;
   private final List<Object> contexts;
 
-  /**
-   * Calls {@code getContext} on every handler once and stores the result. If a later handler's
-   * {@code getContext} throws, unwinds the already-succeeded prefix by calling {@code done()} in
-   * reverse, then rethrows -- preserves the per-handler invariant that a successful {@code
-   * getContext} is always paired with a {@code done()}.
-   */
   public ContextChain(
       List<ThriftEventHandler> handlers, String methodName, RequestContext requestContext) {
     this.handlers = handlers;
     this.methodName = methodName;
     this.contexts = new ArrayList<>();
-    try {
-      for (ThriftEventHandler h : this.handlers) {
-        this.contexts.add(h.getContext(methodName, requestContext));
-      }
-    } catch (Throwable t) {
-      for (int i = contexts.size() - 1; i >= 0; i--) {
-        try {
-          this.handlers.get(i).done(contexts.get(i), methodName);
-        } catch (Throwable suppressed) {
-          t.addSuppressed(suppressed);
-        }
-      }
-      throw t;
-    }
-  }
-
-  /**
-   * Admission-control hook: invoked on the caller thread BEFORE off-loop queueing so a shed never
-   * pays queue time, parse CPU, or pins the request buffer.
-   */
-  public void preprocess() throws TException {
-    for (int i = 0; i < handlers.size(); i++) {
-      handlers.get(i).preprocess(contexts.get(i), methodName);
+    for (ThriftEventHandler h : this.handlers) {
+      this.contexts.add(h.getContext(methodName, requestContext));
     }
   }
 

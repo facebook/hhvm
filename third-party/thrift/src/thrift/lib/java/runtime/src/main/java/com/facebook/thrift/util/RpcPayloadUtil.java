@@ -71,30 +71,6 @@ public final class RpcPayloadUtil {
 
   private RpcPayloadUtil() {}
 
-  /**
-   * Maps an unhandled {@link Throwable} to a {@link TApplicationException} with code {@link
-   * TApplicationException#INTERNAL_ERROR} and encodes it as a Thrift error response. Fires the
-   * chain's exception write hooks when {@code chain} is non-null. Mirrors the C++ server's {@code
-   * TApplicationException::INTERNAL_ERROR} wrapping pattern.
-   *
-   * @param description short description of what failed, e.g. {@code "preprocess"} or {@code "ping
-   *     handler"}; included in the encoded message.
-   */
-  public static ServerResponsePayload internalErrorResponse(
-      final Throwable t,
-      final String description,
-      final RequestRpcMetadata requestRpcMetadata,
-      final ContextChain chain) {
-    String message =
-        String.format(
-            "Internal error during %s: %s",
-            description, t.getMessage() == null ? "<null>" : t.getMessage());
-    TApplicationException tae =
-        new TApplicationException(TApplicationException.INTERNAL_ERROR, message);
-    tae.initCause(t);
-    return fromTApplicationException(tae, requestRpcMetadata, chain);
-  }
-
   public static ServerResponsePayload fromTApplicationException(
       final TApplicationException applicationException,
       final RequestRpcMetadata requestRpcMetadata,

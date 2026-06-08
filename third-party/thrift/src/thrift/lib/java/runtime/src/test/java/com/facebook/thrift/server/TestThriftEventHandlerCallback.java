@@ -16,6 +16,7 @@
 
 package com.facebook.thrift.server;
 
+import com.facebook.nifty.core.RequestContext;
 import com.facebook.nifty.core.RequestContexts;
 import com.facebook.swift.service.ThriftEventHandler;
 import com.facebook.swift.service.ThriftServerConfig;
@@ -157,6 +158,8 @@ public class TestThriftEventHandlerCallback {
     client.ping(PingRequest.defaultInstance());
 
     Assertions.assertTrue(
+        handler.contextAvailableInGetContext, "RequestContext should be available in getContext()");
+    Assertions.assertTrue(
         handler.contextAvailableInPreRead, "RequestContext should be available in preRead()");
     Assertions.assertTrue(
         handler.contextAvailableInPostRead, "RequestContext should be available in postRead()");
@@ -194,6 +197,8 @@ public class TestThriftEventHandlerCallback {
     client.ping(PingRequest.defaultInstance());
 
     Assertions.assertTrue(
+        handler.contextAvailableInGetContext, "RequestContext should be available in getContext()");
+    Assertions.assertTrue(
         handler.contextAvailableInPreRead, "RequestContext should be available in preRead()");
     Assertions.assertTrue(
         handler.contextAvailableInPostRead, "RequestContext should be available in postRead()");
@@ -202,9 +207,16 @@ public class TestThriftEventHandlerCallback {
   }
 
   private static class RequestContextAssertingEventHandler extends ThriftEventHandler {
+    volatile boolean contextAvailableInGetContext;
     volatile boolean contextAvailableInPreRead;
     volatile boolean contextAvailableInPostRead;
     volatile boolean contextAvailableInPreWrite;
+
+    @Override
+    public Object getContext(String methodName, RequestContext requestContext) {
+      contextAvailableInGetContext = RequestContexts.getCurrentContext() != null;
+      return null;
+    }
 
     @Override
     public void preRead(Object context, String methodName) {

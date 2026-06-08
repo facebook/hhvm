@@ -12,7 +12,9 @@
 
 #include <fmt/format.h>
 
+#include <folly/Conv.h>
 #include <folly/Range.h>
+#include <folly/String.h>
 #include <folly/fibers/FiberManager.h>
 #include <folly/fibers/WhenN.h>
 #include <folly/io/Cursor.h>
@@ -51,6 +53,30 @@ InputIterator reduce(InputIterator begin, InputIterator end) {
 uint64_t hashBigValue(const folly::IOBuf& value);
 
 BigValueRouteOptions parseBigValueRouteSettings(const folly::dynamic& json);
+
+// Parses a chunks-info string of the form "version-numChunks-suffix".
+// replyValue is not NUL-terminated (it views into an IOBuf payload), so it must
+// never be passed to sscanf, which scans for a NUL and reads past the buffer.
+inline bool parseChunksInfo(
+    folly::StringPiece replyValue,
+    uint32_t& version,
+    uint32_t& numChunks,
+    uint64_t& suffix) {
+  folly::StringPiece versionStr, numChunksStr, suffixStr;
+  if (!folly::split('-', replyValue, versionStr, numChunksStr, suffixStr)) {
+    return false;
+  }
+  auto v = folly::tryTo<uint32_t>(versionStr);
+  auto n = folly::tryTo<uint32_t>(numChunksStr);
+  auto s = folly::tryTo<uint64_t>(suffixStr);
+  if (!v || !n || !s) {
+    return false;
+  }
+  version = *v;
+  numChunks = *n;
+  suffix = *s;
+  return true;
+}
 
 } // namespace detail
 
@@ -383,20 +409,9 @@ McLeaseGetReply BigValueRoute<RouterInfo>::doLeaseGetRoute(
 
 template <class RouterInfo>
 BigValueRoute<RouterInfo>::ChunksInfo::ChunksInfo(folly::StringPiece replyValue)
-    : infoVersion_(1), valid_(true) {
-  // Verify that replyValue is of the form version-numChunks-suffix,
-  // where version, numChunks and suffix should be numeric
-  uint32_t version;
-  int charsRead;
-  valid_ &=
-      (sscanf(
-           replyValue.data(),
-           "%u-%u-%lu%n",
-           &version,
-           &numChunks_,
-           &suffix_,
-           &charsRead) == 3);
-  valid_ &= (static_cast<size_t>(charsRead) == replyValue.size());
+    : infoVersion_(1), numChunks_(0), suffix_(0), valid_(true) {
+  uint32_t version = 0;
+  valid_ &= detail::parseChunksInfo(replyValue, version, numChunks_, suffix_);
   valid_ &= (version == infoVersion_);
 }
 

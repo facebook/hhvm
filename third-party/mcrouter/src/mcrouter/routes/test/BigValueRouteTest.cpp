@@ -26,3 +26,31 @@ TEST(BigValueRouteTest, bigvalue) {
   facebook::memcache::mcrouter::testBigvalue<
       facebook::memcache::MemcacheRouterInfo>();
 }
+
+TEST(BigValueRouteTest, chunksInfoParsing) {
+  namespace mc = facebook::memcache::mcrouter;
+  uint32_t version = 0, numChunks = 0;
+  uint64_t suffix = 0;
+
+  EXPECT_TRUE(
+      mc::detail::parseChunksInfo("1-2-7419256", version, numChunks, suffix));
+  EXPECT_EQ(1, version);
+  EXPECT_EQ(2, numChunks);
+  EXPECT_EQ(7419256, suffix);
+
+  EXPECT_FALSE(mc::detail::parseChunksInfo("1-2", version, numChunks, suffix));
+  EXPECT_FALSE(
+      mc::detail::parseChunksInfo("1-2-3-4", version, numChunks, suffix));
+  EXPECT_FALSE(
+      mc::detail::parseChunksInfo("1-2-x", version, numChunks, suffix));
+  EXPECT_FALSE(mc::detail::parseChunksInfo("", version, numChunks, suffix));
+
+  // Regression: must stay within the StringPiece bounds and never read trailing
+  // bytes. The crash was sscanf scanning a non-NUL-terminated buffer past its
+  // end.
+  folly::StringPiece backing("1-2-3456789");
+  EXPECT_TRUE(
+      mc::detail::parseChunksInfo(
+          backing.subpiece(0, 7), version, numChunks, suffix));
+  EXPECT_EQ(345, suffix);
+}

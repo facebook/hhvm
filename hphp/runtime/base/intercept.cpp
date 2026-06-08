@@ -27,8 +27,11 @@
 
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/random.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
+
+#include <folly/Random.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -154,7 +157,14 @@ bool register_intercept(const String& name, const Variant& callback) {
 
   if (interceptedFunc == nullptr) {
     // This intercept request can't possibly do anything, we are done.
-    // TODO: should this throw?
+    // This returns silently instead of throwing, but logging can be enabled via config
+    if (folly::Random::oneIn(
+          Cfg::Eval::InterceptNonExistentFunctionNoticeSampleRate,
+          threadLocalRng64())) {
+      raise_notice(
+        "fb_intercept2 was used on a non-existent function (%s)",
+        name.data());
+    }
     return true;
   }
 

@@ -1719,6 +1719,12 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Unconditionally disable the async scheduler optimization when
   FastMethodIntercept is set.
 
+- uint32_t Eval.InterceptNonExistentFunctionNoticeSampleRate = 0, fzn
+
+  Sample rate for raising a notice when fb_intercept2 is called on a
+  non-existent class or function. 0 disables the notice, 1 fires on every
+  call, N > 1 fires with probability 1/N.
+
 - bool Eval.LogHttpServerSignalSource = true, UNKNOWN
 
 - bool Eval.CrashOnStaticAnalysisError, UNKNOWN

@@ -1450,6 +1450,17 @@ static bool HHVM_METHOD(AsyncMysqlResult, isSslCertValidationEnforced) {
   return false;
 }
 
+static String HHVM_METHOD(AsyncMysqlResult, getSslVersion) {
+  auto* data = Native::data<AsyncMysqlResult>(this_);
+  if (auto* op = data->m_op.get()) {
+    const auto* context = connectionContextFromOperation(op);
+    if (context && !context->sslVersion.empty()) {
+      return context->sslVersion;
+    }
+  }
+  return String();
+}
+
 #define DEFINE_PROXY_METHOD(cls, method, type) \
   type HHVM_METHOD(cls, method) { return Native::data<cls>(this_)->method(); }
 
@@ -2191,7 +2202,7 @@ static struct AsyncMysqlExtension final : Extension {
   // bump the version number and use a version guard in www:
   //   $ext = new ReflectionExtension("async_mysql");
   //   $version = (float) $ext->getVersion();
-  AsyncMysqlExtension() : Extension("async_mysql", "8.2", "mysql_gateway") {}
+  AsyncMysqlExtension() : Extension("async_mysql", "8.3", "mysql_gateway") {}
   void moduleRegisterNative() override {
     // expose the mysql flags
     HHVM_RC_INT_SAME(NOT_NULL_FLAG);
@@ -2289,6 +2300,7 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlResult, getSslCertSan);
     HHVM_ME(AsyncMysqlResult, getSslCertExtensions);
     HHVM_ME(AsyncMysqlResult, isSslCertValidationEnforced);
+    HHVM_ME(AsyncMysqlResult, getSslVersion);
 
     HHVM_ME(AsyncMysqlConnectResult, elapsedMicros);
     HHVM_ME(AsyncMysqlConnectResult, startTime);

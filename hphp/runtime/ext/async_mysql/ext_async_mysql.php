@@ -1029,6 +1029,19 @@ abstract class AsyncMysqlResult {
   <<__Native>>
   public function isSslCertValidationEnforced(): bool;
 
+  /**
+   * Returns the TLS protocol version negotiated for this connection (e.g.
+   * "TLSv1.2" or "TLSv1.3"), as resolved during the TLS handshake.
+   *
+   * Unlike `AsyncMysqlConnection::getSslVersion()`, this is available on the
+   * result object, so it can be read on the connect-and-query path where no
+   * `AsyncMysqlConnection` is returned.
+   *
+   * @return - The TLS version, or an empty string for non-SSL connections.
+   */
+  <<__Native>>
+  public function getSslVersion(): string;
+
 }
 
 /**

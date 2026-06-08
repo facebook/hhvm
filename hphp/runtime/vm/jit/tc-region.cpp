@@ -155,6 +155,7 @@ void relocateOptFunc(FuncMetaInfo& info,
     // We don't want to align the first region, to enable fall-through from the
     // last emitted prologue.
     const bool alignMain = !regionTranslator || nRegions != 1;
+    translator->viewTid = pthread_self();
     translator->relocate(alignMain);
     if (!translator->translateSuccess()) {
       if (failedBytes) *failedBytes += bytes;

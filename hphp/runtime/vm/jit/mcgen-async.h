@@ -23,6 +23,14 @@ namespace HPHP::jit::mcgen {
 namespace detail {
 
 /*
+ * Non-blocking attempt to reserve a code view slot for `tid'. Returns true if
+ * the slot was acquired (and immediately released with a drop hint so the async
+ * worker can fast-path reactivate it). Returns false if no slot is available,
+ * in which case the caller should skip the enqueue to avoid blocking workers.
+ */
+bool tryReserveView(pthread_t tid);
+
+/*
  * Check that async translation of `sk' for a live translation kind is allowed,
  * and if so mark the current thread as having enqueued a translation request.
  *
@@ -33,9 +41,12 @@ bool mayEnqueueAsyncTranslateRequest(const SrcKey& sk);
 /*
  * Enqueue a translation of `kind' for `ctx'. You must check
  * mayEnqueueAsyncTranslateRequest before calling this function.
+ * `requestTid' is the thread ID of the requesting thread, used to
+ * direct the async worker to emit code into that thread's code view.
  */
 void enqueueAsyncTranslateRequest(TransKind kind, RegionContext&& ctx,
-                                  int currNumTranslations);
+                                  int currNumTranslations,
+                                  pthread_t requestTid);
 }
 
 /*
@@ -57,15 +68,24 @@ bool isAsyncJitEnabled(TransKind kind);
 template<class F>
 void enqueueAsyncTranslateRequest(TransKind kind, const SrcKey& sk,
                                     F&& getCtx, int currNumTranslations) {
+  auto const requestTid = pthread_self();
+  if (!isProfiling(kind) && !detail::tryReserveView(requestTid)) {
+    FTRACE_MOD(Trace::async_jit, 2,
+      "No code view slot available, skipping enqueue for sk {}\n",
+      show(sk)
+    );
+    return;
+  }
   if (!Cfg::Eval::AsyncJitDeferContext) {
     auto ctx = getCtx();
     if (detail::mayEnqueueAsyncTranslateRequest(sk)) {
       detail::enqueueAsyncTranslateRequest(kind, std::move(ctx),
-                                           currNumTranslations);
+                                           currNumTranslations, requestTid);
       return;
     }
   } else if (detail::mayEnqueueAsyncTranslateRequest(sk)) {
-    detail::enqueueAsyncTranslateRequest(kind, getCtx(), currNumTranslations);
+    detail::enqueueAsyncTranslateRequest(kind, getCtx(), currNumTranslations,
+                                         requestTid);
     return;
   }
 
@@ -78,8 +98,10 @@ void enqueueAsyncTranslateRequest(TransKind kind, const SrcKey& sk,
 /*
  * Request an async translation of `kind' for the prologue of `func' for
  * `nPassed' parameters. Ensures only one copy of each prologue is translated.
+ * `requestTid' is the thread ID of the requesting thread.
  */
-void enqueueAsyncPrologueRequest(TransKind kind, Func* func, int nPassed);
+void enqueueAsyncPrologueRequest(TransKind kind, Func* func, int nPassed,
+                                 pthread_t requestTid);
 
 /*
  * During sandbox jumpstart we need to enqueue deserialized region contexts for

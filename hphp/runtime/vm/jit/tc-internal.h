@@ -30,7 +30,7 @@ namespace HPHP::jit::tc {
 
 bool tcIsFull();
 
-void setTcIsFull();
+void setTcIsFull(pthread_t viewTid);
 
 bool threadIsFull();
 

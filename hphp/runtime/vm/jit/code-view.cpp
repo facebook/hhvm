@@ -183,6 +183,14 @@ CodeCache::View CodeCacheViews::view(TransKind kind, const tc::TransRange* sizes
   return newView;
 }
 
+std::unique_lock<std::mutex> CodeCacheViews::lockView(pthread_t tid) {
+  auto it = m_viewMutexes.find(tid);
+  if (it == m_viewMutexes.end()) {
+    it = m_viewMutexes.insert(tid, std::make_shared<std::mutex>()).first;
+  }
+  return std::unique_lock<std::mutex>(*it->second);
+}
+
 void CodeCacheViews::release(pthread_t tid, std::chrono::milliseconds dropHint) {
   if (!Cfg::Jit::EnableConcurrentCodeViews) {
     return;

@@ -289,15 +289,18 @@ SrcKeySet& enqueuedSKs() {
 struct AsyncRegionTranslationContext {
   AsyncRegionTranslationContext(TransKind kind,
                                 RegionContext&& ctx,
-                                int currNumTranslations)
+                                int currNumTranslations,
+                                pthread_t requestTid)
     : kind(kind)
     , ctx(ctx)
     , currNumTranslations(currNumTranslations)
+    , requestTid(requestTid)
   {}
 
   TransKind kind;
   RegionContext ctx;
   int currNumTranslations;
+  pthread_t requestTid;
 };
 
 struct AsyncPrologueContext {
@@ -305,17 +308,20 @@ struct AsyncPrologueContext {
     TransKind kind,
     FuncId funcId,
     int nPassed,
-    bool forJumpstart
+    bool forJumpstart,
+    pthread_t requestTid
   ) : kind(kind)
     , funcId(funcId)
     , nPassed(nPassed)
     , forJumpstart(forJumpstart)
+    , requestTid(requestTid)
   {}
 
   TransKind kind;
   FuncId funcId;
   int nPassed;
   bool forJumpstart;
+  pthread_t requestTid;
 };
 
 struct AsyncOptimizeContext {
@@ -432,7 +438,9 @@ struct AsyncTranslationWorker
     ProfileNonVMThread nonVM;
     HphpSession hps{Treadmill::SessionKind::TranslateWorker};
     VMProtect _;
-    ViewHolder viewer{pthread_self(), true};
+    auto const viewTid = isProfiling(rctx.kind) ? pthread_self()
+                                                : rctx.requestTid;
+    ViewHolder viewer{viewTid, true};
 
     if (!Func::isFuncIdValid(ctx.sk.funcID())) {
       FTRACE(2, "Invalid func id {}\n", ctx.sk.funcID().toInt());
@@ -462,6 +470,7 @@ struct AsyncTranslationWorker
     }
 
     tc::RegionTranslator translator(ctx.sk, rctx.kind);
+    translator.viewTid = viewTid;
     translator.spOff = ctx.spOffset;
     translator.liveTypes = ctx.liveTypes;
     auto const noThreshold = ctxNumTrans == kIgnoreNumTrans;
@@ -521,7 +530,9 @@ struct AsyncTranslationWorker
     ProfileNonVMThread nonVM;
     HphpSession hps{Treadmill::SessionKind::TranslateWorker};
     VMProtect _;
-    ViewHolder viewer{pthread_self(), true};
+    auto const viewTid = isProfiling(ctx.kind) ? pthread_self()
+                                               : ctx.requestTid;
+    ViewHolder viewer{viewTid, true};
 
     if (!Func::isFuncIdValid(ctx.funcId)) {
       FTRACE(2, "Invalid func id {}\n", ctx.funcId.toInt());
@@ -545,6 +556,7 @@ struct AsyncTranslationWorker
     }
 
     tc::PrologueTranslator translator(func, ctx.nPassed, ctx.kind);
+    translator.viewTid = viewTid;
 
     auto const tcAddr = translator.getCached();
     if (tcAddr) {
@@ -650,7 +662,7 @@ void enqueueAsyncTranslateRequestForJumpstart(RegionContext&& ctx) {
   // invariant.
  if (detail::mayEnqueueAsyncTranslateRequest(ctx.sk)) {
   dispatcher().enqueue(AsyncRegionTranslationContext {
-    TransKind::Live, std::move(ctx), kIgnoreNumTrans
+    TransKind::Live, std::move(ctx), kIgnoreNumTrans, pthread_self()
   });
   FTRACE(2, "Enqueued sk {} for jitting in jumpstart\n", show(ctx.sk));
  }
@@ -702,6 +714,12 @@ void log(const RegionContext& ctx) {
 
 namespace detail {
 
+bool tryReserveView(pthread_t tid) {
+  if (!Cfg::Jit::EnableConcurrentCodeViews) return true;
+  ViewHolder viewer{tid, false};
+  return viewer.isValid();
+}
+
 bool mayEnqueueAsyncTranslateRequest(const SrcKey& sk) {
   if (!Cfg::Repo::Authoritative) {
     assertx(Cfg::Eval::EnableAsyncJIT);
@@ -721,9 +739,11 @@ bool mayEnqueueAsyncTranslateRequest(const SrcKey& sk) {
 
 void enqueueAsyncTranslateRequest(TransKind kind,
                                   RegionContext&& ctx,
-                                  int currNumTranslations) {
+                                  int currNumTranslations,
+                                  pthread_t requestTid) {
   dispatcher().enqueue(
-    AsyncRegionTranslationContext {kind, std::move(ctx), currNumTranslations}
+    AsyncRegionTranslationContext {kind, std::move(ctx), currNumTranslations,
+                                   requestTid}
   );
   FTRACE(2, "Enqueued sk {} for jitting\n", show(ctx.sk));
   log(ctx);
@@ -733,11 +753,13 @@ void enqueueAsyncTranslateRequest(TransKind kind,
 
 namespace {
 template<bool forJumpstart>
-void enqueueAsyncPrologueRequestImpl(TransKind kind, Func* func, int nPassed) {
+void enqueueAsyncPrologueRequestImpl(TransKind kind, Func* func, int nPassed,
+                                     pthread_t requestTid) {
   if (forJumpstart ||
       !func->atomicFlags().set(Func::Flags::LockedForPrologueGen)) {
     dispatcher().enqueue(
-      AsyncPrologueContext {kind, func->getFuncId(), nPassed, forJumpstart});
+      AsyncPrologueContext {kind, func->getFuncId(), nPassed, forJumpstart,
+                            requestTid});
     FTRACE(2, "Enqueued func {} for prologue generation\n", func->name());
   } else {
     FTRACE(2,
@@ -748,13 +770,20 @@ void enqueueAsyncPrologueRequestImpl(TransKind kind, Func* func, int nPassed) {
 }
 }
 
-void enqueueAsyncPrologueRequest(TransKind kind, Func* func, int nPassed) {
-  enqueueAsyncPrologueRequestImpl<false>(kind, func, nPassed);
+void enqueueAsyncPrologueRequest(TransKind kind, Func* func, int nPassed,
+                                 pthread_t requestTid) {
+  if (!isProfiling(kind) && !detail::tryReserveView(requestTid)) {
+    FTRACE(2, "No code view slot available, skipping prologue enqueue for func {}\n",
+           func->name());
+    return;
+  }
+  enqueueAsyncPrologueRequestImpl<false>(kind, func, nPassed, requestTid);
   log(func, nPassed);
 }
 
 void enqueueAsyncPrologueRequestForJumpstart(Func* func, int nPassed) {
-  enqueueAsyncPrologueRequestImpl<true>(TransKind::Live, func, nPassed);
+  enqueueAsyncPrologueRequestImpl<true>(TransKind::Live, func, nPassed,
+                                        pthread_self());
 }
 
 void enqueueAsyncTranslateOptRequest(const Func* func) {

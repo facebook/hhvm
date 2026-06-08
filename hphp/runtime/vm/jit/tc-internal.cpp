@@ -738,11 +738,14 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
   RelocationInfo rel;
   {
     auto codeLock = lockCode(!Cfg::Jit::EnableConcurrentCodeViews);
+    auto viewLock = Cfg::Jit::EnableConcurrentCodeViews
+      ? codeViews().lockView(viewTid)
+      : std::unique_lock<std::mutex>();
     std::optional<TransLocMaker> maker;
     std::optional<CodeCache::View> finalView;
     while (true) {
       try {
-        finalView = codeViews().view(kind, &range, pthread_self(),
+        finalView = codeViews().view(kind, &range, viewTid,
                                      Cfg::Jit::EnableConcurrentCodeViews);
         CodeReuseBlock crb;
         auto dstView = crb.getMaybeReusedView(finalView.value(), range);
@@ -778,7 +781,7 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
       } catch (const DataBlockFull& dbFull) {
         // Set a flag so we quickly bail from trying to generate new
         // translations next time.
-        setTcIsFull();
+        setTcIsFull(viewTid);
         // Rollback so the area can be used by something else.
         if (maker) {
           maker->rollback();
@@ -916,9 +919,11 @@ bool tcIsFull() {
   return code().isAnySectionFull();
 }
 
-void setTcIsFull() {
-  tl_threadIsFull = true;
-  codeViews().setFull(pthread_self());
+void setTcIsFull(pthread_t viewTid) {
+  if (viewTid == pthread_self()) {
+    tl_threadIsFull = true;
+  }
+  codeViews().setFull(viewTid);
 
   if (codeViews().numThreadsFull() >= Cfg::Eval::MaxConcurrentCodeViews) {
     s_TCisFull.store(true, std::memory_order_release);

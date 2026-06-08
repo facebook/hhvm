@@ -25,6 +25,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <limits>
+#include <memory>
 #include <mutex>
 
 namespace HPHP::jit {
@@ -56,12 +57,15 @@ struct CodeCacheViews {
   int numViews() const;
   int maxViews() const;
 
+  std::unique_lock<std::mutex> lockView(pthread_t tid);
+
 private:
   bool doTryAcquire(pthread_t tid);
   bool reserveSlot();
   folly::ConcurrentHashMap<pthread_t, CodeCache::View> m_views;
   folly::ConcurrentHashMap<pthread_t, SlotState> m_slots;
   folly::ConcurrentHashMap<pthread_t, bool> m_threadsFull{};
+  folly::ConcurrentHashMap<pthread_t, std::shared_ptr<std::mutex>> m_viewMutexes;
   std::atomic<std::chrono::steady_clock::time_point> m_lastStealTime{};
   std::atomic<int> m_numSlots{0};
   std::atomic<int> m_maxViews;

@@ -108,6 +108,10 @@ struct Translator {
   // The following members are the inputs to the translation pipeline.
   SrcKey sk;
   TransKind kind;
+  // Thread ID whose code view to relocate into. Defaults to the current
+  // thread; async JIT workers override this to the requesting thread's ID
+  // so translations land in the requester's TC blocks.
+  pthread_t viewTid{pthread_self()};
   // The TransID for this translation.  This is always set for Profile and
   // ProfPrologue translations, and holds their ID in ProfData.  For other
   // translations, this is only valid if the TransDB is enabled, and it's their

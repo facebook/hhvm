@@ -117,7 +117,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
       Cfg::Jit::EnableConcurrentCodeViews, true /* codeLocked */);
   } catch (const DataBlockFull&) {
     s_fullForStub.store(true, std::memory_order_release);
-    tc::setTcIsFull();
+    tc::setTcIsFull(CodeCacheViews::kAnchorTid);
     return nullptr;
   }
   auto view = viewOpt.value();
@@ -231,7 +231,7 @@ TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk) {
       Cfg::Jit::EnableConcurrentCodeViews, true /* codeLocked */);
   } catch (const DataBlockFull&) {
     s_fullForStub.store(true, std::memory_order_release);
-    tc::setTcIsFull();
+    tc::setTcIsFull(CodeCacheViews::kAnchorTid);
     return nullptr;
   }
 

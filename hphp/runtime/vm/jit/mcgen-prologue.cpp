@@ -173,7 +173,7 @@ TranslationResult getFuncPrologue(Func* func, int nPassed) {
     }
     FTRACE_MOD(Trace::async_jit, 2,
                "Enqueueing func {} for prologue generation\n", func->name());
-    mcgen::enqueueAsyncPrologueRequest(kind, func, nPassed);
+    mcgen::enqueueAsyncPrologueRequest(kind, func, nPassed, pthread_self());
     return TranslationResult::failTransiently();
   }
 

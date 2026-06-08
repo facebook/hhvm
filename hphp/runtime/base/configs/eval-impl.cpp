@@ -149,7 +149,6 @@ std::string EvalLoader::PackagesTomlFileNameDefault() {
 }
 
 int EvalLoader::AsyncJitWorkerThreadsDefault() {
-  // So that each thread can have their own view to emit code.
   return 12;
 }
 

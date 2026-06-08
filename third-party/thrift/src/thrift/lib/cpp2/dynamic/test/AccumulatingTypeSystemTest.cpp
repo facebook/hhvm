@@ -43,7 +43,7 @@ SerializableTypeSystem makeTs(
   SerializableTypeSystem ts;
   SerializableTypeDefinitionEntry entry;
   SerializableTypeDefinition typeDef;
-  typeDef.structDef_ref() = def::Struct(std::move(fields));
+  typeDef.structDef() = def::Struct(std::move(fields));
   entry.definition() = std::move(typeDef);
   ts.types()[uri] = std::move(entry);
   return ts;
@@ -56,9 +56,9 @@ SerializableTypeSystem makeTsWithAnnotation(
     const std::vector<std::pair<int16_t, std::string>>& fieldSpecs,
     const std::string& annUri) {
   auto ts = makeTs(uri, fieldSpecs);
-  auto& structDef = *ts.types()->at(uri).definition()->structDef_ref();
+  auto& structDef = *ts.types()->at(uri).definition()->structDef();
   SerializableRecordUnion rec;
-  rec.boolDatum_ref() = true;
+  rec.boolDatum() = true;
   structDef.annotations()[annUri] = std::move(rec);
   return ts;
 }
@@ -71,7 +71,7 @@ SerializableTypeSystem makeStructReferencing(
   SerializableTypeSystem ts;
   SerializableTypeDefinitionEntry entry;
   SerializableTypeDefinition typeDef;
-  typeDef.structDef_ref() = def::Struct({def::Field(
+  typeDef.structDef() = def::Struct({def::Field(
       def::Identity(1, fieldName), def::Optional, TypeIds::uri(targetUri))});
   entry.definition() = std::move(typeDef);
   ts.types()[uri] = std::move(entry);
@@ -144,7 +144,7 @@ TEST(
   for (const std::string uri : {"test.thrift/A", "test.thrift/B"}) {
     SerializableTypeDefinitionEntry entry;
     SerializableTypeDefinition typeDef;
-    typeDef.structDef_ref() = def::Struct(
+    typeDef.structDef() = def::Struct(
         {def::Field(def::Identity(1, "a"), def::AlwaysPresent, TypeIds::I32)});
     entry.definition() = std::move(typeDef);
     SerializableThriftSourceInfo sourceInfo;

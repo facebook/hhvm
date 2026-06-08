@@ -15,7 +15,8 @@
 # pyre-strict
 
 """
-Programmatic, two-phase construction of an ``IndexedTypeSystem``.
+Programmatic, two-phase construction of a bounded ``EnumerableTypeSystem``
+(concretely an ``IndexedTypeSystem``).
 
 ``TypeSystemBuilder`` lets callers hand-pick arbitrary definitions
 (``add_struct`` / ``add_union`` / ``add_enum`` / ``add_opaque_alias``) and then
@@ -36,10 +37,12 @@ cyclic and mutually-recursive types resolve against stable node identities:
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import assert_never, Sequence
 
 from thrift.lib.python.schema.type_system import (
     DefinitionNode,
+    EnumerableTypeSystem,
     EnumNode,
     EnumTypeRef,
     EnumValue,
@@ -57,6 +60,7 @@ from thrift.lib.python.schema.type_system import (
     StructNode,
     StructTypeRef,
     TypeRef,
+    TypeSystem,
     UnionNode,
     UnionTypeRef,
 )
@@ -190,12 +194,10 @@ _Pending = _PendingStructured | _PendingEnum | _PendingOpaqueAlias
 # ---------------------------------------------------------------------------
 
 
-def _resolve_uri(uri: str, nodes: dict[str, DefinitionNode]) -> TypeRef:
-    """Resolve a user-defined URI against the phase-1 node map to a node-holding
-    ``TypeRef``."""
-    node = nodes.get(uri)
-    if node is None:
-        raise InvalidTypeError(f"Unresolved type URI: {uri!r}")
+def _type_ref_for_node(node: DefinitionNode) -> TypeRef:
+    """Wrap a resolved ``DefinitionNode`` in the matching user-defined
+    ``TypeRef`` (``StructTypeRef`` / ``UnionTypeRef`` / ``EnumTypeRef`` /
+    ``OpaqueAliasTypeRef``)."""
     if isinstance(node, StructNode):
         return StructTypeRef(node)
     if isinstance(node, UnionNode):
@@ -204,7 +206,16 @@ def _resolve_uri(uri: str, nodes: dict[str, DefinitionNode]) -> TypeRef:
         return EnumTypeRef(node)
     if isinstance(node, OpaqueAliasNode):
         return OpaqueAliasTypeRef(node)
-    raise InvalidTypeError(f"Unknown definition kind for URI: {uri!r}")
+    raise InvalidTypeError(f"Unknown definition kind: {node!r}")
+
+
+def _resolve_uri(uri: str, nodes: dict[str, DefinitionNode]) -> TypeRef:
+    """Resolve a user-defined URI against the phase-1 node map to a node-holding
+    ``TypeRef``."""
+    node = nodes.get(uri)
+    if node is None:
+        raise InvalidTypeError(f"Unresolved type URI: {uri!r}")
+    return _type_ref_for_node(node)
 
 
 def _resolve(spec: TypeInput, nodes: dict[str, DefinitionNode]) -> TypeRef:
@@ -246,7 +257,8 @@ def _is_user_defined(type_ref: TypeRef) -> bool:
 
 
 class TypeSystemBuilder:
-    """Programmatic builder for a bounded, self-contained ``IndexedTypeSystem``.
+    """Programmatic builder for a bounded, self-contained ``EnumerableTypeSystem``
+    (concretely an ``IndexedTypeSystem``).
 
     ``add_*`` methods register definitions (returning ``self`` for chaining);
     ``build()`` runs the two-phase resolution and validators."""
@@ -302,7 +314,7 @@ class TypeSystemBuilder:
         self._pending.append(_PendingOpaqueAlias(uri, target))
         return self
 
-    def build(self) -> IndexedTypeSystem:
+    def build(self) -> EnumerableTypeSystem:
         nodes = self._build_placeholders()
         self._populate(nodes)
         return IndexedTypeSystem(nodes)
@@ -396,3 +408,180 @@ def _build_enum_values(pending: _PendingEnum) -> list[EnumValue]:
         seen_names.add(value.name)
         seen_datums.add(value.datum)
     return list(pending.values)
+
+
+# ---------------------------------------------------------------------------
+# Pruning: extract a bounded, self-contained TypeSystem from a larger source.
+# ---------------------------------------------------------------------------
+
+
+class PruneOptions:
+    """Options for :func:`build_pruned`.
+
+    ``include_source_info`` is a forward-looking toggle: the current model
+    carries no ``sourceInfo``, so it currently has no effect on the pruned type
+    structure. It is accepted now so the signature is stable across milestones.
+    """
+
+    __slots__ = ("_include_source_info",)
+    _include_source_info: bool
+
+    def __init__(self, include_source_info: bool = True) -> None:
+        self._include_source_info = include_source_info
+
+    @property
+    def include_source_info(self) -> bool:
+        return self._include_source_info
+
+    def __repr__(self) -> str:
+        return f"PruneOptions(include_source_info={self._include_source_info})"
+
+
+def build_pruned(
+    source: TypeSystem,
+    root_uris: Sequence[str],
+    options: PruneOptions | None = None,
+    *,
+    share: bool = False,
+) -> EnumerableTypeSystem:
+    """Extract a bounded, self-contained ``EnumerableTypeSystem`` holding exactly
+    ``root_uris`` plus their transitive type-structure closure.
+
+    ``source`` may be any ``TypeSystem`` -- including the lazy ``SchemaRegistry``
+    view or another ``IndexedTypeSystem``.
+
+    By default the result is **independent**: every node is deep-copied and the
+    graph is rewired to the copies, so dropping or mutating ``source`` leaves the
+    pruned type system intact. Pass ``share=True`` for a fast path that reuses
+    ``source``'s memoized nodes (the result's lifetime is then tied to
+    ``source``).
+
+    Raises ``InvalidTypeError`` if a root URI is absent from ``source``, or if
+    ``source`` is not self-contained (a referenced URI fails to resolve).
+    """
+    closure = _collect_closure(source, root_uris)
+    if share:
+        return IndexedTypeSystem(dict(closure))
+    return IndexedTypeSystem(_copy_closure(closure))
+
+
+def _collect_closure(
+    source: TypeSystem, root_uris: Sequence[str]
+) -> dict[str, DefinitionNode]:
+    """DFS the dependency closure of ``root_uris`` over ``source``, returning a
+    ``{uri: source node}`` map."""
+    roots = set(root_uris)
+    closure: dict[str, DefinitionNode] = {}
+    worklist: list[str] = list(root_uris)
+    while worklist:
+        uri = worklist.pop()
+        if uri in closure:
+            continue
+        node = source.get_user_defined_type(uri)
+        if node is None:
+            if uri in roots:
+                raise InvalidTypeError(f"Root URI not found in source: {uri!r}")
+            raise InvalidTypeError(
+                f"Source type system is not self-contained: referenced URI "
+                f"{uri!r} is not resolvable"
+            )
+        closure[uri] = node
+        worklist.extend(_referenced_uris(node))
+    return closure
+
+
+def _referenced_uris(node: DefinitionNode) -> Iterator[str]:
+    """The user-defined URIs ``node`` references through its type structure
+    (enum nodes reference nothing)."""
+    if isinstance(node, (StructNode, UnionNode)):
+        for field in node.fields:
+            yield from _type_ref_uris(field.type)
+    elif isinstance(node, OpaqueAliasNode):
+        yield from _type_ref_uris(node.target_type)
+
+
+def _type_ref_uris(type_ref: TypeRef) -> Iterator[str]:
+    """The user-defined URIs reachable from a ``TypeRef``, recursing into
+    containers (primitives reference nothing)."""
+    if isinstance(type_ref, (ListTypeRef, SetTypeRef)):
+        yield from _type_ref_uris(type_ref.element_type)
+    elif isinstance(type_ref, MapTypeRef):
+        yield from _type_ref_uris(type_ref.key_type)
+        yield from _type_ref_uris(type_ref.value_type)
+    elif isinstance(
+        type_ref, (StructTypeRef, UnionTypeRef, EnumTypeRef, OpaqueAliasTypeRef)
+    ):
+        yield type_ref.node.uri
+
+
+def _copy_closure(closure: dict[str, DefinitionNode]) -> dict[str, DefinitionNode]:
+    """Deep-copy a resolved closure into fresh, independent nodes, rewiring every
+    edge to the copies. Two-phase (placeholder then populate) so cyclic and
+    mutually-recursive types resolve against stable node identities."""
+    new_nodes: dict[str, DefinitionNode] = {
+        uri: _empty_copy(node) for uri, node in closure.items()
+    }
+    for uri, node in closure.items():
+        _populate_copy(node, new_nodes[uri], new_nodes)
+    return new_nodes
+
+
+def _empty_copy(node: DefinitionNode) -> DefinitionNode:
+    """Phase 1: an empty same-kind node carrying ``node``'s URI identity."""
+    if isinstance(node, UnionNode):
+        return UnionNode(uri=node.uri, is_sealed=node.is_sealed)
+    if isinstance(node, StructNode):
+        return StructNode(uri=node.uri, is_sealed=node.is_sealed)
+    if isinstance(node, EnumNode):
+        return EnumNode(uri=node.uri)
+    if isinstance(node, OpaqueAliasNode):
+        return OpaqueAliasNode(uri=node.uri)
+    raise InvalidTypeError(f"Cannot copy definition node: {node!r}")
+
+
+def _populate_copy(
+    src: DefinitionNode,
+    dst: DefinitionNode,
+    new_nodes: dict[str, DefinitionNode],
+) -> None:
+    """Phase 2: copy ``src``'s contents into ``dst``, rewiring edges to the
+    copied nodes in ``new_nodes``."""
+    if isinstance(src, (StructNode, UnionNode)):
+        assert isinstance(dst, (StructNode, UnionNode))
+        dst._set_fields([_copy_field(f, new_nodes) for f in src.fields])
+    elif isinstance(src, EnumNode):
+        assert isinstance(dst, EnumNode)
+        dst._set_values([EnumValue(v.name, v.datum) for v in src.values])
+    elif isinstance(src, OpaqueAliasNode):
+        assert isinstance(dst, OpaqueAliasNode)
+        dst._set_target_type(_copy_type_ref(src.target_type, new_nodes))
+
+
+def _copy_field(
+    field: FieldDefinition, new_nodes: dict[str, DefinitionNode]
+) -> FieldDefinition:
+    return FieldDefinition(
+        identity=FieldIdentity(field.identity.id, field.identity.name),
+        presence=field.presence,
+        type=_copy_type_ref(field.type, new_nodes),
+    )
+
+
+def _copy_type_ref(type_ref: TypeRef, new_nodes: dict[str, DefinitionNode]) -> TypeRef:
+    """Deep-copy a ``TypeRef``, rewiring user-defined edges to ``new_nodes``."""
+    if isinstance(type_ref, PrimitiveTypeRef):
+        return PrimitiveTypeRef(type_ref.primitive)
+    if isinstance(type_ref, ListTypeRef):
+        return ListTypeRef(_copy_type_ref(type_ref.element_type, new_nodes))
+    if isinstance(type_ref, SetTypeRef):
+        return SetTypeRef(_copy_type_ref(type_ref.element_type, new_nodes))
+    if isinstance(type_ref, MapTypeRef):
+        return MapTypeRef(
+            _copy_type_ref(type_ref.key_type, new_nodes),
+            _copy_type_ref(type_ref.value_type, new_nodes),
+        )
+    if isinstance(
+        type_ref, (StructTypeRef, UnionTypeRef, EnumTypeRef, OpaqueAliasTypeRef)
+    ):
+        return _type_ref_for_node(new_nodes[type_ref.node.uri])
+    raise InvalidTypeError(f"Cannot copy TypeRef: {type_ref!r}")

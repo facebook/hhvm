@@ -16,22 +16,34 @@
 
 import unittest
 
+# Importing the fixture module makes its URIs discoverable by the registry.
+import thrift.lib.python.schema.tests.type_system_bridge_test.thrift_types  # noqa: F401
+from thrift.lib.python.schema.schema_registry import SchemaRegistry
 from thrift.lib.python.schema.type_system import (
+    EnumerableTypeSystem,
     EnumNode,
+    EnumTypeRef,
     EnumValue,
     FieldIdentity,
     InvalidTypeError,
     ListTypeRef,
+    MapTypeRef,
     OpaqueAliasNode,
+    OpaqueAliasTypeRef,
     PresenceQualifier,
     Primitive,
     PrimitiveTypeRef,
+    SetTypeRef,
     StructNode,
     StructTypeRef,
+    TypeRef,
     UnionNode,
+    UnionTypeRef,
 )
 from thrift.lib.python.schema.type_system_builder import (
+    build_pruned,
     FieldSpec,
+    PruneOptions,
     ref,
     TypeInput,
     TypeSystemBuilder,
@@ -49,6 +61,32 @@ def _field(
 
 I32 = PrimitiveTypeRef(Primitive.I32)
 STRING = PrimitiveTypeRef(Primitive.STRING)
+
+# `Outer` references `Inner` (directly, via a typedef-to-struct, and inside
+# a `list`), so its closure is {Outer, Inner}.
+_BRIDGE_URI = "thrift.com/python/schema/ts_bridge"
+
+
+def _referenced_uris(type_ref: TypeRef) -> list[str]:
+    """The user-defined URIs reachable from a ``TypeRef`` (test-local walker used
+    to assert that a pruned type system is self-contained)."""
+    if isinstance(type_ref, (ListTypeRef, SetTypeRef)):
+        return _referenced_uris(type_ref.element_type)
+    if isinstance(type_ref, MapTypeRef):
+        return _referenced_uris(type_ref.key_type) + _referenced_uris(
+            type_ref.value_type
+        )
+    if isinstance(
+        type_ref, (StructTypeRef, UnionTypeRef, EnumTypeRef, OpaqueAliasTypeRef)
+    ):
+        return [type_ref.node.uri]
+    return []
+
+
+def _field_shape(
+    node: StructNode | UnionNode,
+) -> list[tuple[FieldIdentity, PresenceQualifier, TypeRef]]:
+    return [(f.identity, f.presence, f.type) for f in node.fields]
 
 
 class BuildBasicTest(unittest.TestCase):
@@ -255,3 +293,194 @@ class OpaqueAliasTest(unittest.TestCase):
         builder.add_opaque_alias("test/AliasToS", "test/S")
         with self.assertRaises(InvalidTypeError):
             builder.build()
+
+
+class BuildPrunedFromBuilderTest(unittest.TestCase):
+    """``build_pruned`` over a builder-made ``IndexedTypeSystem`` source."""
+
+    def _source(self) -> EnumerableTypeSystem:
+        builder = TypeSystemBuilder()
+        builder.add_struct("test/Bar", [_field(1, "x", I32)])
+        builder.add_enum("test/Color", [EnumValue("RED", 0), EnumValue("GREEN", 1)])
+        builder.add_struct("test/Unrelated", [_field(1, "y", I32)])
+        builder.add_struct(
+            "test/Foo",
+            [
+                _field(1, "bar", "test/Bar"),  # field type -> Bar
+                _field(2, "colors", SetTypeRef(ref("test/Color"))),  # set elt -> Color
+                _field(
+                    3,
+                    "lookup",
+                    MapTypeRef(ref("test/Color"), ref("test/Bar")),  # key/value -> deps
+                ),
+            ],
+        )
+        return builder.build()
+
+    def test_closure_pulls_field_container_and_map_deps(self) -> None:
+        source = self._source()
+        pruned = build_pruned(source, ["test/Foo"])
+        self.assertEqual(
+            pruned.get_known_uris(),
+            frozenset({"test/Foo", "test/Bar", "test/Color"}),
+        )
+        # Unrelated types are not pulled into the closure.
+        self.assertIsNone(pruned.get_user_defined_type("test/Unrelated"))
+
+    def test_result_is_self_contained(self) -> None:
+        pruned = build_pruned(self._source(), ["test/Foo"])
+        known = pruned.get_known_uris()
+        assert known is not None
+        for uri in known:
+            node = pruned.get_user_defined_type(uri)
+            if isinstance(node, (StructNode, UnionNode)):
+                for field in node.fields:
+                    for ref_uri in _referenced_uris(field.type):
+                        self.assertIn(ref_uri, known)
+
+    def test_opaque_alias_target_closure(self) -> None:
+        builder = TypeSystemBuilder()
+        builder.add_struct("test/Bar", [_field(1, "x", I32)])
+        # An opaque alias to `list<Bar>` -- the target transitively references a
+        # user-defined type, which the closure must follow.
+        builder.add_opaque_alias("test/BarList", ListTypeRef(ref("test/Bar")))
+        source = builder.build()
+
+        pruned = build_pruned(source, ["test/BarList"])
+        self.assertEqual(
+            pruned.get_known_uris(), frozenset({"test/BarList", "test/Bar"})
+        )
+
+    def test_enum_root_has_empty_closure(self) -> None:
+        pruned = build_pruned(self._source(), ["test/Color"])
+        self.assertEqual(pruned.get_known_uris(), frozenset({"test/Color"}))
+
+    def test_root_absent_from_source_raises(self) -> None:
+        with self.assertRaises(InvalidTypeError):
+            build_pruned(self._source(), ["test/Missing"])
+
+    def test_independent_copy_is_default(self) -> None:
+        source = self._source()
+        pruned = build_pruned(source, ["test/Foo"])
+
+        # Copied nodes are distinct objects ...
+        self.assertIsNot(
+            pruned.get_user_defined_type("test/Bar"),
+            source.get_user_defined_type("test/Bar"),
+        )
+        # ... and the copied graph is internally rewired to its own copies.
+        pruned_foo = pruned.get_user_defined_type("test/Foo")
+        pruned_bar = pruned.get_user_defined_type("test/Bar")
+        assert isinstance(pruned_foo, StructNode)
+        bar_field = pruned_foo.field_by_name("bar")
+        assert bar_field is not None
+        bar_edge = bar_field.type
+        assert isinstance(bar_edge, StructTypeRef)
+        self.assertIs(bar_edge.node, pruned_bar)
+        self.assertIsNot(bar_edge.node, source.get_user_defined_type("test/Bar"))
+
+    def test_mutating_source_leaves_independent_copy_intact(self) -> None:
+        source = self._source()
+        pruned = build_pruned(source, ["test/Foo"])
+
+        # Wipe the source's Bar fields; the independent copy must be unaffected.
+        src_bar = source.get_user_defined_type("test/Bar")
+        assert isinstance(src_bar, StructNode)
+        src_bar._set_fields([])
+        self.assertEqual(len(src_bar.fields), 0)
+
+        pruned_bar = pruned.get_user_defined_type("test/Bar")
+        assert isinstance(pruned_bar, StructNode)
+        self.assertEqual(len(pruned_bar.fields), 1)
+
+    def test_share_reuses_source_nodes(self) -> None:
+        source = self._source()
+        shared = build_pruned(source, ["test/Foo"], share=True)
+        self.assertIs(
+            shared.get_user_defined_type("test/Foo"),
+            source.get_user_defined_type("test/Foo"),
+        )
+        self.assertIs(
+            shared.get_user_defined_type("test/Bar"),
+            source.get_user_defined_type("test/Bar"),
+        )
+        # The shared subset is still bounded to the closure.
+        self.assertEqual(
+            shared.get_known_uris(),
+            frozenset({"test/Foo", "test/Bar", "test/Color"}),
+        )
+
+    def test_include_source_info_false_leaves_structure_unchanged(self) -> None:
+        source = self._source()
+        default = build_pruned(source, ["test/Foo"])
+        no_source_info = build_pruned(
+            source, ["test/Foo"], PruneOptions(include_source_info=False)
+        )
+        self.assertEqual(default.get_known_uris(), no_source_info.get_known_uris())
+
+        a = default.get_user_defined_type("test/Foo")
+        b = no_source_info.get_user_defined_type("test/Foo")
+        assert isinstance(a, StructNode) and isinstance(b, StructNode)
+        self.assertEqual(_field_shape(a), _field_shape(b))
+
+
+class BuildPrunedFromRegistryTest(unittest.TestCase):
+    """``build_pruned`` over the lazy ``SchemaRegistry`` view as the source."""
+
+    def setUp(self) -> None:
+        SchemaRegistry._reset()
+        self.registry = SchemaRegistry()
+
+    def _uri(self, name: str) -> str:
+        return f"{_BRIDGE_URI}/{name}"
+
+    def test_closure_equals_roots_plus_transitive_deps(self) -> None:
+        pruned = build_pruned(self.registry, [self._uri("Outer")])
+        self.assertEqual(
+            pruned.get_known_uris(),
+            frozenset({self._uri("Outer"), self._uri("Inner")}),
+        )
+
+    def test_mix_and_match_multiple_roots(self) -> None:
+        pruned = build_pruned(self.registry, [self._uri("Outer"), self._uri("Color")])
+        self.assertEqual(
+            pruned.get_known_uris(),
+            frozenset({self._uri("Outer"), self._uri("Inner"), self._uri("Color")}),
+        )
+
+    def test_result_is_self_contained(self) -> None:
+        pruned = build_pruned(self.registry, [self._uri("Outer")])
+        known = pruned.get_known_uris()
+        assert known is not None
+        for uri in known:
+            node = pruned.get_user_defined_type(uri)
+            if isinstance(node, (StructNode, UnionNode)):
+                for field in node.fields:
+                    for ref_uri in _referenced_uris(field.type):
+                        self.assertIn(ref_uri, known)
+
+    def test_root_not_in_registry_raises(self) -> None:
+        with self.assertRaises(InvalidTypeError):
+            build_pruned(self.registry, ["does.not/Exist"])
+
+    def test_independent_copy_is_default(self) -> None:
+        pruned = build_pruned(self.registry, [self._uri("Outer")])
+        self.assertIsNot(
+            pruned.get_user_defined_type(self._uri("Outer")),
+            self.registry.get_user_defined_type(self._uri("Outer")),
+        )
+        outer = pruned.get_user_defined_type(self._uri("Outer"))
+        inner = pruned.get_user_defined_type(self._uri("Inner"))
+        assert isinstance(outer, StructNode)
+        inner_field = outer.field_by_name("inner")
+        assert inner_field is not None
+        inner_edge = inner_field.type
+        assert isinstance(inner_edge, StructTypeRef)
+        self.assertIs(inner_edge.node, inner)
+
+    def test_share_reuses_registry_nodes(self) -> None:
+        pruned = build_pruned(self.registry, [self._uri("Outer")], share=True)
+        self.assertIs(
+            pruned.get_user_defined_type(self._uri("Outer")),
+            self.registry.get_user_defined_type(self._uri("Outer")),
+        )

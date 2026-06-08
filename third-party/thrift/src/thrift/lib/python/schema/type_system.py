@@ -26,8 +26,10 @@ It contains:
 * ``DefinitionNode`` -- what URI lookups return (``StructNode`` / ``UnionNode`` /
   ``EnumNode`` / ``OpaqueAliasNode``), plus ``FieldDefinition`` / ``FieldIdentity``
   / ``EnumValue``.
-* ``TypeSystem`` -- the (possibly bounded) collection interface, and the bounded,
-  self-contained ``IndexedTypeSystem``.
+* ``TypeSystem`` -- the (possibly unbounded) collection interface;
+  ``EnumerableTypeSystem`` -- the *finitely enumerable* refinement (its
+  ``get_known_uris`` is total); and ``IndexedTypeSystem`` -- the bounded,
+  self-contained implementation.
 
 Equality is *structural*: nodes by URI, ``TypeRef`` by ``TypeId``. Object
 identity remains available via ``is``.
@@ -544,9 +546,8 @@ class OpaqueAliasNode(DefinitionNode):
 
 
 class TypeSystem(ABC):
-    """Interface for a (possibly bounded) collection of user-defined types,
-    keyed by URI. The registry is an *unbounded* implementation;
-    ``IndexedTypeSystem`` is the bounded, self-contained one."""
+    """Interface for a (possibly unbounded) collection of user-defined types,
+    keyed by URI. The lazy registry is an *unbounded* implementation."""
 
     __slots__: tuple[str, ...] = ()
 
@@ -570,8 +571,21 @@ class TypeSystem(ABC):
         raise NotImplementedError
 
 
-class IndexedTypeSystem(TypeSystem):
-    """A bounded, self-contained ``{uri: DefinitionNode}`` collection.
+class EnumerableTypeSystem(TypeSystem):
+    """A ``TypeSystem`` whose types are *finitely enumerable*: ``get_known_uris``
+    is total and never returns ``None``."""
+
+    __slots__: tuple[str, ...] = ()
+
+    @abstractmethod
+    def get_known_uris(self) -> frozenset[str]:
+        """The exact, finite set of known URIs (never ``None``)."""
+        raise NotImplementedError
+
+
+class IndexedTypeSystem(EnumerableTypeSystem):
+    """A concrete, bounded, self-contained ``{uri: DefinitionNode}`` collection
+    and the canonical ``EnumerableTypeSystem`` implementation;
     ``get_known_uris`` returns the exact set."""
 
     __slots__ = ("_by_uri",)

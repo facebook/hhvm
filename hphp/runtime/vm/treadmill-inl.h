@@ -17,6 +17,8 @@
 
 #include <utility>
 
+#include "hphp/util/concurrent-slist.h"
+
 namespace HPHP::Treadmill {
 
 //////////////////////////////////////////////////////////////////////
@@ -26,7 +28,7 @@ void enqueueInternal(std::unique_ptr<WorkItem>);
 
 //////////////////////////////////////////////////////////////////////
 
-struct WorkItem {
+struct WorkItem : ConcurrentSListNode {
   WorkItem() = default;
   WorkItem(const WorkItem&) = delete;
   WorkItem& operator=(const WorkItem&) = delete;
@@ -38,7 +40,6 @@ private:
   friend void finishRequest();
   friend void enqueueInternal(std::unique_ptr<WorkItem>);
 
-private:
   // Inherently racy. We get a lower bound on the generation;
   // presumably clients are aware of this, and are creating the
   // trigger for an object that was reachable strictly in the past.

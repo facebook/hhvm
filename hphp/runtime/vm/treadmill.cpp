@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/treadmill.h"
 
-#include <list>
 #include <atomic>
 #include <vector>
 #include <memory>
@@ -225,9 +224,17 @@ int64_t requestIdx() {
   return *rl_thisRequestIdx;
 }
 
-struct PendingTriggers : std::list<std::unique_ptr<WorkItem>> {
+struct PendingTriggers {
+  ConcurrentSList<WorkItem> list;
   ~PendingTriggers() {
     s_destroyed = true;
+    // Delete any work items still in the list at shutdown.
+    auto it = list.begin();
+    while (it.valid()) {
+      auto* item = &it.data();
+      it.advance(true);
+      delete item;
+    }
   }
   static bool s_destroyed;
 };
@@ -239,15 +246,11 @@ void enqueueInternal(std::unique_ptr<WorkItem> gt) {
     return;
   }
 
-  // Work item enqueue is potentially a high frequency operation. Grab the
-  // current timestamp before obtaining the lock. This might result in
-  // a non-strict order of the list, but that's okay, timestamps will be close
-  // enough and work items will be most likely processed together.
-  auto const now = Clock::now();
-
-  StateGuard g;
-  gt->m_timestamp = now;
-  s_tq.emplace_back(std::move(gt));
+  // Timestamp is grabbed without synchronization so the list may not be
+  // strictly ordered, but that's okay — timestamps will be close enough
+  // and work items will most likely be processed together.
+  gt->m_timestamp = Clock::now();
+  s_tq.list.insert_head(*gt.release());
 }
 
 void startRequest(SessionKind session_kind) {
@@ -317,19 +320,20 @@ void finishRequest() {
         std::memory_order_release
       );
 
-      // collect WorkItems to run
-      auto it = s_tq.begin();
-      auto end = s_tq.end();
-      while (it != end) {
-        TRACE(2, "considering delendum %lld\n",
-              (long long)(*it)->m_timestamp.time_since_epoch().count());
-        if ((*it)->m_timestamp >= limit) {
-          TRACE(2, "not unreachable! %lld\n",
-                (long long)(*it)->m_timestamp.time_since_epoch().count());
-          break;
+      // Collect WorkItems to run. The list is in reverse insertion order
+      // (newest at head), so we must walk the entire list to find all
+      // items older than the new oldest request.
+      auto it = s_tq.list.begin();
+      while (it.valid()) {
+        auto& item = it.data();
+        if (item.m_timestamp >= limit) {
+          it.advance();
+          continue;
         }
-        toFire.emplace_back(std::move(*it));
-        it = s_tq.erase(it);
+        TRACE(2, "delendum %lld\n",
+              (long long)item.m_timestamp.time_since_epoch().count());
+        it.advance(true);
+        toFire.emplace_back(&item);
       }
     }
     constexpr int limit = 100;

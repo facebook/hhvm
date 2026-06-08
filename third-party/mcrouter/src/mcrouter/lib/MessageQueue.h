@@ -18,6 +18,8 @@
 #include <folly/io/async/EventHandler.h>
 #include <folly/io/async/VirtualEventBase.h>
 
+DECLARE_bool(mcrouter_propagate_folly_request_context);
+
 namespace facebook {
 namespace memcache {
 
@@ -275,7 +277,9 @@ class MessageQueue {
    */
   template <class... Args>
   void blockingWriteNoNotify(Args&&... args) noexcept {
-    if (!queue_.writeIfNotFull(std::forward<Args>(args)...)) {
+    if (!queue_.writeIfNotFull(
+            folly::RequestContext::saveContext(),
+            std::forward<Args>(args)...)) {
       // If we block here and the consumer is asleep, the caller has no chance
       // to notify it, causing a deadlock. Force a notification in this case
       // before blocking.
@@ -283,7 +287,8 @@ class MessageQueue {
       if (notifier_.shouldNotify()) {
         doNotify();
       }
-      queue_.blockingWrite(std::forward<Args>(args)...);
+      queue_.blockingWrite(
+          folly::RequestContext::saveContext(), std::forward<Args>(args)...);
     }
   }
 
@@ -303,8 +308,25 @@ class MessageQueue {
   }
 
  private:
+  struct Payload {
+    Payload() = default;
+    template <typename... Args>
+    explicit Payload(
+        std::shared_ptr<folly::RequestContext> ctx,
+        Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
+        : rctx(std::move(ctx)), message(std::forward<Args>(args)...) {}
+    Payload(const Payload&) = default;
+    Payload(Payload&&) = default;
+    Payload& operator=(const Payload&) = default;
+    Payload& operator=(Payload&&) = default;
+    ~Payload() = default;
+
+    std::shared_ptr<folly::RequestContext> rctx;
+    T message;
+  };
+
   static constexpr int64_t kWakeupEveryMs = 2;
-  folly::MPMCQueue<T> queue_;
+  folly::MPMCQueue<Payload> queue_;
   std::function<void(T&&)> onMessage_;
   Notifier notifier_;
 
@@ -343,9 +365,19 @@ class MessageQueue {
   }
 
   void drainImpl() {
-    T message;
-    while (queue_.read(message)) {
-      onMessage_(std::move(message));
+    Payload payload;
+    // Even though we do not expect payloads in the queue to share the same
+    // RequestContext, it is still better to use the
+    // RequestContextSaverScopeGuard pattern here which context switches back to
+    // the parent context only once on exit, while compared to the plain
+    // RequestContextScopeGuard which context switches back to the parent
+    // #queue_size times.
+    folly::RequestContextSaverScopeGuard rctxSaver;
+    while (queue_.read(payload)) {
+      if (FLAGS_mcrouter_propagate_folly_request_context) {
+        folly::RequestContext::setContext(std::move(payload.rctx));
+      }
+      onMessage_(std::move(payload.message));
       notifier_.bumpMessages();
     }
   }

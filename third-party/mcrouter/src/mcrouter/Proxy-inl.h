@@ -58,12 +58,18 @@ template <class Request>
 Proxy<RouterInfo>::WaitingRequest<Request>::WaitingRequest(
     const Request& req,
     std::unique_ptr<ProxyRequestContextTyped<RouterInfo, Request>> ctx)
-    : req_(req), ctx_(std::move(ctx)) {}
+    : req_(req),
+      ctx_(std::move(ctx)),
+      rctx_(folly::RequestContext::saveContext()) {}
 
 template <class RouterInfo>
 template <class Request>
 void Proxy<RouterInfo>::WaitingRequest<Request>::process(
-    Proxy<RouterInfo>* proxy) {
+    Proxy<RouterInfo>* proxy) && {
+  std::optional<folly::RequestContextScopeGuard> rcsg;
+  if (FLAGS_mcrouter_propagate_folly_request_context) {
+    rcsg.emplace(std::move(rctx_));
+  }
   // timePushedOnQueue_ is nonnegative only if waiting-requests-timeout is
   // enabled
   if (timePushedOnQueue_ >= 0) {
@@ -389,7 +395,7 @@ void Proxy<RouterInfo>::pump() {
       auto w = queue.popFront();
       stats().decrement(proxy_reqs_waiting_stat);
 
-      w->process(this);
+      std::move(*w).process(this);
     }
   }
 }

@@ -272,7 +272,7 @@ class Proxy : public ProxyBase {
      * processing requests retaining all the type information
      * (e.g. Operation and Request).
      */
-    virtual void process(Proxy* proxy) = 0;
+    virtual void process(Proxy* proxy) && = 0;
   };
 
   template <class Request>
@@ -281,7 +281,7 @@ class Proxy : public ProxyBase {
     WaitingRequest(
         const Request& req,
         std::unique_ptr<ProxyRequestContextTyped<RouterInfo, Request>> ctx);
-    void process(Proxy* proxy) final;
+    void process(Proxy* proxy) && final;
     void setTimePushedOnQueue(int64_t now) {
       timePushedOnQueue_ = now;
     }
@@ -289,6 +289,7 @@ class Proxy : public ProxyBase {
    private:
     const Request& req_;
     std::unique_ptr<ProxyRequestContextTyped<RouterInfo, Request>> ctx_;
+    std::shared_ptr<folly::RequestContext> rctx_;
 
     int64_t timePushedOnQueue_{-1};
   };

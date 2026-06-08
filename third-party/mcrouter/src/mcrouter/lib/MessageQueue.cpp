@@ -7,6 +7,13 @@
 
 #include "MessageQueue.h"
 
+DEFINE_bool(
+    mcrouter_propagate_folly_request_context,
+    true,
+    "Enable folly::RequestContext propagation in mcrouter. "
+    "It should always be enabled. The flag is only introduced "
+    "for testing and data collection purposes.");
+
 namespace facebook {
 namespace memcache {
 

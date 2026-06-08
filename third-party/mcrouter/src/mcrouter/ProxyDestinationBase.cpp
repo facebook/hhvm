@@ -224,6 +224,8 @@ void ProxyDestinationBase::scheduleNextProbe() {
 }
 
 void ProxyDestinationBase::startSendingProbes() {
+  // Reset the RequestContext before scheduling repeated tasks.
+  folly::RequestContextScopeGuard guard{nullptr};
   probeDelayNextMs = proxy().router().opts().probe_delay_initial_ms;
   probeTimer_ =
       folly::AsyncTimeout::make(proxy().eventBase(), [this]() noexcept {

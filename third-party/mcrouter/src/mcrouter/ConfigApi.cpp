@@ -473,6 +473,9 @@ void ConfigApi::dumpConfigSourceToDisk(
     const std::string& name,
     std::string contents,
     const std::string& md5OrVersion) {
+  // Reset the RequestContext to prevent it from being propagated to the dump
+  // thread
+  folly::RequestContextScopeGuard guard{nullptr};
   if (!dumpConfigToDiskExecutor_) {
     return;
   }

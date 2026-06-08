@@ -262,6 +262,27 @@ TEST(Vasm, FoldImms) {
 }
 
 #ifdef __aarch64__
+namespace arm { struct ImmFolder; }
+
+namespace {
+
+template <typename EmitFn>
+Vunit genArmFoldCode(uint64_t idxVal, EmitFn emit) {
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  Vout out(unit, unit.entry);
+  auto base = unit.makeReg();
+  auto idx = unit.makeReg();
+  out << ldimmq{Immed64{1}, base};
+  out << ldimmq{Immed64{idxVal}, idx};
+  emit(unit, out, base, idx);
+  out << ret{};
+  foldImms<arm::ImmFolder>(unit);
+  return unit;
+}
+
+} // namespace
+
 TEST(Vasm, FoldImmsArmLimitsSignedZeroToCmpsd) {
   Vunit unit;
   unit.entry = unit.makeBlock(AreaIndex::Main, 1);
@@ -355,5 +376,177 @@ TEST(Vasm, FoldImmsArmLimitsSignedZeroToUcomisd) {
   EXPECT_EQ(code[5].ucomisd_.s1, VregDbl{nonZero}) << show(unit);
 }
 #endif
+
+TEST(Vasm, FoldImmsArmMemIndex) {
+#ifndef __aarch64__
+  GTEST_SKIP() << "ARM-specific fold_mem_index test";
+#else
+  // ldimmq constant index folded into load displacement
+  {
+    auto unit = genArmFoldCode(100,
+        [](Vunit& u, Vout& out, Vreg base, Vreg idx) {
+      out << load{Vptr{base, idx, 1, 0}, u.makeReg()};
+    });
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(4, code.size());
+    EXPECT_EQ(Vinstr::load, code[2].op);
+    EXPECT_FALSE(code[2].load_.s.index.isValid());
+    EXPECT_EQ(100, code[2].load_.s.disp);
+    EXPECT_EQ(1, code[2].load_.s.scale);
+  }
+
+  // constToReg constant index folded into load displacement
+  {
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout out(unit, unit.entry);
+    auto base = unit.makeReg();
+    auto dst = unit.makeReg();
+    auto cst = unit.makeConst(uint64_t{200});
+    out << ldimmq{Immed64{1}, base};
+    out << load{Vptr{base, Vreg{cst}, 1, 0}, dst};
+    out << ret{};
+    foldImms<arm::ImmFolder>(unit);
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(3, code.size());
+    EXPECT_EQ(Vinstr::load, code[1].op);
+    EXPECT_FALSE(code[1].load_.s.index.isValid());
+    EXPECT_EQ(200, code[1].load_.s.disp);
+    EXPECT_EQ(1, code[1].load_.s.scale);
+  }
+
+  // Scaled index with existing displacement: 10 * 4 + 16 = 56
+  {
+    auto unit = genArmFoldCode(10,
+        [](Vunit& u, Vout& out, Vreg base, Vreg idx) {
+      out << load{Vptr{base, idx, 4, 16}, u.makeReg()};
+    });
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(4, code.size());
+    EXPECT_EQ(Vinstr::load, code[2].op);
+    EXPECT_FALSE(code[2].load_.s.index.isValid());
+    EXPECT_EQ(56, code[2].load_.s.disp);
+    EXPECT_EQ(1, code[2].load_.s.scale);
+  }
+
+  // Store: constant index folded into displacement
+  {
+    auto unit = genArmFoldCode(100,
+        [](Vunit& u, Vout& out, Vreg base, Vreg idx) {
+      auto src = u.makeReg();
+      out << ldimmq{Immed64{1}, src};
+      out << store{src, Vptr{base, idx, 1, 0}};
+    });
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(5, code.size());
+    EXPECT_EQ(Vinstr::store, code[3].op);
+    EXPECT_FALSE(code[3].store_.d.index.isValid());
+    EXPECT_EQ(100, code[3].store_.d.disp);
+    EXPECT_EQ(1, code[3].store_.d.scale);
+  }
+
+  // Lea: constant index folded into displacement
+  {
+    auto unit = genArmFoldCode(100,
+        [](Vunit& u, Vout& out, Vreg base, Vreg idx) {
+      out << lea{Vptr{base, idx, 1, 0}, Vreg64{u.makeReg()}};
+    });
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(4, code.size());
+    EXPECT_EQ(Vinstr::lea, code[2].op);
+    EXPECT_FALSE(code[2].lea_.s.index.isValid());
+    EXPECT_EQ(100, code[2].lea_.s.disp);
+    EXPECT_EQ(1, code[2].lea_.s.scale);
+  }
+
+  // Boundary: max scaled quad load (32760 = 4095 * 8) folds
+  {
+    auto unit = genArmFoldCode(32760,
+        [](Vunit& u, Vout& out, Vreg base, Vreg idx) {
+      out << load{Vptr{base, idx, 1, 0}, u.makeReg()};
+    });
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(4, code.size());
+    EXPECT_EQ(Vinstr::load, code[2].op);
+    EXPECT_FALSE(code[2].load_.s.index.isValid());
+    EXPECT_EQ(32760, code[2].load_.s.disp);
+  }
+
+  // No fold: quad load displacement exceeds ARM64 scaled range
+  {
+    auto unit = genArmFoldCode(32768,
+        [](Vunit& u, Vout& out, Vreg base, Vreg idx) {
+      out << load{Vptr{base, idx, 1, 0}, u.makeReg()};
+    });
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(4, code.size());
+    EXPECT_EQ(Vinstr::load, code[2].op);
+    EXPECT_TRUE(code[2].load_.s.index.isValid());
+  }
+
+  // Byte load: max scaled range is 4095
+  {
+    auto unit = genArmFoldCode(4095,
+        [](Vunit& u, Vout& out, Vreg base, Vreg idx) {
+      out << loadb{Vptr{base, idx, 1, 0}, u.makeReg()};
+    });
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(4, code.size());
+    EXPECT_EQ(Vinstr::loadb, code[2].op);
+    EXPECT_FALSE(code[2].loadb_.s.index.isValid());
+    EXPECT_EQ(4095, code[2].loadb_.s.disp);
+  }
+
+  // No fold: byte load displacement exceeds byte scaled range
+  {
+    auto unit = genArmFoldCode(4096,
+        [](Vunit& u, Vout& out, Vreg base, Vreg idx) {
+      out << loadb{Vptr{base, idx, 1, 0}, u.makeReg()};
+    });
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(4, code.size());
+    EXPECT_EQ(Vinstr::loadb, code[2].op);
+    EXPECT_TRUE(code[2].loadb_.s.index.isValid());
+  }
+
+  // Small displacement folds for byte load (fits unscaled range)
+  {
+    auto unit = genArmFoldCode(100,
+        [](Vunit& u, Vout& out, Vreg base, Vreg idx) {
+      out << loadb{Vptr{base, idx, 1, 0}, u.makeReg()};
+    });
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(4, code.size());
+    EXPECT_EQ(Vinstr::loadb, code[2].op);
+    EXPECT_FALSE(code[2].loadb_.s.index.isValid());
+    EXPECT_EQ(100, code[2].loadb_.s.disp);
+  }
+
+  // No fold: quad load with unaligned displacement outside unscaled range
+  {
+    auto unit = genArmFoldCode(257,
+        [](Vunit& u, Vout& out, Vreg base, Vreg idx) {
+      out << load{Vptr{base, idx, 1, 0}, u.makeReg()};
+    });
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(4, code.size());
+    EXPECT_EQ(Vinstr::load, code[2].op);
+    EXPECT_TRUE(code[2].load_.s.index.isValid());
+  }
+
+  // No fold: constant exceeds INT32_MAX
+  {
+    auto unit = genArmFoldCode(uint64_t{INT32_MAX} + 1,
+        [](Vunit& u, Vout& out, Vreg base, Vreg idx) {
+      out << load{Vptr{base, idx, 1, 0}, u.makeReg()};
+    });
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(4, code.size());
+    EXPECT_EQ(Vinstr::load, code[2].op);
+    EXPECT_TRUE(code[2].load_.s.index.isValid());
+    EXPECT_EQ(0, code[2].load_.s.disp);
+  }
+#endif
+}
 
 }

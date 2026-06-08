@@ -77,6 +77,34 @@ struct ImmFolder {
     }
   }
 
+  // foldImms runs after lowerForARM, so the resulting displacement must be
+  // directly encodable — lowerVptr will not run again to fix it up.
+  // accessBytes is the memory access width (1/2/4/8) which determines
+  // the ARM64 scaled-immediate range: [0, 4095 * accessBytes] step accessBytes.
+  // The unscaled range [-256, 255] is always available as a fallback.
+  // For lea (no memory access), pass 0 to allow only the unscaled range.
+  bool fold_mem_index(Vptr& ptr, int accessBytes) {
+    if (!ptr.index.isValid()) return false;
+    if (!valid.test(ptr.index)) return false;
+    auto imm = vals[ptr.index];
+    if (imm > static_cast<uint64_t>(INT32_MAX)) return false;
+    auto newDisp = static_cast<int64_t>(imm) * ptr.scale + ptr.disp;
+    if (newDisp < INT32_MIN || newDisp > INT32_MAX) return false;
+    auto disp = static_cast<int32_t>(newDisp);
+    bool fits = (disp >= -256 && disp <= 255);
+    if (!fits && accessBytes > 0) {
+      fits = disp >= 0 &&
+             (disp % accessBytes) == 0 &&
+             disp <= 4095 * accessBytes;
+    }
+    if (!fits) return false;
+    ptr.index = Vreg{};
+    ptr.disp = disp;
+    ptr.scale = 1;
+    ptr.validate();
+    return true;
+  }
+
   template<typename arithi, typename arith>
   void fold_arith(arith& in, Vinstr& out) {
     int val;
@@ -185,24 +213,31 @@ struct ImmFolder {
   }
 
   void fold(storeb& in, Vinstr& out) {
+    fold_mem_index(in.m, 1);
     if (zero_imm(in.s)) out = storeb{PhysReg(vixl::wzr), in.m};
   }
   void fold(storebi& in, Vinstr& out) {
+    fold_mem_index(in.m, 1);
     if (in.s.l() == 0) out = storeb{PhysReg(vixl::wzr), in.m};
   }
   void fold(storew& in, Vinstr& out) {
+    fold_mem_index(in.m, 2);
     if (zero_imm(in.s)) out = storew{PhysReg(vixl::wzr), in.m};
   }
   void fold(storewi& in, Vinstr& out) {
+    fold_mem_index(in.m, 2);
     if (in.s.l() == 0) out = storew{PhysReg(vixl::wzr), in.m};
   }
   void fold(storel& in, Vinstr& out) {
+    fold_mem_index(in.m, 4);
     if (zero_imm(in.s)) out = storel{PhysReg(vixl::wzr), in.m};
   }
   void fold(storeli& in, Vinstr& out) {
+    fold_mem_index(in.m, 4);
     if (in.s.l() == 0) out = storel{PhysReg(vixl::wzr), in.m};
   }
   void fold(store& in, Vinstr& out) {
+    fold_mem_index(in.d, 8);
     if (zero_imm(in.s)) out = store{PhysReg(vixl::xzr), in.d};
   }
   template<typename storepairT>
@@ -227,8 +262,26 @@ struct ImmFolder {
     fold_storepair(in, out, PhysReg(vixl::wzr));
   }
   void fold(storeqi& in, Vinstr& out) {
+    fold_mem_index(in.m, 8);
     if (in.s.q() == 0) out = store{PhysReg(vixl::xzr), in.m};
   }
+  void fold(storesd& in, Vinstr& /*out*/) { fold_mem_index(in.m, 8); }
+
+  void fold(load& in, Vinstr& /*out*/) { fold_mem_index(in.s, 8); }
+  void fold(loadb& in, Vinstr& /*out*/) { fold_mem_index(in.s, 1); }
+  void fold(loadw& in, Vinstr& /*out*/) { fold_mem_index(in.s, 2); }
+  void fold(loadl& in, Vinstr& /*out*/) { fold_mem_index(in.s, 4); }
+  void fold(loadsd& in, Vinstr& /*out*/) { fold_mem_index(in.s, 8); }
+  void fold(loadzbl& in, Vinstr& /*out*/) { fold_mem_index(in.s, 1); }
+  void fold(loadzbq& in, Vinstr& /*out*/) { fold_mem_index(in.s, 1); }
+  void fold(loadzwq& in, Vinstr& /*out*/) { fold_mem_index(in.s, 2); }
+  void fold(loadzlq& in, Vinstr& /*out*/) { fold_mem_index(in.s, 4); }
+  void fold(loadsbl& in, Vinstr& /*out*/) { fold_mem_index(in.s, 1); }
+  void fold(loadsbq& in, Vinstr& /*out*/) { fold_mem_index(in.s, 1); }
+  void fold(loadtqb& in, Vinstr& /*out*/) { fold_mem_index(in.s, 1); }
+  void fold(loadtql& in, Vinstr& /*out*/) { fold_mem_index(in.s, 4); }
+
+  void fold(lea& in, Vinstr& /*out*/) { fold_mem_index(in.s, 0); }
   void fold(subl& in, Vinstr& out) {
     int val;
     if (arith_imm(in.s0, val)) {
@@ -314,6 +367,12 @@ struct ImmFolder {
       out = xorqi64{bm, in_copy.s1, in_copy.d, in_copy.sf};
     } else if (logical_bmsk(in_copy.s1, bm)) {
       out = xorqi64{bm, in_copy.s0, in_copy.d, in_copy.sf};
+    }
+  }
+  void fold(ldimmq& in, Vinstr& /*out*/) {
+    if (in.d.isVirt()) {
+      valid.set(in.d);
+      vals[in.d] = in.s.q();
     }
   }
   void fold(copy& in, Vinstr& /*out*/) {

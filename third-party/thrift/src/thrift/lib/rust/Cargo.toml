@@ -18,7 +18,7 @@ bytes = { version = "1.11.1", features = ["serde"] }
 clap = { version = "4.6.0", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
 ghost = "0.1.21"
-memchr = "2.8.0"
+memchr = "2.8.1"
 num-derive = "0.4.2"
 num-traits = { version = "0.2.19", default-features = false }
 ordered-float = { version = "4.6.0", features = ["serde"] }

@@ -17,7 +17,7 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 from thrift.python.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import module.thrift_mutable_types as _fbthrift__module__thrift_mutable_types
@@ -32,12 +32,12 @@ class RaiserInterface(
     def service_name() -> bytes:
         return b"Raiser"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"doBland": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_doBland),
-            b"doRaise": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_doRaise),
-            b"get200": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get200),
-            b"get500": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get500),
+            b"doBland": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_doBland),
+            b"doRaise": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_doRaise),
+            b"get200": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get200),
+            b"get500": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get500),
         }
         return {**super().getFunctionTable(), **functionTable}
 

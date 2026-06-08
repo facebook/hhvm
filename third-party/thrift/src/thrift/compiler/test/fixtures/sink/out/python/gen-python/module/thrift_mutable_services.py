@@ -17,7 +17,7 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 from thrift.python.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import module.thrift_mutable_types as _fbthrift__module__thrift_mutable_types
@@ -32,15 +32,15 @@ class SinkServiceInterface(
     def service_name() -> bytes:
         return b"SinkService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"method": (RpcKind.SINK, self._fbthrift__handler_method),
-            b"methodAndReponse": (RpcKind.SINK, self._fbthrift__handler_methodAndReponse),
-            b"methodThrow": (RpcKind.SINK, self._fbthrift__handler_methodThrow),
-            b"methodSinkThrow": (RpcKind.SINK, self._fbthrift__handler_methodSinkThrow),
-            b"methodFinalThrow": (RpcKind.SINK, self._fbthrift__handler_methodFinalThrow),
-            b"methodBothThrow": (RpcKind.SINK, self._fbthrift__handler_methodBothThrow),
-            b"methodFast": (RpcKind.SINK, self._fbthrift__handler_methodFast),
+            b"method": _fbthrift_FunctionEntry(RpcKind.SINK, self._fbthrift__handler_method),
+            b"methodAndReponse": _fbthrift_FunctionEntry(RpcKind.SINK, self._fbthrift__handler_methodAndReponse),
+            b"methodThrow": _fbthrift_FunctionEntry(RpcKind.SINK, self._fbthrift__handler_methodThrow),
+            b"methodSinkThrow": _fbthrift_FunctionEntry(RpcKind.SINK, self._fbthrift__handler_methodSinkThrow),
+            b"methodFinalThrow": _fbthrift_FunctionEntry(RpcKind.SINK, self._fbthrift__handler_methodFinalThrow),
+            b"methodBothThrow": _fbthrift_FunctionEntry(RpcKind.SINK, self._fbthrift__handler_methodBothThrow),
+            b"methodFast": _fbthrift_FunctionEntry(RpcKind.SINK, self._fbthrift__handler_methodFast),
         }
         return {**super().getFunctionTable(), **functionTable}
 

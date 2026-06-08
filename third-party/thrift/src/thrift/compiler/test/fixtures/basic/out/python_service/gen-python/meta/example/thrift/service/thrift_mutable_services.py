@@ -17,7 +17,7 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 from thrift.python.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import meta.example.thrift.service.thrift_mutable_types as _fbthrift__meta__example__thrift__service__thrift_mutable_types
@@ -34,9 +34,9 @@ class EchoServiceInterface(
     def service_name() -> bytes:
         return b"EchoService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"echo": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_echo),
+            b"echo": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_echo),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -89,9 +89,9 @@ EchoServiceInterface,
     def service_name() -> bytes:
         return b"ExtendedEchoService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"echo_2": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_echo_2),
+            b"echo_2": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_echo_2),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -144,9 +144,9 @@ class ExtendedMyServiceInterface(
     def service_name() -> bytes:
         return b"ExtendedMyService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"putDataById_2": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_putDataById_2),
+            b"putDataById_2": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_putDataById_2),
         }
         return {**super().getFunctionTable(), **functionTable}
 

@@ -16,7 +16,7 @@ import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 from thrift.python.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import test.fixtures.basic.module.thrift_types as _fbthrift__test__fixtures__basic__module__thrift_types
@@ -31,9 +31,9 @@ class FooServiceInterface(
     def service_name() -> bytes:
         return b"FooService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"simple_rpc": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_simple_rpc),
+            b"simple_rpc": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_simple_rpc),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -79,9 +79,9 @@ class FB303ServiceInterface(
     def service_name() -> bytes:
         return b"FB303Service"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"simple_rpc": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_simple_rpc),
+            b"simple_rpc": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_simple_rpc),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -128,18 +128,18 @@ class MyServiceInterface(
     def service_name() -> bytes:
         return b"MyService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"ping": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_ping),
-            b"getRandomData": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getRandomData),
-            b"sink": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_sink),
-            b"putDataById": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_putDataById),
-            b"hasDataById": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_hasDataById),
-            b"getDataById": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getDataById),
-            b"deleteDataById": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_deleteDataById),
-            b"lobDataById": (RpcKind.SINGLE_REQUEST_NO_RESPONSE, self._fbthrift__handler_lobDataById),
-            b"invalid_return_for_hack": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_invalid_return_for_hack),
-            b"rpc_skipped_codegen": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_rpc_skipped_codegen),
+            b"ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_ping),
+            b"getRandomData": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getRandomData),
+            b"sink": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_sink),
+            b"putDataById": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_putDataById),
+            b"hasDataById": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_hasDataById),
+            b"getDataById": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getDataById),
+            b"deleteDataById": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_deleteDataById),
+            b"lobDataById": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, self._fbthrift__handler_lobDataById),
+            b"invalid_return_for_hack": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_invalid_return_for_hack),
+            b"rpc_skipped_codegen": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_rpc_skipped_codegen),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -299,10 +299,10 @@ class DbMixedStackArgumentsInterface(
     def service_name() -> bytes:
         return b"DbMixedStackArguments"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"getDataByKey0": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getDataByKey0),
-            b"getDataByKey1": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getDataByKey1),
+            b"getDataByKey0": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getDataByKey0),
+            b"getDataByKey1": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getDataByKey1),
         }
         return {**super().getFunctionTable(), **functionTable}
 

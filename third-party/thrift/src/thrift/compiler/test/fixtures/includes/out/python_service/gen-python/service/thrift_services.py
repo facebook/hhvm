@@ -16,7 +16,7 @@ import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 from thrift.python.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import service.thrift_types as _fbthrift__service__thrift_types
@@ -34,10 +34,10 @@ class MyServiceInterface(
     def service_name() -> bytes:
         return b"MyService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"query": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_query),
-            b"has_arg_docs": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_has_arg_docs),
+            b"query": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_query),
+            b"has_arg_docs": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_has_arg_docs),
         }
         return {**super().getFunctionTable(), **functionTable}
 

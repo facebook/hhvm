@@ -17,7 +17,7 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 from thrift.python.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import empty.thrift_mutable_types as _fbthrift__empty__thrift_mutable_types
@@ -32,7 +32,7 @@ class NullServiceInterface(
     def service_name() -> bytes:
         return b"NullService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
         }
         return {**super().getFunctionTable(), **functionTable}

@@ -19,7 +19,7 @@ import traceback
 from thrift.python.exceptions import ApplicationError
 from thrift.python.metadata import gen_metadata, ThriftMetadata
 from thrift.python.protocol import Protocol, RpcKind
-from thrift.python.types import ServiceInterface
+from thrift.python.types import FunctionEntry, ServiceInterface
 from thrift.python.serializer import serialize_iobuf
 
 from thrift.py3.server import ThriftServer, SSLPolicy

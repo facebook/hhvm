@@ -17,7 +17,7 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 from thrift.python.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import test.fixtures.interactions.module.thrift_mutable_types as _fbthrift__test__fixtures__interactions__module__thrift_mutable_types
@@ -34,12 +34,12 @@ class MyServiceInterface(
     def service_name() -> bytes:
         return b"MyService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"foo": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
-            b"interact": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact),
-            b"interactFast": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast),
-            b"serialize": (RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_serialize),
+            b"foo": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
+            b"interact": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact),
+            b"interactFast": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast),
+            b"serialize": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_serialize),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -134,12 +134,12 @@ class FactoriesInterface(
     def service_name() -> bytes:
         return b"Factories"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"foo": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
-            b"interact": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact),
-            b"interactFast": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast),
-            b"serialize": (RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_serialize),
+            b"foo": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
+            b"interact": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact),
+            b"interactFast": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast),
+            b"serialize": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_serialize),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -234,9 +234,9 @@ class PerformInterface(
     def service_name() -> bytes:
         return b"Perform"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"foo": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
+            b"foo": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -282,9 +282,9 @@ class InteractWithSharedInterface(
     def service_name() -> bytes:
         return b"InteractWithShared"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"do_some_similar_things": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_do_some_similar_things),
+            b"do_some_similar_things": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_do_some_similar_things),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -330,9 +330,9 @@ class BoxServiceInterface(
     def service_name() -> bytes:
         return b"BoxService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"getABoxSession": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getABoxSession),
+            b"getABoxSession": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getABoxSession),
         }
         return {**super().getFunctionTable(), **functionTable}
 

@@ -17,7 +17,7 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import fbcode.thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from fbcode.thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from fbcode.thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from fbcode.thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 from fbcode.thrift.python.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import module.thrift_mutable_types as _fbthrift__module__thrift_mutable_types
@@ -32,50 +32,50 @@ class SimpleServiceInterface(
     def service_name() -> bytes:
         return b"SimpleService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"get_five": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_five),
-            b"add_five": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_add_five),
-            b"do_nothing": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_do_nothing),
-            b"concat": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_concat),
-            b"get_value": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_value),
-            b"negate": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_negate),
-            b"tiny": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_tiny),
-            b"small": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_small),
-            b"big": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_big),
-            b"two": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_two),
-            b"expected_exception": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_expected_exception),
-            b"unexpected_exception": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_unexpected_exception),
-            b"sum_i16_list": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_sum_i16_list),
-            b"sum_i32_list": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_sum_i32_list),
-            b"sum_i64_list": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_sum_i64_list),
-            b"concat_many": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_concat_many),
-            b"count_structs": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_count_structs),
-            b"sum_set": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_sum_set),
-            b"contains_word": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_contains_word),
-            b"get_map_value": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_map_value),
-            b"map_length": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_map_length),
-            b"sum_map_values": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_sum_map_values),
-            b"complex_sum_i32": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_complex_sum_i32),
-            b"repeat_name": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_repeat_name),
-            b"get_struct": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_struct),
-            b"fib": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_fib),
-            b"unique_words": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_unique_words),
-            b"words_count": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_words_count),
-            b"set_enum": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_set_enum),
-            b"list_of_lists": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_list_of_lists),
-            b"word_character_frequency": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_word_character_frequency),
-            b"list_of_sets": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_list_of_sets),
-            b"nested_map_argument": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_nested_map_argument),
-            b"make_sentence": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_make_sentence),
-            b"get_union": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_union),
-            b"get_keys": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_keys),
-            b"lookup_double": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_lookup_double),
-            b"retrieve_binary": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_retrieve_binary),
-            b"contain_binary": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_contain_binary),
-            b"contain_enum": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_contain_enum),
-            b"get_binary_union_struct": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_binary_union_struct),
-            b"get_struct_hidden": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_struct_hidden),
+            b"get_five": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_five),
+            b"add_five": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_add_five),
+            b"do_nothing": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_do_nothing),
+            b"concat": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_concat),
+            b"get_value": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_value),
+            b"negate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_negate),
+            b"tiny": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_tiny),
+            b"small": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_small),
+            b"big": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_big),
+            b"two": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_two),
+            b"expected_exception": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_expected_exception),
+            b"unexpected_exception": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_unexpected_exception),
+            b"sum_i16_list": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_sum_i16_list),
+            b"sum_i32_list": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_sum_i32_list),
+            b"sum_i64_list": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_sum_i64_list),
+            b"concat_many": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_concat_many),
+            b"count_structs": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_count_structs),
+            b"sum_set": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_sum_set),
+            b"contains_word": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_contains_word),
+            b"get_map_value": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_map_value),
+            b"map_length": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_map_length),
+            b"sum_map_values": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_sum_map_values),
+            b"complex_sum_i32": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_complex_sum_i32),
+            b"repeat_name": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_repeat_name),
+            b"get_struct": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_struct),
+            b"fib": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_fib),
+            b"unique_words": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_unique_words),
+            b"words_count": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_words_count),
+            b"set_enum": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_set_enum),
+            b"list_of_lists": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_list_of_lists),
+            b"word_character_frequency": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_word_character_frequency),
+            b"list_of_sets": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_list_of_sets),
+            b"nested_map_argument": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_nested_map_argument),
+            b"make_sentence": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_make_sentence),
+            b"get_union": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_union),
+            b"get_keys": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_keys),
+            b"lookup_double": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_lookup_double),
+            b"retrieve_binary": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_retrieve_binary),
+            b"contain_binary": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_contain_binary),
+            b"contain_enum": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_contain_enum),
+            b"get_binary_union_struct": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_binary_union_struct),
+            b"get_struct_hidden": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_struct_hidden),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -659,9 +659,9 @@ SimpleServiceInterface,
     def service_name() -> bytes:
         return b"DerivedService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"get_six": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_six),
+            b"get_six": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_six),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -707,9 +707,9 @@ DerivedServiceInterface,
     def service_name() -> bytes:
         return b"RederivedService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"get_seven": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_seven),
+            b"get_seven": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get_seven),
         }
         return {**super().getFunctionTable(), **functionTable}
 

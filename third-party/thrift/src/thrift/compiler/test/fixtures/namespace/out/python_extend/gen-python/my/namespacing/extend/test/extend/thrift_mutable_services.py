@@ -17,7 +17,7 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 from thrift.python.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import python_module_root.my.namespacing.extend.test.extend.thrift_mutable_types as python_module_root__my__namespacing__extend__test__extend__thrift_mutable_types
@@ -34,9 +34,9 @@ class ExtendTestServiceInterface(
     def service_name() -> bytes:
         return b"ExtendTestService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"check": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_check),
+            b"check": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_check),
         }
         return {**super().getFunctionTable(), **functionTable}
 

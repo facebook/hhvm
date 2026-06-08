@@ -62,7 +62,7 @@ from thrift.py3.stream cimport (
     createAsyncIteratorFromPyIterator,
     ServerStream
 )
-from thrift.python.types cimport ServiceInterface as cServiceInterface
+from thrift.python.types cimport ServiceInterface as cServiceInterface, FunctionEntry
 from thrift.python.protocol cimport Protocol
 from thrift.python.std_libcpp cimport bytes_to_string_view
 from thrift.python.streaming.py_promise cimport (
@@ -481,12 +481,13 @@ cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
 
         cdef dict funcMap = server.getFunctionTable()
         cdef list lifecycleFuncs = [server.onStartServing, server.onStopRequested]
+        cdef FunctionEntry entry
 
-        for name, (rpc_kind, func) in funcMap.items():
+        for name, entry in funcMap.items():
             name_view = bytes_to_string_view(name)
             funcs[name_view] = makeHandlerFunc(
-                <RpcKind>rpc_kind,
-                <PyObject*>func,
+                entry.rpc_kind,
+                <PyObject*>entry.handler,
                 <bytes>server.service_name(),
                 name_view,
             )

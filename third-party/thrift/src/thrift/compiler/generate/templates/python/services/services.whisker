@@ -40,7 +40,7 @@ from {{program.base_library_package}}.serializer import serialize_iobuf, deseria
 import {{program.base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers
 from {{program.base_library_package}}.mutable_serializer import serialize_iobuf, deserialize, Protocol
 {{/if python.generate_mutable_types?}}
-from {{program.base_library_package}}.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from {{program.base_library_package}}.server import FunctionEntry as _fbthrift_FunctionEntry, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 from {{program.base_library_package}}.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import {{program.module_path}}.{{#partial m_types.import_path}} as {{program.module_mangle}}__{{#partial m_types.import_path}}
@@ -76,10 +76,10 @@ class {{service.name}}Interface(
     def service_name() -> bytes:
         return b"{{service.name}}"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
         {{#each service.supported_functions as |function|}}
-            b"{{function.name}}": ({{#function}}{{> services/function_kind }}{{/function}}, self._fbthrift__handler_{{function.name}}),
+            b"{{function.name}}": _fbthrift_FunctionEntry({{#function}}{{> services/function_kind }}{{/function}}, self._fbthrift__handler_{{function.name}}),
         {{/each}}
         }
         return {**super().getFunctionTable(), **functionTable}

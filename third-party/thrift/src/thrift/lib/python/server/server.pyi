@@ -29,7 +29,10 @@ ThriftServer = _ThriftServer
 SSLPolicy = _SSLPolicy
 
 # This looks really dumb but otherwise this name doesn't get re-exported
-from thrift.python.types import ServiceInterface as ServiceInterface
+from thrift.python.types import (
+    FunctionEntry as FunctionEntry,
+    ServiceInterface as ServiceInterface,
+)
 
 IPAddress = Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
 # pyre-fixme[24]: Generic type `os.PathLike` expects 1 type parameter.

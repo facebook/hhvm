@@ -17,7 +17,7 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 from thrift.python.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import module.thrift_mutable_types as _fbthrift__module__thrift_mutable_types
@@ -32,11 +32,11 @@ class BiDiServiceInterface(
     def service_name() -> bytes:
         return b"BiDiService"
 
-    def getFunctionTable(self) -> _typing.Mapping[bytes, object]:
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"simple": (RpcKind.BIDIRECTIONAL_STREAM, self._fbthrift__handler_simple),
-            b"response": (RpcKind.BIDIRECTIONAL_STREAM, self._fbthrift__handler_response),
-            b"canThrow": (RpcKind.BIDIRECTIONAL_STREAM, self._fbthrift__handler_canThrow),
+            b"simple": _fbthrift_FunctionEntry(RpcKind.BIDIRECTIONAL_STREAM, self._fbthrift__handler_simple),
+            b"response": _fbthrift_FunctionEntry(RpcKind.BIDIRECTIONAL_STREAM, self._fbthrift__handler_response),
+            b"canThrow": _fbthrift_FunctionEntry(RpcKind.BIDIRECTIONAL_STREAM, self._fbthrift__handler_canThrow),
         }
         return {**super().getFunctionTable(), **functionTable}
 

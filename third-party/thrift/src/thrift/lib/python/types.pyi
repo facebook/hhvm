@@ -22,6 +22,7 @@ from typing import Never
 from folly.iobuf import IOBuf
 from thrift.python.adapter import Adapter
 from thrift.python.exceptions import GeneratedError
+from thrift.python.protocol import RpcKind
 from thrift.python.serializer import Protocol
 
 usT = typing.TypeVar("usT", bound=StructOrUnion)
@@ -339,12 +340,19 @@ class _fbthrift_SinkResult(Struct, typing.Generic[TSinkElem]):
 class _fbthrift_SinkFinalResult(Struct, typing.Generic[TSinkFinal]):
     success: typing.Final[TSinkFinal]
 
+class FunctionEntry:
+    rpc_kind: RpcKind
+    handler: typing.Callable[..., object]
+    def __init__(
+        self, rpc_kind: RpcKind, handler: typing.Callable[..., object]
+    ) -> None: ...
+
 class ServiceInterface:
     @staticmethod
     def service_name() -> bytes: ...
     def getFunctionTable(
         self,
-    ) -> typing.Mapping[bytes, object]: ...
+    ) -> typing.Mapping[bytes, FunctionEntry]: ...
     async def __aenter__(self) -> typing.Any: ...
     async def __aexit__(
         self,

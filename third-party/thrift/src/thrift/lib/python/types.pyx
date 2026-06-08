@@ -3284,6 +3284,22 @@ cdef class ServiceInterface:
         pass
 
 
+@cython.final
+@cython.auto_pickle(False)
+cdef class FunctionEntry:
+    """A typed entry in a service's function table (see
+    ``ServiceInterface.getFunctionTable``).
+
+    Replaces the legacy ``(rpc_kind, handler)`` tuple with a named, typed
+    record so the dispatch layer reads fields by name instead of unpacking a
+    positional tuple.
+    """
+
+    def __cinit__(self, RpcKind rpc_kind, handler):
+        self.rpc_kind = rpc_kind
+        self.handler = handler
+
+
 def get_standard_immutable_default_value_for_type(TypeInfoBase typeinfo):
     return typeinfo.to_python_value(getStandardImmutableDefaultValuePtrForType(typeinfo.get_cTypeInfo()[0]))
 

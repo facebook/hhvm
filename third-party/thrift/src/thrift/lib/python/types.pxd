@@ -22,7 +22,7 @@ from libcpp.vector cimport vector
 
 from thrift.python.std_libcpp cimport string_view
 
-from thrift.python.protocol cimport Protocol
+from thrift.python.protocol cimport Protocol, RpcKind
 
 # Service health enum for server status
 cdef extern from "<thrift/lib/cpp2/server/PolledServiceHealth.h>" \
@@ -349,6 +349,10 @@ cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *
 
 cdef class ServiceInterface:
     pass
+
+cdef class FunctionEntry:
+    cdef readonly RpcKind rpc_kind
+    cdef readonly object handler
 
 cdef const cTypeInfo* getCTypeInfo(type_info)
 cdef list_eq(object self, object other)

@@ -24,6 +24,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <thread>
 #include <utility>
 #include <gflags/gflags.h>
 #include <gtest/gtest.h>
@@ -41,11 +42,13 @@
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/async/ClientChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
+#include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/AsyncProcessor_types.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Service_types.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
+#include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -114,6 +117,237 @@ class RocketClientTest : public testing::Test {
     std::atomic<int> hit{0};
   };
 };
+
+class FirstResponseErrorCallback : public StreamClientCallback {
+ public:
+  bool onFirstResponse(
+      FirstResponsePayload&&,
+      folly::EventBase*,
+      StreamServerCallback*) override {
+    ADD_FAILURE() << "unexpected first response";
+    return false;
+  }
+
+  void onFirstResponseError(folly::exception_wrapper) override { ++errors_; }
+
+  bool onStreamNext(StreamPayload&&) override {
+    ADD_FAILURE() << "unexpected stream payload";
+    return false;
+  }
+
+  void onStreamError(folly::exception_wrapper) override {
+    ADD_FAILURE() << "unexpected stream error";
+  }
+
+  void onStreamComplete() override {
+    ADD_FAILURE() << "unexpected stream completion";
+  }
+
+  void resetServerCallback(StreamServerCallback&) override {
+    ADD_FAILURE() << "unexpected server callback reset";
+  }
+
+  int errors() const { return errors_; }
+
+ private:
+  int errors_{0};
+};
+
+class TestRocketClient : public apache::thrift::rocket::RocketClient {
+ public:
+  using Ptr =
+      std::unique_ptr<TestRocketClient, folly::DelayedDestruction::Destructor>;
+
+  static Ptr create(
+      folly::EventBase& evb,
+      folly::AsyncTransport::UniquePtr socket,
+      RequestSetupMetadata&& setupMetadata) {
+    return Ptr(
+        new TestRocketClient(evb, std::move(socket), std::move(setupMetadata)));
+  }
+
+  uint32_t guardCount() const { return getDestructorGuardCount(); }
+
+ private:
+  TestRocketClient(
+      folly::EventBase& evb,
+      folly::AsyncTransport::UniquePtr socket,
+      RequestSetupMetadata&& setupMetadata)
+      : RocketClient(evb, std::move(socket), std::move(setupMetadata)) {}
+};
+
+#ifndef FOLLY_SANITIZE_ADDRESS
+void skipNonAsanRocketClientTest() {
+  GTEST_SKIP()
+      << "requires ASAN to catch RocketClient destruction use-after-free";
+}
+#define RETURN_IF_NON_ASAN_ROCKET_CLIENT_TEST() \
+  do {                                          \
+    skipNonAsanRocketClientTest();              \
+    return;                                     \
+  } while (false)
+#else
+#define RETURN_IF_NON_ASAN_ROCKET_CLIENT_TEST() \
+  do {                                          \
+  } while (false)
+#endif
+
+TEST_F(
+    RocketClientTest,
+    DestroyPendingFirstResponseTimeoutCancelDoesNotReenterClientDestruction) {
+  RETURN_IF_NON_ASAN_ROCKET_CLIENT_TEST();
+
+  apache::thrift::rocket::RocketClient::FlushList flushList;
+  auto testInterface = std::make_shared<RocketClientTest::TestInterface>();
+  ScopedServerInterfaceThread runner(testInterface);
+  FirstResponseErrorCallback callback;
+  folly::EventBase evb;
+  std::thread evbThread([&] { evb.loopForever(); });
+
+  evb.runInEventBaseThreadAndWait([&] {
+    auto socket = folly::AsyncSocket::newSocket(&evb, runner.getAddress());
+    auto client = TestRocketClient::create(
+        evb, std::move(socket), RequestSetupMetadata{});
+    CHECK_NOTNULL(client.get())->setFlushList(&flushList);
+    auto& clientRef = *CHECK_NOTNULL(client.get());
+    clientRef.sendRequestStream(
+        apache::thrift::rocket::Payload::makeFromData(folly::ByteRange()),
+        std::chrono::seconds(60),
+        std::chrono::milliseconds::zero(),
+        1,
+        &callback);
+
+    ASSERT_TRUE(clientRef.streamExists(apache::thrift::rocket::StreamId{1}));
+    ASSERT_GT(clientRef.guardCount(), 0);
+
+    auto& rawClient = *CHECK_NOTNULL(client.release());
+    rawClient.destroy();
+    rawClient.cancelStream(apache::thrift::rocket::StreamId{1});
+  });
+
+  evb.runInEventBaseThreadAndWait([&] { evb.terminateLoopSoon(); });
+  evbThread.join();
+
+  EXPECT_EQ(callback.errors(), 0);
+}
+
+TEST_F(
+    RocketClientTest,
+    DestroyPendingFirstResponseTimeoutExpiryDoesNotReenterClientDestruction) {
+  RETURN_IF_NON_ASAN_ROCKET_CLIENT_TEST();
+
+  apache::thrift::rocket::RocketClient::FlushList flushList;
+  auto testInterface = std::make_shared<RocketClientTest::TestInterface>();
+  ScopedServerInterfaceThread runner(testInterface);
+  FirstResponseErrorCallback callback;
+  folly::EventBase evb;
+  std::thread evbThread([&] { evb.loopForever(); });
+
+  evb.runInEventBaseThreadAndWait([&] {
+    auto socket = folly::AsyncSocket::newSocket(&evb, runner.getAddress());
+    auto client = TestRocketClient::create(
+        evb, std::move(socket), RequestSetupMetadata{});
+    CHECK_NOTNULL(client.get())->setFlushList(&flushList);
+    auto& clientRef = *CHECK_NOTNULL(client.get());
+    clientRef.sendRequestStream(
+        apache::thrift::rocket::Payload::makeFromData(folly::ByteRange()),
+        std::chrono::milliseconds(1),
+        std::chrono::milliseconds::zero(),
+        1,
+        &callback);
+
+    ASSERT_TRUE(clientRef.streamExists(apache::thrift::rocket::StreamId{1}));
+    ASSERT_GT(clientRef.guardCount(), 0);
+
+    auto& rawClient = *CHECK_NOTNULL(client.release());
+    rawClient.destroy();
+  });
+
+  evb.runInEventBaseThreadAndWait([&] {
+    CHECK(evb.tryRunAfterDelay(
+        [&] { evb.terminateLoopSoon(); },
+        static_cast<uint32_t>(std::chrono::milliseconds(100).count())));
+  });
+  evbThread.join();
+
+  EXPECT_EQ(callback.errors(), 1);
+}
+
+TEST_F(
+    RocketClientTest,
+    ChannelDestroyPendingFirstResponseTimeoutExpiryDoesNotReenterClientDestruction) {
+  RETURN_IF_NON_ASAN_ROCKET_CLIENT_TEST();
+
+  apache::thrift::rocket::RocketClient::FlushList flushList;
+  auto testInterface = std::make_shared<RocketClientTest::TestInterface>();
+  ScopedServerInterfaceThread runner(testInterface);
+  FirstResponseErrorCallback callback;
+  folly::EventBase evb;
+  std::thread evbThread([&] { evb.loopForever(); });
+
+  evb.runInEventBaseThreadAndWait([&] {
+    auto socket = folly::AsyncSocket::newSocket(&evb, runner.getAddress());
+    auto channel = RocketClientChannel::newChannelWithMetadata(
+        std::move(socket), RequestSetupMetadata{});
+    CHECK_NOTNULL(channel.get())->setFlushList(&flushList);
+
+    RpcOptions rpcOptions;
+    rpcOptions.setTimeout(std::chrono::milliseconds(1));
+    channel->sendRequestStream(
+        rpcOptions,
+        "dummy",
+        SerializedRequest(folly::IOBuf::copyBuffer("")),
+        std::make_shared<transport::THeader>(),
+        &callback,
+        nullptr);
+
+    auto& rawChannel = *CHECK_NOTNULL(channel.release());
+    rawChannel.destroy();
+  });
+
+  evb.runInEventBaseThreadAndWait([&] {
+    CHECK(evb.tryRunAfterDelay(
+        [&] { evb.terminateLoopSoon(); },
+        static_cast<uint32_t>(std::chrono::milliseconds(100).count())));
+  });
+  evbThread.join();
+
+  EXPECT_EQ(callback.errors(), 1);
+}
+
+TEST_F(
+    RocketClientTest,
+    ChannelDestroyPendingFirstResponseTimeoutEventBaseTeardownDoesNotReenterClientDestruction) {
+  RETURN_IF_NON_ASAN_ROCKET_CLIENT_TEST();
+
+  apache::thrift::rocket::RocketClient::FlushList flushList;
+  auto testInterface = std::make_shared<RocketClientTest::TestInterface>();
+  ScopedServerInterfaceThread runner(testInterface);
+  FirstResponseErrorCallback callback;
+
+  {
+    folly::EventBase evb;
+    auto socket = folly::AsyncSocket::newSocket(&evb, runner.getAddress());
+    auto channel = RocketClientChannel::newChannelWithMetadata(
+        std::move(socket), RequestSetupMetadata{});
+    CHECK_NOTNULL(channel.get())->setFlushList(&flushList);
+
+    RpcOptions rpcOptions;
+    rpcOptions.setTimeout(std::chrono::seconds(60));
+    channel->sendRequestStream(
+        rpcOptions,
+        "dummy",
+        SerializedRequest(folly::IOBuf::copyBuffer("")),
+        std::make_shared<transport::THeader>(),
+        &callback,
+        nullptr);
+
+    auto& rawChannel = *CHECK_NOTNULL(channel.release());
+    rawChannel.destroy();
+  }
+
+  EXPECT_EQ(callback.errors(), 1);
+}
 
 // This test is using a big payload to test the keep alive mechanism. The size
 // of payload is 8MB for now to ensure even in test environment, it will take

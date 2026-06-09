@@ -102,7 +102,7 @@ Optional<ColorMap> performColoring(const LayoutWeightVector& layouts,
     auto const colorAssigned = [&] {
       auto constexpr firstColor = StringData::kDupColor + 1;
       for (Color i = firstColor; i <= StructLayout::kMaxColor; i++) {
-        if (colorsUsed.find(i) == colorsUsed.end()) {
+        if (!colorsUsed.contains(i)) {
           colors[vertex] = i;
           return true;
         }

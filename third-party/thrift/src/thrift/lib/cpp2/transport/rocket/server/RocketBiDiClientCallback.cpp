@@ -19,13 +19,10 @@
 #include <fmt/core.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
-#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
-
-THRIFT_FLAG_DEFINE_bool(bidi_error_on_server_close_killswitch, false);
 
 namespace apache::thrift::rocket {
 
@@ -485,14 +482,12 @@ void RocketBiDiClientCallback::handleConnectionClose() {
             TApplicationException::TApplicationExceptionType::INTERRUPTION));
   }
   if (isStreamOpen()) {
-    if (!THRIFT_FLAG(bidi_error_on_server_close_killswitch)) {
-      connection_.sendErrorAfterDrain(
-          streamId_,
-          RocketException(
-              ErrorCode::CANCELED,
-              connection_.getPayloadSerializer()->packCompact(
-                  getStreamConnectionClosingError())));
-    }
+    connection_.sendErrorAfterDrain(
+        streamId_,
+        RocketException(
+            ErrorCode::CANCELED,
+            connection_.getPayloadSerializer()->packCompact(
+                getStreamConnectionClosingError())));
     std::ignore = cb->onStreamCancel();
   }
 }

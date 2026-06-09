@@ -154,7 +154,8 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal, bool suspended) {
 void generatorReturn(IRGS& env, SSATmp* retval) {
   assertx(curFunc(env)->isGenerator());
   assertx(!isInlining(env));
-  assertx(retval->isA(TInitNull));
+  // A generator returns null.
+  assertx(retval->type().maybe(TInitNull));
 
   retSurpriseCheck(env, retval, []{});
 

@@ -117,6 +117,7 @@ class ReflectionClass implements Reflector {
   public function newInstance(
     HH\FIXME\MISSING_PARAM_TYPE ...$args
   ): HH\FIXME\MISSING_RETURN_TYPE;
+  <<__Deprecated("Use HH_FIXME::reflectionClassNewInstanceArgsForCallsite instead")>>
   public function newInstanceArgs(
     Traversable<mixed> $args = vec[],
   )[defaults]: HH\FIXME\MISSING_RETURN_TYPE;

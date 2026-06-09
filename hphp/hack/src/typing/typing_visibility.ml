@@ -22,6 +22,11 @@ type package_access_result =
   | Package_access_linter_error of
       (Pos.t * Typing_packages.package_warning_info)
 
+type tests_bypass_visibility_hint =
+  | No_tests_bypass_visibility_hint
+  | Add_tests_bypass_visibility_attribute
+  | Enable_tests_bypass_visibility_static_properties
+
 (* Is a private member defined on class/trait [origin_id] visible
  * from code in class/trait [self_id]?
  *
@@ -407,17 +412,17 @@ let is_visible ~is_method env (vis, lsb) cid class_ =
   in
   Option.is_none msg_opt
 
-let visibility_error ~tests_bypass_visibility_context p msg (p_vis, vis) =
+let visibility_error ~tests_bypass_visibility_hint p msg (p_vis, vis) =
   let s = Typing_defs.string_of_visibility vis in
-  let msg_vis =
-    "This member is "
-    ^ s
-    ^
-    if tests_bypass_visibility_context then
+  let hint =
+    match tests_bypass_visibility_hint with
+    | No_tests_bypass_visibility_hint -> ""
+    | Add_tests_bypass_visibility_attribute ->
       ". To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member"
-    else
-      ""
+    | Enable_tests_bypass_visibility_static_properties ->
+      ". To allow static property access from test contexts, set `tests_bypass_visibility_static_properties = true` in `.hhconfig`"
   in
+  let msg_vis = "This member is " ^ s ^ hint in
   Typing_error.(
     primary
     @@ Primary.Visibility
@@ -438,14 +443,13 @@ let check_obj_access
     Option.map
       (is_visible_for_obj ~is_method ~is_receiver_interface env vis)
       ~f:(fun msg ->
-        let tests_bypass_visibility_context =
-          TUtils.is_tests_bypass_visibility_context env
+        let tests_bypass_visibility_hint =
+          if TUtils.is_tests_bypass_visibility_context env then
+            Add_tests_bypass_visibility_attribute
+          else
+            No_tests_bypass_visibility_hint
         in
-        visibility_error
-          ~tests_bypass_visibility_context
-          use_pos
-          msg
-          (def_pos, vis))
+        visibility_error ~tests_bypass_visibility_hint use_pos msg (def_pos, vis))
 
 let check_top_level_access
     ~should_check_package_boundary
@@ -539,6 +543,7 @@ let check_class_access
     ~use_pos
     ~def_pos
     ~tests_bypass_visibility
+    ~tests_bypass_visibility_static_properties_blocked
     env
     (vis, lsb)
     cid
@@ -550,14 +555,16 @@ let check_class_access
     Option.map
       (is_visible_for_class ~is_method env (vis, lsb) cid class_)
       ~f:(fun msg ->
-        let tests_bypass_visibility_context =
-          TUtils.is_tests_bypass_visibility_context env
+        let tests_bypass_visibility_hint =
+          if TUtils.is_tests_bypass_visibility_context env then
+            if tests_bypass_visibility_static_properties_blocked then
+              Enable_tests_bypass_visibility_static_properties
+            else
+              Add_tests_bypass_visibility_attribute
+          else
+            No_tests_bypass_visibility_hint
         in
-        visibility_error
-          ~tests_bypass_visibility_context
-          use_pos
-          msg
-          (def_pos, vis))
+        visibility_error ~tests_bypass_visibility_hint use_pos msg (def_pos, vis))
 
 let check_cross_package ~use_pos ~def_pos:_ env package_requirement =
   let current_pkg = Env.get_current_package env in

@@ -312,3 +312,6 @@ let is_unstable_feature_enabled t name =
 
 let permits_bypassing_visibility t =
   t.GlobalOptions.tco_permits_bypassing_visibility
+
+let tests_bypass_visibility_static_properties t =
+  t.GlobalOptions.tco_tests_bypass_visibility_static_properties

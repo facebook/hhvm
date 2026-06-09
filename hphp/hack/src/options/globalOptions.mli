@@ -298,6 +298,7 @@ type t = {
       (** Error on dict[$c => 1] when $c: class<T>  *)
   tco_poly_function_pointers: bool;
   tco_permits_bypassing_visibility: string list;
+  tco_tests_bypass_visibility_static_properties: bool;
 }
 [@@deriving eq, show]
 
@@ -411,6 +412,7 @@ val set :
   ?class_pointer_ban_class_array_key:bool ->
   ?tco_poly_function_pointers:bool ->
   ?tco_permits_bypassing_visibility:string list ->
+  ?tco_tests_bypass_visibility_static_properties:bool ->
   t ->
   t
 

@@ -21,6 +21,7 @@ val check_class_access :
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
   tests_bypass_visibility:bool ->
+  tests_bypass_visibility_static_properties_blocked:bool ->
   env ->
   ce_visibility * bool ->
   Nast.class_id_ ->

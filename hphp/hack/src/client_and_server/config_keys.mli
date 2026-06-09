@@ -186,6 +186,8 @@ module Hhconfig : sig
 
   val permits_bypassing_visibility : string
 
+  val tests_bypass_visibility_static_properties : string
+
   val pessimise_builtins : string
 
   val poly_function_pointers : string

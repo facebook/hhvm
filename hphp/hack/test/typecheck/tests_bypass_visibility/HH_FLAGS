@@ -1,1 +1,2 @@
 --config permits_bypassing_visibility=WWWTest,AlternateWWWTest
+--config tests_bypass_visibility_static_properties=true

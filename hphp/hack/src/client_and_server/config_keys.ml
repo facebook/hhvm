@@ -205,6 +205,9 @@ module Hhconfig = struct
 
   let permits_bypassing_visibility = key "permits_bypassing_visibility"
 
+  let tests_bypass_visibility_static_properties =
+    key "tests_bypass_visibility_static_properties"
+
   let pessimise_builtins = key "pessimise_builtins"
 
   let poly_function_pointers = key "poly_function_pointers"

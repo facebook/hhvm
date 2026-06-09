@@ -639,6 +639,10 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_permits_bypassing_visibility:
       (string_list_opt Config_keys.Hhconfig.permits_bypassing_visibility config
       |> Option.map ~f:(List.map ~f:Utils.add_ns))
+    ?tco_tests_bypass_visibility_static_properties:
+      (bool_opt
+         Config_keys.Hhconfig.tests_bypass_visibility_static_properties
+         config)
     options
 
 let warn_on_did_you_mean

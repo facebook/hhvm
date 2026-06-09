@@ -1,0 +1,8 @@
+ERROR: File "static_properties.php", line 19, characters 32-41:
+You cannot access this member (Typing[4112])
+  File "static_properties.php", line 7, characters 18-20:
+  This member is private. To allow static property access from test contexts, set `tests_bypass_visibility_static_properties = true` in `.hhconfig`
+ERROR: File "static_properties.php", line 20, characters 32-41:
+Cannot access this protected member, you don't extend StaticPropertyTarget (Typing[4112])
+  File "static_properties.php", line 10, characters 20-22:
+  This member is protected. To allow static property access from test contexts, set `tests_bypass_visibility_static_properties = true` in `.hhconfig`

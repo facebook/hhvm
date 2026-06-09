@@ -8989,6 +8989,7 @@ end = struct
          ~use_pos
          ~def_pos:class_pos
          ~tests_bypass_visibility:(get_ce_tests_bypass_visibility class_elt)
+         ~tests_bypass_visibility_static_properties_blocked:false
          env
          (ce_visibility, get_ce_lsb class_elt)
          class_id_
@@ -13798,6 +13799,20 @@ end = struct
                  _;
                } as ce) ->
             let def_pos = get_pos member_decl_ty in
+            let has_tests_bypass_visibility =
+              get_ce_tests_bypass_visibility ce
+            in
+            let tests_bypass_visibility_static_properties_blocked =
+              has_tests_bypass_visibility
+              && (not is_method)
+              && not
+                   (TypecheckerOptions.tests_bypass_visibility_static_properties
+                      (Env.get_tcopt env))
+            in
+            let tests_bypass_visibility =
+              has_tests_bypass_visibility
+              && not tests_bypass_visibility_static_properties_blocked
+            in
             (* Don't need to check visibilty on class constants in an attribute *)
             (match attribute_check_policy with
             | Expr.Skip_all_access -> ()
@@ -13809,7 +13824,8 @@ end = struct
                    ~is_method
                    ~use_pos:p
                    ~def_pos
-                   ~tests_bypass_visibility:(get_ce_tests_bypass_visibility ce)
+                   ~tests_bypass_visibility
+                   ~tests_bypass_visibility_static_properties_blocked
                    env
                    (vis, get_ce_lsb ce)
                    cid_

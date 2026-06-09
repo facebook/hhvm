@@ -634,6 +634,10 @@ impl HhConfig {
                 .get_str_list("permits_bypassing_visibility")
                 .map(|classes| classes.map(|s| format!("\\{}", s)).collect())
                 .unwrap_or_default(),
+            tco_tests_bypass_visibility_static_properties: hhconfig.get_bool_or(
+                "tests_bypass_visibility_static_properties",
+                default.tco_tests_bypass_visibility_static_properties,
+            )?,
             tco_repo_stdlib_path: hhconfig.get_str("repo_stdlib_path").map(|p| p.to_string()),
         };
         let mut c = Self {

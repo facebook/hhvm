@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c0c95fc8f2f106045015899744ce6116>>
+// @generated SignedSource<<9ef76ec33da58a2a9e9d1b3bd0651d43>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -407,4 +407,5 @@ pub struct GlobalOptions {
     pub class_pointer_ban_class_array_key: bool,
     pub tco_poly_function_pointers: bool,
     pub tco_permits_bypassing_visibility: Vec<String>,
+    pub tco_tests_bypass_visibility_static_properties: bool,
 }

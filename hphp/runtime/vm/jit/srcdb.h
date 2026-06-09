@@ -274,7 +274,7 @@ struct SrcDB {
    * Maybe could be possible with a better hash function or lower max load
    * factor.  (See D450383.)
    */
-  using THM            = TreadHashMap<SrcKey::AtomicInt, SrcRec*,
+  using THM            = TreadHashMap<SrcKey::AtomicInt, std::atomic<SrcRec*>,
                                       int_hash<SrcKey::AtomicInt>,
                                       VMAllocator<char>>;
   using iterator       = THM::iterator;
@@ -298,13 +298,24 @@ struct SrcDB {
 
   SrcRec* find(SrcKey sk) const {
     auto const p = m_map.find(sk.toAtomicInt());
-    return p ? *p : 0;
+    return p ? p->load(std::memory_order_acquire) : 0;
   }
 
+  // Requires tc::lockMetadata() to be held.
+  // Only one thread can execute this function at a time.
   SrcRec* insert(SrcKey sk) {
-    return *m_map.insert(
-      sk.toAtomicInt(), new SrcRec()
-    );
+    auto const srcRec = new SrcRec();
+    DEBUG_ONLY auto prev = m_map.insertOrUpdate(sk.toAtomicInt(), srcRec);
+    assertx(prev == nullptr); // We should not have called this in case it already existed
+    return srcRec;
+  }
+
+  // Requires tc::lockMetadata() to be held.
+  // Only one thread can execute this function at a time.
+  void erase(SrcKey sk) {
+    auto prev = m_map.insertOrUpdate(sk.toAtomicInt(), nullptr);
+    assertx(prev != nullptr); // We should not have called this in case it didn't exist
+    delete prev;
   }
 
 private:

@@ -28,6 +28,28 @@
 
 namespace HPHP {
 
+namespace detail {
+
+template <typename T>
+struct is_atomic : std::false_type {};
+
+template <typename U>
+struct is_atomic<std::atomic<U>> : std::true_type {};
+
+template <typename T>
+struct val_ops {
+  static void store(T& dst, T v) { dst = v; }
+  using type = T;
+};
+
+template <typename U>
+struct val_ops<std::atomic<U>> {
+  static void store(std::atomic<U>& dst, U v) { dst.store(v, std::memory_order_release); }
+  using type = U;
+};
+
+}
+
 extern uint64_t g_emptyTable;
 
 /*
@@ -169,9 +191,15 @@ public:
     return const_cast<TreadHashMap*>(this)->end();
   }
 
-  Val* insert(Key key, Val val) {
+  void insert(Key key, detail::val_ops<Val>::type val) {
     assertx(key != 0);
-    return insertImpl(acquireAndGrowIfNeeded(), key, val);
+    insertImpl<false>(acquireAndGrowIfNeeded(), key, val);
+  }
+
+  template <typename V = Val, typename = std::enable_if_t<detail::is_atomic<V>::value>>
+  detail::val_ops<Val>::type insertOrUpdate(Key key, detail::val_ops<Val>::type val) {
+    assertx(key != 0);
+    return insertImpl<true>(acquireAndGrowIfNeeded(), key, val);
   }
 
   Val* find(Key key) const {
@@ -198,27 +226,38 @@ public:
     for (auto i = uint32_t{}; i < old->capac; ++i) {
       auto const ent = &old->entries[i];
       auto const key = ent->first.load(std::memory_order_acquire);
-      if (key && !fn(key)) insertImpl(newTable, key, ent->second);
+      if (key && !fn(key)) insertImpl<false>(newTable, key, ent->second);
     }
     Treadmill::enqueue([this, old] { freeTable(old); });
     m_table.store(newTable, std::memory_order_release);
   }
 
 private:
-  Val* insertImpl(Table* const tab, Key newKey, Val newValue) {
+  template <bool canUpdate>
+  std::conditional_t<canUpdate, typename detail::val_ops<Val>::type, void>
+  insertImpl(Table* const tab, Key newKey, detail::val_ops<Val>::type newValue) {
+    static_assert(!canUpdate || detail::is_atomic<Val>::value, "canUpdate requires Val to be std::atomic");
+
     auto probe = &tab->entries[project(tab, newKey)];
     assertx(size_t(probe - tab->entries) < tab->capac);
 
     while (Key currentProbe = probe->first.load(std::memory_order_acquire)) {
-      assertx(currentProbe != newKey); // insertions must be unique
+      if constexpr (canUpdate) {
+        if (currentProbe == newKey) {
+          return probe->second.exchange(newValue, std::memory_order_acq_rel);
+        }
+      } else {
+        assertx(currentProbe != newKey); // insertions must be unique
+      }
+
       assertx(probe <= (tab->entries + tab->capac));
       // acquireAndGrowIfNeeded ensures there's at least one empty slot.
       (void)currentProbe;
       if (++probe == (tab->entries + tab->capac)) probe = tab->entries;
     }
 
-    // Copy over the value before we publish.
-    probe->second = newValue;
+    // First copy over the value then update the key to make it visible.
+    detail::val_ops<Val>::store(probe->second, newValue);
 
     // Make it visible.
     probe->first.store(newKey, std::memory_order_release);
@@ -227,7 +266,9 @@ private:
     // ordering is ok.
     ++tab->size;
 
-    return &probe->second;
+    if constexpr (canUpdate) {
+      return nullptr;
+    }
   }
 
   Table* acquireAndGrowIfNeeded() {
@@ -246,7 +287,7 @@ private:
       for (uint32_t i = 0; i < old->capac; ++i) {
         auto const ent = old->entries + i;
         auto const key = ent->first.load(std::memory_order_acquire);
-        if (key) insertImpl(newTable, key, ent->second);
+        if (key) insertImpl<false>(newTable, key, ent->second);
       }
       Treadmill::enqueue([this, old] { freeTable(old); });
     }
@@ -285,4 +326,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

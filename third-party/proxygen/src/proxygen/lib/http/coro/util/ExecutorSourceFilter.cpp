@@ -8,35 +8,26 @@
 
 #include "proxygen/lib/http/coro/util/ExecutorSourceFilter.h"
 
+using folly::coro::co_nothrow;
+
 namespace proxygen::coro {
 
 folly::coro::Task<HTTPHeaderEvent> ExecutorSourceFilter::readHeaderEvent() {
-  if (evb_.isInEventBaseThread()) {
-    return readHeaderEventImpl(/*deleteOnDone=*/true);
-  }
-  return folly::coro::co_invoke([this]() -> folly::coro::Task<HTTPHeaderEvent> {
-    co_return co_await co_awaitTry(
-        co_withExecutor(&evb_, readHeaderEventImpl(/*deleteOnDone=*/true)));
-  });
+  co_return co_await co_nothrow(
+      co_withExecutor(&evb_, readHeaderEventImpl(/*deleteOnDone=*/true)));
 }
 
 folly::coro::Task<HTTPBodyEvent> ExecutorSourceFilter::readBodyEvent(
     uint32_t max) {
-  if (evb_.isInEventBaseThread()) {
-    return readBodyEventImpl(max, /*deleteOnDone=*/true);
-  }
-  return folly::coro::co_invoke([this,
-                                 max]() -> folly::coro::Task<HTTPBodyEvent> {
-    auto ev = co_await co_awaitTry(
+  auto ev = co_await co_nothrow(
+      co_withExecutor(&evb_, readBodyEventImpl(max, /*deleteOnDone=*/true)));
+  // SUSPEND returns a task that must run in the producer's evb
+  while (ev.eventType == HTTPBodyEvent::SUSPEND) {
+    co_await co_awaitTry(co_withExecutor(&evb_, std::move(ev.event.resume)));
+    ev = co_await co_nothrow(
         co_withExecutor(&evb_, readBodyEventImpl(max, /*deleteOnDone=*/true)));
-    // SUSPEND returns a task that must run in the producer's evb
-    while (ev.hasValue() && ev->eventType == HTTPBodyEvent::SUSPEND) {
-      co_await co_awaitTry(co_withExecutor(&evb_, std::move(ev->event.resume)));
-      ev = co_await co_awaitTry(co_withExecutor(
-          &evb_, readBodyEventImpl(max, /*deleteOnDone=*/true)));
-    }
-    co_return ev;
-  });
+  }
+  co_return ev;
 }
 
 void ExecutorSourceFilter::stopReading(

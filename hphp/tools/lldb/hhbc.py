@@ -183,7 +183,7 @@ def subop_to_name(
         "HPHP::SpecialClsRef": ("SpecialClsRef", "SelfCls"),
         "HPHP::ReadonlyOp": ("ReadonlyOp", "Any"),
     }
-    # pyrefly: ignore [bad-typed-dict-key]
+    # pyrefly: ignore [bad-index, bad-typed-dict-key]
     enum_name, member = subop_names_and_table_starting_indices[enum_type_name]
     ix = (
         subop.unsigned - utils.Enum("HPHP::" + enum_name, member, subop.target).unsigned

@@ -923,7 +923,9 @@ class _FunctionCallFinder(libcst.CSTVisitor):
         while isinstance(start_node, libcst.Attribute):
             start_node = start_node.attr
         start_node_range = self.get_metadata(PositionProvider, start_node)
+        # pyrefly: ignore [missing-attribute]
         start_position = start_node_range.start
+        # pyrefly: ignore [missing-attribute]
         end_position = node_range.end
         node_range = CodeRange(start=start_position, end=end_position)
 

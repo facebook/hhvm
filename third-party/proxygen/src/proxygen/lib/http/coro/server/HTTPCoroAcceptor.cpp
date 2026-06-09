@@ -12,6 +12,7 @@
 
 #include <proxygen/lib/http/session/HTTPDefaultSessionCodecFactory.h>
 #include <quic/api/QuicSocket.h>
+#include <quic/common/address/QuicSocketAddressBridge.h>
 #include <quic/common/events/FollyQuicEventBase.h>
 
 namespace proxygen::coro {
@@ -130,7 +131,7 @@ HTTPCoroSession* HTTPCoroDownstreamSessionFactory::makeQuicSession(
                                           accConfig_->headerIndexingStrategy);
   applySettingsToCodec(*codec);
   XLOG(DBG4) << "Created new " << *tinfo.appProtocol << " session for peer "
-             << quicSocket->getPeerAddress();
+             << quic::toFollySocketAddress(quicSocket->getPeerAddress());
   HTTPCoroSession* session =
       HTTPCoroSession::makeDownstreamCoroSession(std::move(quicSocket),
                                                  std::move(handler),
@@ -193,7 +194,7 @@ void HTTPCoroAcceptor::onNewConnection(
     std::shared_ptr<quic::QuicSocket> quicSocket, wangle::TransportInfo tinfo) {
   if (newConnectionFilter_ && *newConnectionFilter_) {
     auto nextProtocol = quicSocket->getAppProtocol().value_or("");
-    auto peerAddr = quicSocket->getPeerAddress();
+    auto peerAddr = quic::toFollySocketAddress(quicSocket->getPeerAddress());
     auto pass = folly::makeTryWith([&] {
       return (*newConnectionFilter_)(&peerAddr,
                                      quicSocket->getPeerCertificate().get(),

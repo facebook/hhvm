@@ -34,6 +34,7 @@
 #include <folly/io/async/HHWheelTimer.h>
 #include <quic/QuicConstants.h>
 #include <quic/common/BufUtil.h>
+#include <quic/common/address/QuicSocketAddressBridge.h>
 #include <quic/folly_utils/Utils.h>
 #include <quic/logging/QLoggerConstants.h>
 #include <sstream>
@@ -317,9 +318,25 @@ bool HQSession::maybeRejectRequestAfterGoaway(quic::StreamId id) {
   return false;
 }
 
+const folly::SocketAddress& HQSession::getLocalAddress() const noexcept {
+  if (!sock_ || !sock_->good()) {
+    return localAddr_;
+  }
+  return quic::toFollySocketAddressRef(sock_->getLocalAddress(),
+                                       cachedLocalAddr_);
+}
+
+const folly::SocketAddress& HQSession::getPeerAddress() const noexcept {
+  if (!sock_ || !sock_->good()) {
+    return peerAddr_;
+  }
+  return quic::toFollySocketAddressRef(sock_->getPeerAddress(),
+                                       cachedPeerAddr_);
+}
+
 bool HQSession::onTransportReadyCommon() noexcept {
-  localAddr_ = sock_->getLocalAddress();
-  peerAddr_ = sock_->getPeerAddress();
+  localAddr_ = quic::toFollySocketAddress(sock_->getLocalAddress());
+  peerAddr_ = quic::toFollySocketAddress(sock_->getPeerAddress());
   initQuicProtocolInfo(*quicInfo_, *sock_);
   // NOTE: this can drop the connection if the next protocol is not supported
   if (!getAndCheckApplicationProtocol()) {
@@ -2388,8 +2405,8 @@ void HQSession::startNow() {
   // Initialize the local and peer address.
   // These will be updated in onTransportReadyCommon() in case they change (e.g.
   // happy eyeballs)
-  localAddr_ = sock_->getLocalAddress();
-  peerAddr_ = sock_->getPeerAddress();
+  localAddr_ = quic::toFollySocketAddress(sock_->getLocalAddress());
+  peerAddr_ = quic::toFollySocketAddress(sock_->getPeerAddress());
   // TODO: invoke socket.start() here
   resetTimeout();
   detail::setEgressWtH3Settings(egressSettings_);

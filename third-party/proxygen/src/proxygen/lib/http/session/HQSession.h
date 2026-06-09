@@ -488,13 +488,9 @@ class HQSession
   }
 
   // Override HTTPSessionBase address getter functions
-  const folly::SocketAddress& getLocalAddress() const noexcept override {
-    return sock_ && sock_->good() ? sock_->getLocalAddress() : localAddr_;
-  }
+  const folly::SocketAddress& getLocalAddress() const noexcept override;
 
-  const folly::SocketAddress& getPeerAddress() const noexcept override {
-    return sock_ && sock_->good() ? sock_->getPeerAddress() : peerAddr_;
-  }
+  const folly::SocketAddress& getPeerAddress() const noexcept override;
 
   void enablePingProbes(std::chrono::seconds /*interval*/,
                         std::chrono::seconds /*timeout*/,
@@ -764,6 +760,12 @@ class HQSession
   // setEarlyDataAppParamsHandler) and may dereference it during teardown.
   std::unique_ptr<H3EarlyDataHandler> earlyDataHandler_;
   std::shared_ptr<quic::QuicSocket> sock_;
+
+  // Cached folly::SocketAddress for bridge conversion from quic::SocketAddress.
+  // On server builds (quic::SocketAddress == folly::SocketAddress) these are
+  // unused; toFollySocketAddressRef returns the original reference directly.
+  mutable folly::SocketAddress cachedLocalAddr_;
+  mutable folly::SocketAddress cachedPeerAddr_;
 
   // Callback pointer used for correctness testing. Not used
   // for session logic.

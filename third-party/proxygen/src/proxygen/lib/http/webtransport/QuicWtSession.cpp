@@ -9,6 +9,7 @@
 #include <proxygen/lib/http/webtransport/QuicWtSession.h>
 
 #include <proxygen/lib/http/codec/HQFramer.h>
+#include <quic/common/address/QuicSocketAddressBridge.h>
 
 using namespace proxygen;
 using namespace proxygen::detail;
@@ -87,6 +88,16 @@ uint64_t getQuicAppErrCode(const QuicError& err) noexcept {
 } // namespace
 
 namespace proxygen {
+
+const folly::SocketAddress& QuicWtSessionBase::getLocalAddress() const {
+  return quic::toFollySocketAddressRef(quicSocket_->getLocalAddress(),
+                                       cachedLocalAddr_);
+}
+
+const folly::SocketAddress& QuicWtSessionBase::getPeerAddress() const {
+  return quic::toFollySocketAddressRef(quicSocket_->getPeerAddress(),
+                                       cachedPeerAddr_);
+}
 
 QuicWtSessionBase::QuicWtSessionBase(
     std::shared_ptr<quic::QuicSocket> quicSocket,

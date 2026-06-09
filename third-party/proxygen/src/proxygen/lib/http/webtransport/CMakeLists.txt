@@ -50,6 +50,8 @@ proxygen_add_library(proxygen_http_webtransport_webtransportimpl
 proxygen_add_library(proxygen_http_webtransport_quicwebtransport
   SRCS
     QuicWebTransport.cpp
+  DEPS
+    mvfst::mvfst_common_address_quic_socket_address_bridge
   EXPORTED_DEPS
     proxygen_http_webtransport_webtransportimpl
     mvfst::mvfst_api_transport
@@ -61,6 +63,7 @@ proxygen_add_library(proxygen_http_webtransport_quic_wt_session
     QuicWtSession.cpp
   DEPS
     proxygen_http_codec_hq_codec
+    mvfst::mvfst_common_address_quic_socket_address_bridge
   EXPORTED_DEPS
     proxygen_http_webtransport
     proxygen_http_webtransport_wt_stream_manager

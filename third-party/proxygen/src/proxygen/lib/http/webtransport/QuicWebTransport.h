@@ -149,13 +149,9 @@ class QuicWebTransport
   folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
       std::unique_ptr<folly::IOBuf> /*datagram*/) override;
 
-  const folly::SocketAddress& getLocalAddress() const override {
-    return quicSocket_->getLocalAddress();
-  }
+  const folly::SocketAddress& getLocalAddress() const override;
 
-  const folly::SocketAddress& getPeerAddress() const override {
-    return quicSocket_->getPeerAddress();
-  }
+  const folly::SocketAddress& getPeerAddress() const override;
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTMaxData(
       uint64_t maxData) override;
@@ -199,6 +195,8 @@ class QuicWebTransport
   }
 
   std::shared_ptr<quic::QuicSocket> quicSocket_;
+  mutable folly::SocketAddress cachedLocalAddr_;
+  mutable folly::SocketAddress cachedPeerAddr_;
   WebTransportHandler* handler_{nullptr};
   folly::Optional<folly::Promise<folly::Unit>> waitingForUniStreams_;
   folly::Optional<folly::Promise<folly::Unit>> waitingForBidiStreams_;

@@ -225,6 +225,7 @@ proxygen_add_library(proxygen_http_session_hq_session
     proxygen_http_webtransport_httpwebtransport
     proxygen_http_webtransport_wt_hq_session
     proxygen_http_webtransport_wt_util
+    mvfst::mvfst_common_address_quic_socket_address_bridge
     mvfst::mvfst_folly_utils
     mvfst::mvfst_logging_qlogger_constants
     wangle::wangle_acceptor_managed

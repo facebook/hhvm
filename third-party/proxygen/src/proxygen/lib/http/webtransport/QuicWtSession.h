@@ -57,13 +57,9 @@ class QuicWtSessionBase
   folly::Expected<folly::Unit, ErrorCode> sendDatagram(
       IoBufPtr datagram) noexcept override;
 
-  [[nodiscard]] const folly::SocketAddress& getLocalAddress() const override {
-    return quicSocket_->getLocalAddress();
-  }
+  [[nodiscard]] const folly::SocketAddress& getLocalAddress() const override;
 
-  [[nodiscard]] const folly::SocketAddress& getPeerAddress() const override {
-    return quicSocket_->getPeerAddress();
-  }
+  [[nodiscard]] const folly::SocketAddress& getPeerAddress() const override;
 
   folly::Expected<folly::Unit, ErrorCode> closeSession(
       folly::Optional<uint32_t> error) noexcept override;
@@ -133,6 +129,8 @@ class QuicWtSessionBase
   bool hasEgressBidiCredit() const noexcept;
 
   std::shared_ptr<quic::QuicSocket> quicSocket_{nullptr};
+  mutable folly::SocketAddress cachedLocalAddr_;
+  mutable folly::SocketAddress cachedPeerAddr_;
   WtHandlerPtr wtHandler_;
   std::unique_ptr<quic::HTTPPriorityQueue> priorityQueue_;
   detail::WtStreamManager sm_;

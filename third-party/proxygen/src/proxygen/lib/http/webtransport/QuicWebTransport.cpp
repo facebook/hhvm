@@ -8,11 +8,23 @@
 
 #include <proxygen/lib/http/webtransport/QuicWebTransport.h>
 
+#include <quic/common/address/QuicSocketAddressBridge.h>
+
 using FCState = proxygen::WebTransport::FCState;
 
 namespace proxygen {
 
 void QuicWebTransport::onFlowControlUpdate(quic::StreamId /*id*/) noexcept {
+}
+
+const folly::SocketAddress& QuicWebTransport::getLocalAddress() const {
+  return quic::toFollySocketAddressRef(quicSocket_->getLocalAddress(),
+                                       cachedLocalAddr_);
+}
+
+const folly::SocketAddress& QuicWebTransport::getPeerAddress() const {
+  return quic::toFollySocketAddressRef(quicSocket_->getPeerAddress(),
+                                       cachedPeerAddr_);
 }
 
 void QuicWebTransport::onNewBidirectionalStream(quic::StreamId id) noexcept {

@@ -75,6 +75,13 @@ void RequestContextQueue::markAsResponded(RequestContext& req) noexcept {
     req.onWriteSuccess();
   }
 
+  // Both timestamps (timeEndSend_ via the synthesized onWriteSuccess() above,
+  // and firstResponsePayloadFrameTime_ via prior onPayloadFrame()) are now
+  // set. Finalize stats BEFORE baton_.post() so the write lands before
+  // RocketClient::Context::post() synchronously delivers the response (and
+  // copies stats into ClientReceiveState).
+  req.finalizeRpcTransportStats();
+
   req.state_ = State::COMPLETE;
   req.baton_.post();
 }

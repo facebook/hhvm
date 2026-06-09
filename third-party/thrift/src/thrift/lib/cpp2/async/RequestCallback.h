@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <chrono>
 #include <functional>
 #include <map>
 #include <optional>
@@ -32,27 +31,11 @@
 #include <thrift/lib/cpp2/async/ClientStreamBridge.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
+#include <thrift/lib/cpp2/async/RpcTransportStats.h>
 #include <thrift/lib/cpp2/async/RpcTypes.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 
 namespace apache::thrift {
-
-struct RpcTransportStats {
-  RpcTransportStats() = default;
-
-  uint32_t requestSerializedSizeBytes{
-      0}; // size of serialized payload without meta data (uncompressed)
-  uint32_t requestWireSizeBytes{0}; // size of data (possibly compressed)
-  uint32_t requestMetadataAndPayloadSizeBytes{
-      0}; // size of meta data (uncompressed) and data (possibly compressed)
-  uint32_t responseSerializedSizeBytes{0};
-  uint32_t responseWireSizeBytes{0};
-  uint32_t responseMetadataAndPayloadSizeBytes{0};
-
-  // I/O latencies
-  std::chrono::nanoseconds requestWriteLatency{0};
-  std::chrono::nanoseconds responseRoundTripLatency{0};
-};
 
 struct ClientBridgePtrPair {
   detail::ClientSinkBridge::ClientPtr sink;

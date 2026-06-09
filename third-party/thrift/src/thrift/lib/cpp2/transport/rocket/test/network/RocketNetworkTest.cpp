@@ -17,6 +17,7 @@
 #include <chrono>
 #include <memory>
 #include <string>
+#include <thread>
 #include <type_traits>
 #include <utility>
 
@@ -43,11 +44,16 @@
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/FutureRequest.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
+#include <thrift/lib/cpp2/async/RpcTransportStats.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
+#include <thrift/lib/cpp2/transport/rocket/client/RequestContext.h>
+#include <thrift/lib/cpp2/transport/rocket/client/RequestContextQueue.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/test/network/ClientServerTestUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/test/network/Mocks.h>
 #include <thrift/lib/cpp2/transport/rocket/test/network/Util.h>
@@ -491,6 +497,143 @@ TEST_F(RocketNetworkTest, RequestResponseBasic) {
     EXPECT_TRUE(reply->hasNonemptyMetadata());
     EXPECT_EQ(metadata, getRange(*dam.first));
   });
+}
+
+// Verifies that finalizeRpcTransportStats() populates the channel-side
+// RpcTransportStats with a positive first-payload-frame latency on a
+// fragmented response, using the FIRST fragment's timestamp.
+//
+// LIMITATION: this test exercises the finalize path through the queue
+// state machine but bypasses the baton/Context::post() ordering. The
+// real ordering correctness (finalize must happen BEFORE the response
+// callback is invoked) is covered by
+// ThriftClientTest.FirstResponsePayloadFrameLatencyPopulated, which
+// exercises the full async pipeline end-to-end.
+namespace {
+struct NoOpTimerCallback : public folly::HHWheelTimer::Callback {
+  void timeoutExpired() noexcept override {}
+};
+} // namespace
+
+TEST(FinalizeRpcTransportStats, MultiFragmentResponseUsesFirstFrameTimestamp) {
+  folly::EventBase eb;
+  NoOpTimerCallback dummyCb;
+  RequestContextQueue queue;
+  RpcTransportStats stats;
+
+  RequestContext req(
+      RequestResponseFrame(
+          StreamId{1}, Payload::makeFromData(folly::IOBuf::copyBuffer("x"))),
+      queue,
+      /*setupFrame=*/nullptr,
+      /*writeSuccessCallback=*/nullptr,
+      /*ioBufFactory=*/nullptr,
+      &stats);
+  // Zero timeout makes scheduleTimeoutForResponse() a no-op.
+  req.setTimeoutInfo(eb.timer(), dummyCb, std::chrono::milliseconds::zero());
+
+  // Push through state machine to WRITE_SENT.
+  queue.enqueueScheduledWrite(req);
+  queue.prepareNextScheduledWritesBatch([](RequestContext&) {});
+  queue.markNextSendingBatchAsSent([](RequestContext&) {});
+
+  // 1) Write callback fires (sets rocket's timeEndSend_).
+  req.onWriteSuccess();
+  // Upper bound for rocket-side timeEndSend_: timeEndSend_ <= now() at
+  // this point because steady_clock is monotonic. Worst case: if the
+  // scheduler preempts between `onWriteSuccess()` returning and this
+  // `now()` call, `timeEndSendUpperBound - timeEndSend_` equals the
+  // preemption duration. The sleeps below are 50 ms to dwarf any
+  // realistic preemption (typically << 10 ms).
+  const auto timeEndSendUpperBound = std::chrono::steady_clock::now();
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+  // 2) First PAYLOAD frame arrives, more to follow. This stamps
+  // firstResponsePayloadFrameTime_ to a value strictly later than
+  // timeEndSendUpperBound (by at least the sleep above).
+  req.onPayloadFrame(PayloadFrame(
+      StreamId{1},
+      Payload::makeFromData(folly::IOBuf::copyBuffer("a")),
+      Flags().next(true).follows(true)));
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+  // 3) Lower bound for "if the second fragment's timestamp were
+  // incorrectly used": now() at this point. Any stamp taken AFTER this
+  // line is >= secondFrameLowerBound.
+  const auto secondFrameLowerBound = std::chrono::steady_clock::now();
+
+  // Last PAYLOAD frame arrives; triggers markAsResponded -> finalize.
+  // onPayloadFrame must NOT update firstResponsePayloadFrameTime_ here
+  // (already set on the first frame).
+  req.onPayloadFrame(PayloadFrame(
+      StreamId{1},
+      Payload::makeFromData(folly::IOBuf::copyBuffer("b")),
+      Flags().next(true).complete(true)));
+
+  EXPECT_GT(stats.firstResponsePayloadFrameLatency.count(), 0);
+  // Strict bound that distinguishes first-vs-second fragment use: if
+  // the implementation correctly used the FIRST fragment's stamp,
+  // recorded latency = firstStamp - timeEndSend_, and both
+  // (firstStamp < secondFrameLowerBound) and
+  // (timeEndSend_ <= timeEndSendUpperBound) hold, so latency must be
+  // strictly less than (secondFrameLowerBound - timeEndSendUpperBound).
+  // If the second fragment's stamp were used by mistake, latency would
+  // be >= (secondFrameLowerBound - timeEndSendUpperBound) and this
+  // assertion would fail. The bound on the right is at least 50 ms
+  // (the second sleep), which leaves ample margin over realistic CI
+  // scheduler preemption between `onWriteSuccess()` and
+  // `timeEndSendUpperBound`.
+  EXPECT_LT(
+      stats.firstResponsePayloadFrameLatency,
+      secondFrameLowerBound - timeEndSendUpperBound);
+}
+
+// Verifies the clamp: when the response (first PAYLOAD frame) arrives
+// BEFORE the AsyncSocket WriteCallback fires (markAsResponded
+// else-branch), the synthesized req.onWriteSuccess() runs AFTER the
+// first-frame timestamp was already stamped. The naive difference
+// would be negative; finalize must clamp the field to zero instead.
+TEST(FinalizeRpcTransportStats, ResponseBeforeWriteCallbackClampsToZero) {
+  folly::EventBase eb;
+  NoOpTimerCallback dummyCb;
+  RequestContextQueue queue;
+  RpcTransportStats stats;
+
+  RequestContext req(
+      RequestResponseFrame(
+          StreamId{2}, Payload::makeFromData(folly::IOBuf::copyBuffer("x"))),
+      queue,
+      /*setupFrame=*/nullptr,
+      /*writeSuccessCallback=*/nullptr,
+      /*ioBufFactory=*/nullptr,
+      &stats);
+  req.setTimeoutInfo(eb.timer(), dummyCb, std::chrono::milliseconds::zero());
+
+  // Push through to WRITE_SENDING only (skip markNextSendingBatchAsSent),
+  // simulating the case where the response arrived before the
+  // AsyncSocket WriteCallback fired.
+  queue.enqueueScheduledWrite(req);
+  queue.prepareNextScheduledWritesBatch([](RequestContext&) {});
+
+  // PAYLOAD frame arrives BEFORE onWriteSuccess(). This triggers
+  // markAsResponded() via the else-branch, which synthesizes
+  // req.onWriteSuccess() AFTER the first-frame stamp -- so the
+  // first-frame timestamp will be strictly LESS than timeEndSend_.
+  req.onPayloadFrame(PayloadFrame(
+      StreamId{2},
+      Payload::makeFromData(folly::IOBuf::copyBuffer("a")),
+      Flags().next(true).complete(true)));
+
+  // Clamp invariant: field stays at zero rather than reporting a
+  // negative I/O latency.
+  EXPECT_EQ(stats.firstResponsePayloadFrameLatency.count(), 0);
+
+  // removeFromWriteSendingQueue() may have inserted a dummy
+  // end-of-batch marker. Drain it so the queue destructor's DCHECKs
+  // pass.
+  queue.markNextSendingBatchAsSent([](RequestContext&) {});
 }
 
 TEST_F(RocketNetworkTest, RequestResponseTimeout) {

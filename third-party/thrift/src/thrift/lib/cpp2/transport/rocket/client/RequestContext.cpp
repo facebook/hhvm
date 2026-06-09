@@ -16,6 +16,8 @@
 
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContext.h>
 
+#include <chrono>
+
 #include <glog/logging.h>
 
 #include <fmt/core.h>
@@ -24,6 +26,7 @@
 #include <folly/lang/Assume.h>
 
 #include <thrift/lib/cpp/transport/TTransportException.h>
+#include <thrift/lib/cpp2/async/RpcTransportStats.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContextQueue.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
@@ -117,6 +120,12 @@ void RequestContext::onPayloadFrame(PayloadFrame&& payloadFrame) {
 
   if (LIKELY(!responsePayload_.hasValue())) {
     responsePayload_.emplace(std::move(payloadFrame.payload()));
+    // Record the moment the first PAYLOAD frame received for this
+    // response (used to decompose
+    // RpcTransportStats::responseRoundTripLatency into a first-frame
+    // interval and a post-first-frame tail). Set only on the first
+    // frame received; not updated by subsequent fragments.
+    firstResponsePayloadFrameTime_ = std::chrono::steady_clock::now();
   } else {
     responsePayload_->append(std::move(payloadFrame.payload()));
   }
@@ -138,8 +147,35 @@ void RequestContext::onErrorFrame(ErrorFrame&& errorFrame) {
 }
 
 void RequestContext::onWriteSuccess() noexcept {
+  // Delegate to the channel callback FIRST so its timeEndSend_ is sampled
+  // before the rocket-side sample below. This preserves the public
+  // invariant firstResponsePayloadFrameLatency <= responseRoundTripLatency.
   if (writeSuccessCallback_) {
     writeSuccessCallback_->onWriteSuccess();
+  }
+  // Sample rocket-side timeEndSend_ AFTER the channel callback returns.
+  // The two samples are nanoseconds apart on the same thread; the rocket
+  // value is monotonically >= the channel value.
+  timeEndSend_ = std::chrono::steady_clock::now();
+}
+
+void RequestContext::finalizeRpcTransportStats() noexcept {
+  if (channelStats_ == nullptr) {
+    return;
+  }
+  // Defensive: no payload frame was ever received (error/timeout paths
+  // that still flow through markAsResponded). Leave the field at zero.
+  if (firstResponsePayloadFrameTime_.time_since_epoch().count() == 0) {
+    return;
+  }
+  // Clamp: in the RequestContextQueue::markAsResponded() else-branch the
+  // synthesized onWriteSuccess() runs AFTER the first PAYLOAD frame has
+  // already been observed, so firstResponsePayloadFrameTime_ can be less
+  // than timeEndSend_. Leave the field at zero rather than reporting a
+  // negative I/O latency.
+  if (firstResponsePayloadFrameTime_ >= timeEndSend_) {
+    channelStats_->firstResponsePayloadFrameLatency =
+        firstResponsePayloadFrameTime_ - timeEndSend_;
   }
 }
 

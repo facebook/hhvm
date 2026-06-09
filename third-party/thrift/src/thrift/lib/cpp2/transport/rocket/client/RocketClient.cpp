@@ -936,7 +936,8 @@ void RocketClient::handleError(RocketException&& rex) {
 folly::Try<Payload> RocketClient::sendRequestResponseSync(
     Payload&& request,
     std::chrono::milliseconds timeout,
-    WriteSuccessCallback* writeSuccessCallback) {
+    WriteSuccessCallback* writeSuccessCallback,
+    RpcTransportStats* channelStats) {
   DestructorGuard dg(this);
   auto g = makeRequestCountGuard(RequestType::CLIENT);
   auto setupFrame = moveOutSetupFrame();
@@ -945,7 +946,8 @@ folly::Try<Payload> RocketClient::sendRequestResponseSync(
       queue_,
       setupFrame.get(),
       writeSuccessCallback,
-      getIOBufFactory());
+      getIOBufFactory(),
+      channelStats);
   if (auto ew = err(scheduleWrite(ctx))) {
     return folly::Try<Payload>(std::move(ew));
   }
@@ -955,14 +957,16 @@ folly::Try<Payload> RocketClient::sendRequestResponseSync(
 void RocketClient::sendRequestResponse(
     Payload&& request,
     std::chrono::milliseconds timeout,
-    std::unique_ptr<RequestResponseCallback> callback) {
+    std::unique_ptr<RequestResponseCallback> callback,
+    RpcTransportStats* channelStats) {
   auto setupFrame = moveOutSetupFrame();
   auto rctx = std::make_unique<RequestContext>(
       RequestResponseFrame(makeStreamId(), std::move(request)),
       queue_,
       setupFrame.get(),
       callback.get(),
-      getIOBufFactory());
+      getIOBufFactory(),
+      channelStats);
   auto callbackWithGuard = [this,
                             dg = DestructorGuard(this),
                             g = makeRequestCountGuard(RequestType::CLIENT),

@@ -689,17 +689,32 @@ class RocketClientChannelBase::SingleRequestSingleResponseCallback final
 
   void onWriteSuccess() noexcept override { timeEndSend_ = clock::now(); }
 
+  // Note: nominally "private" — this nested class is itself a private
+  // implementation detail of RocketClientChannelBase, so this accessor is
+  // not part of any externally visible API. Used only by
+  // RocketClientChannelBase::sendSingleRequestSingleResponse to obtain a
+  // stable pointer to stats_ before the callback is moved into a
+  // unique_ptr (async path) or while it lives on the stack (sync path).
+  // The pointer is then handed down to rocket::RequestContext, which
+  // writes the rocket-side firstResponsePayloadFrameLatency directly.
+  RpcTransportStats& stats() noexcept { return stats_; }
+
   void onResponsePayload(
       folly::AsyncTransport* transport,
       folly::Try<rocket::Payload>&& payload) noexcept override {
     folly::Try<FirstResponsePayload> response;
     folly::Try<folly::SocketFds> tryFds;
-    RpcTransportStats stats;
-    stats.requestSerializedSizeBytes = requestSerializedSize_;
-    stats.requestWireSizeBytes = requestWireSize_;
-    stats.requestMetadataAndPayloadSizeBytes = requestMetadataAndPayloadSize_;
-    stats.requestWriteLatency = timeEndSend_ - timeBeginSend_;
-    stats.responseRoundTripLatency = clock::now() - timeEndSend_;
+    stats_.requestSerializedSizeBytes =
+        static_cast<uint32_t>(requestSerializedSize_);
+    stats_.requestWireSizeBytes = static_cast<uint32_t>(requestWireSize_);
+    stats_.requestMetadataAndPayloadSizeBytes =
+        static_cast<uint32_t>(requestMetadataAndPayloadSize_);
+    stats_.requestWriteLatency = timeEndSend_ - timeBeginSend_;
+    stats_.responseRoundTripLatency = clock::now() - timeEndSend_;
+    // stats_.firstResponsePayloadFrameLatency is populated by the rocket
+    // layer in RequestContext::finalizeRpcTransportStats() via the
+    // non-owning RpcTransportStats* handed down at RequestContext
+    // construction; no channel-side computation is needed here.
     ResponseSerializationHandler handler(protocolId_);
     if (payload.hasException()) {
       if (!payload.exception().with_exception<rocket::RocketException>(
@@ -725,9 +740,9 @@ class RocketClientChannelBase::SingleRequestSingleResponseCallback final
             fdMetadata.fdSeqNum().value_or(folly::SocketFds::kNoSeqNum));
       }
     } else {
-      stats.responseWireSizeBytes =
+      stats_.responseWireSizeBytes =
           payload->metadataAndDataSize() - payload->metadataSize();
-      stats.responseMetadataAndPayloadSizeBytes =
+      stats_.responseMetadataAndPayloadSizeBytes =
           payload->metadataAndDataSize();
 
       if (skipDecompression_) {
@@ -767,7 +782,7 @@ class RocketClientChannelBase::SingleRequestSingleResponseCallback final
       return;
     }
 
-    stats.responseSerializedSizeBytes =
+    stats_.responseSerializedSizeBytes =
         response->payload->computeChainDataLength();
 
     auto tHeader = std::make_unique<transport::THeader>();
@@ -800,7 +815,7 @@ class RocketClientChannelBase::SingleRequestSingleResponseCallback final
         SerializedResponse(std::move(response->payload)),
         std::move(tHeader),
         nullptr, /* ctx */
-        stats));
+        stats_));
   }
 
  private:
@@ -815,6 +830,13 @@ class RocketClientChannelBase::SingleRequestSingleResponseCallback final
   const bool encodeMetadataUsingBinary_;
   rocket::RocketClient::DestructionGuardedClient guardedClient_;
   const bool skipDecompression_;
+  // Channel-side bucket for per-RPC transport stats. The rocket layer
+  // writes firstResponsePayloadFrameLatency into this struct directly via
+  // a non-owning pointer handed down to RequestContext at construction
+  // (see sendSingleRequestSingleResponse below). The channel writes all
+  // other fields in onResponsePayload above. Value-copied into
+  // ClientReceiveState at the end of onResponsePayload.
+  RpcTransportStats stats_;
 };
 
 class RocketClientChannelBase::SingleRequestNoResponseCallback final
@@ -1146,12 +1168,15 @@ void RocketClientChannelBase::sendSingleRequestSingleResponse(
     callback.onResponsePayload(
         getRocketClientImpl().getTransportWrapper(),
         getRocketClientImpl().sendRequestResponseSync(
-            std::move(requestPayload), timeout, &callback));
+            std::move(requestPayload), timeout, &callback, &callback.stats()));
   } else {
+    auto owningCallback = folly::copy_to_unique_ptr(std::move(callback));
+    auto* statsPtr = &owningCallback->stats();
     getRocketClientImpl().sendRequestResponse(
         std::move(requestPayload),
         timeout,
-        folly::copy_to_unique_ptr(std::move(callback)));
+        std::move(owningCallback),
+        statsPtr);
   }
 }
 

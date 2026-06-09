@@ -222,6 +222,39 @@ TEST_F(ThriftClientTest, SyncCallRequestResponse) {
   doSomeFibers(eb);
 }
 
+// Verifies that RpcTransportStats::firstResponsePayloadFrameLatency is
+// populated by the Rocket client on a successful request-response and
+// satisfies the invariant firstResponsePayloadFrameLatency <=
+// responseRoundTripLatency (both fields are sampled from the same
+// steady_clock domain on the client, so the inequality is meaningful).
+// Mirrors SyncCallRequestResponse's scaffolding so the only new behavior
+// under test is the new field's population.
+TEST_F(ThriftClientTest, FirstResponsePayloadFrameLatencyPopulated) {
+  class Handler : public apache::thrift::ServiceHandler<TestService> {
+   public:
+    void sendResponse(std::string& _return, int64_t size) override {
+      _return = to<string>(size);
+    }
+  };
+  auto handler = make_shared<Handler>();
+  ScopedServerInterfaceThread runner(handler);
+
+  EventBase eb;
+  auto client = runner.newClient<apache::thrift::Client<TestService>>(
+      &eb, RocketClientChannel::newChannel);
+
+  RpcOptions options;
+  auto response = client->sync_complete_sendResponse(std::move(options), 123);
+  ASSERT_TRUE(response.hasValue());
+  ASSERT_TRUE(response->response.hasValue());
+  EXPECT_EQ(*response->response, "123");
+
+  auto& stats = response->responseContext.rpcTransportStats;
+  EXPECT_GT(stats.firstResponsePayloadFrameLatency.count(), 0);
+  EXPECT_LE(
+      stats.firstResponsePayloadFrameLatency, stats.responseRoundTripLatency);
+}
+
 TEST_F(ThriftClientTest, SyncCallOneWay) {
   class Handler : public apache::thrift::ServiceHandler<TestService> {
    public:

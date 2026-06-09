@@ -34,6 +34,10 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Serializer.h>
 
+namespace apache::thrift {
+struct RpcTransportStats;
+} // namespace apache::thrift
+
 namespace apache::thrift::rocket {
 class RocketClient;
 class RequestContextQueue;
@@ -66,12 +70,14 @@ class RequestContext {
       RequestContextQueue& queue,
       SetupFrame* setupFrame = nullptr,
       WriteSuccessCallback* writeSuccessCallback = nullptr,
-      folly::IOBufFactory* ioBufFactory = nullptr)
+      folly::IOBufFactory* ioBufFactory = nullptr,
+      RpcTransportStats* channelStats = nullptr)
       : queue_(queue),
         streamId_(frame.streamId()),
         frameType_(Frame::frameType()),
         writeSuccessCallback_(writeSuccessCallback),
-        ioBufFactory_(ioBufFactory) {
+        ioBufFactory_(ioBufFactory),
+        channelStats_(channelStats) {
     // Some `Frame`s lack a `payload()` method -- `RequestNFrame`,
     // `CancelFrame`, etc -- but those that do should have `.fds`.
     if constexpr (folly::is_detected<payload_method_t, Frame>::value) {
@@ -86,10 +92,12 @@ class RequestContext {
       int32_t serverVersion,
       StreamId streamId,
       RequestContextQueue& queue,
-      WriteSuccessCallback* writeSuccessCallback = nullptr)
+      WriteSuccessCallback* writeSuccessCallback = nullptr,
+      RpcTransportStats* channelStats = nullptr)
       : queue_(queue),
         streamId_(streamId),
-        writeSuccessCallback_(writeSuccessCallback) {
+        writeSuccessCallback_(writeSuccessCallback),
+        channelStats_(channelStats) {
     if (UNLIKELY(serverVersion == -1)) {
       deferredInit_ = std::forward<InitFunc>(initFunc);
       state_ = State::DEFERRED_INIT;
@@ -197,8 +205,31 @@ class RequestContext {
   folly::Try<Payload> responsePayload_;
   WriteSuccessCallback* const writeSuccessCallback_{nullptr};
   folly::IOBufFactory* ioBufFactory_{nullptr};
+  // Non-owning pointer to the channel-side RpcTransportStats that the
+  // rocket layer writes the first-payload-frame latency into. May be
+  // nullptr for non-REQUEST_RESPONSE contexts and for REQUEST_RESPONSE
+  // contexts where the caller did not opt in to stats collection.
+  RpcTransportStats* channelStats_{nullptr};
+  // Steady-clock timestamp of when the AsyncSocket WriteCallback fired
+  // (the same epoch RpcTransportStats::responseRoundTripLatency starts
+  // from) -- sampled on the same thread as the channel callback's own
+  // timeEndSend_ but strictly after the channel callback returns.
+  std::chrono::steady_clock::time_point timeEndSend_{};
+  // Steady-clock timestamp of when the first PAYLOAD frame for this
+  // response was received by the Rocket client (set in onPayloadFrame
+  // on the first emplace; not updated by subsequent append() calls so
+  // the value reflects the first frame, not the last).
+  std::chrono::steady_clock::time_point firstResponsePayloadFrameTime_{};
   folly::Function<std::pair<std::unique_ptr<folly::IOBuf>, FrameType>(int32_t)>
       deferredInit_{nullptr};
+
+  // Computes RpcTransportStats::firstResponsePayloadFrameLatency from
+  // timeEndSend_ and firstResponsePayloadFrameTime_ and writes it into
+  // *channelStats_. No-op when channelStats_ is null or when no payload
+  // frame was received. Called by RequestContextQueue::markAsResponded
+  // between the synthesized onWriteSuccess() and baton_.post() so the
+  // write lands BEFORE the synchronous response delivery.
+  void finalizeRpcTransportStats() noexcept;
 
   template <class Frame>
   void serialize(Frame&& frame, SetupFrame* setupFrame) {

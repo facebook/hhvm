@@ -55,6 +55,7 @@ class IOBuf;
 } // namespace folly
 
 namespace apache::thrift {
+struct RpcTransportStats;
 
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
@@ -98,12 +99,14 @@ class RocketClient : public virtual folly::DelayedDestruction,
   [[nodiscard]] folly::Try<Payload> sendRequestResponseSync(
       Payload&& request,
       std::chrono::milliseconds timeout,
-      WriteSuccessCallback* callback);
+      WriteSuccessCallback* callback,
+      RpcTransportStats* channelStats = nullptr);
 
   void sendRequestResponse(
       Payload&& request,
       std::chrono::milliseconds timeout,
-      std::unique_ptr<RequestResponseCallback> callback);
+      std::unique_ptr<RequestResponseCallback> callback,
+      RpcTransportStats* channelStats = nullptr);
 
   class RequestFnfCallback {
    public:

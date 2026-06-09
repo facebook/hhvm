@@ -245,11 +245,7 @@ folly::coro::Task<HTTPBodyEvent> HTTPStreamSource::readBodyEvent(uint32_t max) {
     event_.reset();
     if (canSuspend_) {
       canSuspend_ = false;
-      auto t = folly::coro::co_invoke(
-          [this]() -> folly::coro::Task<TimedBaton::Status> {
-            return event_.wait();
-          });
-      co_return HTTPBodyEvent(std::move(t));
+      co_return HTTPBodyEvent(event_.wait());
     }
     co_await waitForEvent();
     canSuspend_ = true;

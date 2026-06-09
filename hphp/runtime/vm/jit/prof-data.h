@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/rds.h"
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/func-cleanup.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -443,6 +444,7 @@ struct ProfData {
     s_optimized_funcs_counter->decrement();
   }
   void setOptimized(SrcKey sk) {
+    FuncCleanup::addProfDataSks(sk);
     m_optimizedSKs.emplace(sk.toAtomicInt(), true).first->second = true;
   }
 
@@ -604,7 +606,12 @@ struct ProfData {
     return m_targetProfile.get();
   }
 
- private:
+
+  void cleanupFunc(const Func* func,
+                   const std::vector<SrcKey>& srcKeys,
+                   const std::vector<PrologueID>& prologueIDs);
+
+private:
 
   /*
    * m_transLock is used to protect m_transRecs, and m_counters, which are all

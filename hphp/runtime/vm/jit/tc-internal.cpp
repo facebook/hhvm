@@ -933,6 +933,14 @@ void setTcIsFull(pthread_t viewTid) {
 bool threadIsFull() {
   return tl_threadIsFull;
 }
+
+void cleanupSrcDBKeys(const std::vector<SrcKey>& srcKeys) {
+  auto& s = srcDB();
+  for (auto const sk : srcKeys) {
+    s.erase(sk);
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }

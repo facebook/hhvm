@@ -144,6 +144,7 @@ void ProfData::addTransProfile(TransID transID,
     // (e.g. array_map) have complex DV funclets that get retranslated for
     // different types.  For those functions, m_dvFuncletDB keeps the TransID
     // for their first translation.
+    FuncCleanup::addProfDataSks(startSk);
     m_dvFuncletDB.emplace(startSk.toAtomicInt(), transID);
   }
 
@@ -161,7 +162,9 @@ void ProfData::addTransProfile(TransID transID,
 
 void ProfData::addTransProfPrologue(TransID transID, SrcKey sk, uint32_t nArgs,
                                     uint32_t asmSize) {
-  m_proflogueDB.emplace(PrologueID{sk.funcID(), nArgs}, transID);
+  auto prologueID = PrologueID{sk.funcID(), nArgs};
+  FuncCleanup::addProfDataPrologueID(prologueID);
+  m_proflogueDB.emplace(prologueID, transID);
 
   std::unique_lock lock{m_transLock};
   m_transRecs[transID].reset(new ProfTransRec(sk, nArgs, asmSize));
@@ -175,12 +178,14 @@ void ProfData::addProfTrans(TransID transID,
   if (ptr->kind() == TransKind::Profile) {
     if (sk.anyFuncEntry() && sk.entryOffset() != 0) {
       assertx(sk.func()->isDVEntry(sk.entryOffset()));
+      FuncCleanup::addProfDataSks(sk);
       m_dvFuncletDB.emplace(sk.toAtomicInt(), transID);
     }
     m_funcProfTrans[sk.funcID()].push_back(transID);
   } else {
-    m_proflogueDB.emplace(PrologueID{sk.funcID(), ptr->prologueArgs()},
-                          transID);
+    auto prologueID = PrologueID{sk.funcID(), ptr->prologueArgs()};
+    FuncCleanup::addProfDataPrologueID(prologueID);
+    m_proflogueDB.emplace(prologueID, transID);
   }
   m_transRecs.emplace_back(std::move(ptr));
 }
@@ -313,6 +318,27 @@ std::vector<ProfData::TargetProfileInfo> ProfData::getTargetProfiles(
     return it->second;
   } else {
     return std::vector<TargetProfileInfo>{};
+  }
+}
+
+void ProfData::cleanupFunc(const Func* func,
+                           const std::vector<SrcKey>& srcKeys,
+                           const std::vector<PrologueID>& prologueIDs) {
+  std::unique_lock lock{m_funcProfTransLock};
+
+  auto id = func->getFuncId();
+
+  m_funcProfTrans.erase(id);
+  m_blockEndOffsets.erase(id.toInt());
+  m_profilingFuncs.erase(id.toInt());
+
+  for (auto const sk : srcKeys) {
+    m_optimizedSKs.erase(sk.toAtomicInt());
+    m_dvFuncletDB.erase(sk.toAtomicInt());
+  }
+
+  for (auto const prologueID : prologueIDs) {
+    m_proflogueDB.erase(prologueID);
   }
 }
 

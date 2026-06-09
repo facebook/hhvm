@@ -303,12 +303,7 @@ struct SrcDB {
 
   // Requires tc::lockMetadata() to be held.
   // Only one thread can execute this function at a time.
-  SrcRec* insert(SrcKey sk) {
-    auto const srcRec = new SrcRec();
-    DEBUG_ONLY auto prev = m_map.insertOrUpdate(sk.toAtomicInt(), srcRec);
-    assertx(prev == nullptr); // We should not have called this in case it already existed
-    return srcRec;
-  }
+  SrcRec* insert(SrcKey sk);
 
   // Requires tc::lockMetadata() to be held.
   // Only one thread can execute this function at a time.

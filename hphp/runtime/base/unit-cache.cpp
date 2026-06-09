@@ -769,7 +769,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
       rqtrace::EventGuard trace{"COMPILE_UNIT"};
       trace.annotate("file_size", folly::to<std::string>(loader.fileLength()));
       flags = FileLoadFlags::kCompiled;
-      return compile_file(loader, codeSource, path->data(), extension, map, releaseUnit);
+      return compile_file(loader, codeSource, path->data(), extension, map);
     };
 
     // If orig is provided, check if the given Unit has the same bcSha1
@@ -854,7 +854,8 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
         // Try to re-use the original Unit if possible
         if (sameBC(unit)) {
           lock->release();
-          delete unit;
+          if (releaseUnit) *releaseUnit = unit;
+          else delete unit;
           return CachedFilePtr{orig->cu, statInfo, options};
         }
 
@@ -897,7 +898,8 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
       // If the new Unit has the same bcSha1 as the old one, just re-use
       // the old one. This saves any JIT work we've already done on the
       // orig Unit.
-      delete unit;
+      if (releaseUnit) *releaseUnit = unit;
+      else delete unit;
       return CachedFilePtr{orig->cu, statInfo, options};
     }
     flags = FileLoadFlags::kEvicted;

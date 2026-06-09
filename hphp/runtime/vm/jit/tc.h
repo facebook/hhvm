@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/tc-recycle.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
@@ -414,7 +415,9 @@ void codeEmittedThisRequest(size_t& requestEntry, size_t& now);
  * This function should only be called from Func::destroy() and may access the
  * fullname and ID of the function.
  */
-void reclaimFunction(const Func* func);
+void reclaimFunction(const StringData* name, RecycleInfo recycleInfo);
+
+void cleanupSrcDBKeys(const std::vector<SrcKey>& srcKeys);
 
 /*
  * Allows TC space for translations in trans to be reused in future
@@ -533,7 +536,6 @@ void relocateTranslation(
  */
 int smashedCalls();
 int smashedBranches();
-int recordedFuncs();
 
 /*
  * Record a jmp at address toSmash to SrcRec sr.

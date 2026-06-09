@@ -18,6 +18,7 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/func-cleanup.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
@@ -85,15 +86,6 @@ namespace HPHP::jit::tc {
 TRACE_SET_MOD(reusetc)
 
 namespace {
-struct FuncInfo {
-  FuncInfo() = default;
-  FuncInfo(FuncInfo&&) = default;
-  FuncInfo& operator=(FuncInfo&&) = default;
-
-  std::vector<TransLoc> prologues;
-  std::vector<SrcRec*>  srcRecs;
-  jit::fast_set<TCA> callers;
-};
 
 struct SmashedCall {
   FuncId fid;
@@ -112,12 +104,9 @@ jit::fast_map<
   SrcRec* /* dest */
 > s_smashedBranches;
 
-// Keyed on FuncId as these are never reused
-jit::fast_map<FuncId, FuncInfo> s_funcTCData;
-
 struct FuncJob {
   const StringData* fname;
-  FuncId fid;
+  RecycleInfo recycleInfo;
 };
 
 using Job = std::variant<FuncJob, const SrcRec*, TransLoc>;
@@ -129,7 +118,7 @@ std::thread s_reaper;
 
 void enqueueJob(Job j) {
   std::unique_lock<std::mutex> l{s_qlock};
-  s_jobq.emplace(j);
+  s_jobq.emplace(std::move(j));
   l.unlock();
   s_qcv.notify_all();
 }
@@ -142,7 +131,7 @@ Optional<Job> dequeueJob() {
 
   if (!s_running.load(std::memory_order_acquire)) return std::nullopt;
   assertx(!s_jobq.empty());
-  auto ret = s_jobq.front();
+  auto ret = std::move(s_jobq.front());
   s_jobq.pop();
   return ret;
 }
@@ -173,7 +162,10 @@ Optional<SmashedCall> eraseSmashedCall(TCA start) {
     auto scall = std::move(it->second);
     ITRACE(1, "Erasing smashed call mapping @ {} to ProfTransRec {}\n",
            start, scall.rec);
-    s_funcTCData[scall.fid].callers.erase(start);
+    auto fc = FuncCleanup::get(scall.fid);
+    if (!fc) return std::nullopt;
+    auto& m = fc->metadata();
+    m.recycleInfo.callers.erase(start);
     s_smashedCalls.erase(it);
     if (scall.rec) return scall;
   }
@@ -353,33 +345,16 @@ void reclaimSrcRecSync(const SrcRec* rec) {
 void reclaimTranslation(TransLoc loc) { enqueueJob(loc); }
 void reclaimSrcRec(const SrcRec* sr) { enqueueJob(sr); }
 
-Optional<FuncInfo> eraseFuncInfo(FuncId fid) {
+void reclaimFunctionSync(const StringData* fname, RecycleInfo recycleInfo) {
+  ITRACE(1, "Tearing down func {}\n", fname->data());
+  Trace::Indent _i;
   auto dataLock = lockData();
 
-  auto it = s_funcTCData.find(fid);
-  if (it == s_funcTCData.end()) return std::nullopt;
-
-  auto data = std::move(it->second);
-  s_funcTCData.erase(it);
-
-  for (auto& caller : data.callers) {
-    s_smashedCalls.erase(caller);
-  }
-
-  return std::move(data);
-}
-
-void reclaimFunctionSync(const StringData* fname, FuncId fid) {
-  ITRACE(1, "Tearing down func {} (id={})\n", fname->data(), fid);
-  Trace::Indent _i;
-
-  auto data = eraseFuncInfo(fid);
   auto& us = ustubs();
 
-  if (!data) return;
-
-  for (auto& caller : data->callers) {
+  for (auto& caller : recycleInfo.callers) {
     ITRACE(1, "Unsmashing call @ {}\n", caller);
+    s_smashedCalls.erase(caller);
     smashCall(caller, us.immutableBindCallStub);
   }
 
@@ -387,18 +362,18 @@ void reclaimFunctionSync(const StringData* fname, FuncId fid) {
   // race (threads executing callers may end up inside the guard even though
   // the function is now unreachable). Once the following block runs the guards
   // should be unreachable.
-  Treadmill::enqueue([fname, fid, data = std::move(*data)] {
-    ITRACE(1, "Reclaiming func {} (id={})\n", fname, fid);
+  Treadmill::enqueue([fname, recycleInfo = std::move(recycleInfo)] {
+    ITRACE(1, "Reclaiming func {}\n", fname);
     Trace::Indent _i2;
     {
       ITRACE(1, "Reclaiming Prologues\n");
       Trace::Indent _i3;
-      for (auto& loc : data.prologues) {
+      for (auto& loc : recycleInfo.prologues) {
         reclaimTranslation(loc);
       }
     }
 
-    for (auto* rec : data.srcRecs) {
+    for (auto* rec : recycleInfo.srcRecs) {
       reclaimSrcRec(rec);
     }
   });
@@ -409,7 +384,6 @@ void reclaimFunctionSync(const StringData* fname, FuncId fid) {
 
 int smashedCalls()    { return s_smashedCalls.size(); }
 int smashedBranches() { return s_smashedBranches.size(); }
-int recordedFuncs()   { return s_funcTCData.size(); }
 
 namespace {
 ServiceData::CounterCallback s_counters(
@@ -417,7 +391,6 @@ ServiceData::CounterCallback s_counters(
     if (!Cfg::Eval::EnableReusableTC) return;
 
     counters["jit.tc.smashed_calls"] = s_smashedCalls.size();
-    counters["jit.tc.recorded_funcs"] = s_funcTCData.size();
     counters["jit.tc.smashed_branches"] = s_smashedBranches.size();
   },
   "jit.tc."
@@ -428,28 +401,35 @@ ServiceData::CounterCallback s_counters(
 
 void recordFuncCaller(const Func* func, TCA toSmash, ProfTransRec* rec) {
   auto dataLock = lockData();
+  auto fc = FuncCleanup::get(func);
+  if (!fc) return;
 
   FTRACE(1, "Recording smashed call @ {} to func {} (id = {})\n",
          toSmash, func->fullName()->data(), func->getFuncId());
 
-  s_funcTCData[func->getFuncId()].callers.emplace(toSmash);
+  auto& m = fc->metadata();
+  m.recycleInfo.callers.emplace(toSmash);
   s_smashedCalls[toSmash] = SmashedCall{func->getFuncId(), rec};
 }
 
 void recordFuncSrcRec(const Func* func, SrcRec* rec) {
-  auto dataLock = lockData();
+  auto fc = FuncCleanup::get(func);
+  if (!fc) return;
 
   FTRACE(1, "Recording SrcRec for func {} (id = {}) addr = {}\n",
          func->fullName()->data(), func->getFuncId(), (void*)rec);
-  s_funcTCData[func->getFuncId()].srcRecs.emplace_back(rec);
+  auto& m = fc->metadata();
+  m.recycleInfo.srcRecs.emplace_back(rec);
 }
 
 void recordFuncPrologue(const Func* func, TransLoc loc) {
-  auto dataLock = lockData();
+auto fc = FuncCleanup::get(func);
+  if (!fc) return;
 
   FTRACE(1, "Recording Prologue for func {} (id = {}) main={}\n",
          func->fullName()->data(), func->getFuncId(), loc.entry());
-  s_funcTCData[func->getFuncId()].prologues.emplace_back(loc);
+  auto& m = fc->metadata();
+  m.recycleInfo.prologues.emplace_back(loc);
 }
 
 void recordJump(TCA toSmash, SrcRec* sr) {
@@ -462,8 +442,8 @@ void recordJump(TCA toSmash, SrcRec* sr) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void reclaimFunction(const Func* func) {
-  enqueueJob(FuncJob {func->name(), func->getFuncId()});
+void reclaimFunction(const StringData* name, RecycleInfo recycleInfo) {
+  enqueueJob(FuncJob {name, std::move(recycleInfo)});
 }
 
 void reclaimTranslations(GrowableVector<TransLoc>&& trans) {
@@ -473,7 +453,6 @@ void reclaimTranslations(GrowableVector<TransLoc>&& trans) {
     }
   });
 }
-
 
 void recycleInit() {
   if (!Cfg::Eval::EnableReusableTC) return;
@@ -485,10 +464,10 @@ void recycleInit() {
     while (auto j = dequeueJob()) {
       ProfData::Session pds;
       match(
-        *j,
+        std::move(*j),
         [] (TransLoc loc) { reclaimTranslationSync(loc); },
         [] (const SrcRec* sr) { reclaimSrcRecSync(sr); },
-        [] (FuncJob j) { reclaimFunctionSync(j.fname, j.fid); }
+        [] (FuncJob j) { reclaimFunctionSync(j.fname, std::move(j.recycleInfo)); }
       );
     }
   });

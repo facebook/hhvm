@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/cti.h"
+#include "hphp/runtime/vm/func-cleanup.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -156,10 +157,6 @@ void* Func::allocFuncMem(int numPositionalParams) {
 
 void Func::destroy(Func* func) {
   NamedFunc::removeFunc(func);
-  if (jit::mcgen::initialized() && Cfg::Eval::EnableReusableTC) {
-    // Free TC-space associated with func
-    jit::tc::reclaimFunction(func);
-  }
 
   if (func->hasInheritedReturnTypes()) {
     s_inheritedRetTypes.erase(func->getFuncId().toStableInt());
@@ -179,12 +176,22 @@ void Func::destroy(Func* func) {
 
   if (s_treadmill.load(std::memory_order_acquire)) {
     Treadmill::enqueue([func](){
+      {
+        auto metaLock = jit::tc::lockMetadata();
+        auto fc = FuncCleanup::get(func);
+        if (fc) fc->cleanup();
+      }
       func->~Func();
       low_free(func);
     });
     return;
   }
 
+  {
+    auto metaLock = jit::tc::lockMetadata();
+    auto fc = FuncCleanup::get(func);
+    if (fc) fc->cleanup();
+  }
   func->~Func();
   low_free(func);
 }
@@ -192,11 +199,6 @@ void Func::destroy(Func* func) {
 void Func::freeClone() {
   assertx(isPreFunc());
   assertx(m_cloned.flag.test_and_set());
-
-  if (jit::mcgen::initialized() && Cfg::Eval::EnableReusableTC) {
-    // Free TC-space associated with func
-    jit::tc::reclaimFunction(this);
-  }
 
   if (m_allFlags.m_registeredInDataMap) {
     deregisterInDataMap();
@@ -214,6 +216,12 @@ void Func::freeClone() {
     m_funcId = {FuncId::Invalid};
   }
 #endif
+
+  {
+    auto metaLock = jit::tc::lockMetadata();
+    auto fc = FuncCleanup::get(this);
+    if (fc) fc->cleanup();
+  }
 
   m_cloned.flag.clear();
   assertx(!hasInheritedReturnTypes());

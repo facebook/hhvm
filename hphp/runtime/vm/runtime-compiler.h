@@ -41,8 +41,7 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
                    CodeSource codeSource,
                    const char* filename,
                    const Extension* extension,
-                   AutoloadMap*,
-                   Unit** releaseUnit = nullptr);
+                   AutoloadMap*);
 
 // If forDebuggerEval is true, and the unit contains a single expression
 // statement, then we will turn the statement into a return statement while

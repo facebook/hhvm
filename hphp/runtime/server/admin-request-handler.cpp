@@ -1129,7 +1129,6 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
         appendStat(folly::format("tc-{}-free-blocks", info.name).str(),
                    info.free_blocks);
       }
-      appendStat("tc-recorded-funcs", jit::tc::recordedFuncs());
       appendStat("tc-smashed-calls", jit::tc::smashedCalls());
       appendStat("tc-smashed-branches", jit::tc::smashedBranches());
     }

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/srcdb.h"
 
+#include "hphp/runtime/vm/func-cleanup.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
@@ -262,6 +263,14 @@ void SrcRec::replaceOldTranslations(TCA transStub) {
   }
 
   translations.clear();
+}
+
+SrcRec* SrcDB::insert(SrcKey sk) {
+  FuncCleanup::addSrcDBKey(sk);
+  auto const srcRec = new SrcRec();
+  DEBUG_ONLY auto prev = m_map.insertOrUpdate(sk.toAtomicInt(), srcRec);
+  assertx(prev == nullptr); // We should not have called this in case it already existed
+  return srcRec;
 }
 
 } } // HPHP::jit

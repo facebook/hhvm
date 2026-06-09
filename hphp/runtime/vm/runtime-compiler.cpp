@@ -67,7 +67,6 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
                                    const char* filename,
                                    const Extension* extension,
                                    AutoloadMap* map,
-                                   Unit** releaseUnit,
                                    bool isSystemLib,
                                    bool forDebuggerEval) {
   if (!filename) filename = "";
@@ -91,10 +90,6 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
   MemoryManager::SuppressOOM so(*tl_heap);
 
   SCOPE_ASSERT_DETAIL("parsing file") { return filename; };
-  std::unique_ptr<Unit> unit;
-  SCOPE_EXIT {
-    if (unit && releaseUnit) *releaseUnit = unit.release();
-  };
 
   // We don't want to invoke the JIT when trying to run PHP code.
   auto const prevFolding = RID().getJitFolding();
@@ -186,8 +181,7 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
                    CodeSource codeSource,
                    const char* filename,
                    const Extension* extension,
-                   AutoloadMap* map,
-                   Unit** releaseUnit) {
+                   AutoloadMap* map) {
   assertx(!filename || filename[0] != '/' || filename[1] != ':');
   return parse(
     loader,
@@ -195,7 +189,6 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
     filename,
     extension,
     map,
-    releaseUnit,
     false,
     false
   )->create().release();
@@ -223,7 +216,6 @@ Unit* compile_string(folly::StringPiece s,
     fname,
     extension,
     map,
-    nullptr,
     isSystemLib,
     forDebuggerEval
   )->create().release();
@@ -284,7 +276,6 @@ std::unique_ptr<UnitEmitter> compile_systemlib_string_to_ue(
     fname,
     extension,
     Cfg::Eval::EnableDecl ? &empty_map : nullptr,
-    nullptr,
     true,
     false
   );

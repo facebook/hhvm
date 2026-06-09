@@ -1771,6 +1771,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Enforce consistent return types across function hierarchies. 0 indicates no checks are performed, 1 indicates warn on violation and 2 indicates error on violation
 
+- bool Eval.FreeRandomUnits = false, emil
+
+  Free random units in the unit cache to make room for new units during tests. Use this is to stress
+  test FuncCleanup
+
 # Hack.Lang
 
 - std::vector<std::string> Hack.Lang.TestsBypassVisibilityClasses = {}, UNKNOWN

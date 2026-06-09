@@ -90,10 +90,12 @@ function get_expect_file_and_type(
 
 function multi_request_modes(Options $options): vec<string> {
   $r = vec[];
-  if ($options->retranslate_all is nonnull) $r []= 'retranslate-all';
-  if ($options->recycle_tc is nonnull) $r []= 'recycle-tc';
-  if ($options->jit_serialize is nonnull) $r []= 'jit-serialize';
-  if ($options->cli_server) $r []= 'cli-server';
+  if ($options->retranslate_all is nonnull) $r[] = 'retranslate-all';
+  if ($options->recycle_tc is nonnull) $r[] = 'recycle-tc';
+  if ($options->jit_serialize is nonnull) $r[] = 'jit-serialize';
+  if ($options->free_random_units is nonnull) $r[] = 'free-random-units';
+  if ($options->repeat is nonnull) $r[] = 'repeat';
+  if ($options->cli_server) $r[] = 'cli-server';
   return $r;
 }
 
@@ -427,6 +429,8 @@ final class Options {
     public ?string $retranslate_all;
     public bool $async_jit_profile = false;
     public ?string $jit_serialize;
+    public ?string $free_random_units;
+    public ?string $repeat;
     public ?string $hhvm_binary_path;
     public ?string $working_dir;
     public ?string $vendor;
@@ -488,6 +492,8 @@ function get_options(
     '*recycle-tc:' => '',
     '*retranslate-all:' => '',
     '*async-jit-profile' => '',
+    '*free-random-units:' => '',
+    '*repeat:' => '',
     '*jit-serialize:' => '',
     '*hhvm-binary-path:' => 'b:',
     '*working-dir:' => 'w:',
@@ -1197,6 +1203,15 @@ function hhvm_cmd_impl(
       $args[] = '-vEval.JitRetranslateAllSeconds=' . TIMEOUT_SECONDS;
     }
 
+    if ($options->free_random_units is nonnull) {
+      $args[] = '--count='.(int)$options->free_random_units;
+      $args[] = '-vEval.FreeRandomUnits=1';
+    }
+
+    if ($options->repeat is nonnull) {
+      $args[] = '--count='.(int)$options->repeat;
+    }
+
     if ($options->hhas_round_trip) {
       $args[] = '-vEval.AllowHhas=1';
       $args[] = '-vEval.LoadFilepathFromUnitCache=1';
@@ -1391,7 +1406,9 @@ function hhvm_cmd(
 
   if ($options->retranslate_all is nonnull ||
       $options->recycle_tc is nonnull ||
-      $options->cli_server) {
+      $options->cli_server ||
+      $options->free_random_units is nonnull ||
+      $options->repeat is nonnull) {
     $env['HHVM_MULTI_COUNT_SEP'] = MULTI_REQUEST_SEP;
   }
 
@@ -3670,6 +3687,12 @@ function run_config_post(
   if (!$assert_verify) {
     if ($options->retranslate_all is nonnull) {
       $repeats = (int)$options->retranslate_all * 2;
+    }
+    if ($options->free_random_units is nonnull) {
+      $repeats = (int)$options->free_random_units;
+    }
+    if ($options->repeat is nonnull) {
+      $repeats = (int)$options->repeat;
     }
     if ($options->recycle_tc is nonnull) {
       $repeats = (int)$options->recycle_tc;

@@ -146,6 +146,8 @@ way to determine how much progress the server made.
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/util/alloc.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
@@ -2323,6 +2325,14 @@ void run_command_on_cli_server(const char* sock_path,
         printf("%s", sep);
         fflush(stdout);
       }
+    }
+    if (Cfg::Eval::FreeRandomUnits) {
+      auto units = loadedUnitsNonRepoAuth();
+      for (auto const unit : units) {
+        if (unit->isSystemLib()) continue;
+        invalidateUnit(const_cast<StringData*>(unit->origFilepath()));
+      }
+      low_malloc(sizeof(Func) + sizeof(jit::AtomicLowTCA) * (count + 1) );
     }
   }
 

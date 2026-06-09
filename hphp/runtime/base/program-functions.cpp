@@ -2442,6 +2442,14 @@ static int execute_program_impl(int argc, char** argv) {
             fflush(stdout);
           }
         }
+        if (Cfg::Eval::FreeRandomUnits) {
+          auto units = loadedUnitsNonRepoAuth();
+          for (auto const unit : units) {
+            if (unit->isSystemLib()) continue;
+            invalidateUnit(const_cast<StringData*>(unit->origFilepath()));
+          }
+          low_malloc(sizeof(Func) + (sizeof(jit::AtomicLowTCA) * (i + 1)));
+        }
       }
     }
 

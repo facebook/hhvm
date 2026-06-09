@@ -118,6 +118,8 @@ size_t numLoadedUnits();
  */
 std::vector<Unit*> loadedUnitsRepoAuth();
 
+std::vector<Unit*> loadedUnitsNonRepoAuth();
+
 /*
  * Resolve an include path, for the supplied path and directory, using the same
  * rules as PHP's fopen() or include.  May return a null String if the path

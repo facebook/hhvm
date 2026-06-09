@@ -1597,6 +1597,21 @@ std::vector<Unit*> loadedUnitsRepoAuth() {
   return units;
 }
 
+std::vector<Unit*> loadedUnitsNonRepoAuth() {
+  always_assert(!Cfg::Repo::Authoritative);
+  std::vector<Unit*> units;
+  units.reserve(s_nonRepoUnitCache.size());
+  for (auto const& elm : s_nonRepoUnitCache) {
+    auto const cachedUnit = elm.second.cachedUnit.copy();
+    if (cachedUnit) {
+      if (auto const unit = cachedUnit->cu.unit) {
+        units.push_back(unit);
+      }
+    }
+  }
+  return units;
+}
+
 void invalidateUnit(StringData* path) {
   always_assert(!Cfg::Repo::Authoritative);
 

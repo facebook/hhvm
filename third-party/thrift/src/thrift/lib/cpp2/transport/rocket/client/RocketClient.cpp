@@ -1348,6 +1348,7 @@ bool RocketClient::sendRequestN(StreamId streamId, int32_t n) {
 }
 
 void RocketClient::cancelStream(StreamId streamId, bool freeChannel) {
+  DestructorGuard dg(this);
   auto g = makeRequestCountGuard(RequestType::INTERNAL);
   if (freeChannel) {
     freeStream(streamId);
@@ -1382,6 +1383,7 @@ bool RocketClient::sendPayload(
 
 bool RocketClient::sendError(
     StreamId streamId, RocketException&& rex, bool freeChannel) {
+  DestructorGuard dg(this);
   if (freeChannel) {
     freeStream(streamId);
   }
@@ -1397,6 +1399,7 @@ bool RocketClient::sendError(
 }
 
 bool RocketClient::sendComplete(StreamId streamId, bool freeChannel) {
+  DestructorGuard dg(this);
   auto g = makeRequestCountGuard(RequestType::INTERNAL);
   if (freeChannel) {
     freeStream(streamId);
@@ -1428,6 +1431,7 @@ bool RocketClient::sendHeadersPush(
 
 bool RocketClient::sendSinkError(
     StreamId streamId, StreamPayload&& payload, bool freeChannel) {
+  DestructorGuard dg(this);
   if (freeChannel) {
     freeStream(streamId);
   }

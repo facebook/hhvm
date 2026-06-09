@@ -312,6 +312,9 @@ class HTTPCodec {
       case CodecProtocol::HTTP_3:
         // This doesn't factor out of order stream arrival...
         return id / 4;
+      case CodecProtocol::TUNNEL_CONNECT:
+        // Single-stream codecs: always sequence 0
+        return 0;
       case CodecProtocol::HTTP_BINARY:
         [[fallthrough]];
       case CodecProtocol::TUNNEL_LITE:

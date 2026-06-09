@@ -25,7 +25,6 @@
 #include <thrift/compiler/ast/t_include.h>
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/detail/pluggable_functions.h>
-#include <thrift/compiler/generate/const_util.h>
 #include <thrift/compiler/generate/schema_populator.h>
 #include <thrift/compiler/generate/t_generator.h>
 #include <thrift/compiler/sema/schematizer.h>
@@ -61,6 +60,12 @@ std::string serialize(const T& val) {
   auto buf = queue.move();
   auto br = buf->coalesce();
   return std::string(reinterpret_cast<const char*>(br.data()), br.size());
+}
+
+protocol::Value make_string_value(std::string value) {
+  protocol::Value ret;
+  ret.emplace_string(std::move(value));
+  return ret;
 }
 } // namespace
 
@@ -148,9 +153,7 @@ type::Schema t_ast_generator::gen_schema(
   std::unordered_map<const t_named*, apache::thrift::type::DefinitionKey>
       definition_key_index;
 
-  auto intern_value = [&](std::unique_ptr<t_const_value> val,
-                          t_program* = nullptr) {
-    auto value = const_to_value(*val);
+  auto intern_value = [&](protocol::Value value, t_program* = nullptr) {
     if (schema_opts.use_hash) {
       auto hash = op::hash<
           type::struct_t<protocol::Value>,
@@ -260,10 +263,9 @@ type::Schema t_ast_generator::gen_schema(
         "thrift/lib/thrift/schema.thrift must be present in one of the include paths.");
   }
 
-  schema_opts.intern_value = intern_value;
   schematizer schema_source(
       *root_program.global_scope(), source_mgr, schema_opts);
-  schema_populator schema_defs{schema_source, *root_program.global_scope()};
+  schema_populator schema_defs{schema_source, intern_value};
   const_ast_visitor visitor;
   bool is_root_program = true;
   visitor.add_program_visitor([&](const t_program& program) {
@@ -306,14 +308,13 @@ type::Schema t_ast_generator::gen_schema(
       for (const auto& [lang, incs] : program.language_includes()) {
         for (const auto& inc : incs) {
           info.languageIncludes()[lang].push_back(
-              static_cast<type::ValueId>(
-                  intern_value(std::make_unique<t_const_value>(inc))));
+              static_cast<type::ValueId>(intern_value(make_string_value(inc))));
         }
       }
 
       for (const auto& [lang, langNamespace] : program.namespaces()) {
         info.namespaces()[lang] = static_cast<type::ValueId>(
-            intern_value(std::make_unique<t_const_value>(langNamespace->ns())));
+            intern_value(make_string_value(langNamespace->ns())));
       }
 
       ast.sources()[program_id] = std::move(info);

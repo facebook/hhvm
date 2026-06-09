@@ -17,6 +17,7 @@
 #include <thrift/compiler/generate/schema_populator.h>
 
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <fmt/core.h>
 #include <folly/io/IOBuf.h>
@@ -34,6 +35,10 @@
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/ast/type_visitor.h>
+#include <thrift/compiler/generate/const_util.h>
+#include <thrift/lib/cpp2/Thrift.h>
+#include <thrift/lib/cpp2/op/Get.h>
+#include <thrift/lib/cpp2/protocol/Object.h>
 
 namespace apache::thrift::compiler::detail {
 namespace {
@@ -54,25 +59,8 @@ auto as_underlying(Enm val) {
   return static_cast<std::underlying_type_t<Enm>>(val);
 }
 
-template <typename... Args>
-std::unique_ptr<t_const_value> val(Args&&... args) {
-  return std::make_unique<t_const_value>(std::forward<Args>(args)...);
-}
-
 void set_void(auto&& ref) {
   ref.ensure() = Void::Unused;
-}
-
-void set_type_uri_field(
-    TypeUri& uri, std::string_view field, std::string value) {
-  if (field == "definitionKey") {
-    uri.definitionKey_ref() = std::move(value);
-  } else if (field == "uri") {
-    uri.uri_ref() = std::move(value);
-  } else {
-    assert(field == "scopedName");
-    uri.scopedName_ref() = std::move(value);
-  }
 }
 
 Definition as_definition(auto schema) {
@@ -100,6 +88,173 @@ Definition as_definition(auto schema) {
   return def;
 }
 
+template <typename Tag>
+struct protocol_value_converter;
+
+protocol::Value protocol_value_object(const protocol::Value& value);
+
+template <typename T>
+protocol::Value concrete_protocol_value(const T& value) {
+  using ConcreteType = std::remove_cvref_t<T>;
+
+  protocol::Value ret;
+  auto& obj = ret.emplace_object();
+  obj.type() = std::string{apache::thrift::uri<ConcreteType>()};
+
+  op::for_each_field_id<ConcreteType>([&](auto field_id) {
+    using Id = decltype(field_id);
+    using Tag = op::get_type_tag<ConcreteType, Id>;
+
+    if (const auto* field = op::get_value_or_null(op::get<Id>(value))) {
+      obj[FieldId{folly::to_underlying(Id::value)}] =
+          protocol_value_converter<Tag>::convert(*field);
+    }
+  });
+  return ret;
+}
+
+template <typename Tag>
+struct protocol_value_converter {
+  template <typename T>
+  static protocol::Value convert(const T& value) {
+    if constexpr (std::is_same_v<std::remove_cvref_t<T>, protocol::Value>) {
+      return protocol_value_object(value);
+    } else {
+      return protocol::asValueStruct<Tag>(value);
+    }
+  }
+};
+
+template <typename T, typename Tag>
+struct protocol_value_converter<type::cpp_type<T, Tag>>
+    : protocol_value_converter<Tag> {};
+
+template <typename T>
+struct protocol_value_converter<type::struct_t<T>> {
+  static protocol::Value convert(const T& value) {
+    return concrete_protocol_value(value);
+  }
+};
+
+template <typename T>
+struct protocol_value_converter<type::union_t<T>> {
+  static protocol::Value convert(const T& value) {
+    return concrete_protocol_value(value);
+  }
+};
+
+template <typename Elem>
+struct protocol_value_converter<type::list<Elem>> {
+  template <typename C>
+  static protocol::Value convert(const C& value) {
+    protocol::Value ret;
+    auto& list = ret.emplace_list();
+    list.reserve(value.size());
+    for (const auto& item : value) {
+      list.push_back(protocol_value_converter<Elem>::convert(item));
+    }
+    return ret;
+  }
+};
+
+template <typename Elem>
+struct protocol_value_converter<type::set<Elem>> {
+  template <typename C>
+  static protocol::Value convert(const C& value) {
+    protocol::Value ret;
+    auto& set = ret.emplace_set();
+    set.reserve(value.size());
+    for (const auto& item : value) {
+      set.insert(protocol_value_converter<Elem>::convert(item));
+    }
+    return ret;
+  }
+};
+
+template <typename Key, typename Mapped>
+struct protocol_value_converter<type::map<Key, Mapped>> {
+  template <typename C>
+  static protocol::Value convert(const C& value) {
+    protocol::Value ret;
+    auto& map = ret.emplace_map();
+    map.reserve(value.size());
+    for (const auto& [key, mapped] : value) {
+      map.emplace(
+          protocol_value_converter<Key>::convert(key),
+          protocol_value_converter<Mapped>::convert(mapped));
+    }
+    return ret;
+  }
+};
+
+template <typename Tag>
+struct protocol_value_union_field_converter {
+  template <typename T>
+  static protocol::Value convert(const protocol::Value& original, const T&) {
+    return original;
+  }
+};
+
+template <typename T, typename Tag>
+struct protocol_value_union_field_converter<type::cpp_type<T, Tag>>
+    : protocol_value_union_field_converter<Tag> {};
+
+template <typename Elem>
+struct protocol_value_union_field_converter<type::list<Elem>> {
+  template <typename C>
+  static protocol::Value convert(const protocol::Value&, const C& value) {
+    return protocol_value_converter<type::list<Elem>>::convert(value);
+  }
+};
+
+template <typename Elem>
+struct protocol_value_union_field_converter<type::set<Elem>> {
+  template <typename C>
+  static protocol::Value convert(const protocol::Value&, const C& value) {
+    return protocol_value_converter<type::set<Elem>>::convert(value);
+  }
+};
+
+template <typename Key, typename Mapped>
+struct protocol_value_union_field_converter<type::map<Key, Mapped>> {
+  template <typename C>
+  static protocol::Value convert(const protocol::Value&, const C& value) {
+    return protocol_value_converter<type::map<Key, Mapped>>::convert(value);
+  }
+};
+
+protocol::Value protocol_value_object(const protocol::Value& value) {
+  const auto& thrift_value = value.toThrift();
+  using ProtocolValue = std::remove_cvref_t<decltype(thrift_value)>;
+
+  protocol::Value ret;
+  auto& obj = ret.emplace_object();
+  obj.type() = std::string{apache::thrift::uri<ProtocolValue>()};
+
+  op::for_each_field_id<ProtocolValue>([&](auto field_id) {
+    using Id = decltype(field_id);
+    using Tag = op::get_type_tag<ProtocolValue, Id>;
+
+    if (const auto* field = op::get_value_or_null(op::get<Id>(thrift_value))) {
+      obj[FieldId{folly::to_underlying(Id::value)}] =
+          protocol_value_union_field_converter<Tag>::convert(value, *field);
+    }
+  });
+  return ret;
+}
+
+std::string type_uri_value(const TypeUri& uri) {
+  if (const auto* value = op::get_value_or_null(uri.uri_ref())) {
+    return {value->data(), value->size()};
+  }
+  if (const auto* value = op::get_value_or_null(uri.scopedName_ref())) {
+    return {value->data(), value->size()};
+  }
+  const auto* value = op::get_value_or_null(uri.definitionKey_ref());
+  assert(value != nullptr);
+  return {value->data(), value->size()};
+}
+
 protocol::Value make_value(const t_const_value& const_value) {
   protocol::Value value;
   switch (const_value.kind()) {
@@ -124,54 +279,6 @@ protocol::Value make_value(const t_const_value& const_value) {
       break;
   }
   return value;
-}
-
-std::unique_ptr<t_const_value> const_from_value(
-    const protocol::Value& value, t_type_ref protocol_value_type) {
-  auto ret = t_const_value::make_map();
-  ret->set_type(protocol_value_type);
-  if (value.is_bool()) {
-    ret->add_map(val("boolValue"), val(value.as_bool()));
-  } else if (value.is_byte()) {
-    ret->add_map(val("byteValue"), val(value.as_byte()));
-  } else if (value.is_i16()) {
-    ret->add_map(val("i16Value"), val(value.as_i16()));
-  } else if (value.is_i32()) {
-    ret->add_map(val("i32Value"), val(value.as_i32()));
-  } else if (value.is_i64()) {
-    ret->add_map(val("i64Value"), val(value.as_i64()));
-  } else if (value.is_float()) {
-    auto float_value = std::make_unique<t_const_value>();
-    float_value->set_double(value.as_float());
-    ret->add_map(val("floatValue"), std::move(float_value));
-  } else if (value.is_double()) {
-    auto double_value = std::make_unique<t_const_value>();
-    double_value->set_double(value.as_double());
-    ret->add_map(val("doubleValue"), std::move(double_value));
-  } else if (value.is_string()) {
-    ret->add_map(val("stringValue"), val(value.as_string()));
-  } else if (value.is_list()) {
-    auto list = t_const_value::make_list();
-    for (const auto& item : value.as_list()) {
-      list->add_list(const_from_value(item, protocol_value_type));
-    }
-    ret->add_map(val("listValue"), std::move(list));
-  } else if (value.is_set()) {
-    auto set = t_const_value::make_list();
-    for (const auto& item : value.as_set()) {
-      set->add_list(const_from_value(item, protocol_value_type));
-    }
-    ret->add_map(val("setValue"), std::move(set));
-  } else if (value.is_map()) {
-    auto map = t_const_value::make_map();
-    for (const auto& [key, map_value] : value.as_map()) {
-      map->add_map(
-          const_from_value(key, protocol_value_type),
-          const_from_value(map_value, protocol_value_type));
-    }
-    ret->add_map(val("mapValue"), std::move(map));
-  }
-  return ret;
 }
 
 protocol::Value make_primitive_value(const t_type& ty) {
@@ -225,16 +332,25 @@ protocol::Value make_primitive_value(const t_type& ty) {
 } // namespace
 
 TypeUri schema_populator::type_uri(const t_type& type) {
+  return type_uri(type, opts().use_hash);
+}
+
+TypeUri schema_populator::type_uri(const t_named& node, const bool use_hash) {
   TypeUri ret;
-  auto uri = schema_utils_.calculate_uri(type, opts().use_hash);
-  set_type_uri_field(ret, uri.uri_type, std::move(uri.value));
+  if (use_hash) {
+    ret.definitionKey_ref() = schema_utils_.identify_definition(node);
+  } else if (!node.uri().empty()) {
+    ret.uri_ref() = node.uri();
+  } else if (node.program()) {
+    ret.scopedName_ref() = node.program()->scoped_name(node);
+  } else {
+    ret.scopedName_ref() = node.name();
+  }
   return ret;
 }
 
 type::DefinitionAttrs schema_populator::gen_attrs(
-    const t_named& node,
-    const t_program* program,
-    const schematizer::intern_func& intern_value) {
+    const t_named& node, const t_program* program) {
   type::DefinitionAttrs attrs;
   attrs.name() = node.name();
   if (!node.uri().empty()) {
@@ -260,50 +376,21 @@ type::DefinitionAttrs schema_populator::gen_attrs(
 
       // Double write to deprecated externed path. (T161963504)
       if (opts().double_writes) {
-        auto type_uri_type = t_type_ref::from_req_ptr(
-            static_cast<const t_type*>(
-                global_scope_.find_by_uri("facebook.com/thrift/type/TypeUri")));
-        auto protocol_value_type = t_type_ref::from_req_ptr(
-            static_cast<const t_type*>(global_scope_.find_by_uri(
-                "facebook.com/thrift/protocol/Value")));
-        auto structured_annot = t_const_value::make_map();
-        structured_annot->set_type(
-            t_type_ref::from_req_ptr(
-                static_cast<const t_type*>(global_scope_.find_by_uri(
-                    "facebook.com/thrift/type/StructuredAnnotation"))));
-        auto type_val = t_const_value::make_map();
-        type_val->set_type(type_uri_type);
-        auto uri = schema_utils_.calculate_uri(*item.type(), opts().use_hash);
-        type_val->add_map(
-            std::make_unique<t_const_value>(std::string{uri.uri_type}),
-            std::make_unique<t_const_value>(std::move(uri.value)));
-        structured_annot->add_map(
-            std::make_unique<t_const_value>("type"), std::move(type_val));
-
-        auto fields = t_const_value::make_map();
-        for (const auto& [key, value] : item.value()->get_map()) {
-          fields->add_map(
-              key->clone(),
-              const_from_value(
-                  ty_wrapper.property(*key).wrap(*value), protocol_value_type));
-        }
-        structured_annot->add_map(
-            std::make_unique<t_const_value>("fields"), std::move(fields));
-
-        auto id = intern_value(
-            std::move(structured_annot), const_cast<t_program*>(program));
+        type::StructuredAnnotation structured_annotation;
+        structured_annotation.type() = type_uri(*item.type(), opts().use_hash);
+        structured_annotation.fields() = *annot.fields();
+        auto id = intern_value_(
+            concrete_protocol_value(structured_annotation),
+            const_cast<t_program*>(program));
         attrs.structuredAnnotations()->insert(static_cast<type::ValueId>(id));
       }
 
-      auto unhashed_uri =
-          schema_utils_.calculate_uri(*item.type(), false /*use_hash*/);
-      // We're not hashing & ignoring the UriType here, as annotations are
-      // stored as map<string, Annotation>.
-      attrs.annotations()[std::move(unhashed_uri.value)] = annot;
+      auto unhashed_uri = type_uri(*item.type(), false /*use_hash*/);
+      // We're not hashing here, as annotations are stored by string identifier.
+      attrs.annotations()[type_uri_value(unhashed_uri)] = annot;
 
-      auto hashed_uri =
-          schema_utils_.calculate_uri(*item.type(), true /*use_hash*/);
-      attrs.annotationsByKey()[std::move(hashed_uri.value)] = std::move(annot);
+      auto hashed_uri = type_uri(*item.type(), true /*use_hash*/);
+      attrs.annotationsByKey()[type_uri_value(hashed_uri)] = std::move(annot);
     }
   }
 
@@ -484,13 +571,12 @@ type::Fields schema_populator::gen_fields(
     schema_populator* generator,
     const t_program* program,
     DefinitionList* defns_schema,
-    node_list_view<const t_field> fields,
-    const schematizer::intern_func& intern_value) {
+    node_list_view<const t_field> fields) {
   type::Fields fields_schema;
 
   for (const auto& field : fields) {
     auto& field_schema = fields_schema.emplace_back();
-    field_schema.attrs() = gen_attrs(field, program, intern_value);
+    field_schema.attrs() = gen_attrs(field, program);
     field_schema.id() = type::FieldId{field.id()};
 
     switch (field.qualifier()) {
@@ -512,10 +598,9 @@ type::Fields schema_populator::gen_fields(
         gen_type(generator, program, defns_schema, *field.type());
     if (auto deflt = field.default_value()) {
       assert(program);
-      auto clone = deflt->clone();
-      clone->set_type(field.type());
-      field_schema.customDefault() = static_cast<type::ValueId>(
-          intern_value(std::move(clone), const_cast<t_program*>(program)));
+      field_schema.customDefault() = static_cast<type::ValueId>(intern_value_(
+          const_to_value(*deflt, field.type()->get_true_type()),
+          const_cast<t_program*>(program)));
     }
   }
 
@@ -524,25 +609,22 @@ type::Fields schema_populator::gen_fields(
 
 type::Struct schema_populator::gen_schema(const t_struct& node) {
   type::Struct schema;
-  schema.attrs() = gen_attrs(node, node.program(), opts().intern_value);
-  schema.fields() = gen_fields(
-      this, node.program(), nullptr, node.fields(), opts().intern_value);
+  schema.attrs() = gen_attrs(node, node.program());
+  schema.fields() = gen_fields(this, node.program(), nullptr, node.fields());
   return schema;
 }
 
 type::Union schema_populator::gen_schema(const t_union& node) {
   type::Union schema;
-  schema.attrs() = gen_attrs(node, node.program(), opts().intern_value);
-  schema.fields() = gen_fields(
-      this, node.program(), nullptr, node.fields(), opts().intern_value);
+  schema.attrs() = gen_attrs(node, node.program());
+  schema.fields() = gen_fields(this, node.program(), nullptr, node.fields());
   return schema;
 }
 
 type::Exception schema_populator::gen_schema(const t_exception& node) {
   type::Exception schema;
-  schema.attrs() = gen_attrs(node, node.program(), opts().intern_value);
-  schema.fields() = gen_fields(
-      this, node.program(), nullptr, node.fields(), opts().intern_value);
+  schema.attrs() = gen_attrs(node, node.program());
+  schema.fields() = gen_fields(this, node.program(), nullptr, node.fields());
   schema.safety() =
       static_cast<type::ErrorSafety>(as_underlying(node.safety()));
   schema.kind() = static_cast<type::ErrorKind>(as_underlying(node.kind()));
@@ -589,7 +671,7 @@ type::Functions schema_populator::gen_functions(const t_interface& node) {
 
   for (const auto& func : node.functions()) {
     auto& func_schema = functions_schema.emplace_back();
-    func_schema.attrs() = gen_attrs(func, node.program(), opts().intern_value);
+    func_schema.attrs() = gen_attrs(func, node.program());
 
     switch (func.qualifier()) {
       case t_function_qualifier::none:
@@ -632,20 +714,12 @@ type::Functions schema_populator::gen_functions(const t_interface& node) {
       bidi_schema.sinkPayload() =
           gen_type(*bidi_sink->elem_type(), node.program());
       if (auto throws = bidi_stream->exceptions()) {
-        bidi_schema.streamExceptions() = gen_fields(
-            this,
-            node.program(),
-            nullptr,
-            throws->fields(),
-            opts().intern_value);
+        bidi_schema.streamExceptions() =
+            gen_fields(this, node.program(), nullptr, throws->fields());
       }
       if (auto throws = bidi_sink->sink_exceptions()) {
-        bidi_schema.sinkExceptions() = gen_fields(
-            this,
-            node.program(),
-            nullptr,
-            throws->fields(),
-            opts().intern_value);
+        bidi_schema.sinkExceptions() =
+            gen_fields(this, node.program(), nullptr, throws->fields());
       }
       func_schema.streamOrSink()->bidirectionalStream_ref() =
           std::move(bidi_schema);
@@ -653,54 +727,34 @@ type::Functions schema_populator::gen_functions(const t_interface& node) {
       type::Stream stream_schema;
       stream_schema.payload() = gen_type(*stream->elem_type(), node.program());
       if (auto throws = stream->exceptions()) {
-        stream_schema.exceptions() = gen_fields(
-            this,
-            node.program(),
-            nullptr,
-            throws->fields(),
-            opts().intern_value);
+        stream_schema.exceptions() =
+            gen_fields(this, node.program(), nullptr, throws->fields());
       }
       func_schema.streamOrSink()->streamType_ref() = std::move(stream_schema);
     } else if (auto sink = func.sink()) {
       type::Sink sink_schema;
       sink_schema.payload() = gen_type(*sink->elem_type(), node.program());
       if (auto throws = sink->sink_exceptions()) {
-        sink_schema.clientExceptions() = gen_fields(
-            this,
-            node.program(),
-            nullptr,
-            throws->fields(),
-            opts().intern_value);
+        sink_schema.clientExceptions() =
+            gen_fields(this, node.program(), nullptr, throws->fields());
       }
       if (sink->final_response_type()) {
         sink_schema.finalResponse() =
             gen_type(*sink->final_response_type(), node.program());
       }
       if (auto throws = sink->final_response_exceptions()) {
-        sink_schema.serverExceptions() = gen_fields(
-            this,
-            node.program(),
-            nullptr,
-            throws->fields(),
-            opts().intern_value);
+        sink_schema.serverExceptions() =
+            gen_fields(this, node.program(), nullptr, throws->fields());
       }
       func_schema.streamOrSink()->sinkType_ref() = std::move(sink_schema);
     }
 
-    func_schema.paramlist()->fields() = gen_fields(
-        this,
-        node.program(),
-        nullptr,
-        func.params().fields(),
-        opts().intern_value);
+    func_schema.paramlist()->fields() =
+        gen_fields(this, node.program(), nullptr, func.params().fields());
 
     if (func.exceptions()) {
       func_schema.exceptions() = gen_fields(
-          this,
-          node.program(),
-          nullptr,
-          func.exceptions()->fields(),
-          opts().intern_value);
+          this, node.program(), nullptr, func.exceptions()->fields());
     }
   }
 
@@ -709,14 +763,14 @@ type::Functions schema_populator::gen_functions(const t_interface& node) {
 
 type::Interaction schema_populator::gen_schema(const t_interaction& node) {
   type::Interaction schema;
-  schema.attrs() = gen_attrs(node, node.program(), opts().intern_value);
+  schema.attrs() = gen_attrs(node, node.program());
   schema.functions() = gen_functions(node);
   return schema;
 }
 
 type::Service schema_populator::gen_schema(const t_service& node) {
   type::Service schema;
-  schema.attrs() = gen_attrs(node, node.program(), opts().intern_value);
+  schema.attrs() = gen_attrs(node, node.program());
   schema.functions() = gen_functions(node);
   if (auto parent = node.extends()) {
     schema.baseService()->uri() = type_uri(*parent);
@@ -729,25 +783,23 @@ type::Const schema_populator::gen_schema(const t_const& node) {
   assert(program);
 
   type::Const schema;
-  schema.attrs() = gen_attrs(node, program, opts().intern_value);
+  schema.attrs() = gen_attrs(node, program);
   schema.type() = gen_type(*node.type(), program);
 
-  std::unique_ptr<t_const_value> clone = node.value()->clone();
-  clone->set_type(node.type_ref());
-  schema.value() = static_cast<type::ValueId>(
-      opts().intern_value(std::move(clone), const_cast<t_program*>(program)));
+  schema.value() = static_cast<type::ValueId>(intern_value_(
+      const_to_value(*node.value(), node.type()->get_true_type()),
+      const_cast<t_program*>(program)));
 
   return schema;
 }
 
 type::Enum schema_populator::gen_schema(const t_enum& node) {
   type::Enum schema;
-  schema.attrs() = gen_attrs(node, node.program(), opts().intern_value);
+  schema.attrs() = gen_attrs(node, node.program());
 
   for (const auto& value : node.values()) {
     auto& value_schema = schema.values()->emplace_back();
-    value_schema.attrs() =
-        gen_attrs(value, node.program(), opts().intern_value);
+    value_schema.attrs() = gen_attrs(value, node.program());
     value_schema.value() = value.get_value();
   }
 
@@ -756,7 +808,7 @@ type::Enum schema_populator::gen_schema(const t_enum& node) {
 
 type::Program schema_populator::gen_schema(const t_program& node) {
   type::Program schema;
-  schema.attrs() = gen_attrs(node, &node, opts().intern_value);
+  schema.attrs() = gen_attrs(node, &node);
   schema.path() = node.path();
 
   for (const auto& [lang, incs] : node.language_includes()) {
@@ -776,7 +828,7 @@ type::Program schema_populator::gen_schema(const t_program& node) {
 
 type::Typedef schema_populator::gen_schema(const t_typedef& node) {
   type::Typedef schema;
-  schema.attrs() = gen_attrs(node, node.program(), opts().intern_value);
+  schema.attrs() = gen_attrs(node, node.program());
   schema.type() = gen_type(*node.type(), node.program());
   return schema;
 }

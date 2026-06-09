@@ -16,13 +16,9 @@
 
 #pragma once
 
-#include <functional>
-#include <memory>
 #include <string>
 #include <string_view>
 #include <unordered_map>
-
-#include <thrift/compiler/ast/t_const_value.h>
 
 namespace apache::thrift::compiler {
 
@@ -37,9 +33,6 @@ class schematizer {
  public:
   enum class value_id : int64_t {};
 
-  using intern_func = std::function<value_id(
-      std::unique_ptr<t_const_value> val, t_program* program)>;
-
   struct options {
     bool double_writes : 1; // Legacy copies of data for backward compatiblity.
 
@@ -47,7 +40,6 @@ class schematizer {
     bool include_docs : 1;
     bool include_source_ranges : 1;
 
-    intern_func intern_value;
     bool use_hash = false; // Uses typeHashPrefixSha2_256 in typeUri and
                            // definitionKey instead of definitionId.
     bool include_generated_ = false;
@@ -75,13 +67,7 @@ class schematizer {
   static std::string schema_const_name(
       source_manager& sm, const t_program& node);
 
-  struct resolved_uri {
-    std::string_view uri_type;
-    std::string value;
-  };
-
   const options& opts() const { return opts_; }
-  resolved_uri calculate_uri(const t_named& node, bool use_hash);
 
  private:
   const t_global_scope& global_scope_;

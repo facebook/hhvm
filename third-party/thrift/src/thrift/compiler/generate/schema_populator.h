@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -46,8 +47,11 @@ namespace detail {
 
 class schema_populator {
  public:
-  schema_populator(schematizer& schema_utils, const t_global_scope& scope)
-      : schema_utils_(schema_utils), global_scope_(scope) {}
+  using intern_func = std::function<schematizer::value_id(
+      protocol::Value value, t_program* program)>;
+
+  schema_populator(schematizer& schema_utils, intern_func intern_value)
+      : schema_utils_(schema_utils), intern_value_(std::move(intern_value)) {}
 
   // Creates a generated schema struct describing the argument.
   // https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift
@@ -67,11 +71,10 @@ class schema_populator {
 
  private:
   type::TypeUri type_uri(const t_type& type);
+  type::TypeUri type_uri(const t_named& node, bool use_hash);
 
   type::DefinitionAttrs gen_attrs(
-      const t_named& node,
-      const t_program* program,
-      const schematizer::intern_func& intern_value);
+      const t_named& node, const t_program* program);
 
   type::Type gen_type(
       schema_populator* generator,
@@ -87,15 +90,14 @@ class schema_populator {
       schema_populator* generator,
       const t_program* program,
       type::DefinitionList* defns_schema,
-      node_list_view<const t_field> fields,
-      const schematizer::intern_func& intern_value);
+      node_list_view<const t_field> fields);
 
   type::Functions gen_functions(const t_interface& node);
 
   const schematizer::options& opts() const { return schema_utils_.opts(); }
 
   schematizer& schema_utils_;
-  const t_global_scope& global_scope_;
+  intern_func intern_value_;
 };
 
 class protocol_value_builder {

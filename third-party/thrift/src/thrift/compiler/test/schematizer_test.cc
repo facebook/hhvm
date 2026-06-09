@@ -27,6 +27,7 @@
 #include <gtest/gtest.h>
 
 using namespace apache::thrift::compiler;
+using apache::thrift::FieldId;
 using apache::thrift::compiler::detail::protocol_value_builder;
 using apache::thrift::compiler::detail::schema_populator;
 using apache::thrift::compiler::detail::schematizer;
@@ -345,7 +346,10 @@ constexpr auto UTILITY_CLASSES = {
 };
 
 template <typename F>
-void with_schematizer(schematizer::options opts, F&& f) {
+void with_schematizer(
+    schematizer::options opts,
+    schema_populator::intern_func intern_value,
+    F&& f) {
   source_manager sm;
   sm.add_virtual_file("my_prog", "abcd");
 
@@ -364,7 +368,7 @@ void with_schematizer(schematizer::options opts, F&& f) {
   }
 
   schematizer schematizer{scope, sm, std::move(opts)};
-  schema_populator schema_populator{schematizer, scope};
+  schema_populator schema_populator{schematizer, std::move(intern_value)};
   f(*program.get(), schematizer, schema_populator);
 }
 
@@ -432,14 +436,15 @@ TEST(SchematizerTest, use_hash_for_structured_annotations) {
     schematizer::options opts;
     opts.use_hash = use_hash;
     size_t id = 0;
-    std::vector<std::unique_ptr<t_const_value>> interned_values;
-    opts.intern_value = [&](std::unique_ptr<t_const_value> val, t_program*) {
+    std::vector<protocol::Value> interned_values;
+    auto intern_value = [&](protocol::Value val, t_program*) {
       interned_values.push_back(std::move(val));
       return static_cast<schematizer::value_id>(id++);
     };
 
     with_schematizer(
         opts,
+        std::move(intern_value),
         [&](t_program& program,
             schematizer& schematizer,
             schema_populator& schema_populator) {
@@ -469,28 +474,22 @@ TEST(SchematizerTest, use_hash_for_structured_annotations) {
                       0); // There's only one structured annotation
 
                   const auto& interned_annotation =
-                      interned_values.at(id)->get_map();
-                  const t_const_value* type_uri = nullptr;
-                  for (const auto& [key, value] : interned_annotation) {
-                    if (key->get_string() == "type") {
-                      type_uri = value;
-                    }
-                  }
-                  ASSERT_NE(type_uri, nullptr);
+                      interned_values.at(id).as_object();
+                  ASSERT_TRUE(interned_annotation.contains(FieldId{1}));
+                  const auto& type_uri =
+                      interned_annotation.at(FieldId{1}).as_object();
 
                   // TypeUri should be a union, so check for the appropriate
                   // field
-                  const auto [type_uri_key, type_uri_value] =
-                      type_uri->get_map().at(0);
                   if (use_hash) {
-                    EXPECT_EQ(type_uri_key->get_string(), "definitionKey");
+                    ASSERT_TRUE(type_uri.contains(FieldId{4}));
                     EXPECT_EQ(
-                        type_uri_value->get_string(),
+                        type_uri.at(FieldId{4}).as_binary().to<std::string>(),
                         schematizer.identify_definition(foo_bar_ty));
                   } else {
-                    EXPECT_EQ(type_uri_key->get_string(), "scopedName");
+                    ASSERT_TRUE(type_uri.contains(FieldId{3}));
                     EXPECT_EQ(
-                        type_uri_value->get_string(),
+                        type_uri.at(FieldId{3}).as_string(),
                         "my_prog.FooBar"); // This should not be hashed
                   }
                 };

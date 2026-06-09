@@ -31,21 +31,6 @@
 
 namespace apache::thrift::compiler::detail {
 
-// Returns the `TypeUri` type & the corresponding Uri value for the given node
-schematizer::resolved_uri schematizer::calculate_uri(
-    const t_named& node, const bool use_hash) {
-  if (use_hash) {
-    return {"definitionKey", identify_definition(node)};
-  }
-  if (!node.uri().empty()) {
-    return {"uri", node.uri()};
-  }
-  if (node.program()) {
-    return {"scopedName", node.program()->scoped_name(node)};
-  }
-  return {"scopedName", node.name()};
-}
-
 std::string_view schematizer::program_checksum(const t_program& program) {
   if (auto it = program_checksums_.find(&program);
       it != program_checksums_.end()) {

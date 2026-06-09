@@ -143,9 +143,13 @@ inline void hydrate_const(protocol::Object& out, const t_const_value& val) {
 }
 
 // Assigns a t_const_value to a Value.
-inline protocol::Value const_to_value(const t_const_value& val) {
+inline protocol::Value const_to_value(
+    const t_const_value& val, const t_type* type_override = nullptr) {
   protocol::Value ret;
   const t_type* ttype = [&]() -> const t_type* {
+    if (type_override) {
+      return type_override->get_true_type();
+    }
     if (val.type()) {
       return val.type()->get_true_type();
     }
@@ -178,8 +182,12 @@ inline protocol::Value const_to_value(const t_const_value& val) {
     auto valList = val.get_list_or_empty_map();
     auto& list = ret.emplace_list();
     list.reserve(valList.size());
+    const t_type* elem_type = nullptr;
+    if (const auto* list_type = ttype ? ttype->try_as<t_list>() : nullptr) {
+      elem_type = list_type->elem_type()->get_true_type();
+    }
     for (const auto& list_elem : valList) {
-      list.push_back(const_to_value(*list_elem));
+      list.push_back(const_to_value(*list_elem, elem_type));
     }
     return ret;
   }
@@ -190,9 +198,16 @@ inline protocol::Value const_to_value(const t_const_value& val) {
     auto& map = ret.emplace_map();
     if (val.kind() == t_const_value::CV_MAP) {
       map.reserve(val.get_map().size());
+      const t_type* key_type = nullptr;
+      const t_type* val_type = nullptr;
+      if (const auto* map_type = ttype ? ttype->try_as<t_map>() : nullptr) {
+        key_type = map_type->key_type()->get_true_type();
+        val_type = map_type->val_type()->get_true_type();
+      }
       for (const auto& map_elem : val.get_map()) {
         map.emplace(
-            const_to_value(*map_elem.first), const_to_value(*map_elem.second));
+            const_to_value(*map_elem.first, key_type),
+            const_to_value(*map_elem.second, val_type));
       }
     }
     return ret;
@@ -251,8 +266,9 @@ inline protocol::Value const_to_value(const t_const_value& val) {
     const auto& valList = val.get_list_or_empty_map();
     auto& set = ret.emplace_set();
     set.reserve(valList.size());
+    const auto* elem_type = ttype->as<t_set>().elem_type()->get_true_type();
     for (const auto& list_elem : val.get_list_or_empty_map()) {
-      set.insert(const_to_value(*list_elem));
+      set.insert(const_to_value(*list_elem, elem_type));
     }
   } else if (ttype->is<t_enum>()) {
     ret.emplace_i32(val.get_integer());
@@ -266,7 +282,8 @@ inline protocol::Value const_to_value(const t_const_value& val) {
             fmt::format(
                 "invalid field name: {}", map_elem.first->get_string()));
       }
-      obj[FieldId{field->id()}] = const_to_value(*map_elem.second);
+      obj[FieldId{field->id()}] =
+          const_to_value(*map_elem.second, field->type()->get_true_type());
     }
   } else {
     throw std::runtime_error("Unexpected type");

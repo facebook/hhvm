@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/prologue-id.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 

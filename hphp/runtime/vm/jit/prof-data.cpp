@@ -26,6 +26,7 @@
 
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/vasm-block-counters.h"
+#include "hphp/runtime/vm/prologue-id.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 
 namespace HPHP::jit {
@@ -44,7 +45,7 @@ ProfTransRec::ProfTransRec(SrcKey lastSk, SrcKey sk, RegionDescPtr region,
   assertx(region != nullptr && !region->empty() && region->start() == sk);
 }
 
-ProfTransRec::ProfTransRec(SrcKey sk, int nArgs, uint32_t asmSize)
+ProfTransRec::ProfTransRec(SrcKey sk, uint32_t nArgs, uint32_t asmSize)
     : m_kind(TransKind::ProfPrologue)
     , m_asmSize(asmSize)
     , m_prologueArgs(nArgs)
@@ -97,13 +98,13 @@ TransID ProfData::allocTransID() {
   return m_transRecs.size() - 1;
 }
 
-TransID ProfData::proflogueTransId(const Func* func, int nArgs) const {
+TransID ProfData::proflogueTransId(const Func* func, uint32_t nArgs) const {
   auto const numParams = func->numNonVariadicParams();
   if (nArgs > numParams) nArgs = numParams + 1;
 
   return folly::get_default(
     m_proflogueDB,
-    PrologueID{func->getFuncId(), nArgs},
+    PrologueID{func, nArgs},
     kInvalidTransID
   );
 }
@@ -158,7 +159,7 @@ void ProfData::addTransProfile(TransID transID,
   m_funcProfTrans[funcId].push_back(transID);
 }
 
-void ProfData::addTransProfPrologue(TransID transID, SrcKey sk, int nArgs,
+void ProfData::addTransProfPrologue(TransID transID, SrcKey sk, uint32_t nArgs,
                                     uint32_t asmSize) {
   m_proflogueDB.emplace(PrologueID{sk.funcID(), nArgs}, transID);
 

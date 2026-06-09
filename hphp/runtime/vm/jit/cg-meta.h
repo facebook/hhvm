@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/backtrace.h"
 
+#include "hphp/runtime/vm/prologue-id.h"
 #include "hphp/runtime/vm/jit/alignment.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/fixup.h"

@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/prologue-id.h"
 
 #include "hphp/util/optional.h"
 

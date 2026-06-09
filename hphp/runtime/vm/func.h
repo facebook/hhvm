@@ -1978,54 +1978,6 @@ static_assert(CheckSize<Func, kFuncSize>(), "");
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * A prologue is identified by the called function and the number of arguments
- * that the prologue handles.
- */
-struct PrologueID {
-  PrologueID(FuncId funcId, uint32_t nargs)
-    : m_funcId(funcId)
-    , m_nargs(nargs)
-  { }
-
-  PrologueID(const Func* func, uint32_t nargs)
-    : m_funcId(func->getFuncId())
-    , m_nargs(nargs)
-  { }
-
-  PrologueID()
-  { }
-
-  FuncId      funcId() const { return m_funcId; }
-  uint32_t    nargs()  const { return m_nargs;  }
-  const Func* func()   const { return Func::fromFuncId(m_funcId); }
-
-  bool operator==(const PrologueID& other) const {
-    return m_funcId == other.m_funcId && m_nargs == other.m_nargs;
-  }
-
-  struct Eq {
-    bool operator()(const PrologueID& pid1,
-                    const PrologueID& pid2) const {
-      return pid1 == pid2;
-    }
-  };
-
-  struct Hasher {
-    size_t operator()(PrologueID pid) const {
-      return pid.funcId().toInt() + pid.nargs();
-    }
-  };
-
- private:
-  FuncId   m_funcId{FuncId::Invalid};
-  uint32_t m_nargs{0xffffffff};
-};
-
-std::string show(PrologueID pid);
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
  * Log meta-information about func. Records attributes, number of locals,
  * parameters, static locals, class ref slots, frame cells, high watermark,
  * and iterators. Does not record function name or class.

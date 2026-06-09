@@ -93,7 +93,7 @@ struct ProfTransRec {
   /*
    * Construct a ProfTransRec for a ProfPrologue.
    */
-  ProfTransRec(SrcKey sk, int nArgs, uint32_t asmSize);
+  ProfTransRec(SrcKey sk, uint32_t nArgs, uint32_t asmSize);
   ~ProfTransRec();
 
   TransKind kind()        const { return m_kind; }
@@ -137,7 +137,7 @@ struct ProfTransRec {
    *
    * Precondition: kind() == TransKind::ProfPrologue
    */
-  int prologueArgs() const {
+  uint32_t prologueArgs() const {
     assertx(m_kind == TransKind::ProfPrologue);
     return m_prologueArgs;
   }
@@ -223,7 +223,7 @@ private:
   union {
     SrcKey m_lastSk;    // SrcKey of the last bytecode instr
                         // for non-prologue translations
-    int m_prologueArgs; // for prologues
+    uint32_t m_prologueArgs; // for prologues
   };
   SrcKey m_sk;
   union {
@@ -379,12 +379,12 @@ struct ProfData {
    * arguments.  (kInvalidTransID|nullptr) is returned if the prologue is not
    * associated with a TransID.
    */
-  TransID proflogueTransId(const Func* func, int nArgs) const;
-  ProfTransRec* prologueTransRec(const Func* func, int nArgs) {
+  TransID proflogueTransId(const Func* func, uint32_t nArgs) const;
+  ProfTransRec* prologueTransRec(const Func* func, uint32_t nArgs) {
     auto tid = proflogueTransId(func, nArgs);
     return tid != kInvalidTransID ? transRec(tid) : nullptr;
   }
-  const ProfTransRec* prologueTransRec(const Func* func, int nArgs) const {
+  const ProfTransRec* prologueTransRec(const Func* func, uint32_t nArgs) const {
     return const_cast<ProfData*>(this)->prologueTransRec(func, nArgs);
   }
 
@@ -401,7 +401,7 @@ struct ProfData {
    */
   void addTransProfile(TransID, const RegionDescPtr&, const PostConditions&,
                        uint32_t);
-  void addTransProfPrologue(TransID, SrcKey, int, uint32_t);
+  void addTransProfPrologue(TransID, SrcKey, uint32_t, uint32_t);
 
   /*
    * Add a ProfTransRec. Only used when deserializing the profile data, and
@@ -505,9 +505,8 @@ struct ProfData {
   template<class Fn>
   void forEachProfilingPrologue(Fn fn) {
     for (auto it : m_proflogueDB) {
-      auto funcId = FuncId::fromInt(it.first >> 32);
-      auto func = Func::fromFuncId(funcId);
-      fn(func, it.first & 0xffffffff, it.second);
+      auto prologue = PrologueID::fromInt(it.first);
+      fn(prologue.func(), prologue.nargs(), it.second);
     }
   }
 
@@ -606,15 +605,6 @@ struct ProfData {
   }
 
  private:
-  struct PrologueID {
-    FuncId func;
-    int nArgs;
-
-    /* implicit */ operator uint64_t() const {
-      assertx(nArgs >= 0);
-      return (uint64_t(func.toInt()) << 32) | nArgs;
-    }
-  };
 
   /*
    * m_transLock is used to protect m_transRecs, and m_counters, which are all

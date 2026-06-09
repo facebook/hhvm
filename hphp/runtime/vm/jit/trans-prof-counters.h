@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/prof-counters.h"
 
+#include "hphp/runtime/vm/prologue-id.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 

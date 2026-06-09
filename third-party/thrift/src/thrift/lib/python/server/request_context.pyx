@@ -52,8 +52,7 @@ cdef class RequestContext:
         inst._ctx_holder = make_shared[Cpp2RequestContextHolder](ctx)
         inst._c_ctx = ConnectionContext._fbthrift_create(ctx.getConnectionContext())
         inst._requestId = getRequestId()
-        if isPromptRequestContextInvalidationEnabled():
-            installInvalidator(ctx, inst._ctx_holder)
+        installInvalidator(ctx, inst._ctx_holder)
         return inst
 
     def is_valid(self):

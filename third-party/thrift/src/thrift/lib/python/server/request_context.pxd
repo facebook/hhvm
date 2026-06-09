@@ -112,11 +112,6 @@ cdef extern from "thrift/lib/python/server/request_context_holder.h" \
         shared_ptr[Cpp2RequestContextHolder] holder,
     )
 
-cdef extern from "thrift/lib/python/server/flagged/PromptRequestContextInvalidation.h" \
-        namespace "apache::thrift::python::detail":
-    cbool isPromptRequestContextInvalidationEnabled()
-    void mockSetRequestContextInvalidationKillswitch(cbool killed)
-
 cdef void handleAddressCallback(PyObject* future, cfollySocketAddress address) noexcept
 
 

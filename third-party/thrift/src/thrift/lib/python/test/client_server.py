@@ -42,7 +42,6 @@ from thrift.python.exceptions import (
     ApplicationOverloadError,
 )
 from thrift.python.server import ServiceInterface
-from thrift.python.test.flag_helpers import mock_prompt_request_context_invalidation
 
 
 class Handler(TestingServiceInterface):
@@ -414,28 +413,6 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(captured_ctx.connection_context)
         self.assertIsInstance(captured_ctx.request_id, str)
         self.assertIsInstance(captured_ctx.method_name, str)
-
-    async def test_request_context_killswitch_disables_invalidation(self) -> None:
-        captured_ctx: RequestContext | None = None
-
-        class CapturingHandler(Handler):
-            async def getName(self) -> str:
-                nonlocal captured_ctx
-                captured_ctx = get_context()
-                return "Testing"
-
-        with mock_prompt_request_context_invalidation(False):
-            async with local_server(handler=CapturingHandler()) as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(TestingService, host=ip, port=port) as client:
-                    self.assertEqual("Testing", await client.getName())
-
-        assert captured_ctx is not None
-        # With the flag disabled, the invalidator is not installed, so the
-        # holder's pointer is not nulled on request completion. The pointer
-        # still appears valid.
-        _ = captured_ctx.read_headers
 
     async def test_request_context_invalidated_by_default(self) -> None:
         captured_ctx: RequestContext | None = None

@@ -664,7 +664,10 @@ void Class::releaseSProps() {
   if (!init->bound()) {
     if constexpr (debug) {
       for (Slot i = 0, n = numStaticProperties(); i < n; ++i) {
-        always_assert(!m_sPropCache[i].bound());
+        auto const& sProp = m_staticProperties[i];
+        if (declaredOnThisClass(sProp)) {
+          always_assert(!m_sPropCache[i].bound());
+        }
       }
     }
     return;

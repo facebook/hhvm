@@ -1053,22 +1053,25 @@ let main_internal
           Printf.eprintf "Invalid input\n";
           raise Exit_status.(Exit_with Input_error)
       in
-      parse_name_or_member_id
-        ~name_and_member_action:(fun class_name member_name ->
-          match kind with
-          | Some "Method"
-          | None ->
-            Method { class_name; member_name }
-          | Some "Typeconst" -> Typeconst { class_name; member_name }
-          | Some _ -> raise Exit_status.(Exit_with Input_error))
-        ~name_only_action:(fun name ->
-          match kind with
-          | Some "Class" -> Class { class_name = name }
-          | Some "Typedef" -> Typedef { name }
-          | Some _
-          | None ->
-            raise Exit_status.(Exit_with Input_error))
-        name
+      let action_kind =
+        parse_name_or_member_id
+          ~name_and_member_action:(fun class_name member_name ->
+            match kind with
+            | Some "Method"
+            | None ->
+              Method { class_name; member_name }
+            | Some "Typeconst" -> Typeconst { class_name; member_name }
+            | Some _ -> raise Exit_status.(Exit_with Input_error))
+          ~name_only_action:(fun name ->
+            match kind with
+            | Some "Class" -> Class { class_name = name }
+            | Some "Typedef" -> Typedef { name }
+            | Some _
+            | None ->
+              raise Exit_status.(Exit_with Input_error))
+          name
+      in
+      { kind = action_kind; soft = false }
     in
     let actions = List.map ~f:parse_symbol symbols in
     let max_distance =
@@ -1108,23 +1111,34 @@ let main_internal
           Printf.eprintf "Invalid input\n";
           raise Exit_status.(Exit_with Input_error)
       in
-      parse_name_or_member_id
-        ~name_and_member_action:(fun class_name member_name ->
-          match kind with
-          | Some "Method"
-          | None ->
-            Method { class_name; member_name }
-          | Some "Typeconst" -> Typeconst { class_name; member_name }
-          | Some "Class_const" -> Class_const { class_name; member_name }
-          | Some _ -> raise Exit_status.(Exit_with Input_error))
-        ~name_only_action:(fun name ->
-          match kind with
-          | Some "Class" -> Class { class_name = name }
-          | Some "Typedef" -> Typedef { name }
-          | Some _
-          | None ->
-            raise Exit_status.(Exit_with Input_error))
-        name
+      let (kind, soft) =
+        match kind with
+        | Some s ->
+          (match String.chop_suffix s ~suffix:"@soft" with
+          | Some base -> (Some base, true)
+          | None -> (Some s, false))
+        | None -> (None, false)
+      in
+      let action_kind =
+        parse_name_or_member_id
+          ~name_and_member_action:(fun class_name member_name ->
+            match kind with
+            | Some "Method"
+            | None ->
+              Method { class_name; member_name }
+            | Some "Typeconst" -> Typeconst { class_name; member_name }
+            | Some "Class_const" -> Class_const { class_name; member_name }
+            | Some _ -> raise Exit_status.(Exit_with Input_error))
+          ~name_only_action:(fun name ->
+            match kind with
+            | Some "Class" -> Class { class_name = name }
+            | Some "Typedef" -> Typedef { name }
+            | Some _
+            | None ->
+              raise Exit_status.(Exit_with Input_error))
+          name
+      in
+      { kind = action_kind; soft }
     in
     let json_content = Sys_utils.read_file path |> Bytes.to_string in
     let input =

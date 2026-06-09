@@ -161,12 +161,23 @@ module Find_my_tests = struct
   }
   [@@deriving show]
 
-  type action =
+  type action_kind =
     | Class of { class_name: string }
     | Typedef of { name: string }
     | Method of member
     | Typeconst of member
     | Class_const of member
+  [@@deriving show]
+
+  type action = {
+    kind: action_kind;
+    soft: bool;
+        (** Silently drop this root if the symbol does not exist.
+            For top-level definitions (classes, typedefs), the symbol must be
+            declared. For class members, it is sufficient for the member to be
+            defined on the class, even if only inherited (not declared in the
+            class itself). *)
+  }
   [@@deriving show]
 
   type provenance = { root_indices: int list } [@@deriving yojson]

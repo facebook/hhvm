@@ -47,7 +47,7 @@ static_assert(kSizeIndex == 0 ||
 
 constexpr LayoutIndex kLayoutIndex = {kLoggingLayoutByte << 8};
 
-std::atomic<bool> g_emitLoggingArrays;
+std::atomic<bool> g_emitLoggingArrays = false;
 
 // The bespoke kind for a vanilla kind.
 HeaderKind getBespokeKind(ArrayData::ArrayKind kind) {

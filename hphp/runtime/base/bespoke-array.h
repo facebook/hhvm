@@ -25,12 +25,17 @@
 #include "hphp/runtime/base/req-tiny-vector.h"
 #include "hphp/runtime/base/typed-value.h"
 
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
+
 #include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/repo.h"
 
 namespace HPHP {
 
 inline bool allowBespokeArrayLikes() {
-  return Cfg::Eval::BespokeArrayLikeMode > 0;
+  return Cfg::Eval::BespokeArrayLikeMode > 0
+    && Cfg::Repo::Authoritative
+    && jit::mcgen::retranslateAllEnabled();
 }
 
 inline bool shouldTestBespokeArrayLikes() {

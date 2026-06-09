@@ -874,7 +874,18 @@ TEST(Type, BespokeVecRAT) {
   auto const bar_layout = ArrayLayout{
     bespoke::testing::makeDummyLayout("bar", {ArrayLayout::Bespoke()})
   };
+
+  Cfg::Repo::Authoritative = true;
+  Cfg::Jit::PGO = true;
+  Cfg::Jit::RetranslateAllRequest = 1;
+  Cfg::Jit::RetranslateAllSeconds = 1;
+
   bespoke::selectBespokeLayouts();
+
+  Cfg::Repo::Authoritative = false;
+  Cfg::Jit::PGO = false;
+  Cfg::Jit::RetranslateAllRequest = 0;
+  Cfg::Jit::RetranslateAllSeconds = 0;
 
   auto const rat = RepoAuthType::Array::packed(RepoAuthType::Array::Empty::No,
                                                RepoAuthType(RepoAuthType::Tag::Str));
@@ -947,7 +958,18 @@ TEST(Type, BespokeHierarchy) {
   auto const ter_layout = ArrayLayout{
     bespoke::testing::makeDummyLayout("ter", {baz_layout})
   };
+
+  Cfg::Repo::Authoritative = true;
+  Cfg::Jit::PGO = true;
+  Cfg::Jit::RetranslateAllRequest = 1;
+  Cfg::Jit::RetranslateAllSeconds = 1;
+
   bespoke::selectBespokeLayouts();
+
+  Cfg::Repo::Authoritative = false;
+  Cfg::Jit::PGO = false;
+  Cfg::Jit::RetranslateAllRequest = 0;
+  Cfg::Jit::RetranslateAllSeconds = 0;
 
   auto const top = TVec.narrowToLayout(ArrayLayout::Bespoke());
   auto const foo = TVec.narrowToLayout(foo_layout);
@@ -1124,7 +1146,18 @@ TEST(Type, BespokeRanges) {
   auto const qop_layout = ArrayLayout{
     bespoke::testing::makeDummyLayout("qup", {bar_layout})
   };
+
+  Cfg::Repo::Authoritative = true;
+  Cfg::Jit::PGO = true;
+  Cfg::Jit::RetranslateAllRequest = 1;
+  Cfg::Jit::RetranslateAllSeconds = 1;
+
   bespoke::selectBespokeLayouts();
+
+  Cfg::Repo::Authoritative = false;
+  Cfg::Jit::PGO = false;
+  Cfg::Jit::RetranslateAllRequest = 0;
+  Cfg::Jit::RetranslateAllSeconds = 0;
 
   foo_layout.bespokeLayoutTest();
   baz_layout.bespokeLayoutTest();

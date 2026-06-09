@@ -143,6 +143,8 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData, bool pure) {
     size += val.size;
     apcPropVec[numRealProps] = val.handle;
     mayRaise |= val.handle->toLocalMayRaise();
+    // It can raise a notice when NoticeOnCreateDynamicProp is enabled.
+    mayRaise |= Cfg::Eval::NoticeOnCreateDynamicProp;
   }
 
   mayRaise |= !propsDontNeedCheck;

@@ -39,7 +39,11 @@ from __future__ import annotations
 
 import enum
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
+from types import MappingProxyType
+from typing import Generic, TypeVar
+
+from thrift.lib.python.schema._record import SerializableRecord
 
 
 class InvalidTypeError(Exception):
@@ -202,91 +206,60 @@ class MapTypeRef(TypeRef):
         return f"MapTypeRef({self._key_type!r}, {self._value_type!r})"
 
 
-class StructTypeRef(TypeRef):
+# A user-defined type edge is generic over the concrete node it resolves to, so
+# each leaf narrows ``node`` to its own ``DefinitionNode`` subtype.
+_NodeT = TypeVar("_NodeT", bound="DefinitionNode")
+
+
+class _UserDefinedTypeRef(TypeRef, Generic[_NodeT]):
+    """Shared implementation for the four user-defined type edges
+    (``StructTypeRef`` / ``UnionTypeRef`` / ``EnumTypeRef`` /
+    ``OpaqueAliasTypeRef``): each holds a resolved ``DefinitionNode`` and is keyed
+    structurally by that node's URI."""
+
+    __slots__: tuple[str, ...] = ("_node",)
+    __match_args__ = ("node",)
+    _node: _NodeT
+
+    def __init__(self, node: _NodeT) -> None:
+        self._node = node
+
+    @property
+    def node(self) -> _NodeT:
+        return self._node
+
+    def _key(self) -> tuple[object, ...]:
+        return ("user", self._node.uri)
+
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({self._node.uri!r})"
+
+
+class StructTypeRef(_UserDefinedTypeRef["StructNode"]):
     """A user-defined struct edge; holds the resolved ``StructNode``."""
 
-    __slots__ = ("_node",)
-    __match_args__ = ("node",)
-    _node: StructNode
-
-    def __init__(self, node: StructNode) -> None:
-        self._node = node
-
-    @property
-    def node(self) -> StructNode:
-        return self._node
-
-    def _key(self) -> tuple[object, ...]:
-        return ("user", self._node.uri)
-
-    def __repr__(self) -> str:
-        return f"StructTypeRef({self._node.uri!r})"
+    __slots__ = ()
 
 
-class UnionTypeRef(TypeRef):
+class UnionTypeRef(_UserDefinedTypeRef["UnionNode"]):
     """A user-defined union edge; holds the resolved ``UnionNode``."""
 
-    __slots__ = ("_node",)
-    __match_args__ = ("node",)
-    _node: UnionNode
-
-    def __init__(self, node: UnionNode) -> None:
-        self._node = node
-
-    @property
-    def node(self) -> UnionNode:
-        return self._node
-
-    def _key(self) -> tuple[object, ...]:
-        return ("user", self._node.uri)
-
-    def __repr__(self) -> str:
-        return f"UnionTypeRef({self._node.uri!r})"
+    __slots__ = ()
 
 
-class EnumTypeRef(TypeRef):
+class EnumTypeRef(_UserDefinedTypeRef["EnumNode"]):
     """A user-defined enum edge; holds the resolved ``EnumNode``."""
 
-    __slots__ = ("_node",)
-    __match_args__ = ("node",)
-    _node: EnumNode
-
-    def __init__(self, node: EnumNode) -> None:
-        self._node = node
-
-    @property
-    def node(self) -> EnumNode:
-        return self._node
-
-    def _key(self) -> tuple[object, ...]:
-        return ("user", self._node.uri)
-
-    def __repr__(self) -> str:
-        return f"EnumTypeRef({self._node.uri!r})"
+    __slots__ = ()
 
 
-class OpaqueAliasTypeRef(TypeRef):
+class OpaqueAliasTypeRef(_UserDefinedTypeRef["OpaqueAliasNode"]):
     """A user-defined opaque-alias edge; holds the resolved ``OpaqueAliasNode``.
 
     Opaque aliases exist only in programmatically-built type systems (Thrift IDL
     cannot define one)."""
 
-    __slots__ = ("_node",)
-    __match_args__ = ("node",)
-    _node: OpaqueAliasNode
-
-    def __init__(self, node: OpaqueAliasNode) -> None:
-        self._node = node
-
-    @property
-    def node(self) -> OpaqueAliasNode:
-        return self._node
-
-    def _key(self) -> tuple[object, ...]:
-        return ("user", self._node.uri)
-
-    def __repr__(self) -> str:
-        return f"OpaqueAliasTypeRef({self._node.uri!r})"
+    __slots__ = ()
 
 
 # ---------------------------------------------------------------------------
@@ -326,12 +299,18 @@ class FieldIdentity:
 
 
 class FieldDefinition:
-    """A field in a struct or union."""
+    """A field in a struct or union.
 
-    __slots__ = ("_identity", "_presence", "_type")
+    ``custom_default`` is the field's IDL default value (``None`` if it has the
+    intrinsic default), and ``annotations`` maps each retained structured
+    annotation's URI to its (field-id-keyed) ``SerializableRecord`` value."""
+
+    __slots__ = ("_identity", "_presence", "_type", "_custom_default", "_annotations")
     _identity: FieldIdentity
     _presence: PresenceQualifier
     _type: TypeRef
+    _custom_default: SerializableRecord | None
+    _annotations: dict[str, SerializableRecord]
 
     def __init__(
         self,
@@ -339,10 +318,14 @@ class FieldDefinition:
         identity: FieldIdentity,
         presence: PresenceQualifier,
         type: TypeRef,
+        custom_default: SerializableRecord | None = None,
+        annotations: Mapping[str, SerializableRecord] | None = None,
     ) -> None:
         self._identity = identity
         self._presence = presence
         self._type = type
+        self._custom_default = custom_default
+        self._annotations = dict(annotations) if annotations else {}
 
     @property
     def identity(self) -> FieldIdentity:
@@ -355,6 +338,14 @@ class FieldDefinition:
     @property
     def type(self) -> TypeRef:
         return self._type
+
+    @property
+    def custom_default(self) -> SerializableRecord | None:
+        return self._custom_default
+
+    @property
+    def annotations(self) -> Mapping[str, SerializableRecord]:
+        return MappingProxyType(self._annotations)
 
     def __repr__(self) -> str:
         return (
@@ -404,15 +395,31 @@ class DefinitionNode:
     opaque-alias). Equality and hashing are *by URI* -- two distinct node
     objects with the same URI compare equal (``is`` still distinguishes them)."""
 
-    __slots__: tuple[str, ...] = ("_uri",)
+    __slots__: tuple[str, ...] = ("_uri", "_annotations")
     _uri: str
+    _annotations: dict[str, SerializableRecord]
 
-    def __init__(self, *, uri: str) -> None:
+    def __init__(
+        self,
+        *,
+        uri: str,
+        annotations: Mapping[str, SerializableRecord] | None = None,
+    ) -> None:
         self._uri = uri
+        self._annotations = dict(annotations) if annotations else {}
+
+    def _set_annotations(self, annotations: Mapping[str, SerializableRecord]) -> None:
+        """Populate this node's annotations (used by the builder/bridge during
+        the two-phase build, after the placeholder node is created)."""
+        self._annotations = dict(annotations)
 
     @property
     def uri(self) -> str:
         return self._uri
+
+    @property
+    def annotations(self) -> Mapping[str, SerializableRecord]:
+        return MappingProxyType(self._annotations)
 
     def __eq__(self, other: object) -> bool:
         # A Thrift URI names exactly one definition, so a struct and an enum can
@@ -445,8 +452,9 @@ class _StructuredNode(DefinitionNode):
         uri: str,
         fields: Sequence[FieldDefinition] | None = None,
         is_sealed: bool = False,
+        annotations: Mapping[str, SerializableRecord] | None = None,
     ) -> None:
-        super().__init__(uri=uri)
+        super().__init__(uri=uri, annotations=annotations)
         self._is_sealed = is_sealed
         self._fields = ()
         self._by_id = {}
@@ -504,8 +512,14 @@ class EnumNode(DefinitionNode):
     __slots__ = ("_values",)
     _values: tuple[EnumValue, ...]
 
-    def __init__(self, *, uri: str, values: Sequence[EnumValue] | None = None) -> None:
-        super().__init__(uri=uri)
+    def __init__(
+        self,
+        *,
+        uri: str,
+        values: Sequence[EnumValue] | None = None,
+        annotations: Mapping[str, SerializableRecord] | None = None,
+    ) -> None:
+        super().__init__(uri=uri, annotations=annotations)
         self._values = ()
         if values is not None:
             self._set_values(values)
@@ -525,8 +539,14 @@ class OpaqueAliasNode(DefinitionNode):
     __slots__ = ("_target_type",)
     _target_type: TypeRef | None
 
-    def __init__(self, *, uri: str, target_type: TypeRef | None = None) -> None:
-        super().__init__(uri=uri)
+    def __init__(
+        self,
+        *,
+        uri: str,
+        target_type: TypeRef | None = None,
+        annotations: Mapping[str, SerializableRecord] | None = None,
+    ) -> None:
+        super().__init__(uri=uri, annotations=annotations)
         self._target_type = None
         if target_type is not None:
             self._set_target_type(target_type)

@@ -19,6 +19,13 @@ import unittest
 # Importing the fixture module makes its URIs discoverable by the registry.
 import thrift.lib.python.schema.tests.type_system_bridge_test.thrift_types  # noqa: F401
 from thrift.lib.python.schema import syntax_graph as _ast
+from thrift.lib.python.schema._record import (
+    BoolRecord,
+    FieldSetRecord,
+    Int32Record,
+    ListRecord,
+    TextRecord,
+)
 from thrift.lib.python.schema.schema_registry import SchemaRegistry
 from thrift.lib.python.schema.type_system import (
     EnumNode,
@@ -186,6 +193,54 @@ class TypeSystemBridgeTest(unittest.TestCase):
         assert isinstance(node, EnumNode)
         by_name = {v.name: v.datum for v in node.values}
         self.assertEqual(by_name, {"RED": 0, "GREEN": 1, "BLUE": 2})
+
+    # -- Annotations + custom defaults ---------------------------------
+
+    def test_node_annotations_populated(self) -> None:
+        annotated = self._struct("Annotated")
+        record = annotated.annotations.get(f"{_URI}/RecordAnno")
+        assert isinstance(record, FieldSetRecord), (
+            f"missing annotation: {annotated.annotations!r}"
+        )
+        # `count` (field id 1) and `label` (field id 2) re-resolved name -> id.
+        self.assertEqual(record.fields[1], Int32Record(7))
+        self.assertEqual(record.fields[2], TextRecord("outer"))
+
+    def test_field_annotations_populated(self) -> None:
+        annotated = self._struct("Annotated")
+        field = annotated.field_by_name("value")
+        assert field is not None
+        record = field.annotations.get(f"{_URI}/RecordAnno")
+        assert isinstance(record, FieldSetRecord), (
+            f"missing annotation: {field.annotations!r}"
+        )
+        self.assertEqual(record.fields, {1: Int32Record(3), 2: TextRecord("field")})
+
+    def test_field_without_annotation_has_empty_map(self) -> None:
+        inner = self._struct("Inner")
+        value = inner.field_by_name("value")
+        assert value is not None
+        self.assertEqual(value.annotations, {})
+
+    def test_custom_defaults_converted(self) -> None:
+        has_defaults = self._struct("HasDefaults")
+        expected = {
+            "num": Int32Record(42),
+            "label": TextRecord("hello"),
+            "nums": ListRecord([Int32Record(1), Int32Record(2), Int32Record(3)]),
+            "flag": BoolRecord(True),
+        }
+        for name, want in expected.items():
+            field = has_defaults.field_by_name(name)
+            assert field is not None
+            with self.subTest(field=name):
+                self.assertEqual(field.custom_default, want)
+
+    def test_field_without_default_is_none(self) -> None:
+        inner = self._struct("Inner")
+        value = inner.field_by_name("value")
+        assert value is not None
+        self.assertIsNone(value.custom_default)
 
 
 class _StubResolver:

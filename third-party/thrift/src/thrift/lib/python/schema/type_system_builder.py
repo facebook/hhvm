@@ -555,6 +555,9 @@ def _populate_copy(
     elif isinstance(src, OpaqueAliasNode):
         assert isinstance(dst, OpaqueAliasNode)
         dst._set_target_type(_copy_type_ref(src.target_type, new_nodes))
+    # Annotation records are immutable value objects with no node edges, so
+    # sharing them across the copy keeps the result independent of source nodes.
+    dst._set_annotations(src.annotations)
 
 
 def _copy_field(
@@ -564,6 +567,9 @@ def _copy_field(
         identity=FieldIdentity(field.identity.id, field.identity.name),
         presence=field.presence,
         type=_copy_type_ref(field.type, new_nodes),
+        # Defaults and annotations are immutable value records: safe to share.
+        custom_default=field.custom_default,
+        annotations=field.annotations,
     )
 
 

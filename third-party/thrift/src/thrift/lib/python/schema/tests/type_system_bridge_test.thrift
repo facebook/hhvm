@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/scope.thrift"
 include "thrift/lib/thrift/any.thrift"
 
 package "thrift.com/python/schema/ts_bridge"
@@ -76,4 +77,30 @@ enum Color {
   RED = 0,
   GREEN = 1,
   BLUE = 2,
+}
+
+// A user-defined structured annotation. @thrift.RuntimeAnnotation keeps it in
+// the runtime schema so the bridge can read its applied values.
+@thrift.RuntimeAnnotation
+@scope.Structured
+@scope.Field
+struct RecordAnno {
+  1: i32 count;
+  2: string label;
+}
+
+// Carries the annotation at both the definition level and on a field, so the
+// bridge populates node.annotations and field.annotations.
+@RecordAnno{count = 7, label = "outer"}
+struct Annotated {
+  @RecordAnno{count = 3, label = "field"}
+  1: i32 value;
+}
+
+// Fields with IDL custom defaults, exercising the protocol-Value -> record path.
+struct HasDefaults {
+  1: i32 num = 42;
+  2: string label = "hello";
+  3: list<i32> nums = [1, 2, 3];
+  4: bool flag = true;
 }

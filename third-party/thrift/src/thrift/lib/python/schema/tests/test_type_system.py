@@ -17,6 +17,7 @@
 import unittest
 from typing import assert_never
 
+from thrift.lib.python.schema._record import Int32Record
 from thrift.lib.python.schema.type_system import (
     DefinitionNode,
     EnumNode,
@@ -70,6 +71,26 @@ def _i32_field(field_id: int, name: str) -> FieldDefinition:
         presence=PresenceQualifier.UNQUALIFIED,
         type=PrimitiveTypeRef(Primitive.I32),
     )
+
+
+class AnnotationViewTest(unittest.TestCase):
+    def test_field_annotations_is_read_only_view(self) -> None:
+        field = FieldDefinition(
+            identity=FieldIdentity(1, "f"),
+            presence=PresenceQualifier.UNQUALIFIED,
+            type=PrimitiveTypeRef(Primitive.I32),
+            annotations={"a": Int32Record(1)},
+        )
+        with self.assertRaises(TypeError):
+            field.annotations["b"] = Int32Record(2)  # pyre-ignore[16]: read-only
+        self.assertEqual(dict(field.annotations), {"a": Int32Record(1)})
+
+    def test_node_annotations_is_read_only_view(self) -> None:
+        node = StructNode(uri="test/S")
+        node._set_annotations({"a": Int32Record(1)})
+        with self.assertRaises(TypeError):
+            node.annotations["b"] = Int32Record(2)  # pyre-ignore[16]: read-only
+        self.assertEqual(dict(node.annotations), {"a": Int32Record(1)})
 
 
 class TypeRefDiscriminationTest(unittest.TestCase):

@@ -35,7 +35,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientConnectionErrorHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
@@ -58,7 +58,7 @@ using rocket::RocketResponseMessage;
 using ParsedFrame = apache::thrift::fast_thrift::frame::read::ParsedFrame;
 
 // Bring handler types into scope
-using rocket::client::handler::RocketClientErrorFrameHandler;
+using rocket::client::handler::RocketClientConnectionErrorHandler;
 using rocket::client::handler::RocketClientFrameCodecHandler;
 using rocket::client::handler::RocketClientRequestResponseHandler;
 using rocket::client::handler::RocketClientSetupFrameHandler;
@@ -76,7 +76,7 @@ HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
 HANDLER_TAG(rocket_client_request_response_handler);
-HANDLER_TAG(rocket_client_error_frame_handler);
+HANDLER_TAG(rocket_client_connection_error_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 HANDLER_TAG(error_injection_inbound_handler);
 HANDLER_TAG(outbound_write_fail_handler);
@@ -217,8 +217,8 @@ class RocketClientIntegrationTest : public ::testing::Test {
                               folly::IOBuf::copyBuffer("setup"),
                               std::unique_ptr<folly::IOBuf>());
                         })
-                    .addNextInbound<RocketClientErrorFrameHandler>(
-                        rocket_client_error_frame_handler_tag)
+                    .addNextInbound<RocketClientConnectionErrorHandler>(
+                        rocket_client_connection_error_handler_tag)
                     .addNextDuplex<RocketClientStreamStateHandler>(
                         rocket_client_stream_state_handler_tag)
                     .addNextInbound<RocketClientRequestResponseHandler>(
@@ -290,8 +290,8 @@ class RocketClientIntegrationTest : public ::testing::Test {
                         error_injection_inbound_handler_tag,
                         failStreamId,
                         std::move(failWith))
-                    .addNextInbound<RocketClientErrorFrameHandler>(
-                        rocket_client_error_frame_handler_tag)
+                    .addNextInbound<RocketClientConnectionErrorHandler>(
+                        rocket_client_connection_error_handler_tag)
                     .addNextDuplex<RocketClientStreamStateHandler>(
                         rocket_client_stream_state_handler_tag)
                     .addNextInbound<RocketClientRequestResponseHandler>(
@@ -358,8 +358,8 @@ class RocketClientIntegrationTest : public ::testing::Test {
                         })
                     .addNextOutbound<OutboundWriteFailHandler>(
                         outbound_write_fail_handler_tag)
-                    .addNextInbound<RocketClientErrorFrameHandler>(
-                        rocket_client_error_frame_handler_tag)
+                    .addNextInbound<RocketClientConnectionErrorHandler>(
+                        rocket_client_connection_error_handler_tag)
                     .addNextDuplex<RocketClientStreamStateHandler>(
                         rocket_client_stream_state_handler_tag)
                     .addNextInbound<RocketClientRequestResponseHandler>(

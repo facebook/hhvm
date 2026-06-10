@@ -227,21 +227,20 @@ Server
   ├─ CONNECTION_CLOSE        ──► ERROR frame (streamId 0)
   │   (graceful shutdown)        │
   │                              ▼
-  │                           RocketClientErrorFrameHandler
+  │                           RocketClientConnectionErrorHandler
   │                              │
   │                              ▼
-  │                           TTransportException(NOT_OPEN)
+  │                           RocketClientEvent (ConnectionClose, no exception raised)
   │                              │
   │                              ▼
-  │                           Thrift adapter onException()
-  │                              └─ state_ = State::Closing
-  │                              └─ New writes rejected, inflight completes
-  │                              └─ TCP EOF later → state_ = State::Closed, fail remaining
+  │                           Thrift adapter onEvent()
+  │                              └─ Relays via onClose callback
+  │                              └─ In-flight requests untouched
   │
   └─ CONNECTION_ERROR,       ──► ERROR frame (streamId 0)
      INVALID_SETUP, etc.         │
                                  ▼
-                              RocketClientErrorFrameHandler
+                              RocketClientConnectionErrorHandler
                                  │
                                  ▼
                               TTransportException (type varies)

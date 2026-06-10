@@ -49,7 +49,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientConnectionErrorHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
@@ -94,7 +94,7 @@ HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
 HANDLER_TAG(rocket_client_request_response_handler);
-HANDLER_TAG(rocket_client_error_frame_handler);
+HANDLER_TAG(rocket_client_connection_error_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 HANDLER_TAG(thrift_client_metadata_push_handler);
 HANDLER_TAG(thrift_client_checksum_handler);
@@ -255,8 +255,8 @@ std::unique_ptr<rocket::client::RocketClientConnection> createRocketConnection(
                     std::unique_ptr<folly::IOBuf>());
               })
           .addNextInbound<apache::thrift::fast_thrift::rocket::client::handler::
-                              RocketClientErrorFrameHandler>(
-              rocket_client_error_frame_handler_tag)
+                              RocketClientConnectionErrorHandler>(
+              rocket_client_connection_error_handler_tag)
           .addNextDuplex<apache::thrift::fast_thrift::rocket::client::handler::
                              RocketClientStreamStateHandler>(
               rocket_client_stream_state_handler_tag)

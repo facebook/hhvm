@@ -53,7 +53,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientConnectionErrorHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
@@ -106,7 +106,7 @@ HANDLER_TAG(client_frame_length_parser_handler);
 HANDLER_TAG(client_frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
-HANDLER_TAG(rocket_client_error_frame_handler);
+HANDLER_TAG(rocket_client_connection_error_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 HANDLER_TAG(rocket_client_request_response_handler);
 HANDLER_TAG(thrift_client_metadata_push_handler);
@@ -538,8 +538,8 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
                   rocket::client::handler::RocketClientSetupFrameHandler>(
                   rocket_client_setup_handler_tag, std::move(setupFactory))
               .addNextInbound<
-                  rocket::client::handler::RocketClientErrorFrameHandler>(
-                  rocket_client_error_frame_handler_tag)
+                  rocket::client::handler::RocketClientConnectionErrorHandler>(
+                  rocket_client_connection_error_handler_tag)
               .addNextDuplex<
                   rocket::client::handler::RocketClientStreamStateHandler>(
                   rocket_client_stream_state_handler_tag)

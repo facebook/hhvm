@@ -30,6 +30,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientAppAdapter.h>
@@ -115,7 +116,7 @@ TEST(RocketClientAppAdapterTest, OnPipelineActiveFiresOnActiveCallback) {
   int activeCount = 0;
 
   adapter->setLifecycleHandlers(
-      [&]() noexcept { activeCount++; }, []() noexcept {}, []() noexcept {});
+      [&]() noexcept { activeCount++; }, []() noexcept {});
 
   adapter->onPipelineActive();
   EXPECT_EQ(activeCount, 1);
@@ -126,21 +127,10 @@ TEST(RocketClientAppAdapterTest, OnPipelineInactiveFiresOnInactiveCallback) {
   int inactiveCount = 0;
 
   adapter->setLifecycleHandlers(
-      []() noexcept {}, [&]() noexcept { inactiveCount++; }, []() noexcept {});
+      []() noexcept {}, [&]() noexcept { inactiveCount++; });
 
   adapter->onPipelineInactive();
   EXPECT_EQ(inactiveCount, 1);
-}
-
-TEST(RocketClientAppAdapterTest, HandlerRemovedFiresOnCloseCallback) {
-  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
-  int closeCount = 0;
-
-  adapter->setLifecycleHandlers(
-      []() noexcept {}, []() noexcept {}, [&]() noexcept { closeCount++; });
-
-  adapter->handlerRemoved();
-  EXPECT_EQ(closeCount, 1);
 }
 
 TEST(RocketClientAppAdapterTest, LifecycleCallbacksNoOpWhenUnset) {
@@ -161,7 +151,7 @@ TEST(RocketClientAppAdapterTest, LifecycleAndErrorChannelsAreIndependent) {
       [](TypeErasedBox&&) noexcept -> Result { return Result::Success; },
       [&](folly::exception_wrapper&&) noexcept { errorCount++; });
   adapter->setLifecycleHandlers(
-      []() noexcept {}, [&]() noexcept { inactiveCount++; }, []() noexcept {});
+      []() noexcept {}, [&]() noexcept { inactiveCount++; });
 
   // Lifecycle event must NOT route through the error callback.
   adapter->onPipelineInactive();
@@ -201,6 +191,54 @@ TEST(RocketClientAppAdapterTest, HandlerRemovedClearsOnWriteReadyCallback) {
   adapter->onWriteReady();
 
   EXPECT_EQ(readyCount, 0);
+}
+
+TEST(RocketClientAppAdapterTest, OnEventFiresOnCloseCallback) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  int closeCount = 0;
+  adapter->setOnClose([&]() noexcept { closeCount++; });
+
+  adapter->onEvent(
+      RocketClientEventId::ConnectionClose,
+      channel_pipeline::erase_and_box(
+          RocketClientEvent{
+              .kind = RocketClientEvent::Kind::ConnectionClose,
+              .status = {},
+              .frameCount = 0,
+              .bytes = 0}));
+
+  EXPECT_EQ(closeCount, 1);
+}
+
+TEST(RocketClientAppAdapterTest, OnEventNoOpWhenCloseCallbackUnset) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  // No setOnClose — must not crash.
+  adapter->onEvent(
+      RocketClientEventId::ConnectionClose,
+      channel_pipeline::erase_and_box(
+          RocketClientEvent{
+              .kind = RocketClientEvent::Kind::ConnectionClose,
+              .status = {},
+              .frameCount = 0,
+              .bytes = 0}));
+}
+
+TEST(RocketClientAppAdapterTest, HandlerRemovedClearsOnCloseCallback) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  int closeCount = 0;
+  adapter->setOnClose([&]() noexcept { closeCount++; });
+
+  adapter->handlerRemoved();
+  adapter->onEvent(
+      RocketClientEventId::ConnectionClose,
+      channel_pipeline::erase_and_box(
+          RocketClientEvent{
+              .kind = RocketClientEvent::Kind::ConnectionClose,
+              .status = {},
+              .frameCount = 0,
+              .bytes = 0}));
+
+  EXPECT_EQ(closeCount, 0);
 }
 
 HANDLER_TAG(mock_head_tag);

@@ -23,8 +23,9 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientConnectionErrorHandler.h>
 
 namespace apache::thrift::fast_thrift::rocket::client::handler {
 
@@ -35,7 +36,7 @@ using apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox;
 namespace {
 
 /**
- * Mock context for testing RocketClientErrorFrameHandler.
+ * Mock context for testing RocketClientConnectionErrorHandler.
  * Captures frames fired via fireRead() and exceptions via fireException().
  */
 class MockErrorContext {
@@ -49,7 +50,14 @@ class MockErrorContext {
     exception_ = std::move(e);
   }
 
+  void fireEvent(RocketClientEventId ev, TypeErasedBox&& evt) noexcept {
+    eventIds_.push_back(ev);
+    events_.push_back(std::move(evt));
+  }
+
   std::vector<TypeErasedBox>& readMessages() { return readMessages_; }
+  std::vector<TypeErasedBox>& events() { return events_; }
+  std::vector<RocketClientEventId>& eventIds() { return eventIds_; }
 
   bool hasException() const { return static_cast<bool>(exception_); }
 
@@ -57,11 +65,15 @@ class MockErrorContext {
 
   void reset() {
     readMessages_.clear();
+    events_.clear();
+    eventIds_.clear();
     exception_ = folly::exception_wrapper();
   }
 
  private:
   std::vector<TypeErasedBox> readMessages_;
+  std::vector<TypeErasedBox> events_;
+  std::vector<RocketClientEventId> eventIds_;
   folly::exception_wrapper exception_;
 };
 
@@ -145,25 +157,25 @@ RocketResponseMessage makeRocketResponse(
 
 } // namespace
 
-class RocketClientErrorFrameHandlerTest : public ::testing::Test {
+class RocketClientConnectionErrorHandlerTest : public ::testing::Test {
  protected:
   void SetUp() override { ctx_.reset(); }
 
   MockErrorContext ctx_;
-  RocketClientErrorFrameHandler handler_;
+  RocketClientConnectionErrorHandler handler_;
 };
 
 // =============================================================================
 // Handler Lifecycle
 // =============================================================================
 
-TEST_F(RocketClientErrorFrameHandlerTest, HandlerAddedAndRemovedNoOp) {
+TEST_F(RocketClientConnectionErrorHandlerTest, HandlerAddedAndRemovedNoOp) {
   // Just verify lifecycle methods don't crash
   handler_.handlerAdded(ctx_);
   handler_.handlerRemoved(ctx_);
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, OnConnectNoOp) {
+TEST_F(RocketClientConnectionErrorHandlerTest, OnConnectNoOp) {
   // onConnect should be a no-op
   handler_.onPipelineActive(ctx_);
   EXPECT_FALSE(ctx_.hasException());
@@ -174,7 +186,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, OnConnectNoOp) {
 // Non-ERROR Frame Pass-through
 // =============================================================================
 
-TEST_F(RocketClientErrorFrameHandlerTest, PayloadFramePassesThrough) {
+TEST_F(RocketClientConnectionErrorHandlerTest, PayloadFramePassesThrough) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -185,7 +197,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, PayloadFramePassesThrough) {
   EXPECT_FALSE(ctx_.hasException());
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, KeepAliveFramePassesThrough) {
+TEST_F(RocketClientConnectionErrorHandlerTest, KeepAliveFramePassesThrough) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -196,7 +208,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, KeepAliveFramePassesThrough) {
   EXPECT_FALSE(ctx_.hasException());
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, MetadataPushFramePassesThrough) {
+TEST_F(RocketClientConnectionErrorHandlerTest, MetadataPushFramePassesThrough) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -207,7 +219,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, MetadataPushFramePassesThrough) {
   EXPECT_FALSE(ctx_.hasException());
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, SetupFramePassesThrough) {
+TEST_F(RocketClientConnectionErrorHandlerTest, SetupFramePassesThrough) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -222,7 +234,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, SetupFramePassesThrough) {
 // Stream-Level ERROR Frame Pass-through (streamId > 0)
 // =============================================================================
 
-TEST_F(RocketClientErrorFrameHandlerTest, StreamLevelErrorPassesThrough) {
+TEST_F(RocketClientConnectionErrorHandlerTest, StreamLevelErrorPassesThrough) {
   // ERROR frame with streamId > 0 should pass through, not be handled here
   auto result = handler_.onRead(
       ctx_,
@@ -238,7 +250,8 @@ TEST_F(RocketClientErrorFrameHandlerTest, StreamLevelErrorPassesThrough) {
   EXPECT_FALSE(ctx_.hasException());
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, StreamLevelRejectedPassesThrough) {
+TEST_F(
+    RocketClientConnectionErrorHandlerTest, StreamLevelRejectedPassesThrough) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -257,7 +270,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, StreamLevelRejectedPassesThrough) {
 // Connection-Level ERROR Frame Handling (streamId == 0)
 // =============================================================================
 
-TEST_F(RocketClientErrorFrameHandlerTest, ConnectionCloseFiresException) {
+TEST_F(RocketClientConnectionErrorHandlerTest, ConnectionCloseFiresEvent) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -267,18 +280,21 @@ TEST_F(RocketClientErrorFrameHandlerTest, ConnectionCloseFiresException) {
           static_cast<uint32_t>(apache::thrift::fast_thrift::frame::ErrorCode::
                                     CONNECTION_CLOSE))));
 
-  EXPECT_EQ(result, Result::Error);
+  // CONNECTION_CLOSE is a graceful-drain signal: a RocketClientEvent with
+  // Kind::ConnectionClose is emitted up the pipeline (for the app adapter to
+  // relay to the thrift drain handler), the frame is consumed, and no
+  // connection-fatal exception fires.
+  EXPECT_EQ(result, Result::Success);
+  EXPECT_FALSE(ctx_.hasException());
   EXPECT_EQ(ctx_.readMessages().size(), 0);
-  EXPECT_TRUE(ctx_.hasException());
-  auto* ex =
-      ctx_.exception()
-          .get_exception<apache::thrift::transport::TTransportException>();
-  ASSERT_NE(ex, nullptr);
+  ASSERT_EQ(ctx_.events().size(), 1);
+  EXPECT_EQ(ctx_.eventIds()[0], RocketClientEventId::ConnectionClose);
   EXPECT_EQ(
-      ex->getType(), apache::thrift::transport::TTransportException::NOT_OPEN);
+      ctx_.events()[0].get<RocketClientEvent>().kind,
+      RocketClientEvent::Kind::ConnectionClose);
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, ConnectionErrorFiresException) {
+TEST_F(RocketClientConnectionErrorHandlerTest, ConnectionErrorFiresException) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -301,7 +317,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, ConnectionErrorFiresException) {
       apache::thrift::transport::TTransportException::END_OF_FILE);
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, InvalidSetupFiresException) {
+TEST_F(RocketClientConnectionErrorHandlerTest, InvalidSetupFiresException) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -325,7 +341,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, InvalidSetupFiresException) {
   EXPECT_NE(std::string(ex->what()).find("invalid setup"), std::string::npos);
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, UnsupportedSetupFiresException) {
+TEST_F(RocketClientConnectionErrorHandlerTest, UnsupportedSetupFiresException) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -350,7 +366,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, UnsupportedSetupFiresException) {
       std::string(ex->what()).find("unsupported setup"), std::string::npos);
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, RejectedSetupFiresException) {
+TEST_F(RocketClientConnectionErrorHandlerTest, RejectedSetupFiresException) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -373,7 +389,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, RejectedSetupFiresException) {
   EXPECT_NE(std::string(ex->what()).find("setup rejected"), std::string::npos);
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, RejectedResumeFiresException) {
+TEST_F(RocketClientConnectionErrorHandlerTest, RejectedResumeFiresException) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -396,7 +412,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, RejectedResumeFiresException) {
   EXPECT_NE(std::string(ex->what()).find("resume rejected"), std::string::npos);
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, UnknownErrorCodeFiresException) {
+TEST_F(RocketClientConnectionErrorHandlerTest, UnknownErrorCodeFiresException) {
   // Use an unknown error code value
   auto result = handler_.onRead(
       ctx_,
@@ -417,11 +433,12 @@ TEST_F(RocketClientErrorFrameHandlerTest, UnknownErrorCodeFiresException) {
   EXPECT_EQ(
       ex->getType(),
       apache::thrift::transport::TTransportException::END_OF_FILE);
-  EXPECT_NE(std::string(ex->what()).find("Unhandled error"), std::string::npos);
+  EXPECT_NE(
+      std::string(ex->what()).find("Unknown error code"), std::string::npos);
 }
 
 TEST_F(
-    RocketClientErrorFrameHandlerTest,
+    RocketClientConnectionErrorHandlerTest,
     ApplicationErrorOnConnectionFiresException) {
   auto result = handler_.onRead(
       ctx_,
@@ -443,10 +460,13 @@ TEST_F(
   EXPECT_EQ(
       ex->getType(),
       apache::thrift::transport::TTransportException::END_OF_FILE);
-  EXPECT_NE(std::string(ex->what()).find("Unhandled error"), std::string::npos);
+  EXPECT_NE(
+      std::string(ex->what()).find("Protocol violation"), std::string::npos);
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, RejectedOnConnectionFiresException) {
+TEST_F(
+    RocketClientConnectionErrorHandlerTest,
+    RejectedOnConnectionFiresException) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -467,10 +487,13 @@ TEST_F(RocketClientErrorFrameHandlerTest, RejectedOnConnectionFiresException) {
   EXPECT_EQ(
       ex->getType(),
       apache::thrift::transport::TTransportException::END_OF_FILE);
-  EXPECT_NE(std::string(ex->what()).find("Unhandled error"), std::string::npos);
+  EXPECT_NE(
+      std::string(ex->what()).find("Protocol violation"), std::string::npos);
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, CanceledOnConnectionFiresException) {
+TEST_F(
+    RocketClientConnectionErrorHandlerTest,
+    CanceledOnConnectionFiresException) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -491,10 +514,12 @@ TEST_F(RocketClientErrorFrameHandlerTest, CanceledOnConnectionFiresException) {
   EXPECT_EQ(
       ex->getType(),
       apache::thrift::transport::TTransportException::END_OF_FILE);
-  EXPECT_NE(std::string(ex->what()).find("Unhandled error"), std::string::npos);
+  EXPECT_NE(
+      std::string(ex->what()).find("Protocol violation"), std::string::npos);
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, InvalidOnConnectionFiresException) {
+TEST_F(
+    RocketClientConnectionErrorHandlerTest, InvalidOnConnectionFiresException) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -515,7 +540,8 @@ TEST_F(RocketClientErrorFrameHandlerTest, InvalidOnConnectionFiresException) {
   EXPECT_EQ(
       ex->getType(),
       apache::thrift::transport::TTransportException::END_OF_FILE);
-  EXPECT_NE(std::string(ex->what()).find("Unhandled error"), std::string::npos);
+  EXPECT_NE(
+      std::string(ex->what()).find("Protocol violation"), std::string::npos);
 }
 
 // =============================================================================
@@ -523,7 +549,8 @@ TEST_F(RocketClientErrorFrameHandlerTest, InvalidOnConnectionFiresException) {
 // =============================================================================
 
 TEST_F(
-    RocketClientErrorFrameHandlerTest, ErrorFrameWithEmptyPayloadUsesReserved) {
+    RocketClientConnectionErrorHandlerTest,
+    ErrorFrameWithEmptyPayloadUsesReserved) {
   // ERROR frame without error code payload should use RESERVED (0)
   auto result = handler_.onRead(
       ctx_,
@@ -536,18 +563,23 @@ TEST_F(
   EXPECT_EQ(result, Result::Error);
   EXPECT_TRUE(ctx_.hasException());
 
-  // RESERVED falls through to default case
+  // RESERVED is rejected as a reserved-code protocol violation.
   auto* ex =
       ctx_.exception()
           .get_exception<apache::thrift::transport::TTransportException>();
   ASSERT_NE(ex, nullptr);
+  EXPECT_EQ(
+      ex->getType(),
+      apache::thrift::transport::TTransportException::END_OF_FILE);
+  EXPECT_NE(
+      std::string(ex->what()).find("reserved error code"), std::string::npos);
 }
 
 // =============================================================================
 // Exception Forwarding
 // =============================================================================
 
-TEST_F(RocketClientErrorFrameHandlerTest, OnExceptionForwardsToContext) {
+TEST_F(RocketClientConnectionErrorHandlerTest, OnExceptionForwardsToContext) {
   auto ex = folly::make_exception_wrapper<std::runtime_error>("test error");
   handler_.onException(ctx_, std::move(ex));
 
@@ -559,7 +591,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, OnExceptionForwardsToContext) {
 // ErrorCode toString Tests
 // =============================================================================
 
-TEST_F(RocketClientErrorFrameHandlerTest, ToStringReturnsCorrectValues) {
+TEST_F(RocketClientConnectionErrorHandlerTest, ToStringReturnsCorrectValues) {
   EXPECT_EQ(
       toString(apache::thrift::fast_thrift::frame::ErrorCode::RESERVED),
       "RESERVED");
@@ -601,7 +633,8 @@ TEST_F(RocketClientErrorFrameHandlerTest, ToStringReturnsCorrectValues) {
 }
 
 TEST_F(
-    RocketClientErrorFrameHandlerTest, ToStringReturnsUnknownForInvalidCode) {
+    RocketClientConnectionErrorHandlerTest,
+    ToStringReturnsUnknownForInvalidCode) {
   auto unknownCode =
       static_cast<apache::thrift::fast_thrift::frame::ErrorCode>(0xDEADBEEF);
   EXPECT_EQ(toString(unknownCode), "UNKNOWN");
@@ -612,7 +645,8 @@ TEST_F(
 // =============================================================================
 
 TEST_F(
-    RocketClientErrorFrameHandlerTest, ErrorFrameWithMessageExtractsMessage) {
+    RocketClientConnectionErrorHandlerTest,
+    ErrorFrameWithMessageExtractsMessage) {
   std::string_view errorMsg = "Connection failed";
   auto result = handler_.onRead(
       ctx_,
@@ -639,7 +673,8 @@ TEST_F(
       std::string(ex->what()).find("Connection failed"), std::string::npos);
 }
 
-TEST_F(RocketClientErrorFrameHandlerTest, ErrorFrameWithEmptyMessageWorks) {
+TEST_F(
+    RocketClientConnectionErrorHandlerTest, ErrorFrameWithEmptyMessageWorks) {
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -669,7 +704,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, ErrorFrameWithEmptyMessageWorks) {
 }
 
 TEST_F(
-    RocketClientErrorFrameHandlerTest,
+    RocketClientConnectionErrorHandlerTest,
     ErrorFrameWithLongMessageExtractsMessage) {
   std::string longMsg(1024, 'x'); // 1KB message
   auto result = handler_.onRead(
@@ -696,7 +731,8 @@ TEST_F(
 }
 
 TEST_F(
-    RocketClientErrorFrameHandlerTest, ErrorFrameMessageWithSpecialCharsWorks) {
+    RocketClientConnectionErrorHandlerTest,
+    ErrorFrameMessageWithSpecialCharsWorks) {
   std::string_view errorMsg = "Error: connection refused\n\ttimeout=100ms";
   auto result = handler_.onRead(
       ctx_,

@@ -44,7 +44,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/bench/BenchContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientConnectionErrorHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
@@ -87,7 +87,7 @@ HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
 HANDLER_TAG(rocket_client_request_response_handler);
-HANDLER_TAG(rocket_client_error_frame_handler);
+HANDLER_TAG(rocket_client_connection_error_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 
 namespace {
@@ -198,8 +198,8 @@ struct BenchmarkFixture {
                        frame_length_encoder_handler_tag)
                    .addNextDuplex<RocketClientFrameCodecHandler>(
                        rocket_client_frame_codec_handler_tag)
-                   .addNextInbound<RocketClientErrorFrameHandler>(
-                       rocket_client_error_frame_handler_tag)
+                   .addNextInbound<RocketClientConnectionErrorHandler>(
+                       rocket_client_connection_error_handler_tag)
                    .addNextDuplex<RocketClientSetupFrameHandler>(
                        rocket_client_setup_handler_tag,
                        []() {
@@ -366,8 +366,8 @@ BENCHMARK(Rocket_SetupFrame, iters) {
                 frame_length_encoder_handler_tag)
             .addNextDuplex<RocketClientFrameCodecHandler>(
                 rocket_client_frame_codec_handler_tag)
-            .addNextInbound<RocketClientErrorFrameHandler>(
-                rocket_client_error_frame_handler_tag)
+            .addNextInbound<RocketClientConnectionErrorHandler>(
+                rocket_client_connection_error_handler_tag)
             .addNextDuplex<RocketClientSetupFrameHandler>(
                 rocket_client_setup_handler_tag,
                 []() {

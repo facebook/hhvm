@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
 
 #include <folly/ExceptionWrapper.h>
@@ -25,6 +26,8 @@
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 
 namespace apache::thrift::fast_thrift::rocket::client {
@@ -77,9 +80,14 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
   // the owner using rocket-domain terminology (connect/disconnect map to
   // the underlying onPipelineActive/onPipelineInactive). Distinct from
   // OnError: lifecycle events carry no exception, they just signal "the
-  // connection became connected / disconnected / was closed".
+  // connection became connected / disconnected".
   using OnConnectFn = folly::Function<void() noexcept>;
   using OnDisconnectFn = folly::Function<void() noexcept>;
+
+  // Notification that the transport is about to close: the server sent
+  // ERROR(CONNECTION_CLOSE) (graceful drain). NOT a lifecycle/destruction
+  // edge — the connection is still live and in-flight work keeps flowing.
+  // An upper pipeline (thrift) installs this to begin draining.
   using OnCloseFn = folly::Function<void() noexcept>;
 
   // Cross-pipeline write-ready relay: invoked when the rocket pipeline's
@@ -122,17 +130,17 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
   }
 
   void setLifecycleHandlers(
-      OnConnectFn connectHandler,
-      OnDisconnectFn disconnectHandler,
-      OnCloseFn closeHandler) noexcept {
+      OnConnectFn connectHandler, OnDisconnectFn disconnectHandler) noexcept {
     onConnect_ = std::move(connectHandler);
     onDisconnect_ = std::move(disconnectHandler);
-    onClose_ = std::move(closeHandler);
   }
 
   void setOnWriteReady(OnWriteReadyFn fn) noexcept {
     onWriteReady_ = std::move(fn);
   }
+
+  // Install the "transport about to close" (graceful-drain) notification.
+  void setOnClose(OnCloseFn fn) noexcept { onClose_ = std::move(fn); }
 
   /**
    * Fire onReadReady() on the rocket pipeline. The pipeline walks any
@@ -188,15 +196,12 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
   void handlerRemoved() noexcept {
     DCHECK(disconnected_);
     // Defensive: pipeline removed us without a prior deactivate. Fan out
-    // onDisconnect_ so the owner observes the disconnect before the close.
+    // onDisconnect_ so the owner observes the disconnect.
     if (!disconnected_) {
       disconnected_ = true;
       if (onDisconnect_) {
         onDisconnect_();
       }
-    }
-    if (onClose_) {
-      onClose_();
     }
     // Drop callbacks so any post-destroy use-after-detach (e.g. a queued
     // EventBase callback that still holds a stale captured `this`) sees
@@ -226,6 +231,23 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
   void onWriteReady() noexcept {
     if (onWriteReady_) {
       onWriteReady_();
+    }
+  }
+
+  // Subscribe only to the connection-close event; write-completion events on
+  // the same pipeline go to other subscribers.
+  static constexpr std::array<RocketClientEventId, 1> kSubscribedEvents{
+      RocketClientEventId::ConnectionClose};
+
+  // Relay a ConnectionClose event (server graceful drain) to the upper
+  // pipeline via onClose — the transport is about to close.
+  void onEvent(
+      RocketClientEventId /*ev*/,
+      const channel_pipeline::TypeErasedBox& evt) noexcept {
+    if (evt.get<RocketClientEvent>().kind ==
+            RocketClientEvent::Kind::ConnectionClose &&
+        onClose_) {
+      onClose_();
     }
   }
 

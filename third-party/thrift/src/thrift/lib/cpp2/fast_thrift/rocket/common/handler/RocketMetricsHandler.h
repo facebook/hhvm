@@ -39,7 +39,7 @@ HANDLER_TAG(rocket_metrics_handler);
 //
 // Pipeline placement:
 //   Server: ... → RocketServerStreamStateHandler → [RocketMetricsHandler] →
-//   RocketServerAppAdapter Client: ... → RocketClientErrorFrameHandler →
+//   RocketServerAppAdapter Client: ... → RocketClientConnectionErrorHandler →
 //   [RocketMetricsHandler] → ...
 template <Direction Dir, typename Stats>
 class RocketMetricsHandler {

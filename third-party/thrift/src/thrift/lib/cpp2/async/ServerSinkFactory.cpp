@@ -27,50 +27,6 @@ ServerSinkFactory::ServerSinkFactory() : startFunction_(nullptr) {}
 ServerSinkFactory::ServerSinkFactory(StartFunction&& fn)
     : startFunction_(std::move(fn)) {}
 
-ServerSinkFactory::ServerSinkFactory(
-    SinkConsumerImpl::Consumer&& consumer,
-    folly::Executor::KeepAlive<> serverExecutor,
-    uint64_t bufferSize,
-    uint64_t bufferReplenishThreshold,
-    std::chrono::milliseconds timeout)
-    : bufferSize_{bufferSize},
-      bufferReplenishThreshold_{bufferReplenishThreshold},
-      chunkTimeout_{timeout} {
-  startFunction_ = [consumer = std::move(consumer),
-                    serverExecutor = std::move(serverExecutor)](
-                       uint64_t bufferSize,
-                       uint64_t bufferReplenishThreshold,
-                       std::chrono::milliseconds chunkTimeout,
-                       folly::EventBase* evb,
-                       TilePtr&& interaction,
-                       ContextStack::UniquePtr contextStack,
-                       std::unique_ptr<ThriftSinkLog> sinkLog,
-                       FirstResponsePayload&& firstResponsePayload,
-                       SinkClientCallback* clientCallback) mutable {
-    DCHECK(evb->isInEventBaseThread());
-    SinkConsumerImpl sinkConsumer;
-    sinkConsumer.consumer = std::move(consumer);
-    sinkConsumer.bufferSize = bufferSize;
-    sinkConsumer.bufferReplenishThreshold = bufferReplenishThreshold;
-    sinkConsumer.chunkTimeout = chunkTimeout;
-    sinkConsumer.executor = serverExecutor;
-    sinkConsumer.interaction = std::move(interaction);
-    sinkConsumer.contextStack = std::move(contextStack);
-    sinkConsumer.sinkLog = std::move(sinkLog);
-
-    auto sink =
-        new ServerSinkBridge(std::move(sinkConsumer), *evb, clientCallback);
-    auto sinkPtr = sink->copy();
-
-    std::ignore = clientCallback->onFirstResponse(
-        std::move(firstResponsePayload), evb, sink);
-    folly::coro::co_withExecutor(
-        std::move(serverExecutor),
-        folly::coro::co_invoke(&ServerSinkBridge::start, std::move(sinkPtr)))
-        .start();
-  };
-}
-
 void ServerSinkFactory::start(
     FirstResponsePayload&& payload,
     SinkClientCallback* callback,
@@ -122,7 +78,7 @@ ServerSinkFactory::ServerSinkFactory(
                        FirstResponsePayload&& firstResponsePayload,
                        SinkClientCallback* clientCallback) {
     DCHECK(evb->isInEventBaseThread());
-    SinkConsumerImpl sinkConsumer;
+    SinkBridgeContext sinkConsumer;
     sinkConsumer.bufferSize = bufferSize;
     sinkConsumer.bufferReplenishThreshold = bufferReplenishThreshold;
     sinkConsumer.chunkTimeout = chunkTimeout;

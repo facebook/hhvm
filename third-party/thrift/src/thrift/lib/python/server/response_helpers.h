@@ -23,6 +23,7 @@
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/async/ServerSinkBridge.h>
+#include <thrift/lib/cpp2/async/ServerSinkBridgeInput.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
@@ -134,51 +135,39 @@ static void throw_wrapped(
   }
 }
 
-#if FOLLY_HAS_COROUTINES
-template <typename ProtocolWriter>
-folly::coro::Task<folly::Try<StreamPayload>> consumeSink(
-    folly::Function<folly::coro::Task<std::unique_ptr<folly::IOBuf>>(
-        folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>)> consumer,
-    folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> gen) {
-  folly::exception_wrapper ew;
-  PythonStreamElementEncoder<ProtocolWriter> encoder;
-  try {
-    std::unique_ptr<folly::IOBuf> finalResponse = co_await consumer(
-        [](folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> gen_)
-            -> folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> {
-          while (auto item = co_await gen_.next()) {
-            co_yield folly::coro::co_result(
-                decode_stream_element(std::move(*item)));
-          }
-        }(std::move(gen)));
-    co_return encoder(std::move(finalResponse));
-  } catch (...) {
-    ew = folly::exception_wrapper(folly::current_exception());
-  }
-  co_return encoder(std::move(ew));
-}
-#endif
-
 template <typename ProtocolWriter>
 apache::thrift::detail::ServerSinkFactory toServerSinkFactory(
     SinkConsumer<std::unique_ptr<folly::IOBuf>, std::unique_ptr<folly::IOBuf>>&&
         sinkConsumer,
     folly::Executor::KeepAlive<> executor) {
 #if FOLLY_HAS_COROUTINES
-  auto consumer =
-      [innerConsumer = std::move(sinkConsumer.consumer)](
-          folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> gen) mutable
-      -> folly::coro::Task<folly::Try<StreamPayload>> {
-    return consumeSink<ProtocolWriter>(
-        std::move(innerConsumer), std::move(gen));
+  // The decode step (previously a wrapping generator inside the consumer) is
+  // now performed by ServerSinkBridge::getInput<T>() using this decoder.
+  // Encoding of the final response and of exceptions moves into the encode
+  // functions.
+  static PythonSinkElementDecoder decoder;
+
+  auto encodeFinalResponse = [](std::unique_ptr<folly::IOBuf>&& finalResponse)
+      -> folly::Try<StreamPayload> {
+    PythonStreamElementEncoder<ProtocolWriter> encoder;
+    return encoder(std::move(finalResponse));
   };
-  apache::thrift::detail::ServerSinkFactory sinkFactory{
-      std::move(consumer),
+
+  auto encodeException =
+      [](folly::exception_wrapper&& ew) -> folly::Try<StreamPayload> {
+    PythonStreamElementEncoder<ProtocolWriter> encoder;
+    return encoder(std::move(ew));
+  };
+
+  return apache::thrift::detail::ServerSinkFactory(
+      std::move(sinkConsumer.consumer),
+      decoder,
+      std::move(encodeFinalResponse),
+      std::move(encodeException),
       std::move(executor),
       sinkConsumer.bufferSize,
       sinkConsumer.bufferReplenishThreshold,
-      sinkConsumer.sinkOptions.chunkTimeout};
-  return sinkFactory;
+      sinkConsumer.sinkOptions.chunkTimeout);
 #else
   std::terminate();
 #endif

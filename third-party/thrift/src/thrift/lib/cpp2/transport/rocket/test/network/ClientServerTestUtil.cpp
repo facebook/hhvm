@@ -42,7 +42,8 @@
 #include <wangle/acceptor/Acceptor.h>
 #include <wangle/acceptor/ServerSocketConfig.h>
 
-#include <thrift/lib/cpp2/async/ServerSinkBridge.h>
+#include <thrift/lib/cpp2/async/ServerSinkBridgeInput.h>
+#include <thrift/lib/cpp2/async/ServerSinkFactory.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/core/TryUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
@@ -61,6 +62,15 @@
 namespace apache::thrift::rocket::test {
 
 namespace {
+
+struct IdentityStreamPayloadDecoder final
+    : apache::thrift::detail::SinkElementDecoder<StreamPayload> {
+  folly::Try<StreamPayload> operator()(
+      folly::Try<StreamPayload>&& payload) override {
+    return std::move(payload);
+  }
+};
+
 constexpr int32_t kClientVersion = 7;
 constexpr int32_t kServerVersion = 10;
 std::pair<std::unique_ptr<folly::IOBuf>, std::unique_ptr<folly::IOBuf>>
@@ -494,40 +504,48 @@ class RocketTestServer::RocketTestServerHandler : public RocketServerHandler {
       RocketServerFrameContext&&,
       ChannelRequestCallbackFactory factory) final {
     auto clientCallback = factory.create<RocketSinkClientCallback>();
-    apache::thrift::detail::SinkConsumerImpl impl{
-        [](folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> asyncGen)
-            -> folly::coro::Task<folly::Try<StreamPayload>> {
-          int current = 0;
-          while (auto item = co_await asyncGen.next()) {
-            auto payload = (*item).value();
-            auto data = folly::to<int32_t>(
-                folly::StringPiece(payload.payload->coalesce()));
-            EXPECT_EQ(current++, data);
-          }
-          co_return folly::Try<StreamPayload>(StreamPayload(
-              folly::IOBuf::copyBuffer(folly::to<std::string>(current)), {}));
-        },
+
+    static IdentityStreamPayloadDecoder decoder;
+
+    auto consumer = [](folly::coro::AsyncGenerator<StreamPayload&&> gen)
+        -> folly::coro::Task<StreamPayload> {
+      int current = 0;
+      while (auto item = co_await gen.next()) {
+        auto payload = std::move(*item);
+        auto data =
+            folly::to<int32_t>(folly::StringPiece(payload.payload->coalesce()));
+        EXPECT_EQ(current++, data);
+      }
+      co_return StreamPayload(
+          folly::IOBuf::copyBuffer(folly::to<std::string>(current)), {});
+    };
+
+    auto encodeFinalResponse =
+        [](StreamPayload&& response) -> folly::Try<StreamPayload> {
+      return folly::Try<StreamPayload>(std::move(response));
+    };
+
+    auto encodeException =
+        [](folly::exception_wrapper&& ew) -> folly::Try<StreamPayload> {
+      return folly::Try<StreamPayload>(std::move(ew));
+    };
+
+    apache::thrift::detail::ServerSinkFactory sinkFactory(
+        folly::Function<folly::coro::Task<StreamPayload>(
+            folly::coro::AsyncGenerator<StreamPayload&&>)>(std::move(consumer)),
+        decoder,
+        std::move(encodeFinalResponse),
+        std::move(encodeException),
+        folly::getKeepAliveToken(threadManagerThread_.getEventBase()),
         10,
         0,
-        std::chrono::milliseconds::zero(),
-        {},
-        {},
-        nullptr,
-        {}};
-    auto serverCallback = apache::thrift::detail::ServerSinkBridge::create(
-        std::move(impl), ioEvb_, clientCallback);
+        std::chrono::milliseconds::zero());
 
-    clientCallback->onFirstResponse(
+    sinkFactory.start(
         FirstResponsePayload{
             folly::IOBuf::copyBuffer(folly::to<std::string>(0)), {}},
-        nullptr /* evb */,
-        serverCallback.get());
-    co_withExecutor(
-        threadManagerThread_.getEventBase(),
-        folly::coro::co_invoke(
-            &apache::thrift::detail::ServerSinkBridge::start,
-            std::move(serverCallback)))
-        .start();
+        clientCallback,
+        &ioEvb_);
   }
 
   void connectionClosing() final {}

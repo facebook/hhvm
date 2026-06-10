@@ -34,7 +34,7 @@ template class TwoWayBridge<
     ServerSinkBridge>;
 
 ServerSinkBridge::ServerSinkBridge(
-    SinkConsumerImpl&& sinkConsumer,
+    SinkBridgeContext&& sinkConsumer,
     folly::EventBase& evb,
     SinkClientCallback* callback)
     : consumer_(std::move(sinkConsumer)),
@@ -50,7 +50,7 @@ ServerSinkBridge::ServerSinkBridge(
 ServerSinkBridge::~ServerSinkBridge() {}
 
 ServerSinkBridge::Ptr ServerSinkBridge::create(
-    SinkConsumerImpl&& sinkConsumer,
+    SinkBridgeContext&& sinkConsumer,
     folly::EventBase& evb,
     SinkClientCallback* callback) {
   return (new ServerSinkBridge(std::move(sinkConsumer), evb, callback))->copy();
@@ -92,81 +92,10 @@ void ServerSinkBridge::resetClientCallback(SinkClientCallback& clientCallback) {
   clientCallback_ = &clientCallback;
 }
 
-// start should be called on thread manager's thread
-folly::coro::Task<void> ServerSinkBridge::start() {
-  serverPush(
-      StreamMessage::RequestN{static_cast<int32_t>(consumer_.bufferSize)});
-  folly::Try<StreamPayload> finalResponse =
-      co_await consumer_.consumer(makeGenerator());
-
-  if (clientException_) {
-    co_return;
-  }
-
-  serverPush(StreamMessage::PayloadOrError{std::move(finalResponse)});
-}
-
 // TwoWayBridge consumer
 void ServerSinkBridge::consume() {
   evb_->runInEventBaseThread(
       [self = copy()]() { self->processClientMessages(); });
-}
-
-folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&>
-ServerSinkBridge::makeGenerator() {
-  notifySinkSubscribe();
-
-  const auto effectiveThreshold = [&] {
-    auto t = consumer_.bufferReplenishThreshold;
-    if (t == 0) {
-      return consumer_.bufferSize / 2;
-    }
-    CHECK_GT(t, 0) << "bufferReplenishThreshold must not be negative";
-    CHECK_LT(t, consumer_.bufferSize)
-        << "bufferReplenishThreshold (" << t
-        << ") must be strictly less than bufferSize (" << consumer_.bufferSize
-        << ")";
-    return t;
-  }();
-
-  int32_t counter = 0;
-  while (true) {
-    CoroConsumer consumer;
-    if (serverWait(&consumer)) {
-      folly::CancellationCallback cb{
-          co_await folly::coro::co_current_cancellation_token, [&]() {
-            notifySinkCancel();
-            serverClose();
-          }};
-      co_await consumer.wait();
-    }
-    co_await folly::coro::co_safe_point;
-    for (auto messages = serverGetMessages(); !messages.empty();
-         messages.pop()) {
-      auto& message = messages.front();
-
-      if (std::holds_alternative<StreamMessage::Complete>(message)) {
-        co_return;
-      }
-
-      auto& payload =
-          std::get<StreamMessage::PayloadOrError>(message).streamPayloadTry;
-
-      if (payload.hasException()) {
-        clientException_ = true;
-        co_yield std::move(payload);
-        co_return;
-      }
-
-      co_yield std::move(payload);
-      notifySinkConsumed();
-      counter++;
-      if (counter > static_cast<int32_t>(effectiveThreshold)) {
-        serverPush(StreamMessage::RequestN{counter});
-        counter = 0;
-      }
-    }
-  }
 }
 
 void ServerSinkBridge::processClientMessages() {

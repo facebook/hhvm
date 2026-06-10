@@ -36,11 +36,8 @@
 
 namespace apache::thrift::detail {
 
-struct SinkConsumerImpl {
+struct SinkBridgeContext {
 #if FOLLY_HAS_COROUTINES
-  using Consumer = folly::Function<folly::coro::Task<folly::Try<StreamPayload>>(
-      folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&>)>;
-  Consumer consumer;
   uint64_t bufferSize{};
   uint64_t bufferReplenishThreshold{};
   std::chrono::milliseconds chunkTimeout{};
@@ -48,7 +45,6 @@ struct SinkConsumerImpl {
   TilePtr interaction{};
   ContextStack::UniquePtr contextStack = nullptr;
   std::unique_ptr<ThriftSinkLog> sinkLog;
-  explicit operator bool() const { return (bool)consumer; }
 #endif
 };
 
@@ -83,12 +79,16 @@ class ServerSinkBridge : public TwoWayBridge<
   ~ServerSinkBridge() override;
 
   static Ptr create(
-      SinkConsumerImpl&& sinkConsumer,
+      SinkBridgeContext&& sinkConsumer,
       folly::EventBase& evb,
       SinkClientCallback* callback);
 
-  // start() should be called on the CPU thread
-  folly::coro::Task<void> start();
+  /// Fused bridge-read + decode generator. Reads from the TwoWayBridge and
+  /// decodes each payload inline, yielding typed values directly.
+  /// Defined in ServerSinkBridgeInput.h to avoid template overhead here.
+  template <typename T>
+  static folly::coro::AsyncGenerator<T&&> getInput(
+      ServerSinkBridge::Ptr bridge, SinkElementDecoder<T>* decode);
 
   uint64_t getBufferSize() const { return consumer_.bufferSize; }
 
@@ -123,11 +123,10 @@ class ServerSinkBridge : public TwoWayBridge<
 
  private:
   ServerSinkBridge(
-      SinkConsumerImpl&& sinkConsumer,
+      SinkBridgeContext&& sinkConsumer,
       folly::EventBase& evb,
       SinkClientCallback* callback);
 
-  folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> makeGenerator();
   void processClientMessages();
   void close();
 
@@ -143,7 +142,7 @@ class ServerSinkBridge : public TwoWayBridge<
   void notifySinkConsumed();
   void notifySinkCancel();
 
-  SinkConsumerImpl consumer_;
+  SinkBridgeContext consumer_;
   std::unique_ptr<ThriftSinkLog> sinkLog_;
   folly::Executor::KeepAlive<folly::EventBase> evb_;
   SinkClientCallback* clientCallback_;

@@ -54,17 +54,98 @@ class ServerSinkFactory {
   explicit ServerSinkFactory(StartFunction&& fn);
 
   explicit ServerSinkFactory(
-      SinkConsumerImpl::Consumer&& consumer,
-      folly::Executor::KeepAlive<> serverExecutor,
-      uint64_t bufferSize,
-      uint64_t bufferReplenishThreshold,
-      std::chrono::milliseconds timeout);
-
-  explicit ServerSinkFactory(
       ConsumerCallback* consumerCallback,
       uint64_t bufferSize,
       uint64_t bufferReplenishThreshold,
       std::chrono::milliseconds timeout);
+
+  /// Template constructor that captures a typed consumer, decoder, and
+  /// encode functions — avoiding type erasure of the consumer. Analogous
+  /// to ServerBiDiStreamFactory's template constructor.
+  template <
+      typename SinkType,
+      typename FinalResponseType,
+      typename EncodeFinalResponseFunc,
+      typename EncodeExceptionFunc>
+  explicit ServerSinkFactory(
+      folly::Function<folly::coro::Task<FinalResponseType>(
+          folly::coro::AsyncGenerator<SinkType&&>)>&& consumer,
+      SinkElementDecoder<SinkType>& decoder,
+      EncodeFinalResponseFunc encodeFinalResponse,
+      EncodeExceptionFunc encodeException,
+      folly::Executor::KeepAlive<> serverExecutor,
+      uint64_t bufferSize,
+      uint64_t bufferReplenishThreshold,
+      std::chrono::milliseconds timeout)
+      : bufferSize_{bufferSize},
+        bufferReplenishThreshold_{bufferReplenishThreshold},
+        chunkTimeout_{timeout} {
+    startFunction_ = [consumer = std::move(consumer),
+                      decode = &decoder,
+                      encodeFinalResponse = std::move(encodeFinalResponse),
+                      encodeException = std::move(encodeException),
+                      serverExecutor](
+                         uint64_t bufSize,
+                         uint64_t bufReplenishThreshold,
+                         std::chrono::milliseconds chunkTimeout,
+                         folly::EventBase* evb,
+                         TilePtr&& interaction,
+                         ContextStack::UniquePtr contextStack,
+                         std::unique_ptr<ThriftSinkLog> sinkLog,
+                         FirstResponsePayload&& firstResponsePayload,
+                         SinkClientCallback* clientCallback) mutable {
+      DCHECK(evb->isInEventBaseThread());
+      SinkBridgeContext sinkConsumer;
+      sinkConsumer.bufferSize = bufSize;
+      sinkConsumer.bufferReplenishThreshold = bufReplenishThreshold;
+      sinkConsumer.chunkTimeout = chunkTimeout;
+      sinkConsumer.executor = serverExecutor;
+      sinkConsumer.interaction = std::move(interaction);
+      sinkConsumer.contextStack = std::move(contextStack);
+      sinkConsumer.sinkLog = std::move(sinkLog);
+
+      auto sink =
+          new ServerSinkBridge(std::move(sinkConsumer), *evb, clientCallback);
+      auto sinkPtr = sink->copy();
+
+      std::ignore = clientCallback->onFirstResponse(
+          std::move(firstResponsePayload), evb, sink);
+
+      folly::coro::co_withExecutor(
+          std::move(serverExecutor),
+          folly::coro::co_invoke(
+              [consumer = std::move(consumer),
+               decode,
+               encodeFinalResponse = std::move(encodeFinalResponse),
+               encodeException = std::move(encodeException)](
+                  ServerSinkBridge::Ptr bridge) mutable
+                  -> folly::coro::Task<void> {
+                bridge->serverPush(
+                    StreamMessage::RequestN{
+                        static_cast<int32_t>(bridge->getBufferSize())});
+                try {
+                  FinalResponseType finalResponse = co_await consumer(
+                      ServerSinkBridge::getInput<SinkType>(
+                          bridge->copy(), decode));
+                  if (bridge->clientException_) {
+                    co_return;
+                  }
+                  bridge->serverPush(
+                      StreamMessage::PayloadOrError{
+                          encodeFinalResponse(std::move(finalResponse))});
+                } catch (...) {
+                  if (bridge->clientException_) {
+                    co_return;
+                  }
+                  bridge->serverPush(
+                      StreamMessage::PayloadOrError{encodeException(
+                          folly::exception_wrapper(std::current_exception()))});
+                }
+              },
+              std::move(sinkPtr)))
+          .start();
+    };
+  }
 
   void start(
       FirstResponsePayload&& payload,

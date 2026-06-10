@@ -41,6 +41,7 @@
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 #include <thrift/lib/cpp2/async/ServerBiDiStreamFactory.h>
+#include <thrift/lib/cpp2/async/ServerSinkBridgeInput.h>
 #include <thrift/lib/cpp2/async/ServiceInfoHolder.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
@@ -1638,43 +1639,33 @@ apache::thrift::detail::ServerSinkFactory toServerSinkFactory(
     [[maybe_unused]] SinkConsumer<SinkType, FinalResponseType>&& sinkConsumer,
     [[maybe_unused]] folly::Executor::KeepAlive<> executor) {
 #if FOLLY_HAS_COROUTINES
-  auto consumer =
-      [innerConsumer = std::move(sinkConsumer.consumer)](
-          folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> gen) mutable
-      -> folly::coro::Task<folly::Try<StreamPayload>> {
-    folly::exception_wrapper ew;
-    try {
-      FinalResponseType finalResponse = co_await innerConsumer(
-          [](folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> gen_)
-              -> folly::coro::AsyncGenerator<SinkType&&> {
-            while (auto item = co_await gen_.next()) {
-              auto payload = std::move(*item);
-              co_yield folly::coro::co_result(
-                  ap::decode_stream_element<
-                      ProtocolReader,
-                      SinkPResult,
-                      SinkType>(std::move(payload)));
-            }
-          }(std::move(gen)));
-      co_return folly::Try<StreamPayload>(StreamPayload(
-          ap::encode_stream_payload<ProtocolWriter, FinalResponsePResult>(
-              std::move(finalResponse)),
-          {}));
-    } catch (...) {
-      ew = folly::exception_wrapper(folly::current_exception());
-    }
-    co_return folly::Try<StreamPayload>(ap::encode_stream_exception<
-                                        ErrorBlame::SERVER,
-                                        ProtocolWriter,
-                                        FinalResponsePResult>(std::move(ew)));
+  auto& decoder = get_decoder<ProtocolReader, SinkPResult, SinkType>();
+
+  auto encodeFinalResponse =
+      [](FinalResponseType&& finalResponse) -> folly::Try<StreamPayload> {
+    return folly::Try<StreamPayload>(StreamPayload(
+        ap::encode_stream_payload<ProtocolWriter, FinalResponsePResult>(
+            std::move(finalResponse)),
+        {}));
   };
-  apache::thrift::detail::ServerSinkFactory sinkFactory{
-      std::move(consumer),
+
+  auto encodeException =
+      [](folly::exception_wrapper&& ew) -> folly::Try<StreamPayload> {
+    return folly::Try<StreamPayload>(ap::encode_stream_exception<
+                                     ErrorBlame::SERVER,
+                                     ProtocolWriter,
+                                     FinalResponsePResult>(std::move(ew)));
+  };
+
+  return apache::thrift::detail::ServerSinkFactory(
+      std::move(sinkConsumer.consumer),
+      decoder,
+      std::move(encodeFinalResponse),
+      std::move(encodeException),
       std::move(executor),
       sinkConsumer.bufferSize,
       sinkConsumer.bufferReplenishThreshold,
-      sinkConsumer.sinkOptions.chunkTimeout};
-  return sinkFactory;
+      sinkConsumer.sinkOptions.chunkTimeout);
 #else
   std::terminate();
 #endif

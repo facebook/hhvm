@@ -25,6 +25,8 @@ from thrift.python.exceptions import GeneratedError
 from thrift.python.protocol import RpcKind
 from thrift.python.serializer import Protocol
 
+_fbthrift_is_debug_build: bool
+
 usT = typing.TypeVar("usT", bound=StructOrUnion)
 sT = typing.TypeVar("sT", bound=Struct)
 eT = typing.TypeVar("eT", bound=Enum)

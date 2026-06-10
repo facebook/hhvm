@@ -41,8 +41,10 @@ class MyServiceInterface(
             b"serialize": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_serialize, interaction=b"SerialInteraction", creates_interaction=True, interaction_factory=self.createSerialInteraction),
             b"MyInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionInterface._fbthrift__handler_frobnicate, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
             b"MyInteraction.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionInterface._fbthrift__handler_ping, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
+            b"MyInteraction.truthify": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, MyInteractionInterface._fbthrift__handler_truthify, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
             b"MyInteractionFast.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionFastInterface._fbthrift__handler_frobnicate, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
             b"MyInteractionFast.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionFastInterface._fbthrift__handler_ping, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
+            b"MyInteractionFast.truthify": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, MyInteractionFastInterface._fbthrift__handler_truthify, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
             b"SerialInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, SerialInteractionInterface._fbthrift__handler_frobnicate, interaction=b"SerialInteraction", interaction_factory=self.createSerialInteraction),
         }
         return {**super().getFunctionTable(), **functionTable}
@@ -169,6 +171,29 @@ class MyInteractionInterface(
         args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_ping_args, args, protocol)
         value = await self.ping()
 
+    def truthify(
+            self
+        ) -> _typing.Awaitable[_typing.AsyncIterator[builtins.bool]] | _typing.AsyncIterator[builtins.bool]:
+        raise NotImplementedError("async def truthify is not implemented")
+
+    def _fbthrift__stream_wrapper_truthify(self, stream_generator: _typing.AsyncIterator[builtins.bool], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+        return CloseableGenerator(
+            stream_generator,
+            protocol,
+            _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_truthify_result_stream_elem,
+            (),
+        )
+
+    async def _fbthrift__handler_truthify(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_truthify_args, args, protocol)
+        value = self.truthify()
+        stream = value
+        if not isinstance(stream, _typing.AsyncIterator):
+            stream = await stream
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_truthify_result()
+        return_stream = self._fbthrift__stream_wrapper_truthify(stream, protocol)
+        return (serialize_iobuf(return_struct, protocol), return_stream)
+
 class MyInteractionFastInterface(
     _fbthrift_Interaction,
     metaclass=ABCMeta
@@ -193,6 +218,29 @@ class MyInteractionFastInterface(
     async def _fbthrift__handler_ping(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
         args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_ping_args, args, protocol)
         value = await self.ping()
+
+    def truthify(
+            self
+        ) -> _typing.Awaitable[_typing.AsyncIterator[builtins.bool]] | _typing.AsyncIterator[builtins.bool]:
+        raise NotImplementedError("async def truthify is not implemented")
+
+    def _fbthrift__stream_wrapper_truthify(self, stream_generator: _typing.AsyncIterator[builtins.bool], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+        return CloseableGenerator(
+            stream_generator,
+            protocol,
+            _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_truthify_result_stream_elem,
+            (),
+        )
+
+    async def _fbthrift__handler_truthify(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_truthify_args, args, protocol)
+        value = self.truthify()
+        stream = value
+        if not isinstance(stream, _typing.AsyncIterator):
+            stream = await stream
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_truthify_result()
+        return_stream = self._fbthrift__stream_wrapper_truthify(stream, protocol)
+        return (serialize_iobuf(return_struct, protocol), return_stream)
 
 class SerialInteractionInterface(
     _fbthrift_Interaction,
@@ -227,8 +275,10 @@ class FactoriesInterface(
             b"serialize": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_serialize, interaction=b"SerialInteraction", creates_interaction=True, interaction_factory=self.createSerialInteraction),
             b"MyInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionInterface._fbthrift__handler_frobnicate, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
             b"MyInteraction.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionInterface._fbthrift__handler_ping, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
+            b"MyInteraction.truthify": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, MyInteractionInterface._fbthrift__handler_truthify, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
             b"MyInteractionFast.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionFastInterface._fbthrift__handler_frobnicate, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
             b"MyInteractionFast.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionFastInterface._fbthrift__handler_ping, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
+            b"MyInteractionFast.truthify": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, MyInteractionFastInterface._fbthrift__handler_truthify, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
             b"SerialInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, SerialInteractionInterface._fbthrift__handler_frobnicate, interaction=b"SerialInteraction", interaction_factory=self.createSerialInteraction),
         }
         return {**super().getFunctionTable(), **functionTable}
@@ -355,6 +405,29 @@ class MyInteractionInterface(
         args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_ping_args, args, protocol)
         value = await self.ping()
 
+    def truthify(
+            self
+        ) -> _typing.Awaitable[_typing.AsyncIterator[builtins.bool]] | _typing.AsyncIterator[builtins.bool]:
+        raise NotImplementedError("async def truthify is not implemented")
+
+    def _fbthrift__stream_wrapper_truthify(self, stream_generator: _typing.AsyncIterator[builtins.bool], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+        return CloseableGenerator(
+            stream_generator,
+            protocol,
+            _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_truthify_result_stream_elem,
+            (),
+        )
+
+    async def _fbthrift__handler_truthify(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_truthify_args, args, protocol)
+        value = self.truthify()
+        stream = value
+        if not isinstance(stream, _typing.AsyncIterator):
+            stream = await stream
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_truthify_result()
+        return_stream = self._fbthrift__stream_wrapper_truthify(stream, protocol)
+        return (serialize_iobuf(return_struct, protocol), return_stream)
+
 class MyInteractionFastInterface(
     _fbthrift_Interaction,
     metaclass=ABCMeta
@@ -379,6 +452,29 @@ class MyInteractionFastInterface(
     async def _fbthrift__handler_ping(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
         args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_ping_args, args, protocol)
         value = await self.ping()
+
+    def truthify(
+            self
+        ) -> _typing.Awaitable[_typing.AsyncIterator[builtins.bool]] | _typing.AsyncIterator[builtins.bool]:
+        raise NotImplementedError("async def truthify is not implemented")
+
+    def _fbthrift__stream_wrapper_truthify(self, stream_generator: _typing.AsyncIterator[builtins.bool], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+        return CloseableGenerator(
+            stream_generator,
+            protocol,
+            _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_truthify_result_stream_elem,
+            (),
+        )
+
+    async def _fbthrift__handler_truthify(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_truthify_args, args, protocol)
+        value = self.truthify()
+        stream = value
+        if not isinstance(stream, _typing.AsyncIterator):
+            stream = await stream
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_truthify_result()
+        return_stream = self._fbthrift__stream_wrapper_truthify(stream, protocol)
+        return (serialize_iobuf(return_struct, protocol), return_stream)
 
 class SerialInteractionInterface(
     _fbthrift_Interaction,
@@ -410,8 +506,10 @@ class PerformInterface(
             b"foo": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
             b"MyInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionInterface._fbthrift__handler_frobnicate, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
             b"MyInteraction.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionInterface._fbthrift__handler_ping, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
+            b"MyInteraction.truthify": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, MyInteractionInterface._fbthrift__handler_truthify, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
             b"MyInteractionFast.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionFastInterface._fbthrift__handler_frobnicate, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
             b"MyInteractionFast.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionFastInterface._fbthrift__handler_ping, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
+            b"MyInteractionFast.truthify": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, MyInteractionFastInterface._fbthrift__handler_truthify, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
             b"SerialInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, SerialInteractionInterface._fbthrift__handler_frobnicate, interaction=b"SerialInteraction", interaction_factory=self.createSerialInteraction),
         }
         return {**super().getFunctionTable(), **functionTable}
@@ -489,6 +587,29 @@ class MyInteractionInterface(
         args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_ping_args, args, protocol)
         value = await self.ping()
 
+    def truthify(
+            self
+        ) -> _typing.Awaitable[_typing.AsyncIterator[builtins.bool]] | _typing.AsyncIterator[builtins.bool]:
+        raise NotImplementedError("async def truthify is not implemented")
+
+    def _fbthrift__stream_wrapper_truthify(self, stream_generator: _typing.AsyncIterator[builtins.bool], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+        return CloseableGenerator(
+            stream_generator,
+            protocol,
+            _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_truthify_result_stream_elem,
+            (),
+        )
+
+    async def _fbthrift__handler_truthify(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_truthify_args, args, protocol)
+        value = self.truthify()
+        stream = value
+        if not isinstance(stream, _typing.AsyncIterator):
+            stream = await stream
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_truthify_result()
+        return_stream = self._fbthrift__stream_wrapper_truthify(stream, protocol)
+        return (serialize_iobuf(return_struct, protocol), return_stream)
+
 class MyInteractionFastInterface(
     _fbthrift_Interaction,
     metaclass=ABCMeta
@@ -513,6 +634,29 @@ class MyInteractionFastInterface(
     async def _fbthrift__handler_ping(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
         args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_ping_args, args, protocol)
         value = await self.ping()
+
+    def truthify(
+            self
+        ) -> _typing.Awaitable[_typing.AsyncIterator[builtins.bool]] | _typing.AsyncIterator[builtins.bool]:
+        raise NotImplementedError("async def truthify is not implemented")
+
+    def _fbthrift__stream_wrapper_truthify(self, stream_generator: _typing.AsyncIterator[builtins.bool], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+        return CloseableGenerator(
+            stream_generator,
+            protocol,
+            _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_truthify_result_stream_elem,
+            (),
+        )
+
+    async def _fbthrift__handler_truthify(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_truthify_args, args, protocol)
+        value = self.truthify()
+        stream = value
+        if not isinstance(stream, _typing.AsyncIterator):
+            stream = await stream
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_truthify_result()
+        return_stream = self._fbthrift__stream_wrapper_truthify(stream, protocol)
+        return (serialize_iobuf(return_struct, protocol), return_stream)
 
 class SerialInteractionInterface(
     _fbthrift_Interaction,
@@ -544,6 +688,7 @@ class InteractWithSharedInterface(
             b"do_some_similar_things": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_do_some_similar_things),
             b"MyInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionInterface._fbthrift__handler_frobnicate, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
             b"MyInteraction.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionInterface._fbthrift__handler_ping, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
+            b"MyInteraction.truthify": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, MyInteractionInterface._fbthrift__handler_truthify, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
             b"SharedInteraction.init": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, SharedInteractionInterface._fbthrift__handler_init, interaction=b"SharedInteraction", interaction_factory=self.createSharedInteraction),
             b"SharedInteraction.do_something": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, SharedInteractionInterface._fbthrift__handler_do_something, interaction=b"SharedInteraction", interaction_factory=self.createSharedInteraction),
             b"SharedInteraction.tear_down": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, SharedInteractionInterface._fbthrift__handler_tear_down, interaction=b"SharedInteraction", interaction_factory=self.createSharedInteraction),
@@ -619,6 +764,29 @@ class MyInteractionInterface(
     async def _fbthrift__handler_ping(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
         args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_ping_args, args, protocol)
         value = await self.ping()
+
+    def truthify(
+            self
+        ) -> _typing.Awaitable[_typing.AsyncIterator[builtins.bool]] | _typing.AsyncIterator[builtins.bool]:
+        raise NotImplementedError("async def truthify is not implemented")
+
+    def _fbthrift__stream_wrapper_truthify(self, stream_generator: _typing.AsyncIterator[builtins.bool], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+        return CloseableGenerator(
+            stream_generator,
+            protocol,
+            _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_truthify_result_stream_elem,
+            (),
+        )
+
+    async def _fbthrift__handler_truthify(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_truthify_args, args, protocol)
+        value = self.truthify()
+        stream = value
+        if not isinstance(stream, _typing.AsyncIterator):
+            stream = await stream
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_truthify_result()
+        return_stream = self._fbthrift__stream_wrapper_truthify(stream, protocol)
+        return (serialize_iobuf(return_struct, protocol), return_stream)
 
 class SharedInteractionInterface(
     _fbthrift_Interaction,

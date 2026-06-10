@@ -14,11 +14,11 @@
 
 # pyre-strict
 
-"""End-to-end test for thrift-python server-side interactions (Commit 1:
-single request / single response only).
+"""End-to-end test for thrift-python server-side interactions (request/response
+and server streaming).
 
 An in-process thrift-python server using the hand-written interaction handlers
-is exercised by a real thrift-python client over Rocket. Streaming, sinks, and
+is exercised by a real thrift-python client over Rocket. Sinks, bidi, and
 lifecycle hooks are covered in later commits.
 """
 
@@ -151,6 +151,64 @@ class CalculatorInteractionTest(unittest.IsolatedAsyncioTestCase):
                         ApplicationError, "boom: factory intentionally failed"
                     ):
                         await boom.noop()
+
+    # -- server stream --
+
+    async def test_baseline_service_stream(self) -> None:
+        async with _InProcessServer(CalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                count, stream = await calc.serviceTicks(3)
+                self.assertEqual(count, 3)
+                got = [v async for v in stream]
+                self.assertEqual(got, [0, 1, 2])
+
+    async def test_stream_inside_interaction(self) -> None:
+        # The initial response and stream both derive from per-session state, so
+        # this fails unless the stream dispatches against this Counter instance.
+        async with _InProcessServer(CalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                async with calc.createCounter() as c:
+                    await c.add(10)
+                    initial, stream = await c.ticks(4)
+                    self.assertEqual(initial, 10)
+                    got = [v async for v in stream]
+                    self.assertEqual(got, [10, 11, 12, 13])
+
+    async def test_stream_no_first_response_inside_interaction(self) -> None:
+        async with _InProcessServer(CalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                async with calc.createCounter() as c:
+                    await c.add(3)
+                    stream = await c.drain()
+                    got = [v async for v in stream]
+                    self.assertEqual(got, [0, 1, 2])
+
+    async def test_stream_raises_declared_exception_inside_interaction(self) -> None:
+        async with _InProcessServer(CalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                async with calc.createCounter() as c:
+                    count, stream = await c.ticksThenFail(2)
+                    self.assertEqual(count, 2)
+                    got = []
+                    with self.assertRaises(NegativeError):
+                        async for v in stream:
+                            got.append(v)
+                    self.assertEqual(got, [0, 1])
+
+    async def test_stream_isolation_across_interactions(self) -> None:
+        # Two concurrent Counters with diverged state; each interaction's stream
+        # must reflect its own per-session handler instance.
+        async with _InProcessServer(CalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                async with calc.createCounter() as c1, calc.createCounter() as c2:
+                    await c1.add(100)
+                    await c2.add(5)
+                    i1, s1 = await c1.ticks(3)
+                    i2, s2 = await c2.ticks(3)
+                    self.assertEqual(i1, 100)
+                    self.assertEqual(i2, 5)
+                    self.assertEqual([v async for v in s1], [100, 101, 102])
+                    self.assertEqual([v async for v in s2], [5, 6, 7])
 
     async def test_explicit_factory_exception_propagates(self) -> None:
         # Same as above but via the explicit factory method `newBoom`

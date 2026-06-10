@@ -87,9 +87,9 @@ class {{service.name}}Interface(
         {{/each}}
         {{#each service.interactions as |interaction|}}
           {{#each interaction.supported_functions as |function|}}
-          {{#if (not function.sink_or_stream?)}}{{#if (not function.bidirectional_stream?)}}
+          {{#if (not function.sink?)}}{{#if (not function.bidirectional_stream?)}}
             b"{{interaction.name}}.{{function.name}}": _fbthrift_FunctionEntry({{#function}}{{> services/function_kind }}{{/function}}, {{interaction.name}}Interface._fbthrift__handler_{{function.name}}, interaction=b"{{interaction.name}}", interaction_factory=self.create{{interaction.name}}),
-          {{/if (not function.bidirectional_stream?)}}{{/if (not function.sink_or_stream?)}}
+          {{/if (not function.bidirectional_stream?)}}{{/if (not function.sink?)}}
           {{/each}}
         {{/each}}
         }
@@ -278,49 +278,65 @@ class {{service.name}}Interface(
         raise NotImplementedError("create{{interaction.name}} is not implemented")
 
 {{/each}}
-{{! Interaction handler interfaces. Single request/response + oneway only;
-    streaming/sink methods are generated in a later change. }}
+{{! Interaction handler interfaces. Request/response, oneway, and server-stream
+    methods; sink/bidi interaction methods are generated in a later change.
+    `service` is rebound to the interaction so the shared service-side partials
+    (get_handler_result, m_functions.*) resolve interaction struct names. }}
 {{#each service.interactions as |interaction|}}
+{{#let service = interaction}}
 class {{interaction.name}}Interface(
     _fbthrift_Interaction,
     metaclass=ABCMeta
 ):
-{{#if (not interaction.has_single_request_functions?)}}
+{{#if (not interaction.has_interface_methods?)}}
     pass
-{{/if (not interaction.has_single_request_functions?)}}
+{{/if (not interaction.has_interface_methods?)}}
 {{#each interaction.supported_functions as |function|}}
-{{#if (not function.sink_or_stream?)}}{{#if (not function.bidirectional_stream?)}}
+{{#if (not function.sink?)}}{{#if (not function.bidirectional_stream?)}}
 
-    async def {{function.name}}(
+    {{#if (not function.stream?)}}async {{/if}}{{#if function.stream_has_first_response?}}async {{/if}}def {{function.name}}(
             self{{#each function.params.fields as |field|}},
             {{field.py_name}}: {{#partial typehints.field_pep484_type field=field}}{{/each}}
         ) -> {{> services/service_func_return_type }}:
         raise NotImplementedError("async def {{function.name}} is not implemented")
 
+    {{#if function.stream?}}
+    def _fbthrift__stream_wrapper_{{function.name}}(self, stream_generator: _typing.AsyncIterator[{{#partial typehints.pep484_type type=function.stream.elem_type}}], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+        return CloseableGenerator(
+            stream_generator,
+            protocol,
+            {{#partial m_functions.second_return_type service=service function=function}},
+            ({{#each (array.enumerate function.stream.exceptions) as |index field|}}
+                UserExceptionMeta({{field.type.module_mangle}}.{{#partial m_types.unadapted_name type=field.type}}, "{{#partial m_fields.exception_field_name field=field index=index}}", '{{field.type.py3_namespace}}{{#partial m_types.unadapted_name type=field.type}}'),
+            {{/each}}),
+        )
+
+    {{/if function.stream?}}
     async def _fbthrift__handler_{{function.name}}(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) {{!
             }}-> {{> services/service_handler_return_type }}:
-        args_struct = deserialize({{#partial m_functions.args_type service=interaction function=function}}, args, protocol)
+        args_struct = deserialize({{#partial m_functions.args_type service=service function=function}}, args, protocol)
         {{#if function.exceptions?}}
         try:
-            value = await self.{{function.name}}({{#function.params.fields}}args_struct.{{field:py_name}},{{/function.params.fields}})
-            return_struct = {{#partial m_functions.return_type service=interaction function=function}}({{#if function.with_regular_response?}}success=value{{/if}})
+            {{> services/get_handler_result }}
         {{#each (array.enumerate function.exceptions) as |index field|}}
         except {{field.type.module_mangle}}.{{#partial m_types.unadapted_name type=field.type}} as e:
-            return_struct = {{#partial m_functions.return_type service=interaction function=function}}({{#partial m_fields.exception_field_name field=field index=index}}=e)
+            return_struct = {{#partial m_functions.return_type service=service function=function}}({{#partial m_fields.exception_field_name field=field index=index}}=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('{{field.type.py3_namespace}}{{#partial m_types.unadapted_name type=field.type}}', str(e), buf)
             raise exp
         {{/each}}
         {{#else}}
-        value = await self.{{function.name}}({{#function.params.fields}}args_struct.{{field:py_name}},{{/function.params.fields}})
-          {{#if (not function.oneway?)}}
-        return_struct = {{#partial m_functions.return_type service=interaction function=function}}({{#if function.with_regular_response?}}success=value{{/if}})
-          {{/if (not function.oneway?)}}
+        {{> services/get_handler_result }}
         {{/if function.exceptions?}}
         {{#if (not function.oneway?)}}
+          {{#if (not function.sink_or_stream?)}}
         return serialize_iobuf(return_struct, protocol)
+          {{/if (not function.sink_or_stream?)}}
+          {{#if function.stream?}}
+        return (serialize_iobuf(return_struct, protocol), return_stream)
+          {{/if function.stream?}}
         {{/if (not function.oneway?)}}
-{{/if (not function.bidirectional_stream?)}}{{/if (not function.sink_or_stream?)}}
+{{/if (not function.bidirectional_stream?)}}{{/if (not function.sink?)}}
 {{/each}}
 
 {{/each}}

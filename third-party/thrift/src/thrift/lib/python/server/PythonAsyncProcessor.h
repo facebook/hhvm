@@ -24,6 +24,7 @@
 #include <glog/logging.h>
 #include <folly/CppAttributes.h>
 #include <folly/ExceptionWrapper.h>
+#include <folly/Try.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
@@ -235,6 +236,17 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
   // dispatch layer binds the unbound `funcObject` to this instance.
   PyObject* FOLLY_NULLABLE getInteractionHandler(
       const HandlerFunc& function, apache::thrift::Cpp2RequestContext* context);
+
+  // Shared interaction step for a dispatch path: for a factory method, fulfill
+  // any parked TilePromise; for an inside-interaction method, return the
+  // per-session handler instance to bind the dispatch wrapper to. Returns
+  // `Py_None` (borrowed) for ordinary methods / when no tile is bound. If a
+  // factory method's Python factory raised, the returned Try holds that error
+  // so the caller can fail the request with the real message.
+  folly::Try<PyObject*> prepareInteractionDispatch(
+      const HandlerFunc& function,
+      apache::thrift::Cpp2RequestContext* context,
+      folly::EventBase* eb);
 
   PyObject* python_server_;
   const FunctionMapType& functions_;

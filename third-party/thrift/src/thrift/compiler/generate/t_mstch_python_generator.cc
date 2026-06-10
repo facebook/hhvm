@@ -973,17 +973,17 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
       }
       return to_array(functions, proto.of<t_function>());
     });
-    // True when the interaction has at least one single request/response or
-    // oneway function. These are the only functions currently emitted as
-    // abstract methods on the interaction interface; when none exist the class
-    // body is empty and needs a `pass`.
-    def.property("has_single_request_functions?", [](const t_interface& self) {
+    // True when the interaction has at least one function emitted as an
+    // abstract method on its interface, i.e. request/response, oneway, or
+    // server-stream (sink/bidi are not yet implemented). When none exist the
+    // class body is empty and needs a `pass`.
+    def.property("has_interface_methods?", [](const t_interface& self) {
       return std::any_of(
           self.functions().begin(),
           self.functions().end(),
           [](const t_function& func) {
-            return !func.is_interaction_constructor() &&
-                !func.sink_or_stream() && !func.is_bidirectional_stream();
+            return !func.is_interaction_constructor() && !func.sink() &&
+                !func.is_bidirectional_stream();
           });
     });
 

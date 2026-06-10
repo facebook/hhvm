@@ -265,6 +265,35 @@ PyObject* FOLLY_NULLABLE PythonAsyncProcessor::getInteractionHandler(
   return pyTile ? pyTile->handler() : nullptr;
 }
 
+folly::Try<PyObject*> PythonAsyncProcessor::prepareInteractionDispatch(
+    const HandlerFunc& function,
+    apache::thrift::Cpp2RequestContext* context,
+    folly::EventBase* eb) {
+  if (function.createsInteraction) {
+    // On factory failure, return the error so the caller can fail the request
+    // with the real message (instead of stranding its callback).
+    if (auto factoryError = maybeFulfillTilePromise(function, context, eb)) {
+      return folly::Try<PyObject*>(std::move(factoryError));
+    }
+  } else if (function.interactionType == InteractionType::INTERACTION_V1) {
+    if (PyObject* handler = getInteractionHandler(function, context)) {
+      return folly::Try<PyObject*>(handler);
+    }
+    // INTERACTION_V1 inside-method but no PythonTile is bound to this
+    // interaction id (e.g. the interaction's factory failed, or it was already
+    // terminated). `funcObject` here is the *unbound* dispatch wrapper, so we
+    // must not fall through to the Py_None path -- the Cython layer treats
+    // Py_None as "ordinary method, already bound" and would call the wrapper
+    // with the request IOBuf as `self`. Fail the request with a clear error.
+    return folly::Try<PyObject*>(folly::exception_wrapper(
+        apache::thrift::TApplicationException(
+            apache::thrift::TApplicationException::INTERNAL_ERROR,
+            fmt::format(
+                "No interaction handler bound for '{}'", function.fullName))));
+  }
+  return folly::Try<PyObject*>(Py_None);
+}
+
 std::unique_ptr<folly::IOBuf> PythonAsyncProcessor::getPythonMetadata() {
   do_python_import();
   return getSerializedPythonMetadata(python_server_);
@@ -283,28 +312,20 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::handlePythonServerCallback(
   // Interaction routing (req/resp path). A factory method may need to fulfill
   // a parked TilePromise; an inside-interaction method dispatches against the
   // per-session handler instance bound to this interaction id.
-  PyObject* interactionSelf = Py_None;
-  folly::exception_wrapper factoryError;
-  if (function.createsInteraction) {
-    factoryError =
-        maybeFulfillTilePromise(function, context, callback->getEventBase());
-  } else if (function.interactionType == InteractionType::INTERACTION_V1) {
-    if (PyObject* handler = getInteractionHandler(function, context)) {
-      interactionSelf = handler;
-    }
-  }
+  auto interactionSelf =
+      prepareInteractionDispatch(function, context, callback->getEventBase());
 
   auto [promise, future] =
       folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
-  if (factoryError) {
+  if (interactionSelf.hasException()) {
     // The interaction factory raised; fail this request with the real error so
     // the client sees the actual message (the implicit `performs` path reports
     // it the same way via the framework's constructor-error handling).
-    promise.setException(std::move(factoryError));
+    promise.setException(std::move(interactionSelf).exception());
   } else {
     const int retcode = handleServerCallback(
         function.funcObject,
-        interactionSelf,
+        *interactionSelf,
         function.fullName,
         context,
         std::move(promise),
@@ -338,20 +359,28 @@ PythonAsyncProcessor::handlePythonServerCallbackStreaming(
       folly::makePromiseContract<::apache::thrift::ResponseAndServerStream<
           std::unique_ptr<::folly::IOBuf>,
           std::unique_ptr<::folly::IOBuf>>>();
-  const int retcode = handleServerStreamCallback(
-      function.funcObject,
-      Py_None,
-      function.fullName,
-      context,
-      std::move(promise),
-      std::move(serializedRequest),
-      protocol,
-      kind);
-  if (retcode != 0) {
-    DCHECK(PyErr_Occurred());
-    // converts python error to thrown std::runtime_error
-    folly::python::handlePythonError(
-        "PythonAsyncProcessor::handlePythonServerCallbackStreaming: ");
+  auto interactionSelf =
+      prepareInteractionDispatch(function, context, callback->getEventBase());
+  if (interactionSelf.hasException()) {
+    // A stream-returning factory method whose factory raised; fail the request
+    // with the real message rather than stranding the callback.
+    promise.setException(std::move(interactionSelf).exception());
+  } else {
+    const int retcode = handleServerStreamCallback(
+        function.funcObject,
+        *interactionSelf,
+        function.fullName,
+        context,
+        std::move(promise),
+        std::move(serializedRequest),
+        protocol,
+        kind);
+    if (retcode != 0) {
+      DCHECK(PyErr_Occurred());
+      // converts python error to thrown std::runtime_error
+      folly::python::handlePythonError(
+          "PythonAsyncProcessor::handlePythonServerCallbackStreaming: ");
+    }
   }
   return std::move(future).defer([callback = std::move(callback)](auto&& t) {
     callback->complete(std::move(t));
@@ -444,28 +473,32 @@ PythonAsyncProcessor::handlePythonServerCallbackOneway(
   const auto& function = functions_.at(context->getMethodName());
 
   // Inside-interaction oneway methods dispatch against the per-session handler.
-  PyObject* interactionSelf = Py_None;
-  if (function.interactionType == InteractionType::INTERACTION_V1) {
-    if (PyObject* handler = getInteractionHandler(function, context)) {
-      interactionSelf = handler;
-    }
-  }
+  // Oneway methods are never interaction factories, so this never carries a
+  // factory error -- but it may carry a "no handler bound" error if the inside
+  // method's interaction has no live tile. There is no response to fail, so we
+  // just skip dispatch rather than calling the *unbound* wrapper with Py_None.
+  auto interactionSelf =
+      prepareInteractionDispatch(function, context, callback->getEventBase());
 
   auto [promise, future] = folly::makePromiseContract<folly::Unit>();
-  const int retcode = handleServerCallbackOneway(
-      function.funcObject,
-      interactionSelf,
-      function.fullName,
-      context,
-      std::move(promise),
-      std::move(serializedRequest),
-      protocol,
-      kind);
-  if (retcode != 0) {
-    DCHECK(PyErr_Occurred());
-    // converts python error to thrown std::runtime_error
-    folly::python::handlePythonError(
-        "PythonAsyncProcessor::handlePythonServerCallbackOneway: ");
+  if (interactionSelf.hasException()) {
+    promise.setException(std::move(interactionSelf).exception());
+  } else {
+    const int retcode = handleServerCallbackOneway(
+        function.funcObject,
+        *interactionSelf,
+        function.fullName,
+        context,
+        std::move(promise),
+        std::move(serializedRequest),
+        protocol,
+        kind);
+    if (retcode != 0) {
+      DCHECK(PyErr_Occurred());
+      // converts python error to thrown std::runtime_error
+      folly::python::handlePythonError(
+          "PythonAsyncProcessor::handlePythonServerCallbackOneway: ");
+    }
   }
   return std::move(future).defer([callback = std::move(callback)](auto&&) {});
 }

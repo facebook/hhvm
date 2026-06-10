@@ -15,18 +15,22 @@
  */
 
 /*
- * Test IDL for thrift-python server-side interaction support (single
- * request / single response only). Streaming, sinks, and lifecycle hooks are
- * covered in later commits.
+ * Test IDL for thrift-python server-side interaction support (request/response
+ * and server streaming). Sinks, bidi, and lifecycle hooks are covered in later
+ * commits.
  *
  * Exercises:
  *   - Handshake (factory functions): implicit `performs`, explicit factory,
  *     and a request/response-less factory on a dedicated interaction.
  *   - Request/response inside an interaction: void, scalar, struct, oneway,
  *     and a method that throws.
+ *   - Server streaming inside an interaction: with and without an initial
+ *     response, depending on per-session state, and a stream that raises a
+ *     declared exception mid-stream.
  *   - An interaction whose server-side factory raises, to exercise
  *     factory-exception propagation.
- *   - A baseline non-interaction method as a regression guard.
+ *   - Baseline non-interaction methods (request/response and stream) as
+ *     regression guards.
  */
 
 package "facebook.com/thrift/python/test/interactions/calculator"
@@ -58,6 +62,16 @@ interaction Counter {
   void raiseUnexpected();
   // raises ApplicationError directly from the handler.
   void raiseAppError();
+  // server stream from an interaction: initial response is the current value,
+  // stream yields `count` successive values starting at the current value. Both
+  // depend on per-session state, so this exercises per-session dispatch.
+  i32, stream<i32> ticks(1: i32 count);
+  // server stream with no initial response; yields the current value's worth of
+  // ticks (0..value-1), also dependent on per-session state.
+  stream<i32> drain();
+  // server stream that yields `count` values then raises a declared exception
+  // mid-stream, exercising the stream's UserExceptionMeta path.
+  i32, stream<i32 throws (1: NegativeError err)> ticksThenFail(1: i32 count);
 }
 
 // Minimal interaction to test the request/response-less factory path in
@@ -84,8 +98,9 @@ interaction SinkOnly {
 }
 
 service Calculator {
-  // baseline non-interaction method (regression guard)
+  // baseline non-interaction methods (regression guard)
   i32 echo(1: i32 n);
+  i32, stream<i32> serviceTicks(1: i32 count);
 
   // implicit factory: client gets `createCounter()`
   performs Counter;

@@ -29,6 +29,8 @@ because the Tile is installed via ``create<Interaction>``.
 
 from __future__ import annotations
 
+from collections.abc import AsyncGenerator, AsyncIterator
+
 from calculator.thrift_services import (
     BoomInterface,
     CalculatorInterface,
@@ -80,6 +82,35 @@ class CounterHandler(CounterInterface):
             ApplicationErrorType.INTERNAL_ERROR, "deliberate app error"
         )
 
+    async def ticks(self, count: int) -> tuple[int, AsyncIterator[int]]:
+        # Initial response and stream values both derive from per-session state,
+        # so a stream bound to the wrong Counter instance would be observable.
+        start: int = self._value
+
+        async def gen() -> AsyncGenerator[int, None]:
+            for i in range(count):
+                yield start + i
+
+        return start, gen()
+
+    def drain(self) -> AsyncIterator[int]:
+        # No-initial-response stream; yields 0..value-1 from per-session state.
+        value: int = self._value
+
+        async def gen() -> AsyncGenerator[int, None]:
+            for i in range(value):
+                yield i
+
+        return gen()
+
+    async def ticksThenFail(self, count: int) -> tuple[int, AsyncIterator[int]]:
+        async def gen() -> AsyncGenerator[int, None]:
+            for i in range(count):
+                yield i
+            raise NegativeError(reason="stream exhausted")
+
+        return count, gen()
+
 
 class HeartbeatHandler(HeartbeatInterface):
     async def ping(self) -> None:
@@ -103,6 +134,13 @@ class SinkOnlyHandler(SinkOnlyInterface):
 class CalculatorHandler(CalculatorInterface):
     async def echo(self, n: int) -> int:
         return n
+
+    async def serviceTicks(self, count: int) -> tuple[int, AsyncIterator[int]]:
+        async def gen() -> AsyncGenerator[int, None]:
+            for i in range(count):
+                yield i
+
+        return count, gen()
 
     # Per-session Tile constructors invoked by the runtime.
     def createCounter(self) -> CounterHandler:

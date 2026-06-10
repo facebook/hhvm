@@ -57,6 +57,10 @@ frame/
 ├── FrameType.h               # FrameType enum, Flags class, protocol constants
 ├── FrameDescriptor.h         # Flyweight frame type metadata
 │
+├── handler/               # Shared wire codec
+│   ├── BUCK
+│   └── FrameCodecHandler.h    # BytesPtr ↔ ParsedFrame/ComposedFrame
+│
 ├── read/                  # Incoming frame handling
 │   ├── BUCK                  # Reading library targets
 │   ├── FrameMetadata.h       # 32-byte cached header fields
@@ -294,10 +298,10 @@ buck2 run @//mode/opt-clang-lto fbcode//thrift/lib/cpp2/fast_thrift/frame/bench:
 buck2 build fbcode//thrift/lib/cpp2/fast_thrift/frame:...
 
 # Build just reading libraries
-buck2 build fbcode//thrift/lib/cpp2/fast_thrift/frame/reading:...
+buck2 build fbcode//thrift/lib/cpp2/fast_thrift/frame/read:...
 
 # Build just writing libraries
-buck2 build fbcode//thrift/lib/cpp2/fast_thrift/frame/writing:...
+buck2 build fbcode//thrift/lib/cpp2/fast_thrift/frame/write:...
 
 # Run all tests
 buck2 test fbcode//thrift/lib/cpp2/fast_thrift/frame/...

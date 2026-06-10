@@ -343,8 +343,16 @@ class _fbthrift_SinkFinalResult(Struct, typing.Generic[TSinkFinal]):
 class FunctionEntry:
     rpc_kind: RpcKind
     handler: typing.Callable[..., object]
+    interaction: bytes
+    creates_interaction: bool
+    interaction_factory: typing.Callable[..., object] | None
     def __init__(
-        self, rpc_kind: RpcKind, handler: typing.Callable[..., object]
+        self,
+        rpc_kind: RpcKind,
+        handler: typing.Callable[..., object],
+        interaction: bytes = ...,
+        creates_interaction: bool = ...,
+        interaction_factory: typing.Callable[..., object] | None = ...,
     ) -> None: ...
 
 class ServiceInterface:

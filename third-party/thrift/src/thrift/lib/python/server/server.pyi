@@ -29,6 +29,7 @@ ThriftServer = _ThriftServer
 SSLPolicy = _SSLPolicy
 
 # This looks really dumb but otherwise this name doesn't get re-exported
+from thrift.python.server_impl.interactions import Interaction as Interaction
 from thrift.python.types import (
     FunctionEntry as FunctionEntry,
     ServiceInterface as ServiceInterface,

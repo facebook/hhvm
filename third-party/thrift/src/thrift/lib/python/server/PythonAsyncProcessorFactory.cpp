@@ -50,11 +50,17 @@ std::string getLifecycleFuncName(LifecycleFunc func) {
 }
 
 std::shared_ptr<const PythonAsyncProcessor::PythonMetadata> makeMetadata(
-    apache::thrift::RpcKind rpcKind) {
+    const HandlerFunc& function) {
+  std::optional<std::string> interactionName;
+  if (!function.interactionName.empty()) {
+    interactionName = std::string(function.interactionName);
+  }
   return std::make_shared<PythonAsyncProcessor::PythonMetadata>(
       PythonAsyncProcessor::PythonMetadata::ExecutorType::ANY,
-      PythonAsyncProcessor::PythonMetadata::InteractionType::NONE,
-      rpcKind);
+      function.interactionType,
+      function.kind,
+      interactionName,
+      function.createsInteraction);
 }
 } // namespace
 
@@ -105,7 +111,7 @@ PythonAsyncProcessorFactory::createMethodMetadata() {
       case apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE:
       case apache::thrift::RpcKind::SINK:
       case apache::thrift::RpcKind::BIDIRECTIONAL_STREAM:
-        result.emplace(methodName, makeMetadata(rpcKind));
+        result.emplace(methodName, makeMetadata(function));
         break;
     }
   }

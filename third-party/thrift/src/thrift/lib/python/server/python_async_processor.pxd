@@ -36,17 +36,39 @@ from folly.executor cimport cAsyncioExecutor
 ctypedef PyObject* PyObjPtr
 
 
+cdef extern from "thrift/lib/cpp2/async/AsyncProcessorFactory.h" namespace "::apache::thrift::AsyncProcessorFactory::MethodMetadata":
+    cdef enum cInteractionType "::apache::thrift::AsyncProcessorFactory::MethodMetadata::InteractionType":
+        # Explicit values are required: the C++ enum is
+        #   { UNKNOWN=0, NONE=1, INTERACTION_V1=2 } and Cython would otherwise
+        # assign 0, 1 in declaration order.
+        cInteractionType_NONE "::apache::thrift::AsyncProcessorFactory::MethodMetadata::InteractionType::NONE" = 1
+        cInteractionType_INTERACTION_V1 "::apache::thrift::AsyncProcessorFactory::MethodMetadata::InteractionType::INTERACTION_V1" = 2
+
 cdef extern from "thrift/lib/python/server/PythonAsyncProcessor.h" namespace "::apache::thrift::python":
     struct HandlerFunc:
         RpcKind kind
         PyObjPtr funcObject
         string fullName
+        string_view interactionName
+        cInteractionType interactionType
+        cbool createsInteraction
+        PyObjPtr factoryObject
 
     HandlerFunc makeHandlerFunc(
         RpcKind kind,
         PyObjPtr funcObject,
         const string& serviceName,
-        string_view functionName
+        string_view functionName,
+    )
+
+    HandlerFunc makeInteractionHandlerFunc(
+        RpcKind kind,
+        PyObjPtr funcObject,
+        const string& serviceName,
+        string_view functionName,
+        string_view interactionName,
+        cbool createsInteraction,
+        PyObjPtr factoryObject,
     )
 
 cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namespace "::apache::thrift::python":

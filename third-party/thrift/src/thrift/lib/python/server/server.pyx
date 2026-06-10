@@ -17,6 +17,7 @@ import sys
 import traceback
 
 from thrift.python.exceptions import ApplicationError
+from thrift.python.server_impl.interactions import Interaction
 from thrift.python.metadata import gen_metadata, ThriftMetadata
 from thrift.python.protocol import Protocol, RpcKind
 from thrift.python.types import FunctionEntry, ServiceInterface

@@ -18,7 +18,9 @@ from libcpp.memory cimport shared_ptr
 from libcpp.utility cimport move as cmove
 from libcpp cimport bool as cbool
 from folly.executor cimport get_executor
-from thrift.python.server_impl.python_async_processor cimport makeHandlerFunc
+from thrift.python.server_impl.python_async_processor cimport (
+    makeHandlerFunc,
+)
 from thrift.python.std_libcpp cimport bytes_to_string_view
 
 cdef cCreateMethodMetadataResult create(bytes function_name, RpcKind rpc_kind):
@@ -29,7 +31,10 @@ cdef cCreateMethodMetadataResult create(bytes function_name, RpcKind rpc_kind):
     cdef string_view function_name_view = bytes_to_string_view(function_name)
 
     funcs[function_name_view] = makeHandlerFunc(
-        rpc_kind, <PyObject*>None, serviceName, function_name_view,
+        rpc_kind,
+        <PyObject*>None,
+        serviceName,
+        function_name_view,
     )
 
     cdef shared_ptr[cPythonAsyncProcessorFactory] obj = cCreatePythonAsyncProcessorFactory(

@@ -16,9 +16,11 @@
 
 #include <memory>
 
+#include <folly/ScopeGuard.h>
 #include <folly/python/error.h>
 #include <folly/python/import.h>
 #include <thrift/lib/cpp/TApplicationException.h>
+#include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/python/server/PythonAsyncProcessor.h>
 #include <thrift/lib/python/server/python_async_processor_api.h> // @manual
 
@@ -27,6 +29,9 @@ namespace apache::thrift::python {
 using apache::thrift::detail::processServiceInterceptorsOnRequest;
 using apache::thrift::detail::ServiceInterceptorOnRequestArguments;
 using apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest;
+
+using InteractionType =
+    apache::thrift::AsyncProcessorFactory::MethodMetadata::InteractionType;
 
 namespace {
 
@@ -66,7 +71,198 @@ HandlerFunc makeHandlerFunc(
       kind,
       funcObject,
       fmt::format("{}.{}", serviceName, functionName),
+      /*interactionName=*/{},
+      InteractionType::NONE,
+      /*createsInteraction=*/false,
+      /*factoryObject=*/nullptr,
   };
+}
+
+HandlerFunc makeInteractionHandlerFunc(
+    apache::thrift::RpcKind kind,
+    PyObject* funcObject,
+    const std::string& serviceName,
+    std::string_view functionName,
+    std::string_view interactionName,
+    bool createsInteraction,
+    PyObject* factoryObject) {
+  return HandlerFunc{
+      kind,
+      funcObject,
+      fmt::format("{}.{}", serviceName, functionName),
+      interactionName,
+      // The factory method creates the interaction; an inside-interaction
+      // method (createsInteraction == false) routes via the Tile.
+      createsInteraction ? InteractionType::NONE
+                         : InteractionType::INTERACTION_V1,
+      createsInteraction,
+      factoryObject,
+  };
+}
+
+PythonTile::PythonTile(PyObject* handler, folly::Executor::KeepAlive<> executor)
+    : handler_(handler), executor_(std::move(executor)) {
+  // Precondition: the caller holds the GIL. Both construction sites hold it
+  // when building the tile right after invoking the Python factory:
+  // createInteractionImpl wraps it in a PyGILState_Ensure() region, and
+  // maybeFulfillTilePromise runs on the Python executor (loop thread, GIL
+  // held).
+  Py_XINCREF(handler_);
+}
+
+PythonTile::~PythonTile() {
+  if (handler_ == nullptr) {
+    return;
+  }
+  // The tile is destroyed on a C++ teardown thread that neither holds the GIL
+  // nor can safely acquire it (the interpreter may be finalizing). Drop the
+  // handler ref on the Python executor instead -- it runs on the asyncio loop
+  // thread with the GIL held, and the KeepAlive keeps it alive for this task.
+  executor_->add([handler = handler_] { Py_DECREF(handler); });
+}
+
+PyObject* FOLLY_NULLABLE
+PythonAsyncProcessor::findInteractionFactory(std::string_view name) {
+  auto it = interactionFactories_.find(name);
+  return it != interactionFactories_.end() ? it->second : nullptr;
+}
+
+std::unique_ptr<apache::thrift::Tile>
+PythonAsyncProcessor::createInteractionImpl(
+    const std::string& name, int16_t /*protocol*/) {
+  do_python_import();
+  PyObject* factory = findInteractionFactory(name);
+  if (factory == nullptr) {
+    return nullptr;
+  }
+  // PyGILState_Ensure() here is safe against interpreter finalization: this
+  // override only runs while a request that creates an interaction is being
+  // processed, i.e. on a live thrift request-processing thread. The Python
+  // `serve()` coroutine is parked on that C++ `ThriftServer::serve()` call the
+  // whole time, so the interpreter is up and not finalizing; and `serve()`
+  // joins all such threads (cleanUp -> stopWorkers /
+  // stopAcceptingAndJoinOutstandingRequests / stopCPUWorkers) before it returns
+  // -- so no thread can still be in here once Python can begin finalizing.
+  // (Contrast ~PythonTile, which can run during connection/server teardown as
+  // the interpreter shuts down, and so must not acquire the GIL itself.)
+  PyGILState_STATE g = PyGILState_Ensure();
+  SCOPE_EXIT {
+    PyGILState_Release(g);
+  };
+  PyObject* instance = callInteractionFactory(factory);
+  // PythonTile takes its own ref; drop the +1 from callInteractionFactory even
+  // if tile construction throws.
+  SCOPE_EXIT {
+    Py_XDECREF(instance);
+  };
+  if (instance == nullptr) {
+    // The Python factory raised; it propagates per the C-API convention
+    // (nullptr + error set). Surface it as a C++ exception -- the framework
+    // reports it to the client as an interaction-constructor error.
+    folly::python::handlePythonError("interaction factory failed: ");
+  }
+  std::unique_ptr<PythonTile> tile;
+  if (instance != Py_None) {
+    tile = std::make_unique<PythonTile>(instance, executor_);
+  }
+  return tile;
+}
+
+folly::exception_wrapper PythonAsyncProcessor::maybeFulfillTilePromise(
+    const HandlerFunc& function,
+    apache::thrift::Cpp2RequestContext* context,
+    folly::EventBase* eb) {
+  auto interactionId = context->getInteractionId();
+  auto* connCtx = context->getConnectionContext();
+  if (interactionId == 0 || connCtx == nullptr ||
+      function.interactionName.empty() || eb == nullptr) {
+    return {};
+  }
+  {
+    apache::thrift::detail::Cpp2ConnContextInternalAPI api(*connCtx);
+    if (dynamic_cast<apache::thrift::TilePromise*>(
+            api.findTile(interactionId)) == nullptr) {
+      return {}; // no parked promise; nothing to fulfill
+    }
+  }
+  PyObject* factory = findInteractionFactory(function.interactionName);
+  if (factory == nullptr) {
+    return {};
+  }
+  // This runs on the Python executor (asyncio loop thread) with the GIL already
+  // held: executeRequest hops the whole dispatch onto executor_ via
+  // `.via(executor_)` before reaching handlePythonServerCallback, so calling
+  // the Python factory here needs no manual GIL acquire (and no thread hop).
+  std::unique_ptr<PythonTile> pythonTile;
+  PyObject* instance = callInteractionFactory(factory);
+  // Drop the +1 from callInteractionFactory even if construction below throws.
+  SCOPE_EXIT {
+    Py_XDECREF(instance);
+  };
+  if (instance == nullptr) {
+    // The Python factory raised (C-API convention: nullptr + error set). Return
+    // it to the caller so the factory request fails with the real message; we
+    // can't throw here without stranding that request's HandlerCallback.
+    try {
+      folly::python::handlePythonError("interaction factory failed: ");
+    } catch (...) {
+      return folly::exception_wrapper(std::current_exception());
+    }
+  }
+  if (instance != Py_None) {
+    pythonTile = std::make_unique<PythonTile>(instance, executor_);
+  }
+  if (pythonTile == nullptr) {
+    return {};
+  }
+  // Re-resolve the TilePromise inside the EventBase thread to avoid a
+  // use-after-free if a concurrent caller already fulfilled and replaced the
+  // promise. All tile-map mutations happen on the EventBase thread, so the
+  // re-lookup + fulfill + replace is atomic with respect to other tile ops.
+  auto executor = executor_;
+  eb->runInEventBaseThread([eb,
+                            executor,
+                            tile = pythonTile.release(),
+                            interactionId,
+                            connCtx]() mutable {
+    apache::thrift::TilePtr tilePtr{tile, eb};
+    apache::thrift::detail::Cpp2ConnContextInternalAPI api(*connCtx);
+    if (auto* tpromise = dynamic_cast<apache::thrift::TilePromise*>(
+            api.findTile(interactionId))) {
+      tpromise->fulfill(*tilePtr, executor, *eb);
+      connCtx->tryReplaceTile(interactionId, std::move(tilePtr));
+    }
+    // else: someone already fulfilled; let our PythonTile drop on scope exit.
+  });
+  return {};
+}
+
+PyObject* FOLLY_NULLABLE PythonAsyncProcessor::getInteractionHandler(
+    const HandlerFunc& function, apache::thrift::Cpp2RequestContext* context) {
+  if (function.interactionType != InteractionType::INTERACTION_V1) {
+    return nullptr;
+  }
+  auto interactionId = context->getInteractionId();
+  auto* connCtx = context->getConnectionContext();
+  if (interactionId == 0 || connCtx == nullptr) {
+    return nullptr;
+  }
+  // Prefer the tile bound to the request's own context -- the framework's
+  // `TilePromise::fulfill()` sets it on the request before the conn-map
+  // `tryReplaceTile`, so `findTile()` on the conn map can momentarily return
+  // the stale TilePromise. `releaseTile()` + `setTile()` peeks safely (both on
+  // the request thread; there is no public read accessor).
+  apache::thrift::Tile* tile = nullptr;
+  auto reqTile = context->releaseTile();
+  if (reqTile) {
+    tile = reqTile.get();
+    context->setTile(std::move(reqTile));
+  } else {
+    apache::thrift::detail::Cpp2ConnContextInternalAPI api(*connCtx);
+    tile = api.findTile(interactionId);
+  }
+  auto* pyTile = dynamic_cast<PythonTile*>(tile);
+  return pyTile ? pyTile->handler() : nullptr;
 }
 
 std::unique_ptr<folly::IOBuf> PythonAsyncProcessor::getPythonMetadata() {
@@ -83,21 +279,44 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::handlePythonServerCallback(
         callback) {
   do_python_import();
   const auto& function = functions_.at(context->getMethodName());
+
+  // Interaction routing (req/resp path). A factory method may need to fulfill
+  // a parked TilePromise; an inside-interaction method dispatches against the
+  // per-session handler instance bound to this interaction id.
+  PyObject* interactionSelf = Py_None;
+  folly::exception_wrapper factoryError;
+  if (function.createsInteraction) {
+    factoryError =
+        maybeFulfillTilePromise(function, context, callback->getEventBase());
+  } else if (function.interactionType == InteractionType::INTERACTION_V1) {
+    if (PyObject* handler = getInteractionHandler(function, context)) {
+      interactionSelf = handler;
+    }
+  }
+
   auto [promise, future] =
       folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
-  const int retcode = handleServerCallback(
-      function.funcObject,
-      function.fullName,
-      context,
-      std::move(promise),
-      std::move(serializedRequest),
-      protocol,
-      kind);
-  if (retcode != 0) {
-    DCHECK(PyErr_Occurred());
-    // converts python error to thrown std::runtime_error
-    folly::python::handlePythonError(
-        "PythonAsyncProcessor::handlePythonServerCallback: ");
+  if (factoryError) {
+    // The interaction factory raised; fail this request with the real error so
+    // the client sees the actual message (the implicit `performs` path reports
+    // it the same way via the framework's constructor-error handling).
+    promise.setException(std::move(factoryError));
+  } else {
+    const int retcode = handleServerCallback(
+        function.funcObject,
+        interactionSelf,
+        function.fullName,
+        context,
+        std::move(promise),
+        std::move(serializedRequest),
+        protocol,
+        kind);
+    if (retcode != 0) {
+      DCHECK(PyErr_Occurred());
+      // converts python error to thrown std::runtime_error
+      folly::python::handlePythonError(
+          "PythonAsyncProcessor::handlePythonServerCallback: ");
+    }
   }
   return std::move(future).defer([callback = std::move(callback)](auto&& t) {
     callback->complete(std::move(t));
@@ -121,6 +340,7 @@ PythonAsyncProcessor::handlePythonServerCallbackStreaming(
           std::unique_ptr<::folly::IOBuf>>>();
   const int retcode = handleServerStreamCallback(
       function.funcObject,
+      Py_None,
       function.fullName,
       context,
       std::move(promise),
@@ -157,6 +377,7 @@ PythonAsyncProcessor::handlePythonServerCallbackSink(
           std::unique_ptr<::folly::IOBuf>>>();
   const int retcode = handleServerSinkCallback(
       function.funcObject,
+      Py_None,
       function.fullName,
       context,
       std::move(promise),
@@ -194,6 +415,7 @@ PythonAsyncProcessor::handlePythonServerCallbackBidi(
           std::unique_ptr<::folly::IOBuf>>>();
   const int retcode = handleServerBidiCallback(
       function.funcObject,
+      Py_None,
       function.fullName,
       context,
       std::move(promise),
@@ -220,9 +442,19 @@ PythonAsyncProcessor::handlePythonServerCallbackOneway(
     apache::thrift::HandlerCallbackBase::Ptr callback) {
   do_python_import();
   const auto& function = functions_.at(context->getMethodName());
+
+  // Inside-interaction oneway methods dispatch against the per-session handler.
+  PyObject* interactionSelf = Py_None;
+  if (function.interactionType == InteractionType::INTERACTION_V1) {
+    if (PyObject* handler = getInteractionHandler(function, context)) {
+      interactionSelf = handler;
+    }
+  }
+
   auto [promise, future] = folly::makePromiseContract<folly::Unit>();
   const int retcode = handleServerCallbackOneway(
       function.funcObject,
+      interactionSelf,
       function.fullName,
       context,
       std::move(promise),

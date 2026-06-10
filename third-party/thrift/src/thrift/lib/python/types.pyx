@@ -3293,11 +3293,37 @@ cdef class FunctionEntry:
     Replaces the legacy ``(rpc_kind, handler)`` tuple with a named, typed
     record so the dispatch layer reads fields by name instead of unpacking a
     positional tuple.
+
+    Interaction routing fields (all default to empty / False / None for
+    ordinary service methods):
+      - ``interaction``: the interaction name, set on both the factory method
+        that creates an interaction and on each inside-interaction method. C++
+        keys Tile creation and routing on this name.
+      - ``creates_interaction``: ``True`` for the factory method that creates
+        the interaction; ``False`` for a method dispatched *inside* an
+        interaction (which routes via the per-session Tile, INTERACTION_V1) and
+        for ordinary methods. For an inside method (``interaction`` set,
+        ``creates_interaction`` False), ``handler`` is the *unbound* dispatch
+        function, bound to the per-session handler instance at dispatch time.
+      - ``interaction_factory``: a zero-arg callable that constructs the
+        interaction's handler instance, used to create the per-session Tile. Set
+        on both the factory entry and inside-interaction entries (the latter
+        lets the runtime lazily construct the Tile for implicit ``performs``).
     """
 
-    def __cinit__(self, RpcKind rpc_kind, handler):
+    def __cinit__(
+        self,
+        RpcKind rpc_kind,
+        handler,
+        bytes interaction=b"",
+        bint creates_interaction=False,
+        interaction_factory=None,
+    ):
         self.rpc_kind = rpc_kind
         self.handler = handler
+        self.interaction = interaction
+        self.creates_interaction = creates_interaction
+        self.interaction_factory = interaction_factory
 
 
 def get_standard_immutable_default_value_for_type(TypeInfoBase typeinfo):

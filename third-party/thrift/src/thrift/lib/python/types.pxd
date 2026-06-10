@@ -353,6 +353,10 @@ cdef class ServiceInterface:
 cdef class FunctionEntry:
     cdef readonly RpcKind rpc_kind
     cdef readonly object handler
+    # Interaction routing metadata. Empty / False / None for ordinary methods.
+    cdef readonly bytes interaction
+    cdef readonly bint creates_interaction
+    cdef readonly object interaction_factory
 
 cdef const cTypeInfo* getCTypeInfo(type_info)
 cdef list_eq(object self, object other)

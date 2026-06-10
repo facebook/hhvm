@@ -379,6 +379,7 @@ async def lifecycle_coro(object func, str funcName, Promise_Py promise):
 
 cdef int combinedHandler(
     object func,
+    object interaction_self,
     string funcName,
     Cpp2RequestContext* ctx,
     Promise_Py promise,
@@ -386,12 +387,17 @@ cdef int combinedHandler(
     Protocol prot,
     RpcKind kind,
 ) except -1:
+    # For an inside-interaction method, `func` is the *unbound* dispatch
+    # function and `interaction_self` is the per-session handler instance; bind
+    # the two here. For ordinary service methods `interaction_self` is None and
+    # `func` is already a bound method.
+    cdef object call_func = func if interaction_self is None else func.__get__(interaction_self)
     reset_token = PyContextVar_Set(THRIFT_REQUEST_CONTEXT, RequestContext._fbthrift_create(ctx))
 
     try:
         asyncio.get_event_loop().create_task(
             serverCallback_coro(
-                func,
+                call_func,
                 funcName.decode('UTF-8'),
                 promise,
                 from_unique_ptr(cmove(serializedRequest.buffer)),
@@ -409,6 +415,7 @@ cdef api void handleLifecycleCallback(object func, string funcName, cFollyPromis
 
 cdef api int handleServerCallback(
     object func,
+    object interaction_self,
     string funcName,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[cIOBuf]] cPromise,
@@ -417,10 +424,11 @@ cdef api int handleServerCallback(
     RpcKind kind,
 ) except -1:
     cdef Promise_IOBuf __promise = Promise_IOBuf.create(cmove(cPromise))
-    return combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
+    return combinedHandler(func, interaction_self, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
 cdef api int handleServerStreamCallback(
     object func,
+    object interaction_self,
     string funcName,
     Cpp2RequestContext* ctx,
     cFollyPromise[cResponseAndServerStream[unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] cPromise,
@@ -429,10 +437,11 @@ cdef api int handleServerStreamCallback(
     RpcKind kind,
 ) except -1:
     cdef Promise_Stream __promise = Promise_Stream.create(cmove(cPromise))
-    return combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
+    return combinedHandler(func, interaction_self, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
 cdef api int handleServerSinkCallback(
     object func,
+    object interaction_self,
     string funcName,
     Cpp2RequestContext* ctx,
     cFollyPromise[cResponseAndSinkConsumer[unique_ptr[cIOBuf], unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] cPromise,
@@ -441,10 +450,11 @@ cdef api int handleServerSinkCallback(
     RpcKind kind,
 ) except -1:
     cdef Promise_Sink __promise = Promise_Sink.create(cmove(cPromise))
-    return combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
+    return combinedHandler(func, interaction_self, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
 cdef api int handleServerBidiCallback(
     object func,
+    object interaction_self,
     string funcName,
     Cpp2RequestContext* ctx,
     cFollyPromise[cResponseAndStreamTransformation[unique_ptr[cIOBuf], unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] cPromise,
@@ -453,10 +463,11 @@ cdef api int handleServerBidiCallback(
     RpcKind kind,
 ) except -1:
     cdef Promise_BiDi __promise = Promise_BiDi.create(cmove(cPromise))
-    return combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
+    return combinedHandler(func, interaction_self, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
 cdef api int handleServerCallbackOneway(
     object func,
+    object interaction_self,
     string funcName,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
@@ -465,12 +476,22 @@ cdef api int handleServerCallbackOneway(
     RpcKind kind,
 ) except -1:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit.create(cmove(cPromise))
-    return combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
+    return combinedHandler(func, interaction_self, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
 cdef api unique_ptr[cIOBuf] getSerializedPythonMetadata(object server):
     metadata = server.__get_metadata_service_response__()
     iobuf = serialize_iobuf(metadata, protocol=Protocol.BINARY)
     return cmove((<IOBuf>iobuf)._ours)
+
+cdef api object callInteractionFactory(object factory):
+    """Invoke a zero-arg interaction factory callable (``self.create<Name>``)
+    and return the new per-session handler instance. Called from C++
+    ``PythonAsyncProcessor::createInteractionImpl`` /
+    ``maybeFulfillTilePromise`` to construct a ``PythonTile``. A factory
+    exception is not suppressed: it propagates per the Python C-API convention
+    (Cython returns ``nullptr`` with the error set), and the C++ caller surfaces
+    it via ``folly::python::handlePythonError``."""
+    return factory()
 
 cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
     @staticmethod
@@ -482,15 +503,33 @@ cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
         cdef dict funcMap = server.getFunctionTable()
         cdef list lifecycleFuncs = [server.onStartServing, server.onStopRequested]
         cdef FunctionEntry entry
+        cdef PyObject* factory_obj
 
         for name, entry in funcMap.items():
             name_view = bytes_to_string_view(name)
-            funcs[name_view] = makeHandlerFunc(
-                entry.rpc_kind,
-                <PyObject*>entry.handler,
-                <bytes>server.service_name(),
-                name_view,
-            )
+            if entry.interaction:
+                # Factory or inside-interaction method. interactionName is a
+                # string_view into the Python bytes held by `entry` (kept alive
+                # by funcMap), matching the funcMap keys.
+                factory_obj = NULL
+                if entry.interaction_factory is not None:
+                    factory_obj = <PyObject*>entry.interaction_factory
+                funcs[name_view] = makeInteractionHandlerFunc(
+                    entry.rpc_kind,
+                    <PyObject*>entry.handler,
+                    <bytes>server.service_name(),
+                    name_view,
+                    bytes_to_string_view(entry.interaction),
+                    entry.creates_interaction,
+                    factory_obj,
+                )
+            else:
+                funcs[name_view] = makeHandlerFunc(
+                    entry.rpc_kind,
+                    <PyObject*>entry.handler,
+                    <bytes>server.service_name(),
+                    name_view,
+                )
 
         for lifecycle_func in lifecycleFuncs:
             lifecycle.push_back(<PyObject*>lifecycle_func)

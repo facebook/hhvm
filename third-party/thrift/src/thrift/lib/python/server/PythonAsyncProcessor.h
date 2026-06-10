@@ -19,10 +19,14 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <Python.h>
 #include <glog/logging.h>
+#include <folly/CppAttributes.h>
+#include <folly/ExceptionWrapper.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
+#include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/python/server/response_helpers.h>
@@ -37,13 +41,70 @@ struct HandlerFunc {
   apache::thrift::RpcKind kind;
   PyObject* funcObject;
   std::string fullName; // <serviceName>.<functionName>
+  // Interaction routing. For non-interaction methods these stay empty / NONE /
+  // false / null and behavior is unchanged.
+  //
+  // For an inside-interaction method (`interactionType == INTERACTION_V1`),
+  // `funcObject` is the *unbound* dispatch function (e.g.
+  // `CounterInterface._fbthrift__handler_add`); the Cython dispatch layer binds
+  // it to the per-session handler instance.
+  //
+  // `interactionName` is a view into the Python `bytes` held by the function
+  // table (same lifetime as the funcMap keys); used to resolve the factory for
+  // a created interaction. Set on factory methods (used) and inside methods.
+  std::string_view interactionName;
+  apache::thrift::AsyncProcessorFactory::MethodMetadata::InteractionType
+      interactionType{apache::thrift::AsyncProcessorFactory::MethodMetadata::
+                          InteractionType::NONE};
+  bool createsInteraction{false};
+  // Zero-arg Python callable that constructs the interaction's per-session
+  // handler instance (i.e. `self.create<InteractionName>`). Borrowed reference,
+  // owned by the Python function table that outlives this processor.
+  PyObject* factoryObject{nullptr};
 };
 
+// Ordinary (non-interaction) service method.
 HandlerFunc makeHandlerFunc(
     apache::thrift::RpcKind kind,
     PyObject* funcObject,
     const std::string& serviceName,
     std::string_view functionName);
+
+// Interaction method: either the factory that creates `interactionName`
+// (`createsInteraction == true`) or a method dispatched inside it
+// (`createsInteraction == false`). `factoryObject` is the per-session handler
+// constructor. `interactionType` is derived from `createsInteraction`.
+HandlerFunc makeInteractionHandlerFunc(
+    apache::thrift::RpcKind kind,
+    PyObject* funcObject,
+    const std::string& serviceName,
+    std::string_view functionName,
+    std::string_view interactionName,
+    bool createsInteraction,
+    PyObject* factoryObject);
+
+// Per-interaction state on the C++ side. Holds a strong Python reference to the
+// user's interaction handler instance so subsequent inbound interaction method
+// calls can be routed into Python. Mirrors the C++ `apache::thrift::Tile` model
+// that keys per-interaction state by interaction id in the connection context.
+class PythonTile : public apache::thrift::Tile {
+ public:
+  PythonTile(PyObject* handler, folly::Executor::KeepAlive<> executor);
+  ~PythonTile() override;
+
+  PythonTile(const PythonTile&) = delete;
+  PythonTile& operator=(const PythonTile&) = delete;
+  PythonTile(PythonTile&&) = delete;
+  PythonTile& operator=(PythonTile&&) = delete;
+
+  PyObject* handler() const { return handler_; }
+
+ private:
+  PyObject* handler_; // owned reference (Py_INCREF in ctor / DECREF in dtor)
+  // Python (asyncio-loop) executor used to drop `handler_` on the loop thread
+  // at destruction; the KeepAlive guarantees it outlives that scheduled decref.
+  folly::Executor::KeepAlive<> executor_;
+};
 
 using FunctionMapType = std::map<std::string_view, HandlerFunc>;
 
@@ -58,7 +119,19 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       : python_server_(python_server),
         functions_(functions),
         executor_(std::move(executor)),
-        serviceName_(std::move(serviceName)) {}
+        serviceName_(std::move(serviceName)) {
+    // Precompute interaction name -> per-session factory so interaction
+    // dispatch doesn't linearly scan `functions_` on every request. All entries
+    // for a given interaction carry the same factory callable, so first-wins
+    // via `emplace` is fine. Keys are `string_view`s into the Python bytes held
+    // by the function table, which outlives this processor (same as
+    // functions_).
+    for (const auto& [methodName, fn] : functions_) {
+      if (fn.factoryObject != nullptr && !fn.interactionName.empty()) {
+        interactionFactories_.emplace(fn.interactionName, fn.factoryObject);
+      }
+    }
+  }
 
   PythonAsyncProcessor(PythonAsyncProcessor&&) = delete;
   PythonAsyncProcessor(const PythonAsyncProcessor&) = delete;
@@ -70,14 +143,16 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
     PythonMetadata(
         ExecutorType executor,
         InteractionType interaction,
-        apache::thrift::RpcKind rpcKind)
+        apache::thrift::RpcKind rpcKind,
+        const std::optional<std::string>& interactionName = std::nullopt,
+        bool createsInteraction = false)
         : MethodMetadata(
               executor,
               interaction,
               rpcKind,
               apache::thrift::concurrency::NORMAL,
-              std::nullopt,
-              false) {}
+              interactionName,
+              createsInteraction) {}
   };
 
   std::unique_ptr<folly::IOBuf> getPythonMetadata();
@@ -127,9 +202,46 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
     return nullptr;
   }
 
+ protected:
+  // Framework override: construct the per-session Tile for a newly created
+  // interaction named `name` by invoking its registered Python factory.
+  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(
+      const std::string& name, int16_t protocol) override;
+
  private:
+  // Look up the Python factory callable (`self.create<InteractionName>`) for
+  // the interaction `name` from the function table. Returns a borrowed
+  // reference, or nullptr if none is registered.
+  PyObject* FOLLY_NULLABLE findInteractionFactory(std::string_view name);
+
+  // For an explicit factory method (createsInteraction): if the framework has
+  // parked a TilePromise for this request's interaction id, build the real
+  // PythonTile via the registered factory and fulfill the promise on the
+  // connection's EventBase thread. No-op if there is no parked promise.
+  //
+  // Returns an empty exception_wrapper on success; if the Python factory
+  // raised, returns that error so the caller can fail the factory request with
+  // the real message (rather than throwing here and stranding the request's
+  // callback).
+  folly::exception_wrapper maybeFulfillTilePromise(
+      const HandlerFunc& function,
+      apache::thrift::Cpp2RequestContext* context,
+      folly::EventBase* eb);
+
+  // For an inside-interaction method, find the PythonTile bound to this
+  // request's interaction id and return a borrowed reference to its Python
+  // handler instance (the per-session state). Returns nullptr if `function` is
+  // not an inside-interaction method or no PythonTile is bound. The Cython
+  // dispatch layer binds the unbound `funcObject` to this instance.
+  PyObject* FOLLY_NULLABLE getInteractionHandler(
+      const HandlerFunc& function, apache::thrift::Cpp2RequestContext* context);
+
   PyObject* python_server_;
   const FunctionMapType& functions_;
+  // Interaction name -> per-session handler factory (`self.create<Name>`),
+  // derived from `functions_` at construction. Borrowed references owned by the
+  // Python function table that outlives this processor.
+  std::unordered_map<std::string_view, PyObject*> interactionFactories_;
   folly::Executor::KeepAlive<> executor_;
   std::string serviceName_;
 

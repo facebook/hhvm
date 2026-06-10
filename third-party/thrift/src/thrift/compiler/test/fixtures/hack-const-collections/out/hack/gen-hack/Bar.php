@@ -85,6 +85,7 @@ class BarAsyncClient extends \ThriftClientBase implements BarAsyncClientIf {
   use BarClientBase;
 
   const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = BarStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -92,6 +93,7 @@ class BarClient extends \ThriftClientBase implements BarClientIf {
   use BarClientBase;
 
   const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = BarStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -100,6 +102,7 @@ abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as BarAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BarStaticMetadata::class;
   const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = BarStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('baz');
@@ -107,7 +110,7 @@ abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = Bar_baz_result::withDefaultValues();
     try {
       $args = $this->readHelper(Bar_baz_args::class, $input, 'baz', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'Bar', 'baz', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'baz', $args);
       $result->success = await $this->handler->baz($args->a, $args->b, $args->c, $args->d, $args->e);
       $this->eventHandler_->postExec($handler_ctx, 'baz', $result);
     } catch (\Exception $ex) {
@@ -445,6 +448,7 @@ class Bar_baz_result extends \ThriftSyncStructWithResult implements \IThriftStru
 
 class BarStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'Bar';
+  const string THRIFT_SVC_FULL_NAME = 'Bar';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

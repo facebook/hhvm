@@ -40,6 +40,7 @@ class Beeble_BroxAsyncClient extends \ThriftClientBase implements Beeble_BroxAsy
   use Beeble_BroxClientBase;
 
   const string THRIFT_SVC_NAME = Beeble_BroxStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = Beeble_BroxStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -47,6 +48,7 @@ class Beeble_BroxClient extends \ThriftClientBase implements Beeble_BroxClientIf
   use Beeble_BroxClientBase;
 
   const string THRIFT_SVC_NAME = Beeble_BroxStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = Beeble_BroxStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -54,6 +56,7 @@ class Beeble_BroxClient extends \ThriftClientBase implements Beeble_BroxClientIf
 
 class Beeble_BroxStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'Brox';
+  const string THRIFT_SVC_FULL_NAME = 'Beeble_Brox';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

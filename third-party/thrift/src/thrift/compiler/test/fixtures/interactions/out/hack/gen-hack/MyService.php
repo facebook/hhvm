@@ -84,6 +84,7 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
   use MyServiceClientBase;
 
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -91,6 +92,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
 
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -98,6 +100,8 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
 
 class MyService_MyInteraction extends \ThriftClientBase {
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+
+  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   private \InteractionId $interactionId;
 
@@ -332,6 +336,8 @@ $rpc_options->setInteractionId($this->interactionId);
 class MyService_MyInteractionFast extends \ThriftClientBase {
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
+  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
+
   private \InteractionId $interactionId;
 
   public function __construct(\TProtocol $input, ?\TProtocol $output = null, ?\IThriftMigrationAsyncChannel $channel = null)[leak_safe] {
@@ -563,6 +569,8 @@ $rpc_options->setInteractionId($this->interactionId);
 
 class MyService_SerialInteraction extends \ThriftClientBase {
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+
+  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   private \InteractionId $interactionId;
 
@@ -2188,6 +2196,7 @@ class MyService_SerialInteraction_frobnicate_result extends \ThriftSyncStructWit
 
 class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'MyService';
+  const string THRIFT_SVC_FULL_NAME = 'MyService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

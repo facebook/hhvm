@@ -101,6 +101,7 @@ class SomeServiceAsyncClient extends \ThriftClientBase implements SomeServiceAsy
   use SomeServiceClientBase;
 
   const string THRIFT_SVC_NAME = SomeServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = SomeServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -108,6 +109,7 @@ class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf
   use SomeServiceClientBase;
 
   const string THRIFT_SVC_NAME = SomeServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = SomeServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -620,6 +622,7 @@ class SomeService_binary_keyed_map_result extends \ThriftSyncStructWithResult im
 
 class SomeServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'SomeService';
+  const string THRIFT_SVC_FULL_NAME = '\apache\thrift\fixtures\types\SomeService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

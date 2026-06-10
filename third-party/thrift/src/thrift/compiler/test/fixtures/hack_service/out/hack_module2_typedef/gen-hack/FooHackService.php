@@ -42,6 +42,7 @@ class FooHackServiceAsyncClient extends \ThriftClientBase implements FooHackServ
   use FooHackServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -49,6 +50,7 @@ class FooHackServiceClient extends \ThriftClientBase implements FooHackServiceCl
   use FooHackServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -57,6 +59,7 @@ abstract class FooHackServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as FooHackServiceAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooHackServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   <<__Override>>
   protected static function getMethodMetadata(
@@ -79,6 +82,7 @@ class FooHackServiceAsyncProcessor extends FooHackServiceAsyncProcessorBase {
 
 class FooHackServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'FooHackService';
+  const string THRIFT_SVC_FULL_NAME = '\foo\hack_ns\FooHackService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

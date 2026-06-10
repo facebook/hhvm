@@ -95,6 +95,7 @@ class TestServiceWithServiceAnnotationAsyncClient extends \ThriftClientBase impl
   use TestServiceWithServiceAnnotationClientBase;
 
   const string THRIFT_SVC_NAME = TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -102,6 +103,7 @@ class TestServiceWithServiceAnnotationClient extends \ThriftClientBase implement
   use TestServiceWithServiceAnnotationClientBase;
 
   const string THRIFT_SVC_NAME = TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -341,6 +343,7 @@ class TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_result e
 
 class TestServiceWithServiceAnnotationStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'TestServiceWithServiceAnnotation';
+  const string THRIFT_SVC_FULL_NAME = '\hack\fixtures\TestServiceWithServiceAnnotation';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

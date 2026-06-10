@@ -77,6 +77,7 @@ class HackInteractionServiceAsyncClient extends \ThriftClientBase implements Hac
   use HackInteractionServiceClientBase;
 
   const string THRIFT_SVC_NAME = HackInteractionServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = HackInteractionServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -84,6 +85,7 @@ class HackInteractionServiceClient extends \ThriftClientBase implements HackInte
   use HackInteractionServiceClientBase;
 
   const string THRIFT_SVC_NAME = HackInteractionServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = HackInteractionServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -91,6 +93,8 @@ class HackInteractionServiceClient extends \ThriftClientBase implements HackInte
 
 class HackInteractionService_HackInteraction extends \ThriftClientBase {
   const string THRIFT_SVC_NAME = HackInteractionServiceStaticMetadata::THRIFT_SVC_NAME;
+
+  const string THRIFT_SVC_FULL_NAME = HackInteractionServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   private \InteractionId $interactionId;
 
@@ -419,6 +423,7 @@ class HackInteractionService_HackInteraction_ping_result extends \ThriftSyncStru
 
 class HackInteractionServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'HackInteractionService';
+  const string THRIFT_SVC_FULL_NAME = '\foo\hack\ns\HackInteractionService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

@@ -6303,7 +6303,10 @@ void t_hack_generator::generate_service_processor(
                 "SERVICE_METADATA_CLASS = "
              << long_name << "StaticMetadata::class;\n"
              << indent() << "  const string THRIFT_SVC_NAME = " << long_name
-             << "StaticMetadata::THRIFT_SVC_NAME;\n\n";
+             << "StaticMetadata::THRIFT_SVC_NAME;\n"
+             << indent()
+             << "  const string THRIFT_SVC_FULL_NAME = " << long_name
+             << "StaticMetadata::THRIFT_SVC_FULL_NAME;\n\n";
 
   indent_up();
 
@@ -6619,8 +6622,9 @@ void t_hack_generator::generate_process_function(
              << "::class, $input, '" << fn_name << "', $handler_ctx);\n";
 
   // Generate the function call
-  indent(f_service_) << "$this->eventHandler_->preExec($handler_ctx, '"
-                     << service_name << "', '" << fn_name << "', $args);\n";
+  indent(f_service_)
+      << "$this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, '"
+      << fn_name << "', $args);\n";
 
   f_service_ << indent();
   auto is_void = tfunction->return_type()->is_void();
@@ -6786,7 +6790,9 @@ void t_hack_generator::generate_service_helpers(
   indent_up();
 
   f_service_ << indent() << "const string THRIFT_SVC_NAME = '"
-             << tservice->name() << "';\n\n";
+             << tservice->name() << "';\n";
+  f_service_ << indent() << "const string THRIFT_SVC_FULL_NAME = '"
+             << hack_service_name(tservice) << "';\n\n";
 
   // Expose service metadata
   f_service_ << indent() << "public static function getServiceMetadata()[]: "
@@ -6886,6 +6892,9 @@ void t_hack_generator::generate_service_interactions(
     f_service_ << indent() << "const string THRIFT_SVC_NAME = "
                << php_servicename_mangle(mangle, tservice)
                << "StaticMetadata::THRIFT_SVC_NAME;\n\n";
+    f_service_ << indent() << "const string THRIFT_SVC_FULL_NAME = "
+               << php_servicename_mangle(mangle, tservice)
+               << "StaticMetadata::THRIFT_SVC_FULL_NAME;\n\n";
 
     f_service_ << indent() << "private \\InteractionId $interactionId;\n\n";
 
@@ -8093,7 +8102,9 @@ void t_hack_generator::_generate_service_client_children(
       << "  use " << long_name << "ClientBase;\n\n";
   indent_up();
   out << indent() << "const string THRIFT_SVC_NAME = " << long_name
-      << "StaticMetadata::THRIFT_SVC_NAME;\n\n";
+      << "StaticMetadata::THRIFT_SVC_NAME;\n";
+  out << indent() << "const string THRIFT_SVC_FULL_NAME = " << long_name
+      << "StaticMetadata::THRIFT_SVC_FULL_NAME;\n\n";
   indent_down();
   out << "}\n\n";
 }

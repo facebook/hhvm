@@ -75,6 +75,7 @@ class TestServiceAsyncClient extends \foo\hack_ns\FooHackServiceAsyncClient impl
   use TestServiceClientBase;
 
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = TestServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -82,6 +83,7 @@ class TestServiceClient extends \foo\hack_ns\FooHackServiceClient implements Tes
   use TestServiceClientBase;
 
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = TestServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -90,6 +92,7 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
   abstract const type TThriftIf as TestServiceAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = TestServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
@@ -97,7 +100,7 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
     $result = TestService_ping_result::withDefaultValues();
     try {
       $args = $this->readHelper(TestService_ping_args::class, $input, 'ping', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, '\hack_ns2\TestService', 'ping', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'ping', $args);
       $result->success = await $this->handler->ping($args->str_arg);
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
     } catch (\Exception $ex) {
@@ -341,6 +344,7 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
 
 class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'TestService';
+  const string THRIFT_SVC_FULL_NAME = '\hack_ns2\TestService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

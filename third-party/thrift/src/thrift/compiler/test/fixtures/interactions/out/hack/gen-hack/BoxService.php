@@ -40,6 +40,7 @@ class BoxServiceAsyncClient extends \ThriftClientBase implements BoxServiceAsync
   use BoxServiceClientBase;
 
   const string THRIFT_SVC_NAME = BoxServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = BoxServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -47,6 +48,7 @@ class BoxServiceClient extends \ThriftClientBase implements BoxServiceClientIf {
   use BoxServiceClientBase;
 
   const string THRIFT_SVC_NAME = BoxServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = BoxServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -54,6 +56,7 @@ class BoxServiceClient extends \ThriftClientBase implements BoxServiceClientIf {
 
 class BoxServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'BoxService';
+  const string THRIFT_SVC_FULL_NAME = 'BoxService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

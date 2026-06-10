@@ -99,6 +99,7 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
   use MyServiceClientBase;
 
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -106,6 +107,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
 
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -426,6 +428,7 @@ class MyService_second_result extends \ThriftSyncStructWithResult implements \IT
 
 class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'MyService';
+  const string THRIFT_SVC_FULL_NAME = '\test\fixtures\basic_structured_annotations\MyService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

@@ -70,6 +70,7 @@ class BaseServiceAsyncClient extends \ThriftClientBase implements BaseServiceAsy
   use BaseServiceClientBase;
 
   const string THRIFT_SVC_NAME = BaseServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = BaseServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -77,6 +78,7 @@ class BaseServiceClient extends \ThriftClientBase implements BaseServiceClientIf
   use BaseServiceClientBase;
 
   const string THRIFT_SVC_NAME = BaseServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = BaseServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -188,6 +190,7 @@ class BaseService_base_method_result extends \ThriftSyncStructWithoutResult impl
 
 class BaseServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'BaseService';
+  const string THRIFT_SVC_FULL_NAME = '\facebook\thrift\test\fixtures\service_schema\BaseService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

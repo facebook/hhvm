@@ -139,6 +139,7 @@ class PrimitivesServiceAsyncClient extends \ThriftClientBase implements Primitiv
   use PrimitivesServiceClientBase;
 
   const string THRIFT_SVC_NAME = PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = PrimitivesServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -146,6 +147,7 @@ class PrimitivesServiceClient extends \ThriftClientBase implements PrimitivesSer
   use PrimitivesServiceClientBase;
 
   const string THRIFT_SVC_NAME = PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = PrimitivesServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -646,6 +648,7 @@ class PrimitivesService_return_void_method_result extends \ThriftSyncStructWitho
 
 class PrimitivesServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'PrimitivesService';
+  const string THRIFT_SVC_FULL_NAME = '\facebook\thrift\test\fixtures\service_schema\PrimitivesService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

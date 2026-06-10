@@ -246,6 +246,7 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
   use MyServiceClientBase;
 
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -253,6 +254,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
 
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -261,6 +263,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as MyServiceAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
@@ -268,7 +271,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = MyService_ping_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyService_ping_args::class, $input, 'ping', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'MyService', 'ping', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'ping', $args);
       await $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
     } catch (\Exception $ex) {
@@ -288,7 +291,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = MyService_getRandomData_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyService_getRandomData_args::class, $input, 'getRandomData', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'MyService', 'getRandomData', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'getRandomData', $args);
       $result->success = await $this->handler->getRandomData();
       $this->eventHandler_->postExec($handler_ctx, 'getRandomData', $result);
     } catch (\Exception $ex) {
@@ -304,7 +307,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = MyService_hasDataById_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyService_hasDataById_args::class, $input, 'hasDataById', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'MyService', 'hasDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'hasDataById', $args);
       $result->success = await $this->handler->hasDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'hasDataById', $result);
     } catch (\Exception $ex) {
@@ -320,7 +323,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = MyService_getDataById_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyService_getDataById_args::class, $input, 'getDataById', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'MyService', 'getDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'getDataById', $args);
       $result->success = await $this->handler->getDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'getDataById', $result);
     } catch (\Exception $ex) {
@@ -336,7 +339,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = MyService_putDataById_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyService_putDataById_args::class, $input, 'putDataById', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'MyService', 'putDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'putDataById', $args);
       await $this->handler->putDataById($args->id, $args->data);
       $this->eventHandler_->postExec($handler_ctx, 'putDataById', $result);
     } catch (\Exception $ex) {
@@ -351,7 +354,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $reply_type = \TMessageType::REPLY;
     try {
       $args = $this->readHelper(MyService_lobDataById_args::class, $input, 'lobDataById', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'MyService', 'lobDataById', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'lobDataById', $args);
       await $this->handler->lobDataById($args->id, $args->data);
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
@@ -366,7 +369,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = MyService_doNothing_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyService_doNothing_args::class, $input, 'doNothing', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'MyService', 'doNothing', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'doNothing', $args);
       await $this->handler->doNothing();
       $this->eventHandler_->postExec($handler_ctx, 'doNothing', $result);
     } catch (\Exception $ex) {
@@ -1680,6 +1683,7 @@ class MyService_doNothing_result extends \ThriftSyncStructWithoutResult implemen
 
 class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'MyService';
+  const string THRIFT_SVC_FULL_NAME = 'MyService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

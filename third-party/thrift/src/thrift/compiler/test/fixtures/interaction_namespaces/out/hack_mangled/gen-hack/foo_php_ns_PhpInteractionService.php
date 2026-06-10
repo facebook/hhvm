@@ -75,6 +75,7 @@ class foo_php_ns_PhpInteractionServiceAsyncClient extends \ThriftClientBase impl
   use foo_php_ns_PhpInteractionServiceClientBase;
 
   const string THRIFT_SVC_NAME = foo_php_ns_PhpInteractionServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = foo_php_ns_PhpInteractionServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -82,6 +83,7 @@ class foo_php_ns_PhpInteractionServiceClient extends \ThriftClientBase implement
   use foo_php_ns_PhpInteractionServiceClientBase;
 
   const string THRIFT_SVC_NAME = foo_php_ns_PhpInteractionServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = foo_php_ns_PhpInteractionServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -89,6 +91,8 @@ class foo_php_ns_PhpInteractionServiceClient extends \ThriftClientBase implement
 
 class foo_php_ns_PhpInteractionService_PhpInteraction extends \ThriftClientBase {
   const string THRIFT_SVC_NAME = foo_php_ns_PhpInteractionServiceStaticMetadata::THRIFT_SVC_NAME;
+
+  const string THRIFT_SVC_FULL_NAME = foo_php_ns_PhpInteractionServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   private \InteractionId $interactionId;
 
@@ -417,6 +421,7 @@ class foo_php_ns_PhpInteractionService_PhpInteraction_ping_result extends \Thrif
 
 class foo_php_ns_PhpInteractionServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'PhpInteractionService';
+  const string THRIFT_SVC_FULL_NAME = 'foo_php_ns_PhpInteractionService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

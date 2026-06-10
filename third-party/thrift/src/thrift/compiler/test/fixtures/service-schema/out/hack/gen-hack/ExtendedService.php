@@ -76,6 +76,7 @@ class ExtendedServiceAsyncClient extends \facebook\thrift\test\fixtures\service_
   use ExtendedServiceClientBase;
 
   const string THRIFT_SVC_NAME = ExtendedServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = ExtendedServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -83,6 +84,7 @@ class ExtendedServiceClient extends \facebook\thrift\test\fixtures\service_schem
   use ExtendedServiceClientBase;
 
   const string THRIFT_SVC_NAME = ExtendedServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = ExtendedServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -260,6 +262,7 @@ class ExtendedService_init_result extends \ThriftSyncStructWithResult implements
 
 class ExtendedServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'ExtendedService';
+  const string THRIFT_SVC_FULL_NAME = '\facebook\thrift\test\fixtures\service_schema\ExtendedService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

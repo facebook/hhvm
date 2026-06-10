@@ -73,6 +73,7 @@ class FB303ServiceAsyncClient extends \ThriftClientBase implements FB303ServiceA
   use FB303ServiceClientBase;
 
   const string THRIFT_SVC_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -80,6 +81,7 @@ class FB303ServiceClient extends \ThriftClientBase implements FB303ServiceClient
   use FB303ServiceClientBase;
 
   const string THRIFT_SVC_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -88,6 +90,7 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as FB303ServiceAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FB303ServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_renamed_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('renamed_rpc');
@@ -95,7 +98,7 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = FB303Service_renamed_rpc_result::withDefaultValues();
     try {
       $args = $this->readHelper(FB303Service_renamed_rpc_args::class, $input, 'renamed_rpc', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\FB303Service', 'renamed_rpc', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'renamed_rpc', $args);
       $result->success = await $this->handler->renamed_rpc($args->int_parameter);
       $this->eventHandler_->postExec($handler_ctx, 'renamed_rpc', $result);
     } catch (\Exception $ex) {
@@ -312,6 +315,7 @@ class FB303Service_renamed_rpc_result extends \ThriftSyncStructWithResult implem
 
 class FB303ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'FB303Service';
+  const string THRIFT_SVC_FULL_NAME = '\test\fixtures\basic\FB303Service';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

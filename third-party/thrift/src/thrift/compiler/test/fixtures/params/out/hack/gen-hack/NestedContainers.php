@@ -193,6 +193,7 @@ class NestedContainersAsyncClient extends \ThriftClientBase implements NestedCon
   use NestedContainersClientBase;
 
   const string THRIFT_SVC_NAME = NestedContainersStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = NestedContainersStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -200,6 +201,7 @@ class NestedContainersClient extends \ThriftClientBase implements NestedContaine
   use NestedContainersClientBase;
 
   const string THRIFT_SVC_NAME = NestedContainersStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = NestedContainersStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -208,6 +210,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
   abstract const type TThriftIf as NestedContainersAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = NestedContainersStaticMetadata::class;
   const string THRIFT_SVC_NAME = NestedContainersStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = NestedContainersStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_mapList(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('mapList');
@@ -215,7 +218,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     $result = NestedContainers_mapList_result::withDefaultValues();
     try {
       $args = $this->readHelper(NestedContainers_mapList_args::class, $input, 'mapList', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'mapList', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'mapList', $args);
       await $this->handler->mapList($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'mapList', $result);
     } catch (\Exception $ex) {
@@ -231,7 +234,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     $result = NestedContainers_mapSet_result::withDefaultValues();
     try {
       $args = $this->readHelper(NestedContainers_mapSet_args::class, $input, 'mapSet', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'mapSet', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'mapSet', $args);
       await $this->handler->mapSet($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'mapSet', $result);
     } catch (\Exception $ex) {
@@ -247,7 +250,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     $result = NestedContainers_listMap_result::withDefaultValues();
     try {
       $args = $this->readHelper(NestedContainers_listMap_args::class, $input, 'listMap', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'listMap', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'listMap', $args);
       await $this->handler->listMap($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'listMap', $result);
     } catch (\Exception $ex) {
@@ -263,7 +266,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     $result = NestedContainers_listSet_result::withDefaultValues();
     try {
       $args = $this->readHelper(NestedContainers_listSet_args::class, $input, 'listSet', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'listSet', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'listSet', $args);
       await $this->handler->listSet($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'listSet', $result);
     } catch (\Exception $ex) {
@@ -279,7 +282,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     $result = NestedContainers_turtles_result::withDefaultValues();
     try {
       $args = $this->readHelper(NestedContainers_turtles_args::class, $input, 'turtles', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'turtles', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'turtles', $args);
       await $this->handler->turtles($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'turtles', $result);
     } catch (\Exception $ex) {
@@ -1348,6 +1351,7 @@ class NestedContainers_turtles_result extends \ThriftSyncStructWithoutResult imp
 
 class NestedContainersStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'NestedContainers';
+  const string THRIFT_SVC_FULL_NAME = 'NestedContainers';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

@@ -102,6 +102,7 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
   use MyServiceClientBase;
 
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -109,6 +110,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
 
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -117,6 +119,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as MyServiceAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_getStruct(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getStruct');
@@ -124,7 +127,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = MyService_getStruct_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyService_getStruct_args::class, $input, 'getStruct', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\name_prefix_apply_on_getname\MyService', 'getStruct', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'getStruct', $args);
       $result->success = await $this->handler->getStruct($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'getStruct', $result);
     } catch (\Exception $ex) {
@@ -144,7 +147,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = MyService_ping_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyService_ping_args::class, $input, 'ping', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\name_prefix_apply_on_getname\MyService', 'ping', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'ping', $args);
       await $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
     } catch (\Exception $ex) {
@@ -496,6 +499,7 @@ class MyService_ping_result extends \ThriftSyncStructWithoutResult implements \I
 
 class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'MyService';
+  const string THRIFT_SVC_FULL_NAME = '\test\fixtures\name_prefix_apply_on_getname\MyService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

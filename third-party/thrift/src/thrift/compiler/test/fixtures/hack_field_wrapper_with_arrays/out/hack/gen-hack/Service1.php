@@ -140,6 +140,7 @@ class Service1AsyncClient extends \ThriftClientBase implements Service1AsyncClie
   use Service1ClientBase;
 
   const string THRIFT_SVC_NAME = Service1StaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = Service1StaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -147,6 +148,7 @@ class Service1Client extends \ThriftClientBase implements Service1ClientIf {
   use Service1ClientBase;
 
   const string THRIFT_SVC_NAME = Service1StaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = Service1StaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -155,6 +157,7 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as Service1AsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = Service1StaticMetadata::class;
   const string THRIFT_SVC_NAME = Service1StaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = Service1StaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_func(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('func');
@@ -162,7 +165,7 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = Service1_func_result::withDefaultValues();
     try {
       $args = $this->readHelper(Service1_func_args::class, $input, 'func', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'Service1', 'func', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'func', $args);
       $result->success = await $this->handler->func($args->arg1, $args->arg2);
       $this->eventHandler_->postExec($handler_ctx, 'func', $result);
     } catch (\Exception $ex) {
@@ -178,7 +181,7 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = Service1_func1_result::withDefaultValues();
     try {
       $args = $this->readHelper(Service1_func1_args::class, $input, 'func1', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'Service1', 'func1', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'func1', $args);
       $result->success = await $this->handler->func1($args->arg1, $args->arg2);
       $this->eventHandler_->postExec($handler_ctx, 'func1', $result);
     } catch (\Exception $ex) {
@@ -194,7 +197,7 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = Service1_func2_result::withDefaultValues();
     try {
       $args = $this->readHelper(Service1_func2_args::class, $input, 'func2', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'Service1', 'func2', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'func2', $args);
       $result->success = await $this->handler->func2($args->arg1, $args->arg2);
       $this->eventHandler_->postExec($handler_ctx, 'func2', $result);
     } catch (\Exception $ex) {
@@ -1101,6 +1104,7 @@ class Service1_func2_result extends \ThriftAsyncStructWithResult implements \ITh
 
 class Service1StaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'Service1';
+  const string THRIFT_SVC_FULL_NAME = 'Service1';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

@@ -164,6 +164,7 @@ class RaiserAsyncClient extends \ThriftClientBase implements RaiserAsyncClientIf
   use RaiserClientBase;
 
   const string THRIFT_SVC_NAME = RaiserStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = RaiserStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -171,6 +172,7 @@ class RaiserClient extends \ThriftClientBase implements RaiserClientIf {
   use RaiserClientBase;
 
   const string THRIFT_SVC_NAME = RaiserStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = RaiserStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -850,6 +852,7 @@ class Raiser_get500_result extends \ThriftSyncStructWithResult implements \IThri
 
 class RaiserStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'Raiser';
+  const string THRIFT_SVC_FULL_NAME = 'Raiser';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

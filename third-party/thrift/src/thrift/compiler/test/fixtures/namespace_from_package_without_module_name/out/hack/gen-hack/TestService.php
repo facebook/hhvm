@@ -72,6 +72,7 @@ class TestServiceAsyncClient extends \ThriftClientBase implements TestServiceAsy
   use TestServiceClientBase;
 
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = TestServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -79,6 +80,7 @@ class TestServiceClient extends \ThriftClientBase implements TestServiceClientIf
   use TestServiceClientBase;
 
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = TestServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -87,6 +89,7 @@ abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as TestServiceAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = TestServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_init(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('init');
@@ -94,7 +97,7 @@ abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = TestService_init_result::withDefaultValues();
     try {
       $args = $this->readHelper(TestService_init_args::class, $input, 'init', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, '\test\namespace_from_package_without_module_name\TestService', 'init', $args);
+      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'init', $args);
       $result->success = await $this->handler->init($args->int1);
       $this->eventHandler_->postExec($handler_ctx, 'init', $result);
     } catch (\Exception $ex) {
@@ -324,6 +327,7 @@ class TestService_init_result extends \ThriftSyncStructWithResult implements \IT
 
 class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'TestService';
+  const string THRIFT_SVC_FULL_NAME = '\test\namespace_from_package_without_module_name\TestService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

@@ -85,6 +85,7 @@ class BarAsyncClient extends \ThriftClientBase implements BarAsyncClientIf {
   use BarClientBase;
 
   const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = BarStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -92,6 +93,7 @@ class BarClient extends \ThriftClientBase implements BarClientIf {
   use BarClientBase;
 
   const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_FULL_NAME = BarStaticMetadata::THRIFT_SVC_FULL_NAME;
 
 }
 
@@ -395,6 +397,7 @@ class Bar_baz_result extends \ThriftSyncStructWithResult implements \IThriftStru
 
 class BarStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'Bar';
+  const string THRIFT_SVC_FULL_NAME = 'Bar';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

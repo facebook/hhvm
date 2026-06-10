@@ -14,7 +14,37 @@
 
 namespace {
 using namespace proxygen::qmux;
-constexpr uint64_t kMaxWriteSize = 65'535;
+
+constexpr uint64_t kStreamFrameOverhead = 17;
+constexpr uint64_t kTargetTransportWriteBytes = 65'535;
+
+void flushRecord(folly::IOBufQueue& recordBuf, folly::IOBufQueue& egressBuf) {
+  if (!recordBuf.empty()) {
+    writeRecord(egressBuf, recordBuf.move());
+  }
+}
+
+bool appendFrameToRecord(folly::IOBufQueue& recordBuf,
+                         folly::IOBufQueue& egressBuf,
+                         folly::IOBufQueue& frameBuf,
+                         uint64_t recordPayloadLimit) {
+  if (frameBuf.empty()) {
+    return true;
+  }
+
+  const auto frameSize = frameBuf.chainLength();
+  if (frameSize > recordPayloadLimit) {
+    XLOG(ERR) << "QMUX frame exceeds peer max_record_size frameSize="
+              << frameSize << " peerMaxRecordSize=" << recordPayloadLimit;
+    return false;
+  }
+
+  if (recordBuf.chainLength() + frameSize > recordPayloadLimit) {
+    flushRecord(recordBuf, egressBuf);
+  }
+  recordBuf.append(frameBuf.move());
+  return true;
+}
 
 //////// QmuxEventVisitor ////////
 
@@ -227,55 +257,97 @@ void QmuxSession::onIdleTimeout() {
 
 folly::coro::Task<void> QmuxSession::writeLoop(Ptr self) {
   XLOG(DBG4) << "QmuxSession::writeLoop started dir=" << peerAddr_.describe();
-  folly::IOBufQueue egressBuf{folly::IOBufQueue::cacheChainLength()};
-  QmuxEventVisitor eventVisitor{
-      {.egress = egressBuf, .protocol = FrameProtocol::QMUX}};
   auto& waitForEventBaton = wtSmEgressCb.waitForEvent;
+  bool sessionClosed{false};
 
   // sessionClosed flips to true once the visitor has serialized a
   // QxConnectionClose for sm's CloseSession event.
-  while (!eventVisitor.sessionClosed) {
+  while (!sessionClosed) {
     XLOG(DBG6) << "waiting for WtStreamManager event";
     co_await waitForEventBaton.wait();
     waitForEventBaton.reset();
 
+    // Cap each record's payload so it fits within the peer's
+    // max_record_size.
+    const auto recordPayloadLimit = self->peerMaxRecordSize_;
+    folly::IOBufQueue recordBuf{folly::IOBufQueue::cacheChainLength()};
+    folly::IOBufQueue egressBuf{folly::IOBufQueue::cacheChainLength()};
+
     XLOG(DBG6) << "received WtStreamManager event";
     // Always write control frames first
     auto ctrl = sm.moveEvents();
+    bool writeFrameError{false};
     for (auto& ev : ctrl) {
+      folly::IOBufQueue frameBuf{folly::IOBufQueue::cacheChainLength()};
+      QmuxEventVisitor eventVisitor{
+          {.egress = frameBuf, .protocol = FrameProtocol::QMUX}};
       std::visit(eventVisitor, ev);
+      sessionClosed |= eventVisitor.sessionClosed;
+      if (!appendFrameToRecord(
+              recordBuf, egressBuf, frameBuf, recordPayloadLimit)) {
+        writeFrameError = true;
+        break;
+      }
     }
 
-    for (const auto& pong : pendingPongs_) {
-      writePong(egressBuf, pong);
+    if (!writeFrameError) {
+      for (const auto& pong : pendingPongs_) {
+        folly::IOBufQueue frameBuf{folly::IOBufQueue::cacheChainLength()};
+        writePong(frameBuf, pong);
+        if (!appendFrameToRecord(
+                recordBuf, egressBuf, frameBuf, recordPayloadLimit)) {
+          writeFrameError = true;
+          break;
+        }
+      }
+      pendingPongs_.clear();
     }
-    pendingPongs_.clear();
 
-    auto* wh = sm.nextWritable();
+    if (writeFrameError) {
+      sm.onCloseSession(WtStreamManager::CloseSession{
+          .err = static_cast<uint64_t>(QmuxErrorCode::FRAME_ENCODING_ERROR),
+          .msg = "frame exceeds peer max_record_size"});
+      continue;
+    }
+
     // Cap data per STREAM frame so the whole frame fits within peer's
     // max_record_size, leaving room for STREAM frame header overhead.
-    constexpr uint64_t kStreamFrameOverhead = 17;
-    const auto maxStreamData =
-        self->peerMaxRecordSize_ > kStreamFrameOverhead
-            ? self->peerMaxRecordSize_ - kStreamFrameOverhead
-            : 0;
+    const auto maxStreamData = recordPayloadLimit > kStreamFrameOverhead
+                                   ? recordPayloadLimit - kStreamFrameOverhead
+                                   : 0;
+    auto* wh = sm.nextWritable();
     XCHECK(!(wh && maxStreamData == 0))
         << "peer max_record_size too small. The framer rejects undersized "
            "max_record_size at TP parse time";
-    while (wh && egressBuf.chainLength() < kMaxWriteSize) {
+
+    while (wh) {
+      if (recordBuf.empty() && !egressBuf.empty() &&
+          egressBuf.chainLength() >= kTargetTransportWriteBytes) {
+        break;
+      }
+      if (recordBuf.chainLength() + kStreamFrameOverhead >=
+          recordPayloadLimit) {
+        flushRecord(recordBuf, egressBuf);
+        continue;
+      }
+
       auto id = wh->getID();
+      const auto recordBytes = recordBuf.chainLength();
       const auto atMost =
-          std::min(kMaxWriteSize - egressBuf.chainLength(), maxStreamData);
+          std::min(recordPayloadLimit - recordBytes - kStreamFrameOverhead,
+                   maxStreamData);
       auto dequeue = sm.dequeue(*wh, /*atMost=*/atMost);
-      writeWTStream(egressBuf,
+      writeWTStream(recordBuf,
                     WTStreamCapsule{.streamId = id,
                                     .streamData = std::move(dequeue.data),
                                     .fin = dequeue.fin},
                     FrameProtocol::QMUX);
       wh = sm.nextWritable();
     }
+    flushRecord(recordBuf, egressBuf);
     if (wh) {
-      // Loop hit the per-record byte cap with writable streams still pending.
+      // Loop hit the transport-write byte target with writable streams still
+      // pending.
       // The stream manager won't ring the bell for state it already signalled,
       // so re-arm the baton ourselves to drain the remainder next iteration
       // instead of parking with sendable bytes queued.
@@ -283,20 +355,19 @@ folly::coro::Task<void> QmuxSession::writeLoop(Ptr self) {
     }
 
     while (!pendingDatagrams_.empty()) {
-      writeDatagram(egressBuf,
+      writeDatagram(recordBuf,
                     DatagramCapsule{.httpDatagramPayload =
                                         std::move(pendingDatagrams_.front())},
                     FrameProtocol::QMUX);
       pendingDatagrams_.pop_front();
     }
 
-    // Wrap accumulated frames as a single QMux record before flushing.
+    // Flush all accumulated QMux records in one transport write.
+    flushRecord(recordBuf, egressBuf);
     if (!egressBuf.empty()) {
-      folly::IOBufQueue recordBuf{folly::IOBufQueue::cacheChainLength()};
-      writeRecord(recordBuf, egressBuf.move());
       auto writeRes = co_await co_awaitTry(
-          transport_->write(recordBuf, config_.writeTimeout));
-      recordBuf.move();
+          transport_->write(egressBuf, config_.writeTimeout));
+      egressBuf.move();
       if (writeRes.hasException()) {
         sm.onCloseSession(
             WtStreamManager::CloseSession{.err = 0, .msg = "write error"});

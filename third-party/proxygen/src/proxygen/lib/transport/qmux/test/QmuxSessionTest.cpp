@@ -102,6 +102,7 @@ class WireParser {
           // Validator must accept contiguous offsets; track per-stream.
           return off == infra.rxOffsets[id];
         }) {
+    codec.setMaxRecordSize(kDefaultMaxRecordSize);
   }
 
   void feed(std::unique_ptr<folly::IOBuf> bytes) {
@@ -152,6 +153,16 @@ std::unique_ptr<folly::IOBuf> pingRecord(uint64_t seq) {
   folly::IOBufQueue frames{folly::IOBufQueue::cacheChainLength()};
   writePing(frames, QxPing{.sequenceNumber = seq});
   return wrapInRecord(frames);
+}
+
+std::unique_ptr<folly::IOBuf> pingRecords(uint64_t count) {
+  folly::IOBufQueue out{folly::IOBufQueue::cacheChainLength()};
+  for (uint64_t seq = 0; seq < count; ++seq) {
+    folly::IOBufQueue frames{folly::IOBufQueue::cacheChainLength()};
+    writePing(frames, QxPing{.sequenceNumber = seq});
+    writeRecord(out, frames.move());
+  }
+  return out.move();
 }
 
 std::unique_ptr<folly::IOBuf> connectionCloseRecord(uint64_t err,
@@ -360,6 +371,19 @@ TEST_F(QmuxSessionTest, OnPing_RespondsWithPong) {
   EXPECT_TRUE(wire_.cb.pings.empty());
 }
 
+TEST_F(QmuxSessionTest, ManyPings_SplitsPongsIntoPeerSizedRecords) {
+  constexpr uint64_t kPingCount = 4'000;
+
+  feedFromPeer(pingRecords(kPingCount));
+  parseWrites();
+
+  EXPECT_TRUE(wire_.cb.connectionErrors.empty());
+  ASSERT_EQ(wire_.cb.pongs.size(), static_cast<size_t>(kPingCount));
+  for (uint64_t seq = 0; seq < kPingCount; ++seq) {
+    EXPECT_EQ(wire_.cb.pongs[seq].sequenceNumber, seq);
+  }
+}
+
 // 5) An inbound CONNECTION_CLOSE drives the session to onSessionEnd.
 TEST_F(QmuxSessionTest, OnConnectionClose_FiresSessionEnd) {
   feedFromPeer(connectionCloseRecord(/*err=*/0x0, "bye"));
@@ -385,7 +409,37 @@ TEST_F(QmuxSessionTest, SendDatagram_AppearsOnWire) {
             "ping-payload");
 }
 
-// 7) Local closeSession fires onSessionEnd exactly once (both loops finish).
+// 7) Large stream writes are split into peer-sized QMUX records.
+TEST_F(QmuxSessionTest, LargeStreamWrite_SplitsIntoPeerSizedRecords) {
+  auto created = session_->createBidiStream();
+  ASSERT_TRUE(created.hasValue());
+
+  const auto streamId = created.value().writeHandle->getID();
+  std::string payload(kDefaultMaxRecordSize * 2, 'x');
+  auto writeResult = created.value().writeHandle->writeStreamData(
+      folly::IOBuf::copyBuffer(payload), /*fin=*/false, nullptr);
+  ASSERT_TRUE(writeResult.hasValue());
+  drain();
+
+  ASSERT_EQ(state_->writeEvents.size(), 1);
+  parseWrites();
+
+  EXPECT_TRUE(wire_.cb.connectionErrors.empty());
+  ASSERT_GT(wire_.cb.streams.size(), 1);
+
+  std::string observed;
+  for (const auto& stream : wire_.cb.streams) {
+    if (stream.streamId != streamId || !stream.streamData) {
+      continue;
+    }
+    observed.append(stream.streamData->cloneCoalescedAsValue()
+                        .moveToFbString()
+                        .toStdString());
+  }
+  EXPECT_EQ(observed, payload);
+}
+
+// 8) Local closeSession fires onSessionEnd exactly once (both loops finish).
 //    We also signal EOF as a belt-and-suspenders guarantee that the read
 //    coroutine exits regardless of cancellation-propagation timing.
 TEST_F(QmuxSessionTest, CloseSession_FiresSessionEndOnce) {
@@ -397,7 +451,7 @@ TEST_F(QmuxSessionTest, CloseSession_FiresSessionEndOnce) {
   EXPECT_EQ(handler_->sessionEndCount, 1);
 }
 
-// 8) Bytes the connector forwarded as initialIngress are drained by the
+// 9) Bytes the connector forwarded as initialIngress are drained by the
 //    readLoop on its first iteration, before any new transport reads.
 TEST_F(QmuxSessionTest, InitialIngress_IsDrainedOnStartup) {
   auto state = std::make_unique<TestCoroTransport::State>();

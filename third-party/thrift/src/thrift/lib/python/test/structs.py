@@ -33,6 +33,7 @@ import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 import thrift.python.types
 from folly.iobuf import IOBuf
+from isset_inspection_option_test.thrift_types import StructWithIssetInspectionOption
 from parameterized import parameterized, parameterized_class
 from test_thrift.thrift_mutable_types import (
     _Reserved as _ReservedMutable,
@@ -697,6 +698,29 @@ class GetLocallySetFieldsImmutableTests(unittest.TestCase):
         # Optional fields not set in the original are not included
         self.assertNotIn("opt_str_field", result)
         self.assertNotIn("opt_list_field", result)
+
+
+class GetLocallySetFieldsCompilerOptionTests(unittest.TestCase):
+    """`StructWithIssetInspectionOption` is NOT annotated with
+    `@python.EnableUnsafeIssetInspection`. Its library is compiled with
+    `thrift_python_options = ["enable_locally_set_field_inspection"]`, which should
+    enable `get_locally_set_fields()` for it just like the annotation does.
+    """
+
+    def test_option_enables_inspection(self) -> None:
+        s = StructWithIssetInspectionOption(int_field=42, opt_str_field="hello")
+        self.assertEqual(
+            get_locally_set_fields(s),
+            frozenset({"int_field", "opt_str_field"}),
+        )
+
+    def test_option_call_updates_fields(self) -> None:
+        s = StructWithIssetInspectionOption(int_field=42)
+        s2 = s(bool_field=True)
+        self.assertEqual(
+            get_locally_set_fields(s2),
+            frozenset({"int_field", "bool_field"}),
+        )
 
 
 class StructTests(unittest.TestCase):

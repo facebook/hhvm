@@ -260,6 +260,10 @@ struct ConstrainedFloat32 {
 
 /// Enables `get_locally_set_fields()` for a struct.
 /// DO NOT ADD ANY NEW USAGE!
+/// Also available as a thrift_library compiler option, which enables
+/// `get_locally_set_fields()` for every struct in the library:
+///     thrift_library(..., thrift_python_options = ["enable_locally_set_field_inspection"])
+///
 /// `get_locally_set_fields()` only works for structs constructed in the
 /// same process as the `get_locally_set_fields()` call. Usage with
 /// deserialized struct instances will LOG(ERROR) and return a set of

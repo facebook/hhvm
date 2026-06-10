@@ -7,7 +7,7 @@ two_pos_embedded_in_larger_pos.php:4:10
 [1] 4 |   return "5" === 5;
     5 | }
 
-error: Typing[4118] This expression is always false [1]
+warning: Warn[12001] This expression is likely always false [1]
 -> This is a string [2]
 -> This is an int [3]
 

@@ -51,13 +51,13 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
             onFirstResponse(firstResponse)
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", initialErr)
+            internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onFirstResponse(x)
         }
         {{/if func.exceptions?}}
         {{#if (not func.exceptions?)}}
-        internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         {{/if (not func.exceptions?)}}
@@ -100,13 +100,13 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
             onStreamNext(streamWrapStruct)
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal stream handler error {{func.go_name}}: %w", streamErr)
+            internalErr := fmt.Errorf("Internal stream handler error {{func.name}}: %w", streamErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onStreamNext(x)
         }
         {{/if func.stream_exceptions?}}
         {{#if (not func.stream_exceptions?)}}
-        internalErr := fmt.Errorf("Internal stream handler error {{func.go_name}}: %w", streamErr)
+        internalErr := fmt.Errorf("Internal stream handler error {{func.name}}: %w", streamErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onStreamNext(x)
         {{/if (not func.stream_exceptions?)}}
@@ -135,12 +135,12 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context
             return result, nil
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", err)
+            internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", err)
             return nil, internalErr
         }
         {{/if func.exceptions?}}
         {{#if (not func.exceptions?)}}
-        internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", err)
+        internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", err)
         return nil, internalErr
         {{/if (not func.exceptions?)}}
     }
@@ -200,13 +200,13 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunSinkContext(
             onFirstResponse(firstResponse)
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", initialErr)
+            internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onFirstResponse(x)
         }
         {{/if func.exceptions?}}
         {{#if (not func.exceptions?)}}
-        internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         {{/if (not func.exceptions?)}}
@@ -246,13 +246,13 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunSinkContext(
             onFinalResponse(finalResponse)
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal sink handler error {{func.go_name}}: %w", finalErr)
+            internalErr := fmt.Errorf("Internal sink handler error {{func.name}}: %w", finalErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onFinalResponse(x)
         }
         {{/if func.sink_final_response_exceptions?}}
         {{#if (not func.sink_final_response_exceptions?)}}
-        internalErr := fmt.Errorf("Internal sink handler error {{func.go_name}}: %w", finalErr)
+        internalErr := fmt.Errorf("Internal sink handler error {{func.name}}: %w", finalErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFinalResponse(x)
         {{/if (not func.sink_final_response_exceptions?)}}
@@ -297,13 +297,13 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunBiDiContext(
             onFirstResponse(firstResponse)
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", initialErr)
+            internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onFirstResponse(x)
         }
         {{/if func.exceptions?}}
         {{#if (not func.exceptions?)}}
-        internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         {{/if (not func.exceptions?)}}
@@ -366,13 +366,13 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunBiDiContext(
             onStreamNext(streamWrapStruct)
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal stream handler error {{func.go_name}}: %w", streamErr)
+            internalErr := fmt.Errorf("Internal stream handler error {{func.name}}: %w", streamErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onStreamNext(x)
         }
         {{/if func.stream_exceptions?}}
         {{#if (not func.stream_exceptions?)}}
-        internalErr := fmt.Errorf("Internal stream handler error {{func.go_name}}: %w", streamErr)
+        internalErr := fmt.Errorf("Internal stream handler error {{func.name}}: %w", streamErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onStreamNext(x)
         {{/if (not func.stream_exceptions?)}}

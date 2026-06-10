@@ -211,7 +211,7 @@ func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.ReadableSt
     result := newRespCF()
     err := p.handler.F(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing F: %w", err)
+        internalErr := fmt.Errorf("Internal error processing f: %w", err)
         return nil, internalErr
     }
 
@@ -242,7 +242,7 @@ func (p *procFuncCNumbers) RunStreamContext(
     firstResponse := newRespCNumbers()
     elemProducerFunc, initialErr := p.handler.Numbers(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing Numbers: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing numbers: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         onStreamComplete()
@@ -269,7 +269,7 @@ func (p *procFuncCNumbers) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error Numbers: %w", streamErr)
+        internalErr := fmt.Errorf("Internal stream handler error numbers: %w", streamErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onStreamNext(x)
     }
@@ -296,7 +296,7 @@ func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.Readab
             result.Bang = v
             return result, nil
         default:
-            internalErr := fmt.Errorf("Internal error processing Thing: %w", err)
+            internalErr := fmt.Errorf("Internal error processing thing: %w", err)
             return nil, internalErr
         }
     }

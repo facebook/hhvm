@@ -168,7 +168,7 @@ func (p *procFuncMyServiceQuery) RunContext(ctx context.Context, reqStruct thrif
     result := newRespMyServiceQuery()
     err := p.handler.Query(ctx, args.S, args.I)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing Query: %w", err)
+        internalErr := fmt.Errorf("Internal error processing query: %w", err)
         return nil, internalErr
     }
 
@@ -190,7 +190,7 @@ func (p *procFuncMyServiceHasArgDocs) RunContext(ctx context.Context, reqStruct 
     result := newRespMyServiceHasArgDocs()
     err := p.handler.HasArgDocs(ctx, args.S, args.I)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing HasArgDocs: %w", err)
+        internalErr := fmt.Errorf("Internal error processing has_arg_docs: %w", err)
         return nil, internalErr
     }
 

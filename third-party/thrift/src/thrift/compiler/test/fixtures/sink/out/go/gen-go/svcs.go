@@ -481,7 +481,7 @@ func (p *procFuncSinkServiceMethod) RunSinkContext(
     firstResponse := newRespSinkServiceMethod()
     elemConsumerFunc, initialErr := p.handler.Method(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing Method: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing method: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         return
@@ -506,7 +506,7 @@ func (p *procFuncSinkServiceMethod) RunSinkContext(
 
     finalResponse := newRespFinalSinkServiceMethod()
     if finalErr != nil {
-        internalErr := fmt.Errorf("Internal sink handler error Method: %w", finalErr)
+        internalErr := fmt.Errorf("Internal sink handler error method: %w", finalErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFinalResponse(x)
         return
@@ -545,7 +545,7 @@ func (p *procFuncSinkServiceMethodAndReponse) RunSinkContext(
     firstResponse := newRespSinkServiceMethodAndReponse()
     retval, elemConsumerFunc, initialErr := p.handler.MethodAndReponse(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing MethodAndReponse: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing methodAndReponse: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         return
@@ -571,7 +571,7 @@ func (p *procFuncSinkServiceMethodAndReponse) RunSinkContext(
 
     finalResponse := newRespFinalSinkServiceMethodAndReponse()
     if finalErr != nil {
-        internalErr := fmt.Errorf("Internal sink handler error MethodAndReponse: %w", finalErr)
+        internalErr := fmt.Errorf("Internal sink handler error methodAndReponse: %w", finalErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFinalResponse(x)
         return
@@ -615,7 +615,7 @@ func (p *procFuncSinkServiceMethodThrow) RunSinkContext(
             firstResponse.Ex = v
             onFirstResponse(firstResponse)
         default:
-            internalErr := fmt.Errorf("Internal error processing MethodThrow: %w", initialErr)
+            internalErr := fmt.Errorf("Internal error processing methodThrow: %w", initialErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onFirstResponse(x)
         }
@@ -641,7 +641,7 @@ func (p *procFuncSinkServiceMethodThrow) RunSinkContext(
 
     finalResponse := newRespFinalSinkServiceMethodThrow()
     if finalErr != nil {
-        internalErr := fmt.Errorf("Internal sink handler error MethodThrow: %w", finalErr)
+        internalErr := fmt.Errorf("Internal sink handler error methodThrow: %w", finalErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFinalResponse(x)
         return
@@ -680,7 +680,7 @@ func (p *procFuncSinkServiceMethodSinkThrow) RunSinkContext(
     firstResponse := newRespSinkServiceMethodSinkThrow()
     elemConsumerFunc, initialErr := p.handler.MethodSinkThrow(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing MethodSinkThrow: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing methodSinkThrow: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         return
@@ -705,7 +705,7 @@ func (p *procFuncSinkServiceMethodSinkThrow) RunSinkContext(
 
     finalResponse := newRespFinalSinkServiceMethodSinkThrow()
     if finalErr != nil {
-        internalErr := fmt.Errorf("Internal sink handler error MethodSinkThrow: %w", finalErr)
+        internalErr := fmt.Errorf("Internal sink handler error methodSinkThrow: %w", finalErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFinalResponse(x)
         return
@@ -744,7 +744,7 @@ func (p *procFuncSinkServiceMethodFinalThrow) RunSinkContext(
     firstResponse := newRespSinkServiceMethodFinalThrow()
     elemConsumerFunc, initialErr := p.handler.MethodFinalThrow(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing MethodFinalThrow: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing methodFinalThrow: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         return
@@ -774,7 +774,7 @@ func (p *procFuncSinkServiceMethodFinalThrow) RunSinkContext(
             finalResponse.Ex = v
             onFinalResponse(finalResponse)
         default:
-            internalErr := fmt.Errorf("Internal sink handler error MethodFinalThrow: %w", finalErr)
+            internalErr := fmt.Errorf("Internal sink handler error methodFinalThrow: %w", finalErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onFinalResponse(x)
         }
@@ -814,7 +814,7 @@ func (p *procFuncSinkServiceMethodBothThrow) RunSinkContext(
     firstResponse := newRespSinkServiceMethodBothThrow()
     elemConsumerFunc, initialErr := p.handler.MethodBothThrow(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing MethodBothThrow: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing methodBothThrow: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         return
@@ -844,7 +844,7 @@ func (p *procFuncSinkServiceMethodBothThrow) RunSinkContext(
             finalResponse.Ex = v
             onFinalResponse(finalResponse)
         default:
-            internalErr := fmt.Errorf("Internal sink handler error MethodBothThrow: %w", finalErr)
+            internalErr := fmt.Errorf("Internal sink handler error methodBothThrow: %w", finalErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onFinalResponse(x)
         }
@@ -884,7 +884,7 @@ func (p *procFuncSinkServiceMethodFast) RunSinkContext(
     firstResponse := newRespSinkServiceMethodFast()
     elemConsumerFunc, initialErr := p.handler.MethodFast(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing MethodFast: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing methodFast: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         return
@@ -909,7 +909,7 @@ func (p *procFuncSinkServiceMethodFast) RunSinkContext(
 
     finalResponse := newRespFinalSinkServiceMethodFast()
     if finalErr != nil {
-        internalErr := fmt.Errorf("Internal sink handler error MethodFast: %w", finalErr)
+        internalErr := fmt.Errorf("Internal sink handler error methodFast: %w", finalErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFinalResponse(x)
         return

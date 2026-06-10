@@ -188,7 +188,7 @@ func (p *procFuncFinderByPlate) RunContext(ctx context.Context, reqStruct thrift
     result := newRespFinderByPlate()
     retval, err := p.handler.ByPlate(ctx, args.Plate)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing ByPlate: %w", err)
+        internalErr := fmt.Errorf("Internal error processing byPlate: %w", err)
         return nil, internalErr
     }
 
@@ -211,7 +211,7 @@ func (p *procFuncFinderAliasByPlate) RunContext(ctx context.Context, reqStruct t
     result := newRespFinderAliasByPlate()
     retval, err := p.handler.AliasByPlate(ctx, args.Plate)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing AliasByPlate: %w", err)
+        internalErr := fmt.Errorf("Internal error processing aliasByPlate: %w", err)
         return nil, internalErr
     }
 
@@ -234,7 +234,7 @@ func (p *procFuncFinderPreviousPlate) RunContext(ctx context.Context, reqStruct 
     result := newRespFinderPreviousPlate()
     retval, err := p.handler.PreviousPlate(ctx, args.Plate)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing PreviousPlate: %w", err)
+        internalErr := fmt.Errorf("Internal error processing previousPlate: %w", err)
         return nil, internalErr
     }
 

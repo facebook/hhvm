@@ -137,7 +137,7 @@ func (p *procFuncBadInteractionFoo) RunContext(ctx context.Context, reqStruct th
     result := newRespBadInteractionFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing Foo: %w", err)
+        internalErr := fmt.Errorf("Internal error processing foo: %w", err)
         return nil, internalErr
     }
 
@@ -387,7 +387,7 @@ func (p *procFuncMyServicePing) RunContext(ctx context.Context, reqStruct thrift
             result.MyExcept = v
             return result, nil
         default:
-            internalErr := fmt.Errorf("Internal error processing Ping: %w", err)
+            internalErr := fmt.Errorf("Internal error processing ping: %w", err)
             return nil, internalErr
         }
     }
@@ -409,7 +409,7 @@ func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStru
     result := newRespMyServiceGetRandomData()
     retval, err := p.handler.GetRandomData(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetRandomData: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getRandomData: %w", err)
         return nil, internalErr
     }
 
@@ -432,7 +432,7 @@ func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct
     result := newRespMyServiceHasDataById()
     retval, err := p.handler.HasDataById(ctx, args.Id)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing HasDataById: %w", err)
+        internalErr := fmt.Errorf("Internal error processing hasDataById: %w", err)
         return nil, internalErr
     }
 
@@ -455,7 +455,7 @@ func (p *procFuncMyServiceGoGetDataById) RunContext(ctx context.Context, reqStru
     result := newRespMyServiceGoGetDataById()
     retval, err := p.handler.GoGetDataById(ctx, args.Id)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GoGetDataById: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getDataById: %w", err)
         return nil, internalErr
     }
 
@@ -478,7 +478,7 @@ func (p *procFuncMyServicePutDataById) RunContext(ctx context.Context, reqStruct
     result := newRespMyServicePutDataById()
     err := p.handler.PutDataById(ctx, args.Id, args.Data)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing PutDataById: %w", err)
+        internalErr := fmt.Errorf("Internal error processing putDataById: %w", err)
         return nil, internalErr
     }
 
@@ -520,7 +520,7 @@ func (p *procFuncMyServiceGoDoNothing) RunContext(ctx context.Context, reqStruct
     result := newRespMyServiceGoDoNothing()
     err := p.handler.GoDoNothing(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GoDoNothing: %w", err)
+        internalErr := fmt.Errorf("Internal error processing doNothing: %w", err)
         return nil, internalErr
     }
 
@@ -657,7 +657,7 @@ func (p *procFuncMyServicePrioParentPing) RunContext(ctx context.Context, reqStr
     result := newRespMyServicePrioParentPing()
     err := p.handler.Ping(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing Ping: %w", err)
+        internalErr := fmt.Errorf("Internal error processing ping: %w", err)
         return nil, internalErr
     }
 
@@ -678,7 +678,7 @@ func (p *procFuncMyServicePrioParentPong) RunContext(ctx context.Context, reqStr
     result := newRespMyServicePrioParentPong()
     err := p.handler.Pong(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing Pong: %w", err)
+        internalErr := fmt.Errorf("Internal error processing pong: %w", err)
         return nil, internalErr
     }
 
@@ -779,7 +779,7 @@ func (p *procFuncMyServicePrioChildPang) RunContext(ctx context.Context, reqStru
     result := newRespMyServicePrioChildPang()
     err := p.handler.Pang(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing Pang: %w", err)
+        internalErr := fmt.Errorf("Internal error processing pang: %w", err)
         return nil, internalErr
     }
 
@@ -897,7 +897,7 @@ func (p *procFuncBadServiceBar) RunContext(ctx context.Context, reqStruct thrift
     result := newRespBadServiceBar()
     retval, err := p.handler.Bar(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing Bar: %w", err)
+        internalErr := fmt.Errorf("Internal error processing bar: %w", err)
         return nil, internalErr
     }
 
@@ -1056,7 +1056,7 @@ func (p *procFuncFooBarBazServiceFooStructured) RunContext(ctx context.Context, 
     result := newRespFooBarBazServiceFooStructured()
     err := p.handler.FooStructured(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing FooStructured: %w", err)
+        internalErr := fmt.Errorf("Internal error processing foo: %w", err)
         return nil, internalErr
     }
 
@@ -1077,7 +1077,7 @@ func (p *procFuncFooBarBazServiceBarNonStructured) RunContext(ctx context.Contex
     result := newRespFooBarBazServiceBarNonStructured()
     err := p.handler.BarNonStructured(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing BarNonStructured: %w", err)
+        internalErr := fmt.Errorf("Internal error processing bar: %w", err)
         return nil, internalErr
     }
 
@@ -1098,7 +1098,7 @@ func (p *procFuncFooBarBazServiceBaz) RunContext(ctx context.Context, reqStruct 
     result := newRespFooBarBazServiceBaz()
     err := p.handler.Baz(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing Baz: %w", err)
+        internalErr := fmt.Errorf("Internal error processing baz: %w", err)
         return nil, internalErr
     }
 

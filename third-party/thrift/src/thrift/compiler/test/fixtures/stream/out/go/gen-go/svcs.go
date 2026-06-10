@@ -565,7 +565,7 @@ func (p *procFuncPubSubStreamingServiceReturnstream) RunStreamContext(
     firstResponse := newRespPubSubStreamingServiceReturnstream()
     elemProducerFunc, initialErr := p.handler.Returnstream(ctx, args.I32From, args.I32To)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing Returnstream: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing returnstream: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         onStreamComplete()
@@ -592,7 +592,7 @@ func (p *procFuncPubSubStreamingServiceReturnstream) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error Returnstream: %w", streamErr)
+        internalErr := fmt.Errorf("Internal stream handler error returnstream: %w", streamErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onStreamNext(x)
     }
@@ -624,7 +624,7 @@ func (p *procFuncPubSubStreamingServiceStreamthrows) RunStreamContext(
     firstResponse := newRespPubSubStreamingServiceStreamthrows()
     elemProducerFunc, initialErr := p.handler.Streamthrows(ctx, args.Foo)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing Streamthrows: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing streamthrows: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         onStreamComplete()
@@ -657,7 +657,7 @@ func (p *procFuncPubSubStreamingServiceStreamthrows) RunStreamContext(
             streamWrapStruct.E = v
             onStreamNext(streamWrapStruct)
         default:
-            internalErr := fmt.Errorf("Internal stream handler error Streamthrows: %w", streamErr)
+            internalErr := fmt.Errorf("Internal stream handler error streamthrows: %w", streamErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onStreamNext(x)
         }
@@ -695,7 +695,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows) RunStreamContext(
             firstResponse.E = v
             onFirstResponse(firstResponse)
         default:
-            internalErr := fmt.Errorf("Internal error processing Servicethrows: %w", initialErr)
+            internalErr := fmt.Errorf("Internal error processing servicethrows: %w", initialErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onFirstResponse(x)
         }
@@ -723,7 +723,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error Servicethrows: %w", streamErr)
+        internalErr := fmt.Errorf("Internal stream handler error servicethrows: %w", streamErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onStreamNext(x)
     }
@@ -763,7 +763,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows2) RunStreamContext(
             firstResponse.E2 = v
             onFirstResponse(firstResponse)
         default:
-            internalErr := fmt.Errorf("Internal error processing Servicethrows2: %w", initialErr)
+            internalErr := fmt.Errorf("Internal error processing servicethrows2: %w", initialErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onFirstResponse(x)
         }
@@ -791,7 +791,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows2) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error Servicethrows2: %w", streamErr)
+        internalErr := fmt.Errorf("Internal stream handler error servicethrows2: %w", streamErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onStreamNext(x)
     }
@@ -828,7 +828,7 @@ func (p *procFuncPubSubStreamingServiceBoththrows) RunStreamContext(
             firstResponse.E = v
             onFirstResponse(firstResponse)
         default:
-            internalErr := fmt.Errorf("Internal error processing Boththrows: %w", initialErr)
+            internalErr := fmt.Errorf("Internal error processing boththrows: %w", initialErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onFirstResponse(x)
         }
@@ -862,7 +862,7 @@ func (p *procFuncPubSubStreamingServiceBoththrows) RunStreamContext(
             streamWrapStruct.E = v
             onStreamNext(streamWrapStruct)
         default:
-            internalErr := fmt.Errorf("Internal stream handler error Boththrows: %w", streamErr)
+            internalErr := fmt.Errorf("Internal stream handler error boththrows: %w", streamErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onStreamNext(x)
         }
@@ -895,7 +895,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunStreamC
     firstResponse := newRespPubSubStreamingServiceResponseandstreamstreamthrows()
     retval, elemProducerFunc, initialErr := p.handler.Responseandstreamstreamthrows(ctx, args.Foo)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing Responseandstreamstreamthrows: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing responseandstreamstreamthrows: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         onStreamComplete()
@@ -929,7 +929,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunStreamC
             streamWrapStruct.E = v
             onStreamNext(streamWrapStruct)
         default:
-            internalErr := fmt.Errorf("Internal stream handler error Responseandstreamstreamthrows: %w", streamErr)
+            internalErr := fmt.Errorf("Internal stream handler error responseandstreamstreamthrows: %w", streamErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onStreamNext(x)
         }
@@ -967,7 +967,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunStream
             firstResponse.E = v
             onFirstResponse(firstResponse)
         default:
-            internalErr := fmt.Errorf("Internal error processing Responseandstreamservicethrows: %w", initialErr)
+            internalErr := fmt.Errorf("Internal error processing responseandstreamservicethrows: %w", initialErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onFirstResponse(x)
         }
@@ -996,7 +996,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunStream
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error Responseandstreamservicethrows: %w", streamErr)
+        internalErr := fmt.Errorf("Internal stream handler error responseandstreamservicethrows: %w", streamErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onStreamNext(x)
     }
@@ -1033,7 +1033,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunStreamCon
             firstResponse.E = v
             onFirstResponse(firstResponse)
         default:
-            internalErr := fmt.Errorf("Internal error processing Responseandstreamboththrows: %w", initialErr)
+            internalErr := fmt.Errorf("Internal error processing responseandstreamboththrows: %w", initialErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onFirstResponse(x)
         }
@@ -1068,7 +1068,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunStreamCon
             streamWrapStruct.E = v
             onStreamNext(streamWrapStruct)
         default:
-            internalErr := fmt.Errorf("Internal stream handler error Responseandstreamboththrows: %w", streamErr)
+            internalErr := fmt.Errorf("Internal stream handler error responseandstreamboththrows: %w", streamErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onStreamNext(x)
         }
@@ -1101,7 +1101,7 @@ func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunStreamContext(
     firstResponse := newRespPubSubStreamingServiceReturnstreamFast()
     elemProducerFunc, initialErr := p.handler.ReturnstreamFast(ctx, args.I32From, args.I32To)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing ReturnstreamFast: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing returnstreamFast: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         onStreamComplete()
@@ -1128,7 +1128,7 @@ func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error ReturnstreamFast: %w", streamErr)
+        internalErr := fmt.Errorf("Internal stream handler error returnstreamFast: %w", streamErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onStreamNext(x)
     }

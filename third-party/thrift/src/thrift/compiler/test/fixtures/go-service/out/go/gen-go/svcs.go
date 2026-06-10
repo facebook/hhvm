@@ -620,7 +620,7 @@ func (p *procFuncGetEntityGetEntity) RunContext(ctx context.Context, reqStruct t
     result := newRespGetEntityGetEntity()
     retval, err := p.handler.GetEntity(ctx, args.R)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetEntity: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getEntity: %w", err)
         return nil, internalErr
     }
 
@@ -642,7 +642,7 @@ func (p *procFuncGetEntityGetBool) RunContext(ctx context.Context, reqStruct thr
     result := newRespGetEntityGetBool()
     retval, err := p.handler.GetBool(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetBool: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getBool: %w", err)
         return nil, internalErr
     }
 
@@ -664,7 +664,7 @@ func (p *procFuncGetEntityGetByte) RunContext(ctx context.Context, reqStruct thr
     result := newRespGetEntityGetByte()
     retval, err := p.handler.GetByte(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetByte: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getByte: %w", err)
         return nil, internalErr
     }
 
@@ -686,7 +686,7 @@ func (p *procFuncGetEntityGetI16) RunContext(ctx context.Context, reqStruct thri
     result := newRespGetEntityGetI16()
     retval, err := p.handler.GetI16(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetI16: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getI16: %w", err)
         return nil, internalErr
     }
 
@@ -708,7 +708,7 @@ func (p *procFuncGetEntityGetI32) RunContext(ctx context.Context, reqStruct thri
     result := newRespGetEntityGetI32()
     retval, err := p.handler.GetI32(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetI32: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getI32: %w", err)
         return nil, internalErr
     }
 
@@ -730,7 +730,7 @@ func (p *procFuncGetEntityGetI64) RunContext(ctx context.Context, reqStruct thri
     result := newRespGetEntityGetI64()
     retval, err := p.handler.GetI64(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetI64: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getI64: %w", err)
         return nil, internalErr
     }
 
@@ -752,7 +752,7 @@ func (p *procFuncGetEntityGetDouble) RunContext(ctx context.Context, reqStruct t
     result := newRespGetEntityGetDouble()
     retval, err := p.handler.GetDouble(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetDouble: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getDouble: %w", err)
         return nil, internalErr
     }
 
@@ -774,7 +774,7 @@ func (p *procFuncGetEntityGetString) RunContext(ctx context.Context, reqStruct t
     result := newRespGetEntityGetString()
     retval, err := p.handler.GetString(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetString: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getString: %w", err)
         return nil, internalErr
     }
 
@@ -796,7 +796,7 @@ func (p *procFuncGetEntityGetBinary) RunContext(ctx context.Context, reqStruct t
     result := newRespGetEntityGetBinary()
     retval, err := p.handler.GetBinary(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetBinary: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getBinary: %w", err)
         return nil, internalErr
     }
 
@@ -818,7 +818,7 @@ func (p *procFuncGetEntityGetMap) RunContext(ctx context.Context, reqStruct thri
     result := newRespGetEntityGetMap()
     retval, err := p.handler.GetMap(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetMap: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getMap: %w", err)
         return nil, internalErr
     }
 
@@ -840,7 +840,7 @@ func (p *procFuncGetEntityGetSet) RunContext(ctx context.Context, reqStruct thri
     result := newRespGetEntityGetSet()
     retval, err := p.handler.GetSet(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetSet: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getSet: %w", err)
         return nil, internalErr
     }
 
@@ -862,7 +862,7 @@ func (p *procFuncGetEntityGetList) RunContext(ctx context.Context, reqStruct thr
     result := newRespGetEntityGetList()
     retval, err := p.handler.GetList(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetList: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getList: %w", err)
         return nil, internalErr
     }
 
@@ -885,7 +885,7 @@ func (p *procFuncGetEntityGetLegacyStuff) RunContext(ctx context.Context, reqStr
     result := newRespGetEntityGetLegacyStuff()
     retval, err := p.handler.GetLegacyStuff(ctx, args.NumPos, args.NumNeg1, args.NumNeg2)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetLegacyStuff: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getLegacyStuff: %w", err)
         return nil, internalErr
     }
 
@@ -908,7 +908,7 @@ func (p *procFuncGetEntityGetCtxCollision) RunContext(ctx context.Context, reqSt
     result := newRespGetEntityGetCtxCollision()
     retval, err := p.handler.GetCtxCollision(ctx, args.Ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetCtxCollision: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getCtxCollision: %w", err)
         return nil, internalErr
     }
 
@@ -931,7 +931,7 @@ func (p *procFuncGetEntityGetCtx1Collision) RunContext(ctx context.Context, reqS
     result := newRespGetEntityGetCtx1Collision()
     retval, err := p.handler.GetCtx1Collision(ctx, args.Ctx, args.Ctx1)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetCtx1Collision: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getCtx1Collision: %w", err)
         return nil, internalErr
     }
 
@@ -954,7 +954,7 @@ func (p *procFuncGetEntityGetContextCollision) RunContext(ctx context.Context, r
     result := newRespGetEntityGetContextCollision()
     retval, err := p.handler.GetContextCollision(ctx, args.Context)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetContextCollision: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getContextCollision: %w", err)
         return nil, internalErr
     }
 
@@ -977,7 +977,7 @@ func (p *procFuncGetEntityGetOutCollision) RunContext(ctx context.Context, reqSt
     result := newRespGetEntityGetOutCollision()
     retval, err := p.handler.GetOutCollision(ctx, args.Out)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetOutCollision: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getOutCollision: %w", err)
         return nil, internalErr
     }
 
@@ -1000,7 +1000,7 @@ func (p *procFuncGetEntityGetOut1Collision) RunContext(ctx context.Context, reqS
     result := newRespGetEntityGetOut1Collision()
     retval, err := p.handler.GetOut1Collision(ctx, args.Out, args.Out1)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetOut1Collision: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getOut1Collision: %w", err)
         return nil, internalErr
     }
 
@@ -1023,7 +1023,7 @@ func (p *procFuncGetEntityGetInCollision) RunContext(ctx context.Context, reqStr
     result := newRespGetEntityGetInCollision()
     retval, err := p.handler.GetInCollision(ctx, args.In)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetInCollision: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getInCollision: %w", err)
         return nil, internalErr
     }
 
@@ -1046,7 +1046,7 @@ func (p *procFuncGetEntityGetIn1Collision) RunContext(ctx context.Context, reqSt
     result := newRespGetEntityGetIn1Collision()
     retval, err := p.handler.GetIn1Collision(ctx, args.In, args.In1)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetIn1Collision: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getIn1Collision: %w", err)
         return nil, internalErr
     }
 
@@ -1069,7 +1069,7 @@ func (p *procFuncGetEntityGetErrCollision) RunContext(ctx context.Context, reqSt
     result := newRespGetEntityGetErrCollision()
     retval, err := p.handler.GetErrCollision(ctx, args.Err)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetErrCollision: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getErrCollision: %w", err)
         return nil, internalErr
     }
 
@@ -1092,7 +1092,7 @@ func (p *procFuncGetEntityGetErr1Collision) RunContext(ctx context.Context, reqS
     result := newRespGetEntityGetErr1Collision()
     retval, err := p.handler.GetErr1Collision(ctx, args.Err, args.Err1)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing GetErr1Collision: %w", err)
+        internalErr := fmt.Errorf("Internal error processing getErr1Collision: %w", err)
         return nil, internalErr
     }
 
@@ -1115,7 +1115,7 @@ func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) RunContext(ctx 
     result := newRespGetEntityMyMethodWithConflictingParamAccessors()
     err := p.handler.MyMethodWithConflictingParamAccessors(ctx, args.SetFoo, args.Foo)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing MyMethodWithConflictingParamAccessors: %w", err)
+        internalErr := fmt.Errorf("Internal error processing myMethodWithConflictingParamAccessors: %w", err)
         return nil, internalErr
     }
 

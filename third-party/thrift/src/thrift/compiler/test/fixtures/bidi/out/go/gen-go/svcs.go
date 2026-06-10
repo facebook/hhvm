@@ -313,7 +313,7 @@ func (p *procFuncBiDiServiceSimple) RunBiDiContext(
     firstResponse := newRespBiDiServiceSimple()
     sinkConsumerFunc, streamProducerFunc, initialErr := p.handler.Simple(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing Simple: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing simple: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         onStreamComplete()
@@ -360,7 +360,7 @@ func (p *procFuncBiDiServiceSimple) RunBiDiContext(
     close(fbthriftStreamChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error Simple: %w", streamErr)
+        internalErr := fmt.Errorf("Internal stream handler error simple: %w", streamErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onStreamNext(x)
     }
@@ -398,7 +398,7 @@ func (p *procFuncBiDiServiceResponse) RunBiDiContext(
     firstResponse := newRespBiDiServiceResponse()
     retval, sinkConsumerFunc, streamProducerFunc, initialErr := p.handler.Response(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing Response: %w", initialErr)
+        internalErr := fmt.Errorf("Internal error processing response: %w", initialErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onFirstResponse(x)
         onStreamComplete()
@@ -446,7 +446,7 @@ func (p *procFuncBiDiServiceResponse) RunBiDiContext(
     close(fbthriftStreamChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error Response: %w", streamErr)
+        internalErr := fmt.Errorf("Internal stream handler error response: %w", streamErr)
         x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
         onStreamNext(x)
     }
@@ -489,7 +489,7 @@ func (p *procFuncBiDiServiceCanThrow) RunBiDiContext(
             firstResponse.Ex = v
             onFirstResponse(firstResponse)
         default:
-            internalErr := fmt.Errorf("Internal error processing CanThrow: %w", initialErr)
+            internalErr := fmt.Errorf("Internal error processing canThrow: %w", initialErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onFirstResponse(x)
         }
@@ -543,7 +543,7 @@ func (p *procFuncBiDiServiceCanThrow) RunBiDiContext(
             streamWrapStruct.Ex = v
             onStreamNext(streamWrapStruct)
         default:
-            internalErr := fmt.Errorf("Internal stream handler error CanThrow: %w", streamErr)
+            internalErr := fmt.Errorf("Internal stream handler error canThrow: %w", streamErr)
             x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
             onStreamNext(x)
         }

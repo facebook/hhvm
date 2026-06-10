@@ -201,7 +201,7 @@ func (p *procFuncRaiserDoBland) RunContext(ctx context.Context, reqStruct thrift
     result := newRespRaiserDoBland()
     err := p.handler.DoBland(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing DoBland: %w", err)
+        internalErr := fmt.Errorf("Internal error processing doBland: %w", err)
         return nil, internalErr
     }
 
@@ -233,7 +233,7 @@ func (p *procFuncRaiserDoRaise) RunContext(ctx context.Context, reqStruct thrift
             result.S = v
             return result, nil
         default:
-            internalErr := fmt.Errorf("Internal error processing DoRaise: %w", err)
+            internalErr := fmt.Errorf("Internal error processing doRaise: %w", err)
             return nil, internalErr
         }
     }
@@ -255,7 +255,7 @@ func (p *procFuncRaiserGet200) RunContext(ctx context.Context, reqStruct thrift.
     result := newRespRaiserGet200()
     retval, err := p.handler.Get200(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing Get200: %w", err)
+        internalErr := fmt.Errorf("Internal error processing get200: %w", err)
         return nil, internalErr
     }
 
@@ -288,7 +288,7 @@ func (p *procFuncRaiserGet500) RunContext(ctx context.Context, reqStruct thrift.
             result.S = v
             return result, nil
         default:
-            internalErr := fmt.Errorf("Internal error processing Get500: %w", err)
+            internalErr := fmt.Errorf("Internal error processing get500: %w", err)
             return nil, internalErr
         }
     }

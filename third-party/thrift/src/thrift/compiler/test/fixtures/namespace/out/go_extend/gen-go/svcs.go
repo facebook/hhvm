@@ -127,7 +127,7 @@ func (p *procFuncExtendTestServiceCheck) RunContext(ctx context.Context, reqStru
     result := newRespExtendTestServiceCheck()
     retval, err := p.handler.Check(ctx, args.Struct1)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing Check: %w", err)
+        internalErr := fmt.Errorf("Internal error processing check: %w", err)
         return nil, internalErr
     }
 

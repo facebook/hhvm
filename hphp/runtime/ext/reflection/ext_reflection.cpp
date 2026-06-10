@@ -898,24 +898,11 @@ static Array get_function_param_info(const Func* func) {
     param.set(s_index, make_tv<KindOfInt64>(i));
     param.set(s_name, make_tv<KindOfPersistentString>(func->localNames()[i]));
 
-    auto const main = fpi.typeConstraints.firstNonInheritedType();
-    auto const nonExtendedConstraint = main->hasConstraint()
-      && !main->isDisplayNullable()
-      && !main->isSoft();
-    auto const type = nonExtendedConstraint
-      ? main->typeName()
-      : staticEmptyString();
-
-    param.set(s_type, make_tv<KindOfPersistentString>(type));
     auto userType = fpi.userType.get(func->unit());
     const StringData* typeHint = userType
       ? userType
       : staticEmptyString();
     param.set(s_type_hint, make_tv<KindOfPersistentString>(typeHint));
-
-    // callable typehint considered builtin; stdClass typehint is not
-    auto const isBuiltinTC = main->isCallable() || main->isPrecise();
-    param.set(s_type_hint_builtin, make_tv<KindOfBoolean>(isBuiltinTC));
 
     param.set(s_function, make_tv<KindOfPersistentString>(func->name()));
     if (func->preClass()) {
@@ -927,12 +914,21 @@ static Array get_function_param_info(const Func* func) {
         )
       );
     }
-    if (!nonExtendedConstraint || main->isNullable()) {
-      param.set(s_nullable, make_tv<KindOfBoolean>(true));
-      param.set(s_type_hint_nullable, make_tv<KindOfBoolean>(true));
-    } else {
-      param.set(s_type_hint_nullable, make_tv<KindOfBoolean>(false));
-    }
+    // A param allows null if any constraint in the intersection is
+    // unconstrained, display-nullable, soft, or nullable.
+    param.set(
+      s_type_hint_nullable,
+      make_tv<KindOfBoolean>(std::all_of(
+        fpi.typeConstraints.range().begin(),
+        fpi.typeConstraints.range().end(),
+        [](const TypeConstraint& tc) {
+          return !tc.hasConstraint()
+            || tc.isDisplayNullable()
+            || tc.isSoft()
+            || tc.isNullable();
+        }
+      ))
+    );
 
     if (auto phpCode = fpi.phpCode.get(func->unit())) {
       Variant v = default_arg_from_php_code(fpi, func, i);
@@ -996,23 +992,16 @@ static OptString HHVM_METHOD(ReflectionFunctionAbstract, getReturnTypeHint) {
 }
 
 static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
-  DictInit retTypeInfo{3};
+  DictInit retTypeInfo{2};
   auto name = HHVM_MN(ReflectionFunctionAbstract, getReturnTypeHint)(this_);
   if (name && !name.empty()) {
     auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-    auto const retType = func->returnTypeConstraints().firstNonInheritedType();
-    if (retType->isNullable()) {
-      retTypeInfo.set(s_type_hint_nullable, make_tv<KindOfBoolean>(true));
-    } else {
-      retTypeInfo.set(s_type_hint_nullable, make_tv<KindOfBoolean>(false));
-    }
-
-    auto const isBuiltinTC = retType->isCallable() || retType->isPrecise();
-    retTypeInfo.set(s_type_hint_builtin, make_tv<KindOfBoolean>(isBuiltinTC));
+    auto const& retTcs = func->returnTypeConstraints();
+    retTypeInfo.set(s_type_hint_nullable,
+      make_tv<KindOfBoolean>(retTcs.isNullable()));
   } else {
     name = staticEmptyString();
     retTypeInfo.set(s_type_hint_nullable, make_tv<KindOfBoolean>(false));
-    retTypeInfo.set(s_type_hint_builtin, make_tv<KindOfBoolean>(false));
   }
   retTypeInfo.set(s_type_hint, name);
   return retTypeInfo.toArray();

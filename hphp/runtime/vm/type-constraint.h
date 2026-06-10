@@ -818,7 +818,7 @@ struct TypeIntersectionConstraint {
     } else {
       sd(m_u.m_constraints);
     }
-    assertx(firstNonInheritedType());
+    assertx(!isTop());
   }
 
   std::string show() const {
@@ -870,23 +870,6 @@ struct TypeIntersectionConstraint {
     return ubs;
   }
 
-  /*
-   * This function  is a temporary workaround until all usages of
-   * TypeIntersectionConstraint are updated to stop treating upperbounds
-   * differently from the main type constraint.
-   *
-   * Please do not introduce any new uses of this method.
-   */
-  const TypeConstraint* firstNonInheritedType() const {
-    assertx(!isTop());
-    if (isSimple()) {
-      return &m_u.m_typeConstraint;
-    }
-    for (auto const& tc : m_u.m_constraints) {
-      if (!tc.isInherited()) return &tc;
-    }
-    always_assert(false);
-  }
 
   bool isTop() const {
     return !isSimple() && m_u.m_constraints.empty();

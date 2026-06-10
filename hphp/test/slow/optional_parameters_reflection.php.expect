@@ -6,13 +6,11 @@ isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  dict(3) {
+  dict(2) {
     ["name"]=>
     string(6) "HH\int"
     ["nullable"]=>
     bool(false)
-    ["builtin"]=>
-    bool(true)
   }
 }
 type isBuiltin: bool(true)
@@ -36,13 +34,11 @@ isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  dict(3) {
+  dict(2) {
     ["name"]=>
     string(7) "HH\bool"
     ["nullable"]=>
     bool(false)
-    ["builtin"]=>
-    bool(true)
   }
 }
 type isBuiltin: bool(true)
@@ -66,13 +62,11 @@ isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  dict(3) {
+  dict(2) {
     ["name"]=>
     string(9) "HH\string"
     ["nullable"]=>
     bool(false)
-    ["builtin"]=>
-    bool(true)
   }
 }
 type isBuiltin: bool(true)

@@ -66,17 +66,13 @@ vec(0) {
 ReflectionException: Method my_child::my_trait_method does not have a prototype
 object(ReflectionParameter) (2) {
   ["info":"ReflectionParameter":private]=>
-  dict(10) {
+  dict(8) {
     ["index"]=>
     int(0)
     ["name"]=>
     string(1) "c"
-    ["type"]=>
-    string(7) "MyClass"
     ["type_hint"]=>
     string(7) "MyClass"
-    ["type_hint_builtin"]=>
-    bool(false)
     ["function"]=>
     string(1) "f"
     ["class"]=>

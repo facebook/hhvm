@@ -295,12 +295,12 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getReturnType()[]: ?ReflectionType {
     if ($this->hasReturnType()) {
       $retTypeInfo = $this->getRetTypeInfo();
+      $name = $retTypeInfo['type_hint'];
       return new ReflectionType(
         $this,
         dict[
-          'name' => $retTypeInfo['type_hint'],
+          'name' => $name,
           'nullable' => $retTypeInfo['type_hint_nullable'],
-          'builtin' => $retTypeInfo['type_hint_builtin'],
         ]
       );
     }

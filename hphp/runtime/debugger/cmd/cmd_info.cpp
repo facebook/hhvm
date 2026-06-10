@@ -38,7 +38,7 @@ const StaticString
   s_ref("ref"),
   s_name("name"),
   s_varg("varg"),
-  s_type("type"),
+  s_type_hint("type_hint"),
   s_default("default"),
   s_msg("msg"),
   s_constants("constants"),
@@ -416,8 +416,9 @@ OptString CmdInfo::GetParams(const Array& params, bool varg,
       args.append(", ");
     }
     Array arg = iter.second().toArray();
-    if (!arg[s_type].toString().empty()) {
-      args.append(arg[s_type].toString());
+    auto const typeHint = arg[s_type_hint].toString();
+    if (!typeHint.empty()) {
+      args.append(typeHint);
       args.append(' ');
     }
     if (arg[s_ref].toBoolean()) {

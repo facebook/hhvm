@@ -170,16 +170,6 @@ bool(true)
 bool(false)
 ======================================================
 string(9) "HH\varray"
-string(9) "HH\varray"
-string(0) ""
-string(9) "HH\varray"
-string(9) "HH\varray"
-string(9) "HH\varray"
-string(9) "HH\varray"
-string(9) "HH\varray"
-string(9) "HH\varray"
-======================================================
-string(9) "HH\varray"
 string(17) "HH\varray<HH\int>"
 string(10) "?HH\varray"
 string(9) "HH\varray"
@@ -377,16 +367,6 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-======================================================
-string(9) "HH\darray"
-string(9) "HH\darray"
-string(0) ""
-string(9) "HH\darray"
-string(9) "HH\darray"
-string(9) "HH\darray"
-string(9) "HH\darray"
-string(9) "HH\darray"
-string(9) "HH\darray"
 ======================================================
 string(9) "HH\darray"
 string(25) "HH\darray<HH\int, HH\int>"

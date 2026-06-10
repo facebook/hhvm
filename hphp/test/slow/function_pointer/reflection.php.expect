@@ -1,21 +1,15 @@
 vec(1) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(2) "p0"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(5) "func1"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
@@ -38,21 +32,15 @@ vec(1) {
 vec(1) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(2) "p0"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(5) "func2"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
@@ -75,21 +63,15 @@ vec(1) {
 vec(1) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(2) "p0"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(5) "func3"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
@@ -112,21 +94,15 @@ vec(1) {
 vec(1) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(2) "p0"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(5) "func4"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
@@ -146,21 +122,15 @@ vec(1) {
 vec(1) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(2) "p0"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(5) "func5"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
@@ -180,21 +150,15 @@ vec(1) {
 vec(1) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(2) "p0"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(5) "func6"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>

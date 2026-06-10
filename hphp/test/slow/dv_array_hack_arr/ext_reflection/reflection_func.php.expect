@@ -14,21 +14,15 @@ dict(3) {
 vec(3) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(10) {
+    dict(7) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(1) "a"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(3) "foo"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["attributes"]=>
@@ -42,21 +36,15 @@ vec(3) {
   }
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(1)
       ["name"]=>
       string(1) "b"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(3) "foo"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
@@ -74,21 +62,15 @@ vec(3) {
   }
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(2)
       ["name"]=>
       string(1) "c"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(3) "foo"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
@@ -107,12 +89,10 @@ vec(3) {
 }
 object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  dict(3) {
+  dict(2) {
     ["name"]=>
     string(7) "HH\void"
     ["nullable"]=>
-    bool(false)
-    ["builtin"]=>
     bool(false)
   }
 }
@@ -125,23 +105,17 @@ dict(1) {
 vec(1) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(11) {
+    dict(8) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(1) "a"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(1) "a"
       ["class"]=>
       string(3) "Baz"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["attributes"]=>

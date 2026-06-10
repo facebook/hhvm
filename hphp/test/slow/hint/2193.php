@@ -24,7 +24,7 @@ public function f(";
   foreach ($params as $rp) {
     if (!$first) $clsDecl .= ', ';
     $first = false;
-    $th = $rp->getTypehintText();
+    $th = $rp->getTypeText();
     if ($th) {
       $clsDecl .= ($th . ' ');
     }

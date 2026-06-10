@@ -11,7 +11,7 @@ info array_key_exists
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-function array_key_exists($key, $search);
+function array_key_exists(HH\mixed $key, HH\mixed $search);
 
 info stdClass
 final class stdClass {

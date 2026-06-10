@@ -26,21 +26,15 @@ int(2)
 vec(4) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(10) {
+    dict(7) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(1) "a"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(1) "f"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["attributes"]=>
@@ -54,21 +48,15 @@ vec(4) {
   }
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(11) {
+    dict(8) {
       ["index"]=>
       int(1)
       ["name"]=>
       string(1) "b"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(1) "f"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["inout"]=>
@@ -84,21 +72,15 @@ vec(4) {
   }
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(2)
       ["name"]=>
       string(1) "c"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(1) "f"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
@@ -116,21 +98,15 @@ vec(4) {
   }
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(3)
       ["name"]=>
       string(1) "d"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(1) "f"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>

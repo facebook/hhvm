@@ -7,8 +7,8 @@ function main_php_forcehh() :mixed{
 ;
 
 $rp = new ReflectionParameter('foo', 'bar');
-var_dump($rp->getTypehintText());
+var_dump($rp->getTypeText());
 
 $rp = new ReflectionParameter('foo', 'baz');
-var_dump($rp->getTypehintText());
+var_dump($rp->getTypeText());
 }

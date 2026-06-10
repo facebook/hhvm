@@ -52,12 +52,6 @@ function test($func) :mixed{
   echo "======================================================\n";
 
   foreach ((new ReflectionFunction($func))->getParameters() as $p) {
-    var_dump($p->getTypehintText());
-  }
-
-  echo "======================================================\n";
-
-  foreach ((new ReflectionFunction($func))->getParameters() as $p) {
     var_dump($p->getTypeText());
   }
 

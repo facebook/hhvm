@@ -7,7 +7,7 @@ string(8) "stdClass"
 ** Function 0 - Parameter 1
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 string(11) "HH\AnyArray"
 ** Function 0 - Parameter 2
 bool(true)
@@ -68,7 +68,7 @@ string(4) "Test"
 ** Function/method return type 0
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 string(7) "HH\void"
 ** Function/method return type 1
 bool(true)
@@ -88,5 +88,5 @@ string(4) "Test"
 ** Function/method return type 4
 bool(true)
 bool(true)
-bool(true)
+bool(false)
 string(1) "T"

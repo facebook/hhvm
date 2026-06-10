@@ -13,15 +13,15 @@ function main_hack() :mixed{
 ;
 
 $rp = new ReflectionParameter('foo', 'bar');
-var_dump($rp->getTypehintText());
+var_dump($rp->getTypeText());
 
 $rp = new ReflectionParameter('foo', 'baz');
-var_dump($rp->getTypehintText());
+var_dump($rp->getTypeText());
 
 herp(123);
 $rp = new ReflectionParameter('herp', 'derp');
-var_dump($rp->getTypehintText());
+var_dump($rp->getTypeText());
 
 $rp = new ReflectionParameter('bar', 'a');
-var_dump($rp->getTypehintText());
+var_dump($rp->getTypeText());
 }

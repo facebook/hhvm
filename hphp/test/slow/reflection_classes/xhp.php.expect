@@ -2,9 +2,7 @@
 string(4) ":div"
 int(1)
 string(4) ":div"
-string(7) "xhp_div"
 ==== bar ====
 string(18) "xhp_prefixed_class"
 int(1)
-string(18) "xhp_prefixed_class"
 string(18) "xhp_prefixed_class"

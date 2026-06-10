@@ -4,17 +4,13 @@ Warning: Failed to eval default value of JJTest::test()'s $answer argument for r
 vec(1) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(10) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(6) "answer"
-      ["type"]=>
-      string(6) "HH\int"
       ["type_hint"]=>
       string(6) "HH\int"
-      ["type_hint_builtin"]=>
-      bool(true)
       ["function"]=>
       string(4) "test"
       ["class"]=>

@@ -19,7 +19,6 @@ function reflect($name) :mixed{
   $params = $rf->getParameters();
   var_dump(count($params));
   var_dump($params[0]->getTypeText());
-  var_dump($params[0]->getTypehintText());
 }
 
 function main() :mixed{

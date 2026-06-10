@@ -2,21 +2,15 @@ Warning: Failed to eval default value of func1()'s $p0 argument for reflection, 
 vec(1) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(2) "p0"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(5) "func1"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
@@ -38,21 +32,15 @@ Warning: Failed to eval default value of func2()'s $p0 argument for reflection, 
 vec(1) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(2) "p0"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(5) "func2"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
@@ -74,21 +62,15 @@ Warning: Failed to eval default value of func3()'s $p0 argument for reflection, 
 vec(1) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(2) "p0"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(5) "func3"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
@@ -110,21 +92,15 @@ Warning: Failed to eval default value of func4()'s $p0 argument for reflection, 
 vec(1) {
   object(ReflectionParameter) (2) {
     ["info":"ReflectionParameter":private]=>
-    dict(12) {
+    dict(9) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(2) "p0"
-      ["type"]=>
-      string(0) ""
       ["type_hint"]=>
       string(0) ""
-      ["type_hint_builtin"]=>
-      bool(false)
       ["function"]=>
       string(5) "func4"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
